@@ -1,0 +1,10 @@
+
+platform:mesh:../gameresources/primitives/walls/1-0.2-1.dae
+platform:position:0 -5 0
+platform:scale:100 1 100
+
+>maincamera:position:0 0 0
+>maincamera:physics_angle:0.000000 0.000000 0.000000
+>maincamera:script:../../afterworld/scripts/fps.scm
+>maincamera:physics:enabled
+>maincamera:physics_type:dynamic
