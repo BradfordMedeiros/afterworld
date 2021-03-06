@@ -2,8 +2,17 @@
 core gameplay implementation stage:
 
 core gameplay
-- movement 
-- gun system
+- movement   (very tunable)
+  - movement speed
+  - jump height 
+  - gravity
+  - tilt
+  - jump sound effect
+  - landing sound effect
+  - sprint 
+  - can double jump
+
+- gun system (very tunable)
   - specify model 
   - xoffset, yoffset (as percentage of the screen)
   - fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
