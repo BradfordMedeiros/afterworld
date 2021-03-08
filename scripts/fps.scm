@@ -7,10 +7,14 @@
 
 ; Gun parameters
 (define gun-name "default-gun")
-(define gun-model "")
+(define gun-model "../gameresources/weapons/fork.dae")
+(define gun-fire-animation "default:0")
+(define gun-fire-sound "./res/sounds/silenced-gunshot.wav")
 (define hud-element "")
-(define x-offset-percentage 0)
-(define y-offset-percentage 0)
+(define x-offset-position 0)
+(define y-offset-position 0)
+(define z-offset-position -15)
+
 (define firing-rate 400)
 (define can-hold #f)
 (define spread 0)
@@ -82,6 +86,17 @@
     )
   )
 )
+(define (onMouse button action mods) 
+  (display "button: ")
+  (display button)
+  (display ", action: ")
+  (display action)
+  (display "\n")
+  (if (and (= button 0) (= action 1))
+    (fire-gun)
+  )
+)
+
 
 (define (onFrame)
   (look look-velocity-x look-velocity-y)
@@ -95,3 +110,22 @@
 )
 
 
+;; temp code
+(define (fire-gun)
+  (display "should play animation: ")
+  (display gun-fire-animation)
+  (display "\n")
+  (display (gameobj-animations (lsobj-name "gun")))
+  (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
+  (playclip "&gunsound")
+)
+
+(define (update-values)
+  (display "update-values placeholder\n")
+  ; set the gun mesh
+  ; set the gun sound 
+  (gameobj-setpos! (lsobj-name "gun") (list x-offset-position y-offset-position z-offset-position))
+  ; todo add set rotation (everything right now is relative?)
+)
+
+(update-values)

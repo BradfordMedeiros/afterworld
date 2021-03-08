@@ -1,4 +1,11 @@
 
+bugs:
+- model loading ophaned the model
+- optional callback for the animation would be cool?
+
+desired improvements:
+- console.scm can switch scope into modules
+
 core gameplay implementation stage:
 
 core gameplay
