@@ -15,10 +15,10 @@
 (define y-offset-position 0)
 (define z-offset-position -15)
 
-(define firing-rate 400)
-(define can-hold #f)
+(define firing-rate 100)
+(define can-hold #t)
 (define spread 0)
-(define max-ammo 10)
+(define max-ammo 30)
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -86,6 +86,8 @@
     )
   )
 )
+
+(define is-holding #f)
 (define (onMouse button action mods) 
   (display "button: ")
   (display button)
@@ -93,7 +95,13 @@
   (display action)
   (display "\n")
   (if (and (= button 0) (= action 1))
-    (fire-gun)
+    (begin
+      (fire-gun)
+      (set! is-holding #t)
+    )
+  )
+  (if (and (= button 0) (= action 0))
+    (set! is-holding #f)
   )
 )
 
@@ -107,17 +115,42 @@
     (if (equal? go-right    #t) (move (* 0.8 movement-speed) 0 0))
     (if (equal? go-backward #t) (move 0 0 (* -1 movement-speed)))
   )
+  (if (and can-hold is-holding) (fire-gun))
 )
 
 
-;; temp code
+(define current-ammo max-ammo)
+(define last-shooting-time -1000)
+
 (define (fire-gun)
-  (display "should play animation: ")
-  (display gun-fire-animation)
-  (display "\n")
-  (display (gameobj-animations (lsobj-name "gun")))
-  (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
-  (playclip "&gunsound")
+  (define elapsedMilliseconds (* 1000 (time-seconds)))
+  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
+  (define hasAmmo (> current-ammo 0))
+  (define lessThanFiringRate (> timeSinceLastShot firing-rate))
+  (display (string-append "current ammo: " (number->string current-ammo) "\n"))
+
+  (if (and hasAmmo lessThanFiringRate)
+    (begin
+      (display "should play animation: ")
+      (display gun-fire-animation)
+      (display "\n")
+      (display (gameobj-animations (lsobj-name "gun")))
+      (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
+      (playclip "&gunsound")
+      (set! current-ammo (- current-ammo 1))
+      (set! last-shooting-time elapsedMilliseconds)
+      (display (time-seconds))
+    )
+    (begin
+      (display "cannot shoot because: ")
+      (display "(ammo: ")
+      (display hasAmmo)
+      (display ", ")
+      (display "firing-rate: ")
+      (display lessThanFiringRate)
+      (display ")\n")
+    )
+  )
 )
 
 (define (update-values)
