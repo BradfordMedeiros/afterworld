@@ -3,7 +3,7 @@
 (define jump-height 10)
 (define gravity 1)
 (define tilt (list 0 0))
-(define jump-sound-effect "./res/sounds/silenced-gunshot.wav")
+(define jump-sound-effect "./res/sounds/sample.wav")
 
 ; Gun parameters
 (define gun-name "default-gun")
@@ -91,6 +91,10 @@
   )
 
   (if (= key 32) (jump jump-height))
+
+  (if (and (= key 82) (= action 1))
+    (update-values)
+  )
 )
 
 (define is-holding #f)
@@ -166,11 +170,18 @@
 )
 
 (define (update-values)
-  (display "update-values placeholder\n")
-  ; set the gun mesh
-  ; set the gun sound 
+  (display "fps script: updating values\n")
+
+  (display "removing objects\n")
+  (rm-obj (gameobj-id (lsobj-name "gun")))
+  (rm-obj (gameobj-id (lsobj-name "&gunsound")))
+  (rm-obj (gameobj-id (lsobj-name "&jumpsound")))
+  (display "making objects")
+
+  (mk-obj-attr "gun"       (list (list "mesh" gun-model)))
+  (mk-obj-attr "&gunsound" (list (list "clip" gun-fire-sound))) 
+  (mk-obj-attr "&jumpsound" (list (list "clip" jump-sound-effect))) 
   (gameobj-setpos! (lsobj-name "gun") (list x-offset-position y-offset-position z-offset-position))
   ; todo add set rotation (everything right now is relative?)
 )
 
-(update-values)
