@@ -1,9 +1,9 @@
 ; Movement parameters
 (define movement-speed 0.1)
-(define jump-height 1)
+(define jump-height 10)
 (define gravity 1)
 (define tilt (list 0 0))
-(define jump-sound-effect #f)
+(define jump-sound-effect "./res/sounds/silenced-gunshot.wav")
 
 ; Gun parameters
 (define gun-name "default-gun")
@@ -17,25 +17,29 @@
 
 (define firing-rate 100)
 (define can-hold #t)
-(define spread 0)
+(define spread '(5 100))
 (define max-ammo 30)
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Movement code
-(define (jump amount) (display "jump placeholder\n"))
-(define (move x y z) (applyimpulse-rel mainobj (list x y (* -1 z))))
+(define (move x y z) (applyimpulse mainobj (list x y (* -1 z))))
 (define (look x y) (gameobj-setrotd! mainobj (* 0.1 x) (* -0.1 y) 0))
 
 (define (set-gravity vec3) (display "set-gravity placeholder\n"))
-(define (play-jump-sound) (display "play jump sound placeholder\n"))
+(define is-grounded #t)
+(define (jump amount) 
+  (display "Calling jump\n")
+  (applyimpulse mainobj (list 0 amount 0))
+  (playclip "&jumpsound")
+)
+
 
 ;; Gunplay code
 (define (set-gun-model) (display "set gun model placeholder\n"))
 (define (set-hud-element) (display "set hud element placeholder\n"))
 (define (set-gun-offset x y) (display "set gun offset placeholder \n"))
 (define (fire-gun) (display "fire gun placeholder\n"))
-
 
 (define look-velocity-x 0)
 (define look-velocity-y 0)
@@ -85,6 +89,8 @@
       (if (= action 0) (set! go-right #f))
     )
   )
+
+  (if (= key 32) (jump jump-height))
 )
 
 (define is-holding #f)
@@ -127,7 +133,13 @@
   (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
   (define hasAmmo (> current-ammo 0))
   (define lessThanFiringRate (> timeSinceLastShot firing-rate))
+  
+  (define x-offset (random (car spread)))
+  (define y-offset (random (cadr spread)))
+  (display (string-append "offset: (" (number->string x-offset) ", " (number->string y-offset) ")"))
+
   (display (string-append "current ammo: " (number->string current-ammo) "\n"))
+
 
   (if (and hasAmmo lessThanFiringRate)
     (begin
