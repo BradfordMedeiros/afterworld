@@ -12,7 +12,7 @@
       (list "gun-model" "../gameresources/weapons/pistol.dae")
       (list "gun-fire-animation" "default:0")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
-      (list "hud-element" "")
+      (list "hud-element" "../gameresources/ui/hud1/hud.png")
       (list "x-offset-position" 0)
       (list "y-offset-position" 0)
       (list "z-offset-position" 0)
@@ -25,7 +25,7 @@
       (list "gun-model" "../gameresources/weapons/fork.dae")
       (list "gun-fire-animation" "default:0")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
-      (list "hud-element" "")
+      (list "hud-element" "../gameresources/ui/hud1/hud.png")
       (list "x-offset-position" 0)
       (list "y-offset-position" 0)
       (list "z-offset-position" 0)
@@ -40,7 +40,7 @@
 ; Gun parameters
 (define gun-name "default-gun")
 (define gun-fire-animation "default:0")
-(define hud-element "")
+(define hud-element "../gameresources/ui/hud1/hud.png")
 (define firing-rate 100)
 (define can-hold #t)
 (define spread '(5 100))
@@ -49,7 +49,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Movement code
-(define (move x y z) (applyimpulse mainobj (list x y (* -1 z))))
+(define (move x y z) (applyimpulse-rel mainobj (list x y (* -1 z))))
 (define (look x y) (gameobj-setrotd! mainobj (* 0.1 x) (* -0.1 y) 0))
 
 (define (set-gravity vec3) (display "set-gravity placeholder\n"))

@@ -8,8 +8,14 @@ platform:scale:100 1 100
 >maincamera:script:../../afterworld/scripts/fps.scm
 >maincamera:physics:enabled
 >maincamera:physics_type:dynamic
->maincamera:child:gun
+>maincamera:child:gun,&gunsound,&jumpsound,gunhud
+>maincamera:physics_gravity:0 -9.81 0
+
 
 gun:mesh:../gameresources/weapons/fork.dae
-gun:position:0 2 0
+gun:position:20 -15 -40
+gunhud:mesh:../gameresources/ui/hud1/hud.obj
+gunhud:position:0 0 -1.6
+
 &gunsound:clip:./res/sounds/silenced-gunshot.wav
+&jumpsound:clip:./res/sounds/sample.wav
