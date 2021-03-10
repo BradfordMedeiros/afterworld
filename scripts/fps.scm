@@ -5,16 +5,48 @@
 (define tilt (list 0 0))
 (define jump-sound-effect "./res/sounds/sample.wav")
 
+;; GUN DATA
+(define gundata
+  (list 
+    (list "pistol" (list
+      (list "gun-model" "../gameresources/weapons/pistol.dae")
+      (list "gun-fire-animation" "default:0")
+      (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
+      (list "hud-element" "")
+      (list "x-offset-position" 0)
+      (list "y-offset-position" 0)
+      (list "z-offset-position" 0)
+      (list "firing-rate" 1000)
+      (list "can-hold" #f)
+      (list "spread" '(0 0))
+      (list "max-ammo" 30))
+    )
+    (list "fork" (list
+      (list "gun-model" "../gameresources/weapons/fork.dae")
+      (list "gun-fire-animation" "default:0")
+      (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
+      (list "hud-element" "")
+      (list "x-offset-position" 0)
+      (list "y-offset-position" 0)
+      (list "z-offset-position" 0)
+      (list "firing-rate" 100)
+      (list "can-hold" #t)
+      (list "spread" '(5 100))
+      (list "max-ammo" 30))
+    )
+  )
+)
+
+
 ; Gun parameters
 (define gun-name "default-gun")
-(define gun-model "../gameresources/weapons/fork.dae")
+(define gun-model "../gameresources/weapons/pistol.dae")
 (define gun-fire-animation "default:0")
 (define gun-fire-sound "./res/sounds/silenced-gunshot.wav")
 (define hud-element "")
 (define x-offset-position 0)
 (define y-offset-position 0)
 (define z-offset-position -15)
-
 (define firing-rate 100)
 (define can-hold #t)
 (define spread '(5 100))
@@ -138,8 +170,8 @@
   (define hasAmmo (> current-ammo 0))
   (define lessThanFiringRate (> timeSinceLastShot firing-rate))
   
-  (define x-offset (random (car spread)))
-  (define y-offset (random (cadr spread)))
+  (define x-offset (random (+ 1 (car spread))))
+  (define y-offset (random (+ 1 (cadr spread))))
   (display (string-append "offset: (" (number->string x-offset) ", " (number->string y-offset) ")"))
 
   (display (string-append "current ammo: " (number->string current-ammo) "\n"))
@@ -169,8 +201,20 @@
   )
 )
 
-(define (update-values)
-  (display "fps script: updating values\n")
+(define (update-gun-values gundata)
+  (define gunname (car gundata))
+  (define gun-attr (cadr gundata))
+
+  (set! gun-model (cadr (assoc "gun-model" gun-attr)))  
+  (set! gun-fire-sound (cadr (assoc "gun-fire-sound" gun-attr)))
+  (set! x-offset-position (cadr (assoc "x-offset-position" gun-attr)))
+  (set! y-offset-position (cadr (assoc "y-offset-position" gun-attr)))
+  (set! z-offset-position (cadr (assoc "z-offset-position" gun-attr)))
+  (set! firing-rate (cadr (assoc "firing-rate" gun-attr)))
+  (set! can-hold (cadr (assoc "can-hold" gun-attr)))
+  (set! spread (cadr (assoc "spread" gun-attr)))
+  (set! max-ammo (cadr (assoc "max-ammo" gun-attr)))
+  (set! gun-fire-animation (cadr (assoc "gun-fire-animation" gun-attr)))
 
   (display "removing objects\n")
   (rm-obj (gameobj-id (lsobj-name "gun")))
@@ -185,3 +229,6 @@
   ; todo add set rotation (everything right now is relative?)
 )
 
+(define (update-values)
+  (update-gun-values (list-ref gundata (random (length gundata))))
+)
