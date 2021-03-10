@@ -25,7 +25,7 @@
       (list "gun-model" "../gameresources/weapons/fork.dae")
       (list "gun-fire-animation" "default:0")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
-      (list "hud-element" "../gameresources/ui/hud1/hud.png")
+      (list "hud-element" "../gameresources/ui/hud1/hud.data.png")
       (list "x-offset-position" 0)
       (list "y-offset-position" 0)
       (list "z-offset-position" 0)
@@ -195,7 +195,7 @@
   )
 )
 
-(define (update-gun-values gundata)
+(define (switch-gun gundata)
   (define gunname (car gundata))
   (define gun-attr (cadr gundata))
 
@@ -216,9 +216,10 @@
   (mk-obj-attr "gun"       (list (list "mesh" (cadr (assoc "gun-model" gun-attr)))))
   (mk-obj-attr "&gunsound" (list (list "clip" (cadr (assoc "gun-fire-sound" gun-attr))))) 
   (gameobj-setpos! (lsobj-name "gun") (list x-offset-position y-offset-position z-offset-position))
+  (set-texture (gameobj-id (lsobj-name "gunhud")) (cadr (assoc "hud-element" gun-attr)))
   ; todo add set rotation (everything right now is relative?)
 )
 
 (define (update-values)
-  (update-gun-values (list-ref gundata (random (length gundata))))
+  (switch-gun (list-ref gundata (random (length gundata))))
 )
