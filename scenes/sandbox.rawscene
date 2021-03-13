@@ -11,9 +11,28 @@ platform:scale:100 1 100
 >maincamera:child:gun,&gunsound,&jumpsound,gunhud
 >maincamera:physics_gravity:0 -9.81 0
 
+#enemy:mesh:../gameresources/characters/bloodtrooper.fbx
+enemy:mesh:./res/models/box/box.obj
+enemy:script:../../afterworld/scripts/enemy.scm
+enemy:physics:enabled
+enemy:position:5 4 0
+enemy:physics_type:dynamic
 
 gun:mesh:../gameresources/weapons/fork.dae
 gun:position:20 -15 -40
+gun:child:+particles
+
++particles:position:0 0 -8
++particles:limit:20
++particles:rate:0.3
++particles:duration:2
++particles:+mesh:./res/models/box/box.obj
++particles:+physics_type:dynamic
++particles:+physics:enabled
+#+particles:+physics_collision:nocollide
++particles:+texture:../gameresources/textures/iguana.jpg
++particles:state:disabled
+
 gunhud:mesh:../gameresources/ui/hud1/hud.obj
 gunhud:position:0 0 -1.6
 

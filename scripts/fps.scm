@@ -179,6 +179,7 @@
       (display (gameobj-animations (lsobj-name "gun")))
       (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
       (playclip "&gunsound")
+      (emit (gameobj-id (lsobj-name "+particles")))
       (set! current-ammo (- current-ammo 1))
       (set! last-shooting-time elapsedMilliseconds)
       (display (time-seconds))
