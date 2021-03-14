@@ -23,6 +23,7 @@ gun:position:20 -15 -40
 gun:child:+particles
 
 +particles:position:0 0 -8
++particles:!position:0 0 -0.1
 +particles:limit:20
 +particles:rate:0.3
 +particles:duration:2
@@ -30,11 +31,15 @@ gun:child:+particles
 +particles:+physics_type:dynamic
 +particles:+physics:enabled
 #+particles:+physics_collision:nocollide
-+particles:+texture:../gameresources/textures/iguana.jpg
++particles:+texture:./res/textures/gas.png
 +particles:state:disabled
++particles:on-spawn:something
++particles:+fragshader:./res/shaders/discard_lowintensity/fragment.glsl
++particles:+tint:0 1 0
 
 gunhud:mesh:../gameresources/ui/hud1/hud.obj
 gunhud:position:0 0 -1.6
 
 &gunsound:clip:./res/sounds/silenced-gunshot.wav
 &jumpsound:clip:./res/sounds/sample.wav
+
