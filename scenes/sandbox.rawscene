@@ -21,6 +21,7 @@ enemy:physics_type:dynamic
 gun:mesh:../gameresources/weapons/fork.dae
 gun:position:20 -15 -40
 gun:child:+particles
+gun:layer:no_depth
 
 +particles:position:0 0 -8
 +particles:!position:0 0 -0.1
