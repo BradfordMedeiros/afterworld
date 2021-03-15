@@ -1,0 +1,7 @@
+
+platform:mesh:../gameresources/primitives/walls/1-0.2-1.dae
+platform:position:0 -20 0
+platform:scale:100 1 100
+platform:texture:./res/textures/gas.png
+
+>maincamera:position:0 0 0

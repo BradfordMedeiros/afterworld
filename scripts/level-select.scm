@@ -1,16 +1,12 @@
-
 (define onmenu #f)
-(define menu-index 1)
-(define selected-level "../../afterworld/scenes/sandbox.rawscene")
-
+(define menu-index 0)
 (define levels (list 
   "../../afterworld/scenes/sandbox.rawscene"
-  "../../afterworld/scenes/sandbox.rawscene"
-  "../../afterworld/scenes/sandbox.rawscene"
+  "../../afterworld/scenes/sandbox2.rawscene"
 ))
 
-(define (next-level) (set! menu-index 0))
-(define (prev-level) (set! menu-index 0))
+(define (next-level) (set! menu-index (min (- (length levels) 1) (+ menu-index 1))))
+(define (prev-level) (set! menu-index (max 0 (- menu-index 1))))
 (define (selected-level) (list-ref levels menu-index))
 
 (define levelselect (machine
