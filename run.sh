@@ -1,9 +1,9 @@
 #!/bin/sh
 
 BASE_DIRECTORY=$(pwd)
-SCENE_FOLDER=$BASE_DIRECTORY/scenes
+SCRIPT_FOLDER=$BASE_DIRECTORY/scripts
 
 (
   cd ../mosttrusted/ModEngine && 
-  ./build/modengine -r "$SCENE_FOLDER/sandbox.rawscene" $@
+  ./build/modengine -x "$SCRIPT_FOLDER/level-select.scm" $@
 )
