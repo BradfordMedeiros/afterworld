@@ -1,43 +1,66 @@
 
+today:
+
+- onMessage should have key + value
+- fix raycast bug
+  - this is something to do with the collision filter mask
+
+
+- consider when the script should be loaded.
+  - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
+  - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
+- removing and object when animation is playing causes a segfault
+- physics raycast is gets a collision object that does not a rigidbody in the map
+- raycast + collision -> get the normals (allows for example, telling if on ground)
+
+
+tomorrow:
+- make main menu
+- can go between different scenes
+- user defined 
+
 bugs:
 - model loading ophaned the model
-- optional callback for the animation would be cool?
+- playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
+- attribute updating/serialization not kept in line
 
 desired improvements:
 - console.scm can switch scope into modules
+- optional callback for the animation would be cool?
+- ability to have user defined attributes
+- improve state machine attrs (not super important yet but needed when get more involved w/ scripting
+  - attr function (i guess it affects the associated object?)
+  - on exit state hook
+
 
 core gameplay implementation stage:
-
-core gameplay
-- movement   (very tunable)
-  - movement speed
-  - jump height 
-  - gravity
-  - tilt
-  - jump sound effect
-  - landing sound effect
-  - sprint 
-  - can double jump
-
+- emitter initial velocity 
 - gun system (very tunable)
-  - specify model 
-  - xoffset, yoffset (as percentage of the screen)
-  - fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
-  - firing rate (ms between firing)
-  - hold or click
-  - spread 
   - projectile effect (on muzzle?)
-  - hud ui element
+  - parent correctly
   - types:
     - raycast
     - object 
       -> can we just reuse the emitter system somehow?  Same attributes and junk 
-  - ammo counter
   - animation hooks 
     - firing maybe should trigger the animiation, and then specified to that it will actually fire?
-- be able to switch guns 
-- driven via a table: eg model xoffset yoffset firing_type spread is_hitscan max_ammmo (somemodel.cde 5 10 20 hold 0 true 10)
 
 
+improve gun system
+- xoffset, yoffset as percentage of the screen)
+- fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
+- hud ui element better sizing and shit
+- make use of the (not yet implemented) sql system
 
+- improve movement system  (very tunable)
+  - maybe write custom controller and don't rely on the basic physics body stuff?
+  - movement speed
+  - jump height 
+  - gravity
+  - tilt
+  - landing sound effect
+  - sprint 
+  - can double jump
+  - limit vertical
 
+- sql parser? 

@@ -19,7 +19,8 @@
       (list "firing-rate" 1000)
       (list "can-hold" #f)
       (list "spread" '(0 0))
-      (list "max-ammo" 30))
+      (list "max-ammo" 30)
+      (list "is-raycast" #t))
     )
     (list "fork" (list
       (list "gun-model" "../gameresources/weapons/fork.dae")
@@ -32,7 +33,8 @@
       (list "firing-rate" 100)
       (list "can-hold" #t)
       (list "spread" '(5 100))
-      (list "max-ammo" 30))
+      (list "max-ammo" 30)
+      (list "is-raycast" #f))
     )
   )
 )
@@ -45,6 +47,7 @@
 (define can-hold #t)
 (define spread '(5 100))
 (define max-ammo 30)
+(define is-raycast #t)
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -74,7 +77,7 @@
   (set! look-velocity-y 0)
 )
 (define (onMouseMove x y)
-  (display (string-append "mouse move: (" (number->string x) ", " (number->string y) ")\n"))
+  ;(display (string-append "mouse move: (" (number->string x) ", " (number->string y) ")\n"))
   (set! look-velocity-x x)
   (set! look-velocity-y y)
 )
@@ -158,32 +161,17 @@
 (define current-ammo max-ammo)
 (define last-shooting-time -1000)
 
-(define (fire-gun)
-  (define elapsedMilliseconds (* 1000 (time-seconds)))
-  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
-  (define hasAmmo (> current-ammo 0))
-  (define lessThanFiringRate (> timeSinceLastShot firing-rate))
-  
-  (define x-offset (random (+ 1 (car spread))))
-  (define y-offset (random (+ 1 (cadr spread))))
-  (display (string-append "offset: (" (number->string x-offset) ", " (number->string y-offset) ")"))
+(define (fire-ray)
+  (define mainobjpos (gameobj-pos mainobj))
+  (define hitpoints (raycast mainobjpos (gameobj-rot mainobj) 500))   ;; BUG  DUE TO COLLISION GROUPS SO THIS DOESN'T WORK   
 
-  (display (string-append "current ammo: " (number->string current-ammo) "\n"))
+  ;; obviously only should do this if the id of the object here is in the hitpoints
+  (sendnotify "bulletraycast")
 
+)
 
-  (if (and hasAmmo lessThanFiringRate)
-    (begin
-      (display "should play animation: ")
-      (display gun-fire-animation)
-      (display "\n")
-      (display (gameobj-animations (lsobj-name "gun")))
-      (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
-      (playclip "&gunsound")
-      (emit (gameobj-id (lsobj-name "+particles")))
-      (set! current-ammo (- current-ammo 1))
-      (set! last-shooting-time elapsedMilliseconds)
-      (display (time-seconds))
-    )
+(define (display-debug-gun hasAmmo lessThanFiringRate)
+  (if #f
     (begin
       (display "cannot shoot because: ")
       (display "(ammo: ")
@@ -193,6 +181,32 @@
       (display lessThanFiringRate)
       (display ")\n")
     )
+  )
+)
+
+(define (fire-gun)
+  (define elapsedMilliseconds (* 1000 (time-seconds)))
+  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
+  (define hasAmmo (> current-ammo 0))
+  (define lessThanFiringRate (> timeSinceLastShot firing-rate))
+  
+  (define x-offset (random (+ 1 (car spread))))
+  (define y-offset (random (+ 1 (cadr spread))))
+  ;(display (string-append "offset: (" (number->string x-offset) ", " (number->string y-offset) ")"))
+  ;(display (string-append "current ammo: " (number->string current-ammo) "\n"))
+
+  (if (and hasAmmo lessThanFiringRate)
+    (begin
+      (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
+      (playclip "&gunsound")
+      (if is-raycast
+        (fire-ray)
+        (emit (gameobj-id (lsobj-name "+particles")))
+      )
+      (set! current-ammo (- current-ammo 1))
+      (set! last-shooting-time elapsedMilliseconds)
+    )
+    (display-debug-gun hasAmmo lessThanFiringRate)
   )
 )
 
@@ -208,6 +222,7 @@
   (set! spread (cadr (assoc "spread" gun-attr)))
   (set! max-ammo (cadr (assoc "max-ammo" gun-attr)))
   (set! gun-fire-animation (cadr (assoc "gun-fire-animation" gun-attr)))
+  (set! is-raycast (cadr (assoc "is-raycast" gun-attr)))
 
   (display "removing objects\n")
   (rm-obj (gameobj-id (lsobj-name "gun")))
