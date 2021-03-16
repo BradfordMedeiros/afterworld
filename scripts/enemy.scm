@@ -15,5 +15,4 @@
 
 (define (is-bullet obj) (string-contains (gameobj-name obj) "name"))            ; TODO -> better if used labels instead, not good to rely on name
 (define (process-hit obj) (if (is-bullet obj) (rm-self)))
-(define (onCollideEnter obj1 obj2 x) (filterMainObj obj1 obj2 process-hit))
-
+(define (onCollideEnter obj1 obj2 x normal) (filterMainObj obj1 obj2 process-hit))

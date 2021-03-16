@@ -155,19 +155,36 @@
     (if (equal? go-backward #t) (move 0 0 (* -1 movement-speed)))
   )
   (if (and can-hold is-holding) (fire-gun))
+  (draw-line last-ray-from last-ray-to)
 )
 
 
 (define current-ammo max-ammo)
 (define last-shooting-time -1000)
 
+(define last-ray-from '(0 0 0))
+(define last-ray-to '(0 0 0))
 (define (fire-ray)
   (define mainobjpos (gameobj-pos mainobj))
   (define hitpoints (raycast mainobjpos (gameobj-rot mainobj) 500))   ;; BUG  DUE TO COLLISION GROUPS SO THIS DOESN'T WORK   
 
-  ;; obviously only should do this if the id of the object here is in the hitpoints
-  (sendnotify "bulletraycast")
-
+  (if (> (length hitpoints) 0)
+    (begin
+      (let* (
+        (firsthit (car hitpoints))  
+        (frompoint (cadr firsthit)) 
+        (topoint (move-relative (cadr firsthit) (caddr firsthit) 10)) 
+      )
+        (begin
+          (set! last-ray-from frompoint)
+          (set! last-ray-to topoint)
+          (display hitpoints)
+          ; obviously only should do this if the id of the object here is in the hitpoints
+          (sendnotify "bulletraycast")
+        )
+      )
+    )
+  )
 )
 
 (define (display-debug-gun hasAmmo lessThanFiringRate)
