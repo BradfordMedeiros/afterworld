@@ -17,9 +17,15 @@
           (list
             (lambda () (display "LEVEL SELECT: loading menu\n"))
             (lambda () (set! onmenu #t))
-            (lambda () (unload-all-scenes))
             (lambda () (load-scene "../../afterworld/scenes/menu.rawscene"))
             (lambda () (set-camera (gameobj-id (lsobj-name ">maincamera"))))
+          )
+        )
+        (on-exit
+          (list
+            (lambda () (display "on exit main menu\n"))
+            (lambda () (set! onmenu #f))
+            (lambda () (unload-all-scenes))
           )
         )
       )
@@ -29,10 +35,14 @@
         (create-track "load-level"
           (list
             (lambda () (display "LEVEL SELECT: loading level\n"))
-            (lambda () (set! onmenu #f))
-            (lambda () (unload-all-scenes))
             (lambda () (load-scene (selected-level)))
             (lambda () (set-camera (gameobj-id (lsobj-name ">maincamera"))))
+          )
+        )
+        (on-exit
+          (list
+            (lambda () (display "on exit playing level\n"))
+            (lambda () (unload-all-scenes))
           )
         )
       )
