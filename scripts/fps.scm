@@ -54,14 +54,53 @@
 ;; Movement code
 (define (move x y z) (applyimpulse-rel mainobj (list x y (* -1 z))))
 (define (look x y) (gameobj-setrotd! mainobj (* 0.1 x) (* -0.1 y) 0))
-
 (define (set-gravity vec3) (display "set-gravity placeholder\n"))
+
+;;;;;;;;; JUMPING CODE
 (define is-grounded #t)
-(define (jump amount) 
-  (display "Calling jump\n")
-  (applyimpulse mainobj (list 0 amount 0))
-  (playclip "&jumpsound")
+(define grounded-obj #f)
+(define (filterMainObj obj1 obj2 normal fn)
+  (define id (gameobj-id mainobj))
+  (define otherObject #f)
+  (if (equal? (gameobj-id obj1) id) (set! otherObject obj2))
+  (if (equal? (gameobj-id obj2) id) (set! otherObject obj1))
+  (if otherObject (fn normal otherObject))
 )
+(define (filterMainObjWithOther obj1 obj2 fn) 
+  ;; TODO implement this since if not another object that say, hit the player, will allow this to jump
+  ;; check if obj1 or obj2 is mainobj, and the other is the grounded-obj
+  (fn)
+)
+(define (set-grounded normal otherobj)
+  (define offsetvec (move-relative '(0 0 0) normal 1))
+  (if (> (cadr offsetvec) 0)
+    (begin
+      (set! is-grounded #t)
+      (set! grounded-obj otherobj)
+    )
+  )
+)
+(define (set-jumping)
+  (set! is-grounded #f)
+  (set! grounded-obj #f)
+)
+
+(define (onCollideEnter obj1 obj2 hitpoint normal) (filterMainObj obj1 obj2 normal set-grounded))
+(define (onCollideExit obj1 obj2)
+  (display "on collide exit\n")
+  (filterMainObjWithOther obj1 obj2 set-jumping)
+)
+
+(define (jump amount) 
+  (if is-grounded
+    (begin
+      (display "Calling jump\n")
+      (applyimpulse mainobj (list 0 amount 0))
+      (playclip "&jumpsound")
+    )
+  )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;; Gunplay code
