@@ -52,7 +52,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Movement code
-(define (move x y z) (applyimpulse-rel mainobj (list x y (* -1 z))))
+(define (move x y z) 
+  (if is-grounded
+    (applyimpulse-rel mainobj (list x y (* -1 z)))
+    (applyimpulse-rel mainobj (list (* x 0.1) (* y 0.1) (* -1 z)))
+  )
+)
 (define (look x y) (gameobj-setrotd! mainobj (* 0.1 x) (* -0.1 y) 0))
 (define (set-gravity vec3) (display "set-gravity placeholder\n"))
 
@@ -280,10 +285,8 @@
   (set! gun-fire-animation (cadr (assoc "gun-fire-animation" gun-attr)))
   (set! is-raycast (cadr (assoc "is-raycast" gun-attr)))
 
-  (display "removing objects\n")
   (rm-obj (gameobj-id (lsobj-name "gun")))
   (rm-obj (gameobj-id (lsobj-name "&gunsound")))
-  (display "making objects")
 
   (mk-obj-attr "gun"       (list (list "mesh" (cadr (assoc "gun-model" gun-attr)))))
   (mk-obj-attr "&gunsound" (list (list "clip" (cadr (assoc "gun-fire-sound" gun-attr))))) 
