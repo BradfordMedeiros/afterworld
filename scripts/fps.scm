@@ -61,27 +61,42 @@
 (define (look x y) (gameobj-setrotd! mainobj (* 0.1 x) (* -0.1 y) 0))
 (define (set-gravity vec3) (display "set-gravity placeholder\n"))
 
+(define (reverse-quat quat) (orientation-from-pos '(0 0 0) (move-relative '(0 0 0) quat -1)))
+
 ;;;;;;;;; JUMPING CODE
 (define is-grounded #t)
 (define grounded-obj #f)
 (define (filterMainObj obj1 obj2 normal fn)
   (define id (gameobj-id mainobj))
   (define otherObject #f)
+  (define relativeNormal normal)
+  (if (equal? (gameobj-id obj1) id) 
+    (set! otherObject obj2)
+  )
+  (if (equal? (gameobj-id obj2) id) 
+    (begin
+      (set! otherObject obj1)
+      (set! relativeNormal (reverse-quat normal)) ;; This normal is always obj2 on obj1 so have to reverse in this case 
+    )
+  )
+  (if otherObject (fn relativeNormal otherObject))
+)
+(define (filterMainObjWithOther obj1 obj2 filterid fn) 
+  (define id (gameobj-id mainobj))
+  (define otherObject #f)
   (if (equal? (gameobj-id obj1) id) (set! otherObject obj2))
   (if (equal? (gameobj-id obj2) id) (set! otherObject obj1))
-  (if otherObject (fn normal otherObject))
-)
-(define (filterMainObjWithOther obj1 obj2 fn) 
-  ;; TODO implement this since if not another object that say, hit the player, will allow this to jump
-  ;; check if obj1 or obj2 is mainobj, and the other is the grounded-obj
-  (fn)
+  (if (and otherObject (equal? (gameobj-id otherObject) filterid))
+    (fn)
+  )
 )
 (define (set-grounded normal otherobj)
   (define offsetvec (move-relative '(0 0 0) normal 1))
+  (display "set-grounded called!\n")
   (if (> (cadr offsetvec) 0)
     (begin
       (set! is-grounded #t)
-      (set! grounded-obj otherobj)
+      (set! grounded-obj (gameobj-id otherobj))
     )
   )
 )
@@ -90,10 +105,17 @@
   (set! grounded-obj #f)
 )
 
-(define (onCollideEnter obj1 obj2 hitpoint normal) (filterMainObj obj1 obj2 normal set-grounded))
+(define (onCollideEnter obj1 obj2 hitpoint normal) 
+  (display "collide enter -- \n")
+  (filterMainObj obj1 obj2 normal set-grounded)
+)
 (define (onCollideExit obj1 obj2)
-  (display "on collide exit\n")
-  (filterMainObjWithOther obj1 obj2 set-jumping)
+  (display "collide exit -- grounded obj: ")
+  (display grounded-obj)
+  (display "\n")
+  (if grounded-obj
+    (filterMainObjWithOther obj1 obj2 grounded-obj set-jumping)
+  )
 )
 
 (define (jump amount) 
@@ -217,6 +239,7 @@
       (let* (
         (firsthit (car hitpoints))  
         (frompoint (cadr firsthit)) 
+        (id (car firsthit))
         (topoint (move-relative (cadr firsthit) (caddr firsthit) 10)) 
       )
         (begin
@@ -224,7 +247,7 @@
           (set! last-ray-to topoint)
           (display hitpoints)
           ; obviously only should do this if the id of the object here is in the hitpoints
-          (sendnotify "bulletraycast")
+          (sendnotify "bullet" (number->string id))
         )
       )
     )

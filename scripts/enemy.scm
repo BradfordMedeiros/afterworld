@@ -1,8 +1,10 @@
 
 (define (rm-self) (rm-obj (gameobj-id mainobj)))
 
-(define (onMessage topic)
-  (if (equal? topic "bulletraycast") (rm-self))
+(define (onMessage topic value)
+  (if (and (equal? topic "bullet") (equal? (string->number value) (gameobj-id mainobj))) 
+    (rm-self)
+  )
 )
 
 (define (filterMainObj obj1 obj2 fn)
