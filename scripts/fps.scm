@@ -26,7 +26,7 @@
       (list "gun-model" "../gameresources/weapons/fork.dae")
       (list "gun-fire-animation" "default:0")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
-      (list "hud-element" "../gameresources/ui/hud1/hud.data.png")
+      (list "hud-element" "../gameresources/ui/hud1/hud.png")
       (list "x-offset-position" 0)
       (list "y-offset-position" 0)
       (list "z-offset-position" 0)
@@ -39,6 +39,7 @@
   )
 )
 
+
 ; Gun parameters
 (define gun-name "default-gun")
 (define gun-fire-animation "default:0")
@@ -48,13 +49,56 @@
 (define spread '(5 100))
 (define max-ammo 30)
 (define is-raycast #t)
+
+(define x-offset-position 0)
+(define y-offset-position 0)
+(define z-offset-position 0)
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(define (move-and-limit amount-to-move x-curr-offset-position y-curr-offset-position z-curr-offset-position )
+  (define newX (+ x-curr-offset-position (car amount-to-move)))
+  (define newY (+ y-curr-offset-position (cadr amount-to-move)))
+  (define newZ (+ z-curr-offset-position (caddr amount-to-move)))
+  (list 
+    (max (min newX (+ 0.5 x-offset-position)) (- 0.5 x-offset-position)) 
+    (max (min newY (+ 0.5 y-offset-position)) (- 0.5 y-offset-position))
+    (max (min newZ (+ 0.5 z-offset-position)) (- 0.5 z-offset-position))
+  )
+)
+
+(define (move-left) (move-relative '(0 0 0) (orientation-from-pos '(0 0 0) '(-1 0 0)) 0.01))
+(define (move-right) (move-relative '(0 0 0) (orientation-from-pos '(0 0 0) '(1 0 0)) 0.01)
+)
+(define (sway-gun movement)
+  (define gunobj (lsobj-name "gun"))
+  (define amount-to-move '(0 0 0))
+  (define currpos (gameobj-pos gunobj))
+  (define x-curr-offset-position (car currpos))
+  (define y-curr-offset-position (cadr currpos))
+  (define z-curr-offset-position (caddr currpos))
+
+  (if (> (car movement) 0)
+    (set! amount-to-move (move-right))
+  )
+  (if (< (car movement) 0)
+    (set! amount-to-move (move-left))
+  )
+  (set! amount-to-move (move-and-limit amount-to-move x-curr-offset-position y-curr-offset-position z-curr-offset-position))
+  (gameobj-setpos! gunobj amount-to-move)
+)
 
 ;; Movement code
 (define (move x y z) 
   (if is-grounded
-    (applyimpulse-rel mainobj (list x y (* -1 z)))
+    (let (
+      (movement (list x y (* -1 z)))
+    )
+      (applyimpulse-rel mainobj movement)
+      (sway-gun movement)
+    )
     (applyimpulse-rel mainobj (list (* x 0.1) (* y 0.1) (* -1 z)))
   )
 )
@@ -298,9 +342,9 @@
   (define gunname (car gundata))
   (define gun-attr (cadr gundata))
 
-  (define x-offset-position (cadr (assoc "x-offset-position" gun-attr)))
-  (define y-offset-position (cadr (assoc "y-offset-position" gun-attr)))
-  (define z-offset-position (cadr (assoc "z-offset-position" gun-attr)))
+  (set! x-offset-position (cadr (assoc "x-offset-position" gun-attr)))
+  (set! y-offset-position (cadr (assoc "y-offset-position" gun-attr)))
+  (set! z-offset-position (cadr (assoc "z-offset-position" gun-attr)))
   (set! firing-rate (cadr (assoc "firing-rate" gun-attr)))
   (set! can-hold (cadr (assoc "can-hold" gun-attr)))
   (set! spread (cadr (assoc "spread" gun-attr)))
@@ -321,3 +365,8 @@
 (define (update-values)
   (switch-gun (list-ref gundata (random (length gundata))))
 )
+
+
+; when move left gun moves toward a destination on the right
+; when move right gun moves toward a destination offset on the left (toward)
+; when neither you recenter

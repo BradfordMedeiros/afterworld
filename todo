@@ -1,36 +1,23 @@
 
 today:
-
-- onMessage should have key + value
-- fix raycast bug
-  - this is something to do with the collision filter mask
-
-
-- consider when the script should be loaded.
-  - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
-  - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
-- removing and object when animation is playing causes a segfault
-- physics raycast is gets a collision object that does not a rigidbody in the map
-- raycast + collision -> get the normals (allows for example, telling if on ground)
-
-
-tomorrow:
-- make main menu
-- can go between different scenes
-- user defined 
+- add a tilt thing for movement
 
 bugs:
-- model loading ophaned the model
-- playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
-- attribute updating/serialization not kept in line
+- models:
+  - model loading ophaned the model
+  - texture not properly mapped to model
+  - animation plays wrong axis
+- removing and object when animation is playing causes a segfault
+- make everything time independent
+- bugs with memory management for tracks / onexit fns
+- making an object with a parent (eg the gun)
 
-desired improvements:
-- console.scm can switch scope into modules
-- optional callback for the animation would be cool?
-- ability to have user defined attributes
-- improve state machine attrs (not super important yet but needed when get more involved w/ scripting
-  - attr function (i guess it affects the associated object?)
-  - on exit state hook
+eventually:
+- work on ai, make players and shit move and stuff enemy ai 
+- then: world building, figure out how to slice up the world with world loader
+  -> probably get rid of the command line flag loading thing, and just have something like:
+    -> ensureLoaded((list (list posx posy) objectid anotherobjectid)))
+    ----> that way i can say like, always should be loaded around there two cameras, or say the position either one whatever (say to load a big mountain in the distance always)
 
 
 core gameplay implementation stage:
@@ -55,12 +42,28 @@ improve gun system
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
   - movement speed
-  - jump height 
   - gravity
   - tilt
   - landing sound effect
   - sprint 
-  - can double jump
   - limit vertical
 
 - sql parser? 
+
+bugs for eventually:
+- drawline doesn't seem to work with 0 objects being rendered in the scene
+- physics raycast is gets a collision object that does not a rigidbody in the map
+- playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
+- attribute updating/serialization not kept in line
+- consider when the script should be loaded.
+  - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
+  - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
+
+features for eventually:
+- generic messaging thing instead of the individual float/string/bool ones
+- improve state machine attrs (not super important yet but needed when get more involved w/ scripting
+  - attr function (i guess it affects the associated object?)
+- ability to have user defined attributes
+- guile should print a stacktrace
+- console.scm can switch scope into modules
+- optional callback for the animation would be cool?
