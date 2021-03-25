@@ -1,8 +1,14 @@
 today:
-- enemy should then start shooting projectiles at the player
-
 bugs:
-state machines never get cleans up when the script goes away
+- state machines never get cleans up when the script goes away
+- when playing animation if you exit it to menu it errors add animation
+
+
+emitter upgrades: 
+- optional message for each spawn? 
+- maybe the delta stuff should be relative to the parent?  
+and thenfore solve: - enemy should then start shooting projectiles at the player
+
 
 tomorrow:
 - models:

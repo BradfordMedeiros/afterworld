@@ -292,6 +292,7 @@
           (display hitpoints)
           ; obviously only should do this if the id of the object here is in the hitpoints
           (sendnotify "bullet" (number->string id))
+          (sendnotify "killed" "player")
         )
       )
     )

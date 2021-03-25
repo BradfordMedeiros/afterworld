@@ -50,6 +50,13 @@
   )
 ))
 
+(define (onMessage topic value)
+  (display (string-append "message: " topic "\n"))
+  (if (equal? topic "reset") 
+    (set-machine levelselect "main-menu")
+  )
+)
+
 (define (onKey key scancode action mods)
   (display (string-append "key is: " (number->string key) "\n"))
   (if (and (equal? key 259) (equal? action 1)) (set-machine levelselect "main-menu"))
@@ -76,3 +83,4 @@
 )
 
 (play-machine levelselect)
+

@@ -2,6 +2,7 @@
 platform:mesh:../gameresources/primitives/walls/1-0.2-1.dae
 platform:position:0 -20 0
 platform:scale:100 1 100
+platform:script:../../afterworld/scripts/gamelogic.scm
 
 >maincamera:position:0 0 0
 >maincamera:physics_angle:0.000000 0.000000 0.000000
