@@ -15,8 +15,13 @@ platform:scale:100 1 100
 enemy:mesh:./res/models/box/box.obj
 enemy:script:../../afterworld/scripts/enemy.scm
 enemy:physics:enabled
-enemy:position:5 4 0
+enemy:position:5 2 0
 enemy:physics_type:dynamic
+
+enemy_detection:mesh:./res/models/box/box.obj
+enemy_detection:position:10 -15 0
+enemy_detection:physics_shape:shape_sphere
+enemy_detection:physics_collision:nocollide
 
 gun:mesh:../gameresources/weapons/fork.dae
 gun:position:20 -15 -40

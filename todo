@@ -1,36 +1,33 @@
-
 today:
-- add a tilt thing for movement
+- enemy should then start shooting projectiles at the player
 
 bugs:
+state machines never get cleans up when the script goes away
+
+tomorrow:
 - models:
   - model loading ophaned the model
   - texture not properly mapped to model
   - animation plays wrong axis
-- removing and object when animation is playing causes a segfault
+  
+big next week:
+- making an object with a parent (eg the gun)
+- physics relative to parent 
+- map chunks relative to location (via parenting)
+
+bugs:
+- tilt thing for movement not working great
 - make everything time independent
 - bugs with memory management for tracks / onexit fns
-- making an object with a parent (eg the gun)
 
 eventually:
 - work on ai, make players and shit move and stuff enemy ai 
-- then: world building, figure out how to slice up the world with world loader
-  -> probably get rid of the command line flag loading thing, and just have something like:
-    -> ensureLoaded((list (list posx posy) objectid anotherobjectid)))
-    ----> that way i can say like, always should be loaded around there two cameras, or say the position either one whatever (say to load a big mountain in the distance always)
-
 
 core gameplay implementation stage:
 - emitter initial velocity 
 - gun system (very tunable)
   - projectile effect (on muzzle?)
-  - parent correctly
-  - types:
-    - raycast
-    - object 
-      -> can we just reuse the emitter system somehow?  Same attributes and junk 
-  - animation hooks 
-    - firing maybe should trigger the animiation, and then specified to that it will actually fire?
+  - animation hooks => firing maybe should trigger the animiation, and then specified to that it will actually fire?
 
 
 improve gun system
@@ -66,4 +63,12 @@ features for eventually:
 - ability to have user defined attributes
 - guile should print a stacktrace
 - console.scm can switch scope into modules
-- optional callback for the animation would be cool?
+- optional callback for the animation would be cool
+- worldloading:
+- how to resize
+  conceptually:
+  calculate the position of each object 
+  --> don't take into account parented objects b/c too confusing/ constrainty 
+  --> calculate the position relative to the offset of the chunk, so pos = fn(obj_rel, chunk_index, chunk_size)
+  --> solve for pos = fn(obj_rel_to_solve, chunk_index_new, chunk_size_new) such that obj_rel_to_solve < chunk_size_new
+  ====> i guess?

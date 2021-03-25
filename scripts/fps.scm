@@ -97,7 +97,7 @@
       (movement (list x y (* -1 z)))
     )
       (applyimpulse-rel mainobj movement)
-      (sway-gun movement)
+      ;(sway-gun movement)
     )
     (applyimpulse-rel mainobj (list (* x 0.1) (* y 0.1) (* -1 z)))
   )
@@ -276,7 +276,7 @@
 (define last-ray-to '(0 0 0))
 (define (fire-ray)
   (define mainobjpos (gameobj-pos mainobj))
-  (define hitpoints (raycast mainobjpos (gameobj-rot mainobj) 500))   ;; BUG  DUE TO COLLISION GROUPS SO THIS DOESN'T WORK   
+  (define hitpoints (raycast mainobjpos (gameobj-rot mainobj) 500))   
 
   (if (> (length hitpoints) 0)
     (begin
