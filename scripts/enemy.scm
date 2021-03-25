@@ -73,9 +73,24 @@
   )
 ))
 
+(define last-shooting-time 0)
+(define (fire-bullet)
+  (define elapsedMilliseconds (* 1000 (time-seconds)))
+  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
+  (define lessThanFiringRate (> timeSinceLastShot 1000))
+  (if lessThanFiringRate
+    (begin
+      (set! last-shooting-time elapsedMilliseconds)
+      (emit (gameobj-id (lsobj-name "+enemy_particles")))
+    )
+  )
+)
+
 (define (move-toward target)
   (define currPos (gameobj-pos mainobj))
-  (gameobj-setpos! mainobj (move-relative currPos (orientation-from-pos currPos (gameobj-pos target)) 0.01))
+  (define toward-target (orientation-from-pos currPos (gameobj-pos target)))
+  (gameobj-setpos! mainobj (move-relative currPos toward-target 0.01))
+  (gameobj-setrot! mainobj toward-target) 
 )
 (define (distance point1 point2)
   (define xdelta (- (car  point1) (car  point2)))
@@ -90,11 +105,13 @@
 (define (onFrame)
   (if (not (equal? current-target #f))
     (if (not (is-close-enough current-target))
-      (move-toward current-target)
+      (begin
+        (move-toward current-target)
+        (fire-bullet)
+      )
     )
   )
 )
 
 (play-machine enemy)
-
 
