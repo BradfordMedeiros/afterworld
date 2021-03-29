@@ -24,7 +24,7 @@
     )
     (list "fork" (list
       (list "gun-model" "../gameresources/weapons/fork.dae")
-      (list "gun-fire-animation" "default:0")
+      (list "gun-fire-animation" "Armature|ArmatureAction")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
       (list "hud-element" "../gameresources/ui/hud1/hud.png")
       (list "x-offset-position" 0)
@@ -42,7 +42,7 @@
 
 ; Gun parameters
 (define gun-name "default-gun")
-(define gun-fire-animation "default:0")
+(define gun-fire-animation "Armature|ArmatureAction")
 (define hud-element "../gameresources/ui/hud1/hud.png")
 (define firing-rate 100)
 (define can-hold #t)
