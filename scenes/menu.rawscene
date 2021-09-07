@@ -18,5 +18,8 @@ menu:physics:disabled
 menu:texture:../gameresources/textures/evilpattern.png
 menu:textureoffset:0 0
 menu:script:../afterworld/scenes/menu.scm
+menu:fragshader:../afterworld/shaders/menu/fragment.glsl
+
+&music:clip:../afterworld/music/industrial.wav
 
 >maincamera:child:menu,)title

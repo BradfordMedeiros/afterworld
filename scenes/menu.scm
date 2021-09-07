@@ -5,6 +5,7 @@
 (define lastTime (time-seconds))
 (define elapsedTime 0)
 
+(playclip "&music")
 
 (define (onFrame)
   (define currTime (time-seconds))
