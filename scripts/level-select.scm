@@ -17,8 +17,14 @@
           (list
             (lambda () (display "LEVEL SELECT: loading menu\n"))
             (lambda () (set! onmenu #t))
-            ;(lambda () (load-scene "../afterworld/scenes/menu.rawscene"))
-            ;(lambda () (set-camera (gameobj-id (lsobj-name ">maincamera"))))
+            (lambda () 
+              (let ((sceneId (load-scene "../afterworld/scenes/menu.rawscene")))
+                (begin
+                  (display (string-append "scene id: " (number->string sceneId)))
+                  (set-camera (gameobj-id (lsobj-name ">maincamera" sceneId)))
+                )
+              )
+            )
           )
         )
         (on-exit
