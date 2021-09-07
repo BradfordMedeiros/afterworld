@@ -1,5 +1,5 @@
 
-platform:mesh:../gameresources/primitives/walls/1-0.2-1.dae
+platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform:position:0 -20 0
 platform:scale:100 1 100
 platform:texture:./res/textures/gas.png

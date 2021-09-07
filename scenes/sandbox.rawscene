@@ -1,20 +1,20 @@
 
-platform:mesh:../gameresources/primitives/walls/1-0.2-1.dae
+platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform:position:0 -20 0
 platform:scale:100 1 100
-platform:script:../../afterworld/scripts/gamelogic.scm
+platform:script:../afterworld/scripts/gamelogic.scm
 
 >maincamera:position:0 0 0
 >maincamera:physics_angle:0.000000 0.000000 0.000000
->maincamera:script:../../afterworld/scripts/fps.scm
+>maincamera:script:../afterworld/scripts/fps.scm
 >maincamera:physics:enabled
 >maincamera:physics_type:dynamic
 >maincamera:child:gun,&gunsound,&jumpsound,gunhud
 >maincamera:physics_gravity:0 -9.81 0
 
-#enemy:mesh:../gameresources/characters/bloodtrooper.fbx
+#enemy:mesh:../gameresources/build/characters/bloodtrooper.gltf
 enemy:mesh:./res/models/box/box.obj
-enemy:script:../../afterworld/scripts/enemy.scm
+enemy:script:../afterworld/scripts/enemy.scm
 enemy:physics:enabled
 enemy:position:5 2 0
 enemy:physics_type:dynamic
@@ -38,7 +38,7 @@ enemy_detection:physics_collision:nocollide
 +enemy_particles:+tint:0 1 0
 +enemy_particles:+scale:0.1 0.1 0.1
 
-gun:mesh:../gameresources/build/weapons/fork.fbx
+gun:mesh:../gameresources/build/weapons/fork.gltf
 gun:position:20 -15 -40
 gun:child:+particles
 gun:layer:no_depth
@@ -57,8 +57,8 @@ gun:layer:no_depth
 +particles:+fragshader:./res/shaders/discard_lowintensity/fragment.glsl
 +particles:+tint:0 1 0
 
-gunhud:mesh:../gameresources/ui/hud1/hud.obj
-gunhud:position:0 0 -1.6
+#gunhud:mesh:../gameresources/ui/hud1/hud.obj
+#gunhud:position:0 0 -1.6
 
 &gunsound:clip:./res/sounds/silenced-gunshot.wav
 &jumpsound:clip:./res/sounds/sample.wav

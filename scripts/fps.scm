@@ -9,10 +9,10 @@
 (define gundata
   (list 
     (list "pistol" (list
-      (list "gun-model" "../gameresources/weapons/pistol.dae")
+      (list "gun-model" "../gameresources/build/weapons/pistol.gltf")
       (list "gun-fire-animation" "default:0")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
-      (list "hud-element" "../gameresources/ui/hud1/hud.png")
+      ;(list "hud-element" "../gameresources/ui/hud1/hud.png")
       (list "x-offset-position" 0)
       (list "y-offset-position" 0)
       (list "z-offset-position" 0)
@@ -23,10 +23,10 @@
       (list "is-raycast" #t))
     )
     (list "fork" (list
-      (list "gun-model" "../gameresources/weapons/fork.dae")
+      (list "gun-model" "../gameresources/build/weapons/fork.gltf")
       (list "gun-fire-animation" "Armature|ArmatureAction")
       (list "gun-fire-sound" "./res/sounds/silenced-gunshot.wav")
-      (list "hud-element" "../gameresources/ui/hud1/hud.png")
+      ;(list "hud-element" "../gameresources/ui/hud1/hud.png")
       (list "x-offset-position" 0)
       (list "y-offset-position" 0)
       (list "z-offset-position" 0)
@@ -43,7 +43,7 @@
 ; Gun parameters
 (define gun-name "default-gun")
 (define gun-fire-animation "Armature|ArmatureAction")
-(define hud-element "../gameresources/ui/hud1/hud.png")
+;(define hud-element "../gameresources/ui/hud1/hud.png")
 (define firing-rate 100)
 (define can-hold #t)
 (define spread '(5 100))
@@ -176,7 +176,7 @@
 
 ;; Gunplay code
 (define (set-gun-model) (display "set gun model placeholder\n"))
-(define (set-hud-element) (display "set hud element placeholder\n"))
+;(define (set-hud-element) (display "set hud element placeholder\n"))
 (define (set-gun-offset x y) (display "set gun offset placeholder \n"))
 (define (fire-gun) (display "fire gun placeholder\n"))
 
@@ -359,7 +359,7 @@
   (mk-obj-attr "gun"       (list (list "mesh" (cadr (assoc "gun-model" gun-attr)))))
   (mk-obj-attr "&gunsound" (list (list "clip" (cadr (assoc "gun-fire-sound" gun-attr))))) 
   (gameobj-setpos! (lsobj-name "gun") (list x-offset-position y-offset-position z-offset-position))
-  (set-texture (gameobj-id (lsobj-name "gunhud")) (cadr (assoc "hud-element" gun-attr)))
+  ;(set-texture (gameobj-id (lsobj-name "gunhud")) (cadr (assoc "hud-element" gun-attr)))
   ; todo add set rotation (everything right now is relative?)
 )
 

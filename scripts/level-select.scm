@@ -1,8 +1,8 @@
 (define onmenu #f)
 (define menu-index 0)
 (define levels (list 
-  "../../afterworld/scenes/sandbox.rawscene"
-  "../../afterworld/scenes/sandbox2.rawscene"
+  "../afterworld/scenes/sandbox.rawscene"
+  "../afterworld/scenes/sandbox2.rawscene"
 ))
 
 (define (next-level) (set! menu-index (min (- (length levels) 1) (+ menu-index 1))))
@@ -17,8 +17,8 @@
           (list
             (lambda () (display "LEVEL SELECT: loading menu\n"))
             (lambda () (set! onmenu #t))
-            (lambda () (load-scene "../../afterworld/scenes/menu.rawscene"))
-            (lambda () (set-camera (gameobj-id (lsobj-name ">maincamera"))))
+            ;(lambda () (load-scene "../afterworld/scenes/menu.rawscene"))
+            ;(lambda () (set-camera (gameobj-id (lsobj-name ">maincamera"))))
           )
         )
         (on-exit
