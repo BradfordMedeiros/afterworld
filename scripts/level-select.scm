@@ -9,6 +9,26 @@
 (define (prev-level) (set! menu-index (max 0 (- menu-index 1))))
 (define (selected-level) (list-ref levels menu-index))
 
+(define (find-index searchin value index)
+  (if (>= index (length searchin))
+    #f
+    (if (equal? (list-ref searchin index) value)
+      index
+      (find-index searchin value (+ index 1))
+    )
+  )
+)
+(define (set-level-by-name levelname) 
+  (define index (find-index levels levelname 0))
+  (if index
+    (begin
+      (set! menu-index index)
+      #t
+    )
+    #f
+  )
+)
+
 (define levelselect (machine
   (list
     (state "main-menu"
@@ -63,10 +83,11 @@
   )
 )
 
+(define (playlevel) (set-machine levelselect "playing-level"))
 (define (onKey key scancode action mods)
   (display (string-append "key is: " (number->string key) "\n"))
   (if (and (equal? key 259) (equal? action 1)) (set-machine levelselect "main-menu"))
-  (if (and (equal? key 257) (equal? action 1)) (set-machine levelselect "playing-level"))
+  (if (and (equal? key 257) (equal? action 1)) (playlevel))
   (if (and (equal? key 265) (equal? action 1)) (prev-level))
   (if (and (equal? key 264) (equal? action 1)) (next-level))  
 )
@@ -90,3 +111,10 @@
 
 (play-machine levelselect)
 
+(define level (args "level"))
+(if (string? level) 
+  (if (set-level-by-name level)
+    (playlevel)
+    (display (string-append "ERROR: no level named: " level "\n"))
+  )
+)
