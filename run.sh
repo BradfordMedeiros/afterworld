@@ -7,6 +7,8 @@ SCRIPT_FOLDER=$BASE_DIRECTORY/scripts
   cd ../ModEngine && 
   ./build/modengine \
     -x "$SCRIPT_FOLDER/level-select.scm" \
-    -j ../ModPlugins/sequencer/plugin.so \
+    -j ../ModPlugins/build/sequencer.so \
+    -j ../ModPlugins/build/sql.so \
+    -a sqldir=../afterworld/data
     $@
 )

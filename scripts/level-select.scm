@@ -91,11 +91,15 @@
 
 (define (playlevel) (set-machine levelselect "playing-level"))
 (define (onKey key scancode action mods)
-  (display (string-append "key is: " (number->string key) "\n"))
-  (if (and (equal? key 259) (equal? action 1)) (set-machine levelselect "main-menu"))
-  (if (and (equal? key 257) (equal? action 1)) (playlevel))
-  (if (and (equal? key 265) (equal? action 1)) (prev-level))
-  (if (and (equal? key 264) (equal? action 1)) (next-level))  
+  (if (unlock "input")
+    (begin
+      (display (string-append "key is: " (number->string key) "\n"))
+      (if (and (equal? key 259) (equal? action 1)) (set-machine levelselect "main-menu"))
+      (if (and (equal? key 257) (equal? action 1)) (playlevel))
+      (if (and (equal? key 265) (equal? action 1)) (prev-level))
+      (if (and (equal? key 264) (equal? action 1)) (next-level))  
+    )
+  )
 )
 
 (define (text current-index)
