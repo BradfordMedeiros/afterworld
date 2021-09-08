@@ -178,7 +178,6 @@
 (define (set-gun-model) (display "set gun model placeholder\n"))
 ;(define (set-hud-element) (display "set hud element placeholder\n"))
 (define (set-gun-offset x y) (display "set gun offset placeholder \n"))
-(define (fire-gun) (display "fire gun placeholder\n"))
 
 (define look-velocity-x 0)
 (define look-velocity-y 0)
@@ -326,12 +325,13 @@
 
   (if (and hasAmmo lessThanFiringRate)
     (begin
-      (gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
-      (playclip "&gunsound")
-      (if is-raycast
-        (fire-ray)
-        (emit (gameobj-id (lsobj-name "+particles")))
-      )
+      ;(gameobj-playanimation (lsobj-name "gun") gun-fire-animation)
+      ;(playclip "&gunsound")
+      ;(if is-raycast
+      ;  (fire-ray)
+      ;  (emit (gameobj-id (lsobj-name "+particles")))
+      ;)
+      (display "fire gun\n")
       (set! current-ammo (- current-ammo 1))
       (set! last-shooting-time elapsedMilliseconds)
     )

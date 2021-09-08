@@ -1,18 +1,18 @@
 (define onmenu #f)
 (define menu-index 0)
 (define levels (list 
-  "../afterworld/scenes/sandbox.rawscene"
-  "../afterworld/scenes/sandbox2.rawscene"
+  (list "../afterworld/scenes/sandbox.rawscene" "sandbox")
+  (list "../afterworld/scenes/shooter.rawscene" "fps")
 ))
 
 (define (next-level) (set! menu-index (min (- (length levels) 1) (+ menu-index 1))))
 (define (prev-level) (set! menu-index (max 0 (- menu-index 1))))
-(define (selected-level) (list-ref levels menu-index))
+(define (selected-level) (car (list-ref levels menu-index)))
 
 (define (find-index searchin value index)
   (if (>= index (length searchin))
     #f
-    (if (equal? (list-ref searchin index) value)
+    (if (equal? (cadr (list-ref searchin index)) value)
       index
       (find-index searchin value (+ index 1))
     )
@@ -61,8 +61,14 @@
         (create-track "load-level"
           (list
             (lambda () (display "LEVEL SELECT: loading level\n"))
-            (lambda () (load-scene (selected-level)))
-            (lambda () (set-camera (gameobj-id (lsobj-name ">maincamera"))))
+            (lambda () 
+              (let ((sceneId (load-scene (selected-level))))
+                (begin
+                  (display (string-append "scene id: " (number->string sceneId)))
+                  (set-camera (gameobj-id (lsobj-name ">maincamera" sceneId)))
+                )
+              )
+            )
           )
         )
         (on-exit
@@ -93,7 +99,7 @@
 )
 
 (define (text current-index)
-  (define level  (list-ref levels current-index))
+  (define level  (car (list-ref levels current-index)))
   (if (= current-index menu-index) (string-append "-> " level " <-") level)
 )
 (define (render-menu menu index)

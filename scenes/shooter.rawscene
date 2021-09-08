@@ -1,0 +1,23 @@
+
+platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform:position:0 -10 0
+platform:scale:100 1 100
+platform:texture:../gameresources/textures/wood.jpg
+
+>detachedcamera:position:0 1 0
+
+>maincamera:position:0 0 0
+>maincamera:physics_angle:0.000000 0.000000 0.000000
+>maincamera:script:../afterworld/scripts/fps.scm
+>maincamera:physics:enabled
+>maincamera:physics_type:dynamic
+>maincamera:physics_gravity:0 -9.81 0
+>maincamera:physics_shape:shape_sphere
+
+>maincamera:child:gun
+gun:mesh:../gameresources/build/weapons/upistol.gltf
+gun:position:0 0 -10
+
+&gunsound:clip:./res/sounds/silenced-gunshot.wav
+&jumpsound:clip:./res/sounds/sample.wav
+
