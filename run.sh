@@ -9,6 +9,6 @@ SCRIPT_FOLDER=$BASE_DIRECTORY/scripts
     -x "$SCRIPT_FOLDER/level-select.scm" \
     -j ../ModPlugins/build/sequencer.so \
     -j ../ModPlugins/build/sql.so \
-    -a sqldir=../afterworld/data
+    -a sqldir=../afterworld/data \
     $@
 )
