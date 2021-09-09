@@ -1,9 +1,6 @@
 (define onmenu #f)
 (define menu-index 0)
-(define levels (list 
-  (list "../afterworld/scenes/sandbox.rawscene" "sandbox")
-  (list "../afterworld/scenes/shooter.rawscene" "fps")
-))
+(define levels (sql (sql-compile "select filepath, name from levels")))
 
 (define (next-level) (set! menu-index (min (- (length levels) 1) (+ menu-index 1))))
 (define (prev-level) (set! menu-index (max 0 (- menu-index 1))))

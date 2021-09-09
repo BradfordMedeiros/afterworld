@@ -2,9 +2,11 @@
 (define elapsedTime 0)
 
 (define movement-speed 0.1)
-(define (set-movement-speed speed)
+(define movement-speed-air 0.1)
+(define (set-movement-speed speed speed-air)
   (set! movement-speed speed)
-  (format #t "traits: setting speed: ~a\n" speed)
+  (set! movement-speed-air speed-air)
+  (format #t "traits: setting speed: ~a, air: ~a\n" speed speed-air)
 )
 (define jump-height 10)
 (define (set-jump-height height)
@@ -12,12 +14,17 @@
   (format #t "traits: setting jump height: ~a\n" height)
 )
 
-(define (set-object-values gravity)
+(define (set-object-values gravity restitution friction)
   (format #t "traits: set gravity ~a\n" gravity)
+  (format #t "traits: set restitution ~a\n" restitution)
+  (format #t "traits: set friction ~a\n" friction)
+
   (gameobj-setattr! 
     mainobj
     (list
-      (list "physics_gravity" (list 0 gravity 0))
+      (list "physics_gravity"     (list 0 gravity 0))
+      (list "physics_restitution" restitution)
+      (list "physics_friction"    friction)
     )
   )
 )
@@ -34,7 +41,7 @@
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select movement-speed, jump-height, gravity from traits")))
+  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction from traits")))
   (define settings (list-ref (sql (sql-compile "select xsensitivity, ysensitivity from settings")) 0))
   (if (= (length traits) 0)
     (display "no traits in config\n")
@@ -42,9 +49,13 @@
       (set! configIndex (max 0 (- (length traits) 1)))
       (let ((targettrait (list-ref traits configIndex)))
         (format #t "Settings config to index: ~a\n" configIndex)
-        (set-movement-speed (string->number (list-ref targettrait 0)))
-        (set-jump-height (string->number (list-ref targettrait 1)))
-        (set-object-values (string->number (list-ref targettrait 2)))
+        (set-movement-speed (string->number (list-ref targettrait 0)) (string->number (list-ref targettrait 1)))
+        (set-jump-height (string->number (list-ref targettrait 2)))
+        (set-object-values 
+          (string->number (list-ref targettrait 3))
+          (string->number (list-ref targettrait 4))
+          (string->number (list-ref targettrait 5))
+        )
       )
     )
   )
@@ -105,10 +116,7 @@
 )
 
 (define (move x y z) 
-  (display "move placeholder: ")
-  (display x) (display " ")
-  (display y) (display " ")
-  (display z) (display "\n")
+  (format #t "move ~a ~a ~a\n" x y z)
   (applyimpulse-rel mainobj (list x y z))
 )
 
