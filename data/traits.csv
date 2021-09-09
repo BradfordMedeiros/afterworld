@@ -1,5 +1,5 @@
-profile,movement-speed,jump-height
-regular,0.8,10
-slow,0.2,5
-still,0,0
-reverse,-0.5,10
+profile,movement-speed,jump-height,max-angleup,max-angledown,friction,restitution
+slow,0.2,5,85,-90,0,0
+regular,0.8,10,60,-80,0,0
+still,0,0,50,-30,0,0
+reverse,-0.5,10,100,50,0,0
