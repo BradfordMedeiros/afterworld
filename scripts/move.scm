@@ -7,23 +7,25 @@
   (display (string-append "traits: setting speed: " (number->string speed) "\n"))
 )
 
+(define configIndex 0)
+(define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
+(define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
   (define traits (sql (sql-compile "select movement-speed from traits")))
   (if (= (length traits) 0)
     (display "no traits in config\n")
-    (let ((firsttrait (list-ref traits 0)))
-      (set-movement-speed (string->number (list-ref firsttrait 0)))
+    (if (>= configIndex (length traits))
+      (set! configIndex (max 0 (- (length traits) 1)))
+      (let ((targettrait (list-ref traits configIndex)))
+        (display (string-append "Settings config to index: " (number->string configIndex) "\n"))
+        (set-movement-speed (string->number (list-ref targettrait 0)))
+      )
     )
   )
 )
 
 
 (define (onKey key scancode action mods) 
-  (display "key: ")
-  (display key)
-  (display ", action: ")
-  (display action)
-  (display "\n")
   (if (= key 87)
     (begin 
       (if (= action 1) (set! go-forward #t))
@@ -48,7 +50,9 @@
       (if (= action 0) (set! go-right #f))
     )
   )
-  (if (and (= key 345) (= action 1)) (update-config))
+  (if (and (= key 264) (= action 1)) (nextConfigIndex)) ; down arrow
+  (if (and (= key 265) (= action 1)) (prevConfigIndex)) ; up arrow
+  (if (and (= key 345) (= action 1)) (update-config))   ; right ctrl
 )
 
 (define (move x y z) 
