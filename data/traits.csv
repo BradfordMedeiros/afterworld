@@ -1,5 +1,5 @@
-profile,movement-speed
-regular,0.8
-slow,0.2
-still,0
-reverse,-0.5
+profile,movement-speed,jump-height
+regular,0.8,10
+slow,0.2,5
+still,0,0
+reverse,-0.5,10

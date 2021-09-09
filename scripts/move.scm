@@ -4,26 +4,37 @@
 (define movement-speed 0.1)
 (define (set-movement-speed speed)
   (set! movement-speed speed)
-  (display (string-append "traits: setting speed: " (number->string speed) "\n"))
+  (format #t "traits: setting speed: ~a\n" speed)
+)
+(define jump-height 10)
+(define (set-jump-height height)
+  (set! jump-height height)
+  (format #t "traits: setting jump height: ~a\n" height)
 )
 
 (define configIndex 0)
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select movement-speed from traits")))
+  (define traits (sql (sql-compile "select movement-speed, jump-height from traits")))
   (if (= (length traits) 0)
     (display "no traits in config\n")
     (if (>= configIndex (length traits))
       (set! configIndex (max 0 (- (length traits) 1)))
       (let ((targettrait (list-ref traits configIndex)))
-        (display (string-append "Settings config to index: " (number->string configIndex) "\n"))
+        (format #t "Settings config to index: ~a\n" configIndex)
         (set-movement-speed (string->number (list-ref targettrait 0)))
+        (set-jump-height (string->number (list-ref targettrait 1)))
       )
     )
   )
 )
 
+(define (jump)
+  (define impulse (list 0 (* jump-height elapsedTime 1000) 0))
+  (format #t "impulse is: ~a\n" impulse)
+  (applyimpulse mainobj impulse)
+)
 
 (define (onKey key scancode action mods) 
   (if (= key 87)
@@ -53,6 +64,7 @@
   (if (and (= key 264) (= action 1)) (nextConfigIndex)) ; down arrow
   (if (and (= key 265) (= action 1)) (prevConfigIndex)) ; up arrow
   (if (and (= key 345) (= action 1)) (update-config))   ; right ctrl
+  (if (and (= key 32) (= action 1)) (jump)) ; space
 )
 
 (define (move x y z) 
