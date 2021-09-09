@@ -12,6 +12,16 @@
   (format #t "traits: setting jump height: ~a\n" height)
 )
 
+(define (set-object-values gravity)
+  (format #t "traits: set gravity ~a\n" gravity)
+  (gameobj-setattr! 
+    mainobj
+    (list
+      (list "physics_gravity" (list 0 gravity 0))
+    )
+  )
+)
+
 (define xsensitivity 1)
 (define ysensitivity 1)
 (define (set-sensitivity xvalue yvalue)
@@ -24,7 +34,7 @@
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select movement-speed, jump-height from traits")))
+  (define traits (sql (sql-compile "select movement-speed, jump-height, gravity from traits")))
   (define settings (list-ref (sql (sql-compile "select xsensitivity, ysensitivity from settings")) 0))
   (if (= (length traits) 0)
     (display "no traits in config\n")
@@ -34,6 +44,7 @@
         (format #t "Settings config to index: ~a\n" configIndex)
         (set-movement-speed (string->number (list-ref targettrait 0)))
         (set-jump-height (string->number (list-ref targettrait 1)))
+        (set-object-values (string->number (list-ref targettrait 2)))
       )
     )
   )
