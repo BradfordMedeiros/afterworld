@@ -62,10 +62,33 @@
   (set-sensitivity (string->number (car settings)) (string->number (cadr settings)))  
 )
 
+(define is-grounded #f)
+(define grounded-id #f)
+(define (onCollideEnter obj hitpoint normal) 
+  (define ycomponent (cadr normal))
+  (if (< ycomponent 0)
+    (begin
+      (set! is-grounded #t)
+      (set! grounded-id (gameobj-id obj))
+    )
+  )
+)
+(define (onCollideExit obj)
+  (format #t "onCollideExit ~a" obj)
+  (if (equal? (gameobj-id obj) grounded-id)
+    (begin
+      (set! is-grounded #f)
+      (set! grounded-id #f)
+    )
+  )
+)
+
 (define (jump)
   (define impulse (list 0 (* jump-height elapsedTime 1000) 0))
   (format #t "impulse is: ~a\n" impulse)
-  (applyimpulse mainobj impulse)
+  (if is-grounded
+    (applyimpulse mainobj impulse)
+  )
 )
 
 (define look-velocity-x 0)
@@ -116,7 +139,6 @@
 )
 
 (define (move x y z) 
-  (format #t "move ~a ~a ~a\n" x y z)
   (applyimpulse-rel mainobj (list x y z))
 )
 

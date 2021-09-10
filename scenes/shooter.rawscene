@@ -4,6 +4,11 @@ platform:position:0 -10 0
 platform:scale:100 1 100
 platform:texture:../gameresources/textures/wood.jpg
 
+box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+box:position:0 0 0
+box:scale:5 0.2 5
+box:texture:../gameresources/textures/wood.jpg
+
 >maincamera:script:../afterworld/scripts/move.scm
 >maincamera:position:0 0 0
 >maincamera:physics_angle:0.000000 0.000000 0.000000
