@@ -14,10 +14,11 @@
   (format #t "traits: setting jump height: ~a\n" height)
 )
 
-(define (set-object-values gravity restitution friction)
+(define (set-object-values gravity restitution friction mass)
   (format #t "traits: set gravity ~a\n" gravity)
   (format #t "traits: set restitution ~a\n" restitution)
   (format #t "traits: set friction ~a\n" friction)
+  (format #t "traits: set mass ~a\n" mass)
 
   (gameobj-setattr! 
     mainobj
@@ -25,6 +26,7 @@
       (list "physics_gravity"     (list 0 gravity 0))
       (list "physics_restitution" restitution)
       (list "physics_friction"    friction)
+      (list "physics_mass"    mass)
     )
   )
 )
@@ -61,7 +63,7 @@
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown from traits")))
+  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass from traits")))
   (define settings (list-ref (sql (sql-compile "select xsensitivity, ysensitivity from settings")) 0))
   (if (= (length traits) 0)
     (display "no traits in config\n")
@@ -75,6 +77,7 @@
           (string->number (list-ref targettrait 3))
           (string->number (list-ref targettrait 4))
           (string->number (list-ref targettrait 5))
+          (string->number (list-ref targettrait 8))
         )
         (set-max-lookangles (string->number (list-ref targettrait 6)) (string->number (list-ref targettrait 7)))
       )
@@ -167,6 +170,22 @@
   (if (and (= key 32) (= action 1)) (jump)) ; space
 )
 
+(define lastpos (gameobj-pos mainobj))
+(define velocity (list 0 0 0))
+(define (calc-velocity elapsedTime newpos oldpos)
+  (define time (/  1 elapsedTime))
+  (list 
+    (* time (- (car newpos) (car oldpos))) 
+    (* time (- (cadr newpos) (cadr oldpos))) 
+    (* time (- (caddr newpos) (caddr oldpos)))
+  ) 
+)
+(define (update-velocity)
+  (define currpos (gameobj-pos mainobj))
+  (set! velocity (calc-velocity elapsedTime currpos lastpos))
+  ;(format #t "velocity is: ~a\n" velocity)
+  (set! lastpos currpos)
+)
 (define (move x y z) 
   (applyimpulse-rel mainobj (list x y z))
 )
@@ -184,6 +203,7 @@
   (if (equal? go-right    #t) (move (* 0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
   (if (equal? go-backward #t) (move 0 0 (if is-grounded movement-speed movement-speed-air)))
   (look)
+  ;(update-velocity)
 )
 
 (update-config)
