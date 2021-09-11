@@ -23,7 +23,13 @@ box:physics_mass:5
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
->maincamera:child:hud
+>maincamera:child:hud,crosshair
+
+
+
+###########################
+# UI STUFF ## probably move to a seperate prefab scene when can ##
+######################################################
 
 hud:script:../afterworld/scripts/hud.scm
 hud:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
@@ -31,3 +37,10 @@ hud:layer:ui
 hud:position:0 0 -70
 hud:physics:disabled
 hud:texture:../gameresources/textures/ui/crappyhud.png
+
+crosshair:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+crosshair:layer:ui
+crosshair:position:0 0 -60
+crosshair:physics:disabled
+crosshair:texture:./res/textures/crosshairs/crosshair001.png
+crosshair:scale:0.05 0.05 0.05

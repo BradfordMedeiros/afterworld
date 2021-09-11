@@ -1,6 +1,6 @@
 
-(define (amount-to-draw text rate)
-  (define currIndex (inexact->exact (floor (* rate (time-seconds)))))
+(define (amount-to-draw text createTime rate)
+  (define currIndex (inexact->exact (floor (* rate (- (time-seconds) createTime)))))
   (substring text 0 (min (string-length text) currIndex))
 )
 
@@ -8,17 +8,44 @@
 (define messageBuffer (list))
 (define (onMessage key value)
   (format #t "the message is: ~a ~a\n" key value)
-  
-  (set! messageBuffer (append messageBuffer (list key value)))
-  
-
-  (if (> (length messageBuffer) maxBufferSize)
-    (set! messageBuffer (cdr messageBuffer))
+  (if (equal? key "sec-clock")
+    (set! messageBuffer (clear-old-messages messageBuffer))
   )
-  (format #t "list size is: ~a\n" (length messageBuffer))
+  (if (equal? key "alert")
+    (begin
+      (set! messageBuffer (reverse (cons (list value (time-seconds)) (reverse messageBuffer)))) 
+      (if (> (length messageBuffer) maxBufferSize)
+        (set! messageBuffer (cdr messageBuffer))
+      )
+      (format #t "list is: ~a\n" messageBuffer)
+    )
+  )
+)
+
+(define (render-alerts yoffset buffer)
+  (if (> (length buffer) 0)
+    (begin
+      (draw-text (amount-to-draw (car (car buffer)) (cadr (car buffer)) 10) 50 yoffset 4)
+      (render-alerts (+ yoffset 10) (cdr buffer))
+    )
+  )
 )
 
 (define (onFrame)
-  (draw-text (amount-to-draw "hello world" 5) 50 400 4)
+  (render-alerts 400 messageBuffer)
 )
 
+(define crosshairobjname "crosshair")
+(define (set-crosshair image)
+  (format #t "placeholder set crosshair: ~a\n" image)
+  (gameobj-setattr! 
+    (lsobj-name "crosshair")
+    (list
+      (list "texture" image)
+    )
+  )
+)
+(define crosshair (args "crosshair"))
+(if (string? crosshair) 
+  (set-crosshair crosshair)
+)
