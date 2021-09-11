@@ -23,3 +23,11 @@ box:physics_mass:5
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
+>maincamera:child:hud
+
+hud:script:../afterworld/scripts/hud.scm
+hud:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+hud:layer:ui
+hud:position:0 0 -70
+hud:physics:disabled
+hud:texture:../gameresources/textures/ui/crappyhud.png
