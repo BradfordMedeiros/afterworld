@@ -6,12 +6,12 @@ platform:texture:../gameresources/textures/wood.jpg
 platform:physics_restitution:1
 
 floatbox:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-floatbox:position:5 0 0
+floatbox:position:30 0 0
 floatbox:scale:5 0.2 5
 floatbox:texture:../gameresources/textures/wood.jpg
 
 box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-box:position:0 2 0
+box:position:25 2 0
 box:texture:../gameresources/textures/wood.jpg
 box:physics_type:dynamic
 box:physics_mass:5
@@ -20,11 +20,14 @@ box:physics_mass:5
 >maincamera:position:0 0 0
 >maincamera:physics_angle:0.000000 0.000000 0.000000
 >maincamera:physics:enabled
+#>maincamera:physics:disabled
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
->maincamera:child:hud,crosshair
+>maincamera:child:hud,crosshair,gun
 
+########### GUN STUFF
+gun_logic:script:../afterworld/scripts/guns.scm
 
 
 ###########################
