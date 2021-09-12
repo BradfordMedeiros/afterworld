@@ -1,3 +1,4 @@
-name,modelpath,fire-animation
-pistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction
-nailgun,../gameresources/build/weapons/nailgun.gltf,coolanimation
+name,modelpath,fire-animation,fire-sound,xoffset-pos,yoffset-pos,zoffset-pos
+pistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,0,0,-10
+nailgun,../gameresources/build/weapons/nailgun.gltf,,../ModEngine/res/sounds/sample.wav,0,0,-10
+leftypistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,-2,0,-10

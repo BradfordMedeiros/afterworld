@@ -24,7 +24,7 @@ box:physics_mass:5
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
->maincamera:child:hud,crosshair,gun
+>maincamera:child:hud,crosshair
 
 ########### GUN STUFF
 gun_logic:script:../afterworld/scripts/guns.scm
