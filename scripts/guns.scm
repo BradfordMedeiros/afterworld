@@ -8,9 +8,11 @@
 (define firing-rate 1000)
 (define initFiringTime -10000)
 (define last-shooting-time initFiringTime)
-(define (set-firing-rate rate)
+(define can-hold #f)
+(define (set-firing-params rate hold)
   (set! firing-rate rate)
-  (format #t "traits: firing-rate: ~a\n" firing-rate)
+  (set! can-hold hold)
+  (format #t "traits: firing-params - rate: ~a, can-hold: ~a\n" firing-rate can-hold)
 )
 
 (define (get-parent) (lsobj-name ">maincamera"))
@@ -71,7 +73,7 @@
 )
 
 (define (handleChangeGun gunname)
-  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, firing-rate from guns where name = " gunname)) 
+  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
     (format #t "warning: no gun named: ~a\n" gunname)
@@ -89,7 +91,10 @@
         (string->number (list-ref guninfo 11))
       )
       (set-animation (list-ref guninfo 1))
-      (set-firing-rate (string->number (list-ref guninfo 12)))
+      (set-firing-params 
+        (string->number (list-ref guninfo 12))
+        (if (equal? (list-ref guninfo 13) "TRUE") #t #f)
+      )
       (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
       (change-emitter)
@@ -140,7 +145,7 @@
   )
 )
 (define (onFrame)
-  (if is-holding (fire-gun-limited))
+  (if (and can-hold is-holding) (fire-gun-limited))
 )
 
 (define (onKeyChar key)
