@@ -30,6 +30,7 @@
       (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
       (list "scale" (list xscale yscale zscale))
       (list "physics" "disabled")
+      (list "layer" "no_depth")
     )
   )))
     (set! gunid id)
