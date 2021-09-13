@@ -1,3 +1,6 @@
+(define parent-name ">maincamera")
+(define (get-parent) (lsobj-name parent-name))
+
 (define fire-animation #f)
 (define (set-animation animationname)
   (define animation (if (> (string-length animationname) 0) animationname #f))
@@ -9,13 +12,13 @@
 (define initFiringTime -10000)
 (define last-shooting-time initFiringTime)
 (define can-hold #f)
-(define (set-firing-params rate hold)
+(define is-raycast #f)
+(define (set-firing-params rate hold raycast)
   (set! firing-rate rate)
   (set! can-hold hold)
-  (format #t "traits: firing-params - rate: ~a, can-hold: ~a\n" firing-rate can-hold)
+  (set! is-raycast raycast)
+  (format #t "traits: firing-params - rate: ~a, can-hold: ~a, raycast: ~a\n" firing-rate can-hold is-raycast)
 )
-
-(define (get-parent) (lsobj-name ">maincamera"))
 
 (define gunid #f)
 (define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
@@ -26,6 +29,7 @@
       (list "position" (list xoffset yoffset zoffset))
       (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
       (list "scale" (list xscale yscale zscale))
+      (list "physics" "disabled")
     )
   )))
     (set! gunid id)
@@ -64,6 +68,7 @@
         (list "rate" 0.5)
         (list "duration" 1)
         (list "limit" 3)
+        (list "+lookat" parent-name)
       )
     )))
     (set! emitterid id)  
@@ -73,7 +78,11 @@
 )
 
 (define (handleChangeGun gunname)
-  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold from guns where name = " gunname)) 
+  (define query (string-append "
+    select 
+      modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
+      xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast
+    from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
     (format #t "warning: no gun named: ~a\n" gunname)
@@ -94,6 +103,7 @@
       (set-firing-params 
         (string->number (list-ref guninfo 12))
         (if (equal? (list-ref guninfo 13) "TRUE") #t #f)
+        (if (equal? (list-ref guninfo 14) "TRUE") #t #f)
       )
       (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
@@ -111,12 +121,19 @@
   )
 )
 
+(define (fire-raycast)
+  (define mainobjpos (gameobj-pos (get-parent)))
+  (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
+  (format #t "hitpoints: ~a\n" hitpoints)
+  (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500))
+)
 (define (fire-gun)
   (if (not (equal? fire-animation #f))
     (gameobj-playanimation (gameobj-by-id gunid) fire-animation)
   )
   (if soundid (playclip "&weapon-sound"))
   (emit emitterid)
+  (if is-raycast (fire-raycast))
 )
 
 (define (fire-gun-limited)
