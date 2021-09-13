@@ -8,21 +8,22 @@
 
 (define (get-parent) (lsobj-name ">maincamera"))
 
-(define (spawn-gun mesh xoffset yoffset zoffset)
+(define (spawn-gun mesh xoffset yoffset zoffset xrot yrot zrot)
   (mk-obj-attr "weapon"       
     (list 
       (list "mesh" mesh)
       (list "position" (list xoffset yoffset zoffset))
+      (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
     )
   )
 )
 
 (define gunid #f)
-(define (change-gun modelpath xoffset yoffset zoffset)
+(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot)
   (if (not (equal? gunid #f))
     (rm-obj gunid)
   )
-  (let ((id (spawn-gun modelpath xoffset yoffset zoffset)))
+  (let ((id (spawn-gun modelpath xoffset yoffset zoffset xrot yrot zrot)))
     (set! gunid id)
     (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
     (make-parent gunid (gameobj-id (get-parent)))
@@ -51,7 +52,7 @@
 )
 
 (define (handleChangeGun gunname)
-  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos from guns where name = " gunname)) 
+  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
     (format #t "warning: no gun named: ~a\n" gunname)
@@ -61,6 +62,9 @@
         (string->number (list-ref guninfo 3)) 
         (string->number (list-ref guninfo 4))
         (string->number (list-ref guninfo 5))
+        (list-ref guninfo 6)
+        (list-ref guninfo 7)
+        (list-ref guninfo 8)
       )
       (set-animation (list-ref guninfo 1))
       (change-sound (list-ref guninfo 2))
