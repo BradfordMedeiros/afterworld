@@ -8,22 +8,23 @@
 
 (define (get-parent) (lsobj-name ">maincamera"))
 
-(define (spawn-gun mesh xoffset yoffset zoffset xrot yrot zrot)
+(define (spawn-gun mesh xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
   (mk-obj-attr "weapon"       
     (list 
       (list "mesh" mesh)
       (list "position" (list xoffset yoffset zoffset))
       (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
+      (list "scale" (list xscale yscale zscale))
     )
   )
 )
 
 (define gunid #f)
-(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot)
+(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
   (if (not (equal? gunid #f))
     (rm-obj gunid)
   )
-  (let ((id (spawn-gun modelpath xoffset yoffset zoffset xrot yrot zrot)))
+  (let ((id (spawn-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)))
     (set! gunid id)
     (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
     (make-parent gunid (gameobj-id (get-parent)))
@@ -52,7 +53,7 @@
 )
 
 (define (handleChangeGun gunname)
-  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot from guns where name = " gunname)) 
+  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
     (format #t "warning: no gun named: ~a\n" gunname)
@@ -65,6 +66,9 @@
         (list-ref guninfo 6)
         (list-ref guninfo 7)
         (list-ref guninfo 8)
+        (string->number (list-ref guninfo 9))
+        (string->number (list-ref guninfo 10))
+        (string->number (list-ref guninfo 11))
       )
       (set-animation (list-ref guninfo 1))
       (change-sound (list-ref guninfo 2))
@@ -97,5 +101,6 @@
   (if (equal? key 49) (onMessage "changegun" "pistol"))
   (if (equal? key 50) (onMessage "changegun" "leftypistol"))
   (if (equal? key 51) (onMessage "changegun" "nailgun"))
+  (if (equal? key 52) (onMessage "changegun" "machinegun"))
 )
 

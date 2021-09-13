@@ -1,4 +1,5 @@
-name,modelpath,fire-animation,fire-sound,xoffset-pos,yoffset-pos,zoffset-pos,xrot,yrot,zrot,flip
-pistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,6,-2,-10,1,0,0,FALSE
-nailgun,../gameresources/build/weapons/nailgun.gltf,,../ModEngine/res/sounds/sample.wav,7,-4,-15,1,0,0,FALSE
-leftypistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,-6,-2,-10,1,0,0,TRUE
+name,modelpath,fire-animation,fire-sound,xoffset-pos,yoffset-pos,zoffset-pos,xrot,yrot,zrot,xscale,yscale,zscale
+pistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,6,-2,-10,1,0,0,1,1,1
+leftypistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,-6,-2,-10,1,0,0,1,1,-1
+machinegun,../gameresources/build/weapons/ruster.gltf,,../ModEngine/res/sounds/sample.wav,7,-4,-15,1,0,0,1,1,1
+nailgun,../gameresources/build/weapons/nailgun.gltf,,../ModEngine/res/sounds/sample.wav,7,-4,-15,1,0,0,1,1,1
