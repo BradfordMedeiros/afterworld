@@ -1,4 +1,3 @@
-
 (define fire-animation #f)
 (define (set-animation animationname)
   (define animation (if (> (string-length animationname) 0) animationname #f))
@@ -6,37 +5,30 @@
   (format #t "traits: fire-animation: ~a\n" animation)
 )
 
+(define firing-rate 1000)
+(define initFiringTime -10000)
+(define last-shooting-time initFiringTime)
+(define (set-firing-rate rate)
+  (set! firing-rate rate)
+  (format #t "traits: firing-rate: ~a\n" firing-rate)
+)
+
 (define (get-parent) (lsobj-name ">maincamera"))
 
-(define (spawn-gun mesh xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
-  (mk-obj-attr "weapon"       
+(define gunid #f)
+(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
+  (if (not (equal? gunid #f)) (rm-obj gunid))
+  (let ((id (mk-obj-attr "weapon"       
     (list 
-      (list "mesh" mesh)
+      (list "mesh" modelpath)
       (list "position" (list xoffset yoffset zoffset))
       (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
       (list "scale" (list xscale yscale zscale))
     )
-  )
-)
-
-(define gunid #f)
-(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
-  (if (not (equal? gunid #f))
-    (rm-obj gunid)
-  )
-  (let ((id (spawn-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)))
+  )))
     (set! gunid id)
     (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
     (make-parent gunid (gameobj-id (get-parent)))
-  )
-)
-
-(define (spawn-sound clip)
-  (format #t "clip is (~a)\n" clip)
-  (mk-obj-attr "&weapon-sound"
-    (list 
-      (list "clip" clip)
-    )
   )
 )
 
@@ -45,7 +37,7 @@
   (if (not (equal? soundid #f))
     (rm-obj soundid)
   )
-  (let ((id (spawn-sound clip)))
+  (let ((id  (mk-obj-attr "&weapon-sound" (list (list "clip" clip)))))
     (set! soundid id)
     (format #t "the sound id is: ~a: ~a\n" soundid clip)
     (make-parent soundid (gameobj-id (get-parent)))    
@@ -67,7 +59,6 @@
         (list "+physics_collision" "nocollide")
         (list "+texture" "../gameresources/textures/iguana.jpg")
         ;(list "state" "disabled")
-
         (list "rate" 0.5)
         (list "duration" 1)
         (list "limit" 3)
@@ -80,7 +71,7 @@
 )
 
 (define (handleChangeGun gunname)
-  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale from guns where name = " gunname)) 
+  (define query (string-append "select modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, firing-rate from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
     (format #t "warning: no gun named: ~a\n" gunname)
@@ -98,6 +89,8 @@
         (string->number (list-ref guninfo 11))
       )
       (set-animation (list-ref guninfo 1))
+      (set-firing-rate (string->number (list-ref guninfo 12)))
+      (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
       (change-emitter)
     )
@@ -120,10 +113,34 @@
   (if soundid (playclip "&weapon-sound"))
   (emit emitterid)
 )
+
+(define (fire-gun-limited)
+  (define elapsedMilliseconds (* 1000 (time-seconds)))
+  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
+  (define lessThanFiringRate (> timeSinceLastShot firing-rate))
+  (if lessThanFiringRate 
+    (begin
+      (fire-gun)
+      (set! last-shooting-time elapsedMilliseconds)
+    )
+  )
+  (format #f "fire gun limited placeholder\n")
+)
+
+(define is-holding #f)
 (define (onMouse button action mods) 
   (if (and (= button 0) (= action 1))
-    (fire-gun)
+    (begin
+      (set! is-holding #t)
+      (fire-gun-limited)
+    )
   )
+  (if (and (= button 0) (= action 0))
+    (set! is-holding #f)
+  )
+)
+(define (onFrame)
+  (if is-holding (fire-gun-limited))
 )
 
 (define (onKeyChar key)
@@ -132,4 +149,3 @@
   (if (equal? key 51) (onMessage "changegun" "nailgun"))
   (if (equal? key 52) (onMessage "changegun" "machinegun"))
 )
-
