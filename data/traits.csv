@@ -1,5 +1,5 @@
 profile,speed,speed-air,jump-height,max-angleup,max-angledown,friction,restitution,gravity,mass
-slow,0.1,0.1,20,-1.5,1,0.4,0,-40,1
+slow,0.1,0.1,16,-1.5,1,0.4,0,-40,1
 regular,0.8,0,30,-3.1415,3.1415,1,0,-20,2
 still,0,0,0,-1.8,1.1,1,0,2,1
 reverse,-0.5,-0.5,10,-1.8,1.1,1,0,-9.81,1

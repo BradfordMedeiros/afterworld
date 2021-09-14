@@ -170,6 +170,10 @@
   (if (and (= key 32) (= action 1)) (jump)) ; space
 )
 
+(define (move x y z) 
+  (applyimpulse-rel mainobj (list x y z))
+)
+
 (define lastpos (gameobj-pos mainobj))
 (define velocity (list 0 0 0))
 (define (calc-velocity elapsedTime newpos oldpos)
@@ -183,11 +187,17 @@
 (define (update-velocity)
   (define currpos (gameobj-pos mainobj))
   (set! velocity (calc-velocity elapsedTime currpos lastpos))
-  ;(format #t "velocity is: ~a\n" velocity)
   (set! lastpos currpos)
-)
-(define (move x y z) 
-  (applyimpulse-rel mainobj (list x y z))
+  ; todo, sendnotify should be able to send any type
+  (sendnotify "velocity" (
+    string-join 
+    (list 
+      (number->string (car velocity))
+      (number->string (cadr velocity))
+      (number->string (caddr velocity))
+    ) 
+    " "
+  ))
 )
 
 (define go-forward #f)
@@ -203,7 +213,7 @@
   (if (equal? go-right    #t) (move (* 0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
   (if (equal? go-backward #t) (move 0 0 (if is-grounded movement-speed movement-speed-air)))
   (look)
-  ;(update-velocity)
+  (update-velocity)
 )
 
 (update-config)

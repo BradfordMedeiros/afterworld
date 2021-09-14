@@ -7,7 +7,6 @@
 (define maxBufferSize 10)
 (define messageBuffer (list))
 (define (onMessage key value)
-  (format #t "the message is: ~a ~a\n" key value)
   (if (equal? key "sec-clock")
     (set! messageBuffer (clear-old-messages messageBuffer))
   )

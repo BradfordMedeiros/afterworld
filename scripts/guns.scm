@@ -21,12 +21,15 @@
 )
 
 (define gunid #f)
+(define initial-gun-pos (list 0 0 0))
+
 (define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
+  (define gunpos (list xoffset yoffset zoffset))
   (if (not (equal? gunid #f)) (rm-obj gunid))
   (let ((id (mk-obj-attr "weapon"       
     (list 
       (list "mesh" modelpath)
-      (list "position" (list xoffset yoffset zoffset))
+      (list "position" gunpos)
       (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
       (list "scale" (list xscale yscale zscale))
       (list "physics" "disabled")
@@ -34,6 +37,7 @@
     )
   )))
     (set! gunid id)
+    (set! initial-gun-pos gunpos)
     (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
     (make-parent gunid (gameobj-id (get-parent)))
   )
@@ -113,15 +117,6 @@
   )
 )
 
-(define (onMessage key value)
-  (if (equal? key "changegun")
-    (begin
-      (format #t "changing gun to: ~a\n" value)
-      (handleChangeGun value)
-    )
-  )
-)
-
 (define (fire-raycast)
   (define mainobjpos (gameobj-pos (get-parent)))
   (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
@@ -162,8 +157,40 @@
     (set! is-holding #f)
   )
 )
+
+(define velocity (list 0 0 0))
+(define (sway-gun-translation)
+  (define targetpos 
+    (list
+      (+ (list-ref velocity 0) (list-ref initial-gun-pos 0))
+      (list-ref initial-gun-pos 1)
+      (list-ref initial-gun-pos 2)
+    )
+  )
+  (gameobj-setpos-rel! 
+    (gameobj-by-id gunid) 
+    (lerp targetpos targetpos 0.001)
+  )  ; should be based on frame
+)
+
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
+  (format #t "velocity is: ~a\n" velocity)
+  (if gunid
+    (sway-gun-translation)
+  )
+)
+
+(define (onMessage key value)
+  (if (equal? key "changegun")
+    (begin
+      (format #t "changing gun to: ~a\n" value)
+      (handleChangeGun value)
+    )
+  )
+  (if (equal? key "velocity")
+    (set! velocity (map string->number (string-split value #\ )))
+  )
 )
 
 (define (onKeyChar key)

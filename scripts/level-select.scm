@@ -80,7 +80,6 @@
 ))
 
 (define (onMessage topic value)
-  (display (string-append "message: " topic "\n"))
   (if (equal? topic "reset") 
     (set-machine levelselect "main-menu")
   )
