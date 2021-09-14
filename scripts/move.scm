@@ -108,7 +108,7 @@
 )
 
 (define (jump)
-  (define impulse (list 0 (* jump-height elapsedTime 1000) 0))
+  (define impulse (list 0 (* jump-height) 0))
   (format #t "impulse is: ~a\n" impulse)
   (if is-grounded
     (applyimpulse mainobj impulse)
