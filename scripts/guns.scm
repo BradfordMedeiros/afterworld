@@ -150,7 +150,7 @@
   (if (and (= button 0) (= action 1))
     (begin
       (set! is-holding #t)
-      (fire-gun-limited)
+      (if gunid (fire-gun-limited))
     )
   )
   (if (and (= button 0) (= action 0))
@@ -159,17 +159,28 @@
 )
 
 (define velocity (list 0 0 0))
+(define max-mag-sway 4)
+(define sway-velocity 2)
 (define (sway-gun-translation)
+  (define relvelocity velocity)
+  (define sway-amount-x (* sway-velocity (list-ref relvelocity 0)))
+  (define limited-sway-x (min max-mag-sway (max sway-amount-x (* -1 max-mag-sway))))
+  (define sway-amount-y (* sway-velocity (list-ref relvelocity 1)))
+  (define limited-sway-y (min max-mag-sway (max sway-amount-y (* -1 max-mag-sway))))
+  (define sway-amount-z (* sway-velocity (list-ref relvelocity 2)))
+  (define limited-sway-z (min max-mag-sway (max sway-amount-z (* -1 max-mag-sway))))
   (define targetpos 
     (list
-      (+ (list-ref velocity 0) (list-ref initial-gun-pos 0))
-      (list-ref initial-gun-pos 1)
-      (list-ref initial-gun-pos 2)
+      (+ (* -1 limited-sway-x) (list-ref initial-gun-pos 0))
+      (+ (* -1 limited-sway-y) (list-ref initial-gun-pos 1))
+      (+ (* -1 limited-sway-z) (list-ref initial-gun-pos 2))
     )
   )
+  (format #t "targetpos: ~a\n" (car targetpos))
   (gameobj-setpos-rel! 
     (gameobj-by-id gunid) 
-    (lerp targetpos targetpos 0.001)
+    (lerp initial-gun-pos targetpos 0.1)
+    ;initial-gun-pos
   )  ; should be based on frame
 )
 
