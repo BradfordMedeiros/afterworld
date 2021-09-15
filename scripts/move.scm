@@ -6,9 +6,35 @@
   (format #t "traits: setting speed: ~a, air: ~a\n" speed speed-air)
 )
 (define jump-height 10)
-(define (set-jump-height height)
+(define jump-obj-name #f)
+(define land-obj-name #f)
+(define (set-jump-config height jumpsound landsound)
   (set! jump-height height)
-  (format #t "traits: setting jump height: ~a\n" height)
+  (format #t "traits: setting jump height: ~a, jump-sound: ~a, land-sound: ~a\n" height jumpsound landsound)
+  (if jump-obj-name (rm-obj (gameobj-id (lsobj-name jump-obj-name))))
+  (if (> (string-length jumpsound) 0)
+    (begin
+      (mk-obj-attr "&jump-sound"     
+        (list 
+          (list "clip" jumpsound)
+        )
+      )
+      (set! jump-obj-name "&jump-sound")
+    )
+    (set! jump-obj-name #f)
+  )
+  (if land-obj-name (rm-obj (gameobj-id (lsobj-name land-obj-name))))
+  (if (> (string-length landsound) 0)
+    (begin
+      (mk-obj-attr "&land-sound"     
+        (list 
+          (list "clip" landsound)
+        )
+      )
+      (set! land-obj-name "&land-sound")
+    )
+    (set! land-obj-name #f)
+  )
 )
 
 (define (set-object-values gravity restitution friction mass)
@@ -60,7 +86,7 @@
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass from traits")))
+  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound from traits")))
   (define settings (list-ref (sql (sql-compile "select xsensitivity, ysensitivity from settings")) 0))
   (if (= (length traits) 0)
     (display "no traits in config\n")
@@ -69,7 +95,11 @@
       (let ((targettrait (list-ref traits configIndex)))
         (format #t "Settings config to index: ~a\n" configIndex)
         (set-movement-speed (string->number (list-ref targettrait 0)) (string->number (list-ref targettrait 1)))
-        (set-jump-height (string->number (list-ref targettrait 2)))
+        (set-jump-config 
+          (string->number (list-ref targettrait 2))
+          (list-ref targettrait 9)
+          (list-ref targettrait 10)
+        )
         (set-object-values 
           (string->number (list-ref targettrait 3))
           (string->number (list-ref targettrait 4))
@@ -89,6 +119,7 @@
   (define ycomponent (cadr normal))
   (if (< ycomponent 0)
     (begin
+      (if (not is-grounded) (land))
       (set! is-grounded #t)
       (set! grounded-id (gameobj-id obj))
     )
@@ -108,8 +139,14 @@
   (define impulse (list 0 (* jump-height) 0))
   (format #t "impulse is: ~a\n" impulse)
   (if is-grounded
-    (applyimpulse mainobj impulse)
+    (begin
+      (applyimpulse mainobj impulse)
+      (if jump-obj-name (playclip jump-obj-name))  
+    )
   )
+)
+(define (land)
+  (if land-obj-name (playclip land-obj-name))  
 )
 
 (define xrot 0)  ; up and down
