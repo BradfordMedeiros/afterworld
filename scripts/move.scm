@@ -1,3 +1,9 @@
+
+(define using-fpscam #t)
+(define (onCameraSystemChange defaultCam)
+  (set! using-fpscam (not defaultCam))
+)
+
 (define movement-speed 0.1)
 (define movement-speed-air 0.1)
 (define (set-movement-speed speed speed-air)
@@ -240,12 +246,17 @@
 (define go-right #f)
 (define (onFrame)
   (define elapsedTime (time-elapsed))
-  (if (equal? go-forward  #t) (move 0 0 (* -1 (if is-grounded movement-speed movement-speed-air))))
-  (if (equal? go-left     #t) (move (* -0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
-  (if (equal? go-right    #t) (move (* 0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
-  (if (equal? go-backward #t) (move 0 0 (if is-grounded movement-speed movement-speed-air)))
-  (look elapsedTime)
-  (update-velocity elapsedTime)
+  (if using-fpscam
+    (begin
+      (if (equal? go-forward  #t) (move 0 0 (* -1 (if is-grounded movement-speed movement-speed-air))))
+      (if (equal? go-left     #t) (move (* -0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
+      (if (equal? go-right    #t) (move (* 0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
+      (if (equal? go-backward #t) (move 0 0 (if is-grounded movement-speed movement-speed-air)))
+      (look elapsedTime)
+      (update-velocity elapsedTime)
+    )
+  )
 )
 
 (update-config)
+
