@@ -15,6 +15,7 @@ box:position:25 2 0
 box:texture:../gameresources/textures/wood.jpg
 box:physics_type:dynamic
 box:physics_mass:5
+box:script:../afterworld/scripts/deleteonhit.scm
 
 >maincamera:script:../afterworld/scripts/move.scm
 >maincamera:position:0 0 0

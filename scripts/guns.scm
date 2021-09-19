@@ -57,29 +57,30 @@
 
 (define emitterid #f)
 (define (change-emitter)
-  (if (not (equal? emitterid #f))
-    (rm-obj emitterid)
-  )
-  (let 
-    ((id (mk-obj-attr "+particles"
-      (list 
-        (list "position" (list 0 -2 0))
-        (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
-        (list "+physics_type" "dynamic")
-        (list "+physics" "enabled")
-        (list "+physics_collision" "nocollide")
-        (list "+texture" "../gameresources/textures/iguana.jpg")
-        ;(list "state" "disabled")
-        (list "rate" 0.5)
-        (list "duration" 1)
-        (list "limit" 3)
-        (list "+lookat" parent-name)
-      )
-    )))
-    (set! emitterid id)  
-    (format #t "the emitter id is: ~a\n" emitterid)
-    (make-parent emitterid (gameobj-id (get-parent)))
-  )
+  ;(if (not (equal? emitterid #f))
+  ;  (rm-obj emitterid)
+  ;)
+  ;(let 
+  ;  ((id (mk-obj-attr "+particles"
+  ;    (list 
+  ;      (list "position" (list 0 -2 0))
+  ;      (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
+  ;      (list "+physics_type" "dynamic")
+  ;      (list "+physics" "enabled")
+  ;      (list "+physics_collision" "nocollide")
+  ;      (list "+texture" "../gameresources/textures/iguana.jpg")
+  ;      ;(list "state" "disabled")
+  ;      (list "rate" 0.5)
+  ;      (list "duration" 1)
+  ;      (list "limit" 3)
+  ;      (list "+lookat" parent-name)
+  ;    )
+  ;  )))
+  ;  (set! emitterid id)  
+  ;  (format #t "the emitter id is: ~a\n" emitterid)
+  ;  (make-parent emitterid (gameobj-id (get-parent)))
+  ;)
+  (format #t "change emitter\n")
 )
 
 (define (handleChangeGun gunname)
@@ -117,20 +118,26 @@
   )
 )
 
+(define (sendhit hitpoint)
+  (sendnotify "hit" (number->string (car hitpoint)))
+)
+
 (define (fire-raycast)
   (define mainobjpos (gameobj-pos (get-parent)))
   (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
   (format #t "hitpoints: ~a\n" hitpoints)
   (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500))
+  (for-each sendhit hitpoints)
 )
 (define (fire-gun)
   (if (not (equal? fire-animation #f))
     (gameobj-playanimation (gameobj-by-id gunid) fire-animation)
   )
   (if soundid (playclip "&weapon-sound"))
-  (emit emitterid)
+  (if emitterid (emit emitterid))
   (if is-raycast (fire-raycast))
 )
+
 
 (define (fire-gun-limited)
   (define elapsedMilliseconds (* 1000 (time-seconds)))
@@ -159,10 +166,11 @@
 )
 
 (define velocity (list 0 0 0))
-(define max-mag-sway 4)
+(define max-mag-sway 10)
 (define sway-velocity 2)
 (define (sway-gun-translation)
-  (define relvelocity velocity)
+  ;(define relvelocity (move-relative velocity (gameobj-rot (get-parent)) 1))
+  (define relvelocity velocity)  
   (define sway-amount-x (* sway-velocity (list-ref relvelocity 0)))
   (define limited-sway-x (min max-mag-sway (max sway-amount-x (* -1 max-mag-sway))))
   (define sway-amount-y (* sway-velocity (list-ref relvelocity 1)))
@@ -176,23 +184,27 @@
       (+ (* -1 limited-sway-z) (list-ref initial-gun-pos 2))
     )
   )
+  (format #t "velocity: ~a, relvelocity: ~a\n" velocity relvelocity)
+
   (format #t "targetpos: ~a\n" (car targetpos))
   (gameobj-setpos-rel! 
     (gameobj-by-id gunid) 
-    (lerp initial-gun-pos targetpos 0.1)
-    ;initial-gun-pos
+    ;(lerp initial-gun-pos targetpos 0.1)
+    ;(list (cos (time-seconds)) 0 (sin (time-seconds)))
+    initial-gun-pos
   )  ; should be based on frame
 )
 
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
-  (format #t "velocity is: ~a\n" velocity)
-  (if gunid
-    (sway-gun-translation)
-  )
+  ;(format #t "velocity is: ~a\n" velocity)
+  (if gunid (sway-gun-translation))
 )
 
 (define (onMessage key value)
+  (if (equal? key "hit")
+    (format #t "key: ~a, value: ~a\n" key value)
+  )
   (if (equal? key "changegun")
     (begin
       (format #t "changing gun to: ~a\n" value)
