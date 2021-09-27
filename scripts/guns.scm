@@ -166,17 +166,20 @@
 )
 
 (define velocity (list 0 0 0))
-(define max-mag-sway 10)
-(define sway-velocity 2)
+(define max-mag-sway-x 0)
+(define max-mag-sway-y 0)
+(define max-mag-sway-z 10)
+(define sway-velocity 1)
 (define (sway-gun-translation)
-  ;(define relvelocity (move-relative velocity (gameobj-rot (get-parent)) 1))
-  (define relvelocity velocity)  
-  (define sway-amount-x (* sway-velocity (list-ref relvelocity 0)))
-  (define limited-sway-x (min max-mag-sway (max sway-amount-x (* -1 max-mag-sway))))
-  (define sway-amount-y (* sway-velocity (list-ref relvelocity 1)))
-  (define limited-sway-y (min max-mag-sway (max sway-amount-y (* -1 max-mag-sway))))
-  (define sway-amount-z (* sway-velocity (list-ref relvelocity 2)))
-  (define limited-sway-z (min max-mag-sway (max sway-amount-z (* -1 max-mag-sway))))
+  (define relvelocity (move-relative (list 0 0 0) (gameobj-rot (get-parent)) velocity))
+  ;; relative velocity is wrong, going forward is negative when look right
+
+  (define sway-amount-x (list-ref relvelocity 0))
+  (define limited-sway-x (min max-mag-sway-x (max sway-amount-x (* -1 max-mag-sway-x))))
+  (define sway-amount-y (list-ref relvelocity 1))
+  (define limited-sway-y (min max-mag-sway-y (max sway-amount-y (* -1 max-mag-sway-y))))
+  (define sway-amount-z (list-ref relvelocity 2))
+  (define limited-sway-z (min max-mag-sway-z (max sway-amount-z (* -1 max-mag-sway-z))))
   (define targetpos 
     (list
       (+ (* -1 limited-sway-x) (list-ref initial-gun-pos 0))
@@ -184,15 +187,11 @@
       (+ (* -1 limited-sway-z) (list-ref initial-gun-pos 2))
     )
   )
-  (format #t "velocity: ~a, relvelocity: ~a\n" velocity relvelocity)
-
-  (format #t "targetpos: ~a\n" (car targetpos))
   (gameobj-setpos-rel! 
     (gameobj-by-id gunid) 
-    ;(lerp initial-gun-pos targetpos 0.1)
-    ;(list (cos (time-seconds)) 0 (sin (time-seconds)))
-    initial-gun-pos
-  )  ; should be based on frame
+    (lerp (gameobj-pos (gameobj-by-id gunid)) targetpos (* (time-elapsed) sway-velocity))
+  ) 
+  (format #t "relative velocity ~a\n" relvelocity)
 )
 
 (define (onFrame)

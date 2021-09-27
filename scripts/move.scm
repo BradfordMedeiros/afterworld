@@ -208,10 +208,25 @@
   (if (and (= key 265) (= action 1)) (prevConfigIndex)) ; up arrow
   (if (and (= key 345) (= action 1)) (update-config))   ; right ctrl
   (if (and (= key 32) (= action 1)) (jump)) ; space
+
+  (if (and (= key 331) (= action 1)) (begin  ; /
+    (set! xrot 0)
+    (set! yrot 0)
+  ))
+  (if (and (= key 332) (= action 1)) (begin  ; *
+    (set! xrot 1.57079632679) ; 90degrees more or less
+    (set! yrot 0) 
+  ))
 )
 
 (define (move x y z) 
-  (applyimpulse-rel mainobj (list x y z))
+  (applyimpulse-rel mainobj 
+    (list 
+      (* (time-elapsed) x) 
+      (* (time-elapsed) y) 
+      (* (time-elapsed) z)
+    )
+  )
 )
 
 (define lastpos (gameobj-pos mainobj))
@@ -229,6 +244,7 @@
   (set! velocity (calc-velocity elapsedTime currpos lastpos))
   (set! lastpos currpos)
   ; todo, sendnotify should be able to send any type
+  (format #t "velocity is: ~a\n" velocity)
   (sendnotify "velocity" (
     string-join 
     (list 
