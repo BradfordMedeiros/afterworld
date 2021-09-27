@@ -13,11 +13,15 @@
 (define last-shooting-time initFiringTime)
 (define can-hold #f)
 (define is-raycast #f)
-(define (set-firing-params rate hold raycast)
+(define is-ironsight #f)
+(define ironsight-offset (list 0 0 0))
+(define (set-firing-params rate hold raycast ironsight ironoffset)
   (set! firing-rate rate)
   (set! can-hold hold)
   (set! is-raycast raycast)
-  (format #t "traits: firing-params - rate: ~a, can-hold: ~a, raycast: ~a\n" firing-rate can-hold is-raycast)
+  (set! is-ironsight ironsight)
+  (set! ironsight-offset ironoffset)
+  (format #t "traits: firing-params - rate: ~a, can-hold: ~a, raycast: ~a, ironsight: ~a, ironsight-offset: ~a\n" firing-rate can-hold is-raycast is-ironsight ironsight-offset)
 )
 
 (define gunid #f)
@@ -87,7 +91,8 @@
   (define query (string-append "
     select 
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
-      xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast
+      xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
+      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
@@ -110,6 +115,12 @@
         (string->number (list-ref guninfo 12))
         (if (equal? (list-ref guninfo 13) "TRUE") #t #f)
         (if (equal? (list-ref guninfo 14) "TRUE") #t #f)
+        (if (equal? (list-ref guninfo 15) "TRUE") #t #f)
+        (list 
+          (string->number (list-ref guninfo 16))
+          (string->number (list-ref guninfo 17))
+          (string->number (list-ref guninfo 18))
+        )
       )
       (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
@@ -201,26 +212,17 @@
   ;(format #t "relative velocity ~a\n" relvelocity)
 )
 
-(define (add-vec vec x y z)
-  (list 
-    (+ (list-ref initial-gun-pos 0) x)
-    (+ (list-ref initial-gun-pos 1) y)
-    (+ (list-ref initial-gun-pos 2) z)
-  )
-)
-
-(define (zoomgun-position) (add-vec initial-gun-pos -6.5 2 4))
 (define (zoomgun)
   (gameobj-setpos-rel! 
     (gameobj-by-id gunid) 
-    (lerp (gameobj-pos (gameobj-by-id gunid)) (zoomgun-position) (* (time-elapsed) 10))
+    (lerp (gameobj-pos (gameobj-by-id gunid)) ironsight-offset (* (time-elapsed) 10))
   )  
 )
 
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
   ;(format #t "velocity is: ~a\n" velocity)
-  (if is-holding-left
+  (if (and is-holding-left is-ironsight)
     (if gunid (zoomgun))
     (if gunid (sway-gun-translation #f))
   )
