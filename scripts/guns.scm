@@ -52,7 +52,7 @@
   (if (not (equal? soundid #f))
     (rm-obj soundid)
   )
-  (let ((id  (mk-obj-attr "&weapon-sound" (list (list "clip" clip)))))
+  (let ((id  (mk-obj-attr "&weapon-sound" (list (list "clip" clip) (list "physics" "disabled")))))
     (set! soundid id)
     (format #t "the sound id is: ~a: ~a\n" soundid clip)
     (make-parent soundid (gameobj-id (get-parent)))    
