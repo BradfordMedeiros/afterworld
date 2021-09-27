@@ -166,12 +166,12 @@
 )
 
 (define velocity (list 0 0 0))
-(define max-mag-sway-x 0)
-(define max-mag-sway-y 0)
-(define max-mag-sway-z 10)
+(define max-mag-sway-x 1)
+(define max-mag-sway-y 1)
+(define max-mag-sway-z 1)
 (define sway-velocity 1)
 (define (sway-gun-translation)
-  (define relvelocity (move-relative (list 0 0 0) (gameobj-rot (get-parent)) velocity))
+  (define relvelocity (move-relative (list 0 0 0) (invquat (gameobj-rot (get-parent))) velocity))
   ;; relative velocity is wrong, going forward is negative when look right
 
   (define sway-amount-x (list-ref relvelocity 0))
