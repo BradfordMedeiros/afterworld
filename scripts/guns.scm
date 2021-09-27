@@ -153,6 +153,7 @@
 )
 
 (define is-holding #f)
+(define is-holding-left #f)
 (define (onMouse button action mods) 
   (if (and (= button 0) (= action 1))
     (begin
@@ -163,14 +164,20 @@
   (if (and (= button 0) (= action 0))
     (set! is-holding #f)
   )
+  (if (and (= button 1) (= action 1))
+    (set! is-holding-left #t)
+  )
+  (if (and (= button 1) (= action 0))
+    (set! is-holding-left #f)
+  )
 )
 
 (define velocity (list 0 0 0))
 (define max-mag-sway-x 1)
 (define max-mag-sway-y 1)
 (define max-mag-sway-z 1)
-(define sway-velocity 1)
-(define (sway-gun-translation)
+(define sway-velocity 3)
+(define (sway-gun-translation explicitTarget)
   (define relvelocity (move-relative (list 0 0 0) (invquat (gameobj-rot (get-parent))) velocity))
   ;; relative velocity is wrong, going forward is negative when look right
 
@@ -191,13 +198,33 @@
     (gameobj-by-id gunid) 
     (lerp (gameobj-pos (gameobj-by-id gunid)) targetpos (* (time-elapsed) sway-velocity))
   ) 
-  (format #t "relative velocity ~a\n" relvelocity)
+  ;(format #t "relative velocity ~a\n" relvelocity)
+)
+
+(define (add-vec vec x y z)
+  (list 
+    (+ (list-ref initial-gun-pos 0) x)
+    (+ (list-ref initial-gun-pos 1) y)
+    (+ (list-ref initial-gun-pos 2) z)
+  )
+)
+
+(define (zoomgun-position) (add-vec initial-gun-pos -6.5 2 4))
+(define (zoomgun)
+  (gameobj-setpos-rel! 
+    (gameobj-by-id gunid) 
+    (lerp (gameobj-pos (gameobj-by-id gunid)) (zoomgun-position) (* (time-elapsed) 10))
+  )  
 )
 
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
   ;(format #t "velocity is: ~a\n" velocity)
-  (if gunid (sway-gun-translation))
+  (if is-holding-left
+    (if gunid (zoomgun))
+    (if gunid (sway-gun-translation #f))
+  )
+
 )
 
 (define (onMessage key value)

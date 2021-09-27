@@ -244,7 +244,7 @@
   (set! velocity (calc-velocity elapsedTime currpos lastpos))
   (set! lastpos currpos)
   ; todo, sendnotify should be able to send any type
-  (format #t "velocity is: ~a\n" velocity)
+  ;(format #t "velocity is: ~a\n" velocity)
   (sendnotify "velocity" (
     string-join 
     (list 
