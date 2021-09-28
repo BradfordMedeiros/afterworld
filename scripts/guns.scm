@@ -198,7 +198,7 @@
 (define max-mag-sway-y 1)
 (define max-mag-sway-z 1)
 (define sway-velocity 3)
-(define (sway-gun-translation relvelocity)
+(define (sway-gun-translation relvelocity zoomgun)
   (define sway-amount-x (list-ref relvelocity 0))
   (define limited-sway-x (min max-mag-sway-x (max sway-amount-x (* -1 max-mag-sway-x))))
   (define sway-amount-y (list-ref relvelocity 1))
@@ -212,16 +212,16 @@
       (+ (* -1 limited-sway-z) (list-ref initial-gun-pos 2))
     )
   )
-  (gameobj-setpos-rel! 
-    (gameobj-by-id gunid) 
-    (lerp (gameobj-pos (gameobj-by-id gunid)) targetpos (* (time-elapsed) sway-velocity))
-  ) 
-)
-(define (zoomgun)
-  (gameobj-setpos-rel! 
-    (gameobj-by-id gunid) 
-    (lerp (gameobj-pos (gameobj-by-id gunid)) ironsight-offset (* (time-elapsed) 10))
-  )  
+  (if zoomgun
+    (gameobj-setpos-rel! 
+      (gameobj-by-id gunid) 
+      (lerp (gameobj-pos (gameobj-by-id gunid)) ironsight-offset (* (time-elapsed) 10))
+    ) 
+    (gameobj-setpos-rel! 
+      (gameobj-by-id gunid) 
+      (lerp (gameobj-pos (gameobj-by-id gunid)) targetpos (* (time-elapsed) sway-velocity))
+    ) 
+  )
 )
 
 (define max-mag-sway-x-rot 0.1)
@@ -255,23 +255,19 @@
   )
 )
 
-(define sway-rotation #f)
-(define (sway-gun)
+(define sway-rotation #t)
+(define (sway-gun zoomgun)
+  (sway-gun-translation (get-sway-velocity) zoomgun)
   (if sway-rotation
     (sway-gun-rotation mouse-velocity)
-    (sway-gun-translation (get-sway-velocity))
   )
 )
 
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
   ;(format #t "velocity is: ~a\n" velocity)
-  (if (and is-holding-left is-ironsight)
-    (if gunid (zoomgun))
-    (if gunid (sway-gun))
-  )
+  (if gunid (sway-gun (and is-holding-left is-ironsight)))
   (if reset-mouse-velocity (set! mouse-velocity (list 0 0 0)))
-
 )
 
 (define (onMessage key value)
