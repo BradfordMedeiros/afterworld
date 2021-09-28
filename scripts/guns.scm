@@ -72,29 +72,31 @@
 
 (define emitterid #f)
 (define (change-emitter)
-  ;(if (not (equal? emitterid #f))
-  ;  (rm-obj emitterid)
-  ;)
-  ;(let 
-  ;  ((id (mk-obj-attr "+particles"
-  ;    (list 
-  ;      (list "position" (list 0 -2 0))
-  ;      (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
-  ;      (list "+physics_type" "dynamic")
-  ;      (list "+physics" "enabled")
-  ;      (list "+physics_collision" "nocollide")
-  ;      (list "+texture" "../gameresources/textures/iguana.jpg")
-  ;      ;(list "state" "disabled")
-  ;      (list "rate" 0.5)
-  ;      (list "duration" 1)
-  ;      (list "limit" 3)
-  ;      (list "+lookat" parent-name)
-  ;    )
-  ;  )))
-  ;  (set! emitterid id)  
-  ;  (format #t "the emitter id is: ~a\n" emitterid)
-  ;  (make-parent emitterid (gameobj-id (get-parent)))
-  ;)
+  (if (not (equal? emitterid #f))
+    (rm-obj emitterid)
+  )
+  (let 
+    ((id (mk-obj-attr "+particles"
+      (list 
+        (list "position" (list 0.6 0 -2))
+        (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
+        ;(list "+physics" "disabled")
+        (list "+physics_type" "dynamic")
+        (list "+physics_collision" "nocollide")
+        (list "+texture" "../gameresources/textures/iguana.jpg")
+        (list "state" "disabled")
+        (list "+scale" (list 0.1 0.1 0.1))
+        (list "duration" 0.1)
+        (list "limit" 3)
+        (list "+lookat" parent-name)
+        (list "physics" "disabled")
+        (list "+fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
+      )
+    )))
+    (set! emitterid id)  
+    (format #t "the emitter id is: ~a\n" emitterid)
+    (make-parent emitterid (gameobj-id (get-parent)))
+  )
   (format #t "change emitter\n")
 )
 
@@ -237,8 +239,6 @@
     (gameobj-by-id gunid) 
     (slerp (gameobj-rot (gameobj-by-id gunid)) targetrot 0.01)
   )  
-
-  (format #t "sway rotation placeholder: ~a\n" targetrot)
 )
 
 
