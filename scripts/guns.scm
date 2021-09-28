@@ -26,6 +26,7 @@
 
 (define gunid #f)
 (define initial-gun-pos (list 0 0 0))
+(define initial-gun-rot (orientation-from-pos (list 0 0 0) (list 0 0 -1)))
 
 (define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
   (define gunpos (list xoffset yoffset zoffset))
@@ -34,7 +35,6 @@
     (list 
       (list "mesh" modelpath)
       (list "position" gunpos)
-      (list "rotation" (string-join (list xrot yrot zrot) "")) ; rotation is strings...needs to change in engine..
       (list "scale" (list xscale yscale zscale))
       (list "physics" "disabled")
       (list "layer" "no_depth")
@@ -42,7 +42,18 @@
   )))
     (set! gunid id)
     (set! initial-gun-pos gunpos)
+    (set! initial-gun-rot 
+      (orientation-from-pos 
+        (list 0 0 0) 
+        (list 
+          (string->number xrot) 
+          (string->number yrot)
+          (string->number zrot)
+        )
+      )
+    )
     (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
+    (gameobj-setrot! (gameobj-by-id id) initial-gun-rot) ; mk-obj-attr has funky format so this for now
     (make-parent gunid (gameobj-id (get-parent)))
   )
 )
@@ -183,15 +194,11 @@
   )
 )
 
-(define velocity (list 0 0 0))
 (define max-mag-sway-x 1)
 (define max-mag-sway-y 1)
 (define max-mag-sway-z 1)
 (define sway-velocity 3)
-(define (sway-gun-translation explicitTarget)
-  (define relvelocity (move-relative (list 0 0 0) (invquat (gameobj-rot (get-parent))) velocity))
-  ;; relative velocity is wrong, going forward is negative when look right
-
+(define (sway-gun-translation relvelocity)
   (define sway-amount-x (list-ref relvelocity 0))
   (define limited-sway-x (min max-mag-sway-x (max sway-amount-x (* -1 max-mag-sway-x))))
   (define sway-amount-y (list-ref relvelocity 1))
@@ -209,9 +216,7 @@
     (gameobj-by-id gunid) 
     (lerp (gameobj-pos (gameobj-by-id gunid)) targetpos (* (time-elapsed) sway-velocity))
   ) 
-  ;(format #t "relative velocity ~a\n" relvelocity)
 )
-
 (define (zoomgun)
   (gameobj-setpos-rel! 
     (gameobj-by-id gunid) 
@@ -219,13 +224,53 @@
   )  
 )
 
+(define max-mag-sway-x-rot 0.1)
+(define (sway-gun-rotation relvelocity)
+  (define sway-amount-x (list-ref relvelocity 0))
+  (define limited-sway-x (min max-mag-sway-x-rot (max sway-amount-x (* -1 max-mag-sway-x-rot))))
+  (define sway-amount-y (list-ref relvelocity 1))
+  (define limited-sway-y (min max-mag-sway-y (max sway-amount-y (* -1 max-mag-sway-y))))
+  (define sway-amount-z (list-ref relvelocity 2))
+  (define limited-sway-z (min max-mag-sway-z (max sway-amount-z (* -1 max-mag-sway-z))))
+  (define targetrot (setfrontdelta initial-gun-rot limited-sway-x 0 0))
+  (gameobj-setrot! 
+    (gameobj-by-id gunid) 
+    (slerp (gameobj-rot (gameobj-by-id gunid)) targetrot 0.01)
+  )  
+
+  (format #t "sway rotation placeholder: ~a\n" targetrot)
+)
+
+
+(define mouse-velocity (list 0 0 0))
+(define reset-mouse-velocity #t)
+(define (onMouseMove xpos ypos) (set! mouse-velocity (list xpos ypos 0)))
+
+(define velocity (list 0 0 0))
+(define sway-from-mouse #f)
+(define (get-sway-velocity)
+  (if sway-from-mouse
+    mouse-velocity
+    (move-relative (list 0 0 0) (invquat (gameobj-rot (get-parent))) velocity)
+  )
+)
+
+(define sway-rotation #f)
+(define (sway-gun)
+  (if sway-rotation
+    (sway-gun-rotation mouse-velocity)
+    (sway-gun-translation (get-sway-velocity))
+  )
+)
+
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
   ;(format #t "velocity is: ~a\n" velocity)
   (if (and is-holding-left is-ironsight)
     (if gunid (zoomgun))
-    (if gunid (sway-gun-translation #f))
+    (if gunid (sway-gun))
   )
+  (if reset-mouse-velocity (set! mouse-velocity (list 0 0 0)))
 
 )
 
