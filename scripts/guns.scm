@@ -78,14 +78,14 @@
   (let 
     ((id (mk-obj-attr "+particles"
       (list 
-        (list "position" (list 0.6 0 -2))
+        (list "position" (list 0.7 -0.4 -2))
         (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
         ;(list "+physics" "disabled")
         (list "+physics_type" "dynamic")
         (list "+physics_collision" "nocollide")
         (list "+texture" "../gameresources/textures/iguana.jpg")
         (list "state" "disabled")
-        (list "+scale" (list 0.1 0.1 0.1))
+        (list "+scale" "0.3 0.3 0.2")
         (list "duration" 0.1)
         (list "limit" 3)
         (list "+lookat" parent-name)
