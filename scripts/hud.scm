@@ -6,10 +6,9 @@
 
 (define maxBufferSize 10)
 (define messageBuffer (list))
+
+(define displayMessage (args "alert"))
 (define (onMessage key value)
-  (if (equal? key "sec-clock")
-    (set! messageBuffer (clear-old-messages messageBuffer))
-  )
   (if (equal? key "alert")
     (begin
       (set! messageBuffer (reverse (cons (list value (time-seconds)) (reverse messageBuffer)))) 
@@ -19,12 +18,16 @@
       (format #t "list is: ~a\n" messageBuffer)
     )
   )
+  (if (equal? key displayMessage) 
+    (onMessage "alert" (string-append "message: " key value))
+  )
 )
 
 (define (render-alerts yoffset buffer)
   (if (> (length buffer) 0)
     (begin
-      (draw-text (amount-to-draw (car (car buffer)) (cadr (car buffer)) 10) 50 yoffset 4)
+      (format #t "rendering alerts: ~a ~a\n" yoffset buffer)
+      (draw-text (amount-to-draw (car (car buffer)) (cadr (car buffer)) 100) 50 yoffset 4)
       (render-alerts (+ yoffset 10) (cdr buffer))
     )
   )
