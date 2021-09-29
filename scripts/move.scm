@@ -256,6 +256,19 @@
   ))
 )
 
+(define ironsight-mode #f)
+(define ironsight-speed 0.2)
+(define (onMessage key value)
+  (if (equal? key "ironsight")
+    (set! ironsight-mode (equal? value "on"))
+  )
+)
+
+(define (get-move-speed)
+  (define basespeed (if is-grounded movement-speed movement-speed-air))
+  (if ironsight-mode (* ironsight-speed basespeed) basespeed)
+)
+
 (define go-forward #f)
 (define go-left #f)
 (define go-backward #f)
@@ -264,14 +277,15 @@
   (define elapsedTime (time-elapsed))
   (if using-fpscam
     (begin
-      (if (equal? go-forward  #t) (move 0 0 (* -1 (if is-grounded movement-speed movement-speed-air))))
-      (if (equal? go-left     #t) (move (* -0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
-      (if (equal? go-right    #t) (move (* 0.8 (if is-grounded movement-speed movement-speed-air)) 0 0))
-      (if (equal? go-backward #t) (move 0 0 (if is-grounded movement-speed movement-speed-air)))
+      (if (equal? go-forward  #t) (move 0 0 (* -1 (get-move-speed))))
+      (if (equal? go-left     #t) (move (* -0.8 (get-move-speed)) 0 0))
+      (if (equal? go-right    #t) (move (* 0.8 (get-move-speed)) 0 0))
+      (if (equal? go-backward #t) (move 0 0 (get-move-speed)))
       (look elapsedTime)
       (update-velocity elapsedTime)
     )
   )
+  (format #t "ironsight mode: ~a\n" ironsight-mode)
 )
 
 (update-config)

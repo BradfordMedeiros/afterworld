@@ -26,7 +26,6 @@
 (define (render-alerts yoffset buffer)
   (if (> (length buffer) 0)
     (begin
-      (format #t "rendering alerts: ~a ~a\n" yoffset buffer)
       (draw-text (amount-to-draw (car (car buffer)) (cadr (car buffer)) 100) 50 yoffset 4)
       (render-alerts (+ yoffset 10) (cdr buffer))
     )

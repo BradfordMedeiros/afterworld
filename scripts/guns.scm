@@ -82,7 +82,7 @@
         (list "physics" "disabled")
         (list "duration" 0.2)
         (list "limit" 3)
-        ;(list "state" "disabled")
+        (list "state" "disabled")
         (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
         ;(list "+physics" "disabled")
 ;        (list "+physics_type" "static")
