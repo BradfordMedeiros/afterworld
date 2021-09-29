@@ -70,31 +70,27 @@
   )
 )
 
+(define defaultParticleAttrs (list
+  (list "position" (list 0 1 0))
+  (list "physics" "disabled")
+  (list "duration" 0.2)
+  (list "limit" 3)
+  (list "state" "disabled")
+))
+(define (split-emit-line emitLine) (string-split emitLine #\:))
+(define (emitterOptsToList emitterOptions)
+  (map split-emit-line (string-split emitterOptions #\;))
+)
+
 (define emitterid #f)
-(define (change-emitter)
+(define (change-emitter emitterOptions)
+  (define particleAttrs (emitterOptsToList emitterOptions))
   (if (not (equal? emitterid #f))
     (rm-obj emitterid)
   )
+  (format #t "emitter options: [~a]\n" particleAttrs)
   (let 
-    ((id (mk-obj-attr "+particles"
-      (list 
-        (list "position" (list 0 1 0))
-        (list "physics" "disabled")
-        (list "duration" 0.2)
-        (list "limit" 3)
-        (list "state" "disabled")
-        (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
-        ;(list "+physics" "disabled")
-;        (list "+physics_type" "static")
-        (list "+physics_type" "dynamic")
-        (list "+physics_collision" "nocollide")
-        (list "+texture" "../gameresources/textures/iguana.jpg")
-        (list "+scale" "0.3 0.3 0.3")
-        (list "+lookat" parent-name)
-        (list "+layer" "no_depth")
-        (list "+fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
-      )
-    )))
+    ((id (mk-obj-attr "+particles" (append defaultParticleAttrs particleAttrs))))
     (set! emitterid id)  
     (format #t "the emitter id is: ~a\n" emitterid)
     (make-parent emitterid gunid)
@@ -107,7 +103,7 @@
     select 
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
       xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
-      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos
+      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
@@ -139,7 +135,7 @@
       )
       (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
-      (change-emitter)
+      (change-emitter (list-ref guninfo 19))
     )
   )
 )

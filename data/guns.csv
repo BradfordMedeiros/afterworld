@@ -1,5 +1,5 @@
-name,modelpath,fire-animation,fire-sound,xoffset-pos,yoffset-pos,zoffset-pos,xrot,yrot,zrot,xscale,yscale,zscale,firing-rate,hold,raycast,ironsight,iron-xoffset-pos,iron-yoffset-pos,iron-zoffset-pos
-pistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,6,-2,-10,1,0,0,1,1,1,1000,FALSE,TRUE,FALSE,0,0,0
-leftypistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,-6,-2,-10,1,0,0,1,1,-1,1000,FALSE,TRUE,FALSE,0,0,0
-machinegun,../gameresources/build/weapons/ruster.gltf,,../ModEngine/res/sounds/sample.wav,7,-4,-15,1,0,0,1,1,1,100,TRUE,FALSE,TRUE,0.5,-2,-10
-nailgun,../gameresources/build/weapons/nailgun.gltf,,../ModEngine/res/sounds/sample.wav,7,-4,-15,1,0,0,1,1,1,5000,TRUE,TRUE,TRUE,0,-3,-12
+name,modelpath,fire-animation,fire-sound,xoffset-pos,yoffset-pos,zoffset-pos,xrot,yrot,zrot,xscale,yscale,zscale,firing-rate,hold,raycast,ironsight,iron-xoffset-pos,iron-yoffset-pos,iron-zoffset-pos,particle
+pistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,6,-2,-10,1,0,0,1,1,1,1000,FALSE,TRUE,FALSE,0,0,0,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+leftypistol,../gameresources/build/weapons/pistol.gltf,ArmatureAction,../ModEngine/res/sounds/silenced-gunshot.wav,-6,-2,-10,1,0,0,1,1,-1,1000,FALSE,TRUE,FALSE,0,0,0,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+machinegun,../gameresources/build/weapons/ruster.gltf,,../ModEngine/res/sounds/silenced-gunshot.wav,7,-4,-15,1,0,0,1,1,1,100,TRUE,FALSE,TRUE,0.5,-2,-10,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:../gameresources/textures/iguana.jpg
+nailgun,../gameresources/build/weapons/nailgun.gltf,,../ModEngine/res/sounds/sample.wav,7,-4,-15,1,0,0,1,1,1,5000,TRUE,TRUE,TRUE,0,-3,-12,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf

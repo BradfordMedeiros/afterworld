@@ -285,7 +285,6 @@
       (update-velocity elapsedTime)
     )
   )
-  (format #t "ironsight mode: ~a\n" ironsight-mode)
 )
 
 (update-config)
