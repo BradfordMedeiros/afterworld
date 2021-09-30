@@ -1,7 +1,5 @@
 
-(define (is-bouncepad obj1) 
-  (equal? (gameobj-name obj1) "platform")
-)
+(define (is-bouncepad obj1) (equal? (gameobj-name obj1) "platform"))
 
 (define (approach-from-above) #t)
 (define (launch-object obj) 
@@ -20,8 +18,25 @@
   )
 )
 
+(define (is-speedpad obj1) (equal? (gameobj-name obj1) "speedpad"))
+(define (set-high-velocity obj)
+  (format #t "placeholder set high velocity: ~a\n" (gameobj-name obj))
+)
+
+(define (handle-speed-attr obj1 obj2)
+  (define obj1Speedpad (is-speedpad obj1))
+  (define obj2Speedpad (is-speedpad obj2))
+  (if (and obj1Speedpad (not obj2Speedpad))
+    (set-high-velocity obj2)
+  )
+  (if (and obj2Speedpad (not obj1Speedpad))
+    (set-high-velocity obj1)
+  )
+)
+
 (define (onGlobalCollideEnter obj1 obj2 hitpoint normal2On1 normal1On2) 
   (handle-bounce-attr obj1 obj2)
+  (handle-speed-attr obj1 obj2)
   (format #t "(~a): attr obj1: ~a\n" (gameobj-name obj1) (gameobj-attr obj1))
   (format #t "(~a): attr obj2: ~a\n" (gameobj-name obj2) (gameobj-attr obj2))
 )

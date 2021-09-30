@@ -20,6 +20,14 @@ box:physics_type:dynamic
 box:physics_mass:5
 box:script:../afterworld/scripts/deleteonhit.scm
 
+ramp:mesh:../gameresources/build/uncategorized/ramp.gltf
+ramp:scale:15 15 15
+ramp:position:0 -13 0
+ramp:texture:./res/textures/blacktop.jpg
+ramp:physics_shape:shape_exact
+ramp:physics:enabled
+ramp:physics_type:static
+
 >maincamera:script:../afterworld/scripts/move.scm
 >maincamera:position:0 0 0
 >maincamera:physics_angle:0.000000 0.000000 0.000000
