@@ -1,5 +1,5 @@
 
-(define (is-bouncepad obj1) (equal? (gameobj-name obj1) "platform"))
+(define (is-bouncepad obj1) (equal? (gameobj-name obj1) "boundpad"))
 
 (define (approach-from-above) #t)
 (define (launch-object obj) 

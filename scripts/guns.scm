@@ -77,7 +77,19 @@
   (list "limit" 3)
   (list "state" "disabled")
 ))
-(define (split-emit-line emitLine) (string-split emitLine #\:))
+
+(define (template sourceString template templateValue)
+  (define index (string-contains sourceString template))
+  (if index
+    (string-replace sourceString templateValue index (+ index (string-length template)))
+    sourceString
+  )
+)
+
+(define (template-emit-line line) 
+  (list (car line) (template (cadr line) "$MAINOBJ" parent-name))
+)
+(define (split-emit-line emitLine) (template-emit-line (string-split emitLine #\:)))
 (define (emitterOptsToList emitterOptions)
   (map split-emit-line (string-split emitterOptions #\;))
 )
