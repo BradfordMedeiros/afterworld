@@ -10,7 +10,7 @@ floatbox:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox:position:30 0 0
 floatbox:scale:5 5 0.2
 floatbox:rotation:0 -1 0
-floatbox:texture:../gameresources/textures/wood.jpg
+floatbox:texture:./res/textures/grass.png
 
 box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 box:position:25 2 0
