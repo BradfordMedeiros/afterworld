@@ -71,11 +71,11 @@
 )
 
 (define defaultParticleAttrs (list
-  (list "position" (list 0 1 0))
+  (list "position" (list 0 -0.1 0))
   (list "physics" "disabled")
-  (list "duration" 0.2)
-  (list "limit" 3)
   (list "state" "disabled")
+  (list "limit" "1")
+  (list "duration" 0.1)
 ))
 
 (define (template sourceString template templateValue)
@@ -95,17 +95,29 @@
 )
 
 (define emitterid #f)
-(define (change-emitter emitterOptions)
+(define hit-emitterid #f)
+(define (get-hit-particle-id) hit-emitterid)
+(define (change-emitter emitterOptions hitParticleOptions)
   (define particleAttrs (emitterOptsToList emitterOptions))
+  (define hitParticleAttrs (emitterOptsToList hitParticleOptions))
+
   (if (not (equal? emitterid #f))
     (rm-obj emitterid)
   )
   (format #t "emitter options: [~a]\n" particleAttrs)
+  (format #t "hit-emitter options: [~a]\n" hitParticleAttrs)
+
   (let 
     ((id (mk-obj-attr "+particles" (append defaultParticleAttrs particleAttrs))))
     (set! emitterid id)  
     (format #t "the emitter id is: ~a\n" emitterid)
     (make-parent emitterid gunid)
+  )
+  (let 
+    ((id (mk-obj-attr "+hit-particles" (append defaultParticleAttrs hitParticleAttrs))))
+    (set! hit-emitterid id)  
+    (format #t "the hit-emitter id is: ~a\n" hit-emitterid)
+    (make-parent hit-emitterid gunid)
   )
   (format #t "change emitter\n")
 )
@@ -115,7 +127,7 @@
     select 
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
       xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
-      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle
+      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle, hit-particle
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
@@ -147,13 +159,21 @@
       )
       (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
-      (change-emitter (list-ref guninfo 19))
+      (change-emitter 
+        (list-ref guninfo 19)
+        (list-ref guninfo 20)
+      )
     )
   )
 )
 
 (define (sendhit hitpoint)
+  (define hitemitter (get-hit-particle-id))
   (sendnotify "hit" (number->string (car hitpoint)))
+  (format #t "hitpoint: ~a\n" hitpoint)
+  (if hitemitter
+    (emit hitemitter (cadr hitpoint))
+  )
 )
 
 (define (fire-raycast)

@@ -28,8 +28,7 @@
   (define nextCycle (if (>= (+ 1 currCycle) (length cyclecolors)) 0 (+ 1 currCycle)))
   (define lerpamount (calcLerpAmount))
   (define color (lerp (list-ref cyclecolors currCycle) (list-ref cyclecolors nextCycle) lerpamount))
-
-  (format #t "color: ~a, a: ~a\n" color lerpamount)
+  ;(format #t "color: ~a, a: ~a\n" color lerpamount)
   (set-wstate (list 
     (list "skybox" "color" color)
   ))
