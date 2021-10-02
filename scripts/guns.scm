@@ -74,8 +74,6 @@
   (list "position" (list 0 -0.1 0))
   (list "physics" "disabled")
   (list "state" "disabled")
-  (list "limit" "1")
-  (list "duration" 0.1)
 ))
 
 (define (template sourceString template templateValue)
@@ -86,13 +84,19 @@
   )
 )
 
+(define reserved-emitter-chars (list "!" "?" "+"))
+(define (reserved-emitter-name value) (member (substring value 0 1) reserved-emitter-chars))
 (define (template-emit-line line) 
-  (list (car line) (template (cadr line) "$MAINOBJ" parent-name))
+  (define keyname (car line))
+  (define value (template (cadr line) "$MAINOBJ" parent-name))
+  (define reservedKeyName (reserved-emitter-name keyname))
+  (if reservedKeyName
+    (list keyname value)
+    (list keyname (parse-attr value))
+  )
 )
 (define (split-emit-line emitLine) (template-emit-line (string-split emitLine #\:)))
-(define (emitterOptsToList emitterOptions)
-  (map split-emit-line (string-split emitterOptions #\;))
-)
+(define (emitterOptsToList emitterOptions) (map split-emit-line (string-split emitterOptions #\;)))
 
 (define emitterid #f)
 (define hit-emitterid #f)
@@ -101,9 +105,13 @@
   (define particleAttrs (emitterOptsToList emitterOptions))
   (define hitParticleAttrs (emitterOptsToList hitParticleOptions))
 
-  (if (not (equal? emitterid #f))
+  (if (not (equal? (lsobj-name "+particles") #f))
     (rm-obj emitterid)
   )
+  (if (not (equal? (lsobj-name "+hit-particles") #f))
+    (rm-obj hit-emitterid)
+  )
+  
   (format #t "emitter options: [~a]\n" particleAttrs)
   (format #t "hit-emitter options: [~a]\n" hitParticleAttrs)
 
@@ -326,4 +334,5 @@
   (if (equal? key 50) (onMessage "changegun" "leftypistol"))
   (if (equal? key 51) (onMessage "changegun" "nailgun"))
   (if (equal? key 52) (onMessage "changegun" "machinegun"))
+  (if (equal? key 53) (onMessage "changegun" "upistol"))
 )
