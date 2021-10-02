@@ -14,8 +14,15 @@
 (define jump-height 10)
 (define jump-obj-name #f)
 (define land-obj-name #f)
-(define (set-jump-config height jumpsound landsound)
+(define can-dash #f)
+(define dash-delay 0)
+(define (set-jump-config height jumpsound landsound dashdelaytime)
   (set! jump-height height)
+  (set! can-dash (>= dashdelaytime 0))
+  (if (>= dashdelaytime 0)
+    (set! dash-delay dashdelaytime)
+    (set! dash-delay 0)
+  )
   (format #t "traits: setting jump height: ~a, jump-sound: ~a, land-sound: ~a\n" height jumpsound landsound)
   (if jump-obj-name (rm-obj (gameobj-id (lsobj-name jump-obj-name))))
   (if (> (string-length jumpsound) 0)
@@ -92,7 +99,7 @@
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound from traits")))
+  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash from traits")))
   (define settings (list-ref (sql (sql-compile "select xsensitivity, ysensitivity from settings")) 0))
   (if (= (length traits) 0)
     (display "no traits in config\n")
@@ -105,6 +112,7 @@
           (string->number (list-ref targettrait 2))
           (list-ref targettrait 9)
           (list-ref targettrait 10)
+          (string->number (list-ref targettrait 11))
         )
         (set-object-values 
           (string->number (list-ref targettrait 3))
@@ -153,6 +161,21 @@
 )
 (define (land)
   (if land-obj-name (playclip land-obj-name))  
+)
+
+; Would be cool to make this change velocity into the direction of the normal of the surface'
+; Allowing change of direction
+(define last-dash-time -1000000)
+(define (dash)
+  (define now (time-seconds))
+  (define impulse (move-relative (list 0 0 0) (gameobj-rot mainobj) jump-height))
+  (format #t "dashimpulse: ~a\n" impulse)
+  (if (and can-dash (> (- now last-dash-time) dash-delay))
+    (begin
+      (applyimpulse mainobj impulse)
+      (set! last-dash-time now)
+    )
+  )
 )
 
 (define xrot 0)  ; up and down
@@ -217,6 +240,7 @@
     (set! xrot 1.57079632679) ; 90degrees more or less
     (set! yrot 0) 
   ))
+  (if (and (= key 340) (= action 1)) (dash))  ; shift
 )
 
 (define (move x y z) 
