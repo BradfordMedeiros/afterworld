@@ -184,6 +184,7 @@
   )
 )
 
+; TODO -> Consider including translation/rotational sway
 (define (fire-raycast)
   (define mainobjpos (gameobj-pos (get-parent)))
   (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
