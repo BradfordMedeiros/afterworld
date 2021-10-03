@@ -1,3 +1,5 @@
+(define debugmode #t)
+
 (define parent-name ">maincamera")
 (define (get-parent) (lsobj-name parent-name))
 
@@ -15,12 +17,20 @@
 (define is-raycast #f)
 (define is-ironsight #f)
 (define ironsight-offset (list 0 0 0))
-(define (set-firing-params rate hold raycast ironsight ironoffset)
+(define recoilLength 0.1)
+(define recoilPitchRadians 0)  
+(define recoilTranslate (list 0 0 20))
+(define recoilZoomTranslate (list 0 0 15))
+(define (set-firing-params rate hold raycast ironsight ironoffset recoil-length recoil-angle recoil-translate recoil-translate-zoom)
   (set! firing-rate rate)
   (set! can-hold hold)
   (set! is-raycast raycast)
   (set! is-ironsight ironsight)
   (set! ironsight-offset ironoffset)
+  (set! recoilLength recoil-length)
+  (set! recoilPitchRadians recoil-angle)
+  (set! recoilTranslate recoil-translate)
+  (set! recoilZoomTranslate recoil-translate-zoom)
   (format #t "traits: firing-params - rate: ~a, can-hold: ~a, raycast: ~a, ironsight: ~a, ironsight-offset: ~a\n" firing-rate can-hold is-raycast is-ironsight ironsight-offset)
 )
 
@@ -130,12 +140,14 @@
   (format #t "change emitter\n")
 )
 
+(define (parse-stringvec str) (map string->number (string-split str #\ )))
 (define (handleChangeGun gunname)
   (define query (string-append "
     select 
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
       xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
-      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle, hit-particle
+      ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle, hit-particle,
+      recoil-length, recoil-angle, recoil, recoil-zoom
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
@@ -164,6 +176,10 @@
           (string->number (list-ref guninfo 17))
           (string->number (list-ref guninfo 18))
         )
+        (string->number (list-ref guninfo 21))
+        (string->number (list-ref guninfo 22))
+        (parse-stringvec (list-ref guninfo 23))
+        (parse-stringvec (list-ref guninfo 24))
       )
       (set! last-shooting-time initFiringTime)
       (change-sound (list-ref guninfo 2))
@@ -177,27 +193,34 @@
 
 (define (sendhit hitpoint)
   (define hitemitter (get-hit-particle-id))
+  (define hitloc (cadr hitpoint))
   (sendnotify "hit" (number->string (car hitpoint)))
   (format #t "hitpoint: ~a\n" hitpoint)
   (if hitemitter
-    (emit hitemitter (cadr hitpoint))
+    (begin
+      (emit hitemitter hitloc)
+      (if debugmode
+        (draw-line hitloc (list (car hitloc) (+ 10 (cadr hitloc)) (caddr hitloc)) #t)
+      )
+    )
   )
 )
 
 ; TODO -> Consider including translation/rotational sway
+; probably just the delta(rot) added to the gun
+; but then consider the ads is inaccurate, so I probably should introduce ADs adjustment for raycast centering 
+; but maybe just visually make the model line up to the crosshair?
 (define (fire-raycast)
   (define mainobjpos (gameobj-pos (get-parent)))
   (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
   (format #t "hitpoints: ~a\n" hitpoints)
-  (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500))
+  (if debugmode
+    (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500) #t)
+  )
   (for-each sendhit hitpoints)
 )
 
 (define recoilStart -100)
-(define recoilLength 0.1)
-(define recoilPitchRadians -0.161799)  
-(define recoilTranslate (list 0 0 30))
-(define recoilZoomTranslate (list 0 0 15))
 (define (calc-recoil-slerpamount) 
   (define amount (/ (- (time-seconds) recoilStart) recoilLength))
   (if (> amount 1) 0 amount)
