@@ -271,14 +271,17 @@
 )
 
 (define max-mag-sway-x-rot 0.1)
+(define max-mag-sway-y-rot 0.1)
 (define (sway-gun-rotation relvelocity)
   (define sway-amount-x (list-ref relvelocity 0))
   (define limited-sway-x (min max-mag-sway-x-rot (max sway-amount-x (* -1 max-mag-sway-x-rot))))
   (define sway-amount-y (list-ref relvelocity 1))
-  (define limited-sway-y (min max-mag-sway-y (max sway-amount-y (* -1 max-mag-sway-y))))
-  (define sway-amount-z (list-ref relvelocity 2))
-  (define limited-sway-z (min max-mag-sway-z (max sway-amount-z (* -1 max-mag-sway-z))))
-  (define targetrot (setfrontdelta initial-gun-rot limited-sway-x 0 0))
+  (define limited-sway-y (min max-mag-sway-y-rot (max sway-amount-y (* -1 max-mag-sway-y-rot))))
+
+  ; setfrontdelta This is wrong for any gun that has an initial rotation
+  (define targetrot (setfrontdelta initial-gun-rot limited-sway-x (* -1 limited-sway-y) 0))  ; yaw, pitch, roll .  
+
+  (format #t "sway x: ~a, sway y: ~a\n" limited-sway-x limited-sway-y)
   (gameobj-setrot! 
     (gameobj-by-id gunid) 
     (slerp (gameobj-rot (gameobj-by-id gunid)) targetrot 0.01)
