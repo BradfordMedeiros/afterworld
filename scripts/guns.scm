@@ -191,6 +191,19 @@
   (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500))
   (for-each sendhit hitpoints)
 )
+
+(define recoilStart -100)
+(define recoilLength 0.1)
+(define recoilPitchRadians -0.161799)  
+(define recoilTranslate (list 0 0 30))
+(define recoilZoomTranslate (list 0 0 15))
+(define (calc-recoil-slerpamount) 
+  (define amount (/ (- (time-seconds) recoilStart) recoilLength))
+  (if (> amount 1) 0 amount)
+)
+(define (recoil-finished) (> (- (time-seconds) recoilStart) recoilLength))
+(define (start-recoil) (set! recoilStart (time-seconds)))
+
 (define (fire-gun)
   (if (not (equal? fire-animation #f))
     (gameobj-playanimation (gameobj-by-id gunid) fire-animation)
@@ -198,8 +211,8 @@
   (if soundid (playclip "&weapon-sound"))
   (if emitterid (emit emitterid))
   (if is-raycast (fire-raycast))
+  (start-recoil)
 )
-
 
 (define (fire-gun-limited)
   (define elapsedMilliseconds (* 1000 (time-seconds)))
@@ -244,6 +257,18 @@
 (define max-mag-sway-y 1)
 (define max-mag-sway-z 1)
 (define sway-velocity 3)
+
+(define (locationWithRecoil targetpos zoomgun)
+  (define recoilAmount (if zoomgun recoilZoomTranslate recoilTranslate))
+  (define targetposWithRecoil (list 
+    (+ (car targetpos)   (car recoilAmount))
+    (+ (cadr targetpos)  (cadr recoilAmount)) 
+    (+ (caddr targetpos) (caddr recoilAmount))
+  ))
+  (format #t "targetpos: ~a\n" targetposWithRecoil)
+  (lerp targetpos targetposWithRecoil (calc-recoil-slerpamount))
+)
+
 (define (sway-gun-translation relvelocity zoomgun)
   (define sway-amount-x (list-ref relvelocity 0))
   (define limited-sway-x (min max-mag-sway-x (max sway-amount-x (* -1 max-mag-sway-x))))
@@ -258,30 +283,29 @@
       (+ (* -1 limited-sway-z) (list-ref initial-gun-pos 2))
     )
   )
+
   (if zoomgun
     (gameobj-setpos-rel! 
       (gameobj-by-id gunid) 
-      (lerp (gameobj-pos (gameobj-by-id gunid)) ironsight-offset (* (time-elapsed) 10))
+      (lerp (gameobj-pos (gameobj-by-id gunid)) (locationWithRecoil ironsight-offset #t) (* (time-elapsed) 10))
     ) 
     (gameobj-setpos-rel! 
       (gameobj-by-id gunid) 
-      (lerp (gameobj-pos (gameobj-by-id gunid)) targetpos (* (time-elapsed) sway-velocity))
+      (lerp (gameobj-pos (gameobj-by-id gunid)) (locationWithRecoil targetpos #f) (* (time-elapsed) sway-velocity))
     ) 
   )
 )
 
 (define max-mag-sway-x-rot 0.1)
 (define max-mag-sway-y-rot 0.1)
-(define (sway-gun-rotation relvelocity)
+(define (sway-gun-rotation relvelocity zoomgun)
   (define sway-amount-x (list-ref relvelocity 0))
   (define limited-sway-x (min max-mag-sway-x-rot (max sway-amount-x (* -1 max-mag-sway-x-rot))))
   (define sway-amount-y (list-ref relvelocity 1))
   (define limited-sway-y (min max-mag-sway-y-rot (max sway-amount-y (* -1 max-mag-sway-y-rot))))
-
-  ; setfrontdelta This is wrong for any gun that has an initial rotation
-  (define targetrot (setfrontdelta initial-gun-rot limited-sway-x (* -1 limited-sway-y) 0))  ; yaw, pitch, roll .  
-
-  (format #t "sway x: ~a, sway y: ~a\n" limited-sway-x limited-sway-y)
+  (define recoilAmount (cadr (lerp (list 0 0 0) (list 0 recoilPitchRadians 0) (calc-recoil-slerpamount))))
+  (define targetrot (setfrontdelta initial-gun-rot limited-sway-x (+ recoilAmount (* -1 limited-sway-y)) 0))  ; yaw, pitch, roll .  
+  ;(format #t "sway x: ~a, sway y: ~a\n" limited-sway-x limited-sway-y)
   (gameobj-setrot! 
     (gameobj-by-id gunid) 
     (slerp (gameobj-rot (gameobj-by-id gunid)) targetrot 0.01)
@@ -306,7 +330,7 @@
 (define (sway-gun zoomgun)
   (sway-gun-translation (get-sway-velocity) zoomgun)
   (if sway-rotation
-    (sway-gun-rotation mouse-velocity)
+    (sway-gun-rotation mouse-velocity zoomgun)
   )
 )
 
