@@ -12,6 +12,11 @@ floatbox:scale:5 5 0.2
 floatbox:rotation:0 -1 0
 floatbox:texture:./res/textures/grass.png
 
+wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+wall:position:-50 -10 40
+wall:scale:100 100 2
+wall:texture:./res/textures/blacktop.jpg
+
 box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 box:position:25 2 0
 box:rotation:0 -1 0
