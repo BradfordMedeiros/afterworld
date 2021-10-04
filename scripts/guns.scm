@@ -1,5 +1,4 @@
-(define debugmode #t)
-
+(define debugmode (args "debug"))
 (define parent-name ">maincamera")
 (define (get-parent) (lsobj-name parent-name))
 
@@ -289,7 +288,7 @@
     (+ (cadr targetpos)  (cadr recoilAmount)) 
     (+ (caddr targetpos) (caddr recoilAmount))
   ))
-  (format #t "targetpos: ~a\n" targetposWithRecoil)
+  ;(format #t "targetpos: ~a\n" targetposWithRecoil)
   (lerp targetpos targetposWithRecoil (calc-recoil-slerpamount))
 )
 
