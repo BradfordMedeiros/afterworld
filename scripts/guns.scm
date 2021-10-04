@@ -190,6 +190,25 @@
   )
 )
 
+(define hitlength 3)
+(define (debug-hitmarker loc)
+  (draw-line 
+    (list (+ (car loc)) (+ (cadr loc) (* -1 hitlength)) (+ (caddr loc)))
+    (list (+ (car loc)) (+ (cadr loc) hitlength) (+ (caddr loc)))
+    #t
+  )
+  (draw-line 
+    (list (+ (car loc) (* -1 hitlength)) (+ (cadr loc)) (+ (caddr loc)))
+    (list (+ (car loc) hitlength) (+ (cadr loc)) (+ (caddr loc)))
+    #t
+  )
+  (draw-line 
+    (list (+ (car loc)) (+ (cadr loc)) (+ (caddr loc) (* -1 hitlength)))
+    (list (+ (car loc)) (+ (cadr loc)) (+ (caddr loc) hitlength))
+    #t
+  )
+)
+
 (define (sendhit hitpoint)
   (define hitemitter (get-hit-particle-id))
   (define hitloc (cadr hitpoint))
@@ -199,7 +218,7 @@
     (begin
       (emit hitemitter hitloc)
       (if debugmode
-        (draw-line hitloc (list (car hitloc) (+ 10 (cadr hitloc)) (caddr hitloc)) #t)
+        (debug-hitmarker hitloc)
       )
     )
   )
@@ -209,12 +228,17 @@
 ; probably just the delta(rot) added to the gun
 ; but then consider the ads is inaccurate, so I probably should introduce ADs adjustment for raycast centering 
 ; but maybe just visually make the model line up to the crosshair?
+(define raycastline #f)
 (define (fire-raycast)
   (define mainobjpos (gameobj-pos (get-parent)))
   (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
   (format #t "hitpoints: ~a\n" hitpoints)
   (if debugmode
-    (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500) #t)
+    (begin
+      (if raycastline (free-line raycastline))
+      (set! raycastline (draw-line mainobjpos (move-relative mainobjpos (gameobj-rot (get-parent)) 500) #t))
+
+    )
   )
   (for-each sendhit hitpoints)
 )
