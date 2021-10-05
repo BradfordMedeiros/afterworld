@@ -105,7 +105,8 @@
   )
 )
 (define (split-emit-line emitLine) (template-emit-line (string-split emitLine #\:)))
-(define (emitterOptsToList emitterOptions) (map split-emit-line (string-split emitterOptions #\;)))
+(define (is-not-whitespace val) (not (equal? (string-trim val) "")))
+(define (emitterOptsToList emitterOptions) (map split-emit-line (filter is-not-whitespace (string-split emitterOptions #\;))))
 
 (define emitterid #f)
 (define hit-emitterid #f)
@@ -114,17 +115,22 @@
 
 (define (create-emitter name attrs oldemitterid)
   (format #t (string-append name " options: [~a]\n") attrs)
-  (if (not (equal? (lsobj-name name) #f)) (rm-obj oldemitterid))
-  (let 
-    ((id (mk-obj-attr name (append defaultParticleAttrs attrs))))
-    (format #t "the emitter id is: ~a\n" id)
-    (make-parent id gunid)
-    id
+  (format #t "attr length ~a\n" (length attrs))
+  (if (> (length attrs) 0)
+    (begin
+      (if (not (equal? (lsobj-name name) #f)) (rm-obj oldemitterid))
+      (let 
+        ((id (mk-obj-attr name (append defaultParticleAttrs attrs))))
+        (format #t "the emitter id is: ~a\n" id)
+        (make-parent id gunid)
+        id
+      )
+    )
+    #f
   )
 )
 
 (define (change-emitter emitterOptions hitParticleOptions projectileOptions)
-  (format #t "Change emitter\n")
   (set! emitterid            (create-emitter "+particles"     (emitterOptsToList emitterOptions)     emitterid           ))
   (set! hit-emitterid        (create-emitter "+hit-particles" (emitterOptsToList hitParticleOptions) hit-emitterid       ))
   (set! projectile-emitterid (create-emitter "+projectile"    (emitterOptsToList projectileOptions)  projectile-emitterid))
