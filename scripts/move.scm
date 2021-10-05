@@ -159,17 +159,51 @@
     )
   )
 )
-(define (land)
-  (if land-obj-name (playclip land-obj-name))  
-)
+(define (land) (if land-obj-name (playclip land-obj-name)))
 
 ; Would be cool to make this change velocity into the direction of the normal of the surface'
 ; Allowing change of direction
+
+(define (set-velocity gameobj velocity) (format #t "placeholder: set velocity\n"))
+(define (apply-turn oldvelocity hitpoint pos)
+  (define newVelocity (reflect oldvelocity (move-relative (list 0 0 0) (caddr hitpoint) 1)))
+  (set-velocity mainobj newVelocity)
+  (format #t "should apply turn about: ~a\n" hitpoint)
+  (format #t "velocity in: ~a\n" oldvelocity)
+  (format #t "new angle out: ~a\n" newVelocity)
+  (if debugmode
+    (draw-line pos (move-relative pos (orientation-from-pos (list 0 0 0) newVelocity) 10) #t)
+  )
+)
+
+(define debugmode (args "debug"))
+(define dashline #f)
+(define dashwindow 5)
+(define (dashturn pos rot)
+  (if (not is-grounded)
+    (let* (
+        (movingDirection (orientation-from-pos (list 0 0 0) velocity))
+        (hitpoints (raycast pos movingDirection dashwindow))
+      )
+      (format #t "hitpoints: ~a\n" hitpoints)
+      (if (> (length hitpoints) 0) (apply-turn velocity (car hitpoints) pos))
+      (if debugmode 
+        (begin
+          (if dashline (free-line dashline))
+          (set! dashline (draw-line pos (move-relative pos movingDirection 10) #t))
+        )
+      )
+    )
+  )
+)
+
 (define last-dash-time -1000000)
 (define (dash)
   (define now (time-seconds))
-  (define impulse (move-relative (list 0 0 0) (gameobj-rot mainobj) jump-height))
+  (define rot (gameobj-rot mainobj))
+  (define impulse (move-relative (list 0 0 0) rot jump-height))
   (format #t "dashimpulse: ~a\n" impulse)
+  (dashturn lastpos rot)
   (if (and can-dash (> (- now last-dash-time) dash-delay))
     (begin
       (applyimpulse mainobj impulse)

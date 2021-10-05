@@ -368,9 +368,7 @@
 (define sway-rotation #t)
 (define (sway-gun zoomgun)
   (sway-gun-translation (get-sway-velocity) zoomgun)
-  (if sway-rotation
-    (sway-gun-rotation mouse-velocity zoomgun)
-  )
+  (if sway-rotation (sway-gun-rotation mouse-velocity zoomgun))
 )
 
 (define (onFrame)
@@ -381,9 +379,9 @@
 )
 
 (define (onMessage key value)
-  (if (equal? key "hit")
-    (format #t "key: ~a, value: ~a\n" key value)
-  )
+  ;(if (equal? key "hit")
+  ;  (format #t "key: ~a, value: ~a\n" key value)
+  ;)
   (if (equal? key "changegun")
     (begin
       (format #t "changing gun to: ~a\n" value)
