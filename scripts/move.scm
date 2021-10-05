@@ -14,9 +14,21 @@
 (define jump-height 10)
 (define jump-obj-name #f)
 (define land-obj-name #f)
+(define dash-obj-name #f)
 (define can-dash #f)
 (define dash-delay 0)
-(define (set-jump-config height jumpsound landsound dashdelaytime)
+
+(define (create-sound soundname clip oldobjname)
+  (if oldobjname (rm-obj (gameobj-id (lsobj-name jump-obj-name))))
+  (if (> (string-length clip) 0)
+    (begin
+      (make-parent (mk-obj-attr soundname (list (list "clip" clip) (list "physics" "disabled"))) (gameobj-id mainobj))
+      soundname
+    )
+    #f
+  )
+)
+(define (set-jump-config height jumpsound landsound dashdelaytime dashsound)
   (set! jump-height height)
   (set! can-dash (>= dashdelaytime 0))
   (if (>= dashdelaytime 0)
@@ -24,30 +36,9 @@
     (set! dash-delay 0)
   )
   (format #t "traits: setting jump height: ~a, jump-sound: ~a, land-sound: ~a\n" height jumpsound landsound)
-  (if jump-obj-name (rm-obj (gameobj-id (lsobj-name jump-obj-name))))
-  (if (> (string-length jumpsound) 0)
-    (begin
-      (mk-obj-attr "&jump-sound"     
-        (list 
-          (list "clip" jumpsound)
-        )
-      )
-      (set! jump-obj-name "&jump-sound")
-    )
-    (set! jump-obj-name #f)
-  )
-  (if land-obj-name (rm-obj (gameobj-id (lsobj-name land-obj-name))))
-  (if (> (string-length landsound) 0)
-    (begin
-      (mk-obj-attr "&land-sound"     
-        (list 
-          (list "clip" landsound)
-        )
-      )
-      (set! land-obj-name "&land-sound")
-    )
-    (set! land-obj-name #f)
-  )
+  (set! jump-obj-name (create-sound "&jump-sound" jumpsound jump-obj-name))
+  (set! land-obj-name (create-sound "&land-sound" landsound land-obj-name))
+  (set! dash-obj-name (create-sound "&dash-sound" dashsound dash-obj-name))
 )
 
 (define (set-object-values gravity restitution friction mass)
@@ -99,7 +90,7 @@
 (define (nextConfigIndex) (set! configIndex (+ configIndex 1)))
 (define (prevConfigIndex) (set! configIndex (max 0 (- configIndex 1))))
 (define (update-config)
-  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash from traits")))
+  (define traits (sql (sql-compile "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits")))
   (define settings (list-ref (sql (sql-compile "select xsensitivity, ysensitivity from settings")) 0))
   (if (= (length traits) 0)
     (display "no traits in config\n")
@@ -113,6 +104,7 @@
           (list-ref targettrait 9)
           (list-ref targettrait 10)
           (string->number (list-ref targettrait 11))
+          (list-ref targettrait 12)
         )
         (set-object-values 
           (string->number (list-ref targettrait 3))
@@ -203,11 +195,12 @@
   (define rot (gameobj-rot mainobj))
   (define impulse (move-relative (list 0 0 0) rot jump-height))
   (format #t "dashimpulse: ~a\n" impulse)
-  (dashturn lastpos rot)
   (if (and can-dash (> (- now last-dash-time) dash-delay))
     (begin
       (applyimpulse mainobj impulse)
       (set! last-dash-time now)
+      (dashturn lastpos rot)
+      (if dash-obj-name (playclip dash-obj-name))
     )
   )
 )
