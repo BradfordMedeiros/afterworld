@@ -109,34 +109,25 @@
 
 (define emitterid #f)
 (define hit-emitterid #f)
+(define projectile-emitterid #f)
 (define (get-hit-particle-id) hit-emitterid)
-(define (change-emitter emitterOptions hitParticleOptions)
-  (define particleAttrs (emitterOptsToList emitterOptions))
-  (define hitParticleAttrs (emitterOptsToList hitParticleOptions))
 
-  (if (not (equal? (lsobj-name "+particles") #f))
-    (rm-obj emitterid)
+(define (create-emitter name attrs oldemitterid)
+  (format #t (string-append name " options: [~a]\n") attrs)
+  (if (not (equal? (lsobj-name name) #f)) (rm-obj oldemitterid))
+  (let 
+    ((id (mk-obj-attr name (append defaultParticleAttrs attrs))))
+    (format #t "the emitter id is: ~a\n" id)
+    (make-parent id gunid)
+    id
   )
-  (if (not (equal? (lsobj-name "+hit-particles") #f))
-    (rm-obj hit-emitterid)
-  )
-  
-  (format #t "emitter options: [~a]\n" particleAttrs)
-  (format #t "hit-emitter options: [~a]\n" hitParticleAttrs)
+)
 
-  (let 
-    ((id (mk-obj-attr "+particles" (append defaultParticleAttrs particleAttrs))))
-    (set! emitterid id)  
-    (format #t "the emitter id is: ~a\n" emitterid)
-    (make-parent emitterid gunid)
-  )
-  (let 
-    ((id (mk-obj-attr "+hit-particles" (append defaultParticleAttrs hitParticleAttrs))))
-    (set! hit-emitterid id)  
-    (format #t "the hit-emitter id is: ~a\n" hit-emitterid)
-    (make-parent hit-emitterid gunid)
-  )
-  (format #t "change emitter\n")
+(define (change-emitter emitterOptions hitParticleOptions projectileOptions)
+  (format #t "Change emitter\n")
+  (set! emitterid            (create-emitter "+particles"     (emitterOptsToList emitterOptions)     emitterid           ))
+  (set! hit-emitterid        (create-emitter "+hit-particles" (emitterOptsToList hitParticleOptions) hit-emitterid       ))
+  (set! projectile-emitterid (create-emitter "+projectile"    (emitterOptsToList projectileOptions)  projectile-emitterid))
 )
 
 (define (parse-stringvec str) (map string->number (string-split str #\ )))
@@ -146,7 +137,7 @@
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
       xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
       ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle, hit-particle,
-      recoil-length, recoil-angle, recoil, recoil-zoom
+      recoil-length, recoil-angle, recoil, recoil-zoom, projectile
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
@@ -185,6 +176,7 @@
       (change-emitter 
         (list-ref guninfo 19)
         (list-ref guninfo 20)
+        (list-ref guninfo 25)
       )
     )
   )
@@ -209,14 +201,16 @@
   )
 )
 
+(define (zfighting-pos pos normal) (move-relative pos normal 0.01))
 (define (sendhit hitpoint)
   (define hitemitter (get-hit-particle-id))
   (define hitloc (cadr hitpoint))
+  (define hitnormal (caddr hitpoint))
   (sendnotify "hit" (number->string (car hitpoint)))
   (format #t "hitpoint: ~a\n" hitpoint)
   (if hitemitter
     (begin
-      (emit hitemitter hitloc)
+      (emit hitemitter (zfighting-pos hitloc hitnormal) hitnormal)
       (if debugmode
         (debug-hitmarker hitloc)
       )
@@ -257,6 +251,7 @@
   )
   (if soundid (playclip "&weapon-sound"))
   (if emitterid (emit emitterid))
+  (if projectile-emitterid (emit projectile-emitterid (gameobj-pos (lsobj-name parent-name)) (gameobj-rot (lsobj-name parent-name))))
   (if is-raycast (fire-raycast))
   (start-recoil)
 )
