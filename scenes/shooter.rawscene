@@ -23,7 +23,7 @@ box:rotation:0 -1 0
 box:texture:../gameresources/textures/wood.jpg
 box:physics_type:dynamic
 box:physics_mass:5
-box:script:../afterworld/scripts/deleteonhit.scm
+#box:script:../afterworld/scripts/deleteonhit.scm
 
 ramp:mesh:../gameresources/build/uncategorized/ramp.gltf
 ramp:scale:15 15 15
@@ -43,6 +43,8 @@ ramp:physics_type:static
 >maincamera:physics_shape:shape_sphere
 >maincamera:child:hud,crosshair
 
+#enemy:mesh:../gameresources/build/characters/bloodtrooper.gltf
+
 ########### GUN STUFF
 gun_logic:script:../afterworld/scripts/guns.scm
 
@@ -54,13 +56,22 @@ gun_logic:script:../afterworld/scripts/guns.scm
 hud:script:../afterworld/scripts/hud.scm
 hud:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 hud:layer:ui
-hud:position:0 0 -70
+hud:position:0 100 -70
 hud:physics:disabled
 hud:texture:../gameresources/textures/ui/crappyhud.png
 
 crosshair:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 crosshair:layer:ui
-crosshair:position:0 0 -60
+crosshair:position:0 100 -60
 crosshair:physics:disabled
 crosshair:texture:./res/textures/crosshairs/crosshair001.png
 crosshair:scale:0.05 0.05 0.05
+
+
+billboard:mesh:../gameresources/build/building/billboard1.gltf
+billboard:scale:10 10 10
+billboard:position:-20 -10 20
+
+box2:mesh:./res/models/box/box.obj
+box2:position:-5 -10 10
+box2:scale:5 5 5

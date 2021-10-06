@@ -155,7 +155,14 @@
 ; Would be cool to make this change velocity into the direction of the normal of the surface'
 ; Allowing change of direction
 
-(define (set-velocity gameobj velocity) (format #t "placeholder: set velocity\n"))
+(define dull-factor 0.4)
+(define (dull-vel velocity) (list 
+  (* dull-factor (car velocity)) 
+  (* dull-factor (cadr velocity)) 
+  (* dull-factor (caddr velocity))
+))
+
+(define (set-velocity gameobj velocity) (gameobj-setattr! gameobj (list (list "physics_velocity" (dull-vel velocity)))))
 (define (apply-turn oldvelocity hitpoint pos)
   (define newVelocity (reflect oldvelocity (move-relative (list 0 0 0) (caddr hitpoint) 1)))
   (set-velocity mainobj newVelocity)
@@ -169,7 +176,7 @@
 
 (define debugmode (args "debug"))
 (define dashline #f)
-(define dashwindow 5)
+(define dashwindow 10)
 (define (dashturn pos rot)
   (if (not is-grounded)
     (let* (
