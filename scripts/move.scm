@@ -1,4 +1,3 @@
-
 (define using-fpscam #t)
 (define (onCameraSystemChange defaultCam)
   (set! using-fpscam (not defaultCam))
@@ -19,7 +18,7 @@
 (define dash-delay 0)
 
 (define (create-sound soundname clip oldobjname)
-  (if oldobjname (rm-obj (gameobj-id (lsobj-name jump-obj-name))))
+  (if oldobjname (rm-obj (gameobj-id (lsobj-name oldobjname))))
   (if (> (string-length clip) 0)
     (begin
       (make-parent (mk-obj-attr soundname (list (list "clip" clip) (list "physics" "disabled"))) (gameobj-id mainobj))
@@ -210,9 +209,11 @@
 (define look-velocity-x 0)
 (define look-velocity-y 0)
 (define forwardvec (orientation-from-pos (list 0 0 0) (list 0 0 -1)))
-(define (look elapsedTime) 
-  (define deltax (* look-velocity-x xsensitivity elapsedTime))
-  (define deltay (* -1 look-velocity-y ysensitivity elapsedTime))
+(define (look elapsedTime ironsight ironsight_turn) 
+  (define raw_deltax (* look-velocity-x xsensitivity elapsedTime))
+  (define raw_deltay (* -1 look-velocity-y ysensitivity elapsedTime))
+  (define deltax (if ironsight (* raw_deltax ironsight_turn) raw_deltax))
+  (define deltay (if ironsight (* raw_deltay ironsight_turn) raw_deltay))
   (define targetxrot (clamp-pi (+ xrot deltax)))
   (define targetyrot (clamp-pi (+ yrot deltay)))
   (set! xrot targetxrot)
@@ -309,6 +310,7 @@
 
 (define ironsight-mode #f)
 (define ironsight-speed 0.2)
+(define ironsight-turn 1)
 (define (onMessage key value)
   (if (equal? key "ironsight")
     (set! ironsight-mode (equal? value "on"))
@@ -332,7 +334,7 @@
       (if (equal? go-left     #t) (move (* -0.8 (get-move-speed)) 0 0))
       (if (equal? go-right    #t) (move (* 0.8 (get-move-speed)) 0 0))
       (if (equal? go-backward #t) (move 0 0 (get-move-speed)))
-      (look elapsedTime)
+      (look elapsedTime ironsight-mode ironsight-turn)
       (update-velocity elapsedTime)
     )
   )
