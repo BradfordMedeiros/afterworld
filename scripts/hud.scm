@@ -1,4 +1,3 @@
-
 (define (amount-to-draw text createTime rate)
   (define currIndex (inexact->exact (floor (* rate (- (time-seconds) createTime)))))
   (substring text 0 (min (string-length text) currIndex))
@@ -24,6 +23,7 @@
   (if (equal? key displayMessage) 
     (onMessage "alert" (string-append "message: " key value))
   )
+  (if (equal? key "velocity") (set-speed value))
 )
 
 (define (render-alerts yoffset buffer)
@@ -35,8 +35,20 @@
   )
 )
 
+(define showspeed (args "speed"))
+(define speed 0)
+(define (set-speed velocityStr) 
+  (define vel (map string->number (string-split velocityStr #\ )))
+  (define xvel (car vel))
+  (define yvel (cadr vel))
+  (define zvel (caddr vel))
+  (define speedvel (sqrt (+ (* xvel xvel) (* yvel yvel) (* zvel zvel))))
+  (set! speed speedvel)
+  (format #t "speed ~a\n" speedvel)
+)
 (define (onFrame)
   (render-alerts 400 messageBuffer)
+  (if showspeed (draw-text (string-append "SPEED:" (number->string (round speed))) 50 900 5))
 )
 
 (define crosshairobjname "crosshair")
