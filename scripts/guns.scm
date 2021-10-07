@@ -20,6 +20,7 @@
 (define recoilPitchRadians 0)  
 (define recoilTranslate (list 0 0 20))
 (define recoilZoomTranslate (list 0 0 15))
+(define bloom-radius 0)  ; this is the max spread at a distance of one unit along the z
 
 (define gunid #f)
 (define initial-gun-pos (list 0 0 0))
@@ -131,12 +132,12 @@
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
       xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
       ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle, hit-particle,
-      recoil-length, recoil-angle, recoil, recoil-zoom, projectile
+      recoil-length, recoil-angle, recoil, recoil-zoom, projectile, bloom
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
     (format #t "warning: no gun named: ~a\n" gunname)
-    (let ((guninfo (car gunstats)))
+    (let* ((guninfo (car gunstats)) (bloomVec (parse-stringvec (list-ref guninfo 26))))
       (change-gun 
         (list-ref guninfo 0) 
         (string->number (list-ref guninfo 3)) 
@@ -165,6 +166,8 @@
       (set! recoilPitchRadians (string->number (list-ref guninfo 22)))
       (set! recoilTranslate (parse-stringvec (list-ref guninfo 23)))
       (set! recoilZoomTranslate (parse-stringvec (list-ref guninfo 24)))
+      (set! bloom-radius (list-ref bloomVec 0))
+
       (format #t "traits: firing-params - rate: ~a, can-hold: ~a, raycast: ~a, ironsight: ~a, ironsight-offset: ~a\n" firing-rate can-hold is-raycast is-ironsight ironsight-offset)
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -219,7 +222,6 @@
 (define usebloom #f)
 (define (randomfloat number resolution) (/ (* number (random resolution)) resolution))
 (define twopi (* 2 3.14159265359))
-(define bloom-radius 1)  ; this is the max spread at a distance of one unit along the z
 (define (random-angle) (randomfloat twopi 1000)) 
 (define (get-bloom-radius) (randomfloat bloom-radius 1000))
 (define (with-bloom rot)
@@ -401,9 +403,6 @@
 )
 
 (define (onMessage key value)
-  ;(if (equal? key "hit")
-  ;  (format #t "key: ~a, value: ~a\n" key value)
-  ;)
   (if (equal? key "changegun")
     (begin
       (format #t "changing gun to: ~a\n" value)
