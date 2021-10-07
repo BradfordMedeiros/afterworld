@@ -68,7 +68,7 @@
 )
 
 (define defaultParticleAttrs (list
-  (list "position" (list 0 -0.1 0))
+  (list "position" (list 0 0 -1))
   (list "physics" "disabled")
   (list "state" "disabled")
 ))
@@ -81,7 +81,7 @@
   )
 )
 
-(define reserved-emitter-chars (list "!" "?" "+"))
+(define reserved-emitter-chars (list "%" "!" "?" "+"))
 (define (reserved-emitter-name value) (member (substring value 0 1) reserved-emitter-chars))
 (define (template-emit-line line) 
   (define keyname (car line))
@@ -215,14 +215,34 @@
   )
 )
 
+
+(define usebloom #f)
+(define (randomfloat number resolution) (/ (* number (random resolution)) resolution))
+(define twopi (* 2 3.14159265359))
+(define bloom-radius 1)  ; this is the max spread at a distance of one unit along the z
+(define (random-angle) (randomfloat twopi 1000)) 
+(define (get-bloom-radius) (randomfloat bloom-radius 1000))
+(define (with-bloom rot)
+  (define angle (random-angle))
+  (define radius (get-bloom-radius))
+  (define xoffset (* radius (cos angle)))
+  (define yoffset (* radius (sin angle)))
+  (define localoffset (list xoffset yoffset -10))
+  (define deltarot (orientation-from-pos (list 0 0 0) localoffset))
+  (quatmult rot deltarot)
+)
+
 ; TODO -> Consider including translation/rotational sway
 ; probably just the delta(rot) added to the gun
 ; but then consider the ads is inaccurate, so I probably should introduce ADs adjustment for raycast centering 
 ; but maybe just visually make the model line up to the crosshair?
+
 (define raycastline #f)
 (define (fire-raycast)
   (define mainobjpos (gameobj-pos (get-parent)))
-  (define hitpoints (raycast mainobjpos (gameobj-rot (get-parent)) 500))   
+  (define rot (gameobj-rot (get-parent)))
+  (define shotangle (if (should-zoom) rot (with-bloom rot)))
+  (define hitpoints (raycast mainobjpos shotangle 500))   
   (format #t "hitpoints: ~a\n" hitpoints)
   (if debugmode
     (begin
@@ -371,10 +391,12 @@
   (if sway-rotation (sway-gun-rotation mouse-velocity zoomgun))
 )
 
+(define (should-zoom) (and is-holding-left is-ironsight))
+
 (define (onFrame)
   (if (and can-hold is-holding) (fire-gun-limited))
   ;(format #t "velocity is: ~a\n" velocity)
-  (if gunid (sway-gun (and is-holding-left is-ironsight)))
+  (if gunid (sway-gun (should-zoom)))
   (if reset-mouse-velocity (set! mouse-velocity (list 0 0 0)))
 )
 
