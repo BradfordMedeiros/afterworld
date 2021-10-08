@@ -434,4 +434,5 @@
   (if (equal? key 52) (onMessage "changegun" "machinegun"))
   (if (equal? key 53) (onMessage "changegun" "upistol"))
   (if (equal? key 54) (onMessage "changegun" "telefrag"))
+  (if (equal? key 55) (onMessage "changegun" "smartshooter"))
 )
