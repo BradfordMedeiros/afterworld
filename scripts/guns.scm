@@ -419,6 +419,7 @@
     (begin
       (format #t "changing gun to: ~a\n" value)
       (handleChangeGun value)
+      (sendnotify "alert" (string-append "changed gun to: " value))
     )
   )
   (if (equal? key "velocity")
@@ -432,4 +433,5 @@
   (if (equal? key 51) (onMessage "changegun" "nailgun"))
   (if (equal? key 52) (onMessage "changegun" "machinegun"))
   (if (equal? key 53) (onMessage "changegun" "upistol"))
+  (if (equal? key 54) (onMessage "changegun" "telefrag"))
 )
