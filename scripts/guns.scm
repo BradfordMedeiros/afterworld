@@ -100,7 +100,6 @@
 (define emitterid #f)
 (define hit-emitterid #f)
 (define projectile-emitterid #f)
-(define (get-hit-particle-id) hit-emitterid)
 
 (define (create-emitter name attrs oldemitterid)
   (format #t (string-append name " options: [~a]\n") attrs)
@@ -203,14 +202,13 @@
 
 (define (zfighting-pos pos normal) (move-relative pos normal 0.01))
 (define (sendhit hitpoint)
-  (define hitemitter (get-hit-particle-id))
   (define hitloc (cadr hitpoint))
   (define hitnormal (caddr hitpoint))
   (sendnotify "hit" (number->string (car hitpoint)))
   (format #t "hitpoint: ~a\n" hitpoint)
-  (if hitemitter
+  (if hit-emitterid
     (begin
-      (emit hitemitter (zfighting-pos hitloc hitnormal) hitnormal)
+      (emit hit-emitterid (zfighting-pos hitloc hitnormal) hitnormal)
       (if debugmode
         (debug-hitmarker hitloc)
       )
@@ -224,6 +222,7 @@
 (define twopi (* 2 3.14159265359))
 (define (random-angle) (randomfloat twopi 1000)) 
 (define (get-bloom-radius) (randomfloat bloom-radius 1000))
+
 (define (with-bloom rot)
   (define angle (random-angle))
   (define radius (get-bloom-radius))
@@ -264,13 +263,26 @@
 (define (recoil-finished) (> (- (time-seconds) recoilStart) recoilLength))
 (define (start-recoil) (set! recoilStart (time-seconds)))
 
+(define (addvecs vec1 vec2) (list (+ (car vec1) (car vec2)) (+ (cadr vec1) (cadr vec2)) (+ (caddr vec1) (caddr vec2))))
+
 (define (fire-gun)
+  (define objpos (gameobj-pos (lsobj-name parent-name)))
+  (define objrot (gameobj-rot (lsobj-name parent-name)))
   (if (not (equal? fire-animation #f))
     (gameobj-playanimation (gameobj-by-id gunid) fire-animation)
   )
   (if soundid (playclip "&weapon-sound"))
   (if emitterid (emit emitterid))
-  (if projectile-emitterid (emit projectile-emitterid (gameobj-pos (lsobj-name parent-name)) (gameobj-rot (lsobj-name parent-name))))
+  (if projectile-emitterid 
+    (emit projectile-emitterid 
+      (move-relative objpos objrot 3)
+      objrot
+      (addvecs 
+        (move-relative (list 0 0 0) (quatmult objrot (orientation-from-pos (list 0 0 0) (list 0 0.2 -1))) 25)
+        velocity
+      )
+    )
+  )
   (if is-raycast (fire-raycast))
   (start-recoil)
 )
