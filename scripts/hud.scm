@@ -44,7 +44,6 @@
   (define zvel (caddr vel))
   (define speedvel (sqrt (+ (* xvel xvel) (* yvel yvel) (* zvel zvel))))
   (set! speed speedvel)
-  (format #t "speed ~a\n" speedvel)
 )
 (define (onFrame)
   (render-alerts 400 messageBuffer)
