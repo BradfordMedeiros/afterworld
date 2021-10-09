@@ -1,5 +1,5 @@
 (define using-fpscam #t)
-(define (onCameraSystemChange defaultCam)
+(define (onCameraSystemChange cam defaultCam)
   (set! using-fpscam (not defaultCam))
 )
 
