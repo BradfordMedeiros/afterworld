@@ -26,18 +26,18 @@
 (define initial-gun-pos (list 0 0 0))
 (define initial-gun-rot (orientation-from-pos (list 0 0 0) (list 0 0 -1)))
 
+
 (define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
   (define gunpos (list xoffset yoffset zoffset))
+  (define gunattrs (list 
+    (list "mesh" modelpath)
+    (list "position" gunpos)
+    (list "scale" (list xscale yscale zscale))
+    (list "physics" "disabled")
+    (list "layer" "no_depth")
+  ))
   (if (not (equal? gunid #f)) (rm-obj gunid))
-  (let ((id (mk-obj-attr "weapon"       
-    (list 
-      (list "mesh" modelpath)
-      (list "position" gunpos)
-      (list "scale" (list xscale yscale zscale))
-      (list "physics" "disabled")
-      (list "layer" "no_depth")
-    )
-  )))
+  (let ((id (mk-obj-attr "weapon" gunattrs)))
     (set! gunid id)
     (set! initial-gun-pos gunpos)
     (set! initial-gun-rot 
@@ -124,6 +124,21 @@
   (set! projectile-emitterid (create-emitter "+projectile"    (emitterOptsToList projectileOptions)  projectile-emitterid))
 )
 
+(define scriptId #f)
+(define (change-script scriptpath)
+  (define parentId (gameobj-id (lsobj-name parent-name)))
+  (if scriptId (rm-obj scriptId))
+  (if (not (equal? scriptpath ""))
+    (begin
+      (let ((scriptObjId (mk-obj-attr "guns-script-holder" (list (list "script" scriptpath) (list "physics" "disabled")))))
+        (set! scriptId scriptObjId)
+        (make-parent scriptObjId parentId)
+      )
+    )
+  )
+)
+
+
 (define (parse-stringvec str) (map string->number (string-split str #\ )))
 (define (handleChangeGun gunname)
   (define query (string-append "
@@ -131,7 +146,7 @@
       modelpath, fire-animation, fire-sound, xoffset-pos, yoffset-pos, zoffset-pos, 
       xrot, yrot, zrot, xscale, yscale, zscale, firing-rate, hold, raycast, 
       ironsight, iron-xoffset-pos, iron-yoffset-pos, iron-zoffset-pos, particle, hit-particle,
-      recoil-length, recoil-angle, recoil, recoil-zoom, projectile, bloom
+      recoil-length, recoil-angle, recoil, recoil-zoom, projectile, bloom, script
     from guns where name = " gunname)) 
   (define gunstats (sql (sql-compile query)))
   (if (= (length gunstats) 0)
@@ -177,6 +192,7 @@
         (list-ref guninfo 20)
         (list-ref guninfo 25)
       )
+      (change-script (list-ref guninfo 27))
     )
   )
 )
