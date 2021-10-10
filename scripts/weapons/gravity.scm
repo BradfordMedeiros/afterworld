@@ -1,7 +1,5 @@
 
-(define (release-object)
-  (format #t "release object placeholder\n")
-)
+
 
 (define (id-from-hitpoints hitpoints)
   (if (< (length hitpoints) 1)
@@ -20,6 +18,30 @@
   )
 )
 
+(define heldobj #f)
+(define (release-object)
+  (format #t "release object placeholder\n")
+  (set! heldobj #f)
+)
+
+(define (update-obj-position)
+  (if heldobj
+    (begin
+      (format #t "updating obj position!\n")
+      (gameobj-setpos! heldobj (move-relative (gameobj-pos-world mainobj) (gameobj-rot-world mainobj) 3))
+    )
+  )
+)
+
+(define (onFrame)
+  (update-obj-position)
+)
+
+(define (set-hold-object obj)
+  (format #t "should hold: ~a\n" (gameobj-name obj))
+  (set! heldobj obj)
+)
+
 (define grab-length 20)
 (define (grab-object)
   (define hitpoints (raycast (gameobj-pos-world mainobj) (gameobj-rot-world mainobj) grab-length)) 
@@ -29,8 +51,11 @@
     (format #t "hitobj name: ~a\n" (gameobj-name hitobj))
     (format #t "did not hit an object\n")
   )
-  (if hitobj
-    (format #t "is dynamic: ~a\n" isdynamic)
+  (if (and isdynamic hitobj)
+    (begin
+      (format #t "is dynamic: ~a\n" isdynamic)
+      (set-hold-object hitobj)
+    )
   )
 ;  gameobj-attr
   
