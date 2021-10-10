@@ -26,7 +26,7 @@
 
 (define (onCollideEnter obj hitpoint normal) 
   (format #t "on collision!\n")
-  (reset-camera)
+  (rm-obj (gameobj-id mainobj))
 )
 
 (define (onFrame) 
@@ -34,9 +34,10 @@
   (draw-text "////////MISSLE MODE////////" 50 900 5)
 )
 
+(define cameraname (string-append ">smartcamera-" (number->string (random 10000000))))
 (define smartcam 
   (mk-obj-attr 
-    ">smartcamera" 
+    cameraname
     (list 
       (list "position" (list 0 0 10))
       (list "physics" "disabled")

@@ -10,7 +10,7 @@
     (begin
       (format #t "should teleport now!\n")
       (teleport)
-      ;(rm-obj mainobj)
+      (rm-obj (gameobj-id mainobj))
     )
   )
 )
