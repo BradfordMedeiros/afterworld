@@ -387,13 +387,20 @@
 
 (define max-mag-sway-x-rot 0.1)
 (define max-mag-sway-y-rot 0.1)
+(define forwardvec (orientation-from-pos (list 0 0 0) (list 0 0 -1)))
+
 (define (sway-gun-rotation relvelocity zoomgun)
   (define sway-amount-x (list-ref relvelocity 0))
   (define limited-sway-x (min max-mag-sway-x-rot (max sway-amount-x (* -1 max-mag-sway-x-rot))))
   (define sway-amount-y (list-ref relvelocity 1))
   (define limited-sway-y (min max-mag-sway-y-rot (max sway-amount-y (* -1 max-mag-sway-y-rot))))
   (define recoilAmount (cadr (lerp (list 0 0 0) (list 0 recoilPitchRadians 0) (calc-recoil-slerpamount))))
-  (define targetrot (setfrontdelta initial-gun-rot limited-sway-x (+ recoilAmount (* -1 limited-sway-y)) 0))  ; yaw, pitch, roll .  
+  (define targetrot 
+    (quatmult 
+      (setfrontdelta forwardvec limited-sway-x (+ recoilAmount (* -1 limited-sway-y)) 0) ; yaw, pitch, roll 
+      initial-gun-rot 
+    )  
+  )
   ;(format #t "sway x: ~a, sway y: ~a\n" limited-sway-x limited-sway-y)
   (gameobj-setrot! 
     (gameobj-by-id gunid) 
