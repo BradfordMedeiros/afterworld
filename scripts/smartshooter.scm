@@ -48,6 +48,6 @@
 (make-parent smartcam (gameobj-id mainobj))
 (set-camera smartcam 2)
 
-(define (reset-camera) (set-camera (gameobj-id (lsobj-name ">maincamera")) 2))
+(define (reset-camera) (set-camera (gameobj-id (lsobj-name ">maincamera"))))
 (define (beforeUnload) (reset-camera))
 
