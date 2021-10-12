@@ -43,7 +43,22 @@ ramp:physics_type:static
 >maincamera:physics_shape:shape_sphere
 >maincamera:child:hud,crosshair
 
-#enemy:mesh:../gameresources/build/characters/bloodtrooper.gltf
+enemy:mesh:../gameresources/build/characters/bloodtrooper.gltf
+#enemy:mesh:./res/models/box/box.obj
+enemy:script:../afterworld/scripts/enemy.scm
+enemy:position:0 -1 0
+enemy:physics:enabled
+enemy:physics_type:dynamic
+enemy:physics_angle:0.000000 0.000000 0.000000
+
+enemy:child:+enemy_particles
++enemy_particles:limit:5
++enemy_particles:physics:disabled
++enemy_particles:+mesh:../gameresources/build/weapons/grenade.gltf
++enemy_particles:+physics_shape:shape_sphere
++enemy_particles:+physics_type:dynamic
++enemy_particles:+texture:./res/textures/blacktop.jpg
++enemy_particles:+scale:1 0.1 1  # why doesnt this get applied? bug
 
 ########### GUN STUFF
 gun_logic:script:../afterworld/scripts/guns.scm
@@ -57,6 +72,7 @@ hud:script:../afterworld/scripts/hud.scm
 hud:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 hud:layer:ui
 hud:position:0 100 -70
+#hud:position:0 0 -70
 hud:physics:disabled
 hud:texture:../gameresources/textures/ui/crappyhud.png
 
