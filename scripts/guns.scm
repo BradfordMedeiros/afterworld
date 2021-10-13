@@ -452,7 +452,6 @@
 
 (define (onKeyChar key)
   (if (equal? key 49) (onMessage "changegun" "pistol"))
-  (if (equal? key 50) (onMessage "changegun" "leftypistol"))
   (if (equal? key 51) (onMessage "changegun" "nailgun"))
   (if (equal? key 52) (onMessage "changegun" "machinegun"))
   (if (equal? key 53) (onMessage "changegun" "upistol"))

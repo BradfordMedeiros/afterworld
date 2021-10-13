@@ -50,15 +50,24 @@ enemy:position:0 -1 0
 enemy:physics:enabled
 enemy:physics_type:dynamic
 enemy:physics_angle:0.000000 0.000000 0.000000
+#enemy:physics_shape:shape_exact
 
 enemy:child:+enemy_particles
 +enemy_particles:limit:5
++enemy_particles:state:disabled
 +enemy_particles:physics:disabled
 +enemy_particles:+mesh:../gameresources/build/weapons/grenade.gltf
 +enemy_particles:+physics_shape:shape_sphere
 +enemy_particles:+physics_type:dynamic
 +enemy_particles:+texture:./res/textures/blacktop.jpg
 +enemy_particles:+scale:1 0.1 1  # why doesnt this get applied? bug
+
+
+enemy_detection:mesh:./res/models/box/box.obj
+enemy_detection:position:15 -5 0
+enemy_detection:scale:5 5 5
+enemy_detection:physics_collision:nocollide
+enemy_detection:physics_type:static
 
 ########### GUN STUFF
 gun_logic:script:../afterworld/scripts/guns.scm
