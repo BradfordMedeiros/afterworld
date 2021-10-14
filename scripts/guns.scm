@@ -82,7 +82,7 @@
   )
 )
 
-(define reserved-emitter-chars (list "%" "!" "?" "+"))
+(define reserved-emitter-chars (list "%" "!" "?"))
 (define (reserved-emitter-name value) (member (substring value 0 1) reserved-emitter-chars))
 (define (template-emit-line line) 
   (define keyname (car line))
