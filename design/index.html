@@ -3,19 +3,29 @@
 	<h1>Ghost in The Machine: AfterWorld</h1>
 	<div id="content">
 		<h2 class="first">Table of Contents</h2>
-		<ul>
-			<li>Overview</li>
-			<li>Story</li>
-			<li>Gameplay Structure</li>
-			<li>Weapons</li>
+		<ul id="toc">
+			<a href="#overview">Overview</a>
+			<a href="#tone">Concept and Tone</a>
+			<a href="#story">Story</a>
+			<a href="#gameplay">Gameplay Structure</a>
+			<a href="#weapons">Weapons</a>
 		</ul>
 	
-		<h2>Overview</h2>
+		<h2 id="overview">Overview</h2>
 		<p>
 		Ghost in The Machine: Afterworld is the introduction into the Afterworld universe and is a short first person game that emphasises interesting world design and progression, lightweight puzzle elements, and some platforming.  The main character interacts from within his house, and discovers new extensions of his house based upon interacting with his computer.  The computer is his guide into the the AfterWorld, sending him messages from the ether and allowing him to interact with the house, revealing new abstract unfamiliar passages within the house.  The game is more of a lightweight action puzzle game (action puzzle as in Portal) with interesting mechanics to discover new parts of the world in the spirit of Myst, but more intuitive, and easy, requiring less patience.   There will also be a fair bit of (basic) first person platforming utilizing basic jumping skills and a grinding mechanic introduced in the late game. 
 		</p>
 
-		<h2>Story</h2>
+
+		<h2 id="tone">Concept and Tone</h2>
+		<p>
+		Concept Art tone for AfterWorld.  This should establish the overall tone of the AfterWorld sections, but the artwork for the interior house sections and computer bits not depicted here. 
+		<br />
+		<br />
+		<img src="./img/concept.png">
+		</p>
+
+		<h2 id="story">Story</h2>
 		<p>
 		The story is an intro to the Afterworld, but focuses on a single method of introduction to the AfterWorld: through cyberspace.  The AfterWorld is conceptually the place of dreams, death, deep psychadelic tripping, the deep parts of the internet, mysterious myths from folklore, where mysterious beasts and secret conspiratorial groups lay, and so on. 
 
@@ -29,12 +39,12 @@
 
 		</p>
 
-		<h2>Gameplay Structure</h2>
+		<h2 id="gameplay">Gameplay Structure</h2>
 		<p>
 		The design of the game uses a hub structure laid out from a single family style house.  You start in the bedroom of the house.  Through progress of the game, the house gradually opens, and reveals new locations within the house.  For example, at the start of the game, you are simply contained within the bedroom.  You then use your computer to open up a secret passage within the closet into the Afterworld, which basically means that the level there becomes much more abstract, dark, and trippy.  After completing the mission, you then use your computer terminal via some new item or email, that allows you bedroom door to open.  You make your way through the rest of the house, and similarly you find new areas that extend into the afterworld.  Eventually you should get outside the house, and realize that the house is already in the AfterWorld is some weird etheral plane or something cool like that.  Passages to the overworld have a cool tunnel effect that separates the worlds.  Should be immediately obvious if in regular world vs afterword. 
 		</p>
 
-		<h2>Weapons / Items</h2>
+		<h2 id="weapons">Weapons / Items</h2>
 		<p>
 		There are no weapons in the game, since there is no actual real combat. 
 		<h3>Computer</h3>
@@ -78,10 +88,15 @@
 		<p>
 		Combat and weapons would be fun. However, coding enemy behavior and AI, pathfinding, will increase project scope beyond what I want.  If this project were successful, perhaps revisit and extend into a second act with combat. 
 		</p>
+
+
 	</div>
 	<style>
 		* {
 			font-family:  courier;
+		}
+		a {
+			color:  white;
 		}
 		body {
 			background:  #1a1a1a;
@@ -90,6 +105,7 @@
 		}
 		.first {
 			margin-top:  0;
+			margin-bottom: 0;
 		}
 		 h3 + p{
 			margin-top:  0;
@@ -99,7 +115,7 @@
 		}
 		h1 {
 			background: black;
-    	color: grey;
+    	color: #776e4a;
     	margin: 0;
     	font-family:  monospace;
     	display:  flex;
@@ -108,13 +124,24 @@
 		h2 {
     	background: #2a2a2a;
     	padding: 18px;
-    	margin-top: 48px;
-    	border-bottom: 1px solid #d9c37270;
+    	margin-top: 4px;
     	font-family:  monospace;
-
 		}
 		h3 {
 			margin-left: 32px;
 		}
+		#toc {
+    	display: flex;
+    	justify-content: space-evenly;
+    	word-spacing: normal;
+    	padding: 32px;
+    	border: 1px solid darkslategrey;
+    	background: black;
+    	margin: 0px;
+    	box-shadow: 0px 0px 10px black inset;
+		}
+
+
+	
 	</style>
 </html>
