@@ -9,6 +9,7 @@
 			<a href="#story">Story</a>
 			<a href="#gameplay">Gameplay Structure</a>
 			<a href="#weapons">Weapons</a>
+			<a href="#blocks">Gameplay Blocks</a>
 		</ul>
 	
 		<h2 id="overview">Overview</h2>
@@ -23,6 +24,12 @@
 		<br />
 		<br />
 		<img src="./img/concept.png">
+		</p>
+
+		<h3>Graphics and Style</h3>
+		<p>
+		Generally models should use a lower poly style, but not low polygon.  Prefer interesting painted on details in the style of build engine than high fidelity assets. 
+		Procedural effects such as generative art, particle effects, and post processing may be added later to attempt to give a more distinct visual style.  Objects in the AfterWorld should either be either basic, rigid and clean, or have hand painted textures for anything more details giving it a painterly style.  In the house, a cleaner style should be achieved.  The house should be set during nighttime and give the effect of being lit by glowing screens from computers, tvs, a spare light here and there, like what many people have in their houses during night when watching tv. 
 		</p>
 
 		<h2 id="story">Story</h2>
@@ -42,6 +49,8 @@
 		<h2 id="gameplay">Gameplay Structure</h2>
 		<p>
 		The design of the game uses a hub structure laid out from a single family style house.  You start in the bedroom of the house.  Through progress of the game, the house gradually opens, and reveals new locations within the house.  For example, at the start of the game, you are simply contained within the bedroom.  You then use your computer to open up a secret passage within the closet into the Afterworld, which basically means that the level there becomes much more abstract, dark, and trippy.  After completing the mission, you then use your computer terminal via some new item or email, that allows you bedroom door to open.  You make your way through the rest of the house, and similarly you find new areas that extend into the afterworld.  Eventually you should get outside the house, and realize that the house is already in the AfterWorld is some weird etheral plane or something cool like that.  Passages to the overworld have a cool tunnel effect that separates the worlds.  Should be immediately obvious if in regular world vs afterword. 
+
+		The AfterWorld sections are a series of obstacle course style levels.  If you die here, you respawn at the beggining of each of the chambers, walking from some respawn-chamber that is in each room.  You should exit from the portal.  
 		</p>
 
 		<h2 id="weapons">Weapons / Items</h2>
@@ -89,6 +98,24 @@
 		Combat and weapons would be fun. However, coding enemy behavior and AI, pathfinding, will increase project scope beyond what I want.  If this project were successful, perhaps revisit and extend into a second act with combat. 
 		</p>
 
+		<h2 id="blocks">Gameplay Blocks</h2>
+		<p>
+			The below are examples of obstacles or building blocks in the game that may be used in the game. 
+			<h3>Electric Floor</h3>
+			<p>
+			The floor is <s>lava</s> electric.  Touching the floor leads to instant death. 
+			</p>
+
+			<h3>Transformable Scenery</h3>
+			<p>
+			Doors may be switched to open or closed by the environment or player.  Some elements may move automatically on a timer. 
+			</p>
+
+			<h3>Bouncepad</h3>
+			<p>
+			Bounce pad applied force normal to the surface to the player, eg allowing the player to reach new heights, or fall to their death on electric floor. 
+			</p>
+		</p>
 
 	</div>
 	<style>
