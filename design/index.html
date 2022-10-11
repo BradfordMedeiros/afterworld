@@ -1,6 +1,6 @@
 <html>
 
-	<h1>Ascension: AfterWorld</h1>
+	<h1>Ghost in The Machine: AfterWorld</h1>
 	<div id="content">
 		<h2 class="first">Table of Contents</h2>
 		<ul>
@@ -11,12 +11,73 @@
 		</ul>
 	
 		<h2>Overview</h2>
+		<p>
+		Ghost in The Machine: Afterworld is the introduction into the Afterworld universe and is a short first person game that emphasises interesting world design and progression, lightweight puzzle elements, and some platforming.  The main character interacts from within his house, and discovers new extensions of his house based upon interacting with his computer.  The computer is his guide into the the AfterWorld, sending him messages from the ether and allowing him to interact with the house, revealing new abstract unfamiliar passages within the house.  The game is more of a lightweight action puzzle game (action puzzle as in Portal) with interesting mechanics to discover new parts of the world in the spirit of Myst, but more intuitive, and easy, requiring less patience.   There will also be a fair bit of (basic) first person platforming utilizing basic jumping skills and a grinding mechanic introduced in the late game. 
+		</p>
 
 		<h2>Story</h2>
+		<p>
+		The story is an intro to the Afterworld, but focuses on a single method of introduction to the AfterWorld: through cyberspace.  The AfterWorld is conceptually the place of dreams, death, deep psychadelic tripping, the deep parts of the internet, mysterious myths from folklore, where mysterious beasts and secret conspiratorial groups lay, and so on. 
+
+		Character is a silent, first person protagonist.  Other characters are laid out in text emails, maybe other forms that are digital via computer. 
+		Main protagonist does reply in text over the emails, so the character will have characterization.  Character should be a savy internet user, and the interactions in emails should feel like finding deep secrets of the internet.  Some parody could be had within the context of websites the character is able to browse.  During the journey, character thinks inteacting with weird but regular conspiracy args, but eventually realizes that is interacting with something weirder. 
 		
+		<h3>Unreliable Narrator / Guide</h3>
+		<p>
+		The game utilizes and unreliable guide which may often give bad advice or incorrect outlines about what is going on in the story.  Early on, a collect a thon element element will be told to you by communications in email, and by having a number "40" on the protagonists door.  However, by exploring the computer, the switching app will already be available, allowing you to bypass the requirement.   This allows you to explore the second level out of order.  However, in order to advance, some item will be required from the first level.   No door actually will require notes, but the unreliable guide will unlock doors for you if you do collect the notes.  This will lead to a faulty bad ending if you end up thinking the game is a collectathon. 
+		</p>
+
+		</p>
+
 		<h2>Gameplay Structure</h2>
-		
-		<h2>Weapons</h2>
+		<p>
+		The design of the game uses a hub structure laid out from a single family style house.  You start in the bedroom of the house.  Through progress of the game, the house gradually opens, and reveals new locations within the house.  For example, at the start of the game, you are simply contained within the bedroom.  You then use your computer to open up a secret passage within the closet into the Afterworld, which basically means that the level there becomes much more abstract, dark, and trippy.  After completing the mission, you then use your computer terminal via some new item or email, that allows you bedroom door to open.  You make your way through the rest of the house, and similarly you find new areas that extend into the afterworld.  Eventually you should get outside the house, and realize that the house is already in the AfterWorld is some weird etheral plane or something cool like that.  Passages to the overworld have a cool tunnel effect that separates the worlds.  Should be immediately obvious if in regular world vs afterword. 
+		</p>
+
+		<h2>Weapons / Items</h2>
+		<p>
+		There are no weapons in the game, since there is no actual real combat. 
+		<h3>Computer</h3>
+		<p>
+		The computer has programs on it that can do things, like open doors within the house, modify lights to make areas visible, disable barriers, etc. 
+		</p>
+		<h3>Email</h3>
+		<p>
+		The email system sends messages to the player.  This allows development of story bits, as well as allowing the user to get prompts to go on missions. 
+		</p>
+		<h3>Global Setting changer, clock? </h3>
+		<p>
+		Set to certain times for certain effects?  This would be very cool, but also probably takes the most work.  In general, the point here is to set, say, a system clock, or something like that, to be able to get certain effects in the level. 
+		Maybe can pause certain things in the level at a certain time, which allows easy navigation or something like that. 
+		</p>
+		<h3>Tablet</h3>
+		<p>
+		Eventually the player gets a tablet.  This is the exact same functionality as a the computer but is portable.  This opens up new gameplay elements that requires the player to have the computer with them.  For example, opening up a series of gates (or any toggle action) would be impossible if the player needs to go back to the main computer. 
+		</p>
+		<h3>Map</h3>
+		<p>
+		A crude automap style map exists that allow the player to see threats within the area.  May display live threats or points of interests in the areas. 
+		</p>
+		<h3>Switch Toggle</h3>
+		<p>
+		Simple element to toggle a switch.  Network of switches which follow a complete the circuit method for some puzzles to solve.  Doubles as a wire, that can act as a wall.  Has collider, so player can climb on them.  Player may feel like they are "cheating" by climbing on the wires.   Player first just has the ability to toggle switch, then  gets the ability to place nodes later on.  These should be limited by ammo, although you should be able to recollect them (so limited placement, but never can place them wrong and run out of ammo)
+		</p>
+		<h3>Grinding</h3>
+		<p>
+		Player eventually gets the ability to grind on the wires (same types as the switches). 
+		</p>
+		<h3>Flashlight</h3>
+		<p>
+		Flashlight on the tablet.  Allows see dark areas, nothing special but can be useful. 
+		</p>
+		<h3>Camera</h3>
+		<p>
+		Can take photos of the environment.  Hidden functionality of QR code scanner to open special things? 
+		</p>
+		<h3>Note</h3>
+		<p>
+		Combat and weapons would be fun. However, coding enemy behavior and AI, pathfinding, will increase project scope beyond what I want.  If this project were successful, perhaps revisit and extend into a second act with combat. 
+		</p>
 	</div>
 	<style>
 		* {
@@ -29,6 +90,12 @@
 		}
 		.first {
 			margin-top:  0;
+		}
+		 h3 + p{
+			margin-top:  0;
+		}
+		p {
+			margin:  32px;
 		}
 		h1 {
 			background: black;
@@ -45,6 +112,9 @@
     	border-bottom: 1px solid #d9c37270;
     	font-family:  monospace;
 
+		}
+		h3 {
+			margin-left: 32px;
 		}
 	</style>
 </html>
