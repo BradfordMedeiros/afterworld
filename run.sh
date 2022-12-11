@@ -5,7 +5,7 @@ SCRIPT_FOLDER=$BASE_DIRECTORY/scripts
 
 BINARY="./build/modengine"
 COMMAND_ARGS="\
-  -r \"$BASE_DIRECTORY/scenes/menu.rawscene\" \
+  -x native/main \
   $@"
 
 if [ "$1" == "gdb" ]; then
