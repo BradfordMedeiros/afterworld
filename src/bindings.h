@@ -1,10 +1,10 @@
-
-#ifndef MOD_USERBINDING
-#define MOD_USERBINDING
+#ifndef MOD_AFTERWORLD_BINDING
+#define MOD_AFTERWORLD_BINDING
 
 #include <iostream>
 #include <vector>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
+#include "./movement.h"
+#include "./menu.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

@@ -81,7 +81,7 @@ void drawMenuText(){
   }
 }
 
-CScriptBinding sampleBindingPlugin(CustomApiBindings& api, const char* name){
+CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     loadDefaultScenes();
@@ -124,7 +124,9 @@ CScriptBinding sampleBindingPlugin(CustomApiBindings& api, const char* name){
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
-  bindings.push_back(sampleBindingPlugin(api, "native/main"));
+  bindings.push_back(afterworldMainBinding(api, "native/main"));
+  bindings.push_back(movementBinding(api, "native/movement"));
+  bindings.push_back(menuBinding(api, "native/menu"));
   return bindings;
 } 
 
