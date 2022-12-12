@@ -6,6 +6,7 @@ SCRIPT_FOLDER=$BASE_DIRECTORY/scripts
 BINARY="./build/modengine"
 COMMAND_ARGS="\
   -x native/main \
+  -a sqldir=../afterworld/data/ \
   $@"
 
 if [ "$1" == "gdb" ]; then
