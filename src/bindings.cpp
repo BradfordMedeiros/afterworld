@@ -88,7 +88,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     goToMenu();
     return NULL;
   };
-  binding.onFrame = [](int32_t id) -> void {
+  binding.onFrame = [](int32_t id, void* data) -> void {
     if (!gameState.loadedLevel.has_value()){
       drawMenuText();
     }

@@ -49,7 +49,6 @@ void scrollTexture(MenuState& menuState, objid id){
 }
 
 
-MenuState* menu = NULL;
 CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -63,18 +62,14 @@ CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   	if (args.find("silent") == args.end()){
   		gameapi -> playClip("&music", sceneId);
   	}
-  	menu = state;
     return state;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     MenuState* value = (MenuState*)data;
     delete value;
-    menu = NULL;
   };
-  binding.onFrame = [](int32_t id) -> void {
-  	if (menu == NULL){
-  		return;
-  	}
+  binding.onFrame = [](int32_t id, void* data) -> void {
+  	MenuState* menu = static_cast<MenuState*>(data);
   	scrollTexture(*menu, id);
   };
 
