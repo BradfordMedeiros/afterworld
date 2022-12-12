@@ -104,7 +104,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     goToMenu(*gameState);
     auto args = gameapi -> getArgs();
     if (args.find("level") != args.end()){
-      goToLevel(*gameState, levelByShortcutName(args.at("level")).value());
+      auto scene = levelByShortcutName(args.at("level"));
+      if (scene.has_value()){
+        goToLevel(*gameState, scene.value());
+      }else{
+        std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
+      }
+      
     }
     return gameState;
   };

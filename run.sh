@@ -7,6 +7,7 @@ BINARY="./build/modengine"
 COMMAND_ARGS="\
   -x native/main \
   -a sqldir=../afterworld/data/ \
+  --font ./res/fonts/Walby-Regular.ttf \
   $@"
 
 if [ "$1" == "gdb" ]; then
