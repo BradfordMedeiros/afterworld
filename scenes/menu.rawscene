@@ -8,8 +8,9 @@
 menu:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 menu:layer:ui
 menu:position:0 0 -1
+menu:rotation:0 0 -1 0
 menu:texture:../gameresources/textures/evilpattern.png
-menu:tint:0.3 0.3 1 1
+menu:tint:0.4 0.6 1 1
 #menu:script:../afterworld/scenes/menu.scm
 menu:shader:../afterworld/shaders/menu/fragment.glsl
 menu:script:native/menu
