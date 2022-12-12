@@ -5,10 +5,14 @@ CustomApiBindings* gameapi = NULL;
 std::vector<std::string> defaultScenes = { "./res/scenes/editor/console.rawscene" };
 std::vector<std::string> managedTags = { "game-level" };
 
+struct Level {
+  std::string scene;
+  std::string name;
+};
 struct GameState {
   int selectedLevel;
   std::optional<std::string> loadedLevel;
-  std::vector<std::string> levels;
+  std::vector<Level> levels;
 };
 
 void unloadAllManagedScenes(){
@@ -74,12 +78,12 @@ void handleSelectLevel(GameState& gameState){
   if (gameState.loadedLevel.has_value() || gameState.selectedLevel >= gameState.levels.size()){
     return;
   }
-  goToLevel(gameState, gameState.levels.at(gameState.selectedLevel));
+  goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
 }
 
 void drawMenuText(GameState& gameState){
   for (int i = 0; i < gameState.levels.size(); i++){
-    auto level = gameState.levels.at(i);
+    auto level = gameState.levels.at(i).name;
     auto levelText = (i == gameState.selectedLevel) ? (std::string("> ") + level) : level;
     gameapi -> drawText(levelText, -0.9, 0.2 + (i * -0.1f), 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
   }
@@ -91,13 +95,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = new GameState;
     gameState -> selectedLevel = 0;
     gameState -> loadedLevel = std::nullopt;
-    auto query = gameapi -> compileSqlQuery("select filepath from levels");
+    auto query = gameapi -> compileSqlQuery("select filepath, name from levels");
     bool validSql = false;
     auto result = gameapi -> executeSqlQuery(query, &validSql);
     modassert(validSql, "error executing sql query");
-    std::vector<std::string> levels = {};
+    std::vector<Level> levels = {};
     for (auto &row : result){
-      levels.push_back(row.at(0));
+      levels.push_back(Level {
+        .scene = row.at(0),
+        .name = row.at(1),
+      });
     }
     gameState -> levels = levels;
     loadDefaultScenes();
