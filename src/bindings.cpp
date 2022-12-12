@@ -32,6 +32,22 @@ void goToLevel(GameState& gameState, std::string sceneName){
     gameapi ->  setActiveCamera(optCameraId.value(), -1);
   }
 }
+std::optional<std::string> levelByShortcutName(std::string shortcut){
+  auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels");
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+
+  for (auto row : result){
+    auto filepath = row.at(0);
+    auto shortcutResult = row.at(1);
+    if (shortcutResult == shortcut){
+      return filepath;
+    }
+  }
+
+  return std::nullopt;
+}
 void goToMenu(GameState& gameState){
   if (gameState.loadedLevel.has_value()){
     gameState.loadedLevel = std::nullopt;
@@ -86,6 +102,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> levels = levels;
     loadDefaultScenes();
     goToMenu(*gameState);
+    auto args = gameapi -> getArgs();
+    if (args.find("level") != args.end()){
+      goToLevel(*gameState, levelByShortcutName(args.at("level")).value());
+    }
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

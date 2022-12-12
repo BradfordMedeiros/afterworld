@@ -1,4 +1,4 @@
-filepath:STRING,name:STRING
+filepath:STRING,shortcut:STRING
 ../afterworld/scenes/shooter2.rawscene,fps
 ./res/scenes/features/physics/collisiontypes.p.rawscene,collision
 ./res/scenes/features/lighting/tint.p.rawscene,tint
