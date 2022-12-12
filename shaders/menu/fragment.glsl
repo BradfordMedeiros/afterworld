@@ -182,11 +182,17 @@ vec4 calcCookTorrence(
 ////////////////////
 
 bool enableMouseRipple = true;
+vec2 wiggleAmount = vec2(0, -1);
+vec2 calcRipple(vec2 rippleCoord, float rippleMagnitude){
+  float dist = distance(vec2(FragPos.x, FragPos.y), rippleCoord);
+  dist = clamp(dist, 0.0, rippleMagnitude);
+  vec2 direction = normalize(vec2(rippleCoord.x, rippleCoord.y) - vec2(FragPos.x, FragPos.y));
+  float xWeight = direction.x * dist;
+  float yWeight = direction.y * dist;
+  return vec2(xWeight, yWeight);
+}
 
 void main(){
-   // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
-    // real close => 0 , real far => 1
-//    shadowCoord = shadowCoord * 0.5 + 0.5;
     if (hasCubemapTexture){
       FragColor = tint * texture(cubemapTexture, FragPos);
       return;
@@ -197,16 +203,21 @@ void main(){
   
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
 
-    if (enableMouseRipple){
-      vec2 rippleCoord = vec2(mouseCoordVal.x, mouseCoordVal.y);
-      float dist = distance(vec2(FragPos.x, FragPos.y), rippleCoord);
-      dist = clamp(dist, 0.0, 0.005);
-      vec2 direction = normalize(vec2(rippleCoord.x, rippleCoord.y) - vec2(FragPos.x, FragPos.y));
-      float xWeight = direction.x * dist;
-      float yWeight = direction.y * dist;
-      adjustedTexCoord.x += xWeight;
-      adjustedTexCoord.y += yWeight;
+    float movementX = -0.8 + sin(time * 0.1) * wiggleAmount.x;
+    float movementY = -0.8 + sin(time * 0.1) * wiggleAmount.y;
+
+    vec2 totalRipple = vec2(0.0, 0.0);
+    for (int i = 0; i < 4; i++){
+      vec2 rippleCoord = vec2(movementX + i * 0.4, movementY  + i * 0.4);
+      vec2 rippleAmount = calcRipple(rippleCoord, 0.01);
+      totalRipple += rippleAmount;
     }
+    if (enableMouseRipple){
+      totalRipple += calcRipple(vec2(mouseCoordVal.x, mouseCoordVal.y), 0.0005);
+    }
+
+    adjustedTexCoord += totalRipple;
+
 
     vec4 diffuseColor = hasDiffuseTexture ? texture(maintexture, adjustedTexCoord) : vec4(1, 1, 1, 1);
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
