@@ -2,6 +2,13 @@
 
 extern CustomApiBindings* gameapi;
 
+bool debugAssertions = false;
+void assertForNow(bool valid, const char* message){
+  if (debugAssertions){
+    modassert(valid, message);
+  }
+}
+
 struct MovementParams {
 
 };
@@ -16,6 +23,7 @@ struct Movement {
   glm::vec2 lookVelocity;
   float xRot; // up and down
   float yRot; // left and right
+  std::optional<objid> groundedObjId;
 
   float currentSpeed;
 };
@@ -44,10 +52,18 @@ void populateMovementParams(Movement& movement){
   //}
 }
 
-void jump(){
+void jump(Movement& movement, objid id){
   std::cout << "jump placeholder" << std::endl;
+  float jumpHeight = 10.f;
+  glm::vec3 impulse(0, jumpHeight, 0);
+  if (movement.groundedObjId.has_value()){
+    gameapi -> applyImpulse(id, impulse);
+    assertForNow(false, "need to add play clip on jump"); //     (if jump-obj-name (playclip jump-obj-name))  
+  }
 }
-void dash(){
+
+
+void dash(Movement& movement){
   std::cout << "dash placeholder" << std::endl;
 }
 void moveXZ(objid id, glm::vec2 direction){
@@ -127,6 +143,11 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   movement.yRot = 0.f;
 }
 
+void land(){
+  //(define (land) (if land-obj-name (playclip land-obj-name)))
+  assertForNow(false, "land not yet implemented");
+}
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -139,6 +160,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
 
     movement -> currentSpeed = 0.f;
+    movement -> xRot = 0.f;
+    movement -> yRot = 0.f;
+    movement -> groundedObjId = std::nullopt;
 
     populateMovementParams(*movement);
     return movement;
@@ -184,11 +208,11 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      jump();
+      jump(*movement, id);
       return;
     }
     if (key == 340 /* left shift */ && action == 1){
-      dash();
+      dash(*movement);
       return;
     }
   };
@@ -198,7 +222,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lookVelocity.x = xPos;
     movement -> lookVelocity.y = yPos;
   };
-
   binding.onFrame = [](int32_t id, void* data) -> void {
     Movement* movement = static_cast<Movement*>(data);
     float moveSpeed = getMoveSpeed();
@@ -222,6 +245,30 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     look(*movement, id, gameapi -> timeElapsed(), false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
     updateVelocity();
   };
+  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    if (id != obj1 && id != obj2){
+      return;
+    }
+    Movement* movement = static_cast<Movement*>(data);
+    float yComponent = ((id == obj2) ? normal : oppositeNormal).y;
+    objid otherObjectId = id == obj1 ? obj2 : obj1;
+    if (yComponent <= 0){
+      if (!movement -> groundedObjId.has_value()){
+        land();
+      }
+      movement -> groundedObjId = otherObjectId;
+    }
+
+  };
+  binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
+    Movement* movement = static_cast<Movement*>(data);
+    auto otherObjectId = (id == obj1) ? obj2 : obj1;
+    if (movement -> groundedObjId.has_value() && movement -> groundedObjId.value() == otherObjectId){
+      movement -> groundedObjId = std::nullopt;
+    }
+  };
+
+
 
   return binding;
 }
