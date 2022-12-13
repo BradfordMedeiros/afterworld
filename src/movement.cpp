@@ -103,6 +103,17 @@ float PI = 3.141592;
 float TWO_PI = 2 * PI;
 
 float clampPi(float value){
+  /*(define (clamp-pi value)
+  (if (>= value 0)
+    (let* ((numtimes (floor (/ value 2pi))) (remain (- value (* 2pi numtimes))))
+      (if (> remain pi) (- remain 2pi) remain)
+    )
+    (let* ((numtimes (floor (/ value (* -1 2pi)))) (remain (+ value (* 2pi numtimes))))
+      (if (< remain (* -1 pi)) (+ remain 2pi) remain)
+    )
+  )
+)*/
+  return value;
   if (value > 0){
     int numTimes = glm::floor(value / TWO_PI);
     float remain =  value - (TWO_PI * numTimes);
@@ -119,8 +130,8 @@ float maxAngleUp = -1.8f;
 float maxAngleDown = 1.1f;
 
 void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float ironsight_turn){
-  float xsensitivity = 20.f;
-  float ysensitivity = 20.f;
+  float xsensitivity = 1.f;
+  float ysensitivity = 1.f;
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
   float raw_deltax = movement.lookVelocity.x * xsensitivity * elapsedTime;
@@ -129,18 +140,18 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   float deltax = ironsight ? (raw_deltax * ironsight_turn) : raw_deltax;
   float deltay = ironsight ? (raw_deltay * ironsight_turn) : raw_deltay;
 
-  float targetXRot = clampPi(movement.xRot * deltax);
-  float targetYRot = clampPi(movement.yRot * deltay);
+  float targetXRot = clampPi(movement.xRot + deltax);
+  float targetYRot = clampPi(movement.yRot + deltay);
 
   movement.xRot = targetXRot;
   movement.yRot = glm::min(maxAngleDown, glm::max(maxAngleUp, targetYRot));
 
-  auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
+  std::cout << "rot x = " << movement.xRot << ", " << " y = " << movement.yRot << std::endl;
+
+  auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 0.1f);
   gameapi -> setGameObjectRot(id, rotation);
 
   movement.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.xRot = 0.f;
-  movement.yRot = 0.f;
 }
 
 void land(){
@@ -258,7 +269,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
       movement -> groundedObjId = otherObjectId;
     }
-
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     Movement* movement = static_cast<Movement*>(data);
