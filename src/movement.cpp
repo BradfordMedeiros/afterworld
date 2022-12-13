@@ -9,11 +9,22 @@ void assertForNow(bool valid, const char* message){
   }
 }
 
-struct MovementParams {
+// speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits
+// "select xsensitivity, ysensitivity from settings
 
+struct MovementParams {
+  float moveSpeed;
+  float moveSpeedAir;
+  float jumpHeight;
+};
+
+struct ControlParams {
+  float xsensitivity;
+  float ysensitivity;
 };
 
 struct Movement {
+  MovementParams moveParams;
   bool goForward;
   bool goBackward;
   bool goLeft;
@@ -25,7 +36,7 @@ struct Movement {
   float yRot; // left and right
   std::optional<objid> groundedObjId;
 
-  float currentSpeed;
+  glm::vec3 lastPosition;
 };
 
 std::string movementToStr(Movement& movement){
@@ -38,24 +49,9 @@ std::string movementToStr(Movement& movement){
 }
 
 
-void populateMovementParams(Movement& movement){
-  //auto query = gameapi -> compileSqlQuery("select filepath, name from levels");
-  //bool validSql = false;
-  //auto result = gameapi -> executeSqlQuery(query, &validSql);
-  //modassert(validSql, "error executing sql query");
-  //std::vector<Level> levels = {};
-  //for (auto &row : result){
-  //  levels.push_back(Level {
-  //    .scene = row.at(0),
-  //    .name = row.at(1),
-  //  });
-  //}
-}
-
 void jump(Movement& movement, objid id){
   std::cout << "jump placeholder" << std::endl;
-  float jumpHeight = 10.f;
-  glm::vec3 impulse(0, jumpHeight, 0);
+  glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
   if (movement.groundedObjId.has_value()){
     gameapi -> applyImpulse(id, impulse);
     assertForNow(false, "need to add play clip on jump"); //     (if jump-obj-name (playclip jump-obj-name))  
@@ -66,37 +62,28 @@ void jump(Movement& movement, objid id){
 void dash(Movement& movement){
   std::cout << "dash placeholder" << std::endl;
 }
+
 void moveXZ(objid id, glm::vec2 direction){
-  std::cout << "move placeholder" << std::endl;
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulseRel(id, time * glm::vec3(direction.x, 0.f, direction.y));
 }
 
-float getMoveSpeed(){
-  //(define (get-move-speed)
-  //(define basespeed (if is-grounded movement-speed movement-speed-air))
-  //(if ironsight-mode (* ironsight-speed basespeed) basespeed)
-  //)
-  return 20.f;
+float ironsightSpeedMultiplier = 0.4f;
+float getMoveSpeed(Movement& movement, bool ironsight){
+  auto speed = movement.groundedObjId.has_value() ? movement.moveParams.moveSpeed : movement.moveParams.moveSpeedAir;
+  if (ironsight){
+    speed = speed * ironsightSpeedMultiplier;
+  }
+  return speed;
 }
 
-void updateVelocity(){
-  /*(define (update-velocity elapsedTime)
-  (define currpos (gameobj-pos mainobj))
-  (set! velocity (calc-velocity elapsedTime currpos lastpos))
-  (set! lastpos currpos)
-  ; todo, sendnotify should be able to send any type
-  ;(format #t "velocity is: ~a\n" velocity)
-  (sendnotify "velocity" (
-    string-join 
-    (list 
-      (number->string (car velocity))
-      (number->string (cadr velocity))
-      (number->string (caddr velocity))
-    ) 
-    " "
-  ))
-  )*/
+void updateVelocity(Movement& movement, objid id, float elapsedTime){
+  auto currPos = gameapi -> getGameObjectPos(id, true);
+  glm::vec3 displacement = (currPos - movement.lastPosition) / elapsedTime;
+  auto speed = glm::length(displacement);
+  movement.lastPosition = currPos;
+  //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
+  gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
 }
 
 float PI = 3.141592;
@@ -159,6 +146,15 @@ void land(){
   assertForNow(false, "land not yet implemented");
 }
 
+
+float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
+  auto value = sqlResult.at(0).at(index);
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(value, number);
+  modassert(isFloat, "invalid float number");
+  return number;
+}
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -169,13 +165,23 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> goRight = false;
 
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
-
-    movement -> currentSpeed = 0.f;
+    movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
     movement -> xRot = 0.f;
     movement -> yRot = 0.f;
     movement -> groundedObjId = std::nullopt;
 
-    populateMovementParams(*movement);
+    ///Update config ////////////////
+    auto query = gameapi -> compileSqlQuery(
+      "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits"
+    );
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(query, &validSql);
+    modassert(validSql, "error executing sql query");
+    movement -> moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
+    movement -> moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
+    movement -> moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
+  
+    /////
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -235,7 +241,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     Movement* movement = static_cast<Movement*>(data);
-    float moveSpeed = getMoveSpeed();
+    float moveSpeed = getMoveSpeed(*movement, false);
     float horzRelVelocity = 0.8f;
     if (movement -> goForward){
       auto moveVec = moveSpeed * glm::vec2(0.f, -1.f);
@@ -253,8 +259,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       auto moveVec = moveSpeed * glm::vec2(horzRelVelocity * 1.f, 0.f);
       moveXZ(id, moveVec);
     }
-    look(*movement, id, gameapi -> timeElapsed(), false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
-    updateVelocity();
+    float elapsedTime = gameapi -> timeElapsed();
+    look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
+    updateVelocity(*movement, id, elapsedTime);
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     if (id != obj1 && id != obj2){
