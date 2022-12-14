@@ -161,6 +161,30 @@ float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, 
   return number;
 }
 
+void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result){
+  float physics_mass = floatFromFirstSqlResult(result, 8);
+  float physics_restitution = floatFromFirstSqlResult(result, 4);
+  float physics_friction = floatFromFirstSqlResult(result, 5);
+  auto physics_gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
+  GameobjAttributes attr {
+    .stringAttributes = {
+    },
+    .numAttributes = {
+      { "physics_mass", physics_mass },
+      { "physics_restitution", physics_restitution },
+      { "physics_friction", physics_friction },
+    },
+    .vecAttr = { 
+      .vec3 = {
+        { "physics_gravity", physics_gravity },
+      }, 
+      .vec4 = {} 
+    },
+  };
+  gameapi -> setGameObjectAttr(id, attr);
+}
+
+
 void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>& result){
   movement.moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
   movement.moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
@@ -218,6 +242,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     auto result = gameapi -> executeSqlQuery(query, &validSql);
     modassert(validSql, "error executing sql query");
     updateTraitConfig(*movement, result);
+    updateObjectProperties(id, result);
     updateSoundConfig(*movement, id, SoundConfig {
       .jumpClip = result.at(0).at(9),
       .landClip = result.at(0).at(10),
