@@ -1,2 +1,2 @@
-xsensitivity,ysensitivity
-2,2
+xsensitivity:STRING,ysensitivity:STRING
+0.1,0.1

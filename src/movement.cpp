@@ -2,20 +2,12 @@
 
 extern CustomApiBindings* gameapi;
 
-bool debugAssertions = false;
-void assertForNow(bool valid, const char* message){
-  if (debugAssertions){
-    modassert(valid, message);
-  }
-}
-
-// speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits
-// "select xsensitivity, ysensitivity from settings
-
 struct MovementParams {
   float moveSpeed;
   float moveSpeedAir;
   float jumpHeight;
+  float maxAngleUp;
+  float maxAngleDown;
 };
 
 struct ControlParams {
@@ -94,19 +86,7 @@ void updateVelocity(Movement& movement, objid id, float elapsedTime){
 
 float PI = 3.141592;
 float TWO_PI = 2 * PI;
-
-float clampPi(float value){
-  /*(define (clamp-pi value)
-  (if (>= value 0)
-    (let* ((numtimes (floor (/ value 2pi))) (remain (- value (* 2pi numtimes))))
-      (if (> remain pi) (- remain 2pi) remain)
-    )
-    (let* ((numtimes (floor (/ value (* -1 2pi)))) (remain (+ value (* 2pi numtimes))))
-      (if (< remain (* -1 pi)) (+ remain 2pi) remain)
-    )
-  )
-)*/
-  return value;
+float clampPi(float value){ 
   if (value > 0){
     int numTimes = glm::floor(value / TWO_PI);
     float remain =  value - (TWO_PI * numTimes);
@@ -117,10 +97,6 @@ float clampPi(float value){
   float remain = value + (TWO_PI * numTimes);
   return (remain < (-1 * PI)) ? (remain + TWO_PI) : remain;
 }
-
-
-float maxAngleUp = -1.8f;
-float maxAngleDown = 1.1f;
 
 void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float ironsight_turn){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
@@ -135,18 +111,17 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   float targetYRot = clampPi(movement.yRot + deltay);
 
   movement.xRot = targetXRot;
-  movement.yRot = glm::min(maxAngleDown, glm::max(maxAngleUp, targetYRot));
+  movement.yRot = glm::min(movement.moveParams.maxAngleDown, glm::max(movement.moveParams.maxAngleUp, targetYRot));
 
   std::cout << "rot x = " << movement.xRot << ", " << " y = " << movement.yRot << std::endl;
 
-  auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 0.1f);
+  auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
   gameapi -> setGameObjectRot(id, rotation);
 
   movement.lookVelocity = glm::vec2(0.f, 0.f);
 }
 
 void land(Movement& movement, objid id){
-  assertForNow(false, "land not yet implemented");
   if (movement.landSoundObjId.has_value()){
     gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id));
   }
@@ -189,6 +164,8 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
   movement.moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
   movement.moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
+  movement.moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
+  movement.moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
 }
 
 objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
