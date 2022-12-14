@@ -89,24 +89,31 @@ void drawMenuText(GameState& gameState){
   }
 }
 
+void loadConfig(GameState& gameState){
+  auto query = gameapi -> compileSqlQuery("select filepath, name from levels");
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  std::vector<Level> levels = {};
+  for (auto &row : result){
+    levels.push_back(Level {
+      .scene = row.at(0),
+      .name = row.at(1),
+    });
+  }
+  gameState.levels = levels;
+
+  int maxLevelIndex = levels.size() - 1;
+  gameState.selectedLevel = glm::min(gameState.selectedLevel, maxLevelIndex);
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
     gameState -> selectedLevel = 0;
     gameState -> loadedLevel = std::nullopt;
-    auto query = gameapi -> compileSqlQuery("select filepath, name from levels");
-    bool validSql = false;
-    auto result = gameapi -> executeSqlQuery(query, &validSql);
-    modassert(validSql, "error executing sql query");
-    std::vector<Level> levels = {};
-    for (auto &row : result){
-      levels.push_back(Level {
-        .scene = row.at(0),
-        .name = row.at(1),
-      });
-    }
-    gameState -> levels = levels;
+    loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);
     auto args = gameapi -> getArgs();
@@ -154,6 +161,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
       goToMenu(*gameState);
+    }
+    if (key == "reload-config:levels"){
+      loadConfig(*gameState);
     }
   };
 

@@ -193,6 +193,10 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
   movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
 }
 
+void reloadConfig(Movement& movement, std::string name){
+  modassert(false, "reload config not yet implemented");
+}
+
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -338,7 +342,14 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-
+  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+    if (key == "reload-config:movement"){
+      Movement* movement = static_cast<Movement*>(data);
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "reload-config:movement reload value invalid");
+      reloadConfig(*movement, *strValue);
+    }
+  };
 
   return binding;
 }
