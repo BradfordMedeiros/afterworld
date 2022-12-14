@@ -31,6 +31,9 @@ struct Movement {
   bool goRight;
 
 
+  std::optional<objid> jumpSoundObjId;
+  std::optional<objid> landSoundObjId;
+
   glm::vec2 lookVelocity;
   float xRot; // up and down
   float yRot; // left and right
@@ -50,11 +53,12 @@ std::string movementToStr(Movement& movement){
 
 
 void jump(Movement& movement, objid id){
-  std::cout << "jump placeholder" << std::endl;
   glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
   if (movement.groundedObjId.has_value()){
     gameapi -> applyImpulse(id, impulse);
-    assertForNow(false, "need to add play clip on jump"); //     (if jump-obj-name (playclip jump-obj-name))  
+    if (movement.jumpSoundObjId.has_value()){
+      gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id));
+    }
   }
 }
 
@@ -141,9 +145,11 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   movement.lookVelocity = glm::vec2(0.f, 0.f);
 }
 
-void land(){
-  //(define (land) (if land-obj-name (playclip land-obj-name)))
+void land(Movement& movement, objid id){
   assertForNow(false, "land not yet implemented");
+  if (movement.landSoundObjId.has_value()){
+    gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id));
+  }
 }
 
 
@@ -155,6 +161,38 @@ float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, 
   return number;
 }
 
+void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>& result){
+  movement.moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
+  movement.moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
+  movement.moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
+}
+
+objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
+  modassert(soundObjName.at(0) == '&', "sound obj must start with &");
+  auto sceneId = gameapi -> listSceneId(mainobjId);
+  GameobjAttributes attr {
+    .stringAttributes = {
+      { "clip", clip },
+    },
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto soundObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
+  modassert(soundObjId.has_value(), "sound already exists in scene: " + std::to_string(sceneId));
+  gameapi -> makeParent(soundObjId.value(), mainobjId);
+  return soundObjId.value();
+}
+struct SoundConfig {
+  std::string jumpClip;
+  std::string landClip;
+};
+void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
+  movement.jumpSoundObjId = createSound(id, "&code-movement-jump", config.jumpClip);
+  movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
+}
+
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -164,24 +202,27 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> goLeft = false;
     movement -> goRight = false;
 
+    movement -> jumpSoundObjId = std::nullopt;
+    movement -> landSoundObjId = std::nullopt;
+
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
     movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
     movement -> xRot = 0.f;
     movement -> yRot = 0.f;
     movement -> groundedObjId = std::nullopt;
 
-    ///Update config ////////////////
     auto query = gameapi -> compileSqlQuery(
       "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits"
     );
     bool validSql = false;
     auto result = gameapi -> executeSqlQuery(query, &validSql);
     modassert(validSql, "error executing sql query");
-    movement -> moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
-    movement -> moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
-    movement -> moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
-  
-    /////
+    updateTraitConfig(*movement, result);
+    updateSoundConfig(*movement, id, SoundConfig {
+      .jumpClip = result.at(0).at(9),
+      .landClip = result.at(0).at(10),
+    });
+
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -272,7 +313,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     objid otherObjectId = id == obj1 ? obj2 : obj1;
     if (yComponent <= 0){
       if (!movement -> groundedObjId.has_value()){
-        land();
+        land(*movement, id);
       }
       movement -> groundedObjId = otherObjectId;
     }
