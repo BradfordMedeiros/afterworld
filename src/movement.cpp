@@ -25,6 +25,8 @@ struct ControlParams {
 
 struct Movement {
   MovementParams moveParams;
+  ControlParams controlParams;
+
   bool goForward;
   bool goBackward;
   bool goLeft;
@@ -121,12 +123,10 @@ float maxAngleUp = -1.8f;
 float maxAngleDown = 1.1f;
 
 void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float ironsight_turn){
-  float xsensitivity = 1.f;
-  float ysensitivity = 1.f;
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
-  float raw_deltax = movement.lookVelocity.x * xsensitivity * elapsedTime;
-  float raw_deltay = -1.f * movement.lookVelocity.y * ysensitivity * elapsedTime; 
+  float raw_deltax = movement.lookVelocity.x * movement.controlParams.xsensitivity * elapsedTime;
+  float raw_deltay = -1.f * movement.lookVelocity.y * movement.controlParams.ysensitivity * elapsedTime; 
 
   float deltax = ironsight ? (raw_deltax * ironsight_turn) : raw_deltax;
   float deltay = ironsight ? (raw_deltay * ironsight_turn) : raw_deltay;
@@ -235,18 +235,28 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> yRot = 0.f;
     movement -> groundedObjId = std::nullopt;
 
-    auto query = gameapi -> compileSqlQuery(
+    auto traitsQuery = gameapi -> compileSqlQuery(
       "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits"
     );
-    bool validSql = false;
-    auto result = gameapi -> executeSqlQuery(query, &validSql);
-    modassert(validSql, "error executing sql query");
-    updateTraitConfig(*movement, result);
-    updateObjectProperties(id, result);
+    bool validTraitSql = false;
+    auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
+    modassert(validTraitSql, "error executing sql query");
+    updateTraitConfig(*movement, traitsResult);
+    updateObjectProperties(id, traitsResult);
     updateSoundConfig(*movement, id, SoundConfig {
-      .jumpClip = result.at(0).at(9),
-      .landClip = result.at(0).at(10),
+      .jumpClip = traitsResult.at(0).at(9),
+      .landClip = traitsResult.at(0).at(10),
     });
+
+
+    auto settingQuery = gameapi -> compileSqlQuery(
+      "select xsensitivity, ysensitivity from settings"
+    );
+    bool validSettingsSql = false;
+    auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
+    modassert(validSettingsSql, "error executing sql query");
+    movement -> controlParams.xsensitivity = floatFromFirstSqlResult(settingsResult, 0);
+    movement -> controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 
     return movement;
   };
