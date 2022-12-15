@@ -14,7 +14,8 @@ std::vector<glm::vec3> cycleColors = {
   glm::vec3(0.1f, 0.1f, 0.1f)
 };
 
-float cycleLengthSecs = 20.f;
+float totalDaynightLengthSecs = 20.f * 60.f;  // 20 minutes
+float cycleLengthSecs = totalDaynightLengthSecs / cycleColors.size();
 float unitCycleLength = cycleLengthSecs / cycleColors.size();
 
 int cycleIndex(float currtime){
