@@ -1,5 +1,10 @@
 #include "./movement.h"
 
+
+// For parity in behavior of all scripts need to restore 
+//    ironsight mode
+//    dash ability
+
 extern CustomApiBindings* gameapi;
 
 struct MovementParams {
@@ -193,8 +198,29 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
   movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
 }
 
-void reloadConfig(Movement& movement, std::string name){
-  modassert(false, "reload config not yet implemented");
+void reloadMovementConfig(Movement& movement, objid id, std::string name){
+  auto traitsQuery = gameapi -> compileSqlQuery(
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits where profile = " + name
+  );
+  bool validTraitSql = false;
+  auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
+  modassert(validTraitSql, "error executing sql query");
+  updateTraitConfig(movement, traitsResult);
+  updateObjectProperties(id, traitsResult);
+  updateSoundConfig(movement, id, SoundConfig {
+    .jumpClip = traitsResult.at(0).at(9),
+    .landClip = traitsResult.at(0).at(10),
+  });
+}
+void reloadSettingsConfig(Movement& movement, std::string name){
+  auto settingQuery = gameapi -> compileSqlQuery(
+    "select xsensitivity, ysensitivity from settings where profile = " + name
+  );
+  bool validSettingsSql = false;
+  auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
+  modassert(validSettingsSql, "error executing sql query");
+  movement.controlParams.xsensitivity = floatFromFirstSqlResult(settingsResult, 0);
+  movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
 
@@ -216,28 +242,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> yRot = 0.f;
     movement -> groundedObjId = std::nullopt;
 
-    auto traitsQuery = gameapi -> compileSqlQuery(
-      "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits"
-    );
-    bool validTraitSql = false;
-    auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
-    modassert(validTraitSql, "error executing sql query");
-    updateTraitConfig(*movement, traitsResult);
-    updateObjectProperties(id, traitsResult);
-    updateSoundConfig(*movement, id, SoundConfig {
-      .jumpClip = traitsResult.at(0).at(9),
-      .landClip = traitsResult.at(0).at(10),
-    });
-
-
-    auto settingQuery = gameapi -> compileSqlQuery(
-      "select xsensitivity, ysensitivity from settings"
-    );
-    bool validSettingsSql = false;
-    auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
-    modassert(validSettingsSql, "error executing sql query");
-    movement -> controlParams.xsensitivity = floatFromFirstSqlResult(settingsResult, 0);
-    movement -> controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
+    reloadMovementConfig(*movement, id, "default");
+    reloadSettingsConfig(*movement, "default");
 
     return movement;
   };
@@ -347,7 +353,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       Movement* movement = static_cast<Movement*>(data);
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "reload-config:movement reload value invalid");
-      reloadConfig(*movement, *strValue);
+      reloadMovementConfig(*movement, id, *strValue);
+    }else if (key == "reload-config:settings"){
+      Movement* movement = static_cast<Movement*>(data);
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "reload-config:settings reload value invalid");
+      reloadSettingsConfig(*movement, *strValue);      
     }
   };
 
