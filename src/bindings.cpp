@@ -177,7 +177,8 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(afterworldMainBinding(api, "native/main"));
   bindings.push_back(movementBinding(api, "native/movement"));
   bindings.push_back(menuBinding(api, "native/menu"));
-  bindings.push_back(menuBinding(api, "native/weapon"));
+  bindings.push_back(weaponBinding(api, "native/weapon"));
+  bindings.push_back(daynightBinding(api, "native/daynight"));
   return bindings;
 } 
 

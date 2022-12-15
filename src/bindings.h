@@ -5,6 +5,8 @@
 #include <vector>
 #include "./movement.h"
 #include "./menu.h"
+#include "./daynight.h"
+#include "./weapon.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
