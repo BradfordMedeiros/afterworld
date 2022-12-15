@@ -1,2 +1,2 @@
-xsensitivity:STRING,ysensitivity:STRING
-0.1,0.1
+profile:STRING,xsensitivity:STRING,ysensitivity:STRING
+default,0.1,0.1

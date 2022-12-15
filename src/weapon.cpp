@@ -19,15 +19,32 @@ struct Weapons {
 };
 
 
+void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+  GameobjAttributes attr {
+    .stringAttributes = {
+      { "mesh", modelpath },
+      { "layer", "no_depth" },
+    },
+    .numAttributes = {
+    },
+    .vecAttr = { 
+      .vec3 = {
+        { "position", gunpos },
+        { "scale", scale },
+      }, 
+      .vec4 = { 
+        //{ "rotation", rot },
+      } 
+    },
+  };
+
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto gunId = gameapi -> makeObjectAttr(sceneId, "weapon", attr, submodelAttributes);
+  modassert(gunId.has_value(), "gun does not have a value");
+
+
+}
 /*(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
-  (define gunpos (list xoffset yoffset zoffset))
-  (define gunattrs (list 
-    (list "mesh" modelpath)
-    (list "position" gunpos)
-    (list "scale" (list xscale yscale zscale))
-    (list "physics" "disabled")
-    (list "layer" "no_depth")
-  ))
   (if (not (equal? gunid #f)) (rm-obj gunid))
   (let ((id (mk-obj-attr "weapon" gunattrs)))
     (set! gunid id)
@@ -49,7 +66,7 @@ struct Weapons {
 )*/
 
 
-void changeGun(Weapons& weapons, std::string gun){
+void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto gunQuery = gameapi -> compileSqlQuery(
    std::string("select modelpath, fire-animation, fire-sound, xoffset-pos, ") +
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
@@ -69,28 +86,19 @@ void changeGun(Weapons& weapons, std::string gun){
   weapons.weaponParams.firingRate = floatFromFirstSqlResult(result, 12);
   weapons.weaponParams.recoilLength = floatFromFirstSqlResult(result, 21);
   weapons.weaponParams.recoilPitchRadians = floatFromFirstSqlResult(result, 22);
-
-
   weapons.weaponParams.canHold = boolFromFirstSqlResult(result, 13);
   weapons.weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
   weapons.weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
 
-
+  auto modelpath = strFromFirstSqlResult(result, 0);
+  auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
+  auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
+  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
+  auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
+  spawnGun(weapons, sceneId, modelpath, gunpos, rot4, scale);
   /*
-    (format #t "warning: no gun named: ~a\n" gunname)
     (let* ((guninfo (car gunstats)) (bloomVec (parse-stringvec (list-ref guninfo 26))))
-      (change-gun 
-        (list-ref guninfo 0) 
-        (string->number (list-ref guninfo 3)) 
-        (string->number (list-ref guninfo 4))
-        (string->number (list-ref guninfo 5))
-        (list-ref guninfo 6)
-        (list-ref guninfo 7)
-        (list-ref guninfo 8)
-        (string->number (list-ref guninfo 9))
-        (string->number (list-ref guninfo 10))
-        (string->number (list-ref guninfo 11))
-      )
+
       (set-animation     (list-ref guninfo 1))
 
       ; Firing Parameters
@@ -140,7 +148,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
 
-    changeGun(*weapons, "pistol");
+    changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
 
   	return weapons;
   };
@@ -172,7 +180,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     if (key == "change-gun"){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "change-gun value invalid");
-      changeGun(*weapons, *strValue);
+      changeGun(*weapons, gameapi -> listSceneId(id), *strValue);
     }
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
