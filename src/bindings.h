@@ -7,6 +7,8 @@
 #include "./menu.h"
 #include "./daynight.h"
 #include "./weapon.h"
+#include "./tags.h"
+#include "./dialog.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
