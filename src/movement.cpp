@@ -118,8 +118,6 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   movement.xRot = targetXRot;
   movement.yRot = glm::min(movement.moveParams.maxAngleDown, glm::max(movement.moveParams.maxAngleUp, targetYRot));
 
-  std::cout << "rot x = " << movement.xRot << ", " << " y = " << movement.yRot << std::endl;
-
   auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
   gameapi -> setGameObjectRot(id, rotation);
 
@@ -132,14 +130,6 @@ void land(Movement& movement, objid id){
   }
 }
 
-
-float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
-  auto value = sqlResult.at(0).at(index);
-  float number = 0.f;
-  bool isFloat = maybeParseFloat(value, number);
-  modassert(isFloat, "invalid float number");
-  return number;
-}
 
 void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result){
   float physics_mass = floatFromFirstSqlResult(result, 8);
@@ -325,6 +315,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     float elapsedTime = gameapi -> timeElapsed();
     look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
     updateVelocity(*movement, id, elapsedTime);
+
+    //std::cout << movementToStr(*movement) << std::endl;
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     if (id != obj1 && id != obj2){
