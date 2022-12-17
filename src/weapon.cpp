@@ -16,10 +16,18 @@ struct Weapons {
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
   WeaponParams weaponParams;
+
+  std::optional<objid> gunId;
 };
 
 
+std::string parentName = ">maincamera";
 void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+  if (weapons.gunId.has_value()){
+    gameapi -> removeObjectById(weapons.gunId.value());
+    weapons.gunId = std::nullopt;
+  }
+
   GameobjAttributes attr {
     .stringAttributes = {
       { "mesh", modelpath },
@@ -33,7 +41,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 
         { "scale", scale },
       }, 
       .vec4 = { 
-        //{ "rotation", rot },
+        { "rotation", rot },
       } 
     },
   };
@@ -41,27 +49,19 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, "weapon", attr, submodelAttributes);
   modassert(gunId.has_value(), "gun does not have a value");
-
+  weapons.gunId = gunId;
+  auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
+  modassert(parent.has_value(), parentName + " does not exist in scene so cannot create gun");
+  gameapi -> makeParent(gunId.value(), parent.value());
 
 }
+
 /*(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
-  (if (not (equal? gunid #f)) (rm-obj gunid))
   (let ((id (mk-obj-attr "weapon" gunattrs)))
-    (set! gunid id)
     (set! initial-gun-pos gunpos)
-    (set! initial-gun-rot 
-      (orientation-from-pos 
-        (list 0 0 0) 
-        (list 
-          (string->number xrot) 
-          (string->number yrot)
-          (string->number zrot)
-        )
-      )
-    )
+    (set! initial-gun-rot)
     (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
     (gameobj-setrot! (gameobj-by-id id) initial-gun-rot) ; mk-obj-attr has funky format so this for now
-    (make-parent gunid (gameobj-id (get-parent)))
   )
 )*/
 
@@ -93,7 +93,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto modelpath = strFromFirstSqlResult(result, 0);
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
   auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
-  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
+  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
   spawnGun(weapons, sceneId, modelpath, gunpos, rot4, scale);
   /*
@@ -147,6 +147,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
+    weapons -> gunId = std::nullopt;
 
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
 
