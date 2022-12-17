@@ -14,7 +14,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.key = 48,  // 0
 		.action = 0,
 		.keyToPublish = "change-gun",
-		.valueToPublish = "",
+		.valueToPublish = "none",
 	},
 	HotkeyToMessage {
 		.key = 49,  // 1

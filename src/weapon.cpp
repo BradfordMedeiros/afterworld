@@ -25,6 +25,35 @@ struct Weapons {
   CurrentGun currentGun;
 };
 
+void saveGunTransform(Weapons& weapons){
+  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
+
+  if (weapons.currentGun.gunId.has_value()){
+    auto gunId = weapons.currentGun.gunId.value();
+    auto gun = weapons.currentGun.name;
+    auto attr = gameapi -> getGameObjectAttr(gunId);
+    auto position = attr.vecAttr.vec3.at("position");  
+    auto scale = attr.vecAttr.vec3.at("scale");
+    auto rotation = attr.vecAttr.vec4.at("rotation");
+
+    std::cout << "save gun, name = " << weapons.currentGun.name << ",  pos = " << print(position) << ", scale = " << print(scale) << ", rotation = " << print(rotation) << std::endl;
+
+    auto updateQuery = gameapi -> compileSqlQuery(
+      std::string("update guns set ") +
+        "xoffset-pos = " + serializeFloat(position.x) + ", " +
+        "yoffset-pos = " + serializeFloat(position.y) + ", " +
+        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
+        "xrot = " + serializeFloat(rotation.x) + ", " +
+        "yrot = " + serializeFloat(rotation.y) + ", " +
+        "zrot = " + serializeFloat(rotation.z) + 
+        " where name = " + gun
+    );
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+    modassert(validSql, "error executing sql query");
+  }
+}
+
 
 std::string parentName = ">maincamera";
 void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
@@ -62,44 +91,6 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string mod
   gameapi -> makeParent(gunId.value(), parent.value());
 
 }
-
-void saveGunTransform(Weapons& weapons){
-  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
-
-  if (weapons.currentGun.gunId.has_value()){
-    auto gunId = weapons.currentGun.gunId.value();
-    auto gun = weapons.currentGun.name;
-    auto attr = gameapi -> getGameObjectAttr(gunId);
-    auto position = attr.vecAttr.vec3.at("position");  
-    auto scale = attr.vecAttr.vec3.at("scale");
-    auto rotation = attr.vecAttr.vec4.at("rotation");
-
-    std::cout << "save gun, name = " << weapons.currentGun.name << ",  pos = " << print(position) << ", scale = " << print(scale) << ", rotation = " << print(rotation) << std::endl;
-
-    auto updateQuery = gameapi -> compileSqlQuery(
-      std::string("update guns set ") +
-        "xoffset-pos = " + serializeFloat(position.x) + ", " +
-        "yoffset-pos = " + serializeFloat(position.y) + ", " +
-        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
-        "xrot = " + serializeFloat(rotation.x) + ", " +
-        "yrot = " + serializeFloat(rotation.y) + ", " +
-        "zrot = " + serializeFloat(rotation.z) + 
-        " where name = " + gun
-    );
-    bool validSql = false;
-    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-    modassert(validSql, "error executing sql query");
-  }
-}
-/*(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
-  (let ((id (mk-obj-attr "weapon" gunattrs)))
-    (set! initial-gun-pos gunpos)
-    (set! initial-gun-rot)
-    (format #t "the gun id is: ~a, modelpath: ~a\n" id modelpath)
-    (gameobj-setrot! (gameobj-by-id id) initial-gun-rot) ; mk-obj-attr has funky format so this for now
-  )
-)*/
-
 
 void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto gunQuery = gameapi -> compileSqlQuery(
