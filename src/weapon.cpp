@@ -15,6 +15,7 @@ struct WeaponParams {
 struct CurrentGun {
   std::string name;
   std::optional<objid> gunId;
+  std::optional<objid> soundId;
 };
 
 struct Weapons {
@@ -56,39 +57,49 @@ void saveGunTransform(Weapons& weapons){
 
 
 std::string parentName = ">maincamera";
-void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
-    gameapi -> removeObjectById(weapons.currentGun.gunId.value());
     weapons.currentGun.name = "";
+
+    gameapi -> removeObjectById(weapons.currentGun.gunId.value());
     weapons.currentGun.gunId = std::nullopt;
+
+    if (weapons.currentGun.soundId.has_value()){
+      gameapi -> removeObjectById(weapons.currentGun.soundId.value());
+      weapons.currentGun.soundId = std::nullopt;
+    }
   }
 
   GameobjAttributes attr {
-    .stringAttributes = {
-      { "mesh", modelpath },
-      { "layer", "no_depth" },
-    },
-    .numAttributes = {
-    },
-    .vecAttr = { 
-      .vec3 = {
-        { "position", gunpos },
-        { "scale", scale },
-      }, 
-      .vec4 = { 
-        { "rotation", rot },
-      } 
-    },
+    .stringAttributes = { { "mesh", modelpath }, { "layer", "no_depth" }},
+    .numAttributes = {},
+    .vecAttr = {  .vec3 = {{ "position", gunpos }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto gunId = gameapi -> makeObjectAttr(sceneId, "weapon", attr, submodelAttributes);
+  auto gunId = gameapi -> makeObjectAttr(sceneId, "code-weapon", attr, submodelAttributes);
   modassert(gunId.has_value(), "gun does not have a value");
   weapons.currentGun.gunId = gunId;
+
+  GameobjAttributes soundAttr {
+    .stringAttributes = { { "clip", firesound }},
+    .numAttributes = {},
+    .vecAttr = {  .vec3 = {},  .vec4 = {} },
+  };
+
+  if (firesound != ""){
+    auto soundId = gameapi -> makeObjectAttr(sceneId, "&code-weaponsound", soundAttr, submodelAttributes);
+    weapons.currentGun.soundId = soundId;  
+  }
+
+
   weapons.currentGun.name = name;
   auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
   modassert(parent.has_value(), parentName + " does not exist in scene so cannot create gun");
   gameapi -> makeParent(gunId.value(), parent.value());
+  if (weapons.currentGun.soundId.has_value()){
+    gameapi -> makeParent(weapons.currentGun.soundId.value(), parent.value());
+  }
 
 }
 
@@ -116,41 +127,13 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   weapons.weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
   weapons.weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
 
+  auto soundpath = strFromFirstSqlResult(result, 2);
   auto modelpath = strFromFirstSqlResult(result, 0);
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
   auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
-  spawnGun(weapons, sceneId, gun, modelpath, gunpos, rot4, scale);
-  /*
-    (let* ((guninfo (car gunstats)) (bloomVec (parse-stringvec (list-ref guninfo 26))))
-
-      (set-animation     (list-ref guninfo 1))
-
-      ; Firing Parameters
-
-      (set! ironsight-offset (list 
-        (string->number (list-ref guninfo 16))
-        (string->number (list-ref guninfo 17))
-        (string->number (list-ref guninfo 18))
-      ))
-      (set! recoilTranslate (parse-stringvec (list-ref guninfo 23)))
-      (set! recoilZoomTranslate (parse-stringvec (list-ref guninfo 24)))
-      (set! bloom-radius (list-ref bloomVec 0))
-
-      (format #t "traits: firing-params - rate: ~a, can-hold: ~a, raycast: ~a, ironsight: ~a, ironsight-offset: ~a\n" firing-rate can-hold is-raycast is-ironsight ironsight-offset)
-      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-      (set! last-shooting-time initFiringTime)
-      (change-sound (list-ref guninfo 2))
-      (change-emitter 
-        (list-ref guninfo 19)
-        (list-ref guninfo 20)
-        (list-ref guninfo 25)
-      )
-      (change-script (list-ref guninfo 27))
- 
-  )*/
+  spawnGun(weapons, sceneId, gun, soundpath, modelpath, gunpos, rot4, scale);
 }
 
 std::string weaponsToString(Weapons& weapons){
@@ -160,8 +143,55 @@ std::string weaponsToString(Weapons& weapons){
   return str;
 }
 
-void tryFireGun(Weapons& weapons){
+
+bool canFireGunNow(Weapons& weapons){
+  return true;
+}
+void tryFireGun(Weapons& weapons, objid sceneId){
   std::cout << "try fire gun" << std::endl;
+  if (!canFireGunNow(weapons)){
+    return;
+  }
+
+  if (weapons.currentGun.soundId.has_value()){
+    gameapi -> playClip("&code-weaponsound", sceneId);
+  }
+  
+
+  /*
+  (define elapsedMilliseconds (* 1000 (time-seconds)))
+  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
+  (define lessThanFiringRate (> timeSinceLastShot firing-rate))
+  (if lessThanFiringRate 
+    (begin
+      (fire-gun)
+      (set! last-shooting-time elapsedMilliseconds)
+    )
+  )
+  (format #f "fire gun limited placeholder\n")*/
+
+  /*(define (fire-gun)
+  (define objpos (gameobj-pos (lsobj-name parent-name)))
+  (define objrot (gameobj-rot (lsobj-name parent-name)))
+  (if (not (equal? fire-animation #f))
+    (gameobj-playanimation (gameobj-by-id gunid) fire-animation)
+  )
+  (if soundid (playclip "&weapon-sound"))
+  (if emitterid (emit emitterid))
+  (if projectile-emitterid 
+    (emit projectile-emitterid 
+      (move-relative objpos objrot 3)
+      objrot
+      (addvecs 
+        (move-relative (list 0 0 0) (quatmult objrot (orientation-from-pos (list 0 0 0) (list 0 0.2 -1))) 25)
+        velocity
+      )
+    )
+  )
+  (if is-raycast (fire-raycast))
+  (start-recoil)
+  )*/
+
 }
 
 bool debugAssert = false;
@@ -176,6 +206,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> currentGun = CurrentGun {
       .name = "",
       .gunId = std::nullopt,
+      .soundId = std::nullopt,
     };
 
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
@@ -186,12 +217,12 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     Weapons* weapons = static_cast<Weapons*>(data);
     delete weapons;
   };
-  binding.onMouseCallback = [](objid scriptId, void* data, int button, int action, int mods) -> void {
+  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     Weapons* weapons = static_cast<Weapons*>(data);
     if (button == 0){
       if (action == 0){
         weapons -> isHoldingLeftMouse = false;
-        tryFireGun(*weapons);
+        tryFireGun(*weapons, gameapi -> listSceneId(id));
       }else if (action == 1){
         weapons -> isHoldingLeftMouse = true;
       }
