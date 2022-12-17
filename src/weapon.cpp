@@ -9,13 +9,14 @@ struct WeaponParams {
   bool canHold;
   bool isIronsight;
   bool isRaycast;
-
 };
 
 struct CurrentGun {
   std::string name;
   std::optional<objid> gunId;
   std::optional<objid> soundId;
+
+  float lastShootingTime;
 };
 
 struct Weapons {
@@ -127,6 +128,9 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   weapons.weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
   weapons.weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
 
+  weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
+
+
   auto soundpath = strFromFirstSqlResult(result, 2);
   auto modelpath = strFromFirstSqlResult(result, 0);
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
@@ -144,18 +148,23 @@ std::string weaponsToString(Weapons& weapons){
 }
 
 
-bool canFireGunNow(Weapons& weapons){
-  return true;
+bool canFireGunNow(Weapons& weapons, float elapsedMilliseconds){
+  auto timeSinceLastShot = elapsedMilliseconds - weapons.currentGun.lastShootingTime;
+  bool lessThanFiringRate = timeSinceLastShot >= (0.001f * weapons.weaponParams.firingRate);
+  return lessThanFiringRate;
 }
 void tryFireGun(Weapons& weapons, objid sceneId){
-  std::cout << "try fire gun" << std::endl;
-  if (!canFireGunNow(weapons)){
+  float now = gameapi -> timeSeconds(false);
+  auto canFireGun = canFireGunNow(weapons, now);
+
+  std::cout << "try fire gun, can fire = " << canFireGun << ", now = " << now << ", firing rate = " << weapons.weaponParams.firingRate << std::endl;
+  if (!canFireGun){
     return;
   }
-
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> playClip("&code-weaponsound", sceneId);
   }
+  weapons.currentGun.lastShootingTime = now;
   
 
   /*
@@ -248,7 +257,15 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     Weapons* weapons = static_cast<Weapons*>(data);
+
+    if (weapons -> weaponParams.canHold && weapons -> isHoldingLeftMouse){
+      tryFireGun(*weapons, gameapi -> listSceneId(id));
+    }
     //std::cout << weaponsToString(*weapons) << std::endl;
+
+    //(if (and can-hold is-holding) (fire-gun))
+    //(if gunid (sway-gun (should-zoom)))
+
   };
   return binding;
 }
