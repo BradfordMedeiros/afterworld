@@ -242,7 +242,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     delete value;
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
-    std::cout << "key: " << key << std::endl;
     Movement* movement = static_cast<Movement*>(data);
     if (key == 'W'){
       if (action == 0){

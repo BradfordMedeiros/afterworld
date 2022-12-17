@@ -9,6 +9,7 @@
 #include "./weapon.h"
 #include "./tags.h"
 #include "./dialog.h"
+#include "./debug.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

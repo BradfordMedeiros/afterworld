@@ -56,6 +56,9 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 
 
 }
 
+void saveGunTransform(Weapons& weapons){
+  
+}
 /*(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
   (let ((id (mk-obj-attr "weapon" gunattrs)))
     (set! initial-gun-pos gunpos)

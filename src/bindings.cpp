@@ -181,6 +181,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));
+  bindings.push_back(debugBinding(api, "native/debug"));
   return bindings;
 } 
 
