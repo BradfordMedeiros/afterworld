@@ -29,10 +29,36 @@ float calcLerpAmount(float currtime){
   return lerpamount;
 }
 
+void spawnLight(objid sceneId, glm::vec3 color){
+  GameobjAttributes attr {
+    .stringAttributes = {
+    },
+    .numAttributes = {
+    },
+    .vecAttr = { 
+      .vec3 = {
+        { "position", glm::vec3(2.f, 0.f, 0.f) },
+        { "color", color },
+      }, 
+      .vec4 = { 
+      } 
+    },
+  };
+
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  gameapi -> makeObjectAttr(sceneId, "!code-debuglight", attr, submodelAttributes);
+}
 
 CScriptBinding daynightBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+    auto args = gameapi -> getArgs();
+    if (args.find("light") != args.end()){
+      auto lightValue = args.at("light");
+      auto color = lightValue == "" ? parseVec(lightValue) : glm::vec3(1.f, 1.f, 1.f);
+      //std::cout << "lightvalue = " << lightValue << ", color = " << print(color) << std::endl;
+      spawnLight(0, color);
+    }
     return NULL;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {

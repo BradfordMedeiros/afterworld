@@ -12,20 +12,26 @@ struct WeaponParams {
 
 };
 
+struct CurrentGun {
+  std::string name;
+  std::optional<objid> gunId;
+};
+
 struct Weapons {
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
   WeaponParams weaponParams;
 
-  std::optional<objid> gunId;
+  CurrentGun currentGun;
 };
 
 
 std::string parentName = ">maincamera";
-void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
-  if (weapons.gunId.has_value()){
-    gameapi -> removeObjectById(weapons.gunId.value());
-    weapons.gunId = std::nullopt;
+void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+  if (weapons.currentGun.gunId.has_value()){
+    gameapi -> removeObjectById(weapons.currentGun.gunId.value());
+    weapons.currentGun.name = "";
+    weapons.currentGun.gunId = std::nullopt;
   }
 
   GameobjAttributes attr {
@@ -49,7 +55,8 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, "weapon", attr, submodelAttributes);
   modassert(gunId.has_value(), "gun does not have a value");
-  weapons.gunId = gunId;
+  weapons.currentGun.gunId = gunId;
+  weapons.currentGun.name = name;
   auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
   modassert(parent.has_value(), parentName + " does not exist in scene so cannot create gun");
   gameapi -> makeParent(gunId.value(), parent.value());
@@ -57,7 +64,32 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string modelpath, glm::vec3 
 }
 
 void saveGunTransform(Weapons& weapons){
-  
+  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
+
+  if (weapons.currentGun.gunId.has_value()){
+    auto gunId = weapons.currentGun.gunId.value();
+    auto gun = weapons.currentGun.name;
+    auto attr = gameapi -> getGameObjectAttr(gunId);
+    auto position = attr.vecAttr.vec3.at("position");  
+    auto scale = attr.vecAttr.vec3.at("scale");
+    auto rotation = attr.vecAttr.vec4.at("rotation");
+
+    std::cout << "save gun, name = " << weapons.currentGun.name << ",  pos = " << print(position) << ", scale = " << print(scale) << ", rotation = " << print(rotation) << std::endl;
+
+    auto updateQuery = gameapi -> compileSqlQuery(
+      std::string("update guns set ") +
+        "xoffset-pos = " + serializeFloat(position.x) + ", " +
+        "yoffset-pos = " + serializeFloat(position.y) + ", " +
+        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
+        "xrot = " + serializeFloat(rotation.x) + ", " +
+        "yrot = " + serializeFloat(rotation.y) + ", " +
+        "zrot = " + serializeFloat(rotation.z) + 
+        " where name = " + gun
+    );
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+    modassert(validSql, "error executing sql query");
+  }
 }
 /*(define (change-gun modelpath xoffset yoffset zoffset xrot yrot zrot xscale yscale zscale)
   (let ((id (mk-obj-attr "weapon" gunattrs)))
@@ -98,7 +130,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
-  spawnGun(weapons, sceneId, modelpath, gunpos, rot4, scale);
+  spawnGun(weapons, sceneId, gun, modelpath, gunpos, rot4, scale);
   /*
     (let* ((guninfo (car gunstats)) (bloomVec (parse-stringvec (list-ref guninfo 26))))
 
@@ -150,7 +182,10 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
-    weapons -> gunId = std::nullopt;
+    weapons -> currentGun = CurrentGun {
+      .name = "",
+      .gunId = std::nullopt,
+    };
 
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
 
@@ -185,6 +220,8 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "change-gun value invalid");
       changeGun(*weapons, gameapi -> listSceneId(id), *strValue);
+    }else if (key == "save-gun"){
+      saveGunTransform(*weapons);
     }
   };
   binding.onFrame = [](int32_t id, void* data) -> void {

@@ -8,5 +8,6 @@ float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, 
 bool boolFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);
 glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int xIndex, int yIndex, int zIndex); 
 
+void debugAssertForNow(bool valid, const char* message);
 
 #endif

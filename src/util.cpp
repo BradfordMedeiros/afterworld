@@ -1,4 +1,4 @@
-#include "./query.h"
+#include "./util.h"
 
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
   auto value = sqlResult.at(0).at(index);
@@ -24,4 +24,11 @@ glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResul
   auto yValue = floatFromFirstSqlResult(sqlResult, yIndex);
   auto zValue = floatFromFirstSqlResult(sqlResult, zIndex);
   return glm::vec3(xValue, yValue, zValue);
+}
+
+bool assertDebug = false;
+void debugAssertForNow(bool valid, const char* message){
+  if (assertDebug){
+    modassert(valid, message);
+  }
 }
