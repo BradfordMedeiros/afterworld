@@ -83,7 +83,7 @@ float getMoveSpeed(Movement& movement, bool ironsight){
 void updateVelocity(Movement& movement, objid id, float elapsedTime){
   auto currPos = gameapi -> getGameObjectPos(id, true);
   glm::vec3 displacement = (currPos - movement.lastPosition) / elapsedTime;
-  auto speed = glm::length(displacement);
+  //auto speed = glm::length(displacement);
   movement.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
   gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
@@ -288,8 +288,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
-    movement -> lookVelocity.x = xPos;
-    movement -> lookVelocity.y = yPos;
+    movement -> lookVelocity = glm::vec2(xPos, yPos);
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     Movement* movement = static_cast<Movement*>(data);
