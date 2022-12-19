@@ -6,6 +6,8 @@ struct WeaponParams {
   float firingRate;
   float recoilLength;
   float recoilPitchRadians;
+  glm::vec3 recoilTranslate;
+  glm::vec3 recoilZoomTranslate;
   bool canHold;
   bool isIronsight;
   bool isRaycast;
@@ -18,6 +20,7 @@ struct CurrentGun {
   std::optional<objid> soundId;
 
   float lastShootingTime;
+  float recoilStart;
   glm::vec3 initialGunPos;
 };
 
@@ -88,7 +91,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   weapons.currentGun.gunId = gunId;
 
   GameobjAttributes soundAttr {
-    .stringAttributes = { { "clip", firesound } },
+    .stringAttributes = { { "clip", firesound }, { "physics", "disabled" }},
     .numAttributes = {},
     .vecAttr = {  .vec3 = {},  .vec4 = {} },
   };
@@ -129,12 +132,15 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   weapons.weaponParams.firingRate = floatFromFirstSqlResult(result, 12);
   weapons.weaponParams.recoilLength = floatFromFirstSqlResult(result, 21);
   weapons.weaponParams.recoilPitchRadians = floatFromFirstSqlResult(result, 22);
+  weapons.weaponParams.recoilTranslate = vec3FromFirstSqlResult(result, 23);
+  weapons.weaponParams.recoilZoomTranslate = vec3FromFirstSqlResult(result, 24);
   weapons.weaponParams.canHold = boolFromFirstSqlResult(result, 13);
   weapons.weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
   weapons.weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
   weapons.weaponParams.ironsightOffset = vec3FromFirstSqlResult(result, 16, 17, 18);
 
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
+  weapons.currentGun.recoilStart = 0.f;
 
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
   weapons.currentGun.initialGunPos = gunpos;
@@ -161,6 +167,10 @@ bool canFireGunNow(Weapons& weapons, float elapsedMilliseconds){
   bool lessThanFiringRate = timeSinceLastShot >= (0.001f * weapons.weaponParams.firingRate);
   return lessThanFiringRate;
 }
+void startRecoil(Weapons& weapons){
+  weapons.currentGun.recoilStart = gameapi -> timeSeconds(false);
+}
+
 void tryFireGun(Weapons& weapons, objid sceneId){
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(weapons, now);
@@ -173,7 +183,8 @@ void tryFireGun(Weapons& weapons, objid sceneId){
     gameapi -> playClip("&code-weaponsound", sceneId);
   }
   weapons.currentGun.lastShootingTime = now;
-  
+  startRecoil(weapons);
+
 
   /*
   (define elapsedMilliseconds (* 1000 (time-seconds)))
@@ -227,22 +238,17 @@ glm::vec3 getSwayVelocity(Weapons& weapons){
   return newPos;
 }
 
-glm::vec3 calcLocationWithRecoil(Weapons& weapons, glm::vec3 targetPos, bool isGunZoomed){
-  if (isGunZoomed){
-    return weapons.weaponParams.ironsightOffset;
-  }
 
-/*
-  (define recoilAmount (if zoomgun recoilZoomTranslate recoilTranslate))
-  (define targetposWithRecoil (list 
-    (+ (car targetpos)   (car recoilAmount))
-    (+ (cadr targetpos)  (cadr recoilAmount)) 
-    (+ (caddr targetpos) (caddr recoilAmount))
-  ))
-  ;(format #t "targetpos: ~a\n" targetposWithRecoil)
-  (lerp targetpos targetposWithRecoil (calc-recoil-slerpamount))*/
-  debugAssertForNow(false, "recoil location not yet implemented");
-  return targetPos;
+float calcRecoilSlerpAmount(Weapons& weapons){
+  float amount = (gameapi -> timeSeconds(false) - weapons.currentGun.recoilStart) / weapons.weaponParams.recoilLength;
+  return (amount > 1.f) ? 0 : amount;
+}
+
+glm::vec3 calcLocationWithRecoil(Weapons& weapons, glm::vec3 pos, bool isGunZoomed){
+  auto targetPos = isGunZoomed ? weapons.weaponParams.ironsightOffset : pos;
+  auto recoilAmount = isGunZoomed ? weapons.weaponParams.recoilZoomTranslate : weapons.weaponParams.recoilTranslate;
+  auto targetPosWithRecoil = glm::vec3(targetPos.x + recoilAmount.x, targetPos.y + recoilAmount.y, targetPos.z + recoilAmount.z);
+  return glm::lerp(targetPos, targetPosWithRecoil, calcRecoilSlerpAmount(weapons));
 }
 
 
