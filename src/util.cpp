@@ -26,6 +26,10 @@ glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResul
   return glm::vec3(xValue, yValue, zValue);
 }
 
+glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
+  return parseVec(sqlResult.at(0).at(index));
+}
+
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){
