@@ -4,6 +4,10 @@ std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResu
   auto value = sqlResult.at(0).at(index);
   return value ;
 }
+std::string strFromSqlRow(std::vector<std::string>& sqlResult, int index){
+  auto value = sqlResult.at(index);
+  return value ;
+}
 
 float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
   auto value = sqlResult.at(0).at(index);
@@ -28,6 +32,10 @@ glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResul
 
 glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
   return parseVec(sqlResult.at(0).at(index));
+}
+
+glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index){
+  return parseVec(sqlRow.at(index));
 }
 
 bool assertDebug = false;
