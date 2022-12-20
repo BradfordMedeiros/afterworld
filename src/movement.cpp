@@ -286,7 +286,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
-    std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
+    //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
     movement -> lookVelocity = glm::vec2(xPos, yPos);
   };

@@ -19,6 +19,7 @@ struct CurrentGun {
   std::optional<objid> gunId;
   std::optional<objid> soundId;
   std::optional<objid> muzzleParticle;
+  std::optional<objid> scriptId;
 
   float lastShootingTime;
   float recoilStart;
@@ -113,7 +114,7 @@ GameobjAttributes particleAttributes(std::string& particle){
   return particleAttr;
 }
 
-void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
     weapons.currentGun.name = "";
 
@@ -129,6 +130,11 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
       gameapi -> removeObjectById(weapons.currentGun.muzzleParticle.value());
       weapons.currentGun.muzzleParticle = std::nullopt;
     }
+
+    if (weapons.currentGun.scriptId.has_value()){
+      gameapi -> removeObjectById(weapons.currentGun.scriptId.value());
+      weapons.currentGun.scriptId = std::nullopt;
+    }
   }
 
   GameobjAttributes attr {
@@ -142,13 +148,12 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   modassert(gunId.has_value(), "gun does not have a value");
   weapons.currentGun.gunId = gunId;
 
-  GameobjAttributes soundAttr {
-    .stringAttributes = { { "clip", firesound }, { "physics", "disabled" }},
-    .numAttributes = {},
-    .vecAttr = {  .vec3 = {},  .vec4 = {} },
-  };
-
   if (firesound != ""){
+    GameobjAttributes soundAttr {
+      .stringAttributes = { { "clip", firesound }, { "physics", "disabled" }},
+      .numAttributes = {},
+      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+    };
     auto soundId = gameapi -> makeObjectAttr(sceneId, "&code-weaponsound", soundAttr, submodelAttributes);
     weapons.currentGun.soundId = soundId;  
   }
@@ -156,6 +161,16 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   if (particle != ""){
     auto particleAttr = particleAttributes(particle);
     weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
+  }
+
+  if (script != ""){
+    GameobjAttributes scriptAttr {
+      .stringAttributes = {{ "script", script }},
+      .numAttributes = {},
+      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+    };
+    auto scriptId = gameapi -> makeObjectAttr(sceneId, "code-script", scriptAttr, submodelAttributes);
+    weapons.currentGun.scriptId = scriptId;
   }
 
 
@@ -168,6 +183,9 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   }
   if (weapons.currentGun.muzzleParticle.has_value()){
     gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.currentGun.gunId.value());
+  }
+  if (weapons.currentGun.scriptId.has_value()){
+    gameapi -> makeParent(weapons.currentGun.scriptId.value(), parent.value());
   }
 }
 
@@ -206,11 +224,13 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
 
   auto soundpath = strFromFirstSqlResult(result, 2);
   auto modelpath = strFromFirstSqlResult(result, 0);
+  auto script = strFromFirstSqlResult(result, 27);
+
   auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
 
-  spawnGun(weapons, sceneId, gun, soundpath, "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg", modelpath, gunpos, rot4, scale);
+  spawnGun(weapons, sceneId, gun, soundpath, "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg", modelpath, script, gunpos, rot4, scale);
 }
 
 std::string weaponsToString(Weapons& weapons){
@@ -301,7 +321,7 @@ glm::vec3 getSwayVelocity(Weapons& weapons){
   auto parent = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
   auto parentRot = gameapi -> getGameObjectRotation(parent.value(), false);
   auto newPos = gameapi -> moveRelative(glm::vec3(0.f, 0.f, 0.f), glm::inverse(parentRot), weapons.movementVelocity);
-  std::cout << "sway velocity: " << print(newPos) << std::endl;
+  //std::cout << "sway velocity: " << print(newPos) << std::endl;
   return newPos;
 }
 
@@ -401,6 +421,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .gunId = std::nullopt,
       .soundId = std::nullopt,
       .muzzleParticle = std::nullopt,
+      .scriptId = std::nullopt,
     };
 
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
@@ -446,7 +467,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
-    std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
+    //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Weapons* weapons = static_cast<Weapons*>(data);
     weapons -> lookVelocity = glm::vec2(xPos, yPos);
   };
