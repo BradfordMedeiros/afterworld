@@ -19,7 +19,6 @@ struct CurrentGun {
   std::optional<objid> gunId;
   std::optional<objid> soundId;
   std::optional<objid> muzzleParticle;
-  std::optional<objid> scriptId;
 
   float lastShootingTime;
   float recoilStart;
@@ -131,14 +130,14 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
       weapons.currentGun.muzzleParticle = std::nullopt;
     }
 
-    if (weapons.currentGun.scriptId.has_value()){
-      gameapi -> removeObjectById(weapons.currentGun.scriptId.value());
-      weapons.currentGun.scriptId = std::nullopt;
-    }
   }
 
+  std::map<std::string, std::string> stringAttributes = { { "mesh", modelpath }, { "layer", "no_depth" } };
+  if (script != ""){
+    stringAttributes["script"] = script;
+  }
   GameobjAttributes attr {
-    .stringAttributes = { { "mesh", modelpath }, { "layer", "no_depth" }},
+    .stringAttributes = stringAttributes,
     .numAttributes = {},
     .vecAttr = {  .vec3 = {{ "position", gunpos }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
   };
@@ -163,17 +162,6 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
   }
 
-  if (script != ""){
-    GameobjAttributes scriptAttr {
-      .stringAttributes = {{ "script", script }},
-      .numAttributes = {},
-      .vecAttr = {  .vec3 = {},  .vec4 = {} },
-    };
-    auto scriptId = gameapi -> makeObjectAttr(sceneId, "code-script", scriptAttr, submodelAttributes);
-    weapons.currentGun.scriptId = scriptId;
-  }
-
-
   weapons.currentGun.name = name;
   auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
   modassert(parent.has_value(), parentName + " does not exist in scene so cannot create gun");
@@ -183,9 +171,6 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   }
   if (weapons.currentGun.muzzleParticle.has_value()){
     gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.currentGun.gunId.value());
-  }
-  if (weapons.currentGun.scriptId.has_value()){
-    gameapi -> makeParent(weapons.currentGun.scriptId.value(), parent.value());
   }
 }
 
@@ -421,7 +406,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .gunId = std::nullopt,
       .soundId = std::nullopt,
       .muzzleParticle = std::nullopt,
-      .scriptId = std::nullopt,
     };
 
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
