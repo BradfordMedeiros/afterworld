@@ -10,14 +10,20 @@ struct HudElement {
 	std::string image;
 	glm::vec3 position;
 	glm::vec3 scale;
+  glm::vec4 tint;
+  std::optional<std::string> shader;
 };
 
 objid createHudElement(Hud& hud, HudElement& element, objid mainobjId, int index){
   auto sceneId = gameapi -> listSceneId(mainobjId);
+  std::map<std::string, std::string> stringAttributes = {{ "texture", element.image }, { "layer", "basicui"}, { "mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" }};
+  if (element.shader.has_value()){
+    stringAttributes["shader"] = element.shader.value();
+  }
   GameobjAttributes attr {
-    .stringAttributes = {{ "texture", element.image }, { "layer", "basicui"}, { "mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" }},
+    .stringAttributes = stringAttributes,
     .numAttributes = {},
-    .vecAttr = { .vec3 = {{ "position", element.position }, { "scale", element.scale }}, .vec4 = { {"tint", glm::vec4(1.f, 1.f, 1.f, 1.f) }} },
+    .vecAttr = { .vec3 = {{ "position", element.position }, { "scale", element.scale }}, .vec4 = { {"tint", element.tint }} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   return gameapi -> makeObjectAttr(sceneId, "code-hudelement-" + std::to_string(index), attr, submodelAttributes).value();
@@ -34,17 +40,25 @@ void changeHud(Hud& hud, std::string name, objid mainobjId){
 	removeOldHud(hud);
 
   auto query = gameapi -> compileSqlQuery(
-    "select image, position, scale from huds where name = " + name
+    "select image, position, scale, tint, shader from huds where name = " + name
   );
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
 
   std::vector<HudElement> hudElements;
   for (auto row : result){
+    auto tintStr = strFromSqlRow(row, 3);
+    glm::vec4 tint(1.f, 1.f, 1.f, 1.f);
+    if (tintStr != ""){
+      tint = parseVec4(tintStr);
+    }
+    auto shaderStr = strFromSqlRow(row, 4);
   	hudElements.push_back(HudElement {
   		.image = strFromSqlRow(row, 0),
   		.position = vec3FromSqlRow(row, 1),
   		.scale = vec3FromSqlRow(row, 2),
+      .tint = tint,
+      .shader = shaderStr != "" ? std::optional<std::string>(shaderStr) : std::nullopt,
   	});
   }
 
