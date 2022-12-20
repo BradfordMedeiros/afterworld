@@ -18,6 +18,7 @@ struct CurrentGun {
   std::string name;
   std::optional<objid> gunId;
   std::optional<objid> soundId;
+  std::optional<objid> muzzleParticle;
 
   float lastShootingTime;
   float recoilStart;
@@ -66,7 +67,53 @@ void saveGunTransform(Weapons& weapons){
 
 std::string parentName = ">maincamera";
 
-void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+GameobjAttributes particleAttributes(std::string& particle){
+
+/*(define (template sourceString template templateValue)
+  (define index (string-contains sourceString template))
+  (if index
+    (string-replace sourceString templateValue index (+ index (string-length template)))
+    sourceString
+  )
+)
+
+(define reserved-emitter-chars (list "%" "!" "?"))
+(define (reserved-emitter-name value) (member (substring value 0 1) reserved-emitter-chars))
+(define (template-emit-line line) 
+  (define keyname (car line))
+  (define value (template (cadr line) "$MAINOBJ" parent-name))
+  (define reservedKeyName (reserved-emitter-name keyname))
+  (if reservedKeyName
+    (list keyname value)
+    (list keyname (parse-attr value))
+  )
+)
+(define (split-emit-line emitLine) (template-emit-line (string-split emitLine #\:)))
+(define (is-not-whitespace val) (not (equal? (string-trim val) "")))
+(define (emitterOptsToList emitterOptions) (map split-emit-line (filter is-not-whitespace (string-split emitterOptions #\;))))
+*/
+
+  GameobjAttributes particleAttr {
+    .stringAttributes = { 
+      { "state", "disabled" },    // default should keep
+      { "physics", "disabled" },  
+      { "layer", "no_depth" },    ///////
+     
+      { "+mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" },
+      { "+texture", "../gameresources/textures/evilpattern.png" },
+      { "+shader", "../afterworld/shaders/discard/fragment.glsl" },
+      { "+lookat", ">maincamera" },
+    },
+    .numAttributes = { { "duration", 0.3f } },
+    .vecAttr = {  
+      .vec3 = {{ "+scale", glm::vec3(0.2f, 0.2f, 0.2f) }},  
+      .vec4 = {{ "+tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }}  // this shouldn't be needed for the default plane since 0 0 -1 0 should make the plane face the player
+    },
+  };
+  return particleAttr;
+}
+
+void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string modelpath, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
     weapons.currentGun.name = "";
 
@@ -76,6 +123,11 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     if (weapons.currentGun.soundId.has_value()){
       gameapi -> removeObjectById(weapons.currentGun.soundId.value());
       weapons.currentGun.soundId = std::nullopt;
+    }
+
+    if (weapons.currentGun.muzzleParticle.has_value()){
+      gameapi -> removeObjectById(weapons.currentGun.muzzleParticle.value());
+      weapons.currentGun.muzzleParticle = std::nullopt;
     }
   }
 
@@ -101,6 +153,11 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     weapons.currentGun.soundId = soundId;  
   }
 
+  if (particle != ""){
+    auto particleAttr = particleAttributes(particle);
+    weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
+  }
+
 
   weapons.currentGun.name = name;
   auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
@@ -109,7 +166,9 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> makeParent(weapons.currentGun.soundId.value(), parent.value());
   }
-
+  if (weapons.currentGun.muzzleParticle.has_value()){
+    gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.currentGun.gunId.value());
+  }
 }
 
 void changeGun(Weapons& weapons, objid sceneId, std::string gun){
@@ -151,7 +210,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
 
-  spawnGun(weapons, sceneId, gun, soundpath, modelpath, gunpos, rot4, scale);
+  spawnGun(weapons, sceneId, gun, soundpath, "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg", modelpath, gunpos, rot4, scale);
 }
 
 std::string weaponsToString(Weapons& weapons){
@@ -181,6 +240,14 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   }
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> playClip("&code-weaponsound", sceneId);
+  }
+  if (weapons.currentGun.muzzleParticle.has_value()){
+    auto gunPosition = gameapi -> getGameObjectPos(weapons.currentGun.gunId.value(), true);
+    auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
+    auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+    glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -0.1f); // should parameterize particleOffset
+    auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
+    gameapi -> emit(weapons.currentGun.muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt);
   }
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
@@ -333,6 +400,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .name = "",
       .gunId = std::nullopt,
       .soundId = std::nullopt,
+      .muzzleParticle = std::nullopt,
     };
 
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
