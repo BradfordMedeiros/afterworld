@@ -267,6 +267,12 @@ void showDebugHitmark(HitObject& hitpoint, objid playerId){
     hitpoint.point + glm::vec3(0.f, 0.f, 1.f * hitlength),
     true, playerId, std::nullopt,  std::nullopt, std::nullopt
   );
+
+  gameapi -> drawLine(
+    hitpoint.point,
+    hitpoint.point + (10.f * (hitpoint.normal * glm::vec3(0.f, 0.f, -1.f))),
+    true, playerId, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt
+  );
 }
 
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
