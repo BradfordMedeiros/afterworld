@@ -19,6 +19,7 @@ struct CurrentGun {
   std::optional<objid> gunId;
   std::optional<objid> soundId;
   std::optional<objid> muzzleParticle;
+  std::optional<objid> hitParticles;
 
   float lastShootingTime;
   float recoilStart;
@@ -34,6 +35,8 @@ struct Weapons {
 
   glm::vec2 lookVelocity;
   float movementVelocity;
+
+  std::optional<objid> raycastLine;
 };
 
 void saveGunTransform(Weapons& weapons){
@@ -113,7 +116,7 @@ GameobjAttributes particleAttributes(std::string& particle){
   return particleAttr;
 }
 
-void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
     weapons.currentGun.name = "";
 
@@ -128,6 +131,11 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     if (weapons.currentGun.muzzleParticle.has_value()){
       gameapi -> removeObjectById(weapons.currentGun.muzzleParticle.value());
       weapons.currentGun.muzzleParticle = std::nullopt;
+    }
+
+    if (weapons.currentGun.hitParticles.has_value()){
+      gameapi -> removeObjectById(weapons.currentGun.hitParticles.value());
+      weapons.currentGun.hitParticles = std::nullopt;
     }
 
   }
@@ -160,6 +168,10 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   if (particle != ""){
     auto particleAttr = particleAttributes(particle);
     weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
+  }
+  if (hitParticle != ""){
+    auto particleAttr = particleAttributes(hitParticle);
+    weapons.currentGun.hitParticles = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle", particleAttr, submodelAttributes);
   }
 
   weapons.currentGun.name = name;
@@ -215,7 +227,9 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
 
-  spawnGun(weapons, sceneId, gun, soundpath, "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg", modelpath, script, gunpos, rot4, scale);
+  auto muzzleParticleStr = "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg";
+  auto hitParticleStr = "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg";
+  spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, modelpath, script, gunpos, rot4, scale);
 }
 
 std::string weaponsToString(Weapons& weapons){
@@ -233,6 +247,55 @@ bool canFireGunNow(Weapons& weapons, float elapsedMilliseconds){
 }
 void startRecoil(Weapons& weapons){
   weapons.currentGun.recoilStart = gameapi -> timeSeconds(false);
+}
+
+
+float hitlength = 2;
+void showDebugHitmark(HitObject& hitpoint, objid playerId){
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(0.f, -1.f * hitlength,  0.f),
+    hitpoint.point + glm::vec3(0.f, 1.f * hitlength,  0.f),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(-1.f * hitlength, 0.f, 0.f),
+    hitpoint.point + glm::vec3(1.f * hitlength, 0.f, 0.f),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(0.f, 0.f, -1.f * hitlength),
+    hitpoint.point + glm::vec3(0.f, 0.f, 1.f * hitlength),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+}
+
+glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
+  return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
+}
+// fires from point of view of the camera
+float maxRaycastDistance = 500.f;
+void fireRaycast(Weapons& weapons){
+  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
+  auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
+  auto rot = gameapi -> getGameObjectRotation(playerId.value(), true);
+  //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
+
+  if (weapons.raycastLine.has_value()){
+    gameapi -> freeLine(weapons.raycastLine.value());
+  }
+  auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
+  weapons.raycastLine = raycastLineId;
+
+  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
+  std::cout << "fire raycast, total hits = " << hitpoints.size() << std::endl;
+  for (auto &hitpoint : hitpoints){
+    std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
+    if (weapons.currentGun.hitParticles.has_value()){
+      gameapi -> emit(weapons.currentGun.hitParticles.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
+    }
+    // (sendnotify "hit" (number->string (car hitpoint)))
+    showDebugHitmark(hitpoint, playerId.value());
+  }
 }
 
 void tryFireGun(Weapons& weapons, objid sceneId){
@@ -256,6 +319,9 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   }
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
+  if (weapons.weaponParams.isRaycast){
+    fireRaycast(weapons);
+  }
 
 
   /*
@@ -400,6 +466,8 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
     weapons -> movementVelocity = 0.f;
+
+    weapons -> raycastLine = std::nullopt;
 
     weapons -> currentGun = CurrentGun {
       .name = "",
