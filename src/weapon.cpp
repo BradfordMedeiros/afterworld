@@ -295,12 +295,14 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId){
   if (weapons.raycastLine.has_value()){
     gameapi -> freeLine(weapons.raycastLine.value());
   }
+  
+  /*
   auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
   weapons.raycastLine = raycastLineId;
   for (auto &hitpoint : hitpoints){
     std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
     showDebugHitmark(hitpoint, playerId.value());
-  }
+  }*/
   return hitpoints;
 }
 
