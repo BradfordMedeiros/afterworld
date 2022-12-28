@@ -156,11 +156,27 @@ void dumpDotFormat(std::map<std::string, Node>& dialogTree){
 std::optional<std::map<std::string, Node>> dialogTree = std::nullopt;
 
 std::optional<Node*> nodeForTransition(std::string fromNode, std::string transition){
+	Node& node = dialogTree.value().at(fromNode);
+	for (auto &[transitionName, nodeTo] : node.transitionNameToNode){
+		if (transitionName == transition){
+			return &dialogTree.value().at(nodeTo);
+		}
+	}
 	return std::nullopt;
 }
 
-std::optional<std::string> getChatText(std::string npc){
-	auto node = nodeForTransition(npc, "chat");
+std::optional<std::string> getChatText(std::string nodename){
+	auto node = nodeForTransition(nodename, "talk");
+	std::cout << "properties for node: " << nodename << " [ ";
+	//if (node.has_value()){
+	//	for (auto &property : node.value() -> properties.at("text")){
+	//		std::cout << property << " ";
+	//	}
+	//}else{
+	//	std::cout << "<no value>";
+	//}
+	//std::cout << " ]" << std::endl;
+
 	auto property = node.has_value() ? node.value() -> properties.at("text") : std::optional<std::string>(std::nullopt);
 	return property;
 }
@@ -177,7 +193,18 @@ CScriptBinding dialogBinding(CustomApiBindings& api, const char* name){
     	auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "dialog:talk value invalid");
    		auto chatText = getChatText(*strValue);
-   		gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : "no chat text available"));
+   		gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : ("error: no chat text available for node: " + *strValue) ));
+    }else if (key == "selected"){
+    	auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "dialog:talk value invalid");
+      auto gameObjId = std::atoi(strValue -> c_str());
+      auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+      bool hasChatNode = objAttr.stringAttributes.find("chatnode") != objAttr.stringAttributes.end();
+      if (hasChatNode){
+      	auto chatNodeName = objAttr.stringAttributes.at("chatnode");
+      	gameapi -> sendNotifyMessage("dialog:talk", chatNodeName);
+      }
+    	//gameapi -> sendNotifyMessage("dialog:talk", )
     }
   };
 	return binding;
