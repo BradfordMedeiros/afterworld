@@ -282,21 +282,32 @@ void showDebugHitmark(HitObject& hitpoint, objid playerId){
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
+
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-void fireRaycast(Weapons& weapons){
-  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
+std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId){
+  auto playerId = gameapi -> getGameObjectByName(parentName, sceneId, false);
   auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
   auto rot = gameapi -> getGameObjectRotation(playerId.value(), true);
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
+  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
 
   if (weapons.raycastLine.has_value()){
     gameapi -> freeLine(weapons.raycastLine.value());
   }
   auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
   weapons.raycastLine = raycastLineId;
+  for (auto &hitpoint : hitpoints){
+    std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
+    showDebugHitmark(hitpoint, playerId.value());
+  }
+  return hitpoints;
+}
 
-  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
+
+void fireRaycast(Weapons& weapons, objid sceneId){
+  auto hitpoints = doRaycast(weapons, sceneId);
+
   std::cout << "fire raycast, total hits = " << hitpoints.size() << std::endl;
   for (auto &hitpoint : hitpoints){
     std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
@@ -304,8 +315,6 @@ void fireRaycast(Weapons& weapons){
       gameapi -> emit(weapons.currentGun.hitParticles.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
     }
     std::cout << "raycast normal: " << serializeQuat(hitpoint.normal) << std::endl;
-    // (sendnotify "hit" (number->string (car hitpoint)))
-    showDebugHitmark(hitpoint, playerId.value());
   }
 }
 
@@ -331,7 +340,7 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
   if (weapons.weaponParams.isRaycast){
-    fireRaycast(weapons);
+    fireRaycast(weapons, sceneId);
   }
 
 
@@ -507,10 +516,12 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (button == 1){
       if (action == 0){
         weapons -> isHoldingRightMouse = false;
-        debugAssertForNow(false, "should add ironsight");
       }else if (action == 1){
         weapons -> isHoldingRightMouse = true;
-        debugAssertForNow(false, "should add ironsight");
+        auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id));
+        if (hitpoints.size() > 0){
+          gameapi -> sendNotifyMessage("selected", std::to_string(hitpoints.at(0).id));
+        }
       }
     }
   };
