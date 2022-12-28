@@ -19,7 +19,7 @@ struct CurrentGun {
   std::optional<objid> gunId;
   std::optional<objid> soundId;
   std::optional<objid> muzzleParticle;
-  std::optional<objid> hitParticles;
+  std::optional<objid> hitParticles;    // probably this isn't actually particle to the gun 
 
   float lastShootingTime;
   float recoilStart;
@@ -105,9 +105,8 @@ GameobjAttributes particleAttributes(std::string& particle){
       { "+mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" },
       { "+texture", "../gameresources/textures/evilpattern.png" },
       { "+shader", "../afterworld/shaders/discard/fragment.glsl" },
-      { "+lookat", ">maincamera" },
     },
-    .numAttributes = { { "duration", 0.3f } },
+    .numAttributes = { { "duration", 10.f } },
     .vecAttr = {  
       .vec3 = {{ "+scale", glm::vec3(0.2f, 0.2f, 0.2f) }},  
       .vec4 = {{ "+tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }}  // this shouldn't be needed for the default plane since 0 0 -1 0 should make the plane face the player
@@ -167,10 +166,15 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
 
   if (particle != ""){
     auto particleAttr = particleAttributes(particle);
+    particleAttr.stringAttributes["+lookat"] = ">maincamera";
     weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
   }
   if (hitParticle != ""){
     auto particleAttr = particleAttributes(hitParticle);
+    particleAttr.stringAttributes["+physics"] = "enabled";
+    particleAttr.stringAttributes["+physics_type"] = "dynamic";
+    particleAttr.vecAttr.vec3["+scale"] = glm::vec3(0.2, 0.2, 0.2f);
+    particleAttr.vecAttr.vec4["+tint"] = glm::vec4(1.f, 0.f, 0.f, 0.6f);
     weapons.currentGun.hitParticles = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle", particleAttr, submodelAttributes);
   }
 
@@ -299,6 +303,7 @@ void fireRaycast(Weapons& weapons){
     if (weapons.currentGun.hitParticles.has_value()){
       gameapi -> emit(weapons.currentGun.hitParticles.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
     }
+    std::cout << "raycast normal: " << serializeQuat(hitpoint.normal) << std::endl;
     // (sendnotify "hit" (number->string (car hitpoint)))
     showDebugHitmark(hitpoint, playerId.value());
   }
