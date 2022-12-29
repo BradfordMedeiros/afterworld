@@ -107,6 +107,62 @@ void loadConfig(GameState& gameState){
   gameState.selectedLevel = glm::min(gameState.selectedLevel, maxLevelIndex);
 }
 
+std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
+    return objAttr.stringAttributes.at(key);
+  }
+  return std::nullopt;
+}
+
+void handleInteract(objid gameObjId){
+  auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+  auto chatNode = getStrAttr(objAttr, "chatnode");
+  if (chatNode.has_value()){
+    gameapi -> sendNotifyMessage("dialog:talk", chatNode.value());
+  }
+  auto triggerSwitch = getStrAttr(objAttr, "trigger-switch");
+  if (triggerSwitch.has_value()){
+    gameapi -> sendNotifyMessage("switch", triggerSwitch.value());
+  }
+}
+
+float randomNum(){
+  return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX));
+}
+
+// should work globally but needs lsobj-attr modifications, and probably should create a way to index these
+void handleSwitch(std::string switchValue, objid sceneId){ 
+  //wall:switch:someswitch
+  //wall:switch-recording:somerecording
+  auto objectsWithSwitch = gameapi -> getObjectsByAttr("switch", switchValue, sceneId);
+
+  std::cout << "num objects with switch = " << switchValue << ", " << objectsWithSwitch.size() << std::endl;
+  for (auto id : objectsWithSwitch){
+    std::cout << "handle switch: " << id << std::endl;
+    //wall:switch-recording:somerecording
+    // supposed to play recording here, setting tint for now to test
+    auto objAttr =  gameapi -> getGameObjectAttr(id);
+    auto switchRecording = getStrAttr(objAttr, "switch-recording");
+    if (switchRecording.has_value()){
+      gameapi -> playRecording(id, switchRecording.value());
+    }
+    
+    GameobjAttributes attr {
+      .stringAttributes = {},
+      .numAttributes = {},
+      .vecAttr = {
+        .vec3 = {},
+        .vec4 = {
+          { "tint", glm::vec4(randomNum(), randomNum(), randomNum(), 1.f) },
+        },
+      },
+    };
+    gameapi -> setGameObjectAttr(id, attr);
+
+  }
+}
+
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -161,9 +217,24 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
       goToMenu(*gameState);
+      return;
     }
     if (key == "reload-config:levels"){
       loadConfig(*gameState);
+      return;
+    }
+    if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "selected value invalid");
+      auto gameObjId = std::atoi(strValue -> c_str());
+      handleInteract(gameObjId);
+      return;
+    }
+    if (key == "switch"){ // should be moved
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "switch value invalid");
+      handleSwitch(*strValue, gameapi -> listSceneId(id));
+      return;
     }
   };
 
