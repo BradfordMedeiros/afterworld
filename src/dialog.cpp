@@ -202,7 +202,7 @@ void handleInteract(objid gameObjId){
 }
 
 float randomNum(){
-  return static_cast<float>(rand()) / (static_cast <float> (RAND_MAX));
+  return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX));
 }
 
 // should work globally but needs lsobj-attr modifications, and probably should create a way to index these
@@ -216,6 +216,12 @@ void handleSwitch(std::string switchValue, objid sceneId){
     std::cout << "handle switch: " << id << std::endl;
     //wall:switch-recording:somerecording
     // supposed to play recording here, setting tint for now to test
+    auto objAttr =  gameapi -> getGameObjectAttr(id);
+    auto switchRecording = getStrAttr(objAttr, "switch-recording");
+    if (switchRecording.has_value()){
+      gameapi -> playRecording(id, switchRecording.value());
+    }
+    
     GameobjAttributes attr {
       .stringAttributes = {},
       .numAttributes = {},
