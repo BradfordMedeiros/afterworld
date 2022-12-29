@@ -163,6 +163,18 @@ void handleSwitch(std::string switchValue){
   }
 }
 
+void handleCollision(objid obj1, objid obj2, std::string attrName){
+  auto objAttr1 =  gameapi -> getGameObjectAttr(obj1);
+  auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
+  auto switchEnter1 = getStrAttr(objAttr1, attrName);
+  if (switchEnter1.has_value()){
+    gameapi -> sendNotifyMessage("switch", switchEnter1.value());
+  }
+  auto switchEnter2 = getStrAttr(objAttr2, attrName);
+  if (switchEnter2.has_value()){
+    gameapi -> sendNotifyMessage("switch", switchEnter2.value());
+  }
+}
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -240,6 +252,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       handleSwitch(*strValue);
       return;
     }
+  };
+
+  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    handleCollision(obj1, obj2, "switch-enter");
+  };
+  binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
+    handleCollision(obj1, obj2, "switch-exit");
   };
 
   return binding;
