@@ -131,11 +131,12 @@ float randomNum(){
 }
 
 // should work globally but needs lsobj-attr modifications, and probably should create a way to index these
-void handleSwitch(std::string switchValue, objid sceneId){ 
+void handleSwitch(std::string switchValue){ 
   //wall:switch:someswitch
   //wall:switch-recording:somerecording
-  auto objectsWithSwitch = gameapi -> getObjectsByAttr("switch", switchValue, sceneId);
+  auto objectsWithSwitch = gameapi -> getObjectsByAttr("switch", switchValue, std::nullopt);
 
+  //std::vector<objid> objectsWithSwitch = {};
   std::cout << "num objects with switch = " << switchValue << ", " << objectsWithSwitch.size() << std::endl;
   for (auto id : objectsWithSwitch){
     std::cout << "handle switch: " << id << std::endl;
@@ -227,13 +228,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "selected value invalid");
       auto gameObjId = std::atoi(strValue -> c_str());
+      if (!gameapi -> getGameObjNameForId(gameObjId).has_value()){
+        return;
+      }
       handleInteract(gameObjId);
       return;
     }
     if (key == "switch"){ // should be moved
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "switch value invalid");
-      handleSwitch(*strValue, gameapi -> listSceneId(id));
+      handleSwitch(*strValue);
       return;
     }
   };
