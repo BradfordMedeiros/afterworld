@@ -38,6 +38,20 @@ glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index){
   return parseVec(sqlRow.at(index));
 }
 
+std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
+    return objAttr.stringAttributes.at(key);
+  }
+  return std::nullopt;
+}
+
+std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.numAttributes.find(key) != objAttr.numAttributes.end()){
+    return objAttr.numAttributes.at(key);
+  }
+  return std::nullopt;
+}
+
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){

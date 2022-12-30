@@ -7,6 +7,7 @@
 #include "./menu.h"
 #include "./daynight.h"
 #include "./weapon.h"
+#include "./inventory.h"
 #include "./hud.h"
 #include "./tags.h"
 #include "./dialog.h"

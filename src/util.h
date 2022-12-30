@@ -11,6 +11,9 @@ glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResul
 glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index); 
 glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index);
 
+std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
+
 void debugAssertForNow(bool valid, const char* message);
 
 #endif

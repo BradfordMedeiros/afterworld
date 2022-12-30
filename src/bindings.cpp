@@ -107,13 +107,6 @@ void loadConfig(GameState& gameState){
   gameState.selectedLevel = glm::min(gameState.selectedLevel, maxLevelIndex);
 }
 
-std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
-  if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
-    return objAttr.stringAttributes.at(key);
-  }
-  return std::nullopt;
-}
-
 void handleInteract(objid gameObjId){
   auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
   auto chatNode = getStrAttr(objAttr, "chatnode");
@@ -270,8 +263,10 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
   bindings.push_back(movementBinding(api, "native/movement"));
+  bindings.push_back(movementBinding(api, "native/vehicle"));
   bindings.push_back(menuBinding(api, "native/menu"));
   bindings.push_back(weaponBinding(api, "native/weapon"));
+  bindings.push_back(inventoryBinding(api, "native/inventory"));
   bindings.push_back(hudBinding(api, "native/hud"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));

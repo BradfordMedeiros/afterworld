@@ -22,6 +22,16 @@ wall2:texture:../gameresources/textures/wood.jpg
 wall2:physics:enabled
 wall2:chatnode:npc1
 
+item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+item:position:0 2 50
+item:scale:0.5 0.5 0.5
+item:texture:../gameresources/textures/wood.jpg
+item:physics:enabled
+item:physics_type:dynamic
+item:pickup:gold
+item:pickup-amount:100
+item:pickup-type:replacde
+item:pickup-trigger:gold
 
 controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 controlpanel:position:0 -10 30
@@ -51,7 +61,7 @@ portal-trigger:scale:10 80 120
 portal-trigger:rotation:0 -1 0 0
 portal-trigger:physics:enabled
 portal-trigger:physics_collision:nocollide
-portal-trigger:tint:0 0 1 0
+portal-trigger:tint:0 0 1 0.4
 portal-trigger:layer:transparency
 portal-trigger:switch-enter:someswitch_wall2
 portal-trigger:switch-exit:someswitch_wall2
@@ -68,4 +78,5 @@ gunlogic:script:native/weapon
 
 hud:script:native/hud
 dialog:script:native/dialog
+inventory:script:native/inventory
 

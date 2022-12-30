@@ -519,6 +519,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       if (action == 0){
         weapons -> isHoldingRightMouse = false;
       }else if (action == 1){
+        // select item
         weapons -> isHoldingRightMouse = true;
         auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id));
         if (hitpoints.size() > 0){
