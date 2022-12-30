@@ -12,6 +12,7 @@ struct Input {
 
 
 struct Vehicle {
+  std::optional<objid> vehicleId;
   Input input;
   float speed;
 };
@@ -53,24 +54,39 @@ void handleInput(Input& input, int key, int action){
 
 
 void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 position){
-  auto query = gameapi -> compileSqlQuery(std::string("select name, model, speed from vehicles where name = ") +  name);
+  auto query = gameapi -> compileSqlQuery(std::string("select model, speed, camera_offset, physics_angle from vehicles where name = ") +  name);
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "query vehicle params invalid query");
   modassert(result.size() == 1, "invalid query result from vehicles");
   
-  auto model = strFromFirstSqlResult(result, 1);
-  auto speed = floatFromFirstSqlResult(result, 2);
+  auto model = strFromFirstSqlResult(result, 0);
+  auto speed = floatFromFirstSqlResult(result, 1);
+  auto cameraOffset = vec3FromFirstSqlResult(result, 2);
+  auto physicsAngle = vec3FromFirstSqlResult(result, 3);
+
+  float mass = 10.f;
 
 
   GameobjAttributes attr {
     .stringAttributes = { { "mesh", model }, { "physics", "enabled" }, { "physics_type", "dynamic" } },
-    .numAttributes = {},
-    .vecAttr = {  .vec3 = { { "position", position }},  .vec4 = {} },
+    .numAttributes = { { "mass", mass }},
+    .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }},  .vec4 = {} },
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto vehicleId = gameapi -> makeObjectAttr(sceneId, "code-vehicle", attr, submodelAttributes);
+  vehicle.vehicleId = vehicleId;
+
+  GameobjAttributes camAttr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = {  .vec3 = { { "position", cameraOffset }},  .vec4 = {} },
+  };
+
+  auto cameraId = gameapi -> makeObjectAttr(sceneId, ">code-vehicle-cam", camAttr, submodelAttributes);
+  gameapi -> makeParent(cameraId.value(), vehicleId.value());
+
 
   vehicle.speed = speed;
 
@@ -81,15 +97,20 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
 }
 
-void moveVehicle(objid id, glm::vec3 direction){
-  float time = gameapi -> timeElapsed();
-  gameapi -> applyImpulseRel(id, time * glm::vec3(direction.x, direction.y, direction.z));
+void moveVehicle(Vehicle& vehicle, objid id, glm::vec3 direction){
+  if (vehicle.vehicleId.has_value()){
+    float time = gameapi -> timeElapsed();
+    gameapi -> applyImpulseRel(vehicle.vehicleId.value(), time * glm::vec3(direction.x, direction.y, direction.z));
+  }
 }
 
 CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Vehicle* vehicle = new Vehicle;
+
+    vehicle -> vehicleId = std::nullopt;
+
     vehicle -> input.goForward = false;
     vehicle -> input.goBackward = false;
     vehicle -> input.goLeft = false;
@@ -97,7 +118,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
 
     vehicle -> speed = 1.f;
 
-    //createVehicle(*vehicle, "digmole", sceneId, glm::vec3(0.f, -10.f, 50.f));
+    createVehicle(*vehicle, "digmole", sceneId, glm::vec3(0.f, -10.f, 50.f));
 
     return vehicle;
   };
@@ -111,19 +132,19 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     if (vehicle -> input.goForward){
       auto moveVec = vehicle -> speed * glm::vec3(0.f, 0.f, -1.f);
-      moveVehicle(id, moveVec);
+      moveVehicle(*vehicle, id, moveVec);
     }
     if (vehicle -> input.goBackward){
       auto moveVec = vehicle -> speed * glm::vec3(0.f, 0.f, 1.f);
-      moveVehicle(id, moveVec);
+      moveVehicle(*vehicle, id, moveVec);
     }
     if (vehicle -> input.goLeft){
       auto moveVec = vehicle -> speed * glm::vec3(-1.f, 0.f, 0.f);
-      moveVehicle(id, moveVec);
+      moveVehicle(*vehicle, id, moveVec);
     }
     if (vehicle -> input.goRight){
       auto moveVec = vehicle -> speed * glm::vec3(1.f, 0.f, 0.f);
-      moveVehicle(id, moveVec);
+      moveVehicle(*vehicle, id, moveVec);
     }
   };
 
