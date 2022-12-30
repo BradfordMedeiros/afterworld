@@ -1,0 +1,2 @@
+vehicles.name:STRING,vehicles.model:STRING,vehicles.speed:STRING
+digmole,../gameresources/build/uncategorized/bot-digmole.gltf,5
