@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include "./movement.h"
 #include "./menu.h"
 #include "./daynight.h"

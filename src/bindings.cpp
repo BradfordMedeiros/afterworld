@@ -5,6 +5,8 @@ CustomApiBindings* gameapi = NULL;
 std::vector<std::string> defaultScenes = { "./res/scenes/editor/console.rawscene" };
 std::vector<std::string> managedTags = { "game-level" };
 
+std::stack<objid> cameras = {};
+
 struct Level {
   std::string scene;
   std::string name;
@@ -33,7 +35,8 @@ void goToLevel(GameState& gameState, std::string sceneName){
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
   auto optCameraId = gameapi -> getGameObjectByName(">maincamera", sceneId, false);
   if (optCameraId.has_value()){
-    gameapi ->  setActiveCamera(optCameraId.value(), -1);
+    cameras = {};
+    gameapi -> sendNotifyMessage("request:change-control", std::to_string(optCameraId.value()));
   }
 }
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -58,6 +61,7 @@ void goToMenu(GameState& gameState){
     unloadAllManagedScenes();
   }
   gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
+  cameras = {};
 }
 void handleLevelUp(GameState& gameState){
   if (gameState.loadedLevel.has_value()){
@@ -244,6 +248,45 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(strValue != NULL, "switch value invalid");
       handleSwitch(*strValue);
       return;
+    }
+
+    if (key == "request:change-control"){
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "selected value invalid");
+      auto gameObjId = std::atoi(strValue -> c_str());
+      if (cameras.size() != 0 && gameObjId == cameras.top()){
+        std::cout << "returning because: " << gameObjId << " is " << cameras.top() << std::endl;
+        return;
+      }
+      auto gameobjName = gameapi -> getGameObjNameForId(gameObjId);
+      if (!gameobjName.has_value()){
+        return;
+      }
+      std::cout << "request change camera: " << gameobjName.value() << std::endl;
+      gameapi ->  setActiveCamera(gameObjId, -1);
+      cameras.push(gameObjId);
+      //auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+      //auto pickup = getStrAttr(objAttr, "pickup");
+      return;
+    }
+
+    if (key == "request:release-control"){
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "selected value invalid");
+      auto gameObjId = std::atoi(strValue -> c_str());
+      auto gameobjName = gameapi -> getGameObjNameForId(gameObjId);
+      if (!gameobjName.has_value()){
+        return;
+      }
+      if (cameras.size() != 0 && cameras.top() == gameObjId){
+        cameras.pop();
+      }
+
+      if (cameras.size() > 0){
+        auto previousCamera = cameras.top();
+        cameras.pop();
+        gameapi -> sendNotifyMessage("request:change-control", std::to_string(previousCamera));
+      }
     }
   };
 

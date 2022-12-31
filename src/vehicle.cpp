@@ -13,12 +13,13 @@ struct Input {
 
 struct Vehicle {
   std::optional<objid> vehicleId;
+  std::optional<objid> cameraId;
   Input input;
   float speed;
 };
 
 void handleInput(Input& input, int key, int action){
-  if (key == 265){
+  if (key == 'W'){
     if (action == 0){
       input.goForward = false;
     }else if (action == 1){
@@ -26,7 +27,7 @@ void handleInput(Input& input, int key, int action){
     }
     return;
   }
-  if (key == 264){
+  if (key == 'S'){
     if (action == 0){
       input.goBackward = false;
     }else if (action == 1){
@@ -34,7 +35,7 @@ void handleInput(Input& input, int key, int action){
     }
     return;
   }
-  if (key == 263){
+  if (key == 'A'){
     if (action == 0){
       input.goLeft = false;
     }else if (action == 1){
@@ -42,7 +43,7 @@ void handleInput(Input& input, int key, int action){
     }
     return;
   }
-  if (key == 262){
+  if (key == 'D'){
     if (action == 0){
       input.goRight = false;
     }else if (action == 1){
@@ -87,14 +88,9 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
   auto cameraId = gameapi -> makeObjectAttr(sceneId, ">code-vehicle-cam", camAttr, submodelAttributes);
   gameapi -> makeParent(cameraId.value(), vehicleId.value());
-
+  vehicle.cameraId = cameraId;
 
   vehicle.speed = speed;
-
-
-  //#bot:physics_angle:0 1 0
-  //bot:physics_mass:0.1
-  //bot:script:native/vehicle  
 
 }
 
@@ -111,6 +107,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     Vehicle* vehicle = new Vehicle;
 
     vehicle -> vehicleId = std::nullopt;
+    vehicle -> cameraId = std::nullopt;
 
     vehicle -> input.goForward = false;
     vehicle -> input.goBackward = false;
@@ -127,6 +124,9 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     handleInput(vehicle -> input, key, action);
+    if (key == 'E' && action == 1){
+      gameapi -> sendNotifyMessage("request:release-control", std::to_string(vehicle -> cameraId.value()));
+    }
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -146,6 +146,23 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     if (vehicle -> input.goRight){
       auto moveVec = vehicle -> speed * glm::vec3(1.f, 0.f, 0.f);
       moveVehicle(*vehicle, id, moveVec);
+    }
+  };
+
+  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+    Vehicle* vehicle = static_cast<Vehicle*>(data);
+    
+    if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
+      if (vehicle -> vehicleId.has_value()){
+        auto strValue = std::get_if<std::string>(&value); 
+        modassert(strValue != NULL, "selected value invalid");
+        auto gameObjId = std::atoi(strValue -> c_str());
+
+        std::cout << "vehicle selected: " << gameObjId << ", " << vehicle -> vehicleId.value() << std::endl;
+        if (gameObjId == vehicle -> vehicleId.value()){
+          gameapi -> sendNotifyMessage("request:change-control", std::to_string(vehicle -> cameraId.value()));
+        }
+      }
     }
   };
 

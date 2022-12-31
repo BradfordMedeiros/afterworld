@@ -28,6 +28,7 @@ struct Movement {
   bool goBackward;
   bool goLeft;
   bool goRight;
+  bool active;
 
 
   std::optional<objid> jumpSoundObjId;
@@ -222,6 +223,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> goBackward = false;
     movement -> goLeft = false;
     movement -> goRight = false;
+    movement -> active = false;
 
     movement -> jumpSoundObjId = std::nullopt;
     movement -> landSoundObjId = std::nullopt;
@@ -243,6 +245,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Movement* movement = static_cast<Movement*>(data);
+    if (!movement -> active){
+      return;
+    }
     if (key == 'W'){
       if (action == 0){
         movement -> goForward = false;
@@ -288,6 +293,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
+    if (!movement -> active){
+      return;
+    }
     movement -> lookVelocity = glm::vec2(xPos, yPos);
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -349,6 +357,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "reload-config:settings reload value invalid");
       reloadSettingsConfig(*movement, *strValue);      
+    }else if (key == "request:change-control"){
+      Movement* movement = static_cast<Movement*>(data);
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "selected value invalid");
+      auto gameObjId = std::atoi(strValue -> c_str());
+      movement -> active = gameObjId == id;
     }
   };
 
