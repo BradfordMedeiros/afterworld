@@ -54,7 +54,7 @@ void handleInput(Input& input, int key, int action){
 
 
 void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 position){
-  auto query = gameapi -> compileSqlQuery(std::string("select model, speed, camera_offset, physics_angle from vehicles where name = ") +  name);
+  auto query = gameapi -> compileSqlQuery(std::string("select model, speed, camera_offset, physics_angle, physics_linear from vehicles where name = ") +  name);
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "query vehicle params invalid query");
@@ -64,6 +64,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   auto speed = floatFromFirstSqlResult(result, 1);
   auto cameraOffset = vec3FromFirstSqlResult(result, 2);
   auto physicsAngle = vec3FromFirstSqlResult(result, 3);
+  auto physicsLinear = vec3FromFirstSqlResult(result, 4);
 
   float mass = 10.f;
 
@@ -71,7 +72,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   GameobjAttributes attr {
     .stringAttributes = { { "mesh", model }, { "physics", "enabled" }, { "physics_type", "dynamic" } },
     .numAttributes = { { "mass", mass }},
-    .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }},  .vec4 = {} },
+    .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }, { "physics_linear", physicsLinear }},  .vec4 = {} },
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
