@@ -122,6 +122,10 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
 
     return vehicle;
   };
+  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
+    Vehicle* vehicle = static_cast<Vehicle*>(data);
+    delete vehicle;
+  };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Vehicle* vehicle = static_cast<Vehicle*>(data);
