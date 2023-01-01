@@ -12,6 +12,7 @@ struct Input {
 
 
 struct Vehicle {
+  bool active;
   std::optional<objid> vehicleId;
   std::optional<objid> cameraId;
   Input input;
@@ -106,6 +107,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Vehicle* vehicle = new Vehicle;
 
+    vehicle -> active = false;
     vehicle -> vehicleId = std::nullopt;
     vehicle -> cameraId = std::nullopt;
 
@@ -126,11 +128,15 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     handleInput(vehicle -> input, key, action);
     if (key == 'E' && action == 1){
       gameapi -> sendNotifyMessage("request:release-control", std::to_string(vehicle -> cameraId.value()));
+      vehicle -> active = false;
     }
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
     Vehicle* vehicle = static_cast<Vehicle*>(data);
+    if (!vehicle -> active){
+      return;
+    }
     if (vehicle -> input.goForward){
       auto moveVec = vehicle -> speed * glm::vec3(0.f, 0.f, -1.f);
       moveVehicle(*vehicle, id, moveVec);
@@ -151,7 +157,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
     Vehicle* vehicle = static_cast<Vehicle*>(data);
-    
+
     if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
       if (vehicle -> vehicleId.has_value()){
         auto strValue = std::get_if<std::string>(&value); 
@@ -161,6 +167,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
         std::cout << "vehicle selected: " << gameObjId << ", " << vehicle -> vehicleId.value() << std::endl;
         if (gameObjId == vehicle -> vehicleId.value()){
           gameapi -> sendNotifyMessage("request:change-control", std::to_string(vehicle -> cameraId.value()));
+          vehicle -> active = true;
         }
       }
     }

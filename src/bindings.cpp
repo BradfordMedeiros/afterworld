@@ -305,6 +305,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
+  bindings.push_back(aiBinding(api, "native/ai"));
   bindings.push_back(movementBinding(api, "native/movement"));
   bindings.push_back(vehicleBinding(api, "native/vehicle"));
   bindings.push_back(menuBinding(api, "native/menu"));

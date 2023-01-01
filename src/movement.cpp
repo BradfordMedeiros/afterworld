@@ -245,9 +245,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> active){
-      return;
-    }
     if (key == 'W'){
       if (action == 0){
         movement -> goForward = false;
@@ -300,6 +297,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     Movement* movement = static_cast<Movement*>(data);
+    if (!movement -> active){
+      return;
+    }
     float moveSpeed = getMoveSpeed(*movement, false);
     float horzRelVelocity = 0.8f;
     if (movement -> goForward){

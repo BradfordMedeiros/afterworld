@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include "./ai.h"
 #include "./movement.h"
 #include "./menu.h"
 #include "./daynight.h"
