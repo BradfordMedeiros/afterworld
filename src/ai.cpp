@@ -55,8 +55,25 @@ struct Agent {
   objid id;
 };
 
+enum GoalType  { DO_NOTHING, MOVE_TO, EXPLORE, ATTACK, ACTIVATE };
+std::string goalTypeToStr(GoalType type){
+  if (type == DO_NOTHING){
+    return "idle";
+  }else if (type == MOVE_TO){
+    return "move";
+  }else if (type == EXPLORE){
+    return "explore";
+  }else if (type == ATTACK){
+    return "attack";
+  }else if (type == ACTIVATE){
+    return "activate";
+  }
+  modassert(false, "invalid goal type");
+  return "";
+}
 struct Goal {
   int name;
+  GoalType type;
   std::function<int(WorldInfo&)> score;
 };
 
@@ -71,7 +88,9 @@ struct AiTools {
 };
 struct AiData {
   AiTools tools;
+  std::vector<Goal> goals;
 };
+
 
 
 int symbolIndex = -1;
@@ -94,39 +113,45 @@ std::string nameForGoalSymbol(int symbol){
   return "";
 }
 
-std::vector<Goal> goals = {  // these goals should be able to be dynamic, for example, be constructed by placing two bags of gold and having them pick up the one with higher worth
-  Goal { 
-    .name = goalSymbol("idle"), 
-    .score = [](WorldInfo&) -> int { return 1; }
-  },
-  Goal { 
-    .name = goalSymbol("moveToPlayer"), 
-    .score = [](WorldInfo& info) -> int { 
-      if (!info.canSeePlayer){
-        return 0;
-      }
-      return 10;
-    }
-  },
-  Goal {
-    .name = goalSymbol("shootPlayer"),
-    .score = [](WorldInfo& info) -> int {
-      if (info.canShootPlayer){
-        return 20;
-      }else{
-        return 0;  // alternatively maybe make this have a dependency on goal moveToPlayer (and add some idea of goal being completed)
-      }
-    }
-  },
-  Goal {
-    .name = goalSymbol("explore"),
-    .score = [](WorldInfo& info) -> int {
-      return info.isAlerted ? 5 : 0;
-    }
-  },
-};
+Goal createIdleGoal(std::string name, int score){
+  return Goal { 
+    .name = goalSymbol(name), 
+    .type = DO_NOTHING,
+    .score = [score](WorldInfo&) -> int { return score; }
+  };
+}
 
-Goal& getOptimalGoal(WorldInfo& worldInfo, Agent& agent){
+Goal createMoveToGoal(std::string name, int score){
+  return Goal { 
+    .name = goalSymbol(name), 
+    .type = MOVE_TO,
+    .score = [score](WorldInfo&) -> int { return score; }
+  };
+}
+Goal createAttackGoal(std::string name){
+  return Goal { 
+    .name = goalSymbol(name), 
+    .type = ATTACK,
+    .score = [](WorldInfo&) -> int { return 0.f; }
+  };
+}
+Goal createActivateGoal(std::string name){
+  return Goal { 
+    .name = goalSymbol(name), 
+    .type = ACTIVATE,
+    .score = [](WorldInfo&) -> int { return 0.f; }
+  };
+}
+Goal createExploreGoal(std::string name){
+  return Goal { 
+    .name = goalSymbol(name), 
+    .type = EXPLORE,
+    .score = [](WorldInfo&) -> int { return 0.f; }
+  };
+}
+
+
+Goal& getOptimalGoal(std::vector<Goal>& goals, WorldInfo& worldInfo, Agent& agent){
   modassert(goals.size() > 0, "no goals in list for agent");
   int maxScore = goals.at(0).score(worldInfo);
   int maxScoreIndex = 0;
@@ -141,17 +166,9 @@ Goal& getOptimalGoal(WorldInfo& worldInfo, Agent& agent){
 }
 
 void actionMoveTowardPosition(WorldInfo& worldInfo, AiTools& tools){
-  //(define (move-toward targetpos)
-  //(define currentpos (gameobj-pos mainobj))
-  //(define toward-target (orientation-from-pos currentpos targetpos))
-  //(define newpos (move-relative currentpos toward-target (* (time-elapsed) speed-per-second)))
-  //(gameobj-setpos! mainobj newpos)
-  //(gameobj-setrot! mainobj toward-target)
-
-
   auto agentPos = tools.getAgentPosition();
   auto playerPos = tools.getPlayerPosition();
-  auto towardTarget = gameapi -> orientationFromPos(agentPos, playerPos);
+  auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(playerPos.x, agentPos.y, playerPos.z));
   auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 1 * gameapi -> timeElapsed());
   tools.setAgentPosition(newPos);
   tools.setAgentRotation(towardTarget);
@@ -204,10 +221,41 @@ void detectWorldInfo(WorldInfo& worldInfo, AiTools& tools){
 
 
 // insert goals objects into the scene that exist
-// ~nil:goalname:flag
-// ~nil:action:goto, shoot, activate, explore-around
+// ~nil:goal:flag
+// ~nil:type:goto, shoot, activate, explore-around
 // ~nil:action-value:friendly,100
 // ~nil:depends-on:gate-unlocked
+
+GoalType strToGoalType(std::optional<std::string> value){
+  //DO_NOTHING, MOVE_TO, EXPLORE, ATTACK, ACTIVATE
+  modassert(value.has_value(), "goal-type not specified");
+  if (value.value() == "idle"){
+    return DO_NOTHING;
+  }else if (value.value() == "move"){
+    return MOVE_TO;
+  }else if (value.value() == "explore"){
+    return EXPLORE;
+  }else if (value.value() == "attack"){
+    return ATTACK;
+  }else if (value.value() == "activate"){
+    return ACTIVATE;
+  }
+  modassert(false, "invalid goal type str: " + value.value());
+  return DO_NOTHING;
+}
+void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the game too 
+  auto goalObjects = gameapi -> getObjectsByAttr("goal", std::nullopt, std::nullopt);
+  std::cout << "goal objects size: " << goalObjects.size() << std::endl;
+
+  for (auto id : goalObjects){
+    auto objAttr =  gameapi -> getGameObjectAttr(id);
+    auto goalName = getStrAttr(objAttr, "goal");
+    auto goalType = strToGoalType(getStrAttr(objAttr, "goal-type"));
+    auto goalValue = getFloatAttr(objAttr, "goal-value");
+    std::cout << "goal: name = " << goalName.value() << ", type = " << goalTypeToStr(goalType) << ", value = " << goalValue.value() << std::endl;
+  }
+
+}
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -230,6 +278,38 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
         gameapi -> setGameObjectRot(id, rot);
       },
     };
+
+    aiData -> goals = {  // these goals should be able to be dynamic, for example, be constructed by placing two bags of gold and having them pick up the one with higher worth
+      createIdleGoal("idle", 1),
+      Goal { 
+        .name = goalSymbol("moveToPlayer"),
+        //.conditions = { GoalCondition { .key = goalSymbol("canSeePlayer"), .value = true } }, 
+        .score = [](WorldInfo& info) -> int { 
+          if (!info.canSeePlayer){
+            return 0;
+          }
+          return 10;
+        }
+      },
+      Goal {
+        .name = goalSymbol("shootPlayer"),
+        .score = [](WorldInfo& info) -> int {
+          if (info.canShootPlayer){
+            return 20;
+          }else{
+            return 0;  // alternatively maybe make this have a dependency on goal moveToPlayer (and add some idea of goal being completed)
+          }
+        }
+      },
+      Goal {
+        .name = goalSymbol("explore"),
+        .score = [](WorldInfo& info) -> int {
+          return info.isAlerted ? 5 : 0;
+        }
+      },
+    };
+    addGoals(aiData -> goals);
+
     return aiData;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -243,8 +323,9 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
       .id = id 
     };
     WorldInfo worldInfo {};
+
     detectWorldInfo(worldInfo, aiData -> tools);
-    auto goal = getOptimalGoal(worldInfo, agent);
+    auto goal = getOptimalGoal(aiData -> goals, worldInfo, agent);
     std::cout << "executing goal: " << nameForGoalSymbol(goal.name) << std::endl;
     doGoal(worldInfo, agent, goal, aiData -> tools);
   };
