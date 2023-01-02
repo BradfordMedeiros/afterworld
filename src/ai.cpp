@@ -121,44 +121,6 @@ std::string nameForGoalSymbol(int symbol){
   return "";
 }
 
-Goal createIdleGoal(std::string name, int score){
-  return Goal { 
-    .name = goalSymbol(name), 
-    .typeValue = IdleGoal {},
-    .score = [score](WorldInfo&) -> int { return score; }
-  };
-}
-
-Goal createMoveToGoal(std::string name, int score){
-  return Goal { 
-    .name = goalSymbol(name), 
-    .typeValue = MoveToGoal { .getPosition = []() -> glm::vec3 { return glm::vec3(0.f, 0.f, 0.f); }},
-    .score = [score](WorldInfo&) -> int { return score; }
-  };
-}
-Goal createAttackGoal(std::string name){
-  return Goal { 
-    .name = goalSymbol(name), 
-    .typeValue = AttackGoal {},
-    .score = [](WorldInfo&) -> int { return 0.f; }
-  };
-}
-Goal createActivateGoal(std::string name){
-  return Goal { 
-    .name = goalSymbol(name), 
-    .typeValue = ActivateGoal {},
-    .score = [](WorldInfo&) -> int { return 0.f; }
-  };
-}
-Goal createExploreGoal(std::string name){
-  return Goal { 
-    .name = goalSymbol(name), 
-    .typeValue = ExploreGoal {},
-    .score = [](WorldInfo&) -> int { return 0.f; }
-  };
-}
-
-
 Goal& getOptimalGoal(std::vector<Goal>& goals, WorldInfo& worldInfo, Agent& agent){
   modassert(goals.size() > 0, "no goals in list for agent");
   int maxScore = goals.at(0).score(worldInfo);
@@ -173,17 +135,15 @@ Goal& getOptimalGoal(std::vector<Goal>& goals, WorldInfo& worldInfo, Agent& agen
   return goals.at(maxScoreIndex);
 }
 
-void actionMoveTowardPosition(WorldInfo& worldInfo, AiTools& tools){
-
-}
-
-void actionMoveTowardPlayer(WorldInfo& worldInfo, AiTools& tools){
+void moveTo(AiTools& tools, glm::vec3 playerPos){
   auto agentPos = tools.getAgentPosition();
-  auto playerPos = tools.getPlayerPosition();
   auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(playerPos.x, agentPos.y, playerPos.z));
   auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 1 * gameapi -> timeElapsed());
   tools.setAgentPosition(newPos);
   tools.setAgentRotation(towardTarget);
+}
+void actionMoveTo(WorldInfo& worldInfo, AiTools& tools, MoveToGoal& moveToGoal){
+  moveTo(tools, moveToGoal.getPosition());
 }
 
 void actionShootPlayer(WorldInfo& worldInfo, AiTools& tools){
@@ -191,26 +151,15 @@ void actionShootPlayer(WorldInfo& worldInfo, AiTools& tools){
 }
 
 void doGoal(WorldInfo& worldInfo, Agent& agent, Goal& goal, AiTools& tools){
-  static int idle = goalSymbol("idle");
-  static int moveToPlayer = goalSymbol("moveToPlayer");
-  static int shootPlayer = goalSymbol("shootPlayer");
-  if (goal.name == idle){
-    // do nothing
+  auto idleGoal = std::get_if<IdleGoal>(&goal.typeValue);
+  if (idleGoal != NULL){
     return;
   }
-  if (goal.name == moveToPlayer){
-    actionMoveTowardPlayer(worldInfo, tools);
+  auto moveToGoal = std::get_if<MoveToGoal>(&goal.typeValue);
+  if (moveToGoal != NULL){
+    actionMoveTo(worldInfo, tools, *moveToGoal);
     return;
   }
-  if (std::get_if<MoveToGoal>(&goal.typeValue) != NULL){
-    return;
-  }
-
-  if (goal.name == shootPlayer){
-    actionShootPlayer(worldInfo, tools);
-    return;
-  }
-
 
   modassert(false, "invalid goal name: " + nameForGoalSymbol(goal.name));
 }
@@ -258,15 +207,45 @@ void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the 
     std::cout << "goal: name = " << goalName.value() << ", type = " << goalType << ", value = " << goalValue << std::endl;
 
     if (goalType == "idle"){
-      goals.push_back(createIdleGoal(goalName.value(), goalValue));
+      goals.push_back(
+        Goal { 
+          .name = goalSymbol(goalName.value()), 
+          .typeValue = IdleGoal {},
+          .score = [goalValue](WorldInfo&) -> int { return goalValue; }
+        }
+      );
     }else if (goalType == "move"){
-      goals.push_back(createMoveToGoal(goalName.value(), goalValue));
+      goals.push_back(
+        Goal { 
+          .name = goalSymbol(goalName.value()), 
+          .typeValue = MoveToGoal { .getPosition = [id]() -> glm::vec3 { return gameapi -> getGameObjectPos(id, true); }},
+          .score = [goalValue](WorldInfo&) -> int { return goalValue; }
+        }
+      );
     }else if (goalType == "explore"){
-      goals.push_back(createExploreGoal(goalName.value()));
+      goals.push_back(
+        Goal { 
+          .name = goalSymbol(goalName.value()), 
+          .typeValue = ExploreGoal {},
+          .score = [](WorldInfo&) -> int { return 0.f; }
+        }
+      );
     }else if (goalType == "attack"){
-      goals.push_back(createAttackGoal(goalName.value()));
+      goals.push_back(
+        Goal { 
+          .name = goalSymbol(goalName.value()), 
+          .typeValue = AttackGoal {},
+          .score = [](WorldInfo&) -> int { return 0.f; }
+        }
+      );
     }else if (goalType == "activate"){
-      goals.push_back(createActivateGoal(goalName.value()));
+      goals.push_back(
+        Goal { 
+            .name = goalSymbol(goalName.value()), 
+            .typeValue = ActivateGoal {},
+            .score = [](WorldInfo&) -> int { return 0.f; }
+        }
+      );
     }else{
       modassert(false, "invalid goal type");
     }
@@ -296,34 +275,36 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
       },
     };
 
+    //ScorerFn = { SimplerScore { Key: getSymboL("canSeePlayer"), Multipler: 0  }};
+
     aiData -> goals = {  // these goals should be able to be dynamic, for example, be constructed by placing two bags of gold and having them pick up the one with higher worth
-      createIdleGoal("idle", 1),
-      Goal { 
-        .name = goalSymbol("moveToPlayer"),
-        //.conditions = { GoalCondition { .key = goalSymbol("canSeePlayer"), .value = true } }, 
-        .score = [](WorldInfo& info) -> int { 
-          if (!info.canSeePlayer){
-            return 0;
-          }
-          return 10;
-        }
-      },
-      Goal {
-        .name = goalSymbol("shootPlayer"),
-        .score = [](WorldInfo& info) -> int {
-          if (info.canShootPlayer){
-            return 20;
-          }else{
-            return 0;  // alternatively maybe make this have a dependency on goal moveToPlayer (and add some idea of goal being completed)
-          }
-        }
-      },
-      Goal {
-        .name = goalSymbol("explore"),
-        .score = [](WorldInfo& info) -> int {
-          return info.isAlerted ? 5 : 0;
-        }
-      },
+      //Goal { 
+      //  .name = goalSymbol("moveToPlayer"),
+      //  .typeValue = MoveToGoal { .getPosition = [aiData]() -> glm::vec3 { return aiData -> tools.getPlayerPosition(); }},
+      //  //.conditions = { GoalCondition { .key = goalSymbol("canSeePlayer"), .value = true } }, 
+      //  .score = [](WorldInfo& info) -> int { 
+      //    if (!info.canSeePlayer){
+      //      return 0;
+      //    }
+      //    return 10;
+      //  }
+      //},
+      //Goal {
+      //  .name = goalSymbol("shootPlayer"),
+      //  .score = [](WorldInfo& info) -> int {
+      //    if (info.canShootPlayer){
+      //      return 20;
+      //    }else{
+      //      return 0;  // alternatively maybe make this have a dependency on goal moveToPlayer (and add some idea of goal being completed)
+      //    }
+      //  }
+      //},
+      //Goal {
+      //  .name = goalSymbol("explore"),
+      //  .score = [](WorldInfo& info) -> int {
+      //    return info.isAlerted ? 5 : 0;
+      //  }
+      //},
     };
     addGoals(aiData -> goals);
 

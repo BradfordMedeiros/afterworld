@@ -30,7 +30,7 @@ item:physics:enabled
 item:physics_type:dynamic
 item:pickup:gold
 item:pickup-amount:100
-item:pickup-type:replacde
+item:pickup-type:replace
 item:pickup-trigger:gold
 
 controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -75,8 +75,36 @@ gunlogic:script:native/weapon
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
+>maincamera:goal:player
+>maincamera:goal-type:move
+>maincamera:goal-value:5
+>maincamera:goal-conditions:in-range
+>maincamera:goal-conditions-val:20
+
+
+enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+enemy:position:0 -10 70
+enemy:physics_angle:0 0 0
+enemy:physics:enabled
+enemy:physics_type:dynamic
+enemy:script:native/ai
+enemy:tint:1 0 0 1
+enemy:goal:idle-enemy
+enemy:goal-type:idle
+enemy:goal-value:2
+enemy:agent:true
+
+goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+goal:scale:0.2 0.2 0.2
+goal:tint:1 0 0 1
+goal:position:0 50 100
+goal:goal:importantplace
+goal:goal-type:move
+goal:goal-value:9
 
 hud:script:native/hud
 dialog:script:native/dialog
 inventory:script:native/inventory
-
+vehicles:script:native/vehicle
+#vehicles2:script:native/vehicle
+daynight:script:native/daynight
