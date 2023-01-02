@@ -55,25 +55,34 @@ struct Agent {
   objid id;
 };
 
-enum GoalType  { DO_NOTHING, MOVE_TO, EXPLORE, ATTACK, ACTIVATE };
-std::string goalTypeToStr(GoalType type){
-  if (type == DO_NOTHING){
+struct IdleGoal { };
+struct MoveToGoal { std::function<glm::vec3()> getPosition; };
+struct ExploreGoal { };
+struct AttackGoal { };
+struct ActivateGoal { };
+typedef std::variant<IdleGoal, MoveToGoal, ExploreGoal, AttackGoal, ActivateGoal> GoalTypeValue;
+
+
+std::string goalTypeToStr(GoalTypeValue& type){
+  if (std::get_if<IdleGoal>(&type) != NULL){
     return "idle";
-  }else if (type == MOVE_TO){
+  }else if (std::get_if<MoveToGoal>(&type) != NULL){
     return "move";
-  }else if (type == EXPLORE){
+  }else if (std::get_if<ExploreGoal>(&type) != NULL){
     return "explore";
-  }else if (type == ATTACK){
+  }else if (std::get_if<AttackGoal>(&type) != NULL){
     return "attack";
-  }else if (type == ACTIVATE){
+  }else if (std::get_if<ActivateGoal>(&type) != NULL){
     return "activate";
   }
   modassert(false, "invalid goal type");
   return "";
 }
+
+
 struct Goal {
   int name;
-  GoalType type;
+  GoalTypeValue typeValue;
   std::function<int(WorldInfo&)> score;
 };
 
@@ -90,7 +99,6 @@ struct AiData {
   AiTools tools;
   std::vector<Goal> goals;
 };
-
 
 
 int symbolIndex = -1;
@@ -116,7 +124,7 @@ std::string nameForGoalSymbol(int symbol){
 Goal createIdleGoal(std::string name, int score){
   return Goal { 
     .name = goalSymbol(name), 
-    .type = DO_NOTHING,
+    .typeValue = IdleGoal {},
     .score = [score](WorldInfo&) -> int { return score; }
   };
 }
@@ -124,28 +132,28 @@ Goal createIdleGoal(std::string name, int score){
 Goal createMoveToGoal(std::string name, int score){
   return Goal { 
     .name = goalSymbol(name), 
-    .type = MOVE_TO,
+    .typeValue = MoveToGoal { .getPosition = []() -> glm::vec3 { return glm::vec3(0.f, 0.f, 0.f); }},
     .score = [score](WorldInfo&) -> int { return score; }
   };
 }
 Goal createAttackGoal(std::string name){
   return Goal { 
     .name = goalSymbol(name), 
-    .type = ATTACK,
+    .typeValue = AttackGoal {},
     .score = [](WorldInfo&) -> int { return 0.f; }
   };
 }
 Goal createActivateGoal(std::string name){
   return Goal { 
     .name = goalSymbol(name), 
-    .type = ACTIVATE,
+    .typeValue = ActivateGoal {},
     .score = [](WorldInfo&) -> int { return 0.f; }
   };
 }
 Goal createExploreGoal(std::string name){
   return Goal { 
     .name = goalSymbol(name), 
-    .type = EXPLORE,
+    .typeValue = ExploreGoal {},
     .score = [](WorldInfo&) -> int { return 0.f; }
   };
 }
@@ -166,6 +174,10 @@ Goal& getOptimalGoal(std::vector<Goal>& goals, WorldInfo& worldInfo, Agent& agen
 }
 
 void actionMoveTowardPosition(WorldInfo& worldInfo, AiTools& tools){
+
+}
+
+void actionMoveTowardPlayer(WorldInfo& worldInfo, AiTools& tools){
   auto agentPos = tools.getAgentPosition();
   auto playerPos = tools.getPlayerPosition();
   auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(playerPos.x, agentPos.y, playerPos.z));
@@ -187,13 +199,20 @@ void doGoal(WorldInfo& worldInfo, Agent& agent, Goal& goal, AiTools& tools){
     return;
   }
   if (goal.name == moveToPlayer){
-    actionMoveTowardPosition(worldInfo, tools);
+    actionMoveTowardPlayer(worldInfo, tools);
     return;
   }
+  if (std::get_if<MoveToGoal>(&goal.typeValue) != NULL){
+    return;
+  }
+
   if (goal.name == shootPlayer){
     actionShootPlayer(worldInfo, tools);
     return;
   }
+
+
+  modassert(false, "invalid goal name: " + nameForGoalSymbol(goal.name));
 }
 
 
@@ -226,23 +245,6 @@ void detectWorldInfo(WorldInfo& worldInfo, AiTools& tools){
 // ~nil:action-value:friendly,100
 // ~nil:depends-on:gate-unlocked
 
-GoalType strToGoalType(std::optional<std::string> value){
-  //DO_NOTHING, MOVE_TO, EXPLORE, ATTACK, ACTIVATE
-  modassert(value.has_value(), "goal-type not specified");
-  if (value.value() == "idle"){
-    return DO_NOTHING;
-  }else if (value.value() == "move"){
-    return MOVE_TO;
-  }else if (value.value() == "explore"){
-    return EXPLORE;
-  }else if (value.value() == "attack"){
-    return ATTACK;
-  }else if (value.value() == "activate"){
-    return ACTIVATE;
-  }
-  modassert(false, "invalid goal type str: " + value.value());
-  return DO_NOTHING;
-}
 void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the game too 
   auto goalObjects = gameapi -> getObjectsByAttr("goal", std::nullopt, std::nullopt);
   std::cout << "goal objects size: " << goalObjects.size() << std::endl;
@@ -250,9 +252,24 @@ void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the 
   for (auto id : goalObjects){
     auto objAttr =  gameapi -> getGameObjectAttr(id);
     auto goalName = getStrAttr(objAttr, "goal");
-    auto goalType = strToGoalType(getStrAttr(objAttr, "goal-type"));
-    auto goalValue = getFloatAttr(objAttr, "goal-value");
-    std::cout << "goal: name = " << goalName.value() << ", type = " << goalTypeToStr(goalType) << ", value = " << goalValue.value() << std::endl;
+    auto goalType = getStrAttr(objAttr, "goal-type").value();
+    auto optGoalValue = getFloatAttr(objAttr, "goal-value");
+    auto goalValue = optGoalValue.has_value() ? optGoalValue.value() : 1;
+    std::cout << "goal: name = " << goalName.value() << ", type = " << goalType << ", value = " << goalValue << std::endl;
+
+    if (goalType == "idle"){
+      goals.push_back(createIdleGoal(goalName.value(), goalValue));
+    }else if (goalType == "move"){
+      goals.push_back(createMoveToGoal(goalName.value(), goalValue));
+    }else if (goalType == "explore"){
+      goals.push_back(createExploreGoal(goalName.value()));
+    }else if (goalType == "attack"){
+      goals.push_back(createAttackGoal(goalName.value()));
+    }else if (goalType == "activate"){
+      goals.push_back(createActivateGoal(goalName.value()));
+    }else{
+      modassert(false, "invalid goal type");
+    }
   }
 
 }
