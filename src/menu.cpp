@@ -11,8 +11,12 @@ struct MenuState {
 };
 
 void scrollTexture(MenuState& menuState, objid id){
+	auto objAttr =  gameapi -> getGameObjectAttr(id);
+	auto scrollSpeedAttr = getFloatAttr(objAttr, "scrollspeed");
+	auto scrollSpeed = scrollSpeedAttr.has_value() ? scrollSpeedAttr.value() : 0.1f;
+
 	auto currTime = gameapi -> timeSeconds(false);
-	float delta = menuState.elapsedTime * 0.01f;
+	float delta = menuState.elapsedTime * scrollSpeed;
 	float colorDelta = menuState.elapsedTime * 0.1f;
 	menuState.elapsedTime = currTime - menuState.lastTime;
 	menuState.lastTime = currTime;

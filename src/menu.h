@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
+#include "./util.h"
 
 CScriptBinding menuBinding(CustomApiBindings& api, const char* name);
 
