@@ -54,9 +54,11 @@ CScriptBinding daynightBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     auto args = gameapi -> getArgs();
     if (args.find("light") != args.end()){
-      auto lightValue = args.at("light");
-      auto color = lightValue == "" ? parseVec(lightValue) : glm::vec3(1.f, 1.f, 1.f);
-      //std::cout << "lightvalue = " << lightValue << ", color = " << print(color) << std::endl;
+      auto lightValue = args.at("light");  // on terminal can pass in eg -a "light=1\ 1\ 0"
+
+      glm::vec3 color(1.f, 1.f, 1.f);
+      auto isVec3 = maybeParseVec(lightValue, color);
+      modassert(isVec3, "invalid value for light: " + lightValue);
       spawnLight(0, color);
     }
     return NULL;
