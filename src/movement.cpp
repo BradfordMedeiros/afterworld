@@ -33,6 +33,7 @@ struct Movement {
 
   std::optional<objid> jumpSoundObjId;
   std::optional<objid> landSoundObjId;
+  std::optional<objid> moveSoundObjId;
 
   glm::vec2 lookVelocity;
   float xRot; // up and down
@@ -73,8 +74,8 @@ void moveXZ(objid id, glm::vec2 direction){
 }
 
 float ironsightSpeedMultiplier = 0.4f;
-float getMoveSpeed(Movement& movement, bool ironsight){
-  auto speed = movement.groundedObjId.has_value() ? movement.moveParams.moveSpeed : movement.moveParams.moveSpeedAir;
+float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
+  auto speed = isGrounded ? movement.moveParams.moveSpeed : movement.moveParams.moveSpeedAir;
   if (ironsight){
     speed = speed * ironsightSpeedMultiplier;
   }
@@ -183,15 +184,19 @@ objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
 struct SoundConfig {
   std::string jumpClip;
   std::string landClip;
+  std::string moveClip;
 };
 void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
   movement.jumpSoundObjId = createSound(id, "&code-movement-jump", config.jumpClip);
   movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
+  if (config.moveClip != ""){
+    movement.moveSoundObjId = createSound(id, "&code-move", config.moveClip);
+  }
 }
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound from traits where profile = " + name
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound from traits where profile = " + name
   );
   bool validTraitSql = false;
   auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
@@ -201,6 +206,7 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
   updateSoundConfig(movement, id, SoundConfig {
     .jumpClip = traitsResult.at(0).at(9),
     .landClip = traitsResult.at(0).at(10),
+    .moveClip = traitsResult.at(0).at(13),
   });
 }
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -227,6 +233,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     movement -> jumpSoundObjId = std::nullopt;
     movement -> landSoundObjId = std::nullopt;
+    movement -> moveSoundObjId = std::nullopt;
 
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
     movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
@@ -300,23 +307,33 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (!movement -> active){
       return;
     }
-    float moveSpeed = getMoveSpeed(*movement, false);
+
+    bool isGrounded = movement -> groundedObjId.has_value();
+    float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     float horzRelVelocity = 0.8f;
+
+    glm::vec2 moveVec(0.f, 0.f);
     if (movement -> goForward){
-      auto moveVec = moveSpeed * glm::vec2(0.f, -1.f);
+      moveVec = moveSpeed * glm::vec2(0.f, -1.f);
       moveXZ(id, moveVec);
     }
     if (movement -> goBackward){
-      auto moveVec = moveSpeed * glm::vec2(0.f, 1.f);
+      moveVec = moveSpeed * glm::vec2(0.f, 1.f);
       moveXZ(id, moveVec);
     }
     if (movement -> goLeft){
-      auto moveVec = moveSpeed * glm::vec2(horzRelVelocity * -1.f, 0.f);
+      moveVec = moveSpeed * glm::vec2(horzRelVelocity * -1.f, 0.f);
       moveXZ(id, moveVec);
     }
     if (movement -> goRight){
-      auto moveVec = moveSpeed * glm::vec2(horzRelVelocity * 1.f, 0.f);
+      moveVec = moveSpeed * glm::vec2(horzRelVelocity * 1.f, 0.f);
       moveXZ(id, moveVec);
+    }
+
+    if (glm::length(moveVec) > 0.2 && isGrounded && movement -> moveSoundObjId.has_value()){
+      // move-sound-distance:STRING move-sound-mintime:STRING
+      std::cout << "should play move clip" << std::endl;
+      gameapi -> playClip("&code-move", gameapi -> listSceneId(id));
     }
     float elapsedTime = gameapi -> timeElapsed();
     look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)

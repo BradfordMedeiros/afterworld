@@ -324,7 +324,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
     detectWorldInfo(worldInfo, aiData -> tools);
     auto goal = getOptimalGoal(aiData -> goals, worldInfo, agent);
-    std::cout << "executing goal: " << nameForGoalSymbol(goal.name) << std::endl;
+    //std::cout << "executing goal: " << nameForGoalSymbol(goal.name) << std::endl;
     doGoal(worldInfo, agent, goal, aiData -> tools);
   };
 

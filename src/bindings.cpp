@@ -142,7 +142,7 @@ void handleSwitch(std::string switchValue){
     auto objAttr =  gameapi -> getGameObjectAttr(id);
     auto switchRecording = getStrAttr(objAttr, "switch-recording");
     if (switchRecording.has_value()){
-      gameapi -> playRecording(id, switchRecording.value());
+      gameapi -> playRecording(id, switchRecording.value(), std::nullopt);
     }
     
     GameobjAttributes attr {
