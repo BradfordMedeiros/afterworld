@@ -58,3 +58,4 @@ void debugAssertForNow(bool valid, const char* message){
     modassert(valid, message);
   }
 }
+

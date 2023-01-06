@@ -3,7 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 int ensureItemExists(std::string name){
-  auto query = gameapi -> compileSqlQuery(std::string("select item, count from inventory where item = ") +  name);
+  auto query = gameapi -> compileSqlQuery(std::string("select item, count from inventory where item = ") +  name, {});
 	bool validSql = false;
 	auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -11,7 +11,8 @@ int ensureItemExists(std::string name){
 
   if (result.size() == 0){
    	auto insertQuery = gameapi -> compileSqlQuery(
-  	  std::string("insert into inventory (item, count) values (") +  name + ", 0)"
+  	  std::string("insert into inventory (item, count) values (") +  name + ", 0)",
+      {}
   	);
 
 		bool validSql = false;
@@ -25,7 +26,8 @@ int ensureItemExists(std::string name){
 
 void updateItemCount(std::string name, int count){
   auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update inventory set count = " + std::to_string(count) + " where item = " + name)
+    std::string("update inventory set count = " + std::to_string(count) + " where item = " + name),
+    {}
   );
 	bool validSql = false;
 	auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);

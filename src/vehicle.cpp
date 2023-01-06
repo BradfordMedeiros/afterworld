@@ -56,7 +56,7 @@ void handleInput(Input& input, int key, int action){
 
 
 void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 position){
-  auto query = gameapi -> compileSqlQuery(std::string("select model, speed, camera_offset, physics_angle, physics_linear from vehicles where name = ") +  name);
+  auto query = gameapi -> compileSqlQuery(std::string("select model, speed, camera_offset, physics_angle, physics_linear from vehicles where name = ") +  name, {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "query vehicle params invalid query");

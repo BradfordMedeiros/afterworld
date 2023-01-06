@@ -59,7 +59,8 @@ std::map<std::string, std::string> allProperties(DialogData& data, std::string n
 
 std::vector<NodeTransition> deserializeTransitions(){
   auto query = gameapi -> compileSqlQuery(
-    "select nodeFrom, transition, nodeTo from dialog_nodes"
+    "select nodeFrom, transition, nodeTo from dialog_nodes",
+    {}
   );
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
@@ -79,7 +80,8 @@ std::vector<NodeTransition> deserializeTransitions(){
 
 std::vector<NodeProperty> deserializeProperties(){
   auto query = gameapi -> compileSqlQuery(
-    "select node, key, value from dialog_properties"
+    "select node, key, value from dialog_properties",
+    {}
   );
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);

@@ -60,7 +60,8 @@ void saveGunTransform(Weapons& weapons){
         "xrot = " + serializeFloat(rotation.x) + ", " +
         "yrot = " + serializeFloat(rotation.y) + ", " +
         "zrot = " + serializeFloat(rotation.z) + 
-        " where name = " + gun
+        " where name = " + gun,
+        {}
     );
     bool validSql = false;
     auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
@@ -197,7 +198,8 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
    "recoil, recoil-zoom, projectile, bloom, script " + 
-   "from guns where name = " + gun
+   "from guns where name = " + gun,
+   {}
   );
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(gunQuery, &validSql);

@@ -40,7 +40,7 @@ void goToLevel(GameState& gameState, std::string sceneName){
   }
 }
 std::optional<std::string> levelByShortcutName(std::string shortcut){
-  auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels");
+  auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -94,7 +94,7 @@ void drawMenuText(GameState& gameState){
 }
 
 void loadConfig(GameState& gameState){
-  auto query = gameapi -> compileSqlQuery("select filepath, name from levels");
+  auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");

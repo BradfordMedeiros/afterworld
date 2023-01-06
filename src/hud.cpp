@@ -40,7 +40,8 @@ void changeHud(Hud& hud, std::string name, objid mainobjId){
 	removeOldHud(hud);
 
   auto query = gameapi -> compileSqlQuery(
-    "select image, position, scale, tint, shader from huds where name = " + name
+    "select image, position, scale, tint, shader from huds where name = " + name,
+    {}
   );
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);

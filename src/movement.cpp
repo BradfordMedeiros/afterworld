@@ -203,7 +203,8 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime from traits where profile = " + name
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime from traits where profile = " + name,
+    {}
   );
   bool validTraitSql = false;
   auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
@@ -218,7 +219,8 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
 }
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
-    "select xsensitivity, ysensitivity from settings where profile = " + name
+    "select xsensitivity, ysensitivity from settings where profile = " + name,
+    {}
   );
   bool validSettingsSql = false;
   auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
