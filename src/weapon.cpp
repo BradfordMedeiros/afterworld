@@ -31,6 +31,7 @@ struct Weapons {
   bool isHoldingRightMouse;
 
   WeaponParams weaponParams;
+  float selectDistance;
   CurrentGun currentGun;
 
   glm::vec2 lookVelocity;
@@ -479,6 +480,14 @@ void swayGun(Weapons& weapons, bool isGunZoomed){
   }
 }
 
+void reloadTraitsValues(Weapons& weapons){
+  auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(traitQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+  weapons.selectDistance = floatFromFirstSqlResult(result, 0);
+}
+
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -500,8 +509,8 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .muzzleParticle = std::nullopt,
     };
 
+    reloadTraitsValues(*weapons);
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
-
   	return weapons;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -525,7 +534,12 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         weapons -> isHoldingRightMouse = true;
         auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id));
         if (hitpoints.size() > 0){
-          gameapi -> sendNotifyMessage("selected", std::to_string(hitpoints.at(0).id));
+          auto cameraObj = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
+          auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true);
+          float distance = glm::length(cameraPos - hitpoints.at(0).point);
+          if (distance <= weapons -> selectDistance){
+            gameapi -> sendNotifyMessage("selected", std::to_string(hitpoints.at(0).id));
+          }
         }
       }
     }
@@ -543,6 +557,11 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       modassert(strValue != NULL, "velocity value invalid");  
       weapons -> movementVelocity = glm::length(parseVec(*strValue));
       //std::cout << "speed is: " << weapons -> movementVelocity << std::endl;
+    }else if (key == "reload-config:weapon:traits"){
+      Weapons* weapons = static_cast<Weapons*>(data);
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "reload-traits:weapon reload value invalid");
+      reloadTraitsValues(*weapons);
     }
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
