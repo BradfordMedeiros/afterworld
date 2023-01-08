@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <vector>
+#include <regex>
+#include "../../ModEngine/src/scene/serialization.h"
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 

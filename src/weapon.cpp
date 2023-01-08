@@ -72,48 +72,33 @@ void saveGunTransform(Weapons& weapons){
 
 std::string parentName = ">maincamera";
 
+
+std::string templateValues(std::string& particleStr, std::map<std::string, std::string> templateValues){
+  auto particleStrTemplated = particleStr;
+  for (auto &[valueToReplace, replacedValue] : templateValues){
+    particleStrTemplated = std::regex_replace(particleStrTemplated, std::regex(valueToReplace), replacedValue);
+  }
+  return particleStr;
+}
 GameobjAttributes particleAttributes(std::string& particle){
-
-/*(define (template sourceString template templateValue)
-  (define index (string-contains sourceString template))
-  (if index
-    (string-replace sourceString templateValue index (+ index (string-length template)))
-    sourceString
-  )
-)
-
-(define reserved-emitter-chars (list "%" "!" "?"))
-(define (reserved-emitter-name value) (member (substring value 0 1) reserved-emitter-chars))
-(define (template-emit-line line) 
-  (define keyname (car line))
-  (define value (template (cadr line) "$MAINOBJ" parent-name))
-  (define reservedKeyName (reserved-emitter-name keyname))
-  (if reservedKeyName
-    (list keyname value)
-    (list keyname (parse-attr value))
-  )
-)
-(define (split-emit-line emitLine) (template-emit-line (string-split emitLine #\:)))
-(define (is-not-whitespace val) (not (equal? (string-trim val) "")))
-(define (emitterOptsToList emitterOptions) (map split-emit-line (filter is-not-whitespace (string-split emitterOptions #\;))))
-*/
+  auto templateEmitLine = split(particle, ';');
 
   GameobjAttributes particleAttr {
     .stringAttributes = { 
       { "state", "disabled" },    // default should keep
       { "physics", "disabled" },  
       { "layer", "no_depth" },    ///////
-     
-      { "+mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" },
-      { "+texture", "../gameresources/textures/evilpattern.png" },
-      { "+shader", "../afterworld/shaders/discard/fragment.glsl" },
     },
     .numAttributes = { { "duration", 10.f } },
     .vecAttr = {  
-      .vec3 = {{ "+scale", glm::vec3(0.2f, 0.2f, 0.2f) }},  
-      .vec4 = {{ "+tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }}  // this shouldn't be needed for the default plane since 0 0 -1 0 should make the plane face the player
     },
   };
+
+  for (auto &line : templateEmitLine){
+    auto keyValuePair = split(line, ':');
+    modassert(keyValuePair.size() == 2, "invalid emitter particle attr, line: " + line + ", size = " + std::to_string(keyValuePair.size()));
+    addFieldDynamic(particleAttr, keyValuePair.at(0), keyValuePair.at(1));  // should probably use only explicitly allowed api methods
+  }
   return particleAttr;
 }
 
@@ -234,8 +219,8 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
 
-  auto muzzleParticleStr = "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg";
-  auto hitParticleStr = "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+texture:./res/textures/wood.jpg";
+  auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
+  auto hitParticleStr = strFromFirstSqlResult(result, 20);
   spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, modelpath, script, gunpos, rot4, scale);
 }
 
