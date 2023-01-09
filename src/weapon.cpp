@@ -20,6 +20,7 @@ struct CurrentGun {
   std::optional<objid> soundId;
   std::optional<objid> muzzleParticle;
   std::optional<objid> hitParticles;    // probably this isn't actually particle to the gun 
+  std::optional<objid> projectileParticles;
 
   float lastShootingTime;
   float recoilStart;
@@ -102,7 +103,7 @@ GameobjAttributes particleAttributes(std::string& particle){
   return particleAttr;
 }
 
-void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string projectileParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
     weapons.currentGun.name = "";
 
@@ -122,6 +123,10 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     if (weapons.currentGun.hitParticles.has_value()){
       gameapi -> removeObjectById(weapons.currentGun.hitParticles.value());
       weapons.currentGun.hitParticles = std::nullopt;
+    }
+    if (weapons.currentGun.projectileParticles.has_value()){
+      gameapi -> removeObjectById(weapons.currentGun.projectileParticles.value());
+      weapons.currentGun.projectileParticles = std::nullopt;
     }
 
   }
@@ -153,16 +158,17 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
 
   if (particle != ""){
     auto particleAttr = particleAttributes(particle);
-    particleAttr.stringAttributes["+lookat"] = ">maincamera";
     weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
   }
   if (hitParticle != ""){
     auto particleAttr = particleAttributes(hitParticle);
-    particleAttr.stringAttributes["+physics"] = "enabled";
-    particleAttr.stringAttributes["+physics_type"] = "dynamic";
-    particleAttr.vecAttr.vec3["+scale"] = glm::vec3(0.2, 0.2, 0.2f);
-    particleAttr.vecAttr.vec4["+tint"] = glm::vec4(1.f, 0.f, 0.f, 0.6f);
     weapons.currentGun.hitParticles = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle", particleAttr, submodelAttributes);
+  }
+
+  if (projectileParticle != ""){
+    //projectileParticles
+    auto projectileAttr = particleAttributes(projectileParticle);
+    weapons.currentGun.projectileParticles = gameapi -> makeObjectAttr(sceneId, "+code-projectileparticle", projectileAttr, submodelAttributes);
   }
 
   weapons.currentGun.name = name;
@@ -174,6 +180,9 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   }
   if (weapons.currentGun.muzzleParticle.has_value()){
     gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.currentGun.gunId.value());
+  }
+  if (weapons.currentGun.projectileParticles.has_value()){
+    gameapi -> makeParent(weapons.currentGun.projectileParticles.value(), weapons.currentGun.gunId.value());
   }
 }
 
@@ -221,7 +230,9 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
 
   auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
   auto hitParticleStr = strFromFirstSqlResult(result, 20);
-  spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, modelpath, script, gunpos, rot4, scale);
+  auto projectileParticleStr = strFromFirstSqlResult(result, 25);
+
+  spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, gunpos, rot4, scale);
 }
 
 std::string weaponsToString(Weapons& weapons){
@@ -335,16 +346,7 @@ void tryFireGun(Weapons& weapons, objid sceneId){
 
 
   /*
-  (define elapsedMilliseconds (* 1000 (time-seconds)))
-  (define timeSinceLastShot (- elapsedMilliseconds last-shooting-time))
-  (define lessThanFiringRate (> timeSinceLastShot firing-rate))
-  (if lessThanFiringRate 
-    (begin
-      (fire-gun)
-      (set! last-shooting-time elapsedMilliseconds)
-    )
-  )
-  (format #f "fire gun limited placeholder\n")*/
+
 
   /*(define (fire-gun)
   (define objpos (gameobj-pos (lsobj-name parent-name)))
@@ -364,8 +366,7 @@ void tryFireGun(Weapons& weapons, objid sceneId){
       )
     )
   )
-  (if is-raycast (fire-raycast))
-  (start-recoil)
+
   )*/
 
 }
