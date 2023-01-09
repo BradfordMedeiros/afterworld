@@ -330,6 +330,10 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> playClip("&code-weaponsound", sceneId);
   }
+
+  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
+  auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+  auto playerPos = gameapi -> getGameObjectPos(playerId.value(), true);
   if (weapons.currentGun.muzzleParticle.has_value()){
     auto gunPosition = gameapi -> getGameObjectPos(weapons.currentGun.gunId.value(), true);
     auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
@@ -343,32 +347,13 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   if (weapons.weaponParams.isRaycast){
     fireRaycast(weapons, sceneId);
   }
-
-
-  /*
-
-
-  /*(define (fire-gun)
-  (define objpos (gameobj-pos (lsobj-name parent-name)))
-  (define objrot (gameobj-rot (lsobj-name parent-name)))
-  (if (not (equal? fire-animation #f))
-    (gameobj-playanimation (gameobj-by-id gunid) fire-animation)
-  )
-  (if soundid (playclip "&weapon-sound"))
-  (if emitterid (emit emitterid))
-  (if projectile-emitterid 
-    (emit projectile-emitterid 
-      (move-relative objpos objrot 3)
-      objrot
-      (addvecs 
-        (move-relative (list 0 0 0) (quatmult objrot (orientation-from-pos (list 0 0 0) (list 0 0.2 -1))) 25)
-        velocity
-      )
-    )
-  )
-
-  )*/
-
+  if (weapons.currentGun.projectileParticles.has_value()){
+    auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
+    glm::vec3 projectileArc(0.f, 0.f, -1.f);
+    auto playerForwardAndUp = playerRotation * gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), projectileArc);
+    auto initialVelocity = playerForwardAndUp * glm::vec3(0.f, 0.f, -1.f) * 10.f;
+    gameapi -> emit(weapons.currentGun.projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt);
+  }
 }
 
 
