@@ -459,6 +459,17 @@ void reloadTraitsValues(Weapons& weapons){
   weapons.selectDistance = floatFromFirstSqlResult(result, 0);
 }
 
+int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos){
+  modassert(hitpoints.size() > 0, "hitpoints object is size 0");
+  int closestIndex = 0;
+  auto minDistance = glm::distance(playerPos, hitpoints.at(0).point);
+  for (int i = 1; i < hitpoints.size(); i++){
+    if (glm::distance(playerPos, hitpoints.at(i).point) < minDistance){
+      closestIndex = i;
+    }
+  }
+  return closestIndex;
+}
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -507,9 +518,10 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         if (hitpoints.size() > 0){
           auto cameraObj = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
           auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true);
-          float distance = glm::length(cameraPos - hitpoints.at(0).point);
+          auto closestIndex = closestHitpoint(hitpoints, cameraPos);
+          float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons -> selectDistance){
-            gameapi -> sendNotifyMessage("selected", std::to_string(hitpoints.at(0).id));
+            gameapi -> sendNotifyMessage("selected", std::to_string(hitpoints.at(closestIndex).id));
           }
         }
       }
