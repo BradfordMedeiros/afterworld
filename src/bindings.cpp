@@ -316,6 +316,8 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));
+  bindings.push_back(weatherBinding(api, "native/weather"));
+
   return bindings;
 } 
 
