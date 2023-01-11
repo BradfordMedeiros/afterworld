@@ -34,6 +34,10 @@ glm::vec3 vec3FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResul
   return parseVec(sqlResult.at(0).at(index));
 }
 
+glm::vec4 vec4FromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
+  return parseVec4(sqlResult.at(0).at(index));
+}
+
 glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index){
   return parseVec(sqlRow.at(index));
 }
