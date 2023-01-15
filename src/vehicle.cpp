@@ -10,13 +10,17 @@ struct Input {
 };
 
 
-
 struct Vehicle {
   bool active;
   std::optional<objid> vehicleId;
   std::optional<objid> cameraId;
   Input input;
+
   float speed;
+
+  float xRotDegrees;
+  float yRotDegrees;
+  float distance;
 };
 
 void handleInput(Input& input, int key, int action){
@@ -54,6 +58,21 @@ void handleInput(Input& input, int key, int action){
   }
 }
 
+glm::vec3 offsetFromParams(float xRot, float yRot, float distance){
+  auto forwardRot = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
+  auto rotation = gameapi -> setFrontDelta(forwardRot, xRot, yRot, 0, 1.f);
+  auto offsetVec = rotation * glm::vec3(0.f, 0.f, -1.f);
+  return distance * offsetVec;
+}
+
+void setVehicleCamera(Vehicle& vehicle){
+  auto currCameraOffset = gameapi -> getGameObjectPos(vehicle.cameraId.value(), true);
+  auto currVehiclePos = gameapi -> getGameObjectPos(vehicle.vehicleId.value(), true);
+  auto cameraTowardVehicle = gameapi -> orientationFromPos(currCameraOffset, currVehiclePos);
+  auto cameraOffset = offsetFromParams(vehicle.xRotDegrees, vehicle.yRotDegrees, vehicle.distance);
+  gameapi -> setGameObjectPosRelative(vehicle.cameraId.value(), cameraOffset);
+  gameapi -> setGameObjectRot(vehicle.cameraId.value(), cameraTowardVehicle);
+}
 
 void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 position){
   auto query = gameapi -> compileSqlQuery(std::string("select model, speed, camera_offset, physics_angle, physics_linear from vehicles where name = ") +  name, {});
@@ -92,11 +111,17 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   vehicle.cameraId = cameraId;
 
   vehicle.speed = speed;
+  vehicle.xRotDegrees = 0.f;
+  vehicle.yRotDegrees = 0.f;
+  vehicle.distance = 15.f; 
 
+  setVehicleCamera(vehicle);
 }
+
 
 void moveVehicle(Vehicle& vehicle, objid id, glm::vec3 direction){
   if (vehicle.vehicleId.has_value()){
+    std::cout << "move vehicle: " << print(direction) << std::endl;
     float time = gameapi -> timeElapsed();
     gameapi -> applyImpulseRel(vehicle.vehicleId.value(), time * glm::vec3(direction.x, direction.y, direction.z));
   }
@@ -175,6 +200,21 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
+  };
+
+  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+    Vehicle* vehicle = static_cast<Vehicle*>(data);
+    float xDegrees = xPos / 360.f;
+    float yDegrees = yPos / 360.f;
+    vehicle -> xRotDegrees += xDegrees * 0.2f;
+    vehicle -> yRotDegrees += yDegrees * 0.2f;
+    setVehicleCamera(*vehicle);
+  };
+
+  binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
+    Vehicle* vehicle = static_cast<Vehicle*>(data);
+    vehicle -> distance += amount;
+    setVehicleCamera(*vehicle);
   };
 
   return binding;

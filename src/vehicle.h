@@ -4,6 +4,7 @@
 #include <iostream>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "../../ModEngine/src/translations.h"
 
 CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name);
 
