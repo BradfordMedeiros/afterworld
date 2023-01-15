@@ -22,6 +22,12 @@ struct Vehicle {
   float yRot;
   float distance;
 
+  glm::vec3 cameraOffset;
+  std::optional<float> minXRot;
+  std::optional<float> maxXRot;
+  std::optional<float> minYRot;
+  std::optional<float> maxYRot;
+
   std::optional<glm::vec2> wheelAngle;
 
 };
@@ -74,13 +80,16 @@ glm::vec3 offsetFromParams(float xRot, float yRot, float distance){
 }
 
 void setVehicleCamera(Vehicle& vehicle){
+  if (!vehicle.active){
+    return;
+  }
   auto currCameraOffset = gameapi -> getGameObjectPos(vehicle.cameraId.value(), true);
-  auto currVehiclePos = gameapi -> getGameObjectPos(vehicle.vehicleId.value(), true);
+  auto currVehiclePos = gameapi -> getGameObjectPos(vehicle.vehicleId.value(), true) + vehicle.cameraOffset;
   auto cameraTowardVehicle = gameapi -> orientationFromPos(currCameraOffset, currVehiclePos);
   auto cameraOffset = offsetFromParams(vehicle.xRot, vehicle.yRot, vehicle.distance);
 
   std::cout << "rot: " << print(glm::vec2(vehicle.xRot, vehicle.yRot)) << std::endl;
-  gameapi -> setGameObjectPosRelative(vehicle.cameraId.value(), cameraOffset);
+  gameapi -> setGameObjectPosRelative(vehicle.cameraId.value(), cameraOffset + vehicle.cameraOffset);
   gameapi -> setGameObjectRot(vehicle.cameraId.value(), cameraTowardVehicle);
 }
 
@@ -124,6 +133,12 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   vehicle.xRot = 0.f;
   vehicle.yRot = 0.f;
   vehicle.distance = 15.f; 
+
+  vehicle.cameraOffset = cameraOffset;
+  vehicle.minXRot = -2.f;
+  vehicle.maxXRot = 2.f;
+  vehicle.minYRot = 0.f;
+  vehicle.maxYRot = 1.f;
 
   //vehicle.wheelAngle = glm::vec2(0.f, 0.f);
   vehicle.wheelAngle = std::nullopt;
@@ -254,8 +269,8 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     float xRadians = xPos / 400.f;
     float yRadians = yPos / 400.f;
-    vehicle -> xRot += xRadians * 0.2f;
-    vehicle -> yRot += yRadians * 0.2f;
+    vehicle -> xRot = limitAngle(vehicle -> xRot + xRadians * 0.2f, vehicle -> minXRot, vehicle -> maxXRot);
+    vehicle -> yRot = limitAngle(vehicle -> yRot + yRadians * 0.2f, vehicle -> minYRot, vehicle -> maxYRot);
 
     if (vehicle -> wheelAngle.has_value()){
       vehicle -> wheelAngle.value().x += xRadians * 0.2f;

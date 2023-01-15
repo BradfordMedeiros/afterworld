@@ -94,19 +94,6 @@ void updateVelocity(Movement& movement, objid id, float elapsedTime, glm::vec3 c
   gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
 }
 
-float PI = 3.141592;
-float TWO_PI = 2 * PI;
-float clampPi(float value){ 
-  if (value > 0){
-    int numTimes = glm::floor(value / TWO_PI);
-    float remain =  value - (TWO_PI * numTimes);
-    return (remain > PI) ? (- remain - TWO_PI) : remain;
-  }
-
-  int numTimes = glm::floor(value / (-1 * TWO_PI));
-  float remain = value + (TWO_PI * numTimes);
-  return (remain < (-1 * PI)) ? (remain + TWO_PI) : remain;
-}
 
 void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float ironsight_turn){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
@@ -117,11 +104,8 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   float deltax = ironsight ? (raw_deltax * ironsight_turn) : raw_deltax;
   float deltay = ironsight ? (raw_deltay * ironsight_turn) : raw_deltay;
 
-  float targetXRot = clampPi(movement.xRot + deltax);
-  float targetYRot = clampPi(movement.yRot + deltay);
-
-  movement.xRot = targetXRot;
-  movement.yRot = glm::min(movement.moveParams.maxAngleDown, glm::max(movement.moveParams.maxAngleUp, targetYRot));
+  movement.xRot = limitAngle(movement.xRot + deltax, std::nullopt, std::nullopt);
+  movement.yRot = limitAngle(movement.yRot + deltay, movement.moveParams.maxAngleUp, movement.moveParams.maxAngleDown); 
 
   auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
   gameapi -> setGameObjectRot(id, rotation);

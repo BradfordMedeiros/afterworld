@@ -56,6 +56,32 @@ std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
   return std::nullopt;
 }
 
+
+float PI = 3.141592;
+float TWO_PI = 2 * PI;
+float clampPi(float value){ 
+  if (value > 0){
+    int numTimes = glm::floor(value / TWO_PI);
+    float remain =  value - (TWO_PI * numTimes);
+    return (remain > PI) ? (- remain - TWO_PI) : remain;
+  }
+
+  int numTimes = glm::floor(value / (-1 * TWO_PI));
+  float remain = value + (TWO_PI * numTimes);
+  return (remain < (-1 * PI)) ? (remain + TWO_PI) : remain;
+}
+float limitAngle(float angleRadians, std::optional<float> minAngle, std::optional<float> maxAngle){
+  float targetRot = clampPi(angleRadians);
+  if (maxAngle.has_value()){
+    targetRot = glm::min(maxAngle.value(), targetRot);
+  }
+  if (minAngle.has_value()){
+    targetRot = glm::max(minAngle.value(), targetRot);
+  }
+  return targetRot;
+}
+
+
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){
