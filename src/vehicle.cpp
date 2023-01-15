@@ -18,9 +18,12 @@ struct Vehicle {
 
   float speed;
 
-  float xRotDegrees;
-  float yRotDegrees;
+  float xRot;
+  float yRot;
   float distance;
+
+  std::optional<glm::vec2> wheelAngle;
+
 };
 
 void handleInput(Input& input, int key, int action){
@@ -58,10 +61,15 @@ void handleInput(Input& input, int key, int action){
   }
 }
 
-glm::vec3 offsetFromParams(float xRot, float yRot, float distance){
+glm::quat rotationFromAngle(float xRot, float yRot){
   auto forwardRot = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
   auto rotation = gameapi -> setFrontDelta(forwardRot, xRot, yRot, 0, 1.f);
-  auto offsetVec = rotation * glm::vec3(0.f, 0.f, -1.f);
+  return rotation;
+}
+
+glm::vec3 offsetFromParams(float xRot, float yRot, float distance){
+  auto rotation = rotationFromAngle(xRot, yRot);
+  auto offsetVec = rotation * glm::vec3(0.f, 0.f, 1.f);
   return distance * offsetVec;
 }
 
@@ -69,7 +77,9 @@ void setVehicleCamera(Vehicle& vehicle){
   auto currCameraOffset = gameapi -> getGameObjectPos(vehicle.cameraId.value(), true);
   auto currVehiclePos = gameapi -> getGameObjectPos(vehicle.vehicleId.value(), true);
   auto cameraTowardVehicle = gameapi -> orientationFromPos(currCameraOffset, currVehiclePos);
-  auto cameraOffset = offsetFromParams(vehicle.xRotDegrees, vehicle.yRotDegrees, vehicle.distance);
+  auto cameraOffset = offsetFromParams(vehicle.xRot, vehicle.yRot, vehicle.distance);
+
+  std::cout << "rot: " << print(glm::vec2(vehicle.xRot, vehicle.yRot)) << std::endl;
   gameapi -> setGameObjectPosRelative(vehicle.cameraId.value(), cameraOffset);
   gameapi -> setGameObjectRot(vehicle.cameraId.value(), cameraTowardVehicle);
 }
@@ -103,7 +113,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   GameobjAttributes camAttr {
     .stringAttributes = {},
     .numAttributes = {},
-    .vecAttr = {  .vec3 = { { "position", cameraOffset }},  .vec4 = {} },
+    .vecAttr = {  .vec3 = {},  .vec4 = {} },
   };
 
   auto cameraId = gameapi -> makeObjectAttr(sceneId, ">code-vehicle-cam", camAttr, submodelAttributes);
@@ -111,19 +121,28 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   vehicle.cameraId = cameraId;
 
   vehicle.speed = speed;
-  vehicle.xRotDegrees = 0.f;
-  vehicle.yRotDegrees = 0.f;
+  vehicle.xRot = 0.f;
+  vehicle.yRot = 0.f;
   vehicle.distance = 15.f; 
+
+  //vehicle.wheelAngle = glm::vec2(0.f, 0.f);
+  vehicle.wheelAngle = std::nullopt;
 
   setVehicleCamera(vehicle);
 }
 
 
-void moveVehicle(Vehicle& vehicle, objid id, glm::vec3 direction){
+void moveVehicle(Vehicle& vehicle, objid id, glm::vec3 direction, std::optional<glm::quat> wheelRotation){
   if (vehicle.vehicleId.has_value()){
-    std::cout << "move vehicle: " << print(direction) << std::endl;
+    //std::cout << "move vehicle: " << print(direction) << std::endl;
     float time = gameapi -> timeElapsed();
     gameapi -> applyImpulseRel(vehicle.vehicleId.value(), time * glm::vec3(direction.x, direction.y, direction.z));
+
+    // should limit turn speed
+    if (wheelRotation.has_value()){
+      gameapi -> setGameObjectRot(vehicle.vehicleId.value(), wheelRotation.value());
+    }
+    
   }
 }
 
@@ -158,6 +177,13 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     if (key == 'E' && action == 1){
       gameapi -> sendNotifyMessage("request:release-control", std::to_string(vehicle -> cameraId.value()));
       vehicle -> active = false;
+
+      vehicle -> xRot = 0.f;
+      vehicle -> yRot = 0.f;
+      if (vehicle -> wheelAngle.has_value()){
+        vehicle -> wheelAngle.value().x = 0.f;
+        vehicle -> wheelAngle.value().y = 0.f;
+      }
     }
   };
 
@@ -168,19 +194,33 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     }
     if (vehicle -> input.goForward){
       auto moveVec = vehicle -> speed * glm::vec3(0.f, 0.f, -1.f);
-      moveVehicle(*vehicle, id, moveVec);
+      std::optional<glm::quat> wheelRotation = std::nullopt;
+      if (vehicle -> wheelAngle.has_value()){
+        wheelRotation = rotationFromAngle(vehicle -> wheelAngle.value().x, vehicle -> wheelAngle.value().y);
+        moveVec = wheelRotation.value() * moveVec;
+      }
+      moveVehicle(*vehicle, id, moveVec, wheelRotation);
     }
     if (vehicle -> input.goBackward){
       auto moveVec = vehicle -> speed * glm::vec3(0.f, 0.f, 1.f);
-      moveVehicle(*vehicle, id, moveVec);
+      std::optional<glm::quat> wheelRotation = std::nullopt;
+      if (vehicle -> wheelAngle.has_value()){
+        wheelRotation = rotationFromAngle(vehicle -> wheelAngle.value().x, vehicle -> wheelAngle.value().y);
+        moveVec = wheelRotation.value() * moveVec;
+      }
+      moveVehicle(*vehicle, id, moveVec, wheelRotation);
     }
     if (vehicle -> input.goLeft){
-      auto moveVec = vehicle -> speed * glm::vec3(-1.f, 0.f, 0.f);
-      moveVehicle(*vehicle, id, moveVec);
+      if (!vehicle -> wheelAngle.has_value()){
+        auto moveVec = vehicle -> speed * glm::vec3(-1.f, 0.f, 0.f);
+        moveVehicle(*vehicle, id, moveVec, std::nullopt);
+      }
     }
     if (vehicle -> input.goRight){
-      auto moveVec = vehicle -> speed * glm::vec3(1.f, 0.f, 0.f);
-      moveVehicle(*vehicle, id, moveVec);
+      if (!vehicle -> wheelAngle.has_value()){
+        auto moveVec = vehicle -> speed * glm::vec3(1.f, 0.f, 0.f);
+        moveVehicle(*vehicle, id, moveVec, std::nullopt);
+      }
     }
   };
 
@@ -197,6 +237,14 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
         if (gameObjId == vehicle -> vehicleId.value()){
           gameapi -> sendNotifyMessage("request:change-control", std::to_string(vehicle -> cameraId.value()));
           vehicle -> active = true;
+
+          vehicle -> xRot = 0.f;
+          vehicle -> yRot = 0.f;
+          if (vehicle -> wheelAngle.has_value()){
+            vehicle -> wheelAngle.value().x = 0.f;
+            vehicle -> wheelAngle.value().y = 0.f;
+          }
+          setVehicleCamera(*vehicle);
         }
       }
     }
@@ -204,11 +252,17 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     Vehicle* vehicle = static_cast<Vehicle*>(data);
-    float xDegrees = xPos / 360.f;
-    float yDegrees = yPos / 360.f;
-    vehicle -> xRotDegrees += xDegrees * 0.2f;
-    vehicle -> yRotDegrees += yDegrees * 0.2f;
+    float xRadians = xPos / 400.f;
+    float yRadians = yPos / 400.f;
+    vehicle -> xRot += xRadians * 0.2f;
+    vehicle -> yRot += yRadians * 0.2f;
+
+    if (vehicle -> wheelAngle.has_value()){
+      vehicle -> wheelAngle.value().x += xRadians * 0.2f;
+      std::cout << "wheel angle: " << print(vehicle -> wheelAngle.value()) << std::endl;
+    }
     setVehicleCamera(*vehicle);
+
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
