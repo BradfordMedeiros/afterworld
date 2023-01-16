@@ -317,6 +317,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(weatherBinding(api, "native/weather"));
+  bindings.push_back(inGameUiBinding(api, "native/in-game-ui"));
 
   return bindings;
 } 

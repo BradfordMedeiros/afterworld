@@ -5,68 +5,76 @@ platform:scale:100 100 10
 platform:rotation:0 -1 0 0
 platform:texture:../gameresources/textures/wood.jpg
 platform:physics:enabled
+#
+#wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#wall:position:0 0 0
+#wall:scale:10 20 200
+#wall:rotation:0 -1 0 0
+#wall:texture:../gameresources/textures/wood.jpg
+#wall:physics:enabled
+#wall:chatnode:npc1
+#
+#wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#wall2:position:30 0 0
+#wall2:scale:10 20 200
+#wall2:rotation:0 -1 0 0
+#wall2:texture:../gameresources/textures/wood.jpg
+#wall2:physics:enabled
+#wall2:chatnode:npc1
+#
+#item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#item:position:0 2 50
+#item:scale:0.5 0.5 0.5
+#item:texture:../gameresources/textures/wood.jpg
+#item:physics:enabled
+#item:physics_type:dynamic
+#item:pickup:gold
+#item:pickup-amount:100
+#item:pickup-type:replace
+#item:pickup-trigger:gold
+#
+#controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#controlpanel:position:0 -10 30
+#controlpanel:scale:5 5 50
+#controlpanel:rotation:0 -1 0 0
+#controlpanel:texture:../gameresources/textures/blacktop.jpg
+#controlpanel:physics:enabled
+#controlpanel:trigger-switch:someswitch
+#
+#controlpanel2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#controlpanel2:position:30 -10 30
+#controlpanel2:scale:5 5 50
+#controlpanel2:rotation:0 -1 0 0
+#controlpanel2:texture:../gameresources/textures/blacktop.jpg
+#controlpanel2:physics:enabled
+#controlpanel2:trigger-switch:someswitch_wall2
+#
+#wall:switch:someswitch
+#wall:switch-recording:../afterworld/recordings/basic-move.rec
+#
+#wall2:switch:someswitch_wall2
+#wall2:switch-recording:../afterworld/recordings/basic-move.rec
+#
+#portal-trigger:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#portal-trigger:position:20 0 -10
+#portal-trigger:scale:10 80 120
+#portal-trigger:rotation:0 -1 0 0
+#portal-trigger:physics:enabled
+#portal-trigger:physics_collision:nocollide
+#portal-trigger:tint:0 0 1 0.4
+#portal-trigger:layer:transparency
+#portal-trigger:switch-enter:someswitch_wall2
+#portal-trigger:switch-exit:someswitch_wall2
 
-wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-wall:position:0 0 0
-wall:scale:10 20 200
-wall:rotation:0 -1 0 0
-wall:texture:../gameresources/textures/wood.jpg
-wall:physics:enabled
-wall:chatnode:npc1
 
-wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-wall2:position:30 0 0
-wall2:scale:10 20 200
-wall2:rotation:0 -1 0 0
-wall2:texture:../gameresources/textures/wood.jpg
-wall2:physics:enabled
-wall2:chatnode:npc1
 
-item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-item:position:0 2 50
-item:scale:0.5 0.5 0.5
-item:texture:../gameresources/textures/wood.jpg
-item:physics:enabled
-item:physics_type:dynamic
-item:pickup:gold
-item:pickup-amount:100
-item:pickup-type:replace
-item:pickup-trigger:gold
+console:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+console:position:5 -15 -1
+console:scale:3 3 3
+console:rotation:0 0 1 180
+console:texture:../gameresources/textures/controls/up-down.png
+console:tint:0 0.6 1 1
 
-controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-controlpanel:position:0 -10 30
-controlpanel:scale:5 5 50
-controlpanel:rotation:0 -1 0 0
-controlpanel:texture:../gameresources/textures/blacktop.jpg
-controlpanel:physics:enabled
-controlpanel:trigger-switch:someswitch
-
-controlpanel2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-controlpanel2:position:30 -10 30
-controlpanel2:scale:5 5 50
-controlpanel2:rotation:0 -1 0 0
-controlpanel2:texture:../gameresources/textures/blacktop.jpg
-controlpanel2:physics:enabled
-controlpanel2:trigger-switch:someswitch_wall2
-
-wall:switch:someswitch
-wall:switch-recording:../afterworld/recordings/basic-move.rec
-
-wall2:switch:someswitch_wall2
-wall2:switch-recording:../afterworld/recordings/basic-move.rec
-
-portal-trigger:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-portal-trigger:position:20 0 -10
-portal-trigger:scale:10 80 120
-portal-trigger:rotation:0 -1 0 0
-portal-trigger:physics:enabled
-portal-trigger:physics_collision:nocollide
-portal-trigger:tint:0 0 1 0.4
-portal-trigger:layer:transparency
-portal-trigger:switch-enter:someswitch_wall2
-portal-trigger:switch-exit:someswitch_wall2
-
-gunlogic:script:native/weapon
 
 >maincamera:script:native/movement
 >maincamera:position:0 50 100
@@ -108,3 +116,6 @@ inventory:script:native/inventory
 vehicles:script:native/vehicle
 #vehicles2:script:native/vehicle
 daynight:script:native/daynight
+debug:script:native/debug
+weather:script:native/weather
+gunlogic:script:native/weapon
