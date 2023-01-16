@@ -72,7 +72,8 @@ console:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 console:position:5 -15 -1
 console:scale:3 3 3
 console:rotation:0 0 1 180
-console:texture:../gameresources/textures/controls/up-down.png
+#console:texture:../gameresources/textures/controls/up-down.png
+#console:texture:gentexture-ingame-ui-texture
 console:tint:0 0.6 1 1
 
 
@@ -110,6 +111,8 @@ goal:goal:importantplace
 goal:goal-type:move
 goal:goal-value:9
 
+loadtexture:texture:../gameresources/textures/controls/up-down.png
+
 hud:script:native/hud
 dialog:script:native/dialog
 inventory:script:native/inventory
@@ -119,3 +122,5 @@ daynight:script:native/daynight
 debug:script:native/debug
 weather:script:native/weather
 gunlogic:script:native/weapon
+ingame:script:native/in-game-ui
+
