@@ -28,11 +28,14 @@ void removeEntityId(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
 	}
 	hitpoints.erase(id);
 }
-void doDamage(Tags& tags, objid id, float amount){
+bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
 	if (tags.hitpoints.find(id) == tags.hitpoints.end()){
-		return;
+		return false;
 	}
-	tags.hitpoints.at(id).current -= amount;
+	auto newHealthAmount = tags.hitpoints.at(id).current - amount;
+	tags.hitpoints.at(id).current = newHealthAmount;
+	*_enemyDead = newHealthAmount <= 0;
+	return true;
 }
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
@@ -54,7 +57,11 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     	auto id = std::atoi(parts.at(1).c_str());
     	auto floatValue = std::get_if<float>(&value);
     	modassert(floatValue != NULL, "damage message but value not a float");
-    	doDamage(*tags, id, *floatValue);
+    	bool enemyDead = false;
+    	bool valid = doDamage(*tags, id, *floatValue, &enemyDead);
+    	if (valid && enemyDead){
+    		gameapi -> sendNotifyMessage("onkill", std::to_string(id));
+    	}
     }
   };
 	return binding;
