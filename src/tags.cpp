@@ -1,5 +1,7 @@
 #include "./tags.h"
 
+extern CustomApiBindings* gameapi;
+
 struct HitPoints {
 	float current;
 	float total;
@@ -10,12 +12,20 @@ struct Tags {
 };
 
 void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
-	hitpoints[id] = HitPoints {
-		.current = 100,
-		.total = 100,
-	};
+	auto attr = gameapi -> getGameObjectAttr(id);
+	auto totalHealth = getFloatAttr(attr, "health");
+	if (totalHealth.has_value()){
+		auto healthPoints = totalHealth.value();
+		hitpoints[id] = HitPoints {
+			.current = healthPoints,
+			.total = healthPoints,
+		};
+	}
 }
 void removeEntityId(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
+	if (hitpoints.find(id) == hitpoints.end()){
+		return;
+	}
 	hitpoints.erase(id);
 }
 void doDamage(Tags& tags, objid id, float amount){

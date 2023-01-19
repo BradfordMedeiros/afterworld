@@ -52,7 +52,6 @@ void scrollTexture(MenuState& menuState, objid id){
 	gameapi -> setGameObjectAttr(id, attr);
 }
 
-
 CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {

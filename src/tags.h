@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
-
+#include "./util.h"
 
 /*
 	Todo - this should hook up to be responsible for managing all objects with a tag, and then calling back functions

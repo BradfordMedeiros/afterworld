@@ -173,6 +173,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrName){
   }
 }
 
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -192,6 +193,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
       
     }
+
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
