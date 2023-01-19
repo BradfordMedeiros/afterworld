@@ -1,5 +1,7 @@
 #include "./util.h"
 
+extern CustomApiBindings* gameapi;
+
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
   auto value = sqlResult.at(0).at(index);
   return value ;
@@ -81,6 +83,12 @@ float limitAngle(float angleRadians, std::optional<float> minAngle, std::optiona
   return targetRot;
 }
 
+void clickMouse(objid id){
+  gameapi ->  click(0, 1); // mouse down
+  gameapi -> schedule(id, 5000, NULL, [](void*) -> void {
+    gameapi -> click(0, 0);
+  });
+}
 
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){

@@ -17,6 +17,9 @@ std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
 
 float limitAngle(float angleRadians, std::optional<float> minAngle, std::optional<float> maxAngle);
 
+void clickMouse(objid id);
+
 void debugAssertForNow(bool valid, const char* message);
+
 
 #endif
