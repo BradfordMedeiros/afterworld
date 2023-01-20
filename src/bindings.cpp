@@ -293,9 +293,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    auto gameobj1 = gameapi -> getGameObjNameForId(obj1); // this check shouldn't be necessary, is bug
+    auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
+    if (!gameobj1.has_value() || !gameobj2.has_value()){
+      return;
+    } 
     handleCollision(obj1, obj2, "switch-enter");
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
+    auto gameobj1 = gameapi -> getGameObjNameForId(obj1);
+    auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
+    if (!gameobj1.has_value() || !gameobj2.has_value()){
+      return;
+    } 
     handleCollision(obj1, obj2, "switch-exit");
   };
 

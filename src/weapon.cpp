@@ -315,6 +315,7 @@ void fireRaycast(Weapons& weapons, objid sceneId){
     if (weapons.currentGun.hitParticles.has_value()){
       gameapi -> emit(weapons.currentGun.hitParticles.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
     }
+    gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), "50");
     std::cout << "raycast normal: " << serializeQuat(hitpoint.normal) << std::endl;
   }
 }
