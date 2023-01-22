@@ -32,6 +32,7 @@ bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
 	if (tags.hitpoints.find(id) == tags.hitpoints.end()){
 		return false;
 	}
+	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
 	auto newHealthAmount = tags.hitpoints.at(id).current - amount;
 	tags.hitpoints.at(id).current = newHealthAmount;
 	*_enemyDead = newHealthAmount <= 0;
@@ -46,6 +47,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 
     auto managedEnemies = gameapi -> getObjectsByAttr("health", std::nullopt, std::nullopt);
     for (auto id : managedEnemies){
+    	modlog("health", "adding id: " + std::to_string(id));
     	addEntityIdHitpoints(tags -> hitpoints, id);
     }
     return tags;
@@ -56,24 +58,22 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
     auto parts = split(key, '.');
-    std::cout << " key: " << key << std::endl;
     if (parts.size() == 2 && parts.at(0) == "damage"){
     	Tags* tags = static_cast<Tags*>(data);
-    	auto id = std::atoi(parts.at(1).c_str());
-    	std::cout << "got damange for " << id << std::endl;
-    	auto strValue = std::get_if<std::string>(&value);
-    	modassert(strValue != NULL, "damage message needs to be str for now");
-    	auto floatValue = parseFloat(*strValue);
+    	auto targetId = std::atoi(parts.at(1).c_str());
+    	modlog("health", "got damange for: " + std::to_string(targetId));
+    	auto floatValue = std::get_if<float>(&value);
+    	modassert(floatValue != NULL, "damage message needs to be float value");
     	bool enemyDead = false;
-    	bool valid = doDamage(*tags, id, floatValue, &enemyDead);
+    	bool valid = doDamage(*tags, targetId, *floatValue, &enemyDead);
     	if (valid && enemyDead){
-    		gameapi -> sendNotifyMessage("onkill", std::to_string(id));
+    		gameapi -> sendNotifyMessage("onkill", std::to_string(targetId));
     	}
     }else if (key == "onkill"){
     	auto strValue = std::get_if<std::string>(&value);
-    	auto id = std::atoi(strValue -> c_str());
-    	std::cout << "removing object: " << id << std::endl;
-    	gameapi -> removeObjectById(id);
+    	auto targetId = std::atoi(strValue -> c_str());
+    	std::cout << "removing object: " << targetId << std::endl;
+    	gameapi -> removeObjectById(targetId);
     }
   };
 	return binding;
