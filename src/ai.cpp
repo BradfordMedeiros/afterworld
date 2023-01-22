@@ -196,7 +196,7 @@ void detectWorldInfo(WorldInfo& worldInfo, AiTools& tools){
 
 void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the game too 
   auto goalObjects = gameapi -> getObjectsByAttr("goal", std::nullopt, std::nullopt);
-  std::cout << "goal objects size: " << goalObjects.size() << std::endl;
+  modlog("ai", "goal objects size: " + std::to_string(goalObjects.size()));
 
   for (auto id : goalObjects){
     auto objAttr =  gameapi -> getGameObjectAttr(id);
@@ -204,7 +204,7 @@ void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the 
     auto goalType = getStrAttr(objAttr, "goal-type").value();
     auto optGoalValue = getFloatAttr(objAttr, "goal-value");
     auto goalValue = optGoalValue.has_value() ? optGoalValue.value() : 1;
-    std::cout << "goal: name = " << goalName.value() << ", type = " << goalType << ", value = " << goalValue << std::endl;
+    modlog("ai", "goal: name = " + goalName.value() + ", type = " + goalType + ", value = " + std::to_string(goalValue));
 
     if (goalType == "idle"){
       goals.push_back(

@@ -52,7 +52,7 @@ void saveGunTransform(Weapons& weapons){
     auto scale = attr.vecAttr.vec3.at("scale");
     auto rotation = attr.vecAttr.vec4.at("rotation");
 
-    std::cout << "save gun, name = " << weapons.currentGun.name << ",  pos = " << print(position) << ", scale = " << print(scale) << ", rotation = " << print(rotation) << std::endl;
+    modlog("weapons", "save gun, name = " + weapons.currentGun.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
 
     auto updateQuery = gameapi -> compileSqlQuery(
       std::string("update guns set ") +
@@ -202,7 +202,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
 
   modassert(result.size() > 0, "no gun named: " + gun);
   modassert(result.size() == 1, "more than one gun named: " + gun);
-  std::cout << "gun: result: " << print(result.at(0)) << std::endl;
+  modlog("weapons", "gun: result: " + print(result.at(0)));
 
   weapons.weaponParams.firingRate = floatFromFirstSqlResult(result, 12);
   weapons.weaponParams.recoilLength = floatFromFirstSqlResult(result, 21);
@@ -308,15 +308,14 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId){
 
 void fireRaycast(Weapons& weapons, objid sceneId){
   auto hitpoints = doRaycast(weapons, sceneId);
-
-  std::cout << "fire raycast, total hits = " << hitpoints.size() << std::endl;
+  modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
   for (auto &hitpoint : hitpoints){
-    std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
+    modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
     if (weapons.currentGun.hitParticles.has_value()){
       gameapi -> emit(weapons.currentGun.hitParticles.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
     }
     gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), 50);
-    std::cout << "raycast normal: " << serializeQuat(hitpoint.normal) << std::endl;
+    modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
 }
 
@@ -324,7 +323,7 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(weapons, now);
 
-  std::cout << "try fire gun, can fire = " << canFireGun << ", now = " << now << ", firing rate = " << weapons.weaponParams.firingRate << std::endl;
+  modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(weapons.weaponParams.firingRate));
   if (!canFireGun){
     return;
   }

@@ -72,7 +72,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     }else if (key == "onkill"){
     	auto strValue = std::get_if<std::string>(&value);
     	auto targetId = std::atoi(strValue -> c_str());
-    	std::cout << "removing object: " << targetId << std::endl;
+    	modlog("health", "removing object: " + targetId);
     	gameapi -> removeObjectById(targetId);
     }
   };
