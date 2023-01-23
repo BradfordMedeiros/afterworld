@@ -90,6 +90,50 @@ void clickMouse(objid id){
   });
 }
 
+
+std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs){
+  return [attrFuncs](int32_t id, void* data, int32_t idAdded) -> void { 
+    auto objAttrs = gameapi -> getGameObjectAttr(idAdded);
+    for (auto &attrFunc : attrFuncs){
+      auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);
+      if (stringFn != NULL){
+        auto stringValue = getStrAttr(objAttrs, attrFunc.attr);
+        if (stringValue.has_value()){
+          (*stringFn)(data, idAdded, stringValue.value());
+        }
+        continue;
+      }
+      auto floatFn = std::get_if<floatAttrFuncValue>(&attrFunc.fn);
+      if (floatFn != NULL){
+        auto floatValue = getFloatAttr(objAttrs, attrFunc.attr);
+        if (floatValue.has_value()){
+          (*floatFn)(data, idAdded, floatValue.value());
+        }
+        continue;
+      }
+    }
+  };
+}
+
+bool hasAttribute(GameobjAttributes& attributes, std::string attr){
+  bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();
+  bool hasFloatAttr = attributes.numAttributes.find(attr) != attributes.numAttributes.end();
+  bool hasVec3Attr = attributes.vecAttr.vec3.find(attr) != attributes.vecAttr.vec3.end();
+  bool hasVec4Attr = attributes.vecAttr.vec4.find(attr) != attributes.vecAttr.vec4.end();
+  return hasStrAttr || hasFloatAttr || hasVec3Attr || hasVec4Attr;
+}
+
+std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
+  return [attrFuncs](int32_t id, void* data, int32_t idAdded) -> void { 
+    auto objAttrs = gameapi -> getGameObjectAttr(idAdded);
+    for (auto &attrFunc : attrFuncs){
+      if (hasAttribute(objAttrs, attrFunc.attr)){
+        attrFunc.fn(data, idAdded);
+      }
+    }
+  };
+}
+
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){

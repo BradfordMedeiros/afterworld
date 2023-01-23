@@ -19,6 +19,22 @@ float limitAngle(float angleRadians, std::optional<float> minAngle, std::optiona
 
 void clickMouse(objid id);
 
+typedef std::function<void(void*, int32_t idAdded, std::string value)> stringAttrFuncValue;
+typedef std::function<void(void*, int32_t idAdded, float value)> floatAttrFuncValue;
+typedef std::variant<stringAttrFuncValue, floatAttrFuncValue> attrFuncValue;
+struct AttrFuncValue {
+	std::string attr;
+	attrFuncValue fn;
+};
+
+std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs);
+struct AttrFunc {
+	std::string attr;
+	std::function<void(void*, int32_t idAdded)> fn;
+};
+bool hasAttribute(GameobjAttributes& attributes, std::string attr);
+std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs);
+
 void debugAssertForNow(bool valid, const char* message);
 
 

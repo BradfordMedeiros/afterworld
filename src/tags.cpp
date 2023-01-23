@@ -12,6 +12,9 @@ struct Tags {
 };
 
 void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
+	if (hitpoints.find(id) != hitpoints.end()){
+		return;
+	}
 	auto attr = gameapi -> getGameObjectAttr(id);
 	auto totalHealth = getFloatAttr(attr, "health");
 	if (totalHealth.has_value()){
@@ -38,6 +41,7 @@ bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
 	*_enemyDead = newHealthAmount <= 0;
 	return true;
 }
+
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
@@ -72,9 +76,32 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     }else if (key == "onkill"){
     	auto strValue = std::get_if<std::string>(&value);
     	auto targetId = std::atoi(strValue -> c_str());
-    	modlog("health", "removing object: " + targetId);
+    	modlog("health", "removing object: " + std::to_string(targetId));
     	gameapi -> removeObjectById(targetId);
     }
   };
+
+  binding.onObjectAdded = getOnAttrAdds({
+  	AttrFuncValue { 
+  		.attr = "health", 
+  		.fn = [](void* data, int32_t id, float value) -> void {
+  			Tags* tags = static_cast<Tags*>(data);
+ 				modlog("health", "entity added: " + std::to_string(id));
+ 				addEntityIdHitpoints(tags -> hitpoints, id);
+  		}
+  	}
+  });
+
+  binding.onObjectRemoved = getOnAttrRemoved({
+  	AttrFunc {
+  		.attr = "health",
+  		.fn = [](void* data, int32_t id) -> void {
+  			Tags* tags = static_cast<Tags*>(data);
+				modlog("health", "entity removed: " + std::to_string(id));
+				removeEntityId(tags -> hitpoints, id);
+  		}
+  	},
+  });
+
 	return binding;
 }
