@@ -194,7 +194,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-   "recoil, recoil-zoom, projectile, bloom, script, fireanimation " + 
+   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation " + 
    "from guns where name = " + gun,
    {}
   );
@@ -224,6 +224,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   if(fireAnimation != ""){
     weapons.currentGun.fireAnimation = fireAnimation;
   }
+  auto idleAnimation = strFromFirstSqlResult(result, 29);
 
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
   weapons.currentGun.initialGunPos = gunpos;
@@ -241,6 +242,10 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   auto projectileParticleStr = strFromFirstSqlResult(result, 25);
 
   spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, gunpos, rot4, scale);
+
+  if (idleAnimation != "" && weapons.currentGun.gunId.has_value()){
+    gameapi -> playAnimation(weapons.currentGun.gunId.value(), idleAnimation, true);
+  }
 }
 
 std::string weaponsToString(Weapons& weapons){
