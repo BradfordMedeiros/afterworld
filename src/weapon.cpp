@@ -22,6 +22,8 @@ struct CurrentGun {
   std::optional<objid> hitParticles;    // probably this isn't actually particle to the gun 
   std::optional<objid> projectileParticles;
 
+  std::optional<std::string> fireAnimation;
+
   float lastShootingTime;
   float recoilStart;
   glm::vec3 initialGunPos;
@@ -192,7 +194,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-   "recoil, recoil-zoom, projectile, bloom, script " + 
+   "recoil, recoil-zoom, projectile, bloom, script, fireanimation " + 
    "from guns where name = " + gun,
    {}
   );
@@ -216,6 +218,12 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
 
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
   weapons.currentGun.recoilStart = 0.f;
+
+  auto fireAnimation = strFromFirstSqlResult(result, 28);
+  weapons.currentGun.fireAnimation = std::nullopt;
+  if(fireAnimation != ""){
+    weapons.currentGun.fireAnimation = fireAnimation;
+  }
 
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
   weapons.currentGun.initialGunPos = gunpos;
@@ -329,6 +337,9 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   }
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> playClip("&code-weaponsound", sceneId);
+  }
+  if (weapons.currentGun.fireAnimation.has_value()){
+    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), false);
   }
 
   auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
