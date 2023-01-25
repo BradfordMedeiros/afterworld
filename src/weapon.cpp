@@ -492,6 +492,7 @@ int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos){
   return closestIndex;
 }
 
+
 glm::vec3 calculatePoint(float radians, float radius, glm::quat orientation){
   float x = glm::cos(radians) * radius;
   float y = glm::sin(radians) * radius;
@@ -511,6 +512,33 @@ void drawCircle(objid id, glm::vec3 pos, float radius, glm::quat orientation){
   } 
 }
 
+glm::vec4 reticleColor(1.f, 1.f, 1.f, 0.5f);
+bool shouldDrawMarkers = false;
+void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
+  auto left = pos + orientation * glm::vec3(-radius, 0.f, 0.f);
+  auto right = pos + orientation * glm::vec3(radius, 0.f, 0.f);
+  auto top = pos + orientation * glm::vec3(0.f, radius, 0.f);
+  auto bottom = pos + orientation * glm::vec3(0.f, -radius, 0.f);
+
+  auto leftTowardCenter = glm::normalize(pos - left) * 0.01f;
+  gameapi -> drawLine(left, left + leftTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
+
+  auto rightTowardCenter = glm::normalize(pos - right) * 0.01f;
+  gameapi -> drawLine(right, right + rightTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
+
+  auto topTowardCenter = glm::normalize(pos - top) * 0.01f;
+  gameapi -> drawLine(top, top + topTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
+
+  auto bottomTowardCenter = glm::normalize(pos - bottom) * 0.01f;
+  gameapi -> drawLine(bottom, bottom + bottomTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
+
+
+  //gameapi -> drawLine(right, pos, false, id, std::nullopt, std::nullopt, std::nullopt);
+  //gameapi -> drawLine(top, pos, false, id, std::nullopt, std::nullopt, std::nullopt);
+  //gameapi -> drawLine(bottom, pos, false, id, std::nullopt, std::nullopt, std::nullopt);
+
+}
+
 // draw a circle at a distance from the player with a certain radius
 // this is independent of fov, and should be
 void drawBloom(objid id, float distance, float radius){
@@ -520,7 +548,13 @@ void drawBloom(objid id, float distance, float radius){
   auto mainobjRot = gameapi -> getGameObjectRotation(playerId.value(), true);
   auto toPos = mainobjPos + mainobjRot * glm::vec3(0.f, 0.f, distance);
   gameapi -> drawLine(mainobjPos, toPos, false, id, std::nullopt, std::nullopt, std::nullopt);
-  drawCircle(id, toPos, radius, mainobjRot);
+  
+  if (shouldDrawMarkers){
+    drawMarkers(id, toPos, radius, mainobjRot);
+  }else{
+    drawCircle(id, toPos, radius, mainobjRot);
+  }
+  
 }
 
 float calculateBloomAmount(Weapons& weapons){
