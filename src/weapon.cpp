@@ -28,6 +28,7 @@ struct CurrentGun {
   float recoilStart;
   glm::vec3 initialGunPos;
 
+  float minBloom;
   float totalBloom;
   float bloomLength;
 };
@@ -197,7 +198,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length " + 
+   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom " + 
    "from guns where name = " + gun,
    {}
   );
@@ -221,6 +222,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
 
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
   weapons.currentGun.recoilStart = 0.f;
+  weapons.currentGun.minBloom = floatFromFirstSqlResult(result, 31);
   weapons.currentGun.totalBloom = floatFromFirstSqlResult(result, 26);
   weapons.currentGun.bloomLength = floatFromFirstSqlResult(result, 30);
 
@@ -513,7 +515,7 @@ void drawCircle(objid id, glm::vec3 pos, float radius, glm::quat orientation){
 }
 
 glm::vec4 reticleColor(1.f, 1.f, 1.f, 0.5f);
-bool shouldDrawMarkers = false;
+bool shouldDrawMarkers = true;
 void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
   auto left = pos + orientation * glm::vec3(-radius, 0.f, 0.f);
   auto right = pos + orientation * glm::vec3(radius, 0.f, 0.f);
@@ -531,12 +533,6 @@ void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
 
   auto bottomTowardCenter = glm::normalize(pos - bottom) * 0.01f;
   gameapi -> drawLine(bottom, bottom + bottomTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
-
-
-  //gameapi -> drawLine(right, pos, false, id, std::nullopt, std::nullopt, std::nullopt);
-  //gameapi -> drawLine(top, pos, false, id, std::nullopt, std::nullopt, std::nullopt);
-  //gameapi -> drawLine(bottom, pos, false, id, std::nullopt, std::nullopt, std::nullopt);
-
 }
 
 // draw a circle at a distance from the player with a certain radius
@@ -547,7 +543,7 @@ void drawBloom(objid id, float distance, float radius){
   auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
   auto mainobjRot = gameapi -> getGameObjectRotation(playerId.value(), true);
   auto toPos = mainobjPos + mainobjRot * glm::vec3(0.f, 0.f, distance);
-  gameapi -> drawLine(mainobjPos, toPos, false, id, std::nullopt, std::nullopt, std::nullopt);
+  gameapi -> drawLine(mainobjPos, toPos, false, id, reticleColor, std::nullopt, std::nullopt);
   
   if (shouldDrawMarkers){
     drawMarkers(id, toPos, radius, mainobjRot);
@@ -560,8 +556,7 @@ void drawBloom(objid id, float distance, float radius){
 float calculateBloomAmount(Weapons& weapons){
   auto slerpAmount = (1 - calcRecoilSlerpAmount(weapons, weapons.currentGun.bloomLength, false)); 
   modassert(slerpAmount <= 1, "slerp amount must be less than 1, got: " + std::to_string(slerpAmount));
-  std::cout << "bloom amount: " << slerpAmount << std::endl;
-  return weapons.currentGun.totalBloom * slerpAmount;
+  return glm::max(weapons.currentGun.minBloom, (weapons.currentGun.totalBloom - weapons.currentGun.minBloom) * slerpAmount + weapons.currentGun.minBloom);
 }
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
