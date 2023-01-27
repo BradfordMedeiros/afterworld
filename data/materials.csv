@@ -1,0 +1,4 @@
+material:STRING,particle:STRING,hit-sound:STRING,walk-sound:STRING
+default,,,
+wood,,,
+metal,,,
