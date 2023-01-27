@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_QUERY
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
+#include <bits/stdc++.h>
 
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);
 std::string strFromSqlRow(std::vector<std::string>& sqlResult, int index);
@@ -34,6 +35,8 @@ struct AttrFunc {
 };
 bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs);
+
+float randomNumber(float min, float max);
 
 void debugAssertForNow(bool valid, const char* message);
 

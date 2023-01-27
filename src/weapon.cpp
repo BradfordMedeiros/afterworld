@@ -304,10 +304,11 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
 
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId){
+std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
+  auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
   auto playerId = gameapi -> getGameObjectByName(parentName, sceneId, false);
   auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
-  auto rot = gameapi -> getGameObjectRotation(playerId.value(), true);
+  auto rot = orientationOffsetQuat * gameapi -> getGameObjectRotation(playerId.value(), true);
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
 
@@ -326,8 +327,8 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId){
 }
 
 
-void fireRaycast(Weapons& weapons, objid sceneId){
-  auto hitpoints = doRaycast(weapons, sceneId);
+void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
+  auto hitpoints = doRaycast(weapons, sceneId, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
   for (auto &hitpoint : hitpoints){
     modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
@@ -339,7 +340,7 @@ void fireRaycast(Weapons& weapons, objid sceneId){
   }
 }
 
-void tryFireGun(Weapons& weapons, objid sceneId){
+void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(weapons, now);
 
@@ -367,14 +368,17 @@ void tryFireGun(Weapons& weapons, objid sceneId){
   }
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
+
+
+  glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (weapons.weaponParams.isRaycast){
-    fireRaycast(weapons, sceneId);
+    fireRaycast(weapons, sceneId, shootingVecAngle);
   }
   if (weapons.currentGun.projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
     glm::vec3 projectileArc(0.f, 0.f, -1.f);
     auto playerForwardAndUp = playerRotation * gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), projectileArc);
-    auto initialVelocity = playerForwardAndUp * glm::vec3(0.f, 0.f, -1.f) * 10.f;
+    auto initialVelocity = playerForwardAndUp * shootingVecAngle * 10.f;
     gameapi -> emit(weapons.currentGun.projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt);
   }
 }
@@ -594,7 +598,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         weapons -> isHoldingLeftMouse = false;
       }else if (action == 1){
         weapons -> isHoldingLeftMouse = true;
-        tryFireGun(*weapons, gameapi -> listSceneId(id));
+        tryFireGun(*weapons, gameapi -> listSceneId(id), calculateBloomAmount(*weapons));
       }
     }else if (button == 1){
       if (action == 0){
@@ -602,7 +606,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
-        auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id));
+        auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id), glm::vec3(0.f, 0.f, -1.f));
         if (hitpoints.size() > 0){
           auto cameraObj = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
           auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true);
@@ -642,9 +646,10 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     Weapons* weapons = static_cast<Weapons*>(data);
-    drawBloom(id, -1.f, glm::max(0.002f, calculateBloomAmount(*weapons))); // 0.002f is just a min amount for visualization, not actual bloom
+    auto bloomAmount = calculateBloomAmount(*weapons);
+    drawBloom(id, -1.f, glm::max(0.002f, bloomAmount)); // 0.002f is just a min amount for visualization, not actual bloom
     if (weapons -> weaponParams.canHold && weapons -> isHoldingLeftMouse){
-      tryFireGun(*weapons, gameapi -> listSceneId(id));
+      tryFireGun(*weapons, gameapi -> listSceneId(id), bloomAmount);
     }
     swayGun(*weapons, weapons -> isHoldingRightMouse);
     //std::cout << weaponsToString(*weapons) << std::endl;

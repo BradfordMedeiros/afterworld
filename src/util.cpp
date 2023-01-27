@@ -134,6 +134,12 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFu
   };
 }
 
+float randomNumber(float min, float max){
+  static std::default_random_engine gen;
+  std::uniform_real_distribution<double> distribution(min, max);
+  return distribution(gen);
+}
+
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){
