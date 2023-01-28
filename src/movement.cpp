@@ -351,11 +351,15 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    float yComponent = ((id == obj2) ? normal : oppositeNormal).y;
+    auto otherNormal = (id == obj2) ? normal : oppositeNormal;
+    auto value = glm::dot(glm::normalize(otherNormal), glm::vec3(0.f, -1.f, 0.f));
+    auto angleToCompare = glm::cos(glm::radians(35.f));
+    modlog("movement", "y component angleToCompare: " + std::to_string(angleToCompare) + ", reverse = " + std::to_string(glm::degrees(glm::acos(value))));
+    modlog("movement", "y component dot: " + std::to_string(value));
+
     objid otherObjectId = id == obj1 ? obj2 : obj1;
 
-    modlog("movement", "y component: " + std::to_string(yComponent));
-    if (yComponent <= 0){
+    if (value >= angleToCompare){
       if (movement -> groundedObjIds.size() == 0){
         land(*movement, id);
       }
