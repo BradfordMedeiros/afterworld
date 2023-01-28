@@ -42,7 +42,8 @@ struct Movement {
   glm::vec2 lookVelocity;
   float xRot; // up and down
   float yRot; // left and right
-  std::optional<objid> groundedObjId;
+  std::set<objid> groundedObjIds; // a rigid body can have collision spots with multiple grounds at once
+  bool facingWall;
 
   glm::vec3 lastPosition;
 };
@@ -59,7 +60,7 @@ std::string movementToStr(Movement& movement){
 
 void jump(Movement& movement, objid id){
   glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
-  if (movement.groundedObjId.has_value()){
+  if (movement.groundedObjIds.size() > 0){
     gameapi -> applyImpulse(id, impulse);
     if (movement.jumpSoundObjId.has_value()){
       gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id));
@@ -234,7 +235,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
     movement -> xRot = 0.f;
     movement -> yRot = 0.f;
-    movement -> groundedObjId = std::nullopt;
+    movement -> groundedObjIds = {};
+    movement -> facingWall = false;
 
     reloadMovementConfig(*movement, id, "default");
     reloadSettingsConfig(*movement, "default");
@@ -303,7 +305,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    bool isGrounded = movement -> groundedObjId.has_value();
+    bool isGrounded = movement -> groundedObjIds.size() > 0;
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     float horzRelVelocity = 0.8f;
 
@@ -339,27 +341,33 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
     updateVelocity(*movement, id, elapsedTime, currPos);
 
+
+    std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    modlog("movement", "on collision enter: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     if (id != obj1 && id != obj2){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
     float yComponent = ((id == obj2) ? normal : oppositeNormal).y;
     objid otherObjectId = id == obj1 ? obj2 : obj1;
+
+    modlog("movement", "y component: " + std::to_string(yComponent));
     if (yComponent <= 0){
-      if (!movement -> groundedObjId.has_value()){
+      if (movement -> groundedObjIds.size() == 0){
         land(*movement, id);
       }
-      movement -> groundedObjId = otherObjectId;
+      movement -> groundedObjIds.insert(otherObjectId);
     }
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
+    modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     Movement* movement = static_cast<Movement*>(data);
     auto otherObjectId = (id == obj1) ? obj2 : obj1;
-    if (movement -> groundedObjId.has_value() && movement -> groundedObjId.value() == otherObjectId){
-      movement -> groundedObjId = std::nullopt;
+    if (movement -> groundedObjIds.count(otherObjectId) > 0){
+      movement -> groundedObjIds.erase(otherObjectId);
     }
   };
 
