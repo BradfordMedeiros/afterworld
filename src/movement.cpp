@@ -15,6 +15,7 @@ struct MovementParams {
   float maxAngleDown;
   float moveSoundDistance;
   float moveSoundMintime;
+  float groundAngle;
 };
 
 struct ControlParams {
@@ -153,6 +154,7 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
   movement.moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
   movement.moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
+  movement.moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
 }
 
 objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
@@ -188,7 +190,7 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime from traits where profile = " + name,
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle from traits where profile = " + name,
     {}
   );
   bool validTraitSql = false;
@@ -353,13 +355,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     Movement* movement = static_cast<Movement*>(data);
     auto otherNormal = (id == obj2) ? normal : oppositeNormal;
     auto value = glm::dot(glm::normalize(otherNormal), glm::vec3(0.f, -1.f, 0.f));
-    auto angleToCompare = glm::cos(glm::radians(35.f));
-    modlog("movement", "y component angleToCompare: " + std::to_string(angleToCompare) + ", reverse = " + std::to_string(glm::degrees(glm::acos(value))));
+    modlog("movement", "y component angleToCompare: " + std::to_string(movement -> moveParams.groundAngle) + ", reverse = " + std::to_string(glm::degrees(glm::acos(value))));
     modlog("movement", "y component dot: " + std::to_string(value));
 
     objid otherObjectId = id == obj1 ? obj2 : obj1;
 
-    if (value >= angleToCompare){
+    if (value >= movement -> moveParams.groundAngle){
       if (movement -> groundedObjIds.size() == 0){
         land(*movement, id);
       }
