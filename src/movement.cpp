@@ -45,6 +45,7 @@ struct Movement {
   float yRot; // left and right
   std::set<objid> groundedObjIds; // a rigid body can have collision spots with multiple grounds at once
   bool facingWall;
+  bool facingLadder;
 
   glm::vec3 lastPosition;
 };
@@ -103,21 +104,14 @@ void updateFacingWall(Movement& movement, objid id){
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, 2.f);
 
   if (hitpoints.size() > 0){
-    auto hitpointIndex = closestHitpoint(hitpoints, mainobjPos);
-    auto hitpoint = hitpoints.at(hitpointIndex);
-    auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
-    
     movement.facingWall = true;
-    std::cout << "hitpoint normal: " << print(hitpoint.normal) << std::endl;
+    auto hitpoint = hitpoints.at(closestHitpoint(hitpoints, mainobjPos));
+    auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
+    movement.facingLadder = getStrAttr(attr, "ladder").has_value();
   }else{
     movement.facingWall = false;
+    movement.facingLadder = false;
   }
-  
-
-  //std::cout << "hitpoints size: " << hitpoints.size() << std::endl;
-  //   hitpoint.point + (10.f * (hitpoint.normal * glm::vec3(0.f, 0.f, -1.f))),
-
-
 }
 
 
@@ -368,7 +362,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateVelocity(*movement, id, elapsedTime, currPos);
     updateFacingWall(*movement, id);
 
-    std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
+    std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", facing ladder = " << (movement -> facingLadder ? "true" : "false") << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
