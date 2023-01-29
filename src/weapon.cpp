@@ -308,7 +308,7 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orie
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
   auto playerId = gameapi -> getGameObjectByName(parentName, sceneId, false);
   auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
-  auto rot = orientationOffsetQuat * gameapi -> getGameObjectRotation(playerId.value(), true);
+  auto rot = gameapi -> getGameObjectRotation(playerId.value(), true) *  orientationOffsetQuat;
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
 

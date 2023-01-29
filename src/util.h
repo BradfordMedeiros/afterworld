@@ -15,6 +15,7 @@ glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index);
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);
 
 float limitAngle(float angleRadians, std::optional<float> minAngle, std::optional<float> maxAngle);
 

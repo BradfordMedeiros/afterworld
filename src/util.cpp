@@ -58,6 +58,13 @@ std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
   return std::nullopt;
 }
 
+std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key){
+   if (objAttr.vecAttr.vec3.find(key) != objAttr.vecAttr.vec3.end()){
+    return objAttr.vecAttr.vec3.at(key);
+  }
+  return std::nullopt; 
+}
+
 
 float PI = 3.141592;
 float TWO_PI = 2 * PI;
