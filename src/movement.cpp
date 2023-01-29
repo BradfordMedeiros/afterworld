@@ -16,6 +16,8 @@ struct MovementParams {
   float moveSoundDistance;
   float moveSoundMintime;
   float groundAngle;
+  glm::vec3 gravity;
+  glm::vec3 waterGravity;
 };
 
 struct ControlParams {
@@ -173,11 +175,10 @@ void land(Movement& movement, objid id){
 }
 
 
-void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result){
+void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result, glm::vec3 physics_gravity){
   float physics_mass = floatFromFirstSqlResult(result, 8);
   float physics_restitution = floatFromFirstSqlResult(result, 4);
   float physics_friction = floatFromFirstSqlResult(result, 5);
-  auto physics_gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
   GameobjAttributes attr {
     .stringAttributes = {
     },
@@ -206,6 +207,8 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
   movement.moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
   movement.moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
+  movement.moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
+  movement.moveParams.waterGravity = glm::vec3(0.f, 1.f, 0.f);
 }
 
 objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
@@ -248,7 +251,7 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
   modassert(validTraitSql, "error executing sql query");
   updateTraitConfig(movement, traitsResult);
-  updateObjectProperties(id, traitsResult);
+  updateObjectProperties(id, traitsResult, movement.moveParams.gravity);
   updateSoundConfig(movement, id, SoundConfig {
     .jumpClip = traitsResult.at(0).at(9),
     .landClip = traitsResult.at(0).at(10),
@@ -274,6 +277,21 @@ void attachToLadder(Movement& movement){
 }
 void releaseFromLadder(Movement& movement){
   movement.attachedToLadder = false;
+}
+
+void changeWaterGravity(Movement& movement, objid id){
+  auto inWater = movement.waterObjIds.size() > 0;
+  auto gravity = inWater ? movement.moveParams.waterGravity : movement.moveParams.gravity;
+  GameobjAttributes newAttr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = { { "physics_gravity", gravity }}, 
+      .vec4 = { } 
+    },
+  };
+  std::cout << "new gravity is: " << print(gravity) << ", in water = " << print(inWater) << std::endl;
+  gameapi -> setGameObjectAttr(id, newAttr);
 }
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
@@ -455,15 +473,16 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (isWater){
       movement -> waterObjIds.insert(otherObjectId);
-      return;
     }
 
-    if (value >= movement -> moveParams.groundAngle){
+    if (!isWater && value >= movement -> moveParams.groundAngle){
       if (movement -> groundedObjIds.size() == 0){
         land(*movement, id);
       }
       movement -> groundedObjIds.insert(otherObjectId);
     }
+
+    changeWaterGravity(*movement, id);
 
 
     // waterObjIdsattr
@@ -479,6 +498,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (movement -> waterObjIds.count(otherObjectId) > 0){
       movement -> waterObjIds.erase(otherObjectId);
     }
+    changeWaterGravity(*movement, id);
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
