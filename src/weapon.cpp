@@ -486,18 +486,6 @@ void reloadTraitsValues(Weapons& weapons){
   weapons.selectDistance = floatFromFirstSqlResult(result, 0);
 }
 
-int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos){
-  modassert(hitpoints.size() > 0, "hitpoints object is size 0");
-  int closestIndex = 0;
-  auto minDistance = glm::distance(playerPos, hitpoints.at(0).point);
-  for (int i = 1; i < hitpoints.size(); i++){
-    if (glm::distance(playerPos, hitpoints.at(i).point) < minDistance){
-      closestIndex = i;
-    }
-  }
-  return closestIndex;
-}
-
 
 glm::vec3 calculatePoint(float radians, float radius, glm::quat orientation){
   float x = glm::cos(radians) * radius;

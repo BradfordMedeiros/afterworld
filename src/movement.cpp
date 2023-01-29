@@ -96,6 +96,30 @@ void updateVelocity(Movement& movement, objid id, float elapsedTime, glm::vec3 c
   gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
 }
 
+void updateFacingWall(Movement& movement, objid id){
+  auto mainobjPos = gameapi -> getGameObjectPos(id, true);
+  auto rot = gameapi -> getGameObjectRotation(id, true);
+  //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
+  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, 2.f);
+
+  if (hitpoints.size() > 0){
+    auto hitpointIndex = closestHitpoint(hitpoints, mainobjPos);
+    auto hitpoint = hitpoints.at(hitpointIndex);
+    auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
+    
+    movement.facingWall = true;
+    std::cout << "hitpoint normal: " << print(hitpoint.normal) << std::endl;
+  }else{
+    movement.facingWall = false;
+  }
+  
+
+  //std::cout << "hitpoints size: " << hitpoints.size() << std::endl;
+  //   hitpoint.point + (10.f * (hitpoint.normal * glm::vec3(0.f, 0.f, -1.f))),
+
+
+}
+
 
 void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float ironsight_turn){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
@@ -342,7 +366,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     float elapsedTime = gameapi -> timeElapsed();
     look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
     updateVelocity(*movement, id, elapsedTime, currPos);
-
+    updateFacingWall(*movement, id);
 
     std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;

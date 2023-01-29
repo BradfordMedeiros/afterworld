@@ -38,6 +38,8 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFu
 
 float randomNumber(float min, float max);
 
+int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos);
+
 void debugAssertForNow(bool valid, const char* message);
 
 
