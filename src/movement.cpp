@@ -47,6 +47,7 @@ struct Movement {
   bool facingWall;
   bool facingLadder;
   bool attachedToLadder;
+  std::set<objid> waterObjIds;
 
   glm::vec3 lastPosition;
 };
@@ -299,6 +300,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> facingWall = false;
     movement -> facingLadder = false;
     movement -> attachedToLadder = false;
+    movement -> waterObjIds = {};
 
     reloadMovementConfig(*movement, id, "default");
     reloadSettingsConfig(*movement, "default");
@@ -431,7 +433,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateFacingWall(*movement, id);
     restrictLadderMovement(*movement, id, movingDown);
 
-    std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", facing ladder = " << (movement -> facingLadder ? "true" : "false") << ", attached = " << (movement -> attachedToLadder ? "true" : "false")  << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
+    std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
@@ -447,12 +449,25 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     objid otherObjectId = id == obj1 ? obj2 : obj1;
 
+
+    auto attr = gameapi -> getGameObjectAttr(otherObjectId);
+    auto isWater = getStrAttr(attr, "water").has_value();
+
+    if (isWater){
+      movement -> waterObjIds.insert(otherObjectId);
+      return;
+    }
+
     if (value >= movement -> moveParams.groundAngle){
       if (movement -> groundedObjIds.size() == 0){
         land(*movement, id);
       }
       movement -> groundedObjIds.insert(otherObjectId);
     }
+
+
+    // waterObjIdsattr
+
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
@@ -460,6 +475,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     auto otherObjectId = (id == obj1) ? obj2 : obj1;
     if (movement -> groundedObjIds.count(otherObjectId) > 0){
       movement -> groundedObjIds.erase(otherObjectId);
+    }
+    if (movement -> waterObjIds.count(otherObjectId) > 0){
+      movement -> waterObjIds.erase(otherObjectId);
     }
   };
 

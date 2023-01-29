@@ -43,6 +43,21 @@ floatbox3:texture:../gameresources/textures/wood.jpg
 floatbox3:physics:enabled
 floatbox3:rotation:0 0 -1 15
 
+platform2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform2:position:-250 -20 0
+platform2:scale:100 100 10
+platform2:rotation:0 -1 0 0
+platform2:texture:../gameresources/textures/wood.jpg
+platform2:physics:enabled
+#
+
+water:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+water:position:-110 -40 0
+water:scale:50 100 100
+water:rotation:0 -1 0 0
+water:tint:0 0 1 0.5
+water:texture:../gameresources/textures/wood.jpg
+
 
 #
 #wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
