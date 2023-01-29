@@ -46,6 +46,7 @@ struct Movement {
   std::set<objid> groundedObjIds; // a rigid body can have collision spots with multiple grounds at once
   bool facingWall;
   bool facingLadder;
+  bool attachedToLadder;
 
   glm::vec3 lastPosition;
 };
@@ -75,6 +76,15 @@ void dash(Movement& movement){
   std::cout << "dash placeholder" << std::endl;
 }
 
+void moveUp(objid id, glm::vec2 direction){
+  std::cout << "move up" << std::endl;
+  float time = gameapi -> timeElapsed();
+  gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
+}
+void moveDown(objid id, glm::vec2 direction){
+  float time = gameapi -> timeElapsed();
+  gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
+}
 void moveXZ(objid id, glm::vec2 direction){
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulseRel(id, time * glm::vec3(direction.x, 0.f, direction.y));
@@ -89,12 +99,13 @@ float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
   return speed;
 }
 
-void updateVelocity(Movement& movement, objid id, float elapsedTime, glm::vec3 currPos){
+void updateVelocity(Movement& movement, objid id, float elapsedTime, glm::vec3 currPos, bool* _movingDown){ // returns if moveing down
   glm::vec3 displacement = (currPos - movement.lastPosition) / elapsedTime;
   //auto speed = glm::length(displacement);
   movement.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
   gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
+  *_movingDown = displacement.y < 0.f;
 }
 
 void updateFacingWall(Movement& movement, objid id){
@@ -111,6 +122,27 @@ void updateFacingWall(Movement& movement, objid id){
   }else{
     movement.facingWall = false;
     movement.facingLadder = false;
+  }
+}
+
+void restrictLadderMovement(Movement& movement, objid id, bool movingDown){
+  if (movement.attachedToLadder){
+    auto attr = gameapi -> getGameObjectAttr(id);
+    auto velocity = getVec3Attr(attr, "physics_velocity").value();
+    if (velocity.y > 0.f){
+      return;
+    }
+    velocity.y = 0.f;
+
+    GameobjAttributes newAttr {
+      .stringAttributes = {},
+      .numAttributes = {},
+      .vecAttr = { 
+        .vec3 = { { "physics_velocity", velocity }}, 
+        .vec4 = { } 
+      },
+    };
+    gameapi -> setGameObjectAttr(id, newAttr);
   }
 }
 
@@ -234,6 +266,14 @@ void reloadSettingsConfig(Movement& movement, std::string name){
   movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
+void attachToLadder(Movement& movement){
+  if (movement.facingLadder){
+     movement.attachedToLadder = true;
+  }
+}
+void releaseFromLadder(Movement& movement){
+  movement.attachedToLadder = false;
+}
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -257,6 +297,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> yRot = 0.f;
     movement -> groundedObjIds = {};
     movement -> facingWall = false;
+    movement -> facingLadder = false;
+    movement -> attachedToLadder = false;
 
     reloadMovementConfig(*movement, id, "default");
     reloadSettingsConfig(*movement, "default");
@@ -269,6 +311,16 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Movement* movement = static_cast<Movement*>(data);
+
+    if (key == 'R') { // shift
+      if (action == 1){
+        attachToLadder(*movement);
+      }else if (action == 0){
+        releaseFromLadder(*movement);        
+      }
+      return;
+    }
+
     if (key == 'W'){
       if (action == 0){
         movement -> goForward = false;
@@ -332,20 +384,34 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     glm::vec2 moveVec(0.f, 0.f);
     if (movement -> goForward){
       moveVec = moveSpeed * glm::vec2(0.f, -1.f);
-      moveXZ(id, moveVec);
+      if (movement -> facingLadder || movement -> attachedToLadder){
+        moveUp(id, moveVec);
+      }else{
+        moveXZ(id, moveVec);
+      }
     }
     if (movement -> goBackward){
       moveVec = moveSpeed * glm::vec2(0.f, 1.f);
-      moveXZ(id, moveVec);
+      if (movement -> facingLadder || movement -> attachedToLadder){
+        moveDown(id, moveVec);
+      }else{
+        moveXZ(id, moveVec);
+      }
     }
     if (movement -> goLeft){
       moveVec = moveSpeed * glm::vec2(horzRelVelocity * -1.f, 0.f);
-      moveXZ(id, moveVec);
+      if (!movement -> attachedToLadder){
+        moveXZ(id, moveVec);
+      }
+      
     }
     if (movement -> goRight){
       moveVec = moveSpeed * glm::vec2(horzRelVelocity * 1.f, 0.f);
-      moveXZ(id, moveVec);
+      if (!movement -> attachedToLadder){
+        moveXZ(id, moveVec);
+      }
     }
+
 
     auto currPos = gameapi -> getGameObjectPos(id, true);
     auto currTime = gameapi -> timeSeconds(false);
@@ -359,10 +425,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     float elapsedTime = gameapi -> timeElapsed();
     look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
-    updateVelocity(*movement, id, elapsedTime, currPos);
-    updateFacingWall(*movement, id);
 
-    std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", facing ladder = " << (movement -> facingLadder ? "true" : "false") << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
+    bool movingDown = false;
+    updateVelocity(*movement, id, elapsedTime, currPos, &movingDown);
+    updateFacingWall(*movement, id);
+    restrictLadderMovement(*movement, id, movingDown);
+
+    std::cout << "mounted to wall: " << (movement -> facingWall ? "true" : "false") << ", facing ladder = " << (movement -> facingLadder ? "true" : "false") << ", attached = " << (movement -> attachedToLadder ? "true" : "false")  << ", grounded = " << (movement -> groundedObjIds.size() > 0 ? "true" : "false") << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
