@@ -72,6 +72,10 @@ void jump(Movement& movement, objid id){
       gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id));
     }
   }
+
+  if (movement.waterObjIds.size() > 0){
+    gameapi -> applyImpulse(id, impulse);
+  }
 }
 
 
@@ -208,7 +212,7 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
   movement.moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
   movement.moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
-  movement.moveParams.waterGravity = glm::vec3(0.f, 1.f, 0.f);
+  movement.moveParams.waterGravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 17), 0.f);
 }
 
 objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
@@ -244,7 +248,7 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle from traits where profile = " + name,
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water from traits where profile = " + name,
     {}
   );
   bool validTraitSql = false;

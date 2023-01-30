@@ -57,7 +57,9 @@ water:scale:50 100 100
 water:rotation:0 -1 0 0
 water:tint:0 0 1 0.5
 water:texture:../gameresources/textures/wood.jpg
-
+water:water:basic
+water:physics:enabled
+water:physics_collision:nocollide
 
 #
 #wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -68,16 +70,16 @@ water:texture:../gameresources/textures/wood.jpg
 #wall2:physics:enabled
 #wall2:chatnode:npc1
 #
-#item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-#item:position:0 2 50
-#item:scale:0.5 0.5 0.5
-#item:texture:../gameresources/textures/wood.jpg
-#item:physics:enabled
-#item:physics_type:dynamic
-#item:pickup:gold
-#item:pickup-amount:100
-#item:pickup-type:replace
-#item:pickup-trigger:gold
+item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+item:position:-20 2 50
+item:scale:1 1 5
+item:texture:../gameresources/textures/wood.jpg
+item:physics:enabled
+item:physics_type:dynamic
+item:pickup:gold
+item:pickup-amount:100
+item:pickup-type:replace
+item:pickup-trigger:gold
 #
 #controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 #controlpanel:position:0 -10 30
