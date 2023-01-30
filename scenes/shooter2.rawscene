@@ -23,6 +23,18 @@ ladder:physics:enabled
 ladder:ladder:vertical
 ladder:texture:./res/textures/brickwall.jpg
 
+floatbox_above:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+floatbox_above:position:10 -12 30
+floatbox_above:scale:5 5 5
+floatbox_above:texture:../gameresources/textures/wood.jpg
+floatbox_above:physics:enabled
+
+floatbox_small:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+floatbox_small:position:10 -22.8 40
+floatbox_small:scale:5 5 5
+floatbox_small:texture:../gameresources/textures/wood.jpg
+floatbox_small:physics:enabled
+
 floatbox:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox:position:10 -22 50
 floatbox:scale:5 5 5
@@ -137,6 +149,7 @@ console:tint:0 0.6 1 1
 >maincamera:goal-value:5
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
+>maincamera:scale:0.5 0.5 0.5
 
 
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf

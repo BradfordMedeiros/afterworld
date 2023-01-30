@@ -304,7 +304,7 @@ void toggleCrouch(objid id, bool shouldCrouch){
     .stringAttributes = {},
     .numAttributes = {},
     .vecAttr = { 
-      .vec3 = { { "scale", shouldCrouch ? glm::vec3(0.5f, 0.5f, 0.5f) : glm::vec3(1.f, 1.f, 1.f) }}, 
+      .vec3 = { { "scale", shouldCrouch ? glm::vec3(1.f, 0.5f, 1.f) : glm::vec3(1.f, 1.f, 1.f) }}, 
       .vec4 = { } 
     },
   };
