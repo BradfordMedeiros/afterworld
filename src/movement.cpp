@@ -294,7 +294,20 @@ void changeWaterGravity(Movement& movement, objid id){
       .vec4 = { } 
     },
   };
-  std::cout << "new gravity is: " << print(gravity) << ", in water = " << print(inWater) << std::endl;
+  //std::cout << "new gravity is: " << print(gravity) << ", in water = " << print(inWater) << std::endl;
+  gameapi -> setGameObjectAttr(id, newAttr);
+}
+
+void toggleCrouch(objid id, bool shouldCrouch){
+  std::cout << "toggle crouch: " << shouldCrouch << std::endl;
+  GameobjAttributes newAttr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = { { "scale", shouldCrouch ? glm::vec3(0.5f, 0.5f, 0.5f) : glm::vec3(1.f, 1.f, 1.f) }}, 
+      .vec4 = { } 
+    },
+  };
   gameapi -> setGameObjectAttr(id, newAttr);
 }
 
@@ -336,7 +349,17 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Movement* movement = static_cast<Movement*>(data);
 
-    if (key == 'R') { // shift
+    std::cout << "key is: " << key << std::endl;
+
+    if (key == 341){  // ctrl
+      if (action == 1){
+        toggleCrouch(id, true);
+      }else if (action == 0){
+        toggleCrouch(id, false);
+      }
+    }
+
+    if (key == 'R') { 
       if (action == 1){
         attachToLadder(*movement);
       }else if (action == 0){
@@ -455,13 +478,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateFacingWall(*movement, id);
     restrictLadderMovement(*movement, id, movingDown);
 
-    std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
+    //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
   };
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     modlog("movement", "on collision enter: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     if (id != obj1 && id != obj2){
-      return;
+      return; 
     }
     Movement* movement = static_cast<Movement*>(data);
     auto otherNormal = (id == obj2) ? normal : oppositeNormal;
