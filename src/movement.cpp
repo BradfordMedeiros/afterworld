@@ -51,6 +51,9 @@ struct Movement {
   bool attachedToLadder;
   std::set<objid> waterObjIds;
 
+  bool isCrouching;
+  bool shouldBeCrouching;
+
   glm::vec3 lastPosition;
 };
 
@@ -304,7 +307,7 @@ void toggleCrouch(objid id, bool shouldCrouch){
     .stringAttributes = {},
     .numAttributes = {},
     .vecAttr = { 
-      .vec3 = { { "scale", shouldCrouch ? glm::vec3(0.5f, 0.5f, 0.5f) : glm::vec3(1.f, 1.f, 1.f) }}, 
+      .vec3 = { { "scale", shouldCrouch ? glm::vec3(0.3f, 0.3f, 0.3f) : glm::vec3(1.f, 1.f, 1.f) }}, 
       .vec4 = { } 
     },
   };
@@ -314,6 +317,32 @@ void toggleCrouch(objid id, bool shouldCrouch){
     // bug where scaling and object makes the object float in the air 
     // old school crouch jump extra height (intentional)
     gameapi -> applyImpulse(id, glm::vec3(0.f, 1.f, 0.f)); 
+  }
+}
+
+float getPlayerTop(glm::vec3 playerPos){
+  auto playerHitboxHeight = 1.f;
+  return playerPos.y + (playerHitboxHeight * 0.5f);
+}
+
+bool somethingAbovePlayer(glm::vec3 playerPos){
+  auto abovePlayer = getPlayerTop(playerPos);
+  playerPos.y = abovePlayer;
+  auto hitpoints =  gameapi -> raycast(playerPos, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), 0.6f);
+  return hitpoints.size() > 0;
+}
+
+void updateCrouch(Movement& movement, objid id){
+  if (movement.shouldBeCrouching && !movement.isCrouching){
+    movement.isCrouching = true;
+    toggleCrouch(id, true);
+  }else if (!movement.shouldBeCrouching && movement.isCrouching){
+    auto playerPos = gameapi -> getGameObjectPos(id, true);
+    auto canUncrouch = !somethingAbovePlayer(playerPos);
+    if (canUncrouch){
+      movement.isCrouching = false;
+      toggleCrouch(id, false);
+    }
   }
 }
 
@@ -342,6 +371,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> facingLadder = false;
     movement -> attachedToLadder = false;
     movement -> waterObjIds = {};
+    movement -> isCrouching = false;
+    movement -> shouldBeCrouching = false;
 
     reloadMovementConfig(*movement, id, "default");
     reloadSettingsConfig(*movement, "default");
@@ -359,9 +390,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 341){  // ctrl
       if (action == 1){
-        toggleCrouch(id, true);
+        movement -> shouldBeCrouching = true;
       }else if (action == 0){
-        toggleCrouch(id, false);
+        movement -> shouldBeCrouching = false;
       }
     }
 
@@ -483,6 +514,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateVelocity(*movement, id, elapsedTime, currPos, &movingDown);
     updateFacingWall(*movement, id);
     restrictLadderMovement(*movement, id, movingDown);
+    updateCrouch(*movement, id);
 
     //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
@@ -516,7 +548,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     changeWaterGravity(*movement, id);
-
 
     // waterObjIdsattr
 
