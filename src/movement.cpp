@@ -18,6 +18,10 @@ struct MovementParams {
   float groundAngle;
   glm::vec3 gravity;
   glm::vec3 waterGravity;
+  bool canCrouch;
+  float crouchSpeed;
+  float crouchScale;
+  float crouchDelay;
 };
 
 struct ControlParams {
@@ -53,6 +57,7 @@ struct Movement {
 
   bool isCrouching;
   bool shouldBeCrouching;
+  float lastCrouchTime;
 
   glm::vec3 lastPosition;
 };
@@ -102,7 +107,8 @@ void moveXZ(objid id, glm::vec2 direction){
 
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
-  auto speed = isGrounded ? movement.moveParams.moveSpeed : movement.moveParams.moveSpeedAir;
+  auto baseMoveSpeed = movement.isCrouching ? movement.moveParams.crouchSpeed : movement.moveParams.moveSpeed;
+  auto speed = isGrounded ? baseMoveSpeed : movement.moveParams.moveSpeedAir;
   if (ironsight){
     speed = speed * ironsightSpeedMultiplier;
   }
@@ -216,6 +222,10 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
   movement.moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
   movement.moveParams.waterGravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 17), 0.f);
+  movement.moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
+  movement.moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
+  movement.moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
+  movement.moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
 }
 
 objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
@@ -251,7 +261,7 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water from traits where profile = " + name,
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay from traits where profile = " + name,
     {}
   );
   bool validTraitSql = false;
@@ -301,13 +311,13 @@ void changeWaterGravity(Movement& movement, objid id){
   gameapi -> setGameObjectAttr(id, newAttr);
 }
 
-void toggleCrouch(objid id, bool shouldCrouch){
+void toggleCrouch(objid id, bool shouldCrouch, float crouchScale){
   std::cout << "toggle crouch: " << shouldCrouch << std::endl;
   GameobjAttributes newAttr {
     .stringAttributes = {},
     .numAttributes = {},
     .vecAttr = { 
-      .vec3 = { { "scale", shouldCrouch ? glm::vec3(0.3f, 0.3f, 0.3f) : glm::vec3(1.f, 1.f, 1.f) }}, 
+      .vec3 = { { "scale", shouldCrouch ? glm::vec3(crouchScale, crouchScale, crouchScale) : glm::vec3(1.f, 1.f, 1.f) }}, 
       .vec4 = { } 
     },
   };
@@ -335,13 +345,14 @@ bool somethingAbovePlayer(glm::vec3 playerPos){
 void updateCrouch(Movement& movement, objid id){
   if (movement.shouldBeCrouching && !movement.isCrouching){
     movement.isCrouching = true;
-    toggleCrouch(id, true);
+    movement.lastCrouchTime = gameapi -> timeSeconds(false);
+    toggleCrouch(id, true, movement.moveParams.crouchScale);
   }else if (!movement.shouldBeCrouching && movement.isCrouching){
     auto playerPos = gameapi -> getGameObjectPos(id, true);
     auto canUncrouch = !somethingAbovePlayer(playerPos);
     if (canUncrouch){
       movement.isCrouching = false;
-      toggleCrouch(id, false);
+      toggleCrouch(id, false, movement.moveParams.crouchScale);
     }
   }
 }
@@ -373,6 +384,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> waterObjIds = {};
     movement -> isCrouching = false;
     movement -> shouldBeCrouching = false;
+    movement -> lastCrouchTime = -10000.f;  // so can immediately crouch
 
     reloadMovementConfig(*movement, id, "default");
     reloadSettingsConfig(*movement, "default");
@@ -389,7 +401,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     std::cout << "key is: " << key << std::endl;
 
     if (key == 341){  // ctrl
-      if (action == 1){
+      auto timeSinceLastCrouch = (gameapi -> timeSeconds(false) - movement -> lastCrouchTime) * 1000;
+      if (action == 1 && movement -> moveParams.canCrouch && (timeSinceLastCrouch > movement -> moveParams.crouchDelay)){
         movement -> shouldBeCrouching = true;
       }else if (action == 0){
         movement -> shouldBeCrouching = false;
