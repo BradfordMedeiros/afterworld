@@ -10,6 +10,7 @@ extern CustomApiBindings* gameapi;
 struct MovementParams {
   float moveSpeed;
   float moveSpeedAir;
+  float moveSpeedWater;
   float jumpHeight;
   float maxAngleUp;
   float maxAngleDown;
@@ -108,8 +109,10 @@ void moveXZ(objid id, glm::vec2 direction){
 
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
+  auto inWater = movement.waterObjIds.size() > 0;
   auto baseMoveSpeed = movement.isCrouching ? movement.moveParams.crouchSpeed : movement.moveParams.moveSpeed;
   auto speed = isGrounded ? baseMoveSpeed : movement.moveParams.moveSpeedAir;
+  speed = inWater ? movement.moveParams.moveSpeedWater : speed;
   if (ironsight){
     speed = speed * ironsightSpeedMultiplier;
   }
@@ -214,6 +217,7 @@ void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& res
 void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>& result){
   movement.moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
   movement.moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
+  movement.moveParams.moveSpeedWater = floatFromFirstSqlResult(result, 23);
   movement.moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
   movement.moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
   movement.moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
@@ -263,7 +267,7 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction from traits where profile = " + name,
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water from traits where profile = " + name,
     {}
   );
   bool validTraitSql = false;
