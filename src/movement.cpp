@@ -22,6 +22,8 @@ struct MovementParams {
   float crouchSpeed;
   float crouchScale;
   float crouchDelay;
+  float friction;
+  float crouchFriction;
 };
 
 struct ControlParams {
@@ -38,7 +40,6 @@ struct Movement {
   bool goLeft;
   bool goRight;
   bool active;
-
 
   std::optional<objid> jumpSoundObjId;
   std::optional<objid> landSoundObjId;
@@ -188,17 +189,16 @@ void land(Movement& movement, objid id){
 }
 
 
-void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result, glm::vec3 physics_gravity){
+void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result, glm::vec3 physics_gravity, float friction){
   float physics_mass = floatFromFirstSqlResult(result, 8);
   float physics_restitution = floatFromFirstSqlResult(result, 4);
-  float physics_friction = floatFromFirstSqlResult(result, 5);
   GameobjAttributes attr {
     .stringAttributes = {
     },
     .numAttributes = {
       { "physics_mass", physics_mass },
       { "physics_restitution", physics_restitution },
-      { "physics_friction", physics_friction },
+      { "physics_friction", friction },
     },
     .vecAttr = { 
       .vec3 = {
@@ -226,6 +226,8 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
   movement.moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
   movement.moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
+  movement.moveParams.friction = floatFromFirstSqlResult(result, 5);
+  movement.moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
 }
 
 objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
@@ -261,14 +263,14 @@ void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay from traits where profile = " + name,
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction from traits where profile = " + name,
     {}
   );
   bool validTraitSql = false;
   auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
   modassert(validTraitSql, "error executing sql query");
   updateTraitConfig(movement, traitsResult);
-  updateObjectProperties(id, traitsResult, movement.moveParams.gravity);
+  updateObjectProperties(id, traitsResult, movement.moveParams.gravity, movement.moveParams.friction);
   updateSoundConfig(movement, id, SoundConfig {
     .jumpClip = traitsResult.at(0).at(9),
     .landClip = traitsResult.at(0).at(10),
@@ -311,13 +313,18 @@ void changeWaterGravity(Movement& movement, objid id){
   gameapi -> setGameObjectAttr(id, newAttr);
 }
 
-void toggleCrouch(objid id, bool shouldCrouch, float crouchScale){
+void toggleCrouch(Movement& movement, objid id, bool shouldCrouch){
   std::cout << "toggle crouch: " << shouldCrouch << std::endl;
+  auto crouchScale = movement.moveParams.crouchScale;
   GameobjAttributes newAttr {
     .stringAttributes = {},
-    .numAttributes = {},
+    .numAttributes = {
+      { "physics_friction", shouldCrouch ? movement.moveParams.crouchFriction : movement.moveParams.friction },
+    },
     .vecAttr = { 
-      .vec3 = { { "scale", shouldCrouch ? glm::vec3(crouchScale, crouchScale, crouchScale) : glm::vec3(1.f, 1.f, 1.f) }}, 
+      .vec3 = { 
+        { "scale", shouldCrouch ? glm::vec3(crouchScale, crouchScale, crouchScale) : glm::vec3(1.f, 1.f, 1.f) },
+      },
       .vec4 = { } 
     },
   };
@@ -346,13 +353,13 @@ void updateCrouch(Movement& movement, objid id){
   if (movement.shouldBeCrouching && !movement.isCrouching){
     movement.isCrouching = true;
     movement.lastCrouchTime = gameapi -> timeSeconds(false);
-    toggleCrouch(id, true, movement.moveParams.crouchScale);
+    toggleCrouch(movement, id, true);
   }else if (!movement.shouldBeCrouching && movement.isCrouching){
     auto playerPos = gameapi -> getGameObjectPos(id, true);
     auto canUncrouch = !somethingAbovePlayer(playerPos);
     if (canUncrouch){
       movement.isCrouching = false;
-      toggleCrouch(id, false, movement.moveParams.crouchScale);
+      toggleCrouch(movement, id, false);
     }
   }
 }
