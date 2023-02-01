@@ -368,6 +368,30 @@ void updateCrouch(Movement& movement, objid id){
   }
 }
 
+bool shouldStepUp(Movement& movement, objid id){
+  auto playerPos = gameapi -> getGameObjectPos(id, true);
+  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true) * glm::vec3(0.f, 0.f, -1.f);
+  auto inFrontOfPlayerSameHeight = playerPos + glm::vec3(inFrontOfPlayer.x, 0.f, inFrontOfPlayer.z);
+  
+  auto belowPos = playerPos - glm::vec3(0.f, 0.95f, 0.f);
+  auto belowPosSameHeight = inFrontOfPlayerSameHeight - glm::vec3(0.f, 0.95f, 0.f);
+  
+  auto abovePos = playerPos - glm::vec3(0.f, 0.2f, 0.f);
+  auto abovePosSameHeight = inFrontOfPlayerSameHeight - glm::vec3(0.f, 0.2f, 0.f);
+
+  auto belowDir = gameapi -> orientationFromPos(belowPos, belowPosSameHeight);
+  auto aboveDir = gameapi -> orientationFromPos(abovePos, abovePosSameHeight);
+
+  auto belowHitpoints = gameapi -> raycast(belowPos, belowDir, 2.f);
+  auto aboveHitpoints = gameapi -> raycast(abovePos, aboveDir, 2.f);
+
+  //gameapi -> drawLine(belowPos, gameapi -> moveRelative(belowPos, belowDir, 2.f), true, id, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt);
+  //gameapi -> drawLine(abovePos, gameapi -> moveRelative(abovePos, aboveDir, 2.f), true, id, glm::vec4(0.f, 0.f, 1.f, 1.f),  std::nullopt, std::nullopt);
+
+  //std::cout << "hitpoints:  low = " << belowHitpoints.size() << ", high = " << aboveHitpoints.size() << std::endl;
+  return belowHitpoints.size() > 0 && aboveHitpoints.size() == 0;
+}
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -539,6 +563,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateFacingWall(*movement, id);
     restrictLadderMovement(*movement, id, movingDown);
     updateCrouch(*movement, id);
+    std::cout << "should step up: " << print(shouldStepUp(*movement, id)) << std::endl;
 
     //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;

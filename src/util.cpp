@@ -159,6 +159,31 @@ int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos){
   return closestIndex;
 }
 
+float hitlength = 2;
+void showDebugHitmark(HitObject& hitpoint, objid playerId){
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(0.f, -1.f * hitlength,  0.f),
+    hitpoint.point + glm::vec3(0.f, 1.f * hitlength,  0.f),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(-1.f * hitlength, 0.f, 0.f),
+    hitpoint.point + glm::vec3(1.f * hitlength, 0.f, 0.f),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(0.f, 0.f, -1.f * hitlength),
+    hitpoint.point + glm::vec3(0.f, 0.f, 1.f * hitlength),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+
+  gameapi -> drawLine(
+    hitpoint.point,
+    hitpoint.point + (10.f * (hitpoint.normal * glm::vec3(0.f, 0.f, -1.f))),
+    true, playerId, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt
+  );
+}
+
 bool assertDebug = false;
 void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){

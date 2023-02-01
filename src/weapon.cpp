@@ -273,31 +273,6 @@ void startRecoil(Weapons& weapons){
 }
 
 
-float hitlength = 2;
-void showDebugHitmark(HitObject& hitpoint, objid playerId){
-  gameapi -> drawLine(
-    hitpoint.point + glm::vec3(0.f, -1.f * hitlength,  0.f),
-    hitpoint.point + glm::vec3(0.f, 1.f * hitlength,  0.f),
-    true, playerId, std::nullopt,  std::nullopt, std::nullopt
-  );
-  gameapi -> drawLine(
-    hitpoint.point + glm::vec3(-1.f * hitlength, 0.f, 0.f),
-    hitpoint.point + glm::vec3(1.f * hitlength, 0.f, 0.f),
-    true, playerId, std::nullopt,  std::nullopt, std::nullopt
-  );
-  gameapi -> drawLine(
-    hitpoint.point + glm::vec3(0.f, 0.f, -1.f * hitlength),
-    hitpoint.point + glm::vec3(0.f, 0.f, 1.f * hitlength),
-    true, playerId, std::nullopt,  std::nullopt, std::nullopt
-  );
-
-  gameapi -> drawLine(
-    hitpoint.point,
-    hitpoint.point + (10.f * (hitpoint.normal * glm::vec3(0.f, 0.f, -1.f))),
-    true, playerId, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt
-  );
-}
-
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
@@ -316,13 +291,13 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orie
     gameapi -> freeLine(weapons.raycastLine.value());
   }
   
-  /*
+  
   auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
   weapons.raycastLine = raycastLineId;
   for (auto &hitpoint : hitpoints){
     std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
     showDebugHitmark(hitpoint, playerId.value());
-  }*/
+  }
   return hitpoints;
 }
 
