@@ -563,7 +563,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateFacingWall(*movement, id);
     restrictLadderMovement(*movement, id, movingDown);
     updateCrouch(*movement, id);
-    std::cout << "should step up: " << print(shouldStepUp(*movement, id)) << std::endl;
+
+    auto shouldStep = shouldStepUp(*movement, id) && movement -> goForward;
+    std::cout << "should step up: " << shouldStep << std::endl;
+    if (shouldStep){
+      gameapi -> applyImpulse(id, glm::vec3(0.f, 0.4f, 0.f));
+    }
 
     //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
