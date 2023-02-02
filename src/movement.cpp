@@ -79,7 +79,7 @@ void jump(Movement& movement, objid id){
   if (movement.groundedObjIds.size() > 0){
     gameapi -> applyImpulse(id, impulse);
     if (movement.jumpSoundObjId.has_value()){
-      gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id));
+      gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
     }
   }
 
@@ -187,7 +187,7 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
 
 void land(Movement& movement, objid id){
   if (movement.landSoundObjId.has_value()){
-    gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id));
+    gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
   }
 }
 
@@ -551,7 +551,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (glm::length(currPos - movement -> lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && movement -> moveSoundObjId.has_value() && ((currTime - movement -> lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
       // move-sound-distance:STRING move-sound-mintime:STRING
       std::cout << "should play move clip" << std::endl;
-      gameapi -> playClip("&code-move", gameapi -> listSceneId(id));
+      gameapi -> playClip("&code-move", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
       movement -> lastMoveSoundPlayTime = currTime;
       movement -> lastMoveSoundPlayLocation = currPos;
     }

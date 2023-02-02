@@ -77,7 +77,7 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
       auto soundPosition = std::get_if<glm::vec3>(&value);
       modassert(soundPosition != NULL, "sound position not given");
       std::cout << "want to play clip: " << *clip << std::endl;
-      gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id)); // should add playclip position
+      gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, *soundPosition); // should add playclip position
     }
   };
 

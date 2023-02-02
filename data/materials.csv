@@ -1,4 +1,4 @@
 material:STRING,particle:STRING,hit-sound:STRING,walk-sound:STRING
-default,,,
-wood,,,
-metal,,,
+default,,./res/sounds/sample.wav,./res/sounds/sample.wav
+wood,,./res/sounds/sample.wav,./res/sounds/sample.wav
+metal,,./res/sounds/sample.wav,./res/sounds/sample.wav

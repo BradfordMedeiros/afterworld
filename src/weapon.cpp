@@ -324,7 +324,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     return;
   }
   if (weapons.currentGun.soundId.has_value()){
-    gameapi -> playClip("&code-weaponsound", sceneId);
+    gameapi -> playClip("&code-weaponsound", sceneId, std::nullopt, std::nullopt);
   }
   if (weapons.currentGun.fireAnimation.has_value()){
     gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), false);
