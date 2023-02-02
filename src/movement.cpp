@@ -565,7 +565,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateCrouch(*movement, id);
 
     auto shouldStep = shouldStepUp(*movement, id) && movement -> goForward;
-    std::cout << "should step up: " << shouldStep << std::endl;
+    //std::cout << "should step up: " << shouldStep << std::endl;
     if (shouldStep){
       gameapi -> applyImpulse(id, glm::vec3(0.f, 0.4f, 0.f));
     }

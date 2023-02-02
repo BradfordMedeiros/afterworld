@@ -17,6 +17,7 @@
 #include "./debug.h"
 #include "./weather.h"
 #include "./in-game-ui.h"
+#include "./sound.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
