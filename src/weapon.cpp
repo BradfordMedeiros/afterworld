@@ -33,49 +33,11 @@ struct CurrentGun {
   float bloomLength;
 };
 
-struct Weapons {
-  bool isHoldingLeftMouse;
-  bool isHoldingRightMouse;
-
-  WeaponParams weaponParams;
-  float selectDistance;
-  CurrentGun currentGun;
-
-  glm::vec2 lookVelocity;
-  float movementVelocity;
-
-  std::optional<objid> raycastLine;
+struct MaterialToParticle {
+  std::string material;
+  std::optional<std::string> particle;
+  std::optional<objid> particleId;
 };
-
-void saveGunTransform(Weapons& weapons){
-  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
-
-  if (weapons.currentGun.gunId.has_value()){
-    auto gunId = weapons.currentGun.gunId.value();
-    auto gun = weapons.currentGun.name;
-    auto attr = gameapi -> getGameObjectAttr(gunId);
-    auto position = attr.vecAttr.vec3.at("position");  
-    auto scale = attr.vecAttr.vec3.at("scale");
-    auto rotation = attr.vecAttr.vec4.at("rotation");
-
-    modlog("weapons", "save gun, name = " + weapons.currentGun.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
-
-    auto updateQuery = gameapi -> compileSqlQuery(
-      std::string("update guns set ") +
-        "xoffset-pos = " + serializeFloat(position.x) + ", " +
-        "yoffset-pos = " + serializeFloat(position.y) + ", " +
-        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
-        "xrot = " + serializeFloat(rotation.x) + ", " +
-        "yrot = " + serializeFloat(rotation.y) + ", " +
-        "zrot = " + serializeFloat(rotation.z) + 
-        " where name = " + gun,
-        {}
-    );
-    bool validSql = false;
-    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-    modassert(validSql, "error executing sql query");
-  }
-}
 
 std::string parentName = ">maincamera";
 
@@ -108,6 +70,86 @@ GameobjAttributes particleAttributes(std::string& particle){
   }
   return particleAttr;
 }
+
+std::vector<MaterialToParticle> loadMaterials(objid sceneId){
+  std::vector<MaterialToParticle> materialToParticles;
+  auto query = gameapi -> compileSqlQuery("select material, hit-particle from materials", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  for (auto &row : result){
+    auto particleAttr = particleAttributes(row.at(1));
+    auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + row.at(0), particleAttr, submodelAttributes);
+
+    materialToParticles.push_back(MaterialToParticle {
+      .material = row.at(0),
+      .particle = row.at(1),
+      .particleId = materialEmitterId.value(),
+    });
+  }
+  return materialToParticles;
+}
+std::optional<std::string> materialTypeForObj(objid id){
+  auto attr = gameapi -> getGameObjectAttr(id);
+  return getStrAttr(attr, "material");
+}
+std::optional<objid>* getParticleForMaterial(std::vector<MaterialToParticle>& materials, std::string& materialName){
+  for (auto &material : materials){
+    if (material.material == materialName){
+      return &material.particleId;
+    }
+  }
+  return NULL;
+}
+
+struct Weapons {
+  bool isHoldingLeftMouse;
+  bool isHoldingRightMouse;
+
+  WeaponParams weaponParams;
+  float selectDistance;
+  CurrentGun currentGun;
+
+  glm::vec2 lookVelocity;
+  float movementVelocity;
+
+  std::optional<objid> raycastLine;
+  std::vector<MaterialToParticle> materials;
+};
+
+void saveGunTransform(Weapons& weapons){
+  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
+
+  if (weapons.currentGun.gunId.has_value()){
+    auto gunId = weapons.currentGun.gunId.value();
+    auto gun = weapons.currentGun.name;
+    auto attr = gameapi -> getGameObjectAttr(gunId);
+    auto position = attr.vecAttr.vec3.at("position");  
+    auto scale = attr.vecAttr.vec3.at("scale");
+    auto rotation = attr.vecAttr.vec4.at("rotation");
+
+    modlog("weapons", "save gun, name = " + weapons.currentGun.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
+
+    auto updateQuery = gameapi -> compileSqlQuery(
+      std::string("update guns set ") +
+        "xoffset-pos = " + serializeFloat(position.x) + ", " +
+        "yoffset-pos = " + serializeFloat(position.y) + ", " +
+        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
+        "xrot = " + serializeFloat(rotation.x) + ", " +
+        "yrot = " + serializeFloat(rotation.y) + ", " +
+        "zrot = " + serializeFloat(rotation.z) + 
+        " where name = " + gun,
+        {}
+    );
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+    modassert(validSql, "error executing sql query");
+  }
+}
+
+
 
 void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string projectileParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
@@ -292,12 +334,12 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orie
   }
   
   
-  auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
-  weapons.raycastLine = raycastLineId;
-  for (auto &hitpoint : hitpoints){
-    std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
-    showDebugHitmark(hitpoint, playerId.value());
-  }
+  //auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
+  //weapons.raycastLine = raycastLineId;
+  //for (auto &hitpoint : hitpoints){
+  //  std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
+  //  showDebugHitmark(hitpoint, playerId.value());
+  //}
   return hitpoints;
 }
 
@@ -307,9 +349,27 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
   for (auto &hitpoint : hitpoints){
     modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
-    if (weapons.currentGun.hitParticles.has_value()){
-      gameapi -> emit(weapons.currentGun.hitParticles.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
+    auto objMaterial = materialTypeForObj(hitpoint.id);
+
+    std::optional<objid> emitterId = std::nullopt;
+    if (objMaterial.has_value()){
+      auto material = getParticleForMaterial(weapons.materials, objMaterial.value());
+      std::cout << "hit particle material: (" << objMaterial.value() << ") - " << (material ? (material -> has_value() ? std::to_string(material -> value()) : "material exists, but no emitter") : " material does not exist") << std::endl;
+      if (material && material -> has_value()){
+        emitterId = material -> value();
+      }
+    }else{
+      std::cout << "hit particle material: (no material) " << std::endl;
+      if (weapons.currentGun.hitParticles.has_value()){
+        emitterId = weapons.currentGun.hitParticles.value();
+      }
     }
+
+    if (emitterId.has_value()){
+      gameapi -> emit(emitterId.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
+    }
+    
+  
     gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), 50);
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
@@ -536,7 +596,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
     weapons -> movementVelocity = 0.f;
-
     weapons -> raycastLine = std::nullopt;
 
     weapons -> currentGun = CurrentGun {
@@ -545,6 +604,8 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .soundId = std::nullopt,
       .muzzleParticle = std::nullopt,
     };
+
+    weapons -> materials = loadMaterials(sceneId);
 
     reloadTraitsValues(*weapons);
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
