@@ -80,11 +80,25 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
       gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, *soundPosition); // should add playclip position
     }
   };
-
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Sound* value = static_cast<Sound*>(data);
     if (key == 'L'){
     	gameapi -> sendNotifyMessage("play-material-sound:wood", glm::vec3(0.f, 0.f, 1.f));
+    }
+  };
+  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    std::cout << "sound: on collision enter: " << obj1 << ", " << obj2 << std::endl;
+    Sound* sound = static_cast<Sound*>(data);
+    std::string material = "wood";
+    auto clip = getClipForMaterial(*sound, material);
+    if (clip){
+      gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, pos);
+      auto attr1 = gameapi -> getGameObjectAttr(obj1);
+      auto attr2 = gameapi -> getGameObjectAttr(obj2);
+
+      auto vel1 = getVec3Attr(attr1, "physics_velocity").value();
+      auto vel2 = getVec3Attr(attr2, "physics_velocity").value();
+      std::cout << "vel1: " << print(vel1) << ", vel2: " << print(vel2) << std::endl;
     }
   };
 
