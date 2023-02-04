@@ -256,8 +256,12 @@ struct SoundConfig {
   std::string moveClip;
 };
 void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
-  movement.jumpSoundObjId = createSound(id, "&code-movement-jump", config.jumpClip);
-  movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
+  if (config.jumpClip != ""){
+    movement.jumpSoundObjId = createSound(id, "&code-movement-jump", config.jumpClip);
+  }
+  if (config.landClip != ""){
+    movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
+  }
   movement.lastMoveSoundPlayTime = 0.f;
   movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
   if (config.moveClip != ""){
