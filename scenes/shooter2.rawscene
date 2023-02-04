@@ -5,6 +5,9 @@ platform:scale:100 100 10
 platform:rotation:0 -1 0 0
 platform:texture:../gameresources/textures/wood.jpg
 platform:physics:enabled
+
+platform:material:metal
+
 #
 wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 wall:position:0 0 0
@@ -13,6 +16,7 @@ wall:rotation:0 -1 0 0
 wall:texture:../gameresources/textures/wood.jpg
 wall:physics:enabled
 wall:chatnode:npc1
+wall:material:wood
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 ladder:position:-40 -10 0
@@ -36,7 +40,7 @@ floatbox_small:texture:../gameresources/textures/wood.jpg
 floatbox_small:physics:enabled
 
 floatbox:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-floatbox:position:10 -22 50
+floatbox:position:10 -22.9 50
 floatbox:scale:5 5 5
 floatbox:texture:../gameresources/textures/wood.jpg
 floatbox:physics:enabled
@@ -84,7 +88,7 @@ water:physics_collision:nocollide
 #
 item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 item:position:-20 2 50
-item:scale:1 1 5
+item:scale:0.25 0.25 1.25
 item:texture:../gameresources/textures/wood.jpg
 item:physics:enabled
 item:physics_type:dynamic
@@ -149,7 +153,7 @@ console:tint:0 0.6 1 1
 >maincamera:goal-value:5
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
->maincamera:scale:0.5 0.5 0.5
+
 
 
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
@@ -188,4 +192,4 @@ weather:script:native/weather
 gunlogic:script:native/weapon
 ingame:script:native/in-game-ui
 tags:script:native/tags
-
+sounds:script:native/sound
