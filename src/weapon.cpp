@@ -39,6 +39,24 @@ struct MaterialToParticle {
   std::optional<objid> particleId;
 };
 
+struct Weapons {
+  bool isHoldingLeftMouse;
+  bool isHoldingRightMouse;
+
+  WeaponParams weaponParams;
+  float selectDistance;
+  CurrentGun currentGun;
+
+  glm::vec2 lookVelocity;
+  float movementVelocity;
+
+  std::optional<objid> raycastLine;
+  std::vector<MaterialToParticle> materials;
+  std::optional<objid> heldItem;
+};
+
+
+
 std::string parentName = ">maincamera";
 
 
@@ -104,20 +122,6 @@ std::optional<objid>* getParticleForMaterial(std::vector<MaterialToParticle>& ma
   return NULL;
 }
 
-struct Weapons {
-  bool isHoldingLeftMouse;
-  bool isHoldingRightMouse;
-
-  WeaponParams weaponParams;
-  float selectDistance;
-  CurrentGun currentGun;
-
-  glm::vec2 lookVelocity;
-  float movementVelocity;
-
-  std::optional<objid> raycastLine;
-  std::vector<MaterialToParticle> materials;
-};
 
 void saveGunTransform(Weapons& weapons){
   debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
@@ -586,6 +590,21 @@ float calculateBloomAmount(Weapons& weapons){
   return glm::max(weapons.currentGun.minBloom, (weapons.currentGun.totalBloom - weapons.currentGun.minBloom) * slerpAmount + weapons.currentGun.minBloom);
 }
 
+
+// Should interpolate.  Looks better + prevent clipping bugs
+// Might be interesting to incorporate things like mass and stuff
+void handlePickedUpItem(Weapons& weapons){
+  if (!weapons.heldItem.has_value()){
+    return;
+  }
+  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
+  auto playerPos = gameapi -> getGameObjectPos(playerId.value(), true);
+  auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+  glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
+  auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
+  gameapi -> setGameObjectPos(weapons.heldItem.value(), slightlyInFrontOfPlayer);
+}
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -606,6 +625,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     };
 
     weapons -> materials = loadMaterials(sceneId);
+    weapons -> heldItem = std::nullopt;
 
     reloadTraitsValues(*weapons);
     changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
@@ -643,6 +663,36 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       }
     }
   };
+  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+    Weapons* weapons = static_cast<Weapons*>(data);
+    if (key == 'E') { 
+      if (action == 1){
+        if (weapons -> heldItem.has_value()){
+          modlog("weapons", "pickup released held item: " + std::to_string(weapons -> heldItem.value()));
+          weapons -> heldItem = std::nullopt;
+        }else{
+        auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id), glm::vec3(0.f, 0.f, -1.f));
+          if (hitpoints.size() > 0){
+            auto cameraObj = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
+            auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true);
+            auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
+            auto hitpoint = hitpoints.at(closestHitpointIndex);
+            float distance = glm::length(cameraPos - hitpoint.point);
+            auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
+            auto physicsEnabled = getStrAttr(attr, "physics").value() == "enabled";
+            auto physicsDynamic = getStrAttr(attr, "physics_type").value() == "dynamic";
+            auto physicsCollide = getStrAttr(attr, "physics_collision").value() == "collide";
+            auto canPickup = physicsEnabled && physicsDynamic && physicsCollide ;
+            modlog("weapons", "pickup item: " + std::to_string(hitpoint.id) + " can pickup: " + print(canPickup) + " distance = " + std::to_string(distance));
+            if (canPickup && distance < 5.f){
+              weapons -> heldItem = hitpoint.id;              
+            }
+          }
+        }
+      }
+      return;
+    }
+  };
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
     Weapons* weapons = static_cast<Weapons*>(data);
     if (key == "change-gun"){
@@ -676,6 +726,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       tryFireGun(*weapons, gameapi -> listSceneId(id), bloomAmount);
     }
     swayGun(*weapons, weapons -> isHoldingRightMouse);
+    handlePickedUpItem(*weapons);
     //std::cout << weaponsToString(*weapons) << std::endl;
   };
   return binding;
