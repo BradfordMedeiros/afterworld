@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponParams {
   float firingRate;
   float recoilLength;
@@ -31,6 +32,8 @@ struct CurrentGun {
   float minBloom;
   float totalBloom;
   float bloomLength;
+
+  GunAnimation gunState;
 };
 
 struct MaterialToParticle {
@@ -190,7 +193,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   GameobjAttributes attr {
     .stringAttributes = stringAttributes,
     .numAttributes = {},
-    .vecAttr = {  .vec3 = {{ "position", gunpos }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
+    .vecAttr = {  .vec3 = {{ "position", gunpos - glm::vec3(0.f, 1.f, 0.f) }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -238,7 +241,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   }
 }
 
-void changeGun(Weapons& weapons, objid sceneId, std::string gun){
+void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   auto gunQuery = gameapi -> compileSqlQuery(
    std::string("select modelpath, fire-animation, fire-sound, xoffset-pos, ") +
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
@@ -271,6 +274,7 @@ void changeGun(Weapons& weapons, objid sceneId, std::string gun){
   weapons.currentGun.minBloom = floatFromFirstSqlResult(result, 31);
   weapons.currentGun.totalBloom = floatFromFirstSqlResult(result, 26);
   weapons.currentGun.bloomLength = floatFromFirstSqlResult(result, 30);
+  weapons.currentGun.gunState = GUN_RAISED;
 
   auto fireAnimation = strFromFirstSqlResult(result, 28);
   weapons.currentGun.fireAnimation = std::nullopt;
@@ -468,8 +472,13 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   glm::vec3 targetPos(-1.f * limitedSwayX + weapons.currentGun.initialGunPos.x, -1.f * limitedSwayY + weapons.currentGun.initialGunPos.y, -1.f * limitedSwayZ + weapons.currentGun.initialGunPos.z); 
   
   auto targetPosWithRecoil = calcLocationWithRecoil(weapons, targetPos, isGunZoomed); // this should use ironsight-offset
+  if (weapons.currentGun.gunState == GUN_LOWERING){
+    targetPosWithRecoil += glm::vec3(0.f, -1.f, 0.f);
+  }
+
   auto gunId = weapons.currentGun.gunId.value();
-  float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f);
+  auto animationRate = weapons.currentGun.gunState == GUN_LOWERING ? 5.f : 3.f;
+  float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
   auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);
   gameapi -> setGameObjectPosRelative(gunId, newPos);
   /*
@@ -628,7 +637,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> heldItem = std::nullopt;
 
     reloadTraitsValues(*weapons);
-    changeGun(*weapons, gameapi -> listSceneId(id), "pistol");
+    changeGun(*weapons, id, gameapi -> listSceneId(id), "pistol");
   	return weapons;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -698,7 +707,14 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     if (key == "change-gun"){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "change-gun value invalid");
-      changeGun(*weapons, gameapi -> listSceneId(id), *strValue);
+      auto value = *strValue;
+
+      weapons -> currentGun.gunState = GUN_LOWERING;
+      gameapi -> schedule(id, 1000, weapons, [id, value](void* weaponData) -> void {
+        Weapons* weaponValue = static_cast<Weapons*>(weaponData);
+        changeGun(*weaponValue, id, gameapi -> listSceneId(id), value);
+      });
+      
     }else if (key == "save-gun"){
       saveGunTransform(*weapons);
     }else if (key == "velocity"){
