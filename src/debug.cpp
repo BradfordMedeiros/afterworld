@@ -13,25 +13,25 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
 		.action = 0,
-		.keyToPublish = "change-gun",
+		.keyToPublish = "request-change-gun",
 		.valueToPublish = "none",
 	},
 	HotkeyToMessage {
 		.key = 49,  // 1
 		.action = 0,
-		.keyToPublish = "change-gun",
+		.keyToPublish = "request-change-gun",
 		.valueToPublish = "pistol",
 	},
 	HotkeyToMessage {
 		.key = 50,  // 2 
 		.action = 0,
-		.keyToPublish = "change-gun",
+		.keyToPublish = "request-change-gun",
 		.valueToPublish = "electrogun",
 	},
 	HotkeyToMessage {
 		.key = 51,  // 3
 		.action = 0,
-		.keyToPublish = "change-gun",
+		.keyToPublish = "request-change-gun",
 		.valueToPublish = "scrapgun",
 	},
 };

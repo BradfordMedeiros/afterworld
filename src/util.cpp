@@ -19,6 +19,11 @@ float floatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, 
   return number;
 }
 
+int intFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
+  auto value = sqlResult.at(0).at(index);
+  return std::atoi(value.c_str());
+}
+
 bool boolFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
   auto value = sqlResult.at(0).at(index);
   modassert(value == "TRUE" || value == "FALSE", "invalid bool value");

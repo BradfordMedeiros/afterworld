@@ -34,6 +34,14 @@ void updateItemCount(std::string name, int count){
   modassert(validSql, "error executing sql query");
 }
 
+bool hasGun(std::string& gun){
+  auto query = gameapi -> compileSqlQuery("select count from inventory where item = ?", { gun });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.size() > 0;
+}
+
 CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
    binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
@@ -65,6 +73,14 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
  			  	gameapi -> sendNotifyMessage(pickupTrigger.value(), std::to_string(newItemCount));
  			  }
   		}
+    }
+
+    if (key == "request-change-gun"){
+      auto strValue = std::get_if<std::string>(&value); 
+      modassert(strValue != NULL, "selected value invalid");
+      if (hasGun(*strValue)){
+        gameapi -> sendNotifyMessage("change-gun", *strValue);
+      }
     }
   };
 	return binding;
