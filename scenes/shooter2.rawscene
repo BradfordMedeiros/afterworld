@@ -92,10 +92,11 @@ item:scale:0.25 0.25 1.25
 item:texture:../gameresources/textures/wood.jpg
 item:physics:enabled
 item:physics_type:dynamic
-item:pickup:gold
+item:pickup:scrapgun
 item:pickup-amount:100
 item:pickup-type:replace
-item:pickup-trigger:gold
+#item:pickup-trigger:scrapgun
+
 #
 #controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 #controlpanel:position:0 -10 30
