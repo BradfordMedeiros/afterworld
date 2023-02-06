@@ -708,13 +708,13 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "change-gun value invalid");
       auto value = *strValue;
-
-      weapons -> currentGun.gunState = GUN_LOWERING;
-      gameapi -> schedule(id, 1000, weapons, [id, value](void* weaponData) -> void {
-        Weapons* weaponValue = static_cast<Weapons*>(weaponData);
-        changeGun(*weaponValue, id, gameapi -> listSceneId(id), value);
-      });
-      
+      if (value != weapons -> currentGun.name){
+        weapons -> currentGun.gunState = GUN_LOWERING;
+        gameapi -> schedule(id, 1000, weapons, [id, value](void* weaponData) -> void {
+          Weapons* weaponValue = static_cast<Weapons*>(weaponData);
+          changeGun(*weaponValue, id, gameapi -> listSceneId(id), value);
+        });
+      }
     }else if (key == "save-gun"){
       saveGunTransform(*weapons);
     }else if (key == "velocity"){
