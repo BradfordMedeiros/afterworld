@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <ctime>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 
 CScriptBinding daynightBinding(CustomApiBindings& api, const char* name);
