@@ -49,27 +49,6 @@ glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index){
   return parseVec(sqlRow.at(index));
 }
 
-std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
-  if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
-    return objAttr.stringAttributes.at(key);
-  }
-  return std::nullopt;
-}
-
-std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
-  if (objAttr.numAttributes.find(key) != objAttr.numAttributes.end()){
-    return objAttr.numAttributes.at(key);
-  }
-  return std::nullopt;
-}
-
-std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key){
-   if (objAttr.vecAttr.vec3.find(key) != objAttr.vecAttr.vec3.end()){
-    return objAttr.vecAttr.vec3.at(key);
-  }
-  return std::nullopt; 
-}
-
 
 float PI = 3.141592;
 float TWO_PI = 2 * PI;
@@ -127,13 +106,6 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
   };
 }
 
-bool hasAttribute(GameobjAttributes& attributes, std::string attr){
-  bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();
-  bool hasFloatAttr = attributes.numAttributes.find(attr) != attributes.numAttributes.end();
-  bool hasVec3Attr = attributes.vecAttr.vec3.find(attr) != attributes.vecAttr.vec3.end();
-  bool hasVec4Attr = attributes.vecAttr.vec4.find(attr) != attributes.vecAttr.vec4.end();
-  return hasStrAttr || hasFloatAttr || hasVec3Attr || hasVec4Attr;
-}
 
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
   return [attrFuncs](int32_t id, void* data, int32_t idAdded) -> void { 
