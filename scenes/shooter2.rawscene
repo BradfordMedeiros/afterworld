@@ -155,7 +155,7 @@ console:tint:0 0.6 1 1
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
 
-
+!light:position:0 -5 5
 
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
 enemy:position:0 -10 70
@@ -194,3 +194,4 @@ gunlogic:script:native/weapon
 ingame:script:native/in-game-ui
 tags:script:native/tags
 sounds:script:native/sound
+water:script:native/water

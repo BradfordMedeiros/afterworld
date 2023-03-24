@@ -327,6 +327,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(weatherBinding(api, "native/weather"));
   bindings.push_back(inGameUiBinding(api, "native/in-game-ui"));
   bindings.push_back(soundBinding(api, "native/sound"));
+  bindings.push_back(waterBinding(api, "native/water"));
   return bindings;
 } 
 

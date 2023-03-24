@@ -72,8 +72,6 @@ CScriptBinding daynightBinding(CustomApiBindings& api, const char* name){
       nextIndex = 0;
     }
     float ratioThroughCurrCycle = (currMinute - minutesPerCycleState * lowerIndex) / minutesPerCycleState;
-    
-    std::cout << "lowerIndex = " << lowerIndex << ", nextIndex = " << nextIndex << std::endl;
     auto color = glm::lerp(cycleColors.at(lowerIndex), cycleColors.at(nextIndex), ratioThroughCurrCycle);
 
     modassert(currMinute < maxMinutePerDay, "daynight: cycle minute greater than max in a day");
