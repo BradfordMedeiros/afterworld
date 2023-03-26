@@ -25,21 +25,66 @@ void applyWaterForces(Water& water){
 		auto topOfWater = aabb.value().max.y;
     auto waterObjAttr = gameapi -> getGameObjectAttr(waterId);
     auto waterDensity = getFloatAttr(waterObjAttr, "water-density").value();
+    auto waterGravityOpt = getFloatAttr(waterObjAttr, "water-gravity");
+    auto waterGravity = waterGravityOpt.has_value() ? waterGravityOpt.value() : -9.81;
 
 		for (auto submergedObjId : submergedObjects){
-			auto submergedObjectPos = gameapi -> getGameObjectPos(submergedObjId, true);
+			auto submergedAttr = gameapi -> getGameObjectAttr(submergedObjId);
+			
 
+			// Get percentage of the object submerged by volume.  Uses AABS of water + submerged object, determines based upon if in object and y values only 
 			auto submergedAabb = gameapi -> getModAABB(submergedObjId);
-			auto submergedVolume = (submergedAabb.value().max.x - submergedAabb.value().min.x) * (submergedAabb.value().max.y - submergedAabb.value().min.y) * (submergedAabb.value().max.z - submergedAabb.value().min.z);
+
+			float submergedObjWidth = submergedAabb.value().max.x - submergedAabb.value().min.x;
+			float submergedObjHeight = submergedAabb.value().max.y - submergedAabb.value().min.y;
+			float submergedObjDepth = submergedAabb.value().max.z - submergedAabb.value().min.z;
+			auto submergedVolume = submergedObjWidth * submergedObjHeight * submergedObjDepth;
 			auto unsubmergedTop =  submergedAabb.value().max.y - topOfWater;
 			auto submergedHeight = submergedAabb.value().max.y - submergedAabb.value().min.y;
 			auto submergedTop = submergedHeight - unsubmergedTop;
 			auto percentage = std::min(1.f, submergedTop / submergedHeight);
 
-			std::cout << "submerged percentage is: " << percentage << std::endl;
 
-			float upwardForce = waterDensity * submergedVolume * percentage;  
-			auto forceVec = glm::vec3(0.f, upwardForce, 0.f);
+			// Fluid Drag
+			auto submergedObjVelocity = getVec3Attr(submergedAttr, "physics_velocity").value();
+			modlog("water", "submerged velocity: " + print(submergedObjVelocity));
+
+			auto crossSectionalAreaYZ = submergedHeight * submergedObjDepth;
+			auto fluidDragX = (submergedObjVelocity.x * submergedObjVelocity.x) * crossSectionalAreaYZ;
+			if (submergedObjVelocity.x > 0){
+				fluidDragX *= -1;
+			}
+
+			auto crossSectionalAreaXZ = submergedObjWidth * submergedObjDepth;
+			auto fluidDragY = (submergedObjVelocity.y * submergedObjVelocity.y) * crossSectionalAreaXZ;
+			if (submergedObjVelocity.y > 0){
+				fluidDragY *= -1;
+			}
+
+			auto crossSectionalAreaXY = submergedObjWidth * submergedObjHeight;
+			auto fluidDragZ = (submergedObjVelocity.z * submergedObjVelocity.z) * crossSectionalAreaXY;
+			if (submergedObjVelocity.z > 0){
+				fluidDragZ *= -1;
+			}
+
+			float fluidViscosity = 0.1f;
+			auto totalDrag = 0.5f * waterDensity * glm::vec3(0.f, fluidDragY, 0.f) * fluidViscosity;
+
+			modlog("water", "fluid drag: " + print(totalDrag));
+
+
+			// calculate new forces based on percentage
+			auto submergedGravity = getVec3Attr(submergedAttr, "physics_gravity").value().y;
+
+			// Water gravity could be just the same as world gravity, but because i want to have tunable control this is separate 
+			float upwardForce =  waterDensity * waterGravity * (submergedVolume * percentage /* volume of part of object submerged (based on AABB)*/);  
+			auto waterEffectOnGravity = (waterGravity - submergedGravity) * percentage; // saying that the water has an effective gravity proportional to the amount of the object submerged
+
+
+
+
+			auto forceVec = glm::vec3(0.f, upwardForce + waterEffectOnGravity, 0.f) + totalDrag;
+			modlog("water", "force vec is: " + print(forceVec) + ", gravity correction: " + std::to_string(waterEffectOnGravity) + ", buyoant force: " + std::to_string(upwardForce) + ", submerged percentage: " + std::to_string(percentage));
       gameapi -> applyForce(submergedObjId, forceVec);
 		}
 	}

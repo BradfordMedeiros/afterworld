@@ -18,7 +18,6 @@ struct MovementParams {
   float moveSoundMintime;
   float groundAngle;
   glm::vec3 gravity;
-  glm::vec3 waterGravity;
   bool canCrouch;
   float crouchSpeed;
   float crouchScale;
@@ -225,7 +224,6 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
   movement.moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
   movement.moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
-  movement.moveParams.waterGravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 17), 0.f);
   movement.moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
   movement.moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
   movement.moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
@@ -304,21 +302,6 @@ void attachToLadder(Movement& movement){
 }
 void releaseFromLadder(Movement& movement){
   movement.attachedToLadder = false;
-}
-
-void changeWaterGravity(Movement& movement, objid id){
-  auto inWater = movement.waterObjIds.size() > 0;
-  auto gravity = inWater ? movement.moveParams.waterGravity : movement.moveParams.gravity;
-  GameobjAttributes newAttr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { 
-      .vec3 = { { "physics_gravity", gravity }}, 
-      .vec4 = { } 
-    },
-  };
-  //std::cout << "new gravity is: " << print(gravity) << ", in water = " << print(inWater) << std::endl;
-  gameapi -> setGameObjectAttr(id, newAttr);
 }
 
 void toggleCrouch(Movement& movement, objid id, bool shouldCrouch){
@@ -605,10 +588,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       movement -> groundedObjIds.insert(otherObjectId);
     }
 
-    changeWaterGravity(*movement, id);
-
-    // waterObjIdsattr
-
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
@@ -620,7 +599,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (movement -> waterObjIds.count(otherObjectId) > 0){
       movement -> waterObjIds.erase(otherObjectId);
     }
-    changeWaterGravity(*movement, id);
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
