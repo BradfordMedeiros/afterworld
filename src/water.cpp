@@ -19,19 +19,30 @@ void applyWaterForces(Water& water){
 		auto boundingHeight = 30.f;
 		auto halfBoundingHeight = 0.5 * boundingHeight;
 		auto waterPos = gameapi -> getGameObjectPos(waterId, true);
-		auto topOfWater = waterPos + glm::vec3(0.f, halfBoundingHeight, 0.f);
+
+		auto aabb = gameapi -> getModAABB(waterId);
+		modassert(aabb.has_value(), "water does not have an aabb");
+		auto topOfWater = aabb.value().max.y;
+    auto waterObjAttr = gameapi -> getGameObjectAttr(waterId);
+    auto waterDensity = getFloatAttr(waterObjAttr, "water-density").value();
+
 		for (auto submergedObjId : submergedObjects){
 			auto submergedObjectPos = gameapi -> getGameObjectPos(submergedObjId, true);
-			auto submergedDepth = std::max(0.f, (topOfWater - submergedObjectPos).y); 
-			float fluidDensity = 10.f;
-			// notice this force is not proportional to volume of the object (but should be in some way)
-			float upwardForce = fluidDensity * submergedDepth;  
+
+			auto submergedAabb = gameapi -> getModAABB(submergedObjId);
+			auto submergedVolume = (submergedAabb.value().max.x - submergedAabb.value().min.x) * (submergedAabb.value().max.y - submergedAabb.value().min.y) * (submergedAabb.value().max.z - submergedAabb.value().min.z);
+			auto unsubmergedTop =  submergedAabb.value().max.y - topOfWater;
+			auto submergedHeight = submergedAabb.value().max.y - submergedAabb.value().min.y;
+			auto submergedTop = submergedHeight - unsubmergedTop;
+			auto percentage = std::min(1.f, submergedTop / submergedHeight);
+
+			std::cout << "submerged percentage is: " << percentage << std::endl;
+
+			float upwardForce = waterDensity * submergedVolume * percentage;  
 			auto forceVec = glm::vec3(0.f, upwardForce, 0.f);
       gameapi -> applyForce(submergedObjId, forceVec);
 		}
 	}
-
-
 }
 
 void printWaterElements(Water& water){
