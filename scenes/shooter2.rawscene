@@ -8,6 +8,14 @@ platform:physics:enabled
 
 platform:material:metal
 
+platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert:position:-20 -30 0
+platform_lowert:scale:100 100 10
+platform_lowert:rotation:0 -1 0 0
+platform_lowert:texture:../gameresources/textures/wood.jpg
+platform_lowert:physics:enabled
+platform_lowert:material:metal
+
 #
 wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 wall:position:0 0 0
@@ -74,8 +82,11 @@ water:rotation:0 -1 0 0
 water:tint:0 0 1 0.5
 water:texture:../gameresources/textures/wood.jpg
 water:water:basic
+water:water-density:10
+water:water-gravity:0.0125
 water:physics:enabled
 water:physics_collision:nocollide
+water:layer:transparency
 
 #
 #wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -95,6 +106,7 @@ item:physics_type:dynamic
 item:pickup:scrapgun
 item:pickup-amount:100
 item:pickup-type:replace
+item:physics_mass:5
 #item:pickup-trigger:scrapgun
 
 #
@@ -146,6 +158,7 @@ console:tint:0 0.6 1 1
 >maincamera:position:0 50 100
 >maincamera:physics_angle:0.000000 0.000000 0.000000
 >maincamera:physics:enabled
+>maincamera:physics_velocity:0 0 -10
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
@@ -155,7 +168,7 @@ console:tint:0 0.6 1 1
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
 
-!light:position:0 -5 5
+#!light:position:0 -5 5
 
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
 enemy:position:0 -10 70
