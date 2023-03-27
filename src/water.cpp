@@ -16,10 +16,6 @@ struct Water {
 // just say the boyant force is how far the box is down * water density 
 void applyWaterForces(Water& water){
 	for (auto &[waterId, submergedObjects] : water.objectsInWater){
-		auto boundingHeight = 30.f;
-		auto halfBoundingHeight = 0.5 * boundingHeight;
-		auto waterPos = gameapi -> getGameObjectPos(waterId, true);
-
 		auto aabb = gameapi -> getModAABB(waterId);
 		modassert(aabb.has_value(), "water does not have an aabb");
 		auto topOfWater = aabb.value().max.y;
@@ -34,10 +30,8 @@ void applyWaterForces(Water& water){
 		for (auto submergedObjId : submergedObjects){
 			auto submergedAttr = gameapi -> getGameObjectAttr(submergedObjId);
 			
-
 			// Get percentage of the object submerged by volume.  Uses AABS of water + submerged object, determines based upon if in object and y values only 
 			auto submergedAabb = gameapi -> getModAABB(submergedObjId);
-
 			float submergedObjWidth = submergedAabb.value().max.x - submergedAabb.value().min.x;
 			float submergedObjHeight = submergedAabb.value().max.y - submergedAabb.value().min.y;
 			float submergedObjDepth = submergedAabb.value().max.z - submergedAabb.value().min.z;
@@ -50,7 +44,7 @@ void applyWaterForces(Water& water){
 
 			// Fluid Drag
 			auto submergedObjVelocity = getVec3Attr(submergedAttr, "physics_velocity").value();
-			modlog("water", "submerged velocity: " + print(submergedObjVelocity));
+			//modlog("water", "submerged velocity: " + print(submergedObjVelocity));
 
 			auto crossSectionalAreaYZ = submergedHeight * submergedObjDepth;
 			auto fluidDragX = (submergedObjVelocity.x * submergedObjVelocity.x) * crossSectionalAreaYZ;
@@ -72,7 +66,7 @@ void applyWaterForces(Water& water){
 
 			auto totalDrag = 0.5f * waterDensity * glm::vec3(0.f, fluidDragY, 0.f) * fluidViscosity;
 
-			modlog("water", "fluid drag: " + print(totalDrag));
+			//modlog("water", "fluid drag: " + print(totalDrag));
 
 			// calculate new forces based on percentage
 			auto submergedGravity = getVec3Attr(submergedAttr, "physics_gravity").value().y;
@@ -82,7 +76,7 @@ void applyWaterForces(Water& water){
 			auto waterEffectOnGravity = (waterGravity - submergedGravity) * percentage; // saying that the water has an effective gravity proportional to the amount of the object submerged
 
 			auto forceVec = glm::vec3(0.f, upwardForce + waterEffectOnGravity, 0.f) + totalDrag;
-			modlog("water", "force vec is: " + print(forceVec) + ", gravity correction: " + std::to_string(waterEffectOnGravity) + ", buyoant force: " + std::to_string(upwardForce) + ", submerged percentage: " + std::to_string(percentage));
+			//modlog("water", "force vec is: " + print(forceVec) + ", gravity correction: " + std::to_string(waterEffectOnGravity) + ", buyoant force: " + std::to_string(upwardForce) + ", submerged percentage: " + std::to_string(percentage));
       gameapi -> applyForce(submergedObjId, forceVec);
 		}
 	}
