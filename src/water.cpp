@@ -78,6 +78,24 @@ void applyWaterForces(Water& water){
 			auto forceVec = glm::vec3(0.f, upwardForce + waterEffectOnGravity, 0.f) + totalDrag;
 			//modlog("water", "force vec is: " + print(forceVec) + ", gravity correction: " + std::to_string(waterEffectOnGravity) + ", buyoant force: " + std::to_string(upwardForce) + ", submerged percentage: " + std::to_string(percentage));
       gameapi -> applyForce(submergedObjId, forceVec);
+
+
+			auto submergedObjAVelocity = getVec3Attr(submergedAttr, "physics_avelocity").value();
+			auto fluidADragX = (submergedObjAVelocity.x * submergedObjAVelocity.x) * crossSectionalAreaYZ;
+			if (submergedObjAVelocity.x > 0){
+				fluidADragX *= -1;
+			}
+			auto fluidADragY = (submergedObjAVelocity.y * submergedObjAVelocity.y) * crossSectionalAreaXZ;
+			if (submergedObjAVelocity.y > 0){
+				fluidADragY *= -1;
+			}
+			auto fluidADragZ = (submergedObjAVelocity.z * submergedObjAVelocity.z) * crossSectionalAreaXY;
+			if (submergedObjAVelocity.z > 0){
+				fluidADragZ *= -1;
+			}
+
+			auto totalADrag = 0.5f * waterDensity * glm::vec3(fluidADragX, fluidADragY, fluidADragZ) * fluidViscosity;
+      gameapi -> applyTorque(submergedObjId, totalADrag);
 		}
 	}
 }
