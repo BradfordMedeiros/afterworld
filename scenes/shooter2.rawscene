@@ -84,6 +84,7 @@ water:texture:../gameresources/textures/wood.jpg
 water:water:basic
 water:water-density:10
 water:water-gravity:0.0125
+water:water-viscosity:0.1
 water:physics:enabled
 water:physics_collision:nocollide
 water:layer:transparency

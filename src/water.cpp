@@ -27,6 +27,7 @@ void applyWaterForces(Water& water){
     auto waterDensity = getFloatAttr(waterObjAttr, "water-density").value();
     auto waterGravityOpt = getFloatAttr(waterObjAttr, "water-gravity");
     auto waterGravity = waterGravityOpt.has_value() ? waterGravityOpt.value() : -9.81;
+		float fluidViscosity = getFloatAttr(waterObjAttr, "water-viscosity").value();
 
 		for (auto submergedObjId : submergedObjects){
 			auto submergedAttr = gameapi -> getGameObjectAttr(submergedObjId);
@@ -67,11 +68,9 @@ void applyWaterForces(Water& water){
 				fluidDragZ *= -1;
 			}
 
-			float fluidViscosity = 0.1f;
 			auto totalDrag = 0.5f * waterDensity * glm::vec3(0.f, fluidDragY, 0.f) * fluidViscosity;
 
 			modlog("water", "fluid drag: " + print(totalDrag));
-
 
 			// calculate new forces based on percentage
 			auto submergedGravity = getVec3Attr(submergedAttr, "physics_gravity").value().y;
@@ -79,9 +78,6 @@ void applyWaterForces(Water& water){
 			// Water gravity could be just the same as world gravity, but because i want to have tunable control this is separate 
 			float upwardForce =  waterDensity * waterGravity * (submergedVolume * percentage /* volume of part of object submerged (based on AABB)*/);  
 			auto waterEffectOnGravity = (waterGravity - submergedGravity) * percentage; // saying that the water has an effective gravity proportional to the amount of the object submerged
-
-
-
 
 			auto forceVec = glm::vec3(0.f, upwardForce + waterEffectOnGravity, 0.f) + totalDrag;
 			modlog("water", "force vec is: " + print(forceVec) + ", gravity correction: " + std::to_string(waterEffectOnGravity) + ", buyoant force: " + std::to_string(upwardForce) + ", submerged percentage: " + std::to_string(percentage));
