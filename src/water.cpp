@@ -24,10 +24,12 @@ void applyWaterForces(Water& water){
 		modassert(aabb.has_value(), "water does not have an aabb");
 		auto topOfWater = aabb.value().max.y;
     auto waterObjAttr = gameapi -> getGameObjectAttr(waterId);
-    auto waterDensity = getFloatAttr(waterObjAttr, "water-density").value();
+    auto waterDensityOpt = getFloatAttr(waterObjAttr, "water-density");
+    auto waterDensity = waterDensityOpt.has_value() ? waterDensityOpt.value() : 10.f;
     auto waterGravityOpt = getFloatAttr(waterObjAttr, "water-gravity");
     auto waterGravity = waterGravityOpt.has_value() ? waterGravityOpt.value() : -9.81;
-		float fluidViscosity = getFloatAttr(waterObjAttr, "water-viscosity").value();
+		auto fluidViscosityOpt = getFloatAttr(waterObjAttr, "water-viscosity");
+		auto fluidViscosity = fluidViscosityOpt.has_value() ? fluidViscosityOpt.value() : 0.1f;
 
 		for (auto submergedObjId : submergedObjects){
 			auto submergedAttr = gameapi -> getGameObjectAttr(submergedObjId);
