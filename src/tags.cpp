@@ -9,6 +9,7 @@ struct HitPoints {
 
 struct Tags {
 	std::unordered_map<objid, HitPoints> hitpoints;
+	std::set<objid> textureScrollObjIds;
 };
 
 void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
@@ -42,12 +43,36 @@ bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
 	return true;
 }
 
+void handleScroll(Tags& tags){
+	for (auto id : tags.textureScrollObjIds){
+		modlog("tags", "scroll object: " + std::to_string(id));
+		auto objAttr =  gameapi -> getGameObjectAttr(id);
+		auto scrollSpeed = getVec3Attr(objAttr, "scrollspeed").value();
+		auto elapsedTime = gameapi -> timeElapsed();
+		scrollSpeed.x *= elapsedTime;
+		scrollSpeed.y *= elapsedTime;
+		auto textureOffsetStr = getStrAttr(objAttr, "textureoffset").value();
+		auto offset = parseVec2(textureOffsetStr);
+		offset.x += scrollSpeed.x;
+		offset.y += scrollSpeed.y;
+		auto textureOffset = serializeVec(offset);
+		GameobjAttributes attr {
+			.stringAttributes = {
+				{ "textureoffset", textureOffset },
+			},
+			.numAttributes = {},
+			.vecAttr = { .vec3 = {}, .vec4 = {} },
+		};
+		gameapi -> setGameObjectAttr(id, attr);
+	}
+}
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
     binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
     tags -> hitpoints = {};
+    tags -> textureScrollObjIds = {};
 
     auto managedEnemies = gameapi -> getObjectsByAttr("health", std::nullopt, std::nullopt);
     for (auto id : managedEnemies){
@@ -57,8 +82,8 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     return tags;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Tags* value = (Tags*)data;
-    delete value;
+    Tags* tags = static_cast<Tags*>(data);
+    delete tags;
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
     auto parts = split(key, '.');
@@ -89,6 +114,13 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
  				modlog("health", "entity added: " + std::to_string(id));
  				addEntityIdHitpoints(tags -> hitpoints, id);
   		}
+  	},
+    AttrFuncValue { 
+  		.attr = "scrollspeed", 
+  		.fn = [](void* data, int32_t id, glm::vec3 value) -> void {
+  			Tags* tags = static_cast<Tags*>(data);
+  			tags -> textureScrollObjIds.insert(id);
+  		}
   	}
   });
 
@@ -101,7 +133,20 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 				removeEntityId(tags -> hitpoints, id);
   		}
   	},
+   	AttrFunc {
+  		.attr = "scrollspeed",
+  		.fn = [](void* data, int32_t id) -> void {
+  			Tags* tags = static_cast<Tags*>(data);
+  			tags -> textureScrollObjIds.erase(id);
+  		}
+  	},
   });
+
+  binding.onFrame = [](int32_t id, void* data) -> void {
+		Tags* tags = static_cast<Tags*>(data);
+		handleScroll(*tags);
+  };
 
 	return binding;
 }
+

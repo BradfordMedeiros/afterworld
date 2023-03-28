@@ -24,7 +24,9 @@ void clickMouse(objid id);
 
 typedef std::function<void(void*, int32_t idAdded, std::string value)> stringAttrFuncValue;
 typedef std::function<void(void*, int32_t idAdded, float value)> floatAttrFuncValue;
-typedef std::variant<stringAttrFuncValue, floatAttrFuncValue> attrFuncValue;
+typedef std::function<void(void*, int32_t idAdded, glm::vec3 value)> vec3AttrFuncValue;
+
+typedef std::variant<stringAttrFuncValue, floatAttrFuncValue, vec3AttrFuncValue> attrFuncValue;
 struct AttrFuncValue {
 	std::string attr;
 	attrFuncValue fn;

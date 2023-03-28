@@ -102,6 +102,14 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
         }
         continue;
       }
+      auto vec3Fn = std::get_if<vec3AttrFuncValue>(&attrFunc.fn);
+      if (vec3Fn != NULL){
+        auto vec3Value = getVec3Attr(objAttrs, attrFunc.attr);
+        if (vec3Value.has_value()){
+          (*vec3Fn)(data, idAdded, vec3Value.value());
+        }
+        continue;
+      }
     }
   };
 }

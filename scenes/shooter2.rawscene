@@ -88,6 +88,7 @@ water:water-viscosity:0.1
 water:physics:enabled
 water:physics_collision:nocollide
 water:layer:transparency
+water:scrollspeed:0.10 0 0
 
 #
 #wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
