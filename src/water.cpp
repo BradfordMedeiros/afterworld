@@ -81,15 +81,17 @@ void applyWaterForces(Water& water){
 
 
 			auto submergedObjAVelocity = getVec3Attr(submergedAttr, "physics_avelocity").value();
-			auto fluidADragX = (submergedObjAVelocity.x * submergedObjAVelocity.x) * crossSectionalAreaYZ;
+			auto areaCube =  std::cbrt(submergedObjWidth * submergedObjHeight * submergedObjDepth);
+			auto crossSectionalArea =  areaCube * areaCube;
+			auto fluidADragX = (submergedObjAVelocity.x * submergedObjAVelocity.x) * crossSectionalArea;
 			if (submergedObjAVelocity.x > 0){
 				fluidADragX *= -1;
 			}
-			auto fluidADragY = (submergedObjAVelocity.y * submergedObjAVelocity.y) * crossSectionalAreaXZ;
+			auto fluidADragY = (submergedObjAVelocity.y * submergedObjAVelocity.y) * crossSectionalArea;
 			if (submergedObjAVelocity.y > 0){
 				fluidADragY *= -1;
 			}
-			auto fluidADragZ = (submergedObjAVelocity.z * submergedObjAVelocity.z) * crossSectionalAreaXY;
+			auto fluidADragZ = (submergedObjAVelocity.z * submergedObjAVelocity.z) * crossSectionalArea;
 			if (submergedObjAVelocity.z > 0){
 				fluidADragZ *= -1;
 			}
