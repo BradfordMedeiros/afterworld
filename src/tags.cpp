@@ -12,39 +12,15 @@ struct Tags {
 	std::set<objid> textureScrollObjIds;
 };
 
-void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
-	if (hitpoints.find(id) != hitpoints.end()){
-		return;
-	}
-	auto attr = gameapi -> getGameObjectAttr(id);
-	auto totalHealth = getFloatAttr(attr, "health");
-	if (totalHealth.has_value()){
-		auto healthPoints = totalHealth.value();
-		hitpoints[id] = HitPoints {
-			.current = healthPoints,
-			.total = healthPoints,
-		};
-	}
-}
-void removeEntityId(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
-	if (hitpoints.find(id) == hitpoints.end()){
-		return;
-	}
-	hitpoints.erase(id);
-}
-bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
-	if (tags.hitpoints.find(id) == tags.hitpoints.end()){
-		return false;
-	}
-	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
-	auto newHealthAmount = tags.hitpoints.at(id).current - amount;
-	tags.hitpoints.at(id).current = newHealthAmount;
-	*_enemyDead = newHealthAmount <= 0;
-	return true;
-}
+struct TagUpdater {
+	AttrFuncValue onAdd;
+	AttrFunc onRemove;
+	std::optional<std::function<void(Tags&)>> onFrame;
+	std::optional<std::function<void(Tags&, std::string& key, AttributeValue& value)>> onMessage;
+};
 
-void handleScroll(Tags& tags){
-	for (auto id : tags.textureScrollObjIds){
+void handleScroll(std::set<objid>& textureScrollObjIds){
+	for (auto id : textureScrollObjIds){
 		modlog("tags", "scroll object: " + std::to_string(id));
 		auto objAttr =  gameapi -> getGameObjectAttr(id);
 		auto scrollSpeed = getVec3Attr(objAttr, "scrollspeed").value();
@@ -67,47 +43,56 @@ void handleScroll(Tags& tags){
 	}
 }
 
-CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
-	 auto binding = createCScriptBinding(name, api);
-    binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Tags* tags = new Tags;
-    tags -> hitpoints = {};
-    tags -> textureScrollObjIds = {};
+void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
+	if (hitpoints.find(id) != hitpoints.end()){
+		return;
+	}
+	auto attr = gameapi -> getGameObjectAttr(id);
+	auto totalHealth = getFloatAttr(attr, "health");
+	if (totalHealth.has_value()){
+		auto healthPoints = totalHealth.value();
+		hitpoints[id] = HitPoints {
+			.current = healthPoints,
+			.total = healthPoints,
+		};
+	}
+}
 
-    auto managedEnemies = gameapi -> getObjectsByAttr("health", std::nullopt, std::nullopt);
-    for (auto id : managedEnemies){
-    	modlog("health", "adding id: " + std::to_string(id));
-    	addEntityIdHitpoints(tags -> hitpoints, id);
-    }
-    return tags;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Tags* tags = static_cast<Tags*>(data);
-    delete tags;
-  };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
-    auto parts = split(key, '.');
-    if (parts.size() == 2 && parts.at(0) == "damage"){
-    	Tags* tags = static_cast<Tags*>(data);
-    	auto targetId = std::atoi(parts.at(1).c_str());
-    	modlog("health", "got damange for: " + std::to_string(targetId));
-    	auto floatValue = std::get_if<float>(&value);
-    	modassert(floatValue != NULL, "damage message needs to be float value");
-    	bool enemyDead = false;
-    	bool valid = doDamage(*tags, targetId, *floatValue, &enemyDead);
-    	if (valid && enemyDead){
-    		gameapi -> sendNotifyMessage("onkill", std::to_string(targetId));
-    	}
-    }else if (key == "onkill"){
-    	auto strValue = std::get_if<std::string>(&value);
-    	auto targetId = std::atoi(strValue -> c_str());
-    	modlog("health", "removing object: " + std::to_string(targetId));
-    	gameapi -> removeObjectById(targetId);
-    }
-  };
+bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
+	if (tags.hitpoints.find(id) == tags.hitpoints.end()){
+		return false;
+	}
+	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
+	auto newHealthAmount = tags.hitpoints.at(id).current - amount;
+	tags.hitpoints.at(id).current = newHealthAmount;
+	*_enemyDead = newHealthAmount <= 0;
+	return true;
+}
 
-  binding.onObjectAdded = getOnAttrAdds({
-  	AttrFuncValue { 
+std::vector<TagUpdater> tagupdates = {
+	TagUpdater {
+		.onAdd = AttrFuncValue { 
+  		.attr = "scrollspeed", 
+  		.fn = [](void* data, int32_t id, glm::vec3 value) -> void {
+  			Tags* tags = static_cast<Tags*>(data);
+  			tags -> textureScrollObjIds.insert(id);
+  		}
+  	},
+  	.onRemove = AttrFunc {
+  		.attr = "scrollspeed",
+  		.fn = [](void* data, int32_t id) -> void {
+  			Tags* tags = static_cast<Tags*>(data);
+  			tags -> textureScrollObjIds.erase(id);
+  		}
+  	},
+  	.onFrame = [](Tags& tags) -> void {  
+			handleScroll(tags.textureScrollObjIds);
+  	},
+  	.onMessage = std::nullopt,
+	},
+
+	TagUpdater {
+		.onAdd = AttrFuncValue { 
   		.attr = "health", 
   		.fn = [](void* data, int32_t id, float value) -> void {
   			Tags* tags = static_cast<Tags*>(data);
@@ -115,36 +100,80 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
  				addEntityIdHitpoints(tags -> hitpoints, id);
   		}
   	},
-    AttrFuncValue { 
-  		.attr = "scrollspeed", 
-  		.fn = [](void* data, int32_t id, glm::vec3 value) -> void {
-  			Tags* tags = static_cast<Tags*>(data);
-  			tags -> textureScrollObjIds.insert(id);
-  		}
-  	}
-  });
-
-  binding.onObjectRemoved = getOnAttrRemoved({
-  	AttrFunc {
+  	.onRemove =  AttrFunc {
   		.attr = "health",
   		.fn = [](void* data, int32_t id) -> void {
   			Tags* tags = static_cast<Tags*>(data);
 				modlog("health", "entity removed: " + std::to_string(id));
-				removeEntityId(tags -> hitpoints, id);
+				if (tags -> hitpoints.find(id) == tags -> hitpoints.end()){
+					return;
+				}
+				tags -> hitpoints.erase(id);
   		}
   	},
-   	AttrFunc {
-  		.attr = "scrollspeed",
-  		.fn = [](void* data, int32_t id) -> void {
-  			Tags* tags = static_cast<Tags*>(data);
-  			tags -> textureScrollObjIds.erase(id);
-  		}
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, AttributeValue& value) -> void {
+  		auto parts = split(key, '.');
+      if (parts.size() == 2 && parts.at(0) == "damage"){
+      	auto targetId = std::atoi(parts.at(1).c_str());
+      	modlog("health", "got damange for: " + std::to_string(targetId));
+      	auto floatValue = std::get_if<float>(&value);
+      	modassert(floatValue != NULL, "damage message needs to be float value");
+      	bool enemyDead = false;
+      	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead);
+      	if (valid && enemyDead){
+      		gameapi -> sendNotifyMessage("onkill", std::to_string(targetId));
+      	}
+      }else if (key == "onkill"){
+      	auto strValue = std::get_if<std::string>(&value);
+      	auto targetId = std::atoi(strValue -> c_str());
+      	modlog("health", "removing object: " + std::to_string(targetId));
+      	gameapi -> removeObjectById(targetId);
+      }
   	},
-  });
+	},
+};
+
+
+
+CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
+	 auto binding = createCScriptBinding(name, api);
+    binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+    Tags* tags = new Tags;
+    tags -> hitpoints = {};
+    tags -> textureScrollObjIds = {};
+    return tags;
+  };
+  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
+    Tags* tags = static_cast<Tags*>(data);
+    delete tags;
+  };
+  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  	Tags* tags = static_cast<Tags*>(data);
+  	for (auto &tagUpdate : tagupdates){
+  		if (tagUpdate.onMessage.has_value()){
+  			tagUpdate.onMessage.value()(*tags, key, value);
+  		}
+  	}
+  };
+
+	std::vector<AttrFunc> attrFuncs = {};
+	std::vector<AttrFuncValue> attrAddFuncs = {};
+	for (auto &tagUpdate : tagupdates){
+		attrAddFuncs.push_back(tagUpdate.onAdd);
+		attrFuncs.push_back(tagUpdate.onRemove);
+	}
+
+  binding.onObjectAdded = getOnAttrAdds(attrAddFuncs);
+  binding.onObjectRemoved = getOnAttrRemoved(attrFuncs);
 
   binding.onFrame = [](int32_t id, void* data) -> void {
 		Tags* tags = static_cast<Tags*>(data);
-		handleScroll(*tags);
+		for (auto &tagUpdate : tagupdates){
+			if (tagUpdate.onFrame.has_value()){
+				tagUpdate.onFrame.value()(*tags);
+			}
+		}
   };
 
 	return binding;
