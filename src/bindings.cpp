@@ -2,7 +2,7 @@
 
 CustomApiBindings* gameapi = NULL;
 
-std::vector<std::string> defaultScenes = { "./res/scenes/editor/console.rawscene" };
+std::vector<std::string> defaultScenes = { };
 std::vector<std::string> managedTags = { "game-level" };
 
 std::stack<objid> cameras = {};

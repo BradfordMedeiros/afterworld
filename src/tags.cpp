@@ -22,7 +22,7 @@ struct TagUpdater {
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
-		modlog("tags", "scroll object: " + std::to_string(id));
+		//modlog("tags", "scroll object: " + std::to_string(id));
 		auto objAttr =  gameapi -> getGameObjectAttr(id);
 		auto scrollSpeed = getVec3Attr(objAttr, "scrollspeed").value();
 		auto elapsedTime = gameapi -> timeElapsed();
