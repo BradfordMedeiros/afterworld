@@ -28,6 +28,7 @@ struct CurrentGun {
   float lastShootingTime;
   float recoilStart;
   glm::vec3 initialGunPos;
+  glm::quat initialGunRot;
 
   float minBloom;
   float totalBloom;
@@ -52,6 +53,7 @@ struct Weapons {
 
   glm::vec2 lookVelocity;
   float movementVelocity;
+  glm::vec3 movementVec;
 
   std::optional<objid> raycastLine;
   std::vector<MaterialToParticle> materials;
@@ -193,7 +195,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   GameobjAttributes attr {
     .stringAttributes = stringAttributes,
     .numAttributes = {},
-    .vecAttr = {  .vec3 = {{ "position", gunpos - glm::vec3(0.f, 1.f, 0.f) }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
+    .vecAttr = {  .vec3 = {{ "position", gunpos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -291,8 +293,9 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   auto script = strFromFirstSqlResult(result, 27);
 
   auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
-  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 01.f);
+  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 1.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
+  weapons.currentGun.initialGunRot = parseQuat(rot4);
 
   auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
   auto hitParticleStr = strFromFirstSqlResult(result, 20);
@@ -437,7 +440,10 @@ glm::vec3 getSwayVelocity(Weapons& weapons){
  
   auto parent = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
   auto parentRot = gameapi -> getGameObjectRotation(parent.value(), false);
-  auto newPos = gameapi -> moveRelative(glm::vec3(0.f, 0.f, 0.f), glm::inverse(parentRot), weapons.movementVelocity);
+
+  modlog("weapons", "move velocity: " + print(weapons.movementVec));
+
+  auto newPos = glm::inverse(parentRot) * weapons.movementVec;
   //std::cout << "sway velocity: " << print(newPos) << std::endl;
   return newPos;
 }
@@ -481,46 +487,46 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
   auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);
   gameapi -> setGameObjectPosRelative(gunId, newPos);
-  /*
-
-
-  (if zoomgun
-    (gameobj-setpos-rel! 
-      (gameobj-by-id gunid) 
-      (lerp (gameobj-pos (gameobj-by-id gunid)) (locationWithRecoil ironsight-offset #t) (* (time-elapsed) 10))
-    ) 
-
-  )
-  )*/
 }
+
 
 void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed){
-  //(define (sway-gun-rotation relvelocity zoomgun)
-  //  (define sway-amount-x (list-ref relvelocity 0))
-  //  (define limited-sway-x (min max-mag-sway-x-rot (max sway-amount-x (* -1 max-mag-sway-x-rot))))
-  //  (define sway-amount-y (list-ref relvelocity 1))
-  //  (define limited-sway-y (min max-mag-sway-y-rot (max sway-amount-y (* -1 max-mag-sway-y-rot))))
-  //  (define recoilAmount (cadr (lerp (list 0 0 0) (list 0 recoilPitchRadians 0) (calc-recoil-slerpamount))))
-  //  (define targetrot 
-  //    (quatmult 
-  //      (setfrontdelta forwardvec limited-sway-x (+ recoilAmount (* -1 limited-sway-y)) 0) ; yaw, pitch, roll 
-  //      initial-gun-rot 
-  //    )  
-  //  )
-  //  ;(format #t "sway x: ~a, sway y: ~a\n" limited-sway-x limited-sway-y)
-  //  (gameobj-setrot! 
-  //    (gameobj-by-id gunid) 
-  //    (slerp (gameobj-rot (gameobj-by-id gunid)) targetrot 0.01)
-  //  )  
-  //)
+  float swayAmountX = weapons.lookVelocity.x;
+  float limitedSwayX = glm::min(maxMagSway.x, glm::max(swayAmountX, -1.f * maxMagSway.x));
+
+  float swayAmountY = weapons.lookVelocity.y;
+  float limitedSwayY = glm::min(maxMagSway.y, glm::max(swayAmountY, -1.f * maxMagSway.y));
+  float recoilAmount =  glm::lerp(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, weapons.weaponParams.recoilPitchRadians, 0.f), calcRecoilSlerpAmount(weapons, weapons.weaponParams.recoilLength, true)).y;
+
+  float totalSwayY = limitedSwayY + recoilAmount * 5.f;
+  //std::cout << "limited sway x: " << limitedSwayX << std::endl;
+  //std::cout << "limited recoil: " << recoilAmount << std::endl;
+
+  auto oldRotation = gameapi -> getGameObjectRotation(weapons.currentGun.gunId.value(), false);
+  auto rotation = gameapi -> setFrontDelta(
+    parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), 
+    limitedSwayX /* delta yaw */, 
+    totalSwayY /* should add recoil here */, 
+    0.f, 
+    0.1f /* why 0.1f? */
+  );
+  auto targetRotation = rotation * weapons.currentGun.initialGunRot;
+  gameapi -> setGameObjectRot(
+    weapons.currentGun.gunId.value(), 
+    glm::slerp(oldRotation, targetRotation, 0.1f)
+  );
 }
 
-bool swayRotation = false;
+bool swayRotation = true;
 void swayGun(Weapons& weapons, bool isGunZoomed){
   if (!weapons.currentGun.gunId.has_value()){
     return;
   }
-  swayGunTranslation(weapons, getSwayVelocity(weapons), isGunZoomed);
+
+  auto swayVelocity = getSwayVelocity(weapons);
+  modlog("weapon", "movement velocity: " + std::to_string(weapons.movementVelocity));
+  modlog("weapon", "sway velocity: " + print(swayVelocity));
+  swayGunTranslation(weapons, swayVelocity, isGunZoomed);
   if (swayRotation){
     swayGunRotation(weapons, glm::vec3(0.f, 0.f, 0.f) /* mouse-velocity  */, isGunZoomed);
   }
@@ -624,6 +630,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
     weapons -> movementVelocity = 0.f;
+    weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
     weapons -> raycastLine = std::nullopt;
 
     weapons -> currentGun = CurrentGun {
@@ -720,7 +727,8 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (key == "velocity"){
       auto strValue = std::get_if<std::string>(&value);   // would be nice to send the vec3 directly, but notifySend does not support
       modassert(strValue != NULL, "velocity value invalid");  
-      weapons -> movementVelocity = glm::length(parseVec(*strValue));
+      weapons -> movementVec = parseVec(*strValue);
+      weapons -> movementVelocity = glm::length(weapons -> movementVec);
       //std::cout << "speed is: " << weapons -> movementVelocity << std::endl;
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
