@@ -377,7 +377,8 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
     }
 
     if (emitterId.has_value()){
-      gameapi -> emit(emitterId.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt);
+      std::cout << "hit particle, hitpoint.id = " << hitpoint.id << std::endl;
+      gameapi -> emit(emitterId.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
     }
     
   
@@ -410,7 +411,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -0.1f); // should parameterize particleOffset
     auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
-    gameapi -> emit(weapons.currentGun.muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt);
+    gameapi -> emit(weapons.currentGun.muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt, std::nullopt);
   }
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
@@ -425,7 +426,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     glm::vec3 projectileArc(0.f, 0.f, -1.f);
     auto playerForwardAndUp = playerRotation * gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), projectileArc);
     auto initialVelocity = playerForwardAndUp * shootingVecAngle * 10.f;
-    gameapi -> emit(weapons.currentGun.projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt);
+    gameapi -> emit(weapons.currentGun.projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt, std::nullopt);
   }
 }
 
@@ -436,13 +437,9 @@ glm::vec3 getSwayVelocity(Weapons& weapons){
     debugAssertForNow(false, "sway from mouse should take into account sensitivity");
     return glm::vec3(weapons.lookVelocity.x, weapons.lookVelocity.y, 0.f);
   }
-
- 
   auto parent = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
   auto parentRot = gameapi -> getGameObjectRotation(parent.value(), false);
-
-  modlog("weapons", "move velocity: " + print(weapons.movementVec));
-
+  //modlog("weapons", "move velocity: " + print(weapons.movementVec));
   auto newPos = glm::inverse(parentRot) * weapons.movementVec;
   //std::cout << "sway velocity: " << print(newPos) << std::endl;
   return newPos;
@@ -524,8 +521,8 @@ void swayGun(Weapons& weapons, bool isGunZoomed){
   }
 
   auto swayVelocity = getSwayVelocity(weapons);
-  modlog("weapon", "movement velocity: " + std::to_string(weapons.movementVelocity));
-  modlog("weapon", "sway velocity: " + print(swayVelocity));
+  //modlog("weapon", "movement velocity: " + std::to_string(weapons.movementVelocity));
+  //modlog("weapon", "sway velocity: " + print(swayVelocity));
   swayGunTranslation(weapons, swayVelocity, isGunZoomed);
   if (swayRotation){
     swayGunRotation(weapons, glm::vec3(0.f, 0.f, 0.f) /* mouse-velocity  */, isGunZoomed);
@@ -584,6 +581,7 @@ void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
 // draw a circle at a distance from the player with a certain radius
 // this is independent of fov, and should be
 void drawBloom(objid id, float distance, float radius){
+  // i'd rather do this on a screen only texture
   modassert(distance < 0, "distance must be negative (forward -z)");
   auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
   auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
