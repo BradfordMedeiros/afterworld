@@ -13,6 +13,7 @@ struct WeaponParams {
   bool isIronsight;
   bool isRaycast;
   glm::vec3 ironsightOffset;
+  glm::quat ironSightAngle;
 };
 
 struct CurrentGun {
@@ -249,7 +250,7 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom " + 
+   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot " + 
    "from guns where name = " + gun,
    {}
   );
@@ -293,9 +294,10 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   auto script = strFromFirstSqlResult(result, 27);
 
   auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
-  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 1.f);
+  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
   weapons.currentGun.initialGunRot = parseQuat(rot4);
+  weapons.weaponParams.ironSightAngle = result.at(0).at(32) == "" ? weapons.currentGun.initialGunRot : quatFromFirstSqlResult(result, 32);
 
   auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
   auto hitParticleStr = strFromFirstSqlResult(result, 20);
@@ -475,6 +477,7 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   glm::vec3 targetPos(-1.f * limitedSwayX + weapons.currentGun.initialGunPos.x, -1.f * limitedSwayY + weapons.currentGun.initialGunPos.y, -1.f * limitedSwayZ + weapons.currentGun.initialGunPos.z); 
   
   auto targetPosWithRecoil = calcLocationWithRecoil(weapons, targetPos, isGunZoomed); // this should use ironsight-offset
+
   if (weapons.currentGun.gunState == GUN_LOWERING){
     targetPosWithRecoil += glm::vec3(0.f, -1.f, 0.f);
   }
@@ -482,7 +485,9 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   auto gunId = weapons.currentGun.gunId.value();
   auto animationRate = weapons.currentGun.gunState == GUN_LOWERING ? 5.f : 3.f;
   float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
-  auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);
+  auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
+  std::cout << "gun: targetpos: " << print(targetPosWithRecoil) << std::endl;
+  std::cout << "gun: newpos: " << print(newPos) << std::endl;
   gameapi -> setGameObjectPosRelative(gunId, newPos);
 }
 
@@ -507,7 +512,7 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
     0.f, 
     0.1f /* why 0.1f? */
   );
-  auto targetRotation = rotation * weapons.currentGun.initialGunRot;
+  auto targetRotation = rotation * (isGunZoomed ? weapons.weaponParams.ironSightAngle : weapons.currentGun.initialGunRot);
   gameapi -> setGameObjectRot(
     weapons.currentGun.gunId.value(), 
     glm::slerp(oldRotation, targetRotation, 0.1f)
@@ -604,6 +609,10 @@ float calculateBloomAmount(Weapons& weapons){
 }
 
 
+void limitVelocity(objid id, glm::vec3 velocity){
+
+}
+
 // Should interpolate.  Looks better + prevent clipping bugs
 // Might be interesting to incorporate things like mass and stuff
 void handlePickedUpItem(Weapons& weapons){
@@ -615,7 +624,44 @@ void handlePickedUpItem(Weapons& weapons){
   auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
   auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
-  gameapi -> setGameObjectPos(weapons.heldItem.value(), slightlyInFrontOfPlayer);
+
+  // old object position
+  auto oldItemPos = gameapi -> getGameObjectPos(weapons.heldItem.value(), true);
+  auto towardPlayerView = slightlyInFrontOfPlayer - oldItemPos;
+  auto distance = glm::length(towardPlayerView);
+  auto direction = glm::normalize(towardPlayerView);
+
+  glm::vec3 amountToMove = (direction); // * gameapi -> timeSeconds(false);
+
+  auto elapsedTime = gameapi -> timeSeconds(false);
+  amountToMove.x *= 10;
+  amountToMove.y *= 10;
+  amountToMove.z *= 10;
+  std::cout << "amount to move: " << print(amountToMove) << std::endl;
+  //gameapi -> setGameObjectPos(weapons.heldItem.value(), oldItemPos + amountToMove);
+  gameapi -> applyForce(weapons.heldItem.value(), amountToMove);
+
+}
+
+
+void modifyPhysicsForHeldItem(Weapons& weapons){
+  GameobjAttributes newAttr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = { 
+        { "physics_avelocity", glm::vec3(0.f, 0.f, 0.f) }, 
+        { "physics_velocity", glm::vec3(0.f, 0.f, 0.f) },
+        { "physics_angle", glm::vec3(0.f, 0.f, 0.f) }, 
+        { "physics_linear", glm::vec3(1.f, 1.f, 1.f) }, 
+        { "physics_gravity", glm::vec3(0.f, 0.f, 0.f) }, 
+
+
+      }, 
+      .vec4 = { } 
+    },
+  };
+  gameapi -> setGameObjectAttr(weapons.heldItem.value(), newAttr);
 }
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
@@ -699,7 +745,8 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
             auto canPickup = physicsEnabled && physicsDynamic && physicsCollide ;
             modlog("weapons", "pickup item: " + std::to_string(hitpoint.id) + " can pickup: " + print(canPickup) + " distance = " + std::to_string(distance));
             if (canPickup && distance < 5.f){
-              weapons -> heldItem = hitpoint.id;              
+              weapons -> heldItem = hitpoint.id;
+              modifyPhysicsForHeldItem(*weapons);
             }
           }
         }

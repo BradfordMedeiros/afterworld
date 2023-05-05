@@ -49,6 +49,12 @@ glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index){
   return parseVec(sqlRow.at(index));
 }
 
+glm::quat quatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
+  auto vec = vec3FromFirstSqlResult(sqlResult, index);
+  auto rot = glm::vec4(vec.x, vec.y, vec.z, 0.f);
+  return parseQuat(rot);
+}
+
 
 float PI = 3.141592;
 float TWO_PI = 2 * PI;
