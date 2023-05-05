@@ -15,6 +15,7 @@ struct GameState {
   int selectedLevel;
   std::optional<std::string> loadedLevel;
   std::vector<Level> levels;
+  bool menuLoaded;
 };
 
 void unloadAllManagedScenes(){
@@ -31,6 +32,7 @@ void loadDefaultScenes(){
 
 void goToLevel(GameState& gameState, std::string sceneName){
   unloadAllManagedScenes();
+  gameState.menuLoaded = false;
   gameState.loadedLevel = sceneName;
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
   auto optCameraId = gameapi -> getGameObjectByName(">maincamera", sceneId, false);
@@ -60,7 +62,10 @@ void goToMenu(GameState& gameState){
     gameState.loadedLevel = std::nullopt;
     unloadAllManagedScenes();
   }
-  gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
+  if (!gameState.menuLoaded){
+    gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
+    gameState.menuLoaded = true;
+  }
   cameras = {};
 }
 void handleLevelUp(GameState& gameState){
@@ -180,6 +185,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = new GameState;
     gameState -> selectedLevel = 0;
     gameState -> loadedLevel = std::nullopt;
+    gameState -> menuLoaded = false;
     loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);
