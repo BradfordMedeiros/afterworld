@@ -268,7 +268,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
         return gameapi -> getGameObjectPos(id, true);
       },
       .setAgentPosition = [id](glm::vec3 pos) -> void {
-        gameapi -> setGameObjectPosRelative(id, pos);
+        gameapi -> setGameObjectPosition(id, pos, false);
       },
       .setAgentRotation = [id](glm::quat rot) -> void {
         gameapi -> setGameObjectRot(id, rot);

@@ -67,7 +67,7 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 
  		    //gameapi -> removeObjectById(gameObjId);
   			// fake delete because of bug need to fix.  Obviously can't stay like this
- 			  gameapi -> setGameObjectPosRelative(gameObjId, glm::vec3(0.f, -100.f, 0.f));
+ 			  gameapi -> setGameObjectPosition(gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
 
  			  if (pickupTrigger.has_value()){
  			  	gameapi -> sendNotifyMessage(pickupTrigger.value(), std::to_string(newItemCount));

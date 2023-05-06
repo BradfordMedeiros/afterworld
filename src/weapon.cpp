@@ -486,9 +486,9 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   auto animationRate = weapons.currentGun.gunState == GUN_LOWERING ? 5.f : 3.f;
   float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
   auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
-  std::cout << "gun: targetpos: " << print(targetPosWithRecoil) << std::endl;
-  std::cout << "gun: newpos: " << print(newPos) << std::endl;
-  gameapi -> setGameObjectPosRelative(gunId, newPos);
+  //std::cout << "gun: targetpos: " << print(targetPosWithRecoil) << std::endl;
+  //std::cout << "gun: newpos: " << print(newPos) << std::endl;
+  gameapi -> setGameObjectPosition(gunId, newPos, false);
 }
 
 

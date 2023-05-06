@@ -305,7 +305,7 @@ void releaseFromLadder(Movement& movement){
 }
 
 void toggleCrouch(Movement& movement, objid id, bool shouldCrouch){
-  std::cout << "toggle crouch: " << shouldCrouch << std::endl;
+  modlog("movement", "toggle crouch: " + print(shouldCrouch));
   auto crouchScale = movement.moveParams.crouchScale;
   GameobjAttributes newAttr {
     .stringAttributes = {},

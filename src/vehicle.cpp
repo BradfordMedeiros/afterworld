@@ -89,7 +89,7 @@ void setVehicleCamera(Vehicle& vehicle){
   auto cameraOffset = offsetFromParams(vehicle.xRot, vehicle.yRot, vehicle.distance);
 
   std::cout << "rot: " << print(glm::vec2(vehicle.xRot, vehicle.yRot)) << std::endl;
-  gameapi -> setGameObjectPosRelative(vehicle.cameraId.value(), cameraOffset + vehicle.cameraOffset);
+  gameapi -> setGameObjectPosition(vehicle.cameraId.value(), cameraOffset + vehicle.cameraOffset, false);
   gameapi -> setGameObjectRot(vehicle.cameraId.value(), cameraTowardVehicle);
 }
 
