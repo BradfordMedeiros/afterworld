@@ -90,7 +90,7 @@ void setVehicleCamera(Vehicle& vehicle){
 
   std::cout << "rot: " << print(glm::vec2(vehicle.xRot, vehicle.yRot)) << std::endl;
   gameapi -> setGameObjectPosition(vehicle.cameraId.value(), cameraOffset + vehicle.cameraOffset, false);
-  gameapi -> setGameObjectRot(vehicle.cameraId.value(), cameraTowardVehicle);
+  gameapi -> setGameObjectRot(vehicle.cameraId.value(), cameraTowardVehicle, false);
 }
 
 void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 position){
@@ -155,7 +155,7 @@ void moveVehicle(Vehicle& vehicle, objid id, glm::vec3 direction, std::optional<
 
     // should limit turn speed
     if (wheelRotation.has_value()){
-      gameapi -> setGameObjectRot(vehicle.vehicleId.value(), wheelRotation.value());
+      gameapi -> setGameObjectRot(vehicle.vehicleId.value(), wheelRotation.value(), false);
     }
     
   }

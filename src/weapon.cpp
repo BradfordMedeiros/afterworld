@@ -515,7 +515,8 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
   auto targetRotation = rotation * (isGunZoomed ? weapons.weaponParams.ironSightAngle : weapons.currentGun.initialGunRot);
   gameapi -> setGameObjectRot(
     weapons.currentGun.gunId.value(), 
-    glm::slerp(oldRotation, targetRotation, 0.1f)
+    glm::slerp(oldRotation, targetRotation, 0.1f),
+    false
   );
 }
 

@@ -179,7 +179,7 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   movement.yRot = limitAngle(movement.yRot + deltay, movement.moveParams.maxAngleUp, movement.moveParams.maxAngleDown); 
 
   auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
-  gameapi -> setGameObjectRot(id, rotation);
+  gameapi -> setGameObjectRot(id, rotation, false);
 
   movement.lookVelocity = glm::vec2(0.f, 0.f);
 }
