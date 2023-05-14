@@ -20,9 +20,9 @@ struct CurrentGun {
   std::string name;
   std::optional<objid> gunId;
   std::optional<objid> soundId;
-  std::optional<objid> muzzleParticle;
-  std::optional<objid> hitParticles;    // probably this isn't actually particle to the gun 
-  std::optional<objid> projectileParticles;
+  std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
+  std::optional<objid> hitParticles;    // default hit particle for the gun, used if there is no material particle
+  std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 
   std::optional<std::string> fireAnimation;
 
@@ -38,10 +38,15 @@ struct CurrentGun {
   GunAnimation gunState;
 };
 
+struct ParticleAndEmitter {
+  std::string particle;
+  objid particleId;
+};
+
 struct MaterialToParticle {
   std::string material;
-  std::optional<std::string> particle;
-  std::optional<objid> particleId;
+  std::optional<ParticleAndEmitter> hitParticle;  // wherever gun hits, gets parented to the surface
+  std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented. 
 };
 
 struct Weapons {
@@ -97,7 +102,7 @@ GameobjAttributes particleAttributes(std::string& particle){
 
 std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   std::vector<MaterialToParticle> materialToParticles;
-  auto query = gameapi -> compileSqlQuery("select material, hit-particle from materials", {});
+  auto query = gameapi -> compileSqlQuery("select material, hit-particle, particle from materials", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -107,10 +112,19 @@ std::vector<MaterialToParticle> loadMaterials(objid sceneId){
     auto particleAttr = particleAttributes(row.at(1));
     auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + row.at(0), particleAttr, submodelAttributes);
 
+    auto splashParticleAttr = particleAttributes(row.at(2));
+    auto splashEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-splashparticle-" + row.at(0), splashParticleAttr, submodelAttributes);
+
     materialToParticles.push_back(MaterialToParticle {
       .material = row.at(0),
-      .particle = row.at(1),
-      .particleId = materialEmitterId.value(),
+      .hitParticle = ParticleAndEmitter {
+        .particle = row.at(1),
+        .particleId = materialEmitterId.value(),
+      },
+      .splashParticle = ParticleAndEmitter {
+        .particle = row.at(2),
+        .particleId = splashEmitterId.value(),
+      },
     });
   }
   return materialToParticles;
@@ -119,13 +133,13 @@ std::optional<std::string> materialTypeForObj(objid id){
   auto attr = gameapi -> getGameObjectAttr(id);
   return getStrAttr(attr, "material");
 }
-std::optional<objid>* getParticleForMaterial(std::vector<MaterialToParticle>& materials, std::string& materialName){
+std::optional<MaterialToParticle*> getHitMaterial(std::vector<MaterialToParticle>& materials, std::string& materialName){
   for (auto &material : materials){
     if (material.material == materialName){
-      return &material.particleId;
+      return &material;
     }
   }
-  return NULL;
+  return std::nullopt;
 }
 
 
@@ -365,11 +379,16 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
     auto objMaterial = materialTypeForObj(hitpoint.id);
 
     std::optional<objid> emitterId = std::nullopt;
+    std::optional<objid> splashEmitterId = std::nullopt;
+
     if (objMaterial.has_value()){
-      auto material = getParticleForMaterial(weapons.materials, objMaterial.value());
-      std::cout << "hit particle material: (" << objMaterial.value() << ") - " << (material ? (material -> has_value() ? std::to_string(material -> value()) : "material exists, but no emitter") : " material does not exist") << std::endl;
-      if (material && material -> has_value()){
-        emitterId = material -> value();
+      auto material = getHitMaterial(weapons.materials, objMaterial.value());
+      std::cout << "hit particle material: (" << (material.has_value() && material.value() -> hitParticle.has_value() ? "has hit particle" : "no hit particle" ) << ") " << std::endl;
+      if (material.has_value() && material.value() -> hitParticle.has_value()){
+        emitterId = material.value() -> hitParticle.value().particleId;
+      }
+      if (material.has_value() && material.value() -> splashParticle.has_value()){
+        splashEmitterId = material.value() -> splashParticle.value().particleId;
       }
     }else{
       std::cout << "hit particle material: (no material) " << std::endl;
@@ -378,11 +397,16 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
       }
     }
 
+
+    auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
     if (emitterId.has_value()){
       std::cout << "hit particle, hitpoint.id = " << hitpoint.id << std::endl;
-      gameapi -> emit(emitterId.value(), zFightingForParticle(hitpoint.point, hitpoint.normal), hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
+      gameapi -> emit(emitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
     }
-    
+    if (splashEmitterId.has_value()){
+      gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
+    }
+
   
     gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), 50);
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
