@@ -50,6 +50,7 @@ struct MaterialToParticle {
 };
 
 struct Weapons {
+  objid playerId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
 
@@ -346,6 +347,7 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
 
+
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
 std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
@@ -436,11 +438,10 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   auto playerPos = gameapi -> getGameObjectPos(playerId.value(), true);
   if (weapons.currentGun.muzzleParticle.has_value()){
     auto gunPosition = gameapi -> getGameObjectPos(weapons.currentGun.gunId.value(), true);
-    auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
-    auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
-    glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -0.1f); // should parameterize particleOffset
+    auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+    glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
     auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
-    gameapi -> emit(weapons.currentGun.muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt, std::nullopt);
+    gameapi -> emit(weapons.currentGun.muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt, weapons.playerId);
   }
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
@@ -697,6 +698,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Weapons* weapons = new Weapons;
 
+    weapons -> playerId = gameapi -> getGameObjectByName(parentName, sceneId, false).value();
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
 
