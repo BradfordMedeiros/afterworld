@@ -374,9 +374,13 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orie
 void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
   auto hitpoints = doRaycast(weapons, sceneId, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
+
   for (auto &hitpoint : hitpoints){
     modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
     auto objMaterial = materialTypeForObj(hitpoint.id);
+    if (!objMaterial.has_value()){
+      objMaterial = "default";
+    }
 
     std::optional<objid> emitterId = std::nullopt;
     std::optional<objid> splashEmitterId = std::nullopt;
@@ -390,13 +394,12 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
       if (material.has_value() && material.value() -> splashParticle.has_value()){
         splashEmitterId = material.value() -> splashParticle.value().particleId;
       }
-    }else{
-      std::cout << "hit particle material: (no material) " << std::endl;
-      if (weapons.currentGun.hitParticles.has_value()){
-        emitterId = weapons.currentGun.hitParticles.value();
-      }
     }
 
+
+    if (weapons.currentGun.hitParticles.has_value()){
+      emitterId = weapons.currentGun.hitParticles.value();
+    }
 
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
     if (emitterId.has_value()){
