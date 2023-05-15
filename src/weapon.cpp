@@ -261,7 +261,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
 
 void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   auto gunQuery = gameapi -> compileSqlQuery(
-   std::string("select modelpath, fire-animation, fire-sound, xoffset-pos, ") +
+   std::string("select modelpath, fireanimation, fire-sound, xoffset-pos, ") +
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
