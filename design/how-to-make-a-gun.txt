@@ -1,0 +1,19 @@
+properties can manipulate:
+
+./data/guns.csv - define in game 
+
+guns special objects:
+- /muzzle:
+	- needed for the muzzle flash effect
+
+
+animations (can override names in gun.csv, but don't...)
+- start
+- default
+	- continuously playing on a loop
+- fire
+	- called when fire gun
+- exhaust 
+	- called when out of ammo 
+- idle
+	- played when no player movement for a certain amount of time
