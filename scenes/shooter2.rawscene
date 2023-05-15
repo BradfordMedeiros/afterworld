@@ -89,6 +89,7 @@ water:physics:enabled
 water:physics_collision:nocollide
 water:layer:transparency
 water:scrollspeed:0.10 0 0
+water:material:water
 
 #
 #wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -109,6 +110,8 @@ item:pickup:scrapgun
 item:pickup-amount:100
 item:pickup-type:replace
 item:physics_mass:5
+item:material:metal
+
 #item:pickup-trigger:scrapgun
 
 #
@@ -156,7 +159,8 @@ console:rotation:0 0 1 180
 console:tint:0 0.6 1 1
 
 
->maincamera:script:native/movement
+>maincamera:script:native/movement:1
+
 >maincamera:position:0 50 100
 >maincamera:physics_angle:0.000000 0.000000 0.000000
 >maincamera:physics:enabled
