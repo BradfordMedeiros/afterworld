@@ -93,7 +93,7 @@ void dash(Movement& movement){
 }
 
 void moveUp(objid id, glm::vec2 direction){
-  std::cout << "move up" << std::endl;
+  
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
@@ -102,6 +102,7 @@ void moveDown(objid id, glm::vec2 direction){
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
 void moveXZ(objid id, glm::vec2 direction){
+  //modlog("editor: move xz: ", print(direction));
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulseRel(id, time * glm::vec3(direction.x, 0.f, direction.y));
 }
@@ -307,24 +308,24 @@ void releaseFromLadder(Movement& movement){
 void toggleCrouch(Movement& movement, objid id, bool shouldCrouch){
   modlog("movement", "toggle crouch: " + print(shouldCrouch));
   auto crouchScale = movement.moveParams.crouchScale;
+  auto scale = shouldCrouch ? glm::vec3(crouchScale, crouchScale, crouchScale) : glm::vec3(1.f, 1.f, 1.f);
   GameobjAttributes newAttr {
     .stringAttributes = {},
     .numAttributes = {
       { "physics_friction", shouldCrouch ? movement.moveParams.crouchFriction : movement.moveParams.friction },
     },
     .vecAttr = { 
-      .vec3 = { 
-        { "scale", shouldCrouch ? glm::vec3(crouchScale, crouchScale, crouchScale) : glm::vec3(1.f, 1.f, 1.f) },
-      },
-      .vec4 = { } 
+      .vec3 = {},
+      .vec4 = {} 
     },
   };
   gameapi -> setGameObjectAttr(id, newAttr);
+  gameapi -> setGameObjectScale(id, scale, true);
   if (shouldCrouch){
     // two reasons: 
     // bug where scaling and object makes the object float in the air 
     // old school crouch jump extra height (intentional)
-    gameapi -> applyImpulse(id, glm::vec3(0.f, 1.f, 0.f)); 
+    //gameapi -> applyImpulse(id, glm::vec3(0.f, 1.f, 0.f)); 
   }
 }
 
@@ -377,6 +378,15 @@ bool shouldStepUp(Movement& movement, objid id){
 
   //std::cout << "hitpoints:  low = " << belowHitpoints.size() << ", high = " << aboveHitpoints.size() << std::endl;
   return belowHitpoints.size() > 0 && aboveHitpoints.size() == 0;
+}
+
+std::string print(std::set<objid>& values){
+  std::string strValue = "[";
+  for (auto value : values){
+    strValue += " " + std::to_string(value);
+  }
+  strValue += " ]";
+  return strValue;
 }
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
@@ -498,6 +508,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     bool isGrounded = movement -> groundedObjIds.size() > 0;
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
+    //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
+    //modlog("editor grounded = ", print(movement -> groundedObjIds));
+
     float horzRelVelocity = 0.8f;
 
     glm::vec2 moveVec(0.f, 0.f);
@@ -593,7 +606,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     Movement* movement = static_cast<Movement*>(data);
     auto otherObjectId = (id == obj1) ? obj2 : obj1;
-    if (movement -> groundedObjIds.count(otherObjectId) > 0){
+    if (movement -> groundedObjIds.count(otherObjectId) > 0 && (id == obj1 || id == obj2)){
       movement -> groundedObjIds.erase(otherObjectId);
     }
     if (movement -> waterObjIds.count(otherObjectId) > 0){
