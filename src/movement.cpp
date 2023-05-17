@@ -35,6 +35,8 @@ struct Movement {
   MovementParams moveParams;
   ControlParams controlParams;
 
+  objid playerId;
+
   bool goForward;
   bool goBackward;
   bool goLeft;
@@ -393,6 +395,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
+    movement -> playerId = id;
     movement -> goForward = false;
     movement -> goBackward = false;
     movement -> goLeft = false;
@@ -492,6 +495,20 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
   };
+  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+    Movement* movement = static_cast<Movement*>(data);
+    if (button == 1){
+      if (action == 0){
+        auto hitpoints = gameapi -> contactTest(movement -> playerId);
+        std::cout << "hitpoints: [ ";
+        for (auto &hitpoint : hitpoints){
+          std::cout << "\n[ id = " << hitpoint.id << ", pos = " << print(hitpoint.point) << ", normal = " << print(hitpoint.normal) << " ] " << std::endl;
+        }
+        std::cout << " ]" << std::endl;
+      }
+    }
+  };
+
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
