@@ -106,7 +106,12 @@ void moveDown(objid id, glm::vec2 direction){
 void moveXZ(objid id, glm::vec2 direction){
   //modlog("editor: move xz: ", print(direction));
   float time = gameapi -> timeElapsed();
-  gameapi -> applyImpulseRel(id, time * glm::vec3(direction.x, 0.f, direction.y));
+  auto playerRotation = gameapi -> getGameObjectRotation(id, true);
+  auto directionVec = playerRotation * glm::vec3(direction.x, 0.f, direction.y);
+  auto magnitude = glm::length(directionVec);
+  directionVec.y = 0.f;
+
+  gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude);
 }
 
 float ironsightSpeedMultiplier = 0.4f;
@@ -421,6 +426,14 @@ std::vector<CollisionSpace> collisionSpaces = {
   },
   CollisionSpace {  // down
     .direction = glm::vec3(0.f, 1.f, 0.f),
+    .comparison = 0.9f,
+  },
+  CollisionSpace {  // backward
+    .direction = glm::vec3(0.f, 0.f, 1.f),
+    .comparison = 0.9f,
+  },
+  CollisionSpace {  // forward
+    .direction = glm::vec3(0.f, 0.f, -1.f),
     .comparison = 0.9f,
   },
 };
