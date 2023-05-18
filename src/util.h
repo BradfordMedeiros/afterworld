@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_QUERY
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
+#include "../../ModEngine/src/translations.h"
 #include <bits/stdc++.h>
 
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);

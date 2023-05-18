@@ -382,6 +382,15 @@ bool shouldStepUp(Movement& movement, objid id){
   return belowHitpoints.size() > 0 && aboveHitpoints.size() == 0;
 }
 
+std::string print(std::vector<bool>& values){
+  std::string strValue = "[";
+  for (auto value : values){
+    strValue += " " + print(value);
+  }
+  strValue += " ]";
+  return strValue;
+}
+
 std::string print(std::set<objid>& values){
   std::string strValue = "[";
   for (auto value : values){
@@ -389,6 +398,75 @@ std::string print(std::set<objid>& values){
   }
   strValue += " ]";
   return strValue;
+}
+
+struct CollisionSpace {
+  glm::vec3 direction;
+  float comparison;
+};
+
+enum COLLISION_SPACE_INDEX { COLLISION_SPACE_LEFT = 0, COLLISION_SPACE_RIGHT = 1, COLLISION_SPACE_DOWN = 3 };
+std::vector<CollisionSpace> collisionSpaces = {
+  CollisionSpace {   // left
+    .direction = glm::vec3(1.f, 0.f, 0.f),
+    .comparison = 0.9f,
+  },
+  CollisionSpace {  // right
+    .direction = glm::vec3(-1.f, 0.f, 0.f),
+    .comparison = 0.9f,
+  },
+  CollisionSpace {  // up
+    .direction = glm::vec3(0.f, -1.f, 0.f),
+    .comparison = 0.9f,
+  },
+  CollisionSpace {  // down
+    .direction = glm::vec3(0.f, 1.f, 0.f),
+    .comparison = 0.9f,
+  },
+};
+
+bool checkCollision(HitObject& hitpoint, CollisionSpace& collisionSpace, glm::quat rotationWithoutY){
+  //     gameapi -> drawLine(hitpoint.point,  hitpoint.point + normal, true, movement.playerId, std::nullopt, std::nullopt, std::nullopt);
+  auto direction = glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
+  auto checkAgainstDirection = rotationWithoutY * collisionSpace.direction;
+  float value = glm::dot(direction, checkAgainstDirection);
+  std::cout << "value is: " << value << std::endl;
+  return value >= collisionSpace.comparison;
+}
+
+std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY){
+  std::vector<bool> values;
+  for (auto &collisionSpace : collisionSpaces){
+    bool inCollisionSpace = false;
+    for (auto &hitpoint : hitpoints){
+      if (checkCollision(hitpoint, collisionSpace, rotationWithoutY)){
+        inCollisionSpace = true;
+        break;
+      }
+    }
+    values.push_back(inCollisionSpace);
+  }
+  return values;
+}
+
+std::vector<bool>  checkMovementCollisions(Movement& movement){
+  auto hitpoints = gameapi -> contactTest(movement.playerId);
+  std::cout << "hitpoints: [ ";
+  //for (auto &hitpoint : hitpoints){
+  //  std::cout << "\n[ id = " << hitpoint.id << ", pos = " << print(hitpoint.point) << ", normal = " << serializeQuat(hitpoint.normal) << " ] " << std::endl;
+  //  auto normal = 10.f * glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
+  //  gameapi -> drawLine(hitpoint.point,  hitpoint.point + normal, true, movement.playerId, std::nullopt, std::nullopt, std::nullopt);
+  //}
+
+  auto playerDirection = gameapi -> getGameObjectRotation(movement.playerId, true);
+  auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
+  directionVec.y = 0.f;
+  auto rotationWithoutY = quatFromDirection(directionVec);
+  auto collisions = getCollisionSpaces(hitpoints, rotationWithoutY);
+  std::cout << "collisions: " << print(collisions) << std::endl;
+
+  std::cout << " ]" << std::endl;
+  return collisions;
 }
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
@@ -499,12 +577,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     Movement* movement = static_cast<Movement*>(data);
     if (button == 1){
       if (action == 0){
-        auto hitpoints = gameapi -> contactTest(movement -> playerId);
-        std::cout << "hitpoints: [ ";
-        for (auto &hitpoint : hitpoints){
-          std::cout << "\n[ id = " << hitpoint.id << ", pos = " << print(hitpoint.point) << ", normal = " << print(hitpoint.normal) << " ] " << std::endl;
-        }
-        std::cout << " ]" << std::endl;
+        checkMovementCollisions(*movement);
       }
     }
   };
@@ -519,11 +592,14 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     Movement* movement = static_cast<Movement*>(data);
+    //checkMovementCollisions(*movement);
+
     if (!movement -> active){
       return;
     }
 
-    bool isGrounded = movement -> groundedObjIds.size() > 0;
+    bool isGrounded = checkMovementCollisions(*movement).at(COLLISION_SPACE_DOWN);
+    //bool isGrounded = movement -> groundedObjIds.size() > 0;
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
     //modlog("editor grounded = ", print(movement -> groundedObjIds));
