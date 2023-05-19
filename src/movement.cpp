@@ -109,6 +109,11 @@ void moveXZ(objid id, glm::vec2 direction){
   auto playerRotation = gameapi -> getGameObjectRotation(id, true);
   auto directionVec = playerRotation * glm::vec3(direction.x, 0.f, direction.y);
   auto magnitude = glm::length(directionVec);
+  if (aboutEqual(magnitude, 0.f)){
+    //modassert(false, "magnitude was about zero");
+    modlog("movement", "warning magnitude was about zero");
+    return;
+  }
   directionVec.y = 0.f;
 
   gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude);
@@ -462,7 +467,7 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
   return values;
 }
 
-std::vector<bool>  checkMovementCollisions(Movement& movement){
+std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections){
   auto hitpoints = gameapi -> contactTest(movement.playerId);
   std::cout << "hitpoints: [ ";
   //for (auto &hitpoint : hitpoints){
@@ -470,6 +475,9 @@ std::vector<bool>  checkMovementCollisions(Movement& movement){
   //  auto normal = 10.f * glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
   //  gameapi -> drawLine(hitpoint.point,  hitpoint.point + normal, true, movement.playerId, std::nullopt, std::nullopt, std::nullopt);
   //}
+  for (auto &hitpoint : hitpoints){
+    hitDirections.push_back(hitpoint.normal);
+  }
 
   auto playerDirection = gameapi -> getGameObjectRotation(movement.playerId, true);
   auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
@@ -480,6 +488,39 @@ std::vector<bool>  checkMovementCollisions(Movement& movement){
 
   std::cout << " ]" << std::endl;
   return collisions;
+}
+
+glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec, std::vector<glm::quat>& hitDirections){
+  auto playerDirectionWithY = gameapi -> getGameObjectRotation(movement.playerId, true);
+  auto directionVecPlayer = playerDirectionWithY * glm::vec3(0.f, 0.f, -1.f); 
+  directionVecPlayer.y = 0.f;
+  auto playerDirection = quatFromDirection(directionVecPlayer);
+  auto directionVec = playerDirection * moveVec; 
+
+  for (auto &hitDirection : hitDirections){
+    auto playerDirectionFromWall = glm::inverse(hitDirection) * directionVec;
+    auto playerDirectionFromWallNoZ = playerDirectionFromWall;
+    if (playerDirectionFromWallNoZ.z > 0){ // cannot move into the wall
+      playerDirectionFromWallNoZ.z = 0.f;
+    }
+    auto playerDirectionWorld = hitDirection * playerDirectionFromWallNoZ;
+
+    std::cout << "player abs direction: " << print(directionVec) << std::endl;
+    std::cout << "player direction relative to wall: " << print(playerDirectionFromWall) << std::endl;
+    std::cout << "player direction relative to wall target (no +z): " << print(playerDirectionFromWallNoZ) << std::endl;
+    std::cout << "player direction world (no +z): " << print(playerDirectionWorld) << std::endl;
+
+    directionVec = playerDirectionWorld;
+    //auto wallDirection =  glm::normalize(hitDirection * glm::vec3(0.f, 0.f, -1.f));
+    //auto projectMagnitude = glm::dot(directionVec, wallDirection);
+    //auto relativeValue = projectMagnitude * glm::normalize(directionVec);
+    //std::cout << "vec: " << print(directionVec) << ", dot = " << projectMagnitude << ", value = " << print(relativeValue) << std::endl;
+  }  
+
+  //std::cout << "player force: " << print(relativeToPlayer) << ", " <<  print(glm::inverse(playerDirection) * totalForceDiff) << std::endl << std::endl;
+  auto relativeToPlayer = glm::inverse(playerDirection) * directionVec;
+
+  return relativeToPlayer;
 }
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
@@ -590,7 +631,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     Movement* movement = static_cast<Movement*>(data);
     if (button == 1){
       if (action == 0){
-        checkMovementCollisions(*movement);
+        std::vector<glm::quat> hitDirections;
+        //checkMovementCollisions(*movement, hitDirections);
+        for (auto &hitDirection : hitDirections){
+          std::cout << "hit direction is: " << print(directionFromQuat(hitDirection)) << std::endl;
+        }
+        //checkMovementCollisions(*movement);
       }
     }
   };
@@ -611,43 +657,55 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    bool isGrounded = checkMovementCollisions(*movement).at(COLLISION_SPACE_DOWN);
+
+    float horzRelVelocity = 0.8f;
+    glm::vec2 moveVec(0.f, 0.f);
+
+    bool shouldMoveXZ = false;
+    if (movement -> goForward){
+      moveVec += glm::vec2(0.f, -1.f);
+      if (movement -> facingLadder || movement -> attachedToLadder){
+        moveUp(id, moveVec);
+      }else{
+        shouldMoveXZ = true;
+      }
+    }
+    if (movement -> goBackward){
+      moveVec += glm::vec2(0.f, 1.f);
+      if (movement -> facingLadder || movement -> attachedToLadder){
+        moveDown(id, moveVec);
+      }else{
+        shouldMoveXZ = true;
+      }
+    }
+    if (movement -> goLeft){
+      moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
+      if (!movement -> attachedToLadder){
+        shouldMoveXZ = true;
+      }
+      
+    }
+    if (movement -> goRight){
+      moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
+      if (!movement -> attachedToLadder){
+        shouldMoveXZ = true;
+      }
+    }
+
+    std::vector<glm::quat> hitDirections;
+
+    //std::vector<glm::quat> hitDirections;
+    bool isGrounded = checkMovementCollisions(*movement, hitDirections).at(COLLISION_SPACE_DOWN);
     //bool isGrounded = movement -> groundedObjIds.size() > 0;
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
     //modlog("editor grounded = ", print(movement -> groundedObjIds));
 
-    float horzRelVelocity = 0.8f;
-
-    glm::vec2 moveVec(0.f, 0.f);
-    if (movement -> goForward){
-      moveVec = moveSpeed * glm::vec2(0.f, -1.f);
-      if (movement -> facingLadder || movement -> attachedToLadder){
-        moveUp(id, moveVec);
-      }else{
-        moveXZ(id, moveVec);
-      }
-    }
-    if (movement -> goBackward){
-      moveVec = moveSpeed * glm::vec2(0.f, 1.f);
-      if (movement -> facingLadder || movement -> attachedToLadder){
-        moveDown(id, moveVec);
-      }else{
-        moveXZ(id, moveVec);
-      }
-    }
-    if (movement -> goLeft){
-      moveVec = moveSpeed * glm::vec2(horzRelVelocity * -1.f, 0.f);
-      if (!movement -> attachedToLadder){
-        moveXZ(id, moveVec);
-      }
-      
-    }
-    if (movement -> goRight){
-      moveVec = moveSpeed * glm::vec2(horzRelVelocity * 1.f, 0.f);
-      if (!movement -> attachedToLadder){
-        moveXZ(id, moveVec);
-      }
+    auto limitedMoveVec = limitMoveDirectionFromCollisions(*movement, glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections);
+    //auto limitedMoveVec = moveVec;
+    auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
+    if (shouldMoveXZ){
+      moveXZ(id, moveSpeed * direction);
     }
 
 
