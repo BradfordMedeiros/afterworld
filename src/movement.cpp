@@ -467,9 +467,10 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
   return values;
 }
 
-std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections){
+std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY){
   auto hitpoints = gameapi -> contactTest(movement.playerId);
   std::cout << "hitpoints: [ ";
+
   //for (auto &hitpoint : hitpoints){
   //  std::cout << "\n[ id = " << hitpoint.id << ", pos = " << print(hitpoint.point) << ", normal = " << serializeQuat(hitpoint.normal) << " ] " << std::endl;
   //  auto normal = 10.f * glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
@@ -479,10 +480,6 @@ std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::
     hitDirections.push_back(hitpoint.normal);
   }
 
-  auto playerDirection = gameapi -> getGameObjectRotation(movement.playerId, true);
-  auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
-  directionVec.y = 0.f;
-  auto rotationWithoutY = quatFromDirection(directionVec);
   auto collisions = getCollisionSpaces(hitpoints, rotationWithoutY);
   std::cout << "collisions: " << print(collisions) << std::endl;
 
@@ -490,11 +487,7 @@ std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::
   return collisions;
 }
 
-glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec, std::vector<glm::quat>& hitDirections){
-  auto playerDirectionWithY = gameapi -> getGameObjectRotation(movement.playerId, true);
-  auto directionVecPlayer = playerDirectionWithY * glm::vec3(0.f, 0.f, -1.f); 
-  directionVecPlayer.y = 0.f;
-  auto playerDirection = quatFromDirection(directionVecPlayer);
+glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec, std::vector<glm::quat>& hitDirections, glm::quat playerDirection){
   auto directionVec = playerDirection * moveVec; 
 
   for (auto &hitDirection : hitDirections){
@@ -504,22 +497,14 @@ glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec
       playerDirectionFromWallNoZ.z = 0.f;
     }
     auto playerDirectionWorld = hitDirection * playerDirectionFromWallNoZ;
-
     std::cout << "player abs direction: " << print(directionVec) << std::endl;
     std::cout << "player direction relative to wall: " << print(playerDirectionFromWall) << std::endl;
     std::cout << "player direction relative to wall target (no +z): " << print(playerDirectionFromWallNoZ) << std::endl;
     std::cout << "player direction world (no +z): " << print(playerDirectionWorld) << std::endl;
-
     directionVec = playerDirectionWorld;
-    //auto wallDirection =  glm::normalize(hitDirection * glm::vec3(0.f, 0.f, -1.f));
-    //auto projectMagnitude = glm::dot(directionVec, wallDirection);
-    //auto relativeValue = projectMagnitude * glm::normalize(directionVec);
-    //std::cout << "vec: " << print(directionVec) << ", dot = " << projectMagnitude << ", value = " << print(relativeValue) << std::endl;
   }  
 
-  //std::cout << "player force: " << print(relativeToPlayer) << ", " <<  print(glm::inverse(playerDirection) * totalForceDiff) << std::endl << std::endl;
   auto relativeToPlayer = glm::inverse(playerDirection) * directionVec;
-
   return relativeToPlayer;
 }
 
@@ -695,13 +680,18 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
-    bool isGrounded = checkMovementCollisions(*movement, hitDirections).at(COLLISION_SPACE_DOWN);
+    auto playerDirection = gameapi -> getGameObjectRotation(movement -> playerId, true);
+    auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
+    directionVec.y = 0.f;
+    auto rotationWithoutY = quatFromDirection(directionVec);
+
+    bool isGrounded = checkMovementCollisions(*movement, hitDirections, rotationWithoutY).at(COLLISION_SPACE_DOWN);
     //bool isGrounded = movement -> groundedObjIds.size() > 0;
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
     //modlog("editor grounded = ", print(movement -> groundedObjIds));
 
-    auto limitedMoveVec = limitMoveDirectionFromCollisions(*movement, glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections);
+    auto limitedMoveVec = limitMoveDirectionFromCollisions(*movement, glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections, rotationWithoutY);
     //auto limitedMoveVec = moveVec;
     auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
     if (shouldMoveXZ){
