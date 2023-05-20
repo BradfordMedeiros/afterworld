@@ -27,7 +27,12 @@ void applyWaterForces(Water& water){
 		auto fluidViscosityOpt = getFloatAttr(waterObjAttr, "water-viscosity");
 		auto fluidViscosity = fluidViscosityOpt.has_value() ? fluidViscosityOpt.value() : 0.1f;
 
+		std::vector<objid> idsToErase = {};
 		for (auto submergedObjId : submergedObjects){
+			if (!gameapi -> getGameObjNameForId(submergedObjId).has_value()){
+				idsToErase.push_back(submergedObjId);
+				continue;
+			}
 			auto submergedAttr = gameapi -> getGameObjectAttr(submergedObjId);
 			
 			// Get percentage of the object submerged by volume.  Uses AABS of water + submerged object, determines based upon if in object and y values only 
@@ -99,6 +104,9 @@ void applyWaterForces(Water& water){
 			auto totalADrag = 0.5f * waterDensity * glm::vec3(fluidADragX, fluidADragY, fluidADragZ) * fluidViscosity;
       gameapi -> applyTorque(submergedObjId, totalADrag);
 		}
+		for (auto id : idsToErase){
+			submergedObjects.erase(id);
+		}
 	}
 }
 
@@ -156,6 +164,7 @@ CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
     }
     printWaterElements(*water);
   };
+
   binding.onFrame = [](int32_t id, void* data) -> void {
   	Water* water = static_cast<Water*>(data);
   	applyWaterForces(*water);

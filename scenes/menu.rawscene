@@ -15,4 +15,4 @@ menu:script:native/menu
 menu:shader:../afterworld/shaders/menu/fragment.glsl
 
 &music:clip:../gameresources/sound/theme.wav
-&music:volume:0
+&music:volume:1

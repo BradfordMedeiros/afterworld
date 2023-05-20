@@ -6,7 +6,8 @@ platform:rotation:0 -1 0 0
 platform:texture:../gameresources/textures/wood.jpg
 platform:physics:enabled
 
-platform:material:metal
+platform:material:wood
+#platform:health:100
 
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform_lowert:position:-20 -30 0
@@ -34,6 +35,7 @@ ladder:texture:./res/textures/white.png
 ladder:physics:enabled
 ladder:ladder:vertical
 ladder:texture:./res/textures/brickwall.jpg
+ladder:health:100
 
 floatbox_above:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox_above:position:10 -12 30
@@ -100,17 +102,25 @@ water:material:water
 #wall2:physics:enabled
 #wall2:chatnode:npc1
 #
+#item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#item:position:-20 2 50
+#item:scale:0.25 0.25 1.25
+#item:texture:../gameresources/textures/wood.jpg
+#item:physics:enabled
+#item:physics_type:dynamic
+#item:pickup:scrapgun
+#item:pickup-amount:100
+#item:pickup-type:replace
+#item:physics_mass:5
+#item:material:metal
+#
+
 item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-item:position:-20 2 50
+item:position:-22 2 50
 item:scale:0.25 0.25 1.25
 item:texture:../gameresources/textures/wood.jpg
 item:physics:enabled
-item:physics_type:dynamic
-item:pickup:scrapgun
-item:pickup-amount:100
-item:pickup-type:replace
-item:physics_mass:5
-item:material:metal
+item:health:10
 
 #item:pickup-trigger:scrapgun
 
@@ -186,8 +196,7 @@ enemy:goal:idle-enemy
 enemy:goal-type:idle
 enemy:goal-value:2
 enemy:agent:true
-#enemy:script:native/ai
-
+enemy:script:native/ai
 enemy:health:130
 
 
@@ -200,6 +209,8 @@ goal:goal-type:move
 goal:goal-value:9
 
 loadtexture:texture:../gameresources/textures/controls/up-down.png
+
+##############################################
 
 hud:script:native/hud
 dialog:script:native/dialog
