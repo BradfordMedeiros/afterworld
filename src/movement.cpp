@@ -52,12 +52,13 @@ struct Movement {
   glm::vec2 lookVelocity;
   float xRot; // up and down
   float yRot; // left and right
-  std::set<objid> groundedObjIds; // a rigid body can have collision spots with multiple grounds at once
   bool facingWall;
   bool facingLadder;
   bool attachedToLadder;
   std::set<objid> waterObjIds;
 
+  bool isGrounded;
+  bool lastFrameIsGrounded;
   bool isCrouching;
   bool shouldBeCrouching;
   float lastCrouchTime;
@@ -77,7 +78,7 @@ std::string movementToStr(Movement& movement){
 
 void jump(Movement& movement, objid id){
   glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
-  if (movement.groundedObjIds.size() > 0){
+  if (movement.isGrounded){
     gameapi -> applyImpulse(id, impulse);
     if (movement.jumpSoundObjId.has_value()){
       gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
@@ -529,7 +530,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
     movement -> xRot = 0.f;
     movement -> yRot = 0.f;
-    movement -> groundedObjIds = {};
+    movement -> isGrounded = false;
+    movement -> lastFrameIsGrounded = false;
     movement -> facingWall = false;
     movement -> facingLadder = false;
     movement -> attachedToLadder = false;
@@ -685,11 +687,11 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     directionVec.y = 0.f;
     auto rotationWithoutY = quatFromDirection(directionVec);
 
+    movement -> lastFrameIsGrounded = movement -> isGrounded;
     bool isGrounded = checkMovementCollisions(*movement, hitDirections, rotationWithoutY).at(COLLISION_SPACE_DOWN);
-    //bool isGrounded = movement -> groundedObjIds.size() > 0;
+    movement -> isGrounded = isGrounded;
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-    //modlog("editor grounded = ", print(movement -> groundedObjIds));
 
     auto limitedMoveVec = limitMoveDirectionFromCollisions(*movement, glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections, rotationWithoutY);
     //auto limitedMoveVec = moveVec;
@@ -749,10 +751,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (!isWater && value >= movement -> moveParams.groundAngle){
-      if (movement -> groundedObjIds.size() == 0){
+      if (!movement -> lastFrameIsGrounded && movement -> isGrounded){
         land(*movement, id);
       }
-      movement -> groundedObjIds.insert(otherObjectId);
     }
 
   };
@@ -760,9 +761,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     Movement* movement = static_cast<Movement*>(data);
     auto otherObjectId = (id == obj1) ? obj2 : obj1;
-    if (movement -> groundedObjIds.count(otherObjectId) > 0 && (id == obj1 || id == obj2)){
-      movement -> groundedObjIds.erase(otherObjectId);
-    }
     if (movement -> waterObjIds.count(otherObjectId) > 0){
       movement -> waterObjIds.erase(otherObjectId);
     }
