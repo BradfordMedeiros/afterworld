@@ -3,6 +3,7 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "./gametypes/targetkill.h"
 
 CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name);
 

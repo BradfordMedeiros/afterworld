@@ -2,49 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
-struct RaceMode {
-
-};
-
-struct TargetKillMode {
-  int numTargets;
-  float startTime;
-  float durationSeconds;
-};
-
-typedef std::variant<TargetKillMode> GameType;
-struct GameTypeInfo {
-  std::string gametypeName;
-  std::vector<std::string> events;
-  std::function<GameType()> createGametype;
-  std::function<bool(GameType&, std::string& event, AttributeValue value)> onEvent;
-  std::function<std::string(GameType&)> getDebugText;
-}; 
-
 std::vector<GameTypeInfo> gametypes = {
-  GameTypeInfo {
-    .gametypeName = "targetkill",
-    .events = { "nohealth" },
-    .createGametype = []() -> GameType { 
-      return TargetKillMode { 
-        .numTargets = 3,
-        .startTime = 1.f,
-        .durationSeconds = 20,
-      }; 
-    },
-    .onEvent = [](GameType& gametype, std::string& event, AttributeValue value) -> bool {
-      TargetKillMode* targetKillMode = std::get_if<TargetKillMode>(&gametype);
-      modassert(targetKillMode, "target kill mode null");
-      targetKillMode -> numTargets--;
-      modlog("gametypes", "on event: " + event + ", value = " + print(value));
-      return targetKillMode -> numTargets == 0;
-    },
-    .getDebugText = [](GameType& gametype) -> std::string { 
-      TargetKillMode* targetKillMode = std::get_if<TargetKillMode>(&gametype);
-      modassert(targetKillMode, "target kill mode null");
-      return std::string("targets remaining: ") + std::to_string(targetKillMode -> numTargets);
-    }
-  },
+  getTargetKill(),
 };
 
 struct GameTypes  {
@@ -52,7 +11,6 @@ struct GameTypes  {
   GameType gametype;
   GameTypeInfo* meta;
 };
-
 
 GameTypeInfo* gametypeByName(const char* name) {
   for (auto &gametype : gametypes){
@@ -105,7 +63,6 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
-   
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameTypes* gametype = static_cast<GameTypes*>(data);
