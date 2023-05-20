@@ -5,6 +5,7 @@ extern CustomApiBindings* gameapi;
 struct HitPoints {
 	float current;
 	float total;
+	std::optional<std::string> eventName;
 };
 
 struct Tags {
@@ -55,18 +56,22 @@ void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid
 		hitpoints[id] = HitPoints {
 			.current = healthPoints,
 			.total = healthPoints,
+			.eventName = "hud-health",
 		};
 	}
 }
 
-bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead){
+bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead, std::optional<std::string>** _eventName, float* _remainingHealth){
 	if (tags.hitpoints.find(id) == tags.hitpoints.end()){
+		modlog("health", "not an enemy with tracked health: " + std::to_string(id) + ", " + gameapi -> getGameObjNameForId(id).value());
 		return false;
 	}
 	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
 	auto newHealthAmount = tags.hitpoints.at(id).current - amount;
 	tags.hitpoints.at(id).current = newHealthAmount;
 	*_enemyDead = newHealthAmount <= 0;
+	*_eventName = &tags.hitpoints.at(id).eventName;
+	*_remainingHealth = newHealthAmount;
 	return true;
 }
 
@@ -111,11 +116,16 @@ std::vector<TagUpdater> tagupdates = {
       	auto floatValue = std::get_if<float>(&value);
       	modassert(floatValue != NULL, "damage message needs to be float value");
       	bool enemyDead = false;
-      	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead);
+      	std::optional<std::string>* eventName = NULL;
+      	float remainingHealth = 0.f;
+      	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
       	if (valid && enemyDead){
-      		gameapi -> sendNotifyMessage("onkill", std::to_string(targetId));
+      		gameapi -> sendNotifyMessage("nohealth", std::to_string(targetId));
       	}
-      }else if (key == "onkill"){
+      	if (valid && eventName -> has_value()){
+      		gameapi -> sendNotifyMessage(eventName -> value(), remainingHealth);
+      	}
+      }else if (key == "nohealth"){
       	auto strValue = std::get_if<std::string>(&value);
       	auto targetId = std::atoi(strValue -> c_str());
       	modlog("health", "removing object: " + std::to_string(targetId));

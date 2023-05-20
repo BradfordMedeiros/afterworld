@@ -4,6 +4,8 @@ extern CustomApiBindings* gameapi;
 
 struct Hud {
 	std::vector<objid> managedObjIds;
+
+  float health;
 };
 
 struct HudElement {
@@ -75,6 +77,7 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
   	Hud* hud = new Hud;
+    hud -> health = 100.f;
     hud -> managedObjIds = {};
   	changeHud(*hud, "default", id);
   	return hud;
@@ -84,13 +87,23 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
   	delete hud;
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+    Hud* hud = static_cast<Hud*>(data);
     if (key == "reload-config:hud"){
-      Hud* hud = static_cast<Hud*>(data);
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "reload-config:hud reload value invalid");
       changeHud(*hud, *strValue, id);
+    }else if (key == "hud-health"){
+      auto floatValue = std::get_if<float>(&value);
+      modassert(floatValue != NULL, "hud-health value invalid");
+      hud -> health = *floatValue;
     }
   };
+  binding.onFrame = [](int32_t id, void* data) -> void {
+    Hud* hud = static_cast<Hud*>(data);
+    gameapi -> drawText("health: " + std::to_string(static_cast<int>(hud -> health)), -0.9, 0.2, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+  };
+
+
 
 
   return binding;
