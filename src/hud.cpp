@@ -103,9 +103,6 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
     gameapi -> drawText("health: " + std::to_string(static_cast<int>(hud -> health)), -0.9, 0.2, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
   };
 
-
-
-
   return binding;
 }
 

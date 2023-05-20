@@ -19,6 +19,7 @@
 #include "./in-game-ui.h"
 #include "./sound.h"
 #include "./water.h"
+#include "./gametypes.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
