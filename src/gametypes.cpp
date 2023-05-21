@@ -4,11 +4,12 @@ extern CustomApiBindings* gameapi;
 
 std::vector<GameTypeInfo> gametypes = {
   getTargetKill(),
+  getDeathmatchMode(),
 };
 
 struct GameTypes  {
   std::string name;
-  GameType gametype;
+  std::any gametype;
   GameTypeInfo* meta;
 };
 
@@ -36,7 +37,7 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
   	GameTypes* gametype = new GameTypes;
     gametype -> meta = NULL;
-    changeGameType(*gametype, std::string("targetkill").c_str());
+    changeGameType(*gametype, std::string("deathmatch").c_str());
     return gametype;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

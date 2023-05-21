@@ -4,6 +4,7 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./gametypes/targetkill.h"
+#include "./gametypes/deathmatch.h"
 
 CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name);
 

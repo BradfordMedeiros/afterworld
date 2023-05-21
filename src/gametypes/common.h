@@ -2,18 +2,14 @@
 #define MOD_AFTERWORLD_GAMETYPES_COMMON
 
 #include <functional>
-#include <variant>
 #include "../util.h"
-
-struct TargetKillMode;
-typedef std::variant<TargetKillMode> GameType;
 
 struct GameTypeInfo {
   std::string gametypeName;
   std::vector<std::string> events;
-  std::function<GameType()> createGametype;
-  std::function<bool(GameType&, std::string& event, AttributeValue value)> onEvent;
-  std::function<std::string(GameType&)> getDebugText;
+  std::function<std::any()> createGametype;
+  std::function<bool(std::any&, std::string& event, AttributeValue value)> onEvent;
+  std::function<std::string(std::any&)> getDebugText;
 }; 
 
 

@@ -3,12 +3,6 @@
 
 #include "./common.h"
 
-struct TargetKillMode {
-  int numTargets;
-  float startTime;
-  float durationSeconds;
-};
-
 GameTypeInfo getTargetKill();
 
 #endif 
