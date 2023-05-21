@@ -5,6 +5,7 @@
 #include "./util.h"
 #include "./gametypes/targetkill.h"
 #include "./gametypes/deathmatch.h"
+#include "./gametypes/race.h"
 
 CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name);
 
