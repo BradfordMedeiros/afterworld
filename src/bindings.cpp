@@ -165,16 +165,21 @@ void handleSwitch(std::string switchValue){
   }
 }
 
-void handleCollision(objid obj1, objid obj2, std::string attrName){
+void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey){
   auto objAttr1 =  gameapi -> getGameObjectAttr(obj1);
-  auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
-  auto switchEnter1 = getStrAttr(objAttr1, attrName);
+  auto switchEnter1 = getAttr(objAttr1, attrForValue);
+  auto switchEnter1Key = getStrAttr(objAttr1, attrForKey);
   if (switchEnter1.has_value()){
-    gameapi -> sendNotifyMessage("switch", switchEnter1.value());
+    //std::cout << "race publishing 1: " << switchEnter1.value() << std::endl;
+    gameapi -> sendNotifyMessage(switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch", switchEnter1.value());
   }
-  auto switchEnter2 = getStrAttr(objAttr2, attrName);
+
+  auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
+  auto switchEnter2 = getAttr(objAttr2, attrForValue);
+  auto switchEnter2Key = getStrAttr(objAttr2, attrForKey);
   if (switchEnter2.has_value()){
-    gameapi -> sendNotifyMessage("switch", switchEnter2.value());
+    //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
+    gameapi -> sendNotifyMessage(switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch", switchEnter2.value());
   }
 }
 
@@ -302,13 +307,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj1 = gameapi -> getGameObjNameForId(obj1); // this check shouldn't be necessary, is bug
     auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
     modassert(gameobj1.has_value() && gameobj2.has_value(), "collision enter: objs do not exist");
-    handleCollision(obj1, obj2, "switch-enter");
+    handleCollision(obj1, obj2, "switch-enter", "switch-enter-key");
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1 = gameapi -> getGameObjNameForId(obj1);
     auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
     modassert(gameobj1.has_value() && gameobj2.has_value(), "collision exit: objs do not exist");
-    handleCollision(obj1, obj2, "switch-exit");
+    handleCollision(obj1, obj2, "switch-exit", "switch-exit-key");
   };
 
   return binding;

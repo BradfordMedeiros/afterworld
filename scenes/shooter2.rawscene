@@ -1,13 +1,14 @@
 
-platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform:position:0 -20 0
-platform:scale:100 100 10
-platform:rotation:0 -1 0 0
-platform:texture:../gameresources/textures/wood.jpg
-platform:physics:enabled
-
-platform:material:wood
+#platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#platform:position:0 -20 0
+#platform:scale:100 100 10
+#platform:rotation:0 -1 0 0
+#platform:texture:../gameresources/textures/wood.jpg
+#platform:physics:enabled
+#
+#platform:material:wood
 #platform:health:100
+#platform:team:blue
 
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform_lowert:position:-20 -30 0
@@ -36,6 +37,33 @@ ladder:physics:enabled
 ladder:ladder:vertical
 ladder:texture:./res/textures/brickwall.jpg
 ladder:health:100
+ladder:team:blue
+
+## Race elements ###
+race_marker1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+race_marker1:position:-30 -10 30
+race_marker1:scale:5 15 25
+race_marker1:texture:../gameresources/textures/wood.jpg
+race_marker1:physics:enabled
+race_marker1:physics_collision:nocollide
+race_marker1:tint:0 0 1 0.5
+race_marker1:gamemarker-race:1
+race_marker1:switch-enter-key:race-marker
+race_marker1:switch-enter:1
+
+race_marker2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+race_marker2:position:-30 -10 0
+race_marker2:scale:5 15 25
+race_marker2:texture:../gameresources/textures/wood.jpg
+race_marker2:physics:enabled
+race_marker2:physics_collision:nocollide
+race_marker2:tint:0 0 1 0.5
+race_marker2:gamemarker-race:2
+race_marker2:switch-enter-key:race-marker
+race_marker2:switch-enter:2
+
+#######################################
+
 
 floatbox_above:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox_above:position:10 -12 30
@@ -116,11 +144,28 @@ water:material:water
 #
 
 item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-item:position:-22 2 50
+item:position:-22 -15 50
 item:scale:0.25 0.25 1.25
 item:texture:../gameresources/textures/wood.jpg
 item:physics:enabled
 item:health:10
+item:team:red
+
+item2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+item2:position:-21 -15 50
+item2:scale:0.25 0.25 1.25
+item2:texture:../gameresources/textures/wood.jpg
+item2:physics:enabled
+item2:health:10
+item2:team:red
+
+item3:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+item3:position:-20 -15 50
+item3:scale:0.25 0.25 1.25
+item3:texture:../gameresources/textures/wood.jpg
+item3:physics:enabled
+item3:health:10
+item3:team:red
 
 #item:pickup-trigger:scrapgun
 
@@ -222,6 +267,6 @@ debug:script:native/debug
 weather:script:native/weather
 gunlogic:script:native/weapon
 ingame:script:native/in-game-ui
-tags:script:native/tags
+#tags:script:native/tags
 sounds:script:native/sound
 water:script:native/water
