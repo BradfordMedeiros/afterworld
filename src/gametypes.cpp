@@ -47,6 +47,7 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
     GameTypes* gametypes = static_cast<GameTypes*>(data);
+    modlog("gametypes", std::string("on message: ") + key);
     if (key == "change-gametype"){
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "change-gametype attr value wrong type");
@@ -72,6 +73,14 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
       gameapi -> drawText("gametype: no gametype", -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
     }else{
       gameapi -> drawText("gametype: " + gametype -> meta -> getDebugText(gametype -> gametype), -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    }
+  };
+  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+    GameTypes* gametype = static_cast<GameTypes*>(data);
+    if (key == 'R') { 
+      if (action == 1){
+        changeGameType(*gametype, gametype -> name.c_str());
+      }
     }
   };
 
