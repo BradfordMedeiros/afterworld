@@ -5,7 +5,7 @@ extern CustomApiBindings* gameapi;
 struct RaceMode {
   double startTime;
   double durationSeconds;
-  int currentCheckpoint;
+  size_t currentCheckpoint;
   std::vector<int> checkpoints;
 };
 
@@ -43,11 +43,13 @@ GameTypeInfo getRaceMode(){
 	  },
 	  .onEvent = [](std::any& gametype, std::string& event, AttributeValue value) -> bool {
 	    RaceMode* raceMode = std::any_cast<RaceMode>(&gametype);
-	    auto strValue = std::get_if<float>(&value);
-	    modassert(strValue, "raceMode unexpected type for raceMode");
-	    std::cout << "got trigger switch value: " << *strValue << std::endl;
-	    modassert(false, "got racemarker");
-	    return 0;
+	    auto floatValue = std::get_if<float>(&value);
+	    modassert(floatValue, "raceMode unexpected type for raceMode");
+	    auto index = static_cast<size_t>(*floatValue);
+	    if (raceMode -> currentCheckpoint == index - 1){
+	    	raceMode -> currentCheckpoint = glm::min(index, raceMode -> checkpoints.size());
+	    }
+	    return raceMode -> currentCheckpoint == raceMode -> checkpoints.size();
 	  },
 	  .getDebugText = [](std::any& gametype) -> std::string {
 	    RaceMode* raceMode = std::any_cast<RaceMode>(&gametype);

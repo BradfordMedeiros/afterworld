@@ -449,7 +449,7 @@ bool checkCollision(HitObject& hitpoint, CollisionSpace& collisionSpace, glm::qu
   auto direction = glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
   auto checkAgainstDirection = rotationWithoutY * collisionSpace.direction;
   float value = glm::dot(direction, checkAgainstDirection);
-  std::cout << "value is: " << value << std::endl;
+  //std::cout << "value is: " << value << std::endl;
   return value >= collisionSpace.comparison;
 }
 
@@ -470,7 +470,7 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
 
 std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY){
   auto hitpoints = gameapi -> contactTest(movement.playerId);
-  std::cout << "hitpoints: [ ";
+  //std::cout << "hitpoints: [ ";
 
   //for (auto &hitpoint : hitpoints){
   //  std::cout << "\n[ id = " << hitpoint.id << ", pos = " << print(hitpoint.point) << ", normal = " << serializeQuat(hitpoint.normal) << " ] " << std::endl;
@@ -482,9 +482,9 @@ std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::
   }
 
   auto collisions = getCollisionSpaces(hitpoints, rotationWithoutY);
-  std::cout << "collisions: " << print(collisions) << std::endl;
+  //std::cout << "collisions: " << print(collisions) << std::endl;
 
-  std::cout << " ]" << std::endl;
+  //std::cout << " ]" << std::endl;
   return collisions;
 }
 
@@ -498,10 +498,10 @@ glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec
       playerDirectionFromWallNoZ.z = 0.f;
     }
     auto playerDirectionWorld = hitDirection * playerDirectionFromWallNoZ;
-    std::cout << "player abs direction: " << print(directionVec) << std::endl;
-    std::cout << "player direction relative to wall: " << print(playerDirectionFromWall) << std::endl;
-    std::cout << "player direction relative to wall target (no +z): " << print(playerDirectionFromWallNoZ) << std::endl;
-    std::cout << "player direction world (no +z): " << print(playerDirectionWorld) << std::endl;
+    //std::cout << "player abs direction: " << print(directionVec) << std::endl;
+    //std::cout << "player direction relative to wall: " << print(playerDirectionFromWall) << std::endl;
+    //std::cout << "player direction relative to wall target (no +z): " << print(playerDirectionFromWallNoZ) << std::endl;
+    //std::cout << "player direction world (no +z): " << print(playerDirectionWorld) << std::endl;
     directionVec = playerDirectionWorld;
   }  
 
