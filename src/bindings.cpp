@@ -90,14 +90,27 @@ void handleSelectLevel(GameState& gameState){
   goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
 }
 
+
 void drawMenuText(GameState& gameState){
   for (int i = 0; i < gameState.levels.size(); i++){
     auto level = gameState.levels.at(i).name;
     auto levelText = (i == gameState.selectedLevel) ? (std::string("> ") + level) : level;
-    gameapi -> drawText(levelText, -0.9, 0.2 + (i * -0.1f), 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    auto tint = (gameState.selectedLevel == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+    gameapi -> drawText(levelText, -0.9, 0.2 + (i * -0.1f), 8, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
   }
 }
 
+void handleMenuMouseMove(GameState& gameState, float xNdi, float yNdi){
+  std::cout << "pos: " << xNdi << ", " << yNdi << std::endl;
+  if (yNdi > 0.5f){
+    gameState.selectedLevel = 0;
+  }else if (yNdi < -0.5f){
+    gameState.selectedLevel = 2;
+  }else{
+    gameState.selectedLevel = 1;
+  }
+}
+   
 void loadConfig(GameState& gameState){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
   bool validSql = false;
@@ -314,6 +327,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
     modassert(gameobj1.has_value() && gameobj2.has_value(), "collision exit: objs do not exist");
     handleCollision(obj1, obj2, "switch-exit", "switch-exit-key");
+  };
+
+  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+    //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
+    GameState* gameState = static_cast<GameState*>(data);
+    handleMenuMouseMove(*gameState, xNdc, yNdc);
+  };
+
+  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+    if (action == 1 && button == 0){
+      GameState* gameState = static_cast<GameState*>(data);
+      handleSelectLevel(*gameState);
+    }
   };
 
   return binding;
