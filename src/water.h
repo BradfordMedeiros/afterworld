@@ -3,6 +3,7 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "./global.h"
 
 CScriptBinding waterBinding(CustomApiBindings& api, const char* name);
 

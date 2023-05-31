@@ -166,6 +166,9 @@ CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
+  	if (isPaused()){
+  		return;
+  	}
   	Water* water = static_cast<Water*>(data);
   	applyWaterForces(*water);
   };
