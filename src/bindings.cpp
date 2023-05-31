@@ -131,12 +131,11 @@ void drawMenuText(GameState& gameState){
 }
 
 
-void drawPauseText(GameState& gameState){
+void drawPauseMenu(GameState& gameState){
   if (!getGlobalState().paused){
     return;
   }
-
-  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.9f), std::nullopt /* texture id */, true, std::nullopt /* selection id */);
+  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */);
   for (int i = 0; i < pauseText.size(); i++){
     auto option = pauseText.at(i).name;
     auto tint = (gameState.selectedPauseOption == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -305,7 +304,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (!gameState -> loadedLevel.has_value()){
       drawMenuText(*gameState);
     }else{
-      drawPauseText(*gameState);
+      drawPauseMenu(*gameState);
     }
     
   };
@@ -319,14 +318,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1){
       if (key == 257){  // enter
         handleSelect(*gameState);
-      }else if (key == 259){ // backspace
-        goToMenu(*gameState);
-      }
-      else if (key == 265){ // up
+      }else if (key == 265){ // up
         handleLevelUp(*gameState);
       }else if (key == 264){ // down
         handleLevelDown(*gameState);
-      }else if (key == '.'){
+      }else if (key == 256 /* escape */ ){
         togglePauseMode(*gameState);
       }
     }

@@ -5,6 +5,7 @@
 #include <vector>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "./global.h"
 
 CScriptBinding hudBinding(CustomApiBindings& api, const char* name);
 
