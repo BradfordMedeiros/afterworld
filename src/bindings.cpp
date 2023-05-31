@@ -60,6 +60,7 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
   return std::nullopt;
 }
 void goToMenu(GameState& gameState){
+  gameState.selectedLevel = 0;
   if (gameState.loadedLevel.has_value()){
     gameState.loadedLevel = std::nullopt;
     unloadAllManagedScenes();
@@ -324,6 +325,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         handleLevelDown(*gameState);
       }else if (key == 256 /* escape */ ){
         togglePauseMode(*gameState);
+        gameState -> selectedLevel = 2; // used for quit right now 
       }
     }
   };
