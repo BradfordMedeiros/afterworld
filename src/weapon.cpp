@@ -726,6 +726,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     delete weapons;
   };
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+    if (isPaused()){
+      return;
+    }
     Weapons* weapons = static_cast<Weapons*>(data);
     if (button == 0){
       if (action == 0){
@@ -813,11 +816,17 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+    if (isPaused()){
+      return;
+    }
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Weapons* weapons = static_cast<Weapons*>(data);
     weapons -> lookVelocity = glm::vec2(xPos, yPos);
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
+    if (isPaused()){
+      return;
+    }
     Weapons* weapons = static_cast<Weapons*>(data);
     auto bloomAmount = calculateBloomAmount(*weapons);
     drawBloom(id, -1.f, glm::max(0.002f, bloomAmount)); // 0.002f is just a min amount for visualization, not actual bloom

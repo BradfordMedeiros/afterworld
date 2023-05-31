@@ -7,6 +7,7 @@
 #include "../../ModEngine/src/scene/serialization.h"
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "./global.h"
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
 

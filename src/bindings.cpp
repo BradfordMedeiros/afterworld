@@ -13,6 +13,7 @@ struct Level {
 };
 struct GameState {
   int selectedLevel;
+  int selectedPauseOption;
   std::optional<std::string> loadedLevel;
   std::vector<Level> levels;
   bool menuLoaded;
@@ -33,6 +34,7 @@ void loadDefaultScenes(){
 void goToLevel(GameState& gameState, std::string sceneName){
   unloadAllManagedScenes();
   gameState.menuLoaded = false;
+  setPaused(false);
   gameState.loadedLevel = sceneName;
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
   auto optCameraId = gameapi -> getGameObjectByName(">maincamera", sceneId, false);
@@ -90,27 +92,98 @@ void handleSelectLevel(GameState& gameState){
   goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
 }
 
+struct PauseValue {
+  const char* name;
+  std::function<void(GameState& gameState)> fn;
+};
+
+std::vector<PauseValue> pauseText = {
+  PauseValue { 
+    .name = "Resume", 
+    .fn = [](GameState& gameState) -> void { 
+      setPaused(false);
+    },
+  },
+  PauseValue {
+    .name = "Main Menu",
+    .fn = [](GameState& gameState) -> void {
+      goToMenu(gameState);
+    },
+  },
+};
+
+
+void handleSelect(GameState& gameState){
+  handleSelectLevel(gameState);
+  if (isPaused() && !gameState.menuLoaded){
+    pauseText.at(gameState.selectedPauseOption).fn(gameState);
+  } 
+}
+
 
 void drawMenuText(GameState& gameState){
   for (int i = 0; i < gameState.levels.size(); i++){
     auto level = gameState.levels.at(i).name;
     auto levelText = (i == gameState.selectedLevel) ? (std::string("> ") + level) : level;
     auto tint = (gameState.selectedLevel == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    gameapi -> drawText(levelText, -0.9, 0.2 + (i * -0.1f), 8, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
+    gameapi -> drawText(levelText, -0.9, 0.2 + (i * -0.1f), 8, false, tint, std::nullopt, true, std::nullopt, 500);
   }
 }
 
+
+void drawPauseText(GameState& gameState){
+  if (!getGlobalState().paused){
+    return;
+  }
+
+  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.9f), std::nullopt /* texture id */, true, std::nullopt /* selection id */);
+  for (int i = 0; i < pauseText.size(); i++){
+    auto option = pauseText.at(i).name;
+    auto tint = (gameState.selectedPauseOption == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+    gameapi -> drawText(option, 0.f, 0.2 + (i * -0.1f), 8, false, tint, std::nullopt, true, std::nullopt, 1000);
+  }
+
+}
+
+void togglePauseMode(GameState& gameState){
+  setPaused(!getGlobalState().paused);
+}
+
 void handleMenuMouseMove(GameState& gameState, float xNdi, float yNdi){
-  std::cout << "pos: " << xNdi << ", " << yNdi << std::endl;
+  //std::cout << "pos: " << xNdi << ", " << yNdi << std::endl;
   if (yNdi > 0.5f){
     gameState.selectedLevel = 0;
+    gameState.selectedPauseOption = 0;
   }else if (yNdi < -0.5f){
     gameState.selectedLevel = 2;
+    gameState.selectedPauseOption = 1;
   }else{
     gameState.selectedLevel = 1;
+    gameState.selectedPauseOption = 1;
   }
 }
-   
+  
+void onMapping(int32_t id, void* data, int32_t index){
+  GameState* gameState = static_cast<GameState*>(data);
+  std::cout << "on mapping: " << index << std::endl;
+  /*binding.onMapping = [](int32_t id, void* data, int32_t index) -> void {
+
+    if (index >= scenegraph -> baseNumber && index < (scenegraph -> baseNumber + 2 * mappingInterval)){
+      auto selectedIndex = index - scenegraph -> baseNumber;
+      modlog("editor", "scenegraph on mapping: " + std::to_string(index) + ", selected index = " + std::to_string(selectedIndex) + ", type = " + scenegraph -> depgraphType + ", basenumbe = " + std::to_string(scenegraph -> baseNumber));
+      bool isToggle = selectedIndex >= mappingInterval;
+      if (isToggle){
+        toggleExpanded(*scenegraph, selectedIndex - mappingInterval);
+        return;
+      }
+      scenegraph -> selectedIndex = selectedIndex;
+      onGraphChange(*scenegraph);
+      modeToGetDepGraph.at(scenegraph -> depgraphType).handleItemSelected(*scenegraph, false);
+    }
+  };*/
+}
+
+
 void loadConfig(GameState& gameState){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
   bool validSql = false;
@@ -197,13 +270,16 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 }
 
 
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
     gameState -> selectedLevel = 0;
+    gameState -> selectedPauseOption = 0;
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
+    getGlobalState().paused = false;
     loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);
@@ -228,7 +304,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     if (!gameState -> loadedLevel.has_value()){
       drawMenuText(*gameState);
+    }else{
+      drawPauseText(*gameState);
     }
+    
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
@@ -236,9 +315,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (!hasInputKey){
       return;
     }
+    std::cout << "key is: " << key << std::endl;
     if (action == 1){
       if (key == 257){  // enter
-        handleSelectLevel(*gameState);
+        handleSelect(*gameState);
       }else if (key == 259){ // backspace
         goToMenu(*gameState);
       }
@@ -246,6 +326,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         handleLevelUp(*gameState);
       }else if (key == 264){ // down
         handleLevelDown(*gameState);
+      }else if (key == '.'){
+        togglePauseMode(*gameState);
       }
     }
   };
@@ -338,9 +420,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     if (action == 1 && button == 0){
       GameState* gameState = static_cast<GameState*>(data);
-      handleSelectLevel(*gameState);
+      handleSelect(*gameState);
     }
   };
+
+  binding.onMapping = onMapping;
 
   return binding;
 }

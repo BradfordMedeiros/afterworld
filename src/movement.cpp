@@ -550,6 +550,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     delete value;
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+    if (isPaused()){
+      return;
+    }
     Movement* movement = static_cast<Movement*>(data);
 
     std::cout << "key is: " << key << std::endl;
@@ -615,6 +618,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+    if (isPaused()){
+      return;
+    }
     Movement* movement = static_cast<Movement*>(data);
     if (button == 1){
       if (action == 0){
@@ -628,7 +634,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
+    if (isPaused()){
+      return;
+    }
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
     if (!movement -> active){
@@ -637,6 +646,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lookVelocity = glm::vec2(xPos, yPos);
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
+    if (isPaused()){
+      return;
+    }
     Movement* movement = static_cast<Movement*>(data);
     //checkMovementCollisions(*movement);
 

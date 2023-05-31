@@ -20,6 +20,7 @@
 #include "./sound.h"
 #include "./water.h"
 #include "./gametypes.h"
+#include "./global.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

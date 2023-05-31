@@ -187,6 +187,9 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+    if (isPaused()){
+      return;
+    }
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     handleInput(vehicle -> input, key, action);
     if (key == 'E' && action == 1){
@@ -265,7 +268,10 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
+    if (isPaused()){
+      return;
+    }
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     float xRadians = xPos / 400.f;
     float yRadians = yPos / 400.f;
@@ -281,6 +287,9 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
+    if (isPaused()){
+      return;
+    }
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     vehicle -> distance += amount;
     setVehicleCamera(*vehicle);
