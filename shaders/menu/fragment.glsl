@@ -209,7 +209,7 @@ void main(){
     vec2 totalRipple = vec2(0.0, 0.0);
     for (int i = 0; i < 4; i++){
       vec2 rippleCoord = vec2(movementX + i * 0.4, movementY  + i * 0.4);
-      vec2 rippleAmount = calcRipple(rippleCoord, 0.01);
+      vec2 rippleAmount = calcRipple(rippleCoord, 0.02);
       totalRipple += rippleAmount;
     }
     if (enableMouseRipple){
