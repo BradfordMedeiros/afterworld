@@ -71,27 +71,6 @@ void goToMenu(GameState& gameState){
   }
   cameras = {};
 }
-void handleLevelUp(GameState& gameState){
-  if (gameState.loadedLevel.has_value()){
-    return;
-  }
-  auto newIndex = glm::max(0, gameState.selectedLevel - 1);
-  gameState.selectedLevel = newIndex;
-}
-void handleLevelDown(GameState& gameState){
-  if (gameState.loadedLevel.has_value()){
-    return;
-  }
-  int lastLevelIndex = gameState.levels.size() - 1;
-  auto newIndex = glm::min(lastLevelIndex, gameState.selectedLevel + 1);
-  gameState.selectedLevel = newIndex;
-}
-void handleSelectLevel(GameState& gameState){
-  if (gameState.loadedLevel.has_value() || gameState.selectedLevel >= gameState.levels.size()){
-    return;
-  }
-  goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
-}
 
 struct PauseValue {
   const char* name;
@@ -113,6 +92,57 @@ std::vector<PauseValue> pauseText = {
   },
 };
 
+void handleLevelUp(GameState& gameState){
+  if (gameState.loadedLevel.has_value()){
+    return;
+  }
+  auto newIndex = glm::max(0, gameState.selectedLevel - 1);
+  gameState.selectedLevel = newIndex;
+}
+void handleLevelDown(GameState& gameState){
+  if (gameState.loadedLevel.has_value()){
+    return;
+  }
+  int lastLevelIndex = gameState.levels.size() - 1;
+  auto newIndex = glm::min(lastLevelIndex, gameState.selectedLevel + 1);
+  gameState.selectedLevel = newIndex;
+}
+
+
+bool showingPauseMenu(GameState& gameState){
+  return gameState.loadedLevel.has_value() && getGlobalState().paused;
+}
+
+void handlePauseUp(GameState& gameState){
+  if (!showingPauseMenu(gameState)){
+    std::cout << "handle pause up, returning early" << std::endl;
+    return;
+  }
+  auto newIndex = glm::max(0, gameState.selectedPauseOption  - 1);
+  gameState.selectedPauseOption = newIndex;
+  std::cout << "pause up: " << newIndex << std::endl;
+}
+void handlePauseDown(GameState& gameState){
+  if (!showingPauseMenu(gameState)){
+    std::cout << "handle pause down, returning early" << std::endl;
+    return;
+  }
+  int lastMenuIndex = pauseText.size() - 1;
+  auto newIndex = glm::min(lastMenuIndex, gameState.selectedPauseOption + 1);
+  gameState.selectedPauseOption = newIndex;
+  std::cout << "pause down: " << newIndex << std::endl;
+}
+
+
+void handleSelectLevel(GameState& gameState){
+  if (gameState.loadedLevel.has_value() || gameState.selectedLevel >= gameState.levels.size()){
+    return;
+  }
+  goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
+}
+
+
+
 
 void handleSelect(GameState& gameState){
   handleSelectLevel(gameState);
@@ -133,9 +163,6 @@ void drawMenuText(GameState& gameState){
 
 
 void drawPauseMenu(GameState& gameState){
-  if (!getGlobalState().paused){
-    return;
-  }
   gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png");
   for (int i = 0; i < pauseText.size(); i++){
     auto option = pauseText.at(i).name;
@@ -304,7 +331,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     if (!gameState -> loadedLevel.has_value()){
       drawMenuText(*gameState);
-    }else{
+    }
+    if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState);
     }
     
@@ -321,8 +349,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         handleSelect(*gameState);
       }else if (key == 265){ // up
         handleLevelUp(*gameState);
+        handlePauseUp(*gameState);
       }else if (key == 264){ // down
         handleLevelDown(*gameState);
+        handlePauseDown(*gameState);
       }else if (key == 256 /* escape */ ){
         togglePauseMode(*gameState);
         gameState -> selectedLevel = 2; // used for quit right now 
