@@ -61,6 +61,7 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
 }
 void goToMenu(GameState& gameState){
   gameState.selectedLevel = 0;
+  gameState.selectedPauseOption = 0;
   if (gameState.loadedLevel.has_value()){
     gameState.loadedLevel = std::nullopt;
     unloadAllManagedScenes();
