@@ -163,8 +163,18 @@ void drawMenuText(GameState& gameState){
 }
 
 
+double downTime = 0;
 void drawPauseMenu(GameState& gameState){
+  double elapsedTime = gameapi -> timeSeconds(true) - downTime;
+  std::cout << "elapsedTime: " << elapsedTime << std::endl;
+
   gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png");
+
+  gameapi -> drawRect(0.f, 2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
+  gameapi -> drawRect(0.f, -2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(0.4f, 0.4f, 0.4f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
+  gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
+  gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
+
   for (int i = 0; i < pauseText.size(); i++){
     auto option = pauseText.at(i).name;
     auto tint = (gameState.selectedPauseOption == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -175,6 +185,9 @@ void drawPauseMenu(GameState& gameState){
 
 void togglePauseMode(GameState& gameState){
   setPaused(!getGlobalState().paused);
+  if (getGlobalState().paused){
+    downTime = gameapi -> timeSeconds(true);
+  }
 }
 
 void handleMenuMouseMove(GameState& gameState, float xNdi, float yNdi){
@@ -370,6 +383,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       loadConfig(*gameState);
       return;
     }
+
     if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "selected value invalid");
