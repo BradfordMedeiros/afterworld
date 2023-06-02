@@ -152,21 +152,51 @@ void handleSelect(GameState& gameState){
   } 
 }
 
+struct MenuElement {
+  std::string name;
+};
 
-void drawMenuText(GameState& gameState){
-  for (int i = 0; i < gameState.levels.size(); i++){
-    auto level = gameState.levels.at(i).name;
-    auto levelText = (i == gameState.selectedLevel) ? (std::string("> ") + level) : level;
-    auto tint = (gameState.selectedLevel == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    gameapi -> drawText(levelText, -0.9, 0.2 + (i * -0.1f), 8, false, tint, std::nullopt, true, std::nullopt, 500);
+void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint){
+  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
+  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
+
+}
+
+float spacingPerItem = .1f;
+void drawMenu(std::vector<MenuElement>& elements, int selectedIndex){
+  for (int i = 0; i < elements.size(); i++){
+    auto level = elements.at(i).name;
+    auto levelText = (i == selectedIndex) ? (std::string("> ") + level) : level;
+    auto tint = (selectedIndex == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+
+    float fontSizePerLetterNdi = 0.01f;
+    auto length = levelText.size() * fontSizePerLetterNdi;
+    auto left = -0.9f;
+    auto right = left + length;
+    auto center = (left + right) / 2.f;
+
+    auto height = fontSizePerLetterNdi;
+
+    auto padding = 0.1f;
+
+    gameapi -> drawRect(center, 0.2 + (i * -1 * spacingPerItem), length, height, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, std::nullopt);
+
+    drawCenteredText(levelText, -0.9f, 0.2 + (i * -1 * spacingPerItem), fontSizePerLetterNdi, std::nullopt);
+
   }
 }
 
+void drawMenuText(GameState& gameState){
+  std::vector<MenuElement> elements;
+  for (int i = 0; i < gameState.levels.size(); i++){
+    elements.push_back(MenuElement { .name = gameState.levels.at(i).name });
+  }
+  drawMenu(elements, gameState.selectedLevel);
+}
 
 double downTime = 0;
 void drawPauseMenu(GameState& gameState){
   double elapsedTime = gameapi -> timeSeconds(true) - downTime;
-  std::cout << "elapsedTime: " << elapsedTime << std::endl;
 
   gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png");
 
@@ -175,12 +205,11 @@ void drawPauseMenu(GameState& gameState){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
 
+  std::vector<MenuElement> elements;
   for (int i = 0; i < pauseText.size(); i++){
-    auto option = pauseText.at(i).name;
-    auto tint = (gameState.selectedPauseOption == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    gameapi -> drawText(option, 0.f, 0.2 + (i * -0.1f), 8, false, tint, std::nullopt, true, std::nullopt, 1000);
+    elements.push_back(MenuElement { .name = pauseText.at(i).name });
   }
-
+  drawMenu(elements, gameState.selectedPauseOption);
 }
 
 void togglePauseMode(GameState& gameState){
