@@ -86,7 +86,7 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
   	Hud* hud = static_cast<Hud*>(data);
   	delete hud;
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     Hud* hud = static_cast<Hud*>(data);
     if (key == "reload-config:hud"){
       auto strValue = std::get_if<std::string>(&value); 
@@ -97,7 +97,7 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
       modassert(floatValue != NULL, "hud-health value invalid");
       hud -> health = *floatValue;
     }
-  };
+  });
   binding.onFrame = [](int32_t id, void* data) -> void {
     if (isPaused()){
       return;

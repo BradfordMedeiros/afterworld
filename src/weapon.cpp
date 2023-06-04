@@ -413,7 +413,8 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
     }
 
   
-    gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), 50);
+    AttributeValue value = 50.f;
+    gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), 50.f);
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
 }
@@ -787,7 +788,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     Weapons* weapons = static_cast<Weapons*>(data);
     if (key == "change-gun"){
       auto strValue = std::get_if<std::string>(&value); 
@@ -814,7 +815,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       modassert(strValue != NULL, "reload-traits:weapon reload value invalid");
       reloadTraitsValues(*weapons);
     }
-  };
+  });
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     if (isPaused()){
       return;

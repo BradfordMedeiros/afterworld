@@ -64,7 +64,7 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
     Sound* value = static_cast<Sound*>(data);
     delete value;
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
   	auto keyValue = split(key, ':');
     if (keyValue.size() == 2 && keyValue.at(0) == "play-material-sound"){
     	Sound* sound = static_cast<Sound*>(data);
@@ -79,7 +79,7 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
       std::cout << "want to play clip: " << *clip << std::endl;
       gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, *soundPosition); // should add playclip position
     }
-  };
+  });
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Sound* value = static_cast<Sound*>(data);
     if (key == 'L'){

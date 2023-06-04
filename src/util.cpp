@@ -183,3 +183,43 @@ void debugAssertForNow(bool valid, const char* message){
   }
 }
 
+std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::function<void(int32_t, void*, std::string&, AttributeValue& value)> fn){
+  return [fn](int32_t id, void* data, std::string& key, std::any& anyValue) -> void {
+    std::string* value = std::any_cast<std::string>(&anyValue);
+    if (value){
+      AttributeValue attrValue = *value;
+      fn(id, data, key, attrValue);
+      return;
+    }
+
+    float* floatValue = std::any_cast<float>(&anyValue);
+    if (floatValue){
+      AttributeValue attrValue = *floatValue;
+      fn(id, data, key, attrValue);
+      return;
+    }
+  
+    glm::vec3* vec3Value = std::any_cast<glm::vec3>(&anyValue);
+    if (vec3Value){
+      AttributeValue attrValue = *vec3Value;
+      fn(id, data, key, attrValue);
+      return;
+    }
+
+    glm::vec4* vec4Value = std::any_cast<glm::vec4>(&anyValue);
+    if (vec4Value){
+      AttributeValue attrValue = *vec4Value;
+      fn(id, data, key, attrValue);
+      return;
+    }
+
+    AttributeValue* attrRawValue = std::any_cast<AttributeValue>(&anyValue);
+    if (attrRawValue){
+      AttributeValue attrValue = *attrRawValue;
+      fn(id, data, key, attrValue);
+      return;
+    }
+
+    modassert(false, std::string("invalid attribute value: ") + key + ", type = " + anyValue.type().name());
+  };
+}

@@ -242,7 +242,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     Vehicle* vehicle = static_cast<Vehicle*>(data);
 
     if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
@@ -266,7 +266,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
-  };
+  });
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
     if (isPaused()){

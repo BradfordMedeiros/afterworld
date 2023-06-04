@@ -45,7 +45,7 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
   	GameTypes* gametype = static_cast<GameTypes*>(data);
     delete gametype;
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     GameTypes* gametypes = static_cast<GameTypes*>(data);
     modlog("gametypes", std::string("on message: ") + key);
     if (key == "change-gametype"){
@@ -66,7 +66,7 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
-  };
+  });
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameTypes* gametype = static_cast<GameTypes*>(data);
     if (!gametype -> meta){

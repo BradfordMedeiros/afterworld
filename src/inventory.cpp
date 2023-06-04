@@ -44,7 +44,7 @@ bool hasGun(std::string& gun){
 
 CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
-   binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+   binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
    	if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
       auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "selected value invalid");
@@ -82,6 +82,6 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
         gameapi -> sendNotifyMessage("change-gun", *strValue);
       }
     }
-  };
+  });
 	return binding;
 }

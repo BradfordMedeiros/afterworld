@@ -189,14 +189,14 @@ CScriptBinding dialogBinding(CustomApiBindings& api, const char* name){
 		dialogTree = createDialogTree(deserializeDialogData());
 		// dumpDotFormat(dialogTree);
 	}
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     if (key == "dialog:talk"){
     	auto strValue = std::get_if<std::string>(&value); 
       modassert(strValue != NULL, "dialog:talk value invalid");
    		auto chatText = getChatText(*strValue);
    		gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : ("error: no chat text available for node: " + *strValue) ));
     }
-  };
+  });
 	return binding;
 }
 

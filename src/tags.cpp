@@ -149,14 +149,15 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     Tags* tags = static_cast<Tags*>(data);
     delete tags;
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
   	Tags* tags = static_cast<Tags*>(data);
+  	std::cout << "tags on message: " << key << ", value = " << print(value) << std::endl;
   	for (auto &tagUpdate : tagupdates){
   		if (tagUpdate.onMessage.has_value()){
   			tagUpdate.onMessage.value()(*tags, key, value);
   		}
   	}
-  };
+  });
 
 	std::vector<AttrFunc> attrFuncs = {};
 	std::vector<AttrFuncValue> attrAddFuncs = {};

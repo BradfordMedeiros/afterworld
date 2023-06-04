@@ -461,7 +461,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
       goToMenu(*gameState);
@@ -527,7 +527,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameapi -> sendNotifyMessage("request:change-control", std::to_string(previousCamera));
       }
     }
-  };
+  });
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     auto gameobj1 = gameapi -> getGameObjNameForId(obj1); // this check shouldn't be necessary, is bug

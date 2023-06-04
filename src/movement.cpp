@@ -778,7 +778,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-  binding.onMessage = [](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
     if (key == "reload-config:movement"){
       Movement* movement = static_cast<Movement*>(data);
       auto strValue = std::get_if<std::string>(&value); 
@@ -796,7 +796,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       auto gameObjId = std::atoi(strValue -> c_str());
       movement -> active = gameObjId == id;
     }
-  };
+  });
 
   return binding;
 }
