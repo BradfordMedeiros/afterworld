@@ -120,10 +120,11 @@ std::vector<TagUpdater> tagupdates = {
       	std::optional<std::string>* eventName = NULL;
       	float remainingHealth = 0.f;
       	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
+				auto objAttr =  gameapi -> getGameObjectAttr(targetId);
 
       	NoHealthMessage nohealth {
       		.targetId = targetId,
-      		.team = "blue",
+      		.team = getStrAttr(objAttr, "team"),
       	};
 
       	if (valid && enemyDead){
