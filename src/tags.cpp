@@ -120,17 +120,23 @@ std::vector<TagUpdater> tagupdates = {
       	std::optional<std::string>* eventName = NULL;
       	float remainingHealth = 0.f;
       	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
+
+      	NoHealthMessage nohealth {
+      		.targetId = targetId,
+      		.team = "blue",
+      	};
+
       	if (valid && enemyDead){
-      		gameapi -> sendNotifyMessage("nohealth", targetId);
+      		gameapi -> sendNotifyMessage("nohealth", nohealth);
       	}
       	if (valid && eventName -> has_value()){
       		gameapi -> sendNotifyMessage(eventName -> value(), remainingHealth);
       	}
       }else if (key == "nohealth"){
-      	auto targetId = anycast<objid>(value);
-      	modassert(targetId, "nohealth target id null");
-      	modlog("health", "removing object: " + std::to_string(*targetId));
-      	gameapi -> removeObjectById(*targetId);
+      	auto nohealthMessage = anycast<NoHealthMessage>(value);
+      	modassert(nohealthMessage, "nohealth target id null");
+      	modlog("health", "removing object: " + std::to_string(nohealthMessage -> targetId));
+      	gameapi -> removeObjectById(nohealthMessage -> targetId);
       }
   	},
 	},

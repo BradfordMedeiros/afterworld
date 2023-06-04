@@ -41,9 +41,12 @@ GameTypeInfo getRaceMode(){
 	    	.checkpoints = findCheckpoints(),
 	    }; 
 	  },
-	  .onEvent = [](std::any& gametype, std::string& event, AttributeValue value) -> bool {
-	    RaceMode* raceMode = std::any_cast<RaceMode>(&gametype);
-	    auto floatValue = std::get_if<float>(&value);
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& anyValue) -> bool {
+	  	RaceMode* raceMode = std::any_cast<RaceMode>(&gametype);
+	  	auto value = anycast<AttributeValue>(anyValue);
+	  	modassert(value, "race mode any value invalid");
+
+	    auto floatValue = std::get_if<float>(value);
 	    modassert(floatValue, "raceMode unexpected type for raceMode");
 	    auto index = static_cast<size_t>(*floatValue);
 	    if (raceMode -> currentCheckpoint == index - 1){

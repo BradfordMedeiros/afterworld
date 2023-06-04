@@ -8,7 +8,7 @@ struct GameTypeInfo {
   std::string gametypeName;
   std::vector<std::string> events;
   std::function<std::any()> createGametype;
-  std::function<bool(std::any&, std::string& event, AttributeValue value)> onEvent;
+  std::function<bool(std::any&, std::string& event, std::any& value)> onEvent;
   std::function<std::string(std::any&)> getDebugText;
 }; 
 

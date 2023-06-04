@@ -18,11 +18,10 @@ GameTypeInfo getTargetKill(){
 	      .durationSeconds = 20,
 	    }; 
 	  },
-	  .onEvent = [](std::any& gametype, std::string& event, AttributeValue value) -> bool {
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
 	    TargetKillMode* targetKillMode = std::any_cast<TargetKillMode>(&gametype);
 	    modassert(targetKillMode, "target kill mode null");
 	    targetKillMode -> numTargets--;
-	    modlog("gametypes", "on event: " + event + ", value = " + print(value));
 	    return targetKillMode -> numTargets == 0;
 	  },
 	  .getDebugText = [](std::any& gametype) -> std::string { 

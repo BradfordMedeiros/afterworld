@@ -19,10 +19,9 @@ std::string* getWinner(DeathmatchMode& mode){
 	return NULL;
 }
 
-std::optional<int> lookupTeam(DeathmatchMode& deathmatchMode, objid id){
+std::optional<int> lookupTeam(DeathmatchMode& deathmatchMode, NoHealthMessage& message){
 	//std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
-	auto attr = gameapi -> getGameObjectAttr(id);
-	auto team = getStrAttr(attr, "team");
+	auto team = message.team;
 	if (team.has_value()){
 		auto teamName = team.value();
 		for (int i = 0; i < deathmatchMode.teamNames.size(); i++){
@@ -33,6 +32,14 @@ std::optional<int> lookupTeam(DeathmatchMode& deathmatchMode, objid id){
 		return NULL;
 	}
 	return std::nullopt;
+}
+
+std::string generateScoreStr(DeathmatchMode& mode){
+	std::string scoreStr = "";
+	for (int i = 0; i < mode.teamNames.size(); i++){
+		scoreStr += std::string("(") + mode.teamNames.at(i) + " - " + std::to_string(mode.scores.at(i)) +  " )";
+	}
+	return scoreStr;
 }
 
 GameTypeInfo getDeathmatchMode(){
@@ -50,14 +57,13 @@ GameTypeInfo getDeathmatchMode(){
 	    	.scores = scores,
 	    }; 
 	  },
-	  .onEvent = [](std::any& gametype, std::string& event, AttributeValue value) -> bool {
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
 	    DeathmatchMode* deathmatchMode = std::any_cast<DeathmatchMode>(&gametype);
 	    modassert(deathmatchMode, "deatchmatchMode mode null");
 	    if (event == "nohealth"){
-	      auto strValue = std::get_if<std::string>(&value);
-	      modassert(strValue, "deathmatch unexpected type for nohealth");
-	      auto objectId = std::atoi(strValue -> c_str());
-	      auto teamId = lookupTeam(*deathmatchMode, objectId);
+      	auto nohealthMessage = anycast<NoHealthMessage>(value);
+      	modassert(nohealthMessage, "deathmatch nohealth target id null");
+	      auto teamId = lookupTeam(*deathmatchMode, *nohealthMessage);
 	      if (teamId.has_value()){
 	      	deathmatchMode -> scores.at(teamId.value())++;
 	      }
@@ -68,7 +74,8 @@ GameTypeInfo getDeathmatchMode(){
 	    DeathmatchMode* deathmatchMode = std::any_cast<DeathmatchMode>(&gametype);
 	    modassert(deathmatchMode, "deathModeMode mode null");
 	  	auto winner = getWinner(*deathmatchMode);
-	    return std::string("deathmatch mode: ") + (winner ? (*winner + " won!") : "in progress");
+
+	    return std::string("deathmatch mode: ") + (winner ? (*winner + " won!") : "in progress") + generateScoreStr(*deathmatchMode);
 	  }
 	};
 	return deathmatchMode;

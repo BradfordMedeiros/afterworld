@@ -53,7 +53,7 @@ template <typename T>
 T* anycast(std::any& anyValue){
   try {
     T* value = std::any_cast<T>(&anyValue);
-    modassert(value, "anycast value was NULL");
+    modassert(value, std::string("anycast value was NULL: ") + anyValue.type().name());
     return value;
   }catch(...){
     return NULL;
@@ -66,6 +66,11 @@ std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::fu
 struct DamageMessage {
   objid id;
   float amount;
+};
+
+struct NoHealthMessage {
+  objid targetId;
+  std::optional<std::string> team;
 };
 
 #endif
