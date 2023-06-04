@@ -220,6 +220,6 @@ std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::fu
       return;
     }
 
-    modassert(false, std::string("invalid attribute value: ") + key + ", type = " + anyValue.type().name());
+    //modassert(false, std::string("invalid attribute value: ") + key + ", type = " + anyValue.type().name());
   };
 }

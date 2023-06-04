@@ -49,7 +49,23 @@ void showDebugHitmark(HitObject& hitpoint, objid playerId);
 
 void debugAssertForNow(bool valid, const char* message);
 
+template <typename T>
+T* anycast(std::any& anyValue){
+  try {
+    T* value = std::any_cast<T>(&anyValue);
+    modassert(value, "anycast value was NULL");
+    return value;
+  }catch(...){
+    return NULL;
+  }
+}
+
 std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::function<void(int32_t, void*, std::string&, AttributeValue& value)> fn);
 
+
+struct DamageMessage {
+  objid id;
+  float amount;
+};
 
 #endif

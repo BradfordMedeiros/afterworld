@@ -18,7 +18,7 @@ struct TagUpdater {
 	attrFuncValue onAdd;
 	std::function<void(void*, int32_t idAdded)> onRemove;
 	std::optional<std::function<void(Tags&)>> onFrame;
-	std::optional<std::function<void(Tags&, std::string& key, AttributeValue& value)>> onMessage;
+	std::optional<std::function<void(Tags&, std::string& key, std::any& value)>> onMessage;
 };
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
@@ -108,28 +108,29 @@ std::vector<TagUpdater> tagupdates = {
 			tags -> hitpoints.erase(id);
   	},
   	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, AttributeValue& value) -> void {
-  		auto parts = split(key, '.');
-      if (parts.size() == 2 && parts.at(0) == "damage"){
-      	auto targetId = std::atoi(parts.at(1).c_str());
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		if (key == "damage"){
+      	DamageMessage* dMessage = anycast<DamageMessage>(value);
+	    	modassert(dMessage, "dMessage was null");
+
+      	auto targetId = dMessage -> id;
       	modlog("health", "got damange for: " + std::to_string(targetId));
-      	auto floatValue = std::get_if<float>(&value);
-      	modassert(floatValue != NULL, "damage message needs to be float value");
+      	auto floatValue = &dMessage -> amount;
       	bool enemyDead = false;
       	std::optional<std::string>* eventName = NULL;
       	float remainingHealth = 0.f;
       	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
       	if (valid && enemyDead){
-      		gameapi -> sendNotifyMessage("nohealth", std::to_string(targetId));
+      		gameapi -> sendNotifyMessage("nohealth", targetId);
       	}
       	if (valid && eventName -> has_value()){
       		gameapi -> sendNotifyMessage(eventName -> value(), remainingHealth);
       	}
       }else if (key == "nohealth"){
-      	auto strValue = std::get_if<std::string>(&value);
-      	auto targetId = std::atoi(strValue -> c_str());
-      	modlog("health", "removing object: " + std::to_string(targetId));
-      	gameapi -> removeObjectById(targetId);
+      	auto targetId = anycast<objid>(value);
+      	modassert(targetId, "nohealth target id null");
+      	modlog("health", "removing object: " + std::to_string(*targetId));
+      	gameapi -> removeObjectById(*targetId);
       }
   	},
 	},
@@ -149,15 +150,14 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     Tags* tags = static_cast<Tags*>(data);
     delete tags;
   };
-  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
   	Tags* tags = static_cast<Tags*>(data);
-  	std::cout << "tags on message: " << key << ", value = " << print(value) << std::endl;
   	for (auto &tagUpdate : tagupdates){
   		if (tagUpdate.onMessage.has_value()){
   			tagUpdate.onMessage.value()(*tags, key, value);
   		}
   	}
-  });
+  };
 
 	std::vector<AttrFunc> attrFuncs = {};
 	std::vector<AttrFuncValue> attrAddFuncs = {};

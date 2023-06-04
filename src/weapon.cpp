@@ -412,9 +412,11 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
 
-  
-    AttributeValue value = 50.f;
-    gameapi -> sendNotifyMessage("damage." + std::to_string(hitpoint.id), 50.f);
+    DamageMessage damageMessage {
+      .id = hitpoint.id,
+      .amount = 50.f,
+    };
+    gameapi -> sendNotifyMessage("damage", damageMessage);
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
 }
