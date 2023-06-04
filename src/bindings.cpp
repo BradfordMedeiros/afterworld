@@ -17,6 +17,9 @@ struct GameState {
   std::optional<std::string> loadedLevel;
   std::vector<Level> levels;
   bool menuLoaded;
+
+  float xNdc;
+  float yNdc;
 };
 
 void unloadAllManagedScenes(){
@@ -142,8 +145,9 @@ void handleSelectLevel(GameState& gameState){
   goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
 }
 
-
-
+bool onMainMenu(GameState& gameState){
+  return !(gameState.loadedLevel.has_value());
+}
 
 void handleSelect(GameState& gameState){
   handleSelectLevel(gameState);
@@ -151,6 +155,8 @@ void handleSelect(GameState& gameState){
     pauseText.at(gameState.selectedPauseOption).fn(gameState);
   } 
 }
+
+
 
 struct MenuElement {
   std::string name;
@@ -162,36 +168,72 @@ void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, floa
 
 }
 
-float spacingPerItem = .1f;
-void drawMenu(std::vector<MenuElement>& elements, int selectedIndex){
+struct MenuItem {
+  std::string text;
+  double rectX;
+  double rectY;
+  double rectWidth;
+  double rectHeight;
+  double textX;
+  double textY;
+  bool hovered;
+};
+
+const float fontSizePerLetterNdi = 0.05f;
+std::vector<MenuItem> calcMenuItems(std::vector<MenuElement>& elements, int selectedIndex, float xNdc, float yNdc){
+  std::vector<MenuItem> menuItems = {};
   for (int i = 0; i < elements.size(); i++){
     auto level = elements.at(i).name;
-    auto levelText = (i == selectedIndex) ? (std::string("> ") + level) : level;
-    auto tint = (selectedIndex == i) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-
-    float fontSizePerLetterNdi = 0.01f;
-    auto length = levelText.size() * fontSizePerLetterNdi;
-    auto left = -0.9f;
-    auto right = left + length;
-    auto center = (left + right) / 2.f;
-
     auto height = fontSizePerLetterNdi;
+    auto width = level.size() * fontSizePerLetterNdi;
+    auto left = -0.9f;
 
-    auto padding = 0.1f;
+    float padding = 0.02f;
+    float margin = 0.05f;
+    float minSpacingPerItem = height;
+    float spacingPerItem = minSpacingPerItem + 2 * padding + 2 * margin;
 
-    gameapi -> drawRect(center, 0.2 + (i * -1 * spacingPerItem), length, height, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, std::nullopt);
+    auto rectX = (left + (left + width)) / 2.f;
+    auto rectY = 0.2 + (i * -1 * spacingPerItem);
+    auto rectWidth = width + 2 * padding;
+    auto rectHeight = height + 2 * padding;
+    bool hovered = (xNdc > (rectX - rectWidth / 2.f) && xNdc < (rectX + rectWidth / 2.f)) && (yNdc > (rectY - rectHeight / 2.f) && yNdc < (rectY + rectHeight / 2.f));
 
-    drawCenteredText(levelText, -0.9f, 0.2 + (i * -1 * spacingPerItem), fontSizePerLetterNdi, std::nullopt);
-
+    menuItems.push_back(MenuItem{
+      .text = level,
+      .rectX = rectX,
+      .rectY = rectY,
+      .rectWidth = rectWidth,
+      .rectHeight = rectHeight,
+      .textX = -0.9f,
+      .textY =  0.2 + (i * -1 * spacingPerItem),
+      .hovered = hovered,
+    });
   }
+  return menuItems;  
 }
 
-void drawMenuText(GameState& gameState){
+std::vector<MenuItem> menuItems(GameState& gameState){
   std::vector<MenuElement> elements;
   for (int i = 0; i < gameState.levels.size(); i++){
     elements.push_back(MenuElement { .name = gameState.levels.at(i).name });
   }
-  drawMenu(elements, gameState.selectedLevel);
+  return calcMenuItems(elements, gameState.selectedLevel, gameState.xNdc, gameState.yNdc);
+}
+void drawMenuText(GameState& gameState){
+  for (auto &menuItem : menuItems(gameState)){
+    auto tint =  menuItem.hovered? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+    gameapi -> drawRect(menuItem.rectX, menuItem.rectY, menuItem.rectWidth, menuItem.rectHeight, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawCenteredText(menuItem.text, menuItem.textX, menuItem.textY, fontSizePerLetterNdi, tint);
+  }
+}
+
+std::vector<MenuItem> pauseItems(GameState& gameState){
+  std::vector<MenuElement> elements;
+  for (int i = 0; i < pauseText.size(); i++){
+    elements.push_back(MenuElement { .name = pauseText.at(i).name });
+  }
+  return calcMenuItems(elements, gameState.selectedLevel, gameState.xNdc, gameState.yNdc);
 }
 
 double downTime = 0;
@@ -205,11 +247,41 @@ void drawPauseMenu(GameState& gameState){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
 
-  std::vector<MenuElement> elements;
-  for (int i = 0; i < pauseText.size(); i++){
-    elements.push_back(MenuElement { .name = pauseText.at(i).name });
+  for (auto &menuItem : pauseItems(gameState)){
+    auto tint =  menuItem.hovered? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+    gameapi -> drawRect(menuItem.rectX, menuItem.rectY, menuItem.rectWidth, menuItem.rectHeight, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawCenteredText(menuItem.text, menuItem.textX, menuItem.textY, fontSizePerLetterNdi, tint);
   }
-  drawMenu(elements, gameState.selectedPauseOption);
+}
+
+std::optional<int> highlightedMenuItem(std::vector<MenuItem>& items){
+  for (int i = 0; i < items.size(); i++){
+    auto item = items.at(i);
+    if (item.hovered){
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+void handleMouseSelect(GameState& gameState){
+  if (showingPauseMenu(gameState)){
+    //std::vector<MenuItem> pauseItems(GameState& gameState){
+     std::cout << "handle mouse select on pause menu" << std::endl;
+     auto items = pauseItems(gameState);
+     auto selectedItem = highlightedMenuItem(items);
+     if (selectedItem.has_value()){
+       pauseText.at(selectedItem.value()).fn(gameState);
+     }
+     std::cout << "selected item: " << (selectedItem.has_value() ? std::to_string(selectedItem.value()) : "no value") << std::endl;
+  }else if (onMainMenu(gameState)){
+     std::cout << "handle mouse select on main menu" << std::endl;
+     auto items = menuItems(gameState);
+     auto selectedItem = highlightedMenuItem(items);
+     if (selectedItem.has_value()){
+       goToLevel(gameState, gameState.levels.at(selectedItem.value()).scene);
+     }
+     std::cout << "selected item: " << (selectedItem.has_value() ? std::to_string(selectedItem.value()) : "no value") << std::endl;
+  }
 }
 
 void togglePauseMode(GameState& gameState){
@@ -219,20 +291,6 @@ void togglePauseMode(GameState& gameState){
   }
 }
 
-void handleMenuMouseMove(GameState& gameState, float xNdi, float yNdi){
-  //std::cout << "pos: " << xNdi << ", " << yNdi << std::endl;
-  if (yNdi > 0.5f){
-    gameState.selectedLevel = 0;
-    gameState.selectedPauseOption = 0;
-  }else if (yNdi < -0.5f){
-    gameState.selectedLevel = 2;
-    gameState.selectedPauseOption = 1;
-  }else{
-    gameState.selectedLevel = 1;
-    gameState.selectedPauseOption = 1;
-  }
-}
-  
 void onMapping(int32_t id, void* data, int32_t index){
   GameState* gameState = static_cast<GameState*>(data);
   std::cout << "on mapping: " << index << std::endl;
@@ -349,6 +407,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> selectedPauseOption = 0;
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
+    gameState -> xNdc = 0.f;
+    gameState -> yNdc = 0.f;
     getGlobalState().paused = false;
     loadConfig(*gameState);
     loadDefaultScenes();
@@ -378,7 +438,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState);
     }
-    
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
@@ -486,13 +545,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     GameState* gameState = static_cast<GameState*>(data);
-    handleMenuMouseMove(*gameState, xNdc, yNdc);
+    gameState -> xNdc = xNdc;
+    gameState -> yNdc = yNdc;
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     if (action == 1 && button == 0){
       GameState* gameState = static_cast<GameState*>(data);
-      handleSelect(*gameState);
+      handleMouseSelect(*gameState);
     }
   };
 
