@@ -63,14 +63,14 @@ CScriptBinding weatherBinding(CustomApiBindings& api, const char* name){
     Weather* weather = static_cast<Weather*>(data);
     delete weather;
   };
-  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     if (key == "weather"){
       Weather* weather = static_cast<Weather*>(data);
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "weather value invalid");
+      auto strValue = anycast<std::string>(value);
+      modassert(strValue, "weather strValue is NULL");
       auto sceneId = gameapi -> listSceneId(id);
       changeWeather(*weather, *strValue, sceneId);
     }
-  });
+  };
 	 return binding;
 }

@@ -242,12 +242,12 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     Vehicle* vehicle = static_cast<Vehicle*>(data);
 
     if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
       if (vehicle -> vehicleId.has_value()){
-        auto strValue = std::get_if<std::string>(&value); 
+        auto strValue = anycast<std::string>(value); 
         modassert(strValue != NULL, "selected value invalid");
         auto gameObjId = std::atoi(strValue -> c_str());
 
@@ -266,7 +266,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
-  });
+  };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
     if (isPaused()){
