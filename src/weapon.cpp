@@ -51,6 +51,7 @@ struct MaterialToParticle {
 
 struct Weapons {
   objid playerId;
+  objid sceneId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
 
@@ -347,12 +348,17 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
 
+glm::vec3 playerPosWorld(Weapons& weapons){
+  auto cameraObj = gameapi -> getGameObjectByName(parentName, weapons.sceneId, false);
+  auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true); 
+  return cameraPos;
+}
 
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
+std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
-  auto playerId = gameapi -> getGameObjectByName(parentName, sceneId, false);
+  auto playerId = gameapi -> getGameObjectByName(parentName, weapons.sceneId, false);
   auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
   auto rot = gameapi -> getGameObjectRotation(playerId.value(), true) *  orientationOffsetQuat;
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
@@ -372,9 +378,19 @@ std::vector<HitObject> doRaycast(Weapons& weapons, objid sceneId, glm::vec3 orie
   return hitpoints;
 }
 
+std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 orientationOffset){
+  auto hitpoints = doRaycast(weapons, orientationOffset);
+  if (hitpoints.size() > 0){
+    auto cameraPos = playerPosWorld(weapons);
+    auto closestIndex = closestHitpoint(hitpoints, cameraPos);
+    return { hitpoints.at(closestIndex) };
+  }
+  return hitpoints;
+}
+
 
 void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
-  auto hitpoints = doRaycast(weapons, sceneId, orientationOffset);
+  auto hitpoints = doRaycastClosest(weapons, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
@@ -696,12 +712,14 @@ void modifyPhysicsForHeldItem(Weapons& weapons){
   gameapi -> setGameObjectAttr(weapons.heldItem.value(), newAttr);
 }
 
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Weapons* weapons = new Weapons;
 
     weapons -> playerId = gameapi -> getGameObjectByName(parentName, sceneId, false).value();
+    weapons -> sceneId = sceneId;
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
 
@@ -746,10 +764,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
-        auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id), glm::vec3(0.f, 0.f, -1.f));
+        auto hitpoints = doRaycast(*weapons, glm::vec3(0.f, 0.f, -1.f));
         if (hitpoints.size() > 0){
-          auto cameraObj = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
-          auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true);
+          auto cameraPos = playerPosWorld(*weapons);
           auto closestIndex = closestHitpoint(hitpoints, cameraPos);
           float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons -> selectDistance){
@@ -767,10 +784,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
           modlog("weapons", "pickup released held item: " + std::to_string(weapons -> heldItem.value()));
           weapons -> heldItem = std::nullopt;
         }else{
-        auto hitpoints = doRaycast(*weapons, gameapi -> listSceneId(id), glm::vec3(0.f, 0.f, -1.f));
-          if (hitpoints.size() > 0){
-            auto cameraObj = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
-            auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true);
+        auto hitpoints = doRaycast(*weapons, glm::vec3(0.f, 0.f, -1.f));
+        if (hitpoints.size() > 0){
+            auto cameraPos = playerPosWorld(*weapons);
             auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
             auto hitpoint = hitpoints.at(closestHitpointIndex);
             float distance = glm::length(cameraPos - hitpoint.point);
