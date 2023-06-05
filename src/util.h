@@ -49,16 +49,6 @@ void showDebugHitmark(HitObject& hitpoint, objid playerId);
 
 void debugAssertForNow(bool valid, const char* message);
 
-template <typename T>
-T* anycast(std::any& anyValue){
-  try {
-    T* value = std::any_cast<T>(&anyValue);
-    modassert(value, std::string("anycast value was NULL: ") + anyValue.type().name());
-    return value;
-  }catch(...){
-    return NULL;
-  }
-}
 
 std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::function<void(int32_t, void*, std::string&, AttributeValue& value)> fn);
 

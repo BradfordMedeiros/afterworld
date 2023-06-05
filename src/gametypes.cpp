@@ -38,7 +38,7 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
   	GameTypes* gametype = new GameTypes;
     gametype -> meta = NULL;
-    changeGameType(*gametype, "race");
+    changeGameType(*gametype, "deathmatch");
     return gametype;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
