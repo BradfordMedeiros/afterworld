@@ -283,8 +283,13 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
     if (key == '.' && action == 0){
       auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
-      if (spawnpointIds.size() > 0){
-        spawnPlayer(spawnpointIds.at(0));
+      for (auto spawnpointId : spawnpointIds){
+        spawnPlayer(spawnpointId);
+      }
+    }else if (key == '/' && action == 0){
+      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn-managed", std::nullopt, std::nullopt);
+      for (auto spawnpointId : spawnpointIds){
+        gameapi -> removeObjectById(spawnpointId);
       }
     }
   };
