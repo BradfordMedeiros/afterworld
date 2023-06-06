@@ -3,6 +3,42 @@
 extern CustomApiBindings* gameapi;
 
 /*
+
+
+struct BoolValue {
+  std::string symbol;
+  bool truth;
+};
+struct WorldInfp {
+  std::vector<BoolValue> boolValues;
+  std::vector<FloatValue> floatValues;
+  std::vector<glm::vec3> vec3Values;
+};
+
+
+
+addWorldInfo(worldInfo, FloatValue { .symbol = symbol('playerhealth'), .value = 100.f })
+
+struct AgentInfo {
+  std::vector<BoolValue*> boolvalues;
+  std::vector<FloatValue> floatValues;
+};
+
+AgentInfo getAgentInfo(std::vector<symbol> symbols){
+  return WorldInfo
+}
+
+agentBehavior(AgentInfo -> utility)
+
+objectives {
+  
+  .active
+
+}
+
+
+  world sta
+
   ai:
   core loop:
   - detect goals
@@ -180,6 +216,8 @@ glm::vec3 getPlayerPosition(AiTools& tools){
   return tools.getPlayerPosition();
 }
 
+
+
 void detectWorldInfo(WorldInfo& worldInfo, AiTools& tools){
   worldInfo.playerPosition = getPlayerPosition(tools);
   worldInfo.canSeePlayer = canSeePlayer(tools);
@@ -250,8 +288,17 @@ void addGoals(std::vector<Goal>& goals){ // this needs to be updated during the 
       modassert(false, "invalid goal type");
     }
   }
-
 }
+
+//enemy:tint:1 0 0 1
+//enemy:goal:idle-enemy
+//enemy:goal-type:idle
+//enemy:goal-value:2
+//enemy:agent:true
+//enemy:script:native/ai
+//enemy:health:130
+//enemy:team:blue
+
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -315,6 +362,22 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     delete aiData;
   };
 
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
+    if (key == "spawn"){
+      auto spawnId = gameapi -> getGameObjectByName("spawnpoint", gameapi -> listSceneId(id), false).value();
+      spawnPlayer(spawnId);
+    }
+  };
+
+  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+    if (key == ';' && action == 1){
+      std::cout << "add spawn point" << std::endl;
+      gameapi -> sendNotifyMessage("spawn", 0);
+    }else if (key == '[' && action == 1){
+      std::cout << "player holder print goals" << std::endl;
+    }
+  };
+
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
     Agent agent { 
@@ -324,7 +387,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
     detectWorldInfo(worldInfo, aiData -> tools);
     auto goal = getOptimalGoal(aiData -> goals, worldInfo, agent);
-    //std::cout << "executing goal: " << nameForGoalSymbol(goal.name) << std::endl;
+    std::cout << "executing goal: " << nameForGoalSymbol(goal.name) << std::endl;
     doGoal(worldInfo, agent, goal, aiData -> tools);
   };
 
