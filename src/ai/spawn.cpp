@@ -2,6 +2,17 @@
 
 extern CustomApiBindings* gameapi;
 
+/*
+//enemy:tint:1 0 0 1
+//enemy:goal:idle-enemy
+//enemy:goal-type:idle
+//enemy:goal-value:2
+//enemy:agent:true
+//enemy:script:native/ai
+//enemy:health:130
+//enemy:team:blue
+*/
+
 //////////////////////////////// SPAWNING /////////////////////////////
 void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation){
   GameobjAttributes attr = {
@@ -33,4 +44,24 @@ void spawnPlayer(objid id){
   auto spawnPosition = gameapi -> getGameObjectPos(id, true);
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
   createEnemyInstance(gameapi -> listSceneId(id), spawnPosition, spawnRotation);
+}
+
+std::unordered_map<std::string, int> goalnameToInt;
+int symbolIndex = -1;
+int getSymbol(std::string name){
+  if (goalnameToInt.find(name) != goalnameToInt.end()){
+    return goalnameToInt.at(name);
+  }
+  symbolIndex++;
+  goalnameToInt[name] = symbolIndex;
+  return symbolIndex;
+} 
+std::string nameForSymbol(int symbol){
+  for (auto &[name, symbolIndex] : goalnameToInt){
+    if (symbolIndex == symbol){
+      return name;
+    }
+  }
+  modassert(false, "could not find symbol for: " + symbol);
+  return "";
 }

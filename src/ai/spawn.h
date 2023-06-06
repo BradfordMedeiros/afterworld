@@ -5,4 +5,8 @@
 
 void spawnPlayer(objid id);
 
+int getSymbol(std::string name);
+std::string nameForSymbol(int symbol);
+
+
 #endif

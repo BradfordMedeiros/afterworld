@@ -223,7 +223,7 @@ console:tint:0 0.6 1 1
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
->maincamera:goal:player
+#>maincamera:goal:player
 >maincamera:goal-type:move
 >maincamera:goal-value:5
 >maincamera:goal-conditions:in-range
@@ -237,21 +237,30 @@ enemy:physics_angle:0 0 0
 enemy:physics:enabled
 enemy:physics_type:dynamic
 enemy:tint:1 0 0 1
-enemy:goal:idle-enemy
+#enemy:goal:idle-enemy
 enemy:goal-type:idle
 enemy:goal-value:2
 enemy:agent:true
-enemy:script:native/ai
 enemy:health:130
-
+enemy:team:blue
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-goal:scale:0.2 0.2 0.2
+goal:scale:0.25 0.05 1.25
 goal:tint:1 0 0 1
-goal:position:0 50 100
+goal:position:0 -27 60
 goal:goal:importantplace
 goal:goal-type:move
 goal:goal-value:9
+goal:texture:../gameresources/textures/controls/up-down.png
+
+
+goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+
+spawnpoint:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+spawnpoint:scale:0.25 0.05 1.25
+spawnpoint:texture:../gameresources/textures/controls/up-down.png
+spawnpoint:position:0 -27 60
+spawnpoint:spawn:true
 
 loadtexture:texture:../gameresources/textures/controls/up-down.png
 
@@ -270,3 +279,4 @@ ingame:script:native/in-game-ui
 #tags:script:native/tags
 sounds:script:native/sound
 water:script:native/water
+ai:script:native/ai
