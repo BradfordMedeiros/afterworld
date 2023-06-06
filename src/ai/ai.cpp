@@ -162,13 +162,16 @@ struct Agent {
   AgentType type;
 };
 
-Agent createAgent(){
-  auto agents = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
-  modassert(agents.size() == 1, "only supports 1 agent currently");
-  return Agent {
-    .id = agents.at(0),
-    .type = AGENT_MOVER,
-  };
+std::vector<Agent> createAgents(){
+  auto agentIds = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
+  std::vector<Agent> agents;
+  for (auto &id : agentIds){
+    agents.push_back(Agent{
+      .id = id,
+      .type = AGENT_MOVER,
+    });
+  }
+  return agents;
 }
 
 struct Goal {
@@ -262,16 +265,27 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
     detectWorldInfo(aiData -> worldInfo);
-    auto agent = createAgent();
-    auto goals = getGoalsForAgent(aiData -> worldInfo, agent);
-    auto optimalGoal = getOptimalGoal(goals);
-    doGoal(*optimalGoal, agent);
+
+    for (auto &agent : createAgents()){
+      auto goals = getGoalsForAgent(aiData -> worldInfo, agent);
+      auto optimalGoal = getOptimalGoal(goals);
+      doGoal(*optimalGoal, agent);  
+    }
+
+
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     AiData* aiData = static_cast<AiData*>(data);
     if (key == '.' && action == 0) { 
       printWorldInfo(aiData -> worldInfo);
+    }
+
+    if (key == '.' && action == 0){
+      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
+      if (spawnpointIds.size() > 0){
+        spawnPlayer(spawnpointIds.at(0));
+      }
     }
   };
 

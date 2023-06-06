@@ -20,8 +20,11 @@ void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation){
       { "mesh", "../gameresources/build/characters/plaguerobot.gltf" },
       { "physics", "enabled" },
       { "physics_type", "dynamic" },
+      { "agent", "true" },
     },
-    .numAttributes = {},
+    .numAttributes = {
+      { "health", 130.f },
+    },
     .vecAttr = {
       .vec3 = {
         { "position", pos },
