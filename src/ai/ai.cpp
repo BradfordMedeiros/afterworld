@@ -78,6 +78,11 @@ objectives {
 
 */
 
+struct StateInfo {
+  int symbol;
+  std::vector<std::string> tags;
+};
+
 struct BoolState { 
   int symbol;
   bool value;
@@ -96,6 +101,11 @@ struct AiData {
   WorldInfo worldInfo;
 };
 
+enum AgentType { AGENT_MOVER };
+struct Agent { 
+  objid id;
+  AgentType type;
+};
 
 
 void updateBoolState(WorldInfo& worldInfo, std::string name, bool value){
@@ -123,10 +133,23 @@ void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value){
   });
 }
 
-void detectWorldInfo(WorldInfo& worldInfo){
+void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   updateBoolState(worldInfo, "is-night-time", false);
   updateBoolState(worldInfo, "is-day-time", true);
-  updateVec3State(worldInfo, "target-position", glm::vec3(0, 1, 1));
+
+  auto targetIds = gameapi -> getObjectsByAttr("goal-info", "target", std::nullopt);
+  for (auto targetId : targetIds){
+    std::string stateName = std::string("target-pos-") + std::to_string(targetId);
+    updateVec3State(worldInfo, stateName, gameapi -> getGameObjectPos(targetId, true));
+  }
+  modassert(targetIds.size() >= 1, "need >= 1 target");
+  updateVec3State(worldInfo, "target-position", gameapi -> getGameObjectPos(targetIds.at(0), true));
+
+  auto agentIds = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
+  for (auto agentId : agentIds){
+    std::string stateName = std::string("agent-pos-") + std::to_string(agentId);
+    updateVec3State(worldInfo, stateName, gameapi -> getGameObjectPos(agentId, true));
+  }
 }
 
 std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol){
@@ -136,6 +159,14 @@ std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol){
     }
   }
   return std::nullopt;
+}
+
+std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::vector<int> tags){
+  auto position = getVec3State(worldInfo, getSymbol("target-position"));
+  if (!position.has_value()){
+    return {};
+  }
+  return { position.value() };
 }
 
 void printWorldInfo(WorldInfo& worldInfo){
@@ -156,11 +187,6 @@ void printWorldInfo(WorldInfo& worldInfo){
   std::cout << "]" << std::endl;
 }
 
-enum AgentType { AGENT_MOVER };
-struct Agent { 
-  objid id;
-  AgentType type;
-};
 
 std::vector<Agent> createAgents(){
   auto agentIds = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
@@ -171,6 +197,7 @@ std::vector<Agent> createAgents(){
       .type = AGENT_MOVER,
     });
   }
+
   return agents;
 }
 
@@ -183,17 +210,19 @@ struct Goal {
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
   if (agent.type == AGENT_MOVER){
     std::vector<Goal> goals = {};
-    auto targetPosition = getVec3State(worldInfo, getSymbol("target-position"));
-    if (targetPosition.has_value()){
-      goals.push_back(
-        Goal {
-          .goaltype = getSymbol("idle"),
-          .goalData = targetPosition.value(),
-          .score = [](std::any&) -> int { 
-            return 0; 
-          }
+    goals.push_back(
+      Goal {
+        .goaltype = getSymbol("idle"),
+        .goalData = NULL,
+        .score = [](std::any&) -> int { 
+          return 0; 
         }
-      );
+      }
+    );
+    auto targetPositions = getVec3StateByTag(worldInfo, { getSymbol("targets"), getSymbol("blue") });
+    auto targetPosition = targetPositions.size() > 0 ? std::optional<glm::vec3>(targetPositions.at(0)) : std::optional<glm::vec3>(std::nullopt);
+
+    if (targetPosition.has_value()){
       goals.push_back(
         Goal {
           .goaltype = getSymbol("move-to-fixed-target-high-value"),
@@ -264,15 +293,23 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-    detectWorldInfo(aiData -> worldInfo);
 
-    for (auto &agent : createAgents()){
+    auto agents = createAgents();
+
+    // probably don't want to reset world state every frame, but ok for now
+    // consider what data should and shouldn't be per frame (per data refresh?)
+    aiData -> worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
+
+    detectWorldInfo(aiData -> worldInfo, agents);
+
+    for (auto &agent : agents){
       auto goals = getGoalsForAgent(aiData -> worldInfo, agent);
       auto optimalGoal = getOptimalGoal(goals);
-      doGoal(*optimalGoal, agent);  
+      modassert(optimalGoal, "no goal for agent");
+      if (optimalGoal){
+        doGoal(*optimalGoal, agent);  
+      }
     }
-
-
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
