@@ -82,6 +82,14 @@ std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tag
 	return vecs;
 }
 
+std::optional<bool> getBoolState(WorldInfo& worldInfo, int symbol){
+  for (auto &boolValue : worldInfo.boolValues){
+    if (boolValue.stateInfo.symbol == symbol){
+      return boolValue.value;
+    }
+  }
+  return std::nullopt;
+}
 
 void printWorldInfo(WorldInfo& worldInfo){
   std::cout << "world info: [" << std::endl;

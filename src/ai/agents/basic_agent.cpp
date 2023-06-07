@@ -10,7 +10,6 @@ Agent createBasicAgent(objid id){
 }
 
 
-
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   static int moveToTargetGoal = getSymbol("move-to-target");
 
@@ -22,8 +21,10 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     symbols.insert(getSymbol(targetAttr.value()));
   }
   auto targetPositions = getVec3StateByTag(worldInfo, symbols);
+  auto canSeeTarget = getBoolState(worldInfo, getSymbol(std::string("agent-can-see-") + std::to_string(agent.id)));
+  auto canSee = canSeeTarget.has_value() && canSeeTarget.value();
 
-  if (targetPositions.size() > 0){
+  if (targetPositions.size() > 0 && canSee){
     auto targetPosition = targetPositions.at(0);
     goals.push_back(
       Goal {
@@ -60,4 +61,8 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   std::string stateName = std::string("agent-pos-") + std::to_string(agent.id);
   updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(agent.id, true));
+
+  bool canSeeTarget = false;
+  updateBoolState(worldInfo, getSymbol(std::string("agent-can-see-") + std::to_string(agent.id)), false);
+
 }
