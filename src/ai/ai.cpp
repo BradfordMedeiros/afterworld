@@ -31,26 +31,27 @@ struct AiData {
 };
 
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
-  updateBoolState(worldInfo, "is-night-time", false);
-  updateBoolState(worldInfo, "is-day-time", true);
+  static int targetSymbol = getSymbol("target");
 
   auto targetIds = gameapi -> getObjectsByAttr("goal-info", "target", std::nullopt);
   for (auto targetId : targetIds){
     std::string stateName = std::string("target-pos-") + std::to_string(targetId);
     auto team = getSingleAttr(targetId, "team");
-    std::set<int> symbols = { getSymbol("target") };
+    std::set<int> symbols = { targetSymbol };
     if (team.has_value()){
       symbols.insert(getSymbol(team.value()));
     }
-    updateVec3State(worldInfo, stateName, gameapi -> getGameObjectPos(targetId, true), symbols);
+    updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(targetId, true), symbols);
   }
   modassert(targetIds.size() >= 1, "need >= 1 target");
-  updateVec3State(worldInfo, "target-position", gameapi -> getGameObjectPos(targetIds.at(0), true));
+  updateVec3State(worldInfo, getSymbol("target-position"), gameapi -> getGameObjectPos(targetIds.at(0), true));
 
-  auto agentIds = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
-  for (auto agentId : agentIds){
-    std::string stateName = std::string("agent-pos-") + std::to_string(agentId);
-    updateVec3State(worldInfo, stateName, gameapi -> getGameObjectPos(agentId, true));
+  for (auto agent : agents){
+    if (agent.type == AGENT_BASIC_AGENT){
+      detectWorldInfoBasicAgent(worldInfo, agent);
+      continue;
+    }
+    modassert(false, "detect world info invalid agent type");
   }
 }
 
@@ -68,7 +69,7 @@ std::vector<Agent> createAgents(){
 
 
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
-  if (agent.type == AGENT_MOVER){
+  if (agent.type == AGENT_BASIC_AGENT){
     return getGoalsForBasicAgent(worldInfo, agent);
   }
   modassert(false, "get goals for agent invalid agent type");
@@ -94,15 +95,11 @@ Goal* getOptimalGoal(std::vector<Goal>& goals){
 }
 
 void doGoal(Goal& goal, Agent& agent){
-  if (goal.goaltype == getSymbol("move-to-fixed-target-high-value")){
-    auto targetPosition = anycast<glm::vec3>(goal.goalData);
-    modassert(targetPosition, "target pos was null");
-    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
-    auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition -> x, agentPos.y, targetPosition -> z));
-    auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 1 * gameapi -> timeElapsed());
-    gameapi -> setGameObjectPosition(agent.id, newPos, true);  // probably should be applying impulse instead?
-    gameapi -> setGameObjectRot(agent.id, towardTarget, true);
+  if (agent.type == AGENT_BASIC_AGENT){
+    doGoalBasicAgent(goal, agent);
+    return;
   }
+  modassert(false, "do goal invalid agent");
 }
 
 
@@ -130,13 +127,12 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     // probably don't want to reset world state every frame, but ok for now
     // consider what data should and shouldn't be per frame (per data refresh?)
     aiData -> worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
-
     detectWorldInfo(aiData -> worldInfo, agents);
 
     for (auto &agent : agents){
       auto goals = getGoalsForAgent(aiData -> worldInfo, agent);
       auto optimalGoal = getOptimalGoal(goals);
-      modassert(optimalGoal, "no goal for agent");
+      //modassert(optimalGoal, "no goal for agent");
       if (optimalGoal){
         doGoal(*optimalGoal, agent);  
       }
@@ -145,7 +141,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-    if (key == 'm' && action == 0) { 
+    if (key == 'M' && action == 0) { 
       printWorldInfo(aiData -> worldInfo);
     }else if (key == ',' && action == 0){
       auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);

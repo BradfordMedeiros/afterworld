@@ -27,8 +27,8 @@ struct WorldInfo {
   std::vector<Vec3State> vec3Values;
 };
 
-void updateBoolState(WorldInfo& worldInfo, std::string name, bool value);
-void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value, std::set<int> tags = {});
+void updateBoolState(WorldInfo& worldInfo, int symbol, bool value);
+void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags = {});
 std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol);
 std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tags);
 

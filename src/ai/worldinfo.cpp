@@ -3,6 +3,7 @@
 std::unordered_map<std::string, int> goalnameToInt;
 int symbolIndex = -1;
 int getSymbol(std::string name){
+  //std::cout << "get symbol called: " << name << std::endl;
   if (goalnameToInt.find(name) != goalnameToInt.end()){
     return goalnameToInt.at(name);
   }
@@ -22,24 +23,24 @@ std::string nameForSymbol(int symbol){
 
 ///////////////////////////////////////////////
 
-void updateBoolState(WorldInfo& worldInfo, std::string name, bool value){
+void updateBoolState(WorldInfo& worldInfo, int symbol, bool value){
   for (auto &boolValue : worldInfo.boolValues){
-    if (boolValue.stateInfo.symbol == getSymbol(name)){
+    if (boolValue.stateInfo.symbol == symbol){
       boolValue.value = value;
       return;
     }
   }
   worldInfo.boolValues.push_back(BoolState {
     .stateInfo = StateInfo {
-      .symbol = getSymbol(name),
+      .symbol = symbol,
       .tags = {},
     },
     .value = value,
   });
 }
-void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value, std::set<int> tags){
+void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags){
   for (auto &vec3Value : worldInfo.vec3Values){
-    if (vec3Value.stateInfo.symbol == getSymbol(name)){
+    if (vec3Value.stateInfo.symbol == symbol){
       vec3Value.value = value;
       vec3Value.stateInfo.tags = tags;
       return;
@@ -47,7 +48,7 @@ void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value, st
   }
   worldInfo.vec3Values.push_back(Vec3State {
     .stateInfo = StateInfo {
-      .symbol = getSymbol(name),
+      .symbol = symbol,
       .tags = tags,
     },
     .value = value,

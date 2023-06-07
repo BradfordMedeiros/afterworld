@@ -4,7 +4,7 @@
 #include "../../util.h"
 #include "../worldinfo.h"
 
-enum AgentType { AGENT_MOVER };
+enum AgentType { AGENT_BASIC_AGENT };
 struct Agent { 
   objid id;
   AgentType type;
