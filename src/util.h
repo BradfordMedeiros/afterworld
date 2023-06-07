@@ -65,5 +65,6 @@ struct NoHealthMessage {
 
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
+std::string uniqueNameSuffix();
 
 #endif

@@ -156,7 +156,6 @@ std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
 
     if (targetPositions.size() > 0){
       auto targetPosition = targetPositions.at(0);
-      std::cout << "target position: " << print(targetPosition) << std::endl;
       goals.push_back(
         Goal {
           .goaltype = getSymbol("move-to-fixed-target-high-value"),
@@ -227,7 +226,6 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-
     auto agents = createAgents();
 
     // probably don't want to reset world state every frame, but ok for now
@@ -248,14 +246,17 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-    if (key == '.' && action == 0) { 
+    if (key == 'm' && action == 0) { 
       printWorldInfo(aiData -> worldInfo);
-    }
-
-    if (key == '.' && action == 0){
+    }else if (key == ',' && action == 0){
       auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
       for (auto spawnpointId : spawnpointIds){
-        spawnPlayer(spawnpointId);
+        spawnPlayer(spawnpointId, "red");
+      }
+    }else if (key == '.' && action == 0){
+      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
+      for (auto spawnpointId : spawnpointIds){
+        spawnPlayer(spawnpointId, "blue");
       }
     }else if (key == '/' && action == 0){
       auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn-managed", std::nullopt, std::nullopt);

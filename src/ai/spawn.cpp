@@ -14,15 +14,16 @@ extern CustomApiBindings* gameapi;
 */
 
 //////////////////////////////// SPAWNING /////////////////////////////
-void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation){
+void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation, std::string team){
   GameobjAttributes attr = {
     .stringAttributes = {
       { "mesh", "../gameresources/build/characters/plaguerobot.gltf" },
       { "physics", "enabled" },
       { "physics_type", "dynamic" },
       { "agent", "" },
-      { "agent-target", "red" },
+      { "agent-target", team == "red" ? "blue" : "red" },
       { "spawn-managed", "" },
+      { "team", team  },
     },
     .numAttributes = {
       { "health", 130.f },
@@ -33,20 +34,19 @@ void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation){
         { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
       },
       .vec4 = {
-
       },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   gameapi -> makeObjectAttr(
     sceneId, 
-    "spawned-instance", 
+    std::string("spawned-instance-") + uniqueNameSuffix(), 
     attr, 
     submodelAttributes
   );
 }
-void spawnPlayer(objid id){
+void spawnPlayer(objid id, const char* team){
   auto spawnPosition = gameapi -> getGameObjectPos(id, true);
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
-  createEnemyInstance(gameapi -> listSceneId(id), spawnPosition, spawnRotation);
+  createEnemyInstance(gameapi -> listSceneId(id), spawnPosition, spawnRotation, team);
 }

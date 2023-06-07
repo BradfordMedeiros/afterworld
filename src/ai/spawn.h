@@ -3,6 +3,6 @@
 
 #include "../util.h"
 
-void spawnPlayer(objid id);
+void spawnPlayer(objid id, const char* team);
 
 #endif
