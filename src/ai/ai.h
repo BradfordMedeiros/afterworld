@@ -3,6 +3,7 @@
 
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "./spawn.h"
+#include "./worldinfo.h"
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name);
 

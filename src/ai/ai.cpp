@@ -78,28 +78,6 @@ objectives {
 
 */
 
-struct StateInfo {
-  int symbol;
-  std::vector<std::string> tags;
-};
-
-struct BoolState { 
-  int symbol;
-  bool value;
-};
-struct Vec3State {
-  int symbol;
-  glm::vec3 value;
-};
-
-struct WorldInfo {
-  std::vector<BoolState> boolValues;
-  std::vector<Vec3State> vec3Values;
-};
-
-struct AiData {
-  WorldInfo worldInfo;
-};
 
 enum AgentType { AGENT_MOVER };
 struct Agent { 
@@ -107,31 +85,9 @@ struct Agent {
   AgentType type;
 };
 
-
-void updateBoolState(WorldInfo& worldInfo, std::string name, bool value){
-  for (auto &boolValue : worldInfo.boolValues){
-    if (boolValue.symbol == getSymbol(name)){
-      boolValue.value = value;
-      return;
-    }
-  }
-  worldInfo.boolValues.push_back(BoolState {
-    .symbol = getSymbol(name),
-    .value = value,
-  });
-}
-void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value){
-  for (auto &vec3Value : worldInfo.vec3Values){
-    if (vec3Value.symbol == getSymbol(name)){
-      vec3Value.value = value;
-      return;
-    }
-  }
-  worldInfo.vec3Values.push_back(Vec3State {
-    .symbol = getSymbol(name),
-    .value = value,
-  });
-}
+struct AiData {
+  WorldInfo worldInfo;
+};
 
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   updateBoolState(worldInfo, "is-night-time", false);
@@ -152,40 +108,6 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   }
 }
 
-std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol){
-  for (auto &vec3Value : worldInfo.vec3Values){
-    if (vec3Value.symbol == symbol){
-      return vec3Value.value;
-    }
-  }
-  return std::nullopt;
-}
-
-std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::vector<int> tags){
-  auto position = getVec3State(worldInfo, getSymbol("target-position"));
-  if (!position.has_value()){
-    return {};
-  }
-  return { position.value() };
-}
-
-void printWorldInfo(WorldInfo& worldInfo){
-  std::cout << "world info: [" << std::endl;
-
-  std::cout << "  bool = [" << std::endl;
-  for (auto &boolValue : worldInfo.boolValues){
-    std::cout << "    [" << nameForSymbol(boolValue.symbol) << ", " << print(boolValue.value) << "]" << std::endl;
-  }
-  std::cout << "  ]" << std::endl;
-
-  std::cout << "  vec3 = [" << std::endl;
-  for (auto &vec3Value : worldInfo.vec3Values){
-    std::cout << "    [" << nameForSymbol(vec3Value.symbol) << ", " << print(vec3Value.value) << "]" << std::endl;
-  }
-  std::cout << "  ]" << std::endl;
-
-  std::cout << "]" << std::endl;
-}
 
 
 std::vector<Agent> createAgents(){
