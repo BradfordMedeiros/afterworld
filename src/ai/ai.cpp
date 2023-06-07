@@ -3,58 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 /*
-
-
-struct BoolValue {
-  std::string symbol;
-  bool truth;
-};
-struct WorldInfp {
-  std::vector<BoolValue> boolValues;
-  std::vector<FloatValue> floatValues;
-  std::vector<glm::vec3> vec3Values;
-};
-
-
-
-addWorldInfo(worldInfo, FloatValue { .symbol = symbol('playerhealth'), .value = 100.f })
-
-struct AgentInfo {
-  std::vector<BoolValue*> boolvalues;
-  std::vector<FloatValue> floatValues;
-};
-
-AgentInfo getAgentInfo(std::vector<symbol> symbols){
-  return WorldInfo
-}
-
-agentBehavior(AgentInfo -> utility)
-
-objectives {
   
-  .active
-
-}
-
-
-  world sta
-
-  ai:
-  core loop:
-  - detect goals
-  - pick highest utility goal
-  - action 
-  ---> repeast
-
-  behavior tree: 
-    - each agent has a state, and gets triggered into other states based on events
-    - eg idle -> attacking
-  
-  goal 
-    - goals exist as things in a scene -> real objects with position, thing you can do 
-    - of the detected goals, each goal is evaluated with some utility value fn(actor, distance, goal) => number
-    - do the goal that has the highest utility
-
   so to open a door 
     - possible goals: open door, unlock door
     - unlock door prereq to open door, so unlock door, then open door
@@ -74,16 +23,8 @@ objectives {
   - move to place, 
   - shoot
   etc
-
-
 */
 
-
-enum AgentType { AGENT_MOVER };
-struct Agent { 
-  objid id;
-  AgentType type;
-};
 
 struct AiData {
   WorldInfo worldInfo;
@@ -119,60 +60,18 @@ std::vector<Agent> createAgents(){
   auto agentIds = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
   std::vector<Agent> agents;
   for (auto &id : agentIds){
-    agents.push_back(Agent{
-      .id = id,
-      .type = AGENT_MOVER,
-    });
+    agents.push_back(createBasicAgent(id));
   }
 
   return agents;
 }
 
-struct Goal {
-  int goaltype;
-  std::any goalData;
-  std::function<int(std::any&)> score;
-};
 
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
   if (agent.type == AGENT_MOVER){
-    std::vector<Goal> goals = {};
-    goals.push_back(
-      Goal {
-        .goaltype = getSymbol("idle"),
-        .goalData = NULL,
-        .score = [](std::any&) -> int { 
-          return 0; 
-        }
-      }
-    );
-
-    std::set<int> symbols = { getSymbol("target") };
-    auto targetAttr = getSingleAttr(agent.id, "agent-target");
-    if (targetAttr.has_value()){
-      symbols.insert(getSymbol(targetAttr.value()));
-    }
-    auto targetPositions = getVec3StateByTag(worldInfo, symbols);
-
-    if (targetPositions.size() > 0){
-      auto targetPosition = targetPositions.at(0);
-      goals.push_back(
-        Goal {
-          .goaltype = getSymbol("move-to-fixed-target-high-value"),
-          .goalData = targetPosition,
-          .score = [&agent](std::any& targetPosition) -> int { 
-            auto targetPos = anycast<glm::vec3>(targetPosition);
-            modassert(targetPos, "target pos was null");
-            auto distance = glm::distance(*targetPos, gameapi -> getGameObjectPos(agent.id, true));
-            auto score = distance > 2 ? 10 : -1; 
-            return score;
-          }
-        }
-      );
-    
-    }
-    return goals;
+    return getGoalsForBasicAgent(worldInfo, agent);
   }
+  modassert(false, "get goals for agent invalid agent type");
   return {};
 }
 

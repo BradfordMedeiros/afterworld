@@ -4,6 +4,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "./spawn.h"
 #include "./worldinfo.h"
+#include "./agents/basic_agent.h"
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name);
 
