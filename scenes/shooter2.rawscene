@@ -223,11 +223,13 @@ console:tint:0 0.6 1 1
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
-#>maincamera:goal:player
+>maincamera:goal-info:target
 >maincamera:goal-type:move
 >maincamera:goal-value:5
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
+>maincamera:team:blue
+
 
 #!light:position:0 -5 5
 
@@ -241,8 +243,10 @@ enemy:tint:1 0 0 1
 enemy:goal-type:idle
 enemy:goal-value:2
 enemy:agent:true
+enemy:agent-target:blue
+enemy:goal-info:target
+enemy:team:red
 enemy:health:130
-enemy:team:blue
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 goal:scale:0.25 0.05 1.25
@@ -252,7 +256,7 @@ goal:goal:importantplace
 goal:goal-type:move
 goal:goal-value:9
 goal:texture:../gameresources/textures/controls/up-down.png
-
+goal:goal-info:target
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 
@@ -261,6 +265,13 @@ spawnpoint:scale:0.25 0.05 1.25
 spawnpoint:texture:../gameresources/textures/controls/up-down.png
 spawnpoint:position:0 -27 60
 spawnpoint:spawn:true
+
+spawnpoint2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+spawnpoint2:scale:0.25 0.05 1.25
+spawnpoint2:texture:../gameresources/textures/controls/up-down.png
+spawnpoint2:position:-5 -27 60
+spawnpoint2:spawn:true
+
 
 loadtexture:texture:../gameresources/textures/controls/up-down.png
 

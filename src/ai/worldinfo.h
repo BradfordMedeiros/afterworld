@@ -10,7 +10,7 @@ std::string nameForSymbol(int symbol);
 
 struct StateInfo {
   int symbol;
-  std::vector<int> tags;
+  std::set<int> tags;
 };
 
 struct BoolState { 
@@ -29,9 +29,9 @@ struct WorldInfo {
 
 
 void updateBoolState(WorldInfo& worldInfo, std::string name, bool value);
-void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value, std::vector<int> tags = {});
+void updateVec3State(WorldInfo& worldInfo, std::string name, glm::vec3 value, std::set<int> tags = {});
 std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol);
-std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::vector<int> tags);
+std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tags);
 
 void printWorldInfo(WorldInfo& worldInfo);
 

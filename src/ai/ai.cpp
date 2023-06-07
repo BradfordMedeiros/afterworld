@@ -96,7 +96,12 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   auto targetIds = gameapi -> getObjectsByAttr("goal-info", "target", std::nullopt);
   for (auto targetId : targetIds){
     std::string stateName = std::string("target-pos-") + std::to_string(targetId);
-    updateVec3State(worldInfo, stateName, gameapi -> getGameObjectPos(targetId, true));
+    auto team = getSingleAttr(targetId, "team");
+    std::set<int> symbols = { getSymbol("target") };
+    if (team.has_value()){
+      symbols.insert(getSymbol(team.value()));
+    }
+    updateVec3State(worldInfo, stateName, gameapi -> getGameObjectPos(targetId, true), symbols);
   }
   modassert(targetIds.size() >= 1, "need >= 1 target");
   updateVec3State(worldInfo, "target-position", gameapi -> getGameObjectPos(targetIds.at(0), true));
@@ -141,14 +146,21 @@ std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
         }
       }
     );
-    auto targetPositions = getVec3StateByTag(worldInfo, { getSymbol("targets"), getSymbol("blue") });
-    auto targetPosition = targetPositions.size() > 0 ? std::optional<glm::vec3>(targetPositions.at(0)) : std::optional<glm::vec3>(std::nullopt);
 
-    if (targetPosition.has_value()){
+    std::set<int> symbols = { getSymbol("target") };
+    auto targetAttr = getSingleAttr(agent.id, "agent-target");
+    if (targetAttr.has_value()){
+      symbols.insert(getSymbol(targetAttr.value()));
+    }
+    auto targetPositions = getVec3StateByTag(worldInfo, symbols);
+
+    if (targetPositions.size() > 0){
+      auto targetPosition = targetPositions.at(0);
+      std::cout << "target position: " << print(targetPosition) << std::endl;
       goals.push_back(
         Goal {
           .goaltype = getSymbol("move-to-fixed-target-high-value"),
-          .goalData = targetPosition.value(),
+          .goalData = targetPosition,
           .score = [&agent](std::any& targetPosition) -> int { 
             auto targetPos = anycast<glm::vec3>(targetPosition);
             modassert(targetPos, "target pos was null");

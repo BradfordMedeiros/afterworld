@@ -63,4 +63,7 @@ struct NoHealthMessage {
   std::optional<std::string> team;
 };
 
+
+std::optional<std::string> getSingleAttr(objid id, const char* key);
+
 #endif

@@ -21,6 +21,7 @@ void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation){
       { "physics", "enabled" },
       { "physics_type", "dynamic" },
       { "agent", "" },
+      { "agent-target", "red" },
       { "spawn-managed", "" },
     },
     .numAttributes = {

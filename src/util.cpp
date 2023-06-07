@@ -225,3 +225,12 @@ std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::fu
     //modassert(false, std::string("invalid attribute value: ") + key + ", type = " + anyValue.type().name());
   };
 }
+
+
+
+
+std::optional<std::string> getSingleAttr(objid id, const char* key){
+  auto objattr = gameapi -> getGameObjectAttr(id);
+  auto attrValue = getStrAttr(objattr, key);
+  return attrValue;
+}
