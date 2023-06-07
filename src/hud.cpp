@@ -104,6 +104,13 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
     }
     Hud* hud = static_cast<Hud*>(data);
     gameapi -> drawText("health: " + std::to_string(static_cast<int>(hud -> health)), -0.9, 0.2, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+
+    float width = 0.2f;
+    float aspectRatio = 0.1f;
+    float widthPercentage = glm::max(0.f, hud -> health / 100.f);
+    gameapi -> drawRect(-0.8f, 0.1f, width + 0.01f, width * aspectRatio + 0.01f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    gameapi -> drawRect(-0.8f, 0.1f, width, width * aspectRatio, false, glm::vec4(0.f, 0.f, 0.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    gameapi -> drawRect(-0.8f, 0.1f, widthPercentage * width, width * aspectRatio, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
   };
 
   return binding;
