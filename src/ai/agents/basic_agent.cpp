@@ -58,11 +58,31 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
   }
 }
 
+// TODO - add contast test with provided shape 
+// eg gameapi -> contactTest(glm::vec3 pos, glm::quat orientation, glm::vec3 scale, SHAPE)
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
+  auto agentPosition = gameapi -> getGameObjectPos(agent.id, true);
   std::string stateName = std::string("agent-pos-") + std::to_string(agent.id);
-  updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(agent.id, true));
+  updateVec3State(worldInfo, getSymbol(stateName), agentPosition);
 
-  bool canSeeTarget = false;
-  updateBoolState(worldInfo, getSymbol(std::string("agent-can-see-") + std::to_string(agent.id)), false);
+  auto hitobjects = gameapi -> contactTestShape(
+    agentPosition, 
+    orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f)), 
+    glm::vec3(1.f, 1.f, 1.f)
+  );
+  
+  //std::cout << "hit objects: [";
+  //for (auto &hitobject : hitobjects){
+  //  std::cout << hitobject.id << "(" + gameapi -> getGameObjNameForId(hitobject.id).value() + ") ";
+  //  if (aboutEqual(hitobject.position, ))
+  //}
+//
+//  //// this is hackey, since i'm comparing to make sure the position is just close to the target.  Should add a bucket field so I can get additional info about the state i care about here to resolve the id easily
+//
+//
+//
+  //std::cout << "]" << std::endl;
+
+  updateBoolState(worldInfo, getSymbol(std::string("agent-can-see-") + std::to_string(agent.id)), hitobjects.size() > 1);
 
 }

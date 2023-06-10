@@ -3,9 +3,6 @@
 
 #include "../util.h"
 
-int getSymbol(std::string name);
-std::string nameForSymbol(int symbol);
-
 //////////////////////////////////////////////////////////////////////////////////
 
 struct StateInfo {

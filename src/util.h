@@ -3,6 +3,7 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "../../ModEngine/src/translations.h"
+#include "../../ModEngine/src/common/symbols.h"
 #include <bits/stdc++.h>
 
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);
