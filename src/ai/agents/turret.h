@@ -4,6 +4,8 @@
 #include "./common.h"
 
 Agent createTurretAgent(objid id);
-std::vector<Goal> getGoalsForTurretAgent();
+void detectWorldInfoTurretAgent(WorldInfo& worldInfo, Agent& agent);
+std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent);
+void doGoalTurretAgent(Goal& goal, Agent& agent);
 
 #endif

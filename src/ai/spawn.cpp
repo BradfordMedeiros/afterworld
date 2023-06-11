@@ -20,7 +20,7 @@ void createEnemyInstance(objid sceneId, glm::vec3 pos, glm::quat rotation, std::
       { "mesh", "../gameresources/build/characters/plaguerobot.gltf" },
       { "physics", "enabled" },
       { "physics_type", "dynamic" },
-      { "agent", "" },
+      { "agent", "basic" },
       { "agent-target", team == "red" ? "blue" : "red" },
       { "spawn-managed", "" },
       { "team", team  },

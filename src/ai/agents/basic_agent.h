@@ -4,8 +4,8 @@
 #include "./common.h"
 
 Agent createBasicAgent(objid id);
+void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent);
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent);
 void doGoalBasicAgent(Goal& goal, Agent& agent);
-void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent);
 
 #endif

@@ -43,12 +43,13 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
     }
     updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(targetId, true), symbols);
   }
-  modassert(targetIds.size() >= 1, "need >= 1 target");
-  updateVec3State(worldInfo, getSymbol("target-position"), gameapi -> getGameObjectPos(targetIds.at(0), true));
 
   for (auto agent : agents){
     if (agent.type == AGENT_BASIC_AGENT){
       detectWorldInfoBasicAgent(worldInfo, agent);
+      continue;
+    }else if(agent.type == AGENT_TURRET){
+      detectWorldInfoTurretAgent(worldInfo, agent);
       continue;
     }
     modassert(false, "detect world info invalid agent type");
@@ -56,14 +57,26 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
 }
 
 
+bool allAgentsUnique(std::vector<Agent> agents){
+  std::set<objid> agentIds;
+  for (auto &agent : agents){
+    if (agentIds.count(agent.id) > 0){
+      return false;
+    }
+    agentIds.insert(agent.id);
+  }
+  return true;
+}
 
 std::vector<Agent> createAgents(){
-  auto agentIds = gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt);
   std::vector<Agent> agents;
-  for (auto &id : agentIds){
+  for (auto &id : gameapi -> getObjectsByAttr("agent", "basic", std::nullopt)){
     agents.push_back(createBasicAgent(id));
   }
-
+  for (auto &id : gameapi -> getObjectsByAttr("agent", "turret", std::nullopt)){
+    agents.push_back(createTurretAgent(id));
+  }
+  modassert(allAgentsUnique(agents), "found agents with duplicate ids");
   return agents;
 }
 
@@ -71,6 +84,8 @@ std::vector<Agent> createAgents(){
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
   if (agent.type == AGENT_BASIC_AGENT){
     return getGoalsForBasicAgent(worldInfo, agent);
+  }else if (agent.type == AGENT_TURRET){
+    return getGoalsForTurretAgent(worldInfo, agent);
   }
   modassert(false, "get goals for agent invalid agent type");
   return {};
@@ -97,6 +112,9 @@ Goal* getOptimalGoal(std::vector<Goal>& goals){
 void doGoal(Goal& goal, Agent& agent){
   if (agent.type == AGENT_BASIC_AGENT){
     doGoalBasicAgent(goal, agent);
+    return;
+  }else if (agent.type == AGENT_TURRET){
+    doGoalTurretAgent(goal, agent);
     return;
   }
   modassert(false, "do goal invalid agent");
