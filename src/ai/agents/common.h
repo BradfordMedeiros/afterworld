@@ -20,4 +20,11 @@ struct TargetData {
   objid id;
 };
 
+struct IdAndPosition {
+  objid id;
+  glm::vec3 position;
+};
+
+std::vector<IdAndPosition> checkVisibleTargets(WorldInfo& worldInfo, objid agentId);
+
 #endif

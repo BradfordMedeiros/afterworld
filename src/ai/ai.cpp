@@ -156,6 +156,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
       auto optimalGoal = getOptimalGoal(goals);
       //modassert(optimalGoal, "no goal for agent");
       if (optimalGoal){
+        modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
         doGoal(*optimalGoal, agent);  
       }
     }

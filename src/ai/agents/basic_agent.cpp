@@ -9,71 +9,60 @@ Agent createBasicAgent(objid id){
   };
 }
 
-std::set<objid> checkVisibleTargets(WorldInfo& worldInfo, objid agentId){
-  auto agentPosition = gameapi -> getGameObjectPos(agentId, true);
-  auto hitobjectVal = gameapi -> contactTestShape(
-    agentPosition, 
-    orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f)), 
-    glm::vec3(1.f, 1.f, 1.f)
-  );
-
-  std::set<objid> hitobjects;
-  for (auto hitobject : hitobjectVal){
-    hitobjects.insert(hitobject.id);
-  }
-
-  std::set<int> symbols = { getSymbol("target") };
-  auto targetAttr = getSingleAttr(agentId, "agent-target");
-  if (targetAttr.has_value()){
-    symbols.insert(getSymbol(targetAttr.value()));
-  }
-  std::set<objid> targetIds = {};
-  auto targetPosVecStates = getVec3StateRefByTag(worldInfo, symbols);
-  for (auto targetPosVecState : targetPosVecStates){
-    TargetData* targetData = anycast<TargetData>(targetPosVecState -> stateInfo.data);
-    modassert(targetData, "target data was null");
-    std::cout << "targetData: " << targetData -> id << std::endl;
-    if (hitobjects.count(targetData -> id) > 0){
-      targetIds.insert(targetData -> id);
-    }
-  }
-
-  return targetIds;
-}
-
-// TODO - add contast test with provided shape 
-// eg gameapi -> contactTest(glm::vec3 pos, glm::quat orientation, glm::vec3 scale, SHAPE)
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
-
-
-  //if (canSee && targetPositions.size() > 0){
-    //updateVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agentId)), targetPositions.at(0));
-  //}
-
-
+  if (visibleTargets.size() > 0){
+    updateVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)), visibleTargets.at(0).position);
+  }
 }
 
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
+  static int idleGoal = getSymbol("idle");
   static int moveToTargetGoal = getSymbol("move-to-target");
+  static int attackTargetGoal = getSymbol("attack-target");
+
+  std::vector<Goal> goals = {};
+
+  goals.push_back(
+    Goal {
+      .goaltype = idleGoal,
+      .goalData = NULL,
+      .score = [&agent](std::any& targetPosition) -> int { 
+        return 5;
+      }
+    }
+  );
 
   auto targetPosition = getVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)));
-  std::vector<Goal> goals = {};
   if (targetPosition.has_value()){
     goals.push_back(
       Goal {
         .goaltype = moveToTargetGoal,
         .goalData = targetPosition.value(),
         .score = [&agent](std::any& targetPosition) -> int { 
-          auto targetPos = anycast<glm::vec3>(targetPosition);
-          modassert(targetPos, "target pos was null");
-          auto distance = glm::distance(*targetPos, gameapi -> getGameObjectPos(agent.id, true));
-          auto score = distance > 2 ? 10 : -1; 
-          return score;
+          return 10;
         }
       }
     );
   }
+
+  goals.push_back(
+    Goal {
+      .goaltype = attackTargetGoal,
+      .goalData = NULL,
+      .score = [&agent, &worldInfo](std::any&) -> int {
+          auto targetPosition = getVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)));
+          if (targetPosition.has_value()){
+            auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
+            if (distance < 5){
+              return 100;
+            }
+          }
+          return 0;
+      }
+    }
+  );
+
   return goals;
 }
 
