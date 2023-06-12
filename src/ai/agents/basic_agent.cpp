@@ -2,12 +2,20 @@
 
 extern CustomApiBindings* gameapi;
 
+struct AgentAttackState {
+  float lastAttackTime;
+};
+
 Agent createBasicAgent(objid id){
 	return Agent{
     .id = id,
     .type = AGENT_BASIC_AGENT,
+    .agentData = AgentAttackState {
+      .lastAttackTime = 0.f,
+    },
   };
 }
+
 
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
@@ -66,16 +74,52 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   return goals;
 }
 
+
+void ensurePlayingAnimation(objid agentId, int animationSymbol){
+  // not actually implementing
+}
+
+void fireProjectile(glm::vec3 fromPosition, glm::vec3 toPosition){
+
+}
+
+void moveToTarget(objid agentId, glm::vec3 targetPosition){
+  ensurePlayingAnimation(agentId, getSymbol("running"));
+
+  // right now this is just setting the obj position, but probably should rely on the navmesh, probably should be applying impulse instead?
+  auto agentPos = gameapi -> getGameObjectPos(agentId, true);
+  auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, agentPos.y, targetPosition.z));
+  auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 1 * gameapi -> timeElapsed());
+  gameapi -> setGameObjectPosition(agentId, newPos, true); 
+  gameapi -> setGameObjectRot(agentId, towardTarget, true);
+}
+void attackTarget(Agent& agent){
+  AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+  modassert(attackState, "attackState invalid");
+
+  float currentTime = gameapi -> timeSeconds(false);
+  if (currentTime - attackState -> lastAttackTime > 5.f){
+    ensurePlayingAnimation(agent.id, getSymbol("attack"));
+    std::cout << "attack placeholder" << std::endl;
+    attackState -> lastAttackTime = currentTime;
+    fireProjectile();
+  }
+}
+
 void doGoalBasicAgent(Goal& goal, Agent& agent){
+  static int idleGoal = getSymbol("idle");
   static int moveToTargetGoal = getSymbol("move-to-target");
-  if (goal.goaltype == moveToTargetGoal){
+  static int attackTargetGoal = getSymbol("attack-target");
+
+  if (goal.goaltype == idleGoal){
+    // do nothing
+  }else if (goal.goaltype == moveToTargetGoal){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
     modassert(targetPosition, "target pos was null");
-    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
-    auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition -> x, agentPos.y, targetPosition -> z));
-    auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 1 * gameapi -> timeElapsed());
-    gameapi -> setGameObjectPosition(agent.id, newPos, true);  // probably should be applying impulse instead?
-    gameapi -> setGameObjectRot(agent.id, towardTarget, true);
+    moveToTarget(agent.id, *targetPosition);
+  }else if (goal.goaltype == attackTargetGoal){
+    // not yet implemented
+    attackTarget(agent);
   }
 }
 

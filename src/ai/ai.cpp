@@ -28,6 +28,7 @@ extern CustomApiBindings* gameapi;
 
 struct AiData {
   WorldInfo worldInfo;
+  std::vector<Agent> agents;
 };
 
 
@@ -134,6 +135,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
       .boolValues = {},
       .vec3Values = {},
     };
+    aiData -> agents = createAgents();
     return aiData;
   };
 
@@ -144,19 +146,18 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-    auto agents = createAgents();
 
     // probably don't want to reset world state every frame, but ok for now
     // consider what data should and shouldn't be per frame (per data refresh?)
     aiData -> worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
-    detectWorldInfo(aiData -> worldInfo, agents);
+    detectWorldInfo(aiData -> worldInfo, aiData -> agents);
 
-    for (auto &agent : agents){
+    for (auto &agent : aiData -> agents){
       auto goals = getGoalsForAgent(aiData -> worldInfo, agent);
       auto optimalGoal = getOptimalGoal(goals);
       //modassert(optimalGoal, "no goal for agent");
       if (optimalGoal){
-        modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
+        //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
         doGoal(*optimalGoal, agent);  
       }
     }
