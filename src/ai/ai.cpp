@@ -30,9 +30,10 @@ struct AiData {
   WorldInfo worldInfo;
 };
 
-void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
-  static int targetSymbol = getSymbol("target");
 
+// based on goal-info:targets update vec3 position for each - target-pos-<objid> with team symbol from attr
+void updateWorldStateTargets(WorldInfo& worldInfo){
+  static int targetSymbol = getSymbol("target");
   auto targetIds = gameapi -> getObjectsByAttr("goal-info", "target", std::nullopt);
   for (auto targetId : targetIds){
     std::string stateName = std::string("target-pos-") + std::to_string(targetId);
@@ -41,9 +42,12 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
     if (team.has_value()){
       symbols.insert(getSymbol(team.value()));
     }
-    updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(targetId, true), symbols);
+    updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(targetId, true), symbols, TargetData { .id = targetId });
   }
+}
 
+void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
+  updateWorldStateTargets(worldInfo);
   for (auto agent : agents){
     if (agent.type == AGENT_BASIC_AGENT){
       detectWorldInfoBasicAgent(worldInfo, agent);

@@ -8,6 +8,7 @@
 struct StateInfo {
   int symbol;
   std::set<int> tags;
+  std::any data;
 };
 
 struct BoolState { 
@@ -25,10 +26,13 @@ struct WorldInfo {
 };
 
 void updateBoolState(WorldInfo& worldInfo, int symbol, bool value);
-void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags = {});
+void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags = {}, std::any data = NULL);
 std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol);
+std::optional<Vec3State*> getVec3StateRef(WorldInfo& worldInfo, int symbol);
+
 std::optional<bool> getBoolState(WorldInfo& worldInfo, int symbol);
 std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tags);
+std::vector<Vec3State*> getVec3StateRefByTag(WorldInfo& worldInfo, std::set<int> tags);
 
 void printWorldInfo(WorldInfo& worldInfo);
 

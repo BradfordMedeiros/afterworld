@@ -9,46 +9,54 @@ Agent createBasicAgent(objid id){
   };
 }
 
-// TODO - add contast test with provided shape 
-// eg gameapi -> contactTest(glm::vec3 pos, glm::quat orientation, glm::vec3 scale, SHAPE)
-void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
-  auto agentPosition = gameapi -> getGameObjectPos(agent.id, true);
-  auto hitobjects = gameapi -> contactTestShape(
+std::set<objid> checkVisibleTargets(WorldInfo& worldInfo, objid agentId){
+  auto agentPosition = gameapi -> getGameObjectPos(agentId, true);
+  auto hitobjectVal = gameapi -> contactTestShape(
     agentPosition, 
     orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f)), 
     glm::vec3(1.f, 1.f, 1.f)
   );
-  
-  //std::cout << "hit objects: [";
-  //for (auto &hitobject : hitobjects){
-  //  std::cout << hitobject.id << "(" + gameapi -> getGameObjNameForId(hitobject.id).value() + ") ";
-  //  if (aboutEqual(hitobject.position, ))
-  //}
-//
-//  //// this is hackey, since i'm comparing to make sure the position is just close to the target.  Should add a bucket field so I can get additional info about the state i care about here to resolve the id easily
-//
-//
-//
-  //std::cout << "]" << std::endl;
 
-  bool canSee = true;  // should be determined based on raycast to any targets
-
-  /////////////////////////////
+  std::set<objid> hitobjects;
+  for (auto hitobject : hitobjectVal){
+    hitobjects.insert(hitobject.id);
+  }
 
   std::set<int> symbols = { getSymbol("target") };
-  auto targetAttr = getSingleAttr(agent.id, "agent-target");
+  auto targetAttr = getSingleAttr(agentId, "agent-target");
   if (targetAttr.has_value()){
     symbols.insert(getSymbol(targetAttr.value()));
   }
-  auto targetPositions = getVec3StateByTag(worldInfo, symbols);
-  if (canSee && targetPositions.size() > 0){
-    updateVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)), targetPositions.at(0));
+  std::set<objid> targetIds = {};
+  auto targetPosVecStates = getVec3StateRefByTag(worldInfo, symbols);
+  for (auto targetPosVecState : targetPosVecStates){
+    TargetData* targetData = anycast<TargetData>(targetPosVecState -> stateInfo.data);
+    modassert(targetData, "target data was null");
+    std::cout << "targetData: " << targetData -> id << std::endl;
+    if (hitobjects.count(targetData -> id) > 0){
+      targetIds.insert(targetData -> id);
+    }
   }
+
+  return targetIds;
+}
+
+// TODO - add contast test with provided shape 
+// eg gameapi -> contactTest(glm::vec3 pos, glm::quat orientation, glm::vec3 scale, SHAPE)
+void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
+  auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
+
+
+  //if (canSee && targetPositions.size() > 0){
+    //updateVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agentId)), targetPositions.at(0));
+  //}
+
 
 }
 
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   static int moveToTargetGoal = getSymbol("move-to-target");
+
   auto targetPosition = getVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)));
   std::vector<Goal> goals = {};
   if (targetPosition.has_value()){

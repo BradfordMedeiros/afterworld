@@ -13,15 +13,17 @@ void updateBoolState(WorldInfo& worldInfo, int symbol, bool value){
     .stateInfo = StateInfo {
       .symbol = symbol,
       .tags = {},
+      .data = {},
     },
     .value = value,
   });
 }
-void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags){
+void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags, std::any data){
   for (auto &vec3Value : worldInfo.vec3Values){
     if (vec3Value.stateInfo.symbol == symbol){
       vec3Value.value = value;
       vec3Value.stateInfo.tags = tags;
+      vec3Value.stateInfo.data = data;
       return;
     }
   }
@@ -29,6 +31,7 @@ void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set
     .stateInfo = StateInfo {
       .symbol = symbol,
       .tags = tags,
+      .data = data,
     },
     .value = value,
   });
@@ -43,23 +46,42 @@ std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol){
   return std::nullopt;
 }
 
+std::optional<Vec3State*> getVec3StateRef(WorldInfo& worldInfo, int symbol){
+  for (auto &vec3Value : worldInfo.vec3Values){
+    if (vec3Value.stateInfo.symbol == symbol){
+      return &vec3Value;
+    }
+  }
+  return std::nullopt;
+}
+
+std::vector<Vec3State*> getVec3StateRefByTag(WorldInfo& worldInfo, std::set<int> tags){
+  std::vector<Vec3State*> vecs = {};
+  for (auto &vecState : worldInfo.vec3Values){
+    bool allTagsFound = true;
+    for (auto tag : tags){
+      bool stateHasTag = vecState.stateInfo.tags.find(tag) != vecState.stateInfo.tags.end();
+      if (!stateHasTag){
+        allTagsFound = false;
+        break;
+      }   
+    }
+    if (allTagsFound){
+      vecs.push_back(&vecState);
+    }
+  }
+  return vecs;
+}
+
 std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tags){
 	std::vector<glm::vec3> vecs = {};
-	for (auto &vecState : worldInfo.vec3Values){
-		bool allTagsFound = true;
-		for (auto tag : tags){
-			bool stateHasTag = vecState.stateInfo.tags.find(tag) != vecState.stateInfo.tags.end();
-			if (!stateHasTag){
-				allTagsFound = false;
-				break;
-			}		
-		}
-		if (allTagsFound){
-			vecs.push_back(vecState.value);
-		}
+	for (auto vecState : getVec3StateRefByTag(worldInfo, tags)){
+		vecs.push_back(vecState -> value);
 	}
 	return vecs;
 }
+
+
 
 std::optional<bool> getBoolState(WorldInfo& worldInfo, int symbol){
   for (auto &boolValue : worldInfo.boolValues){

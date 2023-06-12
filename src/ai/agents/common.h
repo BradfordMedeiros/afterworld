@@ -16,4 +16,8 @@ struct Goal {
   std::function<int(std::any&)> score;
 };
 
+struct TargetData {
+  objid id;
+};
+
 #endif
