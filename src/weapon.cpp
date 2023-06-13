@@ -38,18 +38,10 @@ struct CurrentGun {
   GunAnimation gunState;
 };
 
-struct ParticleAndEmitter {
-  std::string particle;
-  objid particleId;
-};
-
-struct MaterialToParticle {
-  std::string material;
-  std::optional<ParticleAndEmitter> hitParticle;  // wherever gun hits, gets parented to the surface
-  std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented. 
-};
 
 struct Weapons {
+  std::vector<MaterialToParticle> materials;
+
   objid playerId;
   objid sceneId;
   bool isHoldingLeftMouse;
@@ -64,85 +56,10 @@ struct Weapons {
   glm::vec3 movementVec;
 
   std::optional<objid> raycastLine;
-  std::vector<MaterialToParticle> materials;
   std::optional<objid> heldItem;
 };
 
-
-
 std::string parentName = ">maincamera";
-
-
-std::string templateValues(std::string& particleStr, std::map<std::string, std::string> templateValues){
-  auto particleStrTemplated = particleStr;
-  for (auto &[valueToReplace, replacedValue] : templateValues){
-    particleStrTemplated = std::regex_replace(particleStrTemplated, std::regex(valueToReplace), replacedValue);
-  }
-  return particleStr;
-}
-GameobjAttributes particleAttributes(std::string& particle){
-  auto templateEmitLine = split(particle, ';');
-
-  GameobjAttributes particleAttr {
-    .stringAttributes = { 
-      { "state", "disabled" },    // default should keep
-      { "physics", "disabled" },  
-      { "layer", "no_depth" },    ///////
-    },
-    .numAttributes = { { "duration", 10.f } },
-    .vecAttr = {  
-    },
-  };
-
-  for (auto &line : templateEmitLine){
-    auto keyValuePair = split(line, ':');
-    modassert(keyValuePair.size() == 2, "invalid emitter particle attr, line: " + line + ", size = " + std::to_string(keyValuePair.size()));
-    addFieldDynamic(particleAttr, keyValuePair.at(0), keyValuePair.at(1));  // should probably use only explicitly allowed api methods
-  }
-  return particleAttr;
-}
-
-std::vector<MaterialToParticle> loadMaterials(objid sceneId){
-  std::vector<MaterialToParticle> materialToParticles;
-  auto query = gameapi -> compileSqlQuery("select material, hit-particle, particle from materials", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  for (auto &row : result){
-    auto particleAttr = particleAttributes(row.at(1));
-    auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + row.at(0), particleAttr, submodelAttributes);
-
-    auto splashParticleAttr = particleAttributes(row.at(2));
-    auto splashEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-splashparticle-" + row.at(0), splashParticleAttr, submodelAttributes);
-
-    materialToParticles.push_back(MaterialToParticle {
-      .material = row.at(0),
-      .hitParticle = ParticleAndEmitter {
-        .particle = row.at(1),
-        .particleId = materialEmitterId.value(),
-      },
-      .splashParticle = ParticleAndEmitter {
-        .particle = row.at(2),
-        .particleId = splashEmitterId.value(),
-      },
-    });
-  }
-  return materialToParticles;
-}
-std::optional<std::string> materialTypeForObj(objid id){
-  auto attr = gameapi -> getGameObjectAttr(id);
-  return getStrAttr(attr, "material");
-}
-std::optional<MaterialToParticle*> getHitMaterial(std::vector<MaterialToParticle>& materials, std::string& materialName){
-  for (auto &material : materials){
-    if (material.material == materialName){
-      return &material;
-    }
-  }
-  return std::nullopt;
-}
 
 
 void saveGunTransform(Weapons& weapons){
@@ -175,8 +92,6 @@ void saveGunTransform(Weapons& weapons){
   }
 }
 
-
-
 void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string projectileParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   if (weapons.currentGun.gunId.has_value()){
     weapons.currentGun.name = "";
@@ -202,7 +117,6 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
       gameapi -> removeObjectById(weapons.currentGun.projectileParticles.value());
       weapons.currentGun.projectileParticles = std::nullopt;
     }
-
   }
 
   std::map<std::string, std::string> stringAttributes = { { "mesh", modelpath }, { "layer", "no_depth" } };
@@ -230,22 +144,12 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     weapons.currentGun.soundId = soundId;  
   }
 
-  if (particle != ""){
-    auto particleAttr = particleAttributes(particle);
-    weapons.currentGun.muzzleParticle = gameapi -> makeObjectAttr(sceneId, "+code-muzzleparticles", particleAttr, submodelAttributes);
-  }
-  if (hitParticle != ""){
-    auto particleAttr = particleAttributes(hitParticle);
-    weapons.currentGun.hitParticles = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle", particleAttr, submodelAttributes);
-  }
-
-  if (projectileParticle != ""){
-    //projectileParticles
-    auto projectileAttr = particleAttributes(projectileParticle);
-    weapons.currentGun.projectileParticles = gameapi -> makeObjectAttr(sceneId, "+code-projectileparticle", projectileAttr, submodelAttributes);
-  }
+  weapons.currentGun.muzzleParticle = createParticleEmitter(sceneId, particle, "+code-muzzleparticles");
+  weapons.currentGun.hitParticles = createParticleEmitter(sceneId, hitParticle, "+code-hitparticle");
+  weapons.currentGun.projectileParticles = createParticleEmitter(sceneId, projectileParticle, "+code-projectileparticle");
 
   weapons.currentGun.name = name;
+
   auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
   modassert(parent.has_value(), parentName + " does not exist in scene so cannot create gun");
   gameapi -> makeParent(gunId.value(), parent.value());
@@ -333,7 +237,6 @@ std::string weaponsToString(Weapons& weapons){
   return str;
 }
 
-
 bool canFireGunNow(Weapons& weapons, float elapsedMilliseconds){
   auto timeSinceLastShot = elapsedMilliseconds - weapons.currentGun.lastShootingTime;
   bool lessThanFiringRate = timeSinceLastShot >= (0.001f * weapons.weaponParams.firingRate);
@@ -342,7 +245,6 @@ bool canFireGunNow(Weapons& weapons, float elapsedMilliseconds){
 void startRecoil(Weapons& weapons){
   weapons.currentGun.recoilStart = gameapi -> timeSeconds(false);
 }
-
 
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
@@ -367,7 +269,6 @@ std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset){
   if (weapons.raycastLine.has_value()){
     gameapi -> freeLine(weapons.raycastLine.value());
   }
-  
   
   //auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
   //weapons.raycastLine = raycastLineId;
@@ -413,7 +314,6 @@ void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
         splashEmitterId = material.value() -> splashParticle.value().particleId;
       }
     }
-
 
     if (weapons.currentGun.hitParticles.has_value()){
       emitterId = weapons.currentGun.hitParticles.value();
@@ -480,7 +380,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
 }
 
 
-bool swayFromMouse = false;
+bool swayFromMouse = true;
 glm::vec3 getSwayVelocity(Weapons& weapons){
   if (swayFromMouse){
     debugAssertForNow(false, "sway from mouse should take into account sensitivity");
@@ -703,8 +603,6 @@ void modifyPhysicsForHeldItem(Weapons& weapons){
         { "physics_angle", glm::vec3(0.f, 0.f, 0.f) }, 
         { "physics_linear", glm::vec3(1.f, 1.f, 1.f) }, 
         { "physics_gravity", glm::vec3(0.f, 0.f, 0.f) }, 
-
-
       }, 
       .vec4 = { } 
     },
@@ -717,6 +615,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Weapons* weapons = new Weapons;
+    weapons -> materials = loadMaterials(sceneId);
 
     weapons -> playerId = gameapi -> getGameObjectByName(parentName, sceneId, false).value();
     weapons -> sceneId = sceneId;
@@ -735,7 +634,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .muzzleParticle = std::nullopt,
     };
 
-    weapons -> materials = loadMaterials(sceneId);
     weapons -> heldItem = std::nullopt;
 
     reloadTraitsValues(*weapons);
