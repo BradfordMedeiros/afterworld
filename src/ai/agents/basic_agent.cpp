@@ -79,7 +79,7 @@ void ensurePlayingAnimation(objid agentId, int animationSymbol){
   // not actually implementing
 }
 
-void fireProjectile(glm::vec3 fromPosition, glm::vec3 toPosition){
+void fireProjectile(){
 
 }
 

@@ -59,9 +59,6 @@ struct Weapons {
   std::optional<objid> heldItem;
 };
 
-std::string parentName = ">maincamera";
-
-
 void saveGunTransform(Weapons& weapons){
   debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
 
@@ -150,11 +147,9 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
 
   weapons.currentGun.name = name;
 
-  auto parent = gameapi -> getGameObjectByName(parentName, sceneId, false);
-  modassert(parent.has_value(), parentName + " does not exist in scene so cannot create gun");
-  gameapi -> makeParent(gunId.value(), parent.value());
+  gameapi -> makeParent(gunId.value(), weapons.playerId);
   if (weapons.currentGun.soundId.has_value()){
-    gameapi -> makeParent(weapons.currentGun.soundId.value(), parent.value());
+    gameapi -> makeParent(weapons.currentGun.soundId.value(), weapons.playerId);
   }
   if (weapons.currentGun.muzzleParticle.has_value()){
     gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.currentGun.gunId.value());
@@ -251,8 +246,7 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
 }
 
 glm::vec3 playerPosWorld(Weapons& weapons){
-  auto cameraObj = gameapi -> getGameObjectByName(parentName, weapons.sceneId, false);
-  auto cameraPos = gameapi -> getGameObjectPos(cameraObj.value(), true); 
+  auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId, true); 
   return cameraPos;
 }
 
@@ -260,9 +254,8 @@ glm::vec3 playerPosWorld(Weapons& weapons){
 float maxRaycastDistance = 500.f;
 std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
-  auto playerId = gameapi -> getGameObjectByName(parentName, weapons.sceneId, false);
-  auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
-  auto rot = gameapi -> getGameObjectRotation(playerId.value(), true) *  orientationOffsetQuat;
+  auto mainobjPos = gameapi -> getGameObjectPos(weapons.playerId, true);
+  auto rot = gameapi -> getGameObjectRotation(weapons.playerId, true) *  orientationOffsetQuat;
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
 
@@ -352,9 +345,8 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), false);
   }
 
-  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
-  auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
-  auto playerPos = gameapi -> getGameObjectPos(playerId.value(), true);
+  auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+  auto playerPos = gameapi -> getGameObjectPos(weapons.playerId, true);
   if (weapons.currentGun.muzzleParticle.has_value()){
     auto gunPosition = gameapi -> getGameObjectPos(weapons.currentGun.gunId.value(), true);
     auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
@@ -386,8 +378,7 @@ glm::vec3 getSwayVelocity(Weapons& weapons){
     debugAssertForNow(false, "sway from mouse should take into account sensitivity");
     return glm::vec3(weapons.lookVelocity.x, weapons.lookVelocity.y, 0.f);
   }
-  auto parent = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
-  auto parentRot = gameapi -> getGameObjectRotation(parent.value(), false);
+  auto parentRot = gameapi -> getGameObjectRotation(weapons.playerId, false);
   //modlog("weapons", "move velocity: " + print(weapons.movementVec));
   auto newPos = glm::inverse(parentRot) * weapons.movementVec;
   //std::cout << "sway velocity: " << print(newPos) << std::endl;
@@ -533,12 +524,11 @@ void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
 
 // draw a circle at a distance from the player with a certain radius
 // this is independent of fov, and should be
-void drawBloom(objid id, float distance, float radius){
+void drawBloom(Weapons& weapons, objid id, float distance, float radius){
   // i'd rather do this on a screen only texture
   modassert(distance < 0, "distance must be negative (forward -z)");
-  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(id), false);
-  auto mainobjPos = gameapi -> getGameObjectPos(playerId.value(), true);
-  auto mainobjRot = gameapi -> getGameObjectRotation(playerId.value(), true);
+  auto mainobjPos = gameapi -> getGameObjectPos(weapons.playerId, true);
+  auto mainobjRot = gameapi -> getGameObjectRotation(weapons.playerId, true);
   auto toPos = mainobjPos + mainobjRot * glm::vec3(0.f, 0.f, distance);
   gameapi -> drawLine(mainobjPos, toPos, false, id, reticleColor, std::nullopt, std::nullopt);
   
@@ -567,9 +557,9 @@ void handlePickedUpItem(Weapons& weapons){
   if (!weapons.heldItem.has_value()){
     return;
   }
-  auto playerId = gameapi -> getGameObjectByName(parentName, gameapi -> listSceneId(weapons.currentGun.gunId.value()), false);
-  auto playerPos = gameapi -> getGameObjectPos(playerId.value(), true);
-  auto playerRotation = gameapi -> getGameObjectRotation(playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+
+  auto playerPos = gameapi -> getGameObjectPos(weapons.playerId, true);
+  auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
   auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
 
@@ -617,7 +607,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     Weapons* weapons = new Weapons;
     weapons -> materials = loadMaterials(sceneId);
 
-    weapons -> playerId = gameapi -> getGameObjectByName(parentName, sceneId, false).value();
+    weapons -> playerId = gameapi -> getGameObjectByName(">maincamera", sceneId, false).value();
     weapons -> sceneId = sceneId;
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
@@ -746,7 +736,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
     Weapons* weapons = static_cast<Weapons*>(data);
     auto bloomAmount = calculateBloomAmount(*weapons);
-    drawBloom(id, -1.f, glm::max(0.002f, bloomAmount)); // 0.002f is just a min amount for visualization, not actual bloom
+    drawBloom(*weapons, id, -1.f, glm::max(0.002f, bloomAmount)); // 0.002f is just a min amount for visualization, not actual bloom
     if (weapons -> weaponParams.canHold && weapons -> isHoldingLeftMouse){
       tryFireGun(*weapons, gameapi -> listSceneId(id), bloomAmount);
     }
