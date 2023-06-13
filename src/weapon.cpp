@@ -245,11 +245,6 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
 
-glm::vec3 playerPosWorld(Weapons& weapons){
-  auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId, true); 
-  return cameraPos;
-}
-
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
 std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset){
@@ -267,15 +262,14 @@ std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset){
   //weapons.raycastLine = raycastLineId;
   //for (auto &hitpoint : hitpoints){
   //  std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
-  //  showDebugHitmark(hitpoint, playerId.value());
+  //  showDebugHitmark(hitpoint, weapons.playerId);
   //}
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 orientationOffset){
+std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 cameraPos, glm::vec3 orientationOffset){
   auto hitpoints = doRaycast(weapons, orientationOffset);
   if (hitpoints.size() > 0){
-    auto cameraPos = playerPosWorld(weapons);
     auto closestIndex = closestHitpoint(hitpoints, cameraPos);
     return { hitpoints.at(closestIndex) };
   }
@@ -283,8 +277,9 @@ std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 orientationO
 }
 
 
-void fireRaycast(Weapons& weapons, objid sceneId, glm::vec3 orientationOffset){
-  auto hitpoints = doRaycastClosest(weapons, orientationOffset);
+void fireRaycast(Weapons& weapons, glm::vec3 orientationOffset){
+  auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId, true);
+  auto hitpoints = doRaycastClosest(weapons, cameraPos, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
@@ -357,10 +352,9 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   weapons.currentGun.lastShootingTime = now;
   startRecoil(weapons);
 
-
   glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (weapons.weaponParams.isRaycast){
-    fireRaycast(weapons, sceneId, shootingVecAngle);
+    fireRaycast(weapons, shootingVecAngle);
   }
   if (weapons.currentGun.projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
@@ -428,7 +422,6 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   //std::cout << "gun: newpos: " << print(newPos) << std::endl;
   gameapi -> setGameObjectPosition(gunId, newPos, false);
 }
-
 
 void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed){
   float swayAmountX = weapons.lookVelocity.x;
@@ -537,7 +530,6 @@ void drawBloom(Weapons& weapons, objid id, float distance, float radius){
   }else{
     drawCircle(id, toPos, radius, mainobjRot);
   }
-  
 }
 
 float calculateBloomAmount(Weapons& weapons){
@@ -546,10 +538,6 @@ float calculateBloomAmount(Weapons& weapons){
   return glm::max(weapons.currentGun.minBloom, (weapons.currentGun.totalBloom - weapons.currentGun.minBloom) * slerpAmount + weapons.currentGun.minBloom);
 }
 
-
-void limitVelocity(objid id, glm::vec3 velocity){
-
-}
 
 // Should interpolate.  Looks better + prevent clipping bugs
 // Might be interesting to incorporate things like mass and stuff
@@ -654,7 +642,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         weapons -> isHoldingRightMouse = true;
         auto hitpoints = doRaycast(*weapons, glm::vec3(0.f, 0.f, -1.f));
         if (hitpoints.size() > 0){
-          auto cameraPos = playerPosWorld(*weapons);
+          auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId, true);
           auto closestIndex = closestHitpoint(hitpoints, cameraPos);
           float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons -> selectDistance){
@@ -674,7 +662,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         }else{
         auto hitpoints = doRaycast(*weapons, glm::vec3(0.f, 0.f, -1.f));
         if (hitpoints.size() > 0){
-            auto cameraPos = playerPosWorld(*weapons);
+            auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId, true);
             auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
             auto hitpoint = hitpoints.at(closestHitpointIndex);
             float distance = glm::length(cameraPos - hitpoint.point);
