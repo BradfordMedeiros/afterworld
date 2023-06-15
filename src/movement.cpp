@@ -260,14 +260,23 @@ struct SoundConfig {
 };
 void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
   if (config.jumpClip != ""){
+    if (movement.jumpSoundObjId.has_value()){
+      gameapi -> removeObjectById(movement.jumpSoundObjId.value());
+    }
     movement.jumpSoundObjId = createSound(id, "&code-movement-jump", config.jumpClip);
   }
   if (config.landClip != ""){
+    if (movement.landSoundObjId.has_value()){
+      gameapi -> removeObjectById(movement.landSoundObjId.value());
+    }
     movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
   }
   movement.lastMoveSoundPlayTime = 0.f;
   movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
   if (config.moveClip != ""){
+    if (movement.moveSoundObjId.has_value()){
+      gameapi -> removeObjectById(movement.moveSoundObjId.value());
+    }
     movement.moveSoundObjId = createSound(id, "&code-move", config.moveClip);
   }
 }
@@ -500,17 +509,14 @@ glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec
   return relativeToPlayer;
 }
 
-void changeTargetId(Movement& movement, objid id){
+void changeTargetId(Movement& movement, objid id, bool active){
     movement.playerId =  id;
     movement.goForward = false;
     movement.goBackward = false;
     movement.goLeft = false;
     movement.goRight = false;
-    movement.active = true;
+    movement.active = active;
 
-    movement.jumpSoundObjId = std::nullopt;
-    movement.landSoundObjId = std::nullopt;
-    movement.moveSoundObjId = std::nullopt;
     movement.lastMoveSoundPlayTime = 0.f;
     movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
@@ -537,7 +543,35 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
-    changeTargetId(*movement, gameapi -> getGameObjectByName(">maincamera", sceneId, false).value());
+    movement -> playerId =  0;
+    movement -> goForward = false;
+    movement -> goBackward = false;
+    movement -> goLeft = false;
+    movement -> goRight = false;
+    movement -> active = false;
+
+    movement -> jumpSoundObjId = std::nullopt;
+    movement -> landSoundObjId = std::nullopt;
+    movement -> moveSoundObjId = std::nullopt;
+    movement -> lastMoveSoundPlayTime = 0.f;
+    movement -> lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+
+    movement -> lookVelocity = glm::vec2(0.f, 0.f);
+    movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
+    movement -> xRot = 0.f;
+    movement -> yRot = 0.f;
+    movement -> isGrounded = false;
+    movement -> lastFrameIsGrounded = false;
+    movement -> facingWall = false;
+    movement -> facingLadder = false;
+    movement -> attachedToLadder = false;
+
+    movement -> waterObjIds = {};
+    movement -> isCrouching = false;
+    movement -> shouldBeCrouching = false;
+    movement -> lastCrouchTime = -10000.f;  // so can immediately crouch
+
+    //changeTargetId(*movement, gameapi -> getGameObjectByName(">maincamera", sceneId, false).value(), false);
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -608,17 +642,14 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == '9'){
-      static bool onMainCamera = true;
-      onMainCamera != onMainCamera;
-      if (onMainCamera){
-
-      }else{
-
-      }
-      std::cout << "toggle camera placeholder " << std::endl;
-      return;
+    if (key == '8' && action == 1){
+      auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> playerId), false).value();
+      gameapi -> sendNotifyMessage("request:change-control", obj);
+    }else if (key == '9' && action == 1){
+      auto obj = gameapi -> getGameObjectByName(">maincamera2", gameapi -> listSceneId(movement -> playerId), false).value();
+      gameapi -> sendNotifyMessage("request:change-control", obj);
     }
+
   };
   binding.onMouseCallback = [](objid _, void* data, int button, int action, int mods) -> void {
     if (isPaused()){
@@ -801,7 +832,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       Movement* movement = static_cast<Movement*>(data);
       auto objIdValue = anycast<objid>(value); 
       modassert(objIdValue != NULL, "movement - request change control value invalid");
-      movement -> active = *objIdValue == id;
+      changeTargetId(*movement, *objIdValue, true);
     }
   };
 

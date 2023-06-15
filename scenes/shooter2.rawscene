@@ -213,9 +213,6 @@ console:rotation:0 0 1 180
 #console:texture:gentexture-ingame-ui-texture
 console:tint:0 0.6 1 1
 
-
->maincamera:script:native/movement:1
-
 >maincamera:position:0 50 100
 >maincamera:physics_angle:0.000000 0.000000 0.000000
 >maincamera:physics:enabled
@@ -230,6 +227,20 @@ console:tint:0 0.6 1 1
 >maincamera:goal-conditions-val:20
 >maincamera:team:blue
 
+>maincamera2:position:2 50 100
+>maincamera2:physics_angle:0.000000 0.000000 0.000000
+>maincamera2:physics:enabled
+>maincamera2:physics_velocity:0 0 -10
+>maincamera2:physics_type:dynamic
+>maincamera2:physics_gravity:0 -9.81 0
+>maincamera2:physics_shape:shape_sphere
+>maincamera2:goal-info:target
+>maincamera2:goal-type:move
+>maincamera2:goal-value:5
+>maincamera2:goal-conditions:in-range
+>maincamera2:goal-conditions-val:20
+>maincamera2:team:blue
+
 
 #!light:position:0 -5 5
 
@@ -242,7 +253,7 @@ enemy:tint:1 0 0 1
 #enemy:goal:idle-enemy
 enemy:goal-type:idle
 enemy:goal-value:2
-enemy:agent:true
+enemy:agent:basic
 enemy:agent-target:blue
 enemy:goal-info:target
 enemy:team:red
@@ -266,11 +277,11 @@ spawnpoint:texture:../gameresources/textures/controls/up-down.png
 spawnpoint:position:0 -27 60
 spawnpoint:spawn:true
 
-spawnpoint2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-spawnpoint2:scale:0.25 0.05 1.25
-spawnpoint2:texture:../gameresources/textures/controls/up-down.png
-spawnpoint2:position:-5 -27 60
-spawnpoint2:spawn:true
+#spawnpoint2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#spawnpoint2:scale:0.25 0.05 1.25
+#spawnpoint2:texture:../gameresources/textures/controls/up-down.png
+#spawnpoint2:position:-5 -27 60
+#spawnpoint2:spawn:true
 
 
 loadtexture:texture:../gameresources/textures/controls/up-down.png
@@ -291,3 +302,5 @@ ingame:script:native/in-game-ui
 sounds:script:native/sound
 water:script:native/water
 ai:script:native/ai
+movement:script:native/movement:1
+
