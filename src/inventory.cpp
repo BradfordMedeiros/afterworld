@@ -44,16 +44,15 @@ bool hasGun(std::string& gun){
 
 CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
-   binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
    	if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "selected value invalid");
-      auto gameObjId = std::atoi(strValue -> c_str());
-      if (!gameapi -> getGameObjNameForId(gameObjId).has_value()){
+      auto gameObjId = anycast<objid>(value); 
+      modassert(gameObjId != NULL, "inventory selected value invalid");
+      if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
         return;
       }
 
-  		auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+  		auto objAttr =  gameapi -> getGameObjectAttr(*gameObjId);
   		auto pickup = getStrAttr(objAttr, "pickup");
   		if (pickup.has_value()){
   			auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
@@ -67,7 +66,7 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 
  		    //gameapi -> removeObjectById(gameObjId);
   			// fake delete because of bug need to fix.  Obviously can't stay like this
- 			  gameapi -> setGameObjectPosition(gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
+ 			  gameapi -> setGameObjectPosition(*gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
 
  			  if (pickupTrigger.has_value()){
  			  	gameapi -> sendNotifyMessage(pickupTrigger.value(), std::to_string(newItemCount));
@@ -76,12 +75,12 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == "request-change-gun"){
-      auto strValue = std::get_if<std::string>(&value); 
+      auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "selected value invalid");
       if (hasGun(*strValue)){
         gameapi -> sendNotifyMessage("change-gun", *strValue);
       }
     }
-  });
+  };
 	return binding;
 }

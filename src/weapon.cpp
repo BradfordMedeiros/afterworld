@@ -682,10 +682,10 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
   };
-  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     Weapons* weapons = static_cast<Weapons*>(data);
     if (key == "change-gun"){
-      auto strValue = std::get_if<std::string>(&value); 
+      auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "change-gun value invalid");
       auto value = *strValue;
       if (value != weapons -> currentGun.name){
@@ -698,18 +698,16 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (key == "save-gun"){
       saveGunTransform(*weapons);
     }else if (key == "velocity"){
-      auto strValue = std::get_if<std::string>(&value);   // would be nice to send the vec3 directly, but notifySend does not support
+      auto strValue = anycast<std::string>(value);   // would be nice to send the vec3 directly, but notifySend does not support
       modassert(strValue != NULL, "velocity value invalid");  
       weapons -> movementVec = parseVec(*strValue);
       weapons -> movementVelocity = glm::length(weapons -> movementVec);
       //std::cout << "speed is: " << weapons -> movementVelocity << std::endl;
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "reload-traits:weapon reload value invalid");
       reloadTraitsValues(*weapons);
     }
-  });
+  };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     if (isPaused()){
       return;

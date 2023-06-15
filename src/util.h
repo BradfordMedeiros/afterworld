@@ -50,10 +50,6 @@ void showDebugHitmark(HitObject& hitpoint, objid playerId);
 
 void debugAssertForNow(bool valid, const char* message);
 
-
-std::function<void(int32_t, void*, std::string&, std::any&)> attributeFn(std::function<void(int32_t, void*, std::string&, AttributeValue& value)> fn);
-
-
 struct DamageMessage {
   objid id;
   float amount;
