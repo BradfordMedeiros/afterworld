@@ -43,7 +43,7 @@ void goToLevel(GameState& gameState, std::string sceneName){
   auto optCameraId = gameapi -> getGameObjectByName(">maincamera", sceneId, false);
   if (optCameraId.has_value()){
     cameras = {};
-    gameapi -> sendNotifyMessage("request:change-control", std::to_string(optCameraId.value()));
+    gameapi -> sendNotifyMessage("request:change-control", optCameraId.value());
   }
 }
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -461,7 +461,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
   };
-  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
       goToMenu(*gameState);
@@ -473,61 +473,58 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "selected value invalid");
-      auto gameObjId = std::atoi(strValue -> c_str());
-      if (!gameapi -> getGameObjNameForId(gameObjId).has_value()){
+      auto gameObjId = anycast<objid>(value); 
+      modassert(gameObjId, "selected value invalid");
+      if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
         return;
       }
-      handleInteract(gameObjId);
+      handleInteract(*gameObjId);
       return;
     }
     if (key == "switch"){ // should be moved
-      auto strValue = std::get_if<std::string>(&value); 
+      auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "switch value invalid");
       handleSwitch(*strValue);
       return;
     }
 
     if (key == "request:change-control"){
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "selected value invalid");
-      auto gameObjId = std::atoi(strValue -> c_str());
-      if (cameras.size() != 0 && gameObjId == cameras.top()){
-        std::cout << "returning because: " << gameObjId << " is " << cameras.top() << std::endl;
+      auto gameObjId = anycast<objid>(value); 
+      modassert(gameObjId != NULL, "bindings - request change control gameobjid null");
+      if (cameras.size() != 0 && *gameObjId == cameras.top()){
+        std::cout << "returning because: " << *gameObjId << " is " << cameras.top() << std::endl;
         return;
       }
-      auto gameobjName = gameapi -> getGameObjNameForId(gameObjId);
+      auto gameobjName = gameapi -> getGameObjNameForId(*gameObjId);
       if (!gameobjName.has_value()){
         return;
       }
       std::cout << "request change camera: " << gameobjName.value() << std::endl;
-      gameapi ->  setActiveCamera(gameObjId, -1);
-      cameras.push(gameObjId);
+      gameapi ->  setActiveCamera(*gameObjId, -1);
+      cameras.push(*gameObjId);
       //auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
       //auto pickup = getStrAttr(objAttr, "pickup");
       return;
     }
 
     if (key == "request:release-control"){
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "selected value invalid");
-      auto gameObjId = std::atoi(strValue -> c_str());
-      auto gameobjName = gameapi -> getGameObjNameForId(gameObjId);
+      auto gameObjId = anycast<objid>(value); 
+      modassert(gameObjId != NULL, "request:release-control");
+      auto gameobjName = gameapi -> getGameObjNameForId(*gameObjId);
       if (!gameobjName.has_value()){
         return;
       }
-      if (cameras.size() != 0 && cameras.top() == gameObjId){
+      if (cameras.size() != 0 && cameras.top() == *gameObjId){
         cameras.pop();
       }
 
       if (cameras.size() > 0){
         auto previousCamera = cameras.top();
         cameras.pop();
-        gameapi -> sendNotifyMessage("request:change-control", std::to_string(previousCamera));
+        gameapi -> sendNotifyMessage("request:change-control", previousCamera);
       }
     }
-  });
+  };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     auto gameobj1 = gameapi -> getGameObjNameForId(obj1); // this check shouldn't be necessary, is bug

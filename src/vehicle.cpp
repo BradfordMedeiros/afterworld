@@ -193,7 +193,7 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     Vehicle* vehicle = static_cast<Vehicle*>(data);
     handleInput(vehicle -> input, key, action);
     if (key == 'E' && action == 1){
-      gameapi -> sendNotifyMessage("request:release-control", std::to_string(vehicle -> cameraId.value()));
+      gameapi -> sendNotifyMessage("request:release-control", vehicle -> cameraId.value());
       vehicle -> active = false;
 
       vehicle -> xRot = 0.f;
@@ -247,13 +247,11 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
 
     if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
       if (vehicle -> vehicleId.has_value()){
-        auto strValue = anycast<std::string>(value); 
-        modassert(strValue != NULL, "selected value invalid");
-        auto gameObjId = std::atoi(strValue -> c_str());
-
-        std::cout << "vehicle selected: " << gameObjId << ", " << vehicle -> vehicleId.value() << std::endl;
-        if (gameObjId == vehicle -> vehicleId.value()){
-          gameapi -> sendNotifyMessage("request:change-control", std::to_string(vehicle -> cameraId.value()));
+        auto gameObjId = anycast<objid>(value); 
+        modassert(gameObjId != NULL, "vehicle - selected value invalid");
+        std::cout << "vehicle selected: " << *gameObjId << ", " << vehicle -> vehicleId.value() << std::endl;
+        if (*gameObjId == vehicle -> vehicleId.value()){
+          gameapi -> sendNotifyMessage("request:change-control", vehicle -> cameraId.value());
           vehicle -> active = true;
 
           vehicle -> xRot = 0.f;

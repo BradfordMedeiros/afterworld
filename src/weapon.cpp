@@ -646,7 +646,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
           auto closestIndex = closestHitpoint(hitpoints, cameraPos);
           float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons -> selectDistance){
-            gameapi -> sendNotifyMessage("selected", std::to_string(hitpoints.at(closestIndex).id));
+            gameapi -> sendNotifyMessage("selected", hitpoints.at(closestIndex).id);
           }
         }
       }

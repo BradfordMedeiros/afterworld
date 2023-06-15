@@ -75,7 +75,6 @@ std::string movementToStr(Movement& movement){
   return str;
 }
 
-
 void jump(Movement& movement, objid id){
   glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
   if (movement.isGrounded){
@@ -84,19 +83,12 @@ void jump(Movement& movement, objid id){
       gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
     }
   }
-
   if (movement.waterObjIds.size() > 0){
     gameapi -> applyImpulse(id, impulse);
   }
 }
 
-
-void dash(Movement& movement){
-  std::cout << "dash placeholder" << std::endl;
-}
-
 void moveUp(objid id, glm::vec2 direction){
-  
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
@@ -225,7 +217,6 @@ void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& res
   };
   gameapi -> setGameObjectAttr(id, attr);
 }
-
 
 void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>& result){
   movement.moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
@@ -509,47 +500,51 @@ glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec
   return relativeToPlayer;
 }
 
+void changeTargetId(Movement& movement, objid id){
+    movement.playerId =  id;
+    movement.goForward = false;
+    movement.goBackward = false;
+    movement.goLeft = false;
+    movement.goRight = false;
+    movement.active = true;
+
+    movement.jumpSoundObjId = std::nullopt;
+    movement.landSoundObjId = std::nullopt;
+    movement.moveSoundObjId = std::nullopt;
+    movement.lastMoveSoundPlayTime = 0.f;
+    movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+
+    movement.lookVelocity = glm::vec2(0.f, 0.f);
+    movement.lastPosition = glm::vec3(0.f, 0.f, 0.f);
+    movement.xRot = 0.f;
+    movement.yRot = 0.f;
+    movement.isGrounded = false;
+    movement.lastFrameIsGrounded = false;
+    movement.facingWall = false;
+    movement.facingLadder = false;
+    movement.attachedToLadder = false;
+
+    movement.waterObjIds = {};
+    movement.isCrouching = false;
+    movement.shouldBeCrouching = false;
+    movement.lastCrouchTime = -10000.f;  // so can immediately crouch
+
+    reloadMovementConfig(movement, movement.playerId, "default");
+    reloadSettingsConfig(movement, "default");
+}
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
-  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+  binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
-    movement -> playerId = id;
-    movement -> goForward = false;
-    movement -> goBackward = false;
-    movement -> goLeft = false;
-    movement -> goRight = false;
-    movement -> active = false;
-
-    movement -> jumpSoundObjId = std::nullopt;
-    movement -> landSoundObjId = std::nullopt;
-    movement -> moveSoundObjId = std::nullopt;
-    movement -> lastMoveSoundPlayTime = 0.f;
-    movement -> lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
-
-    movement -> lookVelocity = glm::vec2(0.f, 0.f);
-    movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
-    movement -> xRot = 0.f;
-    movement -> yRot = 0.f;
-    movement -> isGrounded = false;
-    movement -> lastFrameIsGrounded = false;
-    movement -> facingWall = false;
-    movement -> facingLadder = false;
-    movement -> attachedToLadder = false;
-    movement -> waterObjIds = {};
-    movement -> isCrouching = false;
-    movement -> shouldBeCrouching = false;
-    movement -> lastCrouchTime = -10000.f;  // so can immediately crouch
-
-    reloadMovementConfig(*movement, id, "default");
-    reloadSettingsConfig(*movement, "default");
-
+    changeTargetId(*movement, gameapi -> getGameObjectByName(">maincamera", sceneId, false).value());
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     Movement* value = (Movement*)data;
     delete value;
   };
-  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+  binding.onKeyCallback = [](int32_t _, void* data, int key, int scancode, int action, int mods) -> void {
     if (isPaused()){
       return;
     }
@@ -609,15 +604,23 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      jump(*movement, id);
+      jump(*movement, movement -> playerId);
       return;
     }
-    if (key == 340 /* left shift */ && action == 1){
-      dash(*movement);
+
+    if (key == '9'){
+      static bool onMainCamera = true;
+      onMainCamera != onMainCamera;
+      if (onMainCamera){
+
+      }else{
+
+      }
+      std::cout << "toggle camera placeholder " << std::endl;
       return;
     }
   };
-  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+  binding.onMouseCallback = [](objid _, void* data, int button, int action, int mods) -> void {
     if (isPaused()){
       return;
     }
@@ -634,7 +637,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
 
-  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
+  binding.onMouseMoveCallback = [](objid _, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
     if (isPaused()){
       return;
     }
@@ -645,7 +648,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     movement -> lookVelocity = glm::vec2(xPos, yPos);
   };
-  binding.onFrame = [](int32_t id, void* data) -> void {
+  binding.onFrame = [](int32_t _, void* data) -> void {
     if (isPaused()){
       return;
     }
@@ -662,9 +665,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     bool shouldMoveXZ = false;
     if (movement -> goForward){
+      std::cout << "should move forward" << std::endl;
       moveVec += glm::vec2(0.f, -1.f);
       if (movement -> facingLadder || movement -> attachedToLadder){
-        moveUp(id, moveVec);
+        moveUp(movement -> playerId, moveVec);
       }else{
         shouldMoveXZ = true;
       }
@@ -672,7 +676,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (movement -> goBackward){
       moveVec += glm::vec2(0.f, 1.f);
       if (movement -> facingLadder || movement -> attachedToLadder){
-        moveDown(id, moveVec);
+        moveDown(movement -> playerId, moveVec);
       }else{
         shouldMoveXZ = true;
       }
@@ -709,44 +713,45 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     //auto limitedMoveVec = moveVec;
     auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
     if (shouldMoveXZ){
-      moveXZ(id, moveSpeed * direction);
+      moveXZ(movement -> playerId, moveSpeed * direction);
     }
 
 
-    auto currPos = gameapi -> getGameObjectPos(id, true);
+    auto currPos = gameapi -> getGameObjectPos(movement -> playerId, true);
     auto currTime = gameapi -> timeSeconds(false);
   
     if (glm::length(currPos - movement -> lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && movement -> moveSoundObjId.has_value() && ((currTime - movement -> lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
       // move-sound-distance:STRING move-sound-mintime:STRING
       std::cout << "should play move clip" << std::endl;
-      gameapi -> playClip("&code-move", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
+      gameapi -> playClip("&code-move", gameapi -> listSceneId(movement -> playerId), std::nullopt, std::nullopt);
       movement -> lastMoveSoundPlayTime = currTime;
       movement -> lastMoveSoundPlayLocation = currPos;
     }
     float elapsedTime = gameapi -> timeElapsed();
-    look(*movement, id, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
+    look(*movement, movement -> playerId, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
 
     bool movingDown = false;
-    updateVelocity(*movement, id, elapsedTime, currPos, &movingDown);
-    updateFacingWall(*movement, id);
-    restrictLadderMovement(*movement, id, movingDown);
-    updateCrouch(*movement, id);
+    updateVelocity(*movement, movement -> playerId, elapsedTime, currPos, &movingDown);
+    updateFacingWall(*movement, movement -> playerId);
+    restrictLadderMovement(*movement, movement -> playerId, movingDown);
+    updateCrouch(*movement, movement -> playerId);
 
-    auto shouldStep = shouldStepUp(*movement, id) && movement -> goForward;
+    auto shouldStep = shouldStepUp(*movement, movement -> playerId) && movement -> goForward;
     //std::cout << "should step up: " << shouldStep << std::endl;
     if (shouldStep){
-      gameapi -> applyImpulse(id, glm::vec3(0.f, 0.4f, 0.f));
+      gameapi -> applyImpulse(movement -> playerId, glm::vec3(0.f, 0.4f, 0.f));
     }
 
     //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
   };
-  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+  binding.onCollisionEnter = [](objid _, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    Movement* movement = static_cast<Movement*>(data);
+    auto id = movement -> playerId;
     modlog("movement", "on collision enter: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     if (id != obj1 && id != obj2){
       return; 
     }
-    Movement* movement = static_cast<Movement*>(data);
     auto otherNormal = (id == obj2) ? normal : oppositeNormal;
     auto value = glm::dot(glm::normalize(otherNormal), glm::vec3(0.f, -1.f, 0.f));
     modlog("movement", "y component angleToCompare: " + std::to_string(movement -> moveParams.groundAngle) + ", reverse = " + std::to_string(glm::degrees(glm::acos(value))));
@@ -769,34 +774,36 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
   };
-  binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
+  binding.onCollisionExit = [](objid _, void* data, int32_t obj1, int32_t obj2) -> void {
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     Movement* movement = static_cast<Movement*>(data);
+    auto id = movement -> playerId;
     auto otherObjectId = (id == obj1) ? obj2 : obj1;
     if (movement -> waterObjIds.count(otherObjectId) > 0){
       movement -> waterObjIds.erase(otherObjectId);
     }
   };
 
-  binding.onMessage = attributeFn([](int32_t id, void* data, std::string& key, AttributeValue& value){
+  binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
+    Movement* movement = static_cast<Movement*>(data);
+    auto id = movement -> playerId;
     if (key == "reload-config:movement"){
       Movement* movement = static_cast<Movement*>(data);
-      auto strValue = std::get_if<std::string>(&value); 
+      auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "reload-config:movement reload value invalid");
       reloadMovementConfig(*movement, id, *strValue);
     }else if (key == "reload-config:settings"){
       Movement* movement = static_cast<Movement*>(data);
-      auto strValue = std::get_if<std::string>(&value); 
+      auto strValue = anycast<std::string>(value);
       modassert(strValue != NULL, "reload-config:settings reload value invalid");
       reloadSettingsConfig(*movement, *strValue);      
     }else if (key == "request:change-control"){
       Movement* movement = static_cast<Movement*>(data);
-      auto strValue = std::get_if<std::string>(&value); 
-      modassert(strValue != NULL, "selected value invalid");
-      auto gameObjId = std::atoi(strValue -> c_str());
-      movement -> active = gameObjId == id;
+      auto objIdValue = anycast<objid>(value); 
+      modassert(objIdValue != NULL, "movement - request change control value invalid");
+      movement -> active = *objIdValue == id;
     }
-  });
+  };
 
   return binding;
 }
