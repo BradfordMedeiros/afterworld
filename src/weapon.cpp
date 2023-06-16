@@ -474,7 +474,6 @@ void reloadTraitsValues(Weapons& weapons){
   weapons.selectDistance = floatFromFirstSqlResult(result, 0);
 }
 
-
 glm::vec3 calculatePoint(float radians, float radius, glm::quat orientation){
   float x = glm::cos(radians) * radius;
   float y = glm::sin(radians) * radius;
@@ -588,6 +587,11 @@ void modifyPhysicsForHeldItem(Weapons& weapons){
   gameapi -> setGameObjectAttr(weapons.heldItem.value(), newAttr);
 }
 
+void changeWeaponTargetId(Weapons& weapons, objid id){
+  weapons.playerId = id;
+  reloadTraitsValues(weapons);
+  changeGun(weapons, id, gameapi -> listSceneId(id), "pistol");
+}
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -614,8 +618,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> heldItem = std::nullopt;
 
-    reloadTraitsValues(*weapons);
-    changeGun(*weapons, id, gameapi -> listSceneId(id), "pistol");
+    changeWeaponTargetId(*weapons, weapons -> playerId);
   	return weapons;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -706,6 +709,12 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
       reloadTraitsValues(*weapons);
+    }else if (key == "request:change-control"){
+      Weapons* weapons = static_cast<Weapons*>(data);
+      auto objIdValue = anycast<objid>(value); 
+      modassert(objIdValue != NULL, "weapons - request change control value invalid");
+      std::cout << "weapons want to change value: " << objIdValue << std::endl;
+      changeWeaponTargetId(*weapons, *objIdValue);
     }
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
