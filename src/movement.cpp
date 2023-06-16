@@ -35,7 +35,7 @@ struct Movement {
   MovementParams moveParams;
   ControlParams controlParams;
 
-  objid playerId;
+  std::optional<objid> playerId;
 
   bool goForward;
   bool goBackward;
@@ -469,7 +469,7 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
 }
 
 std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY){
-  auto hitpoints = gameapi -> contactTest(movement.playerId);
+  auto hitpoints = gameapi -> contactTest(movement.playerId.value());
   //std::cout << "hitpoints: [ ";
 
   //for (auto &hitpoint : hitpoints){
@@ -535,7 +535,7 @@ void changeTargetId(Movement& movement, objid id, bool active){
     movement.shouldBeCrouching = false;
     movement.lastCrouchTime = -10000.f;  // so can immediately crouch
 
-    reloadMovementConfig(movement, movement.playerId, "default");
+    reloadMovementConfig(movement, movement.playerId.value(), "default");
     reloadSettingsConfig(movement, "default");
 }
 
@@ -543,7 +543,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
-    movement -> playerId =  0;
+    movement -> playerId = std::nullopt;
     movement -> goForward = false;
     movement -> goBackward = false;
     movement -> goLeft = false;
@@ -570,8 +570,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> isCrouching = false;
     movement -> shouldBeCrouching = false;
     movement -> lastCrouchTime = -10000.f;  // so can immediately crouch
-
-    //changeTargetId(*movement, gameapi -> getGameObjectByName(">maincamera", sceneId, false).value(), false);
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -583,6 +581,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
+    if (!movement -> playerId.has_value()){
+      return;
+    }
 
     std::cout << "key is: " << key << std::endl;
 
@@ -638,15 +639,15 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      jump(*movement, movement -> playerId);
+      jump(*movement, movement -> playerId.value());
       return;
     }
 
     if (key == '8' && action == 1){
-      auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> playerId), false).value();
+      auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> playerId.value()), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
     }else if (key == '9' && action == 1){
-      auto obj = gameapi -> getGameObjectByName(">maincamera2", gameapi -> listSceneId(movement -> playerId), false).value();
+      auto obj = gameapi -> getGameObjectByName(">maincamera2", gameapi -> listSceneId(movement -> playerId.value()), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
     }
 
@@ -689,6 +690,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (!movement -> active){
       return;
     }
+    if (!movement -> playerId.has_value()){
+      return;
+    }
 
 
     float horzRelVelocity = 0.8f;
@@ -699,7 +703,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       std::cout << "should move forward" << std::endl;
       moveVec += glm::vec2(0.f, -1.f);
       if (movement -> facingLadder || movement -> attachedToLadder){
-        moveUp(movement -> playerId, moveVec);
+        moveUp(movement -> playerId.value(), moveVec);
       }else{
         shouldMoveXZ = true;
       }
@@ -707,7 +711,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (movement -> goBackward){
       moveVec += glm::vec2(0.f, 1.f);
       if (movement -> facingLadder || movement -> attachedToLadder){
-        moveDown(movement -> playerId, moveVec);
+        moveDown(movement -> playerId.value(), moveVec);
       }else{
         shouldMoveXZ = true;
       }
@@ -729,7 +733,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
-    auto playerDirection = gameapi -> getGameObjectRotation(movement -> playerId, true);
+    auto playerDirection = gameapi -> getGameObjectRotation(movement -> playerId.value(), true);
     auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
     directionVec.y = 0.f;
     auto rotationWithoutY = quatFromDirection(directionVec);
@@ -744,33 +748,33 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     //auto limitedMoveVec = moveVec;
     auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
     if (shouldMoveXZ){
-      moveXZ(movement -> playerId, moveSpeed * direction);
+      moveXZ(movement -> playerId.value(), moveSpeed * direction);
     }
 
 
-    auto currPos = gameapi -> getGameObjectPos(movement -> playerId, true);
+    auto currPos = gameapi -> getGameObjectPos(movement -> playerId.value(), true);
     auto currTime = gameapi -> timeSeconds(false);
   
     if (glm::length(currPos - movement -> lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && movement -> moveSoundObjId.has_value() && ((currTime - movement -> lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
       // move-sound-distance:STRING move-sound-mintime:STRING
       std::cout << "should play move clip" << std::endl;
-      gameapi -> playClip("&code-move", gameapi -> listSceneId(movement -> playerId), std::nullopt, std::nullopt);
+      gameapi -> playClip("&code-move", gameapi -> listSceneId(movement -> playerId.value()), std::nullopt, std::nullopt);
       movement -> lastMoveSoundPlayTime = currTime;
       movement -> lastMoveSoundPlayLocation = currPos;
     }
     float elapsedTime = gameapi -> timeElapsed();
-    look(*movement, movement -> playerId, elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
+    look(*movement, movement -> playerId.value(), elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
 
     bool movingDown = false;
-    updateVelocity(*movement, movement -> playerId, elapsedTime, currPos, &movingDown);
-    updateFacingWall(*movement, movement -> playerId);
-    restrictLadderMovement(*movement, movement -> playerId, movingDown);
-    updateCrouch(*movement, movement -> playerId);
+    updateVelocity(*movement, movement -> playerId.value(), elapsedTime, currPos, &movingDown);
+    updateFacingWall(*movement, movement -> playerId.value());
+    restrictLadderMovement(*movement, movement -> playerId.value(), movingDown);
+    updateCrouch(*movement, movement -> playerId.value());
 
-    auto shouldStep = shouldStepUp(*movement, movement -> playerId) && movement -> goForward;
+    auto shouldStep = shouldStepUp(*movement, movement -> playerId.value()) && movement -> goForward;
     //std::cout << "should step up: " << shouldStep << std::endl;
     if (shouldStep){
-      gameapi -> applyImpulse(movement -> playerId, glm::vec3(0.f, 0.4f, 0.f));
+      gameapi -> applyImpulse(movement -> playerId.value(), glm::vec3(0.f, 0.4f, 0.f));
     }
 
     //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
@@ -778,7 +782,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.onCollisionEnter = [](objid _, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     Movement* movement = static_cast<Movement*>(data);
-    auto id = movement -> playerId;
+    if (!movement -> playerId.has_value()){
+      return;
+    }
+    auto id = movement -> playerId.value();
     modlog("movement", "on collision enter: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     if (id != obj1 && id != obj2){
       return; 
@@ -808,7 +815,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   binding.onCollisionExit = [](objid _, void* data, int32_t obj1, int32_t obj2) -> void {
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
     Movement* movement = static_cast<Movement*>(data);
-    auto id = movement -> playerId;
+    if (!movement -> playerId.has_value()){
+      return;
+    }
+    auto id = movement -> playerId.value();
     auto otherObjectId = (id == obj1) ? obj2 : obj1;
     if (movement -> waterObjIds.count(otherObjectId) > 0){
       movement -> waterObjIds.erase(otherObjectId);
@@ -817,7 +827,16 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
     Movement* movement = static_cast<Movement*>(data);
-    auto id = movement -> playerId;
+    if (key == "request:change-control"){
+      Movement* movement = static_cast<Movement*>(data);
+      auto objIdValue = anycast<objid>(value); 
+      modassert(objIdValue != NULL, "movement - request change control value invalid");
+      changeTargetId(*movement, *objIdValue, true);
+    }
+    if (!movement -> playerId.has_value()){
+      return;
+    }
+    auto id = movement -> playerId.value();
     if (key == "reload-config:movement"){
       Movement* movement = static_cast<Movement*>(data);
       auto strValue = anycast<std::string>(value); 
@@ -828,11 +847,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       auto strValue = anycast<std::string>(value);
       modassert(strValue != NULL, "reload-config:settings reload value invalid");
       reloadSettingsConfig(*movement, *strValue);      
-    }else if (key == "request:change-control"){
-      Movement* movement = static_cast<Movement*>(data);
-      auto objIdValue = anycast<objid>(value); 
-      modassert(objIdValue != NULL, "movement - request change control value invalid");
-      changeTargetId(*movement, *objIdValue, true);
     }
   };
 
