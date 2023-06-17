@@ -50,8 +50,8 @@ struct Movement {
   glm::vec3 lastMoveSoundPlayLocation;
 
   glm::vec2 lookVelocity;
-  float xRot; // up and down
-  float yRot; // left and right
+  float xRot;
+  float yRot;
   bool facingWall;
   bool facingLadder;
   bool attachedToLadder;
@@ -172,6 +172,25 @@ void restrictLadderMovement(Movement& movement, objid id, bool movingDown){
 }
 
 
+glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
+  glm::vec3 euler_angles = glm::eulerAngles(currRotation);
+  auto forwardVec = currRotation * glm::vec3(0.f, 0.f, -1.f);
+  auto angleX = glm::atan(forwardVec.x / forwardVec.z);
+  angleX *= -1;
+  if (forwardVec.x > 0 && forwardVec.z > 0){
+    angleX = angleX + 3.1418;
+  }else if (forwardVec.x < 0 && forwardVec.z > 0){
+    angleX = angleX - 3.1418;
+  }
+  auto angleY = -1 * euler_angles.x;
+  if (forwardVec.z > 0){
+    angleY = angleY - MODPI;
+  }
+  return glm::vec2(angleX, angleY);
+}
+
+
+
 void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float ironsight_turn){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
@@ -183,7 +202,6 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
 
   movement.xRot = limitAngle(movement.xRot + deltax, std::nullopt, std::nullopt);
   movement.yRot = limitAngle(movement.yRot + deltay, movement.moveParams.maxAngleUp, movement.moveParams.maxAngleDown); 
-
   auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
   gameapi -> setGameObjectRot(id, rotation, false);
 
@@ -520,10 +538,15 @@ void changeTargetId(Movement& movement, objid id, bool active){
     movement.lastMoveSoundPlayTime = 0.f;
     movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
+
     movement.lookVelocity = glm::vec2(0.f, 0.f);
     movement.lastPosition = glm::vec3(0.f, 0.f, 0.f);
-    movement.xRot = 0.f;
-    movement.yRot = 0.f;
+
+    auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(movement.playerId.value(), true));
+
+    movement.xRot = oldXYRot.x;
+    movement.yRot = oldXYRot.y;
+
     movement.isGrounded = false;
     movement.lastFrameIsGrounded = false;
     movement.facingWall = false;
@@ -537,6 +560,7 @@ void changeTargetId(Movement& movement, objid id, bool active){
 
     reloadMovementConfig(movement, movement.playerId.value(), "default");
     reloadSettingsConfig(movement, "default");
+
 }
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
