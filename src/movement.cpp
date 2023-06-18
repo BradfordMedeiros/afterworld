@@ -667,7 +667,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == '8' && action == 1){
+    if (key == '7' && action == 1){
+      auto obj = gameapi -> getGameObjectByName("enemy", gameapi -> listSceneId(movement -> playerId.value()), false).value();
+      gameapi -> sendNotifyMessage("request:change-control", obj);
+      // needs to create use a temporary camera mounted to the character
+    }
+    else if (key == '8' && action == 1){
       auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> playerId.value()), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
     }else if (key == '9' && action == 1){
