@@ -24,6 +24,8 @@ struct GameState {
 
   float xNdc;
   float yNdc;
+
+  std::optional<glm::vec2> selecting;
 };
 
 void unloadAllManagedScenes(){
@@ -402,6 +404,26 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 }
 
 
+void drawRectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint){
+  float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
+  float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
+
+  float topY = fromPoint.y < toPoint.y ? fromPoint.y : toPoint.y;
+  float bottomY = fromPoint.y > toPoint.y ? fromPoint.y : toPoint.y;
+
+
+  float width = rightX - leftX;;
+  float height = bottomY - topY;
+
+  //std::cout << "selection: leftX = " << leftX << ", rightX = " << rightX << ", topY = " << topY << ", bottomY = " << bottomY << ", width = " << width << ", height = " << height << std::endl;
+  float borderSize = 0.005f;
+  float borderWidth = width - borderSize;
+  float borderHeight = height - borderSize;
+
+  gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), width, height, false, glm::vec4(0.9f, 0.9f, 0.9f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), borderWidth, borderHeight, false, glm::vec4(0.1f, 0.1f, 0.1f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
+}
+
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -413,6 +435,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> menuLoaded = false;
     gameState -> xNdc = 0.f;
     gameState -> yNdc = 0.f;
+    gameState -> selecting = std::nullopt;
     getGlobalState().paused = false;
     loadConfig(*gameState);
     loadDefaultScenes();
@@ -441,6 +464,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState);
+    }
+    if (gameState -> selecting.has_value()){
+      drawRectWithBorder(gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc));
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -588,9 +614,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+    GameState* gameState = static_cast<GameState*>(data);
     if (action == 1 && button == 0){
-      GameState* gameState = static_cast<GameState*>(data);
       handleMouseSelect(*gameState);
+    }
+   
+    if (button == 1){
+      if (action == 0){
+        gameState -> selecting = std::nullopt;
+      }else if (action == 1){
+        gameState -> selecting = glm::vec2(gameState -> xNdc, gameState -> yNdc);
+      }
     }
   };
 
