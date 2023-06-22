@@ -25,7 +25,7 @@ struct GameState {
   float xNdc;
   float yNdc;
 
-  bool enableDragSelect;
+  std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
 };
 
@@ -405,13 +405,12 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 }
 
 
-void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
+void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
   float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
   float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
 
   float topY = fromPoint.y < toPoint.y ? fromPoint.y : toPoint.y;
   float bottomY = fromPoint.y > toPoint.y ? fromPoint.y : toPoint.y;
-
 
   float width = rightX - leftX;;
   float height = bottomY - topY;
@@ -424,9 +423,6 @@ void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
   gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), width, height, false, glm::vec4(0.9f, 0.9f, 0.9f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
   gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), borderWidth, borderHeight, false, glm::vec4(0.1f, 0.1f, 0.1f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
 
-  auto fromPosAndDir = gameapi -> getCursorInfoWorld(fromPoint.x, fromPoint.y);
-  auto toPosAndDir = gameapi -> getCursorInfoWorld(toPoint.x, toPoint.y);
-
   // this can be amortized over multiple 
   float uvWidth = toPoint.x - fromPoint.x;
   float uvHeight = toPoint.y - fromPoint.y;
@@ -436,40 +432,20 @@ void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
     for (int y = 0; y < 50; y++){    
       auto idAtCoord = gameapi -> idAtCoord(fromPoint.x + (x * uvWidth / 50.f), fromPoint.y + (y * uvHeight / 50.f));
       if (idAtCoord.has_value()){
-        ids.insert(idAtCoord.value());
+        auto selectableValue = getSingleAttr(idAtCoord.value(), "dragselect");
+        if (selectableValue.has_value() && selectableValue.value() == gameState.dragSelect.value()){
+          ids.insert(idAtCoord.value());
+        }
       }
     } 
   }
   gameapi -> setSelected(ids);
   
-  std::cout << "selected ids: [";
-  for (auto id : ids){
-    std::cout << id << " ";
-  }
-  std::cout << "]" << std::endl;
-
-
-  return;
-
-  //glm::vec3 forward(fromPosAndDir.viewDir.x * 10, fromPosAndDir.viewDir.y * 10, fromPosAndDir.viewDir.z * 10);
-
-  //gameapi -> drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(5.f, 5.f, 5.f), false, -1 /* id */, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-
-  //auto fromPosInFront =  (fromPosAndDir.position + fromPosAndDir.position2) + (quatFromDirection(fromPosAndDir.viewDir) * glm::vec3(0.f, 0.f, -1.f));
-  //gameapi -> drawLine(fromPosAndDir.position + fromPosAndDir.position2, fromPosInFront, true, id, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-//
-//
-//
-//
-//  //auto toPosInFront =  (toPosAndDir.position + toPosAndDir.position2) + (quatFromDirection(toPosAndDir.viewDir) * glm::vec3(0.f, 0.f, -1.f));
-  //gameapi -> drawLine(toPosAndDir.position + toPosAndDir.position2, toPosInFront, true, id, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-  //std::cout << "draw rect0, position = " << print(fromPosAndDir.position) <<  "pos2 = " << print(fromPosAndDir.position2) << std::endl;
-  //std::cout << "draw rect1, dir = " << print(toPosAndDir.viewDir) << std::endl;
-
-  //auto playerRotation = gameapi -> getGameObjectRotation(id, true);
-
+  //std::cout << "selected ids: [";
+  //for (auto id : ids){
+  //  std::cout << id << " ";
+  //}
+  //std::cout << "]" << std::endl;
 }
 
 
@@ -497,9 +473,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
       }
     }
-
-    gameState -> enableDragSelect = args.find("dragselect") != args.end();
-
+    gameState -> dragSelect = std::nullopt;
+    if (args.find("dragselect") != args.end()){
+      gameState -> dragSelect = args.at("dragselect");
+      modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
+    }
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -514,8 +492,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState);
     }
-    if (gameState -> enableDragSelect && gameState -> selecting.has_value()){
-      selectWithBorder(gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
+    if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
+      selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
