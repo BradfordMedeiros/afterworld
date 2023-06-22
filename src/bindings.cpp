@@ -25,6 +25,7 @@ struct GameState {
   float xNdc;
   float yNdc;
 
+  bool enableDragSelect;
   std::optional<glm::vec2> selecting;
 };
 
@@ -404,7 +405,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 }
 
 
-void drawRectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
+void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
   float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
   float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
 
@@ -495,8 +496,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else{
         std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
       }
-      
     }
+
+    gameState -> enableDragSelect = args.find("dragselect") != args.end();
 
     return gameState;
   };
@@ -512,8 +514,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState);
     }
-    if (gameState -> selecting.has_value()){
-      drawRectWithBorder(gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
+    if (gameState -> enableDragSelect && gameState -> selecting.has_value()){
+      selectWithBorder(gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
