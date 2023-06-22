@@ -450,21 +450,21 @@ void drawRectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
 
   return;
 
-  glm::vec3 forward(fromPosAndDir.viewDir.x * 10, fromPosAndDir.viewDir.y * 10, fromPosAndDir.viewDir.z * 10);
+  //glm::vec3 forward(fromPosAndDir.viewDir.x * 10, fromPosAndDir.viewDir.y * 10, fromPosAndDir.viewDir.z * 10);
 
   //gameapi -> drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(5.f, 5.f, 5.f), false, -1 /* id */, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
 
 
-  auto fromPosInFront =  (fromPosAndDir.position + fromPosAndDir.position2) + (quatFromDirection(fromPosAndDir.viewDir) * glm::vec3(0.f, 0.f, -1.f));
-  gameapi -> drawLine(fromPosAndDir.position + fromPosAndDir.position2, fromPosInFront, true, id, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  //auto fromPosInFront =  (fromPosAndDir.position + fromPosAndDir.position2) + (quatFromDirection(fromPosAndDir.viewDir) * glm::vec3(0.f, 0.f, -1.f));
+  //gameapi -> drawLine(fromPosAndDir.position + fromPosAndDir.position2, fromPosInFront, true, id, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+//
+//
+//
+//
+//  //auto toPosInFront =  (toPosAndDir.position + toPosAndDir.position2) + (quatFromDirection(toPosAndDir.viewDir) * glm::vec3(0.f, 0.f, -1.f));
+  //gameapi -> drawLine(toPosAndDir.position + toPosAndDir.position2, toPosInFront, true, id, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
 
-
-
-
-  auto toPosInFront =  (toPosAndDir.position + toPosAndDir.position2) + (quatFromDirection(toPosAndDir.viewDir) * glm::vec3(0.f, 0.f, -1.f));
-  gameapi -> drawLine(toPosAndDir.position + toPosAndDir.position2, toPosInFront, true, id, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-  std::cout << "draw rect0, position = " << print(fromPosAndDir.position) <<  "pos2 = " << print(fromPosAndDir.position2) << std::endl;
+  //std::cout << "draw rect0, position = " << print(fromPosAndDir.position) <<  "pos2 = " << print(fromPosAndDir.position2) << std::endl;
   //std::cout << "draw rect1, dir = " << print(toPosAndDir.viewDir) << std::endl;
 
   //auto playerRotation = gameapi -> getGameObjectRotation(id, true);
