@@ -36,21 +36,6 @@ CScriptBinding inGameUiBinding(CustomApiBindings& api, const char* name){
     delete gameUi;
   };
 
-  /*binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
- 	
-  };
-  binding.onObjectHover = [](int32_t id, int32_t index, bool hoverOn) -> void {
-
-  };
-
-  binding.onObjectSelected = [](int32_t id, int32_t index, glm::vec3 color) -> void {
-
-  };
-
-  binding.onMapping = [](int32_t id, int32_t index) -> void {
-
-  };*/
-
 	return binding;
 }
 

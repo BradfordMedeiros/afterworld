@@ -90,7 +90,6 @@ void clickMouse(objid id){
 
 std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs){
   return [attrFuncs](int32_t _, void* data, int32_t idAdded) -> void { 
-    modlog("health: id added", std::to_string(idAdded));
     auto objAttrs = gameapi -> getGameObjectAttr(idAdded);
     for (auto &attrFunc : attrFuncs){
       auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);

@@ -8,9 +8,15 @@ struct HitPoints {
 	std::optional<std::string> eventName;
 };
 
+struct AudioZones {
+	std::set<objid> audiozoneIds;
+	std::optional<objid> currentPlaying;
+};
+
 struct Tags {
 	std::unordered_map<objid, HitPoints> hitpoints;
 	std::set<objid> textureScrollObjIds;
+	AudioZones audiozones;
 };
 
 struct TagUpdater {
@@ -141,6 +147,61 @@ std::vector<TagUpdater> tagupdates = {
       }
   	},
 	},
+
+	TagUpdater {
+		.attribute = "ambient",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		//modassert(false, "on add ambient");
+  		modlog("ambient", std::string("entity added") + gameapi -> getGameObjNameForId(id).value());
+  		tags -> audiozones.audiozoneIds.insert(id);
+  		std::cout << "audio zones: " << print(tags -> audiozones.audiozoneIds) << std::endl;
+  	},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		modlog("ambient", std::string("entity removed") + std::to_string(id));
+  		tags -> audiozones.audiozoneIds.erase(id);
+  		std::cout << "audio zones: " << print(tags -> audiozones.audiozoneIds) << std::endl;
+  	},
+  	.onFrame = [](Tags& tags) -> void {  
+  		auto transform = gameapi -> getView();
+  		auto hitObjects = gameapi -> contactTestShape(transform.position, transform.rotation, glm::vec3(1.f, 1.f, 1.f));
+//
+  		std::set<objid> audioZones;
+  		for (auto &hitobject : hitObjects){
+  			if (tags.audiozones.audiozoneIds.count(hitobject.id) > 0){
+  				audioZones.insert(hitobject.id);
+  			}
+  		}
+
+  		if (tags.audiozones.currentPlaying.has_value()){
+  			if (audioZones.count(tags.audiozones.currentPlaying.value()) == 0){
+  				// stop playing clip
+  				auto firstId = tags.audiozones.currentPlaying.value();
+  				auto sceneId = gameapi -> listSceneId(firstId);
+	  			auto clipToPlay = getSingleAttr(firstId, "ambient").value();
+  				gameapi -> stopClip(clipToPlay, sceneId);
+  				tags.audiozones.currentPlaying = std::nullopt;
+  			}
+  		}
+
+	  	if (audioZones.size() > 0 && !tags.audiozones.currentPlaying.has_value()){
+	  		auto firstId = *(tags.audiozones.audiozoneIds.begin());
+	  		auto sceneId = gameapi -> listSceneId(firstId);
+	  		tags.audiozones.currentPlaying = firstId;
+	  		auto clipToPlay = getSingleAttr(firstId, "ambient").value();
+	  		gameapi -> playClip(clipToPlay, sceneId, std::nullopt, std::nullopt);
+  		}
+
+
+  		// get the view location 
+  		// contact test as ca 
+  		//    --  std::vector<HitObject> (*contactTestShape)(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
+  		// get the audio zone we are in, if any
+  		// play that audio zone 
+  	},
+  	.onMessage = std::nullopt,
+	},
 };
 
 
@@ -151,6 +212,10 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     Tags* tags = new Tags;
     tags -> hitpoints = {};
     tags -> textureScrollObjIds = {};
+    tags -> audiozones = AudioZones {
+    	.audiozoneIds = {},
+    	.currentPlaying = std::nullopt,
+    };
     return tags;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
