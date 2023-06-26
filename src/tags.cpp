@@ -174,6 +174,9 @@ std::vector<TagUpdater> tagupdates = {
   			}
   		}
 
+  		bool stoppedClip = false;
+  		bool startedClip = false;
+  		
   		if (tags.audiozones.currentPlaying.has_value()){
   			if (audioZones.count(tags.audiozones.currentPlaying.value()) == 0){
   				// stop playing clip
@@ -181,16 +184,23 @@ std::vector<TagUpdater> tagupdates = {
   				auto sceneId = gameapi -> listSceneId(firstId);
 	  			auto clipToPlay = getSingleAttr(firstId, "ambient").value();
   				gameapi -> stopClip(clipToPlay, sceneId);
+  				stoppedClip = true;
   				tags.audiozones.currentPlaying = std::nullopt;
   			}
   		}
 
 	  	if (audioZones.size() > 0 && !tags.audiozones.currentPlaying.has_value()){
-	  		auto firstId = *(tags.audiozones.audiozoneIds.begin());
+	  		auto firstId = *(audioZones.begin());
 	  		auto sceneId = gameapi -> listSceneId(firstId);
 	  		tags.audiozones.currentPlaying = firstId;
 	  		auto clipToPlay = getSingleAttr(firstId, "ambient").value();
 	  		gameapi -> playClip(clipToPlay, sceneId, std::nullopt, std::nullopt);
+	  		startedClip = true;
+  		}
+
+  		if (stoppedClip || startedClip){
+  			
+  			std::cout << "ambient: started = " << (startedClip ? "true" : "false") << ", stopped = " << (stoppedClip ? "true" : "false") << ", audio zones: " << print(audioZones) << std::endl; 
   		}
 
 
