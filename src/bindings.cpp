@@ -163,84 +163,20 @@ void handleSelect(GameState& gameState){
   } 
 }
 
-
-
-struct MenuElement {
-  std::string name;
-};
-
-void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint){
-  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
-
-}
-
-struct MenuItem {
-  std::string text;
-  double rectX;
-  double rectY;
-  double rectWidth;
-  double rectHeight;
-  double textX;
-  double textY;
-  bool hovered;
-};
-
-const float fontSizePerLetterNdi = 0.05f;
-std::vector<MenuItem> calcMenuItems(std::vector<MenuElement>& elements, int selectedIndex, float xNdc, float yNdc){
-  std::vector<MenuItem> menuItems = {};
-  for (int i = 0; i < elements.size(); i++){
-    auto level = elements.at(i).name;
-    auto height = fontSizePerLetterNdi;
-    auto width = level.size() * fontSizePerLetterNdi;
-    auto left = -0.9f;
-
-    float padding = 0.02f;
-    float margin = 0.05f;
-    float minSpacingPerItem = height;
-    float spacingPerItem = minSpacingPerItem + 2 * padding + 2 * margin;
-
-    auto rectX = (left + (left + width)) / 2.f;
-    auto rectY = 0.2 + (i * -1 * spacingPerItem);
-    auto rectWidth = width + 2 * padding;
-    auto rectHeight = height + 2 * padding;
-    bool hovered = (xNdc > (rectX - rectWidth / 2.f) && xNdc < (rectX + rectWidth / 2.f)) && (yNdc > (rectY - rectHeight / 2.f) && yNdc < (rectY + rectHeight / 2.f));
-
-    menuItems.push_back(MenuItem{
-      .text = level,
-      .rectX = rectX,
-      .rectY = rectY,
-      .rectWidth = rectWidth,
-      .rectHeight = rectHeight,
-      .textX = -0.9f,
-      .textY =  0.2 + (i * -1 * spacingPerItem),
-      .hovered = hovered,
-    });
-  }
-  return menuItems;  
-}
-
 std::vector<MenuItem> menuItems(GameState& gameState){
-  std::vector<MenuElement> elements;
+  std::vector<std::string> elements;
   for (int i = 0; i < gameState.levels.size(); i++){
-    elements.push_back(MenuElement { .name = gameState.levels.at(i).name });
+    elements.push_back(gameState.levels.at(i).name);
   }
-  return calcMenuItems(elements, gameState.selectedLevel, gameState.xNdc, gameState.yNdc);
-}
-void drawMenuText(GameState& gameState){
-  for (auto &menuItem : menuItems(gameState)){
-    auto tint =  menuItem.hovered? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    //gameapi -> drawRect(menuItem.rectX, menuItem.rectY, menuItem.rectWidth, menuItem.rectHeight, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
-    drawCenteredText(menuItem.text, menuItem.textX, menuItem.textY, fontSizePerLetterNdi, tint);
-  }
+  return calcMenuItems(elements, gameState.xNdc, gameState.yNdc);
 }
 
 std::vector<MenuItem> pauseItems(GameState& gameState){
-  std::vector<MenuElement> elements;
+  std::vector<std::string> elements;
   for (int i = 0; i < pauseText.size(); i++){
-    elements.push_back(MenuElement { .name = pauseText.at(i).name });
+    elements.push_back(pauseText.at(i).name);
   }
-  return calcMenuItems(elements, gameState.selectedLevel, gameState.xNdc, gameState.yNdc);
+  return calcMenuItems(elements, gameState.xNdc, gameState.yNdc);
 }
 
 double downTime = 0;
@@ -254,22 +190,9 @@ void drawPauseMenu(GameState& gameState){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient2.png");
 
-  for (auto &menuItem : pauseItems(gameState)){
-    auto tint =  menuItem.hovered? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    gameapi -> drawRect(menuItem.rectX, menuItem.rectY, menuItem.rectWidth, menuItem.rectHeight, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
-    drawCenteredText(menuItem.text, menuItem.textX, menuItem.textY, fontSizePerLetterNdi, tint);
-  }
+  drawMenuItems(pauseItems(gameState));
 }
 
-std::optional<int> highlightedMenuItem(std::vector<MenuItem>& items){
-  for (int i = 0; i < items.size(); i++){
-    auto item = items.at(i);
-    if (item.hovered){
-      return i;
-    }
-  }
-  return std::nullopt;
-}
 void handleMouseSelect(GameState& gameState){
   if (showingPauseMenu(gameState)){
     //std::vector<MenuItem> pauseItems(GameState& gameState){
@@ -448,6 +371,23 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   //std::cout << "]" << std::endl;
 }
 
+std::vector<MenuItem> animationMenuItems(GameState& gameState){
+  auto selectedIds = gameapi -> selected();
+  if (selectedIds.size() == 0){
+    std::vector<std::string> noValue = { "no object selected" };
+    return calcMenuItems(noValue, gameState.xNdc, gameState.yNdc, 1.5f);
+  }
+
+  auto selectedId = selectedIds.at(0);
+
+  std::vector<std::string> animations = { "animations:"};
+  for (auto &animation : gameapi -> listAnimations(selectedId)){
+    animations.push_back(animation);
+  }
+  auto items = calcMenuItems(animations, gameState.xNdc, gameState.yNdc, 1.5f);
+  return items; 
+}
+
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -487,7 +427,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     if (!gameState -> loadedLevel.has_value()){
-      drawMenuText(*gameState);
+      drawMenuItems(menuItems(*gameState));
     }
     if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState);
@@ -495,6 +435,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
     }
+    drawMenuItems(animationMenuItems(*gameState));
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
