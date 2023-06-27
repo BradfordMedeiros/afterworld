@@ -193,6 +193,27 @@ void drawPauseMenu(GameState& gameState){
   drawMenuItems(pauseItems(gameState));
 }
 
+struct AnimationMenu {
+  std::vector<MenuItem> items;
+  std::optional<objid> selectedObj;
+};
+AnimationMenu animationMenuItems(GameState& gameState){
+  auto selectedIds = gameapi -> selected();
+  if (selectedIds.size() == 0){
+    std::vector<std::string> noValue = { "no object selected" };
+    return AnimationMenu { .items = calcMenuItems(noValue, gameState.xNdc, gameState.yNdc, 1.5f), .selectedObj = std::nullopt };
+  }
+
+  auto selectedId = selectedIds.at(0);
+
+  std::vector<std::string> animations = { "animations:"};
+  for (auto &animation : gameapi -> listAnimations(selectedId)){
+    animations.push_back(animation);
+  }
+  auto items = calcMenuItems(animations, gameState.xNdc, gameState.yNdc, 1.5f);
+  return AnimationMenu { .items = items, .selectedObj = selectedId } ; 
+}
+
 void handleMouseSelect(GameState& gameState){
   if (showingPauseMenu(gameState)){
     //std::vector<MenuItem> pauseItems(GameState& gameState){
@@ -212,6 +233,18 @@ void handleMouseSelect(GameState& gameState){
      }
      std::cout << "selected item: " << (selectedItem.has_value() ? std::to_string(selectedItem.value()) : "no value") << std::endl;
   }
+
+  // select animation
+  auto animationMenu = animationMenuItems(gameState);
+  auto selectedItem = highlightedMenuItem(animationMenu.items);
+  if (selectedItem.has_value() && selectedItem.value() != 0 && animationMenu.selectedObj.has_value()){
+    auto item = animationMenu.items.at(selectedItem.value());
+    gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, false);
+    std::cout << "animation: debug selected: " << selectedItem.value() << ", value = " << item.text << std::endl;
+  }else{
+    std::cout << "animation: debug no item selected" << std::endl;
+  }
+
 }
 
 void togglePauseMode(GameState& gameState){
@@ -371,23 +404,6 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   //std::cout << "]" << std::endl;
 }
 
-std::vector<MenuItem> animationMenuItems(GameState& gameState){
-  auto selectedIds = gameapi -> selected();
-  if (selectedIds.size() == 0){
-    std::vector<std::string> noValue = { "no object selected" };
-    return calcMenuItems(noValue, gameState.xNdc, gameState.yNdc, 1.5f);
-  }
-
-  auto selectedId = selectedIds.at(0);
-
-  std::vector<std::string> animations = { "animations:"};
-  for (auto &animation : gameapi -> listAnimations(selectedId)){
-    animations.push_back(animation);
-  }
-  auto items = calcMenuItems(animations, gameState.xNdc, gameState.yNdc, 1.5f);
-  return items; 
-}
-
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -435,7 +451,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
     }
-    drawMenuItems(animationMenuItems(*gameState));
+    drawMenuItems(animationMenuItems(*gameState).items);
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
