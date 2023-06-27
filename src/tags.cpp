@@ -238,8 +238,24 @@ std::vector<TagUpdater> tagupdates = {
 
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
-	 auto binding = createCScriptBinding(name, api);
-    binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+	  auto binding = createCScriptBinding(name, api);
+
+		std::vector<AttrFunc> attrFuncs = {};
+		std::vector<AttrFuncValue> attrAddFuncs = {};
+		for (auto &tagUpdate : tagupdates){
+			attrAddFuncs.push_back(AttrFuncValue {
+				.attr = tagUpdate.attribute,
+				.fn = tagUpdate.onAdd,
+			});
+			attrFuncs.push_back(AttrFunc {
+				.attr = tagUpdate.attribute,
+				.fn = tagUpdate.onRemove,
+			});
+		}
+
+	  auto onAddFns = getOnAttrAdds(attrAddFuncs);
+
+    binding.create = [onAddFns](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
     tags -> hitpoints = {};
     tags -> textureScrollObjIds = {};
@@ -247,6 +263,18 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     	.audiozoneIds = {},
     	.currentPlaying = std::nullopt,
     };
+    
+    std::set<objid> idsAlreadyExisting;
+    for (auto &tagUpdate : tagupdates){
+    	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
+    	for (auto idAdded : ids){
+	    	idsAlreadyExisting.insert(idAdded);
+    	}
+    }
+    for (auto idAdded : idsAlreadyExisting){
+   		onAddFns(id, (void*)tags, idAdded);
+    }
+
     return tags;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -262,20 +290,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
   	}
   };
 
-	std::vector<AttrFunc> attrFuncs = {};
-	std::vector<AttrFuncValue> attrAddFuncs = {};
-	for (auto &tagUpdate : tagupdates){
-		attrAddFuncs.push_back(AttrFuncValue {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onAdd,
-		});
-		attrFuncs.push_back(AttrFunc {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onRemove,
-		});
-	}
-
-  binding.onObjectAdded = getOnAttrAdds(attrAddFuncs);
+  binding.onObjectAdded = onAddFns;
   binding.onObjectRemoved = getOnAttrRemoved(attrFuncs);
 
   binding.onFrame = [](int32_t id, void* data) -> void {
