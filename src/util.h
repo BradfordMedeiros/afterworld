@@ -60,6 +60,10 @@ struct NoHealthMessage {
   std::optional<std::string> team;
 };
 
+struct AnimationTrigger {
+	objid entityId;
+	std::string transition;
+};
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::string uniqueNameSuffix();

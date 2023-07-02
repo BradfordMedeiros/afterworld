@@ -96,6 +96,7 @@ void moveDown(objid id, glm::vec2 direction){
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
+
 void moveXZ(objid id, glm::vec2 direction){
   //modlog("editor: move xz: ", print(direction));
   float time = gameapi -> timeElapsed();
@@ -108,8 +109,7 @@ void moveXZ(objid id, glm::vec2 direction){
     return;
   }
   directionVec.y = 0.f;
-
-  gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude);
+  gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
 }
 
 float ironsightSpeedMultiplier = 0.4f;
@@ -777,7 +777,16 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     //auto limitedMoveVec = moveVec;
     auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
     if (shouldMoveXZ){
-      moveXZ(movement -> playerId.value(), moveSpeed * direction);
+      moveXZ(movement -> playerId.value(), moveSpeed * direction * 0.6f);
+      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+        .entityId = movement -> playerId.value(),
+        .transition = "walking",
+      });
+    }else{
+      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+        .entityId = movement -> playerId.value(),
+        .transition = "not-walking",
+      });
     }
 
 

@@ -239,7 +239,7 @@ void handleMouseSelect(GameState& gameState){
   auto selectedItem = highlightedMenuItem(animationMenu.items);
   if (selectedItem.has_value() && selectedItem.value() != 0 && animationMenu.selectedObj.has_value()){
     auto item = animationMenu.items.at(selectedItem.value());
-    gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, false);
+    gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, true);
     std::cout << "animation: debug selected: " << selectedItem.value() << ", value = " << item.text << std::endl;
   }else{
     std::cout << "animation: debug no item selected" << std::endl;
@@ -529,7 +529,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         GameobjAttributes attr {
           .stringAttributes = {},
           .numAttributes = {},
-          .vecAttr = { .vec3 = { { "position", glm::vec3(0.f, 2.f, 10.f) }}, .vec4 = {} },
+          .vecAttr = { .vec3 = { { "position", glm::vec3(0.f, 0.5f, 3.f) }}, .vec4 = {} },
         };
         std::map<std::string, GameobjAttributes> submodelAttributes;
         auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(*gameObjId), std::string(">") + uniqueNameSuffix(), attr, submodelAttributes);

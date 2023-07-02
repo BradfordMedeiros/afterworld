@@ -22,6 +22,9 @@ struct Tags {
 	std::unordered_map<objid, HitPoints> hitpoints;
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
+
+	StateController animationController;
+
 };
 
 struct TagUpdater {
@@ -86,7 +89,41 @@ bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead, std::optiona
 	return true;
 }
 
+
 std::vector<TagUpdater> tagupdates = {
+	TagUpdater {
+		.attribute = "animation",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		auto animationController = getSingleAttr(id, "animation");
+  		addEntityController(tags -> animationController, id, getSymbol(animationController.value()));
+  	},
+  	.onRemove = [](void* data, int32_t id) -> void {
+ 			Tags* tags = static_cast<Tags*>(data);
+		 	removeEntityController(tags -> animationController, id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		if (key == "trigger"){
+  			AnimationTrigger* animationTriggerMessage = anycast<AnimationTrigger>(value);
+  			if (!hasControllerState(tags.animationController, animationTriggerMessage -> entityId)){
+  				return;
+  			}
+        bool changedState = triggerControllerState(tags.animationController, animationTriggerMessage -> entityId, getSymbol(animationTriggerMessage -> transition));
+        if (changedState){
+        	auto stateAnimation = stateAnimationForController(tags.animationController, animationTriggerMessage -> entityId);
+        	if (stateAnimation){
+        		if (stateAnimation -> animation.has_value()){
+        			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), true);
+        		}else{
+        			gameapi -> stopAnimation(animationTriggerMessage -> entityId);
+        		}
+        	}
+        }
+  		}
+  	},
+	},
+
 	TagUpdater {
 		.attribute = "scrollspeed",
 		.onAdd = [](void* data, int32_t id, glm::vec3 value) -> void {
@@ -264,6 +301,39 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     	.currentPlaying = std::nullopt,
     };
     
+    ///// animations ////
+    tags -> animationController = createStateController();
+
+    addStateController(
+    	tags -> animationController, 
+    	"character",
+    	{
+   		  ControllerState{
+					.fromState = getSymbol("idle"),
+					.toState = getSymbol("walking"),
+					.transition = getSymbol("walking"),
+				},
+				ControllerState{
+					.fromState = getSymbol("walking"),
+					.toState = getSymbol("idle"),
+					.transition = getSymbol("not-walking"),
+				}
+   		},
+   		{
+   			ControllerStateAnimation {
+   				.state = getSymbol("idle"),
+   				.animation = std::nullopt,
+   			},
+   			ControllerStateAnimation {
+   				.state = getSymbol("walking"),
+   				.animation = "walk",
+   			},
+   		}
+   	);
+
+    ////////////////////////////////
+
+
     std::set<objid> idsAlreadyExisting;
     for (auto &tagUpdate : tagupdates){
     	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
