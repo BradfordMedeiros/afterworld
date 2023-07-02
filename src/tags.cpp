@@ -113,6 +113,7 @@ std::vector<TagUpdater> tagupdates = {
         if (changedState){
         	auto stateAnimation = stateAnimationForController(tags.animationController, animationTriggerMessage -> entityId);
         	if (stateAnimation){
+	        	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
         		if (stateAnimation -> animation.has_value()){
         			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), true);
         		}else{
@@ -313,11 +314,31 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 					.toState = getSymbol("walking"),
 					.transition = getSymbol("walking"),
 				},
+   		  ControllerState{
+					.fromState = getSymbol("idle"),
+					.toState = getSymbol("sidestep"),
+					.transition = getSymbol("sidestep"),
+				},
 				ControllerState{
 					.fromState = getSymbol("walking"),
 					.toState = getSymbol("idle"),
 					.transition = getSymbol("not-walking"),
-				}
+				},
+				ControllerState{
+					.fromState = getSymbol("sidestep"),
+					.toState = getSymbol("idle"),
+					.transition = getSymbol("not-walking"),
+				},
+   		  ControllerState{
+					.fromState = getSymbol("idle"),
+					.toState = getSymbol("jump"),
+					.transition = getSymbol("jump"),
+				},
+   		  ControllerState{
+					.fromState = getSymbol("jump"),
+					.toState = getSymbol("idle"),
+					.transition = getSymbol("land"),
+				},
    		},
    		{
    			ControllerStateAnimation {
@@ -327,6 +348,14 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
    			ControllerStateAnimation {
    				.state = getSymbol("walking"),
    				.animation = "walk",
+   			},
+   			ControllerStateAnimation {
+   				.state = getSymbol("sidestep"),
+   				.animation = "sidestep",
+   			},
+   			ControllerStateAnimation {
+   				.state = getSymbol("jump"),
+   				.animation = "jump",
    			},
    		}
    	);

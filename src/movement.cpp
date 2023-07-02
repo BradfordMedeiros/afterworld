@@ -212,6 +212,11 @@ void land(Movement& movement, objid id){
   if (movement.landSoundObjId.has_value()){
     gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
   }
+  modlog("animation controller", "land");
+  gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+    .entityId = movement.playerId.value(),
+    .transition = "land",
+  });
 }
 
 
@@ -664,6 +669,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 32 /* space */ && action == 1){
       jump(*movement, movement -> playerId.value());
+      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+        .entityId = movement -> playerId.value(),
+        .transition = "jump",
+      });
       return;
     }
 
@@ -728,6 +737,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     glm::vec2 moveVec(0.f, 0.f);
 
     bool shouldMoveXZ = false;
+    bool isSideStepping = false;
     if (movement -> goForward){
       std::cout << "should move forward" << std::endl;
       moveVec += glm::vec2(0.f, -1.f);
@@ -749,6 +759,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
       if (!movement -> attachedToLadder){
         shouldMoveXZ = true;
+        isSideStepping = true;
       }
       
     }
@@ -756,6 +767,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
       if (!movement -> attachedToLadder){
         shouldMoveXZ = true;
+        isSideStepping = true;
       }
     }
 
@@ -777,11 +789,19 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     //auto limitedMoveVec = moveVec;
     auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
     if (shouldMoveXZ){
-      moveXZ(movement -> playerId.value(), moveSpeed * direction * 0.6f);
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = movement -> playerId.value(),
-        .transition = "walking",
-      });
+      moveXZ(movement -> playerId.value(), moveSpeed * direction);
+      if (isSideStepping){
+        gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+          .entityId = movement -> playerId.value(),
+          .transition = "sidestep",
+        });
+      }else{
+        gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+          .entityId = movement -> playerId.value(),
+          .transition = "walking",
+        });
+      }
+
     }else{
       gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
         .entityId = movement -> playerId.value(),
