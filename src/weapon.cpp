@@ -221,7 +221,7 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, gunpos, rot4, scale);
 
   if (idleAnimation != "" && weapons.currentGun.gunId.has_value()){
-    gameapi -> playAnimation(weapons.currentGun.gunId.value(), idleAnimation, true);
+    gameapi -> playAnimation(weapons.currentGun.gunId.value(), idleAnimation, LOOP);
   }
 }
 
@@ -337,7 +337,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     gameapi -> playClip("&code-weaponsound", sceneId, std::nullopt, std::nullopt);
   }
   if (weapons.currentGun.fireAnimation.has_value()){
-    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), false);
+    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), ONESHOT);
   }
 
   auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun

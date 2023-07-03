@@ -239,7 +239,7 @@ void handleMouseSelect(GameState& gameState){
   auto selectedItem = highlightedMenuItem(animationMenu.items);
   if (selectedItem.has_value() && selectedItem.value() != 0 && animationMenu.selectedObj.has_value()){
     auto item = animationMenu.items.at(selectedItem.value());
-    gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, true);
+    gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, LOOP);
     std::cout << "animation: debug selected: " << selectedItem.value() << ", value = " << item.text << std::endl;
   }else{
     std::cout << "animation: debug no item selected" << std::endl;

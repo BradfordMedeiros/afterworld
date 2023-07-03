@@ -115,7 +115,7 @@ std::vector<TagUpdater> tagupdates = {
         	if (stateAnimation){
 	        	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
         		if (stateAnimation -> animation.has_value()){
-        			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), stateAnimation -> loop);
+        			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
         		}else{
         			gameapi -> stopAnimation(animationTriggerMessage -> entityId);
         		}
@@ -325,6 +325,16 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 					.transition = getSymbol("not-walking"),
 				},
 				ControllerState{
+					.fromState = getSymbol("walking"),
+					.toState = getSymbol("jump"),
+					.transition = getSymbol("jump"),
+				},
+				ControllerState{
+					.fromState = getSymbol("sidestep"),
+					.toState = getSymbol("jump"),
+					.transition = getSymbol("jump"),
+				},
+				ControllerState{
 					.fromState = getSymbol("sidestep"),
 					.toState = getSymbol("idle"),
 					.transition = getSymbol("not-walking"),
@@ -344,22 +354,22 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
    			ControllerStateAnimation {
    				.state = getSymbol("idle"),
    				.animation = std::nullopt,
-   				.loop = true,
+   				.animationBehavior = LOOP,
    			},
    			ControllerStateAnimation {
    				.state = getSymbol("walking"),
    				.animation = "walk",
-   				.loop = true,
+   				.animationBehavior = LOOP,
    			},
    			ControllerStateAnimation {
    				.state = getSymbol("sidestep"),
    				.animation = "sidestep",
-   				.loop = true,
+   				.animationBehavior = LOOP,
    			},
    			ControllerStateAnimation {
    				.state = getSymbol("jump"),
    				.animation = "jump",
-   				.loop = false,
+   				.animationBehavior = FORWARDS,
    			},
    		}
    	);
