@@ -115,7 +115,7 @@ std::vector<TagUpdater> tagupdates = {
         	if (stateAnimation){
 	        	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
         		if (stateAnimation -> animation.has_value()){
-        			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), true);
+        			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), stateAnimation -> loop);
         		}else{
         			gameapi -> stopAnimation(animationTriggerMessage -> entityId);
         		}
@@ -344,18 +344,22 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
    			ControllerStateAnimation {
    				.state = getSymbol("idle"),
    				.animation = std::nullopt,
+   				.loop = true,
    			},
    			ControllerStateAnimation {
    				.state = getSymbol("walking"),
    				.animation = "walk",
+   				.loop = true,
    			},
    			ControllerStateAnimation {
    				.state = getSymbol("sidestep"),
    				.animation = "sidestep",
+   				.loop = true,
    			},
    			ControllerStateAnimation {
    				.state = getSymbol("jump"),
    				.animation = "jump",
+   				.loop = false,
    			},
    		}
    	);

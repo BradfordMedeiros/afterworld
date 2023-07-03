@@ -14,6 +14,7 @@ struct ControllerState {
 struct ControllerStateAnimation {
 	int state;
 	std::optional<std::string> animation;
+	bool loop;
 };
 
 struct SingleStateController {
