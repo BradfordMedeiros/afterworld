@@ -212,11 +212,6 @@ void land(Movement& movement, objid id){
   if (movement.landSoundObjId.has_value()){
     gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
   }
-  modlog("animation controller", "land");
-  gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-    .entityId = movement.playerId.value(),
-    .transition = "land",
-  });
 }
 
 
@@ -782,6 +777,15 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lastFrameIsGrounded = movement -> isGrounded;
     bool isGrounded = checkMovementCollisions(*movement, hitDirections, rotationWithoutY).at(COLLISION_SPACE_DOWN);
     movement -> isGrounded = isGrounded;
+
+    if (movement -> isGrounded && !movement -> lastFrameIsGrounded){
+      modlog("animation controller", "land");
+      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+        .entityId = movement -> playerId.value(),
+        .transition = "land",
+      });
+    }
+
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
 
@@ -862,13 +866,11 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (isWater){
       movement -> waterObjIds.insert(otherObjectId);
     }
-
     if (!isWater && value >= movement -> moveParams.groundAngle){
       if (!movement -> lastFrameIsGrounded && movement -> isGrounded){
         land(*movement, id);
       }
     }
-
   };
   binding.onCollisionExit = [](objid _, void* data, int32_t obj1, int32_t obj2) -> void {
     modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
