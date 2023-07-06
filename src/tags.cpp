@@ -339,6 +339,16 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 					.toState = getSymbol("idle"),
 					.transition = getSymbol("not-walking"),
 				},
+				ControllerState{
+					.fromState = getSymbol("sidestep"),
+					.toState = getSymbol("walking"),
+					.transition = getSymbol("walking"),
+				},
+				ControllerState{
+					.fromState = getSymbol("walking"),
+					.toState = getSymbol("sidestep"),
+					.transition = getSymbol("sidestep"),
+				},
    		  ControllerState{
 					.fromState = getSymbol("idle"),
 					.toState = getSymbol("jump"),
