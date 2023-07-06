@@ -42,6 +42,38 @@ bool hasGun(std::string& gun){
   return result.size() > 0;
 }
 
+bool isPlayer(objid id){
+  auto playerAttr = getSingleAttr(id, "player");
+  return playerAttr.has_value() && playerAttr.value() == "true";
+}
+bool isPickup(objid id){
+  auto playerAttr = getSingleAttr(id, "pickup");
+  return playerAttr.has_value();
+}
+
+void tryPickupItem(objid gameObjId){
+  auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+  auto pickup = getStrAttr(objAttr, "pickup");
+  if (pickup.has_value()){
+    auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
+    auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
+    auto pickupType = getStrAttr(objAttr, "pickup-type");
+    auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
+
+    auto oldItemCount = ensureItemExists(pickup.value());
+    auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
+    updateItemCount(pickup.value(), newItemCount);
+
+    modlog("inventory", "warning: pickup not removed");
+    //gameapi -> removeObjectById(gameObjId);
+    // fake delete because of bug need to fix.  Obviously can't stay like this
+    gameapi -> setGameObjectPosition(gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
+    if (pickupTrigger.has_value()){
+      gameapi -> sendNotifyMessage(pickupTrigger.value(), std::to_string(newItemCount));
+    }
+  }
+}
+
 CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
    binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
@@ -52,26 +84,7 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
         return;
       }
 
-  		auto objAttr =  gameapi -> getGameObjectAttr(*gameObjId);
-  		auto pickup = getStrAttr(objAttr, "pickup");
-  		if (pickup.has_value()){
-  			auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
- 	  		auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
-	  		auto pickupType = getStrAttr(objAttr, "pickup-type");
-  			auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
-
-  			auto oldItemCount = ensureItemExists(pickup.value());
-  			auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
-  			updateItemCount(pickup.value(), newItemCount);
-
- 		    //gameapi -> removeObjectById(gameObjId);
-  			// fake delete because of bug need to fix.  Obviously can't stay like this
- 			  gameapi -> setGameObjectPosition(*gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
-
- 			  if (pickupTrigger.has_value()){
- 			  	gameapi -> sendNotifyMessage(pickupTrigger.value(), std::to_string(newItemCount));
- 			  }
-  		}
+      tryPickupItem(*gameObjId);
     }
 
     if (key == "request-change-gun"){
@@ -82,5 +95,18 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
       }
     }
   };
+
+  binding.onCollisionEnter = [](objid _, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+    auto obj1IsPlayer = isPlayer(obj1);
+    auto obj2IsPlayer = isPlayer(obj2);
+    auto obj1IsPickup = isPickup(obj1);
+    auto obj2IsPickup = isPickup(obj2);
+    if (obj1IsPlayer && obj2IsPickup){
+      tryPickupItem(obj2);
+    }else if (obj2IsPlayer && obj1IsPickup){
+      tryPickupItem(obj1);
+    }
+  };
+
 	return binding;
 }
