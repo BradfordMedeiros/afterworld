@@ -91,7 +91,12 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
       auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "selected value invalid");
       if (hasGun(*strValue)){
-        gameapi -> sendNotifyMessage("change-gun", *strValue);
+        ChangeGunMessage changeGun {
+          .currentAmmo = 5,
+          .totalAmmo = 10,
+          .gun = *strValue,
+        };
+        gameapi -> sendNotifyMessage("change-gun", changeGun);
       }
     }
   };

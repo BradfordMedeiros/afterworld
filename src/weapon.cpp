@@ -688,9 +688,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     Weapons* weapons = static_cast<Weapons*>(data);
     if (key == "change-gun"){
-      auto strValue = anycast<std::string>(value); 
-      modassert(strValue != NULL, "change-gun value invalid");
-      auto value = *strValue;
+      auto changeGunMessage = anycast<ChangeGunMessage>(value); 
+      modassert(changeGunMessage != NULL, "change-gun value invalid");
+      auto value = changeGunMessage -> gun;
       if (value != weapons -> currentGun.name){
         weapons -> currentGun.gunState = GUN_LOWERING;
         gameapi -> schedule(id, 1000, weapons, [id, value](void* weaponData) -> void {

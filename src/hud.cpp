@@ -2,10 +2,16 @@
 
 extern CustomApiBindings* gameapi;
 
+struct AmmoHudInfo {
+  int currentAmmo;
+  int totalAmmo;
+};
+
 struct Hud {
 	std::vector<objid> managedObjIds;
 
   float health;
+  AmmoHudInfo ammoInfo;
 };
 
 struct HudElement {
@@ -72,12 +78,24 @@ void changeHud(Hud& hud, std::string name, objid mainobjId){
   }
 }
 
+void drawbar(float health, float yNdc){
+  float width = 0.2f;
+  float aspectRatio = 0.1f;
+  float widthPercentage = glm::max(0.f, health / 100.f);
+  gameapi -> drawRect(-0.8f, yNdc, width + 0.01f, width * aspectRatio + 0.01f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(-0.8f, yNdc, width, width * aspectRatio, false, glm::vec4(0.f, 0.f, 0.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(-0.8f, yNdc, widthPercentage * width, width * aspectRatio, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
+}
 
 CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
   	Hud* hud = new Hud;
     hud -> health = 100.f;
+    hud -> ammoInfo = AmmoHudInfo {
+      .currentAmmo = 0,
+      .totalAmmo = 0,
+    };
     hud -> managedObjIds = {};
   	changeHud(*hud, "default", id);
   	return hud;
@@ -96,6 +114,11 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
       auto floatValue = anycast<float>(value);
       modassert(floatValue != NULL, "hud-health value invalid");
       hud -> health = *floatValue;
+    }else if (key == "change-gun"){
+      auto changeGunMessage = anycast<ChangeGunMessage>(value); 
+      modassert(changeGunMessage != NULL, "change-gun value invalid");
+      hud -> ammoInfo.currentAmmo = changeGunMessage -> currentAmmo;
+      hud -> ammoInfo.totalAmmo = changeGunMessage -> totalAmmo;
     }
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -103,14 +126,14 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Hud* hud = static_cast<Hud*>(data);
+ 
+    // healthbar
     gameapi -> drawText("health: " + std::to_string(static_cast<int>(hud -> health)), -0.9, 0.2, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    drawbar(hud -> health, 0.1f);
+  
+    // ammo counter
+    gameapi -> drawText(std::string("ammo: ") + std::to_string(hud -> ammoInfo.currentAmmo) + " / " + std::to_string(hud -> ammoInfo.totalAmmo), -0.9, 0.6, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
 
-    float width = 0.2f;
-    float aspectRatio = 0.1f;
-    float widthPercentage = glm::max(0.f, hud -> health / 100.f);
-    gameapi -> drawRect(-0.8f, 0.1f, width + 0.01f, width * aspectRatio + 0.01f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    gameapi -> drawRect(-0.8f, 0.1f, width, width * aspectRatio, false, glm::vec4(0.f, 0.f, 0.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    gameapi -> drawRect(-0.8f, 0.1f, widthPercentage * width, width * aspectRatio, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
   };
 
   return binding;

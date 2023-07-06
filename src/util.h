@@ -65,6 +65,12 @@ struct AnimationTrigger {
 	std::string transition;
 };
 
+struct ChangeGunMessage {
+	int currentAmmo;
+	int totalAmmo;
+	std::string gun;
+};
+
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::string uniqueNameSuffix();
 
