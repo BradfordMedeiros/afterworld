@@ -11,7 +11,7 @@ struct Hud {
 	std::vector<objid> managedObjIds;
 
   float health;
-  AmmoHudInfo ammoInfo;
+  std::optional<AmmoHudInfo> ammoInfo;
 };
 
 struct HudElement {
@@ -92,10 +92,7 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
   	Hud* hud = new Hud;
     hud -> health = 100.f;
-    hud -> ammoInfo = AmmoHudInfo {
-      .currentAmmo = 0,
-      .totalAmmo = 0,
-    };
+    hud -> ammoInfo = std::nullopt;
     hud -> managedObjIds = {};
   	changeHud(*hud, "default", id);
   	return hud;
@@ -114,11 +111,13 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
       auto floatValue = anycast<float>(value);
       modassert(floatValue != NULL, "hud-health value invalid");
       hud -> health = *floatValue;
-    }else if (key == "change-gun"){
-      auto changeGunMessage = anycast<ChangeGunMessage>(value); 
-      modassert(changeGunMessage != NULL, "change-gun value invalid");
-      hud -> ammoInfo.currentAmmo = changeGunMessage -> currentAmmo;
-      hud -> ammoInfo.totalAmmo = changeGunMessage -> totalAmmo;
+    }else if (key == "current-gun"){
+      auto currentGunMessage = anycast<CurrentGunMessage>(value); 
+      modassert(currentGunMessage != NULL, "current-gun value invalid");
+      hud -> ammoInfo = AmmoHudInfo {
+        .currentAmmo = currentGunMessage -> currentAmmo,
+        .totalAmmo = currentGunMessage -> totalAmmo,
+      };
     }
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -132,7 +131,9 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
     drawbar(hud -> health, 0.1f);
   
     // ammo counter
-    gameapi -> drawText(std::string("ammo: ") + std::to_string(hud -> ammoInfo.currentAmmo) + " / " + std::to_string(hud -> ammoInfo.totalAmmo), -0.9, 0.6, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    if (hud -> ammoInfo.has_value()){
+      gameapi -> drawText(std::string("ammo: ") + std::to_string(hud -> ammoInfo.value().currentAmmo) + " / " + std::to_string(hud -> ammoInfo.value().totalAmmo), -0.9, 0.6, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    }
 
   };
 

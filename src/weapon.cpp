@@ -35,6 +35,9 @@ struct CurrentGun {
   float totalBloom;
   float bloomLength;
 
+  int currentAmmo;
+  int totalAmmo;
+
   GunAnimation gunState;
 };
 
@@ -159,13 +162,13 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   }
 }
 
-void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
+void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int ammo){
   auto gunQuery = gameapi -> compileSqlQuery(
    std::string("select modelpath, fireanimation, fire-sound, xoffset-pos, ") +
    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot " + 
+   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot, ammo " + 
    "from guns where name = " + gun,
    {}
   );
@@ -192,6 +195,7 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   weapons.currentGun.minBloom = floatFromFirstSqlResult(result, 31);
   weapons.currentGun.totalBloom = floatFromFirstSqlResult(result, 26);
   weapons.currentGun.bloomLength = floatFromFirstSqlResult(result, 30);
+
   weapons.currentGun.gunState = GUN_RAISED;
 
   auto fireAnimation = strFromFirstSqlResult(result, 28);
@@ -217,6 +221,15 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun){
   auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
   auto hitParticleStr = strFromFirstSqlResult(result, 20);
   auto projectileParticleStr = strFromFirstSqlResult(result, 25);
+
+  auto totalAmmo = intFromFirstSqlResult(result, 33);
+
+  weapons.currentGun.currentAmmo = ammo;
+  weapons.currentGun.totalAmmo = totalAmmo;
+  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
+    .currentAmmo = weapons.currentGun.currentAmmo,
+    .totalAmmo = weapons.currentGun.totalAmmo,
+  });
 
   spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, gunpos, rot4, scale);
 
@@ -328,11 +341,21 @@ void fireRaycast(Weapons& weapons, glm::vec3 orientationOffset){
 void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(weapons, now);
-
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(weapons.weaponParams.firingRate));
   if (!canFireGun){
     return;
   }
+  bool hasAmmo = weapons.currentGun.currentAmmo > 0;
+  if (!hasAmmo){
+    modlog("weapons", "no ammo, tried to fire, should play sound");
+    return;
+  }
+  weapons.currentGun.currentAmmo--;
+  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
+    .currentAmmo = weapons.currentGun.currentAmmo,
+    .totalAmmo = weapons.currentGun.totalAmmo,
+  });
+
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> playClip("&code-weaponsound", sceneId, std::nullopt, std::nullopt);
   }
@@ -590,7 +613,7 @@ void modifyPhysicsForHeldItem(Weapons& weapons){
 void changeWeaponTargetId(Weapons& weapons, objid id){
   weapons.playerId = id;
   reloadTraitsValues(weapons);
-  changeGun(weapons, id, gameapi -> listSceneId(id), "pistol");
+  //changeGun(weapons, id, gameapi -> listSceneId(id), "pistol", 10);
 }
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
@@ -685,19 +708,34 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
   };
+
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     Weapons* weapons = static_cast<Weapons*>(data);
     if (key == "change-gun"){
       auto changeGunMessage = anycast<ChangeGunMessage>(value); 
       modassert(changeGunMessage != NULL, "change-gun value invalid");
       auto value = changeGunMessage -> gun;
+      auto currentAmmo = changeGunMessage -> currentAmmo;
       if (value != weapons -> currentGun.name){
+        gameapi -> sendNotifyMessage("set-gun-ammo", SetAmmoMessage {
+          .currentAmmo = weapons -> currentGun.currentAmmo,
+          .gun = weapons -> currentGun.name,
+        });
+
         weapons -> currentGun.gunState = GUN_LOWERING;
-        gameapi -> schedule(id, 1000, weapons, [id, value](void* weaponData) -> void {
+        gameapi -> schedule(id, 1000, weapons, [id, value, currentAmmo](void* weaponData) -> void {
           Weapons* weaponValue = static_cast<Weapons*>(weaponData);
-          changeGun(*weaponValue, id, gameapi -> listSceneId(id), value);
+          changeGun(*weaponValue, id, gameapi -> listSceneId(id), value, currentAmmo);
         });
       }
+    }else if (key == "ammo"){
+      auto intValue = anycast<int>(value);
+      modassert(intValue != NULL, "ammo message not an int");
+      weapons -> currentGun.currentAmmo += *intValue;
+      gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
+        .currentAmmo = weapons -> currentGun.currentAmmo,
+        .totalAmmo = weapons -> currentGun.totalAmmo,
+      });
     }else if (key == "save-gun"){
       saveGunTransform(*weapons);
     }else if (key == "velocity"){

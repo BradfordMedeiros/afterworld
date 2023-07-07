@@ -41,6 +41,16 @@ bool hasGun(std::string& gun){
   modassert(validSql, "error executing sql query");
   return result.size() > 0;
 }
+int ammoForGun(std::string& gun){
+  auto query = gameapi -> compileSqlQuery("select count from inventory where item = ?", { gun + "-ammo" });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  if (result.size() == 0){
+    return 0;
+  }
+  return std::atoi(result.at(0).at(0).c_str());
+}
 
 bool isPlayer(objid id){
   auto playerAttr = getSingleAttr(id, "player");
@@ -69,10 +79,12 @@ void tryPickupItem(objid gameObjId){
     // fake delete because of bug need to fix.  Obviously can't stay like this
     gameapi -> setGameObjectPosition(gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
     if (pickupTrigger.has_value()){
-      gameapi -> sendNotifyMessage(pickupTrigger.value(), std::to_string(newItemCount));
+      gameapi -> sendNotifyMessage(pickupTrigger.value(), static_cast<int>(newItemCount));
     }
   }
 }
+
+
 
 CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
 	 auto binding = createCScriptBinding(name, api);
@@ -83,7 +95,6 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
       if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
         return;
       }
-
       tryPickupItem(*gameObjId);
     }
 
@@ -92,12 +103,16 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
       modassert(strValue != NULL, "selected value invalid");
       if (hasGun(*strValue)){
         ChangeGunMessage changeGun {
-          .currentAmmo = 5,
-          .totalAmmo = 10,
+          .currentAmmo = ammoForGun(*strValue),
           .gun = *strValue,
         };
         gameapi -> sendNotifyMessage("change-gun", changeGun);
       }
+    }
+    if (key == "set-gun-ammo"){
+      auto setAmmoMessage = anycast<SetAmmoMessage>(value); 
+      modassert(setAmmoMessage != NULL, "setAmmoMessage invalid");
+      updateItemCount(setAmmoMessage -> gun + "-ammo", setAmmoMessage -> currentAmmo);
     }
   };
 

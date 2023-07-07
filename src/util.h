@@ -67,7 +67,16 @@ struct AnimationTrigger {
 
 struct ChangeGunMessage {
 	int currentAmmo;
+	std::string gun;
+};
+
+struct CurrentGunMessage {
+	int currentAmmo;
 	int totalAmmo;
+};
+
+struct SetAmmoMessage {
+	int currentAmmo;
 	std::string gun;
 };
 
