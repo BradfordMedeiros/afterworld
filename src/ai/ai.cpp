@@ -125,6 +125,26 @@ void doGoal(Goal& goal, Agent& agent){
   modassert(false, "do goal invalid agent");
 }
 
+void removeAgents(AiData& aiData, std::set<objid> agentIds){
+  std::vector<Agent> newAgents;
+  for (auto &agent : aiData.agents){
+    if (agentIds.count(agent.id) == 0){
+      newAgents.push_back(agent);
+    }
+  }
+  aiData.agents = newAgents;
+}
+void ensureAgentsExist(AiData& aiData){
+  std::set<objid> removedAgents;
+  for (auto &agent : aiData.agents){
+    if (!gameapi -> getGameObjNameForId(agent.id).has_value()){
+      removedAgents.insert(agent.id);
+    }
+  }
+  if (removedAgents.size() > 0){
+    removeAgents(aiData, removedAgents);
+  }
+}
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -147,6 +167,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
 
+    ensureAgentsExist(*aiData);
     // probably don't want to reset world state every frame, but ok for now
     // consider what data should and shouldn't be per frame (per data refresh?)
     aiData -> worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
