@@ -7,6 +7,11 @@
 
 extern CustomApiBindings* gameapi;
 
+//////   resource manager       /////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////
+
 struct MovementParams {
   float moveSpeed;
   float moveSpeedAir;
@@ -32,32 +37,30 @@ struct ControlParams {
 };
 
 struct Movement {
-  MovementParams moveParams;
-  ControlParams controlParams;
+  MovementParams moveParams; // character params
 
-  std::optional<objid> playerId;
+  ControlParams controlParams; // controls
 
-  bool goForward;
+  std::optional<objid> playerId;   // target id 
+
+  bool goForward;                 // control params
   bool goBackward;
   bool goLeft;
   bool goRight;
   bool active;
 
-  std::optional<objid> jumpSoundObjId;
-  std::optional<objid> landSoundObjId;
-  std::optional<objid> moveSoundObjId;
-  float lastMoveSoundPlayTime;
+  float lastMoveSoundPlayTime;      // state
   glm::vec3 lastMoveSoundPlayLocation;
 
-  glm::vec2 lookVelocity;
-  float xRot;
+  glm::vec2 lookVelocity;       // control params
+  float xRot;               
   float yRot;
-  bool facingWall;
+  bool facingWall;              // state
   bool facingLadder;
-  bool attachedToLadder;
-  std::set<objid> waterObjIds;
+  bool attachedToLadder;    
+  std::set<objid> waterObjIds;  
 
-  bool isGrounded;
+  bool isGrounded;              // state
   bool lastFrameIsGrounded;
   bool isCrouching;
   bool shouldBeCrouching;
@@ -79,8 +82,8 @@ void jump(Movement& movement, objid id){
   glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
   if (movement.isGrounded){
     gameapi -> applyImpulse(id, impulse);
-    if (movement.jumpSoundObjId.has_value()){
-      gameapi -> playClip("&code-movement-jump", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
+    if (getManagedSounds().jumpSoundObjId.has_value()){
+      gameapi -> playClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
     }
   }
   if (movement.waterObjIds.size() > 0){
@@ -209,8 +212,8 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
 }
 
 void land(Movement& movement, objid id){
-  if (movement.landSoundObjId.has_value()){
-    gameapi -> playClip("&code-movement-land", gameapi -> listSceneId(id), std::nullopt, std::nullopt);
+  if (getManagedSounds().landSoundObjId.has_value()){
+    gameapi -> playClipById(getManagedSounds().landSoundObjId.value(), std::nullopt, std::nullopt);
   }
 }
 
@@ -255,50 +258,6 @@ void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>
   movement.moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
 }
 
-objid createSound(objid mainobjId, std::string soundObjName, std::string clip){
-  modassert(soundObjName.at(0) == '&', "sound obj must start with &");
-  auto sceneId = gameapi -> listSceneId(mainobjId);
-  GameobjAttributes attr {
-    .stringAttributes = {
-      { "clip", clip },
-    },
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto soundObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
-  modassert(soundObjId.has_value(), "sound already exists in scene: " + std::to_string(sceneId));
-  gameapi -> makeParent(soundObjId.value(), mainobjId);
-  return soundObjId.value();
-}
-struct SoundConfig {
-  std::string jumpClip;
-  std::string landClip;
-  std::string moveClip;
-};
-void updateSoundConfig(Movement& movement, objid id, SoundConfig config){
-  if (config.jumpClip != ""){
-    if (movement.jumpSoundObjId.has_value()){
-      gameapi -> removeObjectById(movement.jumpSoundObjId.value());
-    }
-    movement.jumpSoundObjId = createSound(id, "&code-movement-jump", config.jumpClip);
-  }
-  if (config.landClip != ""){
-    if (movement.landSoundObjId.has_value()){
-      gameapi -> removeObjectById(movement.landSoundObjId.value());
-    }
-    movement.landSoundObjId = createSound(id, "&code-movement-land", config.landClip);
-  }
-  movement.lastMoveSoundPlayTime = 0.f;
-  movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
-  if (config.moveClip != ""){
-    if (movement.moveSoundObjId.has_value()){
-      gameapi -> removeObjectById(movement.moveSoundObjId.value());
-    }
-    movement.moveSoundObjId = createSound(id, "&code-move", config.moveClip);
-  }
-}
-
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
     "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water from traits where profile = " + name,
@@ -309,11 +268,10 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
   modassert(validTraitSql, "error executing sql query");
   updateTraitConfig(movement, traitsResult);
   updateObjectProperties(id, traitsResult, movement.moveParams.gravity, movement.moveParams.friction);
-  updateSoundConfig(movement, id, SoundConfig {
-    .jumpClip = traitsResult.at(0).at(9),
-    .landClip = traitsResult.at(0).at(10),
-    .moveClip = traitsResult.at(0).at(13),
-  });
+
+  ensureSoundsLoaded(gameapi -> listSceneId(id), traitsResult.at(0).at(9), traitsResult.at(0).at(10), traitsResult.at(0).at(13));
+  movement.lastMoveSoundPlayTime = 0.f;
+  movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 }
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
@@ -409,24 +367,6 @@ bool shouldStepUp(Movement& movement, objid id){
 
   //std::cout << "hitpoints:  low = " << belowHitpoints.size() << ", high = " << aboveHitpoints.size() << std::endl;
   return belowHitpoints.size() > 0 && aboveHitpoints.size() == 0;
-}
-
-std::string print(std::vector<bool>& values){
-  std::string strValue = "[";
-  for (auto value : values){
-    strValue += " " + print(value);
-  }
-  strValue += " ]";
-  return strValue;
-}
-
-std::string print(std::set<objid>& values){
-  std::string strValue = "[";
-  for (auto value : values){
-    strValue += " " + std::to_string(value);
-  }
-  strValue += " ]";
-  return strValue;
 }
 
 struct CollisionSpace {
@@ -574,9 +514,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> goRight = false;
     movement -> active = false;
 
-    movement -> jumpSoundObjId = std::nullopt;
-    movement -> landSoundObjId = std::nullopt;
-    movement -> moveSoundObjId = std::nullopt;
     movement -> lastMoveSoundPlayTime = 0.f;
     movement -> lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
@@ -598,6 +535,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     Movement* value = (Movement*)data;
+    ensureSoundsUnloaded(gameapi -> listSceneId(id));
     delete value;
   };
   binding.onKeyCallback = [](int32_t _, void* data, int key, int scancode, int action, int mods) -> void {
@@ -671,7 +609,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == '7' && action == 1){
+    if (key == '6' && action == 1){
+      std::cout << "movement: request change control placeholder" << std::endl;
+    }else if (key == '7' && action == 1){
       auto obj = gameapi -> getGameObjectByName("enemy", gameapi -> listSceneId(movement -> playerId.value()), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
       // needs to create use a temporary camera mounted to the character
@@ -813,14 +753,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       });
     }
 
-
     auto currPos = gameapi -> getGameObjectPos(movement -> playerId.value(), true);
     auto currTime = gameapi -> timeSeconds(false);
   
-    if (glm::length(currPos - movement -> lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && movement -> moveSoundObjId.has_value() && ((currTime - movement -> lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
+    if (glm::length(currPos - movement -> lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movement -> lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
       // move-sound-distance:STRING move-sound-mintime:STRING
       std::cout << "should play move clip" << std::endl;
-      gameapi -> playClip("&code-move", gameapi -> listSceneId(movement -> playerId.value()), std::nullopt, std::nullopt);
+      gameapi -> playClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
       movement -> lastMoveSoundPlayTime = currTime;
       movement -> lastMoveSoundPlayLocation = currPos;
     }

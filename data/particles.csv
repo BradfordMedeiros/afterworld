@@ -1,0 +1,2 @@
+particle.name:STRING,guns.projectile:STRING
+bullet,+mesh:./res/models/box/box.obj;+physics:enabled;+physics_type:dynamic;+Cube/tint:1 0 0 1;+physics_gravity:0 0 0

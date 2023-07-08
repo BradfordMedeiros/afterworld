@@ -1,5 +1,7 @@
 #include "./weather.h"
 
+// maybe the right way to do this is for this to dynamically create some billboards in front of the player?
+
 extern CustomApiBindings* gameapi;
 
 struct Weather {

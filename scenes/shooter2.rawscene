@@ -157,23 +157,21 @@ water:material:water
 #wall2:physics:enabled
 #wall2:chatnode:npc1
 #
-#item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-#item:position:-20 2 50
-#item:scale:0.25 0.25 1.25
-#item:texture:../gameresources/textures/wood.jpg
-#item:physics:enabled
-#item:physics_type:dynamic
-#item:pickup:scrapgun
-#item:pickup-amount:100
-#item:pickup-type:replace
-#item:physics_mass:5
-#item:material:metal
-#
 
-item:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+item:mesh:../gameresources/build/weapons/grenade.gltf
+item:position:-20 2 50
+item:physics:enabled
+item:physics_type:dynamic
+#item:physics_collision:nocollide
+item:pickup:pistol-ammo
+item:pickup-amount:10
+item:pickup-type:replace
+item:pickup-trigger:ammo
+item:physics_mass:5
+item:material:metal
+item:scale:0.1 0.1 0.1
+
 item:position:-22 -15 50
-item:scale:0.25 0.25 1.25
-item:texture:../gameresources/textures/wood.jpg
 item:physics:enabled
 item:health:10
 item:team:red
@@ -196,6 +194,7 @@ item3:physics:enabled
 item3:health:10
 item3:team:red
 item3:dragselect:ai
+#item3:pickup-trigger:ammo
 
 #item:pickup-trigger:scrapgun
 
@@ -257,6 +256,7 @@ console:tint:0 0.6 1 1
 >maincamera:goal-conditions-val:20
 >maincamera:team:blue
 >maincamera:health:200
+>maincamera:player:true
 
 >maincamera2:position:2 50 100
 >maincamera2:physics_angle:0.000000 0.000000 0.000000
@@ -272,6 +272,8 @@ console:tint:0 0.6 1 1
 >maincamera2:goal-conditions-val:20
 >maincamera2:team:blue
 >maincamera2:health:200
+>maincamera2:player:true
+
 
 
 
@@ -287,14 +289,16 @@ enemy:tint:1 0 0 1
 #enemy:goal:idle-enemy
 enemy:goal-type:idle
 enemy:goal-value:2
-#enemy:agent:basic
+enemy:agent:basic
 enemy:agent-target:blue
 enemy:goal-info:target
 enemy:team:red
 enemy:health:130
 enemy:physics_gravity:0 0 0
 enemy:physics_damping_linear:0.9
-enemy/doctor:dragselect:ai
+enemy:dragselect:ai
+enemy:animation:character
+enemy:player:true
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 goal:scale:0.25 0.05 1.25

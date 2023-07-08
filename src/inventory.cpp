@@ -75,9 +75,9 @@ void tryPickupItem(objid gameObjId){
     updateItemCount(pickup.value(), newItemCount);
 
     modlog("inventory", "warning: pickup not removed");
-    //gameapi -> removeObjectById(gameObjId);
+    gameapi -> removeObjectById(gameObjId);
     // fake delete because of bug need to fix.  Obviously can't stay like this
-    gameapi -> setGameObjectPosition(gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
+    //gameapi -> setGameObjectPosition(gameObjId, glm::vec3(0.f, -100.f, 0.f), false);
     if (pickupTrigger.has_value()){
       gameapi -> sendNotifyMessage(pickupTrigger.value(), static_cast<int>(newItemCount));
     }
