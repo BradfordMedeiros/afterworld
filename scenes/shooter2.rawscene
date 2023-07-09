@@ -328,8 +328,6 @@ spawnpoint:spawn:true
 ##############################################
 
 vehicles:script:native/vehicle
-#vehicles2:script:native/vehicle
-weather:script:native/weather
 gunlogic:script:native/weapon
 tags:script:native/tags
 ai:script:native/ai
