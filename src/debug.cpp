@@ -44,6 +44,29 @@ void handleHotkey(int key, int action){
 	}
 }
 
+void spawnProcMesh(objid sceneId){
+	std::vector<glm::vec3> faces = {
+		{ glm::vec3(0.f, 0.f, 0.f) },
+		{ glm::vec3(1.f, 0.f, 0.f) },
+		{ glm::vec3(0.f, 1.f, 0.f) },
+	};
+	std::vector<glm::vec3> points = {
+		glm::vec3(0.f, 0.f, 0.f),
+	};
+	gameapi -> generateMesh(faces, points, "proc-sometest-mesh");
+
+
+	std::map<std::string, std::string> stringAttributes = { { "mesh", "proc-sometest-mesh" } };
+
+  GameobjAttributes attr {
+    .stringAttributes = stringAttributes,
+    .numAttributes = {},
+    .vecAttr = {  .vec3 = {{ "position", glm::vec3(0.f, 0.f, 0.f) }, { "scale", glm::vec3(1.f, 1.f, 1.f) }},  .vec4 = {}},
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
+}
+
 bool printKey = false;
 CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
@@ -54,6 +77,9 @@ CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
    		std::cout << "debugBinding: key = " << key << ", action == " << action << ", scancode = " << scancode << ", mods = " << mods << std::endl;
    	}
    	handleHotkey(key, action);
+   	if (key == 75){
+   		spawnProcMesh(gameapi -> listSceneId(id));
+   	}
   };
 	return binding;
 }

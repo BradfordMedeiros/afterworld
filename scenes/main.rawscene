@@ -1,0 +1,6 @@
+hud:script:native/hud
+dialog:script:native/dialog
+inventory:script:native/inventory
+daynight:script:native/daynight
+debug:script:native/debug
+water:script:native/water

@@ -29,7 +29,7 @@ void applyWaterForces(Water& water){
 
 		std::vector<objid> idsToErase = {};
 		for (auto submergedObjId : submergedObjects){
-			if (!gameapi -> getGameObjNameForId(submergedObjId).has_value()){
+			if (!gameapi -> gameobjExists(submergedObjId)){
 				idsToErase.push_back(submergedObjId);
 				continue;
 			}

@@ -329,19 +329,13 @@ loadtexture:texture:../gameresources/textures/controls/up-down.png
 
 ##############################################
 
-hud:script:native/hud
-dialog:script:native/dialog
-inventory:script:native/inventory
 vehicles:script:native/vehicle
 #vehicles2:script:native/vehicle
-daynight:script:native/daynight
-debug:script:native/debug
 weather:script:native/weather
 gunlogic:script:native/weapon
 ingame:script:native/in-game-ui
 tags:script:native/tags
 sounds:script:native/sound
-water:script:native/water
 ai:script:native/ai
 movement:script:native/movement:1
 
