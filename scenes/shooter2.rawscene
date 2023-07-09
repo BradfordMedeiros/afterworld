@@ -325,17 +325,13 @@ spawnpoint:spawn:true
 #spawnpoint2:spawn:true
 
 
-loadtexture:texture:../gameresources/textures/controls/up-down.png
-
 ##############################################
 
 vehicles:script:native/vehicle
 #vehicles2:script:native/vehicle
 weather:script:native/weather
 gunlogic:script:native/weapon
-ingame:script:native/in-game-ui
 tags:script:native/tags
-sounds:script:native/sound
 ai:script:native/ai
 movement:script:native/movement:1
 

@@ -20,7 +20,6 @@ bool isInGameUi(GameUiBinding& uiBinding, objid id){
 void createInGamesUiInstances(objid id){
 	auto uiTexture = gameapi -> createTexture("gentexture-ingame-ui-texture", 512, 512, id);
 	gameapi -> clearTexture(uiTexture, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
-
 }
 
 CScriptBinding inGameUiBinding(CustomApiBindings& api, const char* name){

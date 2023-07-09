@@ -1,6 +1,17 @@
+# Resources that are expected to always be loaded
+
+# Scripts
 hud:script:native/hud
 dialog:script:native/dialog
 inventory:script:native/inventory
 daynight:script:native/daynight
 debug:script:native/debug
 water:script:native/water
+sounds:script:native/sound
+ingame:script:native/in-game-ui
+
+
+# Texture resources
+loadtexture:texture:../gameresources/textures/controls/up-down.png
+
+# Sounds
