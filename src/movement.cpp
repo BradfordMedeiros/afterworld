@@ -1,16 +1,10 @@
 #include "./movement.h"
 
-
 // For parity in behavior of all scripts need to restore 
 //    ironsight mode
 //    dash ability
 
 extern CustomApiBindings* gameapi;
-
-//////   resource manager       /////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////
 
 struct MovementParams {
   float moveSpeed;
@@ -58,7 +52,7 @@ struct Movement {
   bool facingWall;              // state
   bool facingLadder;
   bool attachedToLadder;    
-  std::set<objid> waterObjIds;  
+  bool inWater;  
 
   bool isGrounded;              // state
   bool lastFrameIsGrounded;
@@ -86,7 +80,7 @@ void jump(Movement& movement, objid id){
       gameapi -> playClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
     }
   }
-  if (movement.waterObjIds.size() > 0){
+  if (movement.inWater){
     gameapi -> applyImpulse(id, impulse);
   }
 }
@@ -117,10 +111,9 @@ void moveXZ(objid id, glm::vec2 direction){
 
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
-  auto inWater = movement.waterObjIds.size() > 0;
   auto baseMoveSpeed = movement.isCrouching ? movement.moveParams.crouchSpeed : movement.moveParams.moveSpeed;
   auto speed = isGrounded ? baseMoveSpeed : movement.moveParams.moveSpeedAir;
-  speed = inWater ? movement.moveParams.moveSpeedWater : speed;
+  speed = movement.inWater ? movement.moveParams.moveSpeedWater : speed;
   if (ironsight){
     speed = speed * ironsightSpeedMultiplier;
   }
@@ -426,7 +419,11 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
   return values;
 }
 
-std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY){
+struct MovementCollisions {
+  std::vector<bool> movementCollisions;
+  std::vector<objid> allCollisions;
+};
+MovementCollisions checkMovementCollisions(Movement& movement, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY){
   auto hitpoints = gameapi -> contactTest(movement.playerId.value());
   //std::cout << "hitpoints: [ ";
 
@@ -435,15 +432,21 @@ std::vector<bool>  checkMovementCollisions(Movement& movement, std::vector<glm::
   //  auto normal = 10.f * glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
   //  gameapi -> drawLine(hitpoint.point,  hitpoint.point + normal, true, movement.playerId, std::nullopt, std::nullopt, std::nullopt);
   //}
+
+  std::vector<objid> allCollisions;
   for (auto &hitpoint : hitpoints){
     hitDirections.push_back(hitpoint.normal);
+    allCollisions.push_back(hitpoint.id);
   }
 
   auto collisions = getCollisionSpaces(hitpoints, rotationWithoutY);
   //std::cout << "collisions: " << print(collisions) << std::endl;
 
   //std::cout << " ]" << std::endl;
-  return collisions;
+  return MovementCollisions {
+    .movementCollisions = collisions,
+    .allCollisions = allCollisions,
+  };
 }
 
 glm::vec3 limitMoveDirectionFromCollisions(Movement& movement, glm::vec3 moveVec, std::vector<glm::quat>& hitDirections, glm::quat playerDirection){
@@ -493,7 +496,7 @@ void changeTargetId(Movement& movement, objid id, bool active){
     movement.facingLadder = false;
     movement.attachedToLadder = false;
 
-    movement.waterObjIds = {};
+    movement.inWater = {};
     movement.isCrouching = false;
     movement.shouldBeCrouching = false;
     movement.lastCrouchTime = -10000.f;  // so can immediately crouch
@@ -527,7 +530,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> facingLadder = false;
     movement -> attachedToLadder = false;
 
-    movement -> waterObjIds = {};
+    movement -> inWater = false;
     movement -> isCrouching = false;
     movement -> shouldBeCrouching = false;
     movement -> lastCrouchTime = -10000.f;  // so can immediately crouch
@@ -715,8 +718,19 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     auto rotationWithoutY = quatFromDirection(directionVec);
 
     movement -> lastFrameIsGrounded = movement -> isGrounded;
-    bool isGrounded = checkMovementCollisions(*movement, hitDirections, rotationWithoutY).at(COLLISION_SPACE_DOWN);
-    movement -> isGrounded = isGrounded;
+
+    auto collisions = checkMovementCollisions(*movement, hitDirections, rotationWithoutY);
+    bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+   
+    movement -> inWater = false;
+    for (auto id : collisions.allCollisions){
+      auto isWater = getSingleAttr(id, "water").has_value();
+      if (isWater){
+        movement -> inWater = true;
+        break;
+      }
+    }
+    movement -> isGrounded = isGrounded && !movement -> inWater; 
 
     if (movement -> isGrounded && !movement -> lastFrameIsGrounded){
       modlog("animation controller", "land");
@@ -724,7 +738,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         .entityId = movement -> playerId.value(),
         .transition = "land",
       });
+
+      land(*movement, movement -> playerId.value());
     }
+
+
+
 
     float moveSpeed = getMoveSpeed(*movement, false, isGrounded);
     //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
@@ -778,50 +797,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       gameapi -> applyImpulse(movement -> playerId.value(), glm::vec3(0.f, 0.4f, 0.f));
     }
 
-    //std::cout << "mounted to wall: " << print(movement -> facingWall) << ", facing ladder = " << print(movement -> facingLadder) << ", attached = " << print(movement -> attachedToLadder)  << ", grounded = " << print(movement -> groundedObjIds.size() > 0) <<  ", inwater = " << print(movement -> waterObjIds.size() > 0) << std::endl;
     //std::cout << movementToStr(*movement) << std::endl;
-  };
-  binding.onCollisionEnter = [](objid _, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> playerId.has_value()){
-      return;
-    }
-    auto id = movement -> playerId.value();
-    modlog("movement", "on collision enter: " + std::to_string(obj1) + ", " + std::to_string(obj2));
-    if (id != obj1 && id != obj2){
-      return; 
-    }
-    auto otherNormal = (id == obj2) ? normal : oppositeNormal;
-    auto value = glm::dot(glm::normalize(otherNormal), glm::vec3(0.f, -1.f, 0.f));
-    modlog("movement", "y component angleToCompare: " + std::to_string(movement -> moveParams.groundAngle) + ", reverse = " + std::to_string(glm::degrees(glm::acos(value))));
-    modlog("movement", "y component dot: " + std::to_string(value));
-
-    objid otherObjectId = id == obj1 ? obj2 : obj1;
-
-
-    auto attr = gameapi -> getGameObjectAttr(otherObjectId);
-    auto isWater = getStrAttr(attr, "water").has_value();
-
-    if (isWater){
-      movement -> waterObjIds.insert(otherObjectId);
-    }
-    if (!isWater && value >= movement -> moveParams.groundAngle){
-      if (!movement -> lastFrameIsGrounded && movement -> isGrounded){
-        land(*movement, id);
-      }
-    }
-  };
-  binding.onCollisionExit = [](objid _, void* data, int32_t obj1, int32_t obj2) -> void {
-    modlog("movement", "on collision exit: " + std::to_string(obj1) + ", " + std::to_string(obj2));
-    Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> playerId.has_value()){
-      return;
-    }
-    auto id = movement -> playerId.value();
-    auto otherObjectId = (id == obj1) ? obj2 : obj1;
-    if (movement -> waterObjIds.count(otherObjectId) > 0){
-      movement -> waterObjIds.erase(otherObjectId);
-    }
   };
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
