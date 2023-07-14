@@ -168,7 +168,7 @@ std::vector<MenuItem> menuItems(GameState& gameState){
   for (int i = 0; i < gameState.levels.size(); i++){
     elements.push_back(gameState.levels.at(i).name);
   }
-  return calcMenuItems(elements, gameState.xNdc, gameState.yNdc);
+  return calcMenuItems(elements, 0.f, 90001000);
 }
 
 std::vector<MenuItem> pauseItems(GameState& gameState){
@@ -176,11 +176,11 @@ std::vector<MenuItem> pauseItems(GameState& gameState){
   for (int i = 0; i < pauseText.size(); i++){
     elements.push_back(pauseText.at(i).name);
   }
-  return calcMenuItems(elements, gameState.xNdc, gameState.yNdc);
+  return calcMenuItems(elements, 0.f, 90002000);
 }
 
 double downTime = 0;
-void drawPauseMenu(GameState& gameState){
+void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
   double elapsedTime = gameapi -> timeSeconds(true) - downTime;
 
   gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png");
@@ -190,7 +190,7 @@ void drawPauseMenu(GameState& gameState){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
 
-  drawMenuItems(pauseItems(gameState));
+  drawMenuItems(pauseItems(gameState), mappingId);
 }
 
 struct AnimationMenu {
@@ -201,7 +201,7 @@ AnimationMenu animationMenuItems(GameState& gameState){
   auto selectedIds = gameapi -> selected();
   if (selectedIds.size() == 0){
     std::vector<std::string> noValue = { "no object selected" };
-    return AnimationMenu { .items = calcMenuItems(noValue, gameState.xNdc, gameState.yNdc, 1.5f), .selectedObj = std::nullopt };
+    return AnimationMenu { .items = calcMenuItems(noValue, 1.5f, 90002000), .selectedObj = std::nullopt };
   }
 
   auto selectedId = selectedIds.at(0);
@@ -210,16 +210,17 @@ AnimationMenu animationMenuItems(GameState& gameState){
   for (auto &animation : gameapi -> listAnimations(selectedId)){
     animations.push_back(animation);
   }
-  auto items = calcMenuItems(animations, gameState.xNdc, gameState.yNdc, 1.5f);
+  auto items = calcMenuItems(animations, 1.5f, 90003000);
   return AnimationMenu { .items = items, .selectedObj = selectedId } ; 
 }
 
-void handleMouseSelect(GameState& gameState){
+void handleMouseSelect(GameState& gameState, objid mappingId){
+  modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
     //std::vector<MenuItem> pauseItems(GameState& gameState){
      std::cout << "handle mouse select on pause menu" << std::endl;
      auto items = pauseItems(gameState);
-     auto selectedItem = highlightedMenuItem(items);
+     auto selectedItem = highlightedMenuItem(items, mappingId);
      if (selectedItem.has_value()){
        pauseText.at(selectedItem.value()).fn(gameState);
      }
@@ -227,7 +228,7 @@ void handleMouseSelect(GameState& gameState){
   }else if (onMainMenu(gameState)){
      std::cout << "handle mouse select on main menu" << std::endl;
      auto items = menuItems(gameState);
-     auto selectedItem = highlightedMenuItem(items);
+     auto selectedItem = highlightedMenuItem(items, mappingId);
      if (selectedItem.has_value()){
        goToLevel(gameState, gameState.levels.at(selectedItem.value()).scene);
      }
@@ -236,7 +237,7 @@ void handleMouseSelect(GameState& gameState){
 
   // select animation
   auto animationMenu = animationMenuItems(gameState);
-  auto selectedItem = highlightedMenuItem(animationMenu.items);
+  auto selectedItem = highlightedMenuItem(animationMenu.items, mappingId);
   if (selectedItem.has_value() && selectedItem.value() != 0 && animationMenu.selectedObj.has_value()){
     auto item = animationMenu.items.at(selectedItem.value());
     gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, LOOP);
@@ -386,7 +387,7 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   std::set<objid> ids;
   for (int x = 0; x < 50; x++){
     for (int y = 0; y < 50; y++){    
-      auto idAtCoord = gameapi -> idAtCoord(fromPoint.x + (x * uvWidth / 50.f), fromPoint.y + (y * uvHeight / 50.f));
+      auto idAtCoord = gameapi -> idAtCoord(fromPoint.x + (x * uvWidth / 50.f), fromPoint.y + (y * uvHeight / 50.f), true);
       if (idAtCoord.has_value()){
         auto selectableValue = getSingleAttr(idAtCoord.value(), "dragselect");
         if (selectableValue.has_value() && selectableValue.value() == gameState.dragSelect.value()){
@@ -416,7 +417,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> xNdc = 0.f;
     gameState -> yNdc = 0.f;
     gameState -> selecting = std::nullopt;
-    getGlobalState().paused = false;
     loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);
@@ -442,16 +442,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+    auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     if (!gameState -> loadedLevel.has_value()){
-      drawMenuItems(menuItems(*gameState));
+      drawMenuItems(menuItems(*gameState), selectedId);
     }
     if (showingPauseMenu(*gameState)){
-      drawPauseMenu(*gameState);
+      drawPauseMenu(*gameState, selectedId);
     }
+    //drawMenuItems(animationMenuItems(*gameState).items, selectedId);
+
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
     }
-    drawMenuItems(animationMenuItems(*gameState).items);
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
@@ -595,12 +597,20 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     gameState -> xNdc = xNdc;
     gameState -> yNdc = yNdc;
+
+    auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
+    if (selectedId.has_value()){
+      std::cout << "hovered id is: " << selectedId.value() << std::endl;
+    }
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     if (action == 1 && button == 0){
-      handleMouseSelect(*gameState);
+      auto idAtCoord = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
+      if (idAtCoord.has_value()){
+        handleMouseSelect(*gameState, idAtCoord.value());
+      }
     }
    
     if (button == 1){

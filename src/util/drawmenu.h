@@ -13,12 +13,12 @@ struct MenuItem {
   double rectHeight;
   double textX;
   double textY;
-  bool hovered;
+  objid selectionId;
 };
 
-std::vector<MenuItem> calcMenuItems(std::vector<std::string>& elements, float xNdc, float yNdc, float xoffset = 0.f);
-void drawMenuItems(std::vector<MenuItem> items);
+std::vector<MenuItem> calcMenuItems(std::vector<std::string>& elements, float xoffset, int mappingOffset);
+void drawMenuItems(std::vector<MenuItem> items, std::optional<objid> mappingId);
 
-std::optional<int> highlightedMenuItem(std::vector<MenuItem>& items);
+std::optional<int> highlightedMenuItem(std::vector<MenuItem>& items, objid mappingId);
 
 #endif

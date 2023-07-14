@@ -125,7 +125,7 @@ CScriptBinding hudBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Hud* hud = static_cast<Hud*>(data);
- 
+    //std::cout << "hud on pause: not paused" << std::endl;
     // healthbar
     gameapi -> drawText("health: " + std::to_string(static_cast<int>(hud -> health)), -0.9, 0.2, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
     drawbar(hud -> health, 0.1f);

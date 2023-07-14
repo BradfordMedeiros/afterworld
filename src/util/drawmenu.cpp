@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 
 const float fontSizePerLetterNdi = 0.02f;
 
-std::vector<MenuItem> calcMenuItems(std::vector<std::string>& elements, float xNdc, float yNdc, float xoffset){
+std::vector<MenuItem> calcMenuItems(std::vector<std::string>& elements, float xoffset, int mappingOffset){
   std::vector<MenuItem> menuItems = {};
   for (int i = 0; i < elements.size(); i++){
   	float textX = -0.9f + xoffset;
@@ -20,9 +20,8 @@ std::vector<MenuItem> calcMenuItems(std::vector<std::string>& elements, float xN
 
     auto rectX = (left + (left + width)) / 2.f;
     auto rectY = 0.2 + (i * -1 * spacingPerItem);
-    auto rectWidth = width + 2 * padding;
-    auto rectHeight = height + 2 * padding;
-    bool hovered = (xNdc > (rectX - rectWidth / 2.f) && xNdc < (rectX + rectWidth / 2.f)) && (yNdc > (rectY - rectHeight / 2.f) && yNdc < (rectY + rectHeight / 2.f));
+    auto rectWidth = width + 4 * padding;
+    auto rectHeight = height + 4 * padding;
 
     menuItems.push_back(MenuItem{
       .text = level,
@@ -32,29 +31,29 @@ std::vector<MenuItem> calcMenuItems(std::vector<std::string>& elements, float xN
       .rectHeight = rectHeight,
       .textX = textX,
       .textY =  0.2 + (i * -1 * spacingPerItem),
-      .hovered = hovered,
+      .selectionId = mappingOffset + i,
     });
   }
   return menuItems;  
 }
 
-void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint){
+void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-void drawMenuItems(std::vector<MenuItem> items){
+void drawMenuItems(std::vector<MenuItem> items, std::optional<objid> mappingId){
   for (auto &menuItem : items){
-    auto tint =  menuItem.hovered? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    //gameapi -> drawRect(menuItem.rectX, menuItem.rectY, menuItem.rectWidth, menuItem.rectHeight, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt);
-    drawCenteredText(menuItem.text, menuItem.textX, menuItem.textY, fontSizePerLetterNdi, tint);
+    auto tint =  (mappingId.has_value() && menuItem.selectionId == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+    drawCenteredText(menuItem.text, menuItem.textX, menuItem.textY, fontSizePerLetterNdi, tint, std::nullopt);
+    gameapi -> drawRect(menuItem.rectX, menuItem.rectY, menuItem.rectWidth, menuItem.rectHeight, false, glm::vec4(0.f, 0.f, 1.f, 0.f), std::nullopt, true, menuItem.selectionId, std::nullopt);
   }
 }
 
-std::optional<int> highlightedMenuItem(std::vector<MenuItem>& items){
+std::optional<int> highlightedMenuItem(std::vector<MenuItem>& items, objid mappingId){
   for (int i = 0; i < items.size(); i++){
     auto item = items.at(i);
-    if (item.hovered){
+    if (item.selectionId == mappingId){
       return i;
     }
   }

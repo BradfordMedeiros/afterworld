@@ -3,10 +3,11 @@
 extern CustomApiBindings* gameapi;
 
 GlobalState global {
-  .paused = false,
+  .paused = true,
 };
 
 void setPaused(bool paused){
+  modlog("paused toggle", std::string("paused state: ") + print(paused));
   global.paused = paused;
   gameapi -> setWorldState({
    ObjectValue {
