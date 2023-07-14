@@ -17,7 +17,7 @@ struct Water {
 void applyWaterForces(Water& water){
 	for (auto &[waterId, submergedObjects] : water.objectsInWater){
 		auto aabb = gameapi -> getModAABB(waterId);
-		modassert(aabb.has_value(), "water does not have an aabb");
+		modassert(aabb.has_value(), std::string("water does not have an aabb, does exist: ") + print(gameapi -> gameobjExists(waterId)));
 		auto topOfWater = aabb.value().max.y;
     auto waterObjAttr = gameapi -> getGameObjectAttr(waterId);
     auto waterDensityOpt = getFloatAttr(waterObjAttr, "water-density");
@@ -163,6 +163,10 @@ CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
     	water -> objectsInWater.at(obj2).erase(obj1);
     }
     printWaterElements(*water);
+  };
+  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+  	Water* water = static_cast<Water*>(data);
+  	water -> objectsInWater.erase(idRemoved);
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
