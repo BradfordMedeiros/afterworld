@@ -178,12 +178,6 @@ void togglePauseMode(GameState& gameState){
   }
 }
 
-void onMapping(int32_t id, void* data, int32_t index){
-  GameState* gameState = static_cast<GameState*>(data);
-  std::cout << "on mapping: " << index << std::endl;
-}
-
-
 void loadConfig(GameState& gameState){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
   bool validSql = false;
@@ -501,7 +495,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         handleMouseSelect(*gameState, idAtCoord.value());
       }
     }
-   
     if (button == 1){
       if (action == 0){
         gameState -> selecting = std::nullopt;
@@ -510,8 +503,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
   };
-
-  binding.onMapping = onMapping;
 
   return binding;
 }
