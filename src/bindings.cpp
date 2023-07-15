@@ -16,8 +16,6 @@ struct Level {
   std::string name;
 };
 struct GameState {
-  int selectedLevel;
-  int selectedPauseOption;
   std::optional<std::string> loadedLevel;
   std::vector<Level> levels;
   bool menuLoaded;
@@ -70,8 +68,6 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
   return std::nullopt;
 }
 void goToMenu(GameState& gameState){
-  gameState.selectedLevel = 0;
-  gameState.selectedPauseOption = 0;
   if (gameState.loadedLevel.has_value()){
     gameState.loadedLevel = std::nullopt;
     unloadAllManagedScenes();
@@ -103,80 +99,27 @@ std::vector<PauseValue> pauseText = {
   },
 };
 
-void handleLevelUp(GameState& gameState){
-  if (gameState.loadedLevel.has_value()){
-    return;
-  }
-  auto newIndex = glm::max(0, gameState.selectedLevel - 1);
-  gameState.selectedLevel = newIndex;
-}
-void handleLevelDown(GameState& gameState){
-  if (gameState.loadedLevel.has_value()){
-    return;
-  }
-  int lastLevelIndex = gameState.levels.size() - 1;
-  auto newIndex = glm::min(lastLevelIndex, gameState.selectedLevel + 1);
-  gameState.selectedLevel = newIndex;
-}
-
 
 bool showingPauseMenu(GameState& gameState){
   return gameState.loadedLevel.has_value() && getGlobalState().paused;
-}
-
-void handlePauseUp(GameState& gameState){
-  if (!showingPauseMenu(gameState)){
-    std::cout << "handle pause up, returning early" << std::endl;
-    return;
-  }
-  auto newIndex = glm::max(0, gameState.selectedPauseOption  - 1);
-  gameState.selectedPauseOption = newIndex;
-  std::cout << "pause up: " << newIndex << std::endl;
-}
-void handlePauseDown(GameState& gameState){
-  if (!showingPauseMenu(gameState)){
-    std::cout << "handle pause down, returning early" << std::endl;
-    return;
-  }
-  int lastMenuIndex = pauseText.size() - 1;
-  auto newIndex = glm::min(lastMenuIndex, gameState.selectedPauseOption + 1);
-  gameState.selectedPauseOption = newIndex;
-  std::cout << "pause down: " << newIndex << std::endl;
-}
-
-
-void handleSelectLevel(GameState& gameState){
-  if (gameState.loadedLevel.has_value() || gameState.selectedLevel >= gameState.levels.size()){
-    return;
-  }
-  goToLevel(gameState, gameState.levels.at(gameState.selectedLevel).scene);
 }
 
 bool onMainMenu(GameState& gameState){
   return !(gameState.loadedLevel.has_value());
 }
 
-void handleSelect(GameState& gameState){
-  handleSelectLevel(gameState);
-  if (isPaused() && !gameState.menuLoaded){
-    pauseText.at(gameState.selectedPauseOption).fn(gameState);
-  } 
-}
+std::vector<ImListItem> mainMenuItems(GameState& gameState){
+  std::vector<ImListItem> elements;
 
-std::vector<MenuItem> menuItems(GameState& gameState){
-  std::vector<std::string> elements;
   for (int i = 0; i < gameState.levels.size(); i++){
-    elements.push_back(gameState.levels.at(i).name);
+    elements.push_back(ImListItem {
+      .value = gameState.levels.at(i).name,
+      .onClick = [&gameState, i]() -> void {
+        goToLevel(gameState, gameState.levels.at(i).scene);
+      },
+    });
   }
-  return calcMenuItems(elements, 0.f, 90001000);
-}
-
-std::vector<MenuItem> pauseItems(GameState& gameState){
-  std::vector<std::string> elements;
-  for (int i = 0; i < pauseText.size(); i++){
-    elements.push_back(pauseText.at(i).name);
-  }
-  return calcMenuItems(elements, 0.f, 90002000);
+  return elements;
 }
 
 double downTime = 0;
@@ -190,7 +133,9 @@ void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
 
-  drawMenuItems(pauseItems(gameState), mappingId);
+  drawImMenuList(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, 0.5f);
+
+  //drawMenuItems(pauseItems(gameState), mappingId, glm::vec4(0.f, 0.f, 1.f, 0.f));
 }
 
 struct AnimationMenu {
@@ -213,27 +158,14 @@ AnimationMenu animationMenuItems(GameState& gameState){
   auto items = calcMenuItems(animations, 1.5f, 90003000);
   return AnimationMenu { .items = items, .selectedObj = selectedId } ; 
 }
-
 void handleMouseSelect(GameState& gameState, objid mappingId){
   modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
-    //std::vector<MenuItem> pauseItems(GameState& gameState){
-     std::cout << "handle mouse select on pause menu" << std::endl;
-     auto items = pauseItems(gameState);
-     auto selectedItem = highlightedMenuItem(items, mappingId);
-     if (selectedItem.has_value()){
-       pauseText.at(selectedItem.value()).fn(gameState);
-     }
-     std::cout << "selected item: " << (selectedItem.has_value() ? std::to_string(selectedItem.value()) : "no value") << std::endl;
+     processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
   }else if (onMainMenu(gameState)){
-     std::cout << "handle mouse select on main menu" << std::endl;
-     auto items = menuItems(gameState);
-     auto selectedItem = highlightedMenuItem(items, mappingId);
-     if (selectedItem.has_value()){
-       goToLevel(gameState, gameState.levels.at(selectedItem.value()).scene);
-     }
-     std::cout << "selected item: " << (selectedItem.has_value() ? std::to_string(selectedItem.value()) : "no value") << std::endl;
+     processImMouseSelect(mainMenuItems(gameState), mappingId);
   }
+  processImMouseSelect(imTransformMenu, mappingId);
 
   // select animation
   auto animationMenu = animationMenuItems(gameState);
@@ -245,7 +177,6 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
   }else{
     std::cout << "animation: debug no item selected" << std::endl;
   }
-
 }
 
 void togglePauseMode(GameState& gameState){
@@ -289,9 +220,6 @@ void loadConfig(GameState& gameState){
     });
   }
   gameState.levels = levels;
-
-  int maxLevelIndex = levels.size() - 1;
-  gameState.selectedLevel = glm::min(gameState.selectedLevel, maxLevelIndex);
 }
 
 void handleInteract(objid gameObjId){
@@ -405,13 +333,10 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   //std::cout << "]" << std::endl;
 }
 
-
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
-    gameState -> selectedLevel = 0;
-    gameState -> selectedPauseOption = 0;
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
     gameState -> xNdc = 0.f;
@@ -444,12 +369,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     if (!gameState -> loadedLevel.has_value()){
-      drawMenuItems(menuItems(*gameState), selectedId);
+      drawImMenuList(mainMenuItems(*gameState), selectedId, -0.5f);
+
+      //drawMenuItems(mainMenuItems(*gameState), selectedId, glm::vec4(0.f, 0.f, 1.f, 0.f));
     }
     if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
     }
     //drawMenuItems(animationMenuItems(*gameState).items, selectedId);
+    //drawImMenuList(imTransformMenu, selectedId);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
@@ -463,17 +391,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     std::cout << "key is: " << key << std::endl;
     if (action == 1){
-      if (key == 257){  // enter
-        handleSelect(*gameState);
-      }else if (key == 265){ // up
-        handleLevelUp(*gameState);
-        handlePauseUp(*gameState);
-      }else if (key == 264){ // down
-        handleLevelDown(*gameState);
-        handlePauseDown(*gameState);
-      }else if (key == 256 /* escape */ ){
+      if (key == 256 /* escape */ ){
         togglePauseMode(*gameState);
-        gameState -> selectedLevel = 2; // used for quit right now 
       }
     }
   };
