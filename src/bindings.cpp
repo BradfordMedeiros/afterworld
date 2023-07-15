@@ -138,26 +138,26 @@ void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
   //drawMenuItems(pauseItems(gameState), mappingId, glm::vec4(0.f, 0.f, 1.f, 0.f));
 }
 
-struct AnimationMenu {
-  std::vector<MenuItem> items;
-  std::optional<objid> selectedObj;
-};
-AnimationMenu animationMenuItems(GameState& gameState){
+std::vector<ImListItem> animationMenuItems2(GameState& gameState){
   auto selectedIds = gameapi -> selected();
   if (selectedIds.size() == 0){
     std::vector<std::string> noValue = { "no object selected" };
-    return AnimationMenu { .items = calcMenuItems(noValue, 1.5f, 90002000), .selectedObj = std::nullopt };
+    return { ImListItem { .value = "no object selected" , .onClick = std::nullopt }};
   }
-
   auto selectedId = selectedIds.at(0);
-
-  std::vector<std::string> animations = { "animations:"};
+  std::vector<ImListItem> items;
   for (auto &animation : gameapi -> listAnimations(selectedId)){
-    animations.push_back(animation);
+    items.push_back(ImListItem{
+      .value = animation,
+      .onClick = [selectedId, animation]() -> void {
+        gameapi -> playAnimation(selectedId, animation, LOOP);
+      },
+    });
   }
-  auto items = calcMenuItems(animations, 1.5f, 90003000);
-  return AnimationMenu { .items = items, .selectedObj = selectedId } ; 
+  return items;
 }
+
+
 void handleMouseSelect(GameState& gameState, objid mappingId){
   modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
@@ -165,18 +165,10 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
   }else if (onMainMenu(gameState)){
      processImMouseSelect(mainMenuItems(gameState), mappingId);
   }
-  processImMouseSelect(imTransformMenu, mappingId);
-
-  // select animation
-  auto animationMenu = animationMenuItems(gameState);
-  auto selectedItem = highlightedMenuItem(animationMenu.items, mappingId);
-  if (selectedItem.has_value() && selectedItem.value() != 0 && animationMenu.selectedObj.has_value()){
-    auto item = animationMenu.items.at(selectedItem.value());
-    gameapi -> playAnimation(animationMenu.selectedObj.value(), item.text, LOOP);
-    std::cout << "animation: debug selected: " << selectedItem.value() << ", value = " << item.text << std::endl;
-  }else{
-    std::cout << "animation: debug no item selected" << std::endl;
+  if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
+     processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
+  processImMouseSelect(imTransformMenu, mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -189,21 +181,6 @@ void togglePauseMode(GameState& gameState){
 void onMapping(int32_t id, void* data, int32_t index){
   GameState* gameState = static_cast<GameState*>(data);
   std::cout << "on mapping: " << index << std::endl;
-  /*binding.onMapping = [](int32_t id, void* data, int32_t index) -> void {
-
-    if (index >= scenegraph -> baseNumber && index < (scenegraph -> baseNumber + 2 * mappingInterval)){
-      auto selectedIndex = index - scenegraph -> baseNumber;
-      modlog("editor", "scenegraph on mapping: " + std::to_string(index) + ", selected index = " + std::to_string(selectedIndex) + ", type = " + scenegraph -> depgraphType + ", basenumbe = " + std::to_string(scenegraph -> baseNumber));
-      bool isToggle = selectedIndex >= mappingInterval;
-      if (isToggle){
-        toggleExpanded(*scenegraph, selectedIndex - mappingInterval);
-        return;
-      }
-      scenegraph -> selectedIndex = selectedIndex;
-      onGraphChange(*scenegraph);
-      modeToGetDepGraph.at(scenegraph -> depgraphType).handleItemSelected(*scenegraph, false);
-    }
-  };*/
 }
 
 
@@ -325,12 +302,6 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
     } 
   }
   gameapi -> setSelected(ids);
-  
-  //std::cout << "selected ids: [";
-  //for (auto id : ids){
-  //  std::cout << id << " ";
-  //}
-  //std::cout << "]" << std::endl;
 }
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -370,14 +341,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     if (!gameState -> loadedLevel.has_value()){
       drawImMenuList(mainMenuItems(*gameState), selectedId, -0.5f);
-
-      //drawMenuItems(mainMenuItems(*gameState), selectedId, glm::vec4(0.f, 0.f, 1.f, 0.f));
-    }
-    if (showingPauseMenu(*gameState)){
+    }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
     }
-    //drawMenuItems(animationMenuItems(*gameState).items, selectedId);
-    //drawImMenuList(imTransformMenu, selectedId);
+
+    if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
+      drawImMenuList(animationMenuItems2(*gameState), selectedId, 0.5f);
+    }
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
