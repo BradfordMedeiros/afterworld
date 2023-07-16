@@ -133,7 +133,7 @@ void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
 
-  drawImMenuList(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, 0.5f);
+  drawImMenuList(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.f, .tint = std::nullopt }, NULL);
 
   //drawMenuItems(pauseItems(gameState), mappingId, glm::vec4(0.f, 0.f, 1.f, 0.f));
 }
@@ -141,7 +141,6 @@ void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
 std::vector<ImListItem> animationMenuItems2(GameState& gameState){
   auto selectedIds = gameapi -> selected();
   if (selectedIds.size() == 0){
-    std::vector<std::string> noValue = { "no object selected" };
     return { ImListItem { .value = "no object selected" , .onClick = std::nullopt }};
   }
   auto selectedId = selectedIds.at(0);
@@ -152,6 +151,12 @@ std::vector<ImListItem> animationMenuItems2(GameState& gameState){
       .onClick = [selectedId, animation]() -> void {
         gameapi -> playAnimation(selectedId, animation, LOOP);
       },
+    });
+  }
+  if (items.size() == 0){
+    items.push_back(ImListItem {
+      .value = "no animations",
+      .onClick = std::nullopt,
     });
   }
   return items;
@@ -334,13 +339,89 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuList(mainMenuItems(*gameState), selectedId, -0.5f);
+      drawImMenuList(mainMenuItems(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.8f) }, NULL);
+
+      std::vector<NestedListItem> values = {
+        NestedListItem {
+          .item = ImListItem {
+            .value = "letters",
+            .onClick = std::nullopt,
+          },
+          .items = {
+            NestedListItem {
+              .item = ImListItem {
+                .value = "A",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+            NestedListItem {
+              .item = ImListItem {
+                .value = "B",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+            NestedListItem {
+              .item = ImListItem {
+                .value = "C",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+            NestedListItem {
+              .item = ImListItem {
+                .value = "D",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+          },
+        },
+        NestedListItem {
+          .item = ImListItem {
+            .value = "numbers",
+            .onClick = std::nullopt,
+          },
+          .items = {
+            NestedListItem {
+              .item = ImListItem {
+                .value = "1",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+            NestedListItem {
+              .item = ImListItem {
+                .value = "2",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+            NestedListItem {
+              .item = ImListItem {
+                .value = "3",
+                .onClick = std::nullopt,
+              },
+              .items = {},
+            },
+          },
+        },
+      };
+
+      std::vector<objid> selectedListIds = {};
+      if (selectedId.has_value()){
+        selectedListIds.push_back(selectedId.value());
+      }
+      drawImNestedList(values, selectedListIds, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.3f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f) });
+
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
     }
 
     if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
-      drawImMenuList(animationMenuItems2(*gameState), selectedId, 0.5f);
+      std::cout << "drawing animation menu items" << std::endl;
+      drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .xoffset = 1.5f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f) }, NULL);
     }
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
