@@ -135,7 +135,7 @@ void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
 
-  drawImMenuList(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.f, .tint = std::nullopt }, NULL);
+  drawImMenuList(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.f, .tint = std::nullopt });
 
 }
 
@@ -167,6 +167,103 @@ std::vector<ImListItem> animationMenuItems2(GameState& gameState){
 }
 
 
+int mappingId = 999995;
+std::vector<NestedListItem> nestedListTest = {
+  NestedListItem {
+    .item = ImListItem {
+      .value = "letters",
+      .onClick = std::nullopt,
+      .mappingId = mappingId++,
+    },
+    .items = {
+      NestedListItem {
+        .item = ImListItem {
+          .value = "A",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "B",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "C",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "D",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+    },
+  },
+  NestedListItem {
+    .item = ImListItem {
+      .value = "numbers",
+      .onClick = std::nullopt,
+      .mappingId = mappingId++,
+    },
+    .items = {
+      NestedListItem {
+        .item = ImListItem {
+          .value = "1",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {
+          NestedListItem {
+            .item = ImListItem {
+              .value = "1a",
+              .onClick = std::nullopt,
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "1b",
+              .onClick = []() -> void { std::cout << "clicked 1b" << std::endl; },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },     
+        },
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "2",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "3",
+          .onClick = []() -> void {
+            std::cout << "on click 3" << std::endl;
+          },
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+    },
+  },
+};
+
 void handleMouseSelect(GameState& gameState, objid mappingId){
   modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
@@ -178,6 +275,7 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
      processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
   processImMouseSelect(imTransformMenu, mappingId);
+  processImMouseSelect(nestedListTest, mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -307,6 +405,7 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   gameapi -> setSelected(ids);
 }
 
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -343,108 +442,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuList(mainMenuItems(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.8f) }, NULL);
+      drawImMenuList(mainMenuItems(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.8f) });
 
-      int mappingId = 99999;
-      std::vector<NestedListItem> values = {
-        NestedListItem {
-          .item = ImListItem {
-            .value = "letters",
-            .onClick = std::nullopt,
-            .mappingId = mappingId++,
-          },
-          .items = {
-            NestedListItem {
-              .item = ImListItem {
-                .value = "A",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {},
-            },
-            NestedListItem {
-              .item = ImListItem {
-                .value = "B",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {},
-            },
-            NestedListItem {
-              .item = ImListItem {
-                .value = "C",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {},
-            },
-            NestedListItem {
-              .item = ImListItem {
-                .value = "D",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {},
-            },
-          },
-        },
-        NestedListItem {
-          .item = ImListItem {
-            .value = "numbers",
-            .onClick = std::nullopt,
-            .mappingId = mappingId++,
-          },
-          .items = {
-            NestedListItem {
-              .item = ImListItem {
-                .value = "1",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {
-                NestedListItem {
-                  .item = ImListItem {
-                    .value = "1a",
-                    .onClick = std::nullopt,
-                    .mappingId = mappingId++,
-                  },
-                  .items = {},
-                },
-                NestedListItem {
-                  .item = ImListItem {
-                    .value = "1b",
-                    .onClick = std::nullopt,
-                    .mappingId = mappingId++,
-                  },
-                  .items = {},
-                },     
-              },
-            },
-            NestedListItem {
-              .item = ImListItem {
-                .value = "2",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {},
-            },
-            NestedListItem {
-              .item = ImListItem {
-                .value = "3",
-                .onClick = std::nullopt,
-                .mappingId = mappingId++,
-              },
-              .items = {},
-            },
-          },
-        },
-      };
-
-      std::vector<objid> selectedListIds = {};
-      if (selectedId.has_value()){
-        selectedListIds.push_back(selectedId.value());
-      }
-      drawImNestedList(values, selectedListIds, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.3f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f) });
+      drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .xoffset = 0.3f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f) });
 
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
@@ -593,10 +593,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> xNdc = xNdc;
     gameState -> yNdc = yNdc;
 
-    auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
-    if (selectedId.has_value()){
-      std::cout << "hovered id is: " << selectedId.value() << std::endl;
-    }
+    //auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
+    //if (selectedId.has_value()){
+    //  std::cout << "hovered id is: " << selectedId.value() << std::endl;
+    //}
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {

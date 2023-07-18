@@ -525,6 +525,12 @@ void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
   auto bottom = pos + orientation * glm::vec3(0.f, -radius, 0.f);
 
   auto leftTowardCenter = glm::normalize(pos - left) * 0.01f;
+
+  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(radius * 10.f, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(radius * -10.f, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, radius * 10.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, radius * -10.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+
   gameapi -> drawLine(left, left + leftTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
 
   auto rightTowardCenter = glm::normalize(pos - right) * 0.01f;

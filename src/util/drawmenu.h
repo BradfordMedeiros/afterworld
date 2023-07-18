@@ -5,25 +5,12 @@
 #include <vector>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 
-struct MenuItem {
-  std::string text;
-  double rectX;
-  double rectY;
-  double rectWidth;
-  double rectHeight;
-  double textX;
-  double textY;
-  objid selectionId;
-};
-
-
 struct MenuItemStyle {
   float margin;
   float padding;
   float xoffset;
   std::optional<glm::vec4> tint;
 };
-
 
 struct ImListItem {
   std::string value;
@@ -37,11 +24,21 @@ struct NestedListItem {
 };
 
 void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId);
+void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid> mappingId);
+
+
 std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu);
 
 extern std::vector<ImListItem> imTransformMenu;
 
-void drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, int mappingOffset = 99999999);
-void drawImNestedList(std::vector<NestedListItem> values, std::vector<objid> mappingIds, MenuItemStyle style);
+struct BoundingBox2D {
+  float x;
+  float y;
+  float width;
+  float height;
+};
+
+BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style);
+void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> mappingId, MenuItemStyle style);
 
 #endif
