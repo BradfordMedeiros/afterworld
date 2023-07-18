@@ -194,3 +194,14 @@ std::optional<std::string> getSingleAttr(objid id, const char* key){
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());
 }
+
+std::optional<std::string> getStrWorldState(const char* object, const char* attribute){
+  auto worldStates = gameapi -> getWorldState();
+  for (auto &worldState : worldStates){
+    if (worldState.object == object && worldState.attribute == attribute){
+      auto strValue = std::get_if<std::string>(&worldState.value);
+      return *strValue;
+    }
+  }
+  return std::nullopt;
+}

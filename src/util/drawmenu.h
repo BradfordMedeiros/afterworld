@@ -8,8 +8,11 @@
 struct MenuItemStyle {
   float margin;
   float padding;
+  float minwidth;
   float xoffset;
+  float yoffset;
   std::optional<glm::vec4> tint;
+  std::optional<float> fontSizePerLetterNdi;
 };
 
 struct ImListItem {
@@ -38,7 +41,7 @@ struct BoundingBox2D {
   float height;
 };
 
-BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style);
+BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset = 0.f);
 void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> mappingId, MenuItemStyle style);
 
 #endif

@@ -10,7 +10,7 @@ void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, floa
   gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style){
+BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   std::vector<std::string> values;
   for (auto &item : list){
     values.push_back(item.value);
@@ -25,25 +25,26 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   modassert(list.size(), "draw im menu list - list is empty");
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
-    float textX = -0.9f + style.xoffset;
+    float textX = style.xoffset;
     auto level = menuItem.value;
 
+    float fontSize = style.fontSizePerLetterNdi.has_value() ? style.fontSizePerLetterNdi.value() : fontSizePerLetterNdi;
     auto height = fontSizePerLetterNdi;
-    auto width = level.size() * fontSizePerLetterNdi;
+    auto width = glm::max(level.size() * fontSize, style.minwidth);
     auto left = textX;
 
     float minSpacingPerItem = height;
     float spacingPerItem = minSpacingPerItem + 2 * style.padding + 2 * style.margin;
 
     auto rectX = (left + (left + width)) / 2.f;
-    auto rectY = 0.2 + (i * -1 * spacingPerItem);
+    auto rectY = style.yoffset + additionalYOffset + (i * -1 * spacingPerItem);
     auto rectWidth = width + 2 * style.padding;
     auto rectHeight = height + 2 * style.padding;
-    auto textY =  0.2 + (i * -1 * spacingPerItem);
+    auto textY = style.yoffset + additionalYOffset + (i * -1 * spacingPerItem);
 
     auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
     gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
-    drawCenteredText(menuItem.value, textX, textY, fontSizePerLetterNdi, tint, menuItem.mappingId);
+    drawCenteredText(menuItem.value, textX, textY, fontSize, tint, menuItem.mappingId);
 
     float bottomY = rectY - (rectHeight * 0.5f);
     float topY = rectY + (rectHeight * 0.5f);
@@ -171,6 +172,8 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
     listOpenIndexs = selectedPath.value();
   }
   std::vector<NestedListItem>* nestedListItems = &values;
+
+  float additionalYOffset = 0.f;
   for (int i = -1; i < static_cast<int>(listOpenIndexs.size()); i++){
     if (nestedListItems -> size() == 0){
       continue;
@@ -179,13 +182,16 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
     for (auto &value : *nestedListItems){
       items.push_back(value.item);
     }
-    auto boundingBox = drawImMenuList(items, mappingId, style);
+    auto boundingBox = drawImMenuList(items, mappingId, style, additionalYOffset);
+    float perElementHeight = boundingBox.height / items.size();
     style.xoffset += boundingBox.width;
 
     float multiplier = (i % 2) ? 1 : -1;
     style.tint = glm::vec4(style.tint.value().x + (multiplier * .2f), style.tint.value().y + (multiplier * .2f), style.tint.value().z + (multiplier * .2f), style.tint.value().w + (multiplier * .2f));
     if ((i + 1) < static_cast<int>(listOpenIndexs.size())){
-      nestedListItems = &(nestedListItems -> at(listOpenIndexs.at(i + 1)).items);
+      auto nextIndex = listOpenIndexs.at(i + 1);
+      nestedListItems = &(nestedListItems -> at(nextIndex).items);
+      additionalYOffset -=  (nextIndex * perElementHeight);
     }
   }
 }

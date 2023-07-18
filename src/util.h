@@ -83,4 +83,6 @@ struct SetAmmoMessage {
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::string uniqueNameSuffix();
 
+std::optional<std::string> getStrWorldState(const char* object, const char* attribute);
+
 #endif
