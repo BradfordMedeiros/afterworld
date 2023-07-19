@@ -205,3 +205,47 @@ std::optional<std::string> getStrWorldState(const char* object, const char* attr
   }
   return std::nullopt;
 }
+
+std::string defaultEnable = "true";
+std::string defaultDisable = "false";
+bool toggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled, const char *disabled){
+  auto currState = getStrWorldState(object, attribute);
+  //modassert(currState == enabled || currState == disabled, "toggle bool invalid value received");
+
+  std::string enableValue = enabled == NULL ? defaultEnable : enabled;
+  std::string disableValue = disabled == NULL ? defaultDisable : disabled;
+  auto newState = !(currState == enableValue);
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = std::string(object),
+      .attribute = std::string(attribute),
+      .value = newState ? enableValue : disableValue,
+    }
+  });
+  return newState;
+}
+
+std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute){
+  return [object, attribute]() -> void {
+    toggleWorldStateBoolStr(object, attribute, NULL, NULL);
+  };
+}
+
+std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled, const char *disabled){
+  return [object, attribute, enabled, disabled]() -> void {
+    toggleWorldStateBoolStr(object, attribute, enabled, disabled);
+  };
+}
+
+std::function<void()> getToggleWorldStateSetStr(const char* object, const char* attribute, const char* value){
+  return [object, attribute, value]() -> void {
+    std::cout << "toggle world state set str" << std::endl;
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = std::string(object),
+        .attribute = std::string(attribute),
+        .value = std::string(value),
+      }
+    });
+  };
+}

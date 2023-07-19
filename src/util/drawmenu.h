@@ -30,10 +30,6 @@ void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> map
 void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid> mappingId);
 
 
-std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu);
-
-extern std::vector<ImListItem> imTransformMenu;
-
 struct BoundingBox2D {
   float x;
   float y;

@@ -9,4 +9,6 @@
 
 extern std::vector<NestedListItem> nestedListTest;
 
+std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu);
+
 #endif

@@ -98,48 +98,6 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   };
 }
 
-
-int transformMappingIds = 999999;
-std::vector<ImListItem> imTransformMenu = {
-  ImListItem { 
-    .value = "translate", 
-    .onClick = []() -> void { 
-      std::cout << "translate" << std::endl; 
-    },
-    .mappingId = transformMappingIds++,
-  },
-  ImListItem { 
-    .value = "scale", 
-    .onClick = []() -> void { 
-      std::cout << "scale" << std::endl; 
-    },
-    .mappingId = transformMappingIds++,
-  },
-  ImListItem { 
-    .value = "rotate", 
-    .onClick = []() -> void { 
-      std::cout << "rotate" << std::endl; 
-    },
-    .mappingId = transformMappingIds++,
-  }
-};
-
-
-std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu){
-  int pauseMappingIds = 999999;
-  std::vector<ImListItem> listItems;
-  listItems.push_back(ImListItem {
-    .value = "Resume",
-    .onClick = resume,
-    .mappingId = pauseMappingIds++,
-  });
-  listItems.push_back(ImListItem {
-    .value = "Main Menu",
-    .onClick = goToMainMenu,
-    .mappingId = pauseMappingIds++,
-  });
-  return listItems;
-}
   
 std::optional<std::vector<int>> searchNestedList(std::vector<NestedListItem>& values, objid mappingId, std::vector<int> currentPath){
   for (int i = 0; i < static_cast<int>(values.size()); i++){

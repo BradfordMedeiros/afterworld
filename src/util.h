@@ -84,5 +84,8 @@ std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::string uniqueNameSuffix();
 
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);
-
+bool toggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled = NULL, const char *disabled = NULL);
+std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute);
+std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled, const char *disabled);
+std::function<void()> getToggleWorldStateSetStr(const char* object, const char* attribute, const char* value);
 #endif

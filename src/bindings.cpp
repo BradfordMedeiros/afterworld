@@ -179,7 +179,6 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
      processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
-  processImMouseSelect(imTransformMenu, mappingId);
   processImMouseSelect(nestedListTest, mappingId);
 }
 
@@ -348,9 +347,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     if (!gameState -> loadedLevel.has_value()){
       drawImMenuList(mainMenuItems(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.f), .fontSizePerLetterNdi = std::nullopt });
-
-      drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
-
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
     }
@@ -360,6 +356,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
     }
 
+    drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
     }
