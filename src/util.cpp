@@ -249,3 +249,7 @@ std::function<void()> getToggleWorldStateSetStr(const char* object, const char* 
     });
   };
 }
+
+void notYetImplementedAlert(){
+  gameapi -> sendNotifyMessage("alert", std::string("functionality not yet implemented"));
+}

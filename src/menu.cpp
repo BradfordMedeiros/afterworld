@@ -76,6 +76,26 @@ CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   	scrollTexture(*menu, id);
   };
 
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
+  	MenuState* menu = static_cast<MenuState*>(data);
+    if (key == "menu-background"){
+    	auto newTexture = anycast<std::string>(value); 
+    	modassert(newTexture, "menu-background invalid");
+ 	    GameobjAttributes attr {
+	    	.stringAttributes = {
+	    		{ "texture", *newTexture },
+	    	},
+	    	.numAttributes = {},
+	    	.vecAttr = {
+	    		.vec3 = {},
+	    		.vec4 = {
+	    			//{ "tint", glm::vec4(menuState.redness + 1, 0.4f, 0.4f, 1.f) },
+	    		},
+	    	},
+	    };
+	    gameapi -> setGameObjectAttr(id, attr);
+    }
+  };
   return binding;
 }
 

@@ -275,7 +275,7 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "mute sound",
-          .onClick = []() -> void {  }, // maybe this should send a request to core engine so can shutdown properly }
+          .onClick = getToggleWorldStateBoolStr("sound", "mute"),
           .mappingId = mappingId++,
         },
         .items = {},
@@ -292,7 +292,7 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "new scene",
-          .onClick = std::nullopt,
+          .onClick = notYetImplementedAlert,
           .mappingId = mappingId++,
         },
         .items = {},
@@ -300,7 +300,7 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "save scene",
-          .onClick = std::nullopt,
+          .onClick = notYetImplementedAlert,
           .mappingId = mappingId++,
         },
         .items = {},
@@ -308,7 +308,7 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "reset scene",
-          .onClick = std::nullopt, // maybe this should send a request to core engine so can shutdown properly }
+          .onClick = notYetImplementedAlert, // maybe this should send a request to core engine so can shutdown properly }
           .mappingId = mappingId++,
         },
         .items = {},
@@ -332,16 +332,57 @@ std::vector<NestedListItem> nestedListTest = {
         .items = {
           NestedListItem {
             .item = ImListItem {
-              .value = "trippy",
-              .onClick = std::nullopt,
+              .value = "dark-trippy",
+              .onClick = []() -> void { 
+                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test3.png"));
+              },
               .mappingId = mappingId++,
             },
             .items = {},
           },
           NestedListItem {
             .item = ImListItem {
-              .value = "fish",
-              .onClick = std::nullopt,
+              .value = "dark-trippy2",
+              .onClick = []() -> void { 
+                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test4.png"));
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "cybertek",
+              .onClick = []() -> void { 
+                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test.png"));
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+        },
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "font",
+          .onClick = std::nullopt,
+          .mappingId = mappingId++,
+        },
+        .items = {
+          NestedListItem {
+            .item = ImListItem {
+              .value = "Walby-Regular.ttf",
+              .onClick = []() -> void { 
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "dpquake.ttf",
+              .onClick = []() -> void { 
+              },
               .mappingId = mappingId++,
             },
             .items = {},
