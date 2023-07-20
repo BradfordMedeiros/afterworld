@@ -250,6 +250,19 @@ std::function<void()> getToggleWorldStateSetStr(const char* object, const char* 
   };
 }
 
+std::function<void()> getToggleWorldStateSetFloat(const char* object, const char* attribute, float value){
+  return [object, attribute, value]() -> void {
+    std::cout << "toggle world state set str" << std::endl;
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = std::string(object),
+        .attribute = std::string(attribute),
+        .value = value,
+      }
+    });
+  };
+}
+
 void notYetImplementedAlert(){
   gameapi -> sendNotifyMessage("alert", std::string("functionality not yet implemented"));
 }

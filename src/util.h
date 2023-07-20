@@ -88,6 +88,8 @@ bool toggleWorldStateBoolStr(const char* object, const char* attribute, const ch
 std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute);
 std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled, const char *disabled);
 std::function<void()> getToggleWorldStateSetStr(const char* object, const char* attribute, const char* value);
+std::function<void()> getToggleWorldStateSetFloat(const char* object, const char* attribute, float value);
+
 void notYetImplementedAlert();
 
 #endif

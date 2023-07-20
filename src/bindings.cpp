@@ -351,7 +351,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
-      std::cout << "drawing animation menu items" << std::endl;
       drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
     }
     drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });

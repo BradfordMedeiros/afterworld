@@ -83,7 +83,7 @@ std::vector<NestedListItem> nestedListTest = {
     .items = {
       NestedListItem {
         .item = ImListItem {
-          .value = "- lighting",
+          .value = "lighting",
           .onClick = std::nullopt,
           .mappingId = mappingId++,
         },
@@ -128,9 +128,39 @@ std::vector<NestedListItem> nestedListTest = {
             },
             .items = {},
           },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "pbr",
+              .onClick = getToggleWorldStateBoolStr("pbr", "enabled"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "exposure",
+              .onClick = getToggleWorldStateBoolStr("exposure", "enabled"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "gamma",
+              .onClick = getToggleWorldStateBoolStr("gamma", "enabled"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "dof",
+              .onClick = getToggleWorldStateBoolStr("dof", "state", "enabled", "disabled"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          }
         },
-
-
       },
       NestedListItem {
         .item = ImListItem {
@@ -188,7 +218,56 @@ std::vector<NestedListItem> nestedListTest = {
           .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "translate"),
           .mappingId = mappingId++,
         },
-        .items = {},
+        .items = {
+          NestedListItem {
+            .item = ImListItem {
+              .value = "position-relative",
+              .onClick = getToggleWorldStateBoolStr("tools", "position-relative"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "position-mirror",
+              .onClick = getToggleWorldStateBoolStr("tools", "position-mirror"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "preserve-scale",
+              .onClick = getToggleWorldStateBoolStr("tools", "preserve-scale"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "snap 0",
+              .onClick = getToggleWorldStateSetFloat("editor", "snaptranslate-index", 0),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "snap 1",
+              .onClick = getToggleWorldStateSetFloat("editor", "snaptranslate-index", 5),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "snap 10",
+              .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "translate"),
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+        },
       },
       NestedListItem {
         .item = ImListItem {
@@ -315,7 +394,6 @@ std::vector<NestedListItem> nestedListTest = {
       },
     },
   },
-
   NestedListItem {
     .item = ImListItem {
       .value = "misc fun",
@@ -356,6 +434,31 @@ std::vector<NestedListItem> nestedListTest = {
               .onClick = []() -> void { 
                 gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test.png"));
               },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+        },
+      },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "hotkeys",
+          .onClick = std::nullopt, 
+          .mappingId = mappingId++,
+        },
+        .items = {
+          NestedListItem {
+            .item = ImListItem {
+              .value = "engine-dev",
+              .onClick = notYetImplementedAlert,
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "editor-keys",
+              .onClick = notYetImplementedAlert,
               .mappingId = mappingId++,
             },
             .items = {},
