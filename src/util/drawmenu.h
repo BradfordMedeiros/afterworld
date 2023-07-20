@@ -40,4 +40,14 @@ struct BoundingBox2D {
 BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset = 0.f);
 void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> mappingId, MenuItemStyle style);
 
+struct RadioButton {
+  bool selected;
+  std::optional<std::function<void()>> onClick;
+  std::optional<objid> mappingId;
+};
+
+std::vector<RadioButton> createRadioButtons();
+void drawRadioButtons(std::vector<RadioButton> radioButtons);
+void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optional<objid> mappingId);
+
 #endif

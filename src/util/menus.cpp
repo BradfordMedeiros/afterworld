@@ -380,7 +380,7 @@ std::vector<NestedListItem> nestedListTest = {
           },
           NestedListItem {
             .item = ImListItem {
-              .value = "dpquake.ttf",
+              .value = "dpquak e.ttf",
               .onClick = []() -> void { 
               },
               .mappingId = mappingId++,
@@ -408,3 +408,27 @@ std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::funct
   });
   return listItems;
 }
+
+std::vector<RadioButton> createRadioButtons(){
+  int radioButtonMappingId = 342089;
+  auto manipulatorMode = getStrWorldState("tools", "manipulator-mode").value();
+  std::vector<RadioButton> radioButtonTest = {
+    RadioButton { 
+      .selected = manipulatorMode == "translate", 
+      .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "translate"),
+      .mappingId = radioButtonMappingId++ 
+    },
+    RadioButton { 
+      .selected = manipulatorMode == "scale",  
+      .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "scale"), 
+      .mappingId = radioButtonMappingId++ 
+    },
+    RadioButton { 
+      .selected = manipulatorMode == "rotate", 
+      .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "rotate"),
+      .mappingId = radioButtonMappingId++ 
+    },
+  };
+  return radioButtonTest;
+}
+

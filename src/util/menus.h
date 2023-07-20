@@ -10,5 +10,6 @@
 extern std::vector<NestedListItem> nestedListTest;
 
 std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu);
+std::vector<RadioButton> createRadioButtons();
 
 #endif

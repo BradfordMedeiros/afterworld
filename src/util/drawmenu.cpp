@@ -181,3 +181,28 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
     }
   }
 }
+
+void drawRadioButtons(std::vector<RadioButton> radioButtons){
+//  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
+  float width = 0.02f;
+  float height = 0.02f;
+  float spacing = 0.01f;
+  float xoffset = -0.5f;
+  float yoffset = 0.f;
+  for (int i = 0; i < radioButtons.size(); i++){
+    RadioButton& radioButton = radioButtons.at(i);
+    gameapi -> drawRect(xoffset + i * width + (i == 0 ? 0.f : (i * spacing)), yoffset, width, height, false, radioButton.selected? glm::vec4(0.f, 0.f, 1.f, 0.6f) : glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, radioButton.mappingId, std::nullopt);
+  }
+}
+void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optional<objid> mappingId){
+  if (!mappingId.has_value()){
+    return;
+  }
+  for (auto &radioButton : radioButtons){
+    if (radioButton.mappingId.has_value() && radioButton.mappingId.value() == mappingId.value()){
+      if(radioButton.onClick.has_value()){
+        radioButton.onClick.value()();
+      }
+    }
+  }
+}
