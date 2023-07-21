@@ -6,6 +6,7 @@
 
 struct GlobalState {
   bool paused;
+  bool showScreenspaceGrid;
 };
 
 void setPaused(bool paused);

@@ -344,6 +344,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
+
+    if (getGlobalState().showScreenspaceGrid){
+     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
+    }
+
     if (!gameState -> loadedLevel.has_value()){
       drawImMenuList(mainMenuItems(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.f), .fontSizePerLetterNdi = std::nullopt });
     }else if (showingPauseMenu(*gameState)){
@@ -355,6 +360,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
     drawRadioButtons(createRadioButtons());
+
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);

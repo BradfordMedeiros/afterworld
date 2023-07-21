@@ -6,6 +6,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "./drawmenu.h"
 #include "../util.h"
+#include "../global.h"
 
 extern std::vector<NestedListItem> nestedListTest;
 

@@ -353,6 +353,16 @@ std::vector<NestedListItem> nestedListTest = {
       },
       NestedListItem {
         .item = ImListItem {
+          .value = "screen grid",
+          .onClick = []() -> void { 
+            getGlobalState().showScreenspaceGrid = !getGlobalState().showScreenspaceGrid; 
+          },
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
+      NestedListItem {
+        .item = ImListItem {
           .value = "mute sound",
           .onClick = getToggleWorldStateBoolStr("sound", "mute"),
           .mappingId = mappingId++,
@@ -401,6 +411,43 @@ std::vector<NestedListItem> nestedListTest = {
       .mappingId = mappingId++,
     },
     .items = {
+      NestedListItem {
+        .item = ImListItem {
+          .value = "worldstate",
+          .onClick = []() -> void { 
+          },
+          .mappingId = mappingId++,
+        },
+        .items = {
+          NestedListItem {
+            .item = ImListItem {
+              .value = "save",
+              .onClick = []() -> void { 
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "load 1",
+              .onClick = []() -> void { 
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "load 2",
+              .onClick = []() -> void { 
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
+        },
+      },
       NestedListItem {
         .item = ImListItem {
           .value = "background",

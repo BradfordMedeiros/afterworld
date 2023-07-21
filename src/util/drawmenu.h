@@ -29,7 +29,6 @@ struct NestedListItem {
 void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId);
 void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid> mappingId);
 
-
 struct BoundingBox2D {
   float x;
   float y;
@@ -49,5 +48,11 @@ struct RadioButton {
 std::vector<RadioButton> createRadioButtons();
 void drawRadioButtons(std::vector<RadioButton> radioButtons);
 void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optional<objid> mappingId);
+
+struct ImGrid {
+  int numCells;
+};
+
+void drawScreenspaceGrid(ImGrid grid);
 
 #endif

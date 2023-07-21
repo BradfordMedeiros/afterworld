@@ -1,55 +1,64 @@
 #include "./drawmenu.h"
 
 extern CustomApiBindings* gameapi;
-
 const float fontSizePerLetterNdi = 0.02f;
-
 
 void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
-  std::vector<std::string> values;
-  for (auto &item : list){
-    values.push_back(item.value);
-  }
+BoundingBox2D drawImMenuListItem(ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+  float fontSize = style.fontSizePerLetterNdi.has_value() ? style.fontSizePerLetterNdi.value() : fontSizePerLetterNdi;
+  auto height = fontSizePerLetterNdi;
+  auto width = glm::max(menuItem.value.size() * fontSize, style.minwidth);
 
+  auto rectX = (style.xoffset + (style.xoffset + width)) / 2.f;
+  auto rectY = style.yoffset + additionalYOffset;
+  auto rectWidth = width + 2 * style.padding;
+  auto rectHeight = height + 2 * style.padding;
+  auto textY = style.yoffset + additionalYOffset;
+
+  auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
+  drawCenteredText(menuItem.value, style.xoffset, textY, fontSize, tint, menuItem.mappingId);
+  return BoundingBox2D {
+    .x = rectX,
+    .y = rectY,
+    .width = rectWidth,
+    .height = rectHeight,
+  };
+}
+
+BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
-  std::optional<float> minY  =  std::nullopt;
+  std::optional<float> minY =  std::nullopt;
   std::optional<float> maxY = std::nullopt;
+
+
+  float lastWidth = 0.f;
+  float lastHeight = 0.f;
+  float yoffset = additionalYOffset;
+
+  //style.margin = 0.05f;
 
   modassert(list.size(), "draw im menu list - list is empty");
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
-    float textX = style.xoffset;
-    auto level = menuItem.value;
 
-    float fontSize = style.fontSizePerLetterNdi.has_value() ? style.fontSizePerLetterNdi.value() : fontSizePerLetterNdi;
-    auto height = fontSizePerLetterNdi;
-    auto width = glm::max(level.size() * fontSize, style.minwidth);
-    auto left = textX;
+    auto boundingBox = drawImMenuListItem(list.at(i), mappingId, style, yoffset);
+    float spacingPerItem = boundingBox.height + 2 * style.margin;
+    yoffset += -1 * spacingPerItem;
 
-    float minSpacingPerItem = height;
-    float spacingPerItem = minSpacingPerItem + 2 * style.padding + 2 * style.margin;
+    lastWidth = boundingBox.width;
+    lastHeight = boundingBox.height;
 
-    auto rectX = (left + (left + width)) / 2.f;
-    auto rectY = style.yoffset + additionalYOffset + (i * -1 * spacingPerItem);
-    auto rectWidth = width + 2 * style.padding;
-    auto rectHeight = height + 2 * style.padding;
-    auto textY = style.yoffset + additionalYOffset + (i * -1 * spacingPerItem);
-
-    auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-    gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
-    drawCenteredText(menuItem.value, textX, textY, fontSize, tint, menuItem.mappingId);
-
-    float bottomY = rectY - (rectHeight * 0.5f);
-    float topY = rectY + (rectHeight * 0.5f);
-    float leftX = rectX - (rectWidth * 0.5f);
-    float rightX = rectX + (rectWidth * 0.5f);
+    float bottomY = boundingBox.y - (boundingBox.height * 0.5f);
+    float topY = boundingBox.y + (boundingBox.height * 0.5f);
+    float leftX = boundingBox.x - (boundingBox.width * 0.5f);
+    float rightX = boundingBox.x + (boundingBox.width * 0.5f);
 
     if (!minX.has_value()){
       minX = leftX;
@@ -78,7 +87,6 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
     if (topY > maxY.value()){
       maxY = topY;
     }
-
   }
 
   modassert(minX.has_value(), "minX does not have value");
@@ -141,6 +149,8 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
       items.push_back(value.item);
     }
     auto boundingBox = drawImMenuList(items, mappingId, style, additionalYOffset);
+    gameapi -> drawRect(style.xoffset + 0.5f, style.yoffset - 0.5f, boundingBox.width, boundingBox.height, false, style.tint, std::nullopt, true, std::nullopt, std::nullopt);
+
     float perElementHeight = boundingBox.height / items.size();
     style.xoffset += boundingBox.width;
 
@@ -205,4 +215,23 @@ void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optio
       }
     }
   }
+}
+
+void drawScreenspaceGrid(ImGrid grid){
+  float numLines = grid.numCells - 1;
+  float ndiSpacePerLine = 1.f / grid.numCells;
+
+  for (int y = 0; y < numLines; y ++){
+    float unitLineNdi = ndiSpacePerLine * (y + 1);
+    float ndiY = (unitLineNdi * 2.f) - 1.f;
+    gameapi -> drawLine2D(glm::vec3(-1.f, ndiY, 0.f), glm::vec3(1.f, ndiY, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
+  }
+  for (int x = 0; x < numLines; x ++){
+    float unitLineNdi = ndiSpacePerLine * (x + 1);
+    float ndiX = (unitLineNdi * 2.f) - 1.f;
+    gameapi -> drawLine2D(glm::vec3(ndiX, -1.f, 0.f), glm::vec3(ndiX, 1.f, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
+  }
+
 }

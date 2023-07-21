@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 GlobalState global {
   .paused = true,
+  .showScreenspaceGrid = false,
 };
 
 void setPaused(bool paused){
