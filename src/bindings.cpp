@@ -109,26 +109,9 @@ bool onMainMenu(GameState& gameState){
 }
 
 
-std::vector<ImListItem> mainMenuItems(GameState& gameState){
-  std::vector<ImListItem> elements;
-
-  int mappingId = 90000;
-  for (int i = 0; i < gameState.levels.size(); i++){
-    elements.push_back(ImListItem {
-      .value = gameState.levels.at(i).name,
-      .onClick = [&gameState, i]() -> void {
-        goToLevel(gameState, gameState.levels.at(i).scene);
-      },
-      .mappingId = mappingId++,
-    });
-  }
-  return elements;
-}
-
-
-
-std::vector<std::function<BoundingBox2D(Props&)>> mainMenuItems2(GameState& gameState){
-  std::vector<std::function<BoundingBox2D(Props&)>> elements;
+int selectedRadioButtonIndex = 0;
+std::vector<Component> mainMenuItems2(GameState& gameState){
+  std::vector<Component> elements;
 
   int mappingId = 90000;
   for (int i = 0; i < gameState.levels.size(); i++){
@@ -139,71 +122,104 @@ std::vector<std::function<BoundingBox2D(Props&)>> mainMenuItems2(GameState& game
       },
       .mappingId = mappingId++,
     };
+    elements.push_back(
+      Component {
+        .draw = [menuItem](Props& props) -> BoundingBox2D {
+          auto box = drawImMenuListItem(menuItem, props.mappingId,  props.style, props.additionalYOffset);
+          //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+          drawDebugBoundingBox(box);
+          return box;
+        },
+        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
+          if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+            if (menuItem.onClick.has_value()){
+              menuItem.onClick.value()();
+            }
+          }
+        },
+      }
+    );
+  }
 
-    elements.push_back([menuItem](Props& props) -> BoundingBox2D {
-      auto box = drawImMenuListItem(menuItem, props.mappingId,  props.style, props.additionalYOffset);
-      //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+  std::vector<RadioButton> radioButtons = { 
+    RadioButton {
+      .selected = selectedRadioButtonIndex == 0,
+      .onClick = []() -> void {
+        std::cout << "on click button 0" << std::endl;
+      },
+      .mappingId = mappingId++,
+    },
+    RadioButton {
+      .selected = selectedRadioButtonIndex == 1,
+      .onClick = std::nullopt,
+      .mappingId = mappingId++,
+    },
+    RadioButton {
+      .selected = selectedRadioButtonIndex == 2,
+      .onClick = []() -> void {
+        std::cout << "on click button 2" << std::endl;
+      },
+      .mappingId = mappingId++,
+    }
+  };
+  elements.push_back(Component {
+    .draw = [radioButtons](Props& props) -> BoundingBox2D {
+      auto boundingBox = drawRadioButtons(
+        radioButtons,
+        props.style.xoffset,
+        props.additionalYOffset,
+        0.05f,
+        0.15f
+      );
+      std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
+      drawDebugBoundingBox(boundingBox);
+      return boundingBox;
+     },
+     .imMouseSelect = [radioButtons](std::optional<objid> mappingIdSelected) -> void {
+        for (int i = 0; i < radioButtons.size(); i++){
+          auto radioMappingId = radioButtons.at(i).mappingId;
+          if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
+            selectedRadioButtonIndex = i;
+            if (radioButtons.at(i).onClick.has_value()){
+              radioButtons.at(i).onClick.value()();
+            }
+            break;
+          }
+        }
+     }  
+   });
+
+  /*elements.push_back(Component {
+    .draw = [](Props& props) -> BoundingBox2D {
+      auto box = drawRadioButtons(
+        { 
+          RadioButton {
+            .selected = true,
+            .onClick = std::nullopt,
+            .mappingId = std::nullopt,
+          },
+          RadioButton {
+            .selected = false,
+            .onClick = std::nullopt,
+            .mappingId = std::nullopt,
+          },
+          RadioButton {
+            .selected = true,
+            .onClick = std::nullopt,
+            .mappingId = std::nullopt,
+          }
+        },
+        props.style.xoffset,
+        props.additionalYOffset ,
+        0.05f,
+        0.04f
+      );
       drawDebugBoundingBox(box);
       return box;
-    });
-  }
-  elements.push_back([](Props& props) -> BoundingBox2D {
-
-    auto boundingBox = drawRadioButtons(
-      { 
-        RadioButton {
-          .selected = true,
-          .onClick = std::nullopt,
-          .mappingId = std::nullopt,
-        },
-        RadioButton {
-          .selected = false,
-          .onClick = std::nullopt,
-          .mappingId = std::nullopt,
-        },
-        RadioButton {
-          .selected = true,
-          .onClick = std::nullopt,
-          .mappingId = std::nullopt,
-        }
-      },
-      props.style.xoffset,
-      props.additionalYOffset,
-      0.05f,
-      0.15f
-    );
-
-    std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
-    drawDebugBoundingBox(boundingBox);
-    return boundingBox;
-  });
-  elements.push_back([](Props& props) -> BoundingBox2D {
-    auto box = drawRadioButtons(
-      { 
-        RadioButton {
-          .selected = true,
-          .onClick = std::nullopt,
-          .mappingId = std::nullopt,
-        },
-        RadioButton {
-          .selected = false,
-          .onClick = std::nullopt,
-          .mappingId = std::nullopt,
-        },
-        RadioButton {
-          .selected = true,
-          .onClick = std::nullopt,
-          .mappingId = std::nullopt,
-        }
-      },
-      props.style.xoffset,
-      props.additionalYOffset ,
-      0.05f,
-      0.04f
-    );
-    drawDebugBoundingBox(box);
-    return box;
-  });
+    },
+    .imMouseSelect [](std::optional<objid> mappingId) -> void {},
+    }
+  );*/
   return elements;
 }
 
@@ -256,7 +272,7 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
   if (showingPauseMenu(gameState)){
      processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
   }else if (onMainMenu(gameState)){
-     processImMouseSelect(mainMenuItems(gameState), mappingId);
+     processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
      processImMouseSelect(animationMenuItems2(gameState), mappingId);

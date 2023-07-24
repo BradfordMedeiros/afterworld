@@ -23,6 +23,7 @@
 #include "./global.h"
 #include "./util/drawmenu.h"
 #include "./util/menus.h"
+#include "./util/components/common.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

@@ -30,25 +30,6 @@ BoundingBox2D drawImMenuListItem(const ImListItem& menuItem, std::optional<objid
   };
 }
 
-void drawDebugBoundingBox(BoundingBox2D& box){
-  //gameapi -> drawRect(box.x, box.y, box.width, box.height, false, glm::vec4(1.f, 0.f, 1.f, 0.2f), std::nullopt, true, std::nullopt, std::nullopt);
-  //gameapi -> drawRect(-0.915000, -0.795, 0.17f, 0.15f, false, glm::vec4(1.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  float left = box.x - (box.width * 0.5f);
-  float right = box.x + (box.width * 0.5f);
-  float up = box.y + (box.height * 0.5f);
-  float down = box.y - (box.height * 0.5f);
-  gameapi -> drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-
-}
-
-
-std::string print(BoundingBox2D& box){
-  return std::string("x = " + std::to_string(box.x) + ", y = " + std::to_string(box.y) + ", width = " + std::to_string(box.width) + ", height = " + std::to_string(box.height));
-}
-
 BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
@@ -125,7 +106,7 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   };
 }
 
-BoundingBox2D drawImMenuList(std::vector<std::function<BoundingBox2D(Props&)>> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+BoundingBox2D drawImMenuList(std::vector<Component> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
@@ -145,7 +126,7 @@ BoundingBox2D drawImMenuList(std::vector<std::function<BoundingBox2D(Props&)>> l
 
   modassert(list.size(), "draw im menu list - list is empty");
   for (int i = 0; i < list.size(); i++){
-    auto boundingBox = list.at(i)(props);
+    auto boundingBox = list.at(i).draw(props);
     float spacingPerItem = boundingBox.height + 2 * style.margin;
     yoffset += -1 * spacingPerItem;
     props.additionalYOffset = yoffset;
@@ -264,12 +245,21 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
   }
 }
 
+void processImMouseSelect(std::vector<Component> components, std::optional<objid> mappingId){
+  if (!mappingId.has_value()){
+    return;
+  }
+  for (auto &component : components){
+    component.imMouseSelect(mappingId);
+  }
+}
+
 void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId){
   if (!mappingId.has_value()){
     return;
   }
   for (auto &item : list){
-    if (item.mappingId.has_value() && item.mappingId.value() == mappingId.value() && item.onClick.has_value()){
+    if (item.mappingId.has_value() && (item.mappingId.value() == mappingId.value()) && item.onClick.has_value()){
       item.onClick.value()();
     }
   }
@@ -289,93 +279,5 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
       }
       values = &item.items;
     }
-  }
-}
-
-BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoffset, float yoffset, float width, float height){
-//  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
-  modassert(radioButtons.size() > 0, "need at least one radiobutton to render");
-  const float spacing = 0.01f;
-
-  std::optional<float> minX = std::nullopt;
-  std::optional<float> maxX = std::nullopt;
-  std::optional<float> minY = std::nullopt;
-  std::optional<float> maxY = std::nullopt;
-  for (int i = 0; i < radioButtons.size(); i++){
-    RadioButton& radioButton = radioButtons.at(i);
-    float x = xoffset + i * width + (i == 0 ? 0.f : (i * spacing));
-    gameapi -> drawRect(x, yoffset, width, height, false, radioButton.selected? glm::vec4(0.f, 0.f, 1.f, 0.6f) : glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, radioButton.mappingId, std::nullopt);
-    
-    float halfWidth = width * 0.5f;
-    float halfHeight = height * 0.5f;
-    float left = x - halfWidth;
-    float right = x + halfWidth;
-    float top = yoffset + halfHeight;
-    float bottom = yoffset - halfHeight;
-    if (!minX.has_value()){
-      minX = left;
-    }
-    if (!maxX.has_value()){
-      maxX = right;
-    }
-    if (!minY.has_value()){
-      minY = bottom;
-    }
-    if (!maxY.has_value()){
-      maxY = top;
-    }
-
-    if (left < minX.value()){
-      minX = left;
-    }
-    if (right > maxX.value()){
-      maxX = right;
-    }
-    if (bottom < minY){
-      minY = bottom;
-    }
-    if (top > maxY){
-      maxY = top;
-    }
-  }
-
-  std::cout << "radio minx: " << minX.value() << ", maxx: " << maxX.value() << std::endl;
-  std::cout << "radio miny: " << minY.value() << ", maxy: " << maxY.value() << std::endl;
-
-  return BoundingBox2D {
-    .x = (maxX.value() + minX.value()) * 0.5f,
-    .y = (maxY.value() + minY.value()) * 0.5f,
-    .width = maxX.value() - minX.value(),
-    .height = maxY.value() - minY.value(),
-  };
-}
-void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optional<objid> mappingId){
-  if (!mappingId.has_value()){
-    return;
-  }
-  for (auto &radioButton : radioButtons){
-    if (radioButton.mappingId.has_value() && radioButton.mappingId.value() == mappingId.value()){
-      if(radioButton.onClick.has_value()){
-        radioButton.onClick.value()();
-      }
-    }
-  }
-}
-
-void drawScreenspaceGrid(ImGrid grid){
-  float numLines = grid.numCells - 1;
-  float ndiSpacePerLine = 1.f / grid.numCells;
-
-  for (int y = 0; y < numLines; y ++){
-    float unitLineNdi = ndiSpacePerLine * (y + 1);
-    float ndiY = (unitLineNdi * 2.f) - 1.f;
-    gameapi -> drawLine2D(glm::vec3(-1.f, ndiY, 0.f), glm::vec3(1.f, ndiY, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
-  }
-  for (int x = 0; x < numLines; x ++){
-    float unitLineNdi = ndiSpacePerLine * (x + 1);
-    float ndiX = (unitLineNdi * 2.f) - 1.f;
-    gameapi -> drawLine2D(glm::vec3(ndiX, -1.f, 0.f), glm::vec3(ndiX, 1.f, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
   }
 }
