@@ -108,8 +108,6 @@ bool onMainMenu(GameState& gameState){
   return !(gameState.loadedLevel.has_value());
 }
 
-
-int selectedRadioButtonIndex = 0;
 std::vector<Component> mainMenuItems2(GameState& gameState){
   std::vector<Component> elements;
 
@@ -141,53 +139,7 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
     );
   }
 
-  std::vector<RadioButton> radioButtons = { 
-    RadioButton {
-      .selected = selectedRadioButtonIndex == 0,
-      .onClick = []() -> void {
-        std::cout << "on click button 0" << std::endl;
-      },
-      .mappingId = mappingId++,
-    },
-    RadioButton {
-      .selected = selectedRadioButtonIndex == 1,
-      .onClick = std::nullopt,
-      .mappingId = mappingId++,
-    },
-    RadioButton {
-      .selected = selectedRadioButtonIndex == 2,
-      .onClick = []() -> void {
-        std::cout << "on click button 2" << std::endl;
-      },
-      .mappingId = mappingId++,
-    }
-  };
-  elements.push_back(Component {
-    .draw = [radioButtons](Props& props) -> BoundingBox2D {
-      auto boundingBox = drawRadioButtons(
-        radioButtons,
-        props.style.xoffset,
-        props.additionalYOffset,
-        0.05f,
-        0.15f
-      );
-      std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
-      drawDebugBoundingBox(boundingBox);
-      return boundingBox;
-     },
-     .imMouseSelect = [radioButtons](std::optional<objid> mappingIdSelected) -> void {
-        for (int i = 0; i < radioButtons.size(); i++){
-          auto radioMappingId = radioButtons.at(i).mappingId;
-          if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
-            selectedRadioButtonIndex = i;
-            if (radioButtons.at(i).onClick.has_value()){
-              radioButtons.at(i).onClick.value()();
-            }
-            break;
-          }
-        }
-     }  
-   });
+  elements.push_back(radioButtonSelector);
 
   /*elements.push_back(Component {
     .draw = [](Props& props) -> BoundingBox2D {
@@ -278,7 +230,6 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
      processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
   processImMouseSelect(nestedListTest, mappingId);
-  processImRadioMouseSelect(createRadioButtons(), mappingId);
 }
 
 void togglePauseMode(GameState& gameState){

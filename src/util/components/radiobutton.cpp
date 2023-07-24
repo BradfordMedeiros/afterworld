@@ -83,15 +83,58 @@ BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoff
   };
 }
 
-void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optional<objid> mappingId){
-  if (!mappingId.has_value()){
-    return;
-  }
-  for (auto &radioButton : radioButtons){
-    if (radioButton.mappingId.has_value() && radioButton.mappingId.value() == mappingId.value()){
-      if(radioButton.onClick.has_value()){
-        radioButton.onClick.value()();
-      }
+
+int mappingIdRadio = 95000;
+RadioButtonContainer radioButtonContainer {
+  .selectedRadioButtonIndex = 0,
+  .radioButtons = { 
+    RadioButton {
+      .selected = false,
+      .onClick = []() -> void {
+        std::cout << "on click button 0" << std::endl;
+      },
+      .mappingId = mappingIdRadio++,
+    },
+    RadioButton {
+      .selected = false,
+      .onClick = std::nullopt,
+      .mappingId = mappingIdRadio++,
+    },
+    RadioButton {
+      .selected = false,
+      .onClick = []() -> void {
+        std::cout << "on click button 2" << std::endl;
+      },
+      .mappingId = mappingIdRadio++,
     }
   }
-}
+};
+
+Component radioButtonSelector  {
+  .draw = [](Props& props) -> BoundingBox2D {
+    auto boundingBox = drawRadioButtons(
+      radioButtonContainer.radioButtons,
+      props.style.xoffset,
+      props.additionalYOffset,
+      0.05f,
+      0.15f
+    );
+    std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
+    drawDebugBoundingBox(boundingBox);
+    return boundingBox;
+  },
+  .imMouseSelect = [](std::optional<objid> mappingIdSelected) -> void {
+     for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
+       auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
+       if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
+         radioButtonContainer.selectedRadioButtonIndex = i;
+         if (radioButtonContainer.radioButtons.at(i).onClick.has_value()){
+           radioButtonContainer.radioButtons.at(i).onClick.value()();
+         }
+         radioButtonContainer.radioButtons.at(i).selected = true;
+       }else{
+         radioButtonContainer.radioButtons.at(i).selected = false;
+       }
+     }
+  }  
+};
