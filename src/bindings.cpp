@@ -108,6 +108,7 @@ bool onMainMenu(GameState& gameState){
   return !(gameState.loadedLevel.has_value());
 }
 
+
 std::vector<ImListItem> mainMenuItems(GameState& gameState){
   std::vector<ImListItem> elements;
 
@@ -123,6 +124,89 @@ std::vector<ImListItem> mainMenuItems(GameState& gameState){
   }
   return elements;
 }
+
+
+
+std::vector<std::function<BoundingBox2D(Props&)>> mainMenuItems2(GameState& gameState){
+  std::vector<std::function<BoundingBox2D(Props&)>> elements;
+
+  int mappingId = 90000;
+  for (int i = 0; i < gameState.levels.size(); i++){
+    ImListItem menuItem {
+      .value = gameState.levels.at(i).name,
+      .onClick = [&gameState, i]() -> void {
+        goToLevel(gameState, gameState.levels.at(i).scene);
+      },
+      .mappingId = mappingId++,
+    };
+
+    elements.push_back([menuItem](Props& props) -> BoundingBox2D {
+      auto box = drawImMenuListItem(menuItem, props.mappingId,  props.style, props.additionalYOffset);
+      //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+      drawDebugBoundingBox(box);
+      return box;
+    });
+  }
+  elements.push_back([](Props& props) -> BoundingBox2D {
+
+    auto boundingBox = drawRadioButtons(
+      { 
+        RadioButton {
+          .selected = true,
+          .onClick = std::nullopt,
+          .mappingId = std::nullopt,
+        },
+        RadioButton {
+          .selected = false,
+          .onClick = std::nullopt,
+          .mappingId = std::nullopt,
+        },
+        RadioButton {
+          .selected = true,
+          .onClick = std::nullopt,
+          .mappingId = std::nullopt,
+        }
+      },
+      props.style.xoffset,
+      props.additionalYOffset,
+      0.05f,
+      0.15f
+    );
+
+    std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
+    drawDebugBoundingBox(boundingBox);
+    return boundingBox;
+  });
+  elements.push_back([](Props& props) -> BoundingBox2D {
+    auto box = drawRadioButtons(
+      { 
+        RadioButton {
+          .selected = true,
+          .onClick = std::nullopt,
+          .mappingId = std::nullopt,
+        },
+        RadioButton {
+          .selected = false,
+          .onClick = std::nullopt,
+          .mappingId = std::nullopt,
+        },
+        RadioButton {
+          .selected = true,
+          .onClick = std::nullopt,
+          .mappingId = std::nullopt,
+        }
+      },
+      props.style.xoffset,
+      props.additionalYOffset ,
+      0.05f,
+      0.04f
+    );
+    drawDebugBoundingBox(box);
+    return box;
+  });
+  return elements;
+}
+
 
 double downTime = 0;
 void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
@@ -350,7 +434,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuList(mainMenuItems(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.f), .fontSizePerLetterNdi = std::nullopt });
+      drawImMenuList(mainMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f), .fontSizePerLetterNdi = std::nullopt });
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
     }
@@ -359,7 +443,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
     }
     drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
-    drawRadioButtons(createRadioButtons());
+    //drawRadioButtons(createRadioButtons());
 
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){

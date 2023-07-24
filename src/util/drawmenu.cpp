@@ -8,7 +8,7 @@ void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, floa
   gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuListItem(ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+BoundingBox2D drawImMenuListItem(const ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   float fontSize = style.fontSizePerLetterNdi.has_value() ? style.fontSizePerLetterNdi.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
   auto width = glm::max(menuItem.value.size() * fontSize, style.minwidth);
@@ -28,6 +28,25 @@ BoundingBox2D drawImMenuListItem(ImListItem& menuItem, std::optional<objid> mapp
     .width = rectWidth,
     .height = rectHeight,
   };
+}
+
+void drawDebugBoundingBox(BoundingBox2D& box){
+  //gameapi -> drawRect(box.x, box.y, box.width, box.height, false, glm::vec4(1.f, 0.f, 1.f, 0.2f), std::nullopt, true, std::nullopt, std::nullopt);
+  //gameapi -> drawRect(-0.915000, -0.795, 0.17f, 0.15f, false, glm::vec4(1.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  float left = box.x - (box.width * 0.5f);
+  float right = box.x + (box.width * 0.5f);
+  float up = box.y + (box.height * 0.5f);
+  float down = box.y - (box.height * 0.5f);
+  gameapi -> drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+
+}
+
+
+std::string print(BoundingBox2D& box){
+  return std::string("x = " + std::to_string(box.x) + ", y = " + std::to_string(box.y) + ", width = " + std::to_string(box.width) + ", height = " + std::to_string(box.height));
 }
 
 BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
@@ -106,6 +125,84 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   };
 }
 
+BoundingBox2D drawImMenuList(std::vector<std::function<BoundingBox2D(Props&)>> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+  std::optional<float> minX = std::nullopt;
+  std::optional<float> maxX = std::nullopt;
+
+  std::optional<float> minY =  std::nullopt;
+  std::optional<float> maxY = std::nullopt;
+
+
+  float lastWidth = 0.f;
+  float lastHeight = 0.f;
+  float yoffset = additionalYOffset;
+
+  Props props { 
+    .mappingId = mappingId,
+    .additionalYOffset = additionalYOffset,
+    .style = style,
+  };
+
+  modassert(list.size(), "draw im menu list - list is empty");
+  for (int i = 0; i < list.size(); i++){
+    auto boundingBox = list.at(i)(props);
+    float spacingPerItem = boundingBox.height + 2 * style.margin;
+    yoffset += -1 * spacingPerItem;
+    props.additionalYOffset = yoffset;
+
+    lastWidth = boundingBox.width;
+    lastHeight = boundingBox.height;
+
+    float bottomY = boundingBox.y - (boundingBox.height * 0.5f);
+    float topY = boundingBox.y + (boundingBox.height * 0.5f);
+    float leftX = boundingBox.x - (boundingBox.width * 0.5f);
+    float rightX = boundingBox.x + (boundingBox.width * 0.5f);
+
+    if (!minX.has_value()){
+      minX = leftX;
+    }
+    if (leftX < minX.value()){
+      minX = leftX;
+    }
+
+    if (!maxX.has_value()){
+      maxX = rightX;
+    }
+    if (rightX > maxX.value()){
+      maxX = rightX;
+    }
+
+    if (!minY.has_value()){
+      minY = bottomY;
+    }
+    if (bottomY < minY.value()){
+      minY = bottomY;
+    }
+
+    if (!maxY.has_value()){
+      maxY = topY;
+    }
+    if (topY > maxY.value()){
+      maxY = topY;
+    }
+  }
+
+  modassert(minX.has_value(), "minX does not have value");
+  modassert(maxX.has_value(), "maxX does not have value");
+  modassert(minY.has_value(), "minY does not have value");
+  modassert(maxY.has_value(), "maxY does not have value");
+
+  float width = maxX.value() - minX.value();
+  float height = maxY.value() - minY.value();
+  float centerX = minX.value() + (width * 0.5f);
+  float centerY = minY.value() + (height * 0.5f);
+  return BoundingBox2D {
+    .x = centerX,
+    .y = centerY,
+    .width = width,
+    .height = height,
+  };
+}
   
 std::optional<std::vector<int>> searchNestedList(std::vector<NestedListItem>& values, objid mappingId, std::vector<int> currentPath){
   for (int i = 0; i < static_cast<int>(values.size()); i++){
@@ -149,7 +246,10 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
       items.push_back(value.item);
     }
     auto boundingBox = drawImMenuList(items, mappingId, style, additionalYOffset);
-    gameapi -> drawRect(style.xoffset + 0.5f, style.yoffset - 0.5f, boundingBox.width, boundingBox.height, false, style.tint, std::nullopt, true, std::nullopt, std::nullopt);
+
+    std::cout << "bounding box: " << print(boundingBox) << std::endl;
+    // gameapi -> drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
+    //gameapi -> drawRect(0.f, 0.f, 0.2f, 0.2f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
 
     float perElementHeight = boundingBox.height / items.size();
     style.xoffset += boundingBox.width;
@@ -192,17 +292,62 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
   }
 }
 
-void drawRadioButtons(std::vector<RadioButton> radioButtons){
+BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoffset, float yoffset, float width, float height){
 //  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
-  float width = 0.02f;
-  float height = 0.02f;
-  float spacing = 0.01f;
-  float xoffset = -0.5f;
-  float yoffset = 0.f;
+  modassert(radioButtons.size() > 0, "need at least one radiobutton to render");
+  const float spacing = 0.01f;
+
+  std::optional<float> minX = std::nullopt;
+  std::optional<float> maxX = std::nullopt;
+  std::optional<float> minY = std::nullopt;
+  std::optional<float> maxY = std::nullopt;
   for (int i = 0; i < radioButtons.size(); i++){
     RadioButton& radioButton = radioButtons.at(i);
-    gameapi -> drawRect(xoffset + i * width + (i == 0 ? 0.f : (i * spacing)), yoffset, width, height, false, radioButton.selected? glm::vec4(0.f, 0.f, 1.f, 0.6f) : glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, radioButton.mappingId, std::nullopt);
+    float x = xoffset + i * width + (i == 0 ? 0.f : (i * spacing));
+    gameapi -> drawRect(x, yoffset, width, height, false, radioButton.selected? glm::vec4(0.f, 0.f, 1.f, 0.6f) : glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, radioButton.mappingId, std::nullopt);
+    
+    float halfWidth = width * 0.5f;
+    float halfHeight = height * 0.5f;
+    float left = x - halfWidth;
+    float right = x + halfWidth;
+    float top = yoffset + halfHeight;
+    float bottom = yoffset - halfHeight;
+    if (!minX.has_value()){
+      minX = left;
+    }
+    if (!maxX.has_value()){
+      maxX = right;
+    }
+    if (!minY.has_value()){
+      minY = bottom;
+    }
+    if (!maxY.has_value()){
+      maxY = top;
+    }
+
+    if (left < minX.value()){
+      minX = left;
+    }
+    if (right > maxX.value()){
+      maxX = right;
+    }
+    if (bottom < minY){
+      minY = bottom;
+    }
+    if (top > maxY){
+      maxY = top;
+    }
   }
+
+  std::cout << "radio minx: " << minX.value() << ", maxx: " << maxX.value() << std::endl;
+  std::cout << "radio miny: " << minY.value() << ", maxy: " << maxY.value() << std::endl;
+
+  return BoundingBox2D {
+    .x = (maxX.value() + minX.value()) * 0.5f,
+    .y = (maxY.value() + minY.value()) * 0.5f,
+    .width = maxX.value() - minX.value(),
+    .height = maxY.value() - minY.value(),
+  };
 }
 void processImRadioMouseSelect(std::vector<RadioButton> radioButtons, std::optional<objid> mappingId){
   if (!mappingId.has_value()){
@@ -233,5 +378,4 @@ void drawScreenspaceGrid(ImGrid grid){
     gameapi -> drawLine2D(glm::vec3(ndiX, -1.f, 0.f), glm::vec3(ndiX, 1.f, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
   }
-
 }
