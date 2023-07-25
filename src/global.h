@@ -7,6 +7,10 @@
 struct GlobalState {
   bool paused;
   bool showScreenspaceGrid;
+
+  float xNdc;
+  float yNdc;
+
 };
 
 void setPaused(bool paused);

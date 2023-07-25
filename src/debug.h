@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util/drawmenu.h"
 
 CScriptBinding debugBinding(CustomApiBindings& api, const char* name);
 

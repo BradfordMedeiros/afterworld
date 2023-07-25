@@ -119,6 +119,7 @@ Component radioButtonSelector  {
       0.05f,
       0.15f
     );
+    
     std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
     drawDebugBoundingBox(boundingBox);
     return boundingBox;

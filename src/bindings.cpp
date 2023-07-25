@@ -20,9 +20,6 @@ struct GameState {
   std::vector<Level> levels;
   bool menuLoaded;
 
-  float xNdc;
-  float yNdc;
-
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
 };
@@ -138,40 +135,9 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
       }
     );
   }
-
   elements.push_back(radioButtonSelector);
+  elements.push_back(sliderSelector);
 
-  /*elements.push_back(Component {
-    .draw = [](Props& props) -> BoundingBox2D {
-      auto box = drawRadioButtons(
-        { 
-          RadioButton {
-            .selected = true,
-            .onClick = std::nullopt,
-            .mappingId = std::nullopt,
-          },
-          RadioButton {
-            .selected = false,
-            .onClick = std::nullopt,
-            .mappingId = std::nullopt,
-          },
-          RadioButton {
-            .selected = true,
-            .onClick = std::nullopt,
-            .mappingId = std::nullopt,
-          }
-        },
-        props.style.xoffset,
-        props.additionalYOffset ,
-        0.05f,
-        0.04f
-      );
-      drawDebugBoundingBox(box);
-      return box;
-    },
-    .imMouseSelect [](std::optional<objid> mappingId) -> void {},
-    }
-  );*/
   return elements;
 }
 
@@ -366,8 +332,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = new GameState;
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
-    gameState -> xNdc = 0.f;
-    gameState -> yNdc = 0.f;
     gameState -> selecting = std::nullopt;
     loadConfig(*gameState);
     loadDefaultScenes();
@@ -394,14 +358,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
+    auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
 
     if (getGlobalState().showScreenspaceGrid){
      drawScreenspaceGrid(ImGrid{ .numCells = 10 });
     }
 
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuList(mainMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f), .fontSizePerLetterNdi = std::nullopt });
+      drawImMenuComponentList(mainMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f), .fontSizePerLetterNdi = std::nullopt });
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(*gameState, selectedId);
     }
@@ -410,11 +374,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
     }
     drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
-    //drawRadioButtons(createRadioButtons());
 
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
-      selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(gameState -> xNdc, gameState -> yNdc), id);
+      selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -548,8 +511,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     GameState* gameState = static_cast<GameState*>(data);
-    gameState -> xNdc = xNdc;
-    gameState -> yNdc = yNdc;
+    getGlobalState().xNdc = xNdc;
+    getGlobalState().yNdc = yNdc;
 
     //auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
     //if (selectedId.has_value()){
@@ -560,7 +523,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     if (action == 1 && button == 0){
-      auto idAtCoord = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
+      auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
       if (idAtCoord.has_value()){
         handleMouseSelect(*gameState, idAtCoord.value());
       }
@@ -569,7 +532,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (action == 0){
         gameState -> selecting = std::nullopt;
       }else if (action == 1){
-        gameState -> selecting = glm::vec2(gameState -> xNdc, gameState -> yNdc);
+        gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
       }
     }
   };

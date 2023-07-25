@@ -21,9 +21,11 @@
 #include "./water.h"
 #include "./gametypes.h"
 #include "./global.h"
-#include "./util/drawmenu.h"
 #include "./util/menus.h"
 #include "./util/components/common.h"
+#include "./util/components/list.h"
+#include "./util/components/radiobutton.h"
+#include "./util/components/slider.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

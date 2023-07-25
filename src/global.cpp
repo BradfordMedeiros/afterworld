@@ -5,6 +5,8 @@ extern CustomApiBindings* gameapi;
 GlobalState global {
   .paused = true,
   .showScreenspaceGrid = false,
+  .xNdc = 0.f,
+  .yNdc = 0.f,
 };
 
 void setPaused(bool paused){
