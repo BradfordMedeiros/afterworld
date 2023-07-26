@@ -560,3 +560,29 @@ std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::funct
 }
 
 
+
+
+ImageList defaultImages {
+  .mappingId = 858584,
+  .images = {
+    "./res/textures/wood.jpg",
+    "./res/textures/grass.jpg",
+    "./res/textures/brickwall.jpg",
+    "./res/textures/grid.png",
+    "./res/textures/grass.jpg",
+    "./res/textures/grid.png",
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg",
+  },
+};
+
+Component imageListTest = createImageList(defaultImages);
+
+Slider exampleSlider {
+  .min  = 0.f,
+  .max = 10.f,
+  .percentage = 0.f,
+  .mappingId = 34545,
+  .update = false,
+};
+Component sliderSelector = createSlider(exampleSlider);

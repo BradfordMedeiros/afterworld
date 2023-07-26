@@ -9,10 +9,10 @@ struct Slider {
   float max;
   float percentage;
   objid mappingId;
+  bool update;
 };
 
-extern Slider slider;
+Component createSlider(Slider& slider);
 
-extern Component sliderSelector;
 
 #endif
