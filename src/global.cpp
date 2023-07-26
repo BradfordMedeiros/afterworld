@@ -7,6 +7,7 @@ GlobalState global {
   .showScreenspaceGrid = false,
   .xNdc = 0.f,
   .yNdc = 0.f,
+  .selectedId = std::nullopt,
 };
 
 void setPaused(bool paused){

@@ -34,10 +34,15 @@ BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoff
   std::optional<float> maxX = std::nullopt;
   std::optional<float> minY = std::nullopt;
   std::optional<float> maxY = std::nullopt;
+
   for (int i = 0; i < radioButtons.size(); i++){
     RadioButton& radioButton = radioButtons.at(i);
     float x = xoffset + i * width + (i == 0 ? 0.f : (i * spacing));
-    gameapi -> drawRect(x, yoffset, width, height, false, radioButton.selected? glm::vec4(0.f, 0.f, 1.f, 0.6f) : glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, radioButton.mappingId, std::nullopt);
+    auto radioButtonColor = radioButton.hovered ? glm::vec4(0.f, 0.f, 1.f, 0.3f) : glm::vec4(0.f, 0.f, 0.f, 0.6f);
+    if (radioButton.selected){
+      radioButtonColor = glm::vec4(0.f, 0.f, 1.f, 0.6f);
+    }
+    gameapi -> drawRect(x, yoffset, width, height, false, radioButtonColor, std::nullopt, true, radioButton.mappingId, std::nullopt);
     
     float halfWidth = width * 0.5f;
     float halfHeight = height * 0.5f;
@@ -90,6 +95,7 @@ RadioButtonContainer radioButtonContainer {
   .radioButtons = { 
     RadioButton {
       .selected = false,
+      .hovered = false,
       .onClick = []() -> void {
         std::cout << "on click button 0" << std::endl;
       },
@@ -97,11 +103,13 @@ RadioButtonContainer radioButtonContainer {
     },
     RadioButton {
       .selected = false,
+      .hovered = false,
       .onClick = std::nullopt,
       .mappingId = mappingIdRadio++,
     },
     RadioButton {
       .selected = false,
+      .hovered = false,
       .onClick = []() -> void {
         std::cout << "on click button 2" << std::endl;
       },
@@ -112,6 +120,16 @@ RadioButtonContainer radioButtonContainer {
 
 Component radioButtonSelector  {
   .draw = [](Props& props) -> BoundingBox2D {
+    for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
+       auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
+       auto selectedId = getGlobalState().selectedId;
+       if (selectedId.has_value() && radioMappingId.has_value() && radioMappingId.value() == selectedId.value()){
+         radioButtonContainer.radioButtons.at(i).hovered = true;
+       }else{
+         radioButtonContainer.radioButtons.at(i).hovered = false;
+       }
+    }
+
     auto boundingBox = drawRadioButtons(
       radioButtonContainer.radioButtons,
       props.style.xoffset,

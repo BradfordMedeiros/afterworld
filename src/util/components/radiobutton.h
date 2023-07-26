@@ -2,9 +2,11 @@
 #define MOD_AFTERWORLD_COMPONENTS_RADIOBUTTON
 
 #include "./common.h"
+#include "../../global.h"
 
 struct RadioButton {
   bool selected;
+  bool hovered;
   std::optional<std::function<void()>> onClick;
   std::optional<objid> mappingId;
 };

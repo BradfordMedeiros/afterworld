@@ -26,6 +26,7 @@
 #include "./util/components/list.h"
 #include "./util/components/radiobutton.h"
 #include "./util/components/slider.h"
+#include "./util/components/imagelist.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

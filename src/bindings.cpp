@@ -137,6 +137,7 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
   }
   elements.push_back(radioButtonSelector);
   elements.push_back(sliderSelector);
+  elements.push_back(imageListTest);
 
   return elements;
 }
@@ -359,6 +360,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
+    getGlobalState().selectedId = selectedId;
 
     if (getGlobalState().showScreenspaceGrid){
      drawScreenspaceGrid(ImGrid{ .numCells = 10 });

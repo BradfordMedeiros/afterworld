@@ -1,0 +1,6 @@
+#ifndef MOD_AFTERWORLD_COMPONENTS_LAYOUT
+#define MOD_AFTERWORLD_COMPONENTS_LAYOUT
+
+#include "./common.h"
+
+#endif

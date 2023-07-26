@@ -10,7 +10,7 @@ struct GlobalState {
 
   float xNdc;
   float yNdc;
-
+  std::optional<objid> selectedId;
 };
 
 void setPaused(bool paused);
