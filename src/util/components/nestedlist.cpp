@@ -130,7 +130,7 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   };
 }
 
-void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> mappingId, MenuItemStyle style){
+BoundingBox2D drawImNestedList(std::vector<NestedListItem>& values , std::optional<objid> mappingId, MenuItemStyle style){
   std::vector<int> listOpenIndexs;
   auto selectedPath = calculateSelectedPath(values, mappingId);
   if (selectedPath.has_value()){
@@ -143,6 +143,7 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
     if (nestedListItems -> size() == 0){
       continue;
     }
+
     std::vector<ImListItem> items;
     for (auto &value : *nestedListItems){
       items.push_back(value.item);
@@ -162,6 +163,24 @@ void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> m
       auto nextIndex = listOpenIndexs.at(i + 1);
       nestedListItems = &(nestedListItems -> at(nextIndex).items);
       additionalYOffset -=  (nextIndex * perElementHeight);
+    }
+  }
+  return BoundingBox2D {  // bounding box incorrect
+    .x = 0.f,
+    .y = 0.f,
+    .width = 1.f,
+    .height = 1.f,
+  };
+}
+
+
+void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId){
+  if (!mappingId.has_value()){
+    return;
+  }
+  for (auto &item : list){
+    if (item.mappingId.has_value() && (item.mappingId.value() == mappingId.value()) && item.onClick.has_value()){
+      item.onClick.value()();
     }
   }
 }
@@ -184,14 +203,14 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
 }
 
 
-void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId){
-  if (!mappingId.has_value()){
-    return;
-  }
-  for (auto &item : list){
-    if (item.mappingId.has_value() && (item.mappingId.value() == mappingId.value()) && item.onClick.has_value()){
-      item.onClick.value()();
-    }
-  }
+Component createNestedList(std::vector<NestedListItem>& items){
+  Component component  {
+    .draw = [&items](Props& props) -> BoundingBox2D {
+      return drawImNestedList(items, props.mappingId, props.style);
+    },
+    .imMouseSelect = [&items](std::optional<objid> mappingIdSelected) -> void {
+      processImMouseSelect(items, mappingIdSelected);
+    }  
+  };
+  return component;
 }
-

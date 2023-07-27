@@ -196,7 +196,7 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
      processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
-  processImMouseSelect(nestedListTest, mappingId);
+  nestedListTestComponent.imMouseSelect(mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -375,7 +375,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
       drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
     }
-    drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
+
+
+
+    Props nestedListProps { .mappingId = selectedId, .additionalYOffset = 0.f, .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f } };
+    nestedListTestComponent.draw(nestedListProps);
+
+    //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
+
+    //drawImNestedList(nestedListTest, selectedId, );
 
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){

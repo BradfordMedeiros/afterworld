@@ -14,15 +14,11 @@ struct NestedListItem {
   std::vector<NestedListItem> items;
 };
 
-void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> mappingId, MenuItemStyle style);
-void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid> mappingId);
-
 void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId);
-void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid> mappingId);
 
 BoundingBox2D drawImMenuListItem(const ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset);
 BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset = 0.f);
-void drawImNestedList(std::vector<NestedListItem> values, std::optional<objid> mappingId, MenuItemStyle style);
 
+Component createNestedList(std::vector<NestedListItem>& items);
 
 #endif

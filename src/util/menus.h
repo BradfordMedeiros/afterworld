@@ -7,16 +7,22 @@
 #include "./components/nestedlist.h"
 #include "./components/imagelist.h"
 #include "./components/slider.h"
+#include "./components/radiobutton.h"
 
 #include "../util.h"
 #include "../global.h"
 
-extern std::vector<NestedListItem> nestedListTest;
 
 std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu);
 
+
+extern std::vector<NestedListItem> nestedListTest;
+
+
 extern Component imageListTest;
 extern Component sliderSelector;
+extern Component radioButtonSelector;
+extern Component nestedListTestComponent;
 
 
 #endif

@@ -2,28 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-std::vector<RadioButton> createRadioButtons(){
-  int radioButtonMappingId = 342089;
-  auto manipulatorMode = getStrWorldState("tools", "manipulator-mode").value();
-  std::vector<RadioButton> radioButtonTest = {
-    RadioButton { 
-      .selected = manipulatorMode == "translate", 
-      .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "translate"),
-      .mappingId = radioButtonMappingId++ 
-    },
-    RadioButton { 
-      .selected = manipulatorMode == "scale",  
-      .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "scale"), 
-      .mappingId = radioButtonMappingId++ 
-    },
-    RadioButton { 
-      .selected = manipulatorMode == "rotate", 
-      .onClick = getToggleWorldStateSetStr("tools", "manipulator-mode", "rotate"),
-      .mappingId = radioButtonMappingId++ 
-    },
-  };
-  return radioButtonTest;
-}
 
 BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoffset, float yoffset, float width, float height){
 //  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
@@ -89,71 +67,45 @@ BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoff
 }
 
 
-int mappingIdRadio = 95000;
-RadioButtonContainer radioButtonContainer {
-  .selectedRadioButtonIndex = 0,
-  .radioButtons = { 
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = []() -> void {
-        std::cout << "on click button 0" << std::endl;
-      },
-      .mappingId = mappingIdRadio++,
-    },
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = std::nullopt,
-      .mappingId = mappingIdRadio++,
-    },
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = []() -> void {
-        std::cout << "on click button 2" << std::endl;
-      },
-      .mappingId = mappingIdRadio++,
-    }
-  }
-};
-
-Component radioButtonSelector  {
-  .draw = [](Props& props) -> BoundingBox2D {
-    for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
-       auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
-       auto selectedId = getGlobalState().selectedId;
-       if (selectedId.has_value() && radioMappingId.has_value() && radioMappingId.value() == selectedId.value()){
-         radioButtonContainer.radioButtons.at(i).hovered = true;
-       }else{
-         radioButtonContainer.radioButtons.at(i).hovered = false;
-       }
-    }
-
-    auto boundingBox = drawRadioButtons(
-      radioButtonContainer.radioButtons,
-      props.style.xoffset,
-      props.additionalYOffset,
-      0.05f,
-      0.15f
-    );
-    
-    std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
-    drawDebugBoundingBox(boundingBox);
-    return boundingBox;
-  },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected) -> void {
-     for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
-       auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
-       if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
-         radioButtonContainer.selectedRadioButtonIndex = i;
-         if (radioButtonContainer.radioButtons.at(i).onClick.has_value()){
-           radioButtonContainer.radioButtons.at(i).onClick.value()();
+Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer){
+  Component radioButtonSelector  {
+    .draw = [&radioButtonContainer](Props& props) -> BoundingBox2D {
+      for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
+         auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
+         auto selectedId = getGlobalState().selectedId;
+         if (selectedId.has_value() && radioMappingId.has_value() && radioMappingId.value() == selectedId.value()){
+           radioButtonContainer.radioButtons.at(i).hovered = true;
+         }else{
+           radioButtonContainer.radioButtons.at(i).hovered = false;
          }
-         radioButtonContainer.radioButtons.at(i).selected = true;
-       }else{
-         radioButtonContainer.radioButtons.at(i).selected = false;
+      }
+  
+      auto boundingBox = drawRadioButtons(
+        radioButtonContainer.radioButtons,
+        props.style.xoffset,
+        props.additionalYOffset,
+        0.05f,
+        0.15f
+      );
+      
+      std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
+      drawDebugBoundingBox(boundingBox);
+      return boundingBox;
+    },
+    .imMouseSelect = [&radioButtonContainer](std::optional<objid> mappingIdSelected) -> void {
+       for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
+         auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
+         if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
+           radioButtonContainer.selectedRadioButtonIndex = i;
+           if (radioButtonContainer.radioButtons.at(i).onClick.has_value()){
+             radioButtonContainer.radioButtons.at(i).onClick.value()();
+           }
+           radioButtonContainer.radioButtons.at(i).selected = true;
+         }else{
+           radioButtonContainer.radioButtons.at(i).selected = false;
+         }
        }
-     }
-  }  
-};
+    }  
+  };
+  return radioButtonSelector;
+}

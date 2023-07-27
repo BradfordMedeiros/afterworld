@@ -543,6 +543,9 @@ std::vector<NestedListItem> nestedListTest = {
   },
 };
 
+Component nestedListTestComponent = createNestedList(nestedListTest);
+
+
 std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu){
   int pauseMappingIds = 999999;
   std::vector<ImListItem> listItems;
@@ -586,3 +589,34 @@ Slider exampleSlider {
   .update = false,
 };
 Component sliderSelector = createSlider(exampleSlider);
+
+
+int mappingIdRadio = 95000;
+RadioButtonContainer radioButtonContainer {
+  .selectedRadioButtonIndex = 0,
+  .radioButtons = { 
+    RadioButton {
+      .selected = false,
+      .hovered = false,
+      .onClick = []() -> void {
+        std::cout << "on click button 0" << std::endl;
+      },
+      .mappingId = mappingIdRadio++,
+    },
+    RadioButton {
+      .selected = false,
+      .hovered = false,
+      .onClick = std::nullopt,
+      .mappingId = mappingIdRadio++,
+    },
+    RadioButton {
+      .selected = false,
+      .hovered = false,
+      .onClick = []() -> void {
+        std::cout << "on click button 2" << std::endl;
+      },
+      .mappingId = mappingIdRadio++,
+    }
+  }
+};
+Component radioButtonSelector = createRadioButtonComponent(radioButtonContainer);
