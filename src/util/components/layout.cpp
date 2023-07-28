@@ -81,15 +81,37 @@ Component createLayoutComponent(Layout& layout){
       }
 
       float xoffset = 0.f;
+      float yoffset = 0.f;
       props.style.xoffset = 0.f;
       props.style.yoffset = 0.f;
       props.additionalYOffset = 0.f;
-      for (int i = 0; i < layout.children.size(); i++){
 
-    		auto boundingBox = layout.children.at(i).draw(props);
-    		float spacingPerItem = boundingBox.width;
-    		xoffset += spacingPerItem;
+			if (layout.margin.has_value()){
+				yoffset -= layout.margin.value();
+    		xoffset += layout.margin.value();
+			}					
+     
+
+      for (int i = 0; i < layout.children.size(); i++){
+    		props.style.yoffset = yoffset;	
     		props.style.xoffset = xoffset;
+    		auto boundingBox = layout.children.at(i).draw(props);
+
+    		if (layout.layoutType == LAYOUT_VERTICAL){
+					float spacingPerItemHeight = boundingBox.height + layout.spacing;
+					if (spacingPerItemHeight < layout.minspacing){
+						spacingPerItemHeight = layout.minspacing;
+					}
+    			yoffset -= spacingPerItemHeight;
+    		}else{
+    			float spacingPerItemWidth = boundingBox.width + layout.spacing;
+    			if (spacingPerItemWidth < layout.minspacing){
+    				spacingPerItemWidth = layout.minspacing;
+    			}
+    			xoffset += spacingPerItemWidth;
+    		}
+
+
 
     		/*lastWidth = boundingBox.width;
     		lastHeight = boundingBox.height;

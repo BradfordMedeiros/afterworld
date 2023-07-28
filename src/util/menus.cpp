@@ -652,7 +652,10 @@ Layout testLayout {
   .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.6f),
   .minwidth = 2.f,
   .minheight = 0.4f,
-  .layoutType = LAYOUT_HORIZONTAL,
+  .layoutType = LAYOUT_VERTICAL,
+  .spacing = 0.1f,
+  .minspacing = 0.4f,
+  .margin = 0.02f,
 
   .children = {
     createListItem("one"),

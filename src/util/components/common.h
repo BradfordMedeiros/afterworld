@@ -35,6 +35,11 @@ struct Component {
   std::function<void(std::optional<objid> mappingId)> imMouseSelect;
 };
 
+struct DrawingContext {
+  // draw rect
+  // draw text 
+};
+
 void drawDebugBoundingBox(BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt);
 std::string print(BoundingBox2D& box);
 

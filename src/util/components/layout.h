@@ -7,7 +7,6 @@ extern CustomApiBindings* gameapi;
 
 
 enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
-enum UILayoutFlowType { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive };
 
 struct Layout {
 	glm::vec4 tint;
@@ -16,8 +15,9 @@ struct Layout {
 	float minwidth;
   float minheight;
   UILayoutType layoutType;
-  UILayoutFlowType horizontal;
-  UILayoutFlowType vertical;
+  float spacing;
+  float minspacing;
+  std::optional<float> margin;
 
 
   std::vector<Component> children;
