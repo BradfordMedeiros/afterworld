@@ -620,3 +620,46 @@ RadioButtonContainer radioButtonContainer {
   }
 };
 Component radioButtonSelector = createRadioButtonComponent(radioButtonContainer);
+
+Component createListItem(std::string value){
+  ImListItem menuItem {
+    .value = value,
+    .onClick = []() -> void {
+    },
+    .mappingId = 0,
+  };
+  auto component = Component {
+    .draw = [menuItem](Props& props) -> BoundingBox2D {
+        auto box = drawImMenuListItem(menuItem, props.mappingId,  props.style, props.additionalYOffset);
+        //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+        drawDebugBoundingBox(box);
+        return box;
+    },
+    .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
+      //if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+      //  if (menuItem.onClick.has_value()){
+      //    menuItem.onClick.value()();
+      //  }
+      //}
+    },
+  };
+  return component;
+}
+
+Layout testLayout {
+  .tint = glm::vec4(0.f, 0.f, 1.f, .6f),
+  .showBackpanel = true,
+  .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.6f),
+  .minwidth = 2.f,
+  .minheight = 0.4f,
+  .layoutType = LAYOUT_HORIZONTAL,
+
+  .children = {
+    createListItem("one"),
+    createListItem("two"),
+    createListItem("three"),
+
+  },
+};
+
+Component testLayoutComponent = createLayoutComponent(testLayout);

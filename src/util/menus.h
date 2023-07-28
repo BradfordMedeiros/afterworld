@@ -8,6 +8,7 @@
 #include "./components/imagelist.h"
 #include "./components/slider.h"
 #include "./components/radiobutton.h"
+#include "./components/layout.h"
 
 #include "../util.h"
 #include "../global.h"
@@ -23,6 +24,6 @@ extern Component imageListTest;
 extern Component sliderSelector;
 extern Component radioButtonSelector;
 extern Component nestedListTestComponent;
-
+extern Component testLayoutComponent;
 
 #endif

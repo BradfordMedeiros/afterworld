@@ -137,7 +137,7 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
   }
   elements.push_back(radioButtonSelector);
   elements.push_back(sliderSelector);
-  elements.push_back(imageListTest);
+  //elements.push_back(imageListTest);
 
   return elements;
 }
@@ -197,6 +197,7 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
      processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
   nestedListTestComponent.imMouseSelect(mappingId);
+  testLayoutComponent.imMouseSelect(mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -379,8 +380,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
 
     Props nestedListProps { .mappingId = selectedId, .additionalYOffset = 0.f, .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f } };
-    nestedListTestComponent.draw(nestedListProps);
-
+    /*drawDebugBoundingBox(*/nestedListTestComponent.draw(nestedListProps); //);
+    testLayoutComponent.draw(nestedListProps /* should have own props */);
     //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
 
     //drawImNestedList(nestedListTest, selectedId, );

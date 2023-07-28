@@ -13,12 +13,15 @@ Component createImageList(ImageList& imageList){
 	    	int row = i / 4;
 	    	gameapi -> drawRect(column * 0.2f , row * 0.2f + row * 0.02f, 0.2f, 0.2f, false, selected ? glm::vec4(2.f, 2.f, 2.f, 1.f) : std::optional<glm::vec4>(std::nullopt), std::nullopt, true, imageList.mappingId + i, imageList.images.at(i));
 	  	}
-	  	return BoundingBox2D {
+
+	  	BoundingBox2D boundingBox {
 	  	  .x = 0,
 	  	  .y = 0,
 	  	  .width = 1.f,
 	  	  .height = 1.f,
 	  	};
+      drawDebugBoundingBox(boundingBox);
+	  	return boundingBox;
 	  },
 	  .imMouseSelect = [](std::optional<objid> mappingIdSelected) -> void {
 	     
