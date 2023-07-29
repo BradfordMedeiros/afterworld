@@ -632,7 +632,7 @@ Component createListItem(std::string value){
     .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
         auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId,  props.style, props.additionalYOffset);
         //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-        drawDebugBoundingBox(box);
+        drawDebugBoundingBox(drawTools, box);
         return box;
     },
     .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {

@@ -18,7 +18,7 @@ Component createImageList(ImageList& imageList){
 	  	  .width = 1.f,
 	  	  .height = 1.f,
 	  	};
-      drawDebugBoundingBox(boundingBox);
+      drawDebugBoundingBox(drawTools, boundingBox);
 	  	return boundingBox;
 	  },
 	  .imMouseSelect = [](std::optional<objid> mappingIdSelected) -> void {

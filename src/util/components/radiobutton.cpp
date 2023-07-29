@@ -87,7 +87,7 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
       );
       
       std::cout << "radio bounding box: " << print(boundingBox) << std::endl;
-      drawDebugBoundingBox(boundingBox);
+      drawDebugBoundingBox(drawTools, boundingBox);
       return boundingBox;
     },
     .imMouseSelect = [&radioButtonContainer](std::optional<objid> mappingIdSelected) -> void {

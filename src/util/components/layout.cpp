@@ -64,38 +64,128 @@ struct Layout {
 
 // The buffered approach could be supported by the game engine more easily, but doing here for now as to not pollute the engine code
 struct BufferedText {
-
+	int drawOrder;
+	std::string word;
+	float left;
+	float top;
+	unsigned int fontSize;
+	bool permatext;
+	std::optional<glm::vec4> tint;
+	std::optional<unsigned int> textureId;
+	bool ndi;
+	std::optional<std::string> fontFamily;
+	std::optional<objid> selectionId;
 };
 struct BufferedRect {
-
+	int drawOrder;
+  float centerX;
+  float centerY;
+  float width;
+  float height;
+  bool perma;
+  std::optional<glm::vec4> tint;
+  std::optional<unsigned int> textureId;
+  bool ndi;
+  std::optional<objid> selectionId;
+  std::optional<std::string> texture;
 };
 struct BufferedLine2D {
-
+	int drawOrder;
+  glm::vec3 fromPos;
+  glm::vec3 toPos;
+  bool perma;
+  std::optional<glm::vec4> tint;
+  std::optional<unsigned int> textureId;
+  bool ndi;
+  std::optional<objid> selectionId;
+  std::optional<std::string> texture;
+};
+struct BufferedData {
+	int bufferedIndex;
+	std::vector<BufferedText> bufferedText;
+	std::vector<BufferedRect> bufferedRect;
+	std::vector<BufferedLine2D> buffered2DLines;
 };
 struct BufferedDrawingTools {
 	DrawingTools drawTools;
 	DrawingTools* realTools;
+	BufferedData bufferedData;
 };
-BufferedDrawingTools createBufferedDrawingTools(DrawingTools& realTools){
+void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, DrawingTools& realTools){
 	DrawingTools drawTools {};
-  drawTools.drawText = [](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId) -> void {
-
+  drawTools.drawText = [&bufferedDrawingTools](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId) -> void {
+  	bufferedDrawingTools.bufferedData.bufferedText.push_back(BufferedText{
+ 			.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
+ 			.word = word,
+			.left = left,
+			.top = top,
+			.fontSize = fontSize,
+			.permatext = permatext,
+			.tint = tint,
+			.textureId = textureId,
+			.ndi = ndi,
+			.fontFamily = fontFamily,
+			.selectionId = selectionId,
+  	});
   };
-  drawTools.drawRect = [](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
-
+  drawTools.drawRect = [&bufferedDrawingTools](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
+  	bufferedDrawingTools.bufferedData.bufferedRect.push_back(BufferedRect{
+ 			.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
+  		.centerX = centerX,
+  		.centerY = centerY,
+  		.width = width,
+  		.height = height,
+  		.perma = perma,
+  		.tint = tint,
+  		.textureId = textureId,
+  		.ndi = ndi,
+  		.selectionId = selectionId,
+  		.texture = texture,
+  	});  	
   };
-  drawTools.drawRect = gameapi -> drawRect;
-  drawTools.drawLine2D = [](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
-
+  drawTools.drawLine2D = [&bufferedDrawingTools](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
+  	bufferedDrawingTools.bufferedData.buffered2DLines.push_back(BufferedLine2D{
+  		.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
+  		.fromPos = fromPos,
+  		.toPos = toPos,
+  		.perma = perma,
+  		.tint = tint,
+  		.textureId = textureId,
+  		.ndi = ndi,
+  		.selectionId = selectionId,
+  		.texture = texture,
+  	});
   };
 
-	return BufferedDrawingTools {
-		.drawTools = drawTools,
-		.realTools = &realTools
+	bufferedDrawingTools.drawTools = drawTools,
+	bufferedDrawingTools.realTools = &realTools,
+	bufferedDrawingTools.bufferedData = BufferedData {
+		.bufferedIndex = 0,
+		.bufferedText = {},
+		.bufferedRect = {},
+		.buffered2DLines = {},
 	};
 }
-void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOffset){
 
+void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOffset){
+	int bufferedTextIndex = 0;
+	int bufferedRectIndex = 0;
+	int bufferedLine2DIndex = 0;
+	for (int i = 0; i < bufferedTools.bufferedData.bufferedIndex; i++){
+		if (bufferedTools.bufferedData.bufferedText.size() > bufferedTextIndex && bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex).drawOrder == i){
+			BufferedText& bufferedText = bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex);
+			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId);
+			bufferedTextIndex++;
+		}else if(bufferedTools.bufferedData.bufferedRect.size() > bufferedRectIndex && bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex).drawOrder == i){
+			BufferedRect& bufferedRect = bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex);
+			bufferedTools.realTools -> drawRect(bufferedRect.centerX + positionOffset.x, bufferedRect.centerY + positionOffset.y, bufferedRect.width, bufferedRect.height, bufferedRect.perma, bufferedRect.tint, bufferedRect.textureId, bufferedRect.ndi, bufferedRect.selectionId, bufferedRect.texture);
+			bufferedRectIndex++;
+		}else if (bufferedTools.bufferedData.buffered2DLines.size() > bufferedLine2DIndex && bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex).drawOrder == i){
+			BufferedLine2D bufferedLine2D = bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex);
+			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.textureId, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture);
+			bufferedLine2DIndex++;
+		}
+	}
 }
 
 Component createLayoutComponent(Layout& layout){
@@ -126,7 +216,8 @@ Component createLayoutComponent(Layout& layout){
     		xoffset += layout.margin.value();
 			}					
      
-			auto bufferedDrawingTools = createBufferedDrawingTools(drawTools);
+     	BufferedDrawingTools bufferedDrawingTools {};
+			createBufferedDrawingTools(bufferedDrawingTools, drawTools);
       for (int i = 0; i < layout.children.size(); i++){
     		props.style.yoffset = yoffset;	
     		props.style.xoffset = xoffset;
@@ -180,7 +271,7 @@ Component createLayoutComponent(Layout& layout){
     		}*/
     	}
 
-    	drawBufferedData(bufferedDrawingTools, glm::vec2(0.f, 0.f));
+    	drawBufferedData(bufferedDrawingTools, glm::vec2(-0.5f, 0.f));
 
 	  	BoundingBox2D boundingBox {
 	  	  .x = x,
@@ -188,7 +279,7 @@ Component createLayoutComponent(Layout& layout){
 	  	  .width = width,
 	  	  .height = height,
 	  	};
-	  	drawDebugBoundingBox(boundingBox, layout.borderColor);
+	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	return boundingBox;
 	  },
 	  .imMouseSelect = [](std::optional<objid> mappingIdSelected) -> void {
