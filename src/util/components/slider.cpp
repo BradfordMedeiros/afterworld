@@ -1,15 +1,12 @@
 #include "./slider.h"
 
-extern CustomApiBindings* gameapi;
-
-
-void drawRight(float x, float y, float width, float height, glm::vec4 color, objid mappingId){
-  gameapi -> drawRect(x + (width * 0.5f), y, width, height, false, color, std::nullopt, true, mappingId /*radioButton.mappingId */, std::nullopt);
+void drawRight(DrawingTools& drawTools, float x, float y, float width, float height, glm::vec4 color, objid mappingId){
+  drawTools.drawRect(x + (width * 0.5f), y, width, height, false, color, std::nullopt, true, mappingId /*radioButton.mappingId */, std::nullopt);
 }
 
 Component createSlider(Slider& slider){
   Component sliderSelector  {
-    .draw = [&slider](Props& props) -> BoundingBox2D {
+    .draw = [&slider](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       float width = 0.2f;
       float height = 0.05f;
       float x = props.style.xoffset + (width * 0.5f);
@@ -25,8 +22,8 @@ Component createSlider(Slider& slider){
       }
       std::cout << "radio 1: " << slider.percentage << ", left = " << left << ", right = " << right << ", xndc = " << getGlobalState().xNdc << std::endl;
   
-      drawRight(x, y, width, height, glm::vec4(0.f, 0.f, 0.f, .8f), slider.mappingId);
-      drawRight(x, y, width * glm::min(1.f, glm::max(slider.percentage, 0.f)), height, glm::vec4(0.4f, 0.4f, 0.4f, .8f), slider.mappingId );
+      drawRight(drawTools, x, y, width, height, glm::vec4(0.f, 0.f, 0.f, .8f), slider.mappingId);
+      drawRight(drawTools, x, y, width * glm::min(1.f, glm::max(slider.percentage, 0.f)), height, glm::vec4(0.4f, 0.4f, 0.4f, .8f), slider.mappingId );
   
       BoundingBox2D boundingBox {
         .x = x + (width * 0.5f),
@@ -42,7 +39,9 @@ Component createSlider(Slider& slider){
       if (mappingIdSelected.has_value() && mappingIdSelected.value() == slider.mappingId){
         slider.update = true;
       }
+      setState(this, 30);
     }  
   };
   return sliderSelector;
 }
+

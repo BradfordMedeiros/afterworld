@@ -119,8 +119,8 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
     };
     elements.push_back(
       Component {
-        .draw = [menuItem](Props& props) -> BoundingBox2D {
-          auto box = drawImMenuListItem(menuItem, props.mappingId,  props.style, props.additionalYOffset);
+        .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId,  props.style, props.additionalYOffset);
           //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
           drawDebugBoundingBox(box);
           return box;
@@ -144,7 +144,7 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
 
 
 double downTime = 0;
-void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
+void drawPauseMenu(DrawingTools& drawTools, GameState& gameState, std::optional<objid> mappingId){
   double elapsedTime = gameapi -> timeSeconds(true) - downTime;
 
   gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png");
@@ -154,7 +154,7 @@ void drawPauseMenu(GameState& gameState, std::optional<objid> mappingId){
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
 
-  drawImMenuList(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt});
+  drawImMenuList(drawTools, createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt});
 
 }
 
@@ -359,6 +359,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     delete gameState;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
+    DrawingTools drawTools {
+      .drawText = gameapi -> drawText,
+      .drawRect = gameapi -> drawRect,
+      .drawLine2D = gameapi -> drawLine2D,
+    };
+
     GameState* gameState = static_cast<GameState*>(data);
     auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
     getGlobalState().selectedId = selectedId;
@@ -368,20 +374,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuComponentList(mainMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f), .fontSizePerLetterNdi = std::nullopt });
+      drawImMenuComponentList(drawTools, mainMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f), .fontSizePerLetterNdi = std::nullopt });
     }else if (showingPauseMenu(*gameState)){
-      drawPauseMenu(*gameState, selectedId);
+      drawPauseMenu(drawTools, *gameState, selectedId);
     }
 
     if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
-      drawImMenuList(animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
+      drawImMenuList(drawTools, animationMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt });
     }
 
 
-
     Props nestedListProps { .mappingId = selectedId, .additionalYOffset = 0.f, .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f } };
-    /*drawDebugBoundingBox(*/nestedListTestComponent.draw(nestedListProps); //);
-    testLayoutComponent.draw(nestedListProps /* should have own props */);
+    /*drawDebugBoundingBox(*/nestedListTestComponent.draw(drawTools, nestedListProps); //);
+    testLayoutComponent.draw(drawTools, nestedListProps /* should have own props */);
     //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
 
     //drawImNestedList(nestedListTest, selectedId, );

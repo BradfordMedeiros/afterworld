@@ -1,10 +1,7 @@
 #include "./radiobutton.h"
 
-extern CustomApiBindings* gameapi;
-
-
-BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoffset, float yoffset, float width, float height){
-//  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
+BoundingBox2D drawRadioButtons(DrawingTools& drawTools, std::vector<RadioButton> radioButtons, float xoffset, float yoffset, float width, float height){
+// drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
   modassert(radioButtons.size() > 0, "need at least one radiobutton to render");
   const float spacing = 0.01f;
 
@@ -20,7 +17,7 @@ BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoff
     if (radioButton.selected){
       radioButtonColor = glm::vec4(0.f, 0.f, 1.f, 0.6f);
     }
-    gameapi -> drawRect(x, yoffset, width, height, false, radioButtonColor, std::nullopt, true, radioButton.mappingId, std::nullopt);
+    drawTools.drawRect(x, yoffset, width, height, false, radioButtonColor, std::nullopt, true, radioButton.mappingId, std::nullopt);
     
     float halfWidth = width * 0.5f;
     float halfHeight = height * 0.5f;
@@ -69,7 +66,7 @@ BoundingBox2D drawRadioButtons(std::vector<RadioButton> radioButtons, float xoff
 
 Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer){
   Component radioButtonSelector  {
-    .draw = [&radioButtonContainer](Props& props) -> BoundingBox2D {
+    .draw = [&radioButtonContainer](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
          auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
          auto selectedId = getGlobalState().selectedId;
@@ -81,6 +78,7 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
       }
   
       auto boundingBox = drawRadioButtons(
+        drawTools,
         radioButtonContainer.radioButtons,
         props.style.xoffset,
         props.additionalYOffset,

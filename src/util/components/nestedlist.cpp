@@ -1,6 +1,5 @@
 #include "./nestedlist.h"
 
-extern CustomApiBindings* gameapi;
 const float fontSizePerLetterNdi = 0.02f;
 
 std::optional<std::vector<int>> searchNestedList(std::vector<NestedListItem>& values, objid mappingId, std::vector<int> currentPath){
@@ -27,12 +26,12 @@ std::optional<std::vector<int>> calculateSelectedPath(std::vector<NestedListItem
   return foundList;
 }
 
-void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
+void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
+  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuListItem(const ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   float fontSize = style.fontSizePerLetterNdi.has_value() ? style.fontSizePerLetterNdi.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
   auto width = glm::max(menuItem.value.size() * fontSize, style.minwidth);
@@ -44,8 +43,8 @@ BoundingBox2D drawImMenuListItem(const ImListItem& menuItem, std::optional<objid
   auto textY = style.yoffset + additionalYOffset;
 
   auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-  gameapi -> drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
-  drawCenteredText(menuItem.value, style.xoffset, textY, fontSize, tint, menuItem.mappingId);
+  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
+  drawCenteredText(drawTools, menuItem.value, style.xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
     .x = rectX,
     .y = rectY,
@@ -54,7 +53,7 @@ BoundingBox2D drawImMenuListItem(const ImListItem& menuItem, std::optional<objid
   };
 }
 
-BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
@@ -72,7 +71,7 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
 
-    auto boundingBox = drawImMenuListItem(list.at(i), mappingId, style, yoffset);
+    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), mappingId, style, yoffset);
     float spacingPerItem = boundingBox.height + 2 * style.margin;
     yoffset += -1 * spacingPerItem;
 
@@ -130,7 +129,7 @@ BoundingBox2D drawImMenuList(std::vector<ImListItem> list, std::optional<objid> 
   };
 }
 
-BoundingBox2D drawImNestedList(std::vector<NestedListItem>& values , std::optional<objid> mappingId, MenuItemStyle style){
+BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values , std::optional<objid> mappingId, MenuItemStyle style){
   std::vector<int> listOpenIndexs;
   auto selectedPath = calculateSelectedPath(values, mappingId);
   if (selectedPath.has_value()){
@@ -148,11 +147,11 @@ BoundingBox2D drawImNestedList(std::vector<NestedListItem>& values , std::option
     for (auto &value : *nestedListItems){
       items.push_back(value.item);
     }
-    auto boundingBox = drawImMenuList(items, mappingId, style, additionalYOffset);
+    auto boundingBox = drawImMenuList(drawTools, items, mappingId, style, additionalYOffset);
 
     std::cout << "bounding box: " << print(boundingBox) << std::endl;
-    // gameapi -> drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
-    //gameapi -> drawRect(0.f, 0.f, 0.2f, 0.2f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
+    // drawTools.drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
+    // drawTools.drawRect(0.f, 0.f, 0.2f, 0.2f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
 
     float perElementHeight = boundingBox.height / items.size();
     style.xoffset += boundingBox.width;
@@ -205,8 +204,8 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
 
 Component createNestedList(std::vector<NestedListItem>& items){
   Component component  {
-    .draw = [&items](Props& props) -> BoundingBox2D {
-      return drawImNestedList(items, props.mappingId, props.style);
+    .draw = [&items](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      return drawImNestedList(drawTools, items, props.mappingId, props.style);
     },
     .imMouseSelect = [&items](std::optional<objid> mappingIdSelected) -> void {
       processImMouseSelect(items, mappingIdSelected);

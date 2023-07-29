@@ -629,8 +629,8 @@ Component createListItem(std::string value){
     .mappingId = 0,
   };
   auto component = Component {
-    .draw = [menuItem](Props& props) -> BoundingBox2D {
-        auto box = drawImMenuListItem(menuItem, props.mappingId,  props.style, props.additionalYOffset);
+    .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId,  props.style, props.additionalYOffset);
         //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
         drawDebugBoundingBox(box);
         return box;
@@ -661,7 +661,6 @@ Layout testLayout {
     createListItem("one"),
     createListItem("two"),
     createListItem("three"),
-
   },
 };
 

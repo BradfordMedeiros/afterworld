@@ -1,5 +1,4 @@
 #include "./layout.h"
-
 extern CustomApiBindings* gameapi;
 
 /*
@@ -63,9 +62,45 @@ struct Layout {
 };
 */
 
+// The buffered approach could be supported by the game engine more easily, but doing here for now as to not pollute the engine code
+struct BufferedText {
+
+};
+struct BufferedRect {
+
+};
+struct BufferedLine2D {
+
+};
+struct BufferedDrawingTools {
+	DrawingTools drawTools;
+	DrawingTools* realTools;
+};
+BufferedDrawingTools createBufferedDrawingTools(DrawingTools& realTools){
+	DrawingTools drawTools {};
+  drawTools.drawText = [](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId) -> void {
+
+  };
+  drawTools.drawRect = [](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
+
+  };
+  drawTools.drawRect = gameapi -> drawRect;
+  drawTools.drawLine2D = [](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
+
+  };
+
+	return BufferedDrawingTools {
+		.drawTools = drawTools,
+		.realTools = &realTools
+	};
+}
+void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOffset){
+
+}
+
 Component createLayoutComponent(Layout& layout){
 	Component layoutComponent  {
-	  .draw = [&layout](Props& props) -> BoundingBox2D {
+	  .draw = [&layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
 	  	float x = 0.f;
 	  	float y = 0.f;
       float width = 0.f;
@@ -77,7 +112,7 @@ Component createLayoutComponent(Layout& layout){
       	height = layout.minheight;
       }
       if (layout.showBackpanel){
-      	gameapi -> drawRect(x, y, width, height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
+      	drawTools.drawRect(x, y, width, height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
       }
 
       float xoffset = 0.f;
@@ -91,11 +126,11 @@ Component createLayoutComponent(Layout& layout){
     		xoffset += layout.margin.value();
 			}					
      
-
+			auto bufferedDrawingTools = createBufferedDrawingTools(drawTools);
       for (int i = 0; i < layout.children.size(); i++){
     		props.style.yoffset = yoffset;	
     		props.style.xoffset = xoffset;
-    		auto boundingBox = layout.children.at(i).draw(props);
+    		auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, props);
 
     		if (layout.layoutType == LAYOUT_VERTICAL){
 					float spacingPerItemHeight = boundingBox.height + layout.spacing;
@@ -145,6 +180,7 @@ Component createLayoutComponent(Layout& layout){
     		}*/
     	}
 
+    	drawBufferedData(bufferedDrawingTools, glm::vec2(0.f, 0.f));
 
 	  	BoundingBox2D boundingBox {
 	  	  .x = x,
