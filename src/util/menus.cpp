@@ -539,6 +539,16 @@ std::vector<NestedListItem> nestedListTest = {
           },
         },
       },
+      NestedListItem {
+        .item = ImListItem {
+          .value = "discord",
+          .onClick = []() -> void {
+            system("xdg-open https://discord.com/channels/1135105623688757288/");
+          },
+          .mappingId = mappingId++,
+        },
+        .items = {},
+      },
     },
   },
 };
