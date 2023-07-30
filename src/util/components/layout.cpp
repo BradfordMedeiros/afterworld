@@ -204,6 +204,10 @@ Component createLayoutComponent(Layout& layout){
       if (layout.showBackpanel){
       	drawTools.drawRect(x, y, width, height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
       }
+    	float left = x - (width * 0.5f);
+    	float right = x + (width * 0.5f);
+    	float top = y + (height * 0.5f);
+    	float bottom = y - (height * 0.5f);
 
       float xoffset = 0.f;
       float yoffset = 0.f;
@@ -223,7 +227,7 @@ Component createLayoutComponent(Layout& layout){
     		props.style.xoffset = xoffset;
     		auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, props);
 
-    		if (layout.layoutType == LAYOUT_VERTICAL){
+    		if (layout.layoutType == LAYOUT_VERTICAL2){
 					float spacingPerItemHeight = boundingBox.height + layout.spacing;
 					if (spacingPerItemHeight < layout.minspacing){
 						spacingPerItemHeight = layout.minspacing;
@@ -271,7 +275,20 @@ Component createLayoutComponent(Layout& layout){
     		}*/
     	}
 
-    	drawBufferedData(bufferedDrawingTools, glm::vec2(-0.5f, 0.f));
+    	float layoutFlowOffsetX = 0.f;
+    	float layoutFlowOffsetY = 0.f;
+
+    	if (layout.layoutFlowHorizontal == UILayoutFlowNegative2){
+    		layoutFlowOffsetX = left;
+    	}else if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
+    		layoutFlowOffsetX = right;
+    	}
+    	if (layout.layoutFlowVertical == UILayoutFlowNegative2){
+    		layoutFlowOffsetY = top;
+    	}else if (layout.layoutFlowVertical == UILayoutFlowPositive2){
+    		layoutFlowOffsetY = bottom;
+    	}
+    	drawBufferedData(bufferedDrawingTools, glm::vec2(layoutFlowOffsetX, layoutFlowOffsetY));
 
 	  	BoundingBox2D boundingBox {
 	  	  .x = x,
