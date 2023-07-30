@@ -52,4 +52,15 @@ struct ImGrid {
 void drawScreenspaceGrid(ImGrid grid);
 
 
+struct BoundingBoxMeasurer {
+  std::optional<float> minX;
+  std::optional<float> maxX;
+  std::optional<float> minY;
+  std::optional<float> maxY;
+};
+BoundingBoxMeasurer createMeasurer();
+void setX(BoundingBoxMeasurer& box, float value);
+void setY(BoundingBoxMeasurer& box, float value);
+BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
+
 #endif

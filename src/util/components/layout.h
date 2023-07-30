@@ -17,6 +17,7 @@ struct Layout {
   UILayoutType2 layoutType;
   UILayoutFlowType2 layoutFlowHorizontal;
   UILayoutFlowType2 layoutFlowVertical;
+  UILayoutFlowType2 align;
   float spacing;
   float minspacing;
   std::optional<float> margin;

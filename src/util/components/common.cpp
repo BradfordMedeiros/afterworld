@@ -37,3 +37,51 @@ void drawScreenspaceGrid(ImGrid grid){
   }
 }
 
+BoundingBoxMeasurer createMeasurer(){
+  return BoundingBoxMeasurer {
+    .minX = std::nullopt,
+    .maxX = std::nullopt,
+    .minY = std::nullopt,
+    .maxY = std::nullopt,
+  };
+}
+void setX(BoundingBoxMeasurer& box, float value){
+  if (!box.minX.has_value()){
+    box.minX = value;
+  }
+  if (!box.maxX.has_value()){
+    box.maxX = value;
+  }
+  if (value < box.minX.value()){
+    box.minX = value;
+  }
+  if (value > box.maxX.value()){
+    box.maxX = value;
+  }
+}
+void setY(BoundingBoxMeasurer& box, float value){
+  if (!box.minY.has_value()){
+    box.minY = value;
+  }
+  if (!box.maxY.has_value()){
+    box.maxY = value;
+  }
+  if (value < box.minY.value()){
+    box.minY = value;
+  }
+  if (value > box.maxY.value()){
+    box.maxY = value;
+  }
+}
+BoundingBox2D measurerToBox(BoundingBoxMeasurer& box){
+  float minX = box.minX.value();
+  float maxX = box.maxX.value();
+  float minY = box.minY.value();
+  float maxY = box.maxY.value();
+  return BoundingBox2D {
+    .x = (maxX + minX) * 0.5f,
+    .y = (maxY + minY) * 0.5f,
+    .width = maxX - minX,
+    .height = maxY - minY,
+  };
+}
