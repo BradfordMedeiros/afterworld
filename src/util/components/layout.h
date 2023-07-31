@@ -5,6 +5,17 @@
 
 extern CustomApiBindings* gameapi;
 
+
+//int limit;
+//float limitsize;
+//enum LayoutContentAlignmentType { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive };
+//struct LayoutContentAlignment {
+//  LayoutContentAlignmentType vertical;
+//  LayoutContentAlignmentType horizontal;
+//
+//enum LayoutContentSpacing  { LayoutContentSpacing_Pack, LayoutContentSpacing_SpaceForFirst, LayoutContentSpacing_SpaceForLast };
+
+
 enum UILayoutType2 { LAYOUT_HORIZONTAL2, LAYOUT_VERTICAL2 };
 enum UILayoutFlowType2 { UILayoutFlowNone2, UILayoutFlowNegative2, UILayoutFlowPositive2 };
 
@@ -17,11 +28,11 @@ struct Layout {
   UILayoutType2 layoutType;
   UILayoutFlowType2 layoutFlowHorizontal;
   UILayoutFlowType2 layoutFlowVertical;
-  UILayoutFlowType2 align;
+  UILayoutFlowType2 alignHorizontal;
+  UILayoutFlowType2 alignVertical;
   float spacing;
   float minspacing;
-  std::optional<float> margin;
-
+  std::optional<float> padding;
 
   std::vector<Component> children;
 };

@@ -130,33 +130,14 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 
 Component createLayoutComponent(Layout& layout){
 	Component layoutComponent  {
-	  .draw = [&layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-	  	float x = 0.f;
-	  	float y = 0.f;
-      float width = 0.f;
-      float height = 0.f;
-      if (layout.minwidth > width){
-      	width = layout.minwidth;
-      }
-      if (layout.minheight > height){
-      	height = layout.minheight;
-      }
-      if (layout.showBackpanel){
-      	drawTools.drawRect(x, y, width, height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
-      }
-
+	  .draw = [&layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
       float xoffset = 0.f;
       float yoffset = 0.f;
       props.style.xoffset = 0.f;
       props.style.yoffset = 0.f;
       props.additionalYOffset = 0.f;
 
-			if (layout.margin.has_value()){
-				yoffset -= layout.margin.value();
-    		xoffset += layout.margin.value();
-			}					
-     
-     auto boundingBoxMeasurer = createMeasurer();
+      auto boundingBoxMeasurer = createMeasurer();
      	BufferedDrawingTools bufferedDrawingTools {};
 			createBufferedDrawingTools(bufferedDrawingTools, drawTools);
       for (int i = 0; i < layout.children.size(); i++){
@@ -183,35 +164,72 @@ Component createLayoutComponent(Layout& layout){
     		}
     	}
 
+    	// this lays out elements starting from the center
+
 			auto layoutOriginalBox = measurerToBox(boundingBoxMeasurer);
 
+     
+	  	float x = layoutOriginalBox.x;
+	  	float y = layoutOriginalBox.y;
+      float width = layoutOriginalBox.width;
+      float height = layoutOriginalBox.height;
 
-    	float layoutFlowOffsetX = 0.f;
+      float layoutFlowOffsetX = 0.f;
     	float layoutFlowOffsetY = 0.f;
 
-    	float fullLeft = x - (width * 0.5f);
-    	float fullRight = x + (width * 0.5f);
-    	float fullTop = y + (height * 0.5f);
-    	float fullBottom = y - (height * 0.5f);
-    	float elementsLeft = layoutOriginalBox.x - (layoutOriginalBox.width * 0.5f);
-    	float elementsRight = layoutOriginalBox.x + (layoutOriginalBox.width * 0.5f);
-    	float elementsTop = layoutOriginalBox.y + (layoutOriginalBox.height * 0.5f);
-    	float elementsBottom = layoutOriginalBox.y - (layoutOriginalBox.height * 0.5f);
+      if (layout.minwidth > width){
+      	width = layout.minwidth;
+      }
+      if (layout.minheight > height){
+      	height = layout.minheight;
+      }
+
+      float padding = layout.padding.has_value() ? layout.padding.value() : 0.f;
+      float innerBoxRight = x + (width * 0.5f) - padding;
+      float innerBoxLeft =  x - (width * 0.5f) + padding;
+      float innerBoxTop  =  y + (height * 0.5f) - padding;
+      float innerBoxBottom = y - (height * 0.5f) + padding; 
+
+      float elementsLeft = x - (layoutOriginalBox.width * 0.5f);
+      float elementsRight = x + (layoutOriginalBox.width * 0.5f);
+      float elementsTop = y + (layoutOriginalBox.height * 0.5f);
+      float elementsBottom = y - (layoutOriginalBox.height * 0.5f);
 
     	if (layout.layoutFlowHorizontal == UILayoutFlowNegative2){
-    		float diffLeft = fullLeft - elementsLeft;
-    		layoutFlowOffsetX = diffLeft;
+    		layoutFlowOffsetX = innerBoxLeft - elementsLeft;
     	}else if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
-    		float diffRight = fullRight - elementsRight;
-    		layoutFlowOffsetX = diffRight;
+    		layoutFlowOffsetX = innerBoxRight - elementsRight;
+    	}else {
+			 	if (layout.alignHorizontal == UILayoutFlowNegative2){
+			 		layoutFlowOffsetX = x - elementsRight;
+    		}else if (layout.alignHorizontal == UILayoutFlowPositive2){
+			 		layoutFlowOffsetX = x - elementsLeft;
+    		}
     	}
+
     	if (layout.layoutFlowVertical == UILayoutFlowNegative2){
-    		float diffBottom = fullBottom - elementsBottom;
-    		layoutFlowOffsetY = diffBottom;
+    		layoutFlowOffsetY = innerBoxBottom - elementsBottom;
     	}else if (layout.layoutFlowVertical == UILayoutFlowPositive2){
-    		float diffTop = fullTop - elementsTop;
-    		layoutFlowOffsetY = diffTop;
+    		layoutFlowOffsetY = innerBoxTop - elementsTop;
+    	}else {
+			 	if (layout.alignVertical == UILayoutFlowPositive2){
+			 		layoutFlowOffsetY = y - elementsBottom;
+    		}else if (layout.alignVertical == UILayoutFlowNegative2){
+			 		layoutFlowOffsetY = y - elementsTop;
+    		}
     	}
+   
+      if (layout.showBackpanel){
+      	drawTools.drawRect(x, y, width, height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
+
+      	// padding visualization
+      	float innerWidth = innerBoxRight - innerBoxLeft;
+      	float innerHeight = innerBoxTop - innerBoxBottom;
+      	float midx = (innerBoxLeft + innerBoxRight) * 0.5f;
+      	float midy = (innerBoxTop + innerBoxBottom) * 0.5f;
+      	drawTools.drawRect(midx, midy, innerWidth, innerHeight, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
+      }
+
     	drawBufferedData(bufferedDrawingTools, glm::vec2(layoutFlowOffsetX, layoutFlowOffsetY));
 
 	  	BoundingBox2D boundingBox {
