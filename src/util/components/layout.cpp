@@ -135,7 +135,6 @@ Component createLayoutComponent(Layout& layout){
       float yoffset = 0.f;
       props.style.xoffset = 0.f;
       props.style.yoffset = 0.f;
-      props.additionalYOffset = 0.f;
 
       auto boundingBoxMeasurer = createMeasurer();
      	BufferedDrawingTools bufferedDrawingTools {};

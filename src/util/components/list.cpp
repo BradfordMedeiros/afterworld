@@ -14,17 +14,15 @@ BoundingBox2D drawImMenuComponentList(DrawingTools& drawTools, std::vector<Compo
 
   Props props { 
     .mappingId = mappingId,
-    .additionalYOffset = additionalYOffset,
     .style = style,
   };
 
   modassert(list.size(), "draw im menu list - list is empty");
   for (int i = 0; i < list.size(); i++){
+    props.style.yoffset = yoffset;
     auto boundingBox = list.at(i).draw(drawTools, props);
     float spacingPerItem = boundingBox.height + 2 * style.margin;
     yoffset += -1 * spacingPerItem;
-    props.additionalYOffset = yoffset;
-
     lastWidth = boundingBox.width;
     lastHeight = boundingBox.height;
 

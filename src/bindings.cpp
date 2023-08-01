@@ -120,7 +120,7 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
     elements.push_back(
       Component {
         .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset + props.additionalYOffset, props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth);
+          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset, props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth);
           //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
           drawDebugBoundingBox(drawTools, box);
           return box;
@@ -396,9 +396,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
 
-    Props nestedListProps { .mappingId = selectedId, .additionalYOffset = 0.f, .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f } };
+    Props nestedListProps { .mappingId = selectedId, .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f } };
     /*drawDebugBoundingBox(*/nestedListTestComponent.draw(drawTools, nestedListProps); //);
-    testLayoutComponent.draw(drawTools, nestedListProps /* should have own props */);
+    //testLayoutComponent.draw(drawTools, nestedListProps /* should have own props */);
     //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
 
     //drawImNestedList(nestedListTest, selectedId, );

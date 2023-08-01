@@ -63,7 +63,6 @@ BoundingBox2D drawRadioButtons(DrawingTools& drawTools, std::vector<RadioButton>
   };
 }
 
-
 Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer){
   Component radioButtonSelector  {
     .draw = [&radioButtonContainer](DrawingTools& drawTools, Props& props) -> BoundingBox2D {

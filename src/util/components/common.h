@@ -16,10 +16,15 @@ struct MenuItemStyle {
 };
 
 
+struct PropPair {
+  int symbol;
+  std::any value;
+};
+
+
 struct Props {
   //std::vector<Symbol, std::any> values;
   std::optional<objid> mappingId;
-  float additionalYOffset;
   MenuItemStyle style;
 };
 

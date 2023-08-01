@@ -640,7 +640,7 @@ Component createListItem(std::string value){
   };
   auto component = Component {
     .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset +  props.additionalYOffset,  props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth);
+        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset,  props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth);
         //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
         drawDebugBoundingBox(drawTools, box);
         return box;
