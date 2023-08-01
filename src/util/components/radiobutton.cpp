@@ -81,7 +81,7 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
         drawTools,
         radioButtonContainer.radioButtons,
         props.style.xoffset,
-        props.additionalYOffset,
+        props.style.yoffset,
         0.05f,
         0.15f
       );

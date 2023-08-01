@@ -7,20 +7,20 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
   drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
-  float fontSize = style.fontSizePerLetterNdi.has_value() ? style.fontSizePerLetterNdi.value() : fontSizePerLetterNdi;
+BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth){
+  float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
-  auto width = glm::max(menuItem.value.size() * fontSize, style.minwidth);
+  auto width = glm::max(menuItem.value.size() * fontSize, minwidth);
 
-  auto rectX = (style.xoffset + (style.xoffset + width)) / 2.f;
-  auto rectY = style.yoffset + additionalYOffset;
-  auto rectWidth = width + 2 * style.padding;
-  auto rectHeight = height + 2 * style.padding;
-  auto textY = style.yoffset + additionalYOffset;
+  auto rectX = (xoffset + (xoffset + width)) / 2.f;
+  auto rectY = yoffset;
+  auto rectWidth = width + 2 * padding;
+  auto rectHeight = height + 2 * padding;
+  auto textY = yoffset;
 
   auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, style.tint, std::nullopt, true, menuItem.mappingId, std::nullopt);
-  drawCenteredText(drawTools, menuItem.value, style.xoffset, textY, fontSize, tint, menuItem.mappingId);
+  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, glm::vec4(1.f, 1.f, 1.f, .4f), std::nullopt, true, menuItem.mappingId, std::nullopt);
+  drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
     .x = rectX,
     .y = rectY,
@@ -29,7 +29,7 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   };
 }
 
-BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
@@ -39,16 +39,14 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
 
   float lastWidth = 0.f;
   float lastHeight = 0.f;
-  float yoffset = additionalYOffset;
-
-  //style.margin = 0.05f;
+  float yoffset = yoffset2;
 
   modassert(list.size(), "draw im menu list - list is empty");
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
 
-    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), mappingId, style, yoffset);
-    float spacingPerItem = boundingBox.height + 2 * style.margin;
+    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), mappingId, xoffset, yoffset, padding, fontSizeStyle, minwidth);
+    float spacingPerItem = boundingBox.height;
     yoffset += -1 * spacingPerItem;
 
     lastWidth = boundingBox.width;

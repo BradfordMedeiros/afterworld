@@ -10,7 +10,7 @@ Component createSlider(Slider& slider){
       float width = 0.2f;
       float height = 0.05f;
       float x = props.style.xoffset + (width * 0.5f);
-      float y = props.additionalYOffset;
+      float y = props.style.yoffset;
   
       float left = x;
       float right = x + width;
