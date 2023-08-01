@@ -656,7 +656,7 @@ Component createListItem(std::string value){
   return component;
 }
 
-Layout testLayout {
+Layout testLayout2 {
   .tint = glm::vec4(0.f, 0.f, 1.f, .6f),
   .showBackpanel = true,
   .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.6f),
@@ -683,4 +683,30 @@ Layout testLayout {
   },
 };
 
-Component testLayoutComponent = createLayoutComponent(testLayout);
+Layout testLayout {
+  .tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
+  .showBackpanel = true,
+  .borderColor = glm::vec4(0.f, 1.f, 0.f, 1.f),
+  //.minwidth = 0.f,
+  .minwidth = 0.f,
+  .minheight = 0.f,
+  .layoutType = LAYOUT_HORIZONTAL2, //LAYOUT_VERTICAL2,
+  .layoutFlowHorizontal = UILayoutFlowNone2,
+  //.layoutFlowHorizontal = UILayoutFlowPositive2,
+  .layoutFlowVertical = UILayoutFlowNone2,
+  .alignHorizontal = UILayoutFlowNone2,
+  .alignVertical = UILayoutFlowNone2,
+
+  //.spacing = 0.1f,
+  .spacing = 0.f,
+  //.minspacing = 0.4f,
+  .minspacing = 0.f,
+  //.margin = 0.02f,
+  .padding = 0.f,
+  .children = {
+    createListItem("one"),
+  },
+};
+
+//Component testLayoutComponent = createLayoutComponent(testLayout);
+Component testLayoutComponent = createListItem("one");
