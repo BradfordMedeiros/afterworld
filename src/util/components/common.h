@@ -26,7 +26,13 @@ struct Props {
   //std::vector<Symbol, std::any> values;
   std::optional<objid> mappingId;
   MenuItemStyle style;
+  std::vector<PropPair> props;
 };
+
+int intFromProp(Props& props, int symbol, int defaultValue);
+glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
+glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
+std::optional<std::function<void()>> fnFromPos(Props& props, int symbol);
 
 struct DrawingTools {
   std::function<void(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId)> drawText;

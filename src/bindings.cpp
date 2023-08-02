@@ -154,13 +154,25 @@ void drawPauseMenu(DrawingTools& drawTools, GameState& gameState, std::optional<
   gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
   gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
 
-  MenuItemStyle style { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt};
-  drawImMenuList(
-    drawTools, 
-    createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), 
-    mappingId, 
-    style.xoffset, style.yoffset, style.padding, style.fontSizePerLetterNdi, style.minwidth
-  );
+  Props props {
+    .mappingId = mappingId,
+    .style = MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt},
+    .props = {
+      { .symbol = getSymbol("pause"), .value = [&gameState]() -> void { goToMenu(gameState); }},
+      { .symbol = getSymbol("resume"), .value = [&gameState]() -> void { goToMenu(gameState); }},
+    },
+  };
+  createPauseMenuComponent(
+      []() -> void { 
+        setPaused(false);
+        std::cout << "pause component: resume called" << std::endl;
+      }, 
+      [&gameState]() -> void { 
+        goToMenu(gameState);
+        std::cout << "pause component: go to menu" << std::endl;
+     },
+     props.style
+  ).draw(drawTools, props);
 
 }
 
@@ -191,11 +203,23 @@ std::vector<ImListItem> animationMenuItems2(GameState& gameState){
   return items;
 }
 
+void resume(){
+  setPaused(false);
+  std::cout << "pause component: resume called" << std::endl;
+}
 
 void handleMouseSelect(GameState& gameState, objid mappingId){
   modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
-     processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
+     //processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
+     createPauseMenuComponent(
+        resume, 
+        [&gameState]() -> void { 
+          goToMenu(gameState);
+          std::cout << "pause component: go to menu" << std::endl;
+       },
+       MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt}
+    ).imMouseSelect(mappingId);
   }else if (onMainMenu(gameState)){
      processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
@@ -396,9 +420,20 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
 
-    Props nestedListProps { .mappingId = selectedId, .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f } };
+    Props nestedListProps { 
+      .mappingId = selectedId, 
+      .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f },
+      .props = {
+        PropPair {
+          .symbol = getSymbol("tint"),
+          .value = glm::vec4(1.f, 1.f, 0.f, 1.f),
+        }
+      }
+    };
+
+
     /*drawDebugBoundingBox(*/nestedListTestComponent.draw(drawTools, nestedListProps); //);
-    //testLayoutComponent.draw(drawTools, nestedListProps /* should have own props */);
+    testLayoutComponent.draw(drawTools, nestedListProps /* should have own props */);
     //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
 
     //drawImNestedList(nestedListTest, selectedId, );

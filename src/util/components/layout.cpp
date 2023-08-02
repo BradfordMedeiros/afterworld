@@ -240,8 +240,10 @@ Component createLayoutComponent(Layout& layout){
 	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	return boundingBox;
 	  },
-	  .imMouseSelect = [](std::optional<objid> mappingIdSelected) -> void {
-	     
+	  .imMouseSelect = [&layout](std::optional<objid> mappingIdSelected) -> void {
+	     for (auto &child : layout.children){
+	     	child.imMouseSelect(mappingIdSelected);
+	     }
 	  }  
 	};
 	return layoutComponent;

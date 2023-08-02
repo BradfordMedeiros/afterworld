@@ -85,3 +85,62 @@ BoundingBox2D measurerToBox(BoundingBoxMeasurer& box){
     .height = maxY - minY,
   };
 }
+
+PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol){
+  for (int i = 0; i < props.size(); i++){
+    PropPair& propPair = props.at(i);
+    if (propPair.symbol == symbol){
+      return &propPair;
+    }
+  }
+  return NULL;
+}
+
+int intFromProp(PropPair& propPair){
+  int* intValue = anycast<int>(propPair.value);
+  modassert(intValue, "invalid prop");
+  return *intValue;
+}
+glm::vec3 vec3FromProp(PropPair& propPair){
+  glm::vec3* vec3Value = anycast<glm::vec3>(propPair.value);
+  modassert(vec3Value, "invalid prop");
+  return *vec3Value;
+}
+glm::vec4 vec4FromProp(PropPair& propPair){
+  glm::vec4* vec4Value = anycast<glm::vec4>(propPair.value);
+  modassert(vec4Value, "invalid prop");
+  return *vec4Value;
+}
+
+int intFromProp(Props& props, int symbol, int defaultValue){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    return intFromProp(*propPair);
+  }
+  return defaultValue;
+}
+glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    return vec3FromProp(*propPair);
+  }
+  return defaultValue;
+}
+glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    return vec4FromProp(*propPair);
+  }
+  return defaultValue;
+}
+
+std::optional<std::function<void()>> fnFromPos(Props& props, int symbol){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    std::function<void()>* fnValue = anycast<std::function<void()>>(propPair -> value);
+    modassert(fnValue, "fnFromPos invalid type");
+    return *fnValue;
+
+  }
+  return std::nullopt;
+}

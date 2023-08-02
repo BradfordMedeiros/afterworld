@@ -572,8 +572,33 @@ std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::funct
   return listItems;
 }
 
+//
+//drawImMenuList(
+//  drawTools, 
+//  createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), 
+//  mappingId, 
+//  style.xoffset, style.yoffset, style.padding, style.fontSizePerLetterNdi, style.minwidth
+//);
+//processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
 
 
+Component createPauseMenuComponent(std::function<void()> resume, std::function<void()> goToMainMenu, MenuItemStyle style){
+  auto pauseMenu =  createPauseMenu(resume, goToMainMenu);
+
+  return Component {
+    .draw = [pauseMenu, style](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      return drawImMenuList(
+        drawTools, 
+        pauseMenu, 
+        mappingId, 
+        style.xoffset, style.yoffset, style.padding, style.fontSizePerLetterNdi, style.minwidth
+      );
+    },
+    .imMouseSelect = [pauseMenu](std::optional<objid> mappingIdSelected) -> void {
+      processImMouseSelect(pauseMenu, mappingIdSelected);
+    }  
+  };
+}
 
 ImageList defaultImages {
   .mappingId = 858584,
@@ -631,30 +656,7 @@ RadioButtonContainer radioButtonContainer {
 };
 Component radioButtonSelector = createRadioButtonComponent(radioButtonContainer);
 
-Component createListItem(std::string value){
-  ImListItem menuItem {
-    .value = value,
-    .onClick = []() -> void {
-    },
-    .mappingId = 0,
-  };
-  auto component = Component {
-    .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset,  props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth);
-        //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-        drawDebugBoundingBox(drawTools, box);
-        return box;
-    },
-    .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
-      //if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-      //  if (menuItem.onClick.has_value()){
-      //    menuItem.onClick.value()();
-      //  }
-      //}
-    },
-  };
-  return component;
-}
+
 
 Layout testLayout2 {
   .tint = glm::vec4(0.f, 0.f, 1.f, .6f),

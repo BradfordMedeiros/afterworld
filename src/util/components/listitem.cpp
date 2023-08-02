@@ -7,7 +7,7 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
   drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth){
+BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color){
   float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
   auto width = glm::max(menuItem.value.size() * fontSize, minwidth);
@@ -18,8 +18,8 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   auto rectHeight = height + 2 * padding;
   auto textY = yoffset;
 
-  auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
-  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, glm::vec4(1.f, 1.f, 1.f, .4f), std::nullopt, true, menuItem.mappingId, std::nullopt);
+  auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(0.f, 0.f, 1.f, 1.f) : color;
+  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
     .x = rectX,
@@ -29,7 +29,7 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   };
 }
 
-BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth){
+BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 tint, glm::vec4 color){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
@@ -45,7 +45,7 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
 
-    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), mappingId, xoffset, yoffset, padding, fontSizeStyle, minwidth);
+    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), mappingId, xoffset, yoffset, padding, fontSizeStyle, minwidth, tint, color);
     float spacingPerItem = boundingBox.height;
     yoffset += -1 * spacingPerItem;
 
@@ -112,4 +112,35 @@ void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> map
       item.onClick.value()();
     }
   }
+}
+
+
+const int tintSymbol = getSymbol("tint");
+const int colorSymbol = getSymbol("color");
+Component createListItem(std::string value){
+  ImListItem menuItem {
+    .value = value,
+    .onClick = []() -> void {
+    },
+    .mappingId = 0,
+  };
+  auto component = Component {
+    .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+        auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 0.f, 0.f, 1.f));
+        auto color = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+        std::cout << "tint is: " << print(tint) << std::endl;
+        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset,  props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth, tint, color);
+        //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+        drawDebugBoundingBox(drawTools, box);
+        return box;
+    },
+    .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
+      //if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+      //  if (menuItem.onClick.has_value()){
+      //    menuItem.onClick.value()();
+      //  }
+      //}
+    },
+  };
+  return component;
 }
