@@ -6,13 +6,10 @@
 #include "../../util.h"
 
 struct MenuItemStyle {
-  float margin;
-  float padding;
   float minwidth;
   float xoffset;
   float yoffset;
   std::optional<glm::vec4> tint;
-  std::optional<float> fontSizePerLetterNdi;
 };
 
 

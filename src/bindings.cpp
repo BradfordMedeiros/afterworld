@@ -120,7 +120,8 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
     elements.push_back(
       Component {
         .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset, props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth);
+          float padding = 0.05f;
+          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset, padding, 0.015f , props.style.minwidth);
           //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
           drawDebugBoundingBox(drawTools, box);
           return box;
@@ -156,7 +157,7 @@ void drawPauseMenu(DrawingTools& drawTools, GameState& gameState, std::optional<
 
   Props props {
     .mappingId = mappingId,
-    .style = MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt},
+    .style = MenuItemStyle { .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt },
     .props = {
       { .symbol = getSymbol("pause"), .value = [&gameState]() -> void { goToMenu(gameState); }},
       { .symbol = getSymbol("resume"), .value = [&gameState]() -> void { goToMenu(gameState); }},
@@ -218,7 +219,7 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
           goToMenu(gameState);
           std::cout << "pause component: go to menu" << std::endl;
        },
-       MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt, .fontSizePerLetterNdi = std::nullopt}
+       MenuItemStyle { .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt }
     ).imMouseSelect(mappingId);
   }else if (onMainMenu(gameState)){
      processImMouseSelect(mainMenuItems2(gameState), mappingId);
@@ -404,25 +405,25 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuComponentList(drawTools, mainMenuItems2(*gameState), selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.05f, .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f), .fontSizePerLetterNdi = std::nullopt });
+      drawImMenuComponentList(drawTools, mainMenuItems2(*gameState), selectedId, MenuItemStyle { .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f) }, 0.f, 0.f);
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(drawTools, *gameState, selectedId);
     }
 
-    MenuItemStyle style { .margin = 0.f, .padding = 0.02f, .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f), .fontSizePerLetterNdi = std::nullopt };
+    MenuItemStyle style { .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f) };
     if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
       drawImMenuList(
         drawTools, 
         animationMenuItems2(*gameState), 
         selectedId,
-        style.xoffset, style.yoffset, style.padding, style.fontSizePerLetterNdi, style.minwidth
+        style.xoffset, style.yoffset, 0.05f, 0.015f, style.minwidth
       );
     }
 
 
     Props nestedListProps { 
       .mappingId = selectedId, 
-      .style = MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f },
+      .style = MenuItemStyle { .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f) },
       .props = {
         PropPair {
           .symbol = getSymbol("tint"),

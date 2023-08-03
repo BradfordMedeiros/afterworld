@@ -587,11 +587,12 @@ Component createPauseMenuComponent(std::function<void()> resume, std::function<v
 
   return Component {
     .draw = [pauseMenu, style](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      float padding = 0.05f;
       return drawImMenuList(
         drawTools, 
         pauseMenu, 
         mappingId, 
-        style.xoffset, style.yoffset, style.padding, style.fontSizePerLetterNdi, style.minwidth
+        style.xoffset, style.yoffset, padding, 0.015f /* fontsize */, style.minwidth
       );
     },
     .imMouseSelect = [pauseMenu](std::optional<objid> mappingIdSelected) -> void {

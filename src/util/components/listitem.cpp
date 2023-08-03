@@ -128,8 +128,9 @@ Component createListItem(std::string value){
     .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
         auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 0.f, 0.f, 1.f));
         auto color = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+        float padding = 0.05f;
         std::cout << "tint is: " << print(tint) << std::endl;
-        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset,  props.style.padding, props.style.fontSizePerLetterNdi, props.style.minwidth, tint, color);
+        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset,  padding, 0.015f, props.style.minwidth, tint, color);
         //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
         drawDebugBoundingBox(drawTools, box);
         return box;

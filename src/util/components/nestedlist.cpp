@@ -24,7 +24,7 @@ std::optional<std::vector<int>> calculateSelectedPath(std::vector<NestedListItem
   return foundList;
 }
 
-BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values , std::optional<objid> mappingId, MenuItemStyle style){
+BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values , std::optional<objid> mappingId, MenuItemStyle style, float padding, float fontSizePerLetterNdi){
   std::vector<int> listOpenIndexs;
   auto selectedPath = calculateSelectedPath(values, mappingId);
   if (selectedPath.has_value()){
@@ -43,7 +43,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
       items.push_back(value.item);
     }
 
-    auto boundingBox = drawImMenuList(drawTools, items, mappingId, style.xoffset, style.yoffset + additionalYOffset, style.padding, style.fontSizePerLetterNdi, style.minwidth);
+    auto boundingBox = drawImMenuList(drawTools, items, mappingId, style.xoffset, style.yoffset + additionalYOffset, padding, fontSizePerLetterNdi, style.minwidth);
 
     std::cout << "bounding box: " << print(boundingBox) << std::endl;
     // drawTools.drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
@@ -90,7 +90,9 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
 Component createNestedList(std::vector<NestedListItem>& items){
   Component component  {
     .draw = [&items](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      return drawImNestedList(drawTools, items, props.mappingId, props.style);
+      float padding = 0.01f;
+      float fontSizePerLetterNdi = 0.015f;
+      return drawImNestedList(drawTools, items, props.mappingId, props.style, padding, fontSizePerLetterNdi);
     },
     .imMouseSelect = [&items](std::optional<objid> mappingIdSelected) -> void {
       processImMouseSelect(items, mappingIdSelected);

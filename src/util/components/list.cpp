@@ -1,6 +1,6 @@
 #include "./list.h"
 
-BoundingBox2D drawImMenuComponentList(DrawingTools& drawTools, std::vector<Component> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset){
+BoundingBox2D drawImMenuComponentList(DrawingTools& drawTools, std::vector<Component> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset, float margin){
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
@@ -21,7 +21,7 @@ BoundingBox2D drawImMenuComponentList(DrawingTools& drawTools, std::vector<Compo
   for (int i = 0; i < list.size(); i++){
     props.style.yoffset = yoffset;
     auto boundingBox = list.at(i).draw(drawTools, props);
-    float spacingPerItem = boundingBox.height + 2 * style.margin;
+    float spacingPerItem = boundingBox.height + 2 * margin;
     yoffset += -1 * spacingPerItem;
     lastWidth = boundingBox.width;
     lastHeight = boundingBox.height;
