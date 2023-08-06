@@ -63,6 +63,9 @@ BoundingBox2D drawRadioButtons(DrawingTools& drawTools, std::vector<RadioButton>
   };
 }
 
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+
 Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer){
   Component radioButtonSelector  {
     .draw = [&radioButtonContainer](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -76,11 +79,13 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
          }
       }
   
+      float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+      float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
       auto boundingBox = drawRadioButtons(
         drawTools,
         radioButtonContainer.radioButtons,
-        props.style.xoffset,
-        props.style.yoffset,
+        xoffset,
+        yoffset,
         0.05f,
         0.15f
       );

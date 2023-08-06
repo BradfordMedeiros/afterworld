@@ -128,20 +128,28 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	}
 }
 
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+
 Component createLayoutComponent(Layout& layout){
 	Component layoutComponent  {
-	  .draw = [&layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
+	  .draw = [layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
       float xoffset = 0.f;
       float yoffset = 0.f;
-      props.style.xoffset = 0.f;
-      props.style.yoffset = 0.f;
+
+      float propsStyleXoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+      updatePropValue(props, yoffsetSymbol, 0.f);
 
       auto boundingBoxMeasurer = createMeasurer();
      	BufferedDrawingTools bufferedDrawingTools {};
 			createBufferedDrawingTools(bufferedDrawingTools, drawTools);
       for (int i = 0; i < layout.children.size(); i++){
-    		props.style.yoffset = yoffset;	
-    		props.style.xoffset = xoffset;
+    		propsStyleXoffset = xoffset;
+
+    		updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
+    		updatePropValue(props, yoffsetSymbol, yoffset);
+    		std::cout << "mainmenu: xoffset " << propsStyleXoffset << ", yoffset" << yoffset << std::endl;
+
     		auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, props);
     		setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
     		setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
@@ -240,7 +248,7 @@ Component createLayoutComponent(Layout& layout){
 	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	return boundingBox;
 	  },
-	  .imMouseSelect = [&layout](std::optional<objid> mappingIdSelected) -> void {
+	  .imMouseSelect = [layout](std::optional<objid> mappingIdSelected) -> void {
 	     for (auto &child : layout.children){
 	     	child.imMouseSelect(mappingIdSelected);
 	     }

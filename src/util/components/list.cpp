@@ -1,87 +1,26 @@
 #include "./list.h"
 
-BoundingBox2D drawImMenuComponentList(DrawingTools& drawTools, std::vector<Component> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset, float margin){
-  std::optional<float> minX = std::nullopt;
-  std::optional<float> maxX = std::nullopt;
-
-  std::optional<float> minY =  std::nullopt;
-  std::optional<float> maxY = std::nullopt;
-
-
-  float lastWidth = 0.f;
-  float lastHeight = 0.f;
-  float yoffset = additionalYOffset;
-
-  Props props { 
-    .mappingId = mappingId,
-    .style = style,
+Component createList(std::vector<ListComponentData> listItems){
+  std::vector<Component> elements;
+  for (auto &listItem : listItems){
+    elements.push_back(createListItem(listItem.name));
+  }
+  Layout layout {
+    .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+    .showBackpanel = false,
+    .borderColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f),
+    .minwidth = 0.f,
+    .minheight = 0.f,
+    .layoutType = LAYOUT_VERTICAL2,
+    .layoutFlowHorizontal = UILayoutFlowNone2,
+    .layoutFlowVertical = UILayoutFlowNone2,
+    .alignHorizontal = UILayoutFlowNone2,
+    .alignVertical = UILayoutFlowNone2,
+    .spacing = 0.f,
+    .minspacing = 0.f,
+    .padding = 0.f,
+    .children = elements,
   };
 
-  modassert(list.size(), "draw im menu list - list is empty");
-  for (int i = 0; i < list.size(); i++){
-    props.style.yoffset = yoffset;
-    auto boundingBox = list.at(i).draw(drawTools, props);
-    float spacingPerItem = boundingBox.height + 2 * margin;
-    yoffset += -1 * spacingPerItem;
-    lastWidth = boundingBox.width;
-    lastHeight = boundingBox.height;
-
-    float bottomY = boundingBox.y - (boundingBox.height * 0.5f);
-    float topY = boundingBox.y + (boundingBox.height * 0.5f);
-    float leftX = boundingBox.x - (boundingBox.width * 0.5f);
-    float rightX = boundingBox.x + (boundingBox.width * 0.5f);
-
-    if (!minX.has_value()){
-      minX = leftX;
-    }
-    if (leftX < minX.value()){
-      minX = leftX;
-    }
-
-    if (!maxX.has_value()){
-      maxX = rightX;
-    }
-    if (rightX > maxX.value()){
-      maxX = rightX;
-    }
-
-    if (!minY.has_value()){
-      minY = bottomY;
-    }
-    if (bottomY < minY.value()){
-      minY = bottomY;
-    }
-
-    if (!maxY.has_value()){
-      maxY = topY;
-    }
-    if (topY > maxY.value()){
-      maxY = topY;
-    }
-  }
-
-  modassert(minX.has_value(), "minX does not have value");
-  modassert(maxX.has_value(), "maxX does not have value");
-  modassert(minY.has_value(), "minY does not have value");
-  modassert(maxY.has_value(), "maxY does not have value");
-
-  float width = maxX.value() - minX.value();
-  float height = maxY.value() - minY.value();
-  float centerX = minX.value() + (width * 0.5f);
-  float centerY = minY.value() + (height * 0.5f);
-  return BoundingBox2D {
-    .x = centerX,
-    .y = centerY,
-    .width = width,
-    .height = height,
-  };
-}
-  
-void processImMouseSelect(std::vector<Component> components, std::optional<objid> mappingId){
-  if (!mappingId.has_value()){
-    return;
-  }
-  for (auto &component : components){
-    component.imMouseSelect(mappingId);
-  }
+  return createLayoutComponent(layout);
 }

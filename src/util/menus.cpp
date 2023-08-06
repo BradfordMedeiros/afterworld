@@ -581,19 +581,22 @@ std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::funct
 //);
 //processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
 
+const int minwidthSymbol = getSymbol("minwidth");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
 
-Component createPauseMenuComponent(std::function<void()> resume, std::function<void()> goToMainMenu, MenuItemStyle style){
+Component createPauseMenuComponent(std::function<void()> resume, std::function<void()> goToMainMenu){
   auto pauseMenu =  createPauseMenu(resume, goToMainMenu);
 
   return Component {
-    .draw = [pauseMenu, style](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [pauseMenu](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+      auto xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+      auto yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+
       float padding = 0.05f;
       return drawImMenuList(
-        drawTools, 
-        pauseMenu, 
-        mappingId, 
-        style.xoffset, style.yoffset, padding, 0.015f /* fontsize */, style.minwidth
-      );
+        drawTools, pauseMenu, mappingId,  xoffset, yoffset, padding, 0.015f /* fontsize */, minwidth);
     },
     .imMouseSelect = [pauseMenu](std::optional<objid> mappingIdSelected) -> void {
       processImMouseSelect(pauseMenu, mappingIdSelected);

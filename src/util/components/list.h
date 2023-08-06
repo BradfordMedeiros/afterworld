@@ -2,8 +2,13 @@
 #define MOD_AFTERWORLD_COMPONENTS_LIST
 
 #include "./common.h"
+#include "./listitem.h"
+#include "./layout.h"
 
-BoundingBox2D drawImMenuComponentList(DrawingTools& drawTools, std::vector<Component> list, std::optional<objid> mappingId, MenuItemStyle style, float additionalYOffset, float margin);
-void processImMouseSelect(std::vector<Component> components, std::optional<objid> mappingId);
+struct ListComponentData {
+	std::string name;
+	std::optional<std::function<void()>> onClick;
+};
+Component createList(std::vector<ListComponentData> listItems);
 
 #endif

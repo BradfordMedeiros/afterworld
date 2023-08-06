@@ -117,6 +117,10 @@ void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> map
 
 const int tintSymbol = getSymbol("tint");
 const int colorSymbol = getSymbol("color");
+const int minwidthSymbol = getSymbol("minwidth");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+
 Component createListItem(std::string value){
   ImListItem menuItem {
     .value = value,
@@ -126,11 +130,16 @@ Component createListItem(std::string value){
   };
   auto component = Component {
     .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-        auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 0.f, 0.f, 1.f));
-        auto color = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+        auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+        auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+        auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+        float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+        float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+
+        std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
         float padding = 0.05f;
         std::cout << "tint is: " << print(tint) << std::endl;
-        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset,  padding, 0.015f, props.style.minwidth, tint, color);
+        auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
         //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
         drawDebugBoundingBox(drawTools, box);
         return box;

@@ -105,6 +105,11 @@ bool onMainMenu(GameState& gameState){
   return !(gameState.loadedLevel.has_value());
 }
 
+const int minwidthSymbol = getSymbol("minwidth");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+const int tintSymbol = getSymbol("tint");
+
 std::vector<Component> mainMenuItems2(GameState& gameState){
   std::vector<Component> elements;
 
@@ -121,8 +126,11 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
       Component {
         .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
           float padding = 0.05f;
-          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, props.style.xoffset, props.style.yoffset, padding, 0.015f , props.style.minwidth);
-          //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+          auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+          float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+          float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+
+          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset, padding, 0.015f , minwidth);
           drawDebugBoundingBox(drawTools, box);
           return box;
         },
@@ -136,10 +144,6 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
       }
     );
   }
-  elements.push_back(radioButtonSelector);
-  elements.push_back(sliderSelector);
-  //elements.push_back(imageListTest);
-
   return elements;
 }
 
@@ -157,10 +161,10 @@ void drawPauseMenu(DrawingTools& drawTools, GameState& gameState, std::optional<
 
   Props props {
     .mappingId = mappingId,
-    .style = MenuItemStyle { .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt },
     .props = {
       { .symbol = getSymbol("pause"), .value = [&gameState]() -> void { goToMenu(gameState); }},
       { .symbol = getSymbol("resume"), .value = [&gameState]() -> void { goToMenu(gameState); }},
+      { .symbol = getSymbol("yoffset"), .value = 0.2f },
     },
   };
   createPauseMenuComponent(
@@ -171,8 +175,7 @@ void drawPauseMenu(DrawingTools& drawTools, GameState& gameState, std::optional<
       [&gameState]() -> void { 
         goToMenu(gameState);
         std::cout << "pause component: go to menu" << std::endl;
-     },
-     props.style
+     }
   ).draw(drawTools, props);
 
 }
@@ -218,17 +221,15 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
         [&gameState]() -> void { 
           goToMenu(gameState);
           std::cout << "pause component: go to menu" << std::endl;
-       },
-       MenuItemStyle { .minwidth = 0.f, .xoffset = 0.f, .yoffset = 0.2f, .tint = std::nullopt }
+       }
     ).imMouseSelect(mappingId);
   }else if (onMainMenu(gameState)){
-     processImMouseSelect(mainMenuItems2(gameState), mappingId);
+     //processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
-     processImMouseSelect(animationMenuItems2(gameState), mappingId);
+     //processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
   nestedListTestComponent.imMouseSelect(mappingId);
-  testLayoutComponent.imMouseSelect(mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -359,6 +360,47 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
 }
 
 
+
+const int routerSymbol = getSymbol("router");
+auto routerHistory = createHistory("menu2");
+void drawMainMenu(GameState& gameState, DrawingTools& drawTools, std::optional<objid> selectedId){
+  /*
+  int mappingId = 90000;
+  for (int i = 0; i < gameState.levels.size(); i++){
+    ImListItem menuItem {
+      .value = gameState.levels.at(i).name,
+      .onClick = [&gameState, i]() -> void {
+        goToLevel(gameState, gameState.levels.at(i).scene);
+      },
+      .mappingId = mappingId++,
+    };
+    elements.push_back(
+      Component {
+        .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+          float padding = 0.05f;
+          auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+          float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+          float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+
+          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset, padding, 0.015f , minwidth);
+          drawDebugBoundingBox(drawTools, box);
+          return box;
+        },
+        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
+          if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+            if (menuItem.onClick.has_value()){
+              menuItem.onClick.value()();
+            }
+          }
+        },
+      }
+    );
+  }*/
+
+
+}
+
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -405,36 +447,68 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (!gameState -> loadedLevel.has_value()){
-      drawImMenuComponentList(drawTools, mainMenuItems2(*gameState), selectedId, MenuItemStyle { .minwidth = 0.f, .xoffset = -0.9f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.3f) }, 0.f, 0.f);
+      std::vector<ListComponentData> levels;
+      for (auto &level : gameState -> levels){
+        levels.push_back(ListComponentData{
+          .name = level.name,
+          .onClick = std::nullopt,
+        });
+      }
+      Props props {
+        .mappingId = selectedId,
+        .props = {
+          { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
+        },
+      };
+      Props routerProps {
+        .mappingId = selectedId,
+        .props = {
+          { routerSymbol, routerHistory },
+          { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
+        },
+      };
+      auto routerComponent = createRouter({
+        { "", createList(levels) },
+      });
+      routerComponent.draw(drawTools, routerProps);
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(drawTools, *gameState, selectedId);
     }
 
-    MenuItemStyle style { .minwidth = 0.f, .xoffset = 1.5f, .yoffset = 0.2f, .tint = glm::vec4(1.f, 1.f, 1.f, 0.1f) };
     if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
       drawImMenuList(
         drawTools, 
         animationMenuItems2(*gameState), 
         selectedId,
-        style.xoffset, style.yoffset, 0.05f, 0.015f, style.minwidth
+        1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */
       );
     }
 
 
     Props nestedListProps { 
       .mappingId = selectedId, 
-      .style = MenuItemStyle { .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f) },
       .props = {
         PropPair {
           .symbol = getSymbol("tint"),
-          .value = glm::vec4(1.f, 1.f, 0.f, 1.f),
+          .value = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+        },
+        PropPair {
+          .symbol = getSymbol("minwidth"),
+          .value = 0.15f,
+        },
+        PropPair {
+          .symbol = getSymbol("xoffset"),
+          .value = -0.99f,
+        },
+        PropPair {
+          .symbol = getSymbol("yoffset"),
+          .value = 0.98f,  
         }
       }
     };
 
 
     /*drawDebugBoundingBox(*/nestedListTestComponent.draw(drawTools, nestedListProps); //);
-    testLayoutComponent.draw(drawTools, nestedListProps /* should have own props */);
     //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
 
     //drawImNestedList(nestedListTest, selectedId, );

@@ -1,5 +1,10 @@
 #include "./nestedlist.h"
 
+const int tintSymbol = getSymbol("tint");
+const int minwidthSymbol = getSymbol("minwidth");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+
 std::optional<std::vector<int>> searchNestedList(std::vector<NestedListItem>& values, objid mappingId, std::vector<int> currentPath){
   for (int i = 0; i < static_cast<int>(values.size()); i++){
     std::vector<int> nextPath = currentPath;
@@ -24,7 +29,7 @@ std::optional<std::vector<int>> calculateSelectedPath(std::vector<NestedListItem
   return foundList;
 }
 
-BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values , std::optional<objid> mappingId, MenuItemStyle style, float padding, float fontSizePerLetterNdi){
+BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values , std::optional<objid> mappingId, float padding, float fontSizePerLetterNdi, glm::vec4 tint, float minwidth, float xoffset, float yoffset){
   std::vector<int> listOpenIndexs;
   auto selectedPath = calculateSelectedPath(values, mappingId);
   if (selectedPath.has_value()){
@@ -33,6 +38,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
   std::vector<NestedListItem>* nestedListItems = &values;
 
   float additionalYOffset = 0.f;
+
   for (int i = -1; i < static_cast<int>(listOpenIndexs.size()); i++){
     if (nestedListItems -> size() == 0){
       continue;
@@ -43,17 +49,17 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
       items.push_back(value.item);
     }
 
-    auto boundingBox = drawImMenuList(drawTools, items, mappingId, style.xoffset, style.yoffset + additionalYOffset, padding, fontSizePerLetterNdi, style.minwidth);
+    auto boundingBox = drawImMenuList(drawTools, items, mappingId, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth);
 
     std::cout << "bounding box: " << print(boundingBox) << std::endl;
     // drawTools.drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
     // drawTools.drawRect(0.f, 0.f, 0.2f, 0.2f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
 
     float perElementHeight = boundingBox.height / items.size();
-    style.xoffset += boundingBox.width;
+    xoffset += boundingBox.width;
 
     float multiplier = (i % 2) ? 1 : -1;
-    style.tint = glm::vec4(style.tint.value().x + (multiplier * .2f), style.tint.value().y + (multiplier * .2f), style.tint.value().z + (multiplier * .2f), style.tint.value().w + (multiplier * .2f));
+    tint = glm::vec4(tint.x + (multiplier * .2f), tint.y + (multiplier * .2f), tint.z + (multiplier * .2f), tint.w + (multiplier * .2f));
     if ((i + 1) < static_cast<int>(listOpenIndexs.size())){
       auto nextIndex = listOpenIndexs.at(i + 1);
       nestedListItems = &(nestedListItems -> at(nextIndex).items);
@@ -86,13 +92,16 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
   }
 }
 
-
 Component createNestedList(std::vector<NestedListItem>& items){
   Component component  {
     .draw = [&items](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       float padding = 0.01f;
       float fontSizePerLetterNdi = 0.015f;
-      return drawImNestedList(drawTools, items, props.mappingId, props.style, padding, fontSizePerLetterNdi);
+      auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.6f));
+      auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+      float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+      float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+      return drawImNestedList(drawTools, items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
     },
     .imMouseSelect = [&items](std::optional<objid> mappingIdSelected) -> void {
       processImMouseSelect(items, mappingIdSelected);

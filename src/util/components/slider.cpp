@@ -4,13 +4,19 @@ void drawRight(DrawingTools& drawTools, float x, float y, float width, float hei
   drawTools.drawRect(x + (width * 0.5f), y, width, height, false, color, std::nullopt, true, mappingId /*radioButton.mappingId */, std::nullopt);
 }
 
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+
 Component createSlider(Slider& slider){
   Component sliderSelector  {
     .draw = [&slider](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+      float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+
       float width = 0.2f;
       float height = 0.05f;
-      float x = props.style.xoffset + (width * 0.5f);
-      float y = props.style.yoffset;
+      float x = xoffset + (width * 0.5f);
+      float y = yoffset;
   
       float left = x;
       float right = x + width;

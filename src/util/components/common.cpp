@@ -101,6 +101,11 @@ int intFromProp(PropPair& propPair){
   modassert(intValue, "invalid prop");
   return *intValue;
 }
+float floatFromProp(PropPair& propPair){
+  float* floatValue = anycast<float>(propPair.value);
+  modassert(floatValue, "invalid prop");
+  return *floatValue;
+}
 glm::vec3 vec3FromProp(PropPair& propPair){
   glm::vec3* vec3Value = anycast<glm::vec3>(propPair.value);
   modassert(vec3Value, "invalid prop");
@@ -116,6 +121,13 @@ int intFromProp(Props& props, int symbol, int defaultValue){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
     return intFromProp(*propPair);
+  }
+  return defaultValue;
+}
+float floatFromProp(Props& props, int symbol, float defaultValue){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    return floatFromProp(*propPair);
   }
   return defaultValue;
 }
@@ -143,4 +155,17 @@ std::optional<std::function<void()>> fnFromPos(Props& props, int symbol){
 
   }
   return std::nullopt;
+}
+
+void updatePropValue(Props& props, int symbol, std::any value){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    propPair -> value = value;
+    return;
+  } 
+  //modassert(false, std::string("prop does not exist: ") + nameForSymbol(symbol));
+  props.props.push_back(PropPair {
+    .symbol = symbol,
+    .value = value,
+  });
 }

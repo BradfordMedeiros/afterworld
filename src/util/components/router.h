@@ -1,0 +1,12 @@
+#ifndef MOD_AFTERWORLD_COMPONENTS_ROUTER
+#define MOD_AFTERWORLD_COMPONENTS_ROUTER
+
+#include "./common.h"
+
+struct RouterHistory {
+  std::string currentPath;
+};
+RouterHistory createHistory(std::string initialRoute);
+Component createRouter(std::map<std::string, Component> routeToComponent);
+
+#endif
