@@ -7,6 +7,8 @@ struct RouterHistory {
   std::string currentPath;
 };
 RouterHistory createHistory(std::string initialRoute);
+void pushHistory(RouterHistory& history, std::string path);
+
 Component createRouter(std::map<std::string, Component> routeToComponent);
 
 #endif

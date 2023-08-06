@@ -108,7 +108,6 @@ bool onMainMenu(GameState& gameState){
 const int minwidthSymbol = getSymbol("minwidth");
 const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
-const int tintSymbol = getSymbol("tint");
 
 std::vector<Component> mainMenuItems2(GameState& gameState){
   std::vector<Component> elements;
@@ -230,6 +229,8 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
      //processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
   nestedListTestComponent.imMouseSelect(mappingId);
+
+  handleInputMainUi(mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -361,8 +362,7 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
 
 
 
-const int routerSymbol = getSymbol("router");
-auto routerHistory = createHistory("menu2");
+
 void drawMainMenu(GameState& gameState, DrawingTools& drawTools, std::optional<objid> selectedId){
   /*
   int mappingId = 90000;
@@ -454,23 +454,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           .onClick = std::nullopt,
         });
       }
-      Props props {
-        .mappingId = selectedId,
-        .props = {
-          { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
-        },
-      };
-      Props routerProps {
-        .mappingId = selectedId,
-        .props = {
-          { routerSymbol, routerHistory },
-          { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
-        },
-      };
-      auto routerComponent = createRouter({
-        { "", createList(levels) },
-      });
-      routerComponent.draw(drawTools, routerProps);
+
+      handleDrawMainUi(drawTools, selectedId);
     }else if (showingPauseMenu(*gameState)){
       drawPauseMenu(drawTools, *gameState, selectedId);
     }
@@ -529,6 +514,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (key == 256 /* escape */ ){
         togglePauseMode(*gameState);
       }
+    }
+    if (key == '['){
+      pushHistory("paused");
     }
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){

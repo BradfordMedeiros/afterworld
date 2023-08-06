@@ -28,6 +28,7 @@
 #include "./util/components/slider.h"
 #include "./util/components/imagelist.h"
 #include "./util/components/router.h"
+#include "./util/views/mainui.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
