@@ -121,12 +121,11 @@ const int minwidthSymbol = getSymbol("minwidth");
 const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
 
-Component createListItem(std::string value){
+Component createListItem(std::string value, std::function<void()> onClick){
   ImListItem menuItem {
     .value = value,
-    .onClick = []() -> void {
-    },
-    .mappingId = 0,
+    .onClick = onClick,
+    .mappingId = 100,
   };
   auto component = Component {
     .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -144,12 +143,12 @@ Component createListItem(std::string value){
         drawDebugBoundingBox(drawTools, box);
         return box;
     },
-    .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
-      //if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-      //  if (menuItem.onClick.has_value()){
-      //    menuItem.onClick.value()();
-      //  }
-      //}
+    .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected, Props& props) -> void {
+      if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+        if (menuItem.onClick.has_value()){
+          menuItem.onClick.value()();
+        }
+      }
     },
   };
   return component;

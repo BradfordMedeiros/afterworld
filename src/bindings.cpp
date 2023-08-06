@@ -133,7 +133,7 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
           drawDebugBoundingBox(drawTools, box);
           return box;
         },
-        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
+        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected, Props& props) -> void {
           if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
             if (menuItem.onClick.has_value()){
               menuItem.onClick.value()();
@@ -212,6 +212,11 @@ void resume(){
 }
 
 void handleMouseSelect(GameState& gameState, objid mappingId){
+  Props props { 
+    .mappingId = mappingId, 
+    .props = {}
+  };
+
   modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
      //processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
@@ -221,14 +226,17 @@ void handleMouseSelect(GameState& gameState, objid mappingId){
           goToMenu(gameState);
           std::cout << "pause component: go to menu" << std::endl;
        }
-    ).imMouseSelect(mappingId);
+    ).imMouseSelect(mappingId, props);
   }else if (onMainMenu(gameState)){
      //processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
      //processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
-  nestedListTestComponent.imMouseSelect(mappingId);
+
+
+
+  nestedListTestComponent.imMouseSelect(mappingId, props);
 
   handleInputMainUi(mappingId);
 }

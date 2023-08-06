@@ -8,8 +8,12 @@ const int tintSymbol = getSymbol("tint");
 Component mainUI = createRouter({
   { "playing",  createList(
     { ListComponentData { .name = "playing", .onClick = []() -> void {
-      pushHistory("paused");
-    }}}
+        pushHistory("paused");
+      }},
+      ListComponentData { .name = "playing", .onClick = []() -> void {
+        pushHistory("quit");
+      }}
+    }
   )},
   { "paused",   createList({
     { ListComponentData { .name = "paused", .onClick = std::nullopt }}
@@ -36,7 +40,13 @@ void handleDrawMainUi(DrawingTools& drawTools, std::optional<objid> selectedId){
 }
 
 void handleInputMainUi(std::optional<objid> selectedId){
-
+   Props routerProps {
+     .mappingId = selectedId,
+     .props = {
+       { routerSymbol, routerHistory },
+     },
+   };
+   mainUI.imMouseSelect(selectedId, routerProps);
 }
 
 void pushHistory(std::string route){

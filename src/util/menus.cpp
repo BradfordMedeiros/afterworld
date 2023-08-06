@@ -598,7 +598,7 @@ Component createPauseMenuComponent(std::function<void()> resume, std::function<v
       return drawImMenuList(
         drawTools, pauseMenu, mappingId,  xoffset, yoffset, padding, 0.015f /* fontsize */, minwidth);
     },
-    .imMouseSelect = [pauseMenu](std::optional<objid> mappingIdSelected) -> void {
+    .imMouseSelect = [pauseMenu](std::optional<objid> mappingIdSelected, Props& props) -> void {
       processImMouseSelect(pauseMenu, mappingIdSelected);
     }  
   };

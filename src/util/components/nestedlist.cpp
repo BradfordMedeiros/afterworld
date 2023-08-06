@@ -103,7 +103,7 @@ Component createNestedList(std::vector<NestedListItem>& items){
       float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
       return drawImNestedList(drawTools, items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
     },
-    .imMouseSelect = [&items](std::optional<objid> mappingIdSelected) -> void {
+    .imMouseSelect = [&items](std::optional<objid> mappingIdSelected, Props& props) -> void {
       processImMouseSelect(items, mappingIdSelected);
     }  
   };

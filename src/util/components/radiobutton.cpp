@@ -94,7 +94,7 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
       drawDebugBoundingBox(drawTools, boundingBox);
       return boundingBox;
     },
-    .imMouseSelect = [&radioButtonContainer](std::optional<objid> mappingIdSelected) -> void {
+    .imMouseSelect = [&radioButtonContainer](std::optional<objid> mappingIdSelected, Props& props) -> void {
        for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
          auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
          if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){

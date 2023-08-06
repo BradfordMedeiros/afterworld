@@ -41,7 +41,7 @@ Component createSlider(Slider& slider){
       drawDebugBoundingBox(drawTools, boundingBox);
       return boundingBox;
     },
-    .imMouseSelect = [&slider](std::optional<objid> mappingIdSelected) -> void {
+    .imMouseSelect = [&slider](std::optional<objid> mappingIdSelected, Props& props) -> void {
       if (mappingIdSelected.has_value() && mappingIdSelected.value() == slider.mappingId){
         slider.update = true;
       }

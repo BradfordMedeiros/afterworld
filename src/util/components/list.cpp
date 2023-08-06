@@ -3,7 +3,11 @@
 Component createList(std::vector<ListComponentData> listItems){
   std::vector<Component> elements;
   for (auto &listItem : listItems){
-    elements.push_back(createListItem(listItem.name));
+    if (listItem.onClick.has_value()){
+      elements.push_back(createListItem(listItem.name, listItem.onClick.value()));
+    }else{
+      elements.push_back(createListItem(listItem.name));
+    }
   }
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),

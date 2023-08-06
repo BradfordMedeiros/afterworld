@@ -248,9 +248,9 @@ Component createLayoutComponent(Layout& layout){
 	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	return boundingBox;
 	  },
-	  .imMouseSelect = [layout](std::optional<objid> mappingIdSelected) -> void {
+	  .imMouseSelect = [layout](std::optional<objid> mappingIdSelected, Props& props) -> void {
 	     for (auto &child : layout.children){
-	     	child.imMouseSelect(mappingIdSelected);
+	     	child.imMouseSelect(mappingIdSelected, props);
 	     }
 	  }  
 	};
