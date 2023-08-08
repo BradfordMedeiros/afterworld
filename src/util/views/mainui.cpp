@@ -80,24 +80,47 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
     createPauseMenuComponent().draw(drawTools, props);    
   }
 
-    /*drawDebugBoundingBox(*/ //);
+  /* 
+  show main menu items 
+  if (!gameState -> loadedLevel.has_value()){
+    std::vector<ListComponentData> levels;
+    for (auto &level : gameState -> levels){
+      levels.push_back(ListComponentData{
+        .name = level.name,
+        .onClick = std::nullopt,
+      });
+    }
+  }
+  */
+  /*drawDebugBoundingBox(*/ //);
+  if (pauseContext.showAnimationMenu){
+    drawImMenuList(drawTools, animationMenuItems2(), selectedId, 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
+  }
 
+  if (pauseContext.showScreenspaceGrid){
+    drawScreenspaceGrid(ImGrid{ .numCells = 10 });
+  }
 }
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
-   Props routerProps {
-     .mappingId = selectedId,
-     .props = {
-       { routerSymbol, routerHistory },
-     },
-   };
-   mainUI.imMouseSelect(selectedId, routerProps);
-
+  Props routerProps {
+    .mappingId = selectedId,
+    .props = {
+      { routerSymbol, routerHistory },
+    },
+  };
+  mainUI.imMouseSelect(selectedId, routerProps);
   Props nestedListProps { 
     .mappingId = selectedId, 
     .props = {}
   };
   nestedListTestComponent.imMouseSelect(selectedId, nestedListProps);
+  processImMouseSelect(animationMenuItems2(), selectedId);
+
+  if (pauseContext.onMainMenu){
+    // should render main menu items
+    //processImMouseSelect(mainMenuItems2(gameState), mappingId);
+  }
 }
 
 void pushHistory(std::string route){
@@ -105,3 +128,72 @@ void pushHistory(std::string route){
 }
 
 //
+
+extern CustomApiBindings* gameapi;
+std::vector<ImListItem> animationMenuItems2(){
+  int mappingId = 900000;
+  auto selectedIds = gameapi -> selected();
+  if (selectedIds.size() == 0){
+    return { ImListItem { .value = "no object selected" , .onClick = std::nullopt, mappingId = mappingId }};
+  }
+  auto selectedId = selectedIds.at(0);
+  std::vector<ImListItem> items;
+  for (auto &animation : gameapi -> listAnimations(selectedId)){
+    items.push_back(ImListItem{
+      .value = animation,
+      .onClick = [selectedId, animation]() -> void {
+        gameapi -> playAnimation(selectedId, animation, LOOP);
+      },
+      .mappingId = mappingId++,
+    });
+  }
+  if (items.size() == 0){
+    items.push_back(ImListItem {
+      .value = "no animations",
+      .onClick = std::nullopt,
+      .mappingId = mappingId++,
+    });
+  }
+  return items;
+}
+
+const int minwidthSymbol = getSymbol("minwidth");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+
+std::vector<Component> mainMenuItems2(){
+  std::vector<Component> elements;
+
+  /*int mappingId = 90000;
+  for (int i = 0; i < gameState.levels.size(); i++){
+    ImListItem menuItem {
+      .value = gameState.levels.at(i).name,
+      .onClick = [&gameState, i]() -> void {
+        goToLevel(gameState, gameState.levels.at(i).scene);
+      },
+      .mappingId = mappingId++,
+    };
+    elements.push_back(
+      Component {
+        .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+          float padding = 0.05f;
+          auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+          float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+          float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+
+          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset, padding, 0.015f , minwidth);
+          drawDebugBoundingBox(drawTools, box);
+          return box;
+        },
+        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected, Props& props) -> void {
+          if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+            if (menuItem.onClick.has_value()){
+              menuItem.onClick.value()();
+            }
+          }
+        },
+      }
+    );
+  }*/
+  return elements;
+}

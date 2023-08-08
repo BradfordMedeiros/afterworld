@@ -84,76 +84,8 @@ bool onMainMenu(GameState& gameState){
   return !(gameState.loadedLevel.has_value());
 }
 
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-
-std::vector<Component> mainMenuItems2(GameState& gameState){
-  std::vector<Component> elements;
-
-  int mappingId = 90000;
-  for (int i = 0; i < gameState.levels.size(); i++){
-    ImListItem menuItem {
-      .value = gameState.levels.at(i).name,
-      .onClick = [&gameState, i]() -> void {
-        goToLevel(gameState, gameState.levels.at(i).scene);
-      },
-      .mappingId = mappingId++,
-    };
-    elements.push_back(
-      Component {
-        .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-          float padding = 0.05f;
-          auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
-          float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-          float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-
-          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset, padding, 0.015f , minwidth);
-          drawDebugBoundingBox(drawTools, box);
-          return box;
-        },
-        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected, Props& props) -> void {
-          if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-            if (menuItem.onClick.has_value()){
-              menuItem.onClick.value()();
-            }
-          }
-        },
-      }
-    );
-  }
-  return elements;
-}
-
-
 double downTime = 0;
 
-std::vector<ImListItem> animationMenuItems2(){
-  int mappingId = 900000;
-  auto selectedIds = gameapi -> selected();
-  if (selectedIds.size() == 0){
-    return { ImListItem { .value = "no object selected" , .onClick = std::nullopt, mappingId = mappingId }};
-  }
-  auto selectedId = selectedIds.at(0);
-  std::vector<ImListItem> items;
-  for (auto &animation : gameapi -> listAnimations(selectedId)){
-    items.push_back(ImListItem{
-      .value = animation,
-      .onClick = [selectedId, animation]() -> void {
-        gameapi -> playAnimation(selectedId, animation, LOOP);
-      },
-      .mappingId = mappingId++,
-    });
-  }
-  if (items.size() == 0){
-    items.push_back(ImListItem {
-      .value = "no animations",
-      .onClick = std::nullopt,
-      .mappingId = mappingId++,
-    });
-  }
-  return items;
-}
 
 PauseContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { goToMenu(gameState); };
@@ -164,21 +96,12 @@ PauseContext getUiContext(GameState& gameState){
    .resume = resume,
    .shouldShowPauseMenu = showingPauseMenu(gameState),
    .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
+   .onMainMenu = onMainMenu(gameState),
+   .showScreenspaceGrid = getGlobalState().showScreenspaceGrid,
   };
   return pauseContext;
 }
 
-void handleMouseSelect(GameState& gameState, objid mappingId){
-  modlog("handle mouse select", std::to_string(mappingId));
-  if (onMainMenu(gameState)){
-     //processImMouseSelect(mainMenuItems2(gameState), mappingId);
-  }
-  if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
-     //processImMouseSelect(animationMenuItems2(), mappingId);
-  }
-  auto pauseContext = getUiContext(gameState);
-  handleInputMainUi(pauseContext, mappingId);
-}
 
 void togglePauseMode(GameState& gameState){
   setPaused(!getGlobalState().paused);
@@ -337,36 +260,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     delete gameState;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
+    GameState* gameState = static_cast<GameState*>(data);
+    auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
+    getGlobalState().selectedId = selectedId;
+
     DrawingTools drawTools {
       .drawText = gameapi -> drawText,
       .drawRect = gameapi -> drawRect,
       .drawLine2D = gameapi -> drawLine2D,
     };
-
-    GameState* gameState = static_cast<GameState*>(data);
-    auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
-    getGlobalState().selectedId = selectedId;
-
-    if (getGlobalState().showScreenspaceGrid){
-     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
-    }
-
     auto pauseContext = getUiContext(*gameState);    
-    if (pauseContext.showAnimationMenu){
-      drawImMenuList(drawTools, animationMenuItems2(), selectedId, 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
-    }
-
-    //handleDrawMainUi(pauseContext, drawTools, selectedId);
-
-    if (!gameState -> loadedLevel.has_value()){
-      std::vector<ListComponentData> levels;
-      for (auto &level : gameState -> levels){
-        levels.push_back(ListComponentData{
-          .name = level.name,
-          .onClick = std::nullopt,
-        });
-      }
-    }
+    handleDrawMainUi(pauseContext, drawTools, selectedId);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);
@@ -520,7 +424,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1 && button == 0){
       auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
       if (idAtCoord.has_value()){
-        handleMouseSelect(*gameState, idAtCoord.value());
+        auto pauseContext = getUiContext(*gameState);
+        handleInputMainUi(pauseContext, idAtCoord.value());
       }
     }
     if (button == 1){
