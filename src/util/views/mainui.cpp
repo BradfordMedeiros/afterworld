@@ -110,6 +110,27 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
   if (pauseContext.showScreenspaceGrid){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
+
+  ImageList defaultImages {
+    .images = {
+      "./res/textures/wood.jpg",
+      "./res/textures/grass.jpg",
+      "./res/textures/brickwall.jpg",
+      "./res/textures/grid.png",
+      "./res/textures/grass.jpg",
+      "./res/textures/grid.png",
+      "./res/textures/wood.jpg",
+      "./res/textures/brickwall.jpg",
+    },
+  };
+  Props imageProps { 
+    .mappingId = selectedId, 
+    .props = {
+      { getSymbol("images"), defaultImages },
+    }
+  };
+
+  //imageListTest.draw(drawTools, imageProps);
 }
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){

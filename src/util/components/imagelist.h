@@ -5,10 +5,9 @@
 #include "../../global.h"
 
 struct ImageList {
-	int mappingId;
  	std::vector<std::string> images;
 };
 
-Component createImageList(ImageList& imageList);
+Component createImageList();
 
 #endif
