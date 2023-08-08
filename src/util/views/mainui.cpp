@@ -1,11 +1,13 @@
 #include "./mainui.h"
 
 const int routerSymbol = getSymbol("router");
+const int routerMappingSymbol = getSymbol("router-mapping");
 auto routerHistory = createHistory("playing");
 
 const int tintSymbol = getSymbol("tint");
 
-Component mainUI = createRouter({
+
+std::map<std::string, Component> routeToComponent = {
   { "playing",  createList(
     { ListComponentData { .name = "playing", .onClick = []() -> void {
         pushHistory("paused");
@@ -26,7 +28,9 @@ Component mainUI = createRouter({
   { "",   createList({
     { ListComponentData { .name = "default", .onClick = std::nullopt }}
   })  },
-});
+};
+
+Component mainUI = createRouter();
 
 
 Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext){
@@ -42,14 +46,20 @@ Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext){
   return props;
 }
 
+Props createRouterProps(std::optional<objid> selectedId){
+  Props routerProps {
+    .mappingId = selectedId,
+    .props = {
+      { routerSymbol, routerHistory },
+      { routerMappingSymbol, routeToComponent },
+      { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
+    },
+  };
+  return routerProps;
+}
+
 void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId){
-   Props routerProps {
-     .mappingId = selectedId,
-     .props = {
-       { routerSymbol, routerHistory },
-       { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
-     },
-   };
+   auto routerProps = createRouterProps(selectedId);
    mainUI.draw(drawTools, routerProps);
 
    Props nestedListProps { 
@@ -103,12 +113,7 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
 }
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
-  Props routerProps {
-    .mappingId = selectedId,
-    .props = {
-      { routerSymbol, routerHistory },
-    },
-  };
+  auto routerProps = createRouterProps(selectedId);
   mainUI.imMouseSelect(selectedId, routerProps);
   Props nestedListProps { 
     .mappingId = selectedId, 

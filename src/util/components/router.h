@@ -9,6 +9,6 @@ struct RouterHistory {
 RouterHistory createHistory(std::string initialRoute);
 void pushHistory(RouterHistory& history, std::string path);
 
-Component createRouter(std::map<std::string, Component> routeToComponent);
+Component createRouter();
 
 #endif
