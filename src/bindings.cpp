@@ -127,25 +127,8 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
 
 
 double downTime = 0;
-Props pauseMenuProps(GameState& gameState, std::optional<objid> mappingId){
-  float elapsedTime = gameapi -> timeSeconds(true) - downTime;
 
-  std::function<void()> pause = [&gameState]() -> void { goToMenu(gameState); };
-  std::function<void()> resume = [&gameState]() -> void { setPaused(false); };
-
-  Props props {
-    .mappingId = mappingId,
-    .props = {
-      { .symbol = getSymbol("elapsedTime"), .value = elapsedTime },
-      { .symbol = getSymbol("pause"), .value = pause } ,
-      { .symbol = getSymbol("resume"), .value = resume },
-      { .symbol = getSymbol("yoffset"), .value = 0.2f },
-    },
-  };
-  return props;
-}
-
-std::vector<ImListItem> animationMenuItems2(GameState& gameState){
+std::vector<ImListItem> animationMenuItems2(){
   int mappingId = 900000;
   auto selectedIds = gameapi -> selected();
   if (selectedIds.size() == 0){
@@ -172,25 +155,29 @@ std::vector<ImListItem> animationMenuItems2(GameState& gameState){
   return items;
 }
 
-void resume(){
-  setPaused(false);
-  std::cout << "pause component: resume called" << std::endl;
+PauseContext getUiContext(GameState& gameState){
+  std::function<void()> pause = [&gameState]() -> void { goToMenu(gameState); };
+  std::function<void()> resume = []() -> void { setPaused(false); };
+  PauseContext pauseContext {
+   .elapsedTime = gameapi -> timeSeconds(true) - downTime,
+   .pause = pause,
+   .resume = resume,
+   .shouldShowPauseMenu = showingPauseMenu(gameState),
+   .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
+  };
+  return pauseContext;
 }
 
 void handleMouseSelect(GameState& gameState, objid mappingId){
   modlog("handle mouse select", std::to_string(mappingId));
-  if (showingPauseMenu(gameState)){
-     //processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
-     auto props = pauseMenuProps(gameState, mappingId);
-     createPauseMenuComponent().imMouseSelect(mappingId, props);
-  }else if (onMainMenu(gameState)){
+  if (onMainMenu(gameState)){
      //processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
-     //processImMouseSelect(animationMenuItems2(gameState), mappingId);
+     //processImMouseSelect(animationMenuItems2(), mappingId);
   }
-
-  handleInputMainUi(mappingId);
+  auto pauseContext = getUiContext(gameState);
+  handleInputMainUi(pauseContext, mappingId);
 }
 
 void togglePauseMode(GameState& gameState){
@@ -282,7 +269,6 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   }
 }
 
-
 void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
   float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
   float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
@@ -365,17 +351,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
      drawScreenspaceGrid(ImGrid{ .numCells = 10 });
     }
 
-    bool showAnimationMenu = gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState);
-    if (showAnimationMenu){
-      drawImMenuList(
-        drawTools, 
-        animationMenuItems2(*gameState), 
-        selectedId,
-        1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */
-      );
+    auto pauseContext = getUiContext(*gameState);    
+    if (pauseContext.showAnimationMenu){
+      drawImMenuList(drawTools, animationMenuItems2(), selectedId, 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
     }
 
-    handleDrawMainUi(drawTools, selectedId);
+    //handleDrawMainUi(pauseContext, drawTools, selectedId);
 
     if (!gameState -> loadedLevel.has_value()){
       std::vector<ListComponentData> levels;
@@ -385,23 +366,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           .onClick = std::nullopt,
         });
       }
-
-     
-    }else if (showingPauseMenu(*gameState)){
-      //auto props = pauseMenuProps(*gameState, selectedId);
-      //createPauseMenuComponent().draw(drawTools, props);
     }
-
-    auto props = pauseMenuProps(*gameState, selectedId);
-    createPauseMenuComponent().draw(drawTools, props);
-
-
-
-  
-    //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
-
-    //drawImNestedList(nestedListTest, selectedId, );
-
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);

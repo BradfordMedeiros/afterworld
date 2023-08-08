@@ -28,7 +28,21 @@ Component mainUI = createRouter({
   })  },
 });
 
-void handleDrawMainUi(DrawingTools& drawTools, std::optional<objid> selectedId){
+
+Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext){
+  Props props {
+    .mappingId = mappingId,
+    .props = {
+      { .symbol = getSymbol("elapsedTime"), .value = pauseContext.elapsedTime },
+      { .symbol = getSymbol("pause"), .value = pauseContext.pause } ,
+      { .symbol = getSymbol("resume"), .value = pauseContext.resume },
+      { .symbol = getSymbol("yoffset"), .value = 0.2f },
+    },
+  };
+  return props;
+}
+
+void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId){
    Props routerProps {
      .mappingId = selectedId,
      .props = {
@@ -61,11 +75,16 @@ void handleDrawMainUi(DrawingTools& drawTools, std::optional<objid> selectedId){
   };
   nestedListTestComponent.draw(drawTools, nestedListProps);
 
+  if (pauseContext.shouldShowPauseMenu){
+    auto props = pauseMenuProps(selectedId, pauseContext);
+    createPauseMenuComponent().draw(drawTools, props);    
+  }
+
     /*drawDebugBoundingBox(*/ //);
 
 }
 
-void handleInputMainUi(std::optional<objid> selectedId){
+void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
    Props routerProps {
      .mappingId = selectedId,
      .props = {
