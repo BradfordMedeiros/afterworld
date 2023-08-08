@@ -556,14 +556,7 @@ std::vector<NestedListItem> nestedListTest = {
 Component nestedListTestComponent = createNestedList(nestedListTest);
 Component imageListTest = createImageList();
 
-Slider exampleSlider {
-  .min  = 0.f,
-  .max = 10.f,
-  .percentage = 0.f,
-  .mappingId = 34545,
-  .update = false,
-};
-Component sliderSelector = createSlider(exampleSlider);
+Component sliderSelector = createSlider();
 
 
 int mappingIdRadio = 95000;
@@ -595,8 +588,6 @@ RadioButtonContainer radioButtonContainer {
   }
 };
 Component radioButtonSelector = createRadioButtonComponent(radioButtonContainer);
-
-
 
 Layout testLayout2 {
   .tint = glm::vec4(0.f, 0.f, 1.f, .6f),

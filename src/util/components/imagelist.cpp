@@ -1,22 +1,12 @@
 #include "./imagelist.h"
 
-
 const int imagesSymbol = getSymbol("images");
-ImageList* imageListFromProps(Props& props){
-  auto propPair = propPairAtIndex(props.props, imagesSymbol);
-  if (!propPair){
-    return NULL;
-  }
-  ImageList* imageList = anycast<ImageList>(propPair -> value);
-  modassert(imageList, "invalid imagelist");
-  return imageList;
-}
 
 Component createImageList(){
 	int baseMappingId = 858584;
 	Component imageListTest  {
 	  .draw = [baseMappingId](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-	  	auto imageList = imageListFromProps(props);
+	  	auto imageList = typeFromProps<ImageList>(props, imagesSymbol);
 	  	modassert(imageList, "invalid image list prop");
 	  	drawTools.drawRect(0.f + 0.2f, 0.f, 1.f, 1.f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt);
 	  	for (int i = 0; i < imageList -> images.size(); i++){

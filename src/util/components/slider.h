@@ -12,7 +12,7 @@ struct Slider {
   bool update;
 };
 
-Component createSlider(Slider& slider);
+Component createSlider();
 
 
 #endif

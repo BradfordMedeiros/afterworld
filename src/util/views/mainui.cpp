@@ -58,6 +58,26 @@ Props createRouterProps(std::optional<objid> selectedId){
   return routerProps;
 }
 
+Slider exampleSlider {
+  .min = 0.f,
+  .max = 10.f,
+  .percentage = 0.f,
+  .mappingId = 34545,
+  .update = false,
+};
+const int sliderSymbol = getSymbol("slider");
+Props sliderProps {
+  .mappingId = std::nullopt,
+  .props = {
+    { sliderSymbol, exampleSlider },
+  },
+};
+
+Props& getSliderProps(std::optional<objid> selectedId){
+  sliderProps.mappingId = selectedId;
+  return sliderProps;  
+}
+
 void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId){
    auto routerProps = createRouterProps(selectedId);
    mainUI.draw(drawTools, routerProps);
@@ -130,7 +150,10 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
     }
   };
 
-  //imageListTest.draw(drawTools, imageProps);
+  imageListTest.draw(drawTools, imageProps);
+
+  Props& sliderProps = getSliderProps(selectedId);
+  sliderSelector.draw(drawTools, sliderProps);
 }
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
@@ -147,6 +170,9 @@ void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selected
     // should render main menu items
     //processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
+
+  Props& sliderProps = getSliderProps(selectedId);
+  sliderSelector.imMouseSelect(selectedId, sliderProps);
 }
 
 void pushHistory(std::string route){

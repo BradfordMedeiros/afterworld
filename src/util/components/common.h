@@ -23,6 +23,18 @@ glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
 glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
 std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
 
+template <typename T>
+T* typeFromProps(Props& props, int symbol){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (!propPair){
+    return NULL;
+  }
+  T* propValue = anycast<T>(propPair -> value);
+  modassert(propValue, "invalid cast in typeFromProps");
+  return propValue;
+}
+
+
 void updatePropValue(Props& props, int symbol, std::any value);
 
 struct DrawingTools {
@@ -64,5 +76,9 @@ BoundingBoxMeasurer createMeasurer();
 void setX(BoundingBoxMeasurer& box, float value);
 void setY(BoundingBoxMeasurer& box, float value);
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
+
+
+
+
 
 #endif

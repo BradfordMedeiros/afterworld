@@ -159,6 +159,7 @@ std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
   return std::nullopt;
 }
 
+
 void updatePropValue(Props& props, int symbol, std::any value){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
@@ -171,3 +172,4 @@ void updatePropValue(Props& props, int symbol, std::any value){
     .value = value,
   });
 }
+
