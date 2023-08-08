@@ -556,54 +556,6 @@ std::vector<NestedListItem> nestedListTest = {
 Component nestedListTestComponent = createNestedList(nestedListTest);
 
 
-std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu){
-  int pauseMappingIds = 999999;
-  std::vector<ImListItem> listItems;
-  listItems.push_back(ImListItem {
-    .value = "Resume",
-    .onClick = resume,
-    .mappingId = pauseMappingIds++,
-  });
-  listItems.push_back(ImListItem {
-    .value = "Main Menu",
-    .onClick = goToMainMenu,
-    .mappingId = pauseMappingIds++,
-  });
-  return listItems;
-}
-
-//
-//drawImMenuList(
-//  drawTools, 
-//  createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), 
-//  mappingId, 
-//  style.xoffset, style.yoffset, style.padding, style.fontSizePerLetterNdi, style.minwidth
-//);
-//processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
-
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-
-Component createPauseMenuComponent(std::function<void()> resume, std::function<void()> goToMainMenu){
-  auto pauseMenu =  createPauseMenu(resume, goToMainMenu);
-
-  return Component {
-    .draw = [pauseMenu](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
-      auto xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-      auto yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-
-      float padding = 0.05f;
-      return drawImMenuList(
-        drawTools, pauseMenu, mappingId,  xoffset, yoffset, padding, 0.015f /* fontsize */, minwidth);
-    },
-    .imMouseSelect = [pauseMenu](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      processImMouseSelect(pauseMenu, mappingIdSelected);
-    }  
-  };
-}
-
 ImageList defaultImages {
   .mappingId = 858584,
   .images = {

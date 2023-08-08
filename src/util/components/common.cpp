@@ -146,11 +146,13 @@ glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue){
   return defaultValue;
 }
 
-std::optional<std::function<void()>> fnFromPos(Props& props, int symbol){
+std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
+    const std::type_info& typeInfo = propPair -> value.type();
+    std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
     std::function<void()>* fnValue = anycast<std::function<void()>>(propPair -> value);
-    modassert(fnValue, "fnFromPos invalid type");
+    modassert(fnValue, "fnFromProp invalid type");
     return *fnValue;
 
   }

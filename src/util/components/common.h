@@ -21,7 +21,7 @@ int intFromProp(Props& props, int symbol, int defaultValue);
 float floatFromProp(Props& props, int symbol, float defaultValue);
 glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
 glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
-std::optional<std::function<void()>> fnFromPos(Props& props, int symbol);
+std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
 
 void updatePropValue(Props& props, int symbol, std::any value);
 

@@ -37,6 +37,32 @@ void handleDrawMainUi(DrawingTools& drawTools, std::optional<objid> selectedId){
      },
    };
    mainUI.draw(drawTools, routerProps);
+
+   Props nestedListProps { 
+    .mappingId = selectedId, 
+    .props = {
+      PropPair {
+        .symbol = getSymbol("tint"),
+        .value = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+      },
+      PropPair {
+        .symbol = getSymbol("minwidth"),
+        .value = 0.15f,
+      },
+      PropPair {
+        .symbol = getSymbol("xoffset"),
+        .value = -0.99f,
+      },
+      PropPair {
+        .symbol = getSymbol("yoffset"),
+        .value = 0.98f,  
+      }
+    }
+  };
+  nestedListTestComponent.draw(drawTools, nestedListProps);
+
+    /*drawDebugBoundingBox(*/ //);
+
 }
 
 void handleInputMainUi(std::optional<objid> selectedId){
@@ -47,6 +73,12 @@ void handleInputMainUi(std::optional<objid> selectedId){
      },
    };
    mainUI.imMouseSelect(selectedId, routerProps);
+
+  Props nestedListProps { 
+    .mappingId = selectedId, 
+    .props = {}
+  };
+  nestedListTestComponent.imMouseSelect(selectedId, nestedListProps);
 }
 
 void pushHistory(std::string route){

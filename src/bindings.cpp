@@ -76,27 +76,6 @@ void goToMenu(GameState& gameState){
   cameras = {};
 }
 
-struct PauseValue {
-  const char* name;
-  std::function<void(GameState& gameState)> fn;
-};
-
-std::vector<PauseValue> pauseText = {
-  PauseValue { 
-    .name = "Resume", 
-    .fn = [](GameState& gameState) -> void { 
-      setPaused(false);
-    },
-  },
-  PauseValue {
-    .name = "Main Menu",
-    .fn = [](GameState& gameState) -> void {
-      goToMenu(gameState);
-    },
-  },
-};
-
-
 bool showingPauseMenu(GameState& gameState){
   return gameState.loadedLevel.has_value() && getGlobalState().paused;
 }
@@ -148,35 +127,22 @@ std::vector<Component> mainMenuItems2(GameState& gameState){
 
 
 double downTime = 0;
-void drawPauseMenu(DrawingTools& drawTools, GameState& gameState, std::optional<objid> mappingId){
-  double elapsedTime = gameapi -> timeSeconds(true) - downTime;
+Props pauseMenuProps(GameState& gameState, std::optional<objid> mappingId){
+  float elapsedTime = gameapi -> timeSeconds(true) - downTime;
 
-  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png");
-
-  gameapi -> drawRect(0.f, 2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
-  gameapi -> drawRect(0.f, -2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(0.4f, 0.4f, 0.4f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
-  gameapi -> drawRect(-2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 1.f, 2.f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
-  gameapi -> drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
+  std::function<void()> pause = [&gameState]() -> void { goToMenu(gameState); };
+  std::function<void()> resume = [&gameState]() -> void { setPaused(false); };
 
   Props props {
     .mappingId = mappingId,
     .props = {
-      { .symbol = getSymbol("pause"), .value = [&gameState]() -> void { goToMenu(gameState); }},
-      { .symbol = getSymbol("resume"), .value = [&gameState]() -> void { goToMenu(gameState); }},
+      { .symbol = getSymbol("elapsedTime"), .value = elapsedTime },
+      { .symbol = getSymbol("pause"), .value = pause } ,
+      { .symbol = getSymbol("resume"), .value = resume },
       { .symbol = getSymbol("yoffset"), .value = 0.2f },
     },
   };
-  createPauseMenuComponent(
-      []() -> void { 
-        setPaused(false);
-        std::cout << "pause component: resume called" << std::endl;
-      }, 
-      [&gameState]() -> void { 
-        goToMenu(gameState);
-        std::cout << "pause component: go to menu" << std::endl;
-     }
-  ).draw(drawTools, props);
-
+  return props;
 }
 
 std::vector<ImListItem> animationMenuItems2(GameState& gameState){
@@ -212,31 +178,17 @@ void resume(){
 }
 
 void handleMouseSelect(GameState& gameState, objid mappingId){
-  Props props { 
-    .mappingId = mappingId, 
-    .props = {}
-  };
-
   modlog("handle mouse select", std::to_string(mappingId));
   if (showingPauseMenu(gameState)){
      //processImMouseSelect(createPauseMenu([]() -> void { setPaused(false); }, [&gameState]() -> void { goToMenu(gameState); }), mappingId);
-     createPauseMenuComponent(
-        resume, 
-        [&gameState]() -> void { 
-          goToMenu(gameState);
-          std::cout << "pause component: go to menu" << std::endl;
-       }
-    ).imMouseSelect(mappingId, props);
+     auto props = pauseMenuProps(gameState, mappingId);
+     createPauseMenuComponent().imMouseSelect(mappingId, props);
   }else if (onMainMenu(gameState)){
      //processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }
   if (gameState.loadedLevel.has_value() && !showingPauseMenu(gameState)){
      //processImMouseSelect(animationMenuItems2(gameState), mappingId);
   }
-
-
-
-  nestedListTestComponent.imMouseSelect(mappingId, props);
 
   handleInputMainUi(mappingId);
 }
@@ -368,47 +320,6 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   gameapi -> setSelected(ids);
 }
 
-
-
-
-void drawMainMenu(GameState& gameState, DrawingTools& drawTools, std::optional<objid> selectedId){
-  /*
-  int mappingId = 90000;
-  for (int i = 0; i < gameState.levels.size(); i++){
-    ImListItem menuItem {
-      .value = gameState.levels.at(i).name,
-      .onClick = [&gameState, i]() -> void {
-        goToLevel(gameState, gameState.levels.at(i).scene);
-      },
-      .mappingId = mappingId++,
-    };
-    elements.push_back(
-      Component {
-        .draw = [menuItem](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-          float padding = 0.05f;
-          auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
-          float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-          float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-
-          auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset, padding, 0.015f , minwidth);
-          drawDebugBoundingBox(drawTools, box);
-          return box;
-        },
-        .imMouseSelect = [menuItem](std::optional<objid> mappingIdSelected) -> void {
-          if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-            if (menuItem.onClick.has_value()){
-              menuItem.onClick.value()();
-            }
-          }
-        },
-      }
-    );
-  }*/
-
-
-}
-
-
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -454,6 +365,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
      drawScreenspaceGrid(ImGrid{ .numCells = 10 });
     }
 
+    bool showAnimationMenu = gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState);
+    if (showAnimationMenu){
+      drawImMenuList(
+        drawTools, 
+        animationMenuItems2(*gameState), 
+        selectedId,
+        1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */
+      );
+    }
+
+    handleDrawMainUi(drawTools, selectedId);
+
     if (!gameState -> loadedLevel.has_value()){
       std::vector<ListComponentData> levels;
       for (auto &level : gameState -> levels){
@@ -463,45 +386,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         });
       }
 
-      handleDrawMainUi(drawTools, selectedId);
+     
     }else if (showingPauseMenu(*gameState)){
-      drawPauseMenu(drawTools, *gameState, selectedId);
+      //auto props = pauseMenuProps(*gameState, selectedId);
+      //createPauseMenuComponent().draw(drawTools, props);
     }
 
-    if (gameState -> loadedLevel.has_value() && !showingPauseMenu(*gameState)){
-      drawImMenuList(
-        drawTools, 
-        animationMenuItems2(*gameState), 
-        selectedId,
-        1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */
-      );
-    }
+    auto props = pauseMenuProps(*gameState, selectedId);
+    createPauseMenuComponent().draw(drawTools, props);
 
 
-    Props nestedListProps { 
-      .mappingId = selectedId, 
-      .props = {
-        PropPair {
-          .symbol = getSymbol("tint"),
-          .value = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-        },
-        PropPair {
-          .symbol = getSymbol("minwidth"),
-          .value = 0.15f,
-        },
-        PropPair {
-          .symbol = getSymbol("xoffset"),
-          .value = -0.99f,
-        },
-        PropPair {
-          .symbol = getSymbol("yoffset"),
-          .value = 0.98f,  
-        }
-      }
-    };
 
-
-    /*drawDebugBoundingBox(*/nestedListTestComponent.draw(drawTools, nestedListProps); //);
+  
     //drawImNestedList(nestedListTest, selectedId, MenuItemStyle { .margin = 0.f, .padding = 0.01f, .minwidth = 0.15f, .xoffset = -0.99f, .yoffset = 0.98f, .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f), .fontSizePerLetterNdi = 0.015f });
 
     //drawImNestedList(nestedListTest, selectedId, );

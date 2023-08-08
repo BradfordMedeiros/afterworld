@@ -29,6 +29,7 @@
 #include "./util/components/imagelist.h"
 #include "./util/components/router.h"
 #include "./util/views/mainui.h"
+#include "./util/views/pausemenu.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
