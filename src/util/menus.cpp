@@ -564,8 +564,6 @@ std::vector<NestedListItem> nestedListTest = {
 };
 
 Component nestedListTestComponent = createNestedList(nestedListTest);
-Component sliderSelector = createSlider();
-
 
 int mappingIdRadio = 95000;
 RadioButtonContainer radioButtonContainer {

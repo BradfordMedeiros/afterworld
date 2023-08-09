@@ -5,29 +5,49 @@ const int routerMappingSymbol = getSymbol("router-mapping");
 auto routerHistory = createHistory("playing");
 
 const int tintSymbol = getSymbol("tint");
+const int listItemsSymbol = getSymbol("listitems");
+
+std::vector<ListComponentData> playingListItems = { 
+  ListComponentData { 
+    .name = "playing wow", 
+    .onClick = []() -> void {
+      pushHistory("paused");
+    }
+  },
+  ListComponentData { 
+    .name = "playing woah", 
+    .onClick = []() -> void {
+      pushHistory("quit");
+    }
+  }
+};
+Props playingListProps {
+  .mappingId = std::nullopt,
+  .props = {
+    { listItemsSymbol, playingListItems },
+  },
+};
+
+std::vector<ListComponentData> quitListItems = { 
+  ListComponentData { 
+    .name = "quit", 
+    .onClick = []() -> void {
+      exit(0);
+    }
+  },
+};
+Props quitProps {
+  .mappingId = std::nullopt,
+  .props = {
+    { listItemsSymbol, quitListItems },
+  },
+};
 
 
 std::map<std::string, Component> routeToComponent = {
-  { "playing",  createList(
-    { ListComponentData { .name = "playing", .onClick = []() -> void {
-        pushHistory("paused");
-      }},
-      ListComponentData { .name = "playing", .onClick = []() -> void {
-        pushHistory("quit");
-      }}
-    }
-  )},
-  { "paused",   createList({
-    { ListComponentData { .name = "paused", .onClick = std::nullopt }}
-  })  },
-  { "quit",  createList(
-    { ListComponentData { .name = "quit", .onClick = []() -> void {
-      exit(0);
-    }}}
-  )},
-  { "",   createList({
-    { ListComponentData { .name = "default", .onClick = std::nullopt }}
-  })  },
+  { "playing",  withProps(listComponent, playingListProps) },
+  { "quit",  withProps(listComponent, quitProps) },
+  { "",  withProps(listComponent, playingListProps)  },
 };
 
 Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext){
@@ -157,7 +177,7 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
   //imageListTest.draw(drawTools, imageProps);
 
   Props& sliderProps = getSliderProps(selectedId);
-  sliderSelector.draw(drawTools, sliderProps);
+  slider.draw(drawTools, sliderProps);
 }
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
@@ -176,7 +196,7 @@ void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selected
   }
 
   Props& sliderProps = getSliderProps(selectedId);
-  sliderSelector.imMouseSelect(selectedId, sliderProps);
+  slider.imMouseSelect(selectedId, sliderProps);
 }
 
 void pushHistory(std::string route){

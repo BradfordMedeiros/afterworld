@@ -12,7 +12,4 @@ struct ListComponentData {
 extern Component listComponent;
 
 
-Component createList(std::vector<ListComponentData> listItems);
-
-
 #endif
