@@ -28,3 +28,16 @@ Component createList(std::vector<ListComponentData> listItems){
 
   return createLayoutComponent(layout);
 }
+
+const int tintSymbol = getSymbol("listitems");
+
+Component listComponent {
+  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    //auto imageList = typeFromProps<ImageList>(props, imagesSymbol);
+    //modassert(imageList, "invalid image list prop");
+
+  },
+  .imMouseSelect = [](std::optional<objid> mappingId, Props& props) -> void {
+   
+  },
+};

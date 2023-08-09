@@ -9,6 +9,10 @@ struct ListComponentData {
 	std::string name;
 	std::optional<std::function<void()>> onClick;
 };
+extern Component listComponent;
+
+
 Component createList(std::vector<ListComponentData> listItems);
+
 
 #endif

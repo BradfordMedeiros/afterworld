@@ -200,3 +200,10 @@ Component withProps(Component& wrappedComponent, Props& outerProps){
 }
 
 
+Props getDefaultProps(std::optional<objid> selectedId){
+  return Props { 
+    .mappingId = selectedId, 
+    .props = {}
+  };
+}
+ 

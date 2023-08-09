@@ -130,10 +130,14 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 
 const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
+const int layoutSymbol = getSymbol("layout");
 
 Component createLayoutComponent(Layout& layout){
 	Component layoutComponent  {
 	  .draw = [layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
+	  	//auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
+	  	//modassert(layoutPtr, "layout prop not provided");
+	  	//Layout& layout2 = *layoutPtr;
       float xoffset = 0.f;
       float yoffset = 0.f;
 
@@ -249,6 +253,9 @@ Component createLayoutComponent(Layout& layout){
 	  	return boundingBox;
 	  },
 	  .imMouseSelect = [layout](std::optional<objid> mappingIdSelected, Props& props) -> void {
+	  		//auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
+	  		//modassert(layoutPtr, "layout prop not provided");
+	  		//Layout& layout = *layoutPtr;
 	     for (auto &child : layout.children){
 	     	child.imMouseSelect(mappingIdSelected, props);
 	     }

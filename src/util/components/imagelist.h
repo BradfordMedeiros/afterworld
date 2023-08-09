@@ -8,6 +8,6 @@ struct ImageList {
  	std::vector<std::string> images;
 };
 
-Component createImageList();
+extern Component imageList;
 
 #endif

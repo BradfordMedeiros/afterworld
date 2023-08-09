@@ -16,6 +16,8 @@ struct Props {
   std::vector<PropPair> props;
 };
 
+Props getDefaultProps(std::optional<objid> selectedId);
+
 PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol);
 int intFromProp(Props& props, int symbol, int defaultValue);
 float floatFromProp(Props& props, int symbol, float defaultValue);

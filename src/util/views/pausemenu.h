@@ -4,7 +4,7 @@
 #include "../components/common.h"
 #include "../components/listitem.h"
 
-Component createPauseMenuComponent();
+extern Component pauseMenuComponent;
 
 
 #endif

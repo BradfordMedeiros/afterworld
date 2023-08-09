@@ -18,7 +18,6 @@ std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::funct
 
 
 extern std::vector<NestedListItem> nestedListTest;
-extern Component imageListTest;
 extern Component sliderSelector;
 extern Component radioButtonSelector;
 extern Component nestedListTestComponent;

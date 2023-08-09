@@ -30,9 +30,6 @@ std::map<std::string, Component> routeToComponent = {
   })  },
 };
 
-Component mainUI = createRouter();
-
-
 Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext){
   Props props {
     .mappingId = mappingId,
@@ -78,9 +75,12 @@ Props& getSliderProps(std::optional<objid> selectedId){
   return sliderProps;  
 }
 
+
+
 void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId){
+   auto defaultProps = getDefaultProps(selectedId);
    auto routerProps = createRouterProps(selectedId);
-   mainUI.draw(drawTools, routerProps);
+   router.draw(drawTools, routerProps);
 
    Props nestedListProps { 
     .mappingId = selectedId, 
@@ -103,11 +103,11 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
       }
     }
   };
-  nestedListTestComponent.draw(drawTools, nestedListProps);
+  withProps(nestedListTestComponent, nestedListProps).draw(drawTools, defaultProps);
 
   if (pauseContext.shouldShowPauseMenu){
     auto props = pauseMenuProps(selectedId, pauseContext);
-    createPauseMenuComponent().draw(drawTools, props);    
+    pauseMenuComponent.draw(drawTools, props);    
   }
 
   /* 
@@ -150,6 +150,10 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
     }
   };
 
+ 
+
+  auto images = withProps(imageList, imageProps);
+  //images.draw(drawTools, defaultProps);
   //imageListTest.draw(drawTools, imageProps);
 
   Props& sliderProps = getSliderProps(selectedId);
@@ -158,7 +162,7 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
   auto routerProps = createRouterProps(selectedId);
-  mainUI.imMouseSelect(selectedId, routerProps);
+  router.imMouseSelect(selectedId, routerProps);
   Props nestedListProps { 
     .mappingId = selectedId, 
     .props = {}

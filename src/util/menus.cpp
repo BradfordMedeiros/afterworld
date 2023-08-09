@@ -564,8 +564,6 @@ std::vector<NestedListItem> nestedListTest = {
 };
 
 Component nestedListTestComponent = createNestedList(nestedListTest);
-Component imageListTest = createImageList();
-
 Component sliderSelector = createSlider();
 
 
