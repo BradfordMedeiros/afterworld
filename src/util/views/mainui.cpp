@@ -150,7 +150,7 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
     }
   };
 
-  imageListTest.draw(drawTools, imageProps);
+  //imageListTest.draw(drawTools, imageProps);
 
   Props& sliderProps = getSliderProps(selectedId);
   sliderSelector.draw(drawTools, sliderProps);

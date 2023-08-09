@@ -22,6 +22,7 @@ float floatFromProp(Props& props, int symbol, float defaultValue);
 glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
 glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
 std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
+std::string strFromProp(Props& props, int symbol, const char* defaultValue);
 
 template <typename T>
 T* typeFromProps(Props& props, int symbol){
@@ -78,7 +79,6 @@ void setY(BoundingBoxMeasurer& box, float value);
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
 
 
-
-
+Component withProps(Component& wrappedComponent, Props& props);
 
 #endif

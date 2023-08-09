@@ -485,6 +485,16 @@ std::vector<NestedListItem> nestedListTest = {
             },
             .items = {},
           },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "scifi",
+              .onClick = []() -> void { 
+                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/testhelmet.jpg"));
+              },
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
         },
       },
       NestedListItem {

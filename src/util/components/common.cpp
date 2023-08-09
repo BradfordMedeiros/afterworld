@@ -159,6 +159,13 @@ std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
   return std::nullopt;
 }
 
+std::string strFromProp(Props& props, int symbol, const char* defaultValue){
+  auto strValue = typeFromProps<std::string>(props, symbol);
+  if (!strValue){
+    return defaultValue;
+  }
+  return *strValue;
+}
 
 void updatePropValue(Props& props, int symbol, std::any value){
   auto propPair = propPairAtIndex(props.props, symbol);
@@ -172,4 +179,24 @@ void updatePropValue(Props& props, int symbol, std::any value){
     .value = value,
   });
 }
+
+
+Component withProps(Component& wrappedComponent, Props& outerProps){
+  auto component = Component {
+    .draw = [&wrappedComponent, &outerProps](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      for (auto &prop : outerProps.props){
+        updatePropValue(props, prop.symbol, prop.value);
+      }
+      return wrappedComponent.draw(drawTools, props);
+    },
+    .imMouseSelect = [&wrappedComponent, &outerProps](std::optional<objid> mappingIdSelected, Props& props) -> void {
+      for (auto &prop : outerProps.props){
+        updatePropValue(props, prop.symbol, prop.value);
+      }
+      wrappedComponent.imMouseSelect(mappingIdSelected, outerProps);
+    },
+  };
+  return component;
+}
+
 
