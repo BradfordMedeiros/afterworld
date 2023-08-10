@@ -92,20 +92,24 @@ void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid>
   }
 }
 
-Component createNestedList(std::vector<NestedListItem>& items){
-  Component component  {
-    .draw = [&items](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      float padding = 0.01f;
-      float fontSizePerLetterNdi = 0.015f;
-      auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.6f));
-      auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
-      float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-      float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-      return drawImNestedList(drawTools, items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
-    },
-    .imMouseSelect = [&items](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      processImMouseSelect(items, mappingIdSelected);
-    }  
-  };
-  return component;
-}
+
+const int itemsSymbol = getSymbol("items");
+
+Component nestedList  {
+  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    auto items = typeFromProps<std::vector<NestedListItem>>(props, itemsSymbol);
+    modassert(items, "nested list - invalid items props");
+    float padding = 0.01f;
+    float fontSizePerLetterNdi = 0.015f;
+    auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.6f));
+    auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+    float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+    float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+    return drawImNestedList(drawTools, *items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
+  },
+  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
+    auto items = typeFromProps<std::vector<NestedListItem>>(props, itemsSymbol);
+    modassert(items, "nested list - invalid items props");
+    processImMouseSelect(*items, mappingIdSelected);
+  }  
+};

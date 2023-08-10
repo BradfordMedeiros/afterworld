@@ -1,6 +1,6 @@
 #include "./list.h"
 
-Component createList(std::vector<ListComponentData> listItems){
+Layout createLayout(std::vector<ListComponentData> listItems){
   std::vector<Component> elements;
   for (auto &listItem : listItems){
     if (listItem.onClick.has_value()){
@@ -15,7 +15,7 @@ Component createList(std::vector<ListComponentData> listItems){
     .borderColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f),
     .minwidth = 0.f,
     .minheight = 0.f,
-    .layoutType = LAYOUT_VERTICAL2,
+    .layoutType = LAYOUT_HORIZONTAL2,
     .layoutFlowHorizontal = UILayoutFlowNone2,
     .layoutFlowVertical = UILayoutFlowNone2,
     .alignHorizontal = UILayoutFlowNone2,
@@ -25,21 +25,36 @@ Component createList(std::vector<ListComponentData> listItems){
     .padding = 0.f,
     .children = elements,
   };
-
-  return createLayoutComponent(layout);
+  return layout;
 }
 
 const int listItemsSymbol = getSymbol("listitems");
+const int layoutSymbol = getSymbol("layout");
 
 Component listComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     auto listItems = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
     modassert(listItems, "invalid listItems prop");
-    return createList(*listItems).draw(drawTools, props);
+    auto layout = createLayout(*listItems);
+    Props listLayoutProps {
+      .mappingId = std::nullopt,
+      .props = {
+        { .symbol = layoutSymbol, .value = layout },
+      },
+    };
+    return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
   },
   .imMouseSelect = [](std::optional<objid> mappingId, Props& props) -> void {
     auto listItems = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
     modassert(listItems, "invalid listItems prop");
-    return createList(*listItems).imMouseSelect(mappingId, props);
+    auto layout = createLayout(*listItems);
+    Props listLayoutProps {
+      .mappingId = std::nullopt,
+      .props = {
+        { .symbol = layoutSymbol, .value = layout },
+      },
+    };
+    withProps(layoutComponent, listLayoutProps).imMouseSelect(mappingId, props);
+
   },
 };

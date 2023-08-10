@@ -132,11 +132,11 @@ const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
 const int layoutSymbol = getSymbol("layout");
 
-Component createLayoutComponent(Layout& layout){
-	Component layoutComponent  {
-	  .draw = [layout](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
-	  	//auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
-	  	//modassert(layoutPtr, "layout prop not provided");
+Component layoutComponent  {
+	  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
+	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
+	  	modassert(layoutPtr, "layout prop not provided");
+	  	auto layout = *layoutPtr;
 	  	//Layout& layout2 = *layoutPtr;
       float xoffset = 0.f;
       float yoffset = 0.f;
@@ -252,7 +252,10 @@ Component createLayoutComponent(Layout& layout){
 	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	return boundingBox;
 	  },
-	  .imMouseSelect = [layout](std::optional<objid> mappingIdSelected, Props& props) -> void {
+	  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
+	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
+	  	modassert(layoutPtr, "layout prop not provided");
+	  	auto layout = *layoutPtr;
 	  		//auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
 	  		//modassert(layoutPtr, "layout prop not provided");
 	  		//Layout& layout = *layoutPtr;
@@ -260,7 +263,5 @@ Component createLayoutComponent(Layout& layout){
 	     	child.imMouseSelect(mappingIdSelected, props);
 	     }
 	  }  
-	};
-	return layoutComponent;
-}
+};
 

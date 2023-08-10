@@ -10,6 +10,6 @@ struct NestedListItem {
   std::vector<NestedListItem> items;
 };
 
-Component createNestedList(std::vector<NestedListItem>& items);
+extern Component nestedList;
 
 #endif

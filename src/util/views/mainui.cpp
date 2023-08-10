@@ -6,6 +6,10 @@ auto routerHistory = createHistory("playing");
 
 const int tintSymbol = getSymbol("tint");
 const int listItemsSymbol = getSymbol("listitems");
+const int minwidthSymbol = getSymbol("minwidth");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+const int radioSymbol  = getSymbol("radio");
 
 std::vector<ListComponentData> playingListItems = { 
   ListComponentData { 
@@ -178,6 +182,34 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
 
   Props& sliderProps = getSliderProps(selectedId);
   slider.draw(drawTools, sliderProps);
+
+  RadioButtonContainer radioButtonContainer {
+    .selectedRadioButtonIndex = 0,
+    .radioButtons = {
+      RadioButton {
+        .selected = false,
+        .hovered = false,
+        .onClick = std::nullopt,
+        .mappingId = std::nullopt,
+      },
+      RadioButton {
+        .selected = true,
+        .hovered = false,
+        .onClick = std::nullopt,
+        .mappingId = std::nullopt,
+      },
+    },
+  };
+
+  Props radioProps {
+    .mappingId = std::nullopt,
+    .props = {
+      PropPair { .symbol = xoffsetSymbol, .value = 0.5f },
+      PropPair { .symbol = yoffsetSymbol, .value = 0.5f },
+      PropPair { .symbol = radioSymbol, .value = radioButtonContainer },
+    }
+  };
+  radioButtons.draw(drawTools, radioProps);
 }
 
 void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
@@ -233,9 +265,6 @@ std::vector<ImListItem> animationMenuItems2(){
   return items;
 }
 
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
 
 std::vector<Component> mainMenuItems2(){
   std::vector<Component> elements;

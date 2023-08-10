@@ -16,6 +16,6 @@ struct RadioButtonContainer {
 	std::vector<RadioButton> radioButtons;
 };
 
-Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer);
+extern Component radioButtons;
 
 #endif

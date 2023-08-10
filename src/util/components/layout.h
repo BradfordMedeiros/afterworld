@@ -37,6 +37,6 @@ struct Layout {
   std::vector<Component> children;
 };
 
-Component createLayoutComponent(Layout& layout);
+extern Component layoutComponent;
 
 #endif

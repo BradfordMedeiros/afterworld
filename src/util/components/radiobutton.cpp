@@ -65,17 +65,22 @@ BoundingBox2D drawRadioButtons(DrawingTools& drawTools, std::vector<RadioButton>
 
 const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
+const int radioSymbol = getSymbol("radio");
 
-Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer){
-  Component radioButtonSelector  {
-    .draw = [&radioButtonContainer](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
-         auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
+//auto listItems = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
+
+Component radioButtons  {
+    .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      auto radioButtonContainer = typeFromProps<RadioButtonContainer>(props, radioSymbol);
+      modassert(radioButtonContainer, "invalid radio symbol props");
+
+      for (int i = 0; i < radioButtonContainer -> radioButtons.size(); i++){
+         auto radioMappingId = radioButtonContainer -> radioButtons.at(i).mappingId;
          auto selectedId = getGlobalState().selectedId;
          if (selectedId.has_value() && radioMappingId.has_value() && radioMappingId.value() == selectedId.value()){
-           radioButtonContainer.radioButtons.at(i).hovered = true;
+           radioButtonContainer -> radioButtons.at(i).hovered = true;
          }else{
-           radioButtonContainer.radioButtons.at(i).hovered = false;
+           radioButtonContainer -> radioButtons.at(i).hovered = false;
          }
       }
   
@@ -83,7 +88,7 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
       float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
       auto boundingBox = drawRadioButtons(
         drawTools,
-        radioButtonContainer.radioButtons,
+        radioButtonContainer -> radioButtons,
         xoffset,
         yoffset,
         0.05f,
@@ -94,20 +99,20 @@ Component createRadioButtonComponent(RadioButtonContainer& radioButtonContainer)
       drawDebugBoundingBox(drawTools, boundingBox);
       return boundingBox;
     },
-    .imMouseSelect = [&radioButtonContainer](std::optional<objid> mappingIdSelected, Props& props) -> void {
-       for (int i = 0; i < radioButtonContainer.radioButtons.size(); i++){
-         auto radioMappingId = radioButtonContainer.radioButtons.at(i).mappingId;
+    .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
+      auto radioButtonContainer = typeFromProps<RadioButtonContainer>(props, radioSymbol);
+      modassert(radioButtonContainer, "invalid radio symbol props");
+       for (int i = 0; i < radioButtonContainer -> radioButtons.size(); i++){
+         auto radioMappingId = radioButtonContainer -> radioButtons.at(i).mappingId;
          if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
-           radioButtonContainer.selectedRadioButtonIndex = i;
-           if (radioButtonContainer.radioButtons.at(i).onClick.has_value()){
-             radioButtonContainer.radioButtons.at(i).onClick.value()();
+           radioButtonContainer -> selectedRadioButtonIndex = i;
+           if (radioButtonContainer -> radioButtons.at(i).onClick.has_value()){
+             radioButtonContainer -> radioButtons.at(i).onClick.value()();
            }
-           radioButtonContainer.radioButtons.at(i).selected = true;
+           radioButtonContainer -> radioButtons.at(i).selected = true;
          }else{
-           radioButtonContainer.radioButtons.at(i).selected = false;
+           radioButtonContainer -> radioButtons.at(i).selected = false;
          }
        }
     }  
-  };
-  return radioButtonSelector;
-}
+};

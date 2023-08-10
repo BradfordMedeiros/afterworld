@@ -563,7 +563,13 @@ std::vector<NestedListItem> nestedListTest = {
   },
 };
 
-Component nestedListTestComponent = createNestedList(nestedListTest);
+Props nestedListProps { 
+  .mappingId = std::nullopt, 
+  .props = {
+    PropPair { .symbol = getSymbol("items"), .value = nestedListTest }
+  }
+};
+Component nestedListTestComponent = withProps(nestedList, nestedListProps);
 
 int mappingIdRadio = 95000;
 RadioButtonContainer radioButtonContainer {
@@ -593,7 +599,6 @@ RadioButtonContainer radioButtonContainer {
     }
   }
 };
-Component radioButtonSelector = createRadioButtonComponent(radioButtonContainer);
 
 Layout testLayout2 {
   .tint = glm::vec4(0.f, 0.f, 1.f, .6f),
