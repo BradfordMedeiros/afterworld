@@ -11,26 +11,6 @@ const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
 const int radioSymbol  = getSymbol("radio");
 
-std::vector<ListComponentData> playingListItems = { 
-  ListComponentData { 
-    .name = "playing wow", 
-    .onClick = []() -> void {
-      pushHistory("paused");
-    }
-  },
-  ListComponentData { 
-    .name = "playing woah", 
-    .onClick = []() -> void {
-      pushHistory("quit");
-    }
-  }
-};
-Props playingListProps {
-  .mappingId = std::nullopt,
-  .props = {
-    { listItemsSymbol, playingListItems },
-  },
-};
 
 Props createLevelListProps(UiContext& uiContext){
   std::vector<ListComponentData> levels;
@@ -41,7 +21,7 @@ Props createLevelListProps(UiContext& uiContext){
       .onClick = [&uiContext, levelData]() -> void {
         auto level = levelData;
         uiContext.levels.goToLevel(level);
-        pushHistory("playing");
+        uiContext.pauseInterface.pause();
       }
     });
   }
@@ -55,29 +35,13 @@ Props createLevelListProps(UiContext& uiContext){
 
 }
 
-std::vector<ListComponentData> quitListItems = { 
-  ListComponentData { 
-    .name = "quit", 
-    .onClick = []() -> void {
-      exit(0);
-    }
-  },
-};
-Props quitProps {
-  .mappingId = std::nullopt,
-  .props = {
-    { listItemsSymbol, quitListItems },
-  },
-};
-
-
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext uiContext){
   Props props {
     .mappingId = mappingId,
     .props = {
-      { .symbol = getSymbol("elapsedTime"), .value = uiContext.elapsedTime },
-      { .symbol = getSymbol("pause"), .value = uiContext.pause } ,
-      { .symbol = getSymbol("resume"), .value = uiContext.resume },
+      { .symbol = getSymbol("elapsedTime"), .value = uiContext.pauseInterface.elapsedTime },
+      { .symbol = getSymbol("pause"), .value = uiContext.pauseInterface.pause } ,
+      { .symbol = getSymbol("resume"), .value = uiContext.pauseInterface.resume },
       { .symbol = getSymbol("yoffset"), .value = 0.2f },
     },
   };
@@ -85,11 +49,16 @@ Props pauseMenuProps(std::optional<objid> mappingId, UiContext uiContext){
 }
 
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
+
+  auto props = pauseMenuProps(selectedId, uiContext);
+  auto pauseComponent = withPropsCopy(pauseMenuComponent, props);
+    
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu",  withPropsCopy(listComponent, createLevelListProps(uiContext)) },
     { "playing",  emptyComponent },
-    { "quit",  withProps(listComponent, quitProps) },
-    { "",  withProps(listComponent, playingListProps)  },
+    { "paused", pauseComponent },
+    { "",  emptyComponent  },
   };
 
   Props routerProps {
@@ -153,10 +122,6 @@ void handleDrawMainUi(UiContext& uiContext, DrawingTools& drawTools, std::option
   };
   withProps(nestedListTestComponent, nestedListProps).draw(drawTools, defaultProps);
 
-  if (uiContext.shouldShowPauseMenu){
-    auto props = pauseMenuProps(selectedId, uiContext);
-    pauseMenuComponent.draw(drawTools, props);    
-  }
 
   /* 
   show main menu items 

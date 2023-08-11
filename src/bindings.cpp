@@ -82,16 +82,33 @@ bool onMainMenu(GameState& gameState){
 }
 
 double downTime = 0;
+void setPausedMode(bool shouldBePaused){
+  setPaused(shouldBePaused);
+  if (!shouldBePaused){
+    pushHistory("playing");
+    downTime = gameapi -> timeSeconds(true);
+  }else{
+    pushHistory("paused");
+    downTime = gameapi -> timeSeconds(true);
+  }
+}
+void togglePauseMode(GameState& gameState){
+  bool isPaused = getGlobalState().paused;
+  setPausedMode(!isPaused);
+}
 
 
 UiContext getUiContext(GameState& gameState){
-  std::function<void()> pause = [&gameState]() -> void { goToMenu(gameState); };
-  std::function<void()> resume = []() -> void { setPaused(false); };
+  std::function<void()> pause = [&gameState]() -> void { 
+    setPausedMode(true); 
+    pushHistory("paused");
+
+  };
+  std::function<void()> resume = []() -> void { 
+    setPausedMode(false); 
+    pushHistory("playing");
+  };
   UiContext uiContext {
-   .elapsedTime = gameapi -> timeSeconds(true) - downTime,
-   .pause = pause,
-   .resume = resume,
-   .shouldShowPauseMenu = showingPauseMenu(gameState),
    .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
    .onMainMenu = onMainMenu(gameState),
    .showScreenspaceGrid = getGlobalState().showScreenspaceGrid,
@@ -107,17 +124,15 @@ UiContext getUiContext(GameState& gameState){
         }; 
       },
     },
+    .pauseInterface = PauseInterface {
+      .elapsedTime = gameapi -> timeSeconds(true) - downTime,
+      .pause = pause,
+      .resume = resume,
+    },
   };
   return uiContext;
 }
 
-
-void togglePauseMode(GameState& gameState){
-  setPaused(!getGlobalState().paused);
-  if (getGlobalState().paused){
-    downTime = gameapi -> timeSeconds(true);
-  }
-}
 
 void loadConfig(GameState& gameState){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -296,9 +311,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (key == 256 /* escape */ ){
         togglePauseMode(*gameState);
       }
-    }
-    if (key == '['){
-      pushHistory("paused");
     }
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){

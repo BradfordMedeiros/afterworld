@@ -14,16 +14,19 @@ struct LevelUIInterface {
   std::function<void(Level&)> goToLevel;
   std::function<std::vector<Level>()> getLevels;
 };
-
-struct UiContext {
+struct PauseInterface {
   float elapsedTime;
   std::function<void()> pause;
   std::function<void()> resume;
-  bool shouldShowPauseMenu;
+
+};
+
+struct UiContext {
   bool showAnimationMenu;
   bool onMainMenu;
   bool showScreenspaceGrid;
   LevelUIInterface levels;
+  PauseInterface pauseInterface;
 };
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext pauseContext);
 
