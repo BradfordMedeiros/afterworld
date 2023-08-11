@@ -228,3 +228,11 @@ Props getDefaultProps(std::optional<objid> selectedId){
   };
 }
  
+
+Component emptyComponent {
+  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
+  },
+  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
+  },
+};

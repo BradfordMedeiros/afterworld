@@ -23,7 +23,7 @@ Layout createLayout(std::vector<ListComponentData> listItems){
     .borderColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f),
     .minwidth = 0.f,
     .minheight = 0.f,
-    .layoutType = LAYOUT_HORIZONTAL2,
+    .layoutType = LAYOUT_VERTICAL2,
     .layoutFlowHorizontal = UILayoutFlowNone2,
     .layoutFlowVertical = UILayoutFlowNone2,
     .alignHorizontal = UILayoutFlowNone2,
