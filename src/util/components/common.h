@@ -82,5 +82,6 @@ BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
 
 
 Component withProps(Component& wrappedComponent, Props& props);
+Component withPropsCopy(Component& wrappedComponent, Props props);
 
 #endif
