@@ -2,7 +2,7 @@
 
 const int routerSymbol = getSymbol("router");
 const int routerMappingSymbol = getSymbol("router-mapping");
-auto routerHistory = createHistory("playing");
+auto routerHistory = createHistory("mainmenu");
 
 const int tintSymbol = getSymbol("tint");
 const int listItemsSymbol = getSymbol("listitems");
@@ -11,63 +11,56 @@ const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
 const int radioSymbol  = getSymbol("radio");
 
-std::vector<ListComponentData> playingListItems = { 
-  ListComponentData { 
-    .name = "playing wow", 
-    .onClick = []() -> void {
-      pushHistory("paused");
-    }
-  },
-  ListComponentData { 
-    .name = "playing woah", 
-    .onClick = []() -> void {
-      pushHistory("quit");
-    }
+
+Props createLevelListProps(UiContext& uiContext){
+  std::vector<ListComponentData> levels;
+  auto levelDatas = uiContext.levels.getLevels();
+  for (auto &levelData : levelDatas){
+    levels.push_back(ListComponentData {
+      .name = levelData.name,
+      .onClick = [&uiContext, levelData]() -> void {
+        auto level = levelData;
+        uiContext.levels.goToLevel(level);
+        uiContext.pauseInterface.pause();
+      }
+    });
   }
-};
-Props playingListProps {
-  .mappingId = std::nullopt,
-  .props = {
-    { listItemsSymbol, playingListItems },
-  },
-};
+  Props levelProps {
+    .mappingId = std::nullopt,
+    .props = {
+      { listItemsSymbol, levels },
+    },
+  };
+  return levelProps;
 
-std::vector<ListComponentData> quitListItems = { 
-  ListComponentData { 
-    .name = "quit", 
-    .onClick = []() -> void {
-      exit(0);
-    }
-  },
-};
-Props quitProps {
-  .mappingId = std::nullopt,
-  .props = {
-    { listItemsSymbol, quitListItems },
-  },
-};
+}
 
-
-std::map<std::string, Component> routeToComponent = {
-  { "playing",  withProps(listComponent, playingListProps) },
-  { "quit",  withProps(listComponent, quitProps) },
-  { "",  withProps(listComponent, playingListProps)  },
-};
-
-Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext){
+Props pauseMenuProps(std::optional<objid> mappingId, UiContext uiContext){
   Props props {
     .mappingId = mappingId,
     .props = {
-      { .symbol = getSymbol("elapsedTime"), .value = pauseContext.elapsedTime },
-      { .symbol = getSymbol("pause"), .value = pauseContext.pause } ,
-      { .symbol = getSymbol("resume"), .value = pauseContext.resume },
+      { .symbol = getSymbol("elapsedTime"), .value = uiContext.pauseInterface.elapsedTime },
+      { .symbol = getSymbol("pause"), .value = uiContext.pauseInterface.pause } ,
+      { .symbol = getSymbol("resume"), .value = uiContext.pauseInterface.resume },
       { .symbol = getSymbol("yoffset"), .value = 0.2f },
     },
   };
   return props;
 }
 
-Props createRouterProps(std::optional<objid> selectedId){
+Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
+
+  auto props = pauseMenuProps(selectedId, uiContext);
+  auto pauseComponent = withPropsCopy(pauseMenuComponent, props);
+    
+
+  std::map<std::string, Component> routeToComponent = {
+    { "mainmenu",  withPropsCopy(listComponent, createLevelListProps(uiContext)) },
+    { "playing",  emptyComponent },
+    { "paused", pauseComponent },
+    { "",  emptyComponent  },
+  };
+
   Props routerProps {
     .mappingId = selectedId,
     .props = {
@@ -101,9 +94,9 @@ Props& getSliderProps(std::optional<objid> selectedId){
 
 
 
-void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId){
+void handleDrawMainUi(UiContext& uiContext, DrawingTools& drawTools, std::optional<objid> selectedId){
    auto defaultProps = getDefaultProps(selectedId);
-   auto routerProps = createRouterProps(selectedId);
+   auto routerProps = createRouterProps(uiContext, selectedId);
    router.draw(drawTools, routerProps);
 
    Props nestedListProps { 
@@ -129,10 +122,6 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
   };
   withProps(nestedListTestComponent, nestedListProps).draw(drawTools, defaultProps);
 
-  if (pauseContext.shouldShowPauseMenu){
-    auto props = pauseMenuProps(selectedId, pauseContext);
-    pauseMenuComponent.draw(drawTools, props);    
-  }
 
   /* 
   show main menu items 
@@ -147,11 +136,11 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
   }
   */
   /*drawDebugBoundingBox(*/ //);
-  if (pauseContext.showAnimationMenu){
+  if (uiContext.showAnimationMenu){
     drawImMenuList(drawTools, animationMenuItems2(), selectedId, 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
   }
 
-  if (pauseContext.showScreenspaceGrid){
+  if (uiContext.showScreenspaceGrid){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
 
@@ -212,8 +201,8 @@ void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::
   radioButtons.draw(drawTools, radioProps);
 }
 
-void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId){
-  auto routerProps = createRouterProps(selectedId);
+void handleInputMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+  auto routerProps = createRouterProps(uiContext, selectedId);
   router.imMouseSelect(selectedId, routerProps);
   Props nestedListProps { 
     .mappingId = selectedId, 
@@ -222,7 +211,7 @@ void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selected
   nestedListTestComponent.imMouseSelect(selectedId, nestedListProps);
   processImMouseSelect(animationMenuItems2(), selectedId);
 
-  if (pauseContext.onMainMenu){
+  if (uiContext.onMainMenu){
     // should render main menu items
     //processImMouseSelect(mainMenuItems2(gameState), mappingId);
   }

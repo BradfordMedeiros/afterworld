@@ -600,32 +600,6 @@ RadioButtonContainer radioButtonContainer {
   }
 };
 
-Layout testLayout2 {
-  .tint = glm::vec4(0.f, 0.f, 1.f, .6f),
-  .showBackpanel = true,
-  .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.6f),
-  //.minwidth = 0.f,
-  .minwidth = 1.5f,
-  .minheight = 1.f,
-  .layoutType = LAYOUT_HORIZONTAL2, //LAYOUT_VERTICAL2,
-  .layoutFlowHorizontal = UILayoutFlowNone2,
-  //.layoutFlowHorizontal = UILayoutFlowPositive2,
-  .layoutFlowVertical = UILayoutFlowNone2,
-  .alignHorizontal = UILayoutFlowNone2,
-  .alignVertical = UILayoutFlowNone2,
-
-  //.spacing = 0.1f,
-  .spacing = 0.f,
-  //.minspacing = 0.4f,
-  .minspacing = 0.f,
-  //.margin = 0.02f,
-  .padding = 0.f,
-  .children = {
-    createListItem("one"),
-    createListItem("two"),
-    createListItem("three"),
-  },
-};
 
 Layout testLayout {
   .tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
@@ -648,9 +622,14 @@ Layout testLayout {
   //.margin = 0.02f,
   .padding = 0.f,
   .children = {
-    createListItem("one"),
+    withPropsCopy(listItem, Props {
+      .mappingId = std::nullopt,
+      .props =  {
+        PropPair { .symbol = getSymbol("value"), .value = "testlayout" },
+        PropPair { .symbol = getSymbol("onclick"), .value = std::nullopt },
+      },
+    })
   },
 };
 
 //Component testLayoutComponent = createLayoutComponent(testLayout);
-Component testLayoutComponent = createListItem("one");

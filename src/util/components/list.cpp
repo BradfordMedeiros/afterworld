@@ -1,13 +1,21 @@
 #include "./list.h"
 
+const int valueSymbol = getSymbol("value");
+const int onclickSymbol = getSymbol("onclick");
+
 Layout createLayout(std::vector<ListComponentData> listItems){
   std::vector<Component> elements;
-  for (auto &listItem : listItems){
-    if (listItem.onClick.has_value()){
-      elements.push_back(createListItem(listItem.name, listItem.onClick.value()));
-    }else{
-      elements.push_back(createListItem(listItem.name));
-    }
+  for (auto &listItemData : listItems){
+    auto onClick = listItemData.onClick.has_value() ? listItemData.onClick.value() : []() -> void {};
+    Props listItemProps {
+      .mappingId = std::nullopt,
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = listItemData.name },
+        PropPair { .symbol = onclickSymbol, .value = onClick },
+      },
+    };
+    auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+    elements.push_back(listItemWithProps);
   }
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
@@ -15,7 +23,7 @@ Layout createLayout(std::vector<ListComponentData> listItems){
     .borderColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f),
     .minwidth = 0.f,
     .minheight = 0.f,
-    .layoutType = LAYOUT_HORIZONTAL2,
+    .layoutType = LAYOUT_VERTICAL2,
     .layoutFlowHorizontal = UILayoutFlowNone2,
     .layoutFlowVertical = UILayoutFlowNone2,
     .alignHorizontal = UILayoutFlowNone2,

@@ -6,16 +6,29 @@
 #include "../menus.h"
 #include "./pausemenu.h"
 
-struct PauseContext {
+struct Level {
+  std::string scene;
+  std::string name;
+};
+struct LevelUIInterface {
+  std::function<void(Level&)> goToLevel;
+  std::function<std::vector<Level>()> getLevels;
+};
+struct PauseInterface {
   float elapsedTime;
   std::function<void()> pause;
   std::function<void()> resume;
-  bool shouldShowPauseMenu;
+
+};
+
+struct UiContext {
   bool showAnimationMenu;
   bool onMainMenu;
   bool showScreenspaceGrid;
+  LevelUIInterface levels;
+  PauseInterface pauseInterface;
 };
-Props pauseMenuProps(std::optional<objid> mappingId, PauseContext pauseContext);
+Props pauseMenuProps(std::optional<objid> mappingId, UiContext pauseContext);
 
 extern Component mainUI;
 
@@ -26,8 +39,8 @@ extern Component mainUI;
 //};
 //void processInputMainUi(InputHandlers& handlers, std::optional<objid> selectedId);
 
-void handleDrawMainUi(PauseContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId);
-void handleInputMainUi(PauseContext& pauseContext, std::optional<objid> selectedId);
+void handleDrawMainUi(UiContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId);
+void handleInputMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void pushHistory(std::string route);
 
 std::vector<ImListItem> animationMenuItems2();
