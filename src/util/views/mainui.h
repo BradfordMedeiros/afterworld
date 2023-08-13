@@ -3,7 +3,10 @@
 
 #include "../components/router.h"
 #include "../components/list.h"
-#include "../menus.h"
+#include "../components/slider.h"
+#include "../components/radiobutton.h"
+#include "../components/imagelist.h"
+#include "./debuglist.h"
 #include "./pausemenu.h"
 
 struct Level {

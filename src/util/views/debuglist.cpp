@@ -1,4 +1,4 @@
-#include "./menus.h"
+#include "./debuglist.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -570,35 +570,6 @@ Props nestedListProps {
   }
 };
 Component nestedListTestComponent = withProps(nestedList, nestedListProps);
-
-int mappingIdRadio = 95000;
-RadioButtonContainer radioButtonContainer {
-  .selectedRadioButtonIndex = 0,
-  .radioButtons = { 
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = []() -> void {
-        std::cout << "on click button 0" << std::endl;
-      },
-      .mappingId = mappingIdRadio++,
-    },
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = std::nullopt,
-      .mappingId = mappingIdRadio++,
-    },
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = []() -> void {
-        std::cout << "on click button 2" << std::endl;
-      },
-      .mappingId = mappingIdRadio++,
-    }
-  }
-};
 
 
 Layout testLayout {
