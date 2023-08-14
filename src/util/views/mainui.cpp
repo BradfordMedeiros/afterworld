@@ -17,6 +17,7 @@ const int radioSymbol  = getSymbol("radio");
 Props createLevelListProps(UiContext& uiContext){
   std::vector<ListComponentData> levels;
   auto levelDatas = uiContext.levels.getLevels();
+
   for (auto &levelData : levelDatas){
     levels.push_back(ListComponentData {
       .name = levelData.name,
@@ -37,7 +38,7 @@ Props createLevelListProps(UiContext& uiContext){
 
 }
 
-Props pauseMenuProps(std::optional<objid> mappingId, UiContext uiContext){
+Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   Props props {
     .mappingId = mappingId,
     .props = {
@@ -205,25 +206,6 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   };
   radioButtons.draw(drawTools, radioProps);
   return handlerFns;
-}
-
-void handleInputMainUi(UiContext& uiContext, std::optional<objid> selectedId){
-  auto routerProps = createRouterProps(uiContext, selectedId);
-  router.imMouseSelect(selectedId, routerProps);
-  Props nestedListProps { 
-    .mappingId = selectedId, 
-    .props = {}
-  };
-  nestedListTestComponent.imMouseSelect(selectedId, nestedListProps);
-  processImMouseSelect(animationMenuItems2(), selectedId);
-
-  if (uiContext.onMainMenu){
-    // should render main menu items
-    //processImMouseSelect(mainMenuItems2(gameState), mappingId);
-  }
-
-  Props& sliderProps = getSliderProps(selectedId);
-  slider.imMouseSelect(selectedId, sliderProps);
 }
 
 void pushHistory(std::string route){

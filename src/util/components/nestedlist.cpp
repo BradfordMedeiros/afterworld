@@ -107,9 +107,4 @@ Component nestedList  {
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
     return drawImNestedList(drawTools, *items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
   },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-    auto items = typeFromProps<std::vector<NestedListItem>>(props, itemsSymbol);
-    modassert(items, "nested list - invalid items props");
-    processImMouseSelect(*items, mappingIdSelected);
-  }  
 };

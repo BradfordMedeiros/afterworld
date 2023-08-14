@@ -102,20 +102,4 @@ Component radioButtons  {
       drawDebugBoundingBox(drawTools, boundingBox);
       return boundingBox;
     },
-    .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      auto radioButtonContainer = typeFromProps<RadioButtonContainer>(props, radioSymbol);
-      modassert(radioButtonContainer, "invalid radio symbol props");
-       for (int i = 0; i < radioButtonContainer -> radioButtons.size(); i++){
-         auto radioMappingId = radioButtonContainer -> radioButtons.at(i).mappingId;
-         if (mappingIdSelected.has_value() && radioMappingId.has_value() && radioMappingId.value() == mappingIdSelected.value()){
-           radioButtonContainer -> selectedRadioButtonIndex = i;
-           if (radioButtonContainer -> radioButtons.at(i).onClick.has_value()){
-             radioButtonContainer -> radioButtons.at(i).onClick.value()();
-           }
-           radioButtonContainer -> radioButtons.at(i).selected = true;
-         }else{
-           radioButtonContainer -> radioButtons.at(i).selected = false;
-         }
-       }
-    }  
 };

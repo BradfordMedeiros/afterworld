@@ -39,8 +39,4 @@ Component pauseMenuComponent {
 	  drawTools.drawRect(2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 0.f, 2.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg");
     return drawImMenuList(drawTools, pauseMenu, mappingId2,  xoffset, yoffset, 0.05f /* padding */, 0.015f /* fontsize */, minwidth);
   },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-  	 auto pauseMenu = createPauseMenu(fnFromProp(props, resumeSymbol).value(), fnFromProp(props, pauseSymbol).value());
-     processImMouseSelect(pauseMenu, mappingIdSelected);
-  }  
 };

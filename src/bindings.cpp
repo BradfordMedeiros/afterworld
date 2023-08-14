@@ -19,6 +19,9 @@ struct GameState {
 
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
+
+  std::map<objid, std::function<void()>> uiCallbacks;
+  UiContext uiContext;
 };
 
 void unloadAllManagedScenes(){
@@ -260,6 +263,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
     gameState -> selecting = std::nullopt;
+    gameState -> uiCallbacks = {};
+    gameState -> uiContext = {};
     loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);
@@ -273,6 +278,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
     gameState -> dragSelect = std::nullopt;
+    gameState -> uiContext = getUiContext(*gameState);    
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
@@ -288,9 +294,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
     getGlobalState().selectedId = selectedId;
 
-
-    auto uiContext = getUiContext(*gameState);    
-    handleDrawMainUi(uiContext, selectedId);
+    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, selectedId);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);
@@ -441,11 +445,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1 && button == 0){
       auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
       if (idAtCoord.has_value()){
-        auto uiContext = getUiContext(*gameState);
-        //handleInputMainUi(uiContext, idAtCoord.value());
-        auto handlerFns = handleDrawMainUi(uiContext, idAtCoord.value());
-        if (handlerFns.find(idAtCoord.value()) != handlerFns.end()){
-          handlerFns.at(idAtCoord.value())();
+        if (gameState -> uiCallbacks.find(idAtCoord.value()) != gameState -> uiCallbacks.end()){
+          gameState -> uiCallbacks.at(idAtCoord.value())();
         }
       }
     }

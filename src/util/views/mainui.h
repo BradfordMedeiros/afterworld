@@ -31,7 +31,7 @@ struct UiContext {
   LevelUIInterface levels;
   PauseInterface pauseInterface;
 };
-Props pauseMenuProps(std::optional<objid> mappingId, UiContext pauseContext);
+Props pauseMenuProps(std::optional<objid> mappingId, UiContext& pauseContext);
 
 extern Component mainUI;
 
@@ -43,7 +43,6 @@ extern Component mainUI;
 //void processInputMainUi(InputHandlers& handlers, std::optional<objid> selectedId);
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
-void handleInputMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void pushHistory(std::string route);
 
 std::vector<ImListItem> animationMenuItems2();

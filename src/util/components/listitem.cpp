@@ -151,19 +151,4 @@ Component listItem {
       drawDebugBoundingBox(drawTools, box);
       return box;
   },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-    //auto strValue = strFromProp(props, valueSymbol, "");
-    //auto onClick = fnFromProp(props, onclickSymbol);
-//
-//    //ImListItem menuItem {
-//    //  .value = strValue,
-//    //  .onClick = onClick,
-//    //  .mappingId = 100,
-//    //};
-//    //if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-//    //  if (menuItem.onClick.has_value()){
-//    //    menuItem.onClick.value()();
-//    //  }
-    //}
-  },
 };

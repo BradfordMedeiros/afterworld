@@ -57,16 +57,4 @@ Component router {
   	}
     return component -> draw(drawTools, props);
   },
-  .imMouseSelect = [](std::optional<objid> mappingId, Props& props) -> void {
-    auto history = routerHistory(props);
-    if (!history){
-      return;
-    }
-    auto routeToComponent = routerMapping(props);
-    modassert(routeToComponent, "router - no router mapping");
-    auto component = componentAtRoute(*routeToComponent, *history);
-    if (component){
-      component -> imMouseSelect(mappingId, props);
-    }  
-  },
 };

@@ -195,12 +195,6 @@ Component withProps(Component& wrappedComponent, Props& outerProps){
       }
       return wrappedComponent.draw(drawTools, props);
     },
-    .imMouseSelect = [&wrappedComponent, &outerProps](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      for (auto &prop : outerProps.props){
-        updatePropValue(props, prop.symbol, prop.value);
-      }
-      wrappedComponent.imMouseSelect(mappingIdSelected, props);
-    },
   };
   return component;
 }
@@ -213,13 +207,6 @@ Component withPropsCopy(Component& wrappedComponent, Props outerProps){
         updatePropValue(props, prop.symbol, prop.value);
       }
       return wrappedComponent.draw(drawTools, props);
-    },
-    .imMouseSelect = [&wrappedComponent, outerProps](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      Props outerPropsCopy = outerProps;
-      for (auto &prop : outerPropsCopy.props){
-        updatePropValue(props, prop.symbol, prop.value);
-      }
-      wrappedComponent.imMouseSelect(mappingIdSelected, props);
     },
   };
   return component;
@@ -238,8 +225,6 @@ Props getDefaultProps(std::optional<objid> selectedId){
 Component emptyComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
-  },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
   },
 };
 

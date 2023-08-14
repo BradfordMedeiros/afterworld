@@ -57,7 +57,6 @@ struct BoundingBox2D {
 
 struct Component {
   std::function<BoundingBox2D(DrawingTools&, Props&)> draw;
-  std::function<void(std::optional<objid> mappingId, Props& props)> imMouseSelect;
 };
 
 

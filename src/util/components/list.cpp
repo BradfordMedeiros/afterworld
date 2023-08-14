@@ -53,16 +53,4 @@ Component listComponent {
     };
     return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
   },
-  .imMouseSelect = [](std::optional<objid> mappingId, Props& props) -> void {
-    auto listItems = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
-    modassert(listItems, "invalid listItems prop");
-    auto layout = createLayout(*listItems);
-    Props listLayoutProps {
-      .mappingId = std::nullopt,
-      .props = {
-        { .symbol = layoutSymbol, .value = layout },
-      },
-    };
-    withProps(layoutComponent, listLayoutProps).imMouseSelect(mappingId, props);
-  },
 };

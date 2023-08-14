@@ -23,8 +23,5 @@ Component imageList  {
      drawDebugBoundingBox(drawTools, boundingBox);
   	return boundingBox;
   },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-     
-  }  
 };
 

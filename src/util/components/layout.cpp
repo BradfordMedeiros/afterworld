@@ -253,16 +253,5 @@ Component layoutComponent  {
 	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	return boundingBox;
 	  },
-	  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
-	  	modassert(layoutPtr, "layout prop not provided");
-	  	auto layout = *layoutPtr;
-	  		//auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
-	  		//modassert(layoutPtr, "layout prop not provided");
-	  		//Layout& layout = *layoutPtr;
-	     for (auto &child : layout.children){
-	     	child.imMouseSelect(mappingIdSelected, props);
-	     }
-	  }  
 };
 
