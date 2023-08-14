@@ -146,7 +146,7 @@ Component listItem {
       std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
       float padding = 0.05f;
       std::cout << "tint is: " << print(tint) << std::endl;
-      auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
+      auto box = drawImMenuListItem(drawTools, menuItem, drawTools.selectedId, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
       //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
       drawDebugBoundingBox(drawTools, box);
       return box;

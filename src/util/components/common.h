@@ -11,8 +11,6 @@ struct PropPair {
 };
 
 struct Props {
-  //std::vector<Symbol, std::any> values;
-  std::optional<objid> mappingId;
   std::vector<PropPair> props;
 };
 
@@ -46,6 +44,7 @@ struct DrawingTools {
   std::function<void(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawRect;
   std::function<void(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawLine2D;
   std::function<void(objid, std::function<void()>)> registerCallbackFns;
+  std::optional<objid> selectedId;
 };
 
 struct BoundingBox2D {
@@ -58,8 +57,6 @@ struct BoundingBox2D {
 struct Component {
   std::function<BoundingBox2D(DrawingTools&, Props&)> draw;
 };
-
-
 
 void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt);
 std::string print(BoundingBox2D& box);

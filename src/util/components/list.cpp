@@ -9,7 +9,6 @@ Layout createLayout(std::vector<ListComponentData> listItems){
     ListComponentData& listItemData = listItems.at(i);
     auto onClick = listItemData.onClick.has_value() ? listItemData.onClick.value() : []() -> void {};
     Props listItemProps {
-      .mappingId = std::nullopt,
       .props = {
         PropPair { .symbol = valueSymbol, .value = listItemData.name },
         PropPair { .symbol = onclickSymbol, .value = onClick },
@@ -46,7 +45,6 @@ Component listComponent {
     modassert(listItems, "invalid listItems prop");
     auto layout = createLayout(*listItems);
     Props listLayoutProps {
-      .mappingId = std::nullopt,
       .props = {
         { .symbol = layoutSymbol, .value = layout },
       },

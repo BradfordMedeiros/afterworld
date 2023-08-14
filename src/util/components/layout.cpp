@@ -97,6 +97,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   	});
   };
   drawTools.registerCallbackFns = realTools.registerCallbackFns;
+  drawTools.selectedId = realTools.selectedId;
 
 	bufferedDrawingTools.drawTools = drawTools,
 	bufferedDrawingTools.realTools = &realTools,

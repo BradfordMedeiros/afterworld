@@ -105,6 +105,6 @@ Component nestedList  {
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-    return drawImNestedList(drawTools, *items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
+    return drawImNestedList(drawTools, *items, drawTools.selectedId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
   },
 };

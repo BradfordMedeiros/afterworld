@@ -29,7 +29,6 @@ Props createLevelListProps(UiContext& uiContext){
     });
   }
   Props levelProps {
-    .mappingId = std::nullopt,
     .props = {
       { listItemsSymbol, levels },
     },
@@ -40,7 +39,6 @@ Props createLevelListProps(UiContext& uiContext){
 
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   Props props {
-    .mappingId = mappingId,
     .props = {
       { .symbol = getSymbol("elapsedTime"), .value = uiContext.pauseInterface.elapsedTime },
       { .symbol = getSymbol("pause"), .value = uiContext.pauseInterface.pause } ,
@@ -65,7 +63,6 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   };
 
   Props routerProps {
-    .mappingId = selectedId,
     .props = {
       { routerSymbol, routerHistory },
       { routerMappingSymbol, routeToComponent },
@@ -84,14 +81,12 @@ Slider exampleSlider {
 };
 const int sliderSymbol = getSymbol("slider");
 Props sliderProps {
-  .mappingId = std::nullopt,
   .props = {
     { sliderSymbol, exampleSlider },
   },
 };
 
-Props& getSliderProps(std::optional<objid> selectedId){
-  sliderProps.mappingId = selectedId;
+Props& getSliderProps(){
   return sliderProps;  
 }
 
@@ -111,6 +106,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
           fn();
         };
      },
+     .selectedId = selectedId,
    };
    resetMenuItemMappingId();
 
@@ -119,7 +115,6 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
    router.draw(drawTools, routerProps);
 
    Props nestedListProps { 
-    .mappingId = selectedId, 
     .props = {
       PropPair {
         .symbol = getSymbol("tint"),
@@ -163,7 +158,6 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     },
   };
   Props imageProps { 
-    .mappingId = selectedId, 
     .props = {
       { getSymbol("images"), defaultImages },
     }
@@ -175,7 +169,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   //images.draw(drawTools, defaultProps);
   //imageListTest.draw(drawTools, imageProps);
 
-  Props& sliderProps = getSliderProps(selectedId);
+  Props& sliderProps = getSliderProps();
   slider.draw(drawTools, sliderProps);
 
   RadioButtonContainer radioButtonContainer {
@@ -197,7 +191,6 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   };
 
   Props radioProps {
-    .mappingId = std::nullopt,
     .props = {
       PropPair { .symbol = xoffsetSymbol, .value = 0.5f },
       PropPair { .symbol = yoffsetSymbol, .value = 0.5f },
