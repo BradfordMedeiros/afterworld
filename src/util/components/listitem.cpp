@@ -7,7 +7,6 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
   drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-int automappingId = 10000;
 BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color){
   float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
@@ -20,6 +19,11 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   auto textY = yoffset;
 
   auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(0.f, 0.f, 1.f, 1.f) : color;
+
+  if (menuItem.onClick.has_value()){
+    drawTools.registerCallbackFns(menuItem.mappingId.value(), menuItem.onClick.value());
+  }
+  
   drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
@@ -133,10 +137,11 @@ Component listItem {
       float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
       float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
       auto onClick = fnFromProp(props, onclickSymbol);
+
       ImListItem menuItem {
         .value = strValue,
         .onClick = onClick,
-        .mappingId = 100,
+        .mappingId = uniqueMenuItemMappingId(),
       };
       std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
       float padding = 0.05f;
@@ -147,18 +152,18 @@ Component listItem {
       return box;
   },
   .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-    auto strValue = strFromProp(props, valueSymbol, "");
-    auto onClick = fnFromProp(props, onclickSymbol);
-
-    ImListItem menuItem {
-      .value = strValue,
-      .onClick = onClick,
-      .mappingId = 100,
-    };
-    if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-      if (menuItem.onClick.has_value()){
-        menuItem.onClick.value()();
-      }
-    }
+    //auto strValue = strFromProp(props, valueSymbol, "");
+    //auto onClick = fnFromProp(props, onclickSymbol);
+//
+//    //ImListItem menuItem {
+//    //  .value = strValue,
+//    //  .onClick = onClick,
+//    //  .mappingId = 100,
+//    //};
+//    //if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
+//    //  if (menuItem.onClick.has_value()){
+//    //    menuItem.onClick.value()();
+//    //  }
+    //}
   },
 };

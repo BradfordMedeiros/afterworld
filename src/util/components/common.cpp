@@ -167,6 +167,12 @@ std::string strFromProp(Props& props, int symbol, const char* defaultValue){
   return *strValue;
 }
 
+objid objidFromProp(Props& props, int symbol){
+  auto objIdValue = typeFromProps<objid>(props, symbol);
+  modassert(objIdValue, "objid is null");
+  return *objIdValue; 
+}
+
 void updatePropValue(Props& props, int symbol, std::any value){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
@@ -236,3 +242,12 @@ Component emptyComponent {
   .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
   },
 };
+
+objid uniqueMappingId  = 990000;
+objid uniqueMenuItemMappingId(){
+  uniqueMappingId++;
+  return uniqueMappingId;
+}
+void resetMenuItemMappingId(){
+  uniqueMappingId = 990000;
+}

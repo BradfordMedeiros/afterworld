@@ -442,7 +442,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
       if (idAtCoord.has_value()){
         auto uiContext = getUiContext(*gameState);
-        handleInputMainUi(uiContext, idAtCoord.value());
+        //handleInputMainUi(uiContext, idAtCoord.value());
+        auto handlerFns = handleDrawMainUi(uiContext, idAtCoord.value());
+        if (handlerFns.find(idAtCoord.value()) != handlerFns.end()){
+          handlerFns.at(idAtCoord.value())();
+        }
       }
     }
     if (button == 1){

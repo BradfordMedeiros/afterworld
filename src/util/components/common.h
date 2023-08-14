@@ -25,6 +25,7 @@ glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
 glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
 std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
 std::string strFromProp(Props& props, int symbol, const char* defaultValue);
+objid objidFromProp(Props& props, int symbol);
 
 template <typename T>
 T* typeFromProps(Props& props, int symbol){
@@ -86,5 +87,8 @@ Component withProps(Component& wrappedComponent, Props& props);
 Component withPropsCopy(Component& wrappedComponent, Props props);
 
 extern Component emptyComponent;
+
+objid uniqueMenuItemMappingId();
+void resetMenuItemMappingId();
 
 #endif

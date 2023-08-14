@@ -96,17 +96,23 @@ Props& getSliderProps(std::optional<objid> selectedId){
 
 
 
-void handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
    std::map<objid, std::function<void()>> handlerFns;
    DrawingTools drawTools {
      .drawText = gameapi -> drawText,
      .drawRect = gameapi -> drawRect,
      .drawLine2D = gameapi -> drawLine2D,
      .registerCallbackFns = [&handlerFns](objid id, std::function<void()> fn) -> void {
-        modassert(false, "handleDrawMainUi cannot register callback fn");
-        handlerFns[id] = fn;
+        //modassert(handlerFns.find(id) == handlerFns.end(), "duplicate hander function");
+        //handlerFns[id] = fn;
+        handlerFns[id] = [id, fn]() -> void {
+          std::cout << std::string("test handler fn for : ") + std::to_string(id) << std::endl;
+          fn();
+        };
      },
    };
+   resetMenuItemMappingId();
+
    auto defaultProps = getDefaultProps(selectedId);
    auto routerProps = createRouterProps(uiContext, selectedId);
    router.draw(drawTools, routerProps);
@@ -198,6 +204,7 @@ void handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
     }
   };
   radioButtons.draw(drawTools, radioProps);
+  return handlerFns;
 }
 
 void handleInputMainUi(UiContext& uiContext, std::optional<objid> selectedId){

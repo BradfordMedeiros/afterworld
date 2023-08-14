@@ -5,7 +5,8 @@ const int onclickSymbol = getSymbol("onclick");
 
 Layout createLayout(std::vector<ListComponentData> listItems){
   std::vector<Component> elements;
-  for (auto &listItemData : listItems){
+  for (int i = 0 ; i < listItems.size(); i++){
+    ListComponentData& listItemData = listItems.at(i);
     auto onClick = listItemData.onClick.has_value() ? listItemData.onClick.value() : []() -> void {};
     Props listItemProps {
       .mappingId = std::nullopt,
@@ -63,6 +64,5 @@ Component listComponent {
       },
     };
     withProps(layoutComponent, listLayoutProps).imMouseSelect(mappingId, props);
-
   },
 };
