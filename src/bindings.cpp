@@ -113,8 +113,8 @@ UiContext getUiContext(GameState& gameState){
   };
   UiContext uiContext {
    .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
-   .onMainMenu = onMainMenu(gameState),
-   .showScreenspaceGrid = getGlobalState().showScreenspaceGrid,
+   .onMainMenu = [&gameState]() -> bool { return onMainMenu(gameState); },
+   .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .levels = LevelUIInterface {
       .goToLevel = [gameState](Level& level) -> void {
         std::cout << "placeholder load level: " << level.name << std::endl;

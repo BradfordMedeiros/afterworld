@@ -26,8 +26,8 @@ struct PauseInterface {
 
 struct UiContext {
   bool showAnimationMenu;
-  bool onMainMenu;
-  bool showScreenspaceGrid;
+  std::function<bool()> onMainMenu;
+  std::function<bool()> showScreenspaceGrid;
   LevelUIInterface levels;
   PauseInterface pauseInterface;
 };

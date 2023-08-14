@@ -9,8 +9,7 @@ struct ImListItem {
   std::optional<objid> mappingId;
 };
 
-BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, .4f), glm::vec4 color = glm::vec4(1.f, 1.f, 1.f, 1.f));
-void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId);
+BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, .4f), glm::vec4 color = glm::vec4(1.f, 1.f, 1.f, 1.f));
 
 extern Component listItem;
 

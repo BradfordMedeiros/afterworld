@@ -138,10 +138,10 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
 
 
   if (uiContext.showAnimationMenu){
-    drawImMenuList(drawTools, animationMenuItems2(), selectedId, 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
+    drawImMenuList(drawTools, animationMenuItems2(), 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
   }
 
-  if (uiContext.showScreenspaceGrid){
+  if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
 
