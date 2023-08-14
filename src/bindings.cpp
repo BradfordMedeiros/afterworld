@@ -288,13 +288,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
     getGlobalState().selectedId = selectedId;
 
-    DrawingTools drawTools {
-      .drawText = gameapi -> drawText,
-      .drawRect = gameapi -> drawRect,
-      .drawLine2D = gameapi -> drawLine2D,
-    };
+
     auto uiContext = getUiContext(*gameState);    
-    handleDrawMainUi(uiContext, drawTools, selectedId);
+    handleDrawMainUi(uiContext, selectedId);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);

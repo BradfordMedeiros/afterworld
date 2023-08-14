@@ -1,5 +1,7 @@
 #include "./mainui.h"
 
+extern CustomApiBindings* gameapi;
+
 const int routerSymbol = getSymbol("router");
 const int routerMappingSymbol = getSymbol("router-mapping");
 auto routerHistory = createHistory("mainmenu");
@@ -94,7 +96,17 @@ Props& getSliderProps(std::optional<objid> selectedId){
 
 
 
-void handleDrawMainUi(UiContext& uiContext, DrawingTools& drawTools, std::optional<objid> selectedId){
+void handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+   std::map<objid, std::function<void()>> handlerFns;
+   DrawingTools drawTools {
+     .drawText = gameapi -> drawText,
+     .drawRect = gameapi -> drawRect,
+     .drawLine2D = gameapi -> drawLine2D,
+     .registerCallbackFns = [&handlerFns](objid id, std::function<void()> fn) -> void {
+        modassert(false, "handleDrawMainUi cannot register callback fn");
+        handlerFns[id] = fn;
+     },
+   };
    auto defaultProps = getDefaultProps(selectedId);
    auto routerProps = createRouterProps(uiContext, selectedId);
    router.draw(drawTools, routerProps);
@@ -123,19 +135,6 @@ void handleDrawMainUi(UiContext& uiContext, DrawingTools& drawTools, std::option
   withProps(nestedListTestComponent, nestedListProps).draw(drawTools, defaultProps);
 
 
-  /* 
-  show main menu items 
-  if (!gameState -> loadedLevel.has_value()){
-    std::vector<ListComponentData> levels;
-    for (auto &level : gameState -> levels){
-      levels.push_back(ListComponentData{
-        .name = level.name,
-        .onClick = std::nullopt,
-      });
-    }
-  }
-  */
-  /*drawDebugBoundingBox(*/ //);
   if (uiContext.showAnimationMenu){
     drawImMenuList(drawTools, animationMenuItems2(), selectedId, 1.5f /*xoffset*/, 0.2f /*yoffset*/ , 0.05f, 0.015f, 0.f /* minwidth */);
   }

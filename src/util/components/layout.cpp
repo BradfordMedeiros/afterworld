@@ -96,6 +96,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   		.texture = texture,
   	});
   };
+  drawTools.registerCallbackFns = realTools.registerCallbackFns;
 
 	bufferedDrawingTools.drawTools = drawTools,
 	bufferedDrawingTools.realTools = &realTools,

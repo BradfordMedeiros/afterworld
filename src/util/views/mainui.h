@@ -42,7 +42,7 @@ extern Component mainUI;
 //};
 //void processInputMainUi(InputHandlers& handlers, std::optional<objid> selectedId);
 
-void handleDrawMainUi(UiContext& pauseContext, DrawingTools& drawTools, std::optional<objid> selectedId);
+void handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void handleInputMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void pushHistory(std::string route);
 
