@@ -19,12 +19,12 @@ const int minwidthSymbol = getSymbol("minwidth");
 const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
 const int resumeSymbol = getSymbol("resume");
-const int pauseSymbol = getSymbol("pause");
+const int goToMainMenuSymbol = getSymbol("gotoMenu");
 const int elapsedTimeSymbol = getSymbol("elapsedTime");
 
 Component pauseMenuComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-  	auto pauseMenu = createPauseMenu(fnFromProp(props, resumeSymbol).value(), fnFromProp(props, pauseSymbol).value());
+  	auto pauseMenu = createPauseMenu(fnFromProp(props, resumeSymbol).value(), fnFromProp(props, goToMainMenuSymbol).value());
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     auto xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     auto yoffset = floatFromProp(props, yoffsetSymbol, 0.f);

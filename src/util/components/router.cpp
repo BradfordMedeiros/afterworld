@@ -50,7 +50,6 @@ Component router {
     auto routeToComponent = routerMapping(props);
     modassert(routeToComponent, "router - no router mapping");
     auto component = componentAtRoute(*routeToComponent, *history);
-    drawTools.drawText(std::string("route: ") + history -> currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   	if (!component){
   		modlog("router", std::string("no path for: ") + history -> currentPath);
   		return BoundingBox2D { .x = 0.f, .y = 0.f, .width = 0.f, .height = 0.f };

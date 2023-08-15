@@ -15,6 +15,7 @@ const int radioSymbol  = getSymbol("radio");
 const int elapsedTimeSymbol = getSymbol("elapsedTime");
 const int pausedSymbol = getSymbol("pause");
 const int resumeSymbol = getSymbol("resume");
+const int goToMainMenuSymbol = getSymbol("gotoMenu");
 
 
 Props createLevelListProps(UiContext& uiContext){
@@ -27,7 +28,6 @@ Props createLevelListProps(UiContext& uiContext){
       .onClick = [&uiContext, levelData]() -> void {
         auto level = levelData;
         uiContext.levels.goToLevel(level);
-        uiContext.pauseInterface.pause();
       }
     });
   }
@@ -47,7 +47,7 @@ Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   Props props {
     .props = {
       { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime },
-      { .symbol = pausedSymbol, .value = uiContext.pauseInterface.pause } ,
+      { .symbol = goToMainMenuSymbol, .value = uiContext.levels.goToMenu } ,
       { .symbol = resumeSymbol, .value = uiContext.pauseInterface.resume },
       { .symbol = yoffsetSymbol, .value = 0.2f },
     },
@@ -115,6 +115,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   auto defaultProps = getDefaultProps(selectedId);
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
+  drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   withProps(nestedListTestComponent, nestedListProps2).draw(drawTools, defaultProps);
 
   if (uiContext.showScreenspaceGrid()){

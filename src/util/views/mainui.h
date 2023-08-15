@@ -16,6 +16,7 @@ struct Level {
 struct LevelUIInterface {
   std::function<void(Level&)> goToLevel;
   std::function<std::vector<Level>()> getLevels;
+  std::function<void()> goToMenu;
 };
 struct PauseInterface {
   float elapsedTime;

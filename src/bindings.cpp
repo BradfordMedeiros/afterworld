@@ -70,7 +70,8 @@ void goToMenu(GameState& gameState){
     unloadAllManagedScenes();
   }
   if (!gameState.menuLoaded){
-    gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
+    gameapi -> loadScene(
+      "../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
     gameState.menuLoaded = true;
   }
   cameras = {};
@@ -104,12 +105,9 @@ void togglePauseMode(GameState& gameState){
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
-    pushHistory("paused");
-
   };
   std::function<void()> resume = []() -> void { 
     setPausedMode(false); 
-    pushHistory("playing");
   };
   UiContext uiContext {
    .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
@@ -118,10 +116,15 @@ UiContext getUiContext(GameState& gameState){
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState, level.scene);
+        setPausedMode(false);
       },
       .getLevels = [&gameState]() -> std::vector<Level> {
         return gameState.levels; 
       },
+      .goToMenu = [&gameState]() -> void {
+        goToMenu(gameState);
+        pushHistory("mainmenu");
+      }
     },
     .pauseInterface = PauseInterface {
       .elapsedTime = gameapi -> timeSeconds(true) - downTime,
