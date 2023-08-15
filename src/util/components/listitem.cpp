@@ -128,6 +128,8 @@ Component listItem {
       float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
       auto onClick = fnFromProp(props, onclickSymbol);
 
+      std::cout << "list item, tint: " << print(tint) << std::endl;
+
       ImListItem menuItem {
         .value = strValue,
         .onClick = onClick,
@@ -135,10 +137,10 @@ Component listItem {
       };
       std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
       float padding = 0.05f;
-      std::cout << "tint is: " << print(tint) << std::endl;
+      std::cout << "tint is: " << print(tint) << ", xoffset= " << xoffset << std::endl;
       auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
       //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-      drawDebugBoundingBox(drawTools, box);
+      //drawDebugBoundingBox(drawTools, box);
       return box;
   },
 };

@@ -144,17 +144,23 @@ Component layoutComponent  {
       float yoffset = 0.f;
 
       float propsStyleXoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-      updatePropValue(props, yoffsetSymbol, 0.f);
+      updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
+
+      float propsStyleYoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+      updatePropValue(props, yoffsetSymbol, propsStyleYoffset);
+
+      xoffset = propsStyleXoffset;
+      yoffset = propsStyleYoffset;
 
       auto boundingBoxMeasurer = createMeasurer();
      	BufferedDrawingTools bufferedDrawingTools {};
 			createBufferedDrawingTools(bufferedDrawingTools, drawTools);
       for (int i = 0; i < layout.children.size(); i++){
     		propsStyleXoffset = xoffset;
+    		propsStyleYoffset = yoffset;
 
-    		updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
-    		updatePropValue(props, yoffsetSymbol, yoffset);
-    		std::cout << "mainmenu: xoffset " << propsStyleXoffset << ", yoffset" << yoffset << std::endl;
+        updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
+    		updatePropValue(props, yoffsetSymbol, propsStyleYoffset);
 
     		auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, props);
     		setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
@@ -251,7 +257,9 @@ Component layoutComponent  {
 	  	  .width = width,
 	  	  .height = height,
 	  	};
-	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
+	  	if (layout.borderColor.has_value()){
+	  		drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
+	  	}
 	  	return boundingBox;
 	  },
 };

@@ -116,15 +116,11 @@ UiContext getUiContext(GameState& gameState){
    .onMainMenu = [&gameState]() -> bool { return onMainMenu(gameState); },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .levels = LevelUIInterface {
-      .goToLevel = [gameState](Level& level) -> void {
-        std::cout << "placeholder load level: " << level.name << std::endl;
+      .goToLevel = [&gameState](Level& level) -> void {
+        goToLevel(gameState, level.scene);
       },
-      .getLevels = []() -> std::vector<Level> {
-        return {
-          Level { .scene = "test-scene1", .name = "test-level1" },
-          Level { .scene = "test-scene2", .name = "test-level2" },
-          Level { .scene = "test-scene3", .name = "test-level3" },
-        }; 
+      .getLevels = [&gameState]() -> std::vector<Level> {
+        return gameState.levels; 
       },
     },
     .pauseInterface = PauseInterface {

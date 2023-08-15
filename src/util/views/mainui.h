@@ -21,7 +21,6 @@ struct PauseInterface {
   float elapsedTime;
   std::function<void()> pause;
   std::function<void()> resume;
-
 };
 
 struct UiContext {
@@ -31,21 +30,12 @@ struct UiContext {
   LevelUIInterface levels;
   PauseInterface pauseInterface;
 };
-Props pauseMenuProps(std::optional<objid> mappingId, UiContext& pauseContext);
 
 extern Component mainUI;
-
-//struct InputHandlers {
-//	std::map<objid, std::function<void()>> mappingidToFn;
-//	std::map<objid, Component> registeredComponentList;
-//	std::map<objid, void*> componentData;
-//};
-//void processInputMainUi(InputHandlers& handlers, std::optional<objid> selectedId);
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void pushHistory(std::string route);
 
 std::vector<ImListItem> animationMenuItems2();
-std::vector<Component> mainMenuItems2();
 
 #endif

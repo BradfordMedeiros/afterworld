@@ -20,7 +20,7 @@ Layout createLayout(std::vector<ListComponentData> listItems){
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
     .showBackpanel = false,
-    .borderColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f),
+    .borderColor = std::nullopt,
     .minwidth = 0.f,
     .minheight = 0.f,
     .layoutType = LAYOUT_VERTICAL2,
