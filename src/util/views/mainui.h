@@ -25,6 +25,7 @@ struct PauseInterface {
 };
 
 struct UiContext {
+  std::function<bool()> isDebugMode;
   bool showAnimationMenu;
   std::function<bool()> onMainMenu;
   std::function<bool()> showScreenspaceGrid;
@@ -36,7 +37,5 @@ extern Component mainUI;
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void pushHistory(std::string route);
-
-std::vector<ImListItem> animationMenuItems2();
 
 #endif

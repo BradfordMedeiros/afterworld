@@ -103,10 +103,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
      .drawRect = gameapi -> drawRect,
      .drawLine2D = gameapi -> drawLine2D,
      .registerCallbackFns = [&handlerFns](objid id, std::function<void()> fn) -> void {
-        handlerFns[id] = [id, fn]() -> void {
-          std::cout << std::string("test handler fn for : ") + std::to_string(id) << std::endl;
-          fn();
-        };
+        handlerFns[id] = fn;
      },
      .selectedId = selectedId,
   };
@@ -115,9 +112,11 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   auto defaultProps = getDefaultProps(selectedId);
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
-  drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  withProps(nestedListTestComponent, nestedListProps2).draw(drawTools, defaultProps);
-
+  
+  if (uiContext.isDebugMode()){
+    drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    withProps(nestedListTestComponent, nestedListProps2).draw(drawTools, defaultProps);
+  }
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }

@@ -110,6 +110,9 @@ UiContext getUiContext(GameState& gameState){
     setPausedMode(false); 
   };
   UiContext uiContext {
+   .isDebugMode = []() -> bool { 
+     return getStrWorldState("editor", "debug").value() == "true"; 
+   },
    .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
    .onMainMenu = [&gameState]() -> bool { return onMainMenu(gameState); },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
