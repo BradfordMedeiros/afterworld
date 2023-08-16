@@ -3,6 +3,7 @@
 
 #include "../components/common.h"
 #include "../components/list.h"
+#include "../components/options.h"
 #include "./docks/dock_camera.h"
 #include "./docks/dock_transform.h"
 

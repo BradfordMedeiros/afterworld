@@ -28,6 +28,18 @@ Component dockComponent {
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
     elements.push_back(listItemWithProps);
   
+    int value = 2;
+    std::function<void()> defaultOnClick = [value]() -> void {
+      std::cout << "hello world on click from button" << value << std::endl;
+    };
+    Props buttonProps {
+      .props = {
+        PropPair { .symbol = onclickSymbol, .value = defaultOnClick }, 
+      }
+    };
+    elements.push_back(withProps(button, buttonProps));
+
+    elements.push_back(options);
 
     modassert(dockToComponent.find(strValue) != dockToComponent.end(), std::string("dock - no component for ") + strValue);
     auto component = dockToComponent.at(strValue);

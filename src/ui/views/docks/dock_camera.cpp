@@ -81,9 +81,6 @@
     */
 
 
-std::optional<std::function<void()>> nullClick = []() -> void {
-
-};
 
 Props cameraOptions(){
   std::vector<ListComponentData> levels;
