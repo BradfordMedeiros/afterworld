@@ -1,10 +1,5 @@
 #include "./nestedlist.h"
 
-const int tintSymbol = getSymbol("tint");
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-
 std::optional<std::vector<int>> searchNestedList(std::vector<NestedListItem>& values, objid mappingId, std::vector<int> currentPath){
   for (int i = 0; i < static_cast<int>(values.size()); i++){
     std::vector<int> nextPath = currentPath;
@@ -29,7 +24,8 @@ std::optional<std::vector<int>> calculateSelectedPath(std::vector<NestedListItem
   return foundList;
 }
 
-BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values , std::optional<objid> mappingId, float padding, float fontSizePerLetterNdi, glm::vec4 tint, float minwidth, float xoffset, float yoffset){
+BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListItem>& values, float padding, float fontSizePerLetterNdi, glm::vec4 tint, float minwidth, float xoffset, float yoffset){
+  std::optional<objid> mappingId  = drawTools.selectedId;
   std::vector<int> listOpenIndexs;
   auto selectedPath = calculateSelectedPath(values, mappingId);
   if (selectedPath.has_value()){
@@ -39,6 +35,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
 
   float additionalYOffset = 0.f;
 
+  std::cout << "list open indexs: " << print(listOpenIndexs) << std::endl;
   for (int i = -1; i < static_cast<int>(listOpenIndexs.size()); i++){
     if (nestedListItems -> size() == 0){
       continue;
@@ -49,7 +46,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
       items.push_back(value.item);
     }
 
-    auto boundingBox = drawImMenuList(drawTools, items, mappingId, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth);
+    auto boundingBox = drawImMenuList(drawTools, items, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth);
 
     std::cout << "bounding box: " << print(boundingBox) << std::endl;
     // drawTools.drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
@@ -75,24 +72,6 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
 }
 
 
-void processImMouseSelect(std::vector<NestedListItem> list, std::optional<objid> mappingId){
-  if (!mappingId.has_value()){
-    return;
-  }
-  std::vector<NestedListItem>* values = &list;
-  auto path = calculateSelectedPath(list, mappingId);
-  if (path.has_value()){
-    for (auto index : path.value()){
-      NestedListItem& item = values -> at(index);
-      if (item.item.onClick.has_value()){
-        item.item.onClick.value()();
-      }
-      values = &item.items;
-    }
-  }
-}
-
-
 const int itemsSymbol = getSymbol("items");
 
 Component nestedList  {
@@ -105,11 +84,6 @@ Component nestedList  {
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-    return drawImNestedList(drawTools, *items, props.mappingId, padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
+    return drawImNestedList(drawTools, *items,  padding, fontSizePerLetterNdi, tint, minwidth, xoffset, yoffset);
   },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-    auto items = typeFromProps<std::vector<NestedListItem>>(props, itemsSymbol);
-    modassert(items, "nested list - invalid items props");
-    processImMouseSelect(*items, mappingIdSelected);
-  }  
 };

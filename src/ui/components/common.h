@@ -11,12 +11,10 @@ struct PropPair {
 };
 
 struct Props {
-  //std::vector<Symbol, std::any> values;
-  std::optional<objid> mappingId;
   std::vector<PropPair> props;
 };
 
-Props getDefaultProps(std::optional<objid> selectedId);
+Props getDefaultProps();
 
 PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol);
 int intFromProp(Props& props, int symbol, int defaultValue);
@@ -24,7 +22,10 @@ float floatFromProp(Props& props, int symbol, float defaultValue);
 glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
 glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
 std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
+std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol);
 std::string strFromProp(Props& props, int symbol, const char* defaultValue);
+objid objidFromProp(Props& props, int symbol);
+bool boolFromProp(Props& prop, int symbol, bool defaultValue);
 
 template <typename T>
 T* typeFromProps(Props& props, int symbol){
@@ -45,6 +46,7 @@ struct DrawingTools {
   std::function<void(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawRect;
   std::function<void(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawLine2D;
   std::function<void(objid, std::function<void()>)> registerCallbackFns;
+  std::optional<objid> selectedId;
 };
 
 struct BoundingBox2D {
@@ -56,10 +58,7 @@ struct BoundingBox2D {
 
 struct Component {
   std::function<BoundingBox2D(DrawingTools&, Props&)> draw;
-  std::function<void(std::optional<objid> mappingId, Props& props)> imMouseSelect;
 };
-
-
 
 void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt);
 std::string print(BoundingBox2D& box);
@@ -86,5 +85,30 @@ Component withProps(Component& wrappedComponent, Props& props);
 Component withPropsCopy(Component& wrappedComponent, Props props);
 
 extern Component emptyComponent;
+
+objid uniqueMenuItemMappingId();
+void resetMenuItemMappingId();
+
+extern const int horizontalSymbol;
+extern const int listItemsSymbol;
+extern const int valueSymbol;
+extern const int onclickSymbol;
+extern const int layoutSymbol;
+extern const int routerSymbol;
+extern const int tintSymbol;
+extern const int minwidthSymbol;
+extern const int minheightSymbol;
+extern const int xoffsetSymbol;
+extern const int yoffsetSymbol;
+extern const int elapsedTimeSymbol;
+extern const int resumeSymbol;
+extern const int goToMainMenuSymbol;
+extern const int layoutSymbol;
+extern const int sliderSymbol;
+extern const int radioSymbol;
+extern const int colorSymbol;
+extern const int routerMappingSymbol;
+extern const int paddingSymbol;
+extern const int titleSymbol;
 
 #endif

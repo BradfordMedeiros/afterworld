@@ -21,14 +21,14 @@
 #include "./water.h"
 #include "./gametypes.h"
 #include "./global.h"
-#include "./util/components/common.h"
-#include "./util/components/list.h"
-#include "./util/components/radiobutton.h"
-#include "./util/components/slider.h"
-#include "./util/components/imagelist.h"
-#include "./util/components/router.h"
-#include "./util/views/mainui.h"
-#include "./util/views/pausemenu.h"
+#include "./ui/components/common.h"
+#include "./ui/components/list.h"
+#include "./ui/components/radiobutton.h"
+#include "./ui/components/slider.h"
+#include "./ui/components/imagelist.h"
+#include "./ui/components/router.h"
+#include "./ui/views/mainui.h"
+#include "./ui/views/pausemenu.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

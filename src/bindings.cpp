@@ -19,6 +19,9 @@ struct GameState {
 
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
+
+  std::map<objid, std::function<void()>> uiCallbacks;
+  UiContext uiContext;
 };
 
 void unloadAllManagedScenes(){
@@ -67,7 +70,8 @@ void goToMenu(GameState& gameState){
     unloadAllManagedScenes();
   }
   if (!gameState.menuLoaded){
-    gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
+    gameapi -> loadScene(
+      "../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
     gameState.menuLoaded = true;
   }
   cameras = {};
@@ -85,12 +89,18 @@ double downTime = 0;
 void setPausedMode(bool shouldBePaused){
   setPaused(shouldBePaused);
   if (!shouldBePaused){
-    pushHistory("playing");
+    if (getCurrentPath() == "paused"){
+      pushHistory("playing");
+    }
     downTime = gameapi -> timeSeconds(true);
   }else{
-    pushHistory("paused");
+    if (getCurrentPath() == "playing"){
+      pushHistory("paused");
+    }
     downTime = gameapi -> timeSeconds(true);
   }
+
+
 }
 void togglePauseMode(GameState& gameState){
   bool isPaused = getGlobalState().paused;
@@ -101,28 +111,30 @@ void togglePauseMode(GameState& gameState){
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
-    pushHistory("paused");
-
   };
   std::function<void()> resume = []() -> void { 
     setPausedMode(false); 
-    pushHistory("playing");
   };
   UiContext uiContext {
+   .isDebugMode = []() -> bool { 
+     return getStrWorldState("editor", "debug").value() == "true"; 
+   },
    .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
-   .onMainMenu = onMainMenu(gameState),
-   .showScreenspaceGrid = getGlobalState().showScreenspaceGrid,
+   .onMainMenu = [&gameState]() -> bool { return onMainMenu(gameState); },
+   .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .levels = LevelUIInterface {
-      .goToLevel = [gameState](Level& level) -> void {
-        std::cout << "placeholder load level: " << level.name << std::endl;
+      .goToLevel = [&gameState](Level& level) -> void {
+        goToLevel(gameState, level.scene);
+        setPausedMode(false);
+        pushHistory("playing");
       },
-      .getLevels = []() -> std::vector<Level> {
-        return {
-          Level { .scene = "test-scene1", .name = "test-level1" },
-          Level { .scene = "test-scene2", .name = "test-level2" },
-          Level { .scene = "test-scene3", .name = "test-level3" },
-        }; 
+      .getLevels = [&gameState]() -> std::vector<Level> {
+        return gameState.levels; 
       },
+      .goToMenu = [&gameState]() -> void {
+        goToMenu(gameState);
+        pushHistory("mainmenu");
+      }
     },
     .pauseInterface = PauseInterface {
       .elapsedTime = gameapi -> timeSeconds(true) - downTime,
@@ -260,6 +272,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
     gameState -> selecting = std::nullopt;
+    gameState -> uiCallbacks = {};
+    gameState -> uiContext = {};
     loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);
@@ -273,6 +287,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
     gameState -> dragSelect = std::nullopt;
+    gameState -> uiContext = getUiContext(*gameState);    
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
@@ -288,9 +303,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
     getGlobalState().selectedId = selectedId;
 
-
-    auto uiContext = getUiContext(*gameState);    
-    handleDrawMainUi(uiContext, selectedId);
+    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, selectedId);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);
@@ -441,8 +454,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1 && button == 0){
       auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
       if (idAtCoord.has_value()){
-        auto uiContext = getUiContext(*gameState);
-        handleInputMainUi(uiContext, idAtCoord.value());
+        if (gameState -> uiCallbacks.find(idAtCoord.value()) != gameState -> uiCallbacks.end()){
+          gameState -> uiCallbacks.at(idAtCoord.value())();
+        }
       }
     }
     if (button == 1){

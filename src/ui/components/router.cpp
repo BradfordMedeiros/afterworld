@@ -8,8 +8,10 @@ RouterHistory createHistory(std::string initialRoute){
 void pushHistory(RouterHistory& history, std::string path){
   history.currentPath = path;
 }
+std::string getCurrentPath(RouterHistory& history){
+  return history.currentPath;
+}
 
-const int routerSymbol = getSymbol("router");
 RouterHistory* routerHistory(Props& props){
  	auto propPair = propPairAtIndex(props.props, routerSymbol);
  	if (!propPair){
@@ -20,7 +22,6 @@ RouterHistory* routerHistory(Props& props){
  	return router;
 }
 
-const int routerMappingSymbol = getSymbol("router-mapping");
 std::map<std::string, Component>* routerMapping(Props& props){
   auto propPair = propPairAtIndex(props.props, routerMappingSymbol);
   if (!propPair){
@@ -50,23 +51,10 @@ Component router {
     auto routeToComponent = routerMapping(props);
     modassert(routeToComponent, "router - no router mapping");
     auto component = componentAtRoute(*routeToComponent, *history);
-    drawTools.drawText(std::string("route: ") + history -> currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   	if (!component){
   		modlog("router", std::string("no path for: ") + history -> currentPath);
   		return BoundingBox2D { .x = 0.f, .y = 0.f, .width = 0.f, .height = 0.f };
   	}
     return component -> draw(drawTools, props);
-  },
-  .imMouseSelect = [](std::optional<objid> mappingId, Props& props) -> void {
-    auto history = routerHistory(props);
-    if (!history){
-      return;
-    }
-    auto routeToComponent = routerMapping(props);
-    modassert(routeToComponent, "router - no router mapping");
-    auto component = componentAtRoute(*routeToComponent, *history);
-    if (component){
-      component -> imMouseSelect(mappingId, props);
-    }  
   },
 };

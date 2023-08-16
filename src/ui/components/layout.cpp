@@ -97,6 +97,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   	});
   };
   drawTools.registerCallbackFns = realTools.registerCallbackFns;
+  drawTools.selectedId = realTools.selectedId;
 
 	bufferedDrawingTools.drawTools = drawTools,
 	bufferedDrawingTools.realTools = &realTools,
@@ -129,12 +130,8 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	}
 }
 
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int layoutSymbol = getSymbol("layout");
 
-Component layoutComponent  {
-	  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
+BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
 	  	modassert(layoutPtr, "layout prop not provided");
 	  	auto layout = *layoutPtr;
@@ -143,17 +140,23 @@ Component layoutComponent  {
       float yoffset = 0.f;
 
       float propsStyleXoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-      updatePropValue(props, yoffsetSymbol, 0.f);
+      updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
+
+      float propsStyleYoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+      updatePropValue(props, yoffsetSymbol, propsStyleYoffset);
+
+      xoffset = propsStyleXoffset;
+      yoffset = propsStyleYoffset;
 
       auto boundingBoxMeasurer = createMeasurer();
      	BufferedDrawingTools bufferedDrawingTools {};
 			createBufferedDrawingTools(bufferedDrawingTools, drawTools);
       for (int i = 0; i < layout.children.size(); i++){
     		propsStyleXoffset = xoffset;
+    		propsStyleYoffset = yoffset;
 
-    		updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
-    		updatePropValue(props, yoffsetSymbol, yoffset);
-    		std::cout << "mainmenu: xoffset " << propsStyleXoffset << ", yoffset" << yoffset << std::endl;
+        updatePropValue(props, xoffsetSymbol, propsStyleXoffset);
+    		updatePropValue(props, yoffsetSymbol, propsStyleYoffset);
 
     		auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, props);
     		setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
@@ -177,7 +180,7 @@ Component layoutComponent  {
     	}
 
     	// this lays out elements starting from the center
-
+    	
 			auto layoutOriginalBox = measurerToBox(boundingBoxMeasurer);
 
      
@@ -250,19 +253,13 @@ Component layoutComponent  {
 	  	  .width = width,
 	  	  .height = height,
 	  	};
-	  	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
+	  	if (layout.borderColor.has_value()){
+	  		drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
+	  	}
 	  	return boundingBox;
-	  },
-	  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
-	  	modassert(layoutPtr, "layout prop not provided");
-	  	auto layout = *layoutPtr;
-	  		//auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
-	  		//modassert(layoutPtr, "layout prop not provided");
-	  		//Layout& layout = *layoutPtr;
-	     for (auto &child : layout.children){
-	     	child.imMouseSelect(mappingIdSelected, props);
-	     }
-	  }  
+}
+
+Component layoutComponent  {
+	  .draw = drawLayout,
 };
 

@@ -8,6 +8,7 @@ struct RouterHistory {
 };
 RouterHistory createHistory(std::string initialRoute);
 void pushHistory(RouterHistory& history, std::string path);
+std::string getCurrentPath(RouterHistory& history);
 
 extern Component router;
 
