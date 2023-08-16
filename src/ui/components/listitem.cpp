@@ -117,7 +117,9 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
   float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
   float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+  std::cout << "getting on click" << std::endl;
   auto onClick = fnFromProp(props, onclickSymbol);
+  std::cout << "got on click" << std::endl;
   auto padding = floatFromProp(props, paddingSymbol, 0.05f);
 
   std::cout << "list item, tint: " << print(tint) << std::endl;
