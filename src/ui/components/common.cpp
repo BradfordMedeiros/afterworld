@@ -74,6 +74,7 @@ void setY(BoundingBoxMeasurer& box, float value){
   }
 }
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box){
+  modassert(box.minX.has_value() && box.maxX.has_value() && box.minY.has_value() && box.maxY.has_value(), "box mins incomplete, probably no items");
   float minX = box.minX.value();
   float maxX = box.maxX.value();
   float minY = box.minY.value();
@@ -159,12 +160,38 @@ std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
   return std::nullopt;
 }
 
+std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    const std::type_info& typeInfo = propPair -> value.type();
+    std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
+    std::function<void(const char*)>* fnValue = anycast<std::function<void(const char*)>>(propPair -> value);
+    modassert(fnValue, "fnFromProp invalid type");
+    return *fnValue;
+  }
+  return std::nullopt;
+}
+
 std::string strFromProp(Props& props, int symbol, const char* defaultValue){
   auto strValue = typeFromProps<std::string>(props, symbol);
   if (!strValue){
     return defaultValue;
   }
   return *strValue;
+}
+
+objid objidFromProp(Props& props, int symbol){
+  auto objIdValue = typeFromProps<objid>(props, symbol);
+  modassert(objIdValue, "objid is null");
+  return *objIdValue; 
+}
+
+bool boolFromProp(Props& props, int symbol, bool defaultValue){
+  auto boolValue = typeFromProps<bool>(props, symbol);
+  if (!boolValue){
+    return defaultValue;
+  }
+  return *boolValue; 
 }
 
 void updatePropValue(Props& props, int symbol, std::any value){
@@ -189,12 +216,6 @@ Component withProps(Component& wrappedComponent, Props& outerProps){
       }
       return wrappedComponent.draw(drawTools, props);
     },
-    .imMouseSelect = [&wrappedComponent, &outerProps](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      for (auto &prop : outerProps.props){
-        updatePropValue(props, prop.symbol, prop.value);
-      }
-      wrappedComponent.imMouseSelect(mappingIdSelected, props);
-    },
   };
   return component;
 }
@@ -203,17 +224,10 @@ Component withPropsCopy(Component& wrappedComponent, Props outerProps){
   auto component = Component {
     .draw = [&wrappedComponent, outerProps](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       Props outerPropsCopy = outerProps;
-      for (auto &prop : outerProps.props){
-        updatePropValue(props, prop.symbol, prop.value);
+      for (auto &prop : props.props){
+        updatePropValue(outerPropsCopy, prop.symbol, prop.value);
       }
-      return wrappedComponent.draw(drawTools, props);
-    },
-    .imMouseSelect = [&wrappedComponent, outerProps](std::optional<objid> mappingIdSelected, Props& props) -> void {
-      Props outerPropsCopy = outerProps;
-      for (auto &prop : outerPropsCopy.props){
-        updatePropValue(props, prop.symbol, prop.value);
-      }
-      wrappedComponent.imMouseSelect(mappingIdSelected, props);
+      return wrappedComponent.draw(drawTools, outerPropsCopy);
     },
   };
   return component;
@@ -221,9 +235,8 @@ Component withPropsCopy(Component& wrappedComponent, Props outerProps){
 
 
 
-Props getDefaultProps(std::optional<objid> selectedId){
+Props getDefaultProps(){
   return Props { 
-    .mappingId = selectedId, 
     .props = {}
   };
 }
@@ -233,6 +246,34 @@ Component emptyComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-  },
 };
+
+objid uniqueMappingId  = 990000;
+objid uniqueMenuItemMappingId(){
+  uniqueMappingId++;
+  return uniqueMappingId;
+}
+void resetMenuItemMappingId(){
+  uniqueMappingId = 990000;
+}
+
+const int horizontalSymbol = getSymbol("horizontal");
+const int listItemsSymbol = getSymbol("listitems");
+const int valueSymbol = getSymbol("value");
+const int onclickSymbol = getSymbol("onclick");
+const int layoutSymbol = getSymbol("layout");
+const int routerSymbol = getSymbol("router");
+const int tintSymbol = getSymbol("tint");
+const int minwidthSymbol = getSymbol("minwidth");
+const int minheightSymbol = getSymbol("minheight");
+const int xoffsetSymbol = getSymbol("xoffset");
+const int yoffsetSymbol = getSymbol("yoffset");
+const int elapsedTimeSymbol = getSymbol("elapsedTime");
+const int resumeSymbol = getSymbol("resume");
+const int goToMainMenuSymbol = getSymbol("gotoMenu");
+const int sliderSymbol = getSymbol("slider");
+const int radioSymbol = getSymbol("radio");
+const int colorSymbol = getSymbol("color");
+const int routerMappingSymbol = getSymbol("router-mapping");
+const int paddingSymbol = getSymbol("padding");
+const int titleSymbol = getSymbol("title");

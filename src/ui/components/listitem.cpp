@@ -7,7 +7,8 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
   drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
-BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, std::optional<objid> mappingId, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color){
+BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color){
+  std::optional<objid> mappingId = drawTools.selectedId;
   float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
   auto width = glm::max(menuItem.value.size() * fontSize, minwidth);
@@ -19,6 +20,11 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   auto textY = yoffset;
 
   auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(0.f, 0.f, 1.f, 1.f) : color;
+
+  if (menuItem.onClick.has_value()){
+    drawTools.registerCallbackFns(menuItem.mappingId.value(), menuItem.onClick.value());
+  }
+  
   drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
@@ -29,7 +35,8 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   };
 }
 
-BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, std::optional<objid> mappingId, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 tint, glm::vec4 color){
+BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 tint, glm::vec4 color){
+  std::optional<objid> mappingId = drawTools.selectedId;
   std::optional<float> minX = std::nullopt;
   std::optional<float> maxX = std::nullopt;
 
@@ -45,7 +52,7 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
 
-    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), mappingId, xoffset, yoffset, padding, fontSizeStyle, minwidth, tint, color);
+    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), xoffset, yoffset, padding, fontSizeStyle, minwidth, tint, color);
     float spacingPerItem = boundingBox.height;
     yoffset += -1 * spacingPerItem;
 
@@ -103,61 +110,31 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
   };
 }
 
-void processImMouseSelect(std::vector<ImListItem> list, std::optional<objid> mappingId){
-  if (!mappingId.has_value()){
-    return;
-  }
-  for (auto &item : list){
-    if (item.mappingId.has_value() && (item.mappingId.value() == mappingId.value()) && item.onClick.has_value()){
-      item.onClick.value()();
-    }
-  }
+BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
+  auto strValue = strFromProp(props, valueSymbol, "");
+  auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+  auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+  auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+  float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+  float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+  auto onClick = fnFromProp(props, onclickSymbol);
+  auto padding = floatFromProp(props, paddingSymbol, 0.05f);
+
+  std::cout << "list item, tint: " << print(tint) << std::endl;
+
+  ImListItem menuItem {
+    .value = strValue,
+    .onClick = onClick,
+    .mappingId = uniqueMenuItemMappingId(),
+  };
+  std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
+  std::cout << "tint is: " << print(tint) << ", xoffset= " << xoffset << std::endl;
+  auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
+  //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+  //drawDebugBoundingBox(drawTools, box);
+  return box;
 }
 
-
-const int tintSymbol = getSymbol("tint");
-const int colorSymbol = getSymbol("color");
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int valueSymbol = getSymbol("value");
-const int onclickSymbol = getSymbol("onclick");
-
 Component listItem {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      auto strValue = strFromProp(props, valueSymbol, "");
-      auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
-      auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
-      auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
-      float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-      float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-      auto onClick = fnFromProp(props, onclickSymbol);
-      ImListItem menuItem {
-        .value = strValue,
-        .onClick = onClick,
-        .mappingId = 100,
-      };
-      std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
-      float padding = 0.05f;
-      std::cout << "tint is: " << print(tint) << std::endl;
-      auto box = drawImMenuListItem(drawTools, menuItem, props.mappingId, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
-      //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-      drawDebugBoundingBox(drawTools, box);
-      return box;
-  },
-  .imMouseSelect = [](std::optional<objid> mappingIdSelected, Props& props) -> void {
-    auto strValue = strFromProp(props, valueSymbol, "");
-    auto onClick = fnFromProp(props, onclickSymbol);
-
-    ImListItem menuItem {
-      .value = strValue,
-      .onClick = onClick,
-      .mappingId = 100,
-    };
-    if (mappingIdSelected.has_value() && mappingIdSelected.value() == menuItem.mappingId.value()){
-      if (menuItem.onClick.has_value()){
-        menuItem.onClick.value()();
-      }
-    }
-  },
+  .draw = drawListItem,
 };

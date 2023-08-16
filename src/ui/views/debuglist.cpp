@@ -1,4 +1,4 @@
-#include "./menus.h"
+#include "./debuglist.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -564,66 +564,29 @@ std::vector<NestedListItem> nestedListTest = {
 };
 
 Props nestedListProps { 
-  .mappingId = std::nullopt, 
   .props = {
     PropPair { .symbol = getSymbol("items"), .value = nestedListTest }
   }
 };
 Component nestedListTestComponent = withProps(nestedList, nestedListProps);
 
-int mappingIdRadio = 95000;
-RadioButtonContainer radioButtonContainer {
-  .selectedRadioButtonIndex = 0,
-  .radioButtons = { 
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = []() -> void {
-        std::cout << "on click button 0" << std::endl;
-      },
-      .mappingId = mappingIdRadio++,
-    },
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = std::nullopt,
-      .mappingId = mappingIdRadio++,
-    },
-    RadioButton {
-      .selected = false,
-      .hovered = false,
-      .onClick = []() -> void {
-        std::cout << "on click button 2" << std::endl;
-      },
-      .mappingId = mappingIdRadio++,
-    }
-  }
-};
-
 
 Layout testLayout {
   .tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
   .showBackpanel = true,
   .borderColor = glm::vec4(0.f, 1.f, 0.f, 1.f),
-  //.minwidth = 0.f,
   .minwidth = 0.f,
   .minheight = 0.f,
   .layoutType = LAYOUT_HORIZONTAL2, //LAYOUT_VERTICAL2,
   .layoutFlowHorizontal = UILayoutFlowNone2,
   //.layoutFlowHorizontal = UILayoutFlowPositive2,
-  .layoutFlowVertical = UILayoutFlowNone2,
   .alignHorizontal = UILayoutFlowNone2,
   .alignVertical = UILayoutFlowNone2,
-
-  //.spacing = 0.1f,
   .spacing = 0.f,
-  //.minspacing = 0.4f,
   .minspacing = 0.f,
-  //.margin = 0.02f,
   .padding = 0.f,
   .children = {
     withPropsCopy(listItem, Props {
-      .mappingId = std::nullopt,
       .props =  {
         PropPair { .symbol = getSymbol("value"), .value = "testlayout" },
         PropPair { .symbol = getSymbol("onclick"), .value = std::nullopt },
