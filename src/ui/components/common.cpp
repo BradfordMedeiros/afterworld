@@ -160,6 +160,18 @@ std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
   return std::nullopt;
 }
 
+std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    const std::type_info& typeInfo = propPair -> value.type();
+    std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
+    std::function<void(const char*)>* fnValue = anycast<std::function<void(const char*)>>(propPair -> value);
+    modassert(fnValue, "fnFromProp invalid type");
+    return *fnValue;
+  }
+  return std::nullopt;
+}
+
 std::string strFromProp(Props& props, int symbol, const char* defaultValue){
   auto strValue = typeFromProps<std::string>(props, symbol);
   if (!strValue){

@@ -2,29 +2,41 @@
 
 struct NavbarOption {
 	const char* name;
+	const char* dock;
 };
 
 std::vector<NavbarOption> navbarOptions = {
 	NavbarOption {
+		.name = "Hide",
+		.dock = "",
+	},
+	NavbarOption {
 		.name = "Editor",
+		.dock = "Editor",
 	},
 	NavbarOption {
 		.name = "Object Details",
+		.dock = "Object Details",
 	},
 	NavbarOption {
 		.name = "Cameras",
+		.dock = "Cameras",
 	},
 	NavbarOption {
 		.name = "Lights",
+		.dock = "Lights",
 	},
 	NavbarOption {
 		.name = "Sound",
+		.dock = "Sound",
 	},
 	NavbarOption {
 		.name = "Text",
+		.dock = "Text",
 	},
 	NavbarOption {
 		.name = "Scenegraph",
+		.dock = "Scenegraph",
 	},
 	/*NavbarOption {
 		.name = "Scene Info",
@@ -64,13 +76,13 @@ std::vector<NavbarOption> navbarOptions = {
 
 
 
-Props createMenuOptions(std::function<void(const char*)> onClickNavbar){
+Props createMenuOptions(std::function<void(const char*)>& onClickNavbar){
   std::vector<ListComponentData> levels;
   for (auto &navbarOption : navbarOptions){
   	levels.push_back(ListComponentData {
   		.name = navbarOption.name,
-  		.onClick = [&navbarOption, onClickNavbar]() -> void {
-  			onClickNavbar(navbarOption.name);
+  		.onClick = [onClickNavbar, &navbarOption]() -> void {
+  			onClickNavbar(navbarOption.dock);
   		}
   	});
   }
@@ -90,11 +102,10 @@ Props createMenuOptions(std::function<void(const char*)> onClickNavbar){
 
 
 Component navbarComponent {
-  .draw = withPropsCopy(
-  	listComponent, 
-  	createMenuOptions(
-  		[](const char* name) -> void {
-  			std::cout << "navbar on click: " << name << std::endl;
-  		})
-  ).draw,
+  .draw = [](DrawingTools& drawTools, Props& props){	
+  	auto onClick = fnStrFromProp(props, onclickSymbol);
+  	modassert(onClick.has_value(), "navbar - need to provide on click value");
+  	Props defaultProps { .props = {} };
+  	return withPropsCopy(listComponent,  createMenuOptions(onClick.value())).draw(drawTools, defaultProps);
+  },
 };

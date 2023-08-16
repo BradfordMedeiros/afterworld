@@ -83,6 +83,11 @@ Props nestedListProps2 {
 };
 
 std::string dockedDock = "";
+std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
+  dockedDock = value;
+  std::cout << "navbar new dock: " << dockedDock << std::endl;
+};
+
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
   DrawingTools drawTools {
@@ -98,13 +103,15 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
 
   Props navbarProps { 
     .props = {
+      { onclickSymbol, onClickNavbar }
     }
   };
   navbarComponent.draw(drawTools, navbarProps);
   if (dockedDock != ""){
     Props dockProps { 
       .props = {
-        { titleSymbol, std::string("test dock") },
+        { titleSymbol, dockedDock },
+        { yoffsetSymbol, -0.02f },
       }
     };
     dockComponent.draw(drawTools, dockProps);
@@ -116,8 +123,11 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   router.draw(drawTools, routerProps);
   
   if (uiContext.isDebugMode()){
-    drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     withProps(nestedListTestComponent, nestedListProps2).draw(drawTools, defaultProps);
+
+    drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+
   }
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });

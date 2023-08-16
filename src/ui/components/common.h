@@ -22,6 +22,7 @@ float floatFromProp(Props& props, int symbol, float defaultValue);
 glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
 glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
 std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
+std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol);
 std::string strFromProp(Props& props, int symbol, const char* defaultValue);
 objid objidFromProp(Props& props, int symbol);
 bool boolFromProp(Props& prop, int symbol, bool defaultValue);

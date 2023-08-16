@@ -1,5 +1,7 @@
 #include "./dock.h"
 
+
+
 Layout createDockLayout(std::string& title){
   std::vector<Component> elements;
   std::function<void()> onClick = []() -> void {
@@ -18,8 +20,8 @@ Layout createDockLayout(std::string& title){
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
     .showBackpanel = true,
     .borderColor = std::nullopt,
-    .minwidth = 1.f,
-    .minheight = 1.f,
+    .minwidth = 0.5f,
+    .minheight = 1.9f,
     .layoutType = LAYOUT_VERTICAL2,
     .layoutFlowHorizontal = UILayoutFlowNegative2,
     .layoutFlowVertical = UILayoutFlowPositive2,
@@ -32,6 +34,11 @@ Layout createDockLayout(std::string& title){
   };
   return layout;
 }
+
+
+std::map<std::string, Component> dockToComponent {
+
+};
 
 Component dockComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
