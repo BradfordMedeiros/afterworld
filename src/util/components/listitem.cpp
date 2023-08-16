@@ -110,37 +110,31 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
   };
 }
 
-const int tintSymbol = getSymbol("tint");
-const int colorSymbol = getSymbol("color");
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int valueSymbol = getSymbol("value");
-const int onclickSymbol = getSymbol("onclick");
+BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
+  auto strValue = strFromProp(props, valueSymbol, "");
+  auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+  auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+  auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+  float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
+  float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+  auto onClick = fnFromProp(props, onclickSymbol);
+  auto padding = floatFromProp(props, paddingSymbol, 0.05f);
+
+  std::cout << "list item, tint: " << print(tint) << std::endl;
+
+  ImListItem menuItem {
+    .value = strValue,
+    .onClick = onClick,
+    .mappingId = uniqueMenuItemMappingId(),
+  };
+  std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
+  std::cout << "tint is: " << print(tint) << ", xoffset= " << xoffset << std::endl;
+  auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
+  //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
+  //drawDebugBoundingBox(drawTools, box);
+  return box;
+}
 
 Component listItem {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      auto strValue = strFromProp(props, valueSymbol, "");
-      auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
-      auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
-      auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
-      float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
-      float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
-      auto onClick = fnFromProp(props, onclickSymbol);
-
-      std::cout << "list item, tint: " << print(tint) << std::endl;
-
-      ImListItem menuItem {
-        .value = strValue,
-        .onClick = onClick,
-        .mappingId = uniqueMenuItemMappingId(),
-      };
-      std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
-      float padding = 0.05f;
-      std::cout << "tint is: " << print(tint) << ", xoffset= " << xoffset << std::endl;
-      auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
-      //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-      //drawDebugBoundingBox(drawTools, box);
-      return box;
-  },
+  .draw = drawListItem,
 };

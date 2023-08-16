@@ -14,7 +14,7 @@ struct Props {
   std::vector<PropPair> props;
 };
 
-Props getDefaultProps(std::optional<objid> selectedId);
+Props getDefaultProps();
 
 PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol);
 int intFromProp(Props& props, int symbol, int defaultValue);
@@ -24,6 +24,7 @@ glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
 std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
 std::string strFromProp(Props& props, int symbol, const char* defaultValue);
 objid objidFromProp(Props& props, int symbol);
+bool boolFromProp(Props& prop, int symbol, bool defaultValue);
 
 template <typename T>
 T* typeFromProps(Props& props, int symbol){
@@ -86,5 +87,27 @@ extern Component emptyComponent;
 
 objid uniqueMenuItemMappingId();
 void resetMenuItemMappingId();
+
+extern const int horizontalSymbol;
+extern const int listItemsSymbol;
+extern const int valueSymbol;
+extern const int onclickSymbol;
+extern const int layoutSymbol;
+extern const int routerSymbol;
+extern const int tintSymbol;
+extern const int minwidthSymbol;
+extern const int minheightSymbol;
+extern const int xoffsetSymbol;
+extern const int yoffsetSymbol;
+extern const int elapsedTimeSymbol;
+extern const int resumeSymbol;
+extern const int goToMainMenuSymbol;
+extern const int layoutSymbol;
+extern const int sliderSymbol;
+extern const int radioSymbol;
+extern const int colorSymbol;
+extern const int routerMappingSymbol;
+extern const int paddingSymbol;
+extern const int titleSymbol;
 
 #endif

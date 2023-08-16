@@ -2,21 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
-const int routerSymbol = getSymbol("router");
-const int routerMappingSymbol = getSymbol("router-mapping");
 auto routerHistory = createHistory("mainmenu");
-
-const int tintSymbol = getSymbol("tint");
-const int listItemsSymbol = getSymbol("listitems");
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int radioSymbol  = getSymbol("radio");
-const int elapsedTimeSymbol = getSymbol("elapsedTime");
-const int pausedSymbol = getSymbol("pause");
-const int resumeSymbol = getSymbol("resume");
-const int goToMainMenuSymbol = getSymbol("gotoMenu");
-
 
 Props createLevelListProps(UiContext& uiContext){
   std::vector<ListComponentData> levels;
@@ -40,7 +26,6 @@ Props createLevelListProps(UiContext& uiContext){
     },
   };
   return levelProps;
-
 }
 
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
@@ -96,6 +81,8 @@ Props nestedListProps2 {
     }
   }
 };
+
+std::string dockedDock = "";
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
   DrawingTools drawTools {
@@ -109,7 +96,22 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   };
   resetMenuItemMappingId();
 
-  auto defaultProps = getDefaultProps(selectedId);
+  Props navbarProps { 
+    .props = {
+    }
+  };
+  navbarComponent.draw(drawTools, navbarProps);
+  if (dockedDock != ""){
+    Props dockProps { 
+      .props = {
+        { titleSymbol, std::string("test dock") },
+      }
+    };
+    dockComponent.draw(drawTools, dockProps);
+  }
+
+
+  auto defaultProps = getDefaultProps();
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
   
@@ -120,6 +122,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
+
   return handlerFns;
 }
 
@@ -127,3 +130,6 @@ void pushHistory(std::string route){
 	pushHistory(routerHistory, route);
 }
 
+std::string getCurrentPath(){
+  return getCurrentPath(routerHistory);
+}

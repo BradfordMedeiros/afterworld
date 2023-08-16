@@ -66,9 +66,6 @@ BoundingBox2D drawRadioButtons(DrawingTools& drawTools, std::vector<RadioButton>
   };
 }
 
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int radioSymbol = getSymbol("radio");
 
 //auto listItems = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
 

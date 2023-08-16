@@ -89,12 +89,18 @@ double downTime = 0;
 void setPausedMode(bool shouldBePaused){
   setPaused(shouldBePaused);
   if (!shouldBePaused){
-    pushHistory("playing");
+    if (getCurrentPath() == "paused"){
+      pushHistory("playing");
+    }
     downTime = gameapi -> timeSeconds(true);
   }else{
-    pushHistory("paused");
+    if (getCurrentPath() == "playing"){
+      pushHistory("paused");
+    }
     downTime = gameapi -> timeSeconds(true);
   }
+
+
 }
 void togglePauseMode(GameState& gameState){
   bool isPaused = getGlobalState().paused;
@@ -120,6 +126,7 @@ UiContext getUiContext(GameState& gameState){
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState, level.scene);
         setPausedMode(false);
+        pushHistory("playing");
       },
       .getLevels = [&gameState]() -> std::vector<Level> {
         return gameState.levels; 

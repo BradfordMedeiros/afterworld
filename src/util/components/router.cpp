@@ -8,8 +8,10 @@ RouterHistory createHistory(std::string initialRoute){
 void pushHistory(RouterHistory& history, std::string path){
   history.currentPath = path;
 }
+std::string getCurrentPath(RouterHistory& history){
+  return history.currentPath;
+}
 
-const int routerSymbol = getSymbol("router");
 RouterHistory* routerHistory(Props& props){
  	auto propPair = propPairAtIndex(props.props, routerSymbol);
  	if (!propPair){
@@ -20,7 +22,6 @@ RouterHistory* routerHistory(Props& props){
  	return router;
 }
 
-const int routerMappingSymbol = getSymbol("router-mapping");
 std::map<std::string, Component>* routerMapping(Props& props){
   auto propPair = propPairAtIndex(props.props, routerMappingSymbol);
   if (!propPair){

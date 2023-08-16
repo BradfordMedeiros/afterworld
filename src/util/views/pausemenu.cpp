@@ -15,13 +15,6 @@ std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::funct
   return listItems;
 }
 
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int resumeSymbol = getSymbol("resume");
-const int goToMainMenuSymbol = getSymbol("gotoMenu");
-const int elapsedTimeSymbol = getSymbol("elapsedTime");
-
 Component pauseMenuComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
   	auto pauseMenu = createPauseMenu(fnFromProp(props, resumeSymbol).value(), fnFromProp(props, goToMainMenuSymbol).value());

@@ -8,6 +8,8 @@
 #include "../components/imagelist.h"
 #include "./debuglist.h"
 #include "./pausemenu.h"
+#include "./navbar.h"
+#include "./dock.h"
 
 struct Level {
   std::string scene;
@@ -37,5 +39,6 @@ extern Component mainUI;
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void pushHistory(std::string route);
+std::string getCurrentPath();
 
 #endif

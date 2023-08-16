@@ -130,12 +130,8 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	}
 }
 
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-const int layoutSymbol = getSymbol("layout");
 
-Component layoutComponent  {
-	  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D { 
+BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
 	  	modassert(layoutPtr, "layout prop not provided");
 	  	auto layout = *layoutPtr;
@@ -184,7 +180,7 @@ Component layoutComponent  {
     	}
 
     	// this lays out elements starting from the center
-
+    	
 			auto layoutOriginalBox = measurerToBox(boundingBoxMeasurer);
 
      
@@ -261,6 +257,9 @@ Component layoutComponent  {
 	  		drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
 	  	}
 	  	return boundingBox;
-	  },
+}
+
+Component layoutComponent  {
+	  .draw = drawLayout,
 };
 

@@ -1,10 +1,5 @@
 #include "./nestedlist.h"
 
-const int tintSymbol = getSymbol("tint");
-const int minwidthSymbol = getSymbol("minwidth");
-const int xoffsetSymbol = getSymbol("xoffset");
-const int yoffsetSymbol = getSymbol("yoffset");
-
 std::optional<std::vector<int>> searchNestedList(std::vector<NestedListItem>& values, objid mappingId, std::vector<int> currentPath){
   for (int i = 0; i < static_cast<int>(values.size()); i++){
     std::vector<int> nextPath = currentPath;
