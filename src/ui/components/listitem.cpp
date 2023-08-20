@@ -120,18 +120,14 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto onClick = fnFromProp(props, onclickSymbol);
   auto padding = floatFromProp(props, paddingSymbol, 0.05f);
 
-  std::cout << "list item, tint: " << print(tint) << std::endl;
-
   ImListItem menuItem {
     .value = strValue,
     .onClick = onClick,
     .mappingId = uniqueMenuItemMappingId(),
   };
-  std::cout << "mainmenu: list item: " << xoffset << ", " << yoffset << std::endl;
-  std::cout << "tint is: " << print(tint) << ", xoffset= " << xoffset << std::endl;
   auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
   //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-  //drawDebugBoundingBox(drawTools, box);
+  drawDebugBoundingBox(drawTools, box);
   return box;
 }
 

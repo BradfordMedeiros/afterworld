@@ -257,6 +257,9 @@ void resetMenuItemMappingId(){
   uniqueMappingId = 990000;
 }
 
+std::optional<std::function<void()>> nullClick = []() -> void {};
+
+
 const int horizontalSymbol = getSymbol("horizontal");
 const int listItemsSymbol = getSymbol("listitems");
 const int valueSymbol = getSymbol("value");

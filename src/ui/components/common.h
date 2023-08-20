@@ -89,6 +89,8 @@ extern Component emptyComponent;
 objid uniqueMenuItemMappingId();
 void resetMenuItemMappingId();
 
+extern std::optional<std::function<void()>> nullClick;
+
 extern const int horizontalSymbol;
 extern const int listItemsSymbol;
 extern const int valueSymbol;
