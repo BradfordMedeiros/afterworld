@@ -1,20 +1,14 @@
 #include "./options.h"
 
-Props optionsProps(){
+Props optionsProps(Options& options){
   std::vector<ListComponentData> levels;
-  levels.push_back(ListComponentData {
-  	.name = "opt1",
-  	.onClick = nullClick,
-  });
-  levels.push_back(ListComponentData {
-    .name = "opt2",
-    .onClick = nullClick,
-  });
-  levels.push_back(ListComponentData {
-    .name = "opt3",
-    .onClick = nullClick,
-  });
-  
+  for (auto &option : options.options){
+    levels.push_back(ListComponentData {
+      .name = option.name,
+      .onClick = option.onClick,
+    });
+  }
+
   Props levelProps {
     .props = {
       PropPair { .symbol = listItemsSymbol, .value = levels },
@@ -28,9 +22,12 @@ Props optionsProps(){
   return levelProps;
 }
 
+const int optionsSymbol = getSymbol("options");
+
 Component options {
   .draw = [](DrawingTools& drawTools, Props& props){	
-  	Props defaultProps { .props = {} };
-  	return withPropsCopy(listComponent,  optionsProps()).draw(drawTools, props);
+    auto options = typeFromProps<Options>(props, optionsSymbol);
+    modassert(options, "options - options not defined");
+  	return withPropsCopy(listComponent,  optionsProps(*options)).draw(drawTools, props);
   },
 };

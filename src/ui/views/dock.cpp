@@ -1,11 +1,5 @@
 #include "./dock.h"
 
-
-
-
-
-
-
 Component dockComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     static std::map<std::string, Component> dockToComponent {
@@ -13,12 +7,10 @@ Component dockComponent {
       { "transform", dockTransformComponent },
     };  
 
-    auto strValue = strFromProp(props, titleSymbol, "Dock");
-
     std::vector<Component> elements;
-    std::function<void()> onClick = []() -> void {
-      std::cout << "on click" << std::endl;
-    };
+
+    auto strValue = strFromProp(props, titleSymbol, "Dock");
+    std::function<void()> onClick = []() -> void { std::cout << "on click" << std::endl; };
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = strValue },
@@ -27,19 +19,7 @@ Component dockComponent {
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
     elements.push_back(listItemWithProps);
-  
-    int value = 2;
-    std::function<void()> defaultOnClick = [value]() -> void {
-      std::cout << "hello world on click from button" << value << std::endl;
-    };
-    Props buttonProps {
-      .props = {
-        PropPair { .symbol = onclickSymbol, .value = defaultOnClick }, 
-      }
-    };
-    elements.push_back(withProps(button, buttonProps));
 
-    elements.push_back(options);
 
     modassert(dockToComponent.find(strValue) != dockToComponent.end(), std::string("dock - no component for ") + strValue);
     auto component = dockToComponent.at(strValue);
@@ -47,10 +27,10 @@ Component dockComponent {
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-      .showBackpanel = true,
-      .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.8f),
+      .showBackpanel = false,
+      .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.8f),
       .minwidth = 0.5f,
-      .minheight = 1.9f,
+      .minheight = 1.f,
       .layoutType = LAYOUT_VERTICAL2,
       .layoutFlowHorizontal = UILayoutFlowNegative2,
       .layoutFlowVertical = UILayoutFlowPositive2,

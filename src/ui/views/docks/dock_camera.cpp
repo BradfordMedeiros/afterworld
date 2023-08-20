@@ -85,7 +85,7 @@
 Props cameraOptions(){
   std::vector<ListComponentData> levels;
   levels.push_back(ListComponentData {
-  	.name = "one",
+  	.name = "docker camera item 1",
   	.onClick = nullClick,
   });
   levels.push_back(ListComponentData {
@@ -97,7 +97,7 @@ Props cameraOptions(){
     .onClick = nullClick,
   });
   levels.push_back(ListComponentData {
-    .name = "four",
+    .name = "docker camera last item",
     .onClick = nullClick,
   });
   
@@ -114,9 +114,66 @@ Props cameraOptions(){
   return levelProps;
 }
 
+int value = 2;
+std::function<void()> defaultOnClick = [value]() -> void {
+  std::cout << "hello world on click from button" << value << std::endl;
+};
+
 Component dockCameraComponent {
-  .draw = [](DrawingTools& drawTools, Props& props){	
-  	Props defaultProps { .props = {} };
-  	return withPropsCopy(listComponent,  cameraOptions()).draw(drawTools, props);
+  .draw = [](DrawingTools& drawTools, Props& props){
+    std::vector<Component> elements;
+
+    Props buttonProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = std::string("create camera") },
+        PropPair { .symbol = onclickSymbol, .value = defaultOnClick }, 
+      }
+    };
+    elements.push_back(withProps(button, buttonProps));
+
+    Options defaultOptions {
+      .options = {
+        Option {
+          .name = "opt1",
+          .onClick = nullClick,
+        },
+        Option {
+          .name = "opt2",
+          .onClick = nullClick,
+        }
+      },
+    };
+    Props optionsProps {
+      .props = {
+        PropPair { .symbol = optionsSymbol, .value = defaultOptions },
+      }
+    };
+    elements.push_back(withProps(options, optionsProps));
+
+
+    Layout layout {
+      .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+      .showBackpanel = false,
+      .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.8f),
+      .minwidth = 0.5f,
+      .minheight = 0.f,
+      .layoutType = LAYOUT_VERTICAL2,
+      .layoutFlowHorizontal = UILayoutFlowNegative2,
+      .layoutFlowVertical = UILayoutFlowPositive2,
+      .alignHorizontal = UILayoutFlowNone2,
+      .alignVertical = UILayoutFlowNone2,
+      .spacing = 0.f,
+      .minspacing = 0.f,
+      .padding = 0.f,
+      .children = elements,
+    };
+
+    Props listLayoutProps {
+      .props = {
+        { .symbol = layoutSymbol, .value = layout },
+      },
+    };
+    return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
+
   },
 };
