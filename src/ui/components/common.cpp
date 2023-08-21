@@ -27,13 +27,13 @@ void drawScreenspaceGrid(ImGrid grid){
     float unitLineNdi = ndiSpacePerLine * (y + 1);
     float ndiY = (unitLineNdi * 2.f) - 1.f;
     gameapi -> drawLine2D(glm::vec3(-1.f, ndiY, 0.f), glm::vec3(1.f, ndiY, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
+    //modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
   }
   for (int x = 0; x < numLines; x ++){
     float unitLineNdi = ndiSpacePerLine * (x + 1);
     float ndiX = (unitLineNdi * 2.f) - 1.f;
     gameapi -> drawLine2D(glm::vec3(ndiX, -1.f, 0.f), glm::vec3(ndiX, 1.f, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
+    //modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
   }
 }
 
@@ -151,7 +151,7 @@ std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
     const std::type_info& typeInfo = propPair -> value.type();
-    std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
+    //std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
     std::function<void()>* fnValue = anycast<std::function<void()>>(propPair -> value);
     modassert(fnValue, "fnFromProp invalid type");
     return *fnValue;
@@ -164,7 +164,7 @@ std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int 
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
     const std::type_info& typeInfo = propPair -> value.type();
-    std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
+    //std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
     std::function<void(const char*)>* fnValue = anycast<std::function<void(const char*)>>(propPair -> value);
     modassert(fnValue, "fnFromProp invalid type");
     return *fnValue;

@@ -101,6 +101,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   };
   resetMenuItemMappingId();
 
+  /*
   Props navbarProps { 
     .props = {
       { onclickSymbol, onClickNavbar }
@@ -128,10 +129,34 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
 
-  }
-  if (uiContext.showScreenspaceGrid()){
+  }*/
+  if (true || uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
+
+  //Props dockCameraProps {
+  //  .props = {},
+  //};
+  //dockCameraComponent.draw(drawTools, dockCameraProps);
+
+  Options defaultOptions {
+    .options = {
+      Option {
+        .name = "opt1",
+        .onClick = nullClick,
+      },
+      Option {
+        .name = "opt2",
+        .onClick = nullClick,
+      }
+    },
+  };
+  Props optionsProps {
+    .props = {
+      PropPair { .symbol = optionsSymbol, .value = defaultOptions },
+    }
+  };
+  options.draw(drawTools, optionsProps);
 
   return handlerFns;
 }
