@@ -181,7 +181,6 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
       float elementsTop = elementsBox.y + (elementsBox.height * 0.5f);
       float elementsBottom = elementsBox.y - (elementsBox.height * 0.5f);
 
-	
       float padding = layout.padding.has_value() ? layout.padding.value() : 0.f;
       float outerWidth = elementsBox.width + (2 * padding);
       float outerHeight = elementsBox.height + (2 * padding);
@@ -225,31 +224,42 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
       }
 
 
-      float elementsOffsetX = initialXOffset - elementsBox.x + (elementsBox.width * 0.5f);
-      float elementsOffsetY = initialYOffset - elementsBox.y + (elementsBox.height * 0.5f);
-      float layoutFlowOffsetX = elementsOffsetX;
-      float layoutFlowOffsetY = elementsOffsetY;
-      // position the outer correctly, position the elements in the lower left of the outer box
-      if (layout.layoutFlowHorizontal == UILayoutFlowNone2){
-      	layoutFlowOffsetX = elementsOffsetX - (elementsBox.width * 0.5f);
-      }else if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
-      	layoutFlowOffsetX = outerOffsetX;
-      }else if (layout.layoutFlowHorizontal == UILayoutFlowNegative2){
-      	layoutFlowOffsetX = elementsOffsetX - (elementsBox.width);
-      }
-
-      if (layout.layoutFlowVertical == UILayoutFlowNone2){
-      	layoutFlowOffsetY = elementsOffsetY - (elementsBox.height * 0.5f);
-      }else if (layout.layoutFlowVertical == UILayoutFlowPositive2){
-      	layoutFlowOffsetY = elementsOffsetY;
-      }else if (layout.layoutFlowVertical == UILayoutFlowNegative2){
-      	layoutFlowOffsetY = elementsOffsetY - (elementsBox.height);
-      }
-
-
 
       float outerCenterXFinal = outerCenterX + outerLayoutFlowOffsetX;
       float outerCenterYFinal = outerCenterY + outerLayoutFlowOffsetY;
+      float newOuterLeft = outerLeft + outerLayoutFlowOffsetX;
+      float newOuterRight = outerRight + outerLayoutFlowOffsetX;
+      float newOuterBottom = outerBottom + outerLayoutFlowOffsetY;
+      float newOuterTop = outerTop + outerLayoutFlowOffsetY;
+
+      float containerElementsAdjustX = newOuterLeft - elementsLeft;
+      float containerElementsAdjustY = newOuterBottom - elementsBottom;
+      float layoutFlowOffsetX = containerElementsAdjustX;
+      float layoutFlowOffsetY = containerElementsAdjustY;
+
+      float newElementsRight = elementsRight + containerElementsAdjustX;
+      float newElementsTop = elementsTop + containerElementsAdjustY;
+      float newElementsX = elementsBox.x + containerElementsAdjustX;
+      float newElementsY = elementsBox.y + containerElementsAdjustY;
+
+      if (layout.alignHorizontal == UILayoutFlowNegative2){
+      	layoutFlowOffsetX += padding;
+      }else if (layout.alignHorizontal == UILayoutFlowNone2){
+      	layoutFlowOffsetX += outerCenterXFinal - newElementsX;
+      }else if (layout.alignHorizontal == UILayoutFlowPositive2){
+      	float diffToRight = newOuterRight - newElementsRight - padding;
+      	layoutFlowOffsetX += diffToRight;
+      }
+
+      if (layout.alignVertical == UILayoutFlowNegative2){
+      	layoutFlowOffsetY += padding;
+      }else if (layout.alignVertical == UILayoutFlowNone2){
+      	layoutFlowOffsetY += outerCenterYFinal - newElementsY;
+      }else if (layout.alignVertical == UILayoutFlowPositive2){
+      	float diffToTop = newOuterTop - newElementsTop - padding;
+      	layoutFlowOffsetY += diffToTop;
+      }
+
 
       if (true){
       	BoundingBox2D outerBounding {
@@ -269,10 +279,10 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
       	drawDebugBoundingBox(drawTools, innerBounding, glm::vec4(1.f, 1.f, 0.f, 1.f));	
       }
 
-      if (false && layout.showBackpanel){
+      if (true && layout.showBackpanel){
       	drawTools.drawRect(outerCenterXFinal, outerCenterYFinal, outerWidth, outerHeight, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
       }
-    	//drawBufferedData(bufferedDrawingTools, glm::vec2(layoutFlowOffsetX, layoutFlowOffsetY));
+    	drawBufferedData(bufferedDrawingTools, glm::vec2(layoutFlowOffsetX, layoutFlowOffsetY));
 	  	//BoundingBox2D boundingBox {
 	  	//  .x = x,
 	  	//  .y = y,
@@ -284,10 +294,10 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	  	//}
 	  	//return boundingBox;
 	  	return BoundingBox2D {
-	  		.x = 0,
-	  		.y = 0,
-	  		.width = 0.f,
-	  		.height = 0.f,
+	  		.x = outerCenterXFinal,
+	  		.y = outerCenterYFinal,
+	  		.width = outerWidth,
+	  		.height = outerHeight,
 	  	};
 }
 
