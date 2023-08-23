@@ -87,6 +87,19 @@ BoundingBox2D measurerToBox(BoundingBoxMeasurer& box){
   };
 }
 
+SideMeasurements calculateSides(BoundingBox2D& elementsBox){
+  float elementsLeft = elementsBox.x - (elementsBox.width * 0.5f);
+  float elementsRight = elementsBox.x + (elementsBox.width * 0.5f);
+  float elementsTop = elementsBox.y + (elementsBox.height * 0.5f);
+  float elementsBottom = elementsBox.y - (elementsBox.height * 0.5f);
+  return SideMeasurements {
+    .left = elementsLeft,
+    .right = elementsRight,
+    .top = elementsTop,
+    .bottom = elementsBottom,
+  };
+}
+
 PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol){
   for (int i = 0; i < props.size(); i++){
     PropPair& propPair = props.at(i);

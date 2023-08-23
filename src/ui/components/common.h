@@ -80,6 +80,14 @@ void setX(BoundingBoxMeasurer& box, float value);
 void setY(BoundingBoxMeasurer& box, float value);
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
 
+struct SideMeasurements {
+  float left;
+  float right;
+  float top;
+  float bottom;
+};
+SideMeasurements calculateSides(BoundingBox2D& elementsBox);
+
 
 Component withProps(Component& wrappedComponent, Props& props);
 Component withPropsCopy(Component& wrappedComponent, Props props);

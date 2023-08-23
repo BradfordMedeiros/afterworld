@@ -18,7 +18,7 @@ Component dockComponent {
       },
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-    elements.push_back(listItemWithProps);
+    //elements.push_back(listItemWithProps);
 
 
     modassert(dockToComponent.find(strValue) != dockToComponent.end(), std::string("dock - no component for ") + strValue);
@@ -32,8 +32,8 @@ Component dockComponent {
       .minwidth = 0.5f,
       .minheight = 1.f,
       .layoutType = LAYOUT_VERTICAL2,
-      .layoutFlowHorizontal = UILayoutFlowNegative2,
-      .layoutFlowVertical = UILayoutFlowPositive2,
+      .layoutFlowHorizontal = UILayoutFlowNone2,
+      .layoutFlowVertical = UILayoutFlowNone2,
       .alignHorizontal = UILayoutFlowNone2,
       .alignVertical = UILayoutFlowNone2,
       .spacing = 0.f,

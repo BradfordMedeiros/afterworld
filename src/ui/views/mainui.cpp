@@ -112,7 +112,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     Props dockProps { 
       .props = {
         { titleSymbol, dockedDock },
-        { yoffsetSymbol, -0.02f },
+        { yoffsetSymbol, 0.f },
       }
     };
     dockComponent.draw(drawTools, dockProps);

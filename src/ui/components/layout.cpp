@@ -130,176 +130,178 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	}
 }
 
-BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
-	  	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
-	  	modassert(layoutPtr, "layout prop not provided");
-	  	auto layout = *layoutPtr;
+BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Layout& layout){
+  auto boundingBoxMeasurer = createMeasurer();
 
-      auto boundingBoxMeasurer = createMeasurer();
-     	BufferedDrawingTools bufferedDrawingTools {};
-			createBufferedDrawingTools(bufferedDrawingTools, drawTools);
+  float xoffset = 0.f;
+  float yoffset = 0.f;
+  for (int i = 0; i < layout.children.size(); i++){
+		Props childProps {
+			.props  = {},
+		};
+    updatePropValue(childProps, xoffsetSymbol, xoffset);
+    updatePropValue(childProps, yoffsetSymbol, yoffset);
 
-			float initialXOffset = floatFromProp(props, xoffsetSymbol, 0.f);
-			float initialYOffset = floatFromProp(props, yoffsetSymbol, 0.f);
-			{
-      	float xoffset = initialXOffset;
-      	float yoffset = initialYOffset;
-      	for (int i = 0; i < layout.children.size(); i++){
-					Props childProps {
-						.props  = {},
-					};
+    auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, childProps);
+    //repositionLastDraw(bufferedDrawingTools, calcPositionFromBoundingBox(boundingBox));
 
-      	  updatePropValue(childProps, xoffsetSymbol, xoffset);
-    			updatePropValue(childProps, yoffsetSymbol, yoffset);
-    			auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, childProps);
-    			
-    			setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
-    			setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
-    			setY(boundingBoxMeasurer, boundingBox.y + (boundingBox.height * 0.5f));
-    			setY(boundingBoxMeasurer, boundingBox.y - (boundingBox.height * 0.5f));
-
-    			if (layout.layoutType == LAYOUT_VERTICAL2){
-						float spacingPerItemHeight = boundingBox.height + layout.spacing;
-						if (spacingPerItemHeight < layout.minspacing){
-							spacingPerItemHeight = layout.minspacing;
-						}
-    				yoffset -= spacingPerItemHeight;
-    			}else{
-    				float spacingPerItemWidth = boundingBox.width + layout.spacing;
-    				if (spacingPerItemWidth < layout.minspacing){
-    					spacingPerItemWidth = layout.minspacing;
-    				}
-    				xoffset += spacingPerItemWidth;
-    			}
-    		}
+    setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
+    setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
+    setY(boundingBoxMeasurer, boundingBox.y + (boundingBox.height * 0.5f));
+    setY(boundingBoxMeasurer, boundingBox.y - (boundingBox.height * 0.5f));
+    
+    if (layout.layoutType == LAYOUT_VERTICAL2){
+			float spacingPerItemHeight = boundingBox.height + layout.spacing;
+			if (spacingPerItemHeight < layout.minspacing){
+				spacingPerItemHeight = layout.minspacing;
+			}
+    	yoffset -= spacingPerItemHeight;
+    }else{
+    	float spacingPerItemWidth = boundingBox.width + layout.spacing;
+    	if (spacingPerItemWidth < layout.minspacing){
+    		spacingPerItemWidth = layout.minspacing;
     	}
+    	xoffset += spacingPerItemWidth;
+    }
+  }
+	return measurerToBox(boundingBoxMeasurer);
 
-    	
-			auto elementsBox = measurerToBox(boundingBoxMeasurer);
-      float elementsLeft = elementsBox.x - (elementsBox.width * 0.5f);
-      float elementsRight = elementsBox.x + (elementsBox.width * 0.5f);
-      float elementsTop = elementsBox.y + (elementsBox.height * 0.5f);
-      float elementsBottom = elementsBox.y - (elementsBox.height * 0.5f);
-
-      float padding = layout.padding.has_value() ? layout.padding.value() : 0.f;
-      float outerWidth = elementsBox.width + (2 * padding);
-      float outerHeight = elementsBox.height + (2 * padding);
-      if (layout.minwidth > outerWidth){
-      	outerWidth = layout.minwidth;
-      }
-      if (layout.minheight > outerHeight){
-      	outerHeight = layout.minheight;
-      }
-
-      float outerLeft = elementsBox.x - (outerWidth * 0.5f);
-      float outerRight = elementsBox.x + (outerWidth * 0.5f);
-      float outerTop = elementsBox.y + (outerHeight * 0.5f);
-      float outerBottom = elementsBox.y - (outerHeight * 0.5f);
-
-   		float outerCenterX = (outerRight + outerLeft) * 0.5f;
-      float outerCenterY = (outerTop + outerBottom) * 0.5f;
-
-      // offset x / y makes the box start from the bottom left and up
-      float outerOffsetX = initialXOffset - outerCenterX + (outerWidth * 0.5f);
-      float outerOffsetY = initialYOffset - outerCenterY + (outerHeight * 0.5f);
-
-      float outerLayoutFlowOffsetX = outerOffsetX;
-      float outerLayoutFlowOffsetY = outerOffsetY;
-
-      // position the outer correctly, position the elements in the lower left of the outer box
-      if (layout.layoutFlowHorizontal == UILayoutFlowNone2){
-      	outerLayoutFlowOffsetX = outerOffsetX - (outerWidth * 0.5f);
-      }else if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
-      	outerLayoutFlowOffsetX = outerOffsetX;
-      }else if (layout.layoutFlowHorizontal == UILayoutFlowNegative2){
-      	outerLayoutFlowOffsetX = outerOffsetX - (outerWidth);
-      }
-
-      if (layout.layoutFlowVertical == UILayoutFlowNone2){
-      	outerLayoutFlowOffsetY = outerOffsetY - (outerHeight * 0.5f);
-      }else if (layout.layoutFlowVertical == UILayoutFlowPositive2){
-      	outerLayoutFlowOffsetY = outerOffsetY;
-      }else if (layout.layoutFlowVertical == UILayoutFlowNegative2){
-      	outerLayoutFlowOffsetY = outerOffsetY - (outerHeight);
-      }
-
-
-
-      float outerCenterXFinal = outerCenterX + outerLayoutFlowOffsetX;
-      float outerCenterYFinal = outerCenterY + outerLayoutFlowOffsetY;
-      float newOuterLeft = outerLeft + outerLayoutFlowOffsetX;
-      float newOuterRight = outerRight + outerLayoutFlowOffsetX;
-      float newOuterBottom = outerBottom + outerLayoutFlowOffsetY;
-      float newOuterTop = outerTop + outerLayoutFlowOffsetY;
-
-      float containerElementsAdjustX = newOuterLeft - elementsLeft;
-      float containerElementsAdjustY = newOuterBottom - elementsBottom;
-      float layoutFlowOffsetX = containerElementsAdjustX;
-      float layoutFlowOffsetY = containerElementsAdjustY;
-
-      float newElementsRight = elementsRight + containerElementsAdjustX;
-      float newElementsTop = elementsTop + containerElementsAdjustY;
-      float newElementsX = elementsBox.x + containerElementsAdjustX;
-      float newElementsY = elementsBox.y + containerElementsAdjustY;
-
-      if (layout.alignHorizontal == UILayoutFlowNegative2){
-      	layoutFlowOffsetX += padding;
-      }else if (layout.alignHorizontal == UILayoutFlowNone2){
-      	layoutFlowOffsetX += outerCenterXFinal - newElementsX;
-      }else if (layout.alignHorizontal == UILayoutFlowPositive2){
-      	float diffToRight = newOuterRight - newElementsRight - padding;
-      	layoutFlowOffsetX += diffToRight;
-      }
-
-      if (layout.alignVertical == UILayoutFlowNegative2){
-      	layoutFlowOffsetY += padding;
-      }else if (layout.alignVertical == UILayoutFlowNone2){
-      	layoutFlowOffsetY += outerCenterYFinal - newElementsY;
-      }else if (layout.alignVertical == UILayoutFlowPositive2){
-      	float diffToTop = newOuterTop - newElementsTop - padding;
-      	layoutFlowOffsetY += diffToTop;
-      }
-
-
-      if (true){
-      	BoundingBox2D outerBounding {
-      		.x = outerCenterXFinal,
-      		.y = outerCenterYFinal,
-      		.width = outerWidth,
-      		.height = outerHeight,
-      	};
-      	drawDebugBoundingBox(drawTools, outerBounding, glm::vec4(0.f, 1.f, 1.f, 1.f));
-
-      	BoundingBox2D innerBounding {
-      		.x = elementsBox.x + layoutFlowOffsetX,
-      		.y = elementsBox.y + layoutFlowOffsetY,
-      		.width = elementsBox.width,
-      		.height = elementsBox.height,
-      	};
-      	drawDebugBoundingBox(drawTools, innerBounding, glm::vec4(1.f, 1.f, 0.f, 1.f));	
-      }
-
-      if (true && layout.showBackpanel){
-      	drawTools.drawRect(outerCenterXFinal, outerCenterYFinal, outerWidth, outerHeight, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
-      }
-    	drawBufferedData(bufferedDrawingTools, glm::vec2(layoutFlowOffsetX, layoutFlowOffsetY));
-	  	//BoundingBox2D boundingBox {
-	  	//  .x = x,
-	  	//  .y = y,
-	  	//  .width = width,
-	  	//  .height = height,
-	  	//};
-	  	//if (layout.borderColor.has_value()){
-	  	//	drawDebugBoundingBox(drawTools, boundingBox, layout.borderColor);
-	  	//}
-	  	//return boundingBox;
-	  	return BoundingBox2D {
-	  		.x = outerCenterXFinal,
-	  		.y = outerCenterYFinal,
-	  		.width = outerWidth,
-	  		.height = outerHeight,
-	  	};
 }
+
+BoundingBox2D calculateAdjustedBackpanel(BoundingBox2D& elementsBox, Layout& layout, float padding, float initialXOffset, float initialYOffset){  
+  float outerWidth = elementsBox.width + (2 * padding);
+  float outerHeight = elementsBox.height + (2 * padding);
+  if (layout.minwidth > outerWidth){
+  	outerWidth = layout.minwidth;
+  }
+  if (layout.minheight > outerHeight){
+  	outerHeight = layout.minheight;
+  }
+
+  BoundingBox2D outerBox {
+  	.x = elementsBox.x,
+  	.y = elementsBox.y,
+  	.width = outerWidth,
+  	.height = outerHeight,
+  };
+
+  auto outerSides = calculateSides(outerBox);
+
+  // offset x / y makes the box start from the bottom left and up
+  float outerOffsetX = initialXOffset - outerBox.x + (outerWidth * 0.5f);
+  float outerOffsetY = initialYOffset - outerBox.y + (outerHeight * 0.5f);
+
+  float outerLayoutFlowOffsetX = outerOffsetX;
+  float outerLayoutFlowOffsetY = outerOffsetY;
+	
+  // position the outer correctly, position the elements in the lower left of the outer box
+  if (layout.layoutFlowHorizontal == UILayoutFlowNone2){
+  	outerLayoutFlowOffsetX = outerOffsetX - (outerWidth * 0.5f);
+  }else if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
+  	outerLayoutFlowOffsetX = outerOffsetX;
+  }else if (layout.layoutFlowHorizontal == UILayoutFlowNegative2){
+  	outerLayoutFlowOffsetX = outerOffsetX - (outerWidth);
+  }
+
+  if (layout.layoutFlowVertical == UILayoutFlowNone2){
+  	outerLayoutFlowOffsetY = outerOffsetY - (outerHeight * 0.5f);
+  }else if (layout.layoutFlowVertical == UILayoutFlowPositive2){
+  	outerLayoutFlowOffsetY = outerOffsetY;
+  }else if (layout.layoutFlowVertical == UILayoutFlowNegative2){
+  	outerLayoutFlowOffsetY = outerOffsetY - (outerHeight);
+  }
+
+  float outerCenterXFinal = outerBox.x + outerLayoutFlowOffsetX;
+  float outerCenterYFinal = outerBox.y + outerLayoutFlowOffsetY;
+
+ 	BoundingBox2D outerBoundingBox {
+		.x = outerCenterXFinal,
+		.y = outerCenterYFinal,
+		.width = outerWidth,
+		.height = outerHeight,
+ 	};
+
+	return outerBoundingBox;
+}
+
+struct FlowOffsets {
+	float x;
+	float y;
+};
+
+FlowOffsets calculateFlowOffsets(Layout& layout, BoundingBox2D& elementsBox, BoundingBox2D& outerBoundingBox, float padding){
+ 	auto finalOuterSides = calculateSides(outerBoundingBox);
+	auto elementSides = calculateSides(elementsBox);
+  float containerElementsAdjustX = finalOuterSides.left - elementSides.left;
+  float containerElementsAdjustY = finalOuterSides.bottom - elementSides.bottom;
+
+  float layoutFlowOffsetX = containerElementsAdjustX;
+  float layoutFlowOffsetY = containerElementsAdjustY;
+
+  float newElementsRight = elementSides.right + containerElementsAdjustX;
+  float newElementsTop = elementSides.top + containerElementsAdjustY;
+
+  float newElementsX = elementsBox.x + containerElementsAdjustX;
+  float newElementsY = elementsBox.y + containerElementsAdjustY;
+
+  if (layout.alignHorizontal == UILayoutFlowNegative2){
+  	layoutFlowOffsetX += padding;
+  }else if (layout.alignHorizontal == UILayoutFlowNone2){
+  	layoutFlowOffsetX += outerBoundingBox.x - newElementsX;
+  }else if (layout.alignHorizontal == UILayoutFlowPositive2){
+  	float diffToRight = finalOuterSides.right - newElementsRight - padding;
+  	layoutFlowOffsetX += diffToRight;
+  }
+
+  if (layout.alignVertical == UILayoutFlowNegative2){
+  	layoutFlowOffsetY += padding;
+  }else if (layout.alignVertical == UILayoutFlowNone2){
+  	layoutFlowOffsetY += outerBoundingBox.y - newElementsY;
+  }else if (layout.alignVertical == UILayoutFlowPositive2){
+  	float diffToTop = finalOuterSides.top - newElementsTop - padding;
+  	layoutFlowOffsetY += diffToTop;
+  }
+
+  return FlowOffsets {
+  	.x = layoutFlowOffsetX,
+  	.y = layoutFlowOffsetY,
+  };
+}
+
+
+BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
+	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
+	modassert(layoutPtr, "layout prop not provided");
+	auto layout = *layoutPtr;
+
+  BufferedDrawingTools bufferedDrawingTools {};
+	createBufferedDrawingTools(bufferedDrawingTools, drawTools);
+
+	// Draw the elements
+	// initial x,y offset shouldn't actually matter.  
+  float padding = layout.padding.has_value() ? layout.padding.value() : 0.f;
+	auto elementsBox = drawLayoutElements(bufferedDrawingTools, layout);
+	auto outerBox = calculateAdjustedBackpanel(elementsBox, layout, padding, floatFromProp(props, xoffsetSymbol, 0.f), floatFromProp(props, yoffsetSymbol, 0.f));
+	auto flowOffsets = calculateFlowOffsets(layout, elementsBox, outerBox, padding);
+
+  if (true){
+  	drawDebugBoundingBox(drawTools, outerBox, glm::vec4(0.f, 1.f, 1.f, 1.f));
+  	BoundingBox2D innerBounding {
+  		.x = elementsBox.x + flowOffsets.x,
+  		.y = elementsBox.y + flowOffsets.y,
+  		.width = elementsBox.width,
+  		.height = elementsBox.height,
+  	};
+  	//drawDebugBoundingBox(drawTools, innerBounding, glm::vec4(1.f, 1.f, 0.f, 1.f));	
+  }
+
+  if (true && layout.showBackpanel){
+   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
+  }
+ 	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y));
+ 	return outerBox;
+}
+
 
 Component layoutComponent  {
 	  .draw = drawLayout,

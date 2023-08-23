@@ -149,6 +149,7 @@ Component dockCameraComponent {
       }
     };
     elements.push_back(withProps(options, optionsProps));
+    elements.push_back(withProps(options, optionsProps));
 
 
     Layout layout {
@@ -157,13 +158,13 @@ Component dockCameraComponent {
       .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.8f),
       .minwidth = 0.f,
       .minheight = 0.f,
-      .layoutType = LAYOUT_HORIZONTAL2, // LAYOUT_VERTICAL2,
+      .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,
       .layoutFlowHorizontal = UILayoutFlowPositive2, // L UILayoutFlowNone2,
       .layoutFlowVertical = UILayoutFlowNone2,
       .alignHorizontal = UILayoutFlowNone2,
       .alignVertical = UILayoutFlowNone2,
       .spacing = 0.f,
-      .minspacing = 0.f,
+      .minspacing = 0.2f,
       .padding = 0.f,
       .children = elements,
     };
