@@ -159,7 +159,7 @@ Component dockCameraComponent {
       .minwidth = 0.f,
       .minheight = 0.f,
       .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,
-      .layoutFlowHorizontal = UILayoutFlowPositive2, // L UILayoutFlowNone2,
+      .layoutFlowHorizontal = UILayoutFlowNone2, // L UILayoutFlowNone2,
       .layoutFlowVertical = UILayoutFlowNone2,
       .alignHorizontal = UILayoutFlowNone2,
       .alignVertical = UILayoutFlowNone2,

@@ -108,6 +108,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     }
   };
   navbarComponent.draw(drawTools, navbarProps);
+  
   if (dockedDock != ""){
     Props dockProps { 
       .props = {

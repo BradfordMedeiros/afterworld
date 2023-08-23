@@ -186,37 +186,24 @@ BoundingBox2D calculateAdjustedBackpanel(BoundingBox2D& elementsBox, Layout& lay
   };
 
   auto outerSides = calculateSides(outerBox);
-
-  // offset x / y makes the box start from the bottom left and up
-  float outerOffsetX = initialXOffset - outerBox.x + (outerWidth * 0.5f);
-  float outerOffsetY = initialYOffset - outerBox.y + (outerHeight * 0.5f);
-
-  float outerLayoutFlowOffsetX = outerOffsetX;
-  float outerLayoutFlowOffsetY = outerOffsetY;
+  float outerLayoutFlowOffsetX = 0.f;
+  float outerLayoutFlowOffsetY = 0.f;
 	
   // position the outer correctly, position the elements in the lower left of the outer box
-  if (layout.layoutFlowHorizontal == UILayoutFlowNone2){
-  	outerLayoutFlowOffsetX = outerOffsetX - (outerWidth * 0.5f);
-  }else if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
-  	outerLayoutFlowOffsetX = outerOffsetX;
+  if (layout.layoutFlowHorizontal == UILayoutFlowPositive2){
+  	outerLayoutFlowOffsetX = 0.5f * outerWidth;
   }else if (layout.layoutFlowHorizontal == UILayoutFlowNegative2){
-  	outerLayoutFlowOffsetX = outerOffsetX - (outerWidth);
+  	outerLayoutFlowOffsetX = -0.5f * outerWidth;
   }
-
-  if (layout.layoutFlowVertical == UILayoutFlowNone2){
-  	outerLayoutFlowOffsetY = outerOffsetY - (outerHeight * 0.5f);
-  }else if (layout.layoutFlowVertical == UILayoutFlowPositive2){
-  	outerLayoutFlowOffsetY = outerOffsetY;
+  if (layout.layoutFlowVertical == UILayoutFlowPositive2){
+  	outerLayoutFlowOffsetY = 0.5f * outerHeight;
   }else if (layout.layoutFlowVertical == UILayoutFlowNegative2){
-  	outerLayoutFlowOffsetY = outerOffsetY - (outerHeight);
+  	outerLayoutFlowOffsetY = -0.5f * outerHeight;
   }
-
-  float outerCenterXFinal = outerBox.x + outerLayoutFlowOffsetX;
-  float outerCenterYFinal = outerBox.y + outerLayoutFlowOffsetY;
 
  	BoundingBox2D outerBoundingBox {
-		.x = outerCenterXFinal,
-		.y = outerCenterYFinal,
+		.x = initialXOffset + outerLayoutFlowOffsetX,
+		.y = initialYOffset + outerLayoutFlowOffsetY,
 		.width = outerWidth,
 		.height = outerHeight,
  	};
