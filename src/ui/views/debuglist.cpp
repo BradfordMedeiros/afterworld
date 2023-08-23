@@ -571,28 +571,3 @@ Props nestedListProps {
 Component nestedListTestComponent = withProps(nestedList, nestedListProps);
 
 
-Layout testLayout {
-  .tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
-  .showBackpanel = true,
-  .borderColor = glm::vec4(0.f, 1.f, 0.f, 1.f),
-  .minwidth = 0.f,
-  .minheight = 0.f,
-  .layoutType = LAYOUT_HORIZONTAL2, //LAYOUT_VERTICAL2,
-  .layoutFlowHorizontal = UILayoutFlowNone2,
-  //.layoutFlowHorizontal = UILayoutFlowPositive2,
-  .alignHorizontal = UILayoutFlowNone2,
-  .alignVertical = UILayoutFlowNone2,
-  .spacing = 0.f,
-  .minspacing = 0.f,
-  .padding = 0.f,
-  .children = {
-    withPropsCopy(listItem, Props {
-      .props =  {
-        PropPair { .symbol = getSymbol("value"), .value = "testlayout" },
-        PropPair { .symbol = getSymbol("onclick"), .value = std::nullopt },
-      },
-    })
-  },
-};
-
-//Component testLayoutComponent = createLayoutComponent(testLayout);
