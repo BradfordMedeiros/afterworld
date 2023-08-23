@@ -16,19 +16,19 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal){
     elements.push_back(listItemWithProps);
   }
   Layout layout {
-    .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-    .showBackpanel = false,
-    .borderColor = std::nullopt,
+    .tint = glm::vec4(1.f, 0.f, 0.f, 0.8f),
+    .showBackpanel = true,
+    .borderColor = glm::vec4(0.f, 1.f, 1.f, 1.f),
     .minwidth = 0.f,
     .minheight = 0.f,
     .layoutType = horizontal ? LAYOUT_HORIZONTAL2 : LAYOUT_VERTICAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
+    .layoutFlowHorizontal = UILayoutFlowPositive2,
     .layoutFlowVertical = UILayoutFlowNone2,
-    .alignHorizontal = UILayoutFlowNone2,
+    .alignHorizontal = UILayoutFlowPositive2,
     .alignVertical = UILayoutFlowNone2,
     .spacing = 0.f,
     .minspacing = 0.f,
-    .padding = 0.f,
+    .padding = 0.02f,
     .children = elements,
   };
   return layout;

@@ -73,7 +73,7 @@ Props nestedListProps2 {
     },
     PropPair {
       .symbol = xoffsetSymbol,
-      .value = -0.99f,
+      .value = -1.f,
     },
     PropPair {
       .symbol = yoffsetSymbol,
@@ -100,6 +100,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
      .selectedId = selectedId,
   };
   resetMenuItemMappingId();
+
 
   Props navbarProps { 
     .props = {
