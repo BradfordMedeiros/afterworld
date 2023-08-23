@@ -215,38 +215,26 @@ struct FlowOffsets {
 	float x;
 	float y;
 };
-
 FlowOffsets calculateFlowOffsets(Layout& layout, BoundingBox2D& elementsBox, BoundingBox2D& outerBoundingBox, float padding){
  	auto finalOuterSides = calculateSides(outerBoundingBox);
 	auto elementSides = calculateSides(elementsBox);
-  float containerElementsAdjustX = finalOuterSides.left - elementSides.left;
-  float containerElementsAdjustY = finalOuterSides.bottom - elementSides.bottom;
 
-  float layoutFlowOffsetX = containerElementsAdjustX;
-  float layoutFlowOffsetY = containerElementsAdjustY;
-
-  float newElementsRight = elementSides.right + containerElementsAdjustX;
-  float newElementsTop = elementSides.top + containerElementsAdjustY;
-
-  float newElementsX = elementsBox.x + containerElementsAdjustX;
-  float newElementsY = elementsBox.y + containerElementsAdjustY;
-
+  float layoutFlowOffsetX = 0.f;
   if (layout.alignHorizontal == UILayoutFlowNegative2){
-  	layoutFlowOffsetX += padding;
+  	layoutFlowOffsetX = finalOuterSides.left - elementSides.left + padding;
   }else if (layout.alignHorizontal == UILayoutFlowNone2){
-  	layoutFlowOffsetX += outerBoundingBox.x - newElementsX;
+  	layoutFlowOffsetX = outerBoundingBox.x - elementsBox.x;
   }else if (layout.alignHorizontal == UILayoutFlowPositive2){
-  	float diffToRight = finalOuterSides.right - newElementsRight - padding;
-  	layoutFlowOffsetX += diffToRight;
+  	layoutFlowOffsetX = finalOuterSides.right - elementSides.right - padding;
   }
 
+  float layoutFlowOffsetY = 0.f;
   if (layout.alignVertical == UILayoutFlowNegative2){
-  	layoutFlowOffsetY += padding;
+  	layoutFlowOffsetY = finalOuterSides.bottom - elementSides.bottom + padding;
   }else if (layout.alignVertical == UILayoutFlowNone2){
-  	layoutFlowOffsetY += outerBoundingBox.y - newElementsY;
+  	layoutFlowOffsetY = outerBoundingBox.y - elementsBox.y;
   }else if (layout.alignVertical == UILayoutFlowPositive2){
-  	float diffToTop = finalOuterSides.top - newElementsTop - padding;
-  	layoutFlowOffsetY += diffToTop;
+  	layoutFlowOffsetY = finalOuterSides.top - elementSides.top - padding;
   }
 
   return FlowOffsets {
@@ -260,15 +248,18 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);
 	modassert(layoutPtr, "layout prop not provided");
 	auto layout = *layoutPtr;
+  float padding = layout.padding.has_value() ? layout.padding.value() : 0.f;
 
   BufferedDrawingTools bufferedDrawingTools {};
 	createBufferedDrawingTools(bufferedDrawingTools, drawTools);
 
-	// Draw the elements
-	// initial x,y offset shouldn't actually matter.  
-  float padding = layout.padding.has_value() ? layout.padding.value() : 0.f;
+  // Draws the elements into the buffer with their relative spacing
 	auto elementsBox = drawLayoutElements(bufferedDrawingTools, layout);
+
+	// Figures out where the backpanel will go based upon the elements sizing, and layout properties
 	auto outerBox = calculateAdjustedBackpanel(elementsBox, layout, padding, floatFromProp(props, xoffsetSymbol, 0.f), floatFromProp(props, yoffsetSymbol, 0.f));
+
+	// Repositions elements into the backpanel, taking into account alignment
 	auto flowOffsets = calculateFlowOffsets(layout, elementsBox, outerBox, padding);
 
   if (true){
