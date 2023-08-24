@@ -130,6 +130,32 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	}
 }
 
+BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, BoundingBox2D& boundingBox, float xoffset, float yoffset, int startDrawIndex, int endDrawIndex){
+	modassert(startDrawIndex <= endDrawIndex, "invalid indexs for reposition");
+	auto sides = calculateSides(boundingBox);
+	std::cout << "layout : xoffset = " << xoffset << ", yoffset = " << yoffset << std::endl;
+	std::cout << "layout: element: " << print(boundingBox) << std::endl;
+	std::cout << "layout: sides: " << print(sides) << std::endl;
+	std::cout << "layout: need to offset: xoffset = " << (xoffset - sides.left) << ", yoffset = " << (yoffset - sides.bottom) << std::endl;
+	// reposition to xoffset
+	//
+	boundingBox.x += (xoffset - sides.left);
+ 	//drawDebugBoundingBox(*(bufferedDrawingTools.realTools), boundingBox, glm::vec4(0.f, 1.f, 1.f, 1.f));
+
+	for (int i = bufferedDrawingTools.bufferedData.bufferedRect.size() - 1; i >= 0; i--){
+		BufferedRect& bufferedRect = bufferedDrawingTools.bufferedData.bufferedRect.at(i);
+		if (bufferedRect.drawOrder >= startDrawIndex && bufferedRect.drawOrder < endDrawIndex){
+			bufferedDrawingTools.bufferedData.bufferedRect.at(i).centerX += (xoffset - sides.left);
+		}
+		// need to fix for other draw types, but this is probably the most important
+	}
+
+	modassert(false, "include offset adjustments for every element type here");
+ 	
+
+	return boundingBox;
+}
+
 BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Layout& layout){
   auto boundingBoxMeasurer = createMeasurer();
 
@@ -142,8 +168,11 @@ BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Lay
     updatePropValue(childProps, xoffsetSymbol, xoffset);
     updatePropValue(childProps, yoffsetSymbol, yoffset);
 
+
+    int startDrawIndex  = bufferedDrawingTools.bufferedData.bufferedIndex;
     auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, childProps);
-    //repositionLastDraw(bufferedDrawingTools, calcPositionFromBoundingBox(boundingBox));
+    int upperDrawing = bufferedDrawingTools.bufferedData.bufferedIndex;
+    boundingBox = repositionLastElement(bufferedDrawingTools, boundingBox, xoffset, yoffset, startDrawIndex, upperDrawing);
 
     setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
     setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
@@ -261,8 +290,9 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 
 	// Repositions elements into the backpanel, taking into account alignment
 	auto flowOffsets = calculateFlowOffsets(layout, elementsBox, outerBox, padding);
+	//auto flowOffsets = glm::vec2(0.f, 0.f);
 
-  if (true){
+  if (false){
   	drawDebugBoundingBox(drawTools, outerBox, glm::vec4(0.f, 1.f, 1.f, 1.f));
   	BoundingBox2D innerBounding {
   		.x = elementsBox.x + flowOffsets.x,
@@ -274,7 +304,7 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
   }
 
   if (true && layout.showBackpanel){
-   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
+   	//drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
   }
  	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y));
  	return outerBox;

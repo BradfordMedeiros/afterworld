@@ -127,7 +127,7 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   };
   auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
   //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-  drawDebugBoundingBox(drawTools, box);
+  //drawDebugBoundingBox(drawTools, box);
   return box;
 }
 

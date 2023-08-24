@@ -87,7 +87,7 @@ struct SideMeasurements {
   float bottom;
 };
 SideMeasurements calculateSides(BoundingBox2D& elementsBox);
-
+std::string print(SideMeasurements& sides);
 
 Component withProps(Component& wrappedComponent, Props& props);
 Component withPropsCopy(Component& wrappedComponent, Props props);

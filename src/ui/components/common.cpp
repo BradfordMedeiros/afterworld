@@ -100,6 +100,10 @@ SideMeasurements calculateSides(BoundingBox2D& elementsBox){
   };
 }
 
+std::string print(SideMeasurements& sides){
+  return std::string("left = " + std::to_string(sides.left) + ", right = " + std::to_string(sides.right) + ", top = " + std::to_string(sides.top) + ", bottom = " + std::to_string(sides.bottom));
+}
+
 PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol){
   for (int i = 0; i < props.size(); i++){
     PropPair& propPair = props.at(i);
