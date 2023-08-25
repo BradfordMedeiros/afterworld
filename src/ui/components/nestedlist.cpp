@@ -36,6 +36,14 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
   float additionalYOffset = 0.f;
 
   //std::cout << "list open indexs: " << print(listOpenIndexs) << std::endl;
+
+  BoundingBox2D overallBounds {  // bounding box incorrect
+    .x = 0.f,
+    .y = 0.f,
+    .width = 0.f,
+    .height = 0.f,
+  };
+
   for (int i = -1; i < static_cast<int>(listOpenIndexs.size()); i++){
     if (nestedListItems -> size() == 0){
       continue;
@@ -47,7 +55,9 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
     }
 
     auto boundingBox = drawImMenuList(drawTools, items, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth);
-
+    if (i == -1){
+      overallBounds = boundingBox;
+    }
     //std::cout << "bounding box: " << print(boundingBox) << std::endl;
     // drawTools.drawRect(boundingBox.x, boundingBox.y, boundingBox.width + 0.01f, boundingBox.height + 0.01f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
     // drawTools.drawRect(0.f, 0.f, 0.2f, 0.2f, false, style.tint.value() + glm::vec4(0.3f, 0.3f, 0.3f, 0.f), std::nullopt, true, std::nullopt, std::nullopt);
@@ -63,12 +73,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
       additionalYOffset -=  (nextIndex * perElementHeight);
     }
   }
-  return BoundingBox2D {  // bounding box incorrect
-    .x = 0.f,
-    .y = 0.f,
-    .width = 1.f,
-    .height = 1.f,
-  };
+  return overallBounds; // this is just the first leftmost list
 }
 
 

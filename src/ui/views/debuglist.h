@@ -11,6 +11,6 @@
 #include "../../global.h"
 
 
-extern Component nestedListTestComponent;
+extern Component debugList;
 
 #endif

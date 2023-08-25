@@ -57,13 +57,12 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     .props = {
       { routerSymbol, routerHistory },
       { routerMappingSymbol, routeToComponent },
-      { tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.2f) }
     },
   };
   return routerProps;
 }
 
-Props nestedListProps2 { 
+Props debugListProps { 
   .props = {
     PropPair {
       .symbol = tintSymbol,
@@ -75,7 +74,7 @@ Props nestedListProps2 {
     },
     PropPair {
       .symbol = xoffsetSymbol,
-      .value = -1.f,
+      .value = -0.99f,
     },
     PropPair {
       .symbol = yoffsetSymbol,
@@ -115,7 +114,6 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     Props dockProps { 
       .props = {
         { titleSymbol, dockedDock },
-        { yoffsetSymbol, 0.f },
       }
     };
     dockComponent.draw(drawTools, dockProps);
@@ -126,7 +124,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   router.draw(drawTools, routerProps);
 
   if (uiContext.isDebugMode()){
-    withProps(nestedListTestComponent, nestedListProps2).draw(drawTools, defaultProps);
+    withProps(debugList, debugListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }

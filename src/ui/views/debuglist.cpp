@@ -568,6 +568,6 @@ Props nestedListProps {
     PropPair { .symbol = getSymbol("items"), .value = nestedListTest }
   }
 };
-Component nestedListTestComponent = withProps(nestedList, nestedListProps);
+Component debugList = withProps(nestedList, nestedListProps);
 
 

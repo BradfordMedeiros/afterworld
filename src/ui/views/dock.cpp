@@ -28,12 +28,12 @@ Component dockComponent {
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
       .showBackpanel = true,
-      .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.8f),
+      .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,
       .minheight = 1.f,
       .layoutType = LAYOUT_VERTICAL2,
-      .layoutFlowHorizontal = UILayoutFlowPositive2,
-      .layoutFlowVertical = UILayoutFlowPositive2,
+      .layoutFlowHorizontal = UILayoutFlowNegative2,
+      .layoutFlowVertical = UILayoutFlowNegative2,
       .alignHorizontal = UILayoutFlowNone2,
       .alignVertical = UILayoutFlowNone2,
       .spacing = 0.f,
@@ -45,6 +45,8 @@ Component dockComponent {
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },
+        { .symbol = xoffsetSymbol, .value = 1.f },
+        { .symbol = yoffsetSymbol, .value = 0.88f },
       },
     };
     return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
