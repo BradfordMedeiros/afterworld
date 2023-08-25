@@ -139,19 +139,40 @@ BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, 
 	std::cout << "layout: need to offset: xoffset = " << (xoffset - sides.left) << ", yoffset = " << (yoffset - sides.bottom) << std::endl;
 	// reposition to xoffset
 	//
-	boundingBox.x += (xoffset - sides.left);
+
+	float amountToOffsetX = xoffset - sides.left;
+	boundingBox.x += amountToOffsetX;
  	//drawDebugBoundingBox(*(bufferedDrawingTools.realTools), boundingBox, glm::vec4(0.f, 1.f, 1.f, 1.f));
 
 	for (int i = bufferedDrawingTools.bufferedData.bufferedRect.size() - 1; i >= 0; i--){
 		BufferedRect& bufferedRect = bufferedDrawingTools.bufferedData.bufferedRect.at(i);
-		if (bufferedRect.drawOrder >= startDrawIndex && bufferedRect.drawOrder < endDrawIndex){
-			bufferedDrawingTools.bufferedData.bufferedRect.at(i).centerX += (xoffset - sides.left);
+		if (bufferedRect.drawOrder < startDrawIndex){
+			break;
 		}
-		// need to fix for other draw types, but this is probably the most important
+		if (bufferedRect.drawOrder < endDrawIndex){
+			bufferedRect.centerX += amountToOffsetX;
+		}
+	}
+	for (int i = bufferedDrawingTools.bufferedData.bufferedText.size() - 1; i >= 0; i--){
+		BufferedText& bufferedText = bufferedDrawingTools.bufferedData.bufferedText.at(i);
+		if (bufferedText.drawOrder < startDrawIndex){
+			break;
+		}
+		if (bufferedText.drawOrder < endDrawIndex){
+			bufferedText.left += amountToOffsetX;
+		}
 	}
 
-	modassert(false, "include offset adjustments for every element type here");
- 	
+	for (int i = bufferedDrawingTools.bufferedData.buffered2DLines.size() - 1; i >= 0; i--){
+		BufferedLine2D& buffered2DLines = bufferedDrawingTools.bufferedData.buffered2DLines.at(i);
+		if (buffered2DLines.drawOrder < startDrawIndex){
+			break;
+		}
+		if (buffered2DLines.drawOrder < endDrawIndex){
+			buffered2DLines.fromPos.x += amountToOffsetX;
+			buffered2DLines.toPos.x += amountToOffsetX;
+		}
+	}
 
 	return boundingBox;
 }
@@ -292,8 +313,11 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	auto flowOffsets = calculateFlowOffsets(layout, elementsBox, outerBox, padding);
 	//auto flowOffsets = glm::vec2(0.f, 0.f);
 
+	if (layout.borderColor.has_value()){
+	 	drawDebugBoundingBox(drawTools, outerBox, layout.borderColor);
+	}
+
   if (false){
-  	drawDebugBoundingBox(drawTools, outerBox, glm::vec4(0.f, 1.f, 1.f, 1.f));
   	BoundingBox2D innerBounding {
   		.x = elementsBox.x + flowOffsets.x,
   		.y = elementsBox.y + flowOffsets.y,
@@ -303,8 +327,8 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
   	//drawDebugBoundingBox(drawTools, innerBounding, glm::vec4(1.f, 1.f, 0.f, 1.f));	
   }
 
-  if (true && layout.showBackpanel){
-   	//drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
+  if (layout.showBackpanel){
+   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
   }
  	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y));
  	return outerBox;

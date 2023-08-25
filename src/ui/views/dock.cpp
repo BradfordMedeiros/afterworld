@@ -27,7 +27,7 @@ Component dockComponent {
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-      .showBackpanel = false,
+      .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.8f),
       .minwidth = 0.5f,
       .minheight = 1.f,

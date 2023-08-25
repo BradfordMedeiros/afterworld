@@ -119,6 +119,9 @@ extern const int radioSymbol;
 extern const int colorSymbol;
 extern const int routerMappingSymbol;
 extern const int paddingSymbol;
+extern const int alignVertical;
+extern const int flowHorizontal;
+extern const int flowVertical;
 extern const int titleSymbol;
 
 #endif

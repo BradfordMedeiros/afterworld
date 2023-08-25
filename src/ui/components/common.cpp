@@ -296,4 +296,7 @@ const int radioSymbol = getSymbol("radio");
 const int colorSymbol = getSymbol("color");
 const int routerMappingSymbol = getSymbol("router-mapping");
 const int paddingSymbol = getSymbol("padding");
+const int alignVertical = getSymbol("align-vertical");
+const int flowHorizontal = getSymbol("flow-horizontal");
+const int flowVertical = getSymbol("flow-vertical");
 const int titleSymbol = getSymbol("title");

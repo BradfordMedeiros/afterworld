@@ -1,7 +1,7 @@
 #include "./list.h"
 
 
-Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal){
+Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal){
   std::vector<Component> elements;
   for (int i = 0 ; i < listItems.size(); i++){
     ListComponentData& listItemData = listItems.at(i);
@@ -16,19 +16,19 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal){
     elements.push_back(listItemWithProps);
   }
   Layout layout {
-    .tint = glm::vec4(1.f, 0.f, 0.f, 0.8f),
+    .tint = glm::vec4(1.f, 1.f, 1.f, 0.4f),
     .showBackpanel = true,
-    .borderColor = glm::vec4(0.f, 1.f, 1.f, 1.f),
+    .borderColor = std::nullopt,
     .minwidth = 0.f,
     .minheight = 0.f,
     .layoutType = horizontal ? LAYOUT_HORIZONTAL2 : LAYOUT_VERTICAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
-    .layoutFlowVertical = UILayoutFlowNone2,
+    .layoutFlowHorizontal = flowHorizontal,
+    .layoutFlowVertical = flowVertical,
     .alignHorizontal = UILayoutFlowNone2,
     .alignVertical = UILayoutFlowNone2,
     .spacing = 0.f,
     .minspacing = 0.f,
-    .padding = 0.02f,
+    .padding = 0.f,
     .children = elements,
   };
   return layout;
@@ -39,8 +39,19 @@ Component listComponent {
     auto listItems = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
     modassert(listItems, "invalid listItems prop");
     auto horizontal = boolFromProp(props, horizontalSymbol, false);
+    auto flowVerticalProp = typeFromProps<UILayoutFlowType2>(props, flowVertical);
+    auto flowVerticalValue = UILayoutFlowNone2;
+    if (flowVerticalProp){
+      flowVerticalValue = *flowVerticalProp;
+    }
 
-    auto layout = createLayout(*listItems, horizontal);
+    auto flowHorizontalProp = typeFromProps<UILayoutFlowType2>(props, flowHorizontal);
+    auto flowHorizontalValue = UILayoutFlowNone2;
+    if (flowHorizontalProp){
+      flowHorizontalValue = *flowHorizontalProp;
+    }
+
+    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue);
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },

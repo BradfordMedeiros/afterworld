@@ -90,10 +90,11 @@ Props createMenuOptions(std::function<void(const char*)>& onClickNavbar){
     .props = {
       PropPair { .symbol = listItemsSymbol, .value = levels },
       PropPair { .symbol = xoffsetSymbol,   .value = -0.81f },
-      PropPair { .symbol = yoffsetSymbol,   .value = 0.98f },
-      PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 1.f) },
+      PropPair { .symbol = yoffsetSymbol,   .value = 1.f },
+      PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 2.f) },
       PropPair { .symbol = horizontalSymbol,   .value = true },
-      PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+      //PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+      PropPair { .symbol = flowVertical,     .value = UILayoutFlowNegative2 },
     },
   };
   return levelProps;
