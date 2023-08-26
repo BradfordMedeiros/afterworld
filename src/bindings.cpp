@@ -77,14 +77,6 @@ void goToMenu(GameState& gameState){
   cameras = {};
 }
 
-bool showingPauseMenu(GameState& gameState){
-  return gameState.loadedLevel.has_value() && getGlobalState().paused;
-}
-
-bool onMainMenu(GameState& gameState){
-  return !(gameState.loadedLevel.has_value());
-}
-
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
   setPaused(shouldBePaused);
@@ -119,8 +111,6 @@ UiContext getUiContext(GameState& gameState){
    .isDebugMode = []() -> bool { 
      return getStrWorldState("editor", "debug").value() == "true"; 
    },
-   .showAnimationMenu = gameState.loadedLevel.has_value() && !showingPauseMenu(gameState),
-   .onMainMenu = [&gameState]() -> bool { return onMainMenu(gameState); },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {

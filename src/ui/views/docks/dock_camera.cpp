@@ -153,8 +153,8 @@ Component dockCameraComponent {
 
 
     Layout layout {
-      .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-      .showBackpanel = false,
+      .tint = glm::vec4(0.f, 0.f, 1.f, 0.2f),
+      .showBackpanel = true,
       .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.8f),
       .minwidth = 0.f,
       .minheight = 0.f,
@@ -164,7 +164,7 @@ Component dockCameraComponent {
       .alignHorizontal = UILayoutFlowNone2,
       .alignVertical = UILayoutFlowNone2,
       .spacing = 0.f,
-      .minspacing = 0.2f,
+      .minspacing = 0.f,
       .padding = 0.f,
       .children = elements,
     };
@@ -174,7 +174,8 @@ Component dockCameraComponent {
         { .symbol = layoutSymbol, .value = layout },
       },
     };
-    return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
-
+    auto cameraBoundingBox = withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
+    drawDebugBoundingBox(drawTools, cameraBoundingBox, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    return cameraBoundingBox;
   },
 };

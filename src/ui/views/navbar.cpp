@@ -86,11 +86,15 @@ Props createMenuOptions(std::function<void(const char*)>& onClickNavbar){
   		}
   	});
   }
+
+  float xoffset = -0.83f;
+  float width = 2.f - xoffset - 0.2f;
   Props levelProps {
     .props = {
       PropPair { .symbol = listItemsSymbol, .value = levels },
-      PropPair { .symbol = xoffsetSymbol,   .value = -1.f },
+      PropPair { .symbol = xoffsetSymbol,   .value = xoffset },
       PropPair { .symbol = yoffsetSymbol,   .value = 1.f },
+      PropPair { .symbol = minwidthSymbol,  .value = width },
       PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 2.f) },
       PropPair { .symbol = horizontalSymbol,   .value = true },
       //PropPair { .symbol = paddingSymbol,      .value = 0.02f },

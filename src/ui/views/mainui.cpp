@@ -101,14 +101,6 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
      .selectedId = selectedId,
   };
   resetMenuItemMappingId();
-
-
-  Props navbarProps { 
-    .props = {
-      { onclickSymbol, onClickNavbar }
-    }
-  };
-  navbarComponent.draw(drawTools, navbarProps);
   
   if (dockedDock != ""){
     Props dockProps { 
@@ -124,6 +116,13 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   router.draw(drawTools, routerProps);
 
   if (uiContext.isDebugMode()){
+    Props navbarProps { 
+      .props = {
+        { onclickSymbol, onClickNavbar }
+      }
+    };
+    navbarComponent.draw(drawTools, navbarProps);
+
     withProps(debugList, debugListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);

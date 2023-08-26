@@ -13,20 +13,19 @@ Component dockComponent {
     std::function<void()> onClick = []() -> void { std::cout << "on click" << std::endl; };
     Props listItemProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = strValue },
+        PropPair { .symbol = valueSymbol, .value = std::string("Dock") },
         PropPair { .symbol = onclickSymbol, .value = onClick },
       },
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
     //elements.push_back(listItemWithProps);
 
-
     modassert(dockToComponent.find(strValue) != dockToComponent.end(), std::string("dock - no component for ") + strValue);
     auto component = dockToComponent.at(strValue);
     elements.push_back(component);
 
     Layout layout {
-      .tint = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+      .tint = glm::vec4(0.f, 1.f, 0.f, 0.5f),
       .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,
@@ -35,10 +34,10 @@ Component dockComponent {
       .layoutFlowHorizontal = UILayoutFlowNegative2,
       .layoutFlowVertical = UILayoutFlowNegative2,
       .alignHorizontal = UILayoutFlowNone2,
-      .alignVertical = UILayoutFlowNone2,
+      .alignVertical = UILayoutFlowPositive2,
       .spacing = 0.f,
       .minspacing = 0.f,
-      .padding = 0.f,
+      .padding = 0.2f,
       .children = elements,
     };
 

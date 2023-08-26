@@ -566,6 +566,7 @@ std::vector<NestedListItem> nestedListTest = {
 Props nestedListProps { 
   .props = {
     PropPair { .symbol = getSymbol("items"), .value = nestedListTest }
+    
   }
 };
 Component debugList = withProps(nestedList, nestedListProps);

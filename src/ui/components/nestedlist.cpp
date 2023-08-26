@@ -54,7 +54,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
       items.push_back(value.item);
     }
 
-    auto boundingBox = drawImMenuList(drawTools, items, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth);
+    auto boundingBox = drawImMenuList(drawTools, items, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth, tint);
     if (i == -1){
       overallBounds = boundingBox;
     }
@@ -85,7 +85,7 @@ Component nestedList  {
     modassert(items, "nested list - invalid items props");
     float padding = 0.01f;
     float fontSizePerLetterNdi = 0.015f;
-    auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 1.f, 1.f, 0.6f));
+    auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 0.6f));
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
