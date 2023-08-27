@@ -85,7 +85,7 @@ Props debugListProps {
 
 std::string dockedDock = "";
 std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
-  pushQueryParam(routerHistory, "dockedDock");
+  //pushQueryParam(routerHistory, "dockedDock");
   dockedDock = value;
   std::cout << "navbar new dock: " << dockedDock << std::endl;
 };
@@ -110,10 +110,10 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
         { titleSymbol, dockedDock },
         { xoffsetSymbol, 1.f },
         { yoffsetSymbol, 0.88f },
-        { xoffsetFromSymbol, -1.f },
+        { xoffsetFromSymbol, 1.5f },
       }
     };
-    withAnimator(routerHistory, dockComponent, 5.f).draw(drawTools, dockProps);
+    withAnimator(routerHistory, dockComponent, 0.1f).draw(drawTools, dockProps);
   }
 
   auto defaultProps = getDefaultProps();
