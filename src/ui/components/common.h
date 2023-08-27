@@ -123,5 +123,7 @@ extern const int alignVertical;
 extern const int flowHorizontal;
 extern const int flowVertical;
 extern const int titleSymbol;
+extern const int xoffsetFromSymbol;
+extern const int interpolationSymbol;
 
 #endif

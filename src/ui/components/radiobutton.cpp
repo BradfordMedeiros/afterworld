@@ -76,7 +76,7 @@ Component radioButtons  {
 
       for (int i = 0; i < radioButtonContainer -> radioButtons.size(); i++){
          auto radioMappingId = radioButtonContainer -> radioButtons.at(i).mappingId;
-         auto selectedId = getGlobalState().selectedId;
+         auto selectedId = drawTools.selectedId;
          if (selectedId.has_value() && radioMappingId.has_value() && radioMappingId.value() == selectedId.value()){
            radioButtonContainer -> radioButtons.at(i).hovered = true;
          }else{

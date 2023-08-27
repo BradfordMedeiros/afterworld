@@ -1,12 +1,16 @@
 #include "./router.h"
 
+extern CustomApiBindings* gameapi;
+
 RouterHistory createHistory(std::string initialRoute){
 	return RouterHistory {
 		.currentPath = initialRoute,
+    .currentRouteTime = 0.f,
 	};
 }
 void pushHistory(RouterHistory& history, std::string path){
   history.currentPath = path;
+  history.currentRouteTime = gameapi -> timeSeconds(true);
 }
 std::string getCurrentPath(RouterHistory& history){
   return history.currentPath;
@@ -58,3 +62,15 @@ Component router {
     return component -> draw(drawTools, props);
   },
 };
+
+Component withAnimator(RouterHistory& history, Component& component, float duration){
+  float elapsedTime = gameapi -> timeSeconds(true) - history.currentRouteTime;
+  float interpAmount = glm::min(1.f, elapsedTime / duration);
+
+  Props props {
+    .props = {
+      PropPair  { .symbol = interpolationSymbol, .value = interpAmount },
+    },
+  };
+  return withPropsCopy(component, props);
+}

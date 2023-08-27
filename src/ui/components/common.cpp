@@ -300,3 +300,5 @@ const int alignVertical = getSymbol("align-vertical");
 const int flowHorizontal = getSymbol("flow-horizontal");
 const int flowVertical = getSymbol("flow-vertical");
 const int titleSymbol = getSymbol("title");
+const int xoffsetFromSymbol =  getSymbol("xoffset-from");
+const int interpolationSymbol = getSymbol("interpolation");

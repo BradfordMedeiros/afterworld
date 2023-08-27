@@ -40,3 +40,4 @@ void pushHistory(std::string route);
 std::string getCurrentPath();
 
 #endif
+

@@ -1,5 +1,7 @@
 #include "./dock.h"
 
+
+
 Component dockComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     static std::map<std::string, Component> dockToComponent {
@@ -24,6 +26,15 @@ Component dockComponent {
     auto component = dockToComponent.at(strValue);
     elements.push_back(component);
 
+
+    float xoffset = floatFromProp(props, xoffsetSymbol, 1.f);
+    float xoffsetFrom = floatFromProp(props, xoffsetFromSymbol, xoffset);
+    float interpAmount = floatFromProp(props, interpolationSymbol, 1.f);
+
+    float xoffsetActual = (xoffset * interpAmount) + (xoffsetFrom * (1 - interpAmount));
+
+    float yoffset = floatFromProp(props, yoffsetSymbol, 0.88f);
+
     Layout layout {
       .tint = glm::vec4(0.f, 1.f, 0.f, 0.5f),
       .showBackpanel = true,
@@ -44,8 +55,8 @@ Component dockComponent {
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },
-        { .symbol = xoffsetSymbol, .value = 1.f },
-        { .symbol = yoffsetSymbol, .value = 0.88f },
+        { .symbol = xoffsetSymbol, .value = xoffsetActual },
+        { .symbol = yoffsetSymbol, .value = yoffset },
       },
     };
     return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
