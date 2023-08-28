@@ -20,7 +20,7 @@ Component dockComponent {
       },
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-    //elements.push_back(listItemWithProps);
+    elements.push_back(listItemWithProps);
 
     modassert(dockToComponent.find(strValue) != dockToComponent.end(), std::string("dock - no component for ") + strValue);
     auto component = dockToComponent.at(strValue);
@@ -36,7 +36,7 @@ Component dockComponent {
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.88f);
 
     Layout layout {
-      .tint = glm::vec4(0.f, 1.f, 0.f, 0.5f),
+      .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
       .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,
@@ -48,7 +48,7 @@ Component dockComponent {
       .alignVertical = UILayoutFlowPositive2,
       .spacing = 0.f,
       .minspacing = 0.f,
-      .padding = 0.2f,
+      .padding = 0.f,
       .children = elements,
     };
 

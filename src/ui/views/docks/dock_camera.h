@@ -5,6 +5,7 @@
 #include "../../components/list.h"
 #include "../../components/button.h"
 #include "../../components/options.h"
+#include "../../components/slider.h"
 
 extern Component dockCameraComponent;
 

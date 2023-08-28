@@ -8,7 +8,6 @@ struct Slider {
   float min;
   float max;
   float percentage;
-  objid mappingId;
   bool update;
 };
 

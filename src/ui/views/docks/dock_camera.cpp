@@ -80,38 +80,62 @@
     ],
     */
 
+enum DockFieldType {
+  DOCK_BUTTON,
+  DOCK_OPTION,
+  DOCK_SLIDER,
+  DOCK_CHECKBOX,
+  DOCK_TEXTBOX,
+};
+
+struct DockButtonConfig {
+  const char* buttonText;
+};
+struct DockOptionConfig {
+  std::vector<const char*> options;
+};
+struct DockSliderConfig {
+
+};
+struct DockCheckboxConfig {
+
+};
+struct DockTextboxConfig {
+
+};
+typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig> DockConfig;
+
+struct DockConfiguration {
+  std::string title;
+  std::vector<DockConfig> configFields;
+};
 
 
-Props cameraOptions(){
-  std::vector<ListComponentData> levels;
-  levels.push_back(ListComponentData {
-  	.name = "docker camera item 1",
-  	.onClick = nullClick,
-  });
-  levels.push_back(ListComponentData {
-    .name = "two",
-    .onClick = nullClick,
-  });
-  levels.push_back(ListComponentData {
-    .name = "three",
-    .onClick = nullClick,
-  });
-  levels.push_back(ListComponentData {
-    .name = "docker camera last item",
-    .onClick = nullClick,
-  });
-  
-  Props levelProps {
-    .props = {
-      //PropPair { .symbol = listItemsSymbol, .value = levels },
-      //PropPair { .symbol = xoffsetSymbol,   .value = -0.81f },
-      //PropPair { .symbol = yoffsetSymbol,   .value = 0.98f },
-      //PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 1.f) },
-      //PropPair { .symbol = horizontalSymbol,   .value = true },
-      //PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+std::vector<DockConfiguration> configurations {
+  DockConfiguration {
+    .title = "Cameras",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Camera Yo",
+      },
+      DockOptionConfig {
+        .options = { "one", "two" },
+      },
+      DockSliderConfig {
+
+      },
     },
-  };
-  return levelProps;
+  },
+};
+
+
+DockConfiguration* dockConfigByName(std::string name){
+  for (DockConfiguration& config : configurations){
+    if (config.title == name){
+      return &config;
+    }
+  }
+  return NULL;
 }
 
 int value = 2;
@@ -123,13 +147,23 @@ Component dockCameraComponent {
   .draw = [](DrawingTools& drawTools, Props& props){
     std::vector<Component> elements;
 
-    Props buttonProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string("create camera") },
-        PropPair { .symbol = onclickSymbol, .value = defaultOnClick }, 
+    auto dockConfig = dockConfigByName("Cameras");
+    modassert(dockConfig, "dock config is null");
+    for (auto &config : dockConfig -> configFields){
+      auto dockButton = std::get_if<DockButtonConfig>(&config);
+      if (dockButton){
+        Props buttonProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = std::string(dockButton -> buttonText) },
+            PropPair { .symbol = onclickSymbol, .value = defaultOnClick }, 
+          }
+        };
+        elements.push_back(withPropsCopy(button, buttonProps));  
+        continue;
       }
-    };
-    elements.push_back(withProps(button, buttonProps));
+    }
+
+
 
     Options defaultOptions {
       .options = {
@@ -144,21 +178,33 @@ Component dockCameraComponent {
         PropPair { .symbol = optionsSymbol, .value = defaultOptions },
       }
     };
-    elements.push_back(withProps(options, optionsProps));
     //elements.push_back(withProps(options, optionsProps));
-    elements.push_back(withProps(button, buttonProps));
 
+    Slider sliderData {
+      .min = 0.f,
+      .max = 10.f,
+      .percentage = 0.5f,
+      .update = false,
+    };
+    Props sliderProps {
+      .props = {
+        PropPair { .symbol = sliderSymbol, .value = sliderData },
+      },
+    };
+
+    auto sliderWithProps = withProps(slider, sliderProps); 
+    //elements.push_back(sliderWithProps);
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 1.f, 0.2f),
       .showBackpanel = true,
-      .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.8f),
-      .minwidth = 0.f,
+      .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
+      .minwidth = 0.5f,
       .minheight = 0.f,
       .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,
-      .layoutFlowHorizontal = UILayoutFlowNone2, // L UILayoutFlowNone2,
+      .layoutFlowHorizontal = UILayoutFlowNegative2, // L UILayoutFlowNone2,
       .layoutFlowVertical = UILayoutFlowNone2,
-      .alignHorizontal = UILayoutFlowNone2,
+      .alignHorizontal = UILayoutFlowNegative2,
       .alignVertical = UILayoutFlowNone2,
       .spacing = 0.f,
       .minspacing = 0.f,
