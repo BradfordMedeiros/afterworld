@@ -137,10 +137,6 @@ Component dockCameraComponent {
           .name = "opt1",
           .onClick = nullClick,
         },
-        Option {
-          .name = "opt2",
-          .onClick = nullClick,
-        }
       },
     };
     Props optionsProps {
@@ -149,13 +145,14 @@ Component dockCameraComponent {
       }
     };
     elements.push_back(withProps(options, optionsProps));
-    elements.push_back(withProps(options, optionsProps));
+    //elements.push_back(withProps(options, optionsProps));
+    elements.push_back(withProps(button, buttonProps));
 
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 1.f, 0.2f),
       .showBackpanel = true,
-      .borderColor = glm::vec4(0.f, 1.f, 0.f, 0.8f),
+      .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.8f),
       .minwidth = 0.f,
       .minheight = 0.f,
       .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,
@@ -174,8 +171,11 @@ Component dockCameraComponent {
         { .symbol = layoutSymbol, .value = layout },
       },
     };
+
+    std::cout << "dock camera - start draw" << std::endl;
     auto cameraBoundingBox = withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
-    drawDebugBoundingBox(drawTools, cameraBoundingBox, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    std::cout << "dock camera - end draw" << std::endl << std::endl;
+    //drawDebugBoundingBox(drawTools, cameraBoundingBox, glm::vec4(1.f, 0.f, 0.f, 1.f));
     return cameraBoundingBox;
   },
 };

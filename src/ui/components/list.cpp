@@ -62,6 +62,8 @@ Component listComponent {
         { .symbol = layoutSymbol, .value = layout },
       },
     };
-    return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
+    auto listBoundingBox = withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
+    //drawDebugBoundingBox(drawTools, listBoundingBox, glm::vec4(0.f, 1.f, 0.f, 1.f));
+    return listBoundingBox;
   },
 };

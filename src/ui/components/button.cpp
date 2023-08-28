@@ -14,7 +14,9 @@ Props buttonOptions(){
 Component button {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
   	auto buttonProps = buttonOptions();
-  	return withPropsCopy(listItem,  buttonProps).draw(drawTools, props);
+  	auto buttonBox = withPropsCopy(listItem,  buttonProps).draw(drawTools, props);
+    //drawDebugBoundingBox(drawTools, buttonBox, glm::vec4(1.f, 0.f, 1.f, 1.f));
+    return buttonBox;
   },
 };
 

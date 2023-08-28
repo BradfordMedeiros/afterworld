@@ -142,6 +142,9 @@ BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, 
 
 	float amountToOffsetX = xoffset - sides.left;
 	boundingBox.x += amountToOffsetX;
+
+	float amountToOffsetY = yoffset - sides.top;
+	boundingBox.y += amountToOffsetY;
  	//drawDebugBoundingBox(*(bufferedDrawingTools.realTools), boundingBox, glm::vec4(0.f, 1.f, 1.f, 1.f));
 
 	for (int i = bufferedDrawingTools.bufferedData.bufferedRect.size() - 1; i >= 0; i--){
@@ -151,6 +154,7 @@ BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, 
 		}
 		if (bufferedRect.drawOrder < endDrawIndex){
 			bufferedRect.centerX += amountToOffsetX;
+			bufferedRect.centerY += amountToOffsetY;
 		}
 	}
 	for (int i = bufferedDrawingTools.bufferedData.bufferedText.size() - 1; i >= 0; i--){
@@ -160,6 +164,7 @@ BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, 
 		}
 		if (bufferedText.drawOrder < endDrawIndex){
 			bufferedText.left += amountToOffsetX;
+			bufferedText.top += amountToOffsetY;
 		}
 	}
 
@@ -170,7 +175,9 @@ BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, 
 		}
 		if (buffered2DLines.drawOrder < endDrawIndex){
 			buffered2DLines.fromPos.x += amountToOffsetX;
+			buffered2DLines.fromPos.y += amountToOffsetY;
 			buffered2DLines.toPos.x += amountToOffsetX;
+			buffered2DLines.toPos.y += amountToOffsetY;
 		}
 	}
 
@@ -193,7 +200,8 @@ BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Lay
     int startDrawIndex  = bufferedDrawingTools.bufferedData.bufferedIndex;
     auto boundingBox = layout.children.at(i).draw(bufferedDrawingTools.drawTools, childProps);
     int upperDrawing = bufferedDrawingTools.bufferedData.bufferedIndex;
-    boundingBox = repositionLastElement(bufferedDrawingTools, boundingBox, xoffset, yoffset, startDrawIndex, upperDrawing);
+   	boundingBox = repositionLastElement(bufferedDrawingTools, boundingBox, xoffset, yoffset, startDrawIndex, upperDrawing);
+    //std::cout << print(boundingBox) << std::endl;
 
     setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
     setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
