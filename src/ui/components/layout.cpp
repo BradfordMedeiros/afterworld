@@ -202,12 +202,8 @@ BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Lay
     int upperDrawing = bufferedDrawingTools.bufferedData.bufferedIndex;
    	boundingBox = repositionLastElement(bufferedDrawingTools, boundingBox, xoffset, yoffset, startDrawIndex, upperDrawing);
     //std::cout << print(boundingBox) << std::endl;
+    measureBoundingBox(boundingBoxMeasurer, boundingBox);
 
-    setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
-    setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
-    setY(boundingBoxMeasurer, boundingBox.y + (boundingBox.height * 0.5f));
-    setY(boundingBoxMeasurer, boundingBox.y - (boundingBox.height * 0.5f));
-    
     if (layout.layoutType == LAYOUT_VERTICAL2){
 			float spacingPerItemHeight = boundingBox.height + layout.spacing;
 			if (spacingPerItemHeight < layout.minspacing){

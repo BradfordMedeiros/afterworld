@@ -73,6 +73,12 @@ void setY(BoundingBoxMeasurer& box, float value){
     box.maxY = value;
   }
 }
+void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox){
+  setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
+  setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));
+  setY(boundingBoxMeasurer, boundingBox.y + (boundingBox.height * 0.5f));
+  setY(boundingBoxMeasurer, boundingBox.y - (boundingBox.height * 0.5f));
+}
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box){
   modassert(box.minX.has_value() && box.maxX.has_value() && box.minY.has_value() && box.maxY.has_value(), "box mins incomplete, probably no items");
   float minX = box.minX.value();
@@ -302,3 +308,4 @@ const int flowVertical = getSymbol("flow-vertical");
 const int titleSymbol = getSymbol("title");
 const int xoffsetFromSymbol =  getSymbol("xoffset-from");
 const int interpolationSymbol = getSymbol("interpolation");
+const int checkedSymbol = getSymbol("checked");

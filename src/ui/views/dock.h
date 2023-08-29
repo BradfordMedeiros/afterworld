@@ -6,6 +6,8 @@
 #include "../components/button.h"
 #include "../components/options.h"
 #include "../components/slider.h"
+#include "../components/checkbox.h"
+#include "../components/textbox.h"
 
 extern Component dockComponent;
 

@@ -78,6 +78,7 @@ struct BoundingBoxMeasurer {
 BoundingBoxMeasurer createMeasurer();
 void setX(BoundingBoxMeasurer& box, float value);
 void setY(BoundingBoxMeasurer& box, float value);
+void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox);
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
 
 struct SideMeasurements {
@@ -125,5 +126,6 @@ extern const int flowVertical;
 extern const int titleSymbol;
 extern const int xoffsetFromSymbol;
 extern const int interpolationSymbol;
+extern const int checkedSymbol;
 
 #endif

@@ -20,10 +20,10 @@ struct DockSliderConfig {
 
 };
 struct DockCheckboxConfig {
-
+  std::string label;
 };
 struct DockTextboxConfig {
-
+  std::string text;
 };
 typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig> DockConfig;
 
@@ -53,6 +53,9 @@ std::vector<DockConfiguration> configurations {
       DockSliderConfig {
 
       },
+      DockCheckboxConfig {
+        .label = "toggle dof",
+      },
     },
   },
   DockConfiguration {
@@ -61,6 +64,9 @@ std::vector<DockConfiguration> configurations {
       DockButtonConfig {
         .buttonText = "Create Light",
       },
+      DockTextboxConfig {
+        .text = "some text here",
+      }
     },
   },
 };
@@ -140,12 +146,25 @@ Component genericDockComponent {
 
       auto checkboxOptions = std::get_if<DockCheckboxConfig>(&config);
       if (checkboxOptions){
-        modassert(false, "checkbox not implemented");
+        Props checkboxProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = checkboxOptions -> label },
+            PropPair { .symbol = checkedSymbol, .value = false },
+          },
+        };
+        auto checkboxWithProps = withPropsCopy(checkbox, checkboxProps);
+        elements.push_back(checkboxWithProps);
       }
 
       auto textboxOptions = std::get_if<DockTextboxConfig>(&config);
       if (textboxOptions){
-        modassert(false, "textbox not implemented");
+        Props textboxProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = textboxOptions -> text },
+          }
+        };
+        auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+        elements.push_back(textboxWithProps);
       }
     }
 
