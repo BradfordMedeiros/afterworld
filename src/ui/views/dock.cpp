@@ -12,6 +12,7 @@ enum DockFieldType {
 
 struct DockButtonConfig {
   const char* buttonText;
+  std::optional<std::function<void()>> onClick;
 };
 struct DockOptionConfig {
   std::vector<const char*> options;
@@ -32,12 +33,28 @@ struct DockConfiguration {
   std::vector<DockConfig> configFields;
 };
 
+struct DockConfigApi {
+  std::function<void()> createCamera;
+  std::function<void()> createLight;
+};
+
+DockConfigApi dockConfig {
+  .createCamera = []() -> void {
+    std::cout << "dock config mock make camera" << std::endl;
+  },
+  .createLight = []() -> void {
+    std::cout << "dock config mock make light" << std::endl;
+  },
+};
+
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
     .configFields = {
       DockButtonConfig {
         .buttonText = "no panel available",
+        .onClick = std::nullopt,
       },
     },
   },
@@ -46,6 +63,7 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Camera Yo",
+        .onClick = dockConfig.createCamera,
       },
       DockOptionConfig {
         .options = { "enable dof", "disable dof" },
@@ -63,6 +81,7 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Light",
+        .onClick = dockConfig.createLight,
       },
       DockTextboxConfig {
         .text = "some text here",
@@ -98,9 +117,11 @@ Component genericDockComponent {
         Props buttonProps {
           .props = {
             PropPair { .symbol = valueSymbol, .value = std::string(dockButton -> buttonText) },
-            PropPair { .symbol = onclickSymbol, .value = defaultOnClick }, 
           }
         };
+        if (dockButton -> onClick.has_value()){
+          buttonProps.props.push_back(PropPair { .symbol = onclickSymbol, .value =  dockButton -> onClick.value() });
+        }
         elements.push_back(withPropsCopy(button, buttonProps));  
         continue;
       }

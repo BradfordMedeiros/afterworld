@@ -133,10 +133,10 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 BoundingBox2D repositionLastElement(BufferedDrawingTools& bufferedDrawingTools, BoundingBox2D& boundingBox, float xoffset, float yoffset, int startDrawIndex, int endDrawIndex){
 	modassert(startDrawIndex <= endDrawIndex, "invalid indexs for reposition");
 	auto sides = calculateSides(boundingBox);
-	std::cout << "layout : xoffset = " << xoffset << ", yoffset = " << yoffset << std::endl;
-	std::cout << "layout: element: " << print(boundingBox) << std::endl;
-	std::cout << "layout: sides: " << print(sides) << std::endl;
-	std::cout << "layout: need to offset: xoffset = " << (xoffset - sides.left) << ", yoffset = " << (yoffset - sides.bottom) << std::endl;
+	//std::cout << "layout : xoffset = " << xoffset << ", yoffset = " << yoffset << std::endl;
+	//std::cout << "layout: element: " << print(boundingBox) << std::endl;
+	//std::cout << "layout: sides: " << print(sides) << std::endl;
+	//std::cout << "layout: need to offset: xoffset = " << (xoffset - sides.left) << ", yoffset = " << (yoffset - sides.bottom) << std::endl;
 	// reposition to xoffset
 	//
 
@@ -335,6 +335,7 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
    	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt);
   }
  	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y));
+
  	return outerBox;
 }
 

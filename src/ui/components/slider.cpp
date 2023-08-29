@@ -24,7 +24,6 @@ Component slider  {
       slider -> percentage = percentage;
       slider -> update = false;
     }
-    std::cout << "radio 1: " << slider -> percentage << ", left = " << left << ", right = " << right << ", xndc = " << getGlobalState().xNdc << std::endl;
    
     auto mappingId = uniqueMenuItemMappingId();
     drawRight(drawTools, x, y, width, height, glm::vec4(0.f, 0.f, 0.f, .8f), mappingId);
