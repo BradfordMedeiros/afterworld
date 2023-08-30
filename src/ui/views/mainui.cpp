@@ -116,6 +116,27 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     withAnimator(routerHistory, dockComponent, 0.1f).draw(drawTools, dockProps);
   }
 
+
+  std::vector<ListComponentData> dialogOptions = {
+    ListComponentData {
+      .name = "confirm",
+      .onClick = []() -> void {
+      },      
+    },
+    ListComponentData {
+      .name = "quit",
+      .onClick = []() -> void {
+      },      
+    },
+  };
+  Props dialogProps {
+    .props = {
+      PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
+    },
+  };
+  dialogComponent.draw(drawTools, dialogProps);
+
+
   auto defaultProps = getDefaultProps();
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);

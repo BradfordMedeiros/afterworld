@@ -6,6 +6,7 @@
 #include "../components/slider.h"
 #include "../components/radiobutton.h"
 #include "../components/imagelist.h"
+#include "../components/dialog.h"
 #include "./debuglist.h"
 #include "./pausemenu.h"
 #include "./navbar.h"
