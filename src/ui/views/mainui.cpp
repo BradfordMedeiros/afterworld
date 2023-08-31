@@ -90,6 +90,11 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   std::cout << "navbar new dock: " << dockedDock << std::endl;
 };
 
+std::function<void()> xCallbackFn = []() -> void {
+  std::cout << "x callback fn placeholder" << std::endl;
+  exit(1);
+};
+
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
@@ -121,17 +126,23 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     ListComponentData {
       .name = "confirm",
       .onClick = []() -> void {
+        std::cout << "dialog confirm on click" << std::endl;
       },      
     },
     ListComponentData {
       .name = "quit",
       .onClick = []() -> void {
+        std::cout << "dialog on quit" << std::endl;
+        exit(1);
       },      
     },
   };
   Props dialogProps {
     .props = {
       PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
+      PropPair { .symbol = titleSymbol, .value = std::string("mainui title") },
+      PropPair { .symbol = detailSymbol, .value = std::string("mainui detail") },
+      PropPair { .symbol = onclickSymbol, .value = xCallbackFn },
     },
   };
   dialogComponent.draw(drawTools, dialogProps);

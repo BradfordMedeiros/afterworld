@@ -1,54 +1,6 @@
 #include "./dialog.h"
 
-Component simpleVerticalLayout(std::vector<Component>& children){
-  Layout layout {
-    .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
-    .showBackpanel = true,
-    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
-    .minwidth = 0.f,
-    .minheight = 0.f,
-    .layoutType = LAYOUT_VERTICAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
-    .layoutFlowVertical = UILayoutFlowNone2,
-    .alignHorizontal = UILayoutFlowNegative2,
-    .alignVertical = UILayoutFlowNone2,
-    .spacing = 0.f,
-    .minspacing = 0.f,
-    .padding = 0.02f,
-    .children = children,
-  };
-  Props listLayoutProps {
-    .props = {
-      { .symbol = layoutSymbol, .value = layout },
-    },
-  };
-  return withPropsCopy(layoutComponent, listLayoutProps);
-}
 
-Component simpleHorizontalLayout(std::vector<Component>& children){
-  Layout layout {
-    .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
-    .showBackpanel = true,
-    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
-    .minwidth = 0.f,
-    .minheight = 0.f,
-    .layoutType = LAYOUT_HORIZONTAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
-    .layoutFlowVertical = UILayoutFlowNone2,
-    .alignHorizontal = UILayoutFlowNegative2,
-    .alignVertical = UILayoutFlowNone2,
-    .spacing = 0.f,
-    .minspacing = 0.f,
-    .padding = 0.02f,
-    .children = children,
-  };
-  Props listLayoutProps {
-    .props = {
-      { .symbol = layoutSymbol, .value = layout },
-    },
-  };
-  return withPropsCopy(layoutComponent, listLayoutProps);
-}
 
 Component dialogComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -75,24 +27,39 @@ Component dialogComponent {
 
     std::vector<Component> elements;
 
+    auto titleValue = strFromProp(props, titleSymbol, "title placeholder");
     auto titleTextbox = withPropsCopy(textbox, Props {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string("title placeholder") },
+        PropPair { .symbol = valueSymbol, .value = titleValue },
       }
     });
-
-    auto detailTextbox = withPropsCopy(textbox, Props {
-      .props = { 
-        PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.f) },
-        PropPair { .symbol = valueSymbol, .value = std::string("detail placeholder") },
-      },
-    });
     elements.push_back(titleTextbox);
-    elements.push_back(detailTextbox);
-    elements.push_back(horizontalComponent);
 
+    auto detailValue = strFromProp(props, detailSymbol, "");
+    if (detailValue != ""){
+      auto detailTextbox = withPropsCopy(textbox, Props {
+        .props = { 
+          PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.f) },
+          PropPair { .symbol = valueSymbol, .value = detailValue },
+        },
+      });
+      elements.push_back(detailTextbox);      
+    }
+
+    elements.push_back(horizontalComponent);
     auto listBoundingBox = simpleVerticalLayout(elements).draw(drawTools, props);
     //drawDebugBoundingBox(drawTools, listBoundingBox, glm::vec4(0.f, 1.f, 0.f, 1.f));
-    return listBoundingBox;
+    auto boundingBox = listBoundingBox;
+    auto sides = calculateSides(boundingBox);
+
+    auto onClickX = fnFromProp(props, onclickSymbol);
+    if (onClickX.has_value()){
+      auto xMappingId = uniqueMenuItemMappingId();
+      drawTextLeftHorzDownVert(drawTools, "x", sides.right, sides.top, 0.04f, glm::vec4(1.f, 1.f, 1.f, 0.4f), xMappingId);
+      drawTools.registerCallbackFns(xMappingId, onClickX.value());
+    }
+
+    //drawTools.drawText("some value", sides.right, sides.top, fontSize, false, std::nullopt, std::nullopt, true, std::nullopt, uniqueMenuItemMappingId());
+    return boundingBox;
   },
 };

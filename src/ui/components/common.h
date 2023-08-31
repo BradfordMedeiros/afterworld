@@ -99,6 +99,9 @@ extern Component emptyComponent;
 objid uniqueMenuItemMappingId();
 void resetMenuItemMappingId();
 
+void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
+void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
+
 extern std::optional<std::function<void()>> nullClick;
 
 extern const int horizontalSymbol;
@@ -125,6 +128,7 @@ extern const int alignVertical;
 extern const int flowHorizontal;
 extern const int flowVertical;
 extern const int titleSymbol;
+extern const int detailSymbol;
 extern const int xoffsetFromSymbol;
 extern const int interpolationSymbol;
 extern const int checkedSymbol;

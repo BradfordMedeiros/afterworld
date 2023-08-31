@@ -39,4 +39,7 @@ struct Layout {
 
 extern Component layoutComponent;
 
+Component simpleVerticalLayout(std::vector<Component>& children);
+Component simpleHorizontalLayout(std::vector<Component>& children);
+
 #endif

@@ -344,3 +344,53 @@ Component layoutComponent  {
 	  .draw = drawLayout,
 };
 
+
+Component simpleVerticalLayout(std::vector<Component>& children){
+  Layout layout {
+    .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
+    .showBackpanel = true,
+    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
+    .minwidth = 0.f,
+    .minheight = 0.f,
+    .layoutType = LAYOUT_VERTICAL2,
+    .layoutFlowHorizontal = UILayoutFlowNone2,
+    .layoutFlowVertical = UILayoutFlowNone2,
+    .alignHorizontal = UILayoutFlowNegative2,
+    .alignVertical = UILayoutFlowNone2,
+    .spacing = 0.f,
+    .minspacing = 0.f,
+    .padding = 0.0f,
+    .children = children,
+  };
+  Props listLayoutProps {
+    .props = {
+      { .symbol = layoutSymbol, .value = layout },
+    },
+  };
+  return withPropsCopy(layoutComponent, listLayoutProps);
+}
+
+Component simpleHorizontalLayout(std::vector<Component>& children){
+  Layout layout {
+    .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
+    .showBackpanel = true,
+    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
+    .minwidth = 0.f,
+    .minheight = 0.f,
+    .layoutType = LAYOUT_HORIZONTAL2,
+    .layoutFlowHorizontal = UILayoutFlowNone2,
+    .layoutFlowVertical = UILayoutFlowNone2,
+    .alignHorizontal = UILayoutFlowNegative2,
+    .alignVertical = UILayoutFlowNone2,
+    .spacing = 0.f,
+    .minspacing = 0.f,
+    .padding = 0.0f,
+    .children = children,
+  };
+  Props listLayoutProps {
+    .props = {
+      { .symbol = layoutSymbol, .value = layout },
+    },
+  };
+  return withPropsCopy(layoutComponent, listLayoutProps);
+}

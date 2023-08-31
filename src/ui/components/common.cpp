@@ -291,6 +291,20 @@ void resetMenuItemMappingId(){
   uniqueMappingId = 990000;
 }
 
+
+// this is actually down right aligned, but vert centered
+void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
+  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
+  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
+}
+void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
+  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
+  float width = text.size() * ndiSize;
+  float height = text.size() * ndiSize;
+  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY - (height * 0.5f), fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
+}
+
+
 std::optional<std::function<void()>> nullClick = []() -> void {};
 
 
@@ -317,6 +331,7 @@ const int alignVertical = getSymbol("align-vertical");
 const int flowHorizontal = getSymbol("flow-horizontal");
 const int flowVertical = getSymbol("flow-vertical");
 const int titleSymbol = getSymbol("title");
+const int detailSymbol = getSymbol("detail");
 const int xoffsetFromSymbol =  getSymbol("xoffset-from");
 const int interpolationSymbol = getSymbol("interpolation");
 const int checkedSymbol = getSymbol("checked");
