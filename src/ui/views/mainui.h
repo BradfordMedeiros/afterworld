@@ -7,6 +7,7 @@
 #include "../components/radiobutton.h"
 #include "../components/imagelist.h"
 #include "../components/dialog.h"
+#include "../components/fileexplorer.h"
 #include "./debuglist.h"
 #include "./pausemenu.h"
 #include "./navbar.h"

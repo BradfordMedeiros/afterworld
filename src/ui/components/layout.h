@@ -39,7 +39,14 @@ struct Layout {
 
 extern Component layoutComponent;
 
-Component simpleVerticalLayout(std::vector<Component>& children);
+struct AlignmentParams {
+  UILayoutFlowType2 layoutFlowHorizontal;
+  UILayoutFlowType2 layoutFlowVertical;
+};
+
+extern AlignmentParams defaultAlignment;
+
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim = glm::vec2(0.f, 0.f), AlignmentParams defaultAlignment = defaultAlignment);
 Component simpleHorizontalLayout(std::vector<Component>& children);
 
 #endif

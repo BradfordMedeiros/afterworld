@@ -90,9 +90,15 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   std::cout << "navbar new dock: " << dockedDock << std::endl;
 };
 
+
+std::string dialog = "";
 std::function<void()> xCallbackFn = []() -> void {
-  std::cout << "x callback fn placeholder" << std::endl;
-  exit(1);
+  dialog = "";
+};
+
+std::string fileexplorer = "files";
+std::function<void()> xFileExplorerCallbackFn = []() -> void {
+  fileexplorer = "";
 };
 
 
@@ -137,16 +143,29 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
       },      
     },
   };
-  Props dialogProps {
-    .props = {
-      PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
-      PropPair { .symbol = titleSymbol, .value = std::string("mainui title") },
-      PropPair { .symbol = detailSymbol, .value = std::string("mainui detail") },
-      PropPair { .symbol = onclickSymbol, .value = xCallbackFn },
-    },
-  };
-  dialogComponent.draw(drawTools, dialogProps);
 
+  if (dialog != ""){
+    Props dialogProps {
+      .props = {
+        PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
+        PropPair { .symbol = titleSymbol, .value = std::string("mainui title") },
+        PropPair { .symbol = detailSymbol, .value = std::string("mainui detail") },
+        PropPair { .symbol = onclickSymbol, .value = xCallbackFn },
+      },
+    };
+    dialogComponent.draw(drawTools, dialogProps);
+  }
+
+  if (fileexplorer != ""){
+    Props filexplorerProps {
+      .props = {
+        PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
+        PropPair { .symbol = titleSymbol, .value = std::string("File Explorer") },
+        PropPair { .symbol = onclickSymbol, .value = xFileExplorerCallbackFn },
+      },
+    };
+    fileexplorerComponent.draw(drawTools, filexplorerProps);
+  }
 
   auto defaultProps = getDefaultProps();
   auto routerProps = createRouterProps(uiContext, selectedId);

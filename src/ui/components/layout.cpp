@@ -345,16 +345,20 @@ Component layoutComponent  {
 };
 
 
-Component simpleVerticalLayout(std::vector<Component>& children){
+AlignmentParams defaultAlignment {
+  .layoutFlowHorizontal = UILayoutFlowNone2,
+  .layoutFlowVertical = UILayoutFlowNone2,
+};
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment){
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
     .showBackpanel = true,
     .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
-    .minwidth = 0.f,
-    .minheight = 0.f,
+    .minwidth = minDim.x,
+    .minheight = minDim.y,
     .layoutType = LAYOUT_VERTICAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
-    .layoutFlowVertical = UILayoutFlowNone2,
+    .layoutFlowHorizontal = defaultAlignment.layoutFlowHorizontal,
+    .layoutFlowVertical = defaultAlignment.layoutFlowVertical,
     .alignHorizontal = UILayoutFlowNegative2,
     .alignVertical = UILayoutFlowNone2,
     .spacing = 0.f,
