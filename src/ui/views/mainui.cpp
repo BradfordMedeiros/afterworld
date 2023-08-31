@@ -101,6 +101,25 @@ std::function<void()> xFileExplorerCallbackFn = []() -> void {
   fileexplorer = "";
 };
 
+FileExplorer testExplorer {
+  .contentOffset = 1,
+  .currentPath = { "home", "desktop", "textures" },
+  .currentContents  = {
+    FileContent { .type = Directory, .content = ".." },
+    FileContent { .type = File, .content = "wood.jpg" },\
+    FileContent { .type = Directory, .content = "cool-textures" },
+    FileContent { .type = File, .content = "bluetransparent.jpg" },
+    FileContent { .type = File, .content = "notareal-file.jpg" },
+  },
+  .explorerOnChange = [](FileContentType type) -> void {
+    if (type == File){
+      std::cout << "explorer on change - file" << std::endl;
+    }else if (type == Directory){
+      std::cout << "explorer on change - directory" << std::endl;
+    }
+  }
+};
+
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
@@ -162,6 +181,8 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
         PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
         PropPair { .symbol = titleSymbol, .value = std::string("File Explorer") },
         PropPair { .symbol = onclickSymbol, .value = xFileExplorerCallbackFn },
+        PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
+        // on choose file std::function<void(std::string, type (dir or file)>
       },
     };
     fileexplorerComponent.draw(drawTools, filexplorerProps);

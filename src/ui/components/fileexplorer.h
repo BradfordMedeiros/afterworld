@@ -6,7 +6,21 @@
 #include "./list.h"
 #include "./textbox.h"
 
+enum FileContentType { File, Directory };
+struct FileContent {
+  FileContentType type;
+  std::string content;
+};
+struct FileExplorer {
+  int contentOffset;
+  std::vector<std::string> currentPath;
+  std::vector<FileContent> currentContents;
+  std::function<void(FileContentType type)> explorerOnChange;
+};
+
 extern Component fileexplorerComponent;
+
+extern const int fileExplorerSymbol;
 
 #endif
 

@@ -304,6 +304,13 @@ void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float n
   drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY - (height * 0.5f), fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
 }
 
+void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::function<void()>& onClickX){
+  auto sides = calculateSides(boundingBox);
+  auto xMappingId = uniqueMenuItemMappingId();
+  bool xHovered =  drawTools.selectedId.has_value() && drawTools.selectedId.value() == xMappingId;
+  drawTextLeftHorzDownVert(drawTools, "x", sides.right, sides.top, 0.04f, xHovered ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 0.4f), xMappingId);
+  drawTools.registerCallbackFns(xMappingId, onClickX);
+}
 
 std::optional<std::function<void()>> nullClick = []() -> void {};
 
