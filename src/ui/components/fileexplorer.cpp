@@ -51,6 +51,7 @@ Component fileexplorerComponent {
       }
       auto pathComponent = simpleHorizontalLayout(pathElements);
       elements.push_back(pathComponent);
+      modassert(elements.size() > 0, "need at least 1 elements in path for fileExplorer");
     }
     /////////////////////
     // files
@@ -63,13 +64,16 @@ Component fileexplorerComponent {
         auto clickedPathVec = fileExplorer -> currentPath;
         clickedPathVec.push_back(value.content);
         auto clickedPath = std::string("/") + join(clickedPathVec, '/');
+        if (value.type == Directory){
+          clickedPath += "/";
+        }
         std::function<void()> onClick = [clickedPath, onChange, type]() -> void {
           std::cout << "on click: " <<  clickedPath << std::endl;
           onChange(type, clickedPath);
         };
         Props listItemProps {
           .props = {
-            PropPair { .symbol = valueSymbol, .value = (value.type == File ? value.content : std::string("[D] " + value.content)) },
+            PropPair { .symbol = valueSymbol, .value = (value.type == Directory ? std::string("[D] " + value.content) : value.content) },
             PropPair { .symbol = tintSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.f) },
             PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
             PropPair { .symbol = paddingSymbol, .value = 0.01f },
@@ -79,12 +83,14 @@ Component fileexplorerComponent {
         auto listItemWithProps = withPropsCopy(listItem, listItemProps);
         pathElements.push_back(listItemWithProps);
       }
+      modassert(pathElements.size() > 0, "path elements must be > 0");
       auto pathComponent = simpleVerticalLayout(pathElements, glm::vec2(0.5f, 0.5f), AlignmentParams {
         .layoutFlowHorizontal = UILayoutFlowNone2,
         .layoutFlowVertical = UILayoutFlowNegative2,
 
       });
       elements.push_back(pathComponent);
+      modassert(elements.size() > 0, "need at least 1 elements in files for fileExplorer");
     }
     ///////////////
 

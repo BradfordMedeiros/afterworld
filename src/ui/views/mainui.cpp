@@ -101,21 +101,70 @@ std::function<void()> xFileExplorerCallbackFn = []() -> void {
   fileexplorer = "";
 };
 
+
+struct FileNavigator {
+  std::filesystem::path path;
+};
+
+FileNavigator createFileNavigator(){
+  auto path = std::filesystem::path(".");
+  auto navigator = FileNavigator{
+    .path = path,
+  };
+  return navigator;
+}
+void navigateDir(FileNavigator& navigator, std::string directory){
+  auto path = std::filesystem::weakly_canonical(std::filesystem::path(std::filesystem::absolute(directory)));
+  navigator.path = path;
+  modlog("navigator", std::string("current path: ") +  std::string(std::filesystem::absolute(navigator.path)));
+}
+std::vector<std::string> getCurrentNavigatorPath(FileNavigator& navigator){
+  std::string resourcePath = std::filesystem::absolute(navigator.path);
+  auto currentPath = split(resourcePath, '/');
+  modlog("current path: ", print(currentPath));
+  modassert(currentPath.size() > 0, "current path must be > 0");
+  return currentPath;
+}
+std::vector<FileContent> listCurrentContents(FileNavigator& navigator){
+  std::vector<FileContent> files;
+  for(auto &file: std::filesystem::directory_iterator(navigator.path)) {
+    if (!std::filesystem::is_directory(file)) {
+      files.push_back(FileContent {
+        .type = File,
+        .content = std::filesystem::path(file.path()).filename(),
+      });
+    }else{
+      files.push_back(FileContent {
+        .type = Directory,
+        .content = std::filesystem::path(file.path()).filename(),
+      });
+    }
+  }
+  if (files.size() == 0){
+    files.push_back(FileContent{
+      .type = NoContent,
+      .content = "[empty directory]",
+    });
+  }
+
+  modassert(files.size() > 0, "no files for contents");
+  return files;
+}
+
+FileNavigator navigator = createFileNavigator();
+
 FileExplorer testExplorer {
-  .contentOffset = 1,
-  .currentPath = { "home", "desktop", "textures" },
-  .currentContents  = {
-    FileContent { .type = Directory, .content = ".." },
-    FileContent { .type = File, .content = "wood.jpg" },\
-    FileContent { .type = Directory, .content = "cool-textures" },
-    FileContent { .type = File, .content = "bluetransparent.jpg" },
-    FileContent { .type = File, .content = "notareal-file.jpg" },
-  },
+  .contentOffset = 0,
+  .currentPath = getCurrentNavigatorPath(navigator),
+  .currentContents  = listCurrentContents(navigator),
   .explorerOnChange = [](FileContentType type, std::string file) -> void {
     if (type == File){
-      std::cout << "explorer on change - file: " << file << std::endl;
+      std::cout << "navigator explorer on change - file: " << file << std::endl;
     }else if (type == Directory){
-      std::cout << "explorer on change - directory: " << file << std::endl;
+      std::cout << "navigator explorer on change - directory: " << file << std::endl;
+      navigateDir(navigator, file);
+      testExplorer.currentContents = listCurrentContents(navigator);
+      testExplorer.currentPath = getCurrentNavigatorPath(navigator);
     }
   }
 };

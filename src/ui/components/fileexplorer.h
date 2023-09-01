@@ -6,7 +6,7 @@
 #include "./list.h"
 #include "./textbox.h"
 
-enum FileContentType { File, Directory };
+enum FileContentType { File, Directory, NoContent };
 struct FileContent {
   FileContentType type;
   std::string content;

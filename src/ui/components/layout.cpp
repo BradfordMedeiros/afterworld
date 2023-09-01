@@ -218,6 +218,8 @@ BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Lay
     	xoffset += spacingPerItemWidth;
     }
   }
+
+ 	modassert(layout.children.size() > 0, "layout must have at least 1 element");
 	return measurerToBox(boundingBoxMeasurer);
 
 }
