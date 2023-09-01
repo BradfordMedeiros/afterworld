@@ -15,7 +15,7 @@ struct FileExplorer {
   int contentOffset;
   std::vector<std::string> currentPath;
   std::vector<FileContent> currentContents;
-  std::function<void(FileContentType type)> explorerOnChange;
+  std::function<void(FileContentType type, std::string)> explorerOnChange;
 };
 
 extern Component fileexplorerComponent;

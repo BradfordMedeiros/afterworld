@@ -33,9 +33,9 @@ Component fileexplorerComponent {
       for (int i = 0 ; i < fileExplorer -> currentPath.size(); i++){
         auto value = fileExplorer -> currentPath.at(i);
 
-        std::function<void()> onClick = [onChange]() -> void {
-          std::cout << "on click" << std::endl;
-          onChange(Directory);
+        auto clickedPath = std::string("/") + join(subvector(fileExplorer -> currentPath, 0, i + 1), '/');
+        std::function<void()> onClick = [clickedPath, onChange]() -> void {
+          onChange(Directory, clickedPath);
         };
         Props listItemProps {
           .props = {
@@ -59,9 +59,13 @@ Component fileexplorerComponent {
       for (int i = fileExplorer -> contentOffset ; ((i < (fileExplorer -> contentOffset + 10)) && i < fileExplorer -> currentContents.size()); i++){
         auto value = fileExplorer -> currentContents.at(i);
         auto type = value.type;
-        std::function<void()> onClick = [onChange, type]() -> void {
-          std::cout << "on click" << std::endl;
-          onChange(type);
+
+        auto clickedPathVec = fileExplorer -> currentPath;
+        clickedPathVec.push_back(value.content);
+        auto clickedPath = std::string("/") + join(clickedPathVec, '/');
+        std::function<void()> onClick = [clickedPath, onChange, type]() -> void {
+          std::cout << "on click: " <<  clickedPath << std::endl;
+          onChange(type, clickedPath);
         };
         Props listItemProps {
           .props = {

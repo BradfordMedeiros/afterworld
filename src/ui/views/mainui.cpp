@@ -111,11 +111,11 @@ FileExplorer testExplorer {
     FileContent { .type = File, .content = "bluetransparent.jpg" },
     FileContent { .type = File, .content = "notareal-file.jpg" },
   },
-  .explorerOnChange = [](FileContentType type) -> void {
+  .explorerOnChange = [](FileContentType type, std::string file) -> void {
     if (type == File){
-      std::cout << "explorer on change - file" << std::endl;
+      std::cout << "explorer on change - file: " << file << std::endl;
     }else if (type == Directory){
-      std::cout << "explorer on change - directory" << std::endl;
+      std::cout << "explorer on change - directory: " << file << std::endl;
     }
   }
 };
