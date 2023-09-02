@@ -103,6 +103,10 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
 void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::function<void()>& onClickX);
 
+void registerUiSource(int symbol, void* data);
+void unregisterUiSource(int symbol);
+void* uiConnect(int symbol);
+
 extern std::optional<std::function<void()>> nullClick;
 
 extern const int horizontalSymbol;
@@ -134,5 +138,6 @@ extern const int xoffsetFromSymbol;
 extern const int interpolationSymbol;
 extern const int checkedSymbol;
 extern const int editableSymbol;
+extern const int textEditorDefault;
 
 #endif

@@ -10,20 +10,20 @@ std::string insertString(std::string& str, int index, char character){
   return prefix + character + suffix;
 }
 
-std::string valueText = "default textbox";
-int cursorLocation = 2;
 
 Component textbox {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    static TextData* textData = static_cast<TextData*>(uiConnect(textEditorDefault));
+
     auto strValue = strFromProp(props, valueSymbol, "default textbox");
 
     auto isEditable = boolFromProp(props, editableSymbol, false);
     auto tint = vec4FromProp(props, tintSymbol, isEditable ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 0.f, 1.f));
     auto color = vec4FromProp(props, colorSymbol, isEditable ? glm::vec4(0.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f));
 
-    auto textValue = isEditable ? valueText : strValue;
+    auto textValue = isEditable ? textData -> valueText : strValue;
 
-    auto newTextValue = insertString(textValue, cursorLocation, 't');
+    auto newTextValue = insertString(textValue, textData -> cursorLocation, '|');
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol,   .value = newTextValue },

@@ -255,8 +255,41 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   gameapi -> setSelected(ids);
 }
 
+TextData textData {
+  .valueText = "default \n textbox",
+  .cursorLocation = 2,
+  .highlightLength = 0,
+  .maxchars = -1,
+};
+
+void insertCharacter(TextData& textData, char character){
+  auto newString = insertString(textData.valueText, textData.cursorLocation, character);
+  textData.valueText = newString;
+  textData.cursorLocation++;
+}
+void deleteCharacter(TextData& textData){
+  auto index = textData.cursorLocation;
+  if (index == 0){
+    return;
+  }
+  auto prefix = textData.valueText.substr(0, index -1);
+  auto suffixIndex = index;
+  if (suffixIndex >= textData.valueText.size()){
+    suffixIndex = textData.valueText.size();
+  }
+  auto suffix = textData.valueText.substr(suffixIndex, textData.valueText.size());
+  auto newString = prefix + suffix;
+  textData.valueText = newString;
+  textData.cursorLocation--;
+  if (textData.cursorLocation < 0){
+    textData.cursorLocation = 0;
+  }
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
+  registerUiSource(textEditorDefault, static_cast<void*>(&textData));
+  
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
     gameState -> loadedLevel = std::nullopt;
@@ -311,6 +344,33 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         togglePauseMode(*gameState);
       }
     }
+
+    if (action != 1){
+      return;
+    }
+    if (key == 263){        // left  key
+      textData.cursorLocation--;
+      if (textData.cursorLocation < 0){
+        textData.cursorLocation = 0;
+      }
+      return;
+    }else if (key == 262){  // right key
+      textData.cursorLocation++;
+      if (textData.cursorLocation > textData.valueText.size()){
+        textData.cursorLocation = textData.valueText.size();
+      }
+      return;
+    }
+    if (key == 257){
+      insertCharacter(textData, '\n');
+    }else if (key == 261){
+      // delete forward
+    }else if (key == 259){
+      deleteCharacter(textData);
+    }else{
+      insertCharacter(textData, key);
+    }
+
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);

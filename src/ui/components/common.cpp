@@ -312,6 +312,25 @@ void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::funct
   drawTools.registerCallbackFns(xMappingId, onClickX);
 }
 
+struct UiDataStore {
+  std::map<int, void*> data;
+};
+
+UiDataStore dataStore { .data = { } };
+void registerUiSource(int symbol, void* data){
+  modassert(dataStore.data.find(symbol) == dataStore.data.end(), std::string("element already exists in data store: ") + std::to_string(symbol));
+  dataStore.data[symbol] = data;
+  modlog("uistore", std::string("registered data: ") + std::to_string(symbol));
+}
+void unregisterUiSource(int symbol){
+  modlog("uistore", std::string("unregistered data: ") + std::to_string(symbol));
+  dataStore.data.erase(symbol);
+}
+void* uiConnect(int symbol){
+  modlog("uistore", std::string("connected to: " ) + std::to_string(symbol));
+  return dataStore.data.at(symbol);
+}
+
 std::optional<std::function<void()>> nullClick = []() -> void {};
 
 
@@ -343,4 +362,4 @@ const int xoffsetFromSymbol =  getSymbol("xoffset-from");
 const int interpolationSymbol = getSymbol("interpolation");
 const int checkedSymbol = getSymbol("checked");
 const int editableSymbol = getSymbol("editable");
-
+const int textEditorDefault = getSymbol("text-editor-default");

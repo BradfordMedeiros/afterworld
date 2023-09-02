@@ -6,5 +6,13 @@
 
 extern Component textbox;
 
+std::string insertString(std::string& str, int index, char character);
+
+struct TextData {
+  std::string valueText;
+  int cursorLocation;
+  int highlightLength;
+  int maxchars;
+};
 
 #endif
