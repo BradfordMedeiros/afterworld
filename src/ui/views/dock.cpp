@@ -182,6 +182,7 @@ Component genericDockComponent {
         Props textboxProps {
           .props = {
             PropPair { .symbol = valueSymbol, .value = textboxOptions -> text },
+            PropPair { .symbol = editableSymbol, .value = true },
           }
         };
         auto textboxWithProps = withPropsCopy(textbox, textboxProps);
@@ -224,11 +225,9 @@ Component dockComponent {
     std::vector<Component> elements;
 
     auto strValue = strFromProp(props, titleSymbol, "Dock");
-    std::function<void()> onClick = []() -> void { std::cout << "on click" << std::endl; };
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = std::string("Dock") },
-        PropPair { .symbol = onclickSymbol, .value = onClick },
       },
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);

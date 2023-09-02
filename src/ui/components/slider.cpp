@@ -39,7 +39,7 @@ Component slider  {
       .width = width,
       .height = height,
     };
-    drawDebugBoundingBox(drawTools, boundingBox);
+    //drawDebugBoundingBox(drawTools, boundingBox);
     return boundingBox;
   },
 };

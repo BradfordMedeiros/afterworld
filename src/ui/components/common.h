@@ -133,5 +133,6 @@ extern const int detailSymbol;
 extern const int xoffsetFromSymbol;
 extern const int interpolationSymbol;
 extern const int checkedSymbol;
+extern const int editableSymbol;
 
 #endif

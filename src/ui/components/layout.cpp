@@ -355,7 +355,7 @@ Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDi
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
     .showBackpanel = true,
-    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
+    .borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f),
     .minwidth = minDim.x,
     .minheight = minDim.y,
     .layoutType = LAYOUT_VERTICAL2,
@@ -380,7 +380,7 @@ Component simpleHorizontalLayout(std::vector<Component>& children){
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
     .showBackpanel = true,
-    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
+    .borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f),
     .minwidth = 0.f,
     .minheight = 0.f,
     .layoutType = LAYOUT_HORIZONTAL2,

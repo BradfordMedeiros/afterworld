@@ -342,3 +342,5 @@ const int detailSymbol = getSymbol("detail");
 const int xoffsetFromSymbol =  getSymbol("xoffset-from");
 const int interpolationSymbol = getSymbol("interpolation");
 const int checkedSymbol = getSymbol("checked");
+const int editableSymbol = getSymbol("editable");
+

@@ -15,7 +15,7 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   auto rectHeight = height + 2 * padding;
   auto textY = yoffset;
 
-  auto tint = (mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(0.f, 0.f, 1.f, 1.f) : color;
+  auto tint = (menuItem.onClick.has_value() && mappingId.has_value() && menuItem.mappingId.has_value() && menuItem.mappingId.value() == mappingId.value()) ? glm::vec4(0.f, 0.f, 1.f, 1.f) : color;
 
   if (menuItem.onClick.has_value()){
     drawTools.registerCallbackFns(menuItem.mappingId.value(), menuItem.onClick.value());

@@ -30,7 +30,11 @@ Component fileexplorerComponent {
     // current path
     { 
       std::vector<Component> pathElements;
-      for (int i = 0 ; i < fileExplorer -> currentPath.size(); i++){
+      int startIndex = fileExplorer -> currentPath.size() - 4;
+      if (startIndex < 0){
+        startIndex = 0;
+      }
+      for (int i = startIndex ; i < fileExplorer -> currentPath.size(); i++){
         auto value = fileExplorer -> currentPath.at(i);
 
         auto clickedPath = std::string("/") + join(subvector(fileExplorer -> currentPath, 0, i + 1), '/');
