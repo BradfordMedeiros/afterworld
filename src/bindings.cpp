@@ -286,9 +286,11 @@ void deleteCharacter(TextData& textData){
   }
 }
 
+glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   registerUiSource(textEditorDefault, static_cast<void*>(&textData));
+  registerUiSource(color, static_cast<void*>(&activeColor));
   
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
@@ -353,12 +355,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (textData.cursorLocation < 0){
         textData.cursorLocation = 0;
       }
+      activeColor.a += 0.01f;
       return;
     }else if (key == 262){  // right key
       textData.cursorLocation++;
       if (textData.cursorLocation > textData.valueText.size()){
         textData.cursorLocation = textData.valueText.size();
       }
+      activeColor.a -= 0.01f;
       return;
     }
     if (key == 257){

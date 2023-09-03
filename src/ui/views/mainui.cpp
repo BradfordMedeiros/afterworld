@@ -238,6 +238,10 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   }
 
   auto defaultProps = getDefaultProps();
+
+  colorPickerComponent.draw(drawTools, defaultProps);
+
+
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 

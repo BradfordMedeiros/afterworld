@@ -363,3 +363,5 @@ const int interpolationSymbol = getSymbol("interpolation");
 const int checkedSymbol = getSymbol("checked");
 const int editableSymbol = getSymbol("editable");
 const int textEditorDefault = getSymbol("text-editor-default");
+const int color = getSymbol("color");
+

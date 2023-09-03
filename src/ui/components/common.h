@@ -139,5 +139,6 @@ extern const int interpolationSymbol;
 extern const int checkedSymbol;
 extern const int editableSymbol;
 extern const int textEditorDefault;
+extern const int color;
 
 #endif
