@@ -1,14 +1,10 @@
 #include "./uiwindow.h"
 
-Component createUiWindow(std::vector<Component>& components, std::string& titleValue){
-  std::function<void()> onWindowDrag = []() -> void {
-    std::cout << "on window drag" << std::endl;
-    exit(1);
-  };
+Component createUiWindow(std::vector<Component>& components, std::string& titleValue, std::function<void()> onClick){
   auto titleTextbox = withPropsCopy(listItem, Props {
     .props = {
       PropPair { .symbol = valueSymbol, .value = titleValue },
-      PropPair { .symbol = onclickSymbol, .value = onWindowDrag },
+      PropPair { .symbol = onclickSymbol, .value = onClick },
     }
   });
 

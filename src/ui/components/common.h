@@ -140,5 +140,6 @@ extern const int checkedSymbol;
 extern const int editableSymbol;
 extern const int textEditorDefault;
 extern const int color;
+extern const int onWindowDragSymbol;
 
 #endif

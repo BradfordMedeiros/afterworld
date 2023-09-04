@@ -538,6 +538,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           gameState -> uiCallbacks.at(idAtCoord.value())();
         }
       }
+    }else if (action == 0 && button == 0){
+      onMainUiMouseRelease();
     }
     if (button == 1){
       if (action == 0){

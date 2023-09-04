@@ -5,5 +5,5 @@
 #include "./layout.h"
 #include "./listitem.h"
 
-Component createUiWindow(std::vector<Component>& components, std::string& titleValue);
+Component createUiWindow(std::vector<Component>& components, std::string& titleValue, std::function<void()> onClick);
 #endif

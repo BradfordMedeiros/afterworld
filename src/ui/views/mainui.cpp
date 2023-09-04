@@ -169,6 +169,8 @@ FileExplorer testExplorer {
   }
 };
 
+std::optional<glm::vec2> initialDragPos = std::nullopt;
+glm::vec2 colorPickerOffset(0.f, 0.f);
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
@@ -239,7 +241,27 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
 
   auto defaultProps = getDefaultProps();
 
-  colorPickerComponent.draw(drawTools, defaultProps);
+  std::function<void()> onWindowDrag = []() -> void {
+    std::cout << "on window drag" << std::endl;
+    initialDragPos = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+  };
+
+  glm::vec2 draggedOffset(0.f, 0.f);
+  if (initialDragPos.has_value()){
+    draggedOffset = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc) - initialDragPos.value();
+  }
+  Props colorPickerProps {
+    .props = {
+      PropPair { onWindowDragSymbol, onWindowDrag },
+      PropPair { xoffsetSymbol, colorPickerOffset.x + draggedOffset.x },
+      PropPair { yoffsetSymbol, colorPickerOffset.y + draggedOffset.y },
+    }
+  };  
+
+  auto boundingBox = colorPickerComponent.draw(drawTools, colorPickerProps);
+  boundingBox.x -= draggedOffset.x;
+  boundingBox.y -= draggedOffset.y;
+  drawDebugBoundingBox(drawTools, boundingBox);
 
 
   auto routerProps = createRouterProps(uiContext, selectedId);
@@ -261,6 +283,12 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
   return handlerFns;
+}
+
+void onMainUiMouseRelease(){
+  colorPickerOffset += glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc) - initialDragPos.value();
+  initialDragPos = std::nullopt;
+
 }
 
 void pushHistory(std::string route){
