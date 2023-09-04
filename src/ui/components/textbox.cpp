@@ -21,9 +21,13 @@ Component textbox {
     auto tint = vec4FromProp(props, tintSymbol, isEditable ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 0.f, 1.f));
     auto color = vec4FromProp(props, colorSymbol, isEditable ? glm::vec4(0.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f));
 
-    auto textValue = isEditable ? textData -> valueText : strValue;
 
-    auto newTextValue = insertString(textValue, textData -> cursorLocation, '|');
+
+    auto textValue = isEditable ? textData -> valueText : strValue;
+    auto newTextValue = isEditable ?  insertString(textValue, textData -> cursorLocation, '|') : textValue;
+    if (isEditable && textData -> highlightLength > 0 && textData -> cursorLocation != textValue.size()){
+      newTextValue = insertString(newTextValue, textData -> cursorLocation + textData -> highlightLength + 1, '|');
+    }
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol,   .value = newTextValue },

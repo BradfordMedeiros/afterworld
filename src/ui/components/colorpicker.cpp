@@ -1,5 +1,9 @@
 #include "./colorpicker.h"
 
+Component createUiWindow(std::vector<Component>& components){
+	return simpleVerticalLayout(components);
+}
+
 Component createRgbSlider(float percentage){
   Slider sliderData {
     .min = 0.f,
@@ -57,7 +61,8 @@ Component colorPickerComponent {
 
     /////////////////////////
 
-    auto boundingBox = simpleVerticalLayout(elements).draw(drawTools, props);
+    auto uiWindowComponent = createUiWindow(elements);
+    auto boundingBox = uiWindowComponent.draw(drawTools, props);
     auto onClickX = fnFromProp(props, onclickSymbol);
     if (onClickX.has_value()){
       drawWindowX(drawTools, boundingBox, onClickX.value());

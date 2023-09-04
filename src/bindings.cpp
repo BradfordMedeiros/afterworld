@@ -262,29 +262,41 @@ TextData textData {
   .maxchars = -1,
 };
 
-void insertCharacter(TextData& textData, char character){
-  auto newString = insertString(textData.valueText, textData.cursorLocation, character);
-  textData.valueText = newString;
-  textData.cursorLocation++;
-}
 void deleteCharacter(TextData& textData){
-  auto index = textData.cursorLocation;
+  bool deleteSelection = textData.highlightLength > 0;
+  auto index = deleteSelection ? (textData.cursorLocation + 1) : textData.cursorLocation;
   if (index == 0){
     return;
   }
   auto prefix = textData.valueText.substr(0, index -1);
   auto suffixIndex = index;
+  if (deleteSelection){
+    suffixIndex = suffixIndex + textData.highlightLength -1;
+  }
   if (suffixIndex >= textData.valueText.size()){
     suffixIndex = textData.valueText.size();
   }
   auto suffix = textData.valueText.substr(suffixIndex, textData.valueText.size());
   auto newString = prefix + suffix;
   textData.valueText = newString;
-  textData.cursorLocation--;
+
+  if (!deleteSelection){
+    textData.cursorLocation--;
+  }
   if (textData.cursorLocation < 0){
     textData.cursorLocation = 0;
   }
+  textData.highlightLength = 0;
 }
+void insertCharacter(TextData& textData, char character){
+  if (textData.highlightLength > 0){
+    deleteCharacter(textData);
+  }
+  auto newString = insertString(textData.valueText, textData.cursorLocation, character);
+  textData.valueText = newString;
+  textData.cursorLocation++;
+}
+
 
 glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -348,6 +360,20 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (action != 1){
+      return;
+    }
+
+    if (key == 265){
+      // up key
+      textData.highlightLength++;
+      return;
+    }
+    if (key == 264){
+      // downkey
+      textData.highlightLength--;
+      if (textData.highlightLength < 0){
+        textData.highlightLength = 0;
+      }
       return;
     }
     if (key == 263){        // left  key
