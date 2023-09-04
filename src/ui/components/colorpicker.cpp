@@ -1,8 +1,5 @@
 #include "./colorpicker.h"
 
-Component createUiWindow(std::vector<Component>& components){
-	return simpleVerticalLayout(components);
-}
 
 Component createRgbSlider(float percentage){
   Slider sliderData {
@@ -38,17 +35,7 @@ Component colorPickerComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
 
-
     std::vector<Component> elements;
-
-    auto titleValue = strFromProp(props, titleSymbol, "Color Selection");
-    auto titleTextbox = withPropsCopy(textbox, Props {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = titleValue },
-      }
-    });
-    elements.push_back(titleTextbox);
-
     elements.push_back(createRgbSlider(activeColor -> r));
     elements.push_back(createRgbSlider(activeColor -> g));
     elements.push_back(createRgbSlider(activeColor -> b));
@@ -60,12 +47,17 @@ Component colorPickerComponent {
     }));
 
     /////////////////////////
+    auto titleValue = strFromProp(props, titleSymbol, "Color Selection");
+    auto uiWindowComponent = createUiWindow(elements, titleValue);
 
-    auto uiWindowComponent = createUiWindow(elements);
+  std::function<void()> onWindowDrag = []() -> void {
+    std::cout << "on window drag" << std::endl;
+    exit(1);
+  };
     auto boundingBox = uiWindowComponent.draw(drawTools, props);
     auto onClickX = fnFromProp(props, onclickSymbol);
-    if (onClickX.has_value()){
-      drawWindowX(drawTools, boundingBox, onClickX.value());
+    if (true ){
+      drawWindowX(drawTools, boundingBox, onWindowDrag);
     }
     return boundingBox;
   },

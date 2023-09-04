@@ -96,7 +96,7 @@ std::function<void()> xCallbackFn = []() -> void {
   dialog = "";
 };
 
-std::string fileexplorer = "files";
+std::string fileexplorer = "";
 std::function<void()> xFileExplorerCallbackFn = []() -> void {
   fileexplorer = "";
 };

@@ -6,6 +6,7 @@
 #include "./textbox.h"
 #include "./layout.h"
 #include "./slider.h"
+#include "./uiwindow.h"
 
 extern Component colorPickerComponent;
 
