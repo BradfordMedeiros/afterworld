@@ -172,6 +172,10 @@ FileExplorer testExplorer {
 std::optional<glm::vec2> initialDragPos = std::nullopt;
 glm::vec2 colorPickerOffset(0.f, 0.f);
 bool showColorPicker = true;
+std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
+  static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
+  *activeColor = value;
+};
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
@@ -256,12 +260,17 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     if (initialDragPos.has_value()){
       draggedOffset = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc) - initialDragPos.value();
     }
+
+    static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
+
     Props colorPickerProps {
       .props = {
         PropPair { onWindowDragSymbol, onWindowDrag },
         PropPair { onclickSymbol, onWindowRemove },
         PropPair { xoffsetSymbol, colorPickerOffset.x + draggedOffset.x },
         PropPair { yoffsetSymbol, colorPickerOffset.y + draggedOffset.y },
+        PropPair { onSlideSymbol,  onSlide },
+        PropPair { tintSymbol, *activeColor },
       }
     };  
     auto boundingBox = colorPickerComponent.draw(drawTools, colorPickerProps);

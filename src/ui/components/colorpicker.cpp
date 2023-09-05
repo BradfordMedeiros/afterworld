@@ -1,12 +1,12 @@
 #include "./colorpicker.h"
 
 
-Component createRgbSlider(float percentage){
+Component createRgbSlider(float percentage, std::function<void(float)> onSlide){
   Slider sliderData {
     .min = 0.f,
     .max = 10.f,
     .percentage = percentage,
-    .update = false,
+    .onSlide = onSlide,
   };
   Props sliderProps {
     .props = {
@@ -33,18 +33,37 @@ Component colorDisplay {
 
 Component colorPickerComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
+    auto activeColor = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 0.f));
     auto onWindowDrag = fnFromProp(props, onWindowDragSymbol).value();
     auto onClickX = fnFromProp(props, onclickSymbol);
+    auto onSlidePtr = typeFromProps<std::function<void(glm::vec4)>>(props, onSlideSymbol);
+    modassert(onSlidePtr, "slide must not be null");
+    auto onSlide = *onSlidePtr;
 
     std::vector<Component> elements;
-    elements.push_back(createRgbSlider(activeColor -> r));
-    elements.push_back(createRgbSlider(activeColor -> g));
-    elements.push_back(createRgbSlider(activeColor -> b));
-    elements.push_back(createRgbSlider(activeColor -> a));
+    elements.push_back(createRgbSlider(activeColor.r, [activeColor, onSlide](float r) -> void { 
+      glm::vec4 newColor = activeColor;
+      newColor.r = r;
+      onSlide(newColor);
+    }));
+    elements.push_back(createRgbSlider(activeColor.g, [activeColor, onSlide](float g) -> void { 
+      glm::vec4 newColor = activeColor;
+      newColor.g = g;
+      onSlide(newColor);
+    }));
+    elements.push_back(createRgbSlider(activeColor.b, [activeColor, onSlide](float b) -> void { 
+      glm::vec4 newColor = activeColor;
+      newColor.b = b;
+      onSlide(newColor);
+    }));
+    elements.push_back(createRgbSlider(activeColor.a, [activeColor, onSlide](float a) -> void { 
+      glm::vec4 newColor = activeColor;
+      newColor.a = a;
+      onSlide(newColor);
+    }));
     elements.push_back(withPropsCopy(colorDisplay, Props {
     	.props = { 
-    		{ .symbol = colorSymbol, .value = *activeColor },
+    		{ .symbol = colorSymbol, .value = activeColor },
     	}
     }));
 

@@ -8,7 +8,7 @@ struct Slider {
   float min;
   float max;
   float percentage;
-  bool update;
+  std::function<void(float)> onSlide;
 };
 
 extern Component slider;

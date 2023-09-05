@@ -153,7 +153,6 @@ Component genericDockComponent {
           .min = 0.f,
           .max = 10.f,
           .percentage = 0.5f,
-          .update = false,
         };
         Props sliderProps {
           .props = {

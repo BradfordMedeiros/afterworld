@@ -412,4 +412,5 @@ const int editableSymbol = getSymbol("editable");
 const int textEditorDefault = getSymbol("text-editor-default");
 const int color = getSymbol("color");
 const int onWindowDragSymbol = getSymbol("on-window-drag");
+const int onSlideSymbol = getSymbol("on-slide");
 
