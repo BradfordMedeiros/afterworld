@@ -302,7 +302,7 @@ glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   registerUiSource(textEditorDefault, static_cast<void*>(&textData));
-  registerUiSource(color, static_cast<void*>(&activeColor));
+  registerUiSource(color, static_cast<void*>(&activeColor), VEC4);
   
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
@@ -540,7 +540,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }else if (action == 0 && button == 0){
       onMainUiMouseRelease();
+      std::cout << uiStoreToStr() << std::endl;
     }
+
     if (button == 1){
       if (action == 0){
         gameState -> selecting = std::nullopt;

@@ -15,6 +15,10 @@ void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optio
   drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt);
 }
 
+void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){
+  gameapi -> drawRect(box.x, box.y, box.width, box.height, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
+}
+
 std::string print(BoundingBox2D& box){
   return std::string("x = " + std::to_string(box.x) + ", y = " + std::to_string(box.y) + ", width = " + std::to_string(box.width) + ", height = " + std::to_string(box.height));
 }
@@ -314,21 +318,64 @@ void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::funct
 
 struct UiDataStore {
   std::map<int, void*> data;
+  std::map<int, DataStoreHint> typeHints;
 };
 
-UiDataStore dataStore { .data = { } };
-void registerUiSource(int symbol, void* data){
+UiDataStore dataStore { .data = { }, .typeHints = {} };
+void registerUiSource(int symbol, void* data, DataStoreHint typeHint){
   modassert(dataStore.data.find(symbol) == dataStore.data.end(), std::string("element already exists in data store: ") + std::to_string(symbol));
   dataStore.data[symbol] = data;
+  dataStore.typeHints[symbol] = typeHint;
   modlog("uistore", std::string("registered data: ") + std::to_string(symbol));
 }
 void unregisterUiSource(int symbol){
   modlog("uistore", std::string("unregistered data: ") + std::to_string(symbol));
   dataStore.data.erase(symbol);
+  dataStore.typeHints.erase(symbol);
 }
 void* uiConnect(int symbol){
   modlog("uistore", std::string("connected to: " ) + std::to_string(symbol));
   return dataStore.data.at(symbol);
+}
+struct UiStoreKeyValue {
+  std::string key;
+  std::string value;
+};
+std::vector<UiStoreKeyValue> printUiStoreDebug(){
+  std::vector<UiStoreKeyValue> debugData;
+  for (auto &[symbol, data] : dataStore.data){
+    auto type = dataStore.typeHints.at(symbol);
+    if (type == NOHINT){
+      debugData.push_back(UiStoreKeyValue {
+        .key = nameForSymbol(symbol),
+        .value = "cannot serialize data",
+      });
+    }else if (type == VEC4){
+      glm::vec4* value = static_cast<glm::vec4*>(data);
+      debugData.push_back(UiStoreKeyValue {
+        .key = nameForSymbol(symbol),
+        .value = print(*value),
+      });
+    }else if (type == STRING){
+      std::string* value = static_cast<std::string*>(data);
+      debugData.push_back(UiStoreKeyValue {
+        .key = nameForSymbol(symbol),
+        .value = *value,
+      });
+    }else{
+      modassert(false, "printUiStoreDebug invalid type hint");
+    }
+  }
+
+  return debugData;
+}
+
+std::string uiStoreToStr(){
+  std::string data = "";
+  for (auto &dataValue : printUiStoreDebug()){
+    data += dataValue.key + std::string("=") + dataValue.value + std::string("\n");
+  }
+  return data;
 }
 
 std::optional<std::function<void()>> nullClick = []() -> void {};

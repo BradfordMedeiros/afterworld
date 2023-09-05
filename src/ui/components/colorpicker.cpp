@@ -34,9 +34,8 @@ Component colorDisplay {
 Component colorPickerComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
-
     auto onWindowDrag = fnFromProp(props, onWindowDragSymbol).value();
-
+    auto onClickX = fnFromProp(props, onclickSymbol);
 
     std::vector<Component> elements;
     elements.push_back(createRgbSlider(activeColor -> r));
@@ -51,13 +50,14 @@ Component colorPickerComponent {
 
     /////////////////////////
     auto titleValue = strFromProp(props, titleSymbol, "Color Selection");
-    auto uiWindowComponent = createUiWindow(elements, titleValue, onWindowDrag);
+    auto colorPickInner = simpleVerticalLayout(elements);
 
-    auto boundingBox = uiWindowComponent.draw(drawTools, props);
-    auto onClickX = fnFromProp(props, onclickSymbol);
-    if (true ){
-      drawWindowX(drawTools, boundingBox, onWindowDrag);
-    }
-    return boundingBox;
+    auto uiWindowComponent = createUiWindow(colorPickInner, titleValue, onWindowDrag, onClickX);
+
+    //auto boundingBox =
+    //if (true ){
+    //  drawWindowX(drawTools, boundingBox, onWindowDrag);
+    //}
+    return  uiWindowComponent.draw(drawTools, props);;
   },
 };

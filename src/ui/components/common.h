@@ -62,6 +62,7 @@ struct Component {
 };
 
 void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt);
+void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = glm::vec4(0.f, 0.f, 0.f, 0.2f));
 std::string print(BoundingBox2D& box);
 
 struct ImGrid {
@@ -103,9 +104,11 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
 void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::function<void()>& onClickX);
 
-void registerUiSource(int symbol, void* data);
+enum DataStoreHint { NOHINT, VEC4, STRING };
+void registerUiSource(int symbol, void* data, DataStoreHint typeHint = NOHINT);
 void unregisterUiSource(int symbol);
 void* uiConnect(int symbol);
+std::string uiStoreToStr();
 
 extern std::optional<std::function<void()>> nullClick;
 
