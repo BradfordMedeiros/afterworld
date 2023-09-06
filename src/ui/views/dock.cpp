@@ -222,16 +222,7 @@ Component genericDockComponent {
 Component dockComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::vector<Component> elements;
-
-    auto strValue = strFromProp(props, titleSymbol, "Dock");
-    Props listItemProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string("Dock") },
-      },
-    };
-    auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-
-    elements.push_back(listItemWithProps);
+    auto strValue = strFromProp(props, titleSymbol, "Dock Thing");
 
     Props dockProps {
       .props = {
@@ -239,7 +230,6 @@ Component dockComponent {
       }
     };
     elements.push_back(withProps(genericDockComponent, dockProps));
-
 
     float xoffset = floatFromProp(props, xoffsetSymbol, 1.f);
     float xoffsetFrom = floatFromProp(props, xoffsetFromSymbol, xoffset);

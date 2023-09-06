@@ -191,18 +191,15 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   if (dockedDock != ""){
     Props dockProps { 
       .props = {
-        { titleSymbol, dockedDock },
         { xoffsetSymbol, 1.f },
         { yoffsetSymbol, 0.88f },
         { xoffsetFromSymbol, 1.5f },
       }
     };
 
-
     auto dock = withProps(dockComponent, dockProps);
-    auto uiWindowComponent = createUiWindow(dock, windowDockSymbol);
     auto defaultWindowProps = getDefaultProps();
-    uiWindowComponent.draw(drawTools, defaultWindowProps);
+    createUiWindow(dock, windowDockSymbol, dockedDock).draw(drawTools, defaultWindowProps);
   }
 
 
@@ -255,7 +252,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
       PropPair { tintSymbol, *activeColor },
     }
   });
-  auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol);
+  auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, "color picker");
   auto defaultWindowProps = getDefaultProps();
   uiWindowComponent.draw(drawTools, defaultWindowProps);
   

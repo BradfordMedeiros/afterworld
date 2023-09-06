@@ -1,9 +1,9 @@
 #include "./uiwindow.h"
 
 
-Component createUiWindow(Component& component, int symbol){
+Component createUiWindow(Component& component, int symbol, std::string titleValue){
   Component componentUiWindow {
-    .draw = [&component, symbol](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [&component, symbol, &titleValue](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       auto enable = windowEnabled(symbol);
       if (!enable){
         return BoundingBox2D { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
@@ -18,7 +18,6 @@ Component createUiWindow(Component& component, int symbol){
           windowOnDrag(symbol);
       };
 
-      auto titleValue = strFromProp(props, titleSymbol, "Color Selection");
       auto titleTextbox = withPropsCopy(listItem, Props {
         .props = {
           PropPair { .symbol = valueSymbol, .value = titleValue },
