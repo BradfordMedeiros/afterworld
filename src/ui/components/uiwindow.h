@@ -4,6 +4,7 @@
 #include "./common.h"
 #include "./layout.h"
 #include "./listitem.h"
+#include "../views/windowmanager.h"
 
 Component createUiWindow(Component& component, std::string& titleValue, std::function<void()>& onClick, std::optional<std::function<void()>>& onClickX);
 #endif

@@ -13,6 +13,7 @@
 #include "./pausemenu.h"
 #include "./navbar.h"
 #include "./dock.h"
+#include "./windowmanager.h"
 
 struct Level {
   std::string scene;
