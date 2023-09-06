@@ -6,5 +6,5 @@
 #include "./listitem.h"
 #include "../views/windowmanager.h"
 
-Component createUiWindow(Component& component, std::string& titleValue, std::function<void()>& onClick, std::optional<std::function<void()>>& onClickX);
+Component createUiWindow(Component& component, int symbol);
 #endif

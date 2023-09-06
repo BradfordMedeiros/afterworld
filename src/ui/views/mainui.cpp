@@ -251,22 +251,22 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
 
   if (showColorPicker){
     static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
-  
     auto colorPickerWindowOffset = windowGetOffset(windowColorPickerSymbol);
-
     Props colorPickerProps {
       .props = {
         PropPair { onclickSymbol, onWindowRemove },
         PropPair { xoffsetSymbol, colorPickerWindowOffset.x  },
         PropPair { yoffsetSymbol, colorPickerWindowOffset.y  },
-        PropPair { onSlideSymbol,  onSlide },
-        PropPair { tintSymbol, *activeColor },
-        PropPair { windowSymbol, windowColorPickerSymbol },
       }
     };
-
-    colorPickerComponent.draw(drawTools, colorPickerProps);
-   
+    auto colorPicker = withPropsCopy(colorPickerComponent, Props {
+      .props = { 
+        PropPair { onSlideSymbol,  onSlide },
+        PropPair { tintSymbol, *activeColor },
+      }
+    });
+    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol);
+    uiWindowComponent.draw(drawTools, colorPickerProps);
   }
 
   auto routerProps = createRouterProps(uiContext, selectedId);
