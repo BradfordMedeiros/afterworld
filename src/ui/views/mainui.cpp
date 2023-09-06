@@ -197,7 +197,12 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
         { xoffsetFromSymbol, 1.5f },
       }
     };
-    withAnimator(routerHistory, dockComponent, 0.1f).draw(drawTools, dockProps);
+
+
+    auto dock = withProps(dockComponent, dockProps);
+    auto uiWindowComponent = createUiWindow(dock, windowDockSymbol);
+    auto defaultWindowProps = getDefaultProps();
+    uiWindowComponent.draw(drawTools, defaultWindowProps);
   }
 
 
@@ -242,32 +247,18 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     fileexplorerComponent.draw(drawTools, filexplorerProps);
   }
 
-  auto defaultProps = getDefaultProps();
 
-
-  std::function<void()> onWindowRemove = []() -> void {
-    showColorPicker = false;
-  };
-
-  if (showColorPicker){
-    static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
-    auto colorPickerWindowOffset = windowGetOffset(windowColorPickerSymbol);
-    Props colorPickerProps {
-      .props = {
-        PropPair { onclickSymbol, onWindowRemove },
-        PropPair { xoffsetSymbol, colorPickerWindowOffset.x  },
-        PropPair { yoffsetSymbol, colorPickerWindowOffset.y  },
-      }
-    };
-    auto colorPicker = withPropsCopy(colorPickerComponent, Props {
-      .props = { 
-        PropPair { onSlideSymbol,  onSlide },
-        PropPair { tintSymbol, *activeColor },
-      }
-    });
-    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol);
-    uiWindowComponent.draw(drawTools, colorPickerProps);
-  }
+  static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
+  auto colorPicker = withPropsCopy(colorPickerComponent, Props {
+    .props = { 
+      PropPair { onSlideSymbol,  onSlide },
+      PropPair { tintSymbol, *activeColor },
+    }
+  });
+  auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol);
+  auto defaultWindowProps = getDefaultProps();
+  uiWindowComponent.draw(drawTools, defaultWindowProps);
+  
 
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
@@ -280,6 +271,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     };
     navbarComponent.draw(drawTools, navbarProps);
 
+    auto defaultProps = getDefaultProps();
     withProps(debugList, debugListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);

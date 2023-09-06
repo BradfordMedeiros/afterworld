@@ -4,16 +4,22 @@
 #include "../components/common.h"
 #include "../../global.h"
 
-extern const int windowSymbol;
 extern const int windowColorPickerSymbol;
+extern const int windowDockSymbol;
+
 struct WindowData {
   glm::vec2 windowOffset;
   std::optional<glm::vec2> initialDragPos;
   glm::vec2 colorPickerOffset;
+  bool enable;
+  bool horizontal;
+  bool vertical;
 };
 
 extern std::map<int, WindowData> windowData;
 
+bool windowEnabled(int symbol);
+void windowSetEnabled(int symbol, bool enable);
 void windowOnDrag(int symbol);
 bool windowIsBeingDragged(int symbol);
 void windowOnRelease();
