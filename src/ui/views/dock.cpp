@@ -231,6 +231,7 @@ Component dockComponent {
     };
     elements.push_back(withProps(genericDockComponent, dockProps));
 
+    // this interpolation (for animation) shouldn't be happening int he componnet here
     float xoffset = floatFromProp(props, xoffsetSymbol, 1.f);
     float xoffsetFrom = floatFromProp(props, xoffsetFromSymbol, xoffset);
     float interpAmount = floatFromProp(props, interpolationSymbol, 1.f);

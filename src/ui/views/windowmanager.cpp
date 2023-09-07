@@ -10,19 +10,18 @@ std::map<int, WindowData> windowData = {
   { windowColorPickerSymbol, WindowData {
     .windowOffset = glm::vec2(0.f, 0.f),
     .initialDragPos = std::nullopt,
-    .colorPickerOffset = glm::vec2(0.f, 0.f),
     .enable = true,
     .horizontal = true,
     .vertical = true,
   }},
   { windowDockSymbol, WindowData {
-    .windowOffset = glm::vec2(0.f, 0.f),
+    .windowOffset = glm::vec2(1.f, 0.88f),
     .initialDragPos = std::nullopt,
-    .colorPickerOffset = glm::vec2(0.f, 0.f),
     .enable = true,
     .horizontal = true,
     .vertical = false,
-  }}
+  }},
+
 };
 
 bool windowEnabled(int symbol){
@@ -44,17 +43,17 @@ void windowOnRelease(){
 			continue;
 		}
     if (window.horizontal){
-      window.colorPickerOffset.x += getGlobalState().xNdc - window.initialDragPos.value().x;
+      window.windowOffset.x += getGlobalState().xNdc - window.initialDragPos.value().x;
     }
     if (window.vertical){
-      window.colorPickerOffset.y += getGlobalState().yNdc - window.initialDragPos.value().y;
+      window.windowOffset.y += getGlobalState().yNdc - window.initialDragPos.value().y;
     }
   	window.initialDragPos = std::nullopt;
 	}
 }
 glm::vec2 windowGetPreDragOffset(int symbol){
   WindowData& window = windowData.at(symbol);
-  return window.colorPickerOffset;
+  return window.windowOffset;
 }
 glm::vec2 windowGetOffset(int symbol){
   WindowData& window = windowData.at(symbol);
@@ -62,8 +61,8 @@ glm::vec2 windowGetOffset(int symbol){
   if (windowIsBeingDragged(symbol)){
     draggedOffset = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc) - window.initialDragPos.value();
   }
-  auto colorPickerOffset = window.colorPickerOffset;
-  float x = window.horizontal ?  colorPickerOffset.x + draggedOffset.x : colorPickerOffset.x;
-  float y = window.vertical  ?  colorPickerOffset.y + draggedOffset.y : colorPickerOffset.y;
+  auto windowOffset = window.windowOffset;
+  float x = window.horizontal ?  windowOffset.x + draggedOffset.x : windowOffset.x;
+  float y = window.vertical  ?  windowOffset.y + draggedOffset.y : windowOffset.y;
   return glm::vec2(x, y);
 }

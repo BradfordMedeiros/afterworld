@@ -1,9 +1,9 @@
 #include "./uiwindow.h"
 
 
-Component createUiWindow(Component& component, int symbol, std::string titleValue){
+Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment){
   Component componentUiWindow {
-    .draw = [&component, symbol, &titleValue](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [&component, symbol, &titleValue, alignment](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       auto enable = windowEnabled(symbol);
       if (!enable){
         return BoundingBox2D { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
@@ -33,7 +33,8 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
       props.props.push_back(PropPair { xoffsetSymbol, windowOffset.x  });
       props.props.push_back(PropPair { yoffsetSymbol, windowOffset.y  });
 
-      auto boundingBox = simpleVerticalLayout(allComponents).draw(drawTools, props);
+
+      auto boundingBox = simpleVerticalLayout(allComponents, glm::vec2(0.f, 0.f), alignment).draw(drawTools, props);
       drawWindowX(drawTools, boundingBox, onClickX);
       
 

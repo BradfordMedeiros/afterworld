@@ -191,15 +191,13 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   if (dockedDock != ""){
     Props dockProps { 
       .props = {
-        { xoffsetSymbol, 1.f },
-        { yoffsetSymbol, 0.88f },
         { xoffsetFromSymbol, 1.5f },
       }
     };
 
     auto dock = withProps(dockComponent, dockProps);
     auto defaultWindowProps = getDefaultProps();
-    createUiWindow(dock, windowDockSymbol, dockedDock).draw(drawTools, defaultWindowProps);
+    createUiWindow(dock, windowDockSymbol, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }).draw(drawTools, defaultWindowProps);
   }
 
 

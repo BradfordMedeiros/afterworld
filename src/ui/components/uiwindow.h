@@ -6,5 +6,5 @@
 #include "./listitem.h"
 #include "../views/windowmanager.h"
 
-Component createUiWindow(Component& component, int symbol, std::string titleValue = "Untitled Window");
+Component createUiWindow(Component& component, int symbol, std::string titleValue = "Untitled Window", AlignmentParams alignment = defaultAlignment);
 #endif

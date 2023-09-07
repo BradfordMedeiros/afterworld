@@ -10,7 +10,6 @@ extern const int windowDockSymbol;
 struct WindowData {
   glm::vec2 windowOffset;
   std::optional<glm::vec2> initialDragPos;
-  glm::vec2 colorPickerOffset;
   bool enable;
   bool horizontal;
   bool vertical;
