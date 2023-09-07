@@ -9,6 +9,7 @@ struct Option {
 };
 struct Options {
   std::vector<Option> options;
+  int selectedIndex;
 };
 
 extern const int optionsSymbol;

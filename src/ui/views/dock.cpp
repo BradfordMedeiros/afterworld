@@ -1,7 +1,5 @@
 #include "./dock.h"
 
-const int dockTypeSymbol = getSymbol("dock-type");
-
 enum DockFieldType {
   DOCK_BUTTON,
   DOCK_OPTION,
@@ -16,6 +14,8 @@ struct DockButtonConfig {
 };
 struct DockOptionConfig {
   std::vector<const char*> options;
+  std::function<void(std::string&)> onClick;
+  std::function<int(void)> getSelectedIndex;
 };
 struct DockSliderConfig {
 
@@ -40,14 +40,15 @@ struct DockConfigApi {
 
 DockConfigApi dockConfig {
   .createCamera = []() -> void {
-    std::cout << "dock config mock make camera" << std::endl;
+    modlog("dock", "mock make camera");
   },
   .createLight = []() -> void {
-    std::cout << "dock config mock make light" << std::endl;
+    modlog("dock", "mock make light");
   },
 };
 
 
+int selectedIndex = 0;
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -62,11 +63,20 @@ std::vector<DockConfiguration> configurations {
     .title = "Cameras",
     .configFields = {
       DockButtonConfig {
-        .buttonText = "Create Camera Yo",
+        .buttonText = "Create Camera",
         .onClick = dockConfig.createCamera,
       },
       DockOptionConfig {
         .options = { "enable dof", "disable dof" },
+        .onClick = [](std::string& choice) -> void {
+          std::cout << "dock mock enable dof: " << choice << std::endl;
+          if (choice == "enable dof"){
+            selectedIndex = 0;
+          }else if (choice == "disable dof"){
+            selectedIndex = 1;
+          }
+        },
+        .getSelectedIndex = []() -> int { return selectedIndex; },
       },
       DockSliderConfig {
 
@@ -83,6 +93,22 @@ std::vector<DockConfiguration> configurations {
         .buttonText = "Create Light",
         .onClick = dockConfig.createLight,
       },
+      DockOptionConfig {
+        .options = { "point", "spotlight", "directional" },
+        .onClick = [](std::string& choice) -> void {
+          std::cout << "dock mock toggle light mode: " << choice << std::endl;
+          if (choice == "point"){
+            selectedIndex = 0;
+          }else if (choice == "spotlight"){
+            selectedIndex = 1;
+          }else if (choice == "directional"){
+            selectedIndex = 2;
+          }
+        },
+        .getSelectedIndex = []() -> int { 
+          return selectedIndex; 
+        },
+      },
       DockTextboxConfig {
         .text = "some text here",
       }
@@ -96,14 +122,11 @@ DockConfiguration* dockConfigByName(std::string name){
       return &config;
     }
   }
-  return &configurations.at(0);
+  return NULL;
+  //return &configurations.at(0);
 }
 
 
-int value = 2;
-std::function<void()> defaultOnClick = [value]() -> void {
-  std::cout << "hello world on click from button" << value << std::endl;
-};
 
 Component genericDockComponent {
   .draw = [](DrawingTools& drawTools, Props& props){
@@ -130,13 +153,18 @@ Component genericDockComponent {
       if (dockOptions){
         std::vector<Option> optionsData = {};
         for (auto &option : dockOptions -> options){
+          auto onClick = dockOptions -> onClick;
           optionsData.push_back(Option {
             .name = option,
-            .onClick = nullClick,
+            .onClick = [onClick, option]() -> void {
+              std::string optionStr(option);
+              onClick(optionStr);
+            },
           });
         }
         Options defaultOptions {
           .options = optionsData,
+          .selectedIndex = dockOptions -> getSelectedIndex(),
         };
         Props optionsProps {
           .props = {
@@ -222,11 +250,11 @@ Component genericDockComponent {
 Component dockComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::vector<Component> elements;
-    auto strValue = strFromProp(props, titleSymbol, "Dock Thing");
+    auto dock = strFromProp(props, dockTypeSymbol, "");
 
     Props dockProps {
       .props = {
-        PropPair { .symbol = dockTypeSymbol, .value = strValue },
+        PropPair { .symbol = dockTypeSymbol, .value = dock },
       }
     };
     elements.push_back(withProps(genericDockComponent, dockProps));

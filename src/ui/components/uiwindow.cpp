@@ -36,11 +36,8 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
 
       auto boundingBox = simpleVerticalLayout(allComponents, glm::vec2(0.f, 0.f), alignment).draw(drawTools, props);
       drawWindowX(drawTools, boundingBox, onClickX);
-      
 
-      std::cout << "symbol is: " << nameForSymbol(symbol) << std::endl;
       auto oldCoords = windowGetPreDragOffset(symbol);
-
       BoundingBox2D copyBoundingBox = boundingBox;
       copyBoundingBox.x = oldCoords.x;
       copyBoundingBox.y = oldCoords.y;

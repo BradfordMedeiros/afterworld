@@ -16,6 +16,8 @@ Props optionsProps(Options& options){
       //PropPair { .symbol = yoffsetSymbol,   .value = 0.98f },
       PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 1.f) },
       PropPair { .symbol = horizontalSymbol,   .value = true },
+      PropPair { .symbol = selectedSymbol, options.selectedIndex },
+
       //PropPair { .symbol = paddingSymbol,      .value = 0.02f },
     },
   };

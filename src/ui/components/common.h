@@ -146,6 +146,7 @@ extern const int color;
 extern const int onWindowDragSymbol;
 extern const int onSlideSymbol;
 extern const int enableSymbol;
-
+extern const int dockTypeSymbol;
+extern const int selectedSymbol;
 
 #endif

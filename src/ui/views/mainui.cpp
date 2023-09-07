@@ -87,7 +87,7 @@ std::string dockedDock = "";
 std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   //pushQueryParam(routerHistory, "dockedDock");
   dockedDock = value;
-  std::cout << "navbar new dock: " << dockedDock << std::endl;
+  modlog("dock", std::string("new dock: ") + dockedDock);
 };
 
 
@@ -191,7 +191,9 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   if (dockedDock != ""){
     Props dockProps { 
       .props = {
+        { dockTypeSymbol, dockedDock }, 
         { xoffsetFromSymbol, 1.5f },
+        
       }
     };
 

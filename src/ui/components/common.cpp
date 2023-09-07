@@ -414,3 +414,5 @@ const int color = getSymbol("color");
 const int onWindowDragSymbol = getSymbol("on-window-drag");
 const int onSlideSymbol = getSymbol("on-slide");
 const int enableSymbol = getSymbol("enable");
+const int dockTypeSymbol = getSymbol("dock-type");
+const int selectedSymbol = getSymbol("selected");

@@ -1,7 +1,7 @@
 #include "./list.h"
 
 
-Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth){
+Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, int selectedIndex){
   std::vector<Component> elements;
   for (int i = 0 ; i < listItems.size(); i++){
     ListComponentData& listItemData = listItems.at(i);
@@ -11,6 +11,7 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
         PropPair { .symbol = valueSymbol, .value = listItemData.name },
         PropPair { .symbol = onclickSymbol, .value = onClick },
         PropPair { .symbol = tintSymbol, .value = tint },
+        PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f) },
       },
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
@@ -47,6 +48,7 @@ Component listComponent {
     }
 
     auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+    auto selectedIndex = intFromProp(props, selectedSymbol, -1);
 
     auto flowHorizontalProp = typeFromProps<UILayoutFlowType2>(props, flowHorizontal);
     auto flowHorizontalValue = UILayoutFlowNone2;
@@ -56,7 +58,7 @@ Component listComponent {
 
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
 
-    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth);
+    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, selectedIndex);
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },
