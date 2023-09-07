@@ -22,6 +22,8 @@ struct DockSliderConfig {
 };
 struct DockCheckboxConfig {
   std::string label;
+  std::function<bool()> isChecked;
+  std::function<void(bool)> onChecked;
 };
 struct DockTextboxConfig {
   std::string text;
@@ -49,6 +51,7 @@ DockConfigApi dockConfig {
 
 
 int selectedIndex = 0;
+bool checkboxChecked = true;
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -83,6 +86,11 @@ std::vector<DockConfiguration> configurations {
       },
       DockCheckboxConfig {
         .label = "toggle dof",
+        .isChecked = []() -> bool { return checkboxChecked; },
+        .onChecked = [](bool checked) -> void {
+          std::cout << "dock toggledof: " << checked << std::endl;
+          checkboxChecked = checked;
+        },
       },
     },
   },
@@ -197,7 +205,8 @@ Component genericDockComponent {
         Props checkboxProps {
           .props = {
             PropPair { .symbol = valueSymbol, .value = checkboxOptions -> label },
-            PropPair { .symbol = checkedSymbol, .value = false },
+            PropPair { .symbol = checkedSymbol, .value = checkboxOptions -> isChecked() },
+            PropPair { .symbol = onclickSymbol, .value = checkboxOptions -> onChecked },
           },
         };
         auto checkboxWithProps = withPropsCopy(checkbox, checkboxProps);
