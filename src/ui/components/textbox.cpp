@@ -21,6 +21,7 @@ Component textbox {
     auto tint = vec4FromProp(props, tintSymbol, isEditable ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 0.f, 1.f));
     auto color = vec4FromProp(props, colorSymbol, isEditable ? glm::vec4(0.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f));
 
+    auto onClick = fnFromProp(props, onclickSymbol);
 
 
     auto textValue = isEditable ? textData -> valueText : strValue;
@@ -36,6 +37,10 @@ Component textbox {
         PropPair { .symbol = colorSymbol, .value = color },
       },
     };
+
+    if (onClick.has_value()){
+      listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClick.value() });
+    }
 
   	return listItem.draw(drawTools, listItemProps);
   },

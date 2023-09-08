@@ -5,14 +5,15 @@ extern CustomApiBindings* gameapi;
 
 const int windowColorPickerSymbol = getSymbol("window-symbol-colorpicker");
 const int windowDockSymbol = getSymbol("window-symbol-dock");
+const int windowFileExplorerSymbol = getSymbol("window-fileexplorer");
 
 std::map<int, WindowData> windowData = {
   { windowColorPickerSymbol, WindowData {
     .windowOffset = glm::vec2(0.f, 0.f),
     .initialDragPos = std::nullopt,
-    .enable = true,
+    .enable = false,
     .horizontal = true,
-    .vertical = true,
+    .vertical = false,
   }},
   { windowDockSymbol, WindowData {
     .windowOffset = glm::vec2(1.f, 0.88f),
@@ -21,7 +22,13 @@ std::map<int, WindowData> windowData = {
     .horizontal = true,
     .vertical = false,
   }},
-
+  { windowFileExplorerSymbol, WindowData {
+    .windowOffset = glm::vec2(0.f, 0.f),
+    .initialDragPos = std::nullopt,
+    .enable = true,
+    .horizontal = true,
+    .vertical = true,
+  }},
 };
 
 bool windowEnabled(int symbol){
@@ -66,3 +73,4 @@ glm::vec2 windowGetOffset(int symbol){
   float y = window.vertical  ?  windowOffset.y + draggedOffset.y : windowOffset.y;
   return glm::vec2(x, y);
 }
+

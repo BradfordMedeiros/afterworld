@@ -102,73 +102,6 @@ std::function<void()> xFileExplorerCallbackFn = []() -> void {
 };
 
 
-struct FileNavigator {
-  std::filesystem::path path;
-};
-
-FileNavigator createFileNavigator(){
-  auto path = std::filesystem::path(".");
-  auto navigator = FileNavigator{
-    .path = path,
-  };
-  return navigator;
-}
-void navigateDir(FileNavigator& navigator, std::string directory){
-  auto path = std::filesystem::weakly_canonical(std::filesystem::path(std::filesystem::absolute(directory)));
-  navigator.path = path;
-  modlog("navigator", std::string("current path: ") +  std::string(std::filesystem::absolute(navigator.path)));
-}
-std::vector<std::string> getCurrentNavigatorPath(FileNavigator& navigator){
-  std::string resourcePath = std::filesystem::absolute(navigator.path);
-  auto currentPath = split(resourcePath, '/');
-  modlog("current path: ", print(currentPath));
-  modassert(currentPath.size() > 0, "current path must be > 0");
-  return currentPath;
-}
-std::vector<FileContent> listCurrentContents(FileNavigator& navigator){
-  std::vector<FileContent> files;
-  for(auto &file: std::filesystem::directory_iterator(navigator.path)) {
-    if (!std::filesystem::is_directory(file)) {
-      files.push_back(FileContent {
-        .type = File,
-        .content = std::filesystem::path(file.path()).filename(),
-      });
-    }else{
-      files.push_back(FileContent {
-        .type = Directory,
-        .content = std::filesystem::path(file.path()).filename(),
-      });
-    }
-  }
-  if (files.size() == 0){
-    files.push_back(FileContent{
-      .type = NoContent,
-      .content = "[empty directory]",
-    });
-  }
-
-  modassert(files.size() > 0, "no files for contents");
-  return files;
-}
-
-FileNavigator navigator = createFileNavigator();
-
-FileExplorer testExplorer {
-  .contentOffset = 0,
-  .currentPath = getCurrentNavigatorPath(navigator),
-  .currentContents  = listCurrentContents(navigator),
-  .explorerOnChange = [](FileContentType type, std::string file) -> void {
-    if (type == File){
-      std::cout << "navigator explorer on change - file: " << file << std::endl;
-    }else if (type == Directory){
-      std::cout << "navigator explorer on change - directory: " << file << std::endl;
-      navigateDir(navigator, file);
-      testExplorer.currentContents = listCurrentContents(navigator);
-      testExplorer.currentPath = getCurrentNavigatorPath(navigator);
-    }
-  }
-};
-
 bool showColorPicker = true;
 std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
@@ -193,10 +126,8 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
       .props = {
         { dockTypeSymbol, dockedDock }, 
         { xoffsetFromSymbol, 1.5f },
-        
       }
     };
-
     auto dock = withProps(dockComponent, dockProps);
     auto defaultWindowProps = getDefaultProps();
     createUiWindow(dock, windowDockSymbol, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }).draw(drawTools, defaultWindowProps);
@@ -231,17 +162,17 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     dialogComponent.draw(drawTools, dialogProps);
   }
 
-  if (fileexplorer != ""){
+  if (fileexplorer != "dafsd"){
     Props filexplorerProps {
       .props = {
-        PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
-        PropPair { .symbol = titleSymbol, .value = std::string("File Explorer") },
-        PropPair { .symbol = onclickSymbol, .value = xFileExplorerCallbackFn },
         PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
-        // on choose file std::function<void(std::string, type (dir or file)>
       },
     };
-    fileexplorerComponent.draw(drawTools, filexplorerProps);
+
+    auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);
+    auto fileExplorerWindow = createUiWindow(fileExplorer, windowFileExplorerSymbol, "File Explorer");
+    auto defaultWindowProps = getDefaultProps();
+    fileExplorerWindow.draw(drawTools, defaultWindowProps);
   }
 
 

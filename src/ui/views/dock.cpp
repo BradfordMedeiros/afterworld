@@ -1,5 +1,8 @@
 #include "./dock.h"
 
+extern CustomApiBindings* gameapi;
+
+
 enum DockFieldType {
   DOCK_BUTTON,
   DOCK_OPTION,
@@ -32,25 +35,30 @@ struct DockTextboxConfig {
   std::function<void(std::string)> onEdit;
 };
 
-typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig> DockConfig;
+struct DockFileConfig {
+  std::string label;
+};
+
+typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig> DockConfig;
 
 struct DockConfiguration {
   std::string title;
   std::vector<DockConfig> configFields;
 };
 
-struct DockConfigApi {
-  std::function<void()> createCamera;
-  std::function<void()> createLight;
-};
 
-DockConfigApi dockConfig {
+DockConfigApi dockConfigApi {
   .createCamera = []() -> void {
     modlog("dock", "mock make camera");
   },
   .createLight = []() -> void {
     modlog("dock", "mock make light");
   },
+  .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
+    gameapi -> schedule(-1, 10000, NULL, [onFileAdded](void* data) -> void {
+      onFileAdded(false, "./res/textures/wood.jpg");
+    });
+  }
 };
 
 
@@ -75,7 +83,7 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Camera",
-        .onClick = dockConfig.createCamera,
+        .onClick = dockConfigApi.createCamera,
       },
       DockOptionConfig {
         .options = { "enable dof", "disable dof" },
@@ -158,7 +166,7 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Light",
-        .onClick = dockConfig.createLight,
+        .onClick = dockConfigApi.createLight,
       },
       DockOptionConfig {
         .options = { "point", "spotlight", "directional" },
@@ -183,7 +191,10 @@ std::vector<DockConfiguration> configurations {
         .onEdit = [](std::string value) -> void {
 
         }
-      }
+      },
+      DockFileConfig {
+        .label = "somefile-here",
+      },
     },
   },
 };
@@ -197,7 +208,6 @@ DockConfiguration* dockConfigByName(std::string name){
   return NULL;
   //return &configurations.at(0);
 }
-
 
 Component genericDockComponent {
   .draw = [](DrawingTools& drawTools, Props& props){
@@ -262,6 +272,7 @@ Component genericDockComponent {
         };
         auto sliderWithProps = withPropsCopy(slider, sliderProps); 
         elements.push_back(sliderWithProps);
+        continue;
       }
 
       auto checkboxOptions = std::get_if<DockCheckboxConfig>(&config);
@@ -275,6 +286,7 @@ Component genericDockComponent {
         };
         auto checkboxWithProps = withPropsCopy(checkbox, checkboxProps);
         elements.push_back(checkboxWithProps);
+        continue;
       }
 
       auto textboxOptions = std::get_if<DockTextboxConfig>(&config);
@@ -287,7 +299,29 @@ Component genericDockComponent {
         };
         auto textboxWithProps = withPropsCopy(textbox, textboxProps);
         elements.push_back(textboxWithProps);
+        continue;
       }
+
+      auto fileconfigOptions = std::get_if<DockFileConfig>(&config);
+      if (fileconfigOptions){
+        std::function<void()> onClick =  []() -> void {
+          dockConfigApi.openFilePicker([](bool justClosed, std::string file) -> void {
+            std::cout << "open file picker dialog mock: " << justClosed << ", file = " << file << std::endl;
+          });
+        };
+        Props textboxProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = std::string("file config placeholder") },
+            PropPair { .symbol = onclickSymbol, .value = onClick },
+          }
+        };
+        auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+        elements.push_back(textboxWithProps); 
+        continue;
+      }
+
+      modassert(false, "dock slider component not yet implemented");
+
     }
 
     Layout layout {

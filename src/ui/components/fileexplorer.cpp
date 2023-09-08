@@ -4,29 +4,30 @@ const int fileExplorerSymbol = getSymbol("file-explorer");
 
 typedef std::function<void(std::string)> ExplorerNavigation;
 
+std::vector<ListComponentData> fileExplorerOptions = {
+  ListComponentData {
+    .name = "confirm",
+    .onClick = []() -> void {
+      std::cout << "dialog confirm on click" << std::endl;
+    },      
+  },
+  ListComponentData {
+    .name = "quit",
+    .onClick = []() -> void {
+      std::cout << "dialog on quit" << std::endl;
+      exit(1);
+    },      
+  },
+};
+
+
 Component fileexplorerComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     auto fileExplorer = typeFromProps<FileExplorer>(props, fileExplorerSymbol);
     modassert(fileExplorer, "fileexplorer must be defined for dialog");
-
-    auto listItemPtr = typeFromProps<std::vector<ListComponentData>>(props, listItemsSymbol);
-    modassert(listItemPtr, "invalid listItems prop");
  
-    auto listItems = *listItemPtr;
-
-
     std::vector<Component> elements;
-
-    auto titleValue = strFromProp(props, titleSymbol, "title placeholder");
-    auto titleTextbox = withPropsCopy(textbox, Props {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = titleValue },
-      }
-    });
-    elements.push_back(titleTextbox);
-
     auto onChange = fileExplorer -> explorerOnChange;
-
     // current path
     { 
       std::vector<Component> pathElements;
@@ -100,8 +101,8 @@ Component fileexplorerComponent {
 
     {
       std::vector<Component> choiceElements;
-      for (int i = 0 ; i < listItems.size(); i++){
-        ListComponentData& listItemData = listItems.at(i);
+      for (int i = 0 ; i < fileExplorerOptions.size(); i++){
+        ListComponentData& listItemData = fileExplorerOptions.at(i);
         auto onClick = listItemData.onClick.has_value() ? listItemData.onClick.value() : []() -> void {};
         Props listItemProps {
           .props = {
@@ -118,12 +119,74 @@ Component fileexplorerComponent {
     }
     /////////////////////////
 
-    auto boundingBox = simpleVerticalLayout(elements).draw(drawTools, props);
-    auto onClickX = fnFromProp(props, onclickSymbol);
-    if (onClickX.has_value()){
-      drawWindowX(drawTools, boundingBox, onClickX.value());
-    }
-    return boundingBox;
+    return simpleVerticalLayout(elements).draw(drawTools, props);
   },
 };
 
+
+struct FileNavigator {
+  std::filesystem::path path;
+};
+
+FileNavigator createFileNavigator(){
+  auto path = std::filesystem::path(".");
+  auto navigator = FileNavigator{
+    .path = path,
+  };
+  return navigator;
+}
+void navigateDir(FileNavigator& navigator, std::string directory){
+  auto path = std::filesystem::weakly_canonical(std::filesystem::path(std::filesystem::absolute(directory)));
+  navigator.path = path;
+  modlog("navigator", std::string("current path: ") +  std::string(std::filesystem::absolute(navigator.path)));
+}
+std::vector<std::string> getCurrentNavigatorPath(FileNavigator& navigator){
+  std::string resourcePath = std::filesystem::absolute(navigator.path);
+  auto currentPath = split(resourcePath, '/');
+  modlog("current path: ", print(currentPath));
+  modassert(currentPath.size() > 0, "current path must be > 0");
+  return currentPath;
+}
+std::vector<FileContent> listCurrentContents(FileNavigator& navigator){
+  std::vector<FileContent> files;
+  for(auto &file: std::filesystem::directory_iterator(navigator.path)) {
+    if (!std::filesystem::is_directory(file)) {
+      files.push_back(FileContent {
+        .type = File,
+        .content = std::filesystem::path(file.path()).filename(),
+      });
+    }else{
+      files.push_back(FileContent {
+        .type = Directory,
+        .content = std::filesystem::path(file.path()).filename(),
+      });
+    }
+  }
+  if (files.size() == 0){
+    files.push_back(FileContent{
+      .type = NoContent,
+      .content = "[empty directory]",
+    });
+  }
+
+  modassert(files.size() > 0, "no files for contents");
+  return files;
+}
+
+FileNavigator navigator = createFileNavigator();
+
+FileExplorer testExplorer {
+  .contentOffset = 0,
+  .currentPath = getCurrentNavigatorPath(navigator),
+  .currentContents  = listCurrentContents(navigator),
+  .explorerOnChange = [](FileContentType type, std::string file) -> void {
+    if (type == File){
+      std::cout << "navigator explorer on change - file: " << file << std::endl;
+    }else if (type == Directory){
+      std::cout << "navigator explorer on change - directory: " << file << std::endl;
+      navigateDir(navigator, file);
+      testExplorer.currentContents = listCurrentContents(navigator);
+      testExplorer.currentPath = getCurrentNavigatorPath(navigator);
+    }
+  }
+};

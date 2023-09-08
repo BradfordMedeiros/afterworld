@@ -19,8 +19,8 @@ struct FileExplorer {
 };
 
 extern Component fileexplorerComponent;
-
 extern const int fileExplorerSymbol;
+extern FileExplorer testExplorer;
 
 #endif
 
