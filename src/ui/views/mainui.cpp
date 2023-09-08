@@ -96,9 +96,8 @@ std::function<void()> xCallbackFn = []() -> void {
   dialog = "";
 };
 
-std::string fileexplorer = "";
 std::function<void()> xFileExplorerCallbackFn = []() -> void {
-  fileexplorer = "";
+  windowSetEnabled(windowFileExplorerSymbol, false);
 };
 
 
@@ -106,6 +105,21 @@ bool showColorPicker = true;
 std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
   *activeColor = value;
+};
+
+DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
+  .createCamera = []() -> void {
+    modlog("dock", "mock make camera");
+  },
+  .createLight = []() -> void {
+    modlog("dock", "mock make light");
+  },
+  .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
+    windowSetEnabled(windowFileExplorerSymbol, true);
+    gameapi -> schedule(-1, 10000, NULL, [onFileAdded](void* data) -> void {
+      onFileAdded(false, "./res/textures/wood.jpg");
+    });
+  }
 };
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
@@ -162,13 +176,12 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     dialogComponent.draw(drawTools, dialogProps);
   }
 
-  if (fileexplorer != "dafsd"){
+  {
     Props filexplorerProps {
       .props = {
         PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
       },
     };
-
     auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);
     auto fileExplorerWindow = createUiWindow(fileExplorer, windowFileExplorerSymbol, "File Explorer");
     auto defaultWindowProps = getDefaultProps();

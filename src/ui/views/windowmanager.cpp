@@ -25,7 +25,7 @@ std::map<int, WindowData> windowData = {
   { windowFileExplorerSymbol, WindowData {
     .windowOffset = glm::vec2(0.f, 0.f),
     .initialDragPos = std::nullopt,
-    .enable = true,
+    .enable = false,
     .horizontal = true,
     .vertical = true,
   }},

@@ -47,19 +47,7 @@ struct DockConfiguration {
 };
 
 
-DockConfigApi dockConfigApi {
-  .createCamera = []() -> void {
-    modlog("dock", "mock make camera");
-  },
-  .createLight = []() -> void {
-    modlog("dock", "mock make light");
-  },
-  .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
-    gameapi -> schedule(-1, 10000, NULL, [onFileAdded](void* data) -> void {
-      onFileAdded(false, "./res/textures/wood.jpg");
-    });
-  }
-};
+extern DockConfigApi dockConfigApi;
 
 
 int selectedIndex = 0;
@@ -304,14 +292,17 @@ Component genericDockComponent {
 
       auto fileconfigOptions = std::get_if<DockFileConfig>(&config);
       if (fileconfigOptions){
-        std::function<void()> onClick =  []() -> void {
-          dockConfigApi.openFilePicker([](bool justClosed, std::string file) -> void {
+        std::function<void()> onClick =  [fileconfigOptions]() -> void {
+          dockConfigApi.openFilePicker([fileconfigOptions](bool justClosed, std::string file) -> void {
             std::cout << "open file picker dialog mock: " << justClosed << ", file = " << file << std::endl;
+            if (!justClosed){
+              fileconfigOptions -> label = file;
+            }
           });
         };
         Props textboxProps {
           .props = {
-            PropPair { .symbol = valueSymbol, .value = std::string("file config placeholder") },
+            PropPair { .symbol = valueSymbol, .value = fileconfigOptions -> label },
             PropPair { .symbol = onclickSymbol, .value = onClick },
           }
         };
