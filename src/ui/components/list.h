@@ -11,5 +11,7 @@ struct ListComponentData {
 };
 extern Component listComponent;
 
+Component wrapWithLabel(Component& innerComponent);
+
 
 #endif

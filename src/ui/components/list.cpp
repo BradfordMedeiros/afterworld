@@ -69,3 +69,31 @@ Component listComponent {
     return listBoundingBox;
   },
 };
+
+
+Component wrapWithLabel(Component& innerComponent){
+  Component wrappedComponent {
+    .draw = [&innerComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      auto innerCheckbox = withProps(innerComponent, props);
+      Props childProps {
+        .props = {},
+      };
+      auto strValue = strFromProp(props, valueSymbol, "untitled");
+      std::function<void()> onClickTest = []() -> void {};
+      Props listItemProps {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = strValue },
+          PropPair { .symbol = onclickSymbol, .value = onClickTest },
+          PropPair { .symbol = paddingSymbol, .value = 0.025f },
+        },
+      };
+      auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+      std::vector<Component> components;
+      components.push_back(listItemWithProps);
+      components.push_back(innerCheckbox);
+      auto layout = simpleHorizontalLayout(components);
+      return layout.draw(drawTools, childProps);
+    },
+  };
+  return wrappedComponent;
+}

@@ -35,29 +35,5 @@ Component checkboxInner {
   },
 };
 
-
-Component checkbox {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    std::vector<Component> components;
-    auto strValue = strFromProp(props, valueSymbol, "default checkbox");
-
-    auto innerCheckbox = withProps(checkboxInner, props);
-    Props childProps {
-      .props = {},
-    };
-    std::function<void()> onClickTest = []() -> void {};
-    Props listItemProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = strValue },
-        PropPair { .symbol = onclickSymbol, .value = onClickTest },
-        PropPair { .symbol = paddingSymbol, .value = 0.025f },
-      },
-    };
-    auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-    components.push_back(listItemWithProps);
-    components.push_back(innerCheckbox);
-    auto layout = simpleHorizontalLayout(components);
-    return layout.draw(drawTools, childProps);
-  },
-};
+Component checkbox = wrapWithLabel(checkboxInner);
 

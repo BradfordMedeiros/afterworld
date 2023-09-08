@@ -18,7 +18,9 @@ struct DockOptionConfig {
   std::function<int(void)> getSelectedIndex;
 };
 struct DockSliderConfig {
-
+  std::string label;
+  std::function<float()> percentage;
+  std::function<void(float)> onSlide;
 };
 struct DockCheckboxConfig {
   std::string label;
@@ -26,8 +28,10 @@ struct DockCheckboxConfig {
   std::function<void(bool)> onChecked;
 };
 struct DockTextboxConfig {
-  std::string text;
+  std::function<std::string(void)> text;
+  std::function<void(std::string)> onEdit;
 };
+
 typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig> DockConfig;
 
 struct DockConfiguration {
@@ -52,6 +56,10 @@ DockConfigApi dockConfig {
 
 int selectedIndex = 0;
 bool checkboxChecked = true;
+float minValuePercentage = 0.f;
+float maxValuePercentage = 0.f;
+float blurPercentage = 0.5f;
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -81,15 +89,66 @@ std::vector<DockConfiguration> configurations {
         },
         .getSelectedIndex = []() -> int { return selectedIndex; },
       },
-      DockSliderConfig {
-
-      },
       DockCheckboxConfig {
         .label = "toggle dof",
         .isChecked = []() -> bool { return checkboxChecked; },
         .onChecked = [](bool checked) -> void {
           std::cout << "dock toggledof: " << checked << std::endl;
           checkboxChecked = checked;
+        },
+      },
+      
+/*
+      [ 
+        "type" => "slider", 
+        "name" => "min blur", 
+        "value" => [ 
+          "binding" => "gameobj:minblur", 
+          "min" => -100,  // what should min and max really be?d
+          "max" => 100,
+        ]
+      ],
+      [ 
+        "type" => "slider", 
+        "name" => "maxblur", 
+        "value" => [ 
+          "binding" => "gameobj:maxblur", 
+          "min" => -100,
+          "max" => 100,
+        ]
+      ],
+      [ 
+        "type" => "slider", 
+        "name" => "amount", 
+        "value" => [ 
+          "binding" => "gameobj:bluramount", 
+          "min" => 0,
+          "max" => 100,
+        ]
+      ]
+      */
+      DockSliderConfig {
+        .label = "blur min",
+        .percentage = []() -> float { return minValuePercentage; },
+        .onSlide = [](float value) -> void {
+          std::cout << "dock slider on slide min: " << value << std::endl;
+          minValuePercentage = value;
+        },
+      },
+      DockSliderConfig {
+        .label = "blur max",
+        .percentage = []() -> float { return maxValuePercentage; },
+        .onSlide = [](float value) -> void {
+          std::cout << "dock slider on slide max: " << value << std::endl;
+          maxValuePercentage = value;
+        },
+      },
+      DockSliderConfig {
+        .label = "blur amount",
+        .percentage = []() -> float { return blurPercentage; },
+        .onSlide = [](float value) -> void {
+          std::cout << "dock slider on slide blur: " << value << std::endl;
+          blurPercentage = value;
         },
       },
     },
@@ -118,7 +177,12 @@ std::vector<DockConfiguration> configurations {
         },
       },
       DockTextboxConfig {
-        .text = "some text here",
+        .text = []() -> std::string {
+          return "some text here"; 
+        },
+        .onEdit = [](std::string value) -> void {
+
+        }
       }
     },
   },
@@ -133,7 +197,6 @@ DockConfiguration* dockConfigByName(std::string name){
   return NULL;
   //return &configurations.at(0);
 }
-
 
 
 Component genericDockComponent {
@@ -187,15 +250,16 @@ Component genericDockComponent {
       if (sliderOptions){
         Slider sliderData {
           .min = 0.f,
-          .max = 10.f,
-          .percentage = 0.5f,
+          .max = 1.f,
+          .percentage = sliderOptions -> percentage(),
+          .onSlide = sliderOptions -> onSlide,
         };
         Props sliderProps {
           .props = {
+            PropPair { .symbol = valueSymbol, .value = sliderOptions -> label },
             PropPair { .symbol = sliderSymbol, .value = sliderData },
           },
         };
-    
         auto sliderWithProps = withPropsCopy(slider, sliderProps); 
         elements.push_back(sliderWithProps);
       }
@@ -217,7 +281,7 @@ Component genericDockComponent {
       if (textboxOptions){
         Props textboxProps {
           .props = {
-            PropPair { .symbol = valueSymbol, .value = textboxOptions -> text },
+            PropPair { .symbol = valueSymbol, .value = textboxOptions -> text() },
             PropPair { .symbol = editableSymbol, .value = true },
           }
         };

@@ -3,6 +3,7 @@
 
 #include "./common.h"
 #include "../../global.h"
+#include "./list.h"
 
 struct Slider {
   float min;

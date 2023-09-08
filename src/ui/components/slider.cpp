@@ -5,7 +5,7 @@ void drawRight(DrawingTools& drawTools, float x, float y, float width, float hei
 }
 
 
-Component slider  {
+Component sliderInner  {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
@@ -39,4 +39,5 @@ Component slider  {
   },
 };
  
+Component slider = wrapWithLabel(sliderInner);
 

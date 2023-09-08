@@ -1,7 +1,7 @@
 #include "./colorpicker.h"
 
 
-Component createRgbSlider(float percentage, std::function<void(float)> onSlide){
+Component createRgbSlider(std::string label, float percentage, std::function<void(float)> onSlide){
   Slider sliderData {
     .min = 0.f,
     .max = 10.f,
@@ -10,6 +10,7 @@ Component createRgbSlider(float percentage, std::function<void(float)> onSlide){
   };
   Props sliderProps {
     .props = {
+      PropPair { .symbol = valueSymbol, .value = label },
       PropPair { .symbol = sliderSymbol, .value = sliderData },
     },
   };
@@ -39,22 +40,22 @@ Component colorPickerComponent {
     auto onSlide = *onSlidePtr;
 
     std::vector<Component> elements;
-    elements.push_back(createRgbSlider(activeColor.r, [activeColor, onSlide](float r) -> void { 
+    elements.push_back(createRgbSlider("red", activeColor.r, [activeColor, onSlide](float r) -> void { 
       glm::vec4 newColor = activeColor;
       newColor.r = r;
       onSlide(newColor);
     }));
-    elements.push_back(createRgbSlider(activeColor.g, [activeColor, onSlide](float g) -> void { 
+    elements.push_back(createRgbSlider("green", activeColor.g, [activeColor, onSlide](float g) -> void { 
       glm::vec4 newColor = activeColor;
       newColor.g = g;
       onSlide(newColor);
     }));
-    elements.push_back(createRgbSlider(activeColor.b, [activeColor, onSlide](float b) -> void { 
+    elements.push_back(createRgbSlider("blue", activeColor.b, [activeColor, onSlide](float b) -> void { 
       glm::vec4 newColor = activeColor;
       newColor.b = b;
       onSlide(newColor);
     }));
-    elements.push_back(createRgbSlider(activeColor.a, [activeColor, onSlide](float a) -> void { 
+    elements.push_back(createRgbSlider("alpha", activeColor.a, [activeColor, onSlide](float a) -> void { 
       glm::vec4 newColor = activeColor;
       newColor.a = a;
       onSlide(newColor);
