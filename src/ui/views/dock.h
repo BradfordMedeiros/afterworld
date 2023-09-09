@@ -15,6 +15,7 @@ struct DockConfigApi {
   std::function<void()> createCamera;
   std::function<void()> createLight;
   std::function<void(std::function<void(bool, std::string)>)> openFilePicker;
+  std::function<void(std::function<void(bool, std::string)>)> openImagePicker;
 };
 
 #endif

@@ -88,6 +88,11 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   //pushQueryParam(routerHistory, "dockedDock");
   dockedDock = value;
   modlog("dock", std::string("new dock: ") + dockedDock);
+  if (dockedDock == ""){
+    windowSetEnabled(windowDockSymbol, false);
+  }else{
+    windowSetEnabled(windowDockSymbol, true);
+  }
 };
 
 
@@ -107,6 +112,11 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   *activeColor = value;
 };
 
+std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedDefaultFn = [](bool closedWithoutNewFile, std::string file) -> void {
+  modlog("dock", "on file added default");
+};
+std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedFn = onFileAddedDefaultFn;
+
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
     modlog("dock", "mock make camera");
@@ -116,9 +126,19 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
-    gameapi -> schedule(-1, 10000, NULL, [onFileAdded](void* data) -> void {
-      onFileAdded(false, "./res/textures/wood.jpg");
-    });
+    onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+      onFileAdded(closedWithoutNewFile, file);
+      onFileAddedFn = onFileAddedDefaultFn;
+      windowSetEnabled(windowFileExplorerSymbol, false);
+    };
+  },
+  .openImagePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
+    windowSetEnabled(windowFileExplorerSymbol, true);
+    onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+      onFileAdded(closedWithoutNewFile, file);
+      onFileAddedFn = onFileAddedDefaultFn;
+      windowSetEnabled(windowFileExplorerSymbol, false);
+    };
   }
 };
 
@@ -177,9 +197,16 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   }
 
   {
+    FileCallback onFileSelect = [](FileContentType type, std::string file) -> void {
+      modassert(type == File, "on file select gave something not a file");
+      modlog("dock - file select", std::string(type == Directory ? "dir" : "file") + " " + file);
+      onFileAddedFn(false, file);
+    };
+
     Props filexplorerProps {
       .props = {
         PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
+        PropPair { .symbol = fileChangeSymbol, .value = onFileSelect }
       },
     };
     auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);

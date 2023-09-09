@@ -39,7 +39,11 @@ struct DockFileConfig {
   std::string label;
 };
 
-typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig> DockConfig;
+struct DockImageConfig {
+  std::string label;
+};
+
+typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig> DockConfig;
 
 struct DockConfiguration {
   std::string title;
@@ -183,6 +187,9 @@ std::vector<DockConfiguration> configurations {
       DockFileConfig {
         .label = "somefile-here",
       },
+      DockImageConfig {
+        .label =  "someimage-here",
+      }
     },
   },
 };
@@ -310,6 +317,28 @@ Component genericDockComponent {
         elements.push_back(textboxWithProps); 
         continue;
       }
+
+      auto imageConfigOptions = std::get_if<DockImageConfig>(&config);
+      if (imageConfigOptions){
+        std::function<void()> onClick =  [imageConfigOptions]() -> void {
+          dockConfigApi.openImagePicker([imageConfigOptions](bool justClosed, std::string image) -> void {
+            std::cout << "open image picker dialog mock: " << justClosed << ", file = " << image << std::endl;
+            if (!justClosed){
+              imageConfigOptions -> label = image;
+            }
+          });
+        };
+        Props textboxProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = imageConfigOptions -> label },
+            PropPair { .symbol = onclickSymbol, .value = onClick },
+          }
+        };
+        auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+        elements.push_back(textboxWithProps); 
+        continue;
+      }
+
 
       modassert(false, "dock slider component not yet implemented");
 

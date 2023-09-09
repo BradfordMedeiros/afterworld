@@ -1,6 +1,7 @@
 #include "./fileexplorer.h"
 
 const int fileExplorerSymbol = getSymbol("file-explorer");
+const int fileChangeSymbol = getSymbol("file-change");
 
 typedef std::function<void(std::string)> ExplorerNavigation;
 
@@ -26,6 +27,10 @@ Component fileexplorerComponent {
     auto fileExplorer = typeFromProps<FileExplorer>(props, fileExplorerSymbol);
     modassert(fileExplorer, "fileexplorer must be defined for dialog");
  
+    auto customFileCallbackPtr = typeFromProps<FileCallback>(props, fileChangeSymbol);
+    modassert(customFileCallbackPtr, "fileexplorer no custom file callback defined");
+    auto customFileCallback = *customFileCallbackPtr;
+
     std::vector<Component> elements;
     auto onChange = fileExplorer -> explorerOnChange;
     // current path
@@ -72,10 +77,14 @@ Component fileexplorerComponent {
         if (value.type == Directory){
           clickedPath += "/";
         }
-        std::function<void()> onClick = [clickedPath, onChange, type]() -> void {
+        std::function<void()> onClick = [clickedPath, onChange, type, customFileCallback]() -> void {
           std::cout << "on click: " <<  clickedPath << std::endl;
           onChange(type, clickedPath);
+          if (type != Directory){
+            customFileCallback(type, clickedPath);
+          }
         };
+
         Props listItemProps {
           .props = {
             PropPair { .symbol = valueSymbol, .value = (value.type == Directory ? std::string("[D] " + value.content) : value.content) },

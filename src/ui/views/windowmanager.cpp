@@ -18,7 +18,7 @@ std::map<int, WindowData> windowData = {
   { windowDockSymbol, WindowData {
     .windowOffset = glm::vec2(1.f, 0.88f),
     .initialDragPos = std::nullopt,
-    .enable = true,
+    .enable = false,
     .horizontal = true,
     .vertical = false,
   }},

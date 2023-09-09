@@ -11,15 +11,19 @@ struct FileContent {
   FileContentType type;
   std::string content;
 };
+
+typedef std::function<void(FileContentType type, std::string file)> FileCallback;
 struct FileExplorer {
   int contentOffset;
   std::vector<std::string> currentPath;
   std::vector<FileContent> currentContents;
-  std::function<void(FileContentType type, std::string)> explorerOnChange;
+  FileCallback explorerOnChange;
 };
 
 extern Component fileexplorerComponent;
 extern const int fileExplorerSymbol;
+extern const int fileChangeSymbol;
+
 extern FileExplorer testExplorer;
 
 #endif
