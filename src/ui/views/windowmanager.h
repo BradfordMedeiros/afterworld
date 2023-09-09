@@ -7,6 +7,7 @@
 extern const int windowColorPickerSymbol;
 extern const int windowDockSymbol;
 extern const int windowFileExplorerSymbol;
+extern const int windowImageExplorerSymbol;
 
 struct WindowData {
   glm::vec2 windowOffset;

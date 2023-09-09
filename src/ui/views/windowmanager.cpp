@@ -6,6 +6,7 @@ extern CustomApiBindings* gameapi;
 const int windowColorPickerSymbol = getSymbol("window-symbol-colorpicker");
 const int windowDockSymbol = getSymbol("window-symbol-dock");
 const int windowFileExplorerSymbol = getSymbol("window-fileexplorer");
+const int windowImageExplorerSymbol = getSymbol("window-imageexplorer");
 
 std::map<int, WindowData> windowData = {
   { windowColorPickerSymbol, WindowData {
@@ -23,6 +24,13 @@ std::map<int, WindowData> windowData = {
     .vertical = false,
   }},
   { windowFileExplorerSymbol, WindowData {
+    .windowOffset = glm::vec2(0.f, 0.f),
+    .initialDragPos = std::nullopt,
+    .enable = false,
+    .horizontal = true,
+    .vertical = true,
+  }},
+  { windowImageExplorerSymbol, WindowData {
     .windowOffset = glm::vec2(0.f, 0.f),
     .initialDragPos = std::nullopt,
     .enable = false,

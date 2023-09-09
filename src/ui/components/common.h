@@ -80,6 +80,7 @@ struct BoundingBoxMeasurer {
 BoundingBoxMeasurer createMeasurer();
 void setX(BoundingBoxMeasurer& box, float value);
 void setY(BoundingBoxMeasurer& box, float value);
+void setBox(BoundingBoxMeasurer& box, float x, float y, float width, float height);
 void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox);
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
 

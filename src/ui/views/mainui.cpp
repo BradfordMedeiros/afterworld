@@ -101,10 +101,6 @@ std::function<void()> xCallbackFn = []() -> void {
   dialog = "";
 };
 
-std::function<void()> xFileExplorerCallbackFn = []() -> void {
-  windowSetEnabled(windowFileExplorerSymbol, false);
-};
-
 
 bool showColorPicker = true;
 std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
@@ -133,11 +129,11 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     };
   },
   .openImagePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
-    windowSetEnabled(windowFileExplorerSymbol, true);
+    windowSetEnabled(windowImageExplorerSymbol, true);
     onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
       onFileAddedFn = onFileAddedDefaultFn;
-      windowSetEnabled(windowFileExplorerSymbol, false);
+      windowSetEnabled(windowImageExplorerSymbol, false);
     };
   }
 };
@@ -216,17 +212,50 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   }
 
 
-  static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
-  auto colorPicker = withPropsCopy(colorPickerComponent, Props {
-    .props = { 
-      PropPair { onSlideSymbol,  onSlide },
-      PropPair { tintSymbol, *activeColor },
-    }
-  });
-  auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, "color picker");
-  auto defaultWindowProps = getDefaultProps();
-  uiWindowComponent.draw(drawTools, defaultWindowProps);
-  
+  {
+    static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
+    auto colorPicker = withPropsCopy(colorPickerComponent, Props {
+      .props = { 
+        PropPair { onSlideSymbol,  onSlide },
+        PropPair { tintSymbol, *activeColor },
+      }
+    });
+    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, "color picker");
+    auto defaultWindowProps = getDefaultProps();
+    uiWindowComponent.draw(drawTools, defaultWindowProps);
+  }
+
+  {
+    ImageList imageListData {
+      .images = { 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+        "./res/textures/wood.jpg",
+        "./res/textures/brickwall.jpg", 
+      },
+    };
+
+    auto imageListComponent = withPropsCopy(imageList, Props {
+      .props = { 
+        PropPair { imagesSymbol,  imageListData },
+      }
+    });
+    auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
+    auto defaultWindowProps = getDefaultProps();
+    uiWindowComponent.draw(drawTools, defaultWindowProps);
+  }
 
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);

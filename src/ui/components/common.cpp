@@ -77,6 +77,18 @@ void setY(BoundingBoxMeasurer& box, float value){
     box.maxY = value;
   }
 }
+
+void setBox(BoundingBoxMeasurer& box, float x, float y, float width, float height){
+  float left = x - (width * 0.5f);
+  float right = x + (width * 0.5f);
+  float top = y + (height * 0.5f);
+  float bottom = y - (height * 0.5f);
+  setX(box, left);
+  setX(box, right);
+  setY(box, top);
+  setY(box, bottom);
+}
+
 void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox){
   setX(boundingBoxMeasurer, boundingBox.x + (boundingBox.width * 0.5f));
   setX(boundingBoxMeasurer, boundingBox.x - (boundingBox.width * 0.5f));

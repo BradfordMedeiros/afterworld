@@ -4,6 +4,8 @@
 #include "./common.h"
 #include "../../global.h"
 
+extern const int imagesSymbol;
+
 struct ImageList {
  	std::vector<std::string> images;
 };
