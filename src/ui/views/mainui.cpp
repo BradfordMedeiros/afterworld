@@ -139,26 +139,9 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
 };
 
 ImageList imageListDatas {
-  .images = { 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-    "./res/textures/wood.jpg",
-    "./res/textures/brickwall.jpg", 
-  },
+  .images = {},
 };
-
+int imageListScrollAmount = 0;
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
@@ -254,12 +237,20 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
       onFileAddedFn(false, imageListDatas.images.at(index));
     };
 
+    static bool loadedImages = false;
+    if (!loadedImages){
+      loadedImages = true;
+      imageListDatas.images = gameapi -> listResources("textures");
+    }
+
     auto imageListComponent = withPropsCopy(imageList, Props {
       .props = { 
         PropPair { imagesSymbol,  imageListDatas },
         PropPair { onclickSymbol, onImageClick },
+        PropPair { offsetSymbol,  imageListScrollAmount },
       }
     });
+
     auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
     auto defaultWindowProps = getDefaultProps();
     uiWindowComponent.draw(drawTools, defaultWindowProps);
@@ -285,6 +276,15 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
   return handlerFns;
+}
+
+void onMainUiScroll(double amount){
+  auto scrollValue = static_cast<int>(amount);
+  std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
+  imageListScrollAmount += (scrollValue * 5);
+  if (imageListScrollAmount < 0){
+    imageListScrollAmount = 0;
+  }
 }
 
 void onMainUiMouseRelease(){

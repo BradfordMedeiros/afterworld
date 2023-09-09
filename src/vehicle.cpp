@@ -292,6 +292,5 @@ CScriptBinding vehicleBinding(CustomApiBindings& api, const char* name){
     vehicle -> distance += amount;
     setVehicleCamera(*vehicle);
   };
-
   return binding;
 }

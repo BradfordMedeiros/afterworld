@@ -40,6 +40,7 @@ struct UiContext {
 extern Component mainUI;
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
+void onMainUiScroll(double amount);
 void onMainUiMouseRelease();
 void pushHistory(std::string route);
 std::string getCurrentPath();

@@ -124,6 +124,7 @@ extern const int minwidthSymbol;
 extern const int minheightSymbol;
 extern const int xoffsetSymbol;
 extern const int yoffsetSymbol;
+extern const int offsetSymbol;
 extern const int elapsedTimeSymbol;
 extern const int resumeSymbol;
 extern const int goToMainMenuSymbol;

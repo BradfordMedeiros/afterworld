@@ -552,6 +552,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
   };
 
+  binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
+    onMainUiScroll(amount);
+  };
+
   return binding;
 }
 

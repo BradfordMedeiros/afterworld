@@ -404,6 +404,7 @@ const int minwidthSymbol = getSymbol("minwidth");
 const int minheightSymbol = getSymbol("minheight");
 const int xoffsetSymbol = getSymbol("xoffset");
 const int yoffsetSymbol = getSymbol("yoffset");
+const int offsetSymbol = getSymbol("offset");
 const int elapsedTimeSymbol = getSymbol("elapsedTime");
 const int resumeSymbol = getSymbol("resume");
 const int goToMainMenuSymbol = getSymbol("gotoMenu");
