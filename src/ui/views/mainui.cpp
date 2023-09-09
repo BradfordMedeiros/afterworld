@@ -138,6 +138,28 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   }
 };
 
+ImageList imageListDatas {
+  .images = { 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+    "./res/textures/wood.jpg",
+    "./res/textures/brickwall.jpg", 
+  },
+};
+
+
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
   DrawingTools drawTools {
@@ -226,30 +248,16 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   }
 
   {
-    ImageList imageListData {
-      .images = { 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-        "./res/textures/wood.jpg",
-        "./res/textures/brickwall.jpg", 
-      },
+
+
+    std::function<void(int)> onImageClick = [](int index) -> void {
+      onFileAddedFn(false, imageListDatas.images.at(index));
     };
 
     auto imageListComponent = withPropsCopy(imageList, Props {
       .props = { 
-        PropPair { imagesSymbol,  imageListData },
+        PropPair { imagesSymbol,  imageListDatas },
+        PropPair { onclickSymbol, onImageClick },
       }
     });
     auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
