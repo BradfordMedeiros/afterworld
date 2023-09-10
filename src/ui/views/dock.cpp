@@ -41,6 +41,7 @@ struct DockFileConfig {
 
 struct DockImageConfig {
   std::string label;
+  std::function<void(std::string)> onImageSelect;
 };
 
 typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig> DockConfig;
@@ -189,6 +190,9 @@ std::vector<DockConfiguration> configurations {
       },
       DockImageConfig {
         .label =  "someimage-here",
+        .onImageSelect = [](std::string texture) -> void {
+          dockConfigApi.setTexture(texture);
+        }
       }
     },
   },
@@ -322,9 +326,9 @@ Component genericDockComponent {
       if (imageConfigOptions){
         std::function<void()> onClick =  [imageConfigOptions]() -> void {
           dockConfigApi.openImagePicker([imageConfigOptions](bool justClosed, std::string image) -> void {
-            std::cout << "open image picker dialog mock: " << justClosed << ", file = " << image << std::endl;
             if (!justClosed){
               imageConfigOptions -> label = image;
+              imageConfigOptions -> onImageSelect(image);
             }
           });
         };

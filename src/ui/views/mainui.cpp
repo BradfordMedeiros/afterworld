@@ -135,7 +135,24 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       onFileAddedFn = onFileAddedDefaultFn;
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
-  }
+  },
+  .setTexture = [](std::string& texture) -> void {
+    std::cout << "dock mock set texture: " << texture << std::endl;
+    auto selectedIds = gameapi -> selected();
+    for (auto id : selectedIds){
+      GameobjAttributes attr {
+        .stringAttributes = {
+          { "texture", texture },
+        },
+        .numAttributes = {},
+        .vecAttr = {
+          .vec3 = {},
+          .vec4 = {},
+        },
+      };
+      gameapi -> setGameObjectAttr(id, attr);     
+    }
+  },
 };
 
 ImageList imageListDatas {

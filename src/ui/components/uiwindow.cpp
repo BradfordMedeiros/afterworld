@@ -22,6 +22,8 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
         .props = {
           PropPair { .symbol = valueSymbol, .value = titleValue },
           PropPair { .symbol = onclickSymbol, .value = onClick },
+          PropPair { .symbol = fontsizeSymbol, .value = 0.02f },
+          PropPair { .symbol = paddingSymbol, .value = 0.015f },
         }
       });
 

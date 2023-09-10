@@ -150,5 +150,6 @@ extern const int onSlideSymbol;
 extern const int enableSymbol;
 extern const int dockTypeSymbol;
 extern const int selectedSymbol;
+extern const int fontsizeSymbol;
 
 #endif

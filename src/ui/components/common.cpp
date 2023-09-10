@@ -429,3 +429,4 @@ const int onSlideSymbol = getSymbol("on-slide");
 const int enableSymbol = getSymbol("enable");
 const int dockTypeSymbol = getSymbol("dock-type");
 const int selectedSymbol = getSymbol("selected");
+const int fontsizeSymbol = getSymbol("fontsize");

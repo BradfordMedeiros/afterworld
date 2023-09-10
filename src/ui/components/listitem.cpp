@@ -115,13 +115,13 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
   auto onClick = fnFromProp(props, onclickSymbol);
   auto padding = floatFromProp(props, paddingSymbol, 0.05f);
-
+  auto fontSize = floatFromProp(props, fontsizeSymbol, 0.015f);
   ImListItem menuItem {
     .value = strValue,
     .onClick = onClick,
     .mappingId = uniqueMenuItemMappingId(),
   };
-  auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, 0.015f, minwidth, tint, color);
+  auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, fontSize, minwidth, tint, color);
   //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
   //drawDebugBoundingBox(drawTools, box);
   return box;
