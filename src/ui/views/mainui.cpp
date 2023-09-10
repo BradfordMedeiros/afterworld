@@ -113,12 +113,29 @@ std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedDefa
 };
 std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedFn = onFileAddedDefaultFn;
 
+objid activeSceneId(){
+  auto selectedId = gameapi -> selected().at(0);
+  auto sceneId = gameapi -> listSceneId(selectedId);
+  return sceneId;
+}
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
-    modlog("dock", "mock make camera");
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr {
+      .stringAttributes = {},
+      .numAttributes = {},
+      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+    };
+    gameapi -> makeObjectAttr(activeSceneId(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createLight = []() -> void {
-    modlog("dock", "mock make light");
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr {
+      .stringAttributes = {},
+      .numAttributes = {},
+      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+    };
+    gameapi -> makeObjectAttr(activeSceneId(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
@@ -153,6 +170,13 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       gameapi -> setGameObjectAttr(id, attr);     
     }
   },
+  .getAttribute = [](std::string&, std::string&) -> AttributeValue {
+    return 0.f;
+  },
+  .setAttribute = [](std::string&, std::string&, AttributeValue& value) -> void {
+  },
+  //std::function<AttributeValue(std::string&, std::string&)> getAttribute;
+
 };
 
 ImageList imageListDatas {

@@ -17,6 +17,9 @@ struct DockConfigApi {
   std::function<void(std::function<void(bool, std::string)>)> openFilePicker;
   std::function<void(std::function<void(bool, std::string)>)> openImagePicker;
   std::function<void(std::string&)> setTexture;
+
+  std::function<AttributeValue(std::string&, std::string&)> getAttribute;
+  std::function<void(std::string&, std::string&, AttributeValue& value)> setAttribute;
 };
 
 #endif

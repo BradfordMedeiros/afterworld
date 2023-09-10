@@ -13,7 +13,7 @@ enum DockFieldType {
 
 struct DockButtonConfig {
   const char* buttonText;
-  std::optional<std::function<void()>> onClick;
+  std::function<void()> onClick;
 };
 struct DockOptionConfig {
   std::vector<const char*> options;
@@ -61,13 +61,15 @@ float minValuePercentage = 0.f;
 float maxValuePercentage = 0.f;
 float blurPercentage = 0.5f;
 
+
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
     .configFields = {
       DockButtonConfig {
         .buttonText = "no panel available",
-        .onClick = std::nullopt,
+        .onClick = []() -> void {},
       },
     },
   },
@@ -76,7 +78,7 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Camera",
-        .onClick = dockConfigApi.createCamera,
+        .onClick = []() -> void { dockConfigApi.createCamera(); },
       },
       DockOptionConfig {
         .options = { "enable dof", "disable dof" },
@@ -159,7 +161,7 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Light",
-        .onClick = dockConfigApi.createLight,
+        .onClick = []() -> void { dockConfigApi.createLight(); } ,
       },
       DockOptionConfig {
         .options = { "point", "spotlight", "directional" },
@@ -220,11 +222,10 @@ Component genericDockComponent {
         Props buttonProps {
           .props = {
             PropPair { .symbol = valueSymbol, .value = std::string(dockButton -> buttonText) },
+            PropPair { .symbol = onclickSymbol, .value =  dockButton -> onClick }
           }
         };
-        if (dockButton -> onClick.has_value()){
-          buttonProps.props.push_back(PropPair { .symbol = onclickSymbol, .value =  dockButton -> onClick.value() });
-        }
+    
         elements.push_back(withPropsCopy(button, buttonProps));  
         continue;
       }

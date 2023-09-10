@@ -2,26 +2,18 @@
 
 Component button {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    auto onClick = fnFromProp(props, onclickSymbol);
+    std::function<void()>* onClick = typeFromProps<std::function<void()>>(props, onclickSymbol);
+    modassert(onClick, "on click not defined in button");
     auto strValue = strFromProp(props, valueSymbol, "button");
+
     Props buttonProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = strValue },
         PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.2f, 0.2f, 0.2f, 0.8f) },
         PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+        PropPair { .symbol = onclickSymbol, .value = *onClick },
       },
     };
-
-    std::function<void()> onClick2 = onClick.has_value() ? onClick.value() : nullClick.value();
-
-    buttonProps.props.push_back(PropPair {
-      .symbol = onclickSymbol,
-      .value = onClick2,
-    });
-
-
-    //auto onClick = listItemData.onClick.has_value() ? listItemData.onClick.value() : []() -> void {};
-  
 
     Props defaultProps {
       .props = {},
