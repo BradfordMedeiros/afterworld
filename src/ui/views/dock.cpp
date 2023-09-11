@@ -63,6 +63,50 @@ float blurPercentage = 0.5f;
 
 
 
+std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
+  return [key, attribute, enabledValue, disabledValue]() -> bool {
+    auto value = dockConfigApi.getAttribute(key, attribute);
+    auto valueStr = std::get_if<std::string>(&value);
+    modassert(valueStr, "getIsCheckedWorld not strValue");
+    return *valueStr == enabledValue;
+  };
+}
+
+std::function<void(bool)> getOnCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
+  return [key, attribute, enabledValue, disabledValue](bool checked) -> void {
+    dockConfigApi.setAttribute("skybox", "enable", checked ? enabledValue : disabledValue);
+  };
+}
+
+std::function<bool()> getIsCheckedGameobj(std::string key, std::string enabledValue, std::string disabledValue){
+  return [key, enabledValue, disabledValue]() -> bool {
+    auto value = dockConfigApi.getObjAttr(key);
+    auto valueStr = std::get_if<std::string>(&value);
+    modassert(valueStr, "enabledValue not strValue");
+    return *valueStr == enabledValue;
+  };
+}
+
+std::function<void(bool)> getOnCheckedGameobj(std::string key, std::string enabledValue, std::string disabledValue){
+  return [key, enabledValue, disabledValue](bool checked) -> void {
+    dockConfigApi.setObjAttr(key, checked ? enabledValue : disabledValue);
+  };
+}
+
+/*
+
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable physics", 
+            "value" => [
+              "binding" => "gameobj:physics",
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],*/
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -94,13 +138,14 @@ std::vector<DockConfiguration> configurations {
       },
       DockCheckboxConfig {
         .label = "toggle dof",
-        .isChecked = []() -> bool { return checkboxChecked; },
-        .onChecked = [](bool checked) -> void {
-          std::cout << "dock toggledof: " << checked << std::endl;
-          checkboxChecked = checked;
-        },
+        .isChecked = getIsCheckedWorld("skybox", "enable", "true", "false"),
+        .onChecked = getOnCheckedWorld("skybox", "enable", "true", "false"),
       },
-      
+      DockCheckboxConfig {
+        .label = "enable physics",
+        .isChecked = getIsCheckedGameobj("physics", "enabled", "disabled"),
+        .onChecked = getOnCheckedGameobj("physics", "enabled", "disabled"),
+      },    
 /*
       [ 
         "type" => "slider", 

@@ -118,6 +118,17 @@ objid activeSceneId(){
   auto sceneId = gameapi -> listSceneId(selectedId);
   return sceneId;
 }
+
+std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
+  auto worldStates = gameapi -> getWorldState();
+  for (auto &worldState : worldStates){
+    if (worldState.object == object && worldState.attribute == attribute){
+      return worldState.value;
+    }
+  }
+  return std::nullopt;
+}
+
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -170,12 +181,63 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       gameapi -> setGameObjectAttr(id, attr);     
     }
   },
-  .getAttribute = [](std::string&, std::string&) -> AttributeValue {
-    return 0.f;
+  .getAttribute = [](std::string key, std::string attribute) -> AttributeValue {
+    auto value = getWorldState(key.c_str(), attribute.c_str()).value();
+    return value;
   },
-  .setAttribute = [](std::string&, std::string&, AttributeValue& value) -> void {
+  .setAttribute = [](std::string key, std::string attribute, AttributeValue value) -> void {
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = key,
+        .attribute = attribute,
+        .value = value,
+      },
+    });
   },
-  //std::function<AttributeValue(std::string&, std::string&)> getAttribute;
+  .getObjAttr = [](std::string key) -> AttributeValue {
+    objid id = gameapi -> selected().at(0);
+    auto gameobjAttr =  gameapi -> getGameObjectAttr(id);
+    auto attr = getAttr(gameobjAttr, key);
+    return attr.value();
+  },
+  .setObjAttr = [](std::string key, AttributeValue value) -> void {
+    auto selected = gameapi -> selected();
+    if (selected.size() == 0){
+      return;
+    }
+    objid id = selected.at(0);
+    std::map<std::string, std::string> stringAttributes;
+    std::map<std::string, double> numAttributes;
+    std::map<std::string, glm::vec3> vec3Attributes;
+    std::map<std::string, glm::vec4> vec4Attributes;
+
+    auto strAttr = std::get_if<std::string>(&value);
+    if (strAttr){
+      stringAttributes[key] = (*strAttr);
+    }
+    auto numAttr = std::get_if<float>(&value);
+    if (numAttr){
+      numAttributes[key] = (*numAttr);
+    }
+    auto vec3Attr = std::get_if<glm::vec3>(&value);
+    if (vec3Attr){
+      vec3Attributes[key] = (*vec3Attr);
+    }
+    auto vec4Attr = std::get_if<glm::vec4>(&value);
+    if (vec4Attr){
+      vec4Attributes[key] = (*vec4Attr);
+    }
+    GameobjAttributes newAttr {
+      .stringAttributes = stringAttributes,
+      .numAttributes = numAttributes,
+      .vecAttr = { 
+        .vec3 = vec3Attributes, 
+        .vec4 = vec4Attributes, 
+      },
+    };
+    gameapi -> setGameObjectAttr(id, newAttr);
+  }
+
 
 };
 

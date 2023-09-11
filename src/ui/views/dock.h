@@ -8,6 +8,7 @@
 #include "../components/slider.h"
 #include "../components/checkbox.h"
 #include "../components/textbox.h"
+#include "../../util.h"
 
 extern Component dockComponent;
 
@@ -18,8 +19,11 @@ struct DockConfigApi {
   std::function<void(std::function<void(bool, std::string)>)> openImagePicker;
   std::function<void(std::string&)> setTexture;
 
-  std::function<AttributeValue(std::string&, std::string&)> getAttribute;
-  std::function<void(std::string&, std::string&, AttributeValue& value)> setAttribute;
+  std::function<AttributeValue(std::string, std::string)> getAttribute;
+  std::function<void(std::string, std::string, AttributeValue value)> setAttribute;
+
+  std::function<AttributeValue(std::string)> getObjAttr;
+  std::function<void(std::string, AttributeValue)> setObjAttr;
 };
 
 #endif
