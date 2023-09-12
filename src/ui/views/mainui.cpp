@@ -113,6 +113,10 @@ std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedDefa
 };
 std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedFn = onFileAddedDefaultFn;
 
+
+std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
+
+
 objid activeSceneId(){
   auto selectedId = gameapi -> selected().at(0);
   auto sceneId = gameapi -> listSceneId(selectedId);
@@ -165,11 +169,11 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     };
   },
   .pickGameObj = [](std::function<void(objid, std::string)> selectGameObj) -> void {
-      std::cout << "dock pick gameobj" << std::endl;
-      gameapi -> schedule(-1, 5000, NULL, [selectGameObj](void*) -> void {
-        selectGameObj(-1, "someselectedobj");
-      });
-
+    std::cout << "dock pick gameobj" << std::endl;
+    // kind of hack, otherwise it would select the object just clicked due to ordering of binding callbacks
+    gameapi -> schedule(-1, 100, NULL, [selectGameObj](void*) -> void { 
+      onGameObjSelected = selectGameObj;
+    });
   },
   .setTexture = [](std::string& texture) -> void {
     std::cout << "dock mock set texture: " << texture << std::endl;
@@ -248,7 +252,6 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     };
     gameapi -> setGameObjectAttr(id, newAttr);
   }
-
 
 };
 
@@ -398,6 +401,14 @@ void onMainUiScroll(double amount){
   imageListScrollAmount += (scrollValue * 5);
   if (imageListScrollAmount < 0){
     imageListScrollAmount = 0;
+  }
+}
+
+void onMainUiMousePress(std::optional<objid> selectedId){
+  if (selectedId.has_value() && onGameObjSelected.has_value()){
+    auto gameobjName = gameapi -> getGameObjNameForId(selectedId.value()).value();
+    onGameObjSelected.value()(selectedId.value(), gameobjName);
+    onGameObjSelected = std::nullopt;
   }
 }
 

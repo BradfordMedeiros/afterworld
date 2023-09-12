@@ -538,6 +538,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           gameState -> uiCallbacks.at(idAtCoord.value())();
         }
       }
+      onMainUiMousePress(idAtCoord);
     }else if (action == 0 && button == 0){
       onMainUiMouseRelease();
       std::cout << uiStoreToStr() << std::endl;

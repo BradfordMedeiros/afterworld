@@ -47,7 +47,7 @@ struct DockImageConfig {
 };
 
 struct DockGameObjSelector {
-  std::string label;
+  std::optional<std::string> label;
 };
 
 
@@ -189,7 +189,7 @@ std::vector<DockConfiguration> configurations {
         .collapse = []() -> bool { return collapseTestGroup;  },
         .configFields = {
           DockGameObjSelector {
-            .label = "some_element",
+            .label = std::nullopt,
           },
           DockCheckboxConfig {
             .label = "toggle dof",
@@ -405,18 +405,26 @@ Component createDockComponent(DockConfig& config){
   auto gameobjSelectorOptions = std::get_if<DockGameObjSelector>(&config);
   if (gameobjSelectorOptions){
     std::function<void()> onClick =  [gameobjSelectorOptions]() -> void {
+      gameobjSelectorOptions -> label = std::nullopt;
       dockConfigApi.pickGameObj([gameobjSelectorOptions](objid id, std::string value) -> void {
         std::cout << "dock gameobjSelectorOptions onclick:  " << id << ", " << value << std::endl;
         gameobjSelectorOptions -> label = value;
       });
     };
+
+    std::string value = gameobjSelectorOptions -> label.has_value() ? (std::string("target: ") + gameobjSelectorOptions -> label.value()) : std::string("none");
     Props textboxProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = (std::string("target: ") + gameobjSelectorOptions -> label) },
+        PropPair { .symbol = valueSymbol, .value = value },
         PropPair { .symbol = onclickSymbol, .value = onClick },
       }
     };
-    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+    if (!gameobjSelectorOptions -> label.has_value()){
+      textboxProps.props.push_back(PropPair {
+        .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 1.f),
+      });
+    }
+    auto textboxWithProps = withPropsCopy(listItem, textboxProps);
     return textboxWithProps; 
   }
 
