@@ -164,6 +164,13 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
+  .pickGameObj = [](std::function<void(objid, std::string)> selectGameObj) -> void {
+      std::cout << "dock pick gameobj" << std::endl;
+      gameapi -> schedule(-1, 5000, NULL, [selectGameObj](void*) -> void {
+        selectGameObj(-1, "someselectedobj");
+      });
+
+  },
   .setTexture = [](std::string& texture) -> void {
     std::cout << "dock mock set texture: " << texture << std::endl;
     auto selectedIds = gameapi -> selected();

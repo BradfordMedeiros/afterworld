@@ -46,10 +46,14 @@ struct DockImageConfig {
   std::function<void(std::string)> onImageSelect;
 };
 
+struct DockGameObjSelector {
+  std::string label;
+};
+
 
 struct DockImageGroup;
 
-typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockImageGroup> DockConfig;
+typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup> DockConfig;
 
 struct DockImageGroup {
   std::string groupName;
@@ -184,6 +188,9 @@ std::vector<DockConfiguration> configurations {
         .onClick = []() -> void { collapseTestGroup = !collapseTestGroup; },
         .collapse = []() -> bool { return collapseTestGroup;  },
         .configFields = {
+          DockGameObjSelector {
+            .label = "some_element",
+          },
           DockCheckboxConfig {
             .label = "toggle dof",
             .isChecked = getIsCheckedWorld("skybox", "enable", "true", "false"),
@@ -259,7 +266,7 @@ std::vector<DockConfiguration> configurations {
         .onImageSelect = [](std::string texture) -> void {
           dockConfigApi.setTexture(texture);
         }
-      }
+      },
     },
   },
 };
@@ -395,6 +402,24 @@ Component createDockComponent(DockConfig& config){
     return textboxWithProps; 
   }
 
+  auto gameobjSelectorOptions = std::get_if<DockGameObjSelector>(&config);
+  if (gameobjSelectorOptions){
+    std::function<void()> onClick =  [gameobjSelectorOptions]() -> void {
+      dockConfigApi.pickGameObj([gameobjSelectorOptions](objid id, std::string value) -> void {
+        std::cout << "dock gameobjSelectorOptions onclick:  " << id << ", " << value << std::endl;
+        gameobjSelectorOptions -> label = value;
+      });
+    };
+    Props textboxProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = (std::string("target: ") + gameobjSelectorOptions -> label) },
+        PropPair { .symbol = onclickSymbol, .value = onClick },
+      }
+    };
+    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+    return textboxWithProps; 
+  }
+
   auto dockGroupOptions = std::get_if<DockImageGroup>(&config);
   if (dockGroupOptions){
     std::vector<Component> elements;
@@ -404,13 +429,14 @@ Component createDockComponent(DockConfig& config){
         PropPair { .symbol = onclickSymbol, .value = dockGroupOptions -> onClick },
         PropPair { .symbol = fontsizeSymbol, .value = 0.02f },
         PropPair { .symbol = paddingSymbol, .value = 0.015f },
+        PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.5f) },
       }
     });
     elements.push_back(titleTextbox);
     if (!dockGroupOptions -> collapse()){
       componentsForFields(dockGroupOptions -> configFields, elements);
     }
-    return simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(0.f, 0.f, 1.f, 1.f), 0.01f);
+    return simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(0.f, 0.f, 0.f, 1.f), 0.01f);
   }
 
   modassert(false, "dock component not yet implemented");
