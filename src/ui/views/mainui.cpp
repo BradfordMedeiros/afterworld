@@ -194,11 +194,15 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       },
     });
   },
-  .getObjAttr = [](std::string key) -> AttributeValue {
-    objid id = gameapi -> selected().at(0);
+  .getObjAttr = [](std::string key) -> std::optional<AttributeValue> {
+    auto selected = gameapi -> selected();
+    if (selected.size() == 0){
+      return std::nullopt;
+    }
+    objid id = selected.at(0);
     auto gameobjAttr =  gameapi -> getGameObjectAttr(id);
     auto attr = getAttr(gameobjAttr, key);
-    return attr.value();
+    return attr;
   },
   .setObjAttr = [](std::string key, AttributeValue value) -> void {
     auto selected = gameapi -> selected();

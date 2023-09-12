@@ -351,11 +351,11 @@ AlignmentParams defaultAlignment {
   .layoutFlowHorizontal = UILayoutFlowNone2,
   .layoutFlowVertical = UILayoutFlowNone2,
 };
-Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment){
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding){
   Layout layout {
     .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
     .showBackpanel = true,
-    .borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f),
+    .borderColor = borderColor,
     .minwidth = minDim.x,
     .minheight = minDim.y,
     .layoutType = LAYOUT_VERTICAL2,
@@ -365,7 +365,7 @@ Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDi
     .alignVertical = UILayoutFlowNone2,
     .spacing = 0.f,
     .minspacing = 0.f,
-    .padding = 0.0f,
+    .padding = padding,
     .children = children,
   };
   Props listLayoutProps {

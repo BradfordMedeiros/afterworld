@@ -46,7 +46,7 @@ struct AlignmentParams {
 
 extern AlignmentParams defaultAlignment;
 
-Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim = glm::vec2(0.f, 0.f), AlignmentParams defaultAlignment = defaultAlignment);
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim = glm::vec2(0.f, 0.f), AlignmentParams defaultAlignment = defaultAlignment, glm::vec4 borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f), float padding = 0.f);
 Component simpleHorizontalLayout(std::vector<Component>& children);
 
 #endif

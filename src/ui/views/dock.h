@@ -22,7 +22,7 @@ struct DockConfigApi {
   std::function<AttributeValue(std::string, std::string)> getAttribute;
   std::function<void(std::string, std::string, AttributeValue value)> setAttribute;
 
-  std::function<AttributeValue(std::string)> getObjAttr;
+  std::function<std::optional<AttributeValue>(std::string)> getObjAttr;
   std::function<void(std::string, AttributeValue)> setObjAttr;
 };
 
