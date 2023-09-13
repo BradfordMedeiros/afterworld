@@ -6,14 +6,13 @@
 #include "./list.h"
 #include "./textbox.h"
 
-enum FileContentType { File, Directory };
 struct FileContent {
-  FileContentType type;
+  bool isDirectory;
   std::string content;
 };
 
-typedef std::function<void(FileContentType type, std::string file)> FileCallback;
-typedef std::function<bool(FileContentType, std::string&)> FileFilter;
+typedef std::function<void(bool, std::string)> FileCallback;
+typedef std::function<bool(bool, std::string&)> FileFilter;
 
 struct FileExplorer {
   std::vector<std::string> currentPath;

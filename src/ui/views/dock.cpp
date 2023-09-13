@@ -388,7 +388,7 @@ Component createDockComponent(DockConfig& config){
         if (!justClosed){
           fileconfigOptions -> label = file;
         }
-      }, [](std::string&) -> bool { return true; });
+      }, [](bool isDirectory, std::string&) -> bool { return !isDirectory; });
     };
     Props textboxProps {
       .props = {

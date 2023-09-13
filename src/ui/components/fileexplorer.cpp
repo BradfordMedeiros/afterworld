@@ -33,7 +33,6 @@ Component fileexplorerComponent {
     auto customFileCallback = *customFileCallbackPtr;
 
     auto fileFilterPtr = typeFromProps<FileFilter>(props, fileFilterSymbol);
-    modassert(fileFilterPtr, "filefilter is not defined");
 
     std::vector<Component> elements;
     auto onChange = fileExplorer -> explorerOnChange;
@@ -49,7 +48,7 @@ Component fileexplorerComponent {
 
         auto clickedPath = std::string("/") + join(subvector(fileExplorer -> currentPath, 0, i + 1), '/');
         std::function<void()> onClick = [clickedPath, onChange]() -> void {
-          onChange(Directory, clickedPath);
+          onChange(true, clickedPath);
         };
         Props listItemProps {
           .props = {
@@ -76,28 +75,28 @@ Component fileexplorerComponent {
 
       for (int i = offset; (i < fileExplorer -> currentContents.size() && numElementsDisplayed < 10); i++){
         auto value = fileExplorer -> currentContents.at(i);
-        auto shouldShow = (*fileFilterPtr)(value.type, value.content);
+        auto shouldShow = fileFilterPtr ? (*fileFilterPtr)(value.isDirectory, value.content) : true;
         if (!shouldShow){
           continue;
         }
-        auto type = value.type;
+        auto isDirectory = value.isDirectory;
         auto clickedPathVec = fileExplorer -> currentPath;
         clickedPathVec.push_back(value.content);
         auto clickedPath = std::string("/") + join(clickedPathVec, '/');
-        if (value.type == Directory){
+        if (value.isDirectory){
           clickedPath += "/";
         }
-        std::function<void()> onClick = [clickedPath, onChange, type, customFileCallback]() -> void {
+        std::function<void()> onClick = [clickedPath, onChange, isDirectory, customFileCallback]() -> void {
           std::cout << "on click: " <<  clickedPath << std::endl;
-          onChange(type, clickedPath);
-          if (type != Directory){
-            customFileCallback(type, clickedPath);
+          onChange(isDirectory, clickedPath);
+          if (!isDirectory){
+            customFileCallback(isDirectory, clickedPath);
           }
         };
 
         Props listItemProps {
           .props = {
-            PropPair { .symbol = valueSymbol, .value = (value.type == Directory ? std::string("[D] " + value.content) : value.content) },
+            PropPair { .symbol = valueSymbol, .value = (value.isDirectory ? std::string("[D] " + value.content) : value.content) },
             PropPair { .symbol = tintSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.f) },
             PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
             PropPair { .symbol = paddingSymbol, .value = 0.01f },
@@ -184,12 +183,12 @@ std::vector<FileContent> listCurrentContents(FileNavigator& navigator){
   for(auto &file: std::filesystem::directory_iterator(navigator.path)) {
     if (!std::filesystem::is_directory(file)) {
       files.push_back(FileContent {
-        .type = File,
+        .isDirectory = false,
         .content = std::filesystem::path(file.path()).filename(),
       });
     }else{
       files.push_back(FileContent {
-        .type = Directory,
+        .isDirectory = true,
         .content = std::filesystem::path(file.path()).filename(),
       });
     }
@@ -202,10 +201,10 @@ FileNavigator navigator = createFileNavigator();
 FileExplorer testExplorer {
   .currentPath = getCurrentNavigatorPath(navigator),
   .currentContents  = listCurrentContents(navigator),
-  .explorerOnChange = [](FileContentType type, std::string file) -> void {
-    if (type == File){
+  .explorerOnChange = [](bool isDirectory, std::string file) -> void {
+    if (!isDirectory){
       std::cout << "navigator explorer on change - file: " << file << std::endl;
-    }else if (type == Directory){
+    }else {
       std::cout << "navigator explorer on change - directory: " << file << std::endl;
       navigateDir(navigator, file);
       testExplorer.currentContents = listCurrentContents(navigator);
