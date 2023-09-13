@@ -108,14 +108,11 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   *activeColor = value;
 };
 
-std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedDefaultFn = [](bool closedWithoutNewFile, std::string file) -> void {
-  modlog("dock", "on file added default");
-};
-std::function<void(bool closedWithoutNewFile, std::string file)> onFileAddedFn = onFileAddedDefaultFn;
-
-
+std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
-
+std::function<bool(FileContentType type, std::string&)> fileFilter = [](FileContentType type, std::string& file) -> bool { 
+  return type == Directory;
+};
 
 objid activeSceneId(){
   auto selectedId = gameapi -> selected().at(0);
@@ -152,11 +149,11 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     };
     gameapi -> makeObjectAttr(activeSceneId(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
-  .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
+  .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(std::string&)> shouldShowFile) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
     onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      onFileAddedFn = onFileAddedDefaultFn;
+      onFileAddedFn = std::nullopt;
       windowSetEnabled(windowFileExplorerSymbol, false);
     };
   },
@@ -164,7 +161,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     windowSetEnabled(windowImageExplorerSymbol, true);
     onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      onFileAddedFn = onFileAddedDefaultFn;
+      onFileAddedFn = std::nullopt;
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
@@ -318,13 +315,16 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     FileCallback onFileSelect = [](FileContentType type, std::string file) -> void {
       modassert(type == File, "on file select gave something not a file");
       modlog("dock - file select", std::string(type == Directory ? "dir" : "file") + " " + file);
-      onFileAddedFn(false, file);
+      if (onFileAddedFn.has_value()){
+        onFileAddedFn.value()(false, file);
+      }
     };
 
     Props filexplorerProps {
       .props = {
         PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
-        PropPair { .symbol = fileChangeSymbol, .value = onFileSelect }
+        PropPair { .symbol = fileChangeSymbol, .value = onFileSelect },
+        PropPair { .symbol = fileFilterSymbol, .value = fileFilter },
       },
     };
     auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);
@@ -351,7 +351,9 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
 
 
     std::function<void(int)> onImageClick = [](int index) -> void {
-      onFileAddedFn(false, imageListDatas.images.at(index));
+      if (onFileAddedFn.has_value()){
+        onFileAddedFn.value()(false, imageListDatas.images.at(index));
+      }
     };
 
     static bool loadedImages = false;

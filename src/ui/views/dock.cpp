@@ -11,6 +11,10 @@ enum DockFieldType {
   DOCK_TEXTBOX,
 };
 
+struct DockLabelConfig {
+  std::string label;
+};
+
 struct DockButtonConfig {
   const char* buttonText;
   std::function<void()> onClick;
@@ -53,7 +57,7 @@ struct DockGameObjSelector {
 
 struct DockImageGroup;
 
-typedef std::variant<DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup> DockConfig;
+typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup> DockConfig;
 
 struct DockImageGroup {
   std::string groupName;
@@ -162,6 +166,9 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "Cameras",
     .configFields = {
+      DockLabelConfig {
+        .label = "some camera placeholder label",
+      },
       DockButtonConfig {
         .buttonText = "Create Camera",
         .onClick = []() -> void { dockConfigApi.createCamera(); },
@@ -283,6 +290,17 @@ DockConfiguration* dockConfigByName(std::string name){
 
 void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Component>& elements);
 Component createDockComponent(DockConfig& config){
+  auto dockLabel = std::get_if<DockLabelConfig>(&config);
+  if (dockLabel){
+    Props textboxProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = dockLabel -> label },
+      }
+    };
+    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+    return textboxWithProps;  
+  }
+
   auto dockButton = std::get_if<DockButtonConfig>(&config);
   if (dockButton){
     Props buttonProps {
@@ -370,7 +388,7 @@ Component createDockComponent(DockConfig& config){
         if (!justClosed){
           fileconfigOptions -> label = file;
         }
-      });
+      }, [](std::string&) -> bool { return true; });
     };
     Props textboxProps {
       .props = {

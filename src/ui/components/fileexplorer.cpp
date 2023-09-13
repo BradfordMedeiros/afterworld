@@ -2,6 +2,7 @@
 
 const int fileExplorerSymbol = getSymbol("file-explorer");
 const int fileChangeSymbol = getSymbol("file-change");
+const int fileFilterSymbol = getSymbol("filter-filter");
 
 typedef std::function<void(std::string)> ExplorerNavigation;
 
@@ -31,6 +32,9 @@ Component fileexplorerComponent {
     modassert(customFileCallbackPtr, "fileexplorer no custom file callback defined");
     auto customFileCallback = *customFileCallbackPtr;
 
+    auto fileFilterPtr = typeFromProps<FileFilter>(props, fileFilterSymbol);
+    modassert(fileFilterPtr, "filefilter is not defined");
+
     std::vector<Component> elements;
     auto onChange = fileExplorer -> explorerOnChange;
     // current path
@@ -50,7 +54,7 @@ Component fileexplorerComponent {
         Props listItemProps {
           .props = {
             PropPair { .symbol = valueSymbol, .value = value },
-            PropPair { .symbol = tintSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.f) },
+            PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 1.f) },
             PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
             PropPair { .symbol = paddingSymbol, .value = 0.01f },
             PropPair { .symbol = onclickSymbol, .value = onClick },
@@ -67,10 +71,14 @@ Component fileexplorerComponent {
     // files
     {
       std::vector<Component> pathElements;
-      for (int i = fileExplorer -> contentOffset ; ((i < (fileExplorer -> contentOffset + 10)) && i < fileExplorer -> currentContents.size()); i++){
+      int numElementsDisplayed = 0;
+      for (int i = fileExplorer -> contentOffset ; (i < fileExplorer -> currentContents.size() && numElementsDisplayed < 10); i++){
         auto value = fileExplorer -> currentContents.at(i);
+        auto shouldShow = (*fileFilterPtr)(value.type, value.content);
+        if (!shouldShow){
+          continue;
+        }
         auto type = value.type;
-
         auto clickedPathVec = fileExplorer -> currentPath;
         clickedPathVec.push_back(value.content);
         auto clickedPath = std::string("/") + join(clickedPathVec, '/');
@@ -96,14 +104,27 @@ Component fileexplorerComponent {
         };
         auto listItemWithProps = withPropsCopy(listItem, listItemProps);
         pathElements.push_back(listItemWithProps);
+        numElementsDisplayed++;
       }
-      modassert(pathElements.size() > 0, "path elements must be > 0");
+
+      if (pathElements.size() == 0){
+        Props listItemProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = std::string("no data") },
+            PropPair { .symbol = tintSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.f) },
+            PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
+            PropPair { .symbol = paddingSymbol, .value = 0.01f },
+          },
+        };
+        auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+        pathElements.push_back(listItemWithProps);  
+      }
       auto pathComponent = simpleVerticalLayout(pathElements, glm::vec2(0.5f, 0.5f), AlignmentParams {
         .layoutFlowHorizontal = UILayoutFlowNone2,
         .layoutFlowVertical = UILayoutFlowNegative2,
-
       });
-      elements.push_back(pathComponent);
+      elements.push_back(pathComponent);        
+      
       modassert(elements.size() > 0, "need at least 1 elements in files for fileExplorer");
     }
     ///////////////
@@ -171,14 +192,6 @@ std::vector<FileContent> listCurrentContents(FileNavigator& navigator){
       });
     }
   }
-  if (files.size() == 0){
-    files.push_back(FileContent{
-      .type = NoContent,
-      .content = "[empty directory]",
-    });
-  }
-
-  modassert(files.size() > 0, "no files for contents");
   return files;
 }
 

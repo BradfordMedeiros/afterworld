@@ -15,7 +15,7 @@ extern Component dockComponent;
 struct DockConfigApi {
   std::function<void()> createCamera;
   std::function<void()> createLight;
-  std::function<void(std::function<void(bool, std::string)>)> openFilePicker;
+  std::function<void(std::function<void(bool, std::string)>, std::function<bool(std::string&)>)> openFilePicker;
   std::function<void(std::function<void(bool, std::string)>)> openImagePicker;
   std::function<void(std::function<void(objid, std::string)>)> pickGameObj;
   std::function<void(std::string&)> setTexture;

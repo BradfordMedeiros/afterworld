@@ -353,7 +353,7 @@ AlignmentParams defaultAlignment {
 };
 Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding){
   Layout layout {
-    .tint = glm::vec4(0.f, 0.f, 0.f, 0.f),
+    .tint = glm::vec4(0.f, 0.f, 0.f, 1.f),
     .showBackpanel = true,
     .borderColor = borderColor,
     .minwidth = minDim.x,
@@ -378,7 +378,7 @@ Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDi
 
 Component simpleHorizontalLayout(std::vector<Component>& children){
   Layout layout {
-    .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
+    .tint = glm::vec4(0.f, 0.f, 0.f, 1.f),
     .showBackpanel = true,
     .borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f),
     .minwidth = 0.f,
