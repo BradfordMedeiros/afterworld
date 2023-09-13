@@ -16,7 +16,6 @@ typedef std::function<void(FileContentType type, std::string file)> FileCallback
 typedef std::function<bool(FileContentType, std::string&)> FileFilter;
 
 struct FileExplorer {
-  int contentOffset;
   std::vector<std::string> currentPath;
   std::vector<FileContent> currentContents;
   FileCallback explorerOnChange;

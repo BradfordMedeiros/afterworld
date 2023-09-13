@@ -256,6 +256,7 @@ ImageList imageListDatas {
   .images = {},
 };
 int imageListScrollAmount = 0;
+int fileexplorerScrollAmount = 0;
 
 std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<objid, std::function<void()>> handlerFns;
@@ -325,6 +326,7 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
         PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
         PropPair { .symbol = fileChangeSymbol, .value = onFileSelect },
         PropPair { .symbol = fileFilterSymbol, .value = fileFilter },
+        PropPair { offsetSymbol,  fileexplorerScrollAmount },
       },
     };
     auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);
@@ -403,6 +405,11 @@ void onMainUiScroll(double amount){
   imageListScrollAmount += (scrollValue * 5);
   if (imageListScrollAmount < 0){
     imageListScrollAmount = 0;
+  }
+
+  fileexplorerScrollAmount += scrollValue;
+  if (fileexplorerScrollAmount < 0){
+    fileexplorerScrollAmount = 0;
   }
 }
 

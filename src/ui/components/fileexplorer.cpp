@@ -72,7 +72,9 @@ Component fileexplorerComponent {
     {
       std::vector<Component> pathElements;
       int numElementsDisplayed = 0;
-      for (int i = fileExplorer -> contentOffset ; (i < fileExplorer -> currentContents.size() && numElementsDisplayed < 10); i++){
+      int offset = intFromProp(props, offsetSymbol, 0);
+
+      for (int i = offset; (i < fileExplorer -> currentContents.size() && numElementsDisplayed < 10); i++){
         auto value = fileExplorer -> currentContents.at(i);
         auto shouldShow = (*fileFilterPtr)(value.type, value.content);
         if (!shouldShow){
@@ -198,7 +200,6 @@ std::vector<FileContent> listCurrentContents(FileNavigator& navigator){
 FileNavigator navigator = createFileNavigator();
 
 FileExplorer testExplorer {
-  .contentOffset = 0,
   .currentPath = getCurrentNavigatorPath(navigator),
   .currentContents  = listCurrentContents(navigator),
   .explorerOnChange = [](FileContentType type, std::string file) -> void {
