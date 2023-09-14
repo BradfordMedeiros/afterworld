@@ -9,6 +9,7 @@
 #include "../components/dialog.h"
 #include "../components/fileexplorer.h"
 #include "../components/colorpicker.h"
+#include "../components/scenegraph.h"
 #include "./debuglist.h"
 #include "./pausemenu.h"
 #include "./navbar.h"

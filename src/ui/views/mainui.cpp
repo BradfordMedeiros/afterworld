@@ -379,6 +379,12 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     uiWindowComponent.draw(drawTools, defaultWindowProps);
   }
 
+  /// scenegraph
+
+  auto scenegraphProps = getDefaultProps();
+  scenegraphComponent.draw(drawTools, scenegraphProps);
+  ////
+
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 

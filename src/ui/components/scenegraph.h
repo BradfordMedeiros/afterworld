@@ -3,6 +3,8 @@
 
 #include "./common.h"
 #include "../../global.h"
+#include "./listitem.h"
+#include "./layout.h"
 
 extern Component scenegraphComponent;
 
