@@ -46,6 +46,18 @@ Scenegraph scenegraph {
 	}
 };
 
+
+void toggleScenegraphElement(std::vector<int> path){
+	if (path.size() == 0){
+		return;
+	}
+	ScenegraphItem* item = &scenegraph.items.at(path.at(0));
+	for (int i = 1; i < path.size(); i++){
+		item = &(item -> children.at(path.at(i)));
+	}
+	item -> expanded = !(item -> expanded);
+}
+
 Component createScenegraphItem(ScenegraphItem& item, int depth, std::vector<int> path){
  	bool expanded = true;
 
@@ -66,9 +78,16 @@ Component createScenegraphItem(ScenegraphItem& item, int depth, std::vector<int>
       //PropPair { .symbol = colorSymbol, .value = color },
     },
   };
-  //if (onClick.has_value()){
-  //  listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClick.value() });
-  //}
+  std::function<void()> onClick = [path]() -> void {
+  	std::cout << "dock path is: ";
+  	for (auto index : path){
+  		std::cout << index << " ";
+  	}
+  	std::cout << std::endl;
+  	toggleScenegraphElement(path);
+  };
+  listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClick });
+ 
   auto listItemElement = withPropsCopy(listItem, listItemProps);
   if (item.expanded && item.children.size() > 0){
   	std::vector<Component> elements;
@@ -93,8 +112,9 @@ Component createScenegraphItem(ScenegraphItem& item, int depth, std::vector<int>
 Component scenegraphComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::vector<Component> elements;
-  	for (auto &item : scenegraph.items){
-    	elements.push_back(createScenegraphItem(item, 0, {}));
+  	for (int i = 0; i < scenegraph.items.size(); i++){
+  		ScenegraphItem& item = scenegraph.items.at(i);
+    	elements.push_back(createScenegraphItem(item, 0, { i }));
   	}
 		auto layout = simpleVerticalLayout(elements);
   	return layout.draw(drawTools, props);
