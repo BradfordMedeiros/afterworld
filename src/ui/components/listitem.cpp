@@ -20,6 +20,9 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   if (menuItem.onClick.has_value()){
     drawTools.registerCallbackFns(menuItem.mappingId.value(), menuItem.onClick.value());
   }
+  if (menuItem.onClick2.has_value()){
+    drawTools.registerCallbackRightFns(menuItem.mappingId.value(), menuItem.onClick2.value());
+  }
   
   drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
@@ -114,11 +117,13 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
   float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
   auto onClick = fnFromProp(props, onclickSymbol);
+  auto onClick2 = typeFromProps<std::function<void(int)>>(props, onclickRightSymbol);
   auto padding = floatFromProp(props, paddingSymbol, 0.05f);
   auto fontSize = floatFromProp(props, fontsizeSymbol, 0.015f);
   ImListItem menuItem {
     .value = strValue,
     .onClick = onClick,
+    .onClick2 = onClick2 ? (*onClick2) : std::optional<std::function<void(int)>>(std::nullopt),
     .mappingId = uniqueMenuItemMappingId(),
   };
   auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, fontSize, minwidth, tint, color);

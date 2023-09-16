@@ -40,7 +40,11 @@ struct UiContext {
 
 extern Component mainUI;
 
-std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
+struct HandlerFns {
+  std::map<objid, std::function<void()>> handlerFns;
+  std::map<objid, std::function<void(int)>> handlerFns2;
+};
+HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void onMainUiScroll(double amount);
 void onMainUiMousePress(std::optional<objid> selectedId);
 void onMainUiMouseRelease();

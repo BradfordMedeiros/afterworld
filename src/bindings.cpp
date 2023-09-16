@@ -20,7 +20,7 @@ struct GameState {
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
 
-  std::map<objid, std::function<void()>> uiCallbacks;
+  HandlerFns uiCallbacks;
   UiContext uiContext;
 };
 
@@ -309,7 +309,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
     gameState -> selecting = std::nullopt;
-    gameState -> uiCallbacks = {};
+    gameState -> uiCallbacks = HandlerFns {
+      .handlerFns = {},
+      .handlerFns2 = {},
+    };
     gameState -> uiContext = {};
     loadConfig(*gameState);
     loadDefaultScenes();
@@ -534,14 +537,23 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1 && button == 0){
       auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
       if (idAtCoord.has_value()){
-        if (gameState -> uiCallbacks.find(idAtCoord.value()) != gameState -> uiCallbacks.end()){
-          gameState -> uiCallbacks.at(idAtCoord.value())();
+        if (gameState -> uiCallbacks.handlerFns.find(idAtCoord.value()) != gameState -> uiCallbacks.handlerFns.end()){
+          gameState -> uiCallbacks.handlerFns.at(idAtCoord.value())();
         }
       }
       onMainUiMousePress(idAtCoord);
     }else if (action == 0 && button == 0){
       onMainUiMouseRelease();
       std::cout << uiStoreToStr() << std::endl;
+    }
+
+    if (action == 1){
+      auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
+      if (idAtCoord.has_value()){
+        if (gameState -> uiCallbacks.handlerFns2.find(idAtCoord.value()) != gameState -> uiCallbacks.handlerFns2.end()){
+          gameState -> uiCallbacks.handlerFns2.at(idAtCoord.value())(button);
+        }
+      }  
     }
 
     if (button == 1){

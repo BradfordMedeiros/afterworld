@@ -258,14 +258,20 @@ ImageList imageListDatas {
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
 
-std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
-  std::map<objid, std::function<void()>> handlerFns;
+HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+  HandlerFns handlerFuncs {
+    .handlerFns = {},
+  };
+  std::map<objid, std::function<void(int)>> handlerFns2;
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
      .drawRect = gameapi -> drawRect,
      .drawLine2D = gameapi -> drawLine2D,
-     .registerCallbackFns = [&handlerFns](objid id, std::function<void()> fn) -> void {
-        handlerFns[id] = fn;
+     .registerCallbackFns = [&handlerFuncs](objid id, std::function<void()> fn) -> void {
+        handlerFuncs.handlerFns[id] = fn;
+     },
+     .registerCallbackRightFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
+        handlerFuncs.handlerFns2[id] = fn;
      },
      .selectedId = selectedId,
   };
@@ -380,8 +386,17 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
   }
 
   /// scenegraph
-
-  auto scenegraphProps = getDefaultProps();
+  static Scenegraph scenegraph = createScenegraph();
+  std::function<void(int)> onClick = [](int id) -> void {
+    std::cout << "scenegraph on click" <<  id << std::endl;
+    //exit(1);
+  };
+  Props scenegraphProps {
+    .props = {
+      PropPair { .symbol = valueSymbol, .value = &scenegraph },
+      PropPair { .symbol = onclickSymbol, .value = onClick },
+    }
+  };
   scenegraphComponent.draw(drawTools, scenegraphProps);
   ////
 
@@ -399,12 +414,12 @@ std::map<objid, std::function<void()>> handleDrawMainUi(UiContext& uiContext, st
     auto defaultProps = getDefaultProps();
     withProps(debugList, debugListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
-  return handlerFns;
+  return handlerFuncs;
 }
 
 void onMainUiScroll(double amount){

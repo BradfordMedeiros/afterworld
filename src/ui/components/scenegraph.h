@@ -6,7 +6,18 @@
 #include "./listitem.h"
 #include "./layout.h"
 
+struct ScenegraphItem {
+	std::string label;
+	bool expanded;
+	std::vector<ScenegraphItem> children;
+};
+
+struct Scenegraph {
+	std::vector<ScenegraphItem> items;
+};
+
 extern Component scenegraphComponent;
 
+Scenegraph createScenegraph();
 
 #endif

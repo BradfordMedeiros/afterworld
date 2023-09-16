@@ -6,6 +6,7 @@
 struct ImListItem {
   std::string value;
   std::optional<std::function<void()>> onClick;
+  std::optional<std::function<void(int)>> onClick2;
   std::optional<objid> mappingId;
 };
 
