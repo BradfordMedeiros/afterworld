@@ -48,8 +48,11 @@ HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> select
 void onMainUiScroll(double amount);
 void onMainUiMousePress(std::optional<objid> selectedId);
 void onMainUiMouseRelease();
+void onObjectsChanged();
 void pushHistory(std::string route);
 std::string getCurrentPath();
+void sendUiAlert(std::string message);
+
 
 #endif
 

@@ -258,6 +258,9 @@ ImageList imageListDatas {
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
 
+std::optional<Scenegraph> scenegraph = std::nullopt;
+bool refreshScenegraph = true;
+
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   HandlerFns handlerFuncs {
     .handlerFns = {},
@@ -386,14 +389,17 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
   /// scenegraph
-  static Scenegraph scenegraph = createScenegraph();
+  if (refreshScenegraph){
+    scenegraph = createScenegraph();
+    refreshScenegraph = false;
+  }
   std::function<void(int)> onClick = [](int id) -> void {
     std::cout << "scenegraph on click" <<  id << std::endl;
     //exit(1);
   };
   Props scenegraphProps {
     .props = {
-      PropPair { .symbol = valueSymbol, .value = &scenegraph },
+      PropPair { .symbol = valueSymbol, .value = &(scenegraph.value()) },
       PropPair { .symbol = onclickSymbol, .value = onClick },
     }
   };
@@ -448,10 +454,18 @@ void onMainUiMouseRelease(){
   windowOnRelease();
 }
 
+void onObjectsChanged(){
+  refreshScenegraph = true;
+}
+
 void pushHistory(std::string route){
 	pushHistory(routerHistory, route);
 }
 
 std::string getCurrentPath(){
   return getCurrentPath(routerHistory);
+}
+
+void sendUiAlert(std::string message){
+  std::cout << "dock: alert: " << message << std::endl;
 }

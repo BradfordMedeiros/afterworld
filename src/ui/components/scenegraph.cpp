@@ -44,10 +44,15 @@ Scenegraph createScenegraph(){
 	std::vector<ScenegraphItem> scenegraphItems;
 	std::map<objid, objid> childToParent;
 	std::map<objid, std::string> idToName;
+
+	std::cout << "dep graph: " << std::endl;
 	for (auto &dep : depGraph){
 		childToParent[dep.childId] = dep.parentId;
+		std::cout << "(" << dep.childId << ", " << dep.parentId << "),  ";
 		idToName[dep.childId] = dep.child;
 	}
+	std::cout << std::endl;
+
 
 	std::map<objid, ScenegraphItem*> idToScenegraphItem;
 	const int LOOPMAX = 10000;

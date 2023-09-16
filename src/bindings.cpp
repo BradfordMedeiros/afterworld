@@ -505,6 +505,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameapi -> sendNotifyMessage("request:push-control", previousCamera);
       }
     }
+
+    if (key == "alert"){
+      auto strValue = anycast<std::string>(value); 
+      modassert(strValue != NULL, "alert value invalid");
+      sendUiAlert(*strValue);
+    }
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
@@ -567,6 +573,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
     onMainUiScroll(amount);
+  };
+
+  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
+    onObjectsChanged();
+  };
+  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    onObjectsChanged();
   };
 
   return binding;
