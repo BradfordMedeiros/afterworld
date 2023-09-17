@@ -257,6 +257,7 @@ ImageList imageListDatas {
 };
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
+int scenegraphScrollAmount = 0;
 
 std::optional<Scenegraph> scenegraph = std::nullopt;
 bool refreshScenegraph = true;
@@ -388,35 +389,43 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     uiWindowComponent.draw(drawTools, defaultWindowProps);
   }
 
-  /// scenegraph
-  if (refreshScenegraph){
-    scenegraph = createScenegraph();
-    refreshScenegraph = false;
-  }
-  std::function<void(int)> onClick = [](int id) -> void {
-    std::cout << "scenegraph on click" <<  id << std::endl;
-    //exit(1);
-  };
-  Props scenegraphProps {
-    .props = {
-      PropPair { .symbol = valueSymbol, .value = &(scenegraph.value()) },
-      PropPair { .symbol = onclickSymbol, .value = onClick },
-    }
-  };
-  scenegraphComponent.draw(drawTools, scenegraphProps);
-  ////
-
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
   if (uiContext.isDebugMode()){
-    Props navbarProps { 
-      .props = {
-        { onclickSymbol, onClickNavbar }
+    /// scenegraph
+    {
+      if (refreshScenegraph){
+        scenegraph = createScenegraph();
+        refreshScenegraph = false;
       }
-    };
-    navbarComponent.draw(drawTools, navbarProps);
-
+      std::function<void(int)> onClick = [](int id) -> void {
+        std::cout << "scenegraph on click" <<  id << std::endl;
+        //exit(1);
+      };
+      Props scenegraphProps {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = &(scenegraph.value()) },
+          PropPair { .symbol = onclickSymbol, .value = onClick },
+          PropPair { .symbol = offsetSymbol,  .value = scenegraphScrollAmount },
+        }
+      };
+      scenegraphComponent.draw(drawTools, scenegraphProps);
+    }
+    {
+      Props defaultProps {
+        .props = {},
+      };
+      alertComponent.draw(drawTools, defaultProps);
+    }
+    {
+      Props navbarProps { 
+        .props = {
+          { onclickSymbol, onClickNavbar }
+        }
+      };
+      navbarComponent.draw(drawTools, navbarProps);
+    }
     auto defaultProps = getDefaultProps();
     withProps(debugList, debugListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
@@ -439,6 +448,11 @@ void onMainUiScroll(double amount){
   fileexplorerScrollAmount += scrollValue;
   if (fileexplorerScrollAmount < 0){
     fileexplorerScrollAmount = 0;
+  }
+
+  scenegraphScrollAmount += scrollValue;
+  if (scenegraphScrollAmount < 0){
+    scenegraphScrollAmount = 0;
   }
 }
 
@@ -468,4 +482,5 @@ std::string getCurrentPath(){
 
 void sendUiAlert(std::string message){
   std::cout << "dock: alert: " << message << std::endl;
+  pushAlertMessage(message);
 }

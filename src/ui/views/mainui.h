@@ -10,6 +10,7 @@
 #include "../components/fileexplorer.h"
 #include "../components/colorpicker.h"
 #include "../components/scenegraph.h"
+#include "./alert.h"
 #include "./debuglist.h"
 #include "./pausemenu.h"
 #include "./navbar.h"
