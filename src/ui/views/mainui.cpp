@@ -403,6 +403,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         std::cout << "scenegraph on click" <<  id << std::endl;
         //exit(1);
       };
+
+      modassert(scenegraph.has_value(), "scenegraph does not have a value");
       Props scenegraphProps {
         .props = {
           PropPair { .symbol = valueSymbol, .value = &(scenegraph.value()) },

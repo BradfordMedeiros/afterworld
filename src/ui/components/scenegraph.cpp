@@ -38,12 +38,15 @@ Scenegraph testScenegraph {
 
 
 extern CustomApiBindings* gameapi;
+
+// This function is bad, because it returns the address of indiviidual elements in the vector,
+// which seems unstable
 Scenegraph createScenegraph(){
 	auto depGraph = gameapi -> scenegraph();
 
-	std::vector<ScenegraphItem> scenegraphItems;
-	std::map<objid, objid> childToParent;
-	std::map<objid, std::string> idToName;
+	std::vector<ScenegraphItem> scenegraphItems = {};
+	std::map<objid, objid> childToParent = {};
+	std::map<objid, std::string> idToName = {};
 
 	std::cout << "dep graph: " << std::endl;
 	for (auto &dep : depGraph){
@@ -54,33 +57,41 @@ Scenegraph createScenegraph(){
 	std::cout << std::endl;
 
 
-	std::map<objid, ScenegraphItem*> idToScenegraphItem;
+	std::map<objid, ScenegraphItem*> idToScenegraphItem = {};
 	const int LOOPMAX = 10000;
 	int i = 0;
 	while(i < LOOPMAX && childToParent.size() > 0){
 		i++;
+		std::optional<objid> idToErase = std::nullopt;
 		for (auto &[childId, parentId] : childToParent){
+			modassert(childId != parentId, "child is a parent of itself");
 			if (parentId == 0){
+				std::string label = idToName.at(childId);
 				scenegraphItems.push_back(ScenegraphItem {
-					.label = idToName.at(childId),
+					.label = label,
 					.expanded = true,
 					.children = {},
 				});
-				idToScenegraphItem[childId] = &scenegraphItems.at(scenegraphItems.size() -1);
-				childToParent.erase(childId);
+				idToScenegraphItem[childId] = &scenegraphItems[scenegraphItems.size() -1];
+				idToErase = childId;
 				break;
 			}else if (idToScenegraphItem.find(parentId) != idToScenegraphItem.end()){
+				modassert(idToScenegraphItem.find(parentId) != idToScenegraphItem.end(), "parent id not in list");
 				ScenegraphItem* parentItem = idToScenegraphItem.at(parentId);
+				std::string label = idToName.at(childId);
 				parentItem -> children.push_back(ScenegraphItem{
-					.label = idToName.at(childId),
+					.label = label,
 					.expanded = true,
 					.children = {},
 				});
-				ScenegraphItem* childItem = &(parentItem -> children.at(parentItem -> children.size() - 1));
+				ScenegraphItem* childItem = &(parentItem -> children[parentItem -> children.size() - 1]);
 				idToScenegraphItem[childId] = childItem;
-				childToParent.erase(childId);
+				idToErase = childId;
 				break;
 			}
+		}
+		if (idToErase.has_value()){
+			childToParent.erase(idToErase.value());
 		}
 	}
 	modassert(childToParent.size() == 0, "create scenegraph - invalid graph, some orphaned elements");
