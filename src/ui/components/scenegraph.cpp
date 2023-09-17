@@ -39,8 +39,17 @@ Scenegraph testScenegraph {
 
 extern CustomApiBindings* gameapi;
 
-// This function is bad, because it returns the address of indiviidual elements in the vector,
-// which seems unstable
+ScenegraphItem* getScenegraphItem(std::vector<ScenegraphItem>& scenegraphItems, std::vector<int> path){
+	ScenegraphItem* item = NULL;
+	std::vector<ScenegraphItem>* scenegraphItemsPtr = &scenegraphItems;
+	for (auto pathIndex : path){
+		item = &(scenegraphItemsPtr -> at(pathIndex));
+		scenegraphItemsPtr = &(item -> children);
+	}
+	modassert(item, "getScenegraphItem item is null");
+	return item;
+}
+
 Scenegraph createScenegraph(){
 	auto depGraph = gameapi -> scenegraph();
 
@@ -57,7 +66,7 @@ Scenegraph createScenegraph(){
 	std::cout << std::endl;
 
 
-	std::map<objid, ScenegraphItem*> idToScenegraphItem = {};
+	std::map<objid, std::vector<int>> idToScenegraphItemPath = {};
 	const int LOOPMAX = 10000;
 	int i = 0;
 	while(i < LOOPMAX && childToParent.size() > 0){
@@ -72,20 +81,23 @@ Scenegraph createScenegraph(){
 					.expanded = true,
 					.children = {},
 				});
-				idToScenegraphItem[childId] = &scenegraphItems[scenegraphItems.size() -1];
+				int index = scenegraphItems.size() - 1;
+				idToScenegraphItemPath[childId] = { index };
 				idToErase = childId;
 				break;
-			}else if (idToScenegraphItem.find(parentId) != idToScenegraphItem.end()){
-				modassert(idToScenegraphItem.find(parentId) != idToScenegraphItem.end(), "parent id not in list");
-				ScenegraphItem* parentItem = idToScenegraphItem.at(parentId);
+			}else if (idToScenegraphItemPath.find(parentId) != idToScenegraphItemPath.end()){
+				modassert(idToScenegraphItemPath.find(parentId) != idToScenegraphItemPath.end(), "parent id not in list");
+				auto path = idToScenegraphItemPath.at(parentId);
+				ScenegraphItem* parentItem = getScenegraphItem(scenegraphItems, path);
 				std::string label = idToName.at(childId);
 				parentItem -> children.push_back(ScenegraphItem{
 					.label = label,
 					.expanded = true,
 					.children = {},
 				});
-				ScenegraphItem* childItem = &(parentItem -> children[parentItem -> children.size() - 1]);
-				idToScenegraphItem[childId] = childItem;
+				path.push_back(parentItem -> children.size() - 1);
+
+				idToScenegraphItemPath[childId] = path;
 				idToErase = childId;
 				break;
 			}
