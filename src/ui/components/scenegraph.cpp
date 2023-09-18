@@ -124,7 +124,7 @@ void toggleScenegraphElement(Scenegraph& scenegraph, std::vector<int> path){
 	item -> expanded = !(item -> expanded);
 }
 
-Component createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int depth, std::vector<int> path, std::function<void(int)> onClick){
+void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int depth, std::vector<int> path, std::function<void(int)> onClick, std::function<bool(Component&)> addElement){
   std::string prefix = "";
   for (int i = 0; i < depth; i++){
   	prefix += "    ";
@@ -143,11 +143,6 @@ Component createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int
 
   bool callOnClick = item.children.size() == 0;
   std::function<void()> onClickFn = [&scenegraph, path, callOnClick, onClick]() -> void {
-  	//std::cout << "dock path is: ";
-  	for (auto index : path){
-  		std::cout << index << " ";
-  	}
-  	std::cout << std::endl;
   	toggleScenegraphElement(scenegraph, path);
   };
 
@@ -160,23 +155,19 @@ Component createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int
 
   auto listItemElement = withPropsCopy(listItem, listItemProps);
   if (item.expanded && item.children.size() > 0){
-  	std::vector<Component> elements;
-  	elements.push_back(listItemElement);
+  	bool limitReached = addElement(listItemElement);
+  	if (limitReached){
+  		return;
+  	}
   	for (int i = 0; i < item.children.size(); i++){
   		ScenegraphItem& sceneItem = item.children.at(i);
-
   		auto elementPath = path;
   		elementPath.push_back(i);
-  		//std::cout << "path is: " << print(elementPath) << std::endl;
-  		auto component = createScenegraphItem(scenegraph, sceneItem, depth + 1, elementPath, onClick);
-  		elements.push_back(component);
+  		createScenegraphItem(scenegraph, sceneItem, depth + 1, elementPath, onClick, addElement);
   	}
-
-		auto layout = simpleVerticalLayout(elements);
-		return layout;
+  }else{
+  	addElement(listItemElement);
   }
-
-  return listItemElement;
 }
 
 
@@ -189,10 +180,27 @@ Component scenegraphComponent {
   	auto onClick = typeFromProps<std::function<void(int)>>(props, onclickSymbol);
   	modassert(onClick, "scenegraph onclick not provided");
 
+    int offset = intFromProp(props, offsetSymbol, 0);
+    if (offset < 0){
+      offset = 0;
+    }
+
     std::vector<Component> elements;
+
+    int currentOffset = 0;
   	for (int i = 0; i < scenegraph -> items.size(); i++){
   		ScenegraphItem& item = scenegraph -> items.at(i);
-    	elements.push_back(createScenegraphItem(*scenegraph, item, 0, { i }, *onClick));
+    	createScenegraphItem(*scenegraph, item, 0, { i }, *onClick, [&elements, &currentOffset, &offset](Component& component) -> bool { 
+    		currentOffset++;
+    		if (currentOffset < offset){
+    			return false;
+    		}
+    		if (elements.size() >= 10){
+    			return true;
+    		}
+    		elements.push_back(component); 
+    		return false;
+    	});
   	}
   	Layout layout {
   	  .tint = glm::vec4(0.f, 0.f, 0.f, 1.f),
