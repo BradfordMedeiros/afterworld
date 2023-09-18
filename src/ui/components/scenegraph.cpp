@@ -3,14 +3,17 @@
 Scenegraph testScenegraph {
 	.items = {
 		ScenegraphItem {
+			.id = 0,
 			.label = "item1",
 			.expanded = true,
 			.children = {
 				ScenegraphItem {
+					.id = 1,
 					.label = "item1-child1",
 					.expanded = true,
 					.children = {
 						ScenegraphItem {
+							.id = 2,
 							.label = "item11-child1",
 							.expanded = true, 
 							.children = {}
@@ -18,16 +21,20 @@ Scenegraph testScenegraph {
 					}
 				},
 				ScenegraphItem {
-					.label = "item1-child2", 
+					.id = 3,
+					.label = "item1-child2",
+					.expanded = false,
 					.children = {}
 				},
 			}
 		},
 		ScenegraphItem {
+			.id = 4,
 			.label = "item2", 
 			.expanded = false,
 			.children = {
 				ScenegraphItem {
+					.id = 5,
 					.label = "item2-child1", 
 					.children = {}
 				},
@@ -77,6 +84,7 @@ Scenegraph createScenegraph(){
 			if (parentId == 0){
 				std::string label = idToName.at(childId);
 				scenegraphItems.push_back(ScenegraphItem {
+					.id = childId,
 					.label = label,
 					.expanded = true,
 					.children = {},
@@ -91,6 +99,7 @@ Scenegraph createScenegraph(){
 				ScenegraphItem* parentItem = getScenegraphItem(scenegraphItems, path);
 				std::string label = idToName.at(childId);
 				parentItem -> children.push_back(ScenegraphItem{
+					.id = childId,
 					.label = label,
 					.expanded = true,
 					.children = {},
@@ -146,8 +155,10 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
   	toggleScenegraphElement(scenegraph, path);
   };
 
-  std::function<void(int)> onClickFn2 = [onClick, &item](int) -> void {
-  	onClick(1000);
+  std::function<void(int)> onClickFn2 = [onClick, &item](int action) -> void {
+  	if (action == 1){
+  		onClick(item.id);
+  	}
   };
 
   listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClickFn });

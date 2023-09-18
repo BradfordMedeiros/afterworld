@@ -400,8 +400,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         refreshScenegraph = false;
       }
       std::function<void(int)> onClick = [](int id) -> void {
-        std::cout << "scenegraph on click" <<  id << std::endl;
-        //exit(1);
+        std::set<objid> selectedIds = { id };
+        gameapi -> setSelected(selectedIds);
       };
 
       modassert(scenegraph.has_value(), "scenegraph does not have a value");

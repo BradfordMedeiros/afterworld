@@ -7,6 +7,7 @@
 #include "./layout.h"
 
 struct ScenegraphItem {
+	objid id;
 	std::string label;
 	bool expanded;
 	std::vector<ScenegraphItem> children;
