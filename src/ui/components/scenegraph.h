@@ -9,16 +9,17 @@
 struct ScenegraphItem {
 	objid id;
 	std::string label;
-	bool expanded;
 	std::vector<ScenegraphItem> children;
 };
 
 struct Scenegraph {
 	std::vector<ScenegraphItem> items;
+	std::set<objid> idToExpanded;
 };
 
 extern Component scenegraphComponent;
 
-Scenegraph createScenegraph();
+Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds = {});
+void refreshScenegraph(Scenegraph& scenegraph);
 
 #endif

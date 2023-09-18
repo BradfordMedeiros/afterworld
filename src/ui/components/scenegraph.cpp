@@ -5,17 +5,14 @@ Scenegraph testScenegraph {
 		ScenegraphItem {
 			.id = 0,
 			.label = "item1",
-			.expanded = true,
 			.children = {
 				ScenegraphItem {
 					.id = 1,
 					.label = "item1-child1",
-					.expanded = true,
 					.children = {
 						ScenegraphItem {
 							.id = 2,
 							.label = "item11-child1",
-							.expanded = true, 
 							.children = {}
 						},
 					}
@@ -23,7 +20,6 @@ Scenegraph testScenegraph {
 				ScenegraphItem {
 					.id = 3,
 					.label = "item1-child2",
-					.expanded = false,
 					.children = {}
 				},
 			}
@@ -31,7 +27,6 @@ Scenegraph testScenegraph {
 		ScenegraphItem {
 			.id = 4,
 			.label = "item2", 
-			.expanded = false,
 			.children = {
 				ScenegraphItem {
 					.id = 5,
@@ -57,12 +52,13 @@ ScenegraphItem* getScenegraphItem(std::vector<ScenegraphItem>& scenegraphItems, 
 	return item;
 }
 
-Scenegraph createScenegraph(){
+Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds){
 	auto depGraph = gameapi -> scenegraph();
 
 	std::vector<ScenegraphItem> scenegraphItems = {};
 	std::map<objid, objid> childToParent = {};
 	std::map<objid, std::string> idToName = {};
+	std::set<objid> idToExpanded = {};
 
 	std::cout << "dep graph: " << std::endl;
 	for (auto &dep : depGraph){
@@ -76,6 +72,13 @@ Scenegraph createScenegraph(){
 	std::map<objid, std::vector<int>> idToScenegraphItemPath = {};
 	const int LOOPMAX = 10000;
 	int i = 0;
+
+	for (auto &[childId, _] : childToParent){
+		if (initiallyExpandedIds.count(childId) > 0){
+			idToExpanded.insert(childId);
+		}
+	}
+
 	while(i < LOOPMAX && childToParent.size() > 0){
 		i++;
 		std::optional<objid> idToErase = std::nullopt;
@@ -86,7 +89,6 @@ Scenegraph createScenegraph(){
 				scenegraphItems.push_back(ScenegraphItem {
 					.id = childId,
 					.label = label,
-					.expanded = true,
 					.children = {},
 				});
 				int index = scenegraphItems.size() - 1;
@@ -101,7 +103,6 @@ Scenegraph createScenegraph(){
 				parentItem -> children.push_back(ScenegraphItem{
 					.id = childId,
 					.label = label,
-					.expanded = true,
 					.children = {},
 				});
 				path.push_back(parentItem -> children.size() - 1);
@@ -118,8 +119,17 @@ Scenegraph createScenegraph(){
 	modassert(childToParent.size() == 0, "create scenegraph - invalid graph, some orphaned elements");
 	return Scenegraph  {
 		.items = scenegraphItems,
+		.idToExpanded = idToExpanded,
 	};
 	return testScenegraph;
+}
+
+void refreshScenegraph(Scenegraph& scenegraph){
+	scenegraph = createScenegraph(scenegraph.idToExpanded);
+}
+
+bool isExpanded(Scenegraph& scenegraph, objid id){
+	return scenegraph.idToExpanded.count(id) > 0;
 }
 
 void toggleScenegraphElement(Scenegraph& scenegraph, std::vector<int> path){
@@ -130,15 +140,22 @@ void toggleScenegraphElement(Scenegraph& scenegraph, std::vector<int> path){
 	for (int i = 1; i < path.size(); i++){
 		item = &(item -> children.at(path.at(i)));
 	}
-	item -> expanded = !(item -> expanded);
+	if (isExpanded(scenegraph, item -> id)){
+		scenegraph.idToExpanded.erase(item -> id);
+	}else{
+		scenegraph.idToExpanded.insert(item -> id);
+	}
 }
+
 
 void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int depth, std::vector<int> path, std::function<void(int)> onClick, int selectedIndex, std::function<bool(Component&)> addElement){
   std::string prefix = "";
   for (int i = 0; i < depth; i++){
   	prefix += "    ";
   }
-  std::string name = prefix + (item.expanded ? "-" : "x") + item.label;
+
+  bool itemIsExpanded = isExpanded(scenegraph, item.id);
+  std::string name = prefix + (itemIsExpanded ? "-" : "x") + item.label;
 
   Props listItemProps {
     .props = {
@@ -167,7 +184,7 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
 
 
   auto listItemElement = withPropsCopy(listItem, listItemProps);
-  if (item.expanded && item.children.size() > 0){
+  if (itemIsExpanded && item.children.size() > 0){
   	bool limitReached = addElement(listItemElement);
   	if (limitReached){
   		return;

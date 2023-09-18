@@ -260,7 +260,7 @@ int fileexplorerScrollAmount = 0;
 int scenegraphScrollAmount = 0;
 
 std::optional<Scenegraph> scenegraph = std::nullopt;
-bool refreshScenegraph = true;
+bool shouldRefreshScenegraph = true;
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   HandlerFns handlerFuncs {
@@ -395,9 +395,12 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   if (uiContext.isDebugMode()){
     /// scenegraph
     {
-      if (refreshScenegraph){
-        scenegraph = createScenegraph();
-        refreshScenegraph = false;
+      if (shouldRefreshScenegraph){
+        if (!scenegraph.has_value()){
+          scenegraph = createScenegraph();
+        }
+        refreshScenegraph(scenegraph.value());
+        shouldRefreshScenegraph = false;
       }
       std::function<void(int)> onClick = [](int id) -> void {
         std::set<objid> selectedIds = { id };
@@ -478,7 +481,7 @@ void onMainUiMouseRelease(){
 }
 
 void onObjectsChanged(){
-  refreshScenegraph = true;
+  shouldRefreshScenegraph = true;
 }
 
 void pushHistory(std::string route){
