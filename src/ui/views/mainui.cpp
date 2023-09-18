@@ -412,6 +412,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
           PropPair { .symbol = offsetSymbol,  .value = scenegraphScrollAmount },
         }
       };
+
+      auto selectedIds = gameapi -> selected();
+      
+      if (selectedIds.size() > 0){
+        int selectedId = selectedIds.at(0);
+        scenegraphProps.props.push_back(PropPair { .symbol = selectedSymbol, .value = selectedId });
+      }
       scenegraphComponent.draw(drawTools, scenegraphProps);
     }
     {

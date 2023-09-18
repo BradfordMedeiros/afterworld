@@ -133,7 +133,7 @@ void toggleScenegraphElement(Scenegraph& scenegraph, std::vector<int> path){
 	item -> expanded = !(item -> expanded);
 }
 
-void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int depth, std::vector<int> path, std::function<void(int)> onClick, std::function<bool(Component&)> addElement){
+void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int depth, std::vector<int> path, std::function<void(int)> onClick, int selectedIndex, std::function<bool(Component&)> addElement){
   std::string prefix = "";
   for (int i = 0; i < depth; i++){
   	prefix += "    ";
@@ -145,10 +145,11 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
       PropPair { .symbol = valueSymbol,   .value = name },
       PropPair { .symbol = paddingSymbol, .value = 0.01f },
       PropPair { .symbol = fontsizeSymbol, .value = 0.015f },
-      //PropPair { .symbol = tintSymbol, .value = glm::vec4(0.1f, 0.1f, 0.1f, 1.f) },
-      //PropPair { .symbol = colorSymbol, .value = color },
     },
   };
+  if (item.id == selectedIndex){
+  	listItemProps.props.push_back(PropPair { .symbol = colorSymbol, .value = glm::vec4(0.f, 1.f, 1.f, 1.f) });
+  }
 
   bool callOnClick = item.children.size() == 0;
   std::function<void()> onClickFn = [&scenegraph, path, callOnClick, onClick]() -> void {
@@ -164,6 +165,7 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
   listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClickFn });
   listItemProps.props.push_back(PropPair { .symbol = onclickRightSymbol, .value = onClickFn2 });
 
+
   auto listItemElement = withPropsCopy(listItem, listItemProps);
   if (item.expanded && item.children.size() > 0){
   	bool limitReached = addElement(listItemElement);
@@ -174,7 +176,7 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
   		ScenegraphItem& sceneItem = item.children.at(i);
   		auto elementPath = path;
   		elementPath.push_back(i);
-  		createScenegraphItem(scenegraph, sceneItem, depth + 1, elementPath, onClick, addElement);
+  		createScenegraphItem(scenegraph, sceneItem, depth + 1, elementPath, onClick, selectedIndex, addElement);
   	}
   }else{
   	addElement(listItemElement);
@@ -196,12 +198,14 @@ Component scenegraphComponent {
       offset = 0;
     }
 
+    int selectedIndex = intFromProp(props, selectedSymbol, 0);
+
     std::vector<Component> elements;
 
     int currentOffset = 0;
   	for (int i = 0; i < scenegraph -> items.size(); i++){
   		ScenegraphItem& item = scenegraph -> items.at(i);
-    	createScenegraphItem(*scenegraph, item, 0, { i }, *onClick, [&elements, &currentOffset, &offset](Component& component) -> bool { 
+    	createScenegraphItem(*scenegraph, item, 0, { i }, *onClick, selectedIndex, [&elements, &currentOffset, &offset](Component& component) -> bool { 
     		currentOffset++;
     		if (currentOffset < offset){
     			return false;
