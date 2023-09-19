@@ -52,8 +52,24 @@ ScenegraphItem* getScenegraphItem(std::vector<ScenegraphItem>& scenegraphItems, 
 	return item;
 }
 
+std::vector<ScenegraphDebug> filterScenegraph(std::vector<ScenegraphDebug> scenegraphItems){
+  std::vector<std::string> tags = { "game-level" };
+  auto editableSceneIds = gameapi -> listScenes(tags);
+  std::set<objid> sceneIds;
+  for (auto sceneId : editableSceneIds){
+  	sceneIds.insert(sceneId);
+  }
+	std::vector<ScenegraphDebug> items;
+	for (auto &scenegraphItem : scenegraphItems){
+		if (sceneIds.count(scenegraphItem.childScene) > 0){
+			items.push_back(scenegraphItem);
+		}
+	}
+	return items;
+}
+
 Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds){
-	auto depGraph = gameapi -> scenegraph();
+	auto depGraph = filterScenegraph(gameapi -> scenegraph());
 
 	std::vector<ScenegraphItem> scenegraphItems = {};
 	std::map<objid, objid> childToParent = {};
@@ -79,7 +95,8 @@ Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds){
 		}
 	}
 
-	while(i < LOOPMAX && childToParent.size() > 0){
+	while(childToParent.size() > 0){
+		modassert(i < LOOPMAX, "loopmax hit, create scenegraph");
 		i++;
 		std::optional<objid> idToErase = std::nullopt;
 		for (auto &[childId, parentId] : childToParent){
@@ -234,6 +251,21 @@ Component scenegraphComponent {
     		return false;
     	});
   	}
+
+
+  	if (elements.size() == 0){
+  		Props listItemProps {
+  		  .props = {
+  		    PropPair { .symbol = valueSymbol,   .value = std::string("[no elements]") },
+  		    PropPair { .symbol = paddingSymbol, .value = 0.01f },
+  		    PropPair { .symbol = fontsizeSymbol, .value = 0.015f },
+  		  },
+  		};
+  		auto listItemElement = withPropsCopy(listItem, listItemProps);
+  		elements.push_back(listItemElement);
+  	}
+
+  	modassert(elements.size() > 0, "scenegraph must have at least 1 elements");
   	Layout layout {
   	  .tint = glm::vec4(0.f, 0.f, 0.f, 1.f),
   	  .showBackpanel = true,
