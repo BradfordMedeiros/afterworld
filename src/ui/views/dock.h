@@ -8,6 +8,7 @@
 #include "../components/slider.h"
 #include "../components/checkbox.h"
 #include "../components/textbox.h"
+#include "../components/scenegraph.h"
 #include "../../util.h"
 
 extern Component dockComponent;

@@ -257,10 +257,7 @@ ImageList imageListDatas {
 };
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
-int scenegraphScrollAmount = 0;
 
-std::optional<Scenegraph> scenegraph = std::nullopt;
-bool shouldRefreshScenegraph = true;
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   HandlerFns handlerFuncs {
@@ -393,37 +390,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   router.draw(drawTools, routerProps);
 
   if (uiContext.isDebugMode()){
-    /// scenegraph
-    {
-      if (shouldRefreshScenegraph){
-        if (!scenegraph.has_value()){
-          scenegraph = createScenegraph();
-        }
-        refreshScenegraph(scenegraph.value());
-        shouldRefreshScenegraph = false;
-      }
-      std::function<void(int)> onClick = [](int id) -> void {
-        std::set<objid> selectedIds = { id };
-        gameapi -> setSelected(selectedIds);
-      };
-
-      modassert(scenegraph.has_value(), "scenegraph does not have a value");
-      Props scenegraphProps {
-        .props = {
-          PropPair { .symbol = valueSymbol, .value = &(scenegraph.value()) },
-          PropPair { .symbol = onclickSymbol, .value = onClick },
-          PropPair { .symbol = offsetSymbol,  .value = scenegraphScrollAmount },
-        }
-      };
-
-      auto selectedIds = gameapi -> selected();
-      
-      if (selectedIds.size() > 0){
-        int selectedId = selectedIds.at(0);
-        scenegraphProps.props.push_back(PropPair { .symbol = selectedSymbol, .value = selectedId });
-      }
-      scenegraphComponent.draw(drawTools, scenegraphProps);
-    }
     {
       Props defaultProps {
         .props = {},
@@ -462,10 +428,7 @@ void onMainUiScroll(double amount){
     fileexplorerScrollAmount = 0;
   }
 
-  scenegraphScrollAmount += scrollValue;
-  if (scenegraphScrollAmount < 0){
-    scenegraphScrollAmount = 0;
-  }
+  scenegraphScroll(scrollValue);
 }
 
 void onMainUiMousePress(std::optional<objid> selectedId){
@@ -481,7 +444,7 @@ void onMainUiMouseRelease(){
 }
 
 void onObjectsChanged(){
-  shouldRefreshScenegraph = true;
+  refreshScenegraph();
 }
 
 void pushHistory(std::string route){

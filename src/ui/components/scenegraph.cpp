@@ -141,9 +141,6 @@ Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds){
 	return testScenegraph;
 }
 
-void refreshScenegraph(Scenegraph& scenegraph){
-	scenegraph = createScenegraph(scenegraph.idToExpanded);
-}
 
 bool isExpanded(Scenegraph& scenegraph, objid id){
 	return scenegraph.idToExpanded.count(id) > 0;
@@ -179,6 +176,7 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
       PropPair { .symbol = valueSymbol,   .value = name },
       PropPair { .symbol = paddingSymbol, .value = 0.01f },
       PropPair { .symbol = fontsizeSymbol, .value = 0.015f },
+      PropPair { .symbol = tintSymbol, .value =  glm::vec4(0.f, 0.f, 0.f, 0.f) },
     },
   };
   if (item.id == selectedIndex){
@@ -216,7 +214,6 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
   	addElement(listItemElement);
   }
 }
-
 
 Component scenegraphComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -267,9 +264,9 @@ Component scenegraphComponent {
 
   	modassert(elements.size() > 0, "scenegraph must have at least 1 elements");
   	Layout layout {
-  	  .tint = glm::vec4(0.f, 0.f, 0.f, 1.f),
+  	  .tint = glm::vec4(0.f, 0.f, 1.f, 0.1f),
   	  .showBackpanel = true,
-  	  .borderColor = std::nullopt,
+  	  .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.1f),
   	  .minwidth = 0.5f,
   	  .minheight = 0.5f,
   	  .layoutType = LAYOUT_VERTICAL2,
@@ -291,3 +288,47 @@ Component scenegraphComponent {
   	return layoutScenegraph.draw(drawTools, props);
   },
 };
+
+int scenegraphScrollAmount = 0;
+bool shouldRefreshScenegraph = true;
+std::optional<Scenegraph> scenegraphValue = std::nullopt;
+void refreshScenegraph(){
+	shouldRefreshScenegraph = true;
+}
+void scenegraphScroll(int scrollValue){
+  scenegraphScrollAmount += scrollValue;
+  if (scenegraphScrollAmount < 0){
+    scenegraphScrollAmount = 0;
+  }
+}
+
+Component scenegraphContainer {
+  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+  	if (shouldRefreshScenegraph){
+  		if (!scenegraphValue.has_value()){
+  		  scenegraphValue = createScenegraph({});
+  		}else{
+  			scenegraphValue = createScenegraph(scenegraphValue.value().idToExpanded);
+  		}
+  		shouldRefreshScenegraph = false;
+  	}
+  	props.props.push_back(PropPair { .symbol = valueSymbol, .value = &(scenegraphValue.value()) });
+
+  	std::function<void(int)> onClick = [](int id) -> void {
+      std::set<objid> selectedIds = { id };
+      gameapi -> setSelected(selectedIds);
+    };
+    props.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClick });
+		props.props.push_back(PropPair { .symbol = offsetSymbol,  .value = scenegraphScrollAmount });
+
+    auto selectedIds = gameapi -> selected();
+    if (selectedIds.size() > 0){
+      int selectedId = selectedIds.at(0);
+      props.props.push_back(PropPair { .symbol = selectedSymbol, .value = selectedId });
+    }
+
+  	return scenegraphComponent.draw(drawTools, props);
+  },
+};
+
+

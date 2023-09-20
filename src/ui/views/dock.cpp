@@ -54,10 +54,11 @@ struct DockGameObjSelector {
   std::optional<std::string> label;
 };
 
+struct DockScenegraph {};
 
 struct DockImageGroup;
 
-typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup> DockConfig;
+typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup, DockScenegraph> DockConfig;
 
 struct DockImageGroup {
   std::string groupName;
@@ -276,6 +277,12 @@ std::vector<DockConfiguration> configurations {
       },
     },
   },
+  DockConfiguration {
+    .title = "Scenegraph",
+    .configFields = {
+      DockScenegraph {},
+    },
+  },
 };
 
 DockConfiguration* dockConfigByName(std::string name){
@@ -463,6 +470,11 @@ Component createDockComponent(DockConfig& config){
       componentsForFields(dockGroupOptions -> configFields, elements);
     }
     return simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(0.f, 0.f, 0.f, 1.f), 0.01f);
+  }
+
+  auto dockScenegraphOptions = std::get_if<DockScenegraph>(&config);
+  if (dockScenegraphOptions){
+    return scenegraphContainer;
   }
 
   modassert(false, "dock component not yet implemented");

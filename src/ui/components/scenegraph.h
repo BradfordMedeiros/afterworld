@@ -18,8 +18,10 @@ struct Scenegraph {
 };
 
 extern Component scenegraphComponent;
+extern Component scenegraphContainer;
 
 Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds = {});
-void refreshScenegraph(Scenegraph& scenegraph);
+void refreshScenegraph();
+void scenegraphScroll(int scrollValue);
 
 #endif

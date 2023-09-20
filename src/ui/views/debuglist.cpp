@@ -7,7 +7,7 @@ std::vector<NestedListItem> nestedListTest = {
   NestedListItem {
     .item = ImListItem {
       .value = "file",
-      .onClick = std::nullopt,
+      .onClick = []() -> void { },
       .mappingId = mappingId++,
     },
     .items = {
@@ -77,7 +77,7 @@ std::vector<NestedListItem> nestedListTest = {
   NestedListItem {
     .item = ImListItem {
       .value = "render",
-      .onClick = std::nullopt,
+      .onClick = []() -> void { },
       .mappingId = mappingId++,
     },
     .items = {
@@ -200,7 +200,7 @@ std::vector<NestedListItem> nestedListTest = {
   NestedListItem {
     .item = ImListItem {
       .value = "editor",
-      .onClick = std::nullopt,
+      .onClick = []() -> void { },
       .mappingId = mappingId++,
     },
     .items = {
@@ -339,7 +339,7 @@ std::vector<NestedListItem> nestedListTest = {
   NestedListItem {
     .item = ImListItem {
       .value = "debug",
-      .onClick = []() -> void { }, // maybe this should send a request to core engine so can shutdown properly }
+      .onClick = []() -> void { },
       .mappingId = mappingId++,
     },
     .items = {
@@ -374,7 +374,7 @@ std::vector<NestedListItem> nestedListTest = {
   NestedListItem {
     .item = ImListItem {
       .value = "scene",
-      .onClick = std::nullopt, 
+      .onClick = []() -> void { }, 
       .mappingId = mappingId++,
     },
     .items = {
@@ -407,7 +407,7 @@ std::vector<NestedListItem> nestedListTest = {
   NestedListItem {
     .item = ImListItem {
       .value = "misc fun",
-      .onClick = std::nullopt, 
+      .onClick = []() -> void { }, 
       .mappingId = mappingId++,
     },
     .items = {
