@@ -21,7 +21,7 @@ struct DockButtonConfig {
 };
 struct DockOptionConfig {
   std::vector<const char*> options;
-  std::function<void(std::string&)> onClick;
+  std::function<void(std::string&, int)> onClick;
   std::function<int(void)> getSelectedIndex;
 };
 struct DockSliderConfig {
@@ -95,7 +95,7 @@ std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute, 
 
 std::function<void(bool)> getOnCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
   return [key, attribute, enabledValue, disabledValue](bool checked) -> void {
-    dockConfigApi.setAttribute("skybox", "enable", checked ? enabledValue : disabledValue);
+    dockConfigApi.setAttribute(key, attribute, checked ? enabledValue : disabledValue);
   };
 }
 
@@ -140,7 +140,7 @@ std::function<float()> getFloatGameobj(std::string key){
 }
 
 /*
-
+snap-rotate
         [
           "type" => "checkbox",
           "data" => [
@@ -153,6 +153,115 @@ std::function<float()> getFloatGameobj(std::string key){
           ],
         ],*/
 
+
+/*
+    "transform_types" => [
+      "items" => [ 
+
+
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "position", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "x", 
+                "value" => [ 
+                  "binding" => "gameobj:position", 
+                  "binding-index" =>  0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "y", 
+                "value" => [ 
+                  "binding" => "gameobj:position", 
+                  "binding-index" =>  1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "z", 
+                "value" => [ 
+                  "binding" => "gameobj:position", 
+                  "binding-index" =>  2,
+                  "type" => "number",
+                ]
+              ]
+            ]
+          ],
+        ],
+
+
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "scale", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "x", 
+                "value" => [ 
+                  "binding" => "gameobj:scale", 
+                  "binding-index" =>  0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "y", 
+                "value" => [ 
+                  "binding" => "gameobj:scale", 
+                  "binding-index" =>  1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "z", 
+                "value" => [ 
+                  "binding" => "gameobj:scale", 
+                  "binding-index" =>  2,
+                  "type" => "number",
+                ]
+              ]
+            ]
+          ],
+        ],
+
+
+      ],
+    ],*/
+
+struct OptionData {
+  const char* optionName;
+
+};
+std::function<void(std::string& choice, int)> optionsOnClick(std::string key, std::string attribute, std::vector<AttributeValue> optionValueMapping){
+  return [key, attribute, optionValueMapping](std::string& choice, int selectedIndex) -> void {
+    dockConfigApi.setAttribute(key, attribute, optionValueMapping.at(selectedIndex));
+  };
+}
+std::function<int()> optionsSelectedIndex(std::string key, std::string attribute, std::vector<AttributeValue> optionValueMapping){
+  return [key, attribute, optionValueMapping]() -> int {
+    auto attr = dockConfigApi.getAttribute(key, attribute);
+    for (int i = 0; i < optionValueMapping.size(); i++){
+      auto value = optionValueMapping.at(i);
+      bool equal = aboutEqual(optionValueMapping.at(i), attr); 
+      //std::cout << "comparing to: " << print(attr) << ", to " << print(value) << ", " << (equal ? "true" : "false") << std::endl;
+      if (equal){
+        return i;
+      }
+    }
+    modassert(false, "options selected index - invalid");
+    return 0;
+  };
+
+}
+
 bool collapseTestGroup = true;
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
@@ -162,6 +271,53 @@ std::vector<DockConfiguration> configurations {
         .buttonText = "no panel available",
         .onClick = []() -> void {},
       },
+    },
+  },
+  DockConfiguration {
+    .title = "Editor",
+    .configFields = {
+      DockCheckboxConfig {
+        .label = "Group Selection",
+        .isChecked = getIsCheckedWorld("editor", "groupselection", "true", "false"),
+        .onChecked = getOnCheckedWorld("editor", "groupselection", "true", "false"),
+      },
+      DockCheckboxConfig {
+        .label = "Symmetric Translate",
+        .isChecked = getIsCheckedWorld("tools", "position-mirror", "true", "false"),
+        .onChecked = getOnCheckedWorld("tools", "position-mirror", "true", "false"),
+      },
+      DockCheckboxConfig {
+        .label = "Absolute Translate",
+        .isChecked = getIsCheckedWorld("tools", "snap-position", "absolute", "relative"),
+        .onChecked = getOnCheckedWorld("tools", "snap-position", "absolute", "relative"),
+      },
+      DockOptionConfig { // Snap Translates
+        .options = { "0.01", "0.1", "0.5", "1", "5" },
+        .onClick = optionsOnClick("editor", "snaptranslate-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
+      },
+      DockCheckboxConfig {
+        .label = "Preserve Scale",
+        .isChecked = getIsCheckedWorld("tools", "preserve-scale", "true", "false"),
+        .onChecked = getOnCheckedWorld("tools", "preserve-scale", "true", "false"),
+      },
+      DockOptionConfig {  // "Snap Scales",
+        .options = { "0.01", "0.1", "0.5", "1", "5" },
+        .onClick = optionsOnClick("editor", "snapscale-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
+      },
+      DockCheckboxConfig {
+        .label = "Absolute Rotation",
+        .isChecked = getIsCheckedWorld("tools", "snap-rotate", "absolute", "relative"),
+        .onChecked = getOnCheckedWorld("tools", "snap-rotate", "absolute", "relative"),
+      },
+      DockOptionConfig { // Snap Rotation
+        .options = { "1", "5", "15", "30", "45", "90", "180" },
+        .onClick = optionsOnClick("editor", "snapangle-index", { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle-index", { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }),
+      },
+
+
     },
   },
   DockConfiguration {
@@ -176,7 +332,7 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig {
         .options = { "enable dof", "disable dof" },
-        .onClick = [](std::string& choice) -> void {
+        .onClick = [](std::string& choice, int) -> void {
           std::cout << "dock mock enable dof: " << choice << std::endl;
           if (choice == "enable dof"){
             selectedIndex = 0;
@@ -244,7 +400,7 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig {
         .options = { "point", "spotlight", "directional" },
-        .onClick = [](std::string& choice) -> void {
+        .onClick = [](std::string& choice, int) -> void {
           std::cout << "dock mock toggle light mode: " << choice << std::endl;
           if (choice == "point"){
             selectedIndex = 0;
@@ -322,13 +478,14 @@ Component createDockComponent(DockConfig& config){
   auto dockOptions = std::get_if<DockOptionConfig>(&config);
   if (dockOptions){
     std::vector<Option> optionsData = {};
-    for (auto &option : dockOptions -> options){
+    for (int i = 0; i < dockOptions -> options.size(); i++){
+      auto option = dockOptions -> options.at(i);
       auto onClick = dockOptions -> onClick;
       optionsData.push_back(Option {
         .name = option,
-        .onClick = [onClick, option]() -> void {
+        .onClick = [onClick, option, i]() -> void {
           std::string optionStr(option);
-          onClick(optionStr);
+          onClick(optionStr, i);
         },
       });
     }
@@ -498,7 +655,7 @@ Component genericDockComponent {
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 1.f, 0.2f),
-      .showBackpanel = true,
+      .showBackpanel = false,
       .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
       .minwidth = 0.5f,
       .minheight = 0.f,
@@ -549,7 +706,7 @@ Component dockComponent {
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
-      .showBackpanel = true,
+      .showBackpanel = false,
       .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,
       .minheight = 1.f,
@@ -574,6 +731,7 @@ Component dockComponent {
     return withProps(layoutComponent, listLayoutProps).draw(drawTools, props);
   },
 };
+
 
 
 
