@@ -56,9 +56,14 @@ struct DockGameObjSelector {
 
 struct DockScenegraph {};
 
+struct DockTextboxNumeric {
+  std::string label;
+  float value;
+};
+
 struct DockImageGroup;
 
-typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup, DockScenegraph> DockConfig;
+typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup, DockScenegraph, DockTextboxNumeric> DockConfig;
 
 struct DockImageGroup {
   std::string groupName;
@@ -259,8 +264,9 @@ std::function<int()> optionsSelectedIndex(std::string key, std::string attribute
     modassert(false, "options selected index - invalid");
     return 0;
   };
-
 }
+
+
 
 bool collapseTestGroup = true;
 std::vector<DockConfiguration> configurations {
@@ -270,6 +276,88 @@ std::vector<DockConfiguration> configurations {
       DockButtonConfig {
         .buttonText = "no panel available",
         .onClick = []() -> void {},
+      },
+    },
+  },
+
+/*
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "texture options", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "tiling x", 
+                "value" => [ 
+                  "binding" => "gameobj:texturetiling", 
+                  "binding-index" => 0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "tiling y", 
+                "value" => [ 
+                  "binding" => "gameobj:texturetiling", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "size x", 
+                "value" => [ 
+                  "binding" => "gameobj:texturesize", 
+                  "binding-index" => 0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "size y", 
+                "value" => [ 
+                  "binding" => "gameobj:texturesize", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "offset x", 
+                "value" => [ 
+                  "binding" => "gameobj:textureoffset", 
+                  "binding-index" => 0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "offset y", 
+                "value" => [ 
+                  "binding" => "gameobj:textureoffset", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+            ]
+          ],
+        ],
+        */
+  DockConfiguration {
+    .title = "Textures",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "no panel available",
+        .onClick = []() -> void {},
+      },
+      DockTextboxNumeric {
+        .label = "tiling x",
+        .value = 10.f,
+      },
+      DockTextboxNumeric {
+        .label = "tiling y",
+        .value = 20.f,
       },
     },
   },
@@ -316,8 +404,6 @@ std::vector<DockConfiguration> configurations {
         .onClick = optionsOnClick("editor", "snapangle-index", { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }),
         .getSelectedIndex = optionsSelectedIndex("editor", "snapangle-index", { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }),
       },
-
-
     },
   },
   DockConfiguration {
@@ -438,6 +524,56 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockScenegraph {},
     },
+  },
+
+  DockConfiguration {
+    .title = "Debug",
+    .configFields = {
+      DockCheckboxConfig {
+        .label = "Show Debug",
+        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
+        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+      },
+      DockCheckboxConfig {
+        .label = "Show Cameras",
+        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
+        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+      },
+      DockCheckboxConfig {
+        .label = "Show Lights",
+        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
+        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+      },
+      DockCheckboxConfig {
+        .label = "Show Sound",
+        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
+        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+      },   
+    },
+  },
+
+  DockConfiguration {
+    .title = "Transform",
+    .configFields = {
+      DockOptionConfig { // Snap Translates
+        .options = { "translate", "scale", "rotate" },
+        .onClick = optionsOnClick("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
+        .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
+      },
+      DockOptionConfig { // Snap Translates
+        .options = { "x", "y", "z" },
+        .onClick = optionsOnClick("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
+        .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
+      },
+      DockButtonConfig {
+        .buttonText = "copy",
+        .onClick = []() -> void {},
+      },
+      DockButtonConfig {
+        .buttonText = "paste",
+        .onClick = []() -> void {},
+      },
+    }
   },
 };
 
@@ -632,6 +768,17 @@ Component createDockComponent(DockConfig& config){
   auto dockScenegraphOptions = std::get_if<DockScenegraph>(&config);
   if (dockScenegraphOptions){
     return scenegraphContainer;
+  }
+
+  auto dockTextboxNumeric = std::get_if<DockTextboxNumeric>(&config);
+  if (dockTextboxNumeric){
+    Props textboxProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = std::string(dockTextboxNumeric -> label) + std::to_string(dockTextboxNumeric -> value) },
+      }
+    };
+    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+    return textboxWithProps;  
   }
 
   modassert(false, "dock component not yet implemented");

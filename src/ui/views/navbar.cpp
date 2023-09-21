@@ -27,16 +27,20 @@ std::vector<NavbarOption> navbarOptions = {
 		.dock = "Lights",
 	},
 	NavbarOption {
-		.name = "Sound",
-		.dock = "Sound",
+		.name = "Textures",
+		.dock = "Textures",
 	},
 	NavbarOption {
-		.name = "Text",
-		.dock = "Text",
+		.name = "Transform",
+		.dock = "Transform",
 	},
 	NavbarOption {
 		.name = "Scenegraph",
 		.dock = "Scenegraph",
+	},
+	NavbarOption {
+		.name = "Debug",
+		.dock = "Debug",
 	},
 	/*NavbarOption {
 		.name = "Scene Info",
