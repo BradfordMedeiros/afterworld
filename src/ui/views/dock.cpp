@@ -266,6 +266,29 @@ std::function<int()> optionsSelectedIndex(std::string key, std::string attribute
   };
 }
 
+std::function<void(std::string& choice, int)> optionsOnClickObj(std::string attribute, std::vector<AttributeValue> optionValueMapping){
+  return [attribute, optionValueMapping](std::string& choice, int selectedIndex) -> void {
+    dockConfigApi.setObjAttr(attribute, optionValueMapping.at(selectedIndex));
+  };
+}
+std::function<int()> optionsSelectedIndexObj(std::string attribute, std::vector<AttributeValue> optionValueMapping){
+  return [attribute, optionValueMapping]() -> int {
+    auto attr = dockConfigApi.getObjAttr(attribute);
+    if (!attr.has_value()){
+      return false;
+    }
+
+    for (int i = 0; i < optionValueMapping.size(); i++){
+      auto value = optionValueMapping.at(i);
+      bool equal = aboutEqual(optionValueMapping.at(i), attr.value()); 
+      //std::cout << "comparing to: " << print(attr) << ", to " << print(value) << ", " << (equal ? "true" : "false") << std::endl;
+      if (equal){
+        return i;
+      }
+    }
+    return -1;
+  };
+}
 
 
 bool collapseTestGroup = true;
@@ -279,85 +302,37 @@ std::vector<DockConfiguration> configurations {
       },
     },
   },
-
-/*
-        [
-          "type" => "numeric",
-          "data" => [
-            "key" => "texture options", 
-            "value" => [
-              [ 
-                "type" => "float", 
-                "name" => "tiling x", 
-                "value" => [ 
-                  "binding" => "gameobj:texturetiling", 
-                  "binding-index" => 0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "tiling y", 
-                "value" => [ 
-                  "binding" => "gameobj:texturetiling", 
-                  "binding-index" => 1,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "size x", 
-                "value" => [ 
-                  "binding" => "gameobj:texturesize", 
-                  "binding-index" => 0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "size y", 
-                "value" => [ 
-                  "binding" => "gameobj:texturesize", 
-                  "binding-index" => 1,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "offset x", 
-                "value" => [ 
-                  "binding" => "gameobj:textureoffset", 
-                  "binding-index" => 0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "offset y", 
-                "value" => [ 
-                  "binding" => "gameobj:textureoffset", 
-                  "binding-index" => 1,
-                  "type" => "number",
-                ]
-              ],
-            ]
-          ],
-        ],
-        */
   DockConfiguration {
     .title = "Textures",
     .configFields = {
-      DockButtonConfig {
-        .buttonText = "no panel available",
-        .onClick = []() -> void {},
-      },
       DockTextboxNumeric {
         .label = "tiling x",
         .value = 10.f,
+        // gameobj:texturetiling
       },
       DockTextboxNumeric {
         .label = "tiling y",
         .value = 20.f,
+      },
+      DockTextboxNumeric {
+        .label = "texturesize x",
+        .value = 20.f,
+        // gameobj:texturetiling
+      },
+      DockTextboxNumeric {
+        .label = "texturesize y",
+        .value = 20.f,
+        // gameobj:texturetiling
+      },
+      DockTextboxNumeric {
+        .label = "textureoffset x",
+        .value = 20.f,
+        // gameobj:textureoffset
+      },
+      DockTextboxNumeric {
+        .label = "textureoffset y",
+        .value = 20.f,
+        // gameobj:textureoffset
       },
     },
   },
@@ -409,24 +384,14 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "Cameras",
     .configFields = {
-      DockLabelConfig {
-        .label = "some camera placeholder label",
-      },
       DockButtonConfig {
         .buttonText = "Create Camera",
         .onClick = []() -> void { dockConfigApi.createCamera(); },
       },
       DockOptionConfig {
         .options = { "enable dof", "disable dof" },
-        .onClick = [](std::string& choice, int) -> void {
-          std::cout << "dock mock enable dof: " << choice << std::endl;
-          if (choice == "enable dof"){
-            selectedIndex = 0;
-          }else if (choice == "disable dof"){
-            selectedIndex = 1;
-          }
-        },
-        .getSelectedIndex = []() -> int { return selectedIndex; },
+        .onClick = optionsOnClickObj("dof", { "enabled", "disabled" }),
+        .getSelectedIndex = optionsSelectedIndexObj("dof",  { "enabled", "disabled" }),
       },
       DockCheckboxConfig {
         .label = "enable physics",
