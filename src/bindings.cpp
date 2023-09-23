@@ -65,6 +65,7 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
   return std::nullopt;
 }
 void goToMenu(GameState& gameState){
+  exitGameMode();
   if (gameState.loadedLevel.has_value()){
     gameState.loadedLevel = std::nullopt;
     unloadAllManagedScenes();
@@ -91,13 +92,14 @@ void setPausedMode(bool shouldBePaused){
     }
     downTime = gameapi -> timeSeconds(true);
   }
-
-
 }
+
+
 void togglePauseMode(GameState& gameState){
-  bool isPaused = getGlobalState().paused;
-  setPausedMode(!isPaused);
+  bool paused = isPaused();
+  setPausedMode(!paused);
 }
+
 
 
 UiContext getUiContext(GameState& gameState){
@@ -115,7 +117,7 @@ UiContext getUiContext(GameState& gameState){
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState, level.scene);
-        setPausedMode(false);
+        enterGameMode();
         pushHistory("playing");
       },
       .getLevels = [&gameState]() -> std::vector<Level> {
@@ -130,6 +132,17 @@ UiContext getUiContext(GameState& gameState){
       .elapsedTime = gameapi -> timeSeconds(true) - downTime,
       .pause = pause,
       .resume = resume,
+    },
+    .worldPlayInterface = WorldPlayInterface {
+      .isGameMode = []() -> bool { return getGlobalState().inGameMode; },
+      .isPaused = isPaused,
+      .enterGameMode = enterGameMode,
+      .exitGameMode = exitGameMode,
+      .pause = pause,
+      .resume = resume,
+      .saveScene = []() -> void {
+        std::cout << "save scene placeholder" << std::endl;
+      }
     },
   };
   return uiContext;
@@ -332,6 +345,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       gameState -> dragSelect = args.at("dragselect");
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
     }
+
+    setPaused(true);
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

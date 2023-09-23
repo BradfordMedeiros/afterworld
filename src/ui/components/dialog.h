@@ -2,8 +2,8 @@
 #define MOD_AFTERWORLD_COMPONENTS_DIALOG
 
 #include "./common.h"
-#include "./listitem.h"
-#include "./list.h"
+#include "./basic/listitem.h"
+#include "./basic/list.h"
 #include "./textbox.h"
 
 extern Component dialogComponent;

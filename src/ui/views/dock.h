@@ -2,11 +2,11 @@
 #define MOD_AFTERWORLD_COMPONENTS_DOCK
 
 #include "../components/common.h"
-#include "../components/list.h"
-#include "../components/button.h"
-#include "../components/options.h"
+#include "../components/basic/list.h"
+#include "../components/basic/button.h"
+#include "../components/basic/options.h"
 #include "../components/slider.h"
-#include "../components/checkbox.h"
+#include "../components/basic/checkbox.h"
 #include "../components/textbox.h"
 #include "../components/scenegraph.h"
 #include "../../util.h"

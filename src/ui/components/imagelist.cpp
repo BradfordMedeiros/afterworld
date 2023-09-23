@@ -16,6 +16,10 @@ Component imageList  {
       offset = 0;
     }
 
+    int numColumns = 0;
+    int numRows = 0;
+
+    auto setFixedSize = boolFromProp(props, fixedSizeSymbol, true);
   	modassert(imageList, "invalid image list prop");
   	for (int i = offset; i < imageList -> images.size(); i++){
       auto mappingId = uniqueMenuItemMappingId();
@@ -26,19 +30,30 @@ Component imageList  {
         break;
       }
 
+      if (row > numRows){
+        numRows = row;
+      }
+      if (column > numColumns){
+        numColumns = column;
+      }
       float width = 0.1f;
       float height = 0.1f;
       float x = column * width;
       float y = -1.f * row * height;
 
-    	drawTools.drawRect(x, y, width, height, false, selected ? glm::vec4(2.f, 2.f, 2.f, 1.f) : std::optional<glm::vec4>(std::nullopt), std::nullopt, true, mappingId, imageList -> images.at(i));
+      auto image = imageList -> images.at(i);
+      auto tint = selected ? glm::vec4(2.f, 2.f, 2.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+      if (image.tint.has_value()){
+        tint = image.tint.value();
+      }
+    	drawTools.drawRect(x, y, width, height, false, tint, std::nullopt, true, mappingId, image.image);
       BoundingBox2D box {
         .x = x,
         .y = y,
         .width  = width,
         .height = height,
       };
-      if (selected){
+      if (!image.tint.has_value() && selected){
         drawDebugBoundingBox(drawTools, box, glm::vec4(1.f, 1.f, 1.f, 1.f));
       }
       drawTools.registerCallbackFns(mappingId, [onClick, i]() -> void {
@@ -48,7 +63,12 @@ Component imageList  {
   	}
 
     setBox(measurer, 0, 0, 0.1f, 0.1f);
-    setBox(measurer, (numPerRow - 1) * 0.1f , (maxRows -1) * -0.1f, 0.1f, 0.1f);
+
+    if (setFixedSize){
+      setBox(measurer, (numPerRow - 1) * 0.1f , (maxRows -1) * -0.1f, 0.1f, 0.1f);
+    }else{
+      setBox(measurer, numColumns * 0.1f, numRows * -0.1f, 0.1f, 0.1f);
+    }
 
     auto boundingBox = measurerToBox(measurer);
     //drawDebugBoundingBox(drawTools, boundingBox);

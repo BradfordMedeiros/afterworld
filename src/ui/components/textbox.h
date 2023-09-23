@@ -2,7 +2,7 @@
 #define MOD_AFTERWORLD_COMPONENTS_TEXTBOX
 
 #include "./common.h"
-#include "./listitem.h"
+#include "./basic/listitem.h"
 
 extern Component textbox;
 

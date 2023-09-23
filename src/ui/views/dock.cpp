@@ -490,7 +490,6 @@ std::vector<DockConfiguration> configurations {
       DockScenegraph {},
     },
   },
-
   DockConfiguration {
     .title = "Debug",
     .configFields = {
@@ -516,7 +515,6 @@ std::vector<DockConfiguration> configurations {
       },   
     },
   },
-
   DockConfiguration {
     .title = "Transform",
     .configFields = {
@@ -537,6 +535,88 @@ std::vector<DockConfiguration> configurations {
       DockButtonConfig {
         .buttonText = "paste",
         .onClick = []() -> void {},
+      },
+    }
+  },
+
+  // Gameplay Docks //////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////
+  DockConfiguration {
+    .title = "MOVEMENT",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "MOVEMENT",
+        .onClick = []() -> void {},
+      },
+    }
+  },
+  DockConfiguration {
+    .title = "WEAPONS",
+    .configFields = {
+      DockCheckboxConfig {
+        .label = "Iron Sights",
+        .isChecked = getIsCheckedWorld("editor", "groupselection", "true", "false"),
+        .onChecked = getOnCheckedWorld("editor", "groupselection", "true", "false"),
+      },
+      DockTextboxNumeric {
+        .label = "Horizontal Sway",
+        .value = 10.f,
+        // gameobj:water-viscosity  // positive number
+      },
+      DockTextboxNumeric {
+        .label = "Vertical Sway",
+        .value = 10.f,
+        // gameobj:water-viscosity  // positive number
+      },
+    }
+  },
+  DockConfiguration {
+    .title = "TRIGGERS",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Trigger",
+        .onClick = []() -> void {},
+      },
+      DockTextboxConfig {
+        .text = []() -> std::string {  // gameobj:trigger-switch
+          return "trigger-name-plaeholder"; 
+        },
+        .onEdit = [](std::string value) -> void {
+
+        }
+      },
+    }
+  },
+  DockConfiguration {
+    .title = "HUD",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "HUD",
+        .onClick = []() -> void {},
+      },
+    }
+  },
+  DockConfiguration {
+    .title = "WATER",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Water",
+        .onClick = []() -> void {},
+      },
+      DockTextboxNumeric {
+        .label = "Density",
+        .value = 10.f,
+        // gameobj:water-density   // positive number
+      },
+      DockTextboxNumeric {
+        .label = "Viscosity",
+        .value = 10.f,
+        // gameobj:water-viscosity  // positive number
+      },
+      DockTextboxNumeric {
+        .label = "Gravity",
+        .value = 10.f,
+        // gameobj:water-gravity  // positive number
       },
     }
   },

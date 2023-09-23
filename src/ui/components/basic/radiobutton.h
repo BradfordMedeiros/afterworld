@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_COMPONENTS_RADIOBUTTON
 #define MOD_AFTERWORLD_COMPONENTS_RADIOBUTTON
 
-#include "./common.h"
+#include "../common.h"
 
 struct RadioButton {
   bool selected;

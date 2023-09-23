@@ -6,6 +6,7 @@
 
 struct GlobalState {
   bool paused;
+  bool inGameMode;
   bool showScreenspaceGrid;
 
   float xNdc;
@@ -15,6 +16,8 @@ struct GlobalState {
 
 void setPaused(bool paused);
 bool isPaused();
+void enterGameMode();
+void exitGameMode();
 GlobalState& getGlobalState();
 
 #endif 

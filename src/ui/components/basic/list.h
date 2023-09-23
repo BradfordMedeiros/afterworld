@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_COMPONENTS_LIST
 #define MOD_AFTERWORLD_COMPONENTS_LIST
 
-#include "./common.h"
+#include "../common.h"
 #include "./listitem.h"
 #include "./layout.h"
 

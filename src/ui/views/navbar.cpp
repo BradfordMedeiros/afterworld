@@ -77,12 +77,44 @@ std::vector<NavbarOption> navbarOptions = {
 	},*/
 };
 
+std::vector<NavbarOption> navbarOptionsGameplay = {
+	NavbarOption {
+		.name = "Hide",
+		.dock = "",
+	},
+	NavbarOption {
+		.name = "MOVEMENT",
+		.dock = "MOVEMENT",
+	},
+	NavbarOption {
+		.name = "WEAPONS",
+		.dock = "WEAPONS",
+	},
+	NavbarOption {
+		.name = "TRIGGERS",
+		.dock = "TRIGGERS",
+	},
+	NavbarOption {
+		.name = "HUD",
+		.dock = "HUD",
+	},
+	NavbarOption {
+		.name = "WATER",
+		.dock = "WATER",
+	},
+};
 
 
-
-Props createMenuOptions(std::function<void(const char*)>& onClickNavbar){
+Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onClickNavbar){
+	std::vector<NavbarOption>* navbarOptionsPtr = NULL;
+	if (type == MAIN_EDITOR){
+		navbarOptionsPtr = &navbarOptions;
+	}else if (type == GAMEPLAY_EDITOR){
+		navbarOptionsPtr = &navbarOptionsGameplay;
+	}
+	modassert(navbarOptionsPtr != NULL, "navbar type null");
   std::vector<ListComponentData> levels;
-  for (auto &navbarOption : navbarOptions){
+  for (auto &navbarOption : *navbarOptionsPtr){
   	levels.push_back(ListComponentData {
   		.name = navbarOption.name,
   		.onClick = [onClickNavbar, &navbarOption]() -> void {
@@ -115,7 +147,9 @@ Component navbarComponent {
   .draw = [](DrawingTools& drawTools, Props& props){	
   	auto onClick = fnStrFromProp(props, onclickSymbol);
   	modassert(onClick.has_value(), "navbar - need to provide on click value");
+  	auto typePtr = typeFromProps<NavbarType>(props, valueSymbol);
+  	auto navbarType = typePtr ? *typePtr : MAIN_EDITOR;
   	Props defaultProps { .props = {} };
-  	return withPropsCopy(listComponent,  createMenuOptions(onClick.value())).draw(drawTools, defaultProps);
+  	return withPropsCopy(listComponent,  createMenuOptions(navbarType, onClick.value())).draw(drawTools, defaultProps);
   },
 };

@@ -6,8 +6,13 @@
 
 extern const int imagesSymbol;
 
+struct ImageListImage {
+	std::string image;
+	std::optional<glm::vec4> tint;
+};
+
 struct ImageList {
- 	std::vector<std::string> images;
+ 	std::vector<ImageListImage> images;
 };
 
 extern Component imageList;

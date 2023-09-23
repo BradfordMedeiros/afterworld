@@ -5,12 +5,15 @@
 #include <vector>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../components/nestedlist.h"
-#include "../components/layout.h"
+#include "../components/basic/layout.h"
 
 #include "../../util.h"
 #include "../../global.h"
 
 
-extern Component debugList;
+struct NavListApi {
+	std::function<void(std::string)> changeLayout;
+};
+extern Component navList;
 
 #endif

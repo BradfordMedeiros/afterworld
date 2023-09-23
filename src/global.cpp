@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 GlobalState global {
   .paused = true,
+  .inGameMode = false,
   .showScreenspaceGrid = false,
   .xNdc = 0.f,
   .yNdc = 0.f,
@@ -24,6 +25,15 @@ void setPaused(bool paused){
 
 bool isPaused(){
 	return global.paused;
+}
+
+void enterGameMode(){
+  global.inGameMode = true;
+  setPaused(false);
+}
+void exitGameMode(){
+  global.inGameMode = false;
+  setPaused(true);
 }
 
 GlobalState& getGlobalState(){

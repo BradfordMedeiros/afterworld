@@ -2,20 +2,21 @@
 #define MOD_AFTERWORLD_COMPONENTS_INDEX
 
 #include "../components/router.h"
-#include "../components/list.h"
+#include "../components/basic/list.h"
 #include "../components/slider.h"
-#include "../components/radiobutton.h"
+#include "../components/basic/radiobutton.h"
 #include "../components/imagelist.h"
 #include "../components/dialog.h"
 #include "../components/fileexplorer.h"
 #include "../components/colorpicker.h"
 #include "../components/scenegraph.h"
 #include "./alert.h"
-#include "./debuglist.h"
+#include "./navlist.h"
 #include "./pausemenu.h"
 #include "./navbar.h"
 #include "./dock.h"
 #include "./windowmanager.h"
+#include "../components/worldplay.h"
 
 struct Level {
   std::string scene;
@@ -37,6 +38,7 @@ struct UiContext {
   std::function<bool()> showScreenspaceGrid;
   LevelUIInterface levels;
   PauseInterface pauseInterface;
+  WorldPlayInterface worldPlayInterface;
 };
 
 extern Component mainUI;

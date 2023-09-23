@@ -2,8 +2,8 @@
 #define MOD_AFTERWORLD_COMPONENTS_UIWINDOW
 
 #include "./common.h"
-#include "./layout.h"
-#include "./listitem.h"
+#include "./basic/layout.h"
+#include "./basic/listitem.h"
 #include "../views/windowmanager.h"
 
 Component createUiWindow(Component& component, int symbol, std::string titleValue = "Untitled Window", AlignmentParams alignment = defaultAlignment);

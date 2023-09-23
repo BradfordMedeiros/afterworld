@@ -22,7 +22,7 @@ Props createLevelListProps(UiContext& uiContext){
       PropPair { .symbol = listItemsSymbol, .value = levels },
       PropPair { .symbol = xoffsetSymbol,   .value = -0.9f },
       PropPair { .symbol = yoffsetSymbol,   .value = 0.2f },
-      //PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.f) },
+      PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.3f) },
       PropPair { .symbol = flowHorizontal,  .value = UILayoutFlowPositive2 },
       PropPair { .symbol = flowVertical,    .value = UILayoutFlowNegative2 },
     },
@@ -62,7 +62,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   return routerProps;
 }
 
-Props debugListProps { 
+Props navListProps { 
   .props = {
     PropPair {
       .symbol = tintSymbol,
@@ -258,6 +258,20 @@ ImageList imageListDatas {
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
 
+NavbarType navbarType = MAIN_EDITOR;
+NavListApi navListApi {
+  .changeLayout = [](std::string layout) -> void {
+    if (layout == "main"){
+      navbarType = MAIN_EDITOR;
+    }else if (layout == "gameplay"){
+      navbarType = GAMEPLAY_EDITOR;
+    }else{
+      modassert(false, std::string("invalid layout: ") + layout);
+    }
+  }
+};
+
+
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   HandlerFns handlerFuncs {
@@ -363,14 +377,21 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
     std::function<void(int)> onImageClick = [](int index) -> void {
       if (onFileAddedFn.has_value()){
-        onFileAddedFn.value()(false, imageListDatas.images.at(index));
+        onFileAddedFn.value()(false, imageListDatas.images.at(index).image);
       }
     };
 
     static bool loadedImages = false;
     if (!loadedImages){
       loadedImages = true;
-      imageListDatas.images = gameapi -> listResources("textures");
+      auto allTextures = gameapi -> listResources("textures");;
+      
+      imageListDatas.images = {};
+      for (auto &texture : allTextures){
+        imageListDatas.images.push_back(ImageListImage {
+          .image = texture,
+        });
+      }
     }
 
     auto imageListComponent = withPropsCopy(imageList, Props {
@@ -380,6 +401,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         PropPair { offsetSymbol,  imageListScrollAmount },
       }
     });
+
+    Props worldPlayProps {
+      .props = {
+          PropPair { .symbol = valueSymbol, .value = &uiContext.worldPlayInterface },
+      }
+    };
+    worldplay.draw(drawTools, worldPlayProps);
 
     auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
     auto defaultWindowProps = getDefaultProps();
@@ -399,13 +427,14 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     {
       Props navbarProps { 
         .props = {
-          { onclickSymbol, onClickNavbar }
+          { onclickSymbol, onClickNavbar },
+          { valueSymbol, navbarType },
         }
       };
       navbarComponent.draw(drawTools, navbarProps);
     }
     auto defaultProps = getDefaultProps();
-    withProps(debugList, debugListProps).draw(drawTools, defaultProps);
+    withProps(navList, navListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }

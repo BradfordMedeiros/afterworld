@@ -1,6 +1,7 @@
-#include "./debuglist.h"
+#include "./navlist.h"
 
 extern CustomApiBindings* gameapi;
+extern NavListApi navListApi;
 
 int mappingId = 999995;
 std::vector<NestedListItem> nestedListTest = {
@@ -31,14 +32,16 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "layout",
-          .onClick = std::nullopt, // maybe this should send a request to core engine so can shutdown properly }
+          .onClick = std::nullopt, 
           .mappingId = mappingId++,
         },
         .items = {
           NestedListItem {
             .item = ImListItem {
               .value = "main",
-              .onClick = std::nullopt, // maybe this should send a request to core engine so can shutdown properly }
+              .onClick = []() -> void {
+                navListApi.changeLayout("main");
+              },
               .mappingId = mappingId++,
             },
             .items = {},
@@ -46,7 +49,9 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "gun editor",
-              .onClick = std::nullopt, // maybe this should send a request to core engine so can shutdown properly }
+              .onClick = []() -> void {
+                navListApi.changeLayout("gameplay");
+              }, 
               .mappingId = mappingId++,
             },
             .items = {},
@@ -569,6 +574,6 @@ Props nestedListProps {
     
   }
 };
-Component debugList = withProps(nestedList, nestedListProps);
+Component navList = withProps(nestedList, nestedListProps);
 
 

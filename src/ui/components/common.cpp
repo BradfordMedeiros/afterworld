@@ -431,3 +431,4 @@ const int enableSymbol = getSymbol("enable");
 const int dockTypeSymbol = getSymbol("dock-type");
 const int selectedSymbol = getSymbol("selected");
 const int fontsizeSymbol = getSymbol("fontsize");
+const int fixedSizeSymbol = getSymbol("fixed-size");

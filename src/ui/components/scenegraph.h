@@ -3,8 +3,8 @@
 
 #include "./common.h"
 #include "../../global.h"
-#include "./listitem.h"
-#include "./layout.h"
+#include "./basic/listitem.h"
+#include "./basic/layout.h"
 
 struct ScenegraphItem {
 	objid id;

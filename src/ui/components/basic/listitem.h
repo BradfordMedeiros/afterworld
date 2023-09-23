@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_COMPONENTS_LIST_ITEM
 #define MOD_AFTERWORLD_COMPONENTS_LIST_ITEM
 
-#include "./common.h"
+#include "../common.h"
 
 struct ImListItem {
   std::string value;

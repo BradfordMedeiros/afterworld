@@ -1,6 +1,4 @@
 #include "./layout.h"
-extern CustomApiBindings* gameapi;
-
 
 // The buffered approach could be supported by the game engine more easily, but doing here for now as to not pollute the engine code
 struct BufferedText {
@@ -393,6 +391,31 @@ Component simpleHorizontalLayout(std::vector<Component>& children){
     .minspacing = 0.f,
     .padding = 0.0f,
     .children = children,
+  };
+  Props listLayoutProps {
+    .props = {
+      { .symbol = layoutSymbol, .value = layout },
+    },
+  };
+  return withPropsCopy(layoutComponent, listLayoutProps);
+}
+
+Component simpleLayout(Component& component){
+  Layout layout {
+    .tint = glm::vec4(0.f, 0.f, 0.f, 0.2f),
+    .showBackpanel = true,
+    .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
+    .minwidth = 0.f,
+    .minheight = 0.f,
+    .layoutType = LAYOUT_HORIZONTAL2,
+    .layoutFlowHorizontal = UILayoutFlowNone2,
+    .layoutFlowVertical = UILayoutFlowNone2,
+    .alignHorizontal = UILayoutFlowNone2,
+    .alignVertical = UILayoutFlowNone2,
+    .spacing = 0.f,
+    .minspacing = 0.f,
+    .padding = 0.0f,
+    .children = { component },
   };
   Props listLayoutProps {
     .props = {

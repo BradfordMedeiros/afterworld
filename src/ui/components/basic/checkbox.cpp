@@ -24,7 +24,6 @@ Component checkboxInner {
       drawTools.drawRect(0.f, 0.f, 0.04f, 0.06f, false, glm::vec4(0.f, 0.f, 0.f, 0.2f), std::nullopt, true, innerMappingId, std::nullopt);
     }
 
-
     auto onCheckValue = [onCheck, isChecked]() -> void {
       onCheck(!isChecked);
     };
