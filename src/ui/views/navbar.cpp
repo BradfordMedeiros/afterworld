@@ -133,7 +133,7 @@ Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onCli
       PropPair { .symbol = minwidthSymbol,  .value = width },
       PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 2.f) },
       PropPair { .symbol = horizontalSymbol,   .value = true },
-      //PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+      PropPair { .symbol = paddingSymbol,      .value = 0.01f },
       PropPair { .symbol = flowHorizontal, .value = UILayoutFlowPositive2 },
       PropPair { .symbol = flowVertical,     .value = UILayoutFlowNegative2 },
     },

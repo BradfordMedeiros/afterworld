@@ -2,7 +2,6 @@
 #define MOD_AFTERWORLD_COMPONENTS_IMAGELIST
 
 #include "./common.h"
-#include "../../global.h"
 
 extern const int imagesSymbol;
 

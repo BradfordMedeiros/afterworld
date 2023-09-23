@@ -154,5 +154,6 @@ extern const int dockTypeSymbol;
 extern const int selectedSymbol;
 extern const int fontsizeSymbol;
 extern const int fixedSizeSymbol;
+extern const int sizeSymbol;
 
 #endif

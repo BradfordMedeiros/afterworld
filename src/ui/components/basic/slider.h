@@ -1,9 +1,9 @@
 #ifndef MOD_AFTERWORLD_COMPONENTS_SLIDER
 #define MOD_AFTERWORLD_COMPONENTS_SLIDER
 
-#include "./common.h"
-#include "../../global.h"
-#include "./basic/list.h"
+#include "../common.h"
+#include "../../../global.h"
+#include "./list.h"
 
 struct Slider {
   float min;

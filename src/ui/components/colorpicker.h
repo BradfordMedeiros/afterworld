@@ -3,9 +3,9 @@
 
 #include "./common.h"
 #include "./basic/listitem.h"
-#include "./textbox.h"
+#include "./basic/textbox.h"
 #include "./basic/layout.h"
-#include "./slider.h"
+#include "./basic/slider.h"
 #include "./uiwindow.h"
 
 extern Component colorPickerComponent;

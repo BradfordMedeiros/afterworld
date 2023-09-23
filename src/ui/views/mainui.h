@@ -3,7 +3,7 @@
 
 #include "../components/router.h"
 #include "../components/basic/list.h"
-#include "../components/slider.h"
+#include "../components/basic/slider.h"
 #include "../components/basic/radiobutton.h"
 #include "../components/imagelist.h"
 #include "../components/dialog.h"

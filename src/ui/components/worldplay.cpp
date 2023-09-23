@@ -42,11 +42,16 @@ Component worldplay {
         PropPair { imagesSymbol,  imageListData },
         PropPair { onclickSymbol, onClick },
         PropPair { fixedSizeSymbol, false },
+        PropPair { sizeSymbol, 0.05f },
 			},
 		};
 
   	auto worldPlayInner = withProps(imageList, imageProps);
-  	return simpleLayout(worldPlayInner).draw(drawTools, imageProps);
+  	AlignmentParams align {
+  		.layoutFlowHorizontal = UILayoutFlowNone2,
+  		.layoutFlowVertical = UILayoutFlowPositive2,
+  	};
+  	return simpleLayout(worldPlayInner, glm::vec2(0.f, 0.f), align).draw(drawTools, props);
   },
 };
 

@@ -404,7 +404,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
     Props worldPlayProps {
       .props = {
-          PropPair { .symbol = valueSymbol, .value = &uiContext.worldPlayInterface },
+        PropPair { .symbol = xoffsetSymbol, .value = 0.f },
+        PropPair { .symbol = yoffsetSymbol, .value = -1.f },
+        PropPair { .symbol = valueSymbol, .value = &uiContext.worldPlayInterface },
       }
     };
     worldplay.draw(drawTools, worldPlayProps);

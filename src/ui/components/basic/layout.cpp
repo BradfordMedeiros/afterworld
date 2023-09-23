@@ -400,27 +400,7 @@ Component simpleHorizontalLayout(std::vector<Component>& children){
   return withPropsCopy(layoutComponent, listLayoutProps);
 }
 
-Component simpleLayout(Component& component){
-  Layout layout {
-    .tint = glm::vec4(0.f, 0.f, 0.f, 0.2f),
-    .showBackpanel = true,
-    .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
-    .minwidth = 0.f,
-    .minheight = 0.f,
-    .layoutType = LAYOUT_HORIZONTAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
-    .layoutFlowVertical = UILayoutFlowNone2,
-    .alignHorizontal = UILayoutFlowNone2,
-    .alignVertical = UILayoutFlowNone2,
-    .spacing = 0.f,
-    .minspacing = 0.f,
-    .padding = 0.0f,
-    .children = { component },
-  };
-  Props listLayoutProps {
-    .props = {
-      { .symbol = layoutSymbol, .value = layout },
-    },
-  };
-  return withPropsCopy(layoutComponent, listLayoutProps);
+Component simpleLayout(Component& component, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding){
+	std::vector<Component> components = { component };
+  return simpleVerticalLayout(components, minDim, defaultAlignment, borderColor, padding);
 }

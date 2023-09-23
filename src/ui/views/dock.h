@@ -5,9 +5,9 @@
 #include "../components/basic/list.h"
 #include "../components/basic/button.h"
 #include "../components/basic/options.h"
-#include "../components/slider.h"
+#include "../components/basic/slider.h"
 #include "../components/basic/checkbox.h"
-#include "../components/textbox.h"
+#include "../components/basic/textbox.h"
 #include "../components/scenegraph.h"
 #include "../../util.h"
 

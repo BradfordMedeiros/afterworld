@@ -21,6 +21,11 @@ Component imageList  {
 
     auto setFixedSize = boolFromProp(props, fixedSizeSymbol, true);
   	modassert(imageList, "invalid image list prop");
+
+    float size = floatFromProp(props, sizeSymbol, 0.1f);
+    float width = size;
+    float height = size;
+
   	for (int i = offset; i < imageList -> images.size(); i++){
       auto mappingId = uniqueMenuItemMappingId();
   		bool selected = drawTools.selectedId.has_value() && drawTools.selectedId.has_value() && (drawTools.selectedId.value() == mappingId);
@@ -36,8 +41,7 @@ Component imageList  {
       if (column > numColumns){
         numColumns = column;
       }
-      float width = 0.1f;
-      float height = 0.1f;
+
       float x = column * width;
       float y = -1.f * row * height;
 
@@ -62,12 +66,12 @@ Component imageList  {
 
   	}
 
-    setBox(measurer, 0, 0, 0.1f, 0.1f);
+    setBox(measurer, 0, 0, width, height);
 
     if (setFixedSize){
-      setBox(measurer, (numPerRow - 1) * 0.1f , (maxRows -1) * -0.1f, 0.1f, 0.1f);
+      setBox(measurer, (numPerRow - 1) * width , (maxRows -1) * -1 * height, width, height);
     }else{
-      setBox(measurer, numColumns * 0.1f, numRows * -0.1f, 0.1f, 0.1f);
+      setBox(measurer, numColumns * 0.1f, numRows * -0.1f, width, height);
     }
 
     auto boundingBox = measurerToBox(measurer);
