@@ -272,6 +272,10 @@ NavListApi navListApi {
 };
 
 
+bool showScenes = false;
+int offset = 2;
+int currentScene = -1;
+
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   HandlerFns handlerFuncs {
@@ -411,6 +415,31 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     };
     worldplay.draw(drawTools, worldPlayProps);
 
+    SceneManagerInterface sceneManagerInterface2 {
+      .showScenes = showScenes,
+      .offset = offset,
+      .onSelectScene = [&uiContext, &currentScene](int index, std::string scene) -> void {
+        uiContext.loadScene(scene);
+        currentScene = index;
+        showScenes = false;
+      },
+      .toggleShowScenes = []() -> void {
+        showScenes = !showScenes;
+      },
+      .scenes = uiContext.listScenes(),
+      .currentScene = currentScene,
+    };
+    Props sceneManagerProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
+        PropPair { .symbol = xoffsetSymbol, .value = 1.f },
+        PropPair { .symbol = yoffsetSymbol, .value = 0.88f },
+
+
+      },
+    };
+    scenemanagerComponent.draw(drawTools, sceneManagerProps);
+
     auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
     auto defaultWindowProps = getDefaultProps();
     uiWindowComponent.draw(drawTools, defaultWindowProps);
@@ -457,6 +486,11 @@ void onMainUiScroll(double amount){
   fileexplorerScrollAmount += scrollValue;
   if (fileexplorerScrollAmount < 0){
     fileexplorerScrollAmount = 0;
+  }
+
+  offset += scrollValue;
+  if (offset < 0){
+    offset = 0;
   }
 
   scenegraphScroll(scrollValue);

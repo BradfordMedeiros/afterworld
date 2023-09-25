@@ -144,6 +144,11 @@ UiContext getUiContext(GameState& gameState){
         std::cout << "save scene placeholder" << std::endl;
       }
     },
+    .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
+    .loadScene = [&gameState](std::string scene) -> void {
+      std::cout << "load scene placeholder: " << scene << std::endl;
+      goToLevel(gameState, scene);
+    },
   };
   return uiContext;
 }

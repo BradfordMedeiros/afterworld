@@ -17,6 +17,7 @@
 #include "./dock.h"
 #include "./windowmanager.h"
 #include "../components/worldplay.h"
+#include "../components/scenemanager.h"
 
 struct Level {
   std::string scene;
@@ -39,6 +40,9 @@ struct UiContext {
   LevelUIInterface levels;
   PauseInterface pauseInterface;
   WorldPlayInterface worldPlayInterface;
+
+  std::function<std::vector<std::string>()> listScenes;
+  std::function<void(std::string)> loadScene;
 };
 
 extern Component mainUI;

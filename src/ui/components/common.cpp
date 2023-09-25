@@ -433,3 +433,4 @@ const int selectedSymbol = getSymbol("selected");
 const int fontsizeSymbol = getSymbol("fontsize");
 const int fixedSizeSymbol = getSymbol("fixed-size");
 const int sizeSymbol = getSymbol("size");
+const int limitSymbol = getSymbol("limit");

@@ -120,6 +120,12 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto onClick2 = typeFromProps<std::function<void(int)>>(props, onclickRightSymbol);
   auto padding = floatFromProp(props, paddingSymbol, 0.05f);
   auto fontSize = floatFromProp(props, fontsizeSymbol, 0.015f);
+  auto limit = intFromProp(props, limitSymbol, -1);
+
+  if (limit >= 0){
+    strValue = strValue.substr(0, limit);
+  }
+
   ImListItem menuItem {
     .value = strValue,
     .onClick = onClick,
