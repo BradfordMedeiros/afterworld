@@ -15,10 +15,8 @@ Component worldplay {
  					.image = worldPlayInterface -> isPaused() ?  "./res/scenes/editor/dock/images/play.png" : "./res/scenes/editor/dock/images/pause.png",
  					.tint = worldPlayInterface -> isGameMode() ? std::optional<glm::vec4>(std::nullopt) : glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
  				}
-	  		 
  			}
 		};
-
 
 		std::function<void(int)> onClick = [worldPlayInterface](int index) -> void {
 			if (index == 0){ // play button

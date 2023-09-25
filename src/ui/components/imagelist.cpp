@@ -71,7 +71,8 @@ Component imageList  {
     if (setFixedSize){
       setBox(measurer, (numPerRow - 1) * width , (maxRows -1) * -1 * height, width, height);
     }else{
-      setBox(measurer, numColumns * 0.1f, numRows * -0.1f, width, height);
+      std::cout << "cols, row = " << numColumns << ", " << numRows << std::endl;
+      setBox(measurer, numColumns * width, numRows * -1 * height, width, height);
     }
 
     auto boundingBox = measurerToBox(measurer);
