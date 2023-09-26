@@ -3,14 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 
-enum DockFieldType {
-  DOCK_BUTTON,
-  DOCK_OPTION,
-  DOCK_SLIDER,
-  DOCK_CHECKBOX,
-  DOCK_TEXTBOX,
-};
-
 struct DockLabelConfig {
   std::string label;
 };
@@ -52,6 +44,7 @@ struct DockImageConfig {
 
 struct DockGameObjSelector {
   std::optional<std::string> label;
+  std::function<void(std::string&)> onSelect;
 };
 
 struct DockScenegraph {};
@@ -79,14 +72,6 @@ struct DockConfiguration {
 
 
 extern DockConfigApi dockConfigApi;
-
-
-int selectedIndex = 0;
-bool checkboxChecked = true;
-float minValuePercentage = 0.f;
-float maxValuePercentage = 0.f;
-float blurPercentage = 0.5f;
-
 
 
 std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
@@ -144,102 +129,11 @@ std::function<float()> getFloatGameobj(std::string key){
   };
 }
 
-/*
-snap-rotate
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "enable physics", 
-            "value" => [
-              "binding" => "gameobj:physics",
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
-            ],
-          ],
-        ],*/
-
-
-/*
-    "transform_types" => [
-      "items" => [ 
-
-
-        [
-          "type" => "numeric",
-          "data" => [
-            "key" => "position", 
-            "value" => [
-              [ 
-                "type" => "float", 
-                "name" => "x", 
-                "value" => [ 
-                  "binding" => "gameobj:position", 
-                  "binding-index" =>  0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "y", 
-                "value" => [ 
-                  "binding" => "gameobj:position", 
-                  "binding-index" =>  1,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "z", 
-                "value" => [ 
-                  "binding" => "gameobj:position", 
-                  "binding-index" =>  2,
-                  "type" => "number",
-                ]
-              ]
-            ]
-          ],
-        ],
-
-
-        [
-          "type" => "numeric",
-          "data" => [
-            "key" => "scale", 
-            "value" => [
-              [ 
-                "type" => "float", 
-                "name" => "x", 
-                "value" => [ 
-                  "binding" => "gameobj:scale", 
-                  "binding-index" =>  0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "y", 
-                "value" => [ 
-                  "binding" => "gameobj:scale", 
-                  "binding-index" =>  1,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "z", 
-                "value" => [ 
-                  "binding" => "gameobj:scale", 
-                  "binding-index" =>  2,
-                  "type" => "number",
-                ]
-              ]
-            ]
-          ],
-        ],
-
-
-      ],
-    ],*/
+std::function<void(std::string&)> getStrGameObj(const char* attribute){
+  return [attribute](std::string& value) -> void {
+    dockConfigApi.setObjAttr(attribute, value);
+  };
+}
 
 struct OptionData {
   const char* optionName;
@@ -319,8 +213,16 @@ std::function<void(bool)> getOnDebugMaskEnabled(int bitmask){
   };
 }
 
+std::unordered_map<std::string, bool> collapseValues;
+std::function<void()> createCollapsableOnClick(const char* value){
+  collapseValues[value] = true;
+  return [value]() -> void { collapseValues[value] = !collapseValues.at(value); };
+}
+std::function<bool()> createShouldBeCollapse(const char* value){
+  return [value]() -> bool { return collapseValues.at(value); };
+}
 
-bool collapseTestGroup = true;
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -328,6 +230,35 @@ std::vector<DockConfiguration> configurations {
       DockButtonConfig {
         .buttonText = "no panel available",
         .onClick = []() -> void {},
+      },
+    },
+  },
+  DockConfiguration {
+    .title = "Object Details",
+    .configFields = {
+      DockTextboxNumeric {
+        .label = "position x",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "position y",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "position z",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "scale x",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "scale y",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "scale z",
+        .value = 1.f,
       },
     },
   },
@@ -427,45 +358,41 @@ std::vector<DockConfiguration> configurations {
         .isChecked = getIsCheckedGameobj("physics", "enabled", "disabled"),
         .onChecked = getOnCheckedGameobj("physics", "enabled", "disabled"),
       },    
+
       DockImageGroup {
         .groupName = "Depth of Field Blur",
-        .onClick = []() -> void { collapseTestGroup = !collapseTestGroup; },
-        .collapse = []() -> bool { return collapseTestGroup;  },
+        .onClick = createCollapsableOnClick("blur"),
+        .collapse = createShouldBeCollapse("blur"),
         .configFields = {
           DockGameObjSelector {
             .label = std::nullopt,
+            .onSelect =  getStrGameObj("target"),
           },
           DockCheckboxConfig {
             .label = "toggle dof",
-            .isChecked = getIsCheckedWorld("skybox", "enable", "true", "false"),
-            .onChecked = getOnCheckedWorld("skybox", "enable", "true", "false"),
+            .isChecked = getIsCheckedGameobj("dof", "enabled", "disabled"),
+            .onChecked = getOnCheckedGameobj("dof", "enabled", "disabled"),
           },
           DockSliderConfig {
             .label = "blur min",
             .min = 0.f,
             .max = 1.f,
             .percentage = getFloatGameobj("minblur"),
-            .onSlide =  getSetFloatGameobj("minblur"),
+            .onSlide = getSetFloatGameobj("minblur"),
           },
           DockSliderConfig {
             .label = "blur max",
             .min = 0.f,
             .max = 1.f,
-            .percentage = []() -> float { return maxValuePercentage; },
-            .onSlide = [](float value) -> void {
-              std::cout << "dock slider on slide max: " << value << std::endl;
-              maxValuePercentage = value;
-            },
+            .percentage = getFloatGameobj("maxblur"),
+            .onSlide = getSetFloatGameobj("maxblur"),
           },
           DockSliderConfig {
             .label = "blur amount",
             .min = 0.f,
             .max = 1.f,
-            .percentage = []() -> float { return blurPercentage; },
-            .onSlide = [](float value) -> void {
-              std::cout << "dock slider on slide blur: " << value << std::endl;
-              blurPercentage = value;
-            },
+            .percentage = getFloatGameobj("bluramount"),
+            .onSlide = getSetFloatGameobj("bluramount"),
           },
         },
       },
@@ -787,6 +714,7 @@ Component createDockComponent(DockConfig& config){
       dockConfigApi.pickGameObj([gameobjSelectorOptions](objid id, std::string value) -> void {
         std::cout << "dock gameobjSelectorOptions onclick:  " << id << ", " << value << std::endl;
         gameobjSelectorOptions -> label = value;
+        gameobjSelectorOptions -> onSelect(value);
       });
     };
 

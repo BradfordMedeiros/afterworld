@@ -49,6 +49,7 @@ struct DrawingTools {
   std::function<void(objid, std::function<void()>)> registerCallbackFns;
   std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
   std::optional<objid> selectedId;
+  std::optional<objid> focusedId;
 };
 
 struct BoundingBox2D {
@@ -101,6 +102,7 @@ extern Component emptyComponent;
 
 objid uniqueMenuItemMappingId();
 void resetMenuItemMappingId();
+void getMenuMappingData(int* _minId, int* _currentId);
 
 void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
@@ -156,5 +158,6 @@ extern const int fontsizeSymbol;
 extern const int fixedSizeSymbol;
 extern const int sizeSymbol;
 extern const int limitSymbol;
+extern const int focusTintSymbol;
 
 #endif

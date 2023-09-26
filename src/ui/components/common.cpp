@@ -298,13 +298,19 @@ Component emptyComponent {
   },
 };
 
-objid uniqueMappingId  = 990000;
+int minManangedId = 990000;
+objid uniqueMappingId  = minManangedId;
 objid uniqueMenuItemMappingId(){
   uniqueMappingId++;
   return uniqueMappingId;
 }
 void resetMenuItemMappingId(){
-  uniqueMappingId = 990000;
+  uniqueMappingId = minManangedId;
+}
+
+void getMenuMappingData(int* _minId, int* _currentId){
+  *_minId = minManangedId;
+  *_currentId = uniqueMappingId;
 }
 
 
@@ -434,3 +440,4 @@ const int fontsizeSymbol = getSymbol("fontsize");
 const int fixedSizeSymbol = getSymbol("fixed-size");
 const int sizeSymbol = getSymbol("size");
 const int limitSymbol = getSymbol("limit");
+const int focusTintSymbol = getSymbol("focus-tint");

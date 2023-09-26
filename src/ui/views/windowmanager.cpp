@@ -53,6 +53,7 @@ bool windowIsBeingDragged(int symbol){
   return windowData.at(symbol).initialDragPos.has_value();
 }
 void windowOnRelease(){
+  modlog("window", "release");
 	for (auto &[id, window] : windowData){
 		if (!windowIsBeingDragged(id)){
 			continue;

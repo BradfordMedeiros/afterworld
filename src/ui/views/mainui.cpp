@@ -277,11 +277,18 @@ int offset = 2;
 int currentScene = -1;
 
 
+std::optional<objid> focusedId = std::nullopt;
+
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   HandlerFns handlerFuncs {
+    .minManagedId = -1,
+    .maxManagedId = -1,
     .handlerFns = {},
+    .handlerFns2 = {},
   };
   std::map<objid, std::function<void(int)>> handlerFns2;
+
+  std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
      .drawRect = gameapi -> drawRect,
@@ -293,9 +300,10 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         handlerFuncs.handlerFns2[id] = fn;
      },
      .selectedId = selectedId,
+     .focusedId = focusedId,
   };
   resetMenuItemMappingId();
-  
+
   if (dockedDock != ""){
     Props dockProps { 
       .props = {
@@ -472,6 +480,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
+  getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
   return handlerFuncs;
 }
 
@@ -492,21 +501,45 @@ void onMainUiScroll(double amount){
   if (offset < 0){
     offset = 0;
   }
-
   scenegraphScroll(scrollValue);
 }
 
-void onMainUiMousePress(std::optional<objid> selectedId){
-  if (selectedId.has_value() && onGameObjSelected.has_value()){
-    auto gameobjName = gameapi -> getGameObjNameForId(selectedId.value()).value();
-    onGameObjSelected.value()(selectedId.value(), gameobjName);
-    onGameObjSelected = std::nullopt;
+void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
+  modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
+  modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
+
+  std::cout << "button: " << button << ", action: " << action << std::endl;
+  if (button == 0 && action == 0){
+    windowOnRelease();
+    std::cout << uiStoreToStr() << std::endl;
+  }
+  if (button == 0 && action == 1){
+    if (selectedId.has_value() && onGameObjSelected.has_value()){
+      auto gameobjName = gameapi -> getGameObjNameForId(selectedId.value()).value();
+      onGameObjSelected.value()(selectedId.value(), gameobjName);
+      onGameObjSelected = std::nullopt;
+    }
+
+    if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() < handlerFns.maxManagedId){
+      focusedId = selectedId.value();
+    }
+
+    if (selectedId.has_value()){
+      if (handlerFns.handlerFns.find(selectedId.value()) != handlerFns.handlerFns.end()){
+        handlerFns.handlerFns.at(selectedId.value())();
+      }
+    }
+  }
+
+  if (action == 1){
+    if (selectedId.has_value()){
+      if (handlerFns.handlerFns2.find(selectedId.value()) != handlerFns.handlerFns2.end()){
+        handlerFns.handlerFns2.at(selectedId.value())(button);
+      }
+    }  
   }
 }
 
-void onMainUiMouseRelease(){
-  windowOnRelease();
-}
 
 void onObjectsChanged(){
   refreshScenegraph();

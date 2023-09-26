@@ -48,13 +48,14 @@ struct UiContext {
 extern Component mainUI;
 
 struct HandlerFns {
+  int minManagedId;
+  int maxManagedId;
   std::map<objid, std::function<void()>> handlerFns;
   std::map<objid, std::function<void(int)>> handlerFns2;
 };
 HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void onMainUiScroll(double amount);
-void onMainUiMousePress(std::optional<objid> selectedId);
-void onMainUiMouseRelease();
+void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onObjectsChanged();
 void pushHistory(std::string route);
 std::string getCurrentPath();

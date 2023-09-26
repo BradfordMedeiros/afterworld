@@ -97,6 +97,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   drawTools.registerCallbackFns = realTools.registerCallbackFns;
   drawTools.registerCallbackRightFns = realTools.registerCallbackRightFns;
   drawTools.selectedId = realTools.selectedId;
+  drawTools.focusedId = realTools.focusedId;
 
 	bufferedDrawingTools.drawTools = drawTools,
 	bufferedDrawingTools.realTools = &realTools,

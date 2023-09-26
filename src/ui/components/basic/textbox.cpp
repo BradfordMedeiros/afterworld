@@ -16,13 +16,10 @@ Component textbox {
     static TextData* textData = static_cast<TextData*>(uiConnect(textEditorDefault));
 
     auto strValue = strFromProp(props, valueSymbol, "default textbox");
-
     auto isEditable = boolFromProp(props, editableSymbol, false);
     auto tint = vec4FromProp(props, tintSymbol, isEditable ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 0.f, 1.f));
     auto color = vec4FromProp(props, colorSymbol, isEditable ? glm::vec4(0.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f));
-
     auto onClick = fnFromProp(props, onclickSymbol);
-
 
     auto textValue = isEditable ? textData -> valueText : strValue;
     auto newTextValue = isEditable ?  insertString(textValue, textData -> cursorLocation, '|') : textValue;
@@ -37,11 +34,12 @@ Component textbox {
         PropPair { .symbol = colorSymbol, .value = color },
       },
     };
-
+    if (isEditable){
+      listItemProps.props.push_back(PropPair { .symbol = focusTintSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 1.f) });
+    }
     if (onClick.has_value()){
       listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClick.value() });
     }
-
   	return listItem.draw(drawTools, listItemProps);
   },
 };

@@ -110,6 +110,8 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
 }
 
 BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
+  auto id = uniqueMenuItemMappingId();
+
   auto strValue = strFromProp(props, valueSymbol, "");
   auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
   auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
@@ -121,6 +123,7 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto padding = floatFromProp(props, paddingSymbol, 0.05f);
   auto fontSize = floatFromProp(props, fontsizeSymbol, 0.015f);
   auto limit = intFromProp(props, limitSymbol, -1);
+  auto focusTint = typeFromProps<glm::vec4>(props, focusTintSymbol);
 
   if (limit >= 0){
     strValue = strValue.substr(0, limit);
@@ -130,11 +133,13 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
     .value = strValue,
     .onClick = onClick,
     .onClick2 = onClick2 ? (*onClick2) : std::optional<std::function<void(int)>>(std::nullopt),
-    .mappingId = uniqueMenuItemMappingId(),
+    .mappingId = id,
   };
   auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, fontSize, minwidth, tint, color);
   //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-  //drawDebugBoundingBox(drawTools, box);
+  if (focusTint && drawTools.focusedId.has_value() && drawTools.focusedId.value() == id){
+    drawDebugBoundingBox(drawTools, box, *focusTint);
+  }
   return box;
 }
 

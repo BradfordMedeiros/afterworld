@@ -560,27 +560,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    if (action == 1 && button == 0){
-      auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
-      if (idAtCoord.has_value()){
-        if (gameState -> uiCallbacks.handlerFns.find(idAtCoord.value()) != gameState -> uiCallbacks.handlerFns.end()){
-          gameState -> uiCallbacks.handlerFns.at(idAtCoord.value())();
-        }
-      }
-      onMainUiMousePress(idAtCoord);
-    }else if (action == 0 && button == 0){
-      onMainUiMouseRelease();
-      std::cout << uiStoreToStr() << std::endl;
-    }
-
-    if (action == 1){
-      auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
-      if (idAtCoord.has_value()){
-        if (gameState -> uiCallbacks.handlerFns2.find(idAtCoord.value()) != gameState -> uiCallbacks.handlerFns2.end()){
-          gameState -> uiCallbacks.handlerFns2.at(idAtCoord.value())(button);
-        }
-      }  
-    }
+    auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
+    onMainUiMousePress(gameState -> uiCallbacks, button, action, idAtCoord);
 
     if (button == 1){
       if (action == 0){
