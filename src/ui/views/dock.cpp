@@ -290,6 +290,35 @@ std::function<int()> optionsSelectedIndexObj(std::string attribute, std::vector<
   };
 }
 
+int currentDebugMask(){
+  auto value = dockConfigApi.getAttribute("editor", "debugmask");
+  auto debugMaskFloat = std::get_if<float>(&value);
+  modassert(debugMaskFloat, "debug mask is not a float");
+  auto debugValue = static_cast<int>(*debugMaskFloat);
+  return debugValue; 
+}
+std::function<bool()> getIsDebugMaskEnabled(int bitmask){
+  return [bitmask]() -> bool {
+    auto debugValue = currentDebugMask();
+    auto newMask = debugValue & bitmask;
+    //std::cout << "debug value is: " << debugValue << ", check against: " << bitmask << ", new mask: " << newMask << std::endl;
+    return newMask != 0;
+  };
+}
+
+std::function<void(bool)> getOnDebugMaskEnabled(int bitmask){
+  return [bitmask](bool checked) -> void {
+    auto debugMask = currentDebugMask();
+    if (checked){
+      debugMask = debugMask | bitmask; // add the bit to the old mask
+    }else{
+      debugMask = debugMask & ~(bitmask);   // take the bit away from the old mask, by making all 1s except the bit
+    }
+    auto floatMask = static_cast<float>(debugMask);
+    dockConfigApi.setAttribute("editor", "debugmask", floatMask);
+  };
+}
+
 
 bool collapseTestGroup = true;
 std::vector<DockConfiguration> configurations {
@@ -451,19 +480,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig {
         .options = { "point", "spotlight", "directional" },
-        .onClick = [](std::string& choice, int) -> void {
-          std::cout << "dock mock toggle light mode: " << choice << std::endl;
-          if (choice == "point"){
-            selectedIndex = 0;
-          }else if (choice == "spotlight"){
-            selectedIndex = 1;
-          }else if (choice == "directional"){
-            selectedIndex = 2;
-          }
-        },
-        .getSelectedIndex = []() -> int { 
-          return selectedIndex; 
-        },
+        .onClick = optionsOnClickObj("type", { "point", "spotlight", "directional" }),
+        .getSelectedIndex = optionsSelectedIndexObj("type", { "point", "spotlight", "directional" }),
       },
       DockTextboxConfig {
         .text = []() -> std::string {
@@ -498,20 +516,25 @@ std::vector<DockConfiguration> configurations {
         .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
         .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
       },
+
+      //     if(objectValue.object == "editor" && objectValue.attribute == "debugmask"){
+      //   debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-cameras", 0b10);
+      //debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-sound", 0b100);
+      //debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-lights", 0b1000);
       DockCheckboxConfig {
         .label = "Show Cameras",
-        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
-        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+        .isChecked = getIsDebugMaskEnabled(0b10),
+        .onChecked = getOnDebugMaskEnabled(0b10),
       },
       DockCheckboxConfig {
         .label = "Show Lights",
-        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
-        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+        .isChecked = getIsDebugMaskEnabled(0b1000),
+        .onChecked = getOnDebugMaskEnabled(0b1000),
       },
       DockCheckboxConfig {
         .label = "Show Sound",
-        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
-        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+        .isChecked = getIsDebugMaskEnabled(0b100),
+        .onChecked = getOnDebugMaskEnabled(0b100),
       },   
     },
   },
@@ -525,16 +548,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig { // Snap Translates
         .options = { "x", "y", "z" },
-        .onClick = optionsOnClick("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
-        .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
-      },
-      DockButtonConfig {
-        .buttonText = "copy",
-        .onClick = []() -> void {},
-      },
-      DockButtonConfig {
-        .buttonText = "paste",
-        .onClick = []() -> void {},
+        .onClick = optionsOnClick("tools", "manipulator-axis", { "x", "y", "z" }),
+        .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-axis", { "x", "y", "z" }),
       },
     }
   },
