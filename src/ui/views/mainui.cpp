@@ -285,6 +285,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     .maxManagedId = -1,
     .handlerFns = {},
     .handlerFns2 = {},
+    .inputFns = {},
   };
   std::map<objid, std::function<void(int)>> handlerFns2;
 
@@ -298,6 +299,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
      },
      .registerCallbackRightFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
         handlerFuncs.handlerFns2[id] = fn;
+     },
+     .registerInputFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
+        handlerFuncs.inputFns[id] = fn;
      },
      .selectedId = selectedId,
      .focusedId = focusedId,
@@ -476,6 +480,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     withProps(navList, navListProps).draw(drawTools, defaultProps);
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), .8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
@@ -537,6 +542,16 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
         handlerFns.handlerFns2.at(selectedId.value())(button);
       }
     }  
+  }
+}
+
+void onMainUiKeyPress(HandlerFns& handlerFns, int key){
+  modlog("mainui key press", std::to_string(key));
+  if (!focusedId.has_value()){
+    return;
+  }
+  if (handlerFns.inputFns.find(focusedId.value()) != handlerFns.inputFns.end()){
+    handlerFns.inputFns.at(focusedId.value())(key);
   }
 }
 

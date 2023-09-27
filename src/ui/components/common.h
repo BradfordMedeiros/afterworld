@@ -48,6 +48,7 @@ struct DrawingTools {
   std::function<void(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawLine2D;
   std::function<void(objid, std::function<void()>)> registerCallbackFns;
   std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
+  std::function<void(objid, std::function<void(int)>)> registerInputFns;
   std::optional<objid> selectedId;
   std::optional<objid> focusedId;
 };
@@ -121,6 +122,7 @@ extern const int listItemsSymbol;
 extern const int valueSymbol;
 extern const int onclickSymbol;
 extern const int onclickRightSymbol;
+extern const int onInputSymbol;
 extern const int layoutSymbol;
 extern const int routerSymbol;
 extern const int tintSymbol;

@@ -280,41 +280,6 @@ TextData textData {
   .maxchars = -1,
 };
 
-void deleteCharacter(TextData& textData){
-  bool deleteSelection = textData.highlightLength > 0;
-  auto index = deleteSelection ? (textData.cursorLocation + 1) : textData.cursorLocation;
-  if (index == 0){
-    return;
-  }
-  auto prefix = textData.valueText.substr(0, index -1);
-  auto suffixIndex = index;
-  if (deleteSelection){
-    suffixIndex = suffixIndex + textData.highlightLength -1;
-  }
-  if (suffixIndex >= textData.valueText.size()){
-    suffixIndex = textData.valueText.size();
-  }
-  auto suffix = textData.valueText.substr(suffixIndex, textData.valueText.size());
-  auto newString = prefix + suffix;
-  textData.valueText = newString;
-
-  if (!deleteSelection){
-    textData.cursorLocation--;
-  }
-  if (textData.cursorLocation < 0){
-    textData.cursorLocation = 0;
-  }
-  textData.highlightLength = 0;
-}
-void insertCharacter(TextData& textData, char character){
-  if (textData.highlightLength > 0){
-    deleteCharacter(textData);
-  }
-  auto newString = insertString(textData.valueText, textData.cursorLocation, character);
-  textData.valueText = newString;
-  textData.cursorLocation++;
-}
-
 
 glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -330,6 +295,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> uiCallbacks = HandlerFns {
       .handlerFns = {},
       .handlerFns2 = {},
+      .inputFns = {},
     };
     gameState -> uiContext = {};
     loadConfig(*gameState);
@@ -386,44 +352,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == 265){
-      // up key
-      textData.highlightLength++;
-      return;
-    }
-    if (key == 264){
-      // downkey
-      textData.highlightLength--;
-      if (textData.highlightLength < 0){
-        textData.highlightLength = 0;
-      }
-      return;
-    }
+
     if (key == 263){        // left  key
-      textData.cursorLocation--;
-      if (textData.cursorLocation < 0){
-        textData.cursorLocation = 0;
-      }
       activeColor.a += 0.01f;
-      return;
     }else if (key == 262){  // right key
-      textData.cursorLocation++;
-      if (textData.cursorLocation > textData.valueText.size()){
-        textData.cursorLocation = textData.valueText.size();
-      }
       activeColor.a -= 0.01f;
-      return;
-    }
-    if (key == 257){
-      insertCharacter(textData, '\n');
-    }else if (key == 261){
-      // delete forward
-    }else if (key == 259){
-      deleteCharacter(textData);
-    }else{
-      insertCharacter(textData, key);
     }
 
+    onMainUiKeyPress(gameState -> uiCallbacks, key);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);

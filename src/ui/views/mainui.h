@@ -52,10 +52,12 @@ struct HandlerFns {
   int maxManagedId;
   std::map<objid, std::function<void()>> handlerFns;
   std::map<objid, std::function<void(int)>> handlerFns2;
+  std::map<objid, std::function<void(int)>> inputFns;
 };
 HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void onMainUiScroll(double amount);
 void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
+void onMainUiKeyPress(HandlerFns& handlerFns, int key);
 void onObjectsChanged();
 void pushHistory(std::string route);
 std::string getCurrentPath();

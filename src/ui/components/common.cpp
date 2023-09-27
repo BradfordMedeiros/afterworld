@@ -404,6 +404,7 @@ const int listItemsSymbol = getSymbol("listitems");
 const int valueSymbol = getSymbol("value");
 const int onclickSymbol = getSymbol("onclick");
 const int onclickRightSymbol = getSymbol("onclick-right");
+const int onInputSymbol = getSymbol("oninput");
 const int layoutSymbol = getSymbol("layout");
 const int routerSymbol = getSymbol("router");
 const int tintSymbol = getSymbol("tint");

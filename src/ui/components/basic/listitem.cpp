@@ -3,7 +3,7 @@
 const float fontSizePerLetterNdi = 0.02f;
 
 
-BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color){
+BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color, std::function<void(int)>* inputFn){
   std::optional<objid> mappingId = drawTools.selectedId;
   float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
   auto height = fontSizePerLetterNdi;
@@ -23,7 +23,11 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
   if (menuItem.onClick2.has_value()){
     drawTools.registerCallbackRightFns(menuItem.mappingId.value(), menuItem.onClick2.value());
   }
-  
+
+  if (inputFn){
+    drawTools.registerInputFns(menuItem.mappingId.value(), *inputFn);
+  }
+
   drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
@@ -51,7 +55,7 @@ BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> li
   for (int i = 0; i < list.size(); i++){
     ImListItem& menuItem = list.at(i);
 
-    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), xoffset, yoffset, padding, fontSizeStyle, minwidth, tint, color);
+    auto boundingBox = drawImMenuListItem(drawTools, list.at(i), xoffset, yoffset, padding, fontSizeStyle, minwidth, tint, color, NULL);
     float spacingPerItem = boundingBox.height;
     yoffset += -1 * spacingPerItem;
 
@@ -124,20 +128,22 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto fontSize = floatFromProp(props, fontsizeSymbol, 0.015f);
   auto limit = intFromProp(props, limitSymbol, -1);
   auto focusTint = typeFromProps<glm::vec4>(props, focusTintSymbol);
+  std::function<void(int)>* inputFnHandler = typeFromProps<std::function<void(int)>>(props, onInputSymbol);
 
   if (limit >= 0){
     strValue = strValue.substr(0, limit);
   }
 
+  bool isFocused = drawTools.focusedId.has_value() && drawTools.focusedId.value() == id;
   ImListItem menuItem {
     .value = strValue,
     .onClick = onClick,
     .onClick2 = onClick2 ? (*onClick2) : std::optional<std::function<void(int)>>(std::nullopt),
     .mappingId = id,
   };
-  auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, fontSize, minwidth, tint, color);
+  auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, fontSize, minwidth, tint, color, isFocused ? inputFnHandler : NULL);
   //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-  if (focusTint && drawTools.focusedId.has_value() && drawTools.focusedId.value() == id){
+  if (focusTint && isFocused){
     drawDebugBoundingBox(drawTools, box, *focusTint);
   }
   return box;

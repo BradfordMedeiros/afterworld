@@ -415,7 +415,8 @@ std::vector<DockConfiguration> configurations {
           return "some text here"; 
         },
         .onEdit = [](std::string value) -> void {
-
+          // 
+          // call registerInputHandler that should get called on keypress when focused? 
         }
       },
       DockFileConfig {
@@ -574,6 +575,13 @@ DockConfiguration* dockConfigByName(std::string name){
   //return &configurations.at(0);
 }
 
+TextData debugText {
+  .valueText = "somedebugtext",
+  .cursorLocation = 0,
+  .highlightLength = 0,
+  .maxchars = -1,
+};
+
 void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Component>& elements);
 Component createDockComponent(DockConfig& config){
   auto dockLabel = std::get_if<DockLabelConfig>(&config);
@@ -657,10 +665,16 @@ Component createDockComponent(DockConfig& config){
 
   auto textboxOptions = std::get_if<DockTextboxConfig>(&config);
   if (textboxOptions){
+    //static TextData* textData = static_cast<TextData*>(uiConnect(textEditorDefault));
+
+    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
+      debugText = textData;
+    };
     Props textboxProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = textboxOptions -> text() },
         PropPair { .symbol = editableSymbol, .value = true },
+        PropPair { .symbol = textDataSymbol, .value = &debugText },
+        PropPair { .symbol = onInputSymbol, .value = onEdit },
       }
     };
     auto textboxWithProps = withPropsCopy(textbox, textboxProps);
