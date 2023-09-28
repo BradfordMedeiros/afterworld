@@ -224,6 +224,12 @@ std::function<bool()> createShouldBeCollapse(const char* value){
 
 std::string debugValue = "wow";
 std::map<std::string, std::string> textStore;
+enum TextEditType { 
+  TEXT_TYPE_STRING, 
+  TEXT_TYPE_NUMBER, TEXT_TYPE_POSITIVE_NUMBER, TEXT_TYPE_INTEGER, TEXT_TYPE_POSITIVE_INTEGER,
+  TEXT_TYPE_VEC2, TEXT_TYPE_VEC3, TEXT_TYPE_VEC4
+};
+
 std::function<std::string()> connectGetText(std::string key){
   if (textStore.find(key) == textStore.end()){
     textStore[key] = "";
@@ -233,9 +239,90 @@ std::function<std::string()> connectGetText(std::string key){
   };
 }
 
-std::function<void(std::string)> connectEditText(std::string key){
-  return [key](std::string value) -> void {
-    textStore[key] = value;
+std::optional<float> toNumber(std::string& text){
+  float number;
+  bool isFloat = maybeParseFloat(text, number);
+  if (!isFloat){
+    return std::nullopt;
+  }
+  return number;
+}
+std::optional<float> toPositiveNumber(std::string& text){
+  float number;
+  bool isFloat = maybeParseFloat(text, number);
+  bool isPositiveNumber = isFloat && number >= 0.f;
+  if (!isPositiveNumber){
+    return std::nullopt;
+  }
+  return number;
+}
+std::optional<int> toInteger(std::string& text){
+  if (text == "-"){
+    return 0;
+  }
+  auto asInt = std::atoi(text.c_str());
+  auto isInteger = std::to_string(asInt) == text;
+  if (!isInteger){
+    return std::nullopt;
+  }
+  return asInt;
+}
+std::optional<int> toPositiveInteger(std::string& text){
+  auto asInt = std::atoi(text.c_str());
+  auto isPositiveInt = asInt >= 0 && std::to_string(asInt) == text;
+  if (!isPositiveInt){
+    return std::nullopt;
+  }
+  return asInt;
+}
+std::optional<glm::vec2> toVec2(std::string& text){
+  glm::vec2 value(0.f, 0.f);
+  auto isVec2 = maybeParseVec2(text, value);
+  if (!isVec2){
+    return std::nullopt;
+  }
+  return value;
+}
+std::optional<glm::vec3> toVec3(std::string& text){
+  glm::vec3 value(0.f, 0.f, 0.f);
+  auto isVec3 = maybeParseVec(text, value);
+  if (!isVec3){
+    return std::nullopt;
+  }
+  return value;
+}
+std::optional<glm::vec4> toVec4(std::string& text){
+  glm::vec4 value(0.f, 0.f, 0.f, 0.f);
+  auto isVec4 = maybeParseVec4(text, value);
+  if (!isVec4){
+    return std::nullopt;
+  }
+  return value;
+}
+
+std::function<void(std::string)> connectEditText(std::string key, TextEditType type = TEXT_TYPE_STRING){
+  return [key, type](std::string value) -> void {
+    if (value.size() == 0){
+      textStore[key] = value;
+      return;
+    }
+    if (type == TEXT_TYPE_STRING){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_NUMBER && toNumber(value).has_value()){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_POSITIVE_NUMBER && toPositiveNumber(value).has_value()){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_INTEGER && toInteger(value).has_value()){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_POSITIVE_INTEGER && toPositiveInteger(value).has_value()){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_VEC2 && toVec2(value).has_value()){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_VEC3 && toVec3(value).has_value()){
+      textStore[key] = value;
+    }else if (type == TEXT_TYPE_VEC4 && toVec4(value).has_value()){
+      textStore[key] = value;
+    }
   };
 }
 
@@ -428,16 +515,13 @@ std::vector<DockConfiguration> configurations {
       },
       DockTextboxConfig {
         .text = connectGetText("test-text"),
-        .onEdit = connectEditText("test-text"),
-      },
-      DockTextboxConfig {
-        .text = connectGetText("test2-text"),
-        .onEdit = connectEditText("test2-text"),
+        .onEdit = connectEditText("test-text", TEXT_TYPE_VEC3 ),
       },
       DockTextboxConfig {
         .text = connectGetText("test-text"),
         .onEdit = connectEditText("test-text"),
       },
+
       DockFileConfig {
         .label = "somefile-here",
       },
