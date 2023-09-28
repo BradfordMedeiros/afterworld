@@ -222,6 +222,22 @@ std::function<bool()> createShouldBeCollapse(const char* value){
   return [value]() -> bool { return collapseValues.at(value); };
 }
 
+std::string debugValue = "wow";
+std::map<std::string, std::string> textStore;
+std::function<std::string()> connectGetText(std::string key){
+  if (textStore.find(key) == textStore.end()){
+    textStore[key] = "";
+  }
+  return [key]() -> std::string {
+    return textStore.at(key);
+  };
+}
+
+std::function<void(std::string)> connectEditText(std::string key){
+  return [key](std::string value) -> void {
+    textStore[key] = value;
+  };
+}
 
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
@@ -411,13 +427,16 @@ std::vector<DockConfiguration> configurations {
         .getSelectedIndex = optionsSelectedIndexObj("type", { "point", "spotlight", "directional" }),
       },
       DockTextboxConfig {
-        .text = []() -> std::string {
-          return "some text here"; 
-        },
-        .onEdit = [](std::string value) -> void {
-          // 
-          // call registerInputHandler that should get called on keypress when focused? 
-        }
+        .text = connectGetText("test-text"),
+        .onEdit = connectEditText("test-text"),
+      },
+      DockTextboxConfig {
+        .text = connectGetText("test2-text"),
+        .onEdit = connectEditText("test2-text"),
+      },
+      DockTextboxConfig {
+        .text = connectGetText("test-text"),
+        .onEdit = connectEditText("test-text"),
       },
       DockFileConfig {
         .label = "somefile-here",
@@ -575,12 +594,7 @@ DockConfiguration* dockConfigByName(std::string name){
   //return &configurations.at(0);
 }
 
-TextData debugText {
-  .valueText = "somedebugtext",
-  .cursorLocation = 0,
-  .highlightLength = 0,
-  .maxchars = -1,
-};
+
 
 void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Component>& elements);
 Component createDockComponent(DockConfig& config){
@@ -665,15 +679,29 @@ Component createDockComponent(DockConfig& config){
 
   auto textboxOptions = std::get_if<DockTextboxConfig>(&config);
   if (textboxOptions){
-    //static TextData* textData = static_cast<TextData*>(uiConnect(textEditorDefault));
-
-    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
-      debugText = textData;
+    static TextData textboxConfigData {
+      .valueText = "somedebugtext",
+      .cursorLocation = 0,
+      .highlightLength = 0,
+      .maxchars = -1,
     };
+
+    std::function<void(TextData)> onEdit = [textboxOptions](TextData textData) -> void {
+      textboxConfigData = textData;
+      textboxOptions -> onEdit(textData.valueText);
+    };
+
+    TextData textData {
+      .valueText = textboxOptions -> text(),
+      .cursorLocation = textboxConfigData.cursorLocation,
+      .highlightLength = textboxConfigData.highlightLength,
+      .maxchars = textboxConfigData.maxchars,
+    };
+
     Props textboxProps {
       .props = {
         PropPair { .symbol = editableSymbol, .value = true },
-        PropPair { .symbol = textDataSymbol, .value = &debugText },
+        PropPair { .symbol = textDataSymbol, .value = textData },
         PropPair { .symbol = onInputSymbol, .value = onEdit },
       }
     };

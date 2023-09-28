@@ -53,7 +53,7 @@ TextData insertCharacter(TextData& textData, char character){
 
 Component textbox {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    auto textData = typeFromProps<TextData*>(props, textDataSymbol);
+    auto textData = typeFromProps<TextData>(props, textDataSymbol);
     auto strValue = strFromProp(props, valueSymbol, "default textbox");
     auto isEditable = boolFromProp(props, editableSymbol, false);
     auto tint = vec4FromProp(props, tintSymbol, isEditable ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 0.f, 1.f));
@@ -63,10 +63,10 @@ Component textbox {
 
     auto onEditTextPtr = typeFromProps<std::function<void(TextData)>>(props, onInputSymbol);
 
-    auto textValue = isEditable ? (*textData) -> valueText : strValue;
-    auto newTextValue = isEditable ?  insertString(textValue, (*textData) -> cursorLocation, '|') : textValue;
-    if (isEditable && (*textData) -> highlightLength > 0 && (*textData) -> cursorLocation != textValue.size()){
-      newTextValue = insertString(newTextValue, (*textData) -> cursorLocation + (*textData) -> highlightLength + 1, '|');
+    auto textValue = isEditable ? textData -> valueText : strValue;
+    auto newTextValue = isEditable ?  insertString(textValue, textData -> cursorLocation, '|') : textValue;
+    if (isEditable && textData -> highlightLength > 0 && textData -> cursorLocation != textValue.size()){
+      newTextValue = insertString(newTextValue, textData -> cursorLocation + textData -> highlightLength + 1, '|');
     }
 
     Props listItemProps {
@@ -79,38 +79,41 @@ Component textbox {
     };
     if (isEditable && onEditTextPtr){
       auto onEditText = *onEditTextPtr;
-      std::function<void(int)> onKeyPress = [onEditText, textData](int key) -> void {
+
+      TextData textDataValue2 = *textData;
+      std::function<void(int)> onKeyPress = [onEditText, textDataValue2](int key) -> void {
+        TextData textDataValue = textDataValue2;
         if (key == 263){        // left  key
-          (*textData) -> cursorLocation--;
-          if ((*textData) -> cursorLocation < 0){
-            (*textData) -> cursorLocation = 0;
+          textDataValue.cursorLocation--;
+          if (textDataValue.cursorLocation < 0){
+            textDataValue.cursorLocation = 0;
           }
-          onEditText(**textData);
+          onEditText(textDataValue);
         }else if (key == 262){  // right key
-          (*textData) -> cursorLocation++;
-          if ((*textData) -> cursorLocation > (*textData) -> valueText.size()){
-            (*textData) -> cursorLocation = (*textData) -> valueText.size();
+          textDataValue.cursorLocation++;
+          if (textDataValue.cursorLocation > textDataValue.valueText.size()){
+            textDataValue.cursorLocation = textDataValue.valueText.size();
           }
-          onEditText(**textData);
+          onEditText(textDataValue);
         }else if (key == 265){
           // up key
-          (*textData) -> highlightLength++;
-          onEditText(**textData);
+          textDataValue.highlightLength++;
+          onEditText(textDataValue);
         }else if (key == 264){
           // downkey
-          (*textData) -> highlightLength--;
-          if ((*textData) -> highlightLength < 0){
-            (*textData) -> highlightLength = 0;
+          textDataValue.highlightLength--;
+          if (textDataValue.highlightLength < 0){
+            textDataValue.highlightLength = 0;
           }
-          onEditText(**textData);
+          onEditText(textDataValue);
         }else if (key == 257){
-          onEditText(insertCharacter(**textData, '\n'));
+          onEditText(insertCharacter(textDataValue, '\n'));
         }else if (key == 261){
           // delete forward
         }else if (key == 259){
-          onEditText(deleteCharacter(**textData));
+          onEditText(deleteCharacter(textDataValue));
         }else{
-          onEditText(insertCharacter(**textData, key));
+          onEditText(insertCharacter(textDataValue, key));
         }
       };
       listItemProps.props.push_back(PropPair { .symbol = onInputSymbol, onKeyPress });
