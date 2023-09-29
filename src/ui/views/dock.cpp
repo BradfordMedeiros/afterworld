@@ -276,26 +276,94 @@ std::optional<int> toPositiveInteger(std::string& text){
   return asInt;
 }
 std::optional<glm::vec2> toVec2(std::string& text){
-  glm::vec2 value(0.f, 0.f);
-  auto isVec2 = maybeParseVec2(text, value);
-  if (!isVec2){
+  auto parts = split(text, ' ');
+  if (parts.size() > 2){
     return std::nullopt;
+  }
+  std::vector<float> vecParts;
+  for (int i = 0; i < parts.size(); i++){
+    float number;
+    if (parts.at(i) == "-" || parts.at(i) == " " || parts.at(i) == "" || parts.at(i) == "." || parts.at(i) == "-."){
+      vecParts.push_back(0.f);
+    }else{
+      bool isFloat = maybeParseFloat(parts.at(i), number);
+      if (!isFloat){
+        return std::nullopt;
+      }
+      vecParts.push_back(number);      
+    }
+  }
+  glm::vec2 value(0.f, 0.f);
+  if (vecParts.size() >= 1){
+    value.x = vecParts.at(0);
+  }
+  if (vecParts.size() >= 2){
+    value.y = vecParts.at(1);
   }
   return value;
 }
+
+
 std::optional<glm::vec3> toVec3(std::string& text){
-  glm::vec3 value(0.f, 0.f, 0.f);
-  auto isVec3 = maybeParseVec(text, value);
-  if (!isVec3){
+  auto parts = split(text, ' ');
+  if (parts.size() > 3){
     return std::nullopt;
+  }
+  std::vector<float> vecParts;
+  for (int i = 0; i < parts.size(); i++){
+    float number;
+    if (parts.at(i) == "-" || parts.at(i) == " " || parts.at(i) == "" || parts.at(i) == "." || parts.at(i) == "-."){
+      vecParts.push_back(0.f);
+    }else{
+      bool isFloat = maybeParseFloat(parts.at(i), number);
+      if (!isFloat){
+        return std::nullopt;
+      }
+      vecParts.push_back(number);      
+    }
+  }
+  glm::vec3 value(0.f, 0.f, 0.f);
+  if (vecParts.size() >= 1){
+    value.x = vecParts.at(0);
+  }
+  if (vecParts.size() >= 2){
+    value.y = vecParts.at(1);
+  }
+  if (vecParts.size() >= 3){
+    value.z = vecParts.at(1);
   }
   return value;
 }
 std::optional<glm::vec4> toVec4(std::string& text){
-  glm::vec4 value(0.f, 0.f, 0.f, 0.f);
-  auto isVec4 = maybeParseVec4(text, value);
-  if (!isVec4){
+  auto parts = split(text, ' ');
+  if (parts.size() > 4){
     return std::nullopt;
+  }
+  std::vector<float> vecParts;
+  for (int i = 0; i < parts.size(); i++){
+    float number;
+    if (parts.at(i) == "-" || parts.at(i) == " " || parts.at(i) == "" || parts.at(i) == "." || parts.at(i) == "-."){
+      vecParts.push_back(0.f);
+    }else{
+      bool isFloat = maybeParseFloat(parts.at(i), number);
+      if (!isFloat){
+        return std::nullopt;
+      }
+      vecParts.push_back(number);      
+    }
+  }
+  glm::vec4 value(0.f, 0.f, 0.f, 0.f);
+  if (vecParts.size() >= 1){
+    value.x = vecParts.at(0);
+  }
+  if (vecParts.size() >= 2){
+    value.y = vecParts.at(1);
+  }
+  if (vecParts.size() >= 3){
+    value.z = vecParts.at(1);
+  }
+  if (vecParts.size() >= 4){
+    value.w = vecParts.at(1);
   }
   return value;
 }
@@ -515,7 +583,7 @@ std::vector<DockConfiguration> configurations {
       },
       DockTextboxConfig {
         .text = connectGetText("test-text"),
-        .onEdit = connectEditText("test-text", TEXT_TYPE_VEC3 ),
+        .onEdit = connectEditText("test-text", TEXT_TYPE_VEC2 ),
       },
       DockTextboxConfig {
         .text = connectGetText("test-text"),
