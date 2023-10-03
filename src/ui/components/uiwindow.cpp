@@ -3,7 +3,7 @@
 
 Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment){
   Component componentUiWindow {
-    .draw = [&component, symbol, &titleValue, alignment](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [&component, symbol, titleValue, alignment](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       auto enable = windowEnabled(symbol);
       if (!enable){
         return BoundingBox2D { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
