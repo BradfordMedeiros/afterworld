@@ -29,6 +29,7 @@ struct DockCheckboxConfig {
   std::function<void(bool)> onChecked;
 };
 struct DockTextboxConfig {
+  std::string label;
   std::function<std::string(void)> text;
   std::function<void(std::string)> onEdit;
 };
@@ -124,6 +125,39 @@ std::function<std::string()> connectGetText(std::string key){
   };
 }
 
+std::function<std::string()> connectGetTextVec2(std::string key){
+  if (textStore.find(key) == textStore.end()){
+    textStore[key] = "";
+  }
+  return [key]() -> std::string {
+    auto attr = dockConfigApi.getObjAttr(key);
+    if (!attr.has_value()){
+      return "";
+    }
+    auto value = std::get_if<std::string>(&attr.value());
+    if (!value){
+      return "";
+    }
+    return *value;
+  };
+}
+
+std::function<void(std::string)> connectEditTextVec2(std::string key, const char* objKey){
+  return [key, objKey](std::string value) -> void {
+    if (value.size() == 0){
+      textStore[key] = value;
+    }
+    auto vec2Value = toVec2(value);
+    std::cout << "setting vec2Value: " << (vec2Value.has_value() ? "true" : "false") << std::endl;
+    if (vec2Value.has_value()){
+      textStore[key] = value;
+
+      std::string asString = std::to_string(vec2Value.value().x) + " " + std::to_string(vec2Value.value().y);
+      dockConfigApi.setObjAttr(objKey, asString);
+    }
+  };
+}
+
 
 std::function<void(std::string)> connectEditText(std::string key, TextEditType type = TEXT_TYPE_STRING){
   return [key, type](std::string value) -> void {
@@ -194,32 +228,19 @@ std::vector<DockConfiguration> configurations {
     .title = "Textures",
     .configFields = {
       DockTextboxConfig {
-        .text = connectGetText("tiling-x"),
-        .onEdit = connectEditText("tiling-x", TEXT_TYPE_VEC2 ),
+        .label = "Tiling",
+        .text = connectGetTextVec2("texturetiling"),
+        .onEdit = connectEditTextVec2("tiling-x", "texturetiling"),
       },
       DockTextboxConfig {
-        .text = connectGetText("tiling-y"),
-        .onEdit = connectEditText("tiling-y", TEXT_TYPE_VEC2 ),
+        .label = "Size",
+        .text = connectGetTextVec2("texturesize"),
+        .onEdit = connectEditTextVec2("texturesize", "texturesize"),
       },
-      DockTextboxNumeric {
-        .label = "texturesize x",
-        .value = 20.f,
-        // gameobj:texturetiling
-      },
-      DockTextboxNumeric {
-        .label = "texturesize y",
-        .value = 20.f,
-        // gameobj:texturetiling
-      },
-      DockTextboxNumeric {
-        .label = "textureoffset x",
-        .value = 20.f,
-        // gameobj:textureoffset
-      },
-      DockTextboxNumeric {
-        .label = "textureoffset y",
-        .value = 20.f,
-        // gameobj:textureoffset
+      DockTextboxConfig {
+        .label = "Offset",
+        .text = connectGetTextVec2("textureoffset"),
+        .onEdit = connectEditTextVec2("textureoffset", "textureoffset"),
       },
     },
   },
@@ -338,10 +359,12 @@ std::vector<DockConfiguration> configurations {
         .getSelectedIndex = optionsSelectedIndexObj("type", { "point", "spotlight", "directional" }),
       },
       DockTextboxConfig {
+        .label = "Test Vec2",
         .text = connectGetText("test-text"),
         .onEdit = connectEditText("test-text", TEXT_TYPE_VEC2 ),
       },
       DockTextboxConfig {
+        .label = "Test Vec",
         .text = connectGetText("test-text"),
         .onEdit = connectEditText("test-text"),
       },
@@ -448,6 +471,7 @@ std::vector<DockConfiguration> configurations {
         .onClick = []() -> void {},
       },
       DockTextboxConfig {
+        .label = "Trigger",
         .text = []() -> std::string {  // gameobj:trigger-switch
           return "trigger-name-plaeholder"; 
         },
@@ -502,7 +526,7 @@ DockConfiguration* dockConfigByName(std::string name){
   //return &configurations.at(0);
 }
 
-
+Component textboxWithLabel = wrapWithLabel(textbox);
 
 void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Component>& elements);
 Component createDockComponent(DockConfig& config){
@@ -611,9 +635,10 @@ Component createDockComponent(DockConfig& config){
         PropPair { .symbol = editableSymbol, .value = true },
         PropPair { .symbol = textDataSymbol, .value = textData },
         PropPair { .symbol = onInputSymbol, .value = onEdit },
+        PropPair { .symbol = valueSymbol, .value = textboxOptions -> label },
       }
     };
-    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+    auto textboxWithProps = withPropsCopy(textboxWithLabel, textboxProps);
     return textboxWithProps;
   }
 

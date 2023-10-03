@@ -225,6 +225,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
 
     auto strAttr = std::get_if<std::string>(&value);
     if (strAttr){
+      std::cout << "setting string attr: " << key << ", " << *strAttr << std::endl;
       stringAttributes[key] = (*strAttr);
     }
     auto numAttr = std::get_if<float>(&value);
