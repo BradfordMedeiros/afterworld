@@ -18,32 +18,7 @@
 #include "./windowmanager.h"
 #include "../components/worldplay.h"
 #include "../components/scenemanager.h"
-
-struct Level {
-  std::string scene;
-  std::string name;
-};
-struct LevelUIInterface {
-  std::function<void(Level&)> goToLevel;
-  std::function<std::vector<Level>()> getLevels;
-  std::function<void()> goToMenu;
-};
-struct PauseInterface {
-  float elapsedTime;
-  std::function<void()> pause;
-  std::function<void()> resume;
-};
-
-struct UiContext {
-  std::function<bool()> isDebugMode;
-  std::function<bool()> showScreenspaceGrid;
-  LevelUIInterface levels;
-  PauseInterface pauseInterface;
-  WorldPlayInterface worldPlayInterface;
-
-  std::function<std::vector<std::string>()> listScenes;
-  std::function<void(std::string)> loadScene;
-};
+#include "./uicontext.h"
 
 extern Component mainUI;
 

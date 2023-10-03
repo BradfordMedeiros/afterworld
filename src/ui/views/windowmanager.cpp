@@ -7,6 +7,7 @@ const int windowColorPickerSymbol = getSymbol("window-symbol-colorpicker");
 const int windowDockSymbol = getSymbol("window-symbol-dock");
 const int windowFileExplorerSymbol = getSymbol("window-fileexplorer");
 const int windowImageExplorerSymbol = getSymbol("window-imageexplorer");
+const int windowDialogSymbol = getSymbol("window-dialogsymbol");
 
 std::map<int, WindowData> windowData = {
   { windowColorPickerSymbol, WindowData {
@@ -31,6 +32,13 @@ std::map<int, WindowData> windowData = {
     .vertical = true,
   }},
   { windowImageExplorerSymbol, WindowData {
+    .windowOffset = glm::vec2(0.f, 0.f),
+    .initialDragPos = std::nullopt,
+    .enable = false,
+    .horizontal = true,
+    .vertical = true,
+  }},
+  { windowDialogSymbol, WindowData {
     .windowOffset = glm::vec2(0.f, 0.f),
     .initialDragPos = std::nullopt,
     .enable = false,

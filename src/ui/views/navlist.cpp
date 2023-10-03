@@ -2,6 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 extern NavListApi navListApi;
+extern UiManagerContext uiManagerContext;
+
 
 int mappingId = 999995;
 std::vector<NestedListItem> nestedListTest = {
@@ -386,7 +388,9 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "new scene",
-          .onClick = notYetImplementedAlert,
+          .onClick = []() -> void {
+            uiManagerContext.uiMainContext.openNewSceneMenu();
+          },
           .mappingId = mappingId++,
         },
         .items = {},
@@ -394,7 +398,10 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "save scene",
-          .onClick = notYetImplementedAlert,
+          .onClick = []() -> void {
+            modassert(uiManagerContext.uiContext, "uiContextPtr null");
+            uiManagerContext.uiContext -> worldPlayInterface.saveScene();
+          },
           .mappingId = mappingId++,
         },
         .items = {},
@@ -402,7 +409,10 @@ std::vector<NestedListItem> nestedListTest = {
       NestedListItem {
         .item = ImListItem {
           .value = "reset scene",
-          .onClick = notYetImplementedAlert, // maybe this should send a request to core engine so can shutdown properly }
+          .onClick = []() -> void {
+            modassert(uiManagerContext.uiContext, "uiContextPtr null");
+            uiManagerContext.uiContext -> resetScene();
+          },
           .mappingId = mappingId++,
         },
         .items = {},

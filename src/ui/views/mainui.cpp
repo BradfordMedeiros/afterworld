@@ -108,15 +108,12 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   *activeColor = value;
 };
 
+std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn = std::nullopt;
 std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
 std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
 
-objid activeSceneId(){
-  auto selectedId = gameapi -> selected().at(0);
-  auto sceneId = gameapi -> listSceneId(selectedId);
-  return sceneId;
-}
+
 
 std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
@@ -126,6 +123,28 @@ std::optional<AttributeValue> getWorldState(const char* object, const char* attr
     }
   }
   return std::nullopt;
+}
+
+UiManagerContext uiManagerContext {
+  .uiContext = NULL,
+  .uiMainContext = UiMainContext {
+    .openNewSceneMenu = []() -> void { // replace with onInputBoxFn
+      windowSetEnabled(windowDialogSymbol, true);
+      //onInputBoxFn = [](bool closedWithoutNewFile, std::string userInput) -> void {
+      //  //onInputBox(closedWithoutNewFile, file);
+      //  std::cout << "open new scene user input is: " << userInput << std::endl;;
+      //  onInputBoxFn = std::nullopt;
+      //  windowSetEnabled(windowDialogSymbol, false);
+      //};
+      std::cout << "open new scene placeholder" << std::endl;
+    }
+  }
+};
+objid activeSceneId(){
+  modassert(uiManagerContext.uiContext, "uicontext null - active scene");
+  auto activeScene = uiManagerContext.uiContext -> activeSceneId();
+  modassert(activeScene.has_value(), "no active scene");
+  return activeScene.value();
 }
 
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
@@ -277,10 +296,11 @@ bool showScenes = false;
 int offset = 2;
 int currentScene = -1;
 
-
 std::optional<objid> focusedId = std::nullopt;
 
+
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+
   HandlerFns handlerFuncs {
     .minManagedId = -1,
     .maxManagedId = -1,
@@ -338,16 +358,20 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     },
   };
 
-  if (dialog != ""){
+  {
     Props dialogProps {
       .props = {
         PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
         PropPair { .symbol = titleSymbol, .value = std::string("mainui title") },
         PropPair { .symbol = detailSymbol, .value = std::string("mainui detail") },
-        PropPair { .symbol = onclickSymbol, .value = xCallbackFn },
       },
     };
-    dialogComponent.draw(drawTools, dialogProps);
+
+    auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
+    auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, "Dialog Placeholder");
+
+    auto defaultProps = getDefaultProps();
+    dialogWindow.draw(drawTools, defaultProps);
   }
 
   {
@@ -477,8 +501,12 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       };
       navbarComponent.draw(drawTools, navbarProps);
     }
+
+    // navlist uses this via extern
+    uiManagerContext.uiContext = &uiContext;
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
+
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), .8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);

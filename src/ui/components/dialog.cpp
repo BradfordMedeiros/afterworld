@@ -51,19 +51,8 @@ Component dialogComponent {
     //////////////////////////////
 
     auto listBoundingBox = simpleVerticalLayout(elements).draw(drawTools, props);
-    //drawDebugBoundingBox(drawTools, listBoundingBox, glm::vec4(0.f, 1.f, 0.f, 1.f));
-    auto boundingBox = listBoundingBox;
-    auto sides = calculateSides(boundingBox);
-
-    auto onClickX = fnFromProp(props, onclickSymbol);
-    if (onClickX.has_value()){
-      auto xMappingId = uniqueMenuItemMappingId();
-      bool xHovered =  drawTools.selectedId.has_value() && drawTools.selectedId.value() == xMappingId;
-      drawTextLeftHorzDownVert(drawTools, "x", sides.right, sides.top, 0.04f, xHovered ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 0.4f), xMappingId);
-      drawTools.registerCallbackFns(xMappingId, onClickX.value());
-    }
 
     //drawTools.drawText("some value", sides.right, sides.top, fontSize, false, std::nullopt, std::nullopt, true, std::nullopt, uniqueMenuItemMappingId());
-    return boundingBox;
+    return listBoundingBox;
   },
 };

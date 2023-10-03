@@ -9,6 +9,7 @@
 
 #include "../../util.h"
 #include "../../global.h"
+#include "./uicontext.h"
 
 
 struct NavListApi {

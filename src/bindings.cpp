@@ -100,8 +100,6 @@ void togglePauseMode(GameState& gameState){
   setPausedMode(!paused);
 }
 
-
-
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -141,14 +139,29 @@ UiContext getUiContext(GameState& gameState){
       .pause = pause,
       .resume = resume,
       .saveScene = []() -> void {
-        std::cout << "save scene placeholder" << std::endl;
-      }
+        //gameapi -> saveScene(false /*include ids */, sceneId, std::nullopt /* filename */);
+      },
     },
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [&gameState](std::string scene) -> void {
       std::cout << "load scene placeholder: " << scene << std::endl;
       goToLevel(gameState, scene);
     },
+    .newScene = []() -> void {
+      std::cout << "new scene placeholder" << std::endl;
+    },
+    .resetScene = []() -> void {
+      std::cout << "reset scene placeholder" << std::endl;
+    },
+    .activeSceneId = []() -> std::optional<objid> {
+      auto selected = gameapi -> selected();
+      if (selected.size() == 0){
+        return std::nullopt;
+      }
+      auto selectedId = gameapi -> selected().at(0);
+      auto sceneId = gameapi -> listSceneId(selectedId);
+      return sceneId;
+    }
   };
   return uiContext;
 }
