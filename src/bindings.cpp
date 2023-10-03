@@ -100,6 +100,16 @@ void togglePauseMode(GameState& gameState){
   setPausedMode(!paused);
 }
 
+std::optional<objid> activeSceneIdOpt(){
+  auto selected = gameapi -> selected();
+  if (selected.size() == 0){
+    return std::nullopt;
+  }
+  auto selectedId = gameapi -> selected().at(0);
+  auto sceneId = gameapi -> listSceneId(selectedId);
+  return sceneId;
+}
+
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -139,7 +149,9 @@ UiContext getUiContext(GameState& gameState){
       .pause = pause,
       .resume = resume,
       .saveScene = []() -> void {
-        //gameapi -> saveScene(false /*include ids */, sceneId, std::nullopt /* filename */);
+        auto sceneId = activeSceneIdOpt();
+        modassert(sceneId.has_value(), "save scene - no active scene");
+        gameapi -> saveScene(false /*include ids */, sceneId.value(), std::nullopt /* filename */);
       },
     },
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
@@ -147,21 +159,17 @@ UiContext getUiContext(GameState& gameState){
       std::cout << "load scene placeholder: " << scene << std::endl;
       goToLevel(gameState, scene);
     },
-    .newScene = []() -> void {
-      std::cout << "new scene placeholder" << std::endl;
+    .newScene = [](std::string sceneName) -> void {
+      std::cout << "new scene placeholder: " << sceneName << std::endl;
+      exit(1);
     },
     .resetScene = []() -> void {
-      std::cout << "reset scene placeholder" << std::endl;
+      auto sceneId = activeSceneIdOpt();
+      modassert(sceneId.has_value(), "resetScene  - no active scene");
+      gameapi -> resetScene(sceneId.value());
+
     },
-    .activeSceneId = []() -> std::optional<objid> {
-      auto selected = gameapi -> selected();
-      if (selected.size() == 0){
-        return std::nullopt;
-      }
-      auto selectedId = gameapi -> selected().at(0);
-      auto sceneId = gameapi -> listSceneId(selectedId);
-      return sceneId;
-    }
+    .activeSceneId = activeSceneIdOpt,
   };
   return uiContext;
 }

@@ -389,7 +389,11 @@ std::vector<NestedListItem> nestedListTest = {
         .item = ImListItem {
           .value = "new scene",
           .onClick = []() -> void {
-            uiManagerContext.uiMainContext.openNewSceneMenu();
+            uiManagerContext.uiMainContext.openNewSceneMenu([](bool closedWithoutInput, std::string sceneName) -> void {
+              if (!closedWithoutInput){
+                uiManagerContext.uiContext -> newScene(sceneName);
+              }
+            });
           },
           .mappingId = mappingId++,
         },

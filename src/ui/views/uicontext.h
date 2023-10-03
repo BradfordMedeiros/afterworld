@@ -28,14 +28,14 @@ struct UiContext {
   std::function<std::vector<std::string>()> listScenes;
   std::function<void(std::string)> loadScene;
   std::function<void()> saveScene;
-  std::function<void()> newScene;
+  std::function<void(std::string)> newScene;
   std::function<void()> resetScene;
   std::function<std::optional<objid>()> activeSceneId;
 };
 
 
 struct UiMainContext {
-	std::function<void()> openNewSceneMenu;
+	std::function<void(std::function<void(bool closedWithoutInput, std::string input)>)> openNewSceneMenu;
 };
 
 struct UiManagerContext {

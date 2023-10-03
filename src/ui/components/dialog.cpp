@@ -30,6 +30,29 @@ Component dialogComponent {
       elements.push_back(detailTextbox);      
     }
 
+   //////////////////////////////
+    TextData textData {
+      .valueText = std::string("test-scene"),
+      //.valueText = textboxOptions -> text(),
+      //.cursorLocation = textboxConfigData.cursorLocation,
+      //.highlightLength = textboxConfigData.highlightLength,
+      //.maxchars = textboxConfigData.maxchars,
+    };
+    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
+    };
+
+    Props textboxProps {
+      .props = {
+        PropPair { .symbol = editableSymbol, .value = true },
+        PropPair { .symbol = textDataSymbol, .value = textData },
+        PropPair { .symbol = onInputSymbol, .value = onEdit },
+      }
+    };
+    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
+    elements.push_back(textboxWithProps);
+    ////
+
+
     // option choices
     std::vector<Component> choiceElements;
     for (int i = 0 ; i < listItems.size(); i++){
@@ -48,7 +71,6 @@ Component dialogComponent {
 
     auto horizontalComponent = simpleHorizontalLayout(choiceElements);
     elements.push_back(horizontalComponent);
-    //////////////////////////////
 
     auto listBoundingBox = simpleVerticalLayout(elements).draw(drawTools, props);
 

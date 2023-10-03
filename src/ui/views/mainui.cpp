@@ -96,12 +96,6 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
 };
 
 
-std::string dialog = "";
-std::function<void()> xCallbackFn = []() -> void {
-  dialog = "";
-};
-
-
 bool showColorPicker = true;
 std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
@@ -128,14 +122,14 @@ std::optional<AttributeValue> getWorldState(const char* object, const char* attr
 UiManagerContext uiManagerContext {
   .uiContext = NULL,
   .uiMainContext = UiMainContext {
-    .openNewSceneMenu = []() -> void { // replace with onInputBoxFn
+    .openNewSceneMenu = [](std::function<void(bool closedWithoutInput, std::string input)> onInputBox) -> void { // replace with onInputBoxFn
       windowSetEnabled(windowDialogSymbol, true);
-      //onInputBoxFn = [](bool closedWithoutNewFile, std::string userInput) -> void {
-      //  //onInputBox(closedWithoutNewFile, file);
-      //  std::cout << "open new scene user input is: " << userInput << std::endl;;
-      //  onInputBoxFn = std::nullopt;
-      //  windowSetEnabled(windowDialogSymbol, false);
-      //};
+      onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
+        onInputBox(closedWithoutNewFile, userInput);
+        std::cout << "open new scene user input is: " << userInput << std::endl;;
+        onInputBoxFn = std::nullopt;
+        windowSetEnabled(windowDialogSymbol, false);
+      };
       std::cout << "open new scene placeholder" << std::endl;
     }
   }
@@ -298,6 +292,7 @@ int currentScene = -1;
 
 std::optional<objid> focusedId = std::nullopt;
 
+std::string dialogText = "test text";
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
 
@@ -342,28 +337,39 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
 
-  std::vector<ListComponentData> dialogOptions = {
-    ListComponentData {
-      .name = "confirm",
-      .onClick = []() -> void {
-        std::cout << "dialog confirm on click" << std::endl;
-      },      
-    },
-    ListComponentData {
-      .name = "quit",
-      .onClick = []() -> void {
-        std::cout << "dialog on quit" << std::endl;
-        exit(1);
-      },      
-    },
-  };
-
   {
+    std::vector<ListComponentData> dialogOptions = {
+      ListComponentData {
+        .name = "confirm",
+        .onClick = []() -> void {
+          std::cout << "dialog confirm on click" << std::endl;
+          if (onInputBoxFn.has_value()){
+            onInputBoxFn.value()(false, "testdata");
+          }
+        },      
+      },
+      ListComponentData {
+        .name = "cancel",
+        .onClick = []() -> void {
+          if (onInputBoxFn.has_value()){
+            onInputBoxFn.value()(true, "");
+          }
+        },      
+      },
+    };
+
+    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
+      dialogText = textData.valueText;
+    };
+
+
     Props dialogProps {
       .props = {
         PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
         PropPair { .symbol = titleSymbol, .value = std::string("mainui title") },
         PropPair { .symbol = detailSymbol, .value = std::string("mainui detail") },
+        PropPair { .symbol = valueSymbol, .value = dialogText },
+        PropPair { .symbol = onInputSymbol, .value = onEdit },
       },
     };
 
