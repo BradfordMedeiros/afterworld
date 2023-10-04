@@ -110,6 +110,7 @@ std::optional<objid> activeSceneIdOpt(){
   return sceneId;
 }
 
+const std::string sceneFolder = "./res/scenes/";
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -160,14 +161,12 @@ UiContext getUiContext(GameState& gameState){
       goToLevel(gameState, scene);
     },
     .newScene = [](std::string sceneName) -> void {
-      std::cout << "new scene placeholder: " << sceneName << std::endl;
-      exit(1);
+      gameapi -> createScene(sceneFolder + sceneName + ".rawscene");
     },
     .resetScene = []() -> void {
       auto sceneId = activeSceneIdOpt();
       modassert(sceneId.has_value(), "resetScene  - no active scene");
       gameapi -> resetScene(sceneId.value());
-
     },
     .activeSceneId = activeSceneIdOpt,
   };

@@ -102,11 +102,11 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   *activeColor = value;
 };
 
-std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn = std::nullopt;
 std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
 std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
 
+std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn = std::nullopt;
 
 
 std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
@@ -291,8 +291,12 @@ int offset = 2;
 int currentScene = -1;
 
 std::optional<objid> focusedId = std::nullopt;
-
-std::string dialogText = "test text";
+TextData newSceneTextData {
+  .valueText = "",
+  .cursorLocation = 0,
+  .highlightLength = 0,
+  .maxchars = -1,
+};
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
 
@@ -344,7 +348,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         .onClick = []() -> void {
           std::cout << "dialog confirm on click" << std::endl;
           if (onInputBoxFn.has_value()){
-            onInputBoxFn.value()(false, "testdata");
+            onInputBoxFn.value()(false, newSceneTextData.valueText);
           }
         },      
       },
@@ -358,23 +362,26 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       },
     };
 
+   //////////////////////////////
+
+
     std::function<void(TextData)> onEdit = [](TextData textData) -> void {
-      dialogText = textData.valueText;
+      newSceneTextData = textData;
     };
+
 
 
     Props dialogProps {
       .props = {
         PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
-        PropPair { .symbol = titleSymbol, .value = std::string("mainui title") },
-        PropPair { .symbol = detailSymbol, .value = std::string("mainui detail") },
-        PropPair { .symbol = valueSymbol, .value = dialogText },
+        PropPair { .symbol = detailSymbol, .value = std::string("Enter Name of New Scene") },
+        PropPair { .symbol = valueSymbol, .value =  newSceneTextData },
         PropPair { .symbol = onInputSymbol, .value = onEdit },
       },
     };
 
     auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
-    auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, "Dialog Placeholder");
+    auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, "New Scene");
 
     auto defaultProps = getDefaultProps();
     dialogWindow.draw(drawTools, defaultProps);
@@ -477,7 +484,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
         PropPair { .symbol = xoffsetSymbol, .value = 1.f },
         PropPair { .symbol = yoffsetSymbol, .value = 0.88f },
-
 
       },
     };

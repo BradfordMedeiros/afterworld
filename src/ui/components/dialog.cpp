@@ -11,13 +11,16 @@ Component dialogComponent {
 
     std::vector<Component> elements;
 
-    auto titleValue = strFromProp(props, titleSymbol, "title placeholder");
-    auto titleTextbox = withPropsCopy(textbox, Props {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = titleValue },
-      }
-    });
-    elements.push_back(titleTextbox);
+    auto titleValue = strFromProp(props, titleSymbol, "");
+    if (titleValue != ""){
+      auto titleTextbox = withPropsCopy(textbox, Props {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = titleValue },
+        }
+      });
+      elements.push_back(titleTextbox);
+    }
+
 
     auto detailValue = strFromProp(props, detailSymbol, "");
     if (detailValue != ""){
@@ -30,22 +33,17 @@ Component dialogComponent {
       elements.push_back(detailTextbox);      
     }
 
-   //////////////////////////////
-    TextData textData {
-      .valueText = std::string("test-scene"),
-      //.valueText = textboxOptions -> text(),
-      //.cursorLocation = textboxConfigData.cursorLocation,
-      //.highlightLength = textboxConfigData.highlightLength,
-      //.maxchars = textboxConfigData.maxchars,
-    };
-    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
-    };
+    auto textData = typeFromProps<TextData>(props, valueSymbol);
+    modassert(textData, "text data is not defined dialog");
+ 
+    auto onEdit = typeFromProps<std::function<void(TextData)>>(props, onInputSymbol);
+    modassert(onEdit, "on edit is not defined dialog");
 
     Props textboxProps {
       .props = {
         PropPair { .symbol = editableSymbol, .value = true },
-        PropPair { .symbol = textDataSymbol, .value = textData },
-        PropPair { .symbol = onInputSymbol, .value = onEdit },
+        PropPair { .symbol = textDataSymbol, .value = *textData },
+        PropPair { .symbol = onInputSymbol, .value = *onEdit },
       }
     };
     auto textboxWithProps = withPropsCopy(textbox, textboxProps);
