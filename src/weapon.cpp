@@ -516,36 +516,24 @@ void drawCircle(objid id, glm::vec3 pos, float radius, glm::quat orientation){
   } 
 }
 
-glm::vec4 reticleColor(1.f, 1.f, 1.f, 0.5f);
+const glm::vec4 reticleColor(1.f, 1.f, 1.f, 0.5f);
+const float markerLineLength = 0.01f;
+
 bool shouldDrawMarkers = true;
 void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
-  auto left = pos + orientation * glm::vec3(-radius, 0.f, 0.f);
-  auto right = pos + orientation * glm::vec3(radius, 0.f, 0.f);
-  auto top = pos + orientation * glm::vec3(0.f, radius, 0.f);
-  auto bottom = pos + orientation * glm::vec3(0.f, -radius, 0.f);
-
-  auto leftTowardCenter = glm::normalize(pos - left) * 0.01f;
-
-  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(radius * 10.f, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(radius * -10.f, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, radius * 10.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, radius * -10.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-
-  gameapi -> drawLine(left, left + leftTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
-
-  auto rightTowardCenter = glm::normalize(pos - right) * 0.01f;
-  gameapi -> drawLine(right, right + rightTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
-
-  auto topTowardCenter = glm::normalize(pos - top) * 0.01f;
-  gameapi -> drawLine(top, top + topTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
-
-  auto bottomTowardCenter = glm::normalize(pos - bottom) * 0.01f;
-  gameapi -> drawLine(bottom, bottom + bottomTowardCenter, false, id, reticleColor, std::nullopt, std::nullopt);
+  float marketInner = radius * 10.f;
+  float markerOuter = radius * 10.f + markerLineLength; //
+  gameapi -> drawLine2D(glm::vec3(0.f, marketInner, 0.f), glm::vec3(0.f, markerOuter, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(0.f, -1 * marketInner, 0.f), glm::vec3(0.f, -1 * markerOuter, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(marketInner, 0.f, 0.f), glm::vec3(markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(-1 * marketInner, 0.f, 0.f), glm::vec3(-1 * markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
 }
+
 
 // draw a circle at a distance from the player with a certain radius
 // this is independent of fov, and should be
-void drawBloom(Weapons& weapons, objid id, float distance, float radius){
+void drawBloom(Weapons& weapons, objid id, float distance, float bloomAmount){
+
   // i'd rather do this on a screen only texture
   modassert(distance < 0, "distance must be negative (forward -z)");
   auto mainobjPos = gameapi -> getGameObjectPos(weapons.playerId, true);
@@ -554,8 +542,9 @@ void drawBloom(Weapons& weapons, objid id, float distance, float radius){
   gameapi -> drawLine(mainobjPos, toPos, false, id, reticleColor, std::nullopt, std::nullopt);
   
   if (shouldDrawMarkers){
-    drawMarkers(id, toPos, radius, mainobjRot);
+    drawMarkers(id, toPos, bloomAmount, mainobjRot);
   }else{
+    float radius = glm::max(0.002f, bloomAmount);
     drawCircle(id, toPos, radius, mainobjRot);
   }
 }
@@ -775,7 +764,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
     Weapons* weapons = static_cast<Weapons*>(data);
     auto bloomAmount = calculateBloomAmount(*weapons);
-    drawBloom(*weapons, id, -1.f, glm::max(0.002f, bloomAmount)); // 0.002f is just a min amount for visualization, not actual bloom
+    drawBloom(*weapons, id, -1.f, bloomAmount); // 0.002f is just a min amount for visualization, not actual bloom
     if (weapons -> weaponParams.canHold && weapons -> isHoldingLeftMouse){
       tryFireGun(*weapons, gameapi -> listSceneId(id), bloomAmount);
     }
