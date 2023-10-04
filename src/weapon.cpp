@@ -260,12 +260,12 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
 
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset, bool precise = false){
+std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
   auto mainobjPos = gameapi -> getGameObjectPos(weapons.playerId, true);
   auto rot = gameapi -> getGameObjectRotation(weapons.playerId, true) *  orientationOffsetQuat;
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
-  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance, false);
+  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
 
   if (weapons.raycastLine.has_value()){
     gameapi -> freeLine(weapons.raycastLine.value());
@@ -280,8 +280,8 @@ std::vector<HitObject> doRaycast(Weapons& weapons, glm::vec3 orientationOffset, 
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 cameraPos, glm::vec3 orientationOffset, bool precise){
-  auto hitpoints = doRaycast(weapons, orientationOffset, precise);
+std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 cameraPos, glm::vec3 orientationOffset){
+  auto hitpoints = doRaycast(weapons, orientationOffset);
   if (hitpoints.size() > 0){
     auto closestIndex = closestHitpoint(hitpoints, cameraPos);
     return { hitpoints.at(closestIndex) };
@@ -290,9 +290,9 @@ std::vector<HitObject> doRaycastClosest(Weapons& weapons, glm::vec3 cameraPos, g
 }
 
 
-void fireRaycastForGun(Weapons& weapons, glm::vec3 orientationOffset){
+void fireRaycast(Weapons& weapons, glm::vec3 orientationOffset){
   auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId, true);
-  auto hitpoints = doRaycastClosest(weapons, cameraPos, orientationOffset, true);
+  auto hitpoints = doRaycastClosest(weapons, cameraPos, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
@@ -377,7 +377,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
 
   glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (weapons.weaponParams.isRaycast){
-    fireRaycastForGun(weapons, shootingVecAngle);
+    fireRaycast(weapons, shootingVecAngle);
   }
   if (weapons.currentGun.projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);

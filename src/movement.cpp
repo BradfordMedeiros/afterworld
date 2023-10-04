@@ -133,7 +133,7 @@ void updateFacingWall(Movement& movement, objid id){
   auto mainobjPos = gameapi -> getGameObjectPos(id, true);
   auto rot = gameapi -> getGameObjectRotation(id, true);
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
-  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, 2.f, false);
+  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, 2.f);
 
   if (hitpoints.size() > 0){
     movement.facingWall = true;
@@ -319,7 +319,7 @@ float getPlayerTop(glm::vec3 playerPos){
 bool somethingAbovePlayer(glm::vec3 playerPos){
   auto abovePlayer = getPlayerTop(playerPos);
   playerPos.y = abovePlayer;
-  auto hitpoints =  gameapi -> raycast(playerPos, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), 0.6f, false);
+  auto hitpoints =  gameapi -> raycast(playerPos, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), 0.6f);
   return hitpoints.size() > 0;
 }
 
@@ -352,8 +352,8 @@ bool shouldStepUp(Movement& movement, objid id){
   auto belowDir = gameapi -> orientationFromPos(belowPos, belowPosSameHeight);
   auto aboveDir = gameapi -> orientationFromPos(abovePos, abovePosSameHeight);
 
-  auto belowHitpoints = gameapi -> raycast(belowPos, belowDir, 2.f, false);
-  auto aboveHitpoints = gameapi -> raycast(abovePos, aboveDir, 2.f, false);
+  auto belowHitpoints = gameapi -> raycast(belowPos, belowDir, 2.f);
+  auto aboveHitpoints = gameapi -> raycast(abovePos, aboveDir, 2.f);
 
   //gameapi -> drawLine(belowPos, gameapi -> moveRelative(belowPos, belowDir, 2.f), true, id, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt);
   //gameapi -> drawLine(abovePos, gameapi -> moveRelative(abovePos, aboveDir, 2.f), true, id, glm::vec4(0.f, 0.f, 1.f, 1.f),  std::nullopt, std::nullopt);
