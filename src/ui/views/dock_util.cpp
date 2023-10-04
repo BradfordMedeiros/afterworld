@@ -57,7 +57,7 @@ std::optional<glm::vec3> toVec3(std::string& text){
     value.y = vecParts.at(1);
   }
   if (vecParts.size() >= 3){
-    value.z = vecParts.at(1);
+    value.z = vecParts.at(2);
   }
   return value;
 }
@@ -87,10 +87,10 @@ std::optional<glm::vec4> toVec4(std::string& text){
     value.y = vecParts.at(1);
   }
   if (vecParts.size() >= 3){
-    value.z = vecParts.at(1);
+    value.z = vecParts.at(2);
   }
   if (vecParts.size() >= 4){
-    value.w = vecParts.at(1);
+    value.w = vecParts.at(3);
   }
   return value;
 }
