@@ -25,9 +25,11 @@ extern Component mainUI;
 struct HandlerFns {
   int minManagedId;
   int maxManagedId;
-  std::map<objid, std::function<void()>> handlerFns;
-  std::map<objid, std::function<void(int)>> handlerFns2;
-  std::map<objid, std::function<void(int)>> inputFns;
+  std::unordered_map<objid, std::function<void()>> handlerFns;
+  std::unordered_map<objid, std::function<void(HandlerCallbackFn&)>> handlerCallbackFns;    
+  std::unordered_map<objid, std::function<void(int)>> handlerFns2;
+  std::unordered_map<objid, std::function<void(int)>> inputFns;
+  std::unordered_map<objid, TrackedLocationData> trackedLocationIds;
 };
 HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void onMainUiScroll(double amount);

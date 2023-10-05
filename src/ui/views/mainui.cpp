@@ -314,25 +314,23 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
   // now just log  the position / location data, lets say for the rect stuff now 
   // then have to provide it back to the callbacks 
-  std::unordered_map<objid, TrackedLocationData> trackedLocationIds = {};
-
   HandlerFns handlerFuncs {
     .minManagedId = -1,
     .maxManagedId = -1,
     .handlerFns = {},
+    .handlerCallbackFns = {},
     .handlerFns2 = {},
     .inputFns = {},
+    .trackedLocationIds = {},
   };
-  std::map<objid, std::function<void(int)>> handlerFns2;
-
   std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
 
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
-     .drawRect = [&trackedLocationIds](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
+     .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
       //gameapi -> drawRect
       if (trackingId.has_value()){
-        trackedLocationIds[trackingId.value()] = TrackedLocationData {
+        handlerFuncs.trackedLocationIds[trackingId.value()] = TrackedLocationData {
           .position = glm::vec2(centerX, centerY),
           .size = glm::vec2(width, height),
         };
@@ -342,6 +340,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
      .drawLine2D = gameapi -> drawLine2D,
      .registerCallbackFns = [&handlerFuncs](objid id, std::function<void()> fn) -> void {
         handlerFuncs.handlerFns[id] = fn;
+     },
+     .registerCallbackFnsHandler = [&handlerFuncs](objid id, std::function<void(HandlerCallbackFn&)> fn) -> void {
+        handlerFuncs.handlerCallbackFns[id] = fn;
      },
      .registerCallbackRightFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
         handlerFuncs.handlerFns2[id] = fn;
@@ -554,7 +555,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
 
-  std::cout << "location data: " << print(trackedLocationIds) << std::endl;
+  //std::cout << "location data: " << print(handlerFuncs.trackedLocationIds) << std::endl;
   return handlerFuncs;
 }
 
@@ -601,6 +602,12 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
     if (selectedId.has_value()){
       if (handlerFns.handlerFns.find(selectedId.value()) != handlerFns.handlerFns.end()){
         handlerFns.handlerFns.at(selectedId.value())();
+      }
+      if (handlerFns.handlerCallbackFns.find(selectedId.value()) != handlerFns.handlerCallbackFns.end()){\
+        HandlerCallbackFn data{
+          .trackedLocationData = handlerFns.trackedLocationIds.at(selectedId.value()),
+        };
+        handlerFns.handlerCallbackFns.at(selectedId.value())(data);
       }
     }
   }

@@ -190,6 +190,7 @@ void createScenegraphItem(Scenegraph& scenegraph, ScenegraphItem& item, int dept
 
   std::function<void(int)> onClickFn2 = [onClick, &item](int action) -> void {
   	if (action == 1){
+	   	modassert(false, "scenegraph right click");
   		onClick(item.id);
   	}
   };
