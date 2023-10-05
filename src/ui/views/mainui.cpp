@@ -298,7 +298,23 @@ TextData newSceneTextData {
   .maxchars = -1,
 };
 
+
+std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocationIds){
+  std::string value = "[";
+  for (auto &[id, data] : trackedLocationIds){
+    value += "(" + print(data.position) + ", " + print(data.size) + ") ";
+  }
+  return value + "]";
+}
+
+
+
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+
+
+  // now just log  the position / location data, lets say for the rect stuff now 
+  // then have to provide it back to the callbacks 
+  std::unordered_map<objid, TrackedLocationData> trackedLocationIds = {};
 
   HandlerFns handlerFuncs {
     .minManagedId = -1,
@@ -310,9 +326,19 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   std::map<objid, std::function<void(int)>> handlerFns2;
 
   std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
+
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
-     .drawRect = gameapi -> drawRect,
+     .drawRect = [&trackedLocationIds](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
+      //gameapi -> drawRect
+      if (trackingId.has_value()){
+        trackedLocationIds[trackingId.value()] = TrackedLocationData {
+          .position = glm::vec2(centerX, centerY),
+          .size = glm::vec2(width, height),
+        };
+      }
+      gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture);
+     },
      .drawLine2D = gameapi -> drawLine2D,
      .registerCallbackFns = [&handlerFuncs](objid id, std::function<void()> fn) -> void {
         handlerFuncs.handlerFns[id] = fn;
@@ -527,6 +553,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
+
+  std::cout << "location data: " << print(trackedLocationIds) << std::endl;
   return handlerFuncs;
 }
 

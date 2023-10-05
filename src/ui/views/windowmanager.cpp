@@ -13,9 +13,9 @@ std::map<int, WindowData> windowData = {
   { windowColorPickerSymbol, WindowData {
     .windowOffset = glm::vec2(0.f, 0.f),
     .initialDragPos = std::nullopt,
-    .enable = false,
+    .enable = true,
     .horizontal = true,
-    .vertical = false,
+    .vertical = true,
   }},
   { windowDockSymbol, WindowData {
     .windowOffset = glm::vec2(1.f, 0.88f),

@@ -5,6 +5,24 @@
 #include <optional>
 #include "../../util.h"
 
+struct TrackedLocationData {
+  glm::vec2 position;
+  glm::vec2 size;
+};
+struct HandlerCallbackFn {
+  TrackedLocationData trackedLocationData;
+};
+struct DrawingTools {
+  std::function<void(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId)> drawText;
+  std::function<void(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId)> drawRect;
+  std::function<void(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawLine2D;
+  std::function<void(objid, std::function<void()>)> registerCallbackFns;
+  std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
+  std::function<void(objid, std::function<void(int)>)> registerInputFns;
+  std::optional<objid> selectedId;
+  std::optional<objid> focusedId;
+};
+
 struct PropPair {
   int symbol;
   std::any value;
@@ -42,16 +60,6 @@ T* typeFromProps(Props& props, int symbol){
 
 void updatePropValue(Props& props, int symbol, std::any value);
 
-struct DrawingTools {
-  std::function<void(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId)> drawText;
-  std::function<void(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawRect;
-  std::function<void(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture)> drawLine2D;
-  std::function<void(objid, std::function<void()>)> registerCallbackFns;
-  std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
-  std::function<void(objid, std::function<void(int)>)> registerInputFns;
-  std::optional<objid> selectedId;
-  std::optional<objid> focusedId;
-};
 
 struct BoundingBox2D {
   float x;

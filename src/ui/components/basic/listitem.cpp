@@ -28,7 +28,7 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
     drawTools.registerInputFns(menuItem.mappingId.value(), *inputFn);
   }
 
-  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt);
+  drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
   return BoundingBox2D {
     .x = rectX,
