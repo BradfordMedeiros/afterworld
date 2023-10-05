@@ -256,7 +256,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   }
 }
 
-void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoint, objid id){
+void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoint){
   float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
   float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
 
@@ -290,6 +290,8 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
       }
     } 
   }
+
+  modlog("dragselect", print(ids));
   gameapi -> setSelected(ids);
 }
 
@@ -352,7 +354,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, selectedId);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
-      selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc), id);
+      selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
