@@ -188,21 +188,6 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     AiData* aiData = static_cast<AiData*>(data);
     if (key == 'M' && action == 0) { 
       printWorldInfo(aiData -> worldInfo);
-    }else if (key == ',' && action == 0){
-      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
-      for (auto spawnpointId : spawnpointIds){
-        spawnPlayer(spawnpointId, "red");
-      }
-    }else if (key == '.' && action == 0){
-      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
-      for (auto spawnpointId : spawnpointIds){
-        spawnPlayer(spawnpointId, "blue");
-      }
-    }else if (key == '/' && action == 0){
-      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn-managed", std::nullopt, std::nullopt);
-      for (auto spawnpointId : spawnpointIds){
-        gameapi -> removeObjectById(spawnpointId);
-      }
     }
   };
 

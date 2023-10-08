@@ -76,6 +76,7 @@ void goToMenu(GameState& gameState){
     gameState.menuLoaded = true;
   }
   cameras = {};
+  pushHistory("mainmenu");
 }
 
 double downTime = 0;
@@ -134,7 +135,6 @@ UiContext getUiContext(GameState& gameState){
       },
       .goToMenu = [&gameState]() -> void {
         goToMenu(gameState);
-        pushHistory("mainmenu");
       }
     },
     .pauseInterface = PauseInterface {
@@ -374,12 +374,31 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-
     if (key == 263){        // left  key
       activeColor.a += 0.01f;
     }else if (key == 262){  // right key
       activeColor.a -= 0.01f;
     }
+
+
+    if (key == ',' && action == 0){
+      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
+      for (auto spawnpointId : spawnpointIds){
+        spawnPlayer(spawnpointId, "red");
+      }
+    }else if (key == '.' && action == 0){
+      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
+      for (auto spawnpointId : spawnpointIds){
+        spawnPlayer(spawnpointId, "blue");
+      }
+    }else if (key == '/' && action == 0){
+      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn-managed", std::nullopt, std::nullopt);
+      for (auto spawnpointId : spawnpointIds){
+        gameapi -> removeObjectById(spawnpointId);
+      }
+    }
+
+
 
     onMainUiKeyPress(gameState -> uiCallbacks, key);
   };
@@ -387,6 +406,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
       goToMenu(*gameState);
+      return;
+    }
+    if (key == "game-over"){
+      gameapi -> sendNotifyMessage("alert", "game-over");
+      gameapi -> schedule(-1, 5000, NULL, [gameState](void*) -> void { 
+        goToMenu(*gameState);
+      });
       return;
     }
     if (key == "reload-config:levels"){
@@ -486,8 +512,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (key == "alert"){
       auto strValue = anycast<std::string>(value); 
-      modassert(strValue != NULL, "alert value invalid");
-      sendUiAlert(*strValue);
+      if (strValue != NULL){
+        sendUiAlert(*strValue);
+        return;
+      }
+
+      auto charStrValue = anycast<const char*>(value);
+      if (charStrValue != NULL){
+        sendUiAlert(*charStrValue);
+        return;
+      }
+      modassert(false, "send alert invalid value");
     }
   };
 

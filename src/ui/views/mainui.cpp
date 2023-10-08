@@ -646,5 +646,5 @@ std::string getCurrentPath(){
 
 void sendUiAlert(std::string message){
   std::cout << "dock: alert: " << message << std::endl;
-  pushAlertMessage(message);
+  pushAlertMessage(message, ALERT_DETAIL);
 }

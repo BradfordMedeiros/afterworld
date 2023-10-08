@@ -8,7 +8,8 @@ const int maxBufferSize = 1;
 
 struct AlertMessage {
 	std::string message;
-	double time;
+	std::optional<double> time;
+	AlertMessageType type;
 };
 struct Alerts {
 	std::deque<AlertMessage> messageBuffer;
@@ -27,9 +28,15 @@ const float marginBottom = margin;
 
 void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer){
 	for (int i = 0; i < buffer.size(); i++){
-		auto message = buffer.at(i);
-		auto textToDraw = amountToDraw2(message.message, message.time, 100);
+		AlertMessage& message = buffer.at(i);
+		if (message.type != ALERT_DETAIL){
+			continue;
+		}
+		if (!message.time.has_value()){
+			message.time = gameapi -> timeSeconds(true);
+		}
 
+		auto textToDraw = amountToDraw2(message.message, message.time.value(), 100);
 		gameapi -> drawText(
 			textToDraw, 
 			(-1 + marginLeft),
@@ -42,12 +49,16 @@ void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer
 			std::nullopt, 
 			std::nullopt
 		);
+		break;
 	}
 }
 
 bool isNotExpiredMessage2(AlertMessage& message){
+	if (!message.time.has_value()){
+		return true;
+	}
 	auto currTime = gameapi -> timeSeconds(true);
-	auto createTime = message.time;
+	auto createTime = message.time.value();
 	auto diff = (currTime - createTime) * 1000;
 	return diff < bufferExpirationTimeMs;
 }
@@ -66,10 +77,11 @@ Alerts alerts {
 	.messageBuffer = {},
 };
 
-void pushAlertMessage(std::string message){
+void pushAlertMessage(std::string message, AlertMessageType type){
    alerts.messageBuffer.push_back(AlertMessage {
    	.message = message,
-   	.time = gameapi -> timeSeconds(true),
+   	.time = std::nullopt,
+   	.type = type,
    });
    if (alerts.messageBuffer.size() > maxBufferSize){
    	alerts.messageBuffer.pop_front();

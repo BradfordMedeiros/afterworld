@@ -20,6 +20,7 @@
 #include "./sound.h"
 #include "./water.h"
 #include "./gametypes.h"
+#include "./spawn.h"
 #include "./global.h"
 #include "./ui/components/common.h"
 #include "./ui/components/basic/list.h"

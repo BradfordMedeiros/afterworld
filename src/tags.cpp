@@ -192,6 +192,18 @@ std::vector<TagUpdater> tagupdates = {
 	},
 
 	TagUpdater {
+		.attribute = "game-control",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+  	.onRemove = [](void* data, int32_t id) -> void { 
+  		gameapi -> sendNotifyMessage("game-over", (int)1);
+  		gameapi -> sendNotifyMessage("alert", "gameover");
+
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
+
+	TagUpdater {
 		.attribute = "ambient",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
   		Tags* tags = static_cast<Tags*>(data);
@@ -214,7 +226,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = [](Tags& tags) -> void {  
   		auto transform = gameapi -> getView();
   		auto hitObjects = gameapi -> contactTestShape(transform.position, transform.rotation, glm::vec3(1.f, 1.f, 1.f));
-//
   		std::set<objid> audioZones;
   		for (auto &hitobject : hitObjects){
   			if (tags.audiozones.audiozoneIds.count(hitobject.id) > 0){
