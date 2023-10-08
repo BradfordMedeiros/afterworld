@@ -139,6 +139,12 @@ float randomNumber(float min, float max){
   return distribution(gen);
 }
 
+int randomNumber(int min, int max){
+  static std::default_random_engine gen;
+  std::uniform_int_distribution<> distribution(min, max);
+  return distribution(gen);
+}
+
 int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos){
   modassert(hitpoints.size() > 0, "hitpoints object is size 0");
   int closestIndex = 0;

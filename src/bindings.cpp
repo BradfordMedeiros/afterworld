@@ -370,10 +370,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
 
-    if (action != 1){
-      return;
-    }
-
     if (key == 263){        // left  key
       activeColor.a += 0.01f;
     }else if (key == 262){  // right key
@@ -381,26 +377,20 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
 
-    if (key == ',' && action == 0){
-      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
-      for (auto spawnpointId : spawnpointIds){
-        spawnPlayer(spawnpointId, "red");
-      }
+    if (key == 'M' && action == 0){
+      spawnFromRandomSpawnpoint("red");
+    }else if (key == ',' && action == 0){
+      spawnFromAllSpawnpoints("red");
     }else if (key == '.' && action == 0){
-      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn", std::nullopt, std::nullopt);
-      for (auto spawnpointId : spawnpointIds){
-        spawnPlayer(spawnpointId, "blue");
-      }
+      spawnFromAllSpawnpoints("blue");
     }else if (key == '/' && action == 0){
-      auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn-managed", std::nullopt, std::nullopt);
-      for (auto spawnpointId : spawnpointIds){
-        gameapi -> removeObjectById(spawnpointId);
-      }
+      removeAllSpawnedEntities();
     }
 
+    if (action == 1){
+      onMainUiKeyPress(gameState -> uiCallbacks, key);
+    }
 
-
-    onMainUiKeyPress(gameState -> uiCallbacks, key);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);

@@ -3,6 +3,8 @@
 
 #include "./util.h"
 
-void spawnPlayer(objid id, const char* team);
+void spawnFromAllSpawnpoints(const char* team);
+void spawnFromRandomSpawnpoint(const char* team);
+void removeAllSpawnedEntities();
 
 #endif

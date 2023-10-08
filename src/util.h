@@ -44,6 +44,7 @@ bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs);
 
 float randomNumber(float min, float max);
+int randomNumber(int min, int max);
 
 int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos);
 void showDebugHitmark(HitObject& hitpoint, objid playerId);

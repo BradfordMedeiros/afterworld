@@ -18,6 +18,7 @@ platform_lowert:texture:../gameresources/textures/wood.jpg
 platform_lowert:physics:enabled
 platform_lowert:material:metal
 
+
 &ambient_space:clip:../gameresources/sound/busy_cyberworld.wav
 &ambient_space:loop:true
 &ambient_space:center:true
@@ -65,6 +66,7 @@ ladder:ladder:vertical
 ladder:texture:./res/textures/brickwall.jpg
 ladder:health:100
 ladder:team:blue
+ladder:game-control:main
 
 ## Race elements ###
 race_marker1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -332,4 +334,5 @@ gunlogic:script:native/weapon
 tags:script:native/tags
 ai:script:native/ai
 movement:script:native/movement:1
+
 
