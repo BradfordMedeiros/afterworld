@@ -47,6 +47,8 @@ void goToLevel(GameState& gameState, std::string sceneName){
     cameras = {};
     gameapi -> sendNotifyMessage("request:change-control", optCameraId.value());
   }
+  enterGameMode();
+  pushHistory("playing");
 }
 std::optional<std::string> levelByShortcutName(std::string shortcut){
   auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels", {});
@@ -127,8 +129,6 @@ UiContext getUiContext(GameState& gameState){
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState, level.scene);
-        enterGameMode();
-        pushHistory("playing");
       },
       .getLevels = [&gameState]() -> std::vector<Level> {
         return gameState.levels; 

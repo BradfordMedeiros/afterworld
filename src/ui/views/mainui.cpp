@@ -310,10 +310,6 @@ std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocatio
 
 
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
-
-
-  // now just log  the position / location data, lets say for the rect stuff now 
-  // then have to provide it back to the callbacks 
   HandlerFns handlerFuncs {
     .minManagedId = -1,
     .maxManagedId = -1,
@@ -323,12 +319,11 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     .inputFns = {},
     .trackedLocationIds = {},
   };
-  std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
+  //std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
 
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
      .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
-      //gameapi -> drawRect
       if (trackingId.has_value()){
         handlerFuncs.trackedLocationIds[trackingId.value()] = TrackedLocationData {
           .position = glm::vec2(centerX, centerY),

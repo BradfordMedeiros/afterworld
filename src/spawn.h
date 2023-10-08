@@ -7,4 +7,8 @@ void spawnFromAllSpawnpoints(const char* team);
 void spawnFromRandomSpawnpoint(const char* team);
 void removeAllSpawnedEntities();
 
+void spawnAddId(objid id);
+void spawnRemoveId(objid id);
+void onSpawnTick();
+
 #endif

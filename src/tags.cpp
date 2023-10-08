@@ -282,6 +282,22 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
+
+
+	TagUpdater {
+		.attribute = "spawn",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+			spawnAddId(id);
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		spawnRemoveId(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {  
+			onSpawnTick();
+  	},
+  	.onMessage = std::nullopt,
+	},
+
 };
 
 
