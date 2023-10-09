@@ -1,0 +1,9 @@
+enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+enemy:physics:enabled
+enemy:physics_type:dynamic
+enemy:agent:basic
+enemy:agent-target:red
+enemy:spawn-managed:
+enemy:team:blue
+enemy:physics_angle:0 0 0
+enemy:health:130

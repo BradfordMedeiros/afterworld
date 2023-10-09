@@ -1,0 +1,10 @@
+item:mesh:../gameresources/build/weapons/grenade.gltf
+item:physics:enabled
+item:physics_type:static
+item:pickup:pistol-ammo
+item:pickup-amount:10
+item:pickup-type:replace
+item:pickup-trigger:ammo
+item:physics_mass:5
+item:material:metal
+item:scale:0.1 0.1 0.1
