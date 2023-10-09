@@ -2,10 +2,11 @@
 
 extern CustomApiBindings* gameapi;
 
-void createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
+objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
   GameobjAttributes attr = {
     .stringAttributes = {
       { "scene", prefab },
+      { "+item", "pickup-remove:scene" },
     },
     .numAttributes = {
       { "spawn-managed", spawnOwnerId},
@@ -18,15 +19,15 @@ void createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pre
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  gameapi -> makeObjectAttr(
+  return gameapi -> makeObjectAttr(
     sceneId, 
     std::string("[spawned-instance-") + uniqueNameSuffix(), 
     attr, 
     submodelAttributes
-  );
+  ).value();
 }
 
-void createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm::quat rotation, std::string team){
+objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm::quat rotation, std::string team){
   // replace with   createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
   // when fix physics bug, add data attributes
   GameobjAttributes attr = {
@@ -52,33 +53,35 @@ void createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm::
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  gameapi -> makeObjectAttr(
+  return gameapi -> makeObjectAttr(
     sceneId, 
     std::string("spawned-instance-") + uniqueNameSuffix(), 
     attr, 
     submodelAttributes
-  );
+  ).value();
 }
 
 
 const int basicEnemyInstance = getSymbol("enemy");
 const int ammoInstance = getSymbol("ammo");
 
-void spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::vec3 pos, glm::quat rotation){
+objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::vec3 pos, glm::quat rotation){
   if (spawnTypeSymbol == basicEnemyInstance){
-    createEnemyInstance(sceneId, spawnOwnerId, pos, rotation, "red");
-    return;
+    return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation, "red");
   }else if (spawnTypeSymbol == ammoInstance){
-    createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/ammo.rawscene", pos, rotation);
-    return;
+    return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/ammo.rawscene", pos, rotation);
   }
   modassert(false, "invalid type: " + nameForSymbol(spawnTypeSymbol));
+  return -1;
 }
 
 struct Spawnpoint {
   int type;
   std::optional<float> respawnRate;
   std::optional<int> itemLimit;
+
+  std::optional<float> lastSpawnTime;
+  std::set<objid> managedIds;
 };
 
 std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
@@ -96,46 +99,65 @@ int spawnTypeFromAttr(std::optional<std::string>&& value){
 
 void spawnAddId(objid id){
   auto attr = gameapi -> getGameObjectAttr(id);
+
   managedSpawnpoints[id] = Spawnpoint {
     .type = spawnTypeFromAttr(getStrAttr(attr, "spawn")),
     .respawnRate = getFloatAttr(attr, "spawnrate"),
+    .itemLimit = getIntFromAttr(attr, "spawnlimit"),
+
+    .lastSpawnTime = 0.f,
+    .managedIds = {},
   };
 }
 void spawnRemoveId(objid id){
   managedSpawnpoints.erase(id);
+  for (auto &[id, spawnpoint] : managedSpawnpoints){
+    spawnpoint.managedIds.erase(id);
+  }
+}
+
+void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
+  auto spawnPosition = gameapi -> getGameObjectPos(id, true);
+  auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
+  spawnpoint.lastSpawnTime = currentTime;
+  auto spawnedEntityId = spawnEntity(ammoInstance, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
+  spawnpoint.managedIds.insert(spawnedEntityId);
 }
 
 void onSpawnTick(){
-  std::cout << "spawn on frame" << std::endl;
-
+  float currentTime = gameapi -> timeSeconds(false);
+  for (auto &[id, spawnpoint] : managedSpawnpoints){
+    if (spawnpoint.respawnRate.has_value()){
+      bool underSpawnRate = !spawnpoint.lastSpawnTime.has_value() || ((currentTime - spawnpoint.lastSpawnTime.value()) > spawnpoint.respawnRate.value());
+      bool underSpawnLimit = spawnpoint.managedIds.size() < spawnpoint.itemLimit;
+      //std::cout << "respawnRate = " << spawnpoint.respawnRate.value() << ", currentTime = " << currentTime << ", lastSpawnTime = " << spawnpoint.lastSpawnTime.value() << std::endl;
+      if (underSpawnRate && underSpawnLimit){
+        //std::cout << "spawning:  " << id << std::endl;
+        spawnEntity(id, spawnpoint, currentTime);
+      }
+    }
+  }
 }
-
-
-void spawnEntity(objid id){
-  auto spawnPosition = gameapi -> getGameObjectPos(id, true);
-  auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
-  spawnEntity(ammoInstance, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
-}
-
 
 void spawnFromAllSpawnpoints(const char* team){
   if (managedSpawnpoints.size() == 0){
     return;
   }
+  float currentTime = gameapi -> timeSeconds(false);
   for (auto &[id, spawnpoint] : managedSpawnpoints){
-    spawnEntity(id);
+    spawnEntity(id, spawnpoint, currentTime);
   }
 }
 void spawnFromRandomSpawnpoint(const char* team){
   if (managedSpawnpoints.size() == 0){
     return;
   }
-
+  float currentTime = gameapi -> timeSeconds(false);
   auto spawnpointIndex = randomNumber(0, managedSpawnpoints.size() - 1);
   int currentIndex = 0;
   for (auto &[id, spawnpoint] : managedSpawnpoints){
     if (spawnpointIndex == currentIndex){
-      spawnEntity(id);
+      spawnEntity(id, spawnpoint, currentTime);
       break;
     }
     currentIndex++;

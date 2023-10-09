@@ -68,13 +68,20 @@ void tryPickupItem(objid gameObjId){
     auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
     auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
     auto pickupType = getStrAttr(objAttr, "pickup-type");
+    auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
     auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
 
     auto oldItemCount = ensureItemExists(pickup.value());
     auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
     updateItemCount(pickup.value(), newItemCount);
 
-    gameapi -> removeObjectById(gameObjId);
+    if (!pickupRemove.has_value()){
+      gameapi -> removeObjectById(gameObjId);
+    }else if (pickupRemove.value() == "scene"){ // useful for prefab types
+      auto sceneId = gameapi -> listSceneId(gameObjId);
+      gameapi -> unloadScene(sceneId);
+    }
+    
 
     if (pickupTrigger.has_value()){
       gameapi -> sendNotifyMessage(pickupTrigger.value(), static_cast<int>(newItemCount));

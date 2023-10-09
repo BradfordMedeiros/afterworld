@@ -297,7 +297,15 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
-
+	TagUpdater {
+		.attribute = "spawn-managed",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		spawnRemoveId(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {},
+  	.onMessage = std::nullopt,
+	},
 };
 
 
