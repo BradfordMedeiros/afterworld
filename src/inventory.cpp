@@ -77,9 +77,10 @@ void tryPickupItem(objid gameObjId){
 
     if (!pickupRemove.has_value()){
       gameapi -> removeObjectById(gameObjId);
-    }else if (pickupRemove.value() == "scene"){ // useful for prefab types
-      auto sceneId = gameapi -> listSceneId(gameObjId);
-      gameapi -> unloadScene(sceneId);
+    }else if (pickupRemove.value() == "prefab"){
+      auto prefabRootId = gameapi -> prefabId(gameObjId);
+      modassert(prefabRootId.has_value(), "inventory remove prefab, but object id is not a prefab type");
+      gameapi -> removeObjectById(prefabRootId.value());
     }
     
 
