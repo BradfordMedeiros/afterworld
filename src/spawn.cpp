@@ -99,7 +99,7 @@ int spawnTypeFromAttr(std::optional<std::string>&& value){
 
 void spawnAddId(objid id){
   auto attr = gameapi -> getGameObjectAttr(id);
-
+  modlog("spawn spawner add id", std::to_string(id));
   managedSpawnpoints[id] = Spawnpoint {
     .type = spawnTypeFromAttr(getStrAttr(attr, "spawn")),
     .respawnRate = getFloatAttr(attr, "spawnrate"),
@@ -110,8 +110,9 @@ void spawnAddId(objid id){
   };
 }
 void spawnRemoveId(objid id){
+  modlog("spawn remove id", std::to_string(id));
   managedSpawnpoints.erase(id);
-  for (auto &[id, spawnpoint] : managedSpawnpoints){
+  for (auto &[_, spawnpoint] : managedSpawnpoints){
     spawnpoint.managedIds.erase(id);
   }
 }
@@ -121,6 +122,8 @@ void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
   spawnpoint.lastSpawnTime = currentTime;
   auto spawnedEntityId = spawnEntity(ammoInstance, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
+
+  modlog("spawn managed add id", std::to_string(spawnedEntityId));
   spawnpoint.managedIds.insert(spawnedEntityId);
 }
 
@@ -130,7 +133,7 @@ void onSpawnTick(){
     if (spawnpoint.respawnRate.has_value()){
       bool underSpawnRate = !spawnpoint.lastSpawnTime.has_value() || ((currentTime - spawnpoint.lastSpawnTime.value()) > spawnpoint.respawnRate.value());
       bool underSpawnLimit = spawnpoint.managedIds.size() < spawnpoint.itemLimit;
-      //std::cout << "respawnRate = " << spawnpoint.respawnRate.value() << ", currentTime = " << currentTime << ", lastSpawnTime = " << spawnpoint.lastSpawnTime.value() << std::endl;
+      //std::cout << "respawnRate = " << spawnpoint.respawnRate.value() << ", currentTime = " << currentTime << ", lastSpawnTime = " << spawnpoint.lastSpawnTime.value() << ", spawn limit: " << spawnpoint.managedIds.size() << std::endl;
       if (underSpawnRate && underSpawnLimit){
         //std::cout << "spawning:  " << id << std::endl;
         spawnEntity(id, spawnpoint, currentTime);
