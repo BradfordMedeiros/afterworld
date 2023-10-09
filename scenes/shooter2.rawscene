@@ -318,7 +318,9 @@ spawnpoint:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 spawnpoint:scale:0.25 0.05 1.25
 spawnpoint:texture:../gameresources/textures/controls/up-down.png
 spawnpoint:position:0 -27 60
-spawnpoint:spawn:true
+spawnpoint:spawn:ammo
+spawnpoint:spawnrate:3
+spawnpoint:spawnlimit:3
 
 #spawnpoint2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 #spawnpoint2:scale:0.25 0.05 1.25

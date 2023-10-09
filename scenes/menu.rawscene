@@ -8,7 +8,7 @@ menu:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 menu:layer:basicui
 menu:position:0 0 -1
 menu:rotation:0 0 1 180
-menu:texture:/home/brad/Desktop/test3.png
+menu:texture:/home/brad/Desktop/testhelmet.jpg
 #menu:tint:0.3 0.4 1.2 1
 menu:script:native/menu
 menu:shader:../afterworld/shaders/menu/fragment.glsl
