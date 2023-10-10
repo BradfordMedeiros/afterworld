@@ -19,6 +19,7 @@
 #include "../components/worldplay.h"
 #include "../components/scenemanager.h"
 #include "./uicontext.h"
+#include "../components/game/weaponwheel.h"
 
 extern Component mainUI;
 

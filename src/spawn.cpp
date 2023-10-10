@@ -2,6 +2,15 @@
 
 extern CustomApiBindings* gameapi;
 
+struct Spawnpoint {
+  int type;
+  std::optional<float> respawnRate;
+  std::optional<int> itemLimit;
+  std::optional<float> lastSlotFreeTime;
+  std::set<objid> managedIds;
+};
+
+
 objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
   GameobjAttributes attr = {
     .stringAttributes = {
@@ -75,15 +84,6 @@ objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::v
   return -1;
 }
 
-struct Spawnpoint {
-  int type;
-  std::optional<float> respawnRate;
-  std::optional<int> itemLimit;
-
-  std::optional<float> lastSpawnTime;
-  std::set<objid> managedIds;
-};
-
 std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 int spawnTypeFromAttr(std::optional<std::string>&& value){
@@ -105,7 +105,7 @@ void spawnAddId(objid id){
     .respawnRate = getFloatAttr(attr, "spawnrate"),
     .itemLimit = getIntFromAttr(attr, "spawnlimit"),
 
-    .lastSpawnTime = 0.f,
+    .lastSlotFreeTime = std::nullopt,
     .managedIds = {},
   };
 }
@@ -120,7 +120,6 @@ void spawnRemoveId(objid id){
 void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
   auto spawnPosition = gameapi -> getGameObjectPos(id, true);
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
-  spawnpoint.lastSpawnTime = currentTime;
   auto spawnedEntityId = spawnEntity(ammoInstance, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
 
   modlog("spawn managed add id", std::to_string(spawnedEntityId));
@@ -131,15 +130,27 @@ void onSpawnTick(){
   float currentTime = gameapi -> timeSeconds(false);
   for (auto &[id, spawnpoint] : managedSpawnpoints){
     if (spawnpoint.respawnRate.has_value()){
-      bool underSpawnRate = !spawnpoint.lastSpawnTime.has_value() || ((currentTime - spawnpoint.lastSpawnTime.value()) > spawnpoint.respawnRate.value());
       bool underSpawnLimit = spawnpoint.managedIds.size() < spawnpoint.itemLimit;
       //std::cout << "respawnRate = " << spawnpoint.respawnRate.value() << ", currentTime = " << currentTime << ", lastSpawnTime = " << spawnpoint.lastSpawnTime.value() << ", spawn limit: " << spawnpoint.managedIds.size() << std::endl;
+      
+      if (!underSpawnLimit){
+        spawnpoint.lastSlotFreeTime = std::nullopt;
+      }else if (!spawnpoint.lastSlotFreeTime.has_value()){
+        spawnpoint.lastSlotFreeTime = currentTime;
+      }
+    
+      // Spawn rate it determines by time elapsed since the slot was opened
+      bool underSpawnRate = !spawnpoint.lastSlotFreeTime.has_value() || ((currentTime - spawnpoint.lastSlotFreeTime.value()) > spawnpoint.respawnRate.value());
+
       if (underSpawnRate && underSpawnLimit){
         //std::cout << "spawning:  " << id << std::endl;
         spawnEntity(id, spawnpoint, currentTime);
       }
     }
   }
+
+  ////
+  //drawDebugRespawnInfo(getRespawnInfos(gameapi -> timeSeconds(false)).at(0));
 }
 
 void spawnFromAllSpawnpoints(const char* team){
@@ -175,3 +186,34 @@ void removeAllSpawnedEntities(){
 }
 
 
+RespawnInfo respawnInfo(Spawnpoint& spawnpoint, objid id, float currentTime){
+   if (!spawnpoint.lastSlotFreeTime.has_value()){
+    return RespawnInfo {
+      .id = id,
+      .blocked = true,
+      .totalTime = spawnpoint.respawnRate.has_value() ? 0.f : spawnpoint.respawnRate.value(),
+      .elapsedTime = 0.f,
+    };
+   }
+   return RespawnInfo {
+     .id = id,
+     .blocked = false,
+     .totalTime = spawnpoint.respawnRate.has_value() ? spawnpoint.respawnRate.value() : 0.f,
+     .elapsedTime = currentTime - spawnpoint.lastSlotFreeTime.value(),
+   };
+}
+
+std::vector<RespawnInfo> getRespawnInfos(float currentTime){
+  std::vector<RespawnInfo> respawnInfos;
+  for (auto &[id, spawnpoint] : managedSpawnpoints){
+    respawnInfos.push_back(respawnInfo(spawnpoint, id, currentTime));
+  }
+  return respawnInfos;
+}
+
+void drawDebugRespawnInfo(RespawnInfo& respawnInfo){
+  float percentage = respawnInfo.blocked ? 1.f : (respawnInfo.elapsedTime / respawnInfo.totalTime);
+  std::cout << "spawn percentage :  " << percentage << std::endl;
+  gameapi -> drawRect(0.f, 0.f, 0.2f, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(0.f, 0.f, 0.2f * percentage, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.8f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+}

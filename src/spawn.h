@@ -11,4 +11,18 @@ void spawnAddId(objid id);
 void spawnRemoveId(objid id);
 void onSpawnTick();
 
+
+struct RespawnInfo {
+	objid id;
+  bool blocked;
+  float totalTime;
+  float elapsedTime;
+};
+
+std::vector<RespawnInfo> getRespawnInfos(float currentTime);
+
+
+void drawDebugRespawnInfo(RespawnInfo& respawnInfo);
+
+
 #endif
