@@ -75,17 +75,11 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
 }
 
 
-void ensurePlayingAnimation(objid agentId, int animationSymbol){
-  // not actually implementing
-}
-
 void fireProjectile(){
-
+  modlog("basic agent", "firing projectile");
 }
 
 void moveToTarget(objid agentId, glm::vec3 targetPosition){
-  ensurePlayingAnimation(agentId, getSymbol("running"));
-
   // right now this is just setting the obj position, but probably should rely on the navmesh, probably should be applying impulse instead?
   auto agentPos = gameapi -> getGameObjectPos(agentId, true);
   auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, agentPos.y, targetPosition.z));
@@ -99,7 +93,6 @@ void attackTarget(Agent& agent){
 
   float currentTime = gameapi -> timeSeconds(false);
   if (currentTime - attackState -> lastAttackTime > 5.f){
-    ensurePlayingAnimation(agent.id, getSymbol("attack"));
     std::cout << "attack placeholder" << std::endl;
     attackState -> lastAttackTime = currentTime;
     fireProjectile();
@@ -113,13 +106,27 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
 
   if (goal.goaltype == idleGoal){
     // do nothing
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = agent.id,
+      .transition = "not-walking",
+    });
   }else if (goal.goaltype == moveToTargetGoal){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
     modassert(targetPosition, "target pos was null");
     moveToTarget(agent.id, *targetPosition);
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = agent.id,
+      .transition = "walking",
+    });
   }else if (goal.goaltype == attackTargetGoal){
     // not yet implemented
     attackTarget(agent);
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = agent.id,
+      .transition = "not-walking",
+    });
   }
 }
+
+
 
