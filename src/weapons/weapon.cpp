@@ -3,18 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
-struct WeaponParams {
-  float firingRate;
-  float recoilLength;
-  float recoilPitchRadians;
-  glm::vec3 recoilTranslate;
-  glm::vec3 recoilZoomTranslate;
-  bool canHold;
-  bool isIronsight;
-  bool isRaycast;
-  glm::vec3 ironsightOffset;
-  glm::quat ironSightAngle;
-};
+
 
 struct CurrentGun {
   std::string name;
@@ -40,6 +29,9 @@ struct CurrentGun {
   int totalAmmo;
 
   GunAnimation gunState;
+
+  glm::quat ironSightAngle;
+
 };
 
 
@@ -186,15 +178,7 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
   modassert(result.size() == 1, "more than one gun named: " + gun);
   modlog("weapons", "gun: result: " + print(result.at(0)));
 
-  weapons.weaponParams.firingRate = floatFromFirstSqlResult(result, 12);
-  weapons.weaponParams.recoilLength = floatFromFirstSqlResult(result, 21);
-  weapons.weaponParams.recoilPitchRadians = floatFromFirstSqlResult(result, 22);
-  weapons.weaponParams.recoilTranslate = vec3FromFirstSqlResult(result, 23);
-  weapons.weaponParams.recoilZoomTranslate = vec3FromFirstSqlResult(result, 24);
-  weapons.weaponParams.canHold = boolFromFirstSqlResult(result, 13);
-  weapons.weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
-  weapons.weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
-  weapons.weaponParams.ironsightOffset = vec3FromFirstSqlResult(result, 16, 17, 18);
+  weapons.weaponParams = queryWeaponParams(gun);
 
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
   weapons.currentGun.recoilStart = 0.f;
@@ -222,7 +206,7 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
   auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
   weapons.currentGun.initialGunRot = parseQuat(rot4);
-  weapons.weaponParams.ironSightAngle = result.at(0).at(32) == "" ? weapons.currentGun.initialGunRot : quatFromFirstSqlResult(result, 32);
+  weapons.currentGun.ironSightAngle = result.at(0).at(32) == "" ? weapons.currentGun.initialGunRot : quatFromFirstSqlResult(result, 32);
 
   auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
   auto hitParticleStr = strFromFirstSqlResult(result, 20);
@@ -472,7 +456,7 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
     0.f, 
     0.1f /* why 0.1f? */
   );
-  auto targetRotation = rotation * (isGunZoomed ? weapons.weaponParams.ironSightAngle : weapons.currentGun.initialGunRot);
+  auto targetRotation = rotation * (isGunZoomed ? weapons.currentGun.ironSightAngle : weapons.currentGun.initialGunRot);
   gameapi -> setGameObjectRot(
     weapons.currentGun.gunId.value(), 
     glm::slerp(oldRotation, targetRotation, 0.1f),

@@ -3,11 +3,12 @@
 
 #include <iostream>
 #include <vector>
-#include <regex>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./global.h"
-#include "./materials.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../global.h"
+#include "../materials.h"
+#include "./weaponcore.h"
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
+
 
 #endif
