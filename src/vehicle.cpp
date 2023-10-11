@@ -116,7 +116,8 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto vehicleId = gameapi -> makeObjectAttr(sceneId, "code-vehicle", attr, submodelAttributes);
+  auto vehicleId = gameapi -> makeObjectAttr(sceneId, std::string("code-vehicle-") + uniqueNameSuffix(), attr, submodelAttributes);
+  modassert(vehicleId.has_value(), "could not make vehicle");
   vehicle.vehicleId = vehicleId;
 
   GameobjAttributes camAttr {
@@ -125,7 +126,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
     .vecAttr = {  .vec3 = {},  .vec4 = {} },
   };
 
-  auto cameraId = gameapi -> makeObjectAttr(sceneId, ">code-vehicle-cam", camAttr, submodelAttributes);
+  auto cameraId = gameapi -> makeObjectAttr(sceneId, std::string(">code-vehicle-cam-") + uniqueNameSuffix(), camAttr, submodelAttributes);
   gameapi -> makeParent(cameraId.value(), vehicleId.value());
   vehicle.cameraId = cameraId;
 

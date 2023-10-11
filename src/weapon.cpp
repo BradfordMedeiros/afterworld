@@ -20,6 +20,7 @@ struct CurrentGun {
   std::string name;
   std::optional<objid> gunId;
   std::optional<objid> soundId;
+  std::optional<std::string> soundClip;
   std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
   std::optional<objid> hitParticles;    // default hit particle for the gun, used if there is no material particle
   std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
@@ -93,6 +94,7 @@ void saveGunTransform(Weapons& weapons){
 }
 
 void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string projectileParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
+  modlog("weapons", std::string("spawn gun: ") + name);
   if (weapons.currentGun.gunId.has_value()){
     weapons.currentGun.name = "";
 
@@ -102,6 +104,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     if (weapons.currentGun.soundId.has_value()){
       gameapi -> removeObjectById(weapons.currentGun.soundId.value());
       weapons.currentGun.soundId = std::nullopt;
+      weapons.currentGun.soundClip = std::nullopt;
     }
 
     if (weapons.currentGun.muzzleParticle.has_value()){
@@ -130,8 +133,8 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto gunId = gameapi -> makeObjectAttr(sceneId, "code-weapon", attr, submodelAttributes);
-  modassert(gunId.has_value(), "gun does not have a value");
+  auto gunId = gameapi -> makeObjectAttr(sceneId, std::string("code-weapon-") + uniqueNameSuffix(), attr, submodelAttributes);
+  modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + name);
   weapons.currentGun.gunId = gunId;
 
   if (firesound != ""){
@@ -140,8 +143,11 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
       .numAttributes = {},
       .vecAttr = {  .vec3 = {},  .vec4 = {} },
     };
-    auto soundId = gameapi -> makeObjectAttr(sceneId, "&code-weaponsound", soundAttr, submodelAttributes);
+
+    std::string soundClip = std::string("&code-weaponsound-") + uniqueNameSuffix();
+    auto soundId = gameapi -> makeObjectAttr(sceneId, soundClip, soundAttr, submodelAttributes);
     weapons.currentGun.soundId = soundId;  
+    weapons.currentGun.soundClip = soundClip;
   }
 
   weapons.currentGun.muzzleParticle = createParticleEmitter(sceneId, particle, "+code-muzzleparticles");
@@ -357,7 +363,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   });
 
   if (weapons.currentGun.soundId.has_value()){
-    gameapi -> playClip("&code-weaponsound", sceneId, std::nullopt, std::nullopt);
+    gameapi -> playClip(weapons.currentGun.soundClip.value(), sceneId, std::nullopt, std::nullopt);
   }
   if (weapons.currentGun.fireAnimation.has_value()){
     gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), ONESHOT);
@@ -631,6 +637,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .name = "",
       .gunId = std::nullopt,
       .soundId = std::nullopt,
+      .soundClip = std::nullopt,
       .muzzleParticle = std::nullopt,
     };
 

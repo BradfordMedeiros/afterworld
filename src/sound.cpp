@@ -30,8 +30,9 @@ void loadAllSounds(std::vector<MaterialToSound>& sounds, objid sceneId){
 
 	for (auto &sound : sounds){
 		attr.stringAttributes["clip"] = sound.clip;
-		gameapi -> makeObjectAttr(sceneId, std::string("&material-") + sound.material, attr, submodelAttributes);
-	}
+		auto id = gameapi -> makeObjectAttr(sceneId, std::string("&material-") + sound.material, attr, submodelAttributes);
+	  modassert(id.has_value(), "could not make material");
+  }
 }
 
 struct MessagePlaySound {

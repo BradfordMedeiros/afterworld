@@ -542,8 +542,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     withProps(navList, navListProps).draw(drawTools, defaultProps);
 
 
-    auto weaponWheelProps = getDefaultProps();
-    weaponWheelComponent.draw(drawTools, weaponWheelProps);
+    //auto weaponWheelProps = getDefaultProps();
+    //weaponWheelComponent.draw(drawTools, weaponWheelProps);
 
     drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);

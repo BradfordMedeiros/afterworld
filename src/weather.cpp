@@ -50,7 +50,7 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
       } 
     },
   };
-  weather.weatherEmitter = gameapi -> makeObjectAttr(sceneId, "+code-weather", particleAttr, submodelAttributes); 
+  weather.weatherEmitter = gameapi -> makeObjectAttr(sceneId, std::string("+code-weather-") + uniqueNameSuffix(), particleAttr, submodelAttributes); 
 }
 
 CScriptBinding weatherBinding(CustomApiBindings& api, const char* name){
