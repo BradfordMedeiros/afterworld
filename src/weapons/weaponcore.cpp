@@ -114,4 +114,23 @@ WeaponInstance createWeaponInstance(){
 
 void removeWeaponInstance(WeaponInstance& weaponInstance){
   gameapi -> removeObjectById(weaponInstance.gunId);
+
+  gameapi -> removeObjectById(weaponInstance.soundId.value());
+  weaponInstance.soundId = std::nullopt;
+  weaponInstance.soundClipObj = std::nullopt;
+
+  if (weaponInstance.muzzleParticle.has_value()){
+     gameapi -> removeObjectById(weaponInstance.muzzleParticle.value());
+     weaponInstance.muzzleParticle = std::nullopt;
+  }
+
+  if (weaponInstance.hitParticles.has_value()){
+    gameapi -> removeObjectById(weaponInstance.hitParticles.value());
+    weaponInstance.hitParticles = std::nullopt;
+  }
+
+  if (weaponInstance.projectileParticles.has_value()){
+    gameapi -> removeObjectById(weaponInstance.projectileParticles.value());
+    weaponInstance.projectileParticles = std::nullopt;
+  }
 }

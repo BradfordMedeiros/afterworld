@@ -55,6 +55,12 @@ WeaponParams queryWeaponParams(std::string gunName);
 
 struct WeaponInstance {
   objid gunId;
+  std::optional<objid> soundId;
+  std::optional<std::string> soundClipObj;
+
+  std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
+  std::optional<objid> hitParticles;    // default hit particle for the gun, used if there is no material particle
+  std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 };
 
 WeaponInstance createWeaponInstance();
