@@ -17,12 +17,14 @@ struct WeaponParams {
   float totalBloom;
   float bloomLength;
 
+  int totalAmmo;
+
   // model specific
   float recoilLength;
   float recoilPitchRadians;
   glm::vec3 recoilTranslate;
   glm::vec3 recoilZoomTranslate;
-  
+
   std::optional<std::string> fireAnimation;
   std::optional<std::string> idleAnimation;
   glm::vec3 initialGunPos;
@@ -30,6 +32,15 @@ struct WeaponParams {
   glm::vec4 initialGunRotVec4;
   glm::quat ironSightAngle;
   glm::vec3 ironsightOffset;
+
+  glm::vec3 scale;
+  std::string soundpath;
+  std::string modelpath;
+  std::string script;
+
+  std::string muzzleParticleStr;
+  std::string hitParticleStr;
+  std::string projectileParticleStr;
 
 };
 

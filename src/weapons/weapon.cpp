@@ -4,25 +4,19 @@ extern CustomApiBindings* gameapi;
 
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 
-
 struct CurrentGun {
   std::string name;
   std::optional<objid> gunId;
   std::optional<objid> soundId;
-  std::optional<std::string> soundClip;
+  std::optional<std::string> soundClipObj;
   std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
   std::optional<objid> hitParticles;    // default hit particle for the gun, used if there is no material particle
   std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 
-
   float lastShootingTime;
   float recoilStart;
-
   int currentAmmo;
-  int totalAmmo;
-
   GunAnimation gunState;
-
 };
 
 
@@ -33,9 +27,9 @@ struct Weapons {
   objid sceneId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
+  float selectDistance;
 
   WeaponParams weaponParams;
-  float selectDistance;
   CurrentGun currentGun;
 
   glm::vec2 lookVelocity;
@@ -87,7 +81,7 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     if (weapons.currentGun.soundId.has_value()){
       gameapi -> removeObjectById(weapons.currentGun.soundId.value());
       weapons.currentGun.soundId = std::nullopt;
-      weapons.currentGun.soundClip = std::nullopt;
+      weapons.currentGun.soundClipObj = std::nullopt;
     }
 
     if (weapons.currentGun.muzzleParticle.has_value()){
@@ -127,10 +121,10 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
       .vecAttr = {  .vec3 = {},  .vec4 = {} },
     };
 
-    std::string soundClip = std::string("&code-weaponsound-") + uniqueNameSuffix();
-    auto soundId = gameapi -> makeObjectAttr(sceneId, soundClip, soundAttr, submodelAttributes);
+    std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
+    auto soundId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
     weapons.currentGun.soundId = soundId;  
-    weapons.currentGun.soundClip = soundClip;
+    weapons.currentGun.soundClipObj = soundClipObj;
   }
 
   weapons.currentGun.muzzleParticle = createParticleEmitter(sceneId, particle, "+code-muzzleparticles");
@@ -152,50 +146,16 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
 }
 
 void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int ammo){
-  auto gunQuery = gameapi -> compileSqlQuery(
-   std::string("select modelpath, fireanimation, fire-sound, xoffset-pos, ") +
-   "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
-   "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
-   "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-   "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot, ammo " + 
-   "from guns where name = " + gun,
-   {}
-  );
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(gunQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-
-  modassert(result.size() > 0, "no gun named: " + gun);
-  modassert(result.size() == 1, "more than one gun named: " + gun);
-  modlog("weapons", "gun: result: " + print(result.at(0)));
-
   weapons.weaponParams = queryWeaponParams(gun);
-
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
   weapons.currentGun.recoilStart = 0.f;
-
   weapons.currentGun.gunState = GUN_RAISED;
-
-  auto soundpath = strFromFirstSqlResult(result, 2);
-  auto modelpath = strFromFirstSqlResult(result, 0);
-  auto script = strFromFirstSqlResult(result, 27);
-
-  auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
-  auto hitParticleStr = strFromFirstSqlResult(result, 20);
-  auto projectileParticleStr = strFromFirstSqlResult(result, 25);
-
-  auto totalAmmo = intFromFirstSqlResult(result, 33);
-
   weapons.currentGun.currentAmmo = ammo;
-  weapons.currentGun.totalAmmo = totalAmmo;
   gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
     .currentAmmo = weapons.currentGun.currentAmmo,
-    .totalAmmo = weapons.currentGun.totalAmmo,
+    .totalAmmo = weapons.weaponParams.totalAmmo,
   });
-
-  auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
-  spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, weapons.weaponParams.initialGunPos, weapons.weaponParams.initialGunRotVec4, scale);
-
+  spawnGun(weapons, sceneId, gun, weapons.weaponParams.soundpath, weapons.weaponParams.muzzleParticleStr, weapons.weaponParams.hitParticleStr, weapons.weaponParams.projectileParticleStr, weapons.weaponParams.modelpath, weapons.weaponParams.script, weapons.weaponParams.initialGunPos, weapons.weaponParams.initialGunRotVec4, weapons.weaponParams.scale);
   if (weapons.weaponParams.idleAnimation.has_value() && weapons.weaponParams.idleAnimation.value() != "" && weapons.currentGun.gunId.has_value()){
     gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.weaponParams.idleAnimation.value(), LOOP);
   }
@@ -316,11 +276,11 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   weapons.currentGun.currentAmmo--;
   gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
     .currentAmmo = weapons.currentGun.currentAmmo,
-    .totalAmmo = weapons.currentGun.totalAmmo,
+    .totalAmmo = weapons.weaponParams.totalAmmo,
   });
 
   if (weapons.currentGun.soundId.has_value()){
-    gameapi -> playClip(weapons.currentGun.soundClip.value(), sceneId, std::nullopt, std::nullopt);
+    gameapi -> playClip(weapons.currentGun.soundClipObj.value(), sceneId, std::nullopt, std::nullopt);
   }
   if (weapons.weaponParams.fireAnimation.has_value()){
     gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.weaponParams.fireAnimation.value(), ONESHOT);
@@ -594,7 +554,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       .name = "",
       .gunId = std::nullopt,
       .soundId = std::nullopt,
-      .soundClip = std::nullopt,
+      .soundClipObj = std::nullopt,
       .muzzleParticle = std::nullopt,
     };
 
@@ -693,7 +653,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       weapons -> currentGun.currentAmmo += *intValue;
       gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
         .currentAmmo = weapons -> currentGun.currentAmmo,
-        .totalAmmo = weapons -> currentGun.totalAmmo,
+        .totalAmmo = weapons -> weaponParams.totalAmmo,
       });
     }else if (key == "save-gun"){
       saveGunTransform(*weapons);

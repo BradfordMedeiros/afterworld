@@ -45,7 +45,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   weaponParams.minBloom = floatFromFirstSqlResult(result, 31);
   weaponParams.totalBloom = floatFromFirstSqlResult(result, 26);
   weaponParams.bloomLength = floatFromFirstSqlResult(result, 30);
-
+  weaponParams.totalAmmo = intFromFirstSqlResult(result, 33);
 
   auto fireAnimation = strFromFirstSqlResult(result, 28);
   weaponParams.fireAnimation = std::nullopt;
@@ -60,7 +60,6 @@ WeaponParams queryWeaponParams(std::string gunName){
   }
   
 
-
   auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
   weaponParams.initialGunPos = gunpos;
 
@@ -68,8 +67,17 @@ WeaponParams queryWeaponParams(std::string gunName){
   auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
   weaponParams.initialGunRotVec4 = rot4;
   weaponParams.initialGunRot = parseQuat(rot4);
+  weaponParams.scale = vec3FromFirstSqlResult(result, 9, 10, 11);
 
   weaponParams.ironSightAngle = result.at(0).at(32) == "" ? weaponParams.initialGunRot : quatFromFirstSqlResult(result, 32);
+
+  weaponParams.soundpath = strFromFirstSqlResult(result, 2);
+  weaponParams.modelpath = strFromFirstSqlResult(result, 0);
+  weaponParams.script = strFromFirstSqlResult(result, 27);
+
+  weaponParams.muzzleParticleStr = strFromFirstSqlResult(result, 19);
+  weaponParams.hitParticleStr = strFromFirstSqlResult(result, 20);
+  weaponParams.projectileParticleStr = strFromFirstSqlResult(result, 25);
 
   return weaponParams;
 }
