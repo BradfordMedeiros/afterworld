@@ -32,6 +32,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   modlog("weapons", "gun: result: " + print(result.at(0)));
 
 	WeaponParams weaponParams {};
+  weaponParams.name = gunName;
   weaponParams.firingRate = floatFromFirstSqlResult(result, 12);
   weaponParams.recoilLength = floatFromFirstSqlResult(result, 21);
 
@@ -108,8 +109,45 @@ void registerGunType(std::string gunName){
 }
 
 
-WeaponInstance createWeaponInstance(){
-  return WeaponInstance {};
+WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId){
+  WeaponInstance weaponInstance {};
+  {
+    std::map<std::string, std::string> stringAttributes = { { "mesh", weaponParams.modelpath }, { "layer", "no_depth" } };
+    if (weaponParams.script != ""){
+      stringAttributes["script"] = weaponParams.script;
+    }
+    GameobjAttributes attr {
+      .stringAttributes = stringAttributes,
+      .numAttributes = {},
+      .vecAttr = {  .vec3 = {{ "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", weaponParams.scale }},  .vec4 = {{ "rotation", weaponParams.initialGunRotVec4 }}},
+    };
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    auto gunId = gameapi -> makeObjectAttr(sceneId, std::string("code-weapon-") + uniqueNameSuffix(), attr, submodelAttributes);
+    modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
+    weaponInstance.gunId = gunId.value();
+  }
+
+  {
+    if (weaponParams.soundpath != ""){
+      GameobjAttributes soundAttr {
+        .stringAttributes = { { "clip", weaponParams.soundpath }, { "physics", "disabled" }},
+        .numAttributes = {},
+        .vecAttr = {  .vec3 = {},  .vec4 = {} },
+      };
+      std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
+      std::map<std::string, GameobjAttributes> submodelAttributes;
+      auto soundId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
+      weaponInstance.soundId = soundId;  
+      weaponInstance.soundClipObj = soundClipObj;
+    }
+  }
+
+  {
+    weaponInstance.muzzleParticle = createParticleEmitter(sceneId, weaponParams.muzzleParticleStr, "+code-muzzleparticles");
+    weaponInstance.hitParticles = createParticleEmitter(sceneId, weaponParams.hitParticleStr, "+code-hitparticle");
+    weaponInstance.projectileParticles = createParticleEmitter(sceneId, weaponParams.projectileParticleStr, "+code-projectileparticle");
+  }
+  return weaponInstance;
 }
 
 void removeWeaponInstance(WeaponInstance& weaponInstance){

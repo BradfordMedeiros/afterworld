@@ -5,8 +5,6 @@ extern CustomApiBindings* gameapi;
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 
 struct CurrentGun {
-  std::string name;
-  
   float lastShootingTime;
   float recoilStart;
   int currentAmmo;
@@ -40,13 +38,13 @@ void saveGunTransform(Weapons& weapons){
 
   if (weapons.weaponInstance.has_value()){
     auto gunId = weapons.weaponInstance.value().gunId;
-    auto gun = weapons.currentGun.name;
+    auto gun = weapons.weaponParams.name;
     auto attr = gameapi -> getGameObjectAttr(gunId);
     auto position = attr.vecAttr.vec3.at("position");  
     auto scale = attr.vecAttr.vec3.at("scale");
     auto rotation = attr.vecAttr.vec4.at("rotation");
 
-    modlog("weapons", "save gun, name = " + weapons.currentGun.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
+    modlog("weapons", "save gun, name = " + weapons.weaponParams.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
 
     auto updateQuery = gameapi -> compileSqlQuery(
       std::string("update guns set ") +
@@ -65,53 +63,17 @@ void saveGunTransform(Weapons& weapons){
   }
 }
 
-void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string projectileParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
-  modlog("weapons", std::string("spawn gun: ") + name);
+void spawnGun(Weapons& weapons, objid sceneId){
+  modlog("weapons", std::string("spawn gun: ") + weapons.weaponParams.name);
 
   if (weapons.weaponInstance.has_value()){
-    weapons.currentGun.name = "";
+    weapons.weaponParams.name = "";
     removeWeaponInstance(weapons.weaponInstance.value());
   }
-  weapons.weaponInstance = std::nullopt;
  
+  weapons.weaponInstance = createWeaponInstance(weapons.weaponParams, sceneId);
 
-  std::map<std::string, std::string> stringAttributes = { { "mesh", modelpath }, { "layer", "no_depth" } };
-  if (script != ""){
-    stringAttributes["script"] = script;
-  }
-  GameobjAttributes attr {
-    .stringAttributes = stringAttributes,
-    .numAttributes = {},
-    .vecAttr = {  .vec3 = {{ "position", gunpos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", scale }},  .vec4 = {{ "rotation", rot }}},
-  };
-
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto gunId = gameapi -> makeObjectAttr(sceneId, std::string("code-weapon-") + uniqueNameSuffix(), attr, submodelAttributes);
-  modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + name);
-  weapons.weaponInstance = WeaponInstance{};
-  weapons.weaponInstance.value().gunId = gunId.value();
-
-
-  if (firesound != ""){
-    GameobjAttributes soundAttr {
-      .stringAttributes = { { "clip", firesound }, { "physics", "disabled" }},
-      .numAttributes = {},
-      .vecAttr = {  .vec3 = {},  .vec4 = {} },
-    };
-
-    std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
-    auto soundId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
-    weapons.weaponInstance.value().soundId = soundId;  
-    weapons.weaponInstance.value().soundClipObj = soundClipObj;
-  }
-
-  weapons.weaponInstance.value().muzzleParticle = createParticleEmitter(sceneId, particle, "+code-muzzleparticles");
-  weapons.weaponInstance.value().hitParticles = createParticleEmitter(sceneId, hitParticle, "+code-hitparticle");
-  weapons.weaponInstance.value().projectileParticles = createParticleEmitter(sceneId, projectileParticle, "+code-projectileparticle");
-
-  weapons.currentGun.name = name;
-
-  gameapi -> makeParent(gunId.value(), weapons.playerId);
+  gameapi -> makeParent(weapons.weaponInstance.value().gunId, weapons.playerId);
   if (weapons.weaponInstance.value().soundId.has_value()){
     gameapi -> makeParent(weapons.weaponInstance.value().soundId.value(), weapons.playerId);
   }
@@ -133,7 +95,7 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
     .currentAmmo = weapons.currentGun.currentAmmo,
     .totalAmmo = weapons.weaponParams.totalAmmo,
   });
-  spawnGun(weapons, sceneId, gun, weapons.weaponParams.soundpath, weapons.weaponParams.muzzleParticleStr, weapons.weaponParams.hitParticleStr, weapons.weaponParams.projectileParticleStr, weapons.weaponParams.modelpath, weapons.weaponParams.script, weapons.weaponParams.initialGunPos, weapons.weaponParams.initialGunRotVec4, weapons.weaponParams.scale);
+  spawnGun(weapons, sceneId);
   if (weapons.weaponParams.idleAnimation.has_value() && weapons.weaponParams.idleAnimation.value() != "" && weapons.weaponInstance.value().gunId){
     gameapi -> playAnimation(weapons.weaponInstance.value().gunId, weapons.weaponParams.idleAnimation.value(), LOOP);
   }
@@ -528,9 +490,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
     weapons -> raycastLine = std::nullopt;
 
-    weapons -> currentGun = CurrentGun {
-      .name = "",
-    };
+    weapons -> currentGun = CurrentGun {};
 
     weapons -> heldItem = std::nullopt;
 
@@ -609,10 +569,10 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       modassert(changeGunMessage != NULL, "change-gun value invalid");
       auto value = changeGunMessage -> gun;
       auto currentAmmo = changeGunMessage -> currentAmmo;
-      if (value != weapons -> currentGun.name){
+      if (value != weapons -> weaponParams.name){
         gameapi -> sendNotifyMessage("set-gun-ammo", SetAmmoMessage {
           .currentAmmo = weapons -> currentGun.currentAmmo,
-          .gun = weapons -> currentGun.name,
+          .gun = weapons -> weaponParams.name,
         });
 
         weapons -> currentGun.gunState = GUN_LOWERING;

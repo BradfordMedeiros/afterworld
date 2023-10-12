@@ -5,9 +5,11 @@
 #include <vector>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
+#include "../materials.h"
 
 struct WeaponParams {
   // gun intrinsic stuff
+  std::string name;
   float firingRate;
   bool canHold;
   bool isIronsight;
@@ -63,7 +65,7 @@ struct WeaponInstance {
   std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 };
 
-WeaponInstance createWeaponInstance();
+WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId);
 void removeWeaponInstance(WeaponInstance& weaponInstance);
 
 
