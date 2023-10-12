@@ -65,7 +65,7 @@ struct WeaponInstance {
   std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 };
 
-WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId);
+WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
 void removeWeaponInstance(WeaponInstance& weaponInstance);
 
 

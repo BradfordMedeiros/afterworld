@@ -63,28 +63,6 @@ void saveGunTransform(Weapons& weapons){
   }
 }
 
-void spawnGun(Weapons& weapons, objid sceneId){
-  modlog("weapons", std::string("spawn gun: ") + weapons.weaponParams.name);
-
-  if (weapons.weaponInstance.has_value()){
-    weapons.weaponParams.name = "";
-    removeWeaponInstance(weapons.weaponInstance.value());
-  }
- 
-  weapons.weaponInstance = createWeaponInstance(weapons.weaponParams, sceneId);
-
-  gameapi -> makeParent(weapons.weaponInstance.value().gunId, weapons.playerId);
-  if (weapons.weaponInstance.value().soundId.has_value()){
-    gameapi -> makeParent(weapons.weaponInstance.value().soundId.value(), weapons.playerId);
-  }
-  if (weapons.weaponInstance.value().muzzleParticle.has_value()){
-    gameapi -> makeParent(weapons.weaponInstance.value().muzzleParticle.value(), weapons.weaponInstance.value().gunId);
-  }
-  if (weapons.weaponInstance.value().projectileParticles.has_value()){
-    gameapi -> makeParent(weapons.weaponInstance.value().projectileParticles.value(), weapons.weaponInstance.value().gunId);
-  }
-}
-
 void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int ammo){
   weapons.weaponParams = queryWeaponParams(gun);
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
@@ -95,7 +73,13 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
     .currentAmmo = weapons.currentGun.currentAmmo,
     .totalAmmo = weapons.weaponParams.totalAmmo,
   });
-  spawnGun(weapons, sceneId);
+
+  modlog("weapons", std::string("spawn gun: ") + weapons.weaponParams.name);
+  if (weapons.weaponInstance.has_value()){
+    removeWeaponInstance(weapons.weaponInstance.value());
+  }
+  weapons.weaponInstance = createWeaponInstance(weapons.weaponParams, sceneId, weapons.playerId);
+  
   if (weapons.weaponParams.idleAnimation.has_value() && weapons.weaponParams.idleAnimation.value() != "" && weapons.weaponInstance.value().gunId){
     gameapi -> playAnimation(weapons.weaponInstance.value().gunId, weapons.weaponParams.idleAnimation.value(), LOOP);
   }

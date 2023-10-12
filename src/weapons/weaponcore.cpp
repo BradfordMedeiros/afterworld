@@ -109,7 +109,7 @@ void registerGunType(std::string gunName){
 }
 
 
-WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId){
+WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId){
   WeaponInstance weaponInstance {};
   {
     std::map<std::string, std::string> stringAttributes = { { "mesh", weaponParams.modelpath }, { "layer", "no_depth" } };
@@ -147,6 +147,20 @@ WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId){
     weaponInstance.hitParticles = createParticleEmitter(sceneId, weaponParams.hitParticleStr, "+code-hitparticle");
     weaponInstance.projectileParticles = createParticleEmitter(sceneId, weaponParams.projectileParticleStr, "+code-projectileparticle");
   }
+  
+  {
+    gameapi -> makeParent(weaponInstance.gunId, playerId);
+    if (weaponInstance.soundId.has_value()){
+      gameapi -> makeParent(weaponInstance.soundId.value(), playerId);
+    }
+    if (weaponInstance.muzzleParticle.has_value()){
+      gameapi -> makeParent(weaponInstance.muzzleParticle.value(), weaponInstance.gunId);
+    }
+    if (weaponInstance.projectileParticles.has_value()){
+      gameapi -> makeParent(weaponInstance.projectileParticles.value(), weaponInstance.gunId);
+    }
+  }
+
   return weaponInstance;
 }
 
