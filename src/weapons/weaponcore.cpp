@@ -42,8 +42,34 @@ WeaponParams queryWeaponParams(std::string gunName){
   weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
   weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
   weaponParams.ironsightOffset = vec3FromFirstSqlResult(result, 16, 17, 18);
+  weaponParams.minBloom = floatFromFirstSqlResult(result, 31);
+  weaponParams.totalBloom = floatFromFirstSqlResult(result, 26);
+  weaponParams.bloomLength = floatFromFirstSqlResult(result, 30);
 
-  //  glm::quat ironSightAngle;
+
+  auto fireAnimation = strFromFirstSqlResult(result, 28);
+  weaponParams.fireAnimation = std::nullopt;
+  if(fireAnimation != ""){
+    weaponParams.fireAnimation = fireAnimation;
+  }
+
+  auto idleAnimation = strFromFirstSqlResult(result, 29);
+  weaponParams.idleAnimation = std::nullopt;
+  if (idleAnimation != ""){
+    weaponParams.idleAnimation = idleAnimation;;
+  }
+  
+
+
+  auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
+  weaponParams.initialGunPos = gunpos;
+
+  auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
+  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
+  weaponParams.initialGunRotVec4 = rot4;
+  weaponParams.initialGunRot = parseQuat(rot4);
+
+  weaponParams.ironSightAngle = result.at(0).at(32) == "" ? weaponParams.initialGunRot : quatFromFirstSqlResult(result, 32);
 
   return weaponParams;
 }

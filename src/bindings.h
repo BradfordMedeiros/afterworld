@@ -8,7 +8,7 @@
 #include "./movement.h"
 #include "./menu.h"
 #include "./daynight.h"
-#include "./weapon.h"
+#include "./weapons/weapon.h"
 #include "./vehicle.h"
 #include "./inventory.h"
 #include "./hud.h"

@@ -7,15 +7,30 @@
 #include "../util.h"
 
 struct WeaponParams {
+  // gun intrinsic stuff
   float firingRate;
+  bool canHold;
+  bool isIronsight;
+  bool isRaycast;
+
+  float minBloom;
+  float totalBloom;
+  float bloomLength;
+
+  // model specific
   float recoilLength;
   float recoilPitchRadians;
   glm::vec3 recoilTranslate;
   glm::vec3 recoilZoomTranslate;
-  bool canHold;
-  bool isIronsight;
-  bool isRaycast;
+  
+  std::optional<std::string> fireAnimation;
+  std::optional<std::string> idleAnimation;
+  glm::vec3 initialGunPos;
+  glm::quat initialGunRot;
+  glm::vec4 initialGunRotVec4;
+  glm::quat ironSightAngle;
   glm::vec3 ironsightOffset;
+
 };
 
 /*

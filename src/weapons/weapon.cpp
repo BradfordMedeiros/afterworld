@@ -14,23 +14,14 @@ struct CurrentGun {
   std::optional<objid> hitParticles;    // default hit particle for the gun, used if there is no material particle
   std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 
-  std::optional<std::string> fireAnimation;
 
   float lastShootingTime;
   float recoilStart;
-  glm::vec3 initialGunPos;
-  glm::quat initialGunRot;
-
-  float minBloom;
-  float totalBloom;
-  float bloomLength;
 
   int currentAmmo;
   int totalAmmo;
 
   GunAnimation gunState;
-
-  glm::quat ironSightAngle;
 
 };
 
@@ -182,31 +173,12 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
 
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
   weapons.currentGun.recoilStart = 0.f;
-  weapons.currentGun.minBloom = floatFromFirstSqlResult(result, 31);
-  weapons.currentGun.totalBloom = floatFromFirstSqlResult(result, 26);
-  weapons.currentGun.bloomLength = floatFromFirstSqlResult(result, 30);
 
   weapons.currentGun.gunState = GUN_RAISED;
-
-  auto fireAnimation = strFromFirstSqlResult(result, 28);
-  weapons.currentGun.fireAnimation = std::nullopt;
-  if(fireAnimation != ""){
-    weapons.currentGun.fireAnimation = fireAnimation;
-  }
-  auto idleAnimation = strFromFirstSqlResult(result, 29);
-
-  auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
-  weapons.currentGun.initialGunPos = gunpos;
 
   auto soundpath = strFromFirstSqlResult(result, 2);
   auto modelpath = strFromFirstSqlResult(result, 0);
   auto script = strFromFirstSqlResult(result, 27);
-
-  auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
-  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
-  auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
-  weapons.currentGun.initialGunRot = parseQuat(rot4);
-  weapons.currentGun.ironSightAngle = result.at(0).at(32) == "" ? weapons.currentGun.initialGunRot : quatFromFirstSqlResult(result, 32);
 
   auto muzzleParticleStr = strFromFirstSqlResult(result, 19);
   auto hitParticleStr = strFromFirstSqlResult(result, 20);
@@ -221,10 +193,11 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
     .totalAmmo = weapons.currentGun.totalAmmo,
   });
 
-  spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, gunpos, rot4, scale);
+  auto scale = vec3FromFirstSqlResult(result, 9, 10, 11);
+  spawnGun(weapons, sceneId, gun, soundpath, muzzleParticleStr, hitParticleStr, projectileParticleStr, modelpath, script, weapons.weaponParams.initialGunPos, weapons.weaponParams.initialGunRotVec4, scale);
 
-  if (idleAnimation != "" && weapons.currentGun.gunId.has_value()){
-    gameapi -> playAnimation(weapons.currentGun.gunId.value(), idleAnimation, LOOP);
+  if (weapons.weaponParams.idleAnimation.has_value() && weapons.weaponParams.idleAnimation.value() != "" && weapons.currentGun.gunId.has_value()){
+    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.weaponParams.idleAnimation.value(), LOOP);
   }
 }
 
@@ -349,8 +322,8 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   if (weapons.currentGun.soundId.has_value()){
     gameapi -> playClip(weapons.currentGun.soundClip.value(), sceneId, std::nullopt, std::nullopt);
   }
-  if (weapons.currentGun.fireAnimation.has_value()){
-    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.currentGun.fireAnimation.value(), ONESHOT);
+  if (weapons.weaponParams.fireAnimation.has_value()){
+    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.weaponParams.fireAnimation.value(), ONESHOT);
   }
 
   auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
@@ -419,7 +392,7 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
   float swayAmountZ =  relVelocity.z;
   float limitedSwayZ = glm::min(maxMagSway.z, glm::max(swayAmountZ, -1.f * maxMagSway.z));  
 
-  glm::vec3 targetPos(-1.f * limitedSwayX + weapons.currentGun.initialGunPos.x, -1.f * limitedSwayY + weapons.currentGun.initialGunPos.y, -1.f * limitedSwayZ + weapons.currentGun.initialGunPos.z); 
+  glm::vec3 targetPos(-1.f * limitedSwayX + weapons.weaponParams.initialGunPos.x, -1.f * limitedSwayY + weapons.weaponParams.initialGunPos.y, -1.f * limitedSwayZ + weapons.weaponParams.initialGunPos.z); 
   
   auto targetPosWithRecoil = calcLocationWithRecoil(weapons, targetPos, isGunZoomed); // this should use ironsight-offset
 
@@ -456,7 +429,7 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
     0.f, 
     0.1f /* why 0.1f? */
   );
-  auto targetRotation = rotation * (isGunZoomed ? weapons.currentGun.ironSightAngle : weapons.currentGun.initialGunRot);
+  auto targetRotation = rotation * (isGunZoomed ? weapons.weaponParams.ironSightAngle : weapons.weaponParams.initialGunRot);
   gameapi -> setGameObjectRot(
     weapons.currentGun.gunId.value(), 
     glm::slerp(oldRotation, targetRotation, 0.1f),
@@ -540,9 +513,9 @@ void drawBloom(Weapons& weapons, objid id, float distance, float bloomAmount){
 }
 
 float calculateBloomAmount(Weapons& weapons){
-  auto slerpAmount = (1 - calcRecoilSlerpAmount(weapons, weapons.currentGun.bloomLength, false)); 
+  auto slerpAmount = (1 - calcRecoilSlerpAmount(weapons, weapons.weaponParams.bloomLength, false)); 
   modassert(slerpAmount <= 1, "slerp amount must be less than 1, got: " + std::to_string(slerpAmount));
-  return glm::max(weapons.currentGun.minBloom, (weapons.currentGun.totalBloom - weapons.currentGun.minBloom) * slerpAmount + weapons.currentGun.minBloom);
+  return glm::max(weapons.weaponParams.minBloom, (weapons.weaponParams.totalBloom - weapons.weaponParams.minBloom) * slerpAmount + weapons.weaponParams.minBloom);
 }
 
 
