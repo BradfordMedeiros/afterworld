@@ -41,7 +41,6 @@ struct WeaponParams {
   std::string muzzleParticleStr;
   std::string hitParticleStr;
   std::string projectileParticleStr;
-
 };
 
 /*
@@ -52,6 +51,15 @@ fireGun(gunType, glm::vec3(fromPos))
 gunInstance = createGunInstance(gunType, parent) // actually created the gun model and stuff
 fireGun(gunInstance)*/
 WeaponParams queryWeaponParams(std::string gunName);
+
+
+struct WeaponInstance {
+  objid gunId;
+};
+
+WeaponInstance createWeaponInstance();
+void removeWeaponInstance(WeaponInstance& weaponInstance);
+
 
 void registerGunType(std::string gunName);
 

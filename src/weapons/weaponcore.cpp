@@ -107,3 +107,11 @@ void registerGunType(std::string gunName){
 	*/
 }
 
+
+WeaponInstance createWeaponInstance(){
+  return WeaponInstance {};
+}
+
+void removeWeaponInstance(WeaponInstance& weaponInstance){
+  gameapi -> removeObjectById(weaponInstance.gunId);
+}

@@ -6,7 +6,6 @@ enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 
 struct CurrentGun {
   std::string name;
-  std::optional<objid> gunId;
   std::optional<objid> soundId;
   std::optional<std::string> soundClipObj;
   std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
@@ -30,6 +29,7 @@ struct Weapons {
   float selectDistance;
 
   WeaponParams weaponParams;
+  std::optional<WeaponInstance> weaponInstance;
   CurrentGun currentGun;
 
   glm::vec2 lookVelocity;
@@ -43,8 +43,8 @@ struct Weapons {
 void saveGunTransform(Weapons& weapons){
   debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
 
-  if (weapons.currentGun.gunId.has_value()){
-    auto gunId = weapons.currentGun.gunId.value();
+  if (weapons.weaponInstance.has_value()){
+    auto gunId = weapons.weaponInstance.value().gunId;
     auto gun = weapons.currentGun.name;
     auto attr = gameapi -> getGameObjectAttr(gunId);
     auto position = attr.vecAttr.vec3.at("position");  
@@ -72,11 +72,12 @@ void saveGunTransform(Weapons& weapons){
 
 void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string firesound, std::string particle, std::string hitParticle, std::string projectileParticle, std::string modelpath, std::string script, glm::vec3 gunpos, glm::vec4 rot, glm::vec3 scale){
   modlog("weapons", std::string("spawn gun: ") + name);
-  if (weapons.currentGun.gunId.has_value()){
+
+  if (weapons.weaponInstance.has_value()){
     weapons.currentGun.name = "";
 
-    gameapi -> removeObjectById(weapons.currentGun.gunId.value());
-    weapons.currentGun.gunId = std::nullopt;
+    removeWeaponInstance(weapons.weaponInstance.value());
+
 
     if (weapons.currentGun.soundId.has_value()){
       gameapi -> removeObjectById(weapons.currentGun.soundId.value());
@@ -98,6 +99,8 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
       weapons.currentGun.projectileParticles = std::nullopt;
     }
   }
+  weapons.weaponInstance = std::nullopt;
+ 
 
   std::map<std::string, std::string> stringAttributes = { { "mesh", modelpath }, { "layer", "no_depth" } };
   if (script != ""){
@@ -112,7 +115,9 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, std::string("code-weapon-") + uniqueNameSuffix(), attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + name);
-  weapons.currentGun.gunId = gunId;
+  weapons.weaponInstance = WeaponInstance{};
+  weapons.weaponInstance.value().gunId = gunId.value();
+
 
   if (firesound != ""){
     GameobjAttributes soundAttr {
@@ -138,15 +143,16 @@ void spawnGun(Weapons& weapons, objid sceneId, std::string name, std::string fir
     gameapi -> makeParent(weapons.currentGun.soundId.value(), weapons.playerId);
   }
   if (weapons.currentGun.muzzleParticle.has_value()){
-    gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.currentGun.gunId.value());
+    gameapi -> makeParent(weapons.currentGun.muzzleParticle.value(), weapons.weaponInstance.value().gunId);
   }
   if (weapons.currentGun.projectileParticles.has_value()){
-    gameapi -> makeParent(weapons.currentGun.projectileParticles.value(), weapons.currentGun.gunId.value());
+    gameapi -> makeParent(weapons.currentGun.projectileParticles.value(), weapons.weaponInstance.value().gunId);
   }
 }
 
 void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int ammo){
   weapons.weaponParams = queryWeaponParams(gun);
+  weapons.weaponInstance = std::nullopt;
   weapons.currentGun.lastShootingTime = -1.f * weapons.weaponParams.firingRate ; // so you can shoot immediately
   weapons.currentGun.recoilStart = 0.f;
   weapons.currentGun.gunState = GUN_RAISED;
@@ -156,8 +162,8 @@ void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int a
     .totalAmmo = weapons.weaponParams.totalAmmo,
   });
   spawnGun(weapons, sceneId, gun, weapons.weaponParams.soundpath, weapons.weaponParams.muzzleParticleStr, weapons.weaponParams.hitParticleStr, weapons.weaponParams.projectileParticleStr, weapons.weaponParams.modelpath, weapons.weaponParams.script, weapons.weaponParams.initialGunPos, weapons.weaponParams.initialGunRotVec4, weapons.weaponParams.scale);
-  if (weapons.weaponParams.idleAnimation.has_value() && weapons.weaponParams.idleAnimation.value() != "" && weapons.currentGun.gunId.has_value()){
-    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.weaponParams.idleAnimation.value(), LOOP);
+  if (weapons.weaponParams.idleAnimation.has_value() && weapons.weaponParams.idleAnimation.value() != "" && weapons.weaponInstance.value().gunId){
+    gameapi -> playAnimation(weapons.weaponInstance.value().gunId, weapons.weaponParams.idleAnimation.value(), LOOP);
   }
 }
 
@@ -283,13 +289,13 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     gameapi -> playClip(weapons.currentGun.soundClipObj.value(), sceneId, std::nullopt, std::nullopt);
   }
   if (weapons.weaponParams.fireAnimation.has_value()){
-    gameapi -> playAnimation(weapons.currentGun.gunId.value(), weapons.weaponParams.fireAnimation.value(), ONESHOT);
+    gameapi -> playAnimation(weapons.weaponInstance.value().gunId, weapons.weaponParams.fireAnimation.value(), ONESHOT);
   }
 
   auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   auto playerPos = gameapi -> getGameObjectPos(weapons.playerId, true);
   if (weapons.currentGun.muzzleParticle.has_value()){
-    auto gunPosition = gameapi -> getGameObjectPos(weapons.currentGun.gunId.value(), true);
+    auto gunPosition = gameapi -> getGameObjectPos(weapons.weaponInstance.value().gunId, true);
     auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
     auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
@@ -360,7 +366,7 @@ void swayGunTranslation(Weapons& weapons, glm::vec3 relVelocity, bool isGunZoome
     targetPosWithRecoil += glm::vec3(0.f, -1.f, 0.f);
   }
 
-  auto gunId = weapons.currentGun.gunId.value();
+  auto gunId = weapons.weaponInstance.value().gunId;
   auto animationRate = weapons.currentGun.gunState == GUN_LOWERING ? 5.f : 3.f;
   float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
   auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
@@ -381,7 +387,7 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
   //std::cout << "limited sway x: " << limitedSwayX << std::endl;
   //std::cout << "limited recoil: " << recoilAmount << std::endl;
 
-  auto oldRotation = gameapi -> getGameObjectRotation(weapons.currentGun.gunId.value(), false);
+  auto oldRotation = gameapi -> getGameObjectRotation(weapons.weaponInstance.value().gunId, false);
   auto rotation = gameapi -> setFrontDelta(
     parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), 
     limitedSwayX /* delta yaw */, 
@@ -391,7 +397,7 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
   );
   auto targetRotation = rotation * (isGunZoomed ? weapons.weaponParams.ironSightAngle : weapons.weaponParams.initialGunRot);
   gameapi -> setGameObjectRot(
-    weapons.currentGun.gunId.value(), 
+    weapons.weaponInstance.value().gunId, 
     glm::slerp(oldRotation, targetRotation, 0.1f),
     false
   );
@@ -399,7 +405,7 @@ void swayGunRotation(Weapons& weapons, glm::vec3 mouseVelocity, bool isGunZoomed
 
 bool swayRotation = true;
 void swayGun(Weapons& weapons, bool isGunZoomed){
-  if (!weapons.currentGun.gunId.has_value()){
+  if (!weapons.weaponInstance.has_value()){
     return;
   }
 
@@ -552,7 +558,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     weapons -> currentGun = CurrentGun {
       .name = "",
-      .gunId = std::nullopt,
       .soundId = std::nullopt,
       .soundClipObj = std::nullopt,
       .muzzleParticle = std::nullopt,
