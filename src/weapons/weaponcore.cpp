@@ -186,3 +186,13 @@ void removeWeaponInstance(WeaponInstance& weaponInstance){
     weaponInstance.projectileParticles = std::nullopt;
   }
 }
+
+WeaponState changeGun(WeaponParams& weaponParams, WeaponState& weaponState, int ammo){
+  WeaponState state {
+    .lastShootingTime = -1.f * weaponParams.firingRate, // so you can shoot immediately
+    .recoilStart = 0.f,
+    .currentAmmo = ammo,
+    .gunState = GUN_RAISED,
+  };
+  return state;
+}

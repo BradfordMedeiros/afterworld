@@ -69,6 +69,22 @@ WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, o
 void removeWeaponInstance(WeaponInstance& weaponInstance);
 
 
+enum GunAnimation { GUN_RAISED, GUN_LOWERING };
+struct WeaponState {
+  float lastShootingTime;
+  float recoilStart;
+  int currentAmmo;
+  GunAnimation gunState;
+};
+
+WeaponState changeGun(WeaponParams& weaponParams, WeaponState& weaponState, int ammo);
+
+struct WeaponValues {
+  WeaponParams weaponParams;
+  std::optional<WeaponInstance> weaponInstance;
+  WeaponState weaponState;
+};
+
 void registerGunType(std::string gunName);
 
 #endif
