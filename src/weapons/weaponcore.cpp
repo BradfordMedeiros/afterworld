@@ -196,3 +196,35 @@ WeaponState changeGun(WeaponParams& weaponParams, WeaponState& weaponState, int 
   };
   return state;
 }
+
+void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId){
+  weaponValues.weaponParams = queryWeaponParams(gun);
+  modlog("weapons", std::string("spawn gun: ") + weaponValues.weaponParams.name);
+
+  weaponValues.weaponState = changeGun(weaponValues.weaponParams, weaponValues.weaponState, ammo);
+  if (weaponValues.weaponInstance.has_value()){
+    removeWeaponInstance(weaponValues.weaponInstance.value());
+  }
+  weaponValues.weaponInstance = createWeaponInstance(weaponValues.weaponParams, sceneId, playerId);
+  if (weaponValues.weaponParams.idleAnimation.has_value() && weaponValues.weaponParams.idleAnimation.value() != "" && weaponValues.weaponInstance.value().gunId){
+    gameapi -> playAnimation(weaponValues.weaponInstance.value().gunId, weaponValues.weaponParams.idleAnimation.value(), LOOP);
+  }
+  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
+    .currentAmmo = weaponValues.weaponState.currentAmmo,
+    .totalAmmo = weaponValues.weaponParams.totalAmmo,
+  });
+}
+
+void deliverAmmo(WeaponValues& weaponValues, int ammo){
+  weaponValues.weaponState.currentAmmo += ammo;
+  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
+    .currentAmmo = weaponValues.weaponState.currentAmmo,
+    .totalAmmo = weaponValues.weaponParams.totalAmmo,
+  });
+}
+
+bool canFireGunNow(WeaponValues& weaponValues, float elapsedMilliseconds){
+  auto timeSinceLastShot = elapsedMilliseconds - weaponValues.weaponState.lastShootingTime;
+  bool lessThanFiringRate = timeSinceLastShot >= (0.001f * weaponValues.weaponParams.firingRate);
+  return lessThanFiringRate;
+}

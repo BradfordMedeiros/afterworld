@@ -51,27 +51,6 @@ void saveGunTransform(Weapons& weapons){
   }
 }
 
-void changeGun(Weapons& weapons, objid id, objid sceneId, std::string gun, int ammo){
-  weapons.weaponValues.weaponParams = queryWeaponParams(gun);
-  
-  weapons.weaponValues.weaponState = changeGun(weapons.weaponValues.weaponParams, weapons.weaponValues.weaponState, ammo);
-
-  if (weapons.weaponValues.weaponInstance.has_value()){
-    removeWeaponInstance(weapons.weaponValues.weaponInstance.value());
-  }
-  weapons.weaponValues.weaponInstance = createWeaponInstance(weapons.weaponValues.weaponParams, sceneId, weapons.playerId);
-  if (weapons.weaponValues.weaponParams.idleAnimation.has_value() && weapons.weaponValues.weaponParams.idleAnimation.value() != "" && weapons.weaponValues.weaponInstance.value().gunId){
-    gameapi -> playAnimation(weapons.weaponValues.weaponInstance.value().gunId, weapons.weaponValues.weaponParams.idleAnimation.value(), LOOP);
-  }
-
-  modlog("weapons", std::string("spawn gun: ") + weapons.weaponValues.weaponParams.name);
-
-  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
-    .currentAmmo = weapons.weaponValues.weaponState.currentAmmo,
-    .totalAmmo = weapons.weaponValues.weaponParams.totalAmmo,
-  });
-
-}
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -80,11 +59,7 @@ std::string weaponsToString(Weapons& weapons){
   return str;
 }
 
-bool canFireGunNow(Weapons& weapons, float elapsedMilliseconds){
-  auto timeSinceLastShot = elapsedMilliseconds - weapons.weaponValues.weaponState.lastShootingTime;
-  bool lessThanFiringRate = timeSinceLastShot >= (0.001f * weapons.weaponValues.weaponParams.firingRate);
-  return lessThanFiringRate;
-}
+
 void startRecoil(Weapons& weapons){
   weapons.weaponValues.weaponState.recoilStart = gameapi -> timeSeconds(false);
 }
@@ -175,7 +150,7 @@ void fireRaycast(Weapons& weapons, glm::vec3 orientationOffset){
 
 void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
   float now = gameapi -> timeSeconds(false);
-  auto canFireGun = canFireGunNow(weapons, now);
+  auto canFireGun = canFireGunNow(weapons.weaponValues, now);
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(weapons.weaponValues.weaponParams.firingRate));
   if (!canFireGun){
     return;
@@ -185,7 +160,7 @@ void tryFireGun(Weapons& weapons, objid sceneId, float bloomAmount){
     modlog("weapons", "no ammo, tried to fire, should play sound");
     return;
   }
-  weapons.weaponValues.weaponState.currentAmmo--;
+  deliverAmmo(weapons.weaponValues, -1);
   gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
     .currentAmmo = weapons.weaponValues.weaponState.currentAmmo,
     .totalAmmo = weapons.weaponValues.weaponParams.totalAmmo,
@@ -550,17 +525,13 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         weapons -> weaponValues.weaponState.gunState = GUN_LOWERING;
         gameapi -> schedule(id, 1000, weapons, [id, value, currentAmmo](void* weaponData) -> void {
           Weapons* weaponValue = static_cast<Weapons*>(weaponData);
-          changeGun(*weaponValue, id, gameapi -> listSceneId(id), value, currentAmmo);
+          changeGun(weaponValue -> weaponValues, value, currentAmmo, gameapi -> listSceneId(id), weaponValue -> playerId);
         });
       }
     }else if (key == "ammo"){
       auto intValue = anycast<int>(value);
       modassert(intValue != NULL, "ammo message not an int");
-      weapons -> weaponValues.weaponState.currentAmmo += *intValue;
-      gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
-        .currentAmmo = weapons -> weaponValues.weaponState.currentAmmo,
-        .totalAmmo = weapons -> weaponValues.weaponParams.totalAmmo,
-      });
+      deliverAmmo(weapons -> weaponValues, *intValue);
     }else if (key == "save-gun"){
       saveGunTransform(*weapons);
     }else if (key == "velocity"){

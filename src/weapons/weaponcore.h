@@ -77,13 +77,15 @@ struct WeaponState {
   GunAnimation gunState;
 };
 
-WeaponState changeGun(WeaponParams& weaponParams, WeaponState& weaponState, int ammo);
-
 struct WeaponValues {
   WeaponParams weaponParams;
   std::optional<WeaponInstance> weaponInstance;
   WeaponState weaponState;
 };
+void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
+void deliverAmmo(WeaponValues& weaponValues, int ammo);
+
+bool canFireGunNow(WeaponValues& weaponValues, float elapsedMilliseconds);
 
 void registerGunType(std::string gunName);
 
