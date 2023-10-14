@@ -85,7 +85,13 @@ struct WeaponValues {
 void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 void deliverAmmo(WeaponValues& weaponValues, int ammo);
 
-bool canFireGunNow(WeaponValues& weaponValues, float elapsedMilliseconds);
+std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
+void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials);
+
+// Sway gun is completely comestic, no effect on gameplay
+void swayGun(WeaponValues& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);
+
+float calcRecoilSlerpAmount(WeaponValues& weaponValues, float length,  bool reset);
 
 void registerGunType(std::string gunName);
 
