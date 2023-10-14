@@ -187,21 +187,49 @@ void removeWeaponInstance(WeaponInstance& weaponInstance){
   }
 }
 
-WeaponState changeGun(WeaponParams& weaponParams, WeaponState& weaponState, int ammo){
-  WeaponState state {
-    .lastShootingTime = -1.f * weaponParams.firingRate, // so you can shoot immediately
-    .recoilStart = 0.f,
-    .currentAmmo = ammo,
-    .gunState = GUN_RAISED,
-  };
-  return state;
+void saveGunTransform(WeaponValues& weaponValues){
+  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
+
+  if (weaponValues.weaponInstance.has_value()){
+    auto gunId = weaponValues.weaponInstance.value().gunId;
+    auto gun = weaponValues.weaponParams.name;
+    auto attr = gameapi -> getGameObjectAttr(gunId);
+    auto position = attr.vecAttr.vec3.at("position");  
+    auto scale = attr.vecAttr.vec3.at("scale");
+    auto rotation = attr.vecAttr.vec4.at("rotation");
+
+    modlog("weapons", "save gun, name = " + weaponValues.weaponParams.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
+
+    auto updateQuery = gameapi -> compileSqlQuery(
+      std::string("update guns set ") +
+        "xoffset-pos = " + serializeFloat(position.x) + ", " +
+        "yoffset-pos = " + serializeFloat(position.y) + ", " +
+        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
+        "xrot = " + serializeFloat(rotation.x) + ", " +
+        "yrot = " + serializeFloat(rotation.y) + ", " +
+        "zrot = " + serializeFloat(rotation.z) + 
+        " where name = " + gun,
+        {}
+    );
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+    modassert(validSql, "error executing sql query");
+  }
 }
 
 void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId){
   weaponValues.weaponParams = queryWeaponParams(gun);
   modlog("weapons", std::string("spawn gun: ") + weaponValues.weaponParams.name);
 
-  weaponValues.weaponState = changeGun(weaponValues.weaponParams, weaponValues.weaponState, ammo);
+  WeaponState newState {
+    .lastShootingTime = -1.f * weaponValues.weaponParams.firingRate, // so you can shoot immediately
+    .recoilStart = 0.f,
+    .currentAmmo = ammo,
+    .gunState = GUN_RAISED,
+  };
+
+  weaponValues.weaponState = newState;
+
   if (weaponValues.weaponInstance.has_value()){
     removeWeaponInstance(weaponValues.weaponInstance.value());
   }
@@ -312,10 +340,6 @@ void fireRaycast(WeaponValues& weaponValues, glm::vec3 orientationOffset, objid 
   }
 }
 
-void startRecoil(WeaponValues& weaponValues){
-  weaponValues.weaponState.recoilStart = gameapi -> timeSeconds(false);
-}
-
 void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials){
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(weaponValues, now);
@@ -351,7 +375,7 @@ void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, ob
     gameapi -> emit(weaponValues.weaponInstance.value().muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt, playerId);
   }
   weaponValues.weaponState.lastShootingTime = now;
-  startRecoil(weaponValues);
+  weaponValues.weaponState.recoilStart = gameapi -> timeSeconds(false);
 
   glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (weaponValues.weaponParams.isRaycast){

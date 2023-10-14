@@ -9,6 +9,7 @@ struct Weapons {
   objid sceneId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
+  bool fireOnce;
   float selectDistance;
 
   WeaponValues weaponValues;
@@ -21,44 +22,12 @@ struct Weapons {
   std::optional<objid> heldItem;
 };
 
-void saveGunTransform(Weapons& weapons){
-  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
-
-  if (weapons.weaponValues.weaponInstance.has_value()){
-    auto gunId = weapons.weaponValues.weaponInstance.value().gunId;
-    auto gun = weapons.weaponValues.weaponParams.name;
-    auto attr = gameapi -> getGameObjectAttr(gunId);
-    auto position = attr.vecAttr.vec3.at("position");  
-    auto scale = attr.vecAttr.vec3.at("scale");
-    auto rotation = attr.vecAttr.vec4.at("rotation");
-
-    modlog("weapons", "save gun, name = " + weapons.weaponValues.weaponParams.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
-
-    auto updateQuery = gameapi -> compileSqlQuery(
-      std::string("update guns set ") +
-        "xoffset-pos = " + serializeFloat(position.x) + ", " +
-        "yoffset-pos = " + serializeFloat(position.y) + ", " +
-        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
-        "xrot = " + serializeFloat(rotation.x) + ", " +
-        "yrot = " + serializeFloat(rotation.y) + ", " +
-        "zrot = " + serializeFloat(rotation.z) + 
-        " where name = " + gun,
-        {}
-    );
-    bool validSql = false;
-    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-    modassert(validSql, "error executing sql query");
-  }
-}
-
-
 std::string weaponsToString(Weapons& weapons){
   std::string str;
   str += std::string("isHoldingLeftMouse: ") + (weapons.isHoldingLeftMouse ? "true" : "false") + "\n";
   str += std::string("isHoldingRightMouseo: ") + (weapons.isHoldingRightMouse ? "true" : "false") + "\n";
   return str;
 }
-
 
 void reloadTraitsValues(Weapons& weapons){
   auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
@@ -68,13 +37,11 @@ void reloadTraitsValues(Weapons& weapons){
   weapons.selectDistance = floatFromFirstSqlResult(result, 0);
 }
 
-
 float calculateBloomAmount(Weapons& weapons){
   auto slerpAmount = (1 - calcRecoilSlerpAmount(weapons.weaponValues, weapons.weaponValues.weaponParams.bloomLength, false)); 
   modassert(slerpAmount <= 1, "slerp amount must be less than 1, got: " + std::to_string(slerpAmount));
   return glm::max(weapons.weaponValues.weaponParams.minBloom, (weapons.weaponValues.weaponParams.totalBloom - weapons.weaponValues.weaponParams.minBloom) * slerpAmount + weapons.weaponValues.weaponParams.minBloom);
 }
-
 
 // Should interpolate.  Looks better + prevent clipping bugs
 // Might be interesting to incorporate things like mass and stuff
@@ -103,9 +70,7 @@ void handlePickedUpItem(Weapons& weapons){
   std::cout << "amount to move: " << print(amountToMove) << std::endl;
   //gameapi -> setGameObjectPos(weapons.heldItem.value(), oldItemPos + amountToMove);
   gameapi -> applyForce(weapons.heldItem.value(), amountToMove);
-
 }
-
 
 void modifyPhysicsForHeldItem(Weapons& weapons){
   GameobjAttributes newAttr {
@@ -141,6 +106,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> sceneId = sceneId;
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
+    weapons -> fireOnce = false;
 
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
     weapons -> movementVelocity = 0.f;
@@ -168,7 +134,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
         weapons -> isHoldingLeftMouse = false;
       }else if (action == 1){
         weapons -> isHoldingLeftMouse = true;
-        tryFireGun(weapons -> weaponValues, gameapi -> listSceneId(id), calculateBloomAmount(*weapons), weapons -> playerId, weapons -> materials);
+        weapons -> fireOnce = true;
       }
     }else if (button == 1){
       if (action == 0){
@@ -243,7 +209,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       modassert(intValue != NULL, "ammo message not an int");
       deliverAmmo(weapons -> weaponValues, *intValue);
     }else if (key == "save-gun"){
-      saveGunTransform(*weapons);
+      saveGunTransform(weapons -> weaponValues);
     }else if (key == "velocity"){
       auto strValue = anycast<std::string>(value);   // would be nice to send the vec3 directly, but notifySend does not support
       modassert(strValue != NULL, "velocity value invalid");  
@@ -276,8 +242,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     Weapons* weapons = static_cast<Weapons*>(data);
     auto bloomAmount = calculateBloomAmount(*weapons);
     drawBloom(weapons -> playerId, id, -1.f, bloomAmount); // 0.002f is just a min amount for visualization, not actual bloom
-    if (weapons -> weaponValues.weaponParams.canHold && weapons -> isHoldingLeftMouse){
+    if ((weapons -> weaponValues.weaponParams.canHold && weapons -> isHoldingLeftMouse) || weapons -> fireOnce){
       tryFireGun(weapons -> weaponValues, gameapi -> listSceneId(id), bloomAmount, weapons -> playerId, weapons -> materials);
+      weapons -> fireOnce = false;
     }
     swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
     handlePickedUpItem(*weapons);

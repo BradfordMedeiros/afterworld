@@ -68,7 +68,6 @@ struct WeaponInstance {
 WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
 void removeWeaponInstance(WeaponInstance& weaponInstance);
 
-
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponState {
   float lastShootingTime;
@@ -82,8 +81,10 @@ struct WeaponValues {
   std::optional<WeaponInstance> weaponInstance;
   WeaponState weaponState;
 };
-void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
-void deliverAmmo(WeaponValues& weaponValues, int ammo);
+void changeGun(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
+void deliverAmmo(WeaponValues& _weaponValues, int ammo);
+
+void saveGunTransform(WeaponValues& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
 void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials);
