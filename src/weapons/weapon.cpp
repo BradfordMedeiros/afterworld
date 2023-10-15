@@ -6,7 +6,6 @@ struct Weapons {
   std::vector<MaterialToParticle> materials;
 
   objid playerId;
-  objid sceneId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
   bool fireOnce;
@@ -15,10 +14,7 @@ struct Weapons {
   WeaponValues weaponValues;
 
   glm::vec2 lookVelocity;
-  float movementVelocity;
   glm::vec3 movementVec;
-
-  std::optional<objid> raycastLine;
   std::optional<objid> heldItem;
 };
 
@@ -97,15 +93,12 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> materials = loadMaterials(sceneId);
 
     weapons -> playerId = gameapi -> getGameObjectByName(">maincamera", sceneId, false).value();
-    weapons -> sceneId = sceneId;
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
     weapons -> fireOnce = false;
 
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
-    weapons -> movementVelocity = 0.f;
     weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
-    weapons -> raycastLine = std::nullopt;
 
     weapons -> weaponValues.weaponState = WeaponState {};
 
@@ -184,20 +177,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     if (key == "change-gun"){
       auto changeGunMessage = anycast<ChangeGunMessage>(value); 
       modassert(changeGunMessage != NULL, "change-gun value invalid");
-      auto value = changeGunMessage -> gun;
-      auto currentAmmo = changeGunMessage -> currentAmmo;
-      if (value != weapons -> weaponValues.weaponParams.name){
-        gameapi -> sendNotifyMessage("set-gun-ammo", SetAmmoMessage {
-          .currentAmmo = weapons -> weaponValues.weaponState.currentAmmo,
-          .gun = weapons -> weaponValues.weaponParams.name,
-        });
-
-        weapons -> weaponValues.weaponState.gunState = GUN_LOWERING;
-        gameapi -> schedule(id, 1000, weapons, [id, value, currentAmmo](void* weaponData) -> void {
-          Weapons* weaponValue = static_cast<Weapons*>(weaponData);
-          changeGun(weaponValue -> weaponValues, value, currentAmmo, gameapi -> listSceneId(id), weaponValue -> playerId);
-        });
-      }
+      changeGunAnimate(weapons -> weaponValues, changeGunMessage -> gun, changeGunMessage -> currentAmmo, gameapi -> listSceneId(id), weapons -> playerId);
     }else if (key == "ammo"){
       auto intValue = anycast<int>(value);
       modassert(intValue != NULL, "ammo message not an int");
@@ -208,8 +188,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       auto strValue = anycast<std::string>(value);   // would be nice to send the vec3 directly, but notifySend does not support
       modassert(strValue != NULL, "velocity value invalid");  
       weapons -> movementVec = parseVec(*strValue);
-      weapons -> movementVelocity = glm::length(weapons -> movementVec);
-      //std::cout << "speed is: " << weapons -> movementVelocity << std::endl;
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
       reloadTraitsValues(*weapons);

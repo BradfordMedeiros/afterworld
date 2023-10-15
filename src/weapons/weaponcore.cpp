@@ -214,6 +214,19 @@ void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid scen
     .totalAmmo = weaponValues.weaponParams.totalAmmo,
   });
 }
+void changeGunAnimate(WeaponValues& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId){
+  if (gun == weaponValues.weaponParams.name){
+    return;
+  }
+  weaponValues.weaponState.gunState = GUN_LOWERING;
+  gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId](void* weaponData) -> void {
+    gameapi -> sendNotifyMessage("set-gun-ammo", SetAmmoMessage {
+      .currentAmmo = ammo,
+      .gun = weaponValues.weaponParams.name,
+    });
+    changeGun(weaponValues, gun, ammo, sceneId, playerId);
+  });
+}
 
 void deliverAmmo(WeaponValues& weaponValues, int ammo){
   weaponValues.weaponState.currentAmmo += ammo;
@@ -389,9 +402,7 @@ glm::vec3 getSwayVelocity(objid playerId, glm::vec2 lookVelocity, glm::vec3 move
     return glm::vec3(lookVelocity.x, lookVelocity.y, 0.f);
   }
   auto parentRot = gameapi -> getGameObjectRotation(playerId, false);
-  //modlog("weapons", "move velocity: " + print(weapons.movementVec));
   auto newPos = glm::inverse(parentRot) * movementVec;
-  //std::cout << "sway velocity: " << print(newPos) << std::endl;
   return newPos;
 }
 
@@ -466,10 +477,9 @@ void swayGun(WeaponValues& weaponValues, bool isGunZoomed, objid playerId, glm::
   if (!weaponValues.weaponInstance.has_value()){
     return;
   }
-
-  auto swayVelocity = getSwayVelocity(playerId, lookVelocity, movementVec);
   //modlog("weapon", "movement velocity: " + std::to_string(weapons.movementVelocity));
   //modlog("weapon", "sway velocity: " + print(swayVelocity));
+  auto swayVelocity = getSwayVelocity(playerId, lookVelocity, movementVec);
   swayGunTranslation(weaponValues, swayVelocity, isGunZoomed);
   if (swayRotation){
     swayGunRotation(weaponValues, isGunZoomed, lookVelocity, movementVec);
