@@ -3,12 +3,65 @@
 extern CustomApiBindings* gameapi;
 
 struct WeaponCore {
+  std::string name;
 
 };
 
 std::vector<WeaponCore> weaponCores = {
 
 };
+
+struct SoundResource {
+  std::string clipName;
+  std::string objName;
+  objid clipObjectId;
+};
+
+std::vector<SoundResource> soundResources;
+
+WeaponCore* findWeaponCore(std::string& name){
+  for (auto &weaponCore : weaponCores){
+    if (weaponCore.name == name){
+      return &weaponCore;
+    }
+  }
+  return NULL;
+}
+
+std::optional<std::string> weaponCoreSoundResource(std::string clipName){
+  for (auto &soundResource : soundResources){
+    if (clipName == soundResource.clipName){
+      return soundResource.objName;
+    }
+  }
+  return std::nullopt;
+}
+
+
+void loadWeaponCore(objid sceneId, std::string clipName){
+  if (clipName == ""){
+    return;
+  }
+  if (weaponCoreSoundResource(clipName).has_value()){
+    return;
+  }
+  GameobjAttributes soundAttr {
+    .stringAttributes = { { "clip", clipName }, { "physics", "disabled" }},
+    .numAttributes = {},
+    .vecAttr = {  .vec3 = {},  .vec4 = {} },
+  };
+  std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto clipObjectId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
+  modassert(clipObjectId.has_value(), "load weapon core sound, could not create clip obj");
+  soundResources.push_back(SoundResource {
+    .clipName = clipName,
+    .objName = soundClipObj,
+    .clipObjectId = clipObjectId.value(),
+  });
+}
+
+
 
 WeaponParams queryWeaponParams(std::string gunName){
   auto gunQuery = gameapi -> compileSqlQuery(
@@ -106,18 +159,8 @@ WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, o
   }
 
   {
-    if (weaponParams.soundpath != ""){
-      GameobjAttributes soundAttr {
-        .stringAttributes = { { "clip", weaponParams.soundpath }, { "physics", "disabled" }},
-        .numAttributes = {},
-        .vecAttr = {  .vec3 = {},  .vec4 = {} },
-      };
-      std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
-      std::map<std::string, GameobjAttributes> submodelAttributes;
-      auto soundId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
-      weaponInstance.soundId = soundId;  
-      weaponInstance.soundClipObj = soundClipObj;
-    }
+    loadWeaponCore(sceneId, weaponParams.soundpath);
+    weaponInstance.soundClipObj = weaponCoreSoundResource(weaponParams.soundpath);
   }
 
   {
@@ -128,9 +171,6 @@ WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, o
   
   {
     gameapi -> makeParent(weaponInstance.gunId, playerId);
-    if (weaponInstance.soundId.has_value()){
-      gameapi -> makeParent(weaponInstance.soundId.value(), playerId);
-    }
     if (weaponInstance.muzzleParticle.has_value()){
       gameapi -> makeParent(weaponInstance.muzzleParticle.value(), weaponInstance.gunId);
     }
@@ -144,9 +184,6 @@ WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, o
 
 void removeWeaponInstance(WeaponInstance& weaponInstance){
   gameapi -> removeObjectById(weaponInstance.gunId);
-
-  gameapi -> removeObjectById(weaponInstance.soundId.value());
-  weaponInstance.soundId = std::nullopt;
   weaponInstance.soundClipObj = std::nullopt;
 
   if (weaponInstance.muzzleParticle.has_value()){
@@ -354,8 +391,8 @@ bool tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, ob
     .totalAmmo = weaponValues.gunCore.weaponParams.totalAmmo,
   });
 
-  if (weaponValues.weaponInstance.value().soundId.has_value()){
-    gameapi -> playClip(weaponValues.weaponInstance.value().soundClipObj.value(), sceneId, std::nullopt, std::nullopt);
+  if (weaponValues.weaponInstance.value().soundClipObj.has_value()){
+    gameapi -> playClip(weaponValues.weaponInstance.value().soundClipObj.value(), sceneId, std::nullopt, playerPos);
   }
 
   if (weaponValues.weaponInstance.value().muzzleParticle.has_value()){

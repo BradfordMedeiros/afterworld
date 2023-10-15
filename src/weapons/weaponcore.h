@@ -58,7 +58,6 @@ WeaponParams queryWeaponParams(std::string gunName);
 
 struct WeaponInstance {
   objid gunId;
-  std::optional<objid> soundId;
   std::optional<std::string> soundClipObj;
 
   std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
