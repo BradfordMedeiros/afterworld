@@ -77,15 +77,21 @@ struct WeaponState {
   GunAnimation gunState;
 };
 
-struct WeaponValues {
+struct GunCore {
   WeaponParams weaponParams;
-  std::optional<WeaponInstance> weaponInstance;
   WeaponState weaponState;
+};
+
+GunCore getGunCoreType(std::string gun, int ammo);
+
+struct WeaponValues {
+  GunCore gunCore;
+  std::optional<WeaponInstance> weaponInstance;
 };
 void changeGun(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 void changeGunAnimate(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 
-void deliverAmmo(WeaponValues& _weaponValues, int ammo);
+void deliverAmmo(GunCore& _gunCore, int ammo);
 
 void saveGunTransform(WeaponValues& weaponValues);
 

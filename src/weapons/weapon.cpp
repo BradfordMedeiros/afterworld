@@ -100,7 +100,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
     weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
 
-    weapons -> weaponValues.weaponState = WeaponState {};
+    weapons -> weaponValues.gunCore.weaponState = WeaponState {};
 
     weapons -> heldItem = std::nullopt;
 
@@ -181,7 +181,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (key == "ammo"){
       auto intValue = anycast<int>(value);
       modassert(intValue != NULL, "ammo message not an int");
-      deliverAmmo(weapons -> weaponValues, *intValue);
+      deliverAmmo(weapons -> weaponValues.gunCore, *intValue);
     }else if (key == "save-gun"){
       saveGunTransform(weapons -> weaponValues);
     }else if (key == "velocity"){
