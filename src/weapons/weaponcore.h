@@ -6,6 +6,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../materials.h"
+#include "./weapon_vector.h"
 
 struct WeaponParams {
   // gun intrinsic stuff
@@ -87,13 +88,9 @@ void deliverAmmo(WeaponValues& _weaponValues, int ammo);
 void saveGunTransform(WeaponValues& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
-void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials);
+bool fireGunAndVisualize(WeaponValues& weaponValues, objid id, objid playerId, std::vector<MaterialToParticle>& materials, bool holding, bool fireOnce);
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(WeaponValues& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);
-
-float calcRecoilSlerpAmount(WeaponValues& weaponValues, float length,  bool reset);
-
-void registerGunType(std::string gunName);
 
 #endif

@@ -10,8 +10,6 @@ std::vector<WeaponCore> weaponCores = {
 
 };
 
-
-
 WeaponParams queryWeaponParams(std::string gunName){
   auto gunQuery = gameapi -> compileSqlQuery(
     std::string("select modelpath, fireanimation, fire-sound, xoffset-pos, ") +
@@ -82,32 +80,6 @@ WeaponParams queryWeaponParams(std::string gunName){
 
   return weaponParams;
 }
-
-void registerGunType(std::string gunName){
-	// query from sql
-	// parse it into a  raw form
-	// load the resources
-	// then add it to the cores
-
-
-
-
-  /*
-  WeaponParams weaponParams {
-  	float firingRate;
-  	float recoilLength;
-  	float recoilPitchRadians;
-  	glm::vec3 recoilTranslate;
-  	glm::vec3 recoilZoomTranslate;
-  	bool canHold;
-  	bool isIronsight;
-  	bool isRaycast;
-  	glm::vec3 ironsightOffset;
-  	glm::quat ironSightAngle;
-	};
-	*/
-}
-
 
 WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId){
   WeaponInstance weaponInstance {};
@@ -340,17 +312,17 @@ void fireRaycast(WeaponValues& weaponValues, glm::vec3 orientationOffset, objid 
   }
 }
 
-void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials){
+bool tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials){
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(weaponValues, now);
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(weaponValues.weaponParams.firingRate));
   if (!canFireGun){
-    return;
+    return false;
   }
   bool hasAmmo = weaponValues.weaponState.currentAmmo > 0;
   if (!hasAmmo){
     modlog("weapons", "no ammo, tried to fire, should play sound");
-    return;
+    return false;
   }
   deliverAmmo(weaponValues, -1);
   gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
@@ -388,6 +360,26 @@ void tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, ob
     auto initialVelocity = playerForwardAndUp * shootingVecAngle * 10.f;
     gameapi -> emit(weaponValues.weaponInstance.value().projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt, std::nullopt);
   }
+  return true;
+}
+
+float calcRecoilSlerpAmount(WeaponValues& weaponValues, float length,  bool reset){
+  float amount = (gameapi -> timeSeconds(false) - weaponValues.weaponState.recoilStart) / length;
+  return (amount > 1.f) ? (reset ? 0.f : 1.f): amount;
+}
+
+float calculateBloomAmount(WeaponValues& weaponValues){
+  auto slerpAmount = (1 - calcRecoilSlerpAmount(weaponValues, weaponValues.weaponParams.bloomLength, false)); 
+  modassert(slerpAmount <= 1, "slerp amount must be less than 1, got: " + std::to_string(slerpAmount));
+  return glm::max(weaponValues.weaponParams.minBloom, (weaponValues.weaponParams.totalBloom - weaponValues.weaponParams.minBloom) * slerpAmount + weaponValues.weaponParams.minBloom);
+}
+bool fireGunAndVisualize(WeaponValues& weaponValues, objid id, objid playerId, std::vector<MaterialToParticle>& materials, bool holding, bool fireOnce){
+  auto bloomAmount = calculateBloomAmount(weaponValues);
+  drawBloom(playerId, id, -1.f, bloomAmount); // 0.002f is just a min amount for visualization, not actual bloom
+  if ((weaponValues.weaponParams.canHold && holding) || fireOnce){
+    return tryFireGun(weaponValues, gameapi -> listSceneId(id), bloomAmount, playerId, materials);
+  }
+  return false;
 }
 
 bool swayFromMouse = false;
@@ -403,10 +395,6 @@ glm::vec3 getSwayVelocity(objid playerId, glm::vec2 lookVelocity, glm::vec3 move
   return newPos;
 }
 
-float calcRecoilSlerpAmount(WeaponValues& weaponValues, float length,  bool reset){
-  float amount = (gameapi -> timeSeconds(false) - weaponValues.weaponState.recoilStart) / length;
-  return (amount > 1.f) ? (reset ? 0.f : 1.f): amount;
-}
 
 glm::vec3 calcLocationWithRecoil(WeaponValues& weaponValues, glm::vec3 pos, bool isGunZoomed){
   auto targetPos = isGunZoomed ? weaponValues.weaponParams.ironsightOffset : pos;

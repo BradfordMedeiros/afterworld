@@ -37,12 +37,6 @@ void reloadTraitsValues(Weapons& weapons){
   weapons.selectDistance = floatFromFirstSqlResult(result, 0);
 }
 
-float calculateBloomAmount(Weapons& weapons){
-  auto slerpAmount = (1 - calcRecoilSlerpAmount(weapons.weaponValues, weapons.weaponValues.weaponParams.bloomLength, false)); 
-  modassert(slerpAmount <= 1, "slerp amount must be less than 1, got: " + std::to_string(slerpAmount));
-  return glm::max(weapons.weaponValues.weaponParams.minBloom, (weapons.weaponValues.weaponParams.totalBloom - weapons.weaponValues.weaponParams.minBloom) * slerpAmount + weapons.weaponValues.weaponParams.minBloom);
-}
-
 // Should interpolate.  Looks better + prevent clipping bugs
 // Might be interesting to incorporate things like mass and stuff
 void handlePickedUpItem(Weapons& weapons){
@@ -240,13 +234,11 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Weapons* weapons = static_cast<Weapons*>(data);
-    auto bloomAmount = calculateBloomAmount(*weapons);
-    drawBloom(weapons -> playerId, id, -1.f, bloomAmount); // 0.002f is just a min amount for visualization, not actual bloom
-    if ((weapons -> weaponValues.weaponParams.canHold && weapons -> isHoldingLeftMouse) || weapons -> fireOnce){
-      tryFireGun(weapons -> weaponValues, gameapi -> listSceneId(id), bloomAmount, weapons -> playerId, weapons -> materials);
-      weapons -> fireOnce = false;
-    }
+
+    fireGunAndVisualize(weapons -> weaponValues, id, weapons -> playerId, weapons -> materials, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
+    weapons -> fireOnce = false;
     swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
+
     handlePickedUpItem(*weapons);
     //std::cout << weaponsToString(*weapons) << std::endl;
   };
