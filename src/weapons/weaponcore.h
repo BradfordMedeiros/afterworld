@@ -56,12 +56,7 @@ fireGun(gunInstance)*/
 WeaponParams queryWeaponParams(std::string gunName);
 
 
-struct WeaponInstance {
-  objid gunId;
-};
-
-WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
-void removeWeaponInstance(WeaponInstance& weaponInstance);
+objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
 
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponState {
@@ -93,7 +88,7 @@ struct GunCore {
 
 struct WeaponValues {
   GunCore gunCore;
-  std::optional<WeaponInstance> weaponInstance;
+  std::optional<objid> gunId;
 };
 void changeGun(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 void changeGunAnimate(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
