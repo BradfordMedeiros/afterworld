@@ -58,11 +58,6 @@ WeaponParams queryWeaponParams(std::string gunName);
 
 struct WeaponInstance {
   objid gunId;
-  std::optional<std::string> soundClipObj;
-
-  std::optional<objid> muzzleParticle;  // particle right in front of the muzzle, eg for a smoke effect
-  std::optional<objid> hitParticles;    // default hit particle for the gun, used if there is no material particle
-  std::optional<objid> projectileParticles;  // eg for a grenade launched from the gun
 };
 
 WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
@@ -76,12 +71,25 @@ struct WeaponState {
   GunAnimation gunState;
 };
 
+struct SoundResource {
+  std::string clipName;
+  std::string objName;
+  objid clipObjectId;
+};
+
+struct WeaponCore {
+  std::string name;
+  std::optional<SoundResource> soundResource;
+  std::optional<objid> muzzleParticle;
+  std::optional<objid> hitParticles;
+  std::optional<objid> projectileParticles;
+};
+
 struct GunCore {
+  WeaponCore* weaponCore;
   WeaponParams weaponParams;
   WeaponState weaponState;
 };
-
-GunCore getGunCoreType(std::string gun, int ammo);
 
 struct WeaponValues {
   GunCore gunCore;

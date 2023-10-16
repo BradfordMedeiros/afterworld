@@ -3,19 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 
-struct SoundResource {
-  std::string clipName;
-  std::string objName;
-  objid clipObjectId;
-};
-
-struct WeaponCore {
-  std::string name;
-  std::optional<SoundResource> soundResource;
-  std::optional<objid> muzzleParticle;
-  std::optional<objid> hitParticles;
-  std::optional<objid> projectileParticles;
-};
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -27,41 +14,6 @@ WeaponCore* findWeaponCore(std::string& name){
   }
   return NULL;
 }
-
-std::optional<std::string> weaponCoreSoundResource(std::string& coreName){
-  auto weaponCore = findWeaponCore(coreName);
-  if (!weaponCore){
-    return std::nullopt;
-  }
-  if (!weaponCore -> soundResource.has_value()){
-    return std::nullopt;
-  }
-  return weaponCore -> soundResource.value().objName;
-}
-std::optional<objid> weaponCoreMuzzleParticle(std::string& coreName){
-  auto weaponCore = findWeaponCore(coreName);
-  if (!weaponCore){
-    return std::nullopt;
-  }
-  return weaponCore -> muzzleParticle;
-}
-std::optional<objid> weaponCoreHitParticle(std::string& coreName){
-  auto weaponCore = findWeaponCore(coreName);
-  if (!weaponCore){
-    return std::nullopt;
-  }
-  return weaponCore -> hitParticles;
-}
-
-std::optional<objid> weaponCoreProjectileParticle(std::string& coreName){
-  return std::nullopt;
-  auto weaponCore = findWeaponCore(coreName);
-  if (!weaponCore){
-    return std::nullopt;
-  }
-  return weaponCore -> projectileParticles;
-}
-
 
 void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponParams){
   modlog("weapons", std::string("load weapon core: ") + coreName);
@@ -90,7 +42,7 @@ void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponPa
   
   weaponCore.name = coreName;
 
-  weaponCore.muzzleParticle = createParticleEmitter(sceneId, weaponParams.muzzleParticleStr, (std::string("+code-muzzleparticles") + uniqueNameSuffix()));
+  weaponCore.muzzleParticle = createParticleEmitter(sceneId, weaponParams.muzzleParticleStr, (std::string("+code-muzzleparticle") + uniqueNameSuffix()));
   weaponCore.hitParticles = createParticleEmitter(sceneId, weaponParams.hitParticleStr, (std::string("+code-hitparticle") + uniqueNameSuffix()));
   weaponCore.projectileParticles = createParticleEmitter(sceneId, weaponParams.projectileParticleStr, (std::string("+code-projectileparticle") + uniqueNameSuffix()));
 
@@ -191,15 +143,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   return weaponParams;
 }
 
-GunCore getGunCoreType(std::string gun, int ammo){
-  modassert(false, "not yet implemented");
-  return GunCore { };
-}
-
 WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId){
-  removeAllWeaponCores();
-  loadWeaponCore(weaponParams.name, sceneId, weaponParams);
-
   WeaponInstance weaponInstance {};
   {
     std::map<std::string, std::string> stringAttributes = { { "mesh", weaponParams.modelpath }, { "layer", "no_depth" } };
@@ -216,11 +160,6 @@ WeaponInstance createWeaponInstance(WeaponParams& weaponParams, objid sceneId, o
     modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
     weaponInstance.gunId = gunId.value();
   }
-
-  weaponInstance.soundClipObj = weaponCoreSoundResource(weaponParams.name);
-  weaponInstance.muzzleParticle = weaponCoreMuzzleParticle(weaponParams.name);
-  weaponInstance.hitParticles = weaponCoreHitParticle(weaponParams.name);
-  weaponInstance.projectileParticles = weaponCoreProjectileParticle(weaponParams.name);
 
   gameapi -> makeParent(weaponInstance.gunId, playerId);
 
@@ -265,6 +204,9 @@ void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid scen
   weaponValues.gunCore.weaponParams = queryWeaponParams(gun);
   modlog("weapons", std::string("spawn gun: ") + weaponValues.gunCore.weaponParams.name);
 
+  removeAllWeaponCores();
+  loadWeaponCore(gun, sceneId, weaponValues.gunCore.weaponParams);
+
   WeaponState newState {
     .lastShootingTime = -1.f * weaponValues.gunCore.weaponParams.firingRate, // so you can shoot immediately
     .recoilStart = 0.f,
@@ -273,6 +215,8 @@ void changeGun(WeaponValues& weaponValues, std::string gun, int ammo, objid scen
   };
 
   weaponValues.gunCore.weaponState = newState;
+  weaponValues.gunCore.weaponCore = findWeaponCore(gun);
+  modassert(weaponValues.gunCore.weaponCore, std::string("could not find gun core for: ") + gun);
 
   if (weaponValues.weaponInstance.has_value()){
     removeWeaponInstance(weaponValues.weaponInstance.value());
@@ -375,8 +319,8 @@ void fireRaycast(WeaponValues& weaponValues, glm::vec3 orientationOffset, objid 
       }
     }
 
-    if (weaponValues.weaponInstance.value().hitParticles.has_value()){
-      emitterId = weaponValues.weaponInstance.value().hitParticles.value();
+    if (weaponValues.gunCore.weaponCore -> hitParticles.has_value()){
+      emitterId = weaponValues.gunCore.weaponCore -> hitParticles.value();
     }
 
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
@@ -420,16 +364,16 @@ bool tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, ob
     .totalAmmo = weaponValues.gunCore.weaponParams.totalAmmo,
   });
 
-  if (weaponValues.weaponInstance.value().soundClipObj.has_value() && weaponValues.weaponInstance.value().soundClipObj.has_value()){
-    gameapi -> playClip(weaponValues.weaponInstance.value().soundClipObj.value(), sceneId, std::nullopt, playerPos);
+  if (weaponValues.gunCore.weaponCore -> soundResource.has_value()){
+    gameapi -> playClip(weaponValues.gunCore.weaponCore -> soundResource.value().objName, sceneId, std::nullopt, playerPos);
   }
 
-  if (weaponValues.weaponInstance.value().muzzleParticle.has_value()){
+  if (weaponValues.gunCore.weaponCore -> muzzleParticle.has_value()){
     auto gunPosition = gameapi -> getGameObjectPos(weaponValues.weaponInstance.value().gunId, true);
     auto playerRotation = gameapi -> getGameObjectRotation(playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
     auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
-    gameapi -> emit(weaponValues.weaponInstance.value().muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt, playerId);
+    gameapi -> emit(weaponValues.gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation, std::nullopt, std::nullopt, playerId);
   }
   weaponValues.gunCore.weaponState.lastShootingTime = now;
   weaponValues.gunCore.weaponState.recoilStart = gameapi -> timeSeconds(false);
@@ -438,12 +382,12 @@ bool tryFireGun(WeaponValues& weaponValues, objid sceneId, float bloomAmount, ob
   if (weaponValues.gunCore.weaponParams.isRaycast){
     fireRaycast(weaponValues, shootingVecAngle, playerId, materials);
   }
-  if (weaponValues.weaponInstance.value().projectileParticles.has_value()){
+  if (weaponValues.gunCore.weaponCore -> projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
     glm::vec3 projectileArc(0.f, 0.f, -1.f);
     auto playerForwardAndUp = playerRotation * gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), projectileArc);
     auto initialVelocity = playerForwardAndUp * shootingVecAngle * 10.f;
-    gameapi -> emit(weaponValues.weaponInstance.value().projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt, std::nullopt);
+    gameapi -> emit(weaponValues.gunCore.weaponCore -> projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt, std::nullopt);
   }
 
   /////////////// not gun core
