@@ -20,6 +20,6 @@ struct MaterialToParticle {
 std::optional<std::string> materialTypeForObj(objid id);
 std::optional<MaterialToParticle*> getHitMaterial(std::vector<MaterialToParticle>& materials, std::string& materialName);
 std::vector<MaterialToParticle> loadMaterials(objid sceneId);
-std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleStr, const char* emitterName);
+std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleStr, std::string emitterName);
 
 #endif

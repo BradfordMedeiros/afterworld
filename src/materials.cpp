@@ -68,11 +68,15 @@ std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   return materialToParticles;
 }
 
-std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleStr, const char* emitterName){
+std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleStr, std::string emitterName){
 	if (particleStr == ""){
 		return std::nullopt;
 	}
+
+  modlog("particle", particleStr);
 	std::map<std::string, GameobjAttributes> submodelAttributes;
   auto particleAttr = particleAttributes(particleStr);
-  return gameapi -> makeObjectAttr(sceneId, emitterName, particleAttr, submodelAttributes);
+  auto particleId = gameapi -> makeObjectAttr(sceneId, emitterName, particleAttr, submodelAttributes);
+  modassert(particleId.has_value(), "create particle emitter - could not create emitter (probably duplicate name)");
+  return particleId;
 }
