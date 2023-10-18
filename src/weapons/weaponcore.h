@@ -74,6 +74,7 @@ struct SoundResource {
 
 struct WeaponCore {
   std::string name;
+  WeaponParams weaponParams;
   std::optional<SoundResource> soundResource;
   std::optional<objid> muzzleParticle;
   std::optional<objid> hitParticles;
@@ -81,26 +82,26 @@ struct WeaponCore {
 };
 
 struct GunCore {
-  WeaponCore* weaponCore;
-  WeaponParams weaponParams;
+  WeaponCore* weaponCore = NULL;
   WeaponState weaponState;
 };
 
-struct WeaponValues {
+struct GunInstance {
   GunCore gunCore;
   std::optional<objid> gunId;
 };
-void changeGun(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
-void changeGunAnimate(WeaponValues& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
+GunInstance changeGun(std::string gun, int ammo, objid sceneId, objid playerId);
+void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 
 void deliverAmmo(GunCore& _gunCore, int ammo);
 
-void saveGunTransform(WeaponValues& weaponValues);
+void saveGunTransform(GunInstance& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
-bool fireGunAndVisualize(WeaponValues& weaponValues, objid id, objid playerId, std::vector<MaterialToParticle>& materials, bool holding, bool fireOnce);
+
+bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id, objid playerId, std::vector<MaterialToParticle>& materials, bool holding, bool fireOnce);
 
 // Sway gun is completely comestic, no effect on gameplay
-void swayGun(WeaponValues& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);
+void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);
 
 #endif

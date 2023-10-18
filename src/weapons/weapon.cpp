@@ -11,7 +11,7 @@ struct Weapons {
   bool fireOnce;
   float selectDistance;
 
-  WeaponValues weaponValues;
+  GunInstance weaponValues;
 
   glm::vec2 lookVelocity;
   glm::vec3 movementVec;
@@ -213,7 +213,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
     Weapons* weapons = static_cast<Weapons*>(data);
 
-    fireGunAndVisualize(weapons -> weaponValues, id, weapons -> playerId, weapons -> materials, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
+    fireGunAndVisualize(weapons -> weaponValues.gunId, weapons -> weaponValues.gunCore, id, weapons -> playerId, weapons -> materials, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
     weapons -> fireOnce = false;
     swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
 
