@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 struct AgentAttackState {
   float lastAttackTime;
+  std::optional<GunCore> gunCore;
 };
 
 Agent createBasicAgent(objid id){
@@ -12,6 +13,7 @@ Agent createBasicAgent(objid id){
     .type = AGENT_BASIC_AGENT,
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,
+      .gunCore = createGunCoreInstance("pistol", 50, gameapi -> listSceneId(id)),
     },
   };
 }
@@ -75,8 +77,11 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
 }
 
 
-void fireProjectile(){
+void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   modlog("basic agent", "firing projectile");
+  if (agentAttackState.gunCore.has_value()){
+    fireGunAndVisualize(agentAttackState.gunCore.value(), false, true, std::nullopt, agentId);
+  }
 }
 
 void moveToTarget(objid agentId, glm::vec3 targetPosition){
@@ -92,10 +97,10 @@ void attackTarget(Agent& agent){
   modassert(attackState, "attackState invalid");
 
   float currentTime = gameapi -> timeSeconds(false);
-  if (currentTime - attackState -> lastAttackTime > 5.f){
+  if (currentTime - attackState -> lastAttackTime > 1.f){
     std::cout << "attack placeholder" << std::endl;
     attackState -> lastAttackTime = currentTime;
-    fireProjectile();
+    fireProjectile(agent.id, *attackState);
   }
 }
 

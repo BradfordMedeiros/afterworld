@@ -44,6 +44,8 @@ struct WeaponParams {
   std::string muzzleParticleStr;
   std::string hitParticleStr;
   std::string projectileParticleStr;
+
+  float damage;
 };
 
 /*
@@ -67,8 +69,6 @@ struct WeaponState {
 };
 
 struct SoundResource {
-  std::string clipName;
-  std::string objName;
   objid clipObjectId;
 };
 
@@ -100,7 +100,7 @@ void saveGunTransform(GunInstance& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
 
-bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id, objid playerId, bool holding, bool fireOnce);
+bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, objid id);
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);

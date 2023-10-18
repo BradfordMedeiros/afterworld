@@ -212,14 +212,14 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
     Weapons* weapons = static_cast<Weapons*>(data);
 
-    //fireGunAndVisualize(weapons -> weaponValues.gunId, weapons -> weaponValues.gunCore, id, weapons -> playerId, weapons -> materials, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
-    //weapons -> fireOnce = false;
-    //swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
+    fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> playerId);
+    weapons -> fireOnce = false;
+    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
 
-    if (weapons -> gunCore.has_value()){
-      fireGunAndVisualize(std::nullopt, weapons -> gunCore.value(), id, weapons -> playerId, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
-      weapons -> fireOnce = false;
-    }
+    //if (weapons -> gunCore.has_value()){
+    //  fireGunAndVisualize(std::nullopt, weapons -> gunCore.value(), weapons -> playerId, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
+    //  weapons -> fireOnce = false;
+    //}
 
     handlePickedUpItem(*weapons);
     //std::cout << weaponsToString(*weapons) << std::endl;

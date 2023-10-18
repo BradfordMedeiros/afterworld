@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_AI_BASIC_AGENT
 
 #include "./common.h"
+#include "../../weapons/weaponcore.h"
 
 Agent createBasicAgent(objid id);
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent);
