@@ -80,3 +80,12 @@ std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleS
   modassert(particleId.has_value(), "create particle emitter - could not create emitter (probably duplicate name)");
   return particleId;
 }
+
+std::vector<MaterialToParticle> materials;
+void loadAllMaterials(objid rootSceneId){
+  materials = loadMaterials(rootSceneId);
+}
+
+std::vector<MaterialToParticle>& getMaterials(){
+  return materials;
+}

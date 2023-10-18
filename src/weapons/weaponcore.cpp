@@ -252,6 +252,9 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
 }
 
 void deliverAmmo(GunCore& _gunCore, int ammo){
+  if (!_gunCore.weaponCore){
+    return;
+  }
   _gunCore.weaponState.currentAmmo += ammo;
   gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
     .currentAmmo = _gunCore.weaponState.currentAmmo,
@@ -348,7 +351,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
   }
 }
 
-bool tryFireGun(std::optional<objid> gunId, GunCore& gunCore, objid sceneId, float bloomAmount, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 playerPos, glm::quat playerRotation){  
+bool tryFireGun(std::optional<objid> gunId, GunCore& gunCore, objid sceneId, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(gunCore, now);
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(gunCore.weaponCore -> weaponParams.firingRate));
@@ -409,7 +412,13 @@ float calculateBloomAmount(GunCore& gunCore){
   modassert(slerpAmount <= 1, "slerp amount must be less than 1, got: " + std::to_string(slerpAmount));
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
-bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id, objid playerId, std::vector<MaterialToParticle>& materials, bool holding, bool fireOnce){
+
+bool firstTimeCalled = true;
+bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id, objid playerId, bool holding, bool fireOnce){
+  if (firstTimeCalled){
+    loadAllMaterials(gameapi -> listSceneId(playerId)); // this should be moved into a core resource management code, not just on demand on fire gun, and depending on the player id is dumb
+  }
+  firstTimeCalled = false;
   if (!gunCore.weaponCore){
     return false;
   }
@@ -420,7 +429,7 @@ bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id,
     auto playerRotation = gameapi -> getGameObjectRotation(playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     auto playerPos = gameapi -> getGameObjectPos(playerId, true);
     //////////////////////
-    return tryFireGun(gunId, gunCore, gameapi -> listSceneId(id), bloomAmount, playerId, materials, playerPos, playerRotation);
+    return tryFireGun(gunId, gunCore, gameapi -> listSceneId(id), bloomAmount, playerId, playerPos, playerRotation, getMaterials());
   }
   return false;
 }

@@ -90,7 +90,8 @@ struct GunInstance {
   GunCore gunCore;
   std::optional<objid> gunId;
 };
-GunInstance changeGun(std::string gun, int ammo, objid sceneId, objid playerId);
+
+GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 
 void deliverAmmo(GunCore& _gunCore, int ammo);
@@ -99,7 +100,7 @@ void saveGunTransform(GunInstance& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
 
-bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id, objid playerId, std::vector<MaterialToParticle>& materials, bool holding, bool fireOnce);
+bool fireGunAndVisualize(std::optional<objid> gunId, GunCore& gunCore, objid id, objid playerId, bool holding, bool fireOnce);
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);

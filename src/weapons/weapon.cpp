@@ -3,8 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 struct Weapons {
-  std::vector<MaterialToParticle> materials;
-
   objid playerId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
@@ -12,6 +10,7 @@ struct Weapons {
   float selectDistance;
 
   GunInstance weaponValues;
+  std::optional<GunCore> gunCore;
 
   glm::vec2 lookVelocity;
   glm::vec3 movementVec;
@@ -90,7 +89,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Weapons* weapons = new Weapons;
-    weapons -> materials = loadMaterials(sceneId);
 
     weapons -> playerId = gameapi -> getGameObjectByName(">maincamera", sceneId, false).value();
     weapons -> isHoldingLeftMouse = false;
@@ -101,6 +99,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
 
     weapons -> weaponValues.gunCore.weaponState = WeaponState {};
+    weapons -> gunCore = createGunCoreInstance("pistol", 50, sceneId);
 
     weapons -> heldItem = std::nullopt;
 
@@ -213,9 +212,14 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
     Weapons* weapons = static_cast<Weapons*>(data);
 
-    fireGunAndVisualize(weapons -> weaponValues.gunId, weapons -> weaponValues.gunCore, id, weapons -> playerId, weapons -> materials, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
-    weapons -> fireOnce = false;
-    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
+    //fireGunAndVisualize(weapons -> weaponValues.gunId, weapons -> weaponValues.gunCore, id, weapons -> playerId, weapons -> materials, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
+    //weapons -> fireOnce = false;
+    //swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
+
+    if (weapons -> gunCore.has_value()){
+      fireGunAndVisualize(std::nullopt, weapons -> gunCore.value(), id, weapons -> playerId, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
+      weapons -> fireOnce = false;
+    }
 
     handlePickedUpItem(*weapons);
     //std::cout << weaponsToString(*weapons) << std::endl;

@@ -22,4 +22,7 @@ std::optional<MaterialToParticle*> getHitMaterial(std::vector<MaterialToParticle
 std::vector<MaterialToParticle> loadMaterials(objid sceneId);
 std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleStr, std::string emitterName);
 
+void loadAllMaterials(objid rootSceneId);
+std::vector<MaterialToParticle>& getMaterials();
+
 #endif
