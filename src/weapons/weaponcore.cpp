@@ -250,6 +250,13 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
     weaponValues = newWeaponValues;
   });
 }
+void removeGun(GunInstance& weaponValues){
+  if (weaponValues.gunId.has_value()){
+    gameapi -> removeObjectById(weaponValues.gunId.value());
+    weaponValues.gunId = std::nullopt;
+  }
+}
+
 
 void deliverAmmo(GunCore& _gunCore, int ammo){
   if (!_gunCore.weaponCore){

@@ -3,14 +3,13 @@
 extern CustomApiBindings* gameapi;
 
 struct Weapons {
-  objid playerId;
+  std::optional<objid> playerId;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
   bool fireOnce;
   float selectDistance;
 
   GunInstance weaponValues;
-  std::optional<GunCore> gunCore;
 
   glm::vec2 lookVelocity;
   glm::vec3 movementVec;
@@ -39,8 +38,8 @@ void handlePickedUpItem(Weapons& weapons){
     return;
   }
 
-  auto playerPos = gameapi -> getGameObjectPos(weapons.playerId, true);
-  auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+  auto playerPos = gameapi -> getGameObjectPos(weapons.playerId.value(), true);
+  auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
   auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
 
@@ -99,11 +98,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
 
     weapons -> weaponValues.gunCore.weaponState = WeaponState {};
-    weapons -> gunCore = createGunCoreInstance("pistol", 50, sceneId);
-
     weapons -> heldItem = std::nullopt;
 
-    changeWeaponTargetId(*weapons, weapons -> playerId);
+    changeWeaponTargetId(*weapons, weapons -> playerId.value());
   	return weapons;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -128,9 +125,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
-        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId);
+        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
         if (hitpoints.size() > 0){
-          auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId, true);
+          auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId.value(), true);
           auto closestIndex = closestHitpoint(hitpoints, cameraPos);
           float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons -> selectDistance){
@@ -148,9 +145,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
           modlog("weapons", "pickup released held item: " + std::to_string(weapons -> heldItem.value()));
           weapons -> heldItem = std::nullopt;
         }else{
-        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId);
+        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
         if (hitpoints.size() > 0){
-            auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId, true);
+            auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId.value(), true);
             auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
             auto hitpoint = hitpoints.at(closestHitpointIndex);
             float distance = glm::length(cameraPos - hitpoint.point);
@@ -176,7 +173,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     if (key == "change-gun"){
       auto changeGunMessage = anycast<ChangeGunMessage>(value); 
       modassert(changeGunMessage != NULL, "change-gun value invalid");
-      changeGunAnimate(weapons -> weaponValues, changeGunMessage -> gun, changeGunMessage -> currentAmmo, gameapi -> listSceneId(id), weapons -> playerId);
+      changeGunAnimate(weapons -> weaponValues, changeGunMessage -> gun, changeGunMessage -> currentAmmo, gameapi -> listSceneId(id), weapons -> playerId.value());
     }else if (key == "ammo"){
       auto intValue = anycast<int>(value);
       modassert(intValue != NULL, "ammo message not an int");
@@ -211,19 +208,25 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Weapons* weapons = static_cast<Weapons*>(data);
+    if (!weapons -> playerId.has_value()){
+      return;
+    }
 
-    fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> playerId);
+    fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> playerId.value());
     weapons -> fireOnce = false;
-    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId, weapons -> lookVelocity, weapons -> movementVec);
-
-    //if (weapons -> gunCore.has_value()){
-    //  fireGunAndVisualize(std::nullopt, weapons -> gunCore.value(), weapons -> playerId, weapons -> isHoldingLeftMouse, weapons -> fireOnce);
-    //  weapons -> fireOnce = false;
-    //}
-
+    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId.value(), weapons -> lookVelocity, weapons -> movementVec);
     handlePickedUpItem(*weapons);
     //std::cout << weaponsToString(*weapons) << std::endl;
   };
+
+  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    Weapons* weapons = static_cast<Weapons*>(data);
+    if (weapons -> playerId.has_value() && weapons -> playerId.value() == idRemoved){
+      weapons -> playerId = std::nullopt;
+      removeGun(weapons -> weaponValues);
+    }
+  };
+
   return binding;
 }
 

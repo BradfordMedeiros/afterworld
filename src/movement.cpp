@@ -825,6 +825,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
 
+  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    Movement* movement = static_cast<Movement*>(data);
+    if (movement -> playerId.has_value() && movement -> playerId.value() == idRemoved){
+      movement -> playerId = std::nullopt;
+    }
+  };
+
   return binding;
 }
 
