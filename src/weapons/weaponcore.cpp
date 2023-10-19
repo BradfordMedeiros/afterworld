@@ -423,7 +423,7 @@ float calculateBloomAmount(GunCore& gunCore){
 bool firstTimeCalled = true;
 bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, objid id){
   if (firstTimeCalled){
-    loadAllMaterials(gameapi -> listSceneId(id)); // this should be moved into a core resource management code, not just on demand on fire gun, and depending on the player id is dumb
+    loadAllMaterials(gameapi -> rootSceneId()); // this should be moved into a core resource management code, not just on demand on fire gun
   }
   firstTimeCalled = false;
   if (!gunCore.weaponCore){

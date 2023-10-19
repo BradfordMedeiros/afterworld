@@ -118,6 +118,7 @@ void spawnRemoveId(objid id){
 }
 
 void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
+  modlog("spawn entity", std::to_string(id));
   auto spawnPosition = gameapi -> getGameObjectPos(id, true);
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
   auto spawnedEntityId = spawnEntity(ammoInstance, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
@@ -171,6 +172,7 @@ void spawnFromRandomSpawnpoint(const char* team){
   int currentIndex = 0;
   for (auto &[id, spawnpoint] : managedSpawnpoints){
     if (spawnpointIndex == currentIndex){
+      modassert(gameapi -> gameobjExists(id), std::string("spawn element does not exist: ") + std::to_string(id));
       spawnEntity(id, spawnpoint, currentTime);
       break;
     }
