@@ -13,7 +13,7 @@ Agent createBasicAgent(objid id){
     .type = AGENT_BASIC_AGENT,
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,
-      .gunCore = createGunCoreInstance("pistol", 50, gameapi -> listSceneId(id)),
+      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(id)),
     },
   };
 }

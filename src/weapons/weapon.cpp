@@ -89,7 +89,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Weapons* weapons = new Weapons;
 
-    weapons -> playerId = gameapi -> getGameObjectByName(">maincamera", sceneId, false).value();
+    weapons -> playerId = std::nullopt;
     weapons -> isHoldingLeftMouse = false;
     weapons -> isHoldingRightMouse = false;
     weapons -> fireOnce = false;
@@ -100,7 +100,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> weaponValues.gunCore.weaponState = WeaponState {};
     weapons -> heldItem = std::nullopt;
 
-    changeWeaponTargetId(*weapons, weapons -> playerId.value());
   	return weapons;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -125,13 +124,15 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
-        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
-        if (hitpoints.size() > 0){
-          auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId.value(), true);
-          auto closestIndex = closestHitpoint(hitpoints, cameraPos);
-          float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
-          if (distance <= weapons -> selectDistance){
-            gameapi -> sendNotifyMessage("selected", hitpoints.at(closestIndex).id);
+        if (weapons -> playerId.has_value()){
+          auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
+          if (hitpoints.size() > 0){
+            auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId.value(), true);
+            auto closestIndex = closestHitpoint(hitpoints, cameraPos);
+            float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
+            if (distance <= weapons -> selectDistance){
+              gameapi -> sendNotifyMessage("selected", hitpoints.at(closestIndex).id);
+            }
           }
         }
       }
@@ -139,6 +140,9 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     Weapons* weapons = static_cast<Weapons*>(data);
+    if (!weapons -> playerId.has_value()){
+      return;
+    }
     if (key == 'E') { 
       if (action == 1){
         if (weapons -> heldItem.has_value()){
@@ -187,7 +191,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
       reloadTraitsValues(*weapons);
-    }else if (key == "request:change-control"){
+    }else if (key == "active-player-change"){
       Weapons* weapons = static_cast<Weapons*>(data);
       auto objIdValue = anycast<objid>(value); 
       modassert(objIdValue != NULL, "weapons - request change control value invalid");
@@ -195,12 +199,16 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       changeWeaponTargetId(*weapons, *objIdValue);
     }
   };
-  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
     if (isPaused()){
       return;
     }
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Weapons* weapons = static_cast<Weapons*>(data);
+    if (!weapons -> playerId.has_value()){
+      return;
+    }
+
     weapons -> lookVelocity = glm::vec2(xPos, yPos);
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -220,6 +228,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    // pretty sure i dont need this
     Weapons* weapons = static_cast<Weapons*>(data);
     if (weapons -> playerId.has_value() && weapons -> playerId.value() == idRemoved){
       weapons -> playerId = std::nullopt;

@@ -30,6 +30,7 @@
 #include "./ui/components/router.h"
 #include "./ui/views/mainui.h"
 #include "./ui/views/pausemenu.h"
+#include "./activeplayer.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

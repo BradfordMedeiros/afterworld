@@ -8,6 +8,7 @@
 #include "../materials.h"
 #include "./weaponcore.h"
 #include "./weapon_vector.h"
+#include "../activeplayer.h"
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
 

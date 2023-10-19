@@ -7,6 +7,7 @@
 #include "./util.h"
 #include "./global.h"
 #include "./resources.h"
+#include "./activeplayer.h"
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 

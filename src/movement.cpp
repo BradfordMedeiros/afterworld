@@ -802,7 +802,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
     Movement* movement = static_cast<Movement*>(data);
-    if (key == "request:change-control"){
+    if (key == "active-player-change"){
       Movement* movement = static_cast<Movement*>(data);
       auto objIdValue = anycast<objid>(value); 
       modassert(objIdValue != NULL, "movement - request change control value invalid");

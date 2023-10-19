@@ -5,13 +5,6 @@ CustomApiBindings* gameapi = NULL;
 std::vector<std::string> defaultScenes = { };
 std::vector<std::string> managedTags = { "game-level" };
 
-struct ManagedCamera {
-  std::optional<objid> defaultCamera;
-  objid id;
-};
-std::stack<ManagedCamera> cameras = {};
-
-
 struct GameState {
   std::optional<std::string> loadedLevel;
   std::vector<Level> levels;
@@ -44,8 +37,7 @@ void goToLevel(GameState& gameState, std::string sceneName){
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
   auto optCameraId = gameapi -> getGameObjectByName(">maincamera", sceneId, false);
   if (optCameraId.has_value()){
-    cameras = {};
-    gameapi -> sendNotifyMessage("request:change-control", optCameraId.value());
+    setActivePlayer(optCameraId.value()); 
   }
   enterGameMode();
   pushHistory("playing");
@@ -77,7 +69,6 @@ void goToMenu(GameState& gameState){
       "../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
     gameState.menuLoaded = true;
   }
-  cameras = {};
   pushHistory("mainmenu");
 }
 
@@ -356,6 +347,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
+    onPlayerFrame();
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
@@ -399,10 +391,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
     if (key == "game-over"){
-      gameapi -> sendNotifyMessage("alert", "game-over");
-      gameapi -> schedule(-1, 5000, NULL, [gameState](void*) -> void { 
-        goToMenu(*gameState);
-      });
+      goToMenu(*gameState);
       return;
     }
     if (key == "reload-config:levels"){
@@ -424,80 +413,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(strValue != NULL, "switch value invalid");
       handleSwitch(*strValue);
       return;
-    }
-
-    if (key == "request:change-control"){
-      auto gameObjId = anycast<objid>(value); 
-      modassert(gameObjId != NULL, "bindings - request change control gameobjid null");
-      if (cameras.size() != 0 && *gameObjId == cameras.top().id){
-        std::cout << "already on camera: " << *gameObjId << " is " << cameras.top().id << std::endl;
-        return;
-      }
-      auto gameobjName = gameapi -> getGameObjNameForId(*gameObjId);
-      if (!gameobjName.has_value()){
-        modassert(false, "change control invalid");
-        return;
-      }
-
-      if (cameras.size() > 0){
-        auto managedCamId = cameras.top().defaultCamera;
-        if (managedCamId.has_value()){
-          gameapi -> removeObjectById(managedCamId.value());
-        }
-        cameras.pop();
-      }
-      
-
-      if (gameobjName.value().at(0) != '>'){
-        //modassert(false, std::string("is not a camera: ") + gameobjName.value());
-        GameobjAttributes attr {
-          .stringAttributes = {},
-          .numAttributes = {},
-          .vecAttr = { .vec3 = { { "position", glm::vec3(0.f, 0.5f, 3.f) }}, .vec4 = {} },
-        };
-        std::map<std::string, GameobjAttributes> submodelAttributes;
-        auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(*gameObjId), std::string(">") + uniqueNameSuffix(), attr, submodelAttributes);
-        gameapi ->  setActiveCamera(cameraId.value(), -1);
-        cameras.push(ManagedCamera {
-          .defaultCamera = cameraId,
-          .id = *gameObjId,
-        });
-        gameapi -> makeParent(cameraId.value(), *gameObjId);
-      }else{
-        std::cout << "request change camera: " << gameobjName.value() << std::endl;
-        gameapi ->  setActiveCamera(*gameObjId, -1);
-        cameras.push(ManagedCamera {
-          .defaultCamera = std::nullopt,
-          .id = *gameObjId,
-        });
-      }
-
-      std::cout << "num cameras: " << cameras.size() << std::endl;
-
-      //auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
-      //auto pickup = getStrAttr(objAttr, "pickup");
-      return;
-    }
-
-    if (key == "request:release-control"){
-      auto gameObjId = anycast<objid>(value); 
-      modassert(gameObjId != NULL, "request:release-control");
-      auto gameobjName = gameapi -> getGameObjNameForId(*gameObjId);
-      if (!gameobjName.has_value()){
-        return;
-      }
-      if (cameras.size() != 0 && cameras.top().id == *gameObjId){
-        auto managedCamId = cameras.top().defaultCamera;
-        if (managedCamId.has_value()){
-          gameapi -> removeObjectById(managedCamId.value());
-        }
-        cameras.pop();
-      }
-
-      if (cameras.size() > 0){
-        auto previousCamera = cameras.top().id;
-        gameapi -> sendNotifyMessage("request:push-control", previousCamera);
-      }
     }
 
     if (key == "alert"){
@@ -563,6 +478,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onObjectsChanged();
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    onActivePlayerRemoved(idRemoved);
     onObjectsChanged();
   };
 
