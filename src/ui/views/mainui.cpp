@@ -448,78 +448,76 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     uiWindowComponent.draw(drawTools, defaultWindowProps);
   }
 
-  {
 
-
-    std::function<void(int)> onImageClick = [](int index) -> void {
-      if (onFileAddedFn.has_value()){
-        onFileAddedFn.value()(false, imageListDatas.images.at(index).image);
-      }
-    };
-
-    static bool loadedImages = false;
-    if (!loadedImages){
-      loadedImages = true;
-      auto allTextures = gameapi -> listResources("textures");;
-      
-      imageListDatas.images = {};
-      for (auto &texture : allTextures){
-        imageListDatas.images.push_back(ImageListImage {
-          .image = texture,
-        });
-      }
-    }
-
-    auto imageListComponent = withPropsCopy(imageList, Props {
-      .props = { 
-        PropPair { imagesSymbol,  imageListDatas },
-        PropPair { onclickSymbol, onImageClick },
-        PropPair { offsetSymbol,  imageListScrollAmount },
-      }
-    });
-
-    Props worldPlayProps {
-      .props = {
-        PropPair { .symbol = xoffsetSymbol, .value = 0.f },
-        PropPair { .symbol = yoffsetSymbol, .value = -1.f },
-        PropPair { .symbol = valueSymbol, .value = &uiContext.worldPlayInterface },
-      }
-    };
-    worldplay.draw(drawTools, worldPlayProps);
-
-    SceneManagerInterface sceneManagerInterface2 {
-      .showScenes = showScenes,
-      .offset = offset,
-      .onSelectScene = [&uiContext, &currentScene](int index, std::string scene) -> void {
-        uiContext.loadScene(scene);
-        currentScene = index;
-        showScenes = false;
-      },
-      .toggleShowScenes = []() -> void {
-        showScenes = !showScenes;
-      },
-      .scenes = uiContext.listScenes(),
-      .currentScene = currentScene,
-    };
-    Props sceneManagerProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
-        PropPair { .symbol = xoffsetSymbol, .value = 1.f },
-        PropPair { .symbol = yoffsetSymbol, .value = 0.88f },
-
-      },
-    };
-    scenemanagerComponent.draw(drawTools, sceneManagerProps);
-
-    auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
-    auto defaultWindowProps = getDefaultProps();
-    uiWindowComponent.draw(drawTools, defaultWindowProps);
-  }
 
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
   if (uiContext.isDebugMode()){
+    {
+      std::function<void(int)> onImageClick = [](int index) -> void {
+        if (onFileAddedFn.has_value()){
+          onFileAddedFn.value()(false, imageListDatas.images.at(index).image);
+        }
+      };
+
+      static bool loadedImages = false;
+      if (!loadedImages){
+        loadedImages = true;
+        auto allTextures = gameapi -> listResources("textures");;
+        
+        imageListDatas.images = {};
+        for (auto &texture : allTextures){
+          imageListDatas.images.push_back(ImageListImage {
+            .image = texture,
+          });
+        }
+      }
+
+      auto imageListComponent = withPropsCopy(imageList, Props {
+        .props = { 
+          PropPair { imagesSymbol,  imageListDatas },
+          PropPair { onclickSymbol, onImageClick },
+          PropPair { offsetSymbol,  imageListScrollAmount },
+        }
+      });
+
+      Props worldPlayProps {
+        .props = {
+          PropPair { .symbol = xoffsetSymbol, .value = 0.f },
+          PropPair { .symbol = yoffsetSymbol, .value = -1.f },
+          PropPair { .symbol = valueSymbol, .value = &uiContext.worldPlayInterface },
+        }
+      };
+      worldplay.draw(drawTools, worldPlayProps);
+
+      SceneManagerInterface sceneManagerInterface2 {
+        .showScenes = showScenes,
+        .offset = offset,
+        .onSelectScene = [&uiContext, &currentScene](int index, std::string scene) -> void {
+          uiContext.loadScene(scene);
+          currentScene = index;
+          showScenes = false;
+        },
+        .toggleShowScenes = []() -> void {
+          showScenes = !showScenes;
+        },
+        .scenes = uiContext.listScenes(),
+        .currentScene = currentScene,
+      };
+      Props sceneManagerProps {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
+          PropPair { .symbol = xoffsetSymbol, .value = 1.f },
+          PropPair { .symbol = yoffsetSymbol, .value = 0.88f },
+        },
+      };
+      scenemanagerComponent.draw(drawTools, sceneManagerProps);
+
+      auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
+      auto defaultWindowProps = getDefaultProps();
+      uiWindowComponent.draw(drawTools, defaultWindowProps);
+    }
     {
       Props defaultProps {
         .props = {},
