@@ -257,24 +257,24 @@ console:tint:0 0.6 1 1
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
 >maincamera:team:blue
->maincamera:health:200
+>maincamera:health:20
 >maincamera:player:true
 
->maincamera2:position:2 50 100
->maincamera2:physics_angle:0.000000 0.000000 0.000000
->maincamera2:physics:enabled
->maincamera2:physics_velocity:0 0 -10
->maincamera2:physics_type:dynamic
->maincamera2:physics_gravity:0 -9.81 0
->maincamera2:physics_shape:shape_sphere
->maincamera2:goal-info:target
->maincamera2:goal-type:move
->maincamera2:goal-value:5
->maincamera2:goal-conditions:in-range
->maincamera2:goal-conditions-val:20
->maincamera2:team:blue
->maincamera2:health:200
->maincamera2:player:true
+#>maincamera2:position:2 50 100
+#>maincamera2:physics_angle:0.000000 0.000000 0.000000
+#>maincamera2:physics:enabled
+#>maincamera2:physics_velocity:0 0 -10
+#>maincamera2:physics_type:dynamic
+#>maincamera2:physics_gravity:0 -9.81 0
+#>maincamera2:physics_shape:shape_sphere
+#>maincamera2:goal-info:target
+#>maincamera2:goal-type:move
+#>maincamera2:goal-value:5
+#>maincamera2:goal-conditions:in-range
+#>maincamera2:goal-conditions-val:20
+#>maincamera2:team:blue
+#>maincamera2:health:200
+#>maincamera2:player:true
 
 
 
@@ -314,12 +314,24 @@ goal:goal-info:target
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 
+spawn_trigger:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+spawn_trigger:position:-10 -13 50
+spawn_trigger:scale:5 15 25
+spawn_trigger:texture:../gameresources/textures/wood.jpg
+spawn_trigger:physics:enabled
+spawn_trigger:physics_collision:nocollide
+spawn_trigger:tint:0 1 0 0.5
+spawn_trigger:switch-enter-key:spawn
+spawn_trigger:switch-enter:type1
+
+
 spawnpoint:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 spawnpoint:scale:0.25 0.05 1.25
 spawnpoint:texture:../gameresources/textures/controls/up-down.png
 spawnpoint:position:0 -27 60
 spawnpoint:spawn:ammo
-spawnpoint:spawnrate:3
+spawnpoint:spawntags:type1
+spawnpoint:spawnrate:100
 spawnpoint:spawnlimit:3
 
 #spawnpoint2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf

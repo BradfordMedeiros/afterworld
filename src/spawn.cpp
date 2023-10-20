@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 struct Spawnpoint {
   int type;
+  std::set<std::string> tags;
   std::optional<float> respawnRate;
   std::optional<int> itemLimit;
   std::optional<float> lastSlotFreeTime;
@@ -97,14 +98,27 @@ int spawnTypeFromAttr(std::optional<std::string>&& value){
   return -1;
 }
 
+std::set<std::string> spawnTags(std::optional<std::string>&& value){
+  if (!value.has_value()){
+    return {};
+  }
+
+  auto values = split(value.value(), ',');
+  std::set<std::string> tags;
+  for (auto &value : values){
+    tags.insert(value);
+  }
+  return tags;
+}
+
 void spawnAddId(objid id){
   auto attr = gameapi -> getGameObjectAttr(id);
   modlog("spawn spawner add id", std::to_string(id));
   managedSpawnpoints[id] = Spawnpoint {
     .type = spawnTypeFromAttr(getStrAttr(attr, "spawn")),
+    .tags = spawnTags(getStrAttr(attr, "spawntags")),
     .respawnRate = getFloatAttr(attr, "spawnrate"),
     .itemLimit = getIntFromAttr(attr, "spawnlimit"),
-
     .lastSlotFreeTime = std::nullopt,
     .managedIds = {},
   };
@@ -154,29 +168,41 @@ void onSpawnTick(){
   //drawDebugRespawnInfo(getRespawnInfos(gameapi -> timeSeconds(false)).at(0));
 }
 
-void spawnFromAllSpawnpoints(const char* team){
+void spawnFromAllSpawnpoints(const char* team, const char* tag){
   if (managedSpawnpoints.size() == 0){
     return;
   }
   float currentTime = gameapi -> timeSeconds(false);
   for (auto &[id, spawnpoint] : managedSpawnpoints){
-    spawnEntity(id, spawnpoint, currentTime);
+    if (tag == NULL || spawnpoint.tags.count(tag) > 0){
+      spawnEntity(id, spawnpoint, currentTime);
+    }
   }
 }
-void spawnFromRandomSpawnpoint(const char* team){
+void spawnFromRandomSpawnpoint(const char* team, const char* tag){
   if (managedSpawnpoints.size() == 0){
     return;
   }
   float currentTime = gameapi -> timeSeconds(false);
-  auto spawnpointIndex = randomNumber(0, managedSpawnpoints.size() - 1);
+
+  int numSpawnpointsWithTag = 0;
+  for (auto &[id, spawnpoint] : managedSpawnpoints){
+    if (tag == NULL || spawnpoint.tags.count(tag) > 0){
+      numSpawnpointsWithTag++;
+    }
+  }
+
+  auto spawnpointIndex = randomNumber(0, numSpawnpointsWithTag - 1);
   int currentIndex = 0;
   for (auto &[id, spawnpoint] : managedSpawnpoints){
-    if (spawnpointIndex == currentIndex){
-      modassert(gameapi -> gameobjExists(id), std::string("spawn element does not exist: ") + std::to_string(id));
-      spawnEntity(id, spawnpoint, currentTime);
-      break;
+    if (tag == NULL || spawnpoint.tags.count(tag) > 0){
+      if (spawnpointIndex == currentIndex){
+        modassert(gameapi -> gameobjExists(id), std::string("spawn element does not exist: ") + std::to_string(id));
+        spawnEntity(id, spawnpoint, currentTime);
+        break;
+      }
+      currentIndex++;
     }
-    currentIndex++;
   }
 }
 

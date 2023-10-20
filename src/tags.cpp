@@ -140,7 +140,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "health",
 		.onAdd = [](void* data, int32_t id, float value) -> void {
@@ -190,7 +189,6 @@ std::vector<TagUpdater> tagupdates = {
       }
   	},
 	},
-
 	TagUpdater {
 		.attribute = "game-control",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
@@ -202,7 +200,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "ambient",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
@@ -282,8 +279,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
-
-
 	TagUpdater {
 		.attribute = "spawn",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {

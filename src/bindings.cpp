@@ -235,7 +235,9 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   auto switchEnter1Key = getStrAttr(objAttr1, attrForKey);
   if (switchEnter1.has_value()){
     //std::cout << "race publishing 1: " << switchEnter1.value() << std::endl;
-    gameapi -> sendNotifyMessage(switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch", switchEnter1.value());
+    auto key = switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch";
+    std::cout << "handle collision: " << key << ", " << print(switchEnter1.value()) << std::endl;
+    gameapi -> sendNotifyMessage(key, switchEnter1.value());
   }
 
   auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
@@ -243,7 +245,9 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   auto switchEnter2Key = getStrAttr(objAttr2, attrForKey);
   if (switchEnter2.has_value()){
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
-    gameapi -> sendNotifyMessage(switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch", switchEnter2.value());
+    auto key = switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch";
+    std::cout << "handle collision:2 " << key << ", " << print(switchEnter2.value()) << std::endl;
+    gameapi -> sendNotifyMessage(key, switchEnter2.value());
   }
 }
 
@@ -428,6 +432,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         return;
       }
       modassert(false, "send alert invalid value");
+    }
+
+    if (key == "spawn"){
+      auto attrValue = anycast<AttributeValue>(value); 
+      modassert(attrValue, "spawn value invalid");
+      auto strValue = std::get_if<std::string>(attrValue);
+      modassert(strValue, "spawn not string value");
+      spawnFromAllSpawnpoints("red", strValue -> c_str());
     }
   };
 
