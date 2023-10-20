@@ -229,25 +229,34 @@ void handleSwitch(std::string switchValue){
   }
 }
 
-void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey){
+void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey){
+  modlog("main collision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
   auto objAttr1 =  gameapi -> getGameObjectAttr(obj1);
   auto switchEnter1 = getAttr(objAttr1, attrForValue);
   auto switchEnter1Key = getStrAttr(objAttr1, attrForKey);
+  auto switchRemove1 = getStrAttr(objAttr1, "switch-remove");
   if (switchEnter1.has_value()){
     //std::cout << "race publishing 1: " << switchEnter1.value() << std::endl;
     auto key = switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch";
     std::cout << "handle collision: " << key << ", " << print(switchEnter1.value()) << std::endl;
     gameapi -> sendNotifyMessage(key, switchEnter1.value());
+    if (switchRemove1.has_value() && switchRemove1.value() == removeKey){
+      gameapi -> removeObjectById(obj1);
+    }
   }
 
   auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
   auto switchEnter2 = getAttr(objAttr2, attrForValue);
   auto switchEnter2Key = getStrAttr(objAttr2, attrForKey);
+  auto switchRemove2 = getStrAttr(objAttr1, "switch-remove");
   if (switchEnter2.has_value()){
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
     auto key = switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch";
     std::cout << "handle collision:2 " << key << ", " << print(switchEnter2.value()) << std::endl;
     gameapi -> sendNotifyMessage(key, switchEnter2.value());
+    if (switchRemove2.has_value() && switchRemove2.value() == removeKey){
+      gameapi -> removeObjectById(obj2);
+    }
   }
 }
 
@@ -447,13 +456,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj1 = gameapi -> getGameObjNameForId(obj1); // this check shouldn't be necessary, is bug
     auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
     modassert(gameobj1.has_value() && gameobj2.has_value(), "collision enter: objs do not exist");
-    handleCollision(obj1, obj2, "switch-enter", "switch-enter-key");
+    handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1 = gameapi -> getGameObjNameForId(obj1);
     auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
     modassert(gameobj1.has_value() && gameobj2.has_value(), "collision exit: objs do not exist");
-    handleCollision(obj1, obj2, "switch-exit", "switch-exit-key");
+    handleCollision(obj1, obj2, "switch-exit", "switch-exit-key", "exit");
+    modassert(false, "exit disabled...i think its working but spawning system seems broken");
   };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 

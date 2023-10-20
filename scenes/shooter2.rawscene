@@ -32,18 +32,18 @@ audiozone2:tint:0 1 1 0.5
 audiozone2:layer:transparency
 audiozone2:ambient:&ambient_space
 
-[audiozone1:scene:../afterworld/scenes/prefabs/audiozone.rawscene
-[audiozone1:position:-40 0 30
+#[audiozone1:scene:../afterworld/scenes/prefabs/audiozone.rawscene
+#[audiozone1:position:-40 0 30
 
 
-wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-wall:position:0 0 0
-wall:scale:10 20 200
-wall:rotation:0 -1 0 0
-wall:texture:../gameresources/textures/wood.jpg
-wall:physics:enabled
-wall:chatnode:npc1
-wall:material:wood
+#wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#wall:position:0 0 0
+#wall:scale:10 20 200
+#wall:rotation:0 -1 0 0
+#wall:texture:../gameresources/textures/wood.jpg
+#wall:physics:enabled
+#wall:chatnode:npc1
+#wall:material:wood
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 ladder:position:-40 -10 0
@@ -123,11 +123,23 @@ platform2:texture:../gameresources/textures/wood.jpg
 platform2:physics:enabled
 #
 
-[water:scene:../afterworld/scenes/prefabs/water.rawscene
-[water:position:-110 -40 0
+water:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+water:scale:50 100 100
+water:rotation:0 -1 0 0
+water:tint:0 0 1 0.5
+water:texture:../gameresources/textures/wood.jpg
+water:water:basic
+water:water-density:10
+water:water-gravity:0.0125
+water:water-viscosity:0.1
+water:physics:enabled
+water:physics_collision:nocollide
+water:layer:transparency
+water:scrollspeed:0.10 0 0
+water:material:water
+water:position:-110 -40 0
 
-[water2:scene:../afterworld/scenes/prefabs/water.rawscene
-[water2:position:-90 -40 0
+
 
 #
 #wall2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -293,8 +305,15 @@ goal:goal-info:target
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 
-[spawntrigger1:scene:../afterworld/scenes/prefabs/spawntrigger.rawscene
-[spawntrigger1:position:-10 -13 50
+spawn_trigger:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+spawn_trigger:scale:5 15 25
+spawn_trigger:texture:../gameresources/textures/wood.jpg
+spawn_trigger:physics:enabled
+spawn_trigger:physics_collision:nocollide
+spawn_trigger:tint:0 1 0 0.5
+spawn_trigger:switch-enter-key:spawn
+spawn_trigger:switch-enter:type1
+spawn_trigger:switch-remove:enter
 
 spawnpoint:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 spawnpoint:scale:0.25 0.05 1.25

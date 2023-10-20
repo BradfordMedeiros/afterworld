@@ -6,3 +6,4 @@ spawn_trigger:physics_collision:nocollide
 spawn_trigger:tint:0 1 0 0.5
 spawn_trigger:switch-enter-key:spawn
 spawn_trigger:switch-enter:type1
+spawn_trigger:switch-remove:enter
