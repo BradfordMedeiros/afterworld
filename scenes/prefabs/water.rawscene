@@ -1,0 +1,14 @@
+water:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+water:scale:50 100 100
+water:rotation:0 -1 0 0
+water:tint:0 0 1 0.5
+water:texture:../gameresources/textures/wood.jpg
+water:water:basic
+water:water-density:10
+water:water-gravity:0.0125
+water:water-viscosity:0.1
+water:physics:enabled
+water:physics_collision:nocollide
+water:layer:transparency
+water:scrollspeed:0.10 0 0
+water:material:water

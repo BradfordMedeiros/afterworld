@@ -1,0 +1,12 @@
+audiozone1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+audiozone1:scale:5 15 25
+audiozone1:physics:enabled
+audiozone1:physics_collision:nocollide
+audiozone1:tint:0 1 0 0.5
+audiozone1:layer:transparency
+audiozone1:ambient:&ambient_rain
+audiozone1:ambient_default:true
+
+&ambient_rain:clip:../gameresources/sound/rain.wav
+&ambient_rain:loop:true
+&ambient_rain:center:true
