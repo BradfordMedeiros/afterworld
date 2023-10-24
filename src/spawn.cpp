@@ -48,6 +48,7 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
       { "agent", "basic" },
       { "agent-target", team == "red" ? "blue" : "red" },
       { "team", team  },
+      { "goal-info", "target" },
     },
     .numAttributes = {
       { "health", 130.f },
@@ -76,8 +77,11 @@ const int basicEnemyInstance = getSymbol("enemy");
 const int ammoInstance = getSymbol("ammo");
 
 objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::vec3 pos, glm::quat rotation){
+  std::cout << "do spawn entity: " << nameForSymbol(spawnTypeSymbol) << std::endl;
   if (spawnTypeSymbol == basicEnemyInstance){
-    return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation, "red");
+    //return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation, "red");
+    return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
+
   }else if (spawnTypeSymbol == ammoInstance){
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/ammo.rawscene", pos, rotation);
   }
@@ -88,10 +92,11 @@ objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::v
 std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 int spawnTypeFromAttr(std::optional<std::string>&& value){
-  if (value == "enemy"){
+  modlog("do spawn spawner create", value.value());
+  if (value.value() == "enemy"){
     return basicEnemyInstance;
   }
-  if (value == "ammo"){
+  if (value.value() == "ammo"){
     return ammoInstance;
   }
   modassert(false, "invalid spawn type");
@@ -135,7 +140,7 @@ void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
   modlog("spawn entity", std::to_string(id));
   auto spawnPosition = gameapi -> getGameObjectPos(id, true);
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?
-  auto spawnedEntityId = spawnEntity(ammoInstance, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
+  auto spawnedEntityId = spawnEntity(spawnpoint.type, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
 
   modlog("spawn managed add id", std::to_string(spawnedEntityId));
   spawnpoint.managedIds.insert(spawnedEntityId);

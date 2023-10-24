@@ -463,7 +463,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
     modassert(gameobj1.has_value() && gameobj2.has_value(), "collision exit: objs do not exist");
     handleCollision(obj1, obj2, "switch-exit", "switch-exit-key", "exit");
-    modassert(false, "exit disabled...i think its working but spawning system seems broken");
   };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 

@@ -50,6 +50,9 @@ void updateWorldStateTargets(WorldInfo& worldInfo){
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   updateWorldStateTargets(worldInfo);
   for (auto agent : agents){
+    if (!gameapi -> gameobjExists(agent.id)){ 
+      continue;
+    }
     if (agent.type == AGENT_BASIC_AGENT){
       detectWorldInfoBasicAgent(worldInfo, agent);
       continue;
@@ -73,16 +76,39 @@ bool allAgentsUnique(std::vector<Agent> agents){
   return true;
 }
 
-std::vector<Agent> createAgents(){
-  std::vector<Agent> agents;
-  for (auto &id : gameapi -> getObjectsByAttr("agent", "basic", std::nullopt)){
-    agents.push_back(createBasicAgent(id));
+bool agentAlreadyExists(AiData& aiData, objid id){
+  for (auto &agent : aiData.agents){
+    if (agent.id == id){
+      return true;
+    }
   }
-  for (auto &id : gameapi -> getObjectsByAttr("agent", "turret", std::nullopt)){
-    agents.push_back(createTurretAgent(id));
+  return false;
+}
+void maybeAddAgent(AiData& aiData, objid id){
+  if (agentAlreadyExists(aiData, id)){
+    return;
   }
-  modassert(allAgentsUnique(agents), "found agents with duplicate ids");
-  return agents;
+  auto agent = getSingleAttr(id, "agent");
+  if (agent.has_value()){
+    auto agentType = agent.value();
+    if (agentType == "basic"){
+      aiData.agents.push_back(createBasicAgent(id));
+    }else if (agentType == "turret"){
+      aiData.agents.push_back(createTurretAgent(id));
+    }else{
+      modassert(false, std::string("invalid agent type: ") + agentType);
+    }
+  }
+}
+
+void maybeRemoveAgent(AiData& aiData, objid id){
+  std::vector<Agent> newAgents;
+  for (auto &agent : aiData.agents){
+    if(gameapi -> gameobjExists(agent.id)){
+      newAgents.push_back(agent);
+    }
+  }
+  aiData.agents = newAgents;
 }
 
 
@@ -134,17 +160,35 @@ void removeAgents(AiData& aiData, std::set<objid> agentIds){
   }
   aiData.agents = newAgents;
 }
-void ensureAgentsExist(AiData& aiData){
-  std::set<objid> removedAgents;
+
+
+void onAiFrame(AiData& aiData){
+  // probably don't want to reset world state every frame, but ok for now
+  // consider what data should and shouldn't be per frame (per data refresh?)
+  aiData.worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
+  detectWorldInfo(aiData.worldInfo, aiData.agents);
+
   for (auto &agent : aiData.agents){
-    if (!gameapi -> getGameObjNameForId(agent.id).has_value()){
-      removedAgents.insert(agent.id);
+    if (!gameapi -> gameobjExists(agent.id)){ 
+      continue;
+    }
+    auto goals = getGoalsForAgent(aiData.worldInfo, agent);
+    auto optimalGoal = getOptimalGoal(goals);
+    //modassert(optimalGoal, "no goal for agent");
+    if (optimalGoal){
+      //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
+      doGoal(*optimalGoal, agent);  
     }
   }
-  if (removedAgents.size() > 0){
-    removeAgents(aiData, removedAgents);
+}
+
+void createAgents(AiData& aiData){
+  std::vector<Agent> agents;
+  for (auto &id : gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt)){
+    maybeAddAgent(aiData, id);
   }
 }
+
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -155,7 +199,9 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
       .boolValues = {},
       .vec3Values = {},
     };
-    aiData -> agents = createAgents();
+    aiData -> agents = {};
+    createAgents(*aiData);
+    
     return aiData;
   };
 
@@ -166,22 +212,8 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrame = [](int32_t id, void* data) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-
-    ensureAgentsExist(*aiData);
-    // probably don't want to reset world state every frame, but ok for now
-    // consider what data should and shouldn't be per frame (per data refresh?)
-    aiData -> worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
-    detectWorldInfo(aiData -> worldInfo, aiData -> agents);
-
-    for (auto &agent : aiData -> agents){
-      auto goals = getGoalsForAgent(aiData -> worldInfo, agent);
-      auto optimalGoal = getOptimalGoal(goals);
-      //modassert(optimalGoal, "no goal for agent");
-      if (optimalGoal){
-        //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
-        doGoal(*optimalGoal, agent);  
-      }
-    }
+    onAiFrame(*aiData);
+    gameapi -> drawText("agents: " + std::to_string(aiData -> agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -189,6 +221,15 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     if (key == 'M' && action == 0) { 
       printWorldInfo(aiData -> worldInfo);
     }
+  };
+
+  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
+    AiData* aiData = static_cast<AiData*>(data);
+    maybeAddAgent(*aiData, idAdded);
+  };
+  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    AiData* aiData = static_cast<AiData*>(data);
+    maybeRemoveAgent(*aiData, idRemoved);
   };
 
 
