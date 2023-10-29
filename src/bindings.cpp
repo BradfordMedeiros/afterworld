@@ -324,6 +324,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       .inputFns = {},
     };
     gameState -> uiContext = {};
+    initGlobal();
     loadConfig(*gameState);
     loadDefaultScenes();
     goToMenu(*gameState);

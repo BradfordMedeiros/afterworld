@@ -12,6 +12,8 @@ struct GlobalState {
   float xNdc;
   float yNdc;
   std::optional<objid> selectedId;
+
+  bool godMode;
 };
 
 void setPaused(bool paused);
@@ -19,5 +21,6 @@ bool isPaused();
 void enterGameMode();
 void exitGameMode();
 GlobalState& getGlobalState();
+void initGlobal();
 
 #endif 

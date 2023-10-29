@@ -9,6 +9,8 @@ GlobalState global {
   .xNdc = 0.f,
   .yNdc = 0.f,
   .selectedId = std::nullopt,
+
+  .godMode = false,
 };
 
 void setPaused(bool paused){
@@ -38,6 +40,13 @@ void exitGameMode(){
 
 GlobalState& getGlobalState(){
   return global;
+}
+
+void initGlobal(){
+  auto args = gameapi -> getArgs();
+  if (args.find("godmode") != args.end()){
+    global.godMode = args.at("godmode") == "true";
+  }
 }
 
 

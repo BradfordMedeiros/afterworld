@@ -7,6 +7,8 @@
 #include "./util.h"
 #include "./state-controller.h"
 #include "./spawn.h"
+#include "./global.h"
+#include "./activeplayer.h"
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
 

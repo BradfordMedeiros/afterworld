@@ -81,7 +81,11 @@ bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead, std::optiona
 		return false;
 	}
 	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
-	auto newHealthAmount = tags.hitpoints.at(id).current - amount;
+
+	auto activePlayerId = getActivePlayerId();
+	float adjustedDamageAmount = (getGlobalState().godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
+
+	auto newHealthAmount = tags.hitpoints.at(id).current - adjustedDamageAmount;
 	tags.hitpoints.at(id).current = newHealthAmount;
 	*_enemyDead = newHealthAmount <= 0;
 	*_eventName = &tags.hitpoints.at(id).eventName;
