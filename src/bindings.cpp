@@ -248,7 +248,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
   auto switchEnter2 = getAttr(objAttr2, attrForValue);
   auto switchEnter2Key = getStrAttr(objAttr2, attrForKey);
-  auto switchRemove2 = getStrAttr(objAttr1, "switch-remove");
+  auto switchRemove2 = getStrAttr(objAttr2, "switch-remove");
   if (switchEnter2.has_value()){
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
     auto key = switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch";
@@ -362,6 +362,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
     onPlayerFrame();
+
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
@@ -454,15 +455,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
-    auto gameobj1 = gameapi -> getGameObjNameForId(obj1); // this check shouldn't be necessary, is bug
-    auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
-    modassert(gameobj1.has_value() && gameobj2.has_value(), "collision enter: objs do not exist");
+    auto gameobj1Exists = gameapi -> gameobjExists(obj1); // this check shouldn't be necessary, is bug
+    auto gameobj2Exists = gameapi -> gameobjExists(obj2);
+    modassert(gameobj1Exists && gameobj2Exists, "collision enter: objs do not exist");
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
-    auto gameobj1 = gameapi -> getGameObjNameForId(obj1);
-    auto gameobj2 = gameapi -> getGameObjNameForId(obj2);
-    modassert(gameobj1.has_value() && gameobj2.has_value(), "collision exit: objs do not exist");
+    auto gameobj1Exists = gameapi -> gameobjExists(obj1);
+    auto gameobj2Exists = gameapi -> gameobjExists(obj2);
+    modassert(gameobj1Exists && gameobj2Exists, "collision exit: objs do not exist");
     handleCollision(obj1, obj2, "switch-exit", "switch-exit-key", "exit");
   };
 
