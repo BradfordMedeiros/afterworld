@@ -89,3 +89,34 @@ void loadAllMaterials(objid rootSceneId){
 std::vector<MaterialToParticle>& getMaterials(){
   return materials;
 }
+
+std::vector<ParticleAndEmitter> particleEmitters;
+void loadParticleEmitters(objid rootSceneId){
+  auto query = gameapi -> compileSqlQuery("select name, projectile from particles", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+
+  modlog("load particle emitters", "start");
+
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  for (auto &row : result){
+    auto particleAttr = particleAttributes(row.at(1));
+    auto materialEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + row.at(0), particleAttr, submodelAttributes);
+    particleEmitters.push_back(ParticleAndEmitter {
+      .particle = row.at(0),
+      .particleId = materialEmitterId.value(),
+    });
+    modlog("load particle emitters - loading", row.at(0));
+  }
+  modlog("load particle emitters", "finish");
+
+}
+std::optional<objid> getParticleEmitter(std::string& emitterName){
+  for (auto &emitter : particleEmitters){
+    if (emitter.particle == emitterName){
+      return emitter.particleId;
+    }
+  }
+  return std::nullopt;
+}

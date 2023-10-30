@@ -25,4 +25,7 @@ std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleS
 void loadAllMaterials(objid rootSceneId);
 std::vector<MaterialToParticle>& getMaterials();
 
+void loadParticleEmitters(objid rootSceneId);
+std::optional<objid> getParticleEmitter(std::string& emitterName);
+
 #endif

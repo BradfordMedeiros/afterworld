@@ -2,8 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
-
 std::vector<WeaponCore> weaponCores = {};
 
 WeaponCore* findWeaponCore(std::string& name){
@@ -15,7 +13,14 @@ WeaponCore* findWeaponCore(std::string& name){
   return NULL;
 }
 
+bool firstTimeCalled = true;
 void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponParams){
+  if (firstTimeCalled){
+    loadAllMaterials(gameapi -> rootSceneId()); // this should be moved into a core resource management code, not just on demand on fire gun
+    loadParticleEmitters(gameapi -> rootSceneId());
+  }
+  firstTimeCalled = false;
+  
   modlog("weapons", std::string("load weapon core: ") + coreName);
   if (findWeaponCore(coreName)){
     return;
@@ -43,7 +48,17 @@ void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponPa
 
   weaponCore.muzzleParticle = createParticleEmitter(sceneId, weaponParams.muzzleParticleStr, (std::string("+code-muzzleparticle") + uniqueNameSuffix()));
   weaponCore.hitParticles = createParticleEmitter(sceneId, weaponParams.hitParticleStr, (std::string("+code-hitparticle") + uniqueNameSuffix()));
-  weaponCore.projectileParticles = createParticleEmitter(sceneId, weaponParams.projectileParticleStr, (std::string("+code-projectileparticle") + uniqueNameSuffix()));
+
+  if (weaponParams.projectileParticleStr.size() > 0 && weaponParams.projectileParticleStr.at(0) == '?'){
+    auto particle = weaponParams.projectileParticleStr.substr(1, weaponParams.projectileParticleStr.size());
+    auto particleId = getParticleEmitter(particle);
+    modassert(particleId.has_value(), "projectile particle: no particle for: " + particle);
+    weaponCore.projectileParticles = particleId.value();
+    weaponCore.removeProjectileOnExit = false;
+  }else{
+    weaponCore.projectileParticles = createParticleEmitter(sceneId, weaponParams.projectileParticleStr, (std::string("+code-projectileparticle") + uniqueNameSuffix()));
+    weaponCore.removeProjectileOnExit = true;
+  }
 
   weaponCores.push_back(weaponCore);
 }
@@ -58,7 +73,7 @@ void unloadWeaponCore(WeaponCore& weaponCore){
   if (weaponCore.hitParticles.has_value()){
     gameapi -> removeObjectById(weaponCore.hitParticles.value());
   }
-  if (weaponCore.projectileParticles.has_value()){
+  if (weaponCore.projectileParticles.has_value() && weaponCore.removeProjectileOnExit){
     gameapi -> removeObjectById(weaponCore.projectileParticles.value());
   }
 }
@@ -420,12 +435,7 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-bool firstTimeCalled = true;
 bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, objid id){
-  if (firstTimeCalled){
-    loadAllMaterials(gameapi -> rootSceneId()); // this should be moved into a core resource management code, not just on demand on fire gun
-  }
-  firstTimeCalled = false;
   if (!gunCore.weaponCore){
     return false;
   }

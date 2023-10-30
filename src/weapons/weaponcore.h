@@ -79,6 +79,7 @@ struct WeaponCore {
   std::optional<objid> muzzleParticle;
   std::optional<objid> hitParticles;
   std::optional<objid> projectileParticles;
+  bool removeProjectileOnExit;
 };
 
 struct GunCore {
