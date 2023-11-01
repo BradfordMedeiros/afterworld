@@ -25,7 +25,7 @@ void onPlayerFrame(){
 	  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.1f, 0.1f, 0.1f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/testgradient.png");
 		drawCenteredText("GAME OVER", 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
 	}
-  printActivePlayer();
+  //printActivePlayer();
 }
 void onActivePlayerRemoved(objid id){
 	if (activePlayerId.has_value() && activePlayerId.value() == id){

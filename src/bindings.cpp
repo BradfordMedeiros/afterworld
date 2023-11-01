@@ -239,7 +239,14 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
     //std::cout << "race publishing 1: " << switchEnter1.value() << std::endl;
     auto key = switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch";
     std::cout << "handle collision: " << key << ", " << print(switchEnter1.value()) << std::endl;
-    gameapi -> sendNotifyMessage(key, switchEnter1.value());
+
+    std::cout << "switch1enter: " << print(switchEnter1.value());
+    auto switchEnter1Str = std::get_if<std::string>(&switchEnter1.value());
+    if (switchEnter1Str && *switchEnter1Str == "$id"){
+      gameapi -> sendNotifyMessage(key, static_cast<float>(obj1));
+    }else{
+      gameapi -> sendNotifyMessage(key, switchEnter1.value());
+    }
     if (switchRemove1.has_value() && switchRemove1.value() == removeKey){
       gameapi -> removeObjectById(obj1);
     }
@@ -253,7 +260,14 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
     auto key = switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch";
     std::cout << "handle collision:2 " << key << ", " << print(switchEnter2.value()) << std::endl;
-    gameapi -> sendNotifyMessage(key, switchEnter2.value());
+
+    std::cout << "switch2enter: " << print(switchEnter2.value());
+    auto switchEnter2Str = std::get_if<std::string>(&switchEnter2.value());
+    if (switchEnter2Str && *switchEnter2Str == "$id"){
+      gameapi -> sendNotifyMessage(key, static_cast<float>(obj2));
+    }else{
+      gameapi -> sendNotifyMessage(key, switchEnter2.value());
+    }
     if (switchRemove2.has_value() && switchRemove2.value() == removeKey){
       gameapi -> removeObjectById(obj2);
     }
@@ -451,6 +465,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto strValue = std::get_if<std::string>(attrValue);
       modassert(strValue, "spawn not string value");
       spawnFromAllSpawnpoints("red", strValue -> c_str());
+    }
+
+    if (key == "damage2"){
+      auto attrValue = anycast<AttributeValue>(value); 
+      modassert(attrValue, "damage2 value invalid");
+      std::cout << "attr value: " << print(*attrValue) << std::endl;
+      auto floatValue = std::get_if<float>(attrValue);
+      modassert(floatValue, "damage2 value  not float value");
+      auto intValue = static_cast<int>(*floatValue);
+      std::cout << "damage2: id: " << intValue << std::endl;
     }
   };
 

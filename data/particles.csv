@@ -1,2 +1,2 @@
 particles.name:STRING,particles.projectile:STRING
-bullet,+mesh:./res/models/box/box.obj;+physics:enabled;+physics_type:dynamic;+Cube/tint:1 0 0 1;+physics_gravity:0 0 0
+bullet,+mesh:./res/models/box/box.obj;+physics:enabled;+physics_type:dynamic;+Cube/tint:1 0.6 0.6 0.9;+physics_gravity:0.0 0.0 0.0;+physics_collision:nocollide;+scale:0.1 0.1 0.1;+switch-enter-key:damage2;+switch-enter:$id

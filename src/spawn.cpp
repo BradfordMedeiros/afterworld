@@ -37,7 +37,7 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
   ).value();
 }
 
-objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm::quat rotation, std::string team){
+objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm::quat rotation){
   // replace with   createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
   // when fix physics bug, add data attributes
   GameobjAttributes attr = {
@@ -46,8 +46,6 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
       { "physics", "enabled" },
       { "physics_type", "dynamic" },
       { "agent", "basic" },
-      { "agent-target", team == "red" ? "blue" : "red" },
-      { "team", team  },
       { "goal-info", "target" },
     },
     .numAttributes = {
@@ -79,7 +77,7 @@ const int ammoInstance = getSymbol("ammo");
 objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::vec3 pos, glm::quat rotation){
   std::cout << "do spawn entity: " << nameForSymbol(spawnTypeSymbol) << std::endl;
   if (spawnTypeSymbol == basicEnemyInstance){
-    //return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation, "red");
+    //return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation);
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
 
   }else if (spawnTypeSymbol == ammoInstance){

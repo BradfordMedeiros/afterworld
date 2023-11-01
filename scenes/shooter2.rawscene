@@ -287,7 +287,6 @@ enemy:agent-target:blue
 enemy:goal-info:target
 enemy:team:red
 enemy:health:130
-enemy:physics_gravity:0 0 0
 enemy:physics_damping_linear:0.9
 enemy:dragselect:ai
 enemy:animation:character
@@ -319,7 +318,7 @@ spawnpoint:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 spawnpoint:scale:0.25 0.05 1.25
 spawnpoint:texture:../gameresources/textures/controls/up-down.png
 spawnpoint:position:0 -27 60
-spawnpoint:spawn:ammo
+spawnpoint:spawn:enemy
 spawnpoint:spawntags:type1
 spawnpoint:spawnrate:100
 spawnpoint:spawnlimit:3

@@ -88,7 +88,7 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition){
   // right now this is just setting the obj position, but probably should rely on the navmesh, probably should be applying impulse instead?
   auto agentPos = gameapi -> getGameObjectPos(agentId, true);
   auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, agentPos.y, targetPosition.z));
-  auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 1 * gameapi -> timeElapsed());
+  auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 5.f * gameapi -> timeElapsed());
   gameapi -> setGameObjectPosition(agentId, newPos, true); 
   gameapi -> setGameObjectRot(agentId, towardTarget, true);
 }

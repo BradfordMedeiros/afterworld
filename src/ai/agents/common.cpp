@@ -2,13 +2,17 @@
 
 extern CustomApiBindings* gameapi;
 
+float MAX_DETECT_DISTANCE = 100.f;
+
 std::vector<IdAndPosition> checkVisibleTargets(WorldInfo& worldInfo, objid agentId){
   auto agentPosition = gameapi -> getGameObjectPos(agentId, true);
   auto hitobjectVal = gameapi -> contactTestShape(   // probably parameterize on size / shape, visualize
     agentPosition, 
     orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f)), 
-    glm::vec3(10.f, 10.f, 10.f)
+    glm::vec3(MAX_DETECT_DISTANCE, MAX_DETECT_DISTANCE, MAX_DETECT_DISTANCE)
   );
+
+  // maybe consider doing a raycast after we have this list here
 
   std::set<objid> hitobjects;
   for (auto hitobject : hitobjectVal){
