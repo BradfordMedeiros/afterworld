@@ -64,19 +64,7 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   }
 }
 
-
-bool allAgentsUnique(std::vector<Agent> agents){
-  std::set<objid> agentIds;
-  for (auto &agent : agents){
-    if (agentIds.count(agent.id) > 0){
-      return false;
-    }
-    agentIds.insert(agent.id);
-  }
-  return true;
-}
-
-bool agentAlreadyExists(AiData& aiData, objid id){
+bool agentExists(AiData& aiData, objid id){
   for (auto &agent : aiData.agents){
     if (agent.id == id){
       return true;
@@ -85,7 +73,7 @@ bool agentAlreadyExists(AiData& aiData, objid id){
   return false;
 }
 void maybeAddAgent(AiData& aiData, objid id){
-  if (agentAlreadyExists(aiData, id)){
+  if (agentExists(aiData, id)){
     return;
   }
   auto agent = getSingleAttr(id, "agent");
@@ -110,7 +98,6 @@ void maybeRemoveAgent(AiData& aiData, objid id){
   }
   aiData.agents = newAgents;
 }
-
 
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
   if (agent.type == AGENT_BASIC_AGENT){
@@ -151,15 +138,6 @@ void doGoal(Goal& goal, Agent& agent){
   modassert(false, "do goal invalid agent");
 }
 
-void removeAgents(AiData& aiData, std::set<objid> agentIds){
-  std::vector<Agent> newAgents;
-  for (auto &agent : aiData.agents){
-    if (agentIds.count(agent.id) == 0){
-      newAgents.push_back(agent);
-    }
-  }
-  aiData.agents = newAgents;
-}
 
 
 void onAiFrame(AiData& aiData){
@@ -182,13 +160,6 @@ void onAiFrame(AiData& aiData){
   }
 }
 
-void createAgents(AiData& aiData){
-  std::vector<Agent> agents;
-  for (auto &id : gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt)){
-    maybeAddAgent(aiData, id);
-  }
-}
-
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -200,8 +171,10 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
       .vec3Values = {},
     };
     aiData -> agents = {};
-    createAgents(*aiData);
-    
+    for (auto &agentId : gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt)){
+      maybeAddAgent(*aiData, agentId);
+    }
+
     return aiData;
   };
 
