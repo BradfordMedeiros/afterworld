@@ -23,9 +23,10 @@ void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   if (visibleTargets.size() > 0){
     updateVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ), visibleTargets.at(0).position);
 
+    auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ); 
     updateState(
       worldInfo, 
-      getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ), 
+      symbol, 
       visibleTargets.at(0).position, 
       {}, 
       STATE_VEC3
@@ -50,7 +51,10 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-  auto targetPosition = getVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)));
+
+  auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
+  auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
+
   if (targetPosition.has_value()){
     goals.push_back(
       Goal {
@@ -63,12 +67,13 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     );
   }
 
+
   goals.push_back(
     Goal {
       .goaltype = attackTargetGoal,
       .goalData = NULL,
-      .score = [&agent, &worldInfo](std::any&) -> int {
-          auto targetPosition = getVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id)));
+      .score = [&agent, &worldInfo, symbol](std::any&) -> int {
+          auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
           if (targetPosition.has_value()){
             auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
             if (distance < 5){

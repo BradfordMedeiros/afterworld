@@ -48,15 +48,6 @@ void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set
   });
 }
 
-std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol){
-  for (auto &vec3Value : worldInfo.vec3Values){
-    if (vec3Value.stateInfo.symbol == symbol){
-      return vec3Value.value;
-    }
-  }
-  return std::nullopt;
-}
-
 std::vector<Vec3State*> getVec3StateRefByTag(WorldInfo& worldInfo, std::set<int> tags){
   std::vector<Vec3State*> vecs = {};
   for (auto &vecState : worldInfo.vec3Values){
@@ -83,13 +74,6 @@ std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tag
 	return vecs;
 }
 
-template <typename T> 
-T getAnyValue(AnyState& anyState){
-  auto anyValuePtr = anycast<T>(anyState.value);
-  modassert(anyValuePtr, "get any value, invalid type provided");
-  return *anyValuePtr;
-}
-
 void printWorldInfo(WorldInfo& worldInfo){
   std::cout << "world info: [" << std::endl;
 
@@ -103,7 +87,7 @@ void printWorldInfo(WorldInfo& worldInfo){
   for (auto &anyValue : worldInfo.anyValues){
     std::string anyValueAsStr = "[cannot print - no hint]";
     if (anyValue.hint == STATE_VEC3){
-      anyValueAsStr = print(getAnyValue<glm::vec3>(anyValue));
+      anyValueAsStr = print(getAnyValue<glm::vec3>(anyValue.value));
     }
     std::cout << "    [" << nameForSymbol(anyValue.stateInfo.symbol) << ", " << anyValueAsStr << "]" << std::endl;
   }

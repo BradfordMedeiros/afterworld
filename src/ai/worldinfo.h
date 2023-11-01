@@ -34,13 +34,29 @@ void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int>
 std::optional<std::any> getState(WorldInfo& worldInfo, int symbol);
 std::vector<std::any> getStateByTag(WorldInfo& worldInfo, std::set<int> tags);
 
+template <typename T> 
+T getAnyValue(std::any& anyValue){
+  auto anyValuePtr = anycast<T>(anyValue);
+  modassert(anyValuePtr, "get any value, invalid type provided");
+  return *anyValuePtr;
+}
+
+template <typename T> 
+std::optional<T> getState(WorldInfo& worldInfo, int symbol){
+  auto anyStateValue = getState(worldInfo, symbol);
+  if (!anyStateValue.has_value()){
+    return std::nullopt;
+  }
+  auto anyValue = anyStateValue.value();
+  return getAnyValue<T>(anyValue);
+}
+
 // probably add templates for type convenience for above getters
 
 //////////////////
 
 
 void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags = {}, std::any data = NULL);
-std::optional<glm::vec3> getVec3State(WorldInfo& worldInfo, int symbol);
 std::vector<Vec3State*> getVec3StateRefByTag(WorldInfo& worldInfo, std::set<int> tags);
 
 void printWorldInfo(WorldInfo& worldInfo);

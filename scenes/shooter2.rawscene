@@ -157,7 +157,7 @@ item:physics:enabled
 item:physics_type:dynamic
 #item:physics_collision:nocollide
 item:pickup:pistol-ammo
-item:pickup-amount:10
+item:pickup-amount:50
 item:pickup-type:replace
 item:pickup-trigger:ammo
 item:physics_mass:5
