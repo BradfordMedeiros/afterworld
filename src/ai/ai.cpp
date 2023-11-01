@@ -43,7 +43,7 @@ void updateWorldStateTargets(WorldInfo& worldInfo){
     if (team.has_value()){
       symbols.insert(getSymbol(team.value()));
     }
-    updateVec3State(worldInfo, getSymbol(stateName), gameapi -> getGameObjectPos(targetId, true), symbols, TargetData { .id = targetId });
+    updateVec3State(worldInfo, getSymbol(stateName) /* this is a leak */, gameapi -> getGameObjectPos(targetId, true), symbols, TargetData { .id = targetId });
   }
 }
 

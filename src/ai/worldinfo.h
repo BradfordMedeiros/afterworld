@@ -5,9 +5,17 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
+
 struct StateInfo {
   int symbol;
   std::set<int> tags;
+  std::any data;
+};
+
+enum STATE_TYPE_HINT { STATE_NOHINT, STATE_VEC4, STATE_BOOL };
+struct AnyState {
+  StateInfo state;
+  STATE_TYPE_HINT hint;
   std::any data;
 };
 
@@ -21,9 +29,19 @@ struct Vec3State {
 };
 
 struct WorldInfo {
+  std::vector<AnyState> anyStateValues;
   std::vector<BoolState> boolValues;
   std::vector<Vec3State> vec3Values;
 };
+
+
+void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int> tags = {}, STATE_TYPE_HINT typeHint = STATE_NOHINT);
+std::optional<std::any> getState(WorldInfo& worldInfo, int symbol);
+std::vector<std::any> getStateByTag(WorldInfo& worldInfo, std::set<int> tags);
+
+// probably add templates for type convenience for above getters
+
+//////////////////
 
 
 void updateBoolState(WorldInfo& worldInfo, int symbol, bool value);

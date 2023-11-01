@@ -2,6 +2,13 @@
 
 ///////////////////////////////////////////////
 
+void updateState(WorldInfo& worldInfo, int symbol, std::any value){
+
+}
+std::optional<std::any> getState(WorldInfo& worldInfo, int symbol){
+  return std::nullopt;
+}
+
 void updateBoolState(WorldInfo& worldInfo, int symbol, bool value){
   for (auto &boolValue : worldInfo.boolValues){
     if (boolValue.stateInfo.symbol == symbol){
