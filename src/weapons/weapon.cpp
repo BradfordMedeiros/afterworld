@@ -179,9 +179,11 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       modassert(changeGunMessage != NULL, "change-gun value invalid");
       changeGunAnimate(weapons -> weaponValues, changeGunMessage -> gun, changeGunMessage -> currentAmmo, gameapi -> listSceneId(id), weapons -> playerId.value());
     }else if (key == "ammo"){
-      auto intValue = anycast<int>(value);
-      modassert(intValue != NULL, "ammo message not an int");
-      deliverAmmo(weapons -> weaponValues.gunCore, *intValue);
+      auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
+      modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
+      if (weapons -> playerId.has_value() && itemAcquiredMessage -> targetId == weapons -> playerId.value()){
+        deliverAmmo(weapons -> weaponValues.gunCore, itemAcquiredMessage -> amount);
+      }
     }else if (key == "save-gun"){
       saveGunTransform(weapons -> weaponValues);
     }else if (key == "velocity"){

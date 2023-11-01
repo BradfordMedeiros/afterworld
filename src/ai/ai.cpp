@@ -205,6 +205,17 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     maybeRemoveAgent(*aiData, idRemoved);
   };
 
+  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
+    AiData* aiData = static_cast<AiData*>(data);
+    for (auto &agent : aiData -> agents){
+      if (agent.type == AGENT_BASIC_AGENT){
+        onMessageBasicAgent(agent, key, value);
+        continue;
+      }else if (agent.type == AGENT_TURRET){
+        continue;
+      }
+    }
+  };
 
   return binding;
 }

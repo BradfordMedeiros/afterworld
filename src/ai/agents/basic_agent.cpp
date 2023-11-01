@@ -13,11 +13,10 @@ Agent createBasicAgent(objid id){
     .type = AGENT_BASIC_AGENT,
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,
-      .gunCore = createGunCoreInstance("pistol", 30, gameapi -> listSceneId(id)),
+      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(id)),
     },
   };
 }
-
 
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
@@ -133,5 +132,18 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
   }
 }
 
+void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
+  // i prefer ai to just defer to some static ammo management system, but messaging ok for now
 
-
+  if(key == "ammo"){
+    auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
+    modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
+    if (itemAcquiredMessage -> targetId == agent.id){
+      AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+      modassert(attackState, "attackState invalid");
+      if (attackState -> gunCore.has_value()){
+        deliverAmmo(attackState -> gunCore.value(), itemAcquiredMessage -> amount);
+      }
+    }
+  }
+}

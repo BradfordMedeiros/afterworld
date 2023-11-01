@@ -76,6 +76,11 @@ struct SetAmmoMessage {
 	int currentAmmo;
 	std::string gun;
 };
+struct ItemAcquiredMessage {
+	objid targetId;
+	int amount;
+
+};
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::string uniqueNameSuffix();

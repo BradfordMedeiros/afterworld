@@ -61,7 +61,7 @@ bool isPickup(objid id){
   return playerAttr.has_value();
 }
 
-void tryPickupItem(objid gameObjId){
+void tryPickupItem(objid gameObjId, objid playerId){
   auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
   auto pickup = getStrAttr(objAttr, "pickup");
   if (pickup.has_value()){
@@ -83,9 +83,12 @@ void tryPickupItem(objid gameObjId){
       gameapi -> removeObjectById(prefabRootId.value());
     }
     
-
     if (pickupTrigger.has_value()){
-      gameapi -> sendNotifyMessage(pickupTrigger.value(), static_cast<int>(newItemCount));
+      ItemAcquiredMessage itemAcquiredMessage {
+        .targetId = playerId,
+        .amount = static_cast<int>(newItemCount),
+      };
+      gameapi -> sendNotifyMessage(pickupTrigger.value(), itemAcquiredMessage);
     }
   }
 }
@@ -101,7 +104,7 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
       if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
         return;
       }
-      tryPickupItem(*gameObjId);
+      tryPickupItem(*gameObjId, id);
     }
 
     if (key == "request-change-gun"){
@@ -128,9 +131,9 @@ CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
     auto obj1IsPickup = isPickup(obj1);
     auto obj2IsPickup = isPickup(obj2);
     if (obj1IsPlayer && obj2IsPickup){
-      tryPickupItem(obj2);
+      tryPickupItem(obj2, obj1);
     }else if (obj2IsPlayer && obj1IsPickup){
-      tryPickupItem(obj1);
+      tryPickupItem(obj1, obj2);
     }
   };
 
