@@ -5,6 +5,7 @@
 #include "./worldinfo.h"
 #include "./agents/basic_agent.h"
 #include "./agents/turret.h"
+#include "../global.h"
 
 CScriptBinding aiBinding(CustomApiBindings& api, const char* name);
 

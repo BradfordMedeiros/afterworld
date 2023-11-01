@@ -143,7 +143,7 @@ void doGoal(Goal& goal, Agent& agent){
 void onAiFrame(AiData& aiData){
   // probably don't want to reset world state every frame, but ok for now
   // consider what data should and shouldn't be per frame (per data refresh?)
-  aiData.worldInfo = WorldInfo { .boolValues = {}, .vec3Values = {} };
+  aiData.worldInfo = WorldInfo { .anyValues = {}, .vec3Values = {} };
   detectWorldInfo(aiData.worldInfo, aiData.agents);
 
   for (auto &agent : aiData.agents){
@@ -167,7 +167,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     AiData* aiData = new AiData;
     aiData -> worldInfo = WorldInfo {
-      .boolValues = {},
+      .anyValues = {},
       .vec3Values = {},
     };
     aiData -> agents = {};
@@ -184,6 +184,9 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
+    if (isPaused()){
+      return;
+    }
     AiData* aiData = static_cast<AiData*>(data);
     onAiFrame(*aiData);
     gameapi -> drawText("agents: " + std::to_string(aiData -> agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
@@ -191,7 +194,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     AiData* aiData = static_cast<AiData*>(data);
-    if (key == 'M' && action == 0) { 
+    if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData -> worldInfo);
     }
   };

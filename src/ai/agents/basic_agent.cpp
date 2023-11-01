@@ -22,6 +22,14 @@ void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
     updateVec3State(worldInfo, getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ), visibleTargets.at(0).position);
+
+    updateState(
+      worldInfo, 
+      getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ), 
+      visibleTargets.at(0).position, 
+      {}, 
+      STATE_VEC3
+    );
   }
 }
 
