@@ -240,13 +240,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
     auto key = switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch";
     std::cout << "handle collision: " << key << ", " << print(switchEnter1.value()) << std::endl;
 
-    std::cout << "switch1enter: " << print(switchEnter1.value());
-    auto switchEnter1Str = std::get_if<std::string>(&switchEnter1.value());
-    if (switchEnter1Str && *switchEnter1Str == "$id"){
-      gameapi -> sendNotifyMessage(key, static_cast<float>(obj1));
-    }else{
-      gameapi -> sendNotifyMessage(key, switchEnter1.value());
-    }
+    gameapi -> sendNotifyMessage(key, switchEnter1.value());
     if (switchRemove1.has_value() && switchRemove1.value() == removeKey){
       gameapi -> removeObjectById(obj1);
     }
@@ -260,15 +254,38 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
     auto key = switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch";
     std::cout << "handle collision:2 " << key << ", " << print(switchEnter2.value()) << std::endl;
-
-    std::cout << "switch2enter: " << print(switchEnter2.value());
-    auto switchEnter2Str = std::get_if<std::string>(&switchEnter2.value());
-    if (switchEnter2Str && *switchEnter2Str == "$id"){
-      gameapi -> sendNotifyMessage(key, static_cast<float>(obj2));
-    }else{
-      gameapi -> sendNotifyMessage(key, switchEnter2.value());
-    }
+    
+    gameapi -> sendNotifyMessage(key, switchEnter2.value());
     if (switchRemove2.has_value() && switchRemove2.value() == removeKey){
+      gameapi -> removeObjectById(obj2);
+    }
+  }
+}
+void handleDamageCollision(objid obj1, objid obj2){
+  modlog("damage collision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+  
+  {
+    auto objAttr1 =  gameapi -> getGameObjectAttr(obj1);
+    auto damageAmount = getFloatAttr(objAttr1, "touch-damage");
+    if (damageAmount.has_value()){
+      DamageMessage damageMessage {
+        .id = obj2,
+        .amount = damageAmount.value(),
+      };
+      gameapi -> sendNotifyMessage("damage", damageMessage);
+      gameapi -> removeObjectById(obj1);
+    }
+  }
+   
+  {
+    auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
+    auto damageAmount2 = getFloatAttr(objAttr2, "touch-damage");
+    if (damageAmount2.has_value()){
+      DamageMessage damageMessage {
+        .id = obj1,
+        .amount = damageAmount2.value(),
+      };
+      gameapi -> sendNotifyMessage("damage", damageMessage);
       gameapi -> removeObjectById(obj2);
     }
   }
@@ -466,16 +483,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(strValue, "spawn not string value");
       spawnFromAllSpawnpoints("red", strValue -> c_str());
     }
-
-    if (key == "damage2"){
-      auto attrValue = anycast<AttributeValue>(value); 
-      modassert(attrValue, "damage2 value invalid");
-      std::cout << "attr value: " << print(*attrValue) << std::endl;
-      auto floatValue = std::get_if<float>(attrValue);
-      modassert(floatValue, "damage2 value  not float value");
-      auto intValue = static_cast<int>(*floatValue);
-      std::cout << "damage2: id: " << intValue << std::endl;
-    }
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
@@ -483,6 +490,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
     modassert(gameobj1Exists && gameobj2Exists, "collision enter: objs do not exist");
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
+    handleDamageCollision(obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1);
