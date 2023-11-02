@@ -43,7 +43,8 @@ void updateWorldStateTargets(WorldInfo& worldInfo){
     if (team.has_value()){
       symbols.insert(getSymbol(team.value()));
     }
-    updateVec3State(worldInfo, getSymbol(stateName) /* this is a leak */, gameapi -> getGameObjectPos(targetId, true), symbols, TargetData { .id = targetId });
+    auto position = gameapi -> getGameObjectPos(targetId, true);
+    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION);
   }
 }
 
@@ -143,7 +144,7 @@ void doGoal(Goal& goal, Agent& agent){
 void onAiFrame(AiData& aiData){
   // probably don't want to reset world state every frame, but ok for now
   // consider what data should and shouldn't be per frame (per data refresh?)
-  aiData.worldInfo = WorldInfo { .anyValues = {}, .vec3Values = {} };
+  aiData.worldInfo = WorldInfo { .anyValues = {} };
   detectWorldInfo(aiData.worldInfo, aiData.agents);
 
   for (auto &agent : aiData.agents){
@@ -168,7 +169,6 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     AiData* aiData = new AiData;
     aiData -> worldInfo = WorldInfo {
       .anyValues = {},
-      .vec3Values = {},
     };
     aiData -> agents = {};
     for (auto &agentId : gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt)){

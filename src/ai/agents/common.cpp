@@ -25,14 +25,12 @@ std::vector<IdAndPosition> checkVisibleTargets(WorldInfo& worldInfo, objid agent
     symbols.insert(getSymbol(targetAttr.value()));
   }
   std::vector<IdAndPosition> idsAndPositions = {};
-  auto targetPosVecStates = getVec3StateRefByTag(worldInfo, symbols);
-  for (auto targetPosVecState : targetPosVecStates){
-    TargetData* targetData = anycast<TargetData>(targetPosVecState -> stateInfo.data);
-    modassert(targetData, "target data was null");
-    if (hitobjects.count(targetData -> id) > 0){
+  auto targetPosVecStates = getStateByTag<EntityPosition>(worldInfo, symbols);
+  for (auto &targetPosVecState : targetPosVecStates){
+    if (hitobjects.count(targetPosVecState.id) > 0){
       idsAndPositions.push_back(IdAndPosition {
-        .id = targetData -> id,
-        .position = targetPosVecState -> value,
+        .id = targetPosVecState.id,
+        .position = targetPosVecState.position,
       });
     }
   }

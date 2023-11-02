@@ -4,92 +4,72 @@
 
 void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int> tags, STATE_TYPE_HINT typeHint){
   for (auto &anyValue : worldInfo.anyValues){
-    if (anyValue.stateInfo.symbol == symbol){
+    if (anyValue.symbol == symbol){
       anyValue.hint = typeHint;
       anyValue.value = value;
       return;
     }
   }
   worldInfo.anyValues.push_back(AnyState {
-    .stateInfo = StateInfo {
-      .symbol = symbol,
-      .tags = tags,
-      .data = {},
-    },
+    .symbol = symbol,
+    .tags = tags,
     .hint = typeHint,
     .value = value,
   });
 }
 std::optional<std::any> getState(WorldInfo& worldInfo, int symbol){
   for (auto &anyValue : worldInfo.anyValues){
-    if (anyValue.stateInfo.symbol == symbol){
+    if (anyValue.symbol == symbol){
       return anyValue.value;
     }
   }
   return std::nullopt;
 }
 
-void updateVec3State(WorldInfo& worldInfo, int symbol, glm::vec3 value, std::set<int> tags, std::any data){
-  for (auto &vec3Value : worldInfo.vec3Values){
-    if (vec3Value.stateInfo.symbol == symbol){
-      vec3Value.value = value;
-      vec3Value.stateInfo.tags = tags;
-      vec3Value.stateInfo.data = data;
-      return;
-    }
-  }
-  worldInfo.vec3Values.push_back(Vec3State {
-    .stateInfo = StateInfo {
-      .symbol = symbol,
-      .tags = tags,
-      .data = data,
-    },
-    .value = value,
-  });
-}
-
-std::vector<Vec3State*> getVec3StateRefByTag(WorldInfo& worldInfo, std::set<int> tags){
-  std::vector<Vec3State*> vecs = {};
-  for (auto &vecState : worldInfo.vec3Values){
+std::vector<AnyState*> getAnyStateRefByTag(WorldInfo& worldInfo, std::set<int> tags){
+  std::vector<AnyState*> values = {};
+  for (auto &anyState : worldInfo.anyValues){
     bool allTagsFound = true;
     for (auto tag : tags){
-      bool stateHasTag = vecState.stateInfo.tags.find(tag) != vecState.stateInfo.tags.end();
+      bool stateHasTag = anyState.tags.find(tag) != anyState.tags.end();
       if (!stateHasTag){
         allTagsFound = false;
         break;
       }   
     }
     if (allTagsFound){
-      vecs.push_back(&vecState);
+      values.push_back(&anyState);
     }
   }
-  return vecs;
+  return values;
 }
-
-std::vector<glm::vec3> getVec3StateByTag(WorldInfo& worldInfo, std::set<int> tags){
-	std::vector<glm::vec3> vecs = {};
-	for (auto vecState : getVec3StateRefByTag(worldInfo, tags)){
-		vecs.push_back(vecState -> value);
-	}
-	return vecs;
+std::vector<std::any> getStateByTag(WorldInfo& worldInfo, std::set<int> tags){
+  std::vector<std::any> values = {};
+  for (auto anyState : getAnyStateRefByTag(worldInfo, tags)){
+    values.push_back(anyState -> value);
+  }
+  return values;
 }
 
 void printWorldInfo(WorldInfo& worldInfo){
   std::cout << "world info: [" << std::endl;
-
-  std::cout << "  vec3 = [" << std::endl;
-  for (auto &vec3Value : worldInfo.vec3Values){
-    std::cout << "    [" << nameForSymbol(vec3Value.stateInfo.symbol) << ", " << print(vec3Value.value) << "]" << std::endl;
-  }
-  std::cout << "  ]" << std::endl;
 
   std::cout << "  any = [" << std::endl;
   for (auto &anyValue : worldInfo.anyValues){
     std::string anyValueAsStr = "[cannot print - no hint]";
     if (anyValue.hint == STATE_VEC3){
       anyValueAsStr = print(getAnyValue<glm::vec3>(anyValue.value));
+    }else if (anyValue.hint == STATE_ENTITY_POSITION){
+      EntityPosition entityPosition = getAnyValue<EntityPosition>(anyValue.value);
+      anyValueAsStr = std::string("id = ") + std::to_string(entityPosition.id) + ", pos = " + print(entityPosition.position);
     }
-    std::cout << "    [" << nameForSymbol(anyValue.stateInfo.symbol) << ", " << anyValueAsStr << "]" << std::endl;
+
+    std::string tagsAsStr = "";
+    for (auto tag : anyValue.tags){
+      tagsAsStr = tagsAsStr + " " + nameForSymbol(tag);
+    }
+
+    std::cout << "    [" << nameForSymbol(anyValue.symbol) << ", " << anyValueAsStr << "]" << " - tags: [" << tagsAsStr << " ]" << std::endl;
   }
   std::cout << "  ]" << std::endl;
 
