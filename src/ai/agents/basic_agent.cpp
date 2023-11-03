@@ -5,6 +5,7 @@ extern CustomApiBindings* gameapi;
 struct AgentAttackState {
   float lastAttackTime;
   std::optional<GunCore> gunCore;
+  bool moveVertical;
 };
 
 Agent createBasicAgent(objid id){
@@ -14,6 +15,7 @@ Agent createBasicAgent(objid id){
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,
       .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(id)),
+      .moveVertical = true,
     },
   };
 }
@@ -113,10 +115,10 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   }
 }
 
-void moveToTarget(objid agentId, glm::vec3 targetPosition){
+void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical){
   // right now this is just setting the obj position, but probably should rely on the navmesh, probably should be applying impulse instead?
   auto agentPos = gameapi -> getGameObjectPos(agentId, true);
-  auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, agentPos.y, targetPosition.z));
+  auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, moveVertical ? targetPosition.y : agentPos.y, targetPosition.z));
   auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 5.f * gameapi -> timeElapsed());
   gameapi -> setGameObjectPosition(agentId, newPos, true); 
   gameapi -> setGameObjectRot(agentId, towardTarget, true);
@@ -143,6 +145,9 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   static int attackTargetGoal = getSymbol("attack-target");
   static int getAmmoGoal = getSymbol("get-ammo");
 
+  AgentAttackState* agentData = anycast<AgentAttackState>(agent.agentData);
+  modassert(agentData, "agentData invalid");
+
   if (goal.goaltype == idleGoal){
     // do nothing
     gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
@@ -152,7 +157,7 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }else if (goal.goaltype == moveToTargetGoal){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
     modassert(targetPosition, "target pos was null");
-    moveToTarget(agent.id, *targetPosition);
+    moveToTarget(agent.id, *targetPosition, agentData -> moveVertical);
   }else if (goal.goaltype == attackTargetGoal){
     // not yet implemented
     attackTarget(agent);
@@ -165,7 +170,7 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
     if (ammoPositions.size() > 0){
       auto ammoPosition = ammoPositions.at(0);
-      moveToTarget(agent.id, ammoPosition.position);
+      moveToTarget(agent.id, ammoPosition.position, agentData -> moveVertical);
     }
 
   }

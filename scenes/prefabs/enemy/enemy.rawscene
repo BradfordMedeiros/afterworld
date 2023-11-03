@@ -8,4 +8,5 @@ enemy:team:red
 enemy:physics_angle:0 0 0
 enemy:health:130
 enemy:goal-info:target
+enemy/doctor:tint:0.8 0.8 0.8 0.6
 

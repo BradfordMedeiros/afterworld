@@ -78,7 +78,7 @@ objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::v
   std::cout << "do spawn entity: " << nameForSymbol(spawnTypeSymbol) << std::endl;
   if (spawnTypeSymbol == basicEnemyInstance){
     //return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation);
-    return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
+    return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy/sentinel.rawscene", pos, rotation);
 
   }else if (spawnTypeSymbol == ammoInstance){
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/ammo.rawscene", pos, rotation);
