@@ -22,7 +22,7 @@ void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
     auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ); 
-    updateState(worldInfo, symbol, visibleTargets.at(0).position, {}, STATE_VEC3);
+    updateState(worldInfo, symbol, visibleTargets.at(0).position, {}, STATE_VEC3, agent.id);
   }
 }
 
@@ -30,6 +30,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   static int idleGoal = getSymbol("idle");
   static int moveToTargetGoal = getSymbol("move-to-target");
   static int attackTargetGoal = getSymbol("attack-target");
+  static int getAmmoGoal = getSymbol("get-ammo");
 
   std::vector<Goal> goals = {};
 
@@ -77,6 +78,25 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
+  goals.push_back(
+    Goal {
+      .goaltype = getAmmoGoal,
+      .goalData = NULL,
+      .score = [&agent, &worldInfo, symbol](std::any&) -> int {
+          AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+          modassert(attackState, "attackState invalid");
+          if (attackState -> gunCore.has_value()){
+            auto currentAmmo = attackState -> gunCore.value().weaponState.currentAmmo;
+            if (currentAmmo <= 0){
+              return 50;
+            }
+          }
+          return 0;
+
+      }
+    }
+  );
+
   return goals;
 }
 
@@ -112,6 +132,7 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
   static int idleGoal = getSymbol("idle");
   static int moveToTargetGoal = getSymbol("move-to-target");
   static int attackTargetGoal = getSymbol("attack-target");
+  static int getAmmoGoal = getSymbol("get-ammo");
 
   if (goal.goaltype == idleGoal){
     // do nothing
@@ -134,6 +155,9 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
       .entityId = agent.id,
       .transition = "not-walking",
     });
+  }else if (goal.goaltype == getAmmoGoal){
+
+    modassert(false, "get ammo goal not yet implemented");
   }
 }
 

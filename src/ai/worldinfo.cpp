@@ -2,16 +2,19 @@
 
 ///////////////////////////////////////////////
 
-void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int> tags, STATE_TYPE_HINT typeHint){
+void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int> tags, STATE_TYPE_HINT typeHint, int ownerId){
   for (auto &anyValue : worldInfo.anyValues){
     if (anyValue.symbol == symbol){
       anyValue.hint = typeHint;
       anyValue.value = value;
+      anyValue.tags = tags;
+      anyValue.ownerId = ownerId;
       return;
     }
   }
   worldInfo.anyValues.push_back(AnyState {
     .symbol = symbol,
+    .ownerId = ownerId,
     .tags = tags,
     .hint = typeHint,
     .value = value,
@@ -51,6 +54,16 @@ std::vector<std::any> getStateByTag(WorldInfo& worldInfo, std::set<int> tags){
   return values;
 }
 
+void freeState(WorldInfo& worldInfo, objid ownerId){
+  std::vector<AnyState> newValues;
+  for (auto &anyValue : worldInfo.anyValues){
+    if (anyValue.ownerId != ownerId){
+      newValues.push_back(anyValue);
+    }
+  }
+  worldInfo.anyValues = newValues;
+}
+
 void printWorldInfo(WorldInfo& worldInfo){
   std::cout << "world info: [" << std::endl;
 
@@ -69,7 +82,7 @@ void printWorldInfo(WorldInfo& worldInfo){
       tagsAsStr = tagsAsStr + " " + nameForSymbol(tag);
     }
 
-    std::cout << "    [" << nameForSymbol(anyValue.symbol) << ", " << anyValueAsStr << "]" << " - tags: [" << tagsAsStr << " ]" << std::endl;
+    std::cout << "    [" << nameForSymbol(anyValue.symbol) << ", " << anyValueAsStr << "]" << " - tags: [" << tagsAsStr << " ]" << " - owner = " << anyValue.ownerId << std::endl;
   }
   std::cout << "  ]" << std::endl;
 

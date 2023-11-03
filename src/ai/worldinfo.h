@@ -13,6 +13,7 @@ struct EntityPosition {
 
 struct AnyState {
   int symbol;
+  int ownerId;
   std::set<int> tags;
   STATE_TYPE_HINT hint;
   std::any value;
@@ -22,9 +23,10 @@ struct WorldInfo {
   std::vector<AnyState> anyValues;
 };
 
-void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int> tags, STATE_TYPE_HINT typeHint);
+void updateState(WorldInfo& worldInfo, int symbol, std::any value, std::set<int> tags, STATE_TYPE_HINT typeHint, int ownerId);
 std::optional<std::any> getState(WorldInfo& worldInfo, int symbol);
 std::vector<std::any> getStateByTag(WorldInfo& worldInfo, std::set<int> tags);
+void freeState(WorldInfo& worldInfo, objid ownerId);
 
 template <typename T> 
 T getAnyValue(std::any& anyValue){

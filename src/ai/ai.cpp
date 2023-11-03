@@ -44,8 +44,10 @@ void updateWorldStateTargets(WorldInfo& worldInfo){
       symbols.insert(getSymbol(team.value()));
     }
     auto position = gameapi -> getGameObjectPos(targetId, true);
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION);
+    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION, 0);
   }
+
+  // agoal-info
 }
 
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
@@ -100,6 +102,7 @@ void maybeRemoveAgent(AiData& aiData, objid id){
   aiData.agents = newAgents;
 }
 
+
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
   if (agent.type == AGENT_BASIC_AGENT){
     return getGoalsForBasicAgent(worldInfo, agent);
@@ -141,10 +144,7 @@ void doGoal(Goal& goal, Agent& agent){
 
 
 
-void onAiFrame(AiData& aiData){
-  // probably don't want to reset world state every frame, but ok for now
-  // consider what data should and shouldn't be per frame (per data refresh?)
-  aiData.worldInfo = WorldInfo { .anyValues = {} };
+void onAiFrame(AiData& aiData){  
   detectWorldInfo(aiData.worldInfo, aiData.agents);
 
   for (auto &agent : aiData.agents){
@@ -206,6 +206,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     AiData* aiData = static_cast<AiData*>(data);
     maybeRemoveAgent(*aiData, idRemoved);
+    freeState(aiData -> worldInfo, idRemoved);
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
