@@ -31,6 +31,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   static int moveToTargetGoal = getSymbol("move-to-target");
   static int attackTargetGoal = getSymbol("attack-target");
   static int getAmmoGoal = getSymbol("get-ammo");
+  static int ammoSymbol = getSymbol("ammo");
 
   std::vector<Goal> goals = {};
 
@@ -78,24 +79,28 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-  goals.push_back(
-    Goal {
-      .goaltype = getAmmoGoal,
-      .goalData = NULL,
-      .score = [&agent, &worldInfo, symbol](std::any&) -> int {
-          AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
-          modassert(attackState, "attackState invalid");
-          if (attackState -> gunCore.has_value()){
-            auto currentAmmo = attackState -> gunCore.value().weaponState.currentAmmo;
-            if (currentAmmo <= 0){
-              return 50;
+  auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
+  if (ammoPositions.size() > 0){
+    goals.push_back(
+      Goal {
+        .goaltype = getAmmoGoal,
+        .goalData = NULL,
+        .score = [&agent, &worldInfo, symbol](std::any&) -> int {
+            AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+            modassert(attackState, "attackState invalid");
+            if (attackState -> gunCore.has_value()){
+              auto currentAmmo = attackState -> gunCore.value().weaponState.currentAmmo;
+              if (currentAmmo <= 0){
+                return 150;
+              }
             }
-          }
-          return 0;
-
+            return 0;
+        }
       }
-    }
-  );
+    );    
+  }
+
+
 
   return goals;
 }
@@ -115,6 +120,10 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition){
   auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 5.f * gameapi -> timeElapsed());
   gameapi -> setGameObjectPosition(agentId, newPos, true); 
   gameapi -> setGameObjectRot(agentId, towardTarget, true);
+  gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+    .entityId = agentId,
+    .transition = "walking",
+  });
 }
 void attackTarget(Agent& agent){
   AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
@@ -128,7 +137,7 @@ void attackTarget(Agent& agent){
   }
 }
 
-void doGoalBasicAgent(Goal& goal, Agent& agent){
+void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   static int idleGoal = getSymbol("idle");
   static int moveToTargetGoal = getSymbol("move-to-target");
   static int attackTargetGoal = getSymbol("attack-target");
@@ -144,10 +153,6 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
     modassert(targetPosition, "target pos was null");
     moveToTarget(agent.id, *targetPosition);
-    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-      .entityId = agent.id,
-      .transition = "walking",
-    });
   }else if (goal.goaltype == attackTargetGoal){
     // not yet implemented
     attackTarget(agent);
@@ -156,8 +161,13 @@ void doGoalBasicAgent(Goal& goal, Agent& agent){
       .transition = "not-walking",
     });
   }else if (goal.goaltype == getAmmoGoal){
+    static int ammoSymbol = getSymbol("ammo");
+    auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
+    if (ammoPositions.size() > 0){
+      auto ammoPosition = ammoPositions.at(0);
+      moveToTarget(agent.id, ammoPosition.position);
+    }
 
-    modassert(false, "get ammo goal not yet implemented");
   }
 }
 

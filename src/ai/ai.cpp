@@ -46,12 +46,23 @@ void updateWorldStateTargets(WorldInfo& worldInfo){
     auto position = gameapi -> getGameObjectPos(targetId, true);
     updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION, 0);
   }
-
   // agoal-info
+}
+
+void updateAmmoLocations(WorldInfo& worldInfo){
+  static int ammoSymbol = getSymbol("ammo");
+  auto targetIds = gameapi -> getObjectsByAttr("pickup-trigger", "ammo", std::nullopt);
+  for (auto targetId : targetIds){
+    std::string stateName = std::string("ammo-pos-") + std::to_string(targetId); // leak
+    auto position = gameapi -> getGameObjectPos(targetId, true);
+    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { ammoSymbol }, STATE_ENTITY_POSITION, targetId);
+  }
 }
 
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   updateWorldStateTargets(worldInfo);
+  updateAmmoLocations(worldInfo);
+  
   for (auto agent : agents){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
@@ -131,12 +142,12 @@ Goal* getOptimalGoal(std::vector<Goal>& goals){
   return &goals.at(maxScoreIndex);
 }
 
-void doGoal(Goal& goal, Agent& agent){
+void doGoal(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   if (agent.type == AGENT_BASIC_AGENT){
-    doGoalBasicAgent(goal, agent);
+    doGoalBasicAgent(worldInfo, goal, agent);
     return;
   }else if (agent.type == AGENT_TURRET){
-    doGoalTurretAgent(goal, agent);
+    doGoalTurretAgent(worldInfo, goal, agent);
     return;
   }
   modassert(false, "do goal invalid agent");
@@ -156,7 +167,7 @@ void onAiFrame(AiData& aiData){
     //modassert(optimalGoal, "no goal for agent");
     if (optimalGoal){
       //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
-      doGoal(*optimalGoal, agent);  
+      doGoal(aiData.worldInfo, *optimalGoal, agent);  
     }
   }
 }

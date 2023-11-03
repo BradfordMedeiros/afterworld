@@ -6,6 +6,6 @@
 Agent createTurretAgent(objid id);
 void detectWorldInfoTurretAgent(WorldInfo& worldInfo, Agent& agent);
 std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent);
-void doGoalTurretAgent(Goal& goal, Agent& agent);
+void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent);
 
 #endif

@@ -17,7 +17,7 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
 	return {};
 }
 
-void doGoalTurretAgent(Goal& goal, Agent& agent){
+void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 	modassert(false, "do goal for turret not yet implemented")
 }
 

@@ -7,7 +7,7 @@
 Agent createBasicAgent(objid id);
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent);
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent);
-void doGoalBasicAgent(Goal& goal, Agent& agent);
+void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent);
 void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value);
 
 #endif
