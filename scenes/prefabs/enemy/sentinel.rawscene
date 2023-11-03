@@ -7,7 +7,7 @@ enemy:agent-target:blue
 enemy:spawn-managed:
 enemy:team:red
 enemy:physics_angle:0 0 0
-enemy:health:10
+enemy:health:30
 enemy:goal-info:target
 enemy:physics_gravity:0 0 0
 enemy:tint:1 0 0 0.5

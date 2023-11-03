@@ -179,12 +179,22 @@ std::vector<TagUpdater> tagupdates = {
       		.team = getStrAttr(objAttr, "team"),
       	};
 
+
       	if (valid && enemyDead){
       		gameapi -> sendNotifyMessage("nohealth", nohealth);
       	}
       	if (valid && eventName -> has_value()){
       		gameapi -> sendNotifyMessage(eventName -> value(), remainingHealth);
       	}
+
+				HealthChangeMessage healthMessage {
+					.targetId = targetId,
+					.originId = std::nullopt,
+					.damageAmount = *floatValue,
+					.remainingHealth = remainingHealth,
+				};
+     		gameapi -> sendNotifyMessage("health-change", healthMessage);
+
       }else if (key == "nohealth"){
       	auto nohealthMessage = anycast<NoHealthMessage>(value);
       	modassert(nohealthMessage, "nohealth target id null");

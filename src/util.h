@@ -57,6 +57,13 @@ struct NoHealthMessage {
   std::optional<std::string> team;
 };
 
+struct HealthChangeMessage {
+	objid targetId;
+	std::optional<objid> originId;
+	float damageAmount;
+	float remainingHealth;
+};
+
 struct AnimationTrigger {
 	objid entityId;
 	std::string transition;
@@ -79,7 +86,6 @@ struct SetAmmoMessage {
 struct ItemAcquiredMessage {
 	objid targetId;
 	int amount;
-
 };
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);

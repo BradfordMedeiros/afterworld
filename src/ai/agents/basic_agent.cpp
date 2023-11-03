@@ -6,6 +6,7 @@ struct AgentAttackState {
   float lastAttackTime;
   std::optional<GunCore> gunCore;
   bool moveVertical;
+  bool aggravated;
 };
 
 Agent createBasicAgent(objid id){
@@ -16,6 +17,7 @@ Agent createBasicAgent(objid id){
       .lastAttackTime = 0.f,
       .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(id)),
       .moveVertical = true,
+      .aggravated = false,
     },
   };
 }
@@ -36,6 +38,8 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   static int ammoSymbol = getSymbol("ammo");
 
   std::vector<Goal> goals = {};
+  AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+  modassert(attackState, "attackState invalid");
 
   goals.push_back(
     Goal {
@@ -51,7 +55,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
 
-  if (targetPosition.has_value()){
+  if (attackState -> aggravated && targetPosition.has_value()){
     goals.push_back(
       Goal {
         .goaltype = moveToTargetGoal,
@@ -64,22 +68,25 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   }
 
 
-  goals.push_back(
-    Goal {
-      .goaltype = attackTargetGoal,
-      .goalData = NULL,
-      .score = [&agent, &worldInfo, symbol](std::any&) -> int {
-          auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-          if (targetPosition.has_value()){
-            auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
-            if (distance < 5){
-              return 100;
+  if (attackState -> aggravated){
+    goals.push_back(
+      Goal {
+        .goaltype = attackTargetGoal,
+        .goalData = NULL,
+        .score = [&agent, &worldInfo, symbol](std::any&) -> int {
+            auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
+            if (targetPosition.has_value()){
+              auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
+              if (distance < 5){
+                return 100;
+              }
             }
-          }
-          return 0;
+            return 0;
+        }
       }
-    }
-  );
+    );    
+  }
+
 
   auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
   if (ammoPositions.size() > 0){
@@ -87,9 +94,8 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
       Goal {
         .goaltype = getAmmoGoal,
         .goalData = NULL,
-        .score = [&agent, &worldInfo, symbol](std::any&) -> int {
-            AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
-            modassert(attackState, "attackState invalid");
+        .score = [&agent, &worldInfo, symbol, attackState](std::any&) -> int {
+
             if (attackState -> gunCore.has_value()){
               auto currentAmmo = attackState -> gunCore.value().weaponState.currentAmmo;
               if (currentAmmo <= 0){
@@ -101,7 +107,6 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
       }
     );    
   }
-
 
 
   return goals;
@@ -188,6 +193,15 @@ void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
       if (attackState -> gunCore.has_value()){
         deliverAmmo(attackState -> gunCore.value(), itemAcquiredMessage -> amount);
       }
+    }
+  }else if (key == "health-change"){
+    auto healthChangeMessage = anycast<HealthChangeMessage>(value);
+    modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");    
+    if (healthChangeMessage -> targetId == agent.id){
+      AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+      modassert(attackState, "attackState invalid");
+      attackState -> aggravated = true;
+
     }
   }
 }
