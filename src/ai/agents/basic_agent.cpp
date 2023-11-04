@@ -5,19 +5,25 @@ extern CustomApiBindings* gameapi;
 struct AgentAttackState {
   float lastAttackTime;
   std::optional<GunCore> gunCore;
+  float initialHealth;
   bool moveVertical;
   bool aggravated;
+  bool scared;
 };
 
 Agent createBasicAgent(objid id){
+  auto initialHealth = getSingleFloatAttr(id, "health").value();
+  auto moveVerticalAttr = getSingleAttr(id, "move-vertical");
 	return Agent{
     .id = id,
     .type = AGENT_BASIC_AGENT,
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,
       .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(id)),
-      .moveVertical = true,
+      .initialHealth = initialHealth,
+      .moveVertical = moveVerticalAttr.has_value() && moveVerticalAttr.value() == "true",
       .aggravated = false,
+      .scared = false,
     },
   };
 }
@@ -36,6 +42,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   static int attackTargetGoal = getSymbol("attack-target");
   static int getAmmoGoal = getSymbol("get-ammo");
   static int ammoSymbol = getSymbol("ammo");
+  static int wanderGoal = getSymbol("wander");
 
   std::vector<Goal> goals = {};
   AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
@@ -51,7 +58,6 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-
   auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
 
@@ -65,6 +71,25 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
         }
       }
     );
+  }
+
+  if (attackState -> scared){
+    glm::vec3 moveToPosition = targetPosition.value();
+    if (attackState -> scared){
+      auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+      auto diff = moveToPosition - agentPos;
+      moveToPosition = agentPos - diff;
+
+      goals.push_back(
+        Goal {
+          .goaltype = moveToTargetGoal,
+          .goalData = moveToPosition,
+          .score = [&agent](std::any& targetPosition) -> int { 
+            return 200;
+          }
+        }
+      );
+    }
   }
 
 
@@ -87,6 +112,17 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     );    
   }
 
+  if (!attackState -> aggravated && !attackState -> scared){
+    goals.push_back(
+      Goal {
+        .goaltype = wanderGoal,
+        .goalData = glm::vec3(0.f, 0.f, 0.f),
+        .score = [&agent, &worldInfo, symbol](std::any&) -> int {
+            return 100;
+        }
+      }
+    );       
+  }
 
   auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
   if (ammoPositions.size() > 0){
@@ -120,13 +156,13 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   }
 }
 
-void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical){
+void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 5.f){
   // right now this is just setting the obj position, but probably should rely on the navmesh, probably should be applying impulse instead?
   auto agentPos = gameapi -> getGameObjectPos(agentId, true);
   auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, moveVertical ? targetPosition.y : agentPos.y, targetPosition.z));
-  auto newPos = gameapi -> moveRelative(agentPos, towardTarget, 5.f * gameapi -> timeElapsed());
-  gameapi -> setGameObjectPosition(agentId, newPos, true); 
+  auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
   gameapi -> setGameObjectRot(agentId, towardTarget, true);
+  gameapi -> setGameObjectPosition(agentId, newPos, true); 
   gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
     .entityId = agentId,
     .transition = "walking",
@@ -149,6 +185,8 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   static int moveToTargetGoal = getSymbol("move-to-target");
   static int attackTargetGoal = getSymbol("attack-target");
   static int getAmmoGoal = getSymbol("get-ammo");
+  static int fleeGoal = getSymbol("flee");
+  static int wanderGoal = getSymbol("wander");
 
   AgentAttackState* agentData = anycast<AgentAttackState>(agent.agentData);
   modassert(agentData, "agentData invalid");
@@ -159,6 +197,10 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
       .entityId = agent.id,
       .transition = "not-walking",
     });
+  }else if (goal.goaltype == wanderGoal){
+    auto targetPosition = anycast<glm::vec3>(goal.goalData);
+    modassert(targetPosition, "target pos was null");
+    moveToTarget(agent.id, *targetPosition, agentData -> moveVertical, 0.2f); 
   }else if (goal.goaltype == moveToTargetGoal){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
     modassert(targetPosition, "target pos was null");
@@ -177,7 +219,10 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
       auto ammoPosition = ammoPositions.at(0);
       moveToTarget(agent.id, ammoPosition.position, agentData -> moveVertical);
     }
-
+  }else if (goal.goaltype == fleeGoal){
+    auto targetPosition = anycast<glm::vec3>(goal.goalData);
+    modassert(targetPosition, "target pos was null");
+    moveToTarget(agent.id, *targetPosition, agentData -> moveVertical); 
   }
 }
 
@@ -201,7 +246,10 @@ void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
       AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
       modassert(attackState, "attackState invalid");
       attackState -> aggravated = true;
-
+      float currHealthPercentage = healthChangeMessage -> remainingHealth / attackState -> initialHealth;
+      if (currHealthPercentage < 0.2f){
+        attackState -> scared = true;
+      }
     }
   }
 }

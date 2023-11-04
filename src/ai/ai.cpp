@@ -59,10 +59,23 @@ void updateAmmoLocations(WorldInfo& worldInfo){
   }
 }
 
+void updatePointsOfInterest(WorldInfo& worldInfo){
+  //static int ammoSymbol = getSymbol("ammo");
+  auto targetIds = gameapi -> getObjectsByAttr("interest", std::nullopt, std::nullopt);
+  for (auto targetId : targetIds){
+    std::string stateName = std::string("interest-") + std::to_string(targetId); // leak
+    auto attrValue = getSingleAttr(targetId, "interest").value();
+    auto tags = getSymbol(std::string("interest-") + attrValue);
+    auto position = gameapi -> getGameObjectPos(targetId, true);
+    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { tags }, STATE_ENTITY_POSITION, targetId);
+  }
+}
+
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   updateWorldStateTargets(worldInfo);
   updateAmmoLocations(worldInfo);
-  
+  updatePointsOfInterest(worldInfo);
+
   for (auto agent : agents){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;

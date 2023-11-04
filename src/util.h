@@ -89,6 +89,8 @@ struct ItemAcquiredMessage {
 };
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
+std::optional<float> getSingleFloatAttr(objid id, const char* key);
+
 std::string uniqueNameSuffix();
 
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);

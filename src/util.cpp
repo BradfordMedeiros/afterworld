@@ -196,6 +196,12 @@ std::optional<std::string> getSingleAttr(objid id, const char* key){
   auto attrValue = getStrAttr(objattr, key);
   return attrValue;
 }
+std::optional<float> getSingleFloatAttr(objid id, const char* key){
+  auto objattr = gameapi -> getGameObjectAttr(id);
+  auto attrValue = getFloatAttr(objattr, key);
+  return attrValue;
+}
+
 
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());
