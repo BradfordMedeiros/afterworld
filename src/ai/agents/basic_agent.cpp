@@ -9,7 +9,7 @@ struct AgentAttackState {
   bool moveVertical;
   bool aggravated;
   bool scared;
-  std::set<objid> visitedPoints;
+  std::set<objid> visited;
 };
 
 Agent createBasicAgent(objid id){
@@ -25,7 +25,7 @@ Agent createBasicAgent(objid id){
       .moveVertical = moveVerticalAttr.has_value() && moveVerticalAttr.value() == "true",
       .aggravated = false,
       .scared = false,
-      .visitedPoints = {},
+      .visited = {},
     },
   };
 }
@@ -38,20 +38,29 @@ void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   }
 }
 
-std::optional<glm::vec3> closestPosition(glm::vec3 position, std::vector<EntityPosition>& entityPositions){
+std::optional<int> closestPositionIndex(glm::vec3 position, std::vector<EntityPosition>& entityPositions, std::set<objid>& visited){
   if (entityPositions.size() == 0){
     return std::nullopt;
   }
-  int minIndex = 0;
-  float minDistance = glm::distance(position, entityPositions.at(0).position);
-  for (int i = 1; i < entityPositions.size(); i++){
+  std::optional<int> minIndex = std::nullopt;
+  std::optional<float> minDistance = std::nullopt;
+  for (int i = 0; i < entityPositions.size(); i++){
+    if (visited.count(entityPositions.at(i).id) > 0){
+      continue;
+    }
     auto distance = glm::distance(position, entityPositions.at(i).position);
-    if (distance < minDistance){
+    if (!minIndex.has_value()){
+      minIndex = i;
+      minDistance = distance;
+    }else if (distance < minDistance.value()){
       minIndex = i;
       minDistance = distance;
     }
   }
-  return entityPositions.at(minIndex).position;
+  if (!minIndex.has_value()){
+    return std::nullopt;
+  }
+  return minIndex.value();
 }
 
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
@@ -134,12 +143,14 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   if (!attackState -> aggravated && !attackState -> scared){
     static int pointOfInterest = getSymbol("interest-generic");
     auto pointOfInterestPositions = getStateByTag<EntityPosition>(worldInfo, { pointOfInterest });
-    auto closestPointOfInterest = closestPosition(agentPos, pointOfInterestPositions);
-    if (closestPointOfInterest.has_value()){
+    auto closestPointOfInterestIndex = closestPositionIndex(agentPos, pointOfInterestPositions, attackState -> visited);
+    if (closestPointOfInterestIndex.has_value()){
+      auto closestPointOfInterest = pointOfInterestPositions.at(closestPointOfInterestIndex.value());
+
       goals.push_back(
         Goal {
           .goaltype = wanderGoal,
-          .goalData = closestPointOfInterest.value(),
+          .goalData = closestPointOfInterest,
           .score = [&agent, &worldInfo, symbol](std::any&) -> int {
               return 100;
           }
@@ -222,9 +233,20 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
       .transition = "not-walking",
     });
   }else if (goal.goaltype == wanderGoal){
-    auto targetPosition = anycast<glm::vec3>(goal.goalData);
+    auto targetPosition = anycast<EntityPosition>(goal.goalData);
     modassert(targetPosition, "target pos was null");
-    moveToTarget(agent.id, *targetPosition, agentData -> moveVertical, 0.4f); 
+    moveToTarget(agent.id, targetPosition -> position, agentData -> moveVertical, 5.f); 
+    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+
+
+    auto distanceToGoal = glm::distance(targetPosition -> position, agentPos);
+    if (distanceToGoal < 1.f){ // what if the enemy can't reach the goal?
+      modlog("ai basic agent", "agent arrived at goal");
+      agentData -> visited.insert(targetPosition -> id); // goal id
+      if (agentData -> visited.size() == 3){
+        agentData -> visited = {};
+      }
+    }
   }else if (goal.goaltype == moveToTargetGoal){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
     modassert(targetPosition, "target pos was null");
