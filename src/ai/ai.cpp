@@ -167,6 +167,9 @@ void doGoal(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 }
 
 
+// probably most of this doesn't need to run on every frame except probably doGoal
+// (which could probably not run every frame too if everything in it is only a state transition
+//   as opposed to eg actually doing the movement)
 
 void onAiFrame(AiData& aiData){  
   detectWorldInfo(aiData.worldInfo, aiData.agents);
