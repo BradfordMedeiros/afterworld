@@ -31,6 +31,8 @@ struct ControlParams {
 };
 
 struct MovementState {
+  float lastMoveSoundPlayTime;      // state
+  glm::vec3 lastMoveSoundPlayLocation;
   float xRot;               
   float yRot;
   bool facingWall;
@@ -46,8 +48,6 @@ struct MovementState {
 };
 
 struct Movement {
-  MovementParams moveParams; // character params
-
   ControlParams controlParams; // controls
 
   std::optional<objid> playerId;   // target id 
@@ -57,12 +57,9 @@ struct Movement {
   bool goLeft;
   bool goRight;
   bool active;
-
   glm::vec2 lookVelocity;       // control params
 
-  float lastMoveSoundPlayTime;      // state
-  glm::vec3 lastMoveSoundPlayLocation;
-
+  MovementParams moveParams; // character params
   MovementState movementState;
 };
 
@@ -266,8 +263,8 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
   updateObjectProperties(id, traitsResult, movement.moveParams.gravity, movement.moveParams.friction);
 
   ensureSoundsLoaded(gameapi -> listSceneId(id), traitsResult.at(0).at(9), traitsResult.at(0).at(10), traitsResult.at(0).at(13));
-  movement.lastMoveSoundPlayTime = 0.f;
-  movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+  movement.movementState.lastMoveSoundPlayTime = 0.f;
+  movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 }
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
@@ -481,8 +478,8 @@ void changeTargetId(Movement& movement, objid id, bool active){
     movement.goRight = false;
     movement.active = active;
 
-    movement.lastMoveSoundPlayTime = 0.f;
-    movement.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+    movement.movementState.lastMoveSoundPlayTime = 0.f;
+    movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
 
     movement.lookVelocity = glm::vec2(0.f, 0.f);
@@ -520,8 +517,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> goRight = false;
     movement -> active = false;
 
-    movement -> lastMoveSoundPlayTime = 0.f;
-    movement -> lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+    movement -> movementState.lastMoveSoundPlayTime = 0.f;
+    movement -> movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
     movement -> movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
@@ -783,12 +780,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     auto currPos = gameapi -> getGameObjectPos(movement -> playerId.value(), true);
     auto currTime = gameapi -> timeSeconds(false);
   
-    if (glm::length(currPos - movement -> lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movement -> lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
+    if (glm::length(currPos - movement -> movementState.lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movement -> movementState.lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
       // move-sound-distance:STRING move-sound-mintime:STRING
       std::cout << "should play move clip" << std::endl;
       gameapi -> playClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
-      movement -> lastMoveSoundPlayTime = currTime;
-      movement -> lastMoveSoundPlayLocation = currPos;
+      movement -> movementState.lastMoveSoundPlayTime = currTime;
+      movement -> movementState.lastMoveSoundPlayLocation = currPos;
     }
     float elapsedTime = gameapi -> timeElapsed();
     look(*movement, movement -> playerId.value(), elapsedTime, false, 0.5f); // (look elapsedTime ironsight-mode ironsight-turn)
