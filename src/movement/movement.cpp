@@ -150,7 +150,28 @@ void changeTargetId(Movement& movement, objid id, bool active){
     reloadSettingsConfig(movement, "default");
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, bool goForward){
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, bool goForward, glm::vec2 lookVelocity, ControlParams& controlParams, bool isGrounded){
+  auto currPos = gameapi -> getGameObjectPos(playerId, true);
+  auto currTime = gameapi -> timeSeconds(false);
+
+  if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
+    // move-sound-distance:STRING move-sound-mintime:STRING
+    std::cout << "should play move clip" << std::endl;
+    gameapi -> playClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
+    movementState.lastMoveSoundPlayTime = currTime;
+    movementState.lastMoveSoundPlayLocation = currPos;
+  }
+    
+
+  float elapsedTime = gameapi -> timeElapsed();
+
+  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, lookVelocity, controlParams); // (look elapsedTime ironsight-mode ironsight-turn)
+
+  bool movingDown = false;
+  updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
+
+  updateFacingWall(movementState, playerId);
+  restrictLadderMovement(movementState, playerId, movingDown);
   updateCrouch(moveParams, movementState, playerId);
 
   auto shouldStep = shouldStepUp(playerId) && goForward;
@@ -422,27 +443,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         .transition = "not-walking",
       });
     }
-
-    auto currPos = gameapi -> getGameObjectPos(movement -> playerId.value(), true);
-    auto currTime = gameapi -> timeSeconds(false);
   
-    if (glm::length(currPos - movement -> movementState.lastMoveSoundPlayLocation) > movement -> moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movement -> movementState.lastMoveSoundPlayTime) > movement -> moveParams.moveSoundMintime)){
-      // move-sound-distance:STRING move-sound-mintime:STRING
-      std::cout << "should play move clip" << std::endl;
-      gameapi -> playClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
-      movement -> movementState.lastMoveSoundPlayTime = currTime;
-      movement -> movementState.lastMoveSoundPlayLocation = currPos;
-    }
-    float elapsedTime = gameapi -> timeElapsed();
-    look(movement -> moveParams, movement -> movementState, movement -> playerId.value(), elapsedTime, false, 0.5f, movement -> lookVelocity, movement -> controlParams); // (look elapsedTime ironsight-mode ironsight-turn)
-    movement -> lookVelocity = glm::vec2(0.f, 0.f);
+    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> goForward, movement -> lookVelocity, movement -> controlParams, isGrounded);
 
-    bool movingDown = false;
-    updateVelocity(movement -> movementState, movement -> playerId.value(), elapsedTime, currPos, &movingDown);
-    updateFacingWall(movement -> movementState, movement -> playerId.value());
-    restrictLadderMovement(movement -> movementState, movement -> playerId.value(), movingDown);
-    
-    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> goForward);
+    movement -> lookVelocity = glm::vec2(0.f, 0.f);
 
     //std::cout << movementToStr(*movement) << std::endl;
   };
