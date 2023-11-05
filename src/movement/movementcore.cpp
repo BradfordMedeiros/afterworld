@@ -13,6 +13,10 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id){
   if (movementState.inWater){
     gameapi -> applyImpulse(id, impulse);
   }
+  gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+    .entityId = id,
+    .transition = "jump",
+  });
 }
 
 void land(objid id){
@@ -301,4 +305,13 @@ glm::vec3 limitMoveDirectionFromCollisions(glm::vec3 moveVec, std::vector<glm::q
 
   auto relativeToPlayer = glm::inverse(playerDirection) * directionVec;
   return relativeToPlayer;
+}
+
+void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown){
+  auto timeSinceLastCrouch = (gameapi -> timeSeconds(false) - movementState.lastCrouchTime) * 1000;
+  if (crouchDown && moveParams.canCrouch && (timeSinceLastCrouch > moveParams.crouchDelay)){
+    movementState.shouldBeCrouching = true;
+  }else {
+    movementState.shouldBeCrouching = false;
+  }
 }

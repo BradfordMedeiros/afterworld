@@ -84,5 +84,7 @@ MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat
 
 glm::vec3 limitMoveDirectionFromCollisions(glm::vec3 moveVec, std::vector<glm::quat>& hitDirections, glm::quat playerDirection);
 
+void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown);
+
 
 #endif

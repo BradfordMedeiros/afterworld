@@ -150,6 +150,17 @@ void changeTargetId(Movement& movement, objid id, bool active){
     reloadSettingsConfig(movement, "default");
 }
 
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, bool goForward){
+  updateCrouch(moveParams, movementState, playerId);
+
+  auto shouldStep = shouldStepUp(playerId) && goForward;
+  //std::cout << "should step up: " << shouldStep << std::endl;
+  if (shouldStep){
+    gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
+  }
+}
+
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -202,11 +213,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     std::cout << "key is: " << key << std::endl;
 
     if (key == 341){  // ctrl
-      auto timeSinceLastCrouch = (gameapi -> timeSeconds(false) - movement -> movementState.lastCrouchTime) * 1000;
-      if (action == 1 && movement -> moveParams.canCrouch && (timeSinceLastCrouch > movement -> moveParams.crouchDelay)){
-        movement -> movementState.shouldBeCrouching = true;
-      }else if (action == 0){
-        movement -> movementState.shouldBeCrouching = false;
+      if (action == 0 || action == 1){
+        maybeToggleCrouch(movement -> moveParams, movement -> movementState, action == 1);
       }
     }
 
@@ -254,10 +262,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 32 /* space */ && action == 1){
       jump(movement -> moveParams, movement -> movementState, movement -> playerId.value());
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = movement -> playerId.value(),
-        .transition = "jump",
-      });
       return;
     }
 
@@ -437,13 +441,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     updateVelocity(movement -> movementState, movement -> playerId.value(), elapsedTime, currPos, &movingDown);
     updateFacingWall(movement -> movementState, movement -> playerId.value());
     restrictLadderMovement(movement -> movementState, movement -> playerId.value(), movingDown);
-    updateCrouch(movement -> moveParams, movement -> movementState, movement -> playerId.value());
-
-    auto shouldStep = shouldStepUp(movement -> playerId.value()) && movement -> goForward;
-    //std::cout << "should step up: " << shouldStep << std::endl;
-    if (shouldStep){
-      gameapi -> applyImpulse(movement -> playerId.value(), glm::vec3(0.f, 0.4f, 0.f));
-    }
+    
+    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> goForward);
 
     //std::cout << movementToStr(*movement) << std::endl;
   };
