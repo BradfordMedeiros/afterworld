@@ -30,6 +30,21 @@ struct ControlParams {
   float ysensitivity;
 };
 
+struct MovementState {
+  float xRot;               
+  float yRot;
+  bool facingWall;
+  bool facingLadder;
+  bool attachedToLadder;    
+  bool inWater;  
+  bool isGrounded;              
+  bool lastFrameIsGrounded;
+  bool isCrouching;
+  bool shouldBeCrouching;
+  glm::vec3 lastPosition;
+  float lastCrouchTime;
+};
+
 struct Movement {
   MovementParams moveParams; // character params
 
@@ -43,24 +58,12 @@ struct Movement {
   bool goRight;
   bool active;
 
+  glm::vec2 lookVelocity;       // control params
+
   float lastMoveSoundPlayTime;      // state
   glm::vec3 lastMoveSoundPlayLocation;
 
-  glm::vec2 lookVelocity;       // control params
-  float xRot;               
-  float yRot;
-  bool facingWall;              // state
-  bool facingLadder;
-  bool attachedToLadder;    
-  bool inWater;  
-
-  bool isGrounded;              // state
-  bool lastFrameIsGrounded;
-  bool isCrouching;
-  bool shouldBeCrouching;
-  float lastCrouchTime;
-
-  glm::vec3 lastPosition;
+  MovementState movementState;
 };
 
 std::string movementToStr(Movement& movement){
@@ -74,13 +77,13 @@ std::string movementToStr(Movement& movement){
 
 void jump(Movement& movement, objid id){
   glm::vec3 impulse(0, movement.moveParams.jumpHeight, 0);
-  if (movement.isGrounded){
+  if (movement.movementState.isGrounded){
     gameapi -> applyImpulse(id, impulse);
     if (getManagedSounds().jumpSoundObjId.has_value()){
       gameapi -> playClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
     }
   }
-  if (movement.inWater){
+  if (movement.movementState.inWater){
     gameapi -> applyImpulse(id, impulse);
   }
 }
@@ -111,9 +114,9 @@ void moveXZ(objid id, glm::vec2 direction){
 
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
-  auto baseMoveSpeed = movement.isCrouching ? movement.moveParams.crouchSpeed : movement.moveParams.moveSpeed;
+  auto baseMoveSpeed = movement.movementState.isCrouching ? movement.moveParams.crouchSpeed : movement.moveParams.moveSpeed;
   auto speed = isGrounded ? baseMoveSpeed : movement.moveParams.moveSpeedAir;
-  speed = movement.inWater ? movement.moveParams.moveSpeedWater : speed;
+  speed = movement.movementState.inWater ? movement.moveParams.moveSpeedWater : speed;
   if (ironsight){
     speed = speed * ironsightSpeedMultiplier;
   }
@@ -121,9 +124,9 @@ float getMoveSpeed(Movement& movement, bool ironsight, bool isGrounded){
 }
 
 void updateVelocity(Movement& movement, objid id, float elapsedTime, glm::vec3 currPos, bool* _movingDown){ // returns if moveing down
-  glm::vec3 displacement = (currPos - movement.lastPosition) / elapsedTime;
+  glm::vec3 displacement = (currPos - movement.movementState.lastPosition) / elapsedTime;
   //auto speed = glm::length(displacement);
-  movement.lastPosition = currPos;
+  movement.movementState.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
   gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
   *_movingDown = displacement.y < 0.f;
@@ -136,18 +139,18 @@ void updateFacingWall(Movement& movement, objid id){
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, 2.f);
 
   if (hitpoints.size() > 0){
-    movement.facingWall = true;
+    movement.movementState.facingWall = true;
     auto hitpoint = hitpoints.at(closestHitpoint(hitpoints, mainobjPos));
     auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
-    movement.facingLadder = getStrAttr(attr, "ladder").has_value();
+    movement.movementState.facingLadder = getStrAttr(attr, "ladder").has_value();
   }else{
-    movement.facingWall = false;
-    movement.facingLadder = false;
+    movement.movementState.facingWall = false;
+    movement.movementState.facingLadder = false;
   }
 }
 
 void restrictLadderMovement(Movement& movement, objid id, bool movingDown){
-  if (movement.attachedToLadder){
+  if (movement.movementState.attachedToLadder){
     auto attr = gameapi -> getGameObjectAttr(id);
     auto velocity = getVec3Attr(attr, "physics_velocity").value();
     if (velocity.y > 0.f){
@@ -196,9 +199,9 @@ void look(Movement& movement, objid id, float elapsedTime, bool ironsight, float
   float deltax = ironsight ? (raw_deltax * ironsight_turn) : raw_deltax;
   float deltay = ironsight ? (raw_deltay * ironsight_turn) : raw_deltay;
 
-  movement.xRot = limitAngle(movement.xRot + deltax, std::nullopt, std::nullopt);
-  movement.yRot = limitAngle(movement.yRot + deltay, movement.moveParams.maxAngleUp, movement.moveParams.maxAngleDown); 
-  auto rotation = gameapi -> setFrontDelta(forwardVec, movement.xRot, movement.yRot, 0, 1.f);
+  movement.movementState.xRot = limitAngle(movement.movementState.xRot + deltax, std::nullopt, std::nullopt);
+  movement.movementState.yRot = limitAngle(movement.movementState.yRot + deltay, movement.moveParams.maxAngleUp, movement.moveParams.maxAngleDown); 
+  auto rotation = gameapi -> setFrontDelta(forwardVec, movement.movementState.xRot, movement.movementState.yRot, 0, 1.f);
   gameapi -> setGameObjectRot(id, rotation, false);
 
   movement.lookVelocity = glm::vec2(0.f, 0.f);
@@ -279,12 +282,12 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 }
 
 void attachToLadder(Movement& movement){
-  if (movement.facingLadder){
-     movement.attachedToLadder = true;
+  if (movement.movementState.facingLadder){
+     movement.movementState.attachedToLadder = true;
   }
 }
 void releaseFromLadder(Movement& movement){
-  movement.attachedToLadder = false;
+  movement.movementState.attachedToLadder = false;
 }
 
 void toggleCrouch(Movement& movement, objid id, bool shouldCrouch){
@@ -324,15 +327,15 @@ bool somethingAbovePlayer(glm::vec3 playerPos){
 }
 
 void updateCrouch(Movement& movement, objid id){
-  if (movement.shouldBeCrouching && !movement.isCrouching){
-    movement.isCrouching = true;
-    movement.lastCrouchTime = gameapi -> timeSeconds(false);
+  if (movement.movementState.shouldBeCrouching && !movement.movementState.isCrouching){
+    movement.movementState.isCrouching = true;
+    movement.movementState.lastCrouchTime = gameapi -> timeSeconds(false);
     toggleCrouch(movement, id, true);
-  }else if (!movement.shouldBeCrouching && movement.isCrouching){
+  }else if (!movement.movementState.shouldBeCrouching && movement.movementState.isCrouching){
     auto playerPos = gameapi -> getGameObjectPos(id, true);
     auto canUncrouch = !somethingAbovePlayer(playerPos);
     if (canUncrouch){
-      movement.isCrouching = false;
+      movement.movementState.isCrouching = false;
       toggleCrouch(movement, id, false);
     }
   }
@@ -483,23 +486,23 @@ void changeTargetId(Movement& movement, objid id, bool active){
 
 
     movement.lookVelocity = glm::vec2(0.f, 0.f);
-    movement.lastPosition = glm::vec3(0.f, 0.f, 0.f);
+    movement.movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
 
     auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(movement.playerId.value(), true));
 
-    movement.xRot = oldXYRot.x;
-    movement.yRot = oldXYRot.y;
+    movement.movementState.xRot = oldXYRot.x;
+    movement.movementState.yRot = oldXYRot.y;
 
-    movement.isGrounded = false;
-    movement.lastFrameIsGrounded = false;
-    movement.facingWall = false;
-    movement.facingLadder = false;
-    movement.attachedToLadder = false;
+    movement.movementState.isGrounded = false;
+    movement.movementState.lastFrameIsGrounded = false;
+    movement.movementState.facingWall = false;
+    movement.movementState.facingLadder = false;
+    movement.movementState.attachedToLadder = false;
 
-    movement.inWater = {};
-    movement.isCrouching = false;
-    movement.shouldBeCrouching = false;
-    movement.lastCrouchTime = -10000.f;  // so can immediately crouch
+    movement.movementState.inWater = {};
+    movement.movementState.isCrouching = false;
+    movement.movementState.shouldBeCrouching = false;
+    movement.movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
 
     reloadMovementConfig(movement, movement.playerId.value(), "default");
     reloadSettingsConfig(movement, "default");
@@ -521,19 +524,24 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
-    movement -> lastPosition = glm::vec3(0.f, 0.f, 0.f);
-    movement -> xRot = 0.f;
-    movement -> yRot = 0.f;
-    movement -> isGrounded = false;
-    movement -> lastFrameIsGrounded = false;
-    movement -> facingWall = false;
-    movement -> facingLadder = false;
-    movement -> attachedToLadder = false;
+    movement -> movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
+    movement -> movementState.xRot = 0.f;
+    movement -> movementState.yRot = 0.f;
+    movement -> movementState.isGrounded = false;
+    movement -> movementState.lastFrameIsGrounded = false;
+    movement -> movementState.facingWall = false;
+    movement -> movementState.facingLadder = false;
+    movement -> movementState.attachedToLadder = false;
 
-    movement -> inWater = false;
-    movement -> isCrouching = false;
-    movement -> shouldBeCrouching = false;
-    movement -> lastCrouchTime = -10000.f;  // so can immediately crouch
+    movement -> movementState.inWater = false;
+    movement -> movementState.isCrouching = false;
+    movement -> movementState.shouldBeCrouching = false;
+    movement -> movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
+
+    movement -> movementState = MovementState {
+
+    };
+
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -553,11 +561,11 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     std::cout << "key is: " << key << std::endl;
 
     if (key == 341){  // ctrl
-      auto timeSinceLastCrouch = (gameapi -> timeSeconds(false) - movement -> lastCrouchTime) * 1000;
+      auto timeSinceLastCrouch = (gameapi -> timeSeconds(false) - movement -> movementState.lastCrouchTime) * 1000;
       if (action == 1 && movement -> moveParams.canCrouch && (timeSinceLastCrouch > movement -> moveParams.crouchDelay)){
-        movement -> shouldBeCrouching = true;
+        movement -> movementState.shouldBeCrouching = true;
       }else if (action == 0){
-        movement -> shouldBeCrouching = false;
+        movement -> movementState.shouldBeCrouching = false;
       }
     }
 
@@ -679,7 +687,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (movement -> goForward){
       std::cout << "should move forward" << std::endl;
       moveVec += glm::vec2(0.f, -1.f);
-      if (movement -> facingLadder || movement -> attachedToLadder){
+      if (movement -> movementState.facingLadder || movement -> movementState.attachedToLadder){
         moveUp(movement -> playerId.value(), moveVec);
       }else{
         shouldMoveXZ = true;
@@ -687,7 +695,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     if (movement -> goBackward){
       moveVec += glm::vec2(0.f, 1.f);
-      if (movement -> facingLadder || movement -> attachedToLadder){
+      if (movement -> movementState.facingLadder || movement -> movementState.attachedToLadder){
         moveDown(movement -> playerId.value(), moveVec);
       }else{
         shouldMoveXZ = true;
@@ -695,7 +703,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     if (movement -> goLeft){
       moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
-      if (!movement -> attachedToLadder){
+      if (!movement -> movementState.attachedToLadder){
         shouldMoveXZ = true;
         isSideStepping = true;
       }
@@ -703,7 +711,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     if (movement -> goRight){
       moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
-      if (!movement -> attachedToLadder){
+      if (!movement -> movementState.attachedToLadder){
         shouldMoveXZ = true;
         isSideStepping = true;
       }
@@ -717,22 +725,22 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     directionVec.y = 0.f;
     auto rotationWithoutY = quatFromDirection(directionVec);
 
-    movement -> lastFrameIsGrounded = movement -> isGrounded;
+    movement -> movementState.lastFrameIsGrounded = movement -> movementState.isGrounded;
 
     auto collisions = checkMovementCollisions(*movement, hitDirections, rotationWithoutY);
     bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
    
-    movement -> inWater = false;
+    movement -> movementState.inWater = false;
     for (auto id : collisions.allCollisions){
       auto isWater = getSingleAttr(id, "water").has_value();
       if (isWater){
-        movement -> inWater = true;
+        movement -> movementState.inWater = true;
         break;
       }
     }
-    movement -> isGrounded = isGrounded && !movement -> inWater; 
+    movement -> movementState.isGrounded = isGrounded && !movement -> movementState.inWater; 
 
-    if (movement -> isGrounded && !movement -> lastFrameIsGrounded){
+    if (movement -> movementState.isGrounded && !movement -> movementState.lastFrameIsGrounded){
       modlog("animation controller", "land");
       gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
         .entityId = movement -> playerId.value(),
