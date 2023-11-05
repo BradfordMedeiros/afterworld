@@ -3,11 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util.h"
-#include "./global.h"
-#include "./resources.h"
-#include "./activeplayer.h"
+#include "./movementcore.h"
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 

@@ -5,10 +5,10 @@
 #include <vector>
 #include <stack>
 #include "./ai/ai.h"
-#include "./movement.h"
 #include "./menu.h"
 #include "./daynight.h"
 #include "./weapons/weapon.h"
+#include "./movement/movement.h"
 #include "./vehicle.h"
 #include "./inventory.h"
 #include "./hud.h"
