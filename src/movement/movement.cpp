@@ -150,7 +150,68 @@ void changeTargetId(Movement& movement, objid id, bool active){
     reloadSettingsConfig(movement, "default");
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, bool goForward, glm::vec2 lookVelocity, ControlParams& controlParams, bool isGrounded){
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, bool goForward, glm::vec2 lookVelocity, ControlParams& controlParams, bool shouldMoveXZ, bool isSideStepping, glm::vec2 moveVec){
+  std::vector<glm::quat> hitDirections;
+
+    //std::vector<glm::quat> hitDirections;
+  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
+  auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
+  directionVec.y = 0.f;
+  auto rotationWithoutY = quatFromDirection(directionVec);
+
+  movementState.lastFrameIsGrounded = movementState.isGrounded;
+
+  auto collisions = checkMovementCollisions(playerId, hitDirections, rotationWithoutY);
+  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+   
+  movementState.inWater = false;
+  for (auto id : collisions.allCollisions){
+    auto isWater = getSingleAttr(id, "water").has_value();
+    if (isWater){
+      movementState.inWater = true;
+      break;
+    }
+  }
+  movementState.isGrounded = isGrounded && !movementState.inWater; 
+
+  if (movementState.isGrounded && !movementState.lastFrameIsGrounded){
+    modlog("animation controller", "land");
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = playerId,
+      .transition = "land",
+    });
+    land(playerId);
+  }
+
+  
+
+  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded);
+  //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
+  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections, rotationWithoutY);
+  //auto limitedMoveVec = moveVec;
+  auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
+
+  if (shouldMoveXZ){
+    moveXZ(playerId, moveSpeed * direction);
+    if (isSideStepping){
+      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+        .entityId = playerId,
+        .transition = "sidestep",
+      });
+    }else{
+      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+        .entityId = playerId,
+        .transition = "walking",
+      });
+    }
+  }else{
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = playerId,
+      .transition = "not-walking",
+    });
+  }
+
+
   auto currPos = gameapi -> getGameObjectPos(playerId, true);
   auto currTime = gameapi -> timeSeconds(false);
 
@@ -383,68 +444,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
     }
 
-    std::vector<glm::quat> hitDirections;
 
-    //std::vector<glm::quat> hitDirections;
-    auto playerDirection = gameapi -> getGameObjectRotation(movement -> playerId.value(), true);
-    auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
-    directionVec.y = 0.f;
-    auto rotationWithoutY = quatFromDirection(directionVec);
-
-    movement -> movementState.lastFrameIsGrounded = movement -> movementState.isGrounded;
-
-    auto collisions = checkMovementCollisions(movement -> playerId.value(), hitDirections, rotationWithoutY);
-    bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
-   
-    movement -> movementState.inWater = false;
-    for (auto id : collisions.allCollisions){
-      auto isWater = getSingleAttr(id, "water").has_value();
-      if (isWater){
-        movement -> movementState.inWater = true;
-        break;
-      }
-    }
-    movement -> movementState.isGrounded = isGrounded && !movement -> movementState.inWater; 
-
-    if (movement -> movementState.isGrounded && !movement -> movementState.lastFrameIsGrounded){
-      modlog("animation controller", "land");
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = movement -> playerId.value(),
-        .transition = "land",
-      });
-
-      land(movement -> playerId.value());
-    }
-
-
-    float moveSpeed = getMoveSpeed(movement -> moveParams, movement -> movementState, false, isGrounded);
-    //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-
-    auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections, rotationWithoutY);
-    //auto limitedMoveVec = moveVec;
-    auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
-    if (shouldMoveXZ){
-      moveXZ(movement -> playerId.value(), moveSpeed * direction);
-      if (isSideStepping){
-        gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-          .entityId = movement -> playerId.value(),
-          .transition = "sidestep",
-        });
-      }else{
-        gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-          .entityId = movement -> playerId.value(),
-          .transition = "walking",
-        });
-      }
-
-    }else{
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = movement -> playerId.value(),
-        .transition = "not-walking",
-      });
-    }
-  
-    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> goForward, movement -> lookVelocity, movement -> controlParams, isGrounded);
+    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> goForward, movement -> lookVelocity, movement -> controlParams, shouldMoveXZ, isSideStepping, moveVec);
 
     movement -> lookVelocity = glm::vec2(0.f, 0.f);
 
