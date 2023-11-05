@@ -16,15 +16,6 @@ struct Movement {
   MovementState movementState;
 };
 
-std::string movementToStr(Movement& movement){
-  std::string str;
-  str += std::string("goForward: ") + (movement.controlParams.goForward ? "true" : "false") + "\n";
-  str += std::string("goBackward: ") + (movement.controlParams.goBackward ? "true" : "false") + "\n";
-  str += std::string("goLeft: ") + (movement.controlParams.goLeft ? "true" : "false") + "\n";
-  str += std::string("goRight: ") + (movement.controlParams.goRight ? "true" : "false") + "\n";
-  return str;
-}
-
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
   glm::vec3 euler_angles = glm::eulerAngles(currRotation);
   auto forwardVec = currRotation * glm::vec3(0.f, 0.f, -1.f);
@@ -142,98 +133,6 @@ void changeTargetId(Movement& movement, objid id, bool active){
 
     reloadMovementConfig(movement, movement.playerId.value(), "default");
     reloadSettingsConfig(movement, "default");
-}
-
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams, bool shouldMoveXZ, bool isSideStepping, glm::vec2 moveVec){
-  std::vector<glm::quat> hitDirections;
-
-    //std::vector<glm::quat> hitDirections;
-  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
-  auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
-  directionVec.y = 0.f;
-  auto rotationWithoutY = quatFromDirection(directionVec);
-
-  movementState.lastFrameIsGrounded = movementState.isGrounded;
-
-  auto collisions = checkMovementCollisions(playerId, hitDirections, rotationWithoutY);
-  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
-   
-  movementState.inWater = false;
-  for (auto id : collisions.allCollisions){
-    auto isWater = getSingleAttr(id, "water").has_value();
-    if (isWater){
-      movementState.inWater = true;
-      break;
-    }
-  }
-  movementState.isGrounded = isGrounded && !movementState.inWater; 
-
-  if (movementState.isGrounded && !movementState.lastFrameIsGrounded){
-    modlog("animation controller", "land");
-    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-      .entityId = playerId,
-      .transition = "land",
-    });
-    land(playerId);
-  }
-
-  
-
-  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded);
-  //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections, rotationWithoutY);
-  //auto limitedMoveVec = moveVec;
-  auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
-
-  if (shouldMoveXZ){
-    moveXZ(playerId, moveSpeed * direction);
-    if (isSideStepping){
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = playerId,
-        .transition = "sidestep",
-      });
-    }else{
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = playerId,
-        .transition = "walking",
-      });
-    }
-  }else{
-    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-      .entityId = playerId,
-      .transition = "not-walking",
-    });
-  }
-
-
-  auto currPos = gameapi -> getGameObjectPos(playerId, true);
-  auto currTime = gameapi -> timeSeconds(false);
-
-  if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
-    // move-sound-distance:STRING move-sound-mintime:STRING
-    std::cout << "should play move clip" << std::endl;
-    gameapi -> playClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
-    movementState.lastMoveSoundPlayTime = currTime;
-    movementState.lastMoveSoundPlayLocation = currPos;
-  }
-    
-
-  float elapsedTime = gameapi -> timeElapsed();
-
-  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlParams.lookVelocity, controlParams); // (look elapsedTime ironsight-mode ironsight-turn)
-
-  bool movingDown = false;
-  updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
-
-  updateFacingWall(movementState, playerId);
-  restrictLadderMovement(movementState, playerId, movingDown);
-  updateCrouch(moveParams, movementState, playerId);
-
-  auto shouldStep = shouldStepUp(playerId) && controlParams.goForward;
-  //std::cout << "should step up: " << shouldStep << std::endl;
-  if (shouldStep){
-    gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
-  }
 }
 
 
@@ -398,47 +297,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-
-    float horzRelVelocity = 0.8f;
-    glm::vec2 moveVec(0.f, 0.f);
-
-    bool shouldMoveXZ = false;
-    bool isSideStepping = false;
-    if (movement -> controlParams.goForward){
-      std::cout << "should move forward" << std::endl;
-      moveVec += glm::vec2(0.f, -1.f);
-      if (movement -> movementState.facingLadder || movement -> movementState.attachedToLadder){
-        moveUp(movement -> playerId.value(), moveVec);
-      }else{
-        shouldMoveXZ = true;
-      }
-    }
-    if (movement -> controlParams.goBackward){
-      moveVec += glm::vec2(0.f, 1.f);
-      if (movement -> movementState.facingLadder || movement -> movementState.attachedToLadder){
-        moveDown(movement -> playerId.value(), moveVec);
-      }else{
-        shouldMoveXZ = true;
-      }
-    }
-    if (movement -> controlParams.goLeft){
-      moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
-      if (!movement -> movementState.attachedToLadder){
-        shouldMoveXZ = true;
-        isSideStepping = true;
-      }
-      
-    }
-    if (movement -> controlParams.goRight){
-      moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
-      if (!movement -> movementState.attachedToLadder){
-        shouldMoveXZ = true;
-        isSideStepping = true;
-      }
-    }
-
-
-    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> controlParams, shouldMoveXZ, isSideStepping, moveVec);
+    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> controlParams);
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 

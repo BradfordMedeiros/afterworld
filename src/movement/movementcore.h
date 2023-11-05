@@ -55,43 +55,11 @@ struct MovementState {
 };
 
 void jump(MovementParams& moveParams, MovementState& movementState, objid id);
-void land(objid id);
-
-void moveUp(objid id, glm::vec2 direction);
-void moveDown(objid id, glm::vec2 direction);
-void moveXZ(objid id, glm::vec2 direction);
-
-float getMoveSpeed(MovementParams& moveParams, MovementState& movementState, bool ironsight, bool isGrounded);
-
-void updateVelocity(MovementState& movementState, objid id, float elapsedTime, glm::vec3 currPos, bool* _movingDown);
-void updateFacingWall(MovementState& movementState, objid id);
-
-void restrictLadderMovement(MovementState& movementState, objid id, bool movingDown);
-
-void look(MovementParams& moveParams, MovementState& movementState, objid id, float elapsedTime, bool ironsight, float ironsight_turn, glm::vec2 lookVelocity, ControlParams& controlParams);
-
 void attachToLadder(MovementState& movementState);
 void releaseFromLadder(MovementState& movementState);
-
-void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch);
-void updateCrouch(MovementParams& moveParams, MovementState& movementState, objid id);
-
-
-bool shouldStepUp(objid id);
-
-
-enum COLLISION_SPACE_INDEX { COLLISION_SPACE_LEFT = 0, COLLISION_SPACE_RIGHT = 1, COLLISION_SPACE_DOWN = 3 };
-std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY);
-
-struct MovementCollisions {
-  std::vector<bool> movementCollisions;
-  std::vector<objid> allCollisions;
-};
-MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY);
-
-glm::vec3 limitMoveDirectionFromCollisions(glm::vec3 moveVec, std::vector<glm::quat>& hitDirections, glm::quat playerDirection);
-
 void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown);
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams);
 
+std::string movementToStr(ControlParams& controlParams);
 
 #endif
