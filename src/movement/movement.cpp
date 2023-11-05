@@ -10,13 +10,7 @@ struct Movement {
   ControlParams controlParams; // controls
 
   std::optional<objid> playerId;   // target id 
-
-  bool goForward;                 // control params
-  bool goBackward;
-  bool goLeft;
-  bool goRight;
   bool active;
-  glm::vec2 lookVelocity;       // control params
 
   MovementParams moveParams; // character params
   MovementState movementState;
@@ -24,10 +18,10 @@ struct Movement {
 
 std::string movementToStr(Movement& movement){
   std::string str;
-  str += std::string("goForward: ") + (movement.goForward ? "true" : "false") + "\n";
-  str += std::string("goBackward: ") + (movement.goBackward ? "true" : "false") + "\n";
-  str += std::string("goLeft: ") + (movement.goLeft ? "true" : "false") + "\n";
-  str += std::string("goRight: ") + (movement.goRight ? "true" : "false") + "\n";
+  str += std::string("goForward: ") + (movement.controlParams.goForward ? "true" : "false") + "\n";
+  str += std::string("goBackward: ") + (movement.controlParams.goBackward ? "true" : "false") + "\n";
+  str += std::string("goLeft: ") + (movement.controlParams.goLeft ? "true" : "false") + "\n";
+  str += std::string("goRight: ") + (movement.controlParams.goRight ? "true" : "false") + "\n";
   return str;
 }
 
@@ -117,17 +111,17 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 
 void changeTargetId(Movement& movement, objid id, bool active){
     movement.playerId =  id;
-    movement.goForward = false;
-    movement.goBackward = false;
-    movement.goLeft = false;
-    movement.goRight = false;
+    movement.controlParams.goForward = false;
+    movement.controlParams.goBackward = false;
+    movement.controlParams.goLeft = false;
+    movement.controlParams.goRight = false;
     movement.active = active;
 
     movement.movementState.lastMoveSoundPlayTime = 0.f;
     movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
 
-    movement.lookVelocity = glm::vec2(0.f, 0.f);
+    movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
     movement.movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
 
     auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(movement.playerId.value(), true));
@@ -150,7 +144,7 @@ void changeTargetId(Movement& movement, objid id, bool active){
     reloadSettingsConfig(movement, "default");
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, bool goForward, glm::vec2 lookVelocity, ControlParams& controlParams, bool shouldMoveXZ, bool isSideStepping, glm::vec2 moveVec){
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams, bool shouldMoveXZ, bool isSideStepping, glm::vec2 moveVec){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -226,7 +220,7 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
 
   float elapsedTime = gameapi -> timeElapsed();
 
-  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, lookVelocity, controlParams); // (look elapsedTime ironsight-mode ironsight-turn)
+  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlParams.lookVelocity, controlParams); // (look elapsedTime ironsight-mode ironsight-turn)
 
   bool movingDown = false;
   updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
@@ -235,7 +229,7 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   restrictLadderMovement(movementState, playerId, movingDown);
   updateCrouch(moveParams, movementState, playerId);
 
-  auto shouldStep = shouldStepUp(playerId) && goForward;
+  auto shouldStep = shouldStepUp(playerId) && controlParams.goForward;
   //std::cout << "should step up: " << shouldStep << std::endl;
   if (shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
@@ -247,17 +241,20 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
+
     movement -> playerId = std::nullopt;
-    movement -> goForward = false;
-    movement -> goBackward = false;
-    movement -> goLeft = false;
-    movement -> goRight = false;
     movement -> active = false;
 
+    movement -> controlParams.goForward = false;
+    movement -> controlParams.goBackward = false;
+    movement -> controlParams.goLeft = false;
+    movement -> controlParams.goRight = false;
+    movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+
+    movement -> movementState = MovementState {};
     movement -> movementState.lastMoveSoundPlayTime = 0.f;
     movement -> movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
-    movement -> lookVelocity = glm::vec2(0.f, 0.f);
     movement -> movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
     movement -> movementState.xRot = 0.f;
     movement -> movementState.yRot = 0.f;
@@ -271,10 +268,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> movementState.isCrouching = false;
     movement -> movementState.shouldBeCrouching = false;
     movement -> movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
-
-    movement -> movementState = MovementState {
-
-    };
 
     return movement;
   };
@@ -311,33 +304,33 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 'W'){
       if (action == 0){
-        movement -> goForward = false;
+        movement -> controlParams.goForward = false;
       }else if (action == 1){
-        movement -> goForward = true;
+        movement -> controlParams.goForward = true;
       }
       return;
     }
     if (key == 'S'){
       if (action == 0){
-        movement -> goBackward = false;
+        movement -> controlParams.goBackward = false;
       }else if (action == 1){
-        movement -> goBackward = true;
+        movement -> controlParams.goBackward = true;
       }
       return;
     }
     if (key == 'A'){
       if (action == 0){
-        movement -> goLeft = false;
+        movement -> controlParams.goLeft = false;
       }else if (action == 1){
-        movement -> goLeft = true;
+        movement -> controlParams.goLeft = true;
       }
       return;
     }
     if (key == 'D'){
       if (action == 0){
-        movement -> goRight = false;
+        movement -> controlParams.goRight = false;
       }else if (action == 1){
-        movement -> goRight = true;
+        movement -> controlParams.goRight = true;
       }
       return;
     }
@@ -389,7 +382,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (!movement -> active){
       return;
     }
-    movement -> lookVelocity = glm::vec2(xPos, yPos);
+    movement -> controlParams.lookVelocity = glm::vec2(xPos, yPos);
   };
   binding.onFrame = [](int32_t _, void* data) -> void {
     if (isPaused()){
@@ -411,7 +404,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     bool shouldMoveXZ = false;
     bool isSideStepping = false;
-    if (movement -> goForward){
+    if (movement -> controlParams.goForward){
       std::cout << "should move forward" << std::endl;
       moveVec += glm::vec2(0.f, -1.f);
       if (movement -> movementState.facingLadder || movement -> movementState.attachedToLadder){
@@ -420,7 +413,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         shouldMoveXZ = true;
       }
     }
-    if (movement -> goBackward){
+    if (movement -> controlParams.goBackward){
       moveVec += glm::vec2(0.f, 1.f);
       if (movement -> movementState.facingLadder || movement -> movementState.attachedToLadder){
         moveDown(movement -> playerId.value(), moveVec);
@@ -428,7 +421,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         shouldMoveXZ = true;
       }
     }
-    if (movement -> goLeft){
+    if (movement -> controlParams.goLeft){
       moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
       if (!movement -> movementState.attachedToLadder){
         shouldMoveXZ = true;
@@ -436,7 +429,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
       
     }
-    if (movement -> goRight){
+    if (movement -> controlParams.goRight){
       moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
       if (!movement -> movementState.attachedToLadder){
         shouldMoveXZ = true;
@@ -445,9 +438,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
 
-    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> goForward, movement -> lookVelocity, movement -> controlParams, shouldMoveXZ, isSideStepping, moveVec);
+    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> controlParams, shouldMoveXZ, isSideStepping, moveVec);
 
-    movement -> lookVelocity = glm::vec2(0.f, 0.f);
+    movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
     //std::cout << movementToStr(*movement) << std::endl;
   };

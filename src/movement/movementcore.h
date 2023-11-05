@@ -10,6 +10,13 @@
 struct ControlParams {
   float xsensitivity;
   float ysensitivity;
+
+  bool goForward;                
+  bool goBackward;
+  bool goLeft;
+  bool goRight;
+
+  glm::vec2 lookVelocity;      
 };
 
 struct MovementParams {
