@@ -33,6 +33,26 @@ glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
   return glm::vec2(angleX, angleY);
 }
 
+MovementParams getMovementParams(std::vector<std::vector<std::string>>& result){
+  MovementParams moveParams {};
+  moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
+  moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
+  moveParams.moveSpeedWater = floatFromFirstSqlResult(result, 23);
+  moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
+  moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
+  moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
+  moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
+  moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
+  moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
+  moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
+  moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
+  moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
+  moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
+  moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
+  moveParams.friction = floatFromFirstSqlResult(result, 5);
+  moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
+  return moveParams;
+}
 void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result, glm::vec3 physics_gravity, float friction){
   float physics_mass = floatFromFirstSqlResult(result, 8);
   float physics_restitution = floatFromFirstSqlResult(result, 4);
@@ -54,25 +74,6 @@ void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& res
   gameapi -> setGameObjectAttr(id, attr);
 }
 
-void updateTraitConfig(Movement& movement, std::vector<std::vector<std::string>>& result){
-  movement.moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
-  movement.moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
-  movement.moveParams.moveSpeedWater = floatFromFirstSqlResult(result, 23);
-  movement.moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
-  movement.moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
-  movement.moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
-  movement.moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
-  movement.moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
-  movement.moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
-  movement.moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
-  movement.moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
-  movement.moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
-  movement.moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
-  movement.moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
-  movement.moveParams.friction = floatFromFirstSqlResult(result, 5);
-  movement.moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
-}
-
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
     "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water from traits where profile = " + name,
@@ -81,7 +82,8 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
   bool validTraitSql = false;
   auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
   modassert(validTraitSql, "error executing sql query");
-  updateTraitConfig(movement, traitsResult);
+  movement.moveParams = getMovementParams(traitsResult);
+
   updateObjectProperties(id, traitsResult, movement.moveParams.gravity, movement.moveParams.friction);
 
   ensureSoundsLoaded(gameapi -> listSceneId(id), traitsResult.at(0).at(9), traitsResult.at(0).at(10), traitsResult.at(0).at(13));
@@ -102,17 +104,18 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 
 void changeTargetId(Movement& movement, objid id, bool active){
     movement.playerId =  id;
+    movement.active = active;
+
     movement.controlParams.goForward = false;
     movement.controlParams.goBackward = false;
     movement.controlParams.goLeft = false;
     movement.controlParams.goRight = false;
-    movement.active = active;
+    movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
     movement.movementState.lastMoveSoundPlayTime = 0.f;
     movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
 
-    movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
     movement.movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
 
     auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(movement.playerId.value(), true));
