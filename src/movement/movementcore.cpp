@@ -455,6 +455,54 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   }
 }
 
+glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
+  glm::vec3 euler_angles = glm::eulerAngles(currRotation);
+  auto forwardVec = currRotation * glm::vec3(0.f, 0.f, -1.f);
+  auto angleX = glm::atan(forwardVec.x / forwardVec.z);
+  angleX *= -1;
+  if (forwardVec.x > 0 && forwardVec.z > 0){
+    angleX = angleX + 3.1418;
+  }else if (forwardVec.x < 0 && forwardVec.z > 0){
+    angleX = angleX - 3.1418;
+  }
+  auto angleY = -1 * euler_angles.x;
+  if (forwardVec.z > 0){
+    angleY = angleY - MODPI;
+  }
+  return glm::vec2(angleX, angleY);
+}
+MovementState getInitialMovementState(std::optional<objid> playerId){
+  MovementState movementState {};
+  movementState.lastMoveSoundPlayTime = 0.f;
+  movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+
+  movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
+
+  if (playerId.has_value()){  // probably this whole thing should just be std::nullopt but ok for now to preserve behavior
+    auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId.value(), true));
+    movementState.xRot = oldXYRot.x;
+    movementState.yRot = oldXYRot.y;    
+  }else{
+    movementState.xRot = 0.f;
+    movementState.yRot = 0.f;
+  }
+
+
+  movementState.isGrounded = false;
+  movementState.lastFrameIsGrounded = false;
+  movementState.facingWall = false;
+  movementState.facingLadder = false;
+  movementState.attachedToLadder = false;
+
+  movementState.inWater = false;
+  movementState.isCrouching = false;
+  movementState.shouldBeCrouching = false;
+  movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
+
+
+  return movementState;
+}
+
 std::string movementToStr(ControlParams& controlParams){
   std::string str;
   str += std::string("goForward: ") + (controlParams.goForward ? "true" : "false") + "\n";

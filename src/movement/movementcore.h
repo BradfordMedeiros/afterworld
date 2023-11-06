@@ -60,6 +60,8 @@ void releaseFromLadder(MovementState& movementState);
 void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown);
 void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams);
 
+MovementState getInitialMovementState(std::optional<objid> playerId);
+
 std::string movementToStr(ControlParams& controlParams);
 
 #endif

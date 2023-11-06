@@ -16,23 +16,6 @@ struct Movement {
   MovementState movementState;
 };
 
-glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
-  glm::vec3 euler_angles = glm::eulerAngles(currRotation);
-  auto forwardVec = currRotation * glm::vec3(0.f, 0.f, -1.f);
-  auto angleX = glm::atan(forwardVec.x / forwardVec.z);
-  angleX *= -1;
-  if (forwardVec.x > 0 && forwardVec.z > 0){
-    angleX = angleX + 3.1418;
-  }else if (forwardVec.x < 0 && forwardVec.z > 0){
-    angleX = angleX - 3.1418;
-  }
-  auto angleY = -1 * euler_angles.x;
-  if (forwardVec.z > 0){
-    angleY = angleY - MODPI;
-  }
-  return glm::vec2(angleX, angleY);
-}
-
 MovementParams getMovementParams(std::vector<std::vector<std::string>>& result){
   MovementParams moveParams {};
   moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
@@ -102,6 +85,7 @@ void reloadSettingsConfig(Movement& movement, std::string name){
   movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
+
 void changeTargetId(Movement& movement, objid id, bool active){
     movement.playerId =  id;
     movement.active = active;
@@ -111,28 +95,7 @@ void changeTargetId(Movement& movement, objid id, bool active){
     movement.controlParams.goLeft = false;
     movement.controlParams.goRight = false;
     movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-
-    movement.movementState.lastMoveSoundPlayTime = 0.f;
-    movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
-
-
-    movement.movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
-
-    auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(movement.playerId.value(), true));
-
-    movement.movementState.xRot = oldXYRot.x;
-    movement.movementState.yRot = oldXYRot.y;
-
-    movement.movementState.isGrounded = false;
-    movement.movementState.lastFrameIsGrounded = false;
-    movement.movementState.facingWall = false;
-    movement.movementState.facingLadder = false;
-    movement.movementState.attachedToLadder = false;
-
-    movement.movementState.inWater = {};
-    movement.movementState.isCrouching = false;
-    movement.movementState.shouldBeCrouching = false;
-    movement.movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
+    movement.movementState = getInitialMovementState(movement.playerId);
 
     reloadMovementConfig(movement, movement.playerId.value(), "default");
     reloadSettingsConfig(movement, "default");
@@ -153,23 +116,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.goRight = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
-    movement -> movementState = MovementState {};
-    movement -> movementState.lastMoveSoundPlayTime = 0.f;
-    movement -> movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
-
-    movement -> movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
-    movement -> movementState.xRot = 0.f;
-    movement -> movementState.yRot = 0.f;
-    movement -> movementState.isGrounded = false;
-    movement -> movementState.lastFrameIsGrounded = false;
-    movement -> movementState.facingWall = false;
-    movement -> movementState.facingLadder = false;
-    movement -> movementState.attachedToLadder = false;
-
-    movement -> movementState.inWater = false;
-    movement -> movementState.isCrouching = false;
-    movement -> movementState.shouldBeCrouching = false;
-    movement -> movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
+    movement -> movementState = getInitialMovementState(movement -> playerId);
 
     return movement;
   };
