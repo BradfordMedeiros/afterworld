@@ -16,6 +16,7 @@ struct Movement {
   MovementState movementState;
 };
 
+
 void updateObjectProperties(objid id, MovementParams& moveParams){
   GameobjAttributes attr {
     .stringAttributes = {},
@@ -41,7 +42,6 @@ void reloadMovementConfig(Movement& movement, objid id, std::string name){
 
   updateObjectProperties(id, *movement.moveParams);
 
-  ensureSoundsLoaded(gameapi -> listSceneId(id), movement.moveParams -> jumpSound, movement.moveParams -> landSound, movement.moveParams -> moveSound);
   movement.movementState.lastMoveSoundPlayTime = 0.f;
   movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 }
@@ -59,18 +59,18 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 
 
 void changeTargetId(Movement& movement, objid id, bool active){
-    movement.playerId =  id;
-    movement.active = active;
+  movement.playerId =  id;
+  movement.active = active;
 
-    movement.controlParams.goForward = false;
-    movement.controlParams.goBackward = false;
-    movement.controlParams.goLeft = false;
-    movement.controlParams.goRight = false;
-    movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-    movement.movementState = getInitialMovementState(movement.playerId);
+  movement.controlParams.goForward = false;
+  movement.controlParams.goBackward = false;
+  movement.controlParams.goLeft = false;
+  movement.controlParams.goRight = false;
+  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+  movement.movementState = getInitialMovementState(movement.playerId);
 
-    reloadMovementConfig(movement, movement.playerId.value(), "default");
-    reloadSettingsConfig(movement, "default");
+  reloadMovementConfig(movement, movement.playerId.value(), "default");
+  reloadSettingsConfig(movement, "default");
 }
 
 
@@ -94,7 +94,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     Movement* value = (Movement*)data;
-    ensureSoundsUnloaded(gameapi -> listSceneId(id));
+    removeAllMovementCores();
     delete value;
   };
   binding.onKeyCallback = [](int32_t _, void* data, int key, int scancode, int action, int mods) -> void {

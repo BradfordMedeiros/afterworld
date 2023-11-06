@@ -62,6 +62,7 @@ struct MovementState {
 
 MovementParams* findMovementCore(std::string& name);
 void loadMovementCore(std::string& coreName);
+void removeAllMovementCores();
 
 MovementParams getMovementParams(std::string name);
 

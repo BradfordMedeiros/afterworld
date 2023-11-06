@@ -59,13 +59,16 @@ void loadMovementCore(std::string& coreName){
   if (findMovementCore(coreName)){
     return;
   }
+
   MovementCore movementCore { .name = coreName };
   movementCore.moveParams = getMovementParams(coreName);
+  ensureSoundsLoaded(gameapi -> rootSceneId(), movementCore.moveParams.jumpSound, movementCore.moveParams.landSound, movementCore.moveParams.moveSound);
   movementCores.push_back(movementCore);
 }
 
 void removeAllMovementCores(){
   movementCores = {};
+  ensureSoundsUnloaded(gameapi -> rootSceneId());
 }
 
 ///////////////////////////////
