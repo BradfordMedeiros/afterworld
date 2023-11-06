@@ -12,44 +12,21 @@ struct Movement {
   std::optional<objid> playerId;   // target id 
   bool active;
 
-  MovementParams moveParams; // character params
+  MovementParams* moveParams; // character params
   MovementState movementState;
 };
 
-MovementParams getMovementParams(std::vector<std::vector<std::string>>& result){
-  MovementParams moveParams {};
-  moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
-  moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
-  moveParams.moveSpeedWater = floatFromFirstSqlResult(result, 23);
-  moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
-  moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
-  moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
-  moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
-  moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
-  moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
-  moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
-  moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
-  moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
-  moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
-  moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
-  moveParams.friction = floatFromFirstSqlResult(result, 5);
-  moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
-  return moveParams;
-}
-void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& result, glm::vec3 physics_gravity, float friction){
-  float physics_mass = floatFromFirstSqlResult(result, 8);
-  float physics_restitution = floatFromFirstSqlResult(result, 4);
+void updateObjectProperties(objid id, MovementParams& moveParams){
   GameobjAttributes attr {
-    .stringAttributes = {
-    },
+    .stringAttributes = {},
     .numAttributes = {
-      { "physics_mass", physics_mass },
-      { "physics_restitution", physics_restitution },
-      { "physics_friction", friction },
+      { "physics_mass", moveParams.physicsMass },
+      { "physics_restitution", moveParams.physicsRestitution },
+      { "physics_friction", moveParams.friction },
     },
     .vecAttr = { 
       .vec3 = {
-        { "physics_gravity", physics_gravity },
+        { "physics_gravity", moveParams.gravity },
       }, 
       .vec4 = {} 
     },
@@ -58,18 +35,13 @@ void updateObjectProperties(objid id, std::vector<std::vector<std::string>>& res
 }
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
-  auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water from traits where profile = " + name,
-    {}
-  );
-  bool validTraitSql = false;
-  auto traitsResult = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
-  modassert(validTraitSql, "error executing sql query");
-  movement.moveParams = getMovementParams(traitsResult);
+  loadMovementCore(name);
+  movement.moveParams = findMovementCore(name);
+  modassert(movement.moveParams, "could not find movement core");
 
-  updateObjectProperties(id, traitsResult, movement.moveParams.gravity, movement.moveParams.friction);
+  updateObjectProperties(id, *movement.moveParams);
 
-  ensureSoundsLoaded(gameapi -> listSceneId(id), traitsResult.at(0).at(9), traitsResult.at(0).at(10), traitsResult.at(0).at(13));
+  ensureSoundsLoaded(gameapi -> listSceneId(id), movement.moveParams -> jumpSound, movement.moveParams -> landSound, movement.moveParams -> moveSound);
   movement.movementState.lastMoveSoundPlayTime = 0.f;
   movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 }
@@ -138,7 +110,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 341){  // ctrl
       if (action == 0 || action == 1){
-        maybeToggleCrouch(movement -> moveParams, movement -> movementState, action == 1);
+        maybeToggleCrouch(*movement -> moveParams, movement -> movementState, action == 1);
       }
     }
 
@@ -185,7 +157,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      jump(movement -> moveParams, movement -> movementState, movement -> playerId.value());
+      jump(*movement -> moveParams, movement -> movementState, movement -> playerId.value());
       return;
     }
 
@@ -247,7 +219,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    onMovementFrame(movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> controlParams);
+    onMovementFrame(*movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> controlParams);
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 

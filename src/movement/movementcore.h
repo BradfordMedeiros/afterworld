@@ -36,6 +36,12 @@ struct MovementParams {
   float crouchDelay;
   float friction;
   float crouchFriction;
+  float physicsMass;
+  float physicsRestitution;
+
+  std::string jumpSound;
+  std::string landSound;
+  std::string moveSound;
 };
 struct MovementState {
   float lastMoveSoundPlayTime;      // state
@@ -53,6 +59,11 @@ struct MovementState {
   glm::vec3 lastPosition;
   float lastCrouchTime;
 };
+
+MovementParams* findMovementCore(std::string& name);
+void loadMovementCore(std::string& coreName);
+
+MovementParams getMovementParams(std::string name);
 
 void jump(MovementParams& moveParams, MovementState& movementState, objid id);
 void attachToLadder(MovementState& movementState);

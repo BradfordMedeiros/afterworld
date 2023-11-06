@@ -2,6 +2,75 @@
 
 extern CustomApiBindings* gameapi;
 
+struct MovementCore {
+  std::string name;
+  MovementParams moveParams;
+};
+
+std::vector<MovementCore> movementCores = {};
+
+MovementParams* findMovementCore(std::string& name){
+  for (auto &movementCore : movementCores){
+    if (movementCore.name == name){
+      return &movementCore.moveParams;
+    }
+  }
+  return NULL;
+}
+
+MovementParams getMovementParams(std::string name){
+  auto traitsQuery = gameapi -> compileSqlQuery(
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water from traits where profile = " + name,
+    {}
+  );
+  bool validTraitSql = false;
+  auto result = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
+  modassert(validTraitSql, "error executing sql query");
+
+  MovementParams moveParams {};
+  moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
+  moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
+  moveParams.moveSpeedWater = floatFromFirstSqlResult(result, 23);
+  moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
+  moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
+  moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
+  moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
+  moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
+  moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
+  moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
+  moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
+  moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
+  moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
+  moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
+  moveParams.friction = floatFromFirstSqlResult(result, 5);
+  moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
+  moveParams.physicsMass = floatFromFirstSqlResult(result, 8);
+  moveParams.physicsRestitution = floatFromFirstSqlResult(result, 4);
+
+  moveParams.jumpSound = result.at(0).at(9);
+  moveParams.landSound = result.at(0).at(10);
+  moveParams.moveSound = result.at(0).at(13);
+
+  return moveParams;
+}
+
+void loadMovementCore(std::string& coreName){
+  modlog("movement", std::string("load movement core: ") + coreName);
+  if (findMovementCore(coreName)){
+    return;
+  }
+  MovementCore movementCore { .name = coreName };
+  movementCore.moveParams = getMovementParams(coreName);
+  movementCores.push_back(movementCore);
+}
+
+void removeAllMovementCores(){
+  movementCores = {};
+}
+
+///////////////////////////////
+
+
 void jump(MovementParams& moveParams, MovementState& movementState, objid id){
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
   if (movementState.isGrounded){
