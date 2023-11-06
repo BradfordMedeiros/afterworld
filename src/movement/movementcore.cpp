@@ -543,22 +543,17 @@ glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
   }
   return glm::vec2(angleX, angleY);
 }
-MovementState getInitialMovementState(std::optional<objid> playerId){
+MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
 
-  if (playerId.has_value()){  // probably this whole thing should just be std::nullopt but ok for now to preserve behavior
-    auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId.value(), true));
-    movementState.xRot = oldXYRot.x;
-    movementState.yRot = oldXYRot.y;    
-  }else{
-    movementState.xRot = 0.f;
-    movementState.yRot = 0.f;
-  }
-
+  auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId, true));
+  movementState.xRot = oldXYRot.x;
+  movementState.yRot = oldXYRot.y;    
+  
 
   movementState.isGrounded = false;
   movementState.lastFrameIsGrounded = false;

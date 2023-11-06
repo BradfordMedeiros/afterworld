@@ -6,14 +6,16 @@
 
 extern CustomApiBindings* gameapi;
 
+struct MovementEntity {
+  objid playerId;
+  MovementParams* moveParams;
+  MovementState movementState;
+};
+
+
 struct Movement {
   ControlParams controlParams; // controls
-
-  std::optional<objid> playerId;   // target id 
-  bool active;
-
-  MovementParams* moveParams; // character params
-  MovementState movementState;
+  std::optional<MovementEntity> entity;
 };
 
 
@@ -37,13 +39,13 @@ void updateObjectProperties(objid id, MovementParams& moveParams){
 
 void reloadMovementConfig(Movement& movement, objid id, std::string name){
   loadMovementCore(name);
-  movement.moveParams = findMovementCore(name);
-  modassert(movement.moveParams, "could not find movement core");
+  movement.entity.value().moveParams = findMovementCore(name);
+  modassert(movement.entity.value().moveParams, "could not find movement core");
 
-  updateObjectProperties(id, *movement.moveParams);
+  updateObjectProperties(id, *movement.entity.value().moveParams);
 
-  movement.movementState.lastMoveSoundPlayTime = 0.f;
-  movement.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+  movement.entity.value().movementState.lastMoveSoundPlayTime = 0.f;
+  movement.entity.value().movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 }
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
@@ -58,18 +60,19 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 }
 
 
-void changeTargetId(Movement& movement, objid id, bool active){
-  movement.playerId =  id;
-  movement.active = active;
+void changeTargetId(Movement& movement, objid id){
+  movement.entity = MovementEntity{
+    .playerId = id,
+  };
 
   movement.controlParams.goForward = false;
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
   movement.controlParams.goRight = false;
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.movementState = getInitialMovementState(movement.playerId);
+  movement.entity.value().movementState = getInitialMovementState(movement.entity.value().playerId);
 
-  reloadMovementConfig(movement, movement.playerId.value(), "default");
+  reloadMovementConfig(movement, movement.entity.value().playerId, "default");
   reloadSettingsConfig(movement, "default");
 }
 
@@ -79,16 +82,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
 
-    movement -> playerId = std::nullopt;
-    movement -> active = false;
+    movement -> entity = std::nullopt;
 
     movement -> controlParams.goForward = false;
     movement -> controlParams.goBackward = false;
     movement -> controlParams.goLeft = false;
     movement -> controlParams.goRight = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-
-    movement -> movementState = getInitialMovementState(movement -> playerId);
 
     return movement;
   };
@@ -102,7 +102,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> playerId.has_value()){
+    if (!movement -> entity.has_value()){
       return;
     }
 
@@ -110,15 +110,15 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 341){  // ctrl
       if (action == 0 || action == 1){
-        maybeToggleCrouch(*movement -> moveParams, movement -> movementState, action == 1);
+        maybeToggleCrouch(*movement -> entity.value().moveParams, movement -> entity.value().movementState, action == 1);
       }
     }
 
     if (key == 'R') { 
       if (action == 1){
-        attachToLadder(movement -> movementState);
+        attachToLadder(movement -> entity.value().movementState);
       }else if (action == 0){
-        releaseFromLadder(movement -> movementState);        
+        releaseFromLadder(movement -> entity.value().movementState);        
       }
       return;
     }
@@ -157,22 +157,22 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      jump(*movement -> moveParams, movement -> movementState, movement -> playerId.value());
+      jump(*movement -> entity.value().moveParams, movement -> entity.value().movementState, movement -> entity.value().playerId);
       return;
     }
 
     if (key == '6' && action == 1){
       std::cout << "movement: request change control placeholder" << std::endl;
     }else if (key == '7' && action == 1){
-      auto obj = gameapi -> getGameObjectByName("enemy", gameapi -> listSceneId(movement -> playerId.value()), false).value();
+      auto obj = gameapi -> getGameObjectByName("enemy", gameapi -> listSceneId(movement -> entity.value().playerId), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
       // needs to create use a temporary camera mounted to the character
     }
     else if (key == '8' && action == 1){
-      auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> playerId.value()), false).value();
+      auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> entity.value().playerId), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
     }else if (key == '9' && action == 1){
-      auto obj = gameapi -> getGameObjectByName(">maincamera2", gameapi -> listSceneId(movement -> playerId.value()), false).value();
+      auto obj = gameapi -> getGameObjectByName(">maincamera2", gameapi -> listSceneId(movement -> entity.value().playerId), false).value();
       gameapi -> sendNotifyMessage("request:change-control", obj);
     }
 
@@ -200,7 +200,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> active){
+    if (!movement -> entity.has_value()){
       return;
     }
     movement -> controlParams.lookVelocity = glm::vec2(xPos, yPos);
@@ -212,14 +212,11 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     Movement* movement = static_cast<Movement*>(data);
     //checkMovementCollisions(*movement);
 
-    if (!movement -> active){
-      return;
-    }
-    if (!movement -> playerId.has_value()){
+    if (!movement -> entity.has_value()){
       return;
     }
 
-    onMovementFrame(*movement -> moveParams, movement -> movementState, movement -> playerId.value(), movement -> controlParams);
+    onMovementFrame(*movement -> entity.value().moveParams, movement -> entity.value().movementState, movement -> entity.value().playerId, movement -> controlParams);
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
@@ -232,12 +229,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       Movement* movement = static_cast<Movement*>(data);
       auto objIdValue = anycast<objid>(value); 
       modassert(objIdValue != NULL, "movement - request change control value invalid");
-      changeTargetId(*movement, *objIdValue, true);
+      changeTargetId(*movement, *objIdValue);
     }
-    if (!movement -> playerId.has_value()){
+    if (!movement -> entity.has_value()){
       return;
     }
-    auto id = movement -> playerId.value();
+    auto id = movement -> entity.value().playerId;
     if (key == "reload-config:movement"){
       Movement* movement = static_cast<Movement*>(data);
       auto strValue = anycast<std::string>(value); 
@@ -253,8 +250,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     Movement* movement = static_cast<Movement*>(data);
-    if (movement -> playerId.has_value() && movement -> playerId.value() == idRemoved){
-      movement -> playerId = std::nullopt;
+    if (movement -> entity.has_value() && movement -> entity.value().playerId == idRemoved){
+      movement -> entity = std::nullopt;
     }
   };
 
