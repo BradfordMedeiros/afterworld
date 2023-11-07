@@ -4,9 +4,11 @@
 #include <optional>
 #include "./util.h"
 #include "./global.h"
+#include "./movement/movement.h"
 
 std::optional<objid> getActivePlayerId();
-void setActivePlayer(objid id);
+void setActivePlayer(std::optional<objid> id);
+void setActivePlayerNext();
 void onActivePlayerRemoved(objid id);
 void printActivePlayer();
 void onPlayerFrame();

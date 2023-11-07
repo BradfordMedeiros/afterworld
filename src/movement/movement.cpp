@@ -9,10 +9,38 @@ struct MovementEntity {
 };
 
 struct Movement {
-  std::optional<int> activeEntity;
-  std::vector<MovementEntity> movementEntities;
   ControlParams controlParams;
 };
+
+std::optional<int> activeEntity;
+std::vector<MovementEntity> movementEntities;
+
+std::optional<int> entityIndex(objid playerId){
+  for (int i = 0; i < movementEntities.size(); i++){
+    if (movementEntities.at(i).playerId == playerId){
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+void setActiveEntity(objid id){
+  activeEntity = entityIndex(id).value();
+}
+std::optional<objid> setNextEntity(){
+  if (!activeEntity.has_value()){
+    if (movementEntities.size() > 0){
+      activeEntity = 0;
+      return movementEntities.at(0).playerId;
+    }
+    return std::nullopt;
+  }
+  auto nextIndex = activeEntity.value() + 1;
+  if (nextIndex >= movementEntities.size()){
+    nextIndex = 0;
+  }
+  activeEntity = nextIndex;
+  return movementEntities.at(nextIndex).playerId;
+}
 
 void updateObjectProperties(objid id, MovementParams& moveParams){
   GameobjAttributes attr {
@@ -49,34 +77,34 @@ MovementEntity createMovementEntity(objid id, std::string&& name){
   return movementEntity;
 }
 
-bool movementEntityExists(Movement& movement, objid id){
-  for (auto &movementEntity : movement.movementEntities){
+bool movementEntityExists(objid id){
+  for (auto &movementEntity : movementEntities){
     if (movementEntity.playerId == id){
       return true;
     }
   }
   return false;
 }
-void maybeAddMovementEntity(Movement& movement, objid id){
-  if (movementEntityExists(movement, id)){
+void maybeAddMovementEntity(objid id){
+  if (movementEntityExists(id)){
     return;
   }
   auto player = getSingleAttr(id, "player");
   if (player.has_value()){
-    movement.movementEntities.push_back(createMovementEntity(id, "default"));
+    movementEntities.push_back(createMovementEntity(id, "default"));
   }
 }
-void maybeRemoveMovementEntity(Movement& movement, objid id){
+void maybeRemoveMovementEntity(objid id){
   std::vector<MovementEntity> newEntities;
-  for (int i = 0; i < movement.movementEntities.size(); i++){
-    MovementEntity& movementEntity = movement.movementEntities.at(i);
+  for (int i = 0; i < movementEntities.size(); i++){
+    MovementEntity& movementEntity = movementEntities.at(i);
     if (movementEntity.playerId != id){
       newEntities.push_back(movementEntity);
-    }else if (i == movement.activeEntity.value()){
-      movement.activeEntity = std::nullopt;
+    }else if (i == activeEntity.value()){
+      activeEntity = std::nullopt;
     }
   }
-  movement.movementEntities = newEntities;
+  movementEntities = newEntities;
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -98,13 +126,6 @@ void changeTargetId(Movement& movement, objid id){
   movement.controlParams.goRight = false;
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);  
   reloadSettingsConfig(movement, "default");
-
-  for (int i = 0; i < movement.movementEntities.size(); i++){
-    if (movement.movementEntities.at(i).playerId == id){
-      movement.activeEntity = i;
-      break;
-    }
-  }
 }
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
@@ -119,7 +140,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
     for (auto id : gameapi -> getObjectsByAttr("player", std::nullopt, std::nullopt)){
-      maybeAddMovementEntity(*movement, id);
+      maybeAddMovementEntity(id);
     }
     return movement;
   };
@@ -133,7 +154,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> activeEntity.has_value()){
+    if (!activeEntity.has_value()){
       return;
     }
 
@@ -141,17 +162,17 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 341){  // ctrl
       if (action == 0 || action == 1){
-        MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+        MovementEntity& entity = movementEntities.at(activeEntity.value());
         maybeToggleCrouch(*entity.moveParams, entity.movementState, action == 1);
       }
     }
 
     if (key == 'R') { 
       if (action == 1){
-        MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+        MovementEntity& entity = movementEntities.at(activeEntity.value());
         attachToLadder(entity.movementState);
       }else if (action == 0){
-        MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+        MovementEntity& entity = movementEntities.at(activeEntity.value());
         releaseFromLadder(entity.movementState);        
       }
       return;
@@ -191,7 +212,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+      MovementEntity& entity = movementEntities.at(activeEntity.value());
       jump(*entity.moveParams, entity.movementState, entity.playerId);
       return;
     }
@@ -218,7 +239,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> activeEntity.has_value()){
+    if (!activeEntity.has_value()){
       return;
     }
     movement -> controlParams.lookVelocity = glm::vec2(xPos, yPos);
@@ -229,13 +250,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     Movement* movement = static_cast<Movement*>(data);
     //checkMovementCollisions(*movement);
-    if (!movement -> activeEntity.has_value()){
+    if (!activeEntity.has_value()){
       return;
     }
-    MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+    MovementEntity& entity = movementEntities.at(activeEntity.value());
     onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, movement -> controlParams);
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-    modlog("movement num entitiies: ", std::to_string(movement -> movementEntities.size()));
+    modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
   };
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
@@ -249,12 +270,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    maybeAddMovementEntity(*movement, idAdded);
+    maybeAddMovementEntity(idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    maybeRemoveMovementEntity(*movement, idRemoved);
+    maybeRemoveMovementEntity(idRemoved);
   };
 
   return binding;

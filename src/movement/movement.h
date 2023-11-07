@@ -5,6 +5,9 @@
 #include <vector>
 #include "./movementcore.h"
 
+void setActiveEntity(objid id);
+std::optional<objid> setNextEntity();
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 
 #endif

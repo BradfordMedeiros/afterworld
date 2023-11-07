@@ -35,10 +35,7 @@ void goToLevel(GameState& gameState, std::string sceneName){
   setPaused(false);
   gameState.loadedLevel = sceneName;
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
-  auto optCameraId = gameapi -> getGameObjectByName(">maincamera", sceneId, false);
-  if (optCameraId.has_value()){
-    setActivePlayer(optCameraId.value()); 
-  }
+  setActivePlayer(gameapi -> getGameObjectByName(">maincamera", sceneId, false)); 
   enterGameMode();
   pushHistory("playing");
 }
@@ -423,6 +420,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       spawnFromAllSpawnpoints("blue");
     }else if (key == '/' && action == 0){
       removeAllSpawnedEntities();
+    }else if (key == '-' && action == 0){
+      setActivePlayerNext();
     }
 
     if (action == 1){

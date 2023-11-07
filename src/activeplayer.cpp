@@ -7,10 +7,35 @@ std::optional<objid> activePlayerId = std::nullopt;
 std::optional<objid> getActivePlayerId(){
 	return activePlayerId;
 }
-void setActivePlayer(objid id){
-	gameapi -> setActiveCamera(id, -1);
-	activePlayerId = id;
-  gameapi -> sendNotifyMessage("active-player-change", id);
+
+void setCameraOrMakeTemp(objid id){
+	auto name = gameapi -> getGameObjNameForId(id).value();
+	auto isCamera = name.at(0) == '>';
+	if (isCamera){
+		gameapi -> setActiveCamera(id, -1);
+	}else{
+		modassert(false, "not a camera so need to make a new one");
+	}
+}
+void setActivePlayer(std::optional<objid> id){
+	if (!id.has_value()){
+		return;
+	}
+	setCameraOrMakeTemp(id.value());
+	activePlayerId = id.value();
+	setActiveEntity(id.value());
+  gameapi -> sendNotifyMessage("active-player-change", id.value());
+}
+
+void setActivePlayerNext(){
+	auto id = setNextEntity();
+	if (id.has_value()){
+		setCameraOrMakeTemp(id.value());
+		activePlayerId = id.value();
+	  gameapi -> sendNotifyMessage("active-player-change", id.value());
+	}else{
+		modassert(false, "setActivePlayerNext no next item");
+	}
 }
 
 void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
