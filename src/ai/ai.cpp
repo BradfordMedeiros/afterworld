@@ -119,7 +119,7 @@ void maybeAddAgent(AiData& aiData, objid id){
 void maybeRemoveAgent(AiData& aiData, objid id){
   std::vector<Agent> newAgents;
   for (auto &agent : aiData.agents){
-    if(gameapi -> gameobjExists(agent.id)){
+    if(agent.id != id){
       newAgents.push_back(agent);
     }
   }

@@ -1,9 +1,5 @@
 #include "./movement.h"
 
-// For parity in behavior of all scripts need to restore 
-//    ironsight mode
-//    dash ability
-
 extern CustomApiBindings* gameapi;
 
 struct MovementEntity {
@@ -12,12 +8,11 @@ struct MovementEntity {
   MovementState movementState;
 };
 
-
 struct Movement {
-  ControlParams controlParams; // controls
-  std::optional<MovementEntity> entity;
+  std::optional<int> activeEntity;
+  std::vector<MovementEntity> movementEntities;
+  ControlParams controlParams;
 };
-
 
 void updateObjectProperties(objid id, MovementParams& moveParams){
   GameobjAttributes attr {
@@ -37,16 +32,53 @@ void updateObjectProperties(objid id, MovementParams& moveParams){
   gameapi -> setGameObjectAttr(id, attr);
 }
 
-void reloadMovementConfig(Movement& movement, objid id, std::string name){
+MovementEntity createMovementEntity(objid id, std::string&& name){
+  MovementEntity movementEntity {
+    .playerId = id,
+  };
+  movementEntity.movementState = getInitialMovementState(movementEntity.playerId);
+
   loadMovementCore(name);
-  movement.entity.value().moveParams = findMovementCore(name);
-  modassert(movement.entity.value().moveParams, "could not find movement core");
+  movementEntity.moveParams = findMovementCore(name);
+  modassert(movementEntity.moveParams, "could not find movement core");
+  movementEntity.movementState.lastMoveSoundPlayTime = 0.f;
+  movementEntity.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
-  updateObjectProperties(id, *movement.entity.value().moveParams);
+  updateObjectProperties(id, *movementEntity.moveParams);
 
-  movement.entity.value().movementState.lastMoveSoundPlayTime = 0.f;
-  movement.entity.value().movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+  return movementEntity;
 }
+
+bool movementEntityExists(Movement& movement, objid id){
+  for (auto &movementEntity : movement.movementEntities){
+    if (movementEntity.playerId == id){
+      return true;
+    }
+  }
+  return false;
+}
+void maybeAddMovementEntity(Movement& movement, objid id){
+  if (movementEntityExists(movement, id)){
+    return;
+  }
+  auto player = getSingleAttr(id, "player");
+  if (player.has_value()){
+    movement.movementEntities.push_back(createMovementEntity(id, "default"));
+  }
+}
+void maybeRemoveMovementEntity(Movement& movement, objid id){
+  std::vector<MovementEntity> newEntities;
+  for (int i = 0; i < movement.movementEntities.size(); i++){
+    MovementEntity& movementEntity = movement.movementEntities.at(i);
+    if (movementEntity.playerId != id){
+      newEntities.push_back(movementEntity);
+    }else if (i == movement.activeEntity.value()){
+      movement.activeEntity = std::nullopt;
+    }
+  }
+  movement.movementEntities = newEntities;
+}
+
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
     "select xsensitivity, ysensitivity from settings where profile = " + name,
@@ -59,30 +91,26 @@ void reloadSettingsConfig(Movement& movement, std::string name){
   movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
-
 void changeTargetId(Movement& movement, objid id){
-  movement.entity = MovementEntity{
-    .playerId = id,
-  };
-
   movement.controlParams.goForward = false;
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
   movement.controlParams.goRight = false;
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.entity.value().movementState = getInitialMovementState(movement.entity.value().playerId);
-
-  reloadMovementConfig(movement, movement.entity.value().playerId, "default");
+  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);  
   reloadSettingsConfig(movement, "default");
-}
 
+  for (int i = 0; i < movement.movementEntities.size(); i++){
+    if (movement.movementEntities.at(i).playerId == id){
+      movement.activeEntity = i;
+      break;
+    }
+  }
+}
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
-
-    movement -> entity = std::nullopt;
 
     movement -> controlParams.goForward = false;
     movement -> controlParams.goBackward = false;
@@ -90,6 +118,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.goRight = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
+    for (auto id : gameapi -> getObjectsByAttr("player", std::nullopt, std::nullopt)){
+      maybeAddMovementEntity(*movement, id);
+    }
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -102,7 +133,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> entity.has_value()){
+    if (!movement -> activeEntity.has_value()){
       return;
     }
 
@@ -110,15 +141,18 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 341){  // ctrl
       if (action == 0 || action == 1){
-        maybeToggleCrouch(*movement -> entity.value().moveParams, movement -> entity.value().movementState, action == 1);
+        MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+        maybeToggleCrouch(*entity.moveParams, entity.movementState, action == 1);
       }
     }
 
     if (key == 'R') { 
       if (action == 1){
-        attachToLadder(movement -> entity.value().movementState);
+        MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+        attachToLadder(entity.movementState);
       }else if (action == 0){
-        releaseFromLadder(movement -> entity.value().movementState);        
+        MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+        releaseFromLadder(entity.movementState);        
       }
       return;
     }
@@ -157,25 +191,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      jump(*movement -> entity.value().moveParams, movement -> entity.value().movementState, movement -> entity.value().playerId);
+      MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+      jump(*entity.moveParams, entity.movementState, entity.playerId);
       return;
     }
-
-    if (key == '6' && action == 1){
-      std::cout << "movement: request change control placeholder" << std::endl;
-    }else if (key == '7' && action == 1){
-      auto obj = gameapi -> getGameObjectByName("enemy", gameapi -> listSceneId(movement -> entity.value().playerId), false).value();
-      gameapi -> sendNotifyMessage("request:change-control", obj);
-      // needs to create use a temporary camera mounted to the character
-    }
-    else if (key == '8' && action == 1){
-      auto obj = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(movement -> entity.value().playerId), false).value();
-      gameapi -> sendNotifyMessage("request:change-control", obj);
-    }else if (key == '9' && action == 1){
-      auto obj = gameapi -> getGameObjectByName(">maincamera2", gameapi -> listSceneId(movement -> entity.value().playerId), false).value();
-      gameapi -> sendNotifyMessage("request:change-control", obj);
-    }
-
   };
   binding.onMouseCallback = [](objid _, void* data, int button, int action, int mods) -> void {
     if (isPaused()){
@@ -198,9 +217,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (isPaused()){
       return;
     }
-    //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
     Movement* movement = static_cast<Movement*>(data);
-    if (!movement -> entity.has_value()){
+    if (!movement -> activeEntity.has_value()){
       return;
     }
     movement -> controlParams.lookVelocity = glm::vec2(xPos, yPos);
@@ -211,16 +229,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     Movement* movement = static_cast<Movement*>(data);
     //checkMovementCollisions(*movement);
-
-    if (!movement -> entity.has_value()){
+    if (!movement -> activeEntity.has_value()){
       return;
     }
-
-    onMovementFrame(*movement -> entity.value().moveParams, movement -> entity.value().movementState, movement -> entity.value().playerId, movement -> controlParams);
-
+    MovementEntity& entity = movement -> movementEntities.at(movement -> activeEntity.value());
+    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, movement -> controlParams);
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-
-    //std::cout << movementToStr(*movement) << std::endl;
+    modlog("movement num entitiies: ", std::to_string(movement -> movementEntities.size()));
   };
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
@@ -231,28 +246,15 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       modassert(objIdValue != NULL, "movement - request change control value invalid");
       changeTargetId(*movement, *objIdValue);
     }
-    if (!movement -> entity.has_value()){
-      return;
-    }
-    auto id = movement -> entity.value().playerId;
-    if (key == "reload-config:movement"){
-      Movement* movement = static_cast<Movement*>(data);
-      auto strValue = anycast<std::string>(value); 
-      modassert(strValue != NULL, "reload-config:movement reload value invalid");
-      reloadMovementConfig(*movement, id, *strValue);
-    }else if (key == "reload-config:settings"){
-      Movement* movement = static_cast<Movement*>(data);
-      auto strValue = anycast<std::string>(value);
-      modassert(strValue != NULL, "reload-config:settings reload value invalid");
-      reloadSettingsConfig(*movement, *strValue);      
-    }
   };
 
+  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
+    Movement* movement = static_cast<Movement*>(data);
+    maybeAddMovementEntity(*movement, idAdded);
+  };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     Movement* movement = static_cast<Movement*>(data);
-    if (movement -> entity.has_value() && movement -> entity.value().playerId == idRemoved){
-      movement -> entity = std::nullopt;
-    }
+    maybeRemoveMovementEntity(*movement, idRemoved);
   };
 
   return binding;
