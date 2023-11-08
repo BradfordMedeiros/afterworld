@@ -14,3 +14,4 @@ enemy:tint:1 0 0 0.5
 enemy:layer:transparency
 enemy:physics_damping_linear:0.9
 enemy:move-vertical:true
+enemy:player:true
