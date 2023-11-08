@@ -3,25 +3,43 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> activePlayerId = std::nullopt;
+std::optional<objid> tempCameraId = std::nullopt;
 
 std::optional<objid> getActivePlayerId(){
 	return activePlayerId;
 }
 
 void setCameraOrMakeTemp(objid id){
+	if (tempCameraId.has_value()){
+		gameapi -> removeObjectById(tempCameraId.value());
+	}
 	auto name = gameapi -> getGameObjNameForId(id).value();
 	auto isCamera = name.at(0) == '>';
 	if (isCamera){
 		gameapi -> setActiveCamera(id, -1);
 	}else{
-		modassert(false, "not a camera so need to make a new one");
+    GameobjAttributes attr {
+      .stringAttributes = { },
+      .numAttributes = {},
+      .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 5.f) }},  .vec4 = {} },
+    };
+    std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), cameraName, attr, submodelAttributes).value();
+    tempCameraId = cameraId;
+    gameapi -> makeParent(cameraId, id);
+    gameapi -> setActiveCamera(cameraId, -1);
 	}
 }
 void setActivePlayer(std::optional<objid> id){
 	if (!id.has_value()){
 		return;
 	}
+	if (activePlayerId.has_value()){
+	  gameapi -> sendNotifyMessage("ai-activate", activePlayerId.value());
+	}
 	setCameraOrMakeTemp(id.value());
+  gameapi -> sendNotifyMessage("ai-deactivate", id.value());
 	activePlayerId = id.value();
 	setActiveEntity(id.value());
   gameapi -> sendNotifyMessage("active-player-change", id.value());
@@ -30,7 +48,11 @@ void setActivePlayer(std::optional<objid> id){
 void setActivePlayerNext(){
 	auto id = setNextEntity();
 	if (id.has_value()){
+		if (activePlayerId.has_value()){
+		  gameapi -> sendNotifyMessage("ai-activate", activePlayerId.value());
+		}
 		setCameraOrMakeTemp(id.value());
+	  gameapi -> sendNotifyMessage("ai-deactivate", id.value());
 		activePlayerId = id.value();
 	  gameapi -> sendNotifyMessage("active-player-change", id.value());
 	}else{

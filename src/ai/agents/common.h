@@ -7,6 +7,7 @@
 enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET };
 struct Agent { 
   objid id;
+  bool enabled;
   AgentType type;
   std::any agentData;
 };

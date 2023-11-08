@@ -3,6 +3,7 @@
 Agent createTurretAgent(objid id){
 	return Agent{
     .id = id,
+    .enabled = true,
     .type = AGENT_TURRET,
     .agentData = NULL,
   };

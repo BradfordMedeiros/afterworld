@@ -127,6 +127,27 @@ void maybeRemoveAgent(AiData& aiData, objid id){
 }
 
 
+void maybeDisableAi(AiData& aiData, objid id){
+  //modassert(false, std::string("disable ai placeholder: ") + gameapi -> getGameObjNameForId(id).value());
+  for (auto &agent : aiData.agents){
+    if (agent.id == id){
+      agent.enabled = false;
+      modlog("ai - disable - ", gameapi -> getGameObjNameForId(id).value());
+      break;
+    }
+  }
+}
+void maybeReEnableAi(AiData& aiData, objid id){
+  //modassert(false, std::string("enable ai placeholder: ") + gameapi -> getGameObjNameForId(id).value());
+  for (auto &agent : aiData.agents){
+    if (agent.id == id){
+      agent.enabled = true;
+      modlog("ai - enable - ", gameapi -> getGameObjNameForId(id).value());
+      break;
+    }
+  }
+}
+
 std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
   if (agent.type == AGENT_BASIC_AGENT){
     return getGoalsForBasicAgent(worldInfo, agent);
@@ -175,6 +196,9 @@ void onAiFrame(AiData& aiData){
   detectWorldInfo(aiData.worldInfo, aiData.agents);
 
   for (auto &agent : aiData.agents){
+    if (!agent.enabled){
+      continue;
+    }
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
     }
@@ -238,6 +262,16 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     AiData* aiData = static_cast<AiData*>(data);
+    if (key == "ai-activate"){
+      objid* id = anycast<objid>(value);
+      modassert(id, "ai-activate null");
+      maybeReEnableAi(*aiData, *id);
+    }else if (key == "ai-deactivate"){
+      objid* id = anycast<objid>(value);
+      modassert(id, "ai-deactivate null");
+      maybeDisableAi(*aiData, *id);
+    }
+
     for (auto &agent : aiData -> agents){
       if (agent.type == AGENT_BASIC_AGENT){
         onMessageBasicAgent(agent, key, value);

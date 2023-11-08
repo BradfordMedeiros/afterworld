@@ -17,6 +17,7 @@ Agent createBasicAgent(objid id){
   auto moveVerticalAttr = getSingleAttr(id, "move-vertical");
 	return Agent{
     .id = id,
+    .enabled = true,
     .type = AGENT_BASIC_AGENT,
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,

@@ -5,6 +5,7 @@
 #include "./util.h"
 #include "./global.h"
 #include "./movement/movement.h"
+#include "./ai/ai.h"
 
 std::optional<objid> getActivePlayerId();
 void setActivePlayer(std::optional<objid> id);
