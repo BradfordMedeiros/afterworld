@@ -21,7 +21,7 @@ void setCameraOrMakeTemp(objid id){
     GameobjAttributes attr {
       .stringAttributes = { },
       .numAttributes = {},
-      .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 5.f) }},  .vec4 = {} },
+      .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 10.f) }},  .vec4 = {} },
     };
     std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
     std::map<std::string, GameobjAttributes> submodelAttributes;
