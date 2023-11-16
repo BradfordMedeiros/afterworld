@@ -101,10 +101,6 @@ void moveUp(objid id, glm::vec2 direction){
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
-void moveDown(objid id, glm::vec2 direction){
-  float time = gameapi -> timeElapsed();
-  gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
-}
 
 void moveXZ(objid id, glm::vec2 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
   //modlog("editor: move xz: ", print(direction));
@@ -179,11 +175,11 @@ void restrictLadderMovement(MovementState& movementState, objid id, bool movingD
   }
 }
 
-void look(MovementParams& moveParams, MovementState& movementState, objid id, float elapsedTime, bool ironsight, float ironsight_turn, glm::vec2 lookVelocity, ControlParams& controlParams){
+void look(MovementParams& moveParams, MovementState& movementState, objid id, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
-  float raw_deltax = lookVelocity.x * controlParams.xsensitivity * elapsedTime;
-  float raw_deltay = -1.f * lookVelocity.y * controlParams.ysensitivity * elapsedTime; 
+  float raw_deltax = turnX * elapsedTime;
+  float raw_deltay = turnY * elapsedTime; 
 
   float deltax = ironsight ? (raw_deltax * ironsight_turn) : raw_deltax;
   float deltay = ironsight ? (raw_deltay * ironsight_turn) : raw_deltay;
@@ -253,7 +249,7 @@ void updateCrouch(MovementParams& moveParams, MovementState& movementState, obji
 }
 
 
-bool shouldStepUp(objid id){
+bool shouldStepUp(objid id){ // check this logic 
   auto playerPos = gameapi -> getGameObjectPos(id, true);
   auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true) * glm::vec3(0.f, 0.f, -1.f);
   auto inFrontOfPlayerSameHeight = playerPos + glm::vec3(inFrontOfPlayer.x, 0.f, inFrontOfPlayer.z);
@@ -261,7 +257,7 @@ bool shouldStepUp(objid id){
   auto belowPos = playerPos - glm::vec3(0.f, 0.95f, 0.f);
   auto belowPosSameHeight = inFrontOfPlayerSameHeight - glm::vec3(0.f, 0.95f, 0.f);
   
-  auto abovePos = playerPos - glm::vec3(0.f, 0.2f, 0.f);
+  auto abovePos = playerPos - glm::vec3(0.f, 1.f, 0.f);
   auto abovePosSameHeight = inFrontOfPlayerSameHeight - glm::vec3(0.f, 0.2f, 0.f);
 
   auto belowDir = gameapi -> orientationFromPos(belowPos, belowPosSameHeight);
@@ -396,45 +392,68 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
   }
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
-  float horzRelVelocity = 0.8f;
-  glm::vec2 moveVec(0.f, 0.f);
+struct MovementControlData {
+  glm::vec2 moveVec;
+  bool isWalking;
+  bool isSideStepping;
+  bool isClimbingLadder;
+  bool stepUpControl;
+  float raw_deltax;
+  float raw_deltay;
+};
+MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState){
+  MovementControlData controlData {
+    .moveVec = glm::vec2(0.f, 0.f),
+    .isWalking = false,
+    .isSideStepping = false,
+    .isClimbingLadder = false,
+    .stepUpControl = false,
+    .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
+    .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
+  };
 
-  bool shouldMoveXZ = false;
-  bool isSideStepping = false;
+  static float horzRelVelocity = 0.8f;
+
   if (controlParams.goForward){
     std::cout << "should move forward" << std::endl;
-    moveVec += glm::vec2(0.f, -1.f);
+    controlData.moveVec += glm::vec2(0.f, -1.f);
     if (movementState.facingLadder || movementState.attachedToLadder){
-      moveUp(playerId, moveVec);
+      controlData.isClimbingLadder = true;
     }else{
-      shouldMoveXZ = true;
+      controlData.isWalking = true;
     }
   }
   if (controlParams.goBackward){
-    moveVec += glm::vec2(0.f, 1.f);
+    controlData.moveVec += glm::vec2(0.f, 1.f);
     if (movementState.facingLadder || movementState.attachedToLadder){
-      moveDown(playerId, moveVec);
+      controlData.isClimbingLadder = true;
     }else{
-      shouldMoveXZ = true;
+      controlData.isWalking = true;
     }
   }
   if (controlParams.goLeft){
-    moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
+    controlData.moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
     if (!movementState.attachedToLadder){
-      shouldMoveXZ = true;
-      isSideStepping = true;
+      controlData.isWalking = true;
+      controlData.isSideStepping = true;
     }
     
   }
   if (controlParams.goRight){
-    moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
+    controlData.moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
     if (!movementState.attachedToLadder){
-      shouldMoveXZ = true;
-      isSideStepping = true;
+      controlData.isWalking = true;
+      controlData.isSideStepping = true;
     }
   }
+  controlData.stepUpControl = controlParams.goForward;
 
+  return controlData;
+}
+
+
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
+  auto controlData = getMovementControlData(controlParams, movementState);
 
   std::vector<glm::quat> hitDirections;
 
@@ -472,13 +491,13 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
 
   float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded);
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(moveVec.x, 0.f, moveVec.y), hitDirections, rotationWithoutY);
+  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, 0.f, controlData.moveVec.y), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;
   auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
 
-  if (shouldMoveXZ){
+  if (controlData.isWalking){
     moveXZ(playerId, moveSpeed * direction);
-    if (isSideStepping){
+    if (controlData.isSideStepping){
       gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
         .entityId = playerId,
         .transition = "sidestep",
@@ -489,6 +508,12 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
         .transition = "walking",
       });
     }
+  }else if (controlData.isClimbingLadder){
+    moveUp(playerId, controlData.moveVec);
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = playerId,
+      .transition = "not-walking",
+    });
   }else{
     gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
       .entityId = playerId,
@@ -511,7 +536,7 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
 
   float elapsedTime = gameapi -> timeElapsed();
 
-  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlParams.lookVelocity, controlParams); // (look elapsedTime ironsight-mode ironsight-turn)
+  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
 
   bool movingDown = false;
   updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
@@ -520,7 +545,7 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   restrictLadderMovement(movementState, playerId, movingDown);
   updateCrouch(moveParams, movementState, playerId);
 
-  auto shouldStep = shouldStepUp(playerId) && controlParams.goForward;
+  auto shouldStep = shouldStepUp(playerId) && controlData.stepUpControl;
   //std::cout << "should step up: " << shouldStep << std::endl;
   if (shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
