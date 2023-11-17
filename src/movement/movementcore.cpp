@@ -102,39 +102,25 @@ void moveUp(objid id, glm::vec2 direction){
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
 
-void moveXZ(objid id, glm::vec2 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
+
+void moveXZAbsolute(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
   //modlog("editor: move xz: ", print(direction));
   float time = gameapi -> timeElapsed();
-  auto playerRotation = gameapi -> getGameObjectRotation(id, true);
-  auto directionVec = playerRotation * glm::vec3(direction.x, 0.f, direction.y);
+  auto directionVec = direction;
+  directionVec.y = 0.f;
+
   auto magnitude = glm::length(directionVec);
   if (aboutEqual(magnitude, 0.f)){
     //modassert(false, "magnitude was about zero");
     modlog("movement", "warning magnitude was about zero");
     return;
   }
-  directionVec.y = 0.f;
   gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
 }
 
-glm::vec3 getRelativeDirection(objid id, glm::vec3 direction){
-  auto playerRotation = gameapi -> getGameObjectRotation(id, true);
-  auto directionVec = playerRotation * direction;
-  return directionVec;
-}
-void moveXZAbs(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
-  //modlog("editor: move xz: ", print(direction));
-  float time = gameapi -> timeElapsed();
-  auto directionVec = glm::vec3(direction.x, 0.f, direction.z);
-  auto magnitude = glm::length(directionVec);
-  if (aboutEqual(magnitude, 0.f)){
-    //modassert(false, "magnitude was about zero");
-    modlog("movement", "warning magnitude was about zero");
-    return;
-  }
-  directionVec.y = 0.f;
-  gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
-}
+
+
+
 
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(MovementParams& moveParams, MovementState& movementState, bool ironsight, bool isGrounded){
@@ -500,18 +486,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   return controlData;
 }
 
-
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
-  auto controlData = getMovementControlData(controlParams, movementState);
-
-  //auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState);
-  //controlData.raw_deltax = controlData1.raw_deltax;
-  //controlData.raw_deltay = controlData1.raw_deltay;
-
-  //if (glm::abs(controlData1.moveVec.x) > 0  || glm::abs(controlData1.moveVec.y) > 0){
-  //  controlData.moveVec = controlData1.moveVec;
-  //}
-
+void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -550,10 +525,10 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
   auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, 0.f, controlData.moveVec.y), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;
-  auto direction = glm::vec2(limitedMoveVec.x, limitedMoveVec.z);
+  auto direction = glm::vec3(limitedMoveVec.x, 0.f, limitedMoveVec.z);
 
   if (controlData.isWalking){
-    moveXZ(playerId, moveSpeed * direction);
+    moveXZAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
     if (controlData.isSideStepping){
       gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
         .entityId = playerId,
@@ -607,6 +582,25 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   if (shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
+}
+
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
+  if (!movementState.isCrouching){
+    auto controlData = getMovementControlData(controlParams, movementState);
+    onMovementFrameControl(moveParams, movementState, playerId, controlData);
+  }else{
+    auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState);
+    onMovementFrameControl(moveParams, movementState, playerId, controlData);
+  }
+
+  //auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState);
+  //controlData.raw_deltax = controlData1.raw_deltax;
+  //controlData.raw_deltay = controlData1.raw_deltay;
+
+  //if (glm::abs(controlData1.moveVec.x) > 0  || glm::abs(controlData1.moveVec.y) > 0){
+  //  controlData.moveVec = controlData1.moveVec;
+  //}
+
 }
 
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
