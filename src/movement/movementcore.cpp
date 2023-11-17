@@ -117,6 +117,25 @@ void moveXZ(objid id, glm::vec2 direction){ // i wonder if i should make this ac
   gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
 }
 
+glm::vec3 getRelativeDirection(objid id, glm::vec3 direction){
+  auto playerRotation = gameapi -> getGameObjectRotation(id, true);
+  auto directionVec = playerRotation * direction;
+  return directionVec;
+}
+void moveXZAbs(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
+  //modlog("editor: move xz: ", print(direction));
+  float time = gameapi -> timeElapsed();
+  auto directionVec = glm::vec3(direction.x, 0.f, direction.z);
+  auto magnitude = glm::length(directionVec);
+  if (aboutEqual(magnitude, 0.f)){
+    //modassert(false, "magnitude was about zero");
+    modlog("movement", "warning magnitude was about zero");
+    return;
+  }
+  directionVec.y = 0.f;
+  gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
+}
+
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(MovementParams& moveParams, MovementState& movementState, bool ironsight, bool isGrounded){
   auto baseMoveSpeed = movementState.isCrouching ? moveParams.crouchSpeed : moveParams.moveSpeed;
@@ -401,6 +420,36 @@ struct MovementControlData {
   float raw_deltax;
   float raw_deltay;
 };
+
+// This is obviously wrong, but a starting point
+MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState){
+  MovementControlData controlData {
+    .moveVec = glm::vec2(0.f, 0.f),
+    .isWalking = false,
+    .isSideStepping = false,
+    .isClimbingLadder = false,
+    .stepUpControl = false,
+    .raw_deltax = 0.f,
+    .raw_deltay = 0.f
+  };
+
+  glm::vec3 positionDiff = targetPosition - movementState.lastPosition;
+  controlData.moveVec = glm::vec2(positionDiff.x, positionDiff.z);
+  auto moveLength = glm::length(controlData.moveVec);
+
+  if (moveLength < 0.1){  // already arrived
+    return controlData;
+  }
+
+  controlData.isWalking = true;
+  if (moveLength){
+    controlData.moveVec = glm::normalize(controlData.moveVec);
+  }
+
+  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(controlData.moveVec));
+  return controlData;
+}
+
 MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState){
   MovementControlData controlData {
     .moveVec = glm::vec2(0.f, 0.f),
@@ -454,6 +503,14 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
 
 void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
   auto controlData = getMovementControlData(controlParams, movementState);
+
+  //auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState);
+  //controlData.raw_deltax = controlData1.raw_deltax;
+  //controlData.raw_deltay = controlData1.raw_deltay;
+
+  //if (glm::abs(controlData1.moveVec.x) > 0  || glm::abs(controlData1.moveVec.y) > 0){
+  //  controlData.moveVec = controlData1.moveVec;
+  //}
 
   std::vector<glm::quat> hitDirections;
 
