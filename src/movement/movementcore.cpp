@@ -400,37 +400,42 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 struct MovementControlData {
   glm::vec2 moveVec;
   bool isWalking;
-  bool isSideStepping;
-  bool isClimbingLadder;
-  bool stepUpControl;
+  bool doJump;
   float raw_deltax;
   float raw_deltay;
 };
 
 // This is obviously wrong, but a starting point
-MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState){
+MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3> targetPositionOpt, MovementState& movementState, objid playerId){
   MovementControlData controlData {
     .moveVec = glm::vec2(0.f, 0.f),
     .isWalking = false,
-    .isSideStepping = false,
-    .isClimbingLadder = false,
-    .stepUpControl = false,
+    .doJump = false,
     .raw_deltax = 0.f,
     .raw_deltay = 0.f
   };
-
-  glm::vec3 positionDiff = targetPosition - movementState.lastPosition;
-  controlData.moveVec = glm::vec2(positionDiff.x, positionDiff.z);
-  auto moveLength = glm::length(controlData.moveVec);
-
-  if (moveLength < 0.1){  // already arrived
+  if (!targetPositionOpt.has_value()){
     return controlData;
   }
 
-  controlData.isWalking = true;
+  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
+  auto targetPosition = targetPositionOpt.value();
+  glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
+  positionDiff = glm::inverse(playerDirection) * positionDiff;
+
+  controlData.moveVec = glm::vec2(positionDiff.x, positionDiff.z);
+  auto moveLength = glm::length(controlData.moveVec);
+
+  if (moveLength < 0.5){  // already arrived
+    controlData.doJump = true;
+    return controlData;
+  }
+
   if (moveLength){
     controlData.moveVec = glm::normalize(controlData.moveVec);
   }
+
+  controlData.isWalking = true;
 
   modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(controlData.moveVec));
   return controlData;
@@ -440,9 +445,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   MovementControlData controlData {
     .moveVec = glm::vec2(0.f, 0.f),
     .isWalking = false,
-    .isSideStepping = false,
-    .isClimbingLadder = false,
-    .stepUpControl = false,
+    .doJump = controlParams.doJump,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
   };
@@ -452,17 +455,13 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   if (controlParams.goForward){
     std::cout << "should move forward" << std::endl;
     controlData.moveVec += glm::vec2(0.f, -1.f);
-    if (movementState.facingLadder || movementState.attachedToLadder){
-      controlData.isClimbingLadder = true;
-    }else{
+    if (!(movementState.facingLadder || movementState.attachedToLadder)){
       controlData.isWalking = true;
     }
   }
   if (controlParams.goBackward){
     controlData.moveVec += glm::vec2(0.f, 1.f);
-    if (movementState.facingLadder || movementState.attachedToLadder){
-      controlData.isClimbingLadder = true;
-    }else{
+    if (!(movementState.facingLadder || movementState.attachedToLadder)){
       controlData.isWalking = true;
     }
   }
@@ -470,7 +469,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     controlData.moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
     if (!movementState.attachedToLadder){
       controlData.isWalking = true;
-      controlData.isSideStepping = true;
     }
     
   }
@@ -478,10 +476,8 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     controlData.moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
     if (!movementState.attachedToLadder){
       controlData.isWalking = true;
-      controlData.isSideStepping = true;
     }
   }
-  controlData.stepUpControl = controlParams.goForward;
 
   return controlData;
 }
@@ -529,7 +525,8 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
 
   if (controlData.isWalking){
     moveXZAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
-    if (controlData.isSideStepping){
+    bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.y);
+    if (isSideStepping){
       gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
         .entityId = playerId,
         .transition = "sidestep",
@@ -540,7 +537,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
         .transition = "walking",
       });
     }
-  }else if (controlData.isClimbingLadder){
+  }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     moveUp(playerId, controlData.moveVec);
     gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
       .entityId = playerId,
@@ -577,7 +574,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   restrictLadderMovement(movementState, playerId, movingDown);
   updateCrouch(moveParams, movementState, playerId);
 
-  auto shouldStep = shouldStepUp(playerId) && controlData.stepUpControl;
+  auto shouldStep = shouldStepUp(playerId) && (direction.z < 0 /* going forward */ );
   //std::cout << "should step up: " << shouldStep << std::endl;
   if (shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
@@ -588,18 +585,16 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   if (!movementState.isCrouching){
     auto controlData = getMovementControlData(controlParams, movementState);
     onMovementFrameControl(moveParams, movementState, playerId, controlData);
+    if (controlData.doJump){
+      jump(moveParams, movementState, playerId);      
+    }
   }else{
-    auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState);
+    auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState, playerId);
     onMovementFrameControl(moveParams, movementState, playerId, controlData);
+    if (controlData.doJump){
+      jump(moveParams, movementState, playerId);      
+    }
   }
-
-  //auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState);
-  //controlData.raw_deltax = controlData1.raw_deltax;
-  //controlData.raw_deltay = controlData1.raw_deltay;
-
-  //if (glm::abs(controlData1.moveVec.x) > 0  || glm::abs(controlData1.moveVec.y) > 0){
-  //  controlData.moveVec = controlData1.moveVec;
-  //}
 
 }
 

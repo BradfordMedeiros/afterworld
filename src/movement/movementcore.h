@@ -16,7 +16,9 @@ struct ControlParams {
   bool goLeft;
   bool goRight;
 
-  glm::vec2 lookVelocity;      
+  glm::vec2 lookVelocity;
+
+  bool doJump;   
 };
 
 struct MovementParams {

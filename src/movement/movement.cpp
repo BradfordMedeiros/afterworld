@@ -124,6 +124,7 @@ void changeTargetId(Movement& movement, objid id){
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
   movement.controlParams.goRight = false;
+  movement.controlParams.doJump = false;
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);  
   reloadSettingsConfig(movement, "default");
 }
@@ -137,6 +138,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.goBackward = false;
     movement -> controlParams.goLeft = false;
     movement -> controlParams.goRight = false;
+    movement -> controlParams.doJump = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
 
     for (auto id : gameapi -> getObjectsByAttr("player", std::nullopt, std::nullopt)){
@@ -212,8 +214,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == 32 /* space */ && action == 1){
-      MovementEntity& entity = movementEntities.at(activeEntity.value());
-      jump(*entity.moveParams, entity.movementState, entity.playerId);
+      Movement* movement = static_cast<Movement*>(data);
+      movement -> controlParams.doJump = true;
       return;
     }
   };
@@ -255,7 +257,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     MovementEntity& entity = movementEntities.at(activeEntity.value());
     onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, movement -> controlParams);
+
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+    movement -> controlParams.doJump = false;
+
     modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
   };
 
