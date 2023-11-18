@@ -219,23 +219,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
   };
-  binding.onMouseCallback = [](objid _, void* data, int button, int action, int mods) -> void {
-    if (isPaused()){
-      return;
-    }
-    Movement* movement = static_cast<Movement*>(data);
-    if (button == 1){
-      if (action == 0){
-        std::vector<glm::quat> hitDirections;
-        //checkMovementCollisions(*movement, hitDirections);
-        for (auto &hitDirection : hitDirections){
-          std::cout << "hit direction is: " << print(directionFromQuat(hitDirection)) << std::endl;
-        }
-        //checkMovementCollisions(*movement);
-      }
-    }
-  };
-
   binding.onMouseMoveCallback = [](objid _, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
     if (isPaused()){
       return;
