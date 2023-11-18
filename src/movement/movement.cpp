@@ -171,11 +171,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 'R') { 
       if (action == 1){
-        MovementEntity& entity = movementEntities.at(activeEntity.value());
-        attachToLadder(entity.movementState);
+        movement -> controlParams.doAttachToLadder = true;
       }else if (action == 0){
-        MovementEntity& entity = movementEntities.at(activeEntity.value());
-        releaseFromLadder(entity.movementState);        
+        movement -> controlParams.doReleaseFromLadder = true;
       }
       return;
     }
@@ -243,6 +241,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
     movement -> controlParams.doJump = false;
+    movement -> controlParams.doAttachToLadder = false;
+    movement -> controlParams.doReleaseFromLadder = false;
 
     modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
   };

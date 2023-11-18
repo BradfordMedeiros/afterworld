@@ -401,6 +401,8 @@ struct MovementControlData {
   glm::vec2 moveVec;
   bool isWalking;
   bool doJump;
+  bool doAttachToLadder;
+  bool doReleaseFromLadder;
   float raw_deltax;
   float raw_deltay;
 };
@@ -411,6 +413,8 @@ MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3>
     .moveVec = glm::vec2(0.f, 0.f),
     .isWalking = false,
     .doJump = false,
+    .doAttachToLadder = false,
+    .doReleaseFromLadder = false,
     .raw_deltax = 0.f,
     .raw_deltay = 0.f
   };
@@ -446,6 +450,8 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .moveVec = glm::vec2(0.f, 0.f),
     .isWalking = false,
     .doJump = controlParams.doJump,
+    .doAttachToLadder = controlParams.doAttachToLadder,
+    .doReleaseFromLadder = controlParams.doReleaseFromLadder,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
   };
@@ -582,20 +588,21 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
 }
 
 void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
-  if (!movementState.isCrouching){
-    auto controlData = getMovementControlData(controlParams, movementState);
-    onMovementFrameControl(moveParams, movementState, playerId, controlData);
-    if (controlData.doJump){
-      jump(moveParams, movementState, playerId);      
-    }
-  }else{
-    auto controlData = getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState, playerId);
-    onMovementFrameControl(moveParams, movementState, playerId, controlData);
-    if (controlData.doJump){
-      jump(moveParams, movementState, playerId);      
-    }
+  auto controlData = (
+    movementState.isCrouching ? 
+    getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState, playerId) : 
+    getMovementControlData(controlParams, movementState)
+  );
+  onMovementFrameControl(moveParams, movementState, playerId, controlData);
+  if (controlData.doJump){
+    jump(moveParams, movementState, playerId);      
   }
-
+  if (controlData.doAttachToLadder){
+    attachToLadder(movementState);
+  }
+  if (controlData.doReleaseFromLadder){
+    releaseFromLadder(movementState);       
+  }
 }
 
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){

@@ -18,7 +18,9 @@ struct ControlParams {
 
   glm::vec2 lookVelocity;
 
-  bool doJump;   
+  bool doJump;
+  bool doAttachToLadder;
+  bool doReleaseFromLadder;
 };
 
 struct MovementParams {
