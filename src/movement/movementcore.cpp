@@ -403,6 +403,7 @@ struct MovementControlData {
   bool doJump;
   bool doAttachToLadder;
   bool doReleaseFromLadder;
+  CrouchType crouchType;
   float raw_deltax;
   float raw_deltay;
 };
@@ -415,6 +416,7 @@ MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3>
     .doJump = false,
     .doAttachToLadder = false,
     .doReleaseFromLadder = false,
+    .crouchType = CROUCH_NONE,
     .raw_deltax = 0.f,
     .raw_deltay = 0.f
   };
@@ -452,6 +454,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .doJump = controlParams.doJump,
     .doAttachToLadder = controlParams.doAttachToLadder,
     .doReleaseFromLadder = controlParams.doReleaseFromLadder,
+    .crouchType = controlParams.crouchType,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
   };
@@ -602,6 +605,13 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   }
   if (controlData.doReleaseFromLadder){
     releaseFromLadder(movementState);       
+  }
+  if (controlData.crouchType != CROUCH_NONE){
+    if (controlData.crouchType == CROUCH_DOWN){
+      maybeToggleCrouch(moveParams, movementState, true);
+    }else if (controlParams.crouchType == CROUCH_UP){
+      maybeToggleCrouch(moveParams, movementState, false);
+    }
   }
 }
 

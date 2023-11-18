@@ -7,6 +7,7 @@
 #include "../resources.h"
 #include "../activeplayer.h"
 
+enum CrouchType { CROUCH_NONE, CROUCH_UP, CROUCH_DOWN };
 struct ControlParams {
   float xsensitivity;
   float ysensitivity;
@@ -21,6 +22,7 @@ struct ControlParams {
   bool doJump;
   bool doAttachToLadder;
   bool doReleaseFromLadder;
+  CrouchType crouchType;
 };
 
 struct MovementParams {

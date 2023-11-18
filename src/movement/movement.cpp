@@ -126,6 +126,9 @@ void changeTargetId(Movement& movement, objid id){
   movement.controlParams.goRight = false;
   movement.controlParams.doJump = false;
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);  
+  movement.controlParams.doAttachToLadder = false;
+  movement.controlParams.doReleaseFromLadder = false;
+  movement.controlParams.crouchType = CROUCH_NONE;
   reloadSettingsConfig(movement, "default");
 }
 
@@ -140,6 +143,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.goRight = false;
     movement -> controlParams.doJump = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+    movement -> controlParams.doAttachToLadder = false;
+    movement -> controlParams.doReleaseFromLadder = false;
+    movement -> controlParams.crouchType = CROUCH_NONE;
 
     for (auto id : gameapi -> getObjectsByAttr("player", std::nullopt, std::nullopt)){
       maybeAddMovementEntity(id);
@@ -164,8 +170,11 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     if (key == 341){  // ctrl
       if (action == 0 || action == 1){
-        MovementEntity& entity = movementEntities.at(activeEntity.value());
-        maybeToggleCrouch(*entity.moveParams, entity.movementState, action == 1);
+        if (action == 0){
+          movement -> controlParams.crouchType = CROUCH_UP;
+        }else if (action == 1){
+          movement -> controlParams.crouchType = CROUCH_DOWN;
+        }
       }
     }
 
@@ -243,6 +252,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.doJump = false;
     movement -> controlParams.doAttachToLadder = false;
     movement -> controlParams.doReleaseFromLadder = false;
+    movement -> controlParams.crouchType = CROUCH_NONE;
 
     modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
   };
