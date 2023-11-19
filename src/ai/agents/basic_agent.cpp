@@ -14,7 +14,7 @@ struct AgentAttackState {
 
 Agent createBasicAgent(objid id){
   auto initialHealth = getSingleFloatAttr(id, "health").value();
-  auto moveVerticalAttr = getSingleAttr(id, "move-vertical");
+  auto moveVerticalAttr = getSingleAttr(id, "move-vertical");  // probably shouldn't be in ai system, i think
 	return Agent{
     .id = id,
     .enabled = true,
@@ -192,17 +192,25 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   }
 }
 
+extern AIInterface aiInterface;
+
+const bool useMovementSystem = false;
 void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 5.f){
-  // right now this is just setting the obj position, but probably should rely on the navmesh, probably should be applying impulse instead?
+  if (!useMovementSystem){  // simple behavior for debug
+    auto agentPos = gameapi -> getGameObjectPos(agentId, true);
+    auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosition);
+    auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
+    gameapi -> setGameObjectRot(agentId, towardTarget, true);
+    gameapi -> setGameObjectPosition(agentId, newPos, true); 
+    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
+      .entityId = agentId,
+      .transition = "walking",
+    });
+    return;
+  }
+
   auto agentPos = gameapi -> getGameObjectPos(agentId, true);
-  auto towardTarget = gameapi -> orientationFromPos(agentPos, glm::vec3(targetPosition.x, moveVertical ? targetPosition.y : agentPos.y, targetPosition.z));
-  auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
-  gameapi -> setGameObjectRot(agentId, towardTarget, true);
-  gameapi -> setGameObjectPosition(agentId, newPos, true); 
-  gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-    .entityId = agentId,
-    .transition = "walking",
-  });
+  aiInterface.move(agentId, glm::vec3(targetPosition.x, moveVertical ? targetPosition.y : agentPos.y, targetPosition.z), speed);
 }
 void attackTarget(Agent& agent){
   AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);

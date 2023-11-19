@@ -4,6 +4,7 @@
 #include "./common.h"
 #include "../../weapons/weaponcore.h"
 
+
 Agent createBasicAgent(objid id);
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent);
 std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent);

@@ -2,6 +2,11 @@
 
 extern CustomApiBindings* gameapi;
 
+struct MovementRequest {
+  glm::vec3 position;
+  float speed;
+};
+
 struct MovementEntity {
   objid playerId;
   MovementParams* moveParams;
@@ -263,7 +268,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     auto controlData = getMovementControlData(movement -> controlParams, entity.movementState);
     onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
     
-   
     for (MovementEntity& movementEntity : movementEntities){
       if (movementEntity.targetLocation.has_value()){
         bool atTarget = false;

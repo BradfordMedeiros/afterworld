@@ -348,6 +348,13 @@ TextData textData {
 };
 
 
+AIInterface aiInterface {
+  .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
+    setEntityTargetLocation(agentId, targetPosition);
+  },
+};
+
+
 glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);

@@ -4,6 +4,10 @@
 #include "../../util.h"
 #include "../worldinfo.h"
 
+struct AIInterface {
+  std::function<void(objid agentId, glm::vec3 targetPosition, float speed)> move;
+};
+
 enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET };
 struct Agent { 
   objid id;
