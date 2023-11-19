@@ -6,6 +6,9 @@ struct MovementEntity {
   objid playerId;
   MovementParams* moveParams;
   MovementState movementState;
+
+  // when set the entity navigates to this location
+  std::optional<glm::vec3> targetLocation;
 };
 
 struct Movement {
@@ -43,9 +46,12 @@ std::optional<objid> setNextEntity(){
   return movementEntities.at(nextIndex).playerId;
 }
 
-std::optional<glm::vec3> targetLocation = std::nullopt;
 void setEntityTargetLocation(objid id, std::optional<glm::vec3> position){
-  targetLocation = position;
+  for (auto &movementEntity : movementEntities){
+    if (movementEntity.playerId == id){
+      movementEntity.targetLocation = position;
+    }
+  }
 }
 
 
@@ -254,19 +260,20 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     MovementEntity& entity = movementEntities.at(activeEntity.value());
 
-
-    if (targetLocation.has_value()){
-      bool atTarget = false;
-      auto controlData = getMovementControlDataFromTargetPos(targetLocation.value(), entity.movementState, entity.playerId, &atTarget);
-      if (atTarget){
-        targetLocation = std::nullopt;
-      }
-      onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
-    }else{
-      auto controlData = getMovementControlData(movement -> controlParams, entity.movementState);
-      onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
-    }
+    auto controlData = getMovementControlData(movement -> controlParams, entity.movementState);
+    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
+    
    
+    for (MovementEntity& movementEntity : movementEntities){
+      if (movementEntity.targetLocation.has_value()){
+        bool atTarget = false;
+        auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value(), entity.movementState, entity.playerId, &atTarget);
+        if (atTarget){
+          movementEntity.targetLocation = std::nullopt;
+        }
+        onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData);  
+      }
+    }
 
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
