@@ -2,10 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-struct MovementRequest {
-  glm::vec3 position;
-  float speed;
-};
 
 struct MovementEntity {
   objid playerId;
@@ -13,7 +9,7 @@ struct MovementEntity {
   MovementState movementState;
 
   // when set the entity navigates to this location
-  std::optional<glm::vec3> targetLocation;
+  std::optional<MovementRequest> targetLocation;
 };
 
 struct Movement {
@@ -51,10 +47,10 @@ std::optional<objid> setNextEntity(){
   return movementEntities.at(nextIndex).playerId;
 }
 
-void setEntityTargetLocation(objid id, std::optional<glm::vec3> position){
+void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRequest){
   for (auto &movementEntity : movementEntities){
     if (movementEntity.playerId == id){
-      movementEntity.targetLocation = position;
+      movementEntity.targetLocation = movementRequest;
     }
   }
 }
@@ -271,7 +267,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     for (MovementEntity& movementEntity : movementEntities){
       if (movementEntity.targetLocation.has_value()){
         bool atTarget = false;
-        auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value(), entity.movementState, entity.playerId, &atTarget);
+        auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, entity.movementState, entity.playerId, &atTarget);
         if (atTarget){
           movementEntity.targetLocation = std::nullopt;
         }

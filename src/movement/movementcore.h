@@ -86,9 +86,10 @@ struct MovementControlData {
   CrouchType crouchType;
   float raw_deltax;
   float raw_deltay;
+  float speed;
 };
 
-MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3> targetPositionOpt, MovementState& movementState, objid playerId, bool* atTargetPos);
+MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
 MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState);
 
 void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData);

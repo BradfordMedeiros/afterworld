@@ -333,7 +333,10 @@ void raycastAndMoveTo(){
 
   if (hitpoints.size() > 0){
     glm::vec3 location = hitpoints.at(0).point;
-    setEntityTargetLocation(getActivePlayerId().value(), location);
+    setEntityTargetLocation(getActivePlayerId().value(), MovementRequest {
+      .position = location,
+      .speed = 0.5f,
+    });
     showDebugHitmark(hitpoints.at(0), -1);
   }
 
@@ -350,7 +353,10 @@ TextData textData {
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
-    setEntityTargetLocation(agentId, targetPosition);
+    setEntityTargetLocation(agentId, MovementRequest {
+      .position = targetPosition,
+      .speed = speed,
+    });
   },
 };
 

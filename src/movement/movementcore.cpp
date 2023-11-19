@@ -398,7 +398,7 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 }
 
 // This is obviously wrong, but a starting point
-MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3> targetPositionOpt, MovementState& movementState, objid playerId, bool* atTargetPos){
+MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos){
   MovementControlData controlData {
     .moveVec = glm::vec2(0.f, 0.f),
     .isWalking = false,
@@ -407,17 +407,14 @@ MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3>
     .doReleaseFromLadder = false,
     .crouchType = CROUCH_NONE,
     .raw_deltax = 0.f,
-    .raw_deltay = 0.f
+    .raw_deltay = 0.f,
+    .speed = speed,
   };
   if (atTargetPos){
     *atTargetPos = false;
   }
-  if (!targetPositionOpt.has_value()){
-    return controlData;
-  }
 
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
-  auto targetPosition = targetPositionOpt.value();
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
   positionDiff = glm::inverse(playerDirection) * positionDiff;
 
@@ -425,7 +422,6 @@ MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3>
   auto moveLength = glm::length(controlData.moveVec);
 
   if (moveLength < 0.5){  // already arrived
-    controlData.doJump = true;
     if (atTargetPos){
       *atTargetPos = true;
     }
@@ -452,6 +448,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .crouchType = controlParams.crouchType,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
+    .speed = 1.f,
   };
 
   static float horzRelVelocity = 0.8f;
@@ -522,7 +519,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
 
   
 
-  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded);
+  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * controlData.speed;
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
   auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, 0.f, controlData.moveVec.y), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;

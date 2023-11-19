@@ -194,8 +194,8 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
 
 extern AIInterface aiInterface;
 
-const bool useMovementSystem = false;
-void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 5.f){
+const bool useMovementSystem = true;
+void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 1.f){
   if (!useMovementSystem){  // simple behavior for debug
     auto agentPos = gameapi -> getGameObjectPos(agentId, true);
     auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosition);
@@ -210,7 +210,7 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, fl
   }
 
   auto agentPos = gameapi -> getGameObjectPos(agentId, true);
-  aiInterface.move(agentId, glm::vec3(targetPosition.x, moveVertical ? targetPosition.y : agentPos.y, targetPosition.z), speed);
+  aiInterface.move(agentId, targetPosition, speed);
 }
 void attackTarget(Agent& agent){
   AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
@@ -244,7 +244,7 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }else if (goal.goaltype == wanderGoal){
     auto targetPosition = anycast<EntityPosition>(goal.goalData);
     modassert(targetPosition, "target pos was null");
-    moveToTarget(agent.id, targetPosition -> position, agentData -> moveVertical, 5.f); 
+    moveToTarget(agent.id, targetPosition -> position, agentData -> moveVertical, 0.7f); 
     auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
 
 

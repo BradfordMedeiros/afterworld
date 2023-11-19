@@ -5,9 +5,15 @@
 #include <vector>
 #include "./movementcore.h"
 
+
 void setActiveEntity(objid id);
 std::optional<objid> setNextEntity();
-void setEntityTargetLocation(objid id, std::optional<glm::vec3> position);
+
+struct MovementRequest {
+  glm::vec3 position;
+  float speed;
+};
+void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRequest);
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 
