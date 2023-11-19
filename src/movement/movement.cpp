@@ -15,6 +15,7 @@ struct Movement {
 std::optional<int> activeEntity;
 std::vector<MovementEntity> movementEntities;
 
+
 std::optional<int> entityIndex(objid playerId){
   for (int i = 0; i < movementEntities.size(); i++){
     if (movementEntities.at(i).playerId == playerId){
@@ -41,6 +42,12 @@ std::optional<objid> setNextEntity(){
   activeEntity = nextIndex;
   return movementEntities.at(nextIndex).playerId;
 }
+
+std::optional<glm::vec3> targetLocation = std::nullopt;
+void setEntityTargetLocation(objid id, std::optional<glm::vec3> position){
+  targetLocation = position;
+}
+
 
 void updateObjectProperties(objid id, MovementParams& moveParams){
   GameobjAttributes attr {
@@ -246,7 +253,21 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     MovementEntity& entity = movementEntities.at(activeEntity.value());
-    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, movement -> controlParams);
+
+
+    if (targetLocation.has_value()){
+      bool atTarget = false;
+      auto controlData = getMovementControlDataFromTargetPos(targetLocation.value(), entity.movementState, entity.playerId, &atTarget);
+      if (atTarget){
+        targetLocation = std::nullopt;
+      }
+      onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
+    }else{
+      auto controlData = getMovementControlData(movement -> controlParams, entity.movementState);
+      onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
+    }
+   
+
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
     movement -> controlParams.doJump = false;

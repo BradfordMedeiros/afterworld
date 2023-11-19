@@ -7,6 +7,7 @@
 
 void setActiveEntity(objid id);
 std::optional<objid> setNextEntity();
+void setEntityTargetLocation(objid id, std::optional<glm::vec3> position);
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 

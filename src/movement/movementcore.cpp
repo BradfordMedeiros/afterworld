@@ -397,19 +397,8 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
   }
 }
 
-struct MovementControlData {
-  glm::vec2 moveVec;
-  bool isWalking;
-  bool doJump;
-  bool doAttachToLadder;
-  bool doReleaseFromLadder;
-  CrouchType crouchType;
-  float raw_deltax;
-  float raw_deltay;
-};
-
 // This is obviously wrong, but a starting point
-MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3> targetPositionOpt, MovementState& movementState, objid playerId){
+MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3> targetPositionOpt, MovementState& movementState, objid playerId, bool* atTargetPos){
   MovementControlData controlData {
     .moveVec = glm::vec2(0.f, 0.f),
     .isWalking = false,
@@ -420,6 +409,9 @@ MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3>
     .raw_deltax = 0.f,
     .raw_deltay = 0.f
   };
+  if (atTargetPos){
+    *atTargetPos = false;
+  }
   if (!targetPositionOpt.has_value()){
     return controlData;
   }
@@ -434,6 +426,9 @@ MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3>
 
   if (moveLength < 0.5){  // already arrived
     controlData.doJump = true;
+    if (atTargetPos){
+      *atTargetPos = true;
+    }
     return controlData;
   }
 
@@ -490,6 +485,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
 
   return controlData;
 }
+
 
 void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData){
   std::vector<glm::quat> hitDirections;
@@ -590,12 +586,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   }
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams){
-  auto controlData = (
-    movementState.isCrouching ? 
-    getMovementControlDataFromTargetPos(glm::vec3(0.f, 0.f, 0.f), movementState, playerId) : 
-    getMovementControlData(controlParams, movementState)
-  );
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData){
   onMovementFrameControl(moveParams, movementState, playerId, controlData);
   if (controlData.doJump){
     jump(moveParams, movementState, playerId);      
@@ -609,7 +600,7 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
   if (controlData.crouchType != CROUCH_NONE){
     if (controlData.crouchType == CROUCH_DOWN){
       maybeToggleCrouch(moveParams, movementState, true);
-    }else if (controlParams.crouchType == CROUCH_UP){
+    }else if (controlData.crouchType == CROUCH_UP){
       maybeToggleCrouch(moveParams, movementState, false);
     }
   }

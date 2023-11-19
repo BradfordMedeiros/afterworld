@@ -327,6 +327,19 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   gameapi -> setSelected(ids);
 }
 
+void raycastAndMoveTo(){
+  auto currentTransform = gameapi -> getCameraTransform();
+  auto hitpoints = gameapi -> raycast(currentTransform.position, currentTransform.rotation, 100.f);
+
+  if (hitpoints.size() > 0){
+    glm::vec3 location = hitpoints.at(0).point;
+    setEntityTargetLocation(getActivePlayerId().value(), location);
+    showDebugHitmark(hitpoints.at(0), -1);
+  }
+
+
+}
+
 TextData textData {
   .valueText = "default \n textbox",
   .cursorLocation = 2,
@@ -520,6 +533,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = std::nullopt;
       }else if (action == 1){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+        raycastAndMoveTo();
       }
     }
   };

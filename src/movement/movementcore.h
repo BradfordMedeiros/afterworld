@@ -76,7 +76,22 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id);
 void attachToLadder(MovementState& movementState);
 void releaseFromLadder(MovementState& movementState);
 void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown);
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, ControlParams& controlParams);
+
+struct MovementControlData {
+  glm::vec2 moveVec;
+  bool isWalking;
+  bool doJump;
+  bool doAttachToLadder;
+  bool doReleaseFromLadder;
+  CrouchType crouchType;
+  float raw_deltax;
+  float raw_deltay;
+};
+
+MovementControlData getMovementControlDataFromTargetPos(std::optional<glm::vec3> targetPositionOpt, MovementState& movementState, objid playerId, bool* atTargetPos);
+MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState);
+
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData);
 
 MovementState getInitialMovementState(objid playerId);
 
