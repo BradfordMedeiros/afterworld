@@ -105,7 +105,8 @@ void maybeAddMovementEntity(objid id){
   }
   auto player = getSingleAttr(id, "player");
   if (player.has_value()){
-    movementEntities.push_back(createMovementEntity(id, "default"));
+    auto playerProfile = getSingleAttr(id, "player-profile");
+    movementEntities.push_back(createMovementEntity(id, playerProfile.has_value() ? playerProfile.value() : "default"));
   }
 }
 void maybeRemoveMovementEntity(objid id){
@@ -264,16 +265,16 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     auto controlData = getMovementControlData(movement -> controlParams, entity.movementState);
     onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
     
-    for (MovementEntity& movementEntity : movementEntities){
-      if (movementEntity.targetLocation.has_value()){
-        bool atTarget = false;
-        auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, entity.movementState, entity.playerId, &atTarget);
-        if (atTarget){
-          movementEntity.targetLocation = std::nullopt;
-        }
-        onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData);  
-      }
-    }
+    //for (MovementEntity& movementEntity : movementEntities){
+    //  if (movementEntity.targetLocation.has_value()){
+    //    bool atTarget = false;
+    //    auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, entity.movementState, entity.playerId, &atTarget);
+    //    if (atTarget){
+    //      movementEntity.targetLocation = std::nullopt;
+    //    }
+    //    onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData);  
+    //  }
+    //}
 
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
@@ -282,7 +283,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.doReleaseFromLadder = false;
     movement -> controlParams.crouchType = CROUCH_NONE;
 
-    modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
+    //modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
   };
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){

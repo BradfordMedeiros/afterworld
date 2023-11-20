@@ -7,11 +7,12 @@ struct MovementCore {
   MovementParams moveParams;
 };
 
-std::vector<MovementCore> movementCores = {};
+std::unordered_map<std::string, MovementCore> movementCores = {};
 
 MovementParams* findMovementCore(std::string& name){
-  for (auto &movementCore : movementCores){
+  for (auto &[_, movementCore] : movementCores){
     if (movementCore.name == name){
+      //modlog("movement, comparing", name + ", to " + movementCore.name);
       return &movementCore.moveParams;
     }
   }
@@ -51,19 +52,22 @@ MovementParams getMovementParams(std::string name){
   moveParams.landSound = result.at(0).at(10);
   moveParams.moveSound = result.at(0).at(13);
 
+  modlog("movement - load params - jump height", std::string("profile - ") + name + ", jump height = " + std::to_string(moveParams.jumpHeight));
+
   return moveParams;
 }
 
 void loadMovementCore(std::string& coreName){
   modlog("movement", std::string("load movement core: ") + coreName);
   if (findMovementCore(coreName)){
+    modlog("movement", "core already loaded");
     return;
   }
 
   MovementCore movementCore { .name = coreName };
   movementCore.moveParams = getMovementParams(coreName);
   ensureSoundsLoaded(gameapi -> rootSceneId(), movementCore.moveParams.jumpSound, movementCore.moveParams.landSound, movementCore.moveParams.moveSound);
-  movementCores.push_back(movementCore);
+  movementCores[coreName] = movementCore;
 }
 
 void removeAllMovementCores(){
@@ -76,6 +80,7 @@ void removeAllMovementCores(){
 
 void jump(MovementParams& moveParams, MovementState& movementState, objid id){
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
+  modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
   if (movementState.isGrounded){
     gameapi -> applyImpulse(id, impulse);
     if (getManagedSounds().jumpSoundObjId.has_value()){
@@ -207,7 +212,7 @@ void releaseFromLadder(MovementState& movementState){
 void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch){
   modlog("movement", "toggle crouch: " + print(shouldCrouch));
   auto crouchScale = moveParams.crouchScale;
-  auto scale = shouldCrouch ? glm::vec3(crouchScale, crouchScale, crouchScale) : glm::vec3(1.f, 1.f, 1.f);
+  auto scale = shouldCrouch ? (crouchScale * movementState.initialScale) : movementState.initialScale;
   GameobjAttributes newAttr {
     .stringAttributes = {},
     .numAttributes = {
@@ -641,6 +646,9 @@ MovementState getInitialMovementState(objid playerId){
   movementState.isCrouching = false;
   movementState.shouldBeCrouching = false;
   movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
+
+  auto scale = gameapi -> getGameObjectScale(playerId, false);
+  movementState.initialScale = scale;
 
 
   return movementState;

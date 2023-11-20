@@ -1,5 +1,5 @@
 enemy:mesh:../gameresources/build/weapons/sawgun.gltf
-enemy:scale:0.2 0.2 0.05
+enemy:scale:0.1 0.1 0.1
 enemy:physics:enabled
 enemy:physics_type:dynamic
 enemy:agent:basic
@@ -15,3 +15,4 @@ enemy:layer:transparency
 enemy:physics_damping_linear:0.9
 enemy:move-vertical:true
 enemy:player:true
+enemy:player-profile:sentinel

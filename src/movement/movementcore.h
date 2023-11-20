@@ -64,6 +64,8 @@ struct MovementState {
   bool shouldBeCrouching;
   glm::vec3 lastPosition;
   float lastCrouchTime;
+
+  glm::vec3 initialScale;
 };
 
 MovementParams* findMovementCore(std::string& name);

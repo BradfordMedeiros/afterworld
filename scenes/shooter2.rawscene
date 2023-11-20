@@ -313,6 +313,7 @@ spawn_trigger:tint:0 1 0 0.5
 spawn_trigger:switch-enter-key:spawn
 spawn_trigger:switch-enter:type1
 spawn_trigger:switch-remove:enter
+spawn_trigger:position:0 -5 0
 
 spawnpoint:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 spawnpoint:scale:0.25 0.05 1.25
