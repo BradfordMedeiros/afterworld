@@ -21,7 +21,7 @@ MovementParams* findMovementCore(std::string& name){
 
 MovementParams getMovementParams(std::string name){
   auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water from traits where profile = " + name,
+    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water, move-vertical from traits where profile = " + name,
     {}
   );
   bool validTraitSql = false;
@@ -39,7 +39,8 @@ MovementParams getMovementParams(std::string name){
   moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
   moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
   moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
-  moveParams.canCrouch = boolFromFirstSqlResult(result, 18);;
+  moveParams.canCrouch = boolFromFirstSqlResult(result, 18);
+  moveParams.moveVertical = boolFromFirstSqlResult(result, 24);
   moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
   moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
   moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
@@ -108,11 +109,10 @@ void moveUp(objid id, glm::vec2 direction){
 }
 
 
-void moveXZAbsolute(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
+void moveAbsolute(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
   //modlog("editor: move xz: ", print(direction));
   float time = gameapi -> timeElapsed();
   auto directionVec = direction;
-  directionVec.y = 0.f;
 
   auto magnitude = glm::length(directionVec);
   if (aboutEqual(magnitude, 0.f)){
@@ -405,7 +405,7 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 // This is obviously wrong, but a starting point
 MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos){
   MovementControlData controlData {
-    .moveVec = glm::vec2(0.f, 0.f),
+    .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
     .doJump = false,
     .doAttachToLadder = false,
@@ -423,7 +423,7 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
   positionDiff = glm::inverse(playerDirection) * positionDiff;
 
-  controlData.moveVec = glm::vec2(positionDiff.x, positionDiff.z);
+  controlData.moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
   auto moveLength = glm::length(controlData.moveVec);
 
   if (moveLength < 0.5){  // already arrived
@@ -443,9 +443,9 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   return controlData;
 }
 
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState){
+MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams){
   MovementControlData controlData {
-    .moveVec = glm::vec2(0.f, 0.f),
+    .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
     .doJump = controlParams.doJump,
     .doAttachToLadder = controlParams.doAttachToLadder,
@@ -460,26 +460,34 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
 
   if (controlParams.goForward){
     std::cout << "should move forward" << std::endl;
-    controlData.moveVec += glm::vec2(0.f, -1.f);
+    if (controlParams.shiftModifier && moveParams.moveVertical){
+      controlData.moveVec += glm::vec3(0.f, 1.f, 0.f);
+    }else{
+      controlData.moveVec += glm::vec3(0.f, 0.f, -1.f);
+    }
     if (!(movementState.facingLadder || movementState.attachedToLadder)){
       controlData.isWalking = true;
     }
   }
   if (controlParams.goBackward){
-    controlData.moveVec += glm::vec2(0.f, 1.f);
+    if (controlParams.shiftModifier && moveParams.moveVertical){
+      controlData.moveVec += glm::vec3(0.f, -1.f, 0.f);
+    }else{
+      controlData.moveVec += glm::vec3(0.f, 0.f, 1.f);
+    }
     if (!(movementState.facingLadder || movementState.attachedToLadder)){
       controlData.isWalking = true;
     }
   }
   if (controlParams.goLeft){
-    controlData.moveVec += glm::vec2(horzRelVelocity * -1.f, 0.f);
+    controlData.moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
     if (!movementState.attachedToLadder){
       controlData.isWalking = true;
     }
     
   }
   if (controlParams.goRight){
-    controlData.moveVec += glm::vec2(horzRelVelocity * 1.f, 0.f);
+    controlData.moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
     if (!movementState.attachedToLadder){
       controlData.isWalking = true;
     }
@@ -526,13 +534,18 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
 
   float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * controlData.speed;
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, 0.f, controlData.moveVec.y), hitDirections, rotationWithoutY);
+  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, controlData.moveVec.y, controlData.moveVec.z), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;
-  auto direction = glm::vec3(limitedMoveVec.x, 0.f, limitedMoveVec.z);
+  if (!moveParams.moveVertical){
+    limitedMoveVec.y = 0.f;
+  }
+  auto direction = glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z);
 
   if (controlData.isWalking){
-    moveXZAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
-    bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.y);
+    std::cout << "movement, direction = : " << print(direction) << std::endl;
+    moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
+
+    bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.z);
     if (isSideStepping){
       gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
         .entityId = playerId,
@@ -660,5 +673,6 @@ std::string movementToStr(ControlParams& controlParams){
   str += std::string("goBackward: ") + (controlParams.goBackward ? "true" : "false") + "\n";
   str += std::string("goLeft: ") + (controlParams.goLeft ? "true" : "false") + "\n";
   str += std::string("goRight: ") + (controlParams.goRight ? "true" : "false") + "\n";
+  str += std::string("shiftModifier: ") + (controlParams.shiftModifier ? "true" : "false") + "\n";
   return str;
 }

@@ -16,6 +16,7 @@ struct ControlParams {
   bool goBackward;
   bool goLeft;
   bool goRight;
+  bool shiftModifier;
 
   glm::vec2 lookVelocity;
 
@@ -37,6 +38,7 @@ struct MovementParams {
   float groundAngle;
   glm::vec3 gravity;
   bool canCrouch;
+  bool moveVertical;
   float crouchSpeed;
   float crouchScale;
   float crouchDelay;
@@ -80,7 +82,7 @@ void releaseFromLadder(MovementState& movementState);
 void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown);
 
 struct MovementControlData {
-  glm::vec2 moveVec;
+  glm::vec3 moveVec;
   bool isWalking;
   bool doJump;
   bool doAttachToLadder;
@@ -92,7 +94,7 @@ struct MovementControlData {
 };
 
 MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState);
+MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams);
 
 void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData);
 

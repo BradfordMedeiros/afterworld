@@ -139,6 +139,7 @@ void changeTargetId(Movement& movement, objid id){
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
   movement.controlParams.goRight = false;
+  movement.controlParams.shiftModifier = false;
   movement.controlParams.doJump = false;
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);  
   movement.controlParams.doAttachToLadder = false;
@@ -156,6 +157,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.goBackward = false;
     movement -> controlParams.goLeft = false;
     movement -> controlParams.goRight = false;
+    movement -> controlParams.shiftModifier = false;
     movement -> controlParams.doJump = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
     movement -> controlParams.doAttachToLadder = false;
@@ -240,6 +242,14 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       movement -> controlParams.doJump = true;
       return;
     }
+
+    if (key == 340 /* shift */){
+      if (action == 0){
+        movement -> controlParams.shiftModifier = false;
+      }else if (action == 1){
+        movement -> controlParams.shiftModifier = true;
+      }
+    }
   };
   binding.onMouseMoveCallback = [](objid _, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
     if (isPaused()){
@@ -262,7 +272,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     MovementEntity& entity = movementEntities.at(activeEntity.value());
 
-    auto controlData = getMovementControlData(movement -> controlParams, entity.movementState);
+    auto controlData = getMovementControlData(movement -> controlParams, entity.movementState, *entity.moveParams);
     onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
     
     //for (MovementEntity& movementEntity : movementEntities){
