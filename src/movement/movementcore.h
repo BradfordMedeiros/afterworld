@@ -19,6 +19,7 @@ struct ControlParams {
   bool shiftModifier;
 
   glm::vec2 lookVelocity;
+  float zoom_delta;
 
   bool doJump;
   bool doAttachToLadder;
@@ -90,13 +91,14 @@ struct MovementControlData {
   CrouchType crouchType;
   float raw_deltax;
   float raw_deltay;
+  float zoom_delta;
   float speed;
 };
 
 MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
 MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams);
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData);
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<objid> managedCamera);
 
 MovementState getInitialMovementState(objid playerId);
 

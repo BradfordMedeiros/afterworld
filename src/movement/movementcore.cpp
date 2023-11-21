@@ -200,6 +200,38 @@ void look(MovementParams& moveParams, MovementState& movementState, objid id, fl
   gameapi -> setGameObjectRot(id, rotation, false);
 }
 
+float distanceFromTarget = -5.f;
+float angleX = 0.f;
+float angleY = 0.f;
+
+void lookThirdPerson(MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<objid> managedCamera){
+    angleX += turnX * 0.1f;
+    angleY += turnY * 0.1f;
+
+  if (glm::abs(turnX) > 0 || glm::abs(turnY) > 0 || glm::abs(zoom_delta) > 0){
+    distanceFromTarget += (zoom_delta * 0.4f);
+    std::cout << "look third person placeholder: " << turnX << ", " << turnY << ", " << zoom_delta << ", distance " << distanceFromTarget << std::endl;
+  
+
+    float x = glm::cos(angleX) * distanceFromTarget;
+    float z = glm::sin(angleX) * distanceFromTarget;
+
+
+    float y = glm::cos(angleY) * distanceFromTarget;
+
+
+    auto targetLocation = movementState.lastPosition;
+    auto fromLocation = targetLocation + glm::vec3(x, y, z);
+    auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+    
+
+    // interpolate to make it smoother
+    gameapi -> setGameObjectRot(managedCamera.value(), newOrientation, true);
+    gameapi -> setGameObjectPosition(managedCamera.value(), fromLocation, true);
+  }
+}
+
+
 void attachToLadder(MovementState& movementState){
   if (movementState.facingLadder){
      movementState.attachedToLadder = true;
@@ -413,6 +445,7 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
     .crouchType = CROUCH_NONE,
     .raw_deltax = 0.f,
     .raw_deltay = 0.f,
+    .zoom_delta = 0.f,
     .speed = speed,
   };
   if (atTargetPos){
@@ -453,6 +486,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .crouchType = controlParams.crouchType,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
+    .zoom_delta = controlParams.zoom_delta,
     .speed = 1.f,
   };
 
@@ -497,7 +531,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
 }
 
 
-void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData){
+void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<objid> managedCamera){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -582,10 +616,14 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
     movementState.lastMoveSoundPlayLocation = currPos;
   }
     
-
   float elapsedTime = gameapi -> timeElapsed();
 
-  look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
+  if (managedCamera.has_value()){
+    lookThirdPerson(movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera);
+  }else{
+    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
+  }
+
 
   bool movingDown = false;
   updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
@@ -601,8 +639,8 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   }
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData){
-  onMovementFrameControl(moveParams, movementState, playerId, controlData);
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<objid> managedCamera){
+  onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera);
   if (controlData.doJump){
     jump(moveParams, movementState, playerId);      
   }

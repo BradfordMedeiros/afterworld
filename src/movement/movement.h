@@ -6,8 +6,8 @@
 #include "./movementcore.h"
 
 
-void setActiveEntity(objid id);
-std::optional<objid> setNextEntity();
+void setActiveEntity(objid id, std::optional<objid> managedCamera);
+std::optional<objid> getNextEntity();
 
 struct MovementRequest {
   glm::vec3 position;

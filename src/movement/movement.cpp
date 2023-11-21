@@ -16,7 +16,11 @@ struct Movement {
   ControlParams controlParams;
 };
 
-std::optional<int> activeEntity;
+struct ActiveEntity {
+  int index;
+  std::optional<objid> managedCamera;
+};
+std::optional<ActiveEntity> activeEntity;
 std::vector<MovementEntity> movementEntities;
 
 
@@ -28,22 +32,26 @@ std::optional<int> entityIndex(objid playerId){
   }
   return std::nullopt;
 }
-void setActiveEntity(objid id){
-  activeEntity = entityIndex(id).value();
+void setActiveEntity(objid id, std::optional<objid> managedCamera){
+  activeEntity = ActiveEntity {
+    .index = entityIndex(id).value(),
+    .managedCamera = managedCamera,
+  }; 
 }
-std::optional<objid> setNextEntity(){
+std::optional<objid> getNextEntity(){
   if (!activeEntity.has_value()){
     if (movementEntities.size() > 0){
-      activeEntity = 0;
+      activeEntity = ActiveEntity {
+        .index = 0,
+      };
       return movementEntities.at(0).playerId;
     }
     return std::nullopt;
   }
-  auto nextIndex = activeEntity.value() + 1;
+  auto nextIndex = activeEntity.value().index + 1;
   if (nextIndex >= movementEntities.size()){
     nextIndex = 0;
   }
-  activeEntity = nextIndex;
   return movementEntities.at(nextIndex).playerId;
 }
 
@@ -115,7 +123,7 @@ void maybeRemoveMovementEntity(objid id){
     MovementEntity& movementEntity = movementEntities.at(i);
     if (movementEntity.playerId != id){
       newEntities.push_back(movementEntity);
-    }else if (i == activeEntity.value()){
+    }else if (i == activeEntity.value().index){
       activeEntity = std::nullopt;
     }
   }
@@ -141,7 +149,8 @@ void changeTargetId(Movement& movement, objid id){
   movement.controlParams.goRight = false;
   movement.controlParams.shiftModifier = false;
   movement.controlParams.doJump = false;
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);  
+  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+  movement.controlParams.zoom_delta = 0.f;
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
@@ -160,6 +169,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.shiftModifier = false;
     movement -> controlParams.doJump = false;
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+    movement -> controlParams.zoom_delta = 0.f;
+
     movement -> controlParams.doAttachToLadder = false;
     movement -> controlParams.doReleaseFromLadder = false;
     movement -> controlParams.crouchType = CROUCH_NONE;
@@ -261,6 +272,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     movement -> controlParams.lookVelocity = glm::vec2(xPos, yPos);
   };
+
+  binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
+    Movement* movement = static_cast<Movement*>(data);
+    movement -> controlParams.zoom_delta = amount;
+  };
+
   binding.onFrame = [](int32_t _, void* data) -> void {
     if (isPaused()){
       return;
@@ -270,10 +287,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (!activeEntity.has_value()){
       return;
     }
-    MovementEntity& entity = movementEntities.at(activeEntity.value());
+    MovementEntity& entity = movementEntities.at(activeEntity.value().index);
 
     auto controlData = getMovementControlData(movement -> controlParams, entity.movementState, *entity.moveParams);
-    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData);
+    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, activeEntity.value().managedCamera);
     
     //for (MovementEntity& movementEntity : movementEntities){
     //  if (movementEntity.targetLocation.has_value()){
@@ -288,6 +305,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
 
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+    movement -> controlParams.zoom_delta = 0.f;
     movement -> controlParams.doJump = false;
     movement -> controlParams.doAttachToLadder = false;
     movement -> controlParams.doReleaseFromLadder = false;

@@ -9,7 +9,7 @@ std::optional<objid> getActivePlayerId(){
 	return activePlayerId;
 }
 
-void setCameraOrMakeTemp(objid id){
+std::optional<objid> setCameraOrMakeTemp(objid id){
 	if (tempCameraId.has_value()){
 		gameapi -> removeObjectById(tempCameraId.value());
 	}
@@ -21,7 +21,7 @@ void setCameraOrMakeTemp(objid id){
     GameobjAttributes attr {
       .stringAttributes = { },
       .numAttributes = {},
-      .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 30.f) }},  .vec4 = {} },
+      .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 20.f) }},  .vec4 = {} },
     };
     std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -29,7 +29,9 @@ void setCameraOrMakeTemp(objid id){
     tempCameraId = cameraId;
     gameapi -> makeParent(cameraId, id);
     gameapi -> setActiveCamera(cameraId, -1);
+    return cameraId;
 	}
+	return std::nullopt;
 }
 void setActivePlayer(std::optional<objid> id){
 	if (!id.has_value()){
@@ -38,26 +40,15 @@ void setActivePlayer(std::optional<objid> id){
 	if (activePlayerId.has_value()){
 	  gameapi -> sendNotifyMessage("ai-activate", activePlayerId.value());
 	}
-	setCameraOrMakeTemp(id.value());
+	auto newCameraId = setCameraOrMakeTemp(id.value());
   gameapi -> sendNotifyMessage("ai-deactivate", id.value());
 	activePlayerId = id.value();
-	setActiveEntity(id.value());
+	setActiveEntity(id.value(), newCameraId);
   gameapi -> sendNotifyMessage("active-player-change", id.value());
 }
 
 void setActivePlayerNext(){
-	auto id = setNextEntity();
-	if (id.has_value()){
-		if (activePlayerId.has_value()){
-		  gameapi -> sendNotifyMessage("ai-activate", activePlayerId.value());
-		}
-		setCameraOrMakeTemp(id.value());
-	  gameapi -> sendNotifyMessage("ai-deactivate", id.value());
-		activePlayerId = id.value();
-	  gameapi -> sendNotifyMessage("active-player-change", id.value());
-	}else{
-		modassert(false, "setActivePlayerNext no next item");
-	}
+	setActivePlayer(getNextEntity());
 }
 
 void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
