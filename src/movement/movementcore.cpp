@@ -204,31 +204,32 @@ float distanceFromTarget = -5.f;
 float angleX = 0.f;
 float angleY = 0.f;
 
-void lookThirdPerson(MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<objid> managedCamera){
-    angleX += turnX * 0.1f;
-    angleY += turnY * 0.1f;
+float actualDistanceFromTarget = -5.f;
+float actualAngleX = 0.f;
+float actualAngleY = 0.f;
 
-  if (glm::abs(turnX) > 0 || glm::abs(turnY) > 0 || glm::abs(zoom_delta) > 0){
-    distanceFromTarget += (zoom_delta * 0.4f);
-    std::cout << "look third person placeholder: " << turnX << ", " << turnY << ", " << zoom_delta << ", distance " << distanceFromTarget << std::endl;
+void lookThirdPerson(MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<objid> managedCamera, float elapsedTime){
+  angleX += turnX * 0.05 /* 0.05f arbitary turn speed */;
+  angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
+  distanceFromTarget += zoom_delta;
+
+  //std::cout << "look third person placeholder: " << turnX << ", " << turnY << ", " << zoom_delta << ", distance " << distanceFromTarget << std::endl;
   
+  actualAngleX = glm::lerp(actualAngleX, angleX, glm::clamp(elapsedTime * 5.f, 0.f, 1.f));  // 5.f arbitrary lerp amount
+  actualAngleY = glm::lerp(actualAngleY, angleY, glm::clamp(elapsedTime * 5.f, 0.f, 1.f));
+  actualDistanceFromTarget = glm::lerp(actualDistanceFromTarget, distanceFromTarget, glm::clamp(elapsedTime * 5.f, 0.f, 1.f));
 
-    float x = glm::cos(angleX) * distanceFromTarget;
-    float z = glm::sin(angleX) * distanceFromTarget;
+  float x = glm::cos(actualAngleX) * actualDistanceFromTarget;
+  float z = glm::sin(actualAngleX) * actualDistanceFromTarget;
+  float y = glm::cos(actualAngleY) * actualDistanceFromTarget;
 
-
-    float y = glm::cos(angleY) * distanceFromTarget;
-
-
-    auto targetLocation = movementState.lastPosition;
-    auto fromLocation = targetLocation + glm::vec3(x, y, z);
-    auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+  auto targetLocation = movementState.lastPosition;
+  auto fromLocation = targetLocation + glm::vec3(x, -y, z);
+  auto newOrientation = orientationFromPos(fromLocation, targetLocation);
     
-
-    // interpolate to make it smoother
-    gameapi -> setGameObjectRot(managedCamera.value(), newOrientation, true);
-    gameapi -> setGameObjectPosition(managedCamera.value(), fromLocation, true);
-  }
+  gameapi -> setGameObjectRot(managedCamera.value(), newOrientation, true);
+  gameapi -> setGameObjectPosition(managedCamera.value(), fromLocation, true);
+  
 }
 
 
@@ -619,7 +620,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   float elapsedTime = gameapi -> timeElapsed();
 
   if (managedCamera.has_value()){
-    lookThirdPerson(movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera);
+    lookThirdPerson(movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime);
   }else{
     look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
   }
