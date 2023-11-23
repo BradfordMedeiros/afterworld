@@ -7,6 +7,17 @@
 #include "../resources.h"
 #include "../activeplayer.h"
 
+struct ThirdPersonCameraInfo {
+  objid id;
+  float distanceFromTarget;
+  float angleX;
+  float angleY;
+  float actualDistanceFromTarget;
+  float actualAngleX;
+  float actualAngleY;
+  glm::vec3 additionalCameraOffset;
+};
+
 enum CrouchType { CROUCH_NONE, CROUCH_UP, CROUCH_DOWN };
 struct ControlParams {
   float xsensitivity;
@@ -98,7 +109,7 @@ struct MovementControlData {
 MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
 MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams);
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<objid> managedCamera);
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera);
 
 MovementState getInitialMovementState(objid playerId);
 

@@ -18,7 +18,8 @@ struct Movement {
 
 struct ActiveEntity {
   int index;
-  std::optional<objid> managedCamera;
+  std::optional<ThirdPersonCameraInfo> managedCamera;
+
 };
 std::optional<ActiveEntity> activeEntity;
 std::vector<MovementEntity> movementEntities;
@@ -32,10 +33,20 @@ std::optional<int> entityIndex(objid playerId){
   }
   return std::nullopt;
 }
+
 void setActiveEntity(objid id, std::optional<objid> managedCamera){
   activeEntity = ActiveEntity {
     .index = entityIndex(id).value(),
-    .managedCamera = managedCamera,
+    .managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
+      .id = managedCamera.value(),
+      .distanceFromTarget = -5.f,
+      .angleX = 0.f,
+      .angleY = 0.f,
+      .actualDistanceFromTarget = -5.f,
+      .actualAngleX = 0.f,
+      .actualAngleY = 0.f,
+      .additionalCameraOffset = glm::vec3(-0.2f, 0.5f, 0.f),
+    },
   }; 
 }
 std::optional<objid> getNextEntity(){

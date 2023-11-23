@@ -200,36 +200,36 @@ void look(MovementParams& moveParams, MovementState& movementState, objid id, fl
   gameapi -> setGameObjectRot(id, rotation, false);
 }
 
-float distanceFromTarget = -5.f;
-float angleX = 0.f;
-float angleY = 0.f;
 
-float actualDistanceFromTarget = -5.f;
-float actualAngleX = 0.f;
-float actualAngleY = 0.f;
-
-void lookThirdPerson(MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<objid> managedCamera, float elapsedTime){
-  angleX += turnX * 0.05 /* 0.05f arbitary turn speed */;
-  angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
-  distanceFromTarget += zoom_delta;
+// this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
+void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<ThirdPersonCameraInfo>& managedCamera, float elapsedTime){
+  ThirdPersonCameraInfo& thirdPersonInfo = managedCamera.value();
+  thirdPersonInfo.angleX += turnX * 0.05 /* 0.05f arbitary turn speed */;
+  thirdPersonInfo.angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
+  thirdPersonInfo.distanceFromTarget += zoom_delta;
 
   //std::cout << "look third person placeholder: " << turnX << ", " << turnY << ", " << zoom_delta << ", distance " << distanceFromTarget << std::endl;
   
-  actualAngleX = glm::lerp(actualAngleX, angleX, glm::clamp(elapsedTime * 5.f, 0.f, 1.f));  // 5.f arbitrary lerp amount
-  actualAngleY = glm::lerp(actualAngleY, angleY, glm::clamp(elapsedTime * 5.f, 0.f, 1.f));
-  actualDistanceFromTarget = glm::lerp(actualDistanceFromTarget, distanceFromTarget, glm::clamp(elapsedTime * 5.f, 0.f, 1.f));
+  thirdPersonInfo.actualAngleX = glm::lerp(thirdPersonInfo.actualAngleX, thirdPersonInfo.angleX, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));  // 5.f arbitrary lerp amount
+  thirdPersonInfo.actualAngleY = glm::lerp(thirdPersonInfo.actualAngleY, thirdPersonInfo.angleY, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));
+  thirdPersonInfo.actualDistanceFromTarget = glm::lerp(thirdPersonInfo.actualDistanceFromTarget, thirdPersonInfo.distanceFromTarget, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));
 
-  float x = glm::cos(actualAngleX) * actualDistanceFromTarget;
-  float z = glm::sin(actualAngleX) * actualDistanceFromTarget;
-  float y = glm::cos(actualAngleY) * actualDistanceFromTarget;
+  float x = glm::cos(thirdPersonInfo.actualAngleX) * thirdPersonInfo.actualDistanceFromTarget;
+  float z = glm::sin(thirdPersonInfo.actualAngleX) * thirdPersonInfo.actualDistanceFromTarget;
+  float y = glm::cos(thirdPersonInfo.actualAngleY) * thirdPersonInfo.actualDistanceFromTarget;
 
-  auto targetLocation = movementState.lastPosition;
+  auto targetLocation = movementState.lastPosition ;
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+
+  fromLocation += newOrientation * thirdPersonInfo.additionalCameraOffset;
     
-  gameapi -> setGameObjectRot(managedCamera.value(), newOrientation, true);
-  gameapi -> setGameObjectPosition(managedCamera.value(), fromLocation, true);
-  
+  gameapi -> setGameObjectRot(managedCamera.value().id, newOrientation, true);
+  gameapi -> setGameObjectPosition(managedCamera.value().id, fromLocation, true);
+
+  // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
+  gameapi -> setGameObjectRot(id, newOrientation, true);  
+
 }
 
 
@@ -532,7 +532,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
 }
 
 
-void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<objid> managedCamera){
+void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -620,7 +620,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   float elapsedTime = gameapi -> timeElapsed();
 
   if (managedCamera.has_value()){
-    lookThirdPerson(movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime);
+    lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime);
   }else{
     look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
   }
@@ -640,7 +640,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   }
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<objid> managedCamera){
+void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera){
   onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera);
   if (controlData.doJump){
     jump(moveParams, movementState, playerId);      
