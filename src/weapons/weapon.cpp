@@ -78,6 +78,11 @@ void modifyPhysicsForHeldItem(Weapons& weapons){
   gameapi -> setGameObjectAttr(weapons.heldItem.value(), newAttr);
 }
 
+bool isGunZoomed = false;
+bool getIsGunZoomed(){
+  return isGunZoomed;
+}
+
 void changeWeaponTargetId(Weapons& weapons, objid id){
   weapons.playerId = id;
   reloadTraitsValues(weapons);
@@ -121,9 +126,11 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (button == 1){
       if (action == 0){
         weapons -> isHoldingRightMouse = false;
+        isGunZoomed = false;
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
+        isGunZoomed = true;
         if (weapons -> playerId.has_value()){
           auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
           if (hitpoints.size() > 0){

@@ -10,6 +10,8 @@
 #include "./weapon_vector.h"
 #include "../activeplayer.h"
 
+bool getIsGunZoomed();
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
 
 

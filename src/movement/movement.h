@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "./movementcore.h"
+#include "../weapons/weapon.h"
 
 
 void setActiveEntity(objid id, std::optional<objid> managedCamera);

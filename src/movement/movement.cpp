@@ -301,7 +301,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     MovementEntity& entity = movementEntities.at(activeEntity.value().index);
 
     auto controlData = getMovementControlData(movement -> controlParams, entity.movementState, *entity.moveParams);
-    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, activeEntity.value().managedCamera);
+    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, activeEntity.value().managedCamera, getIsGunZoomed());
     
     //for (MovementEntity& movementEntity : movementEntities){
     //  if (movementEntity.targetLocation.has_value()){
