@@ -201,7 +201,7 @@ void look(MovementParams& moveParams, MovementState& movementState, objid id, fl
 }
 
 
-glm::vec3 zoomOffset(0.f, 0.f, 1.f);
+glm::vec3 zoomOffset(0.f, 0.f, -1.f);
 
 // this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
 void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<ThirdPersonCameraInfo>& managedCamera, float elapsedTime, bool isGunZoomed){
@@ -210,24 +210,25 @@ void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, f
   thirdPersonInfo.angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.distanceFromTarget += zoom_delta;
 
-  //std::cout << "look third person placeholder: " << turnX << ", " << turnY << ", " << zoom_delta << ", distance " << distanceFromTarget << std::endl;
-  
+  auto finalAdjustedDistance = isGunZoomed ? zoomOffset.z :  thirdPersonInfo.distanceFromTarget;
+  float zoomSpeed = isGunZoomed ? 10.f : 2.f;
+
   thirdPersonInfo.actualAngleX = glm::lerp(thirdPersonInfo.actualAngleX, thirdPersonInfo.angleX, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));  // 5.f arbitrary lerp amount
   thirdPersonInfo.actualAngleY = glm::lerp(thirdPersonInfo.actualAngleY, thirdPersonInfo.angleY, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));
-  thirdPersonInfo.actualDistanceFromTarget = glm::lerp(thirdPersonInfo.actualDistanceFromTarget, thirdPersonInfo.distanceFromTarget, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));
+  thirdPersonInfo.actualDistanceFromTarget = glm::lerp(thirdPersonInfo.actualDistanceFromTarget, finalAdjustedDistance, glm::clamp(elapsedTime * zoomSpeed, 0.f, 1.f));
 
   float x = glm::cos(thirdPersonInfo.actualAngleX) * thirdPersonInfo.actualDistanceFromTarget;
   float z = glm::sin(thirdPersonInfo.actualAngleX) * thirdPersonInfo.actualDistanceFromTarget;
   float y = glm::cos(thirdPersonInfo.actualAngleY) * thirdPersonInfo.actualDistanceFromTarget;
 
-  auto targetLocation = movementState.lastPosition ;
+  auto targetLocation = movementState.lastPosition;
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
-  fromLocation += newOrientation * thirdPersonInfo.additionalCameraOffset;
+  auto finalCameraLocation = fromLocation + (newOrientation * thirdPersonInfo.additionalCameraOffset);
     
   gameapi -> setGameObjectRot(managedCamera.value().id, newOrientation, true);
-  gameapi -> setGameObjectPosition(managedCamera.value().id, fromLocation, true);
+  gameapi -> setGameObjectPosition(managedCamera.value().id, finalCameraLocation, true);
 
   // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
   gameapi -> setGameObjectRot(id, newOrientation, true);  
