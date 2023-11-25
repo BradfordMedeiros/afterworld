@@ -46,6 +46,8 @@ void setActiveEntity(objid id, std::optional<objid> managedCamera){
       .actualAngleX = 0.f,
       .actualAngleY = 0.f,
       .additionalCameraOffset = glm::vec3(-0.2f, 0.5f, 0.f),
+      .zoomOffset = glm::vec3(-0.6f, -0.2f, -1.f),
+      .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
     },
   }; 
 }
