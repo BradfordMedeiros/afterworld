@@ -48,6 +48,7 @@ void setActiveEntity(objid id, std::optional<objid> managedCamera){
       .additionalCameraOffset = glm::vec3(-0.2f, 0.5f, 0.f),
       .zoomOffset = glm::vec3(-0.6f, -0.2f, -1.f),
       .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
+      .reverseCamera = false,
     },
   }; 
 }
@@ -272,6 +273,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         movement -> controlParams.shiftModifier = false;
       }else if (action == 1){
         movement -> controlParams.shiftModifier = true;
+        if (activeEntity.has_value()){
+          activeEntity.value().managedCamera.value().reverseCamera = !activeEntity.value().managedCamera.value().reverseCamera;
+        }
       }
     }
   };

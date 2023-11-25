@@ -208,13 +208,15 @@ void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, f
   thirdPersonInfo.angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.distanceFromTarget += zoom_delta;
 
+  float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
+
   auto finalAdjustedDistance = isGunZoomed ? thirdPersonInfo.zoomOffset.z :  thirdPersonInfo.distanceFromTarget;
   float zoomSpeed = isGunZoomed ? 10.f : 2.f;
 
   thirdPersonInfo.actualAngleX = glm::lerp(thirdPersonInfo.actualAngleX, thirdPersonInfo.angleX, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));  // 5.f arbitrary lerp amount
   thirdPersonInfo.actualAngleY = glm::lerp(thirdPersonInfo.actualAngleY, thirdPersonInfo.angleY, glm::clamp(elapsedTime * 2.f, 0.f, 1.f));
   thirdPersonInfo.actualDistanceFromTarget = glm::lerp(thirdPersonInfo.actualDistanceFromTarget, finalAdjustedDistance, glm::clamp(elapsedTime * zoomSpeed, 0.f, 1.f));
-  thirdPersonInfo.actualZoomOffset.x = glm::lerp(thirdPersonInfo.actualZoomOffset.x, isGunZoomed ? thirdPersonInfo.zoomOffset.x : 0.f, glm::clamp(elapsedTime * zoomSpeed, 0.f, 1.f));
+  thirdPersonInfo.actualZoomOffset.x = glm::lerp(thirdPersonInfo.actualZoomOffset.x, isGunZoomed ? (thirdPersonInfo.zoomOffset.x * reverseMultiplier) : 0.f, glm::clamp(elapsedTime * zoomSpeed, 0.f, 1.f));
   thirdPersonInfo.actualZoomOffset.y = glm::lerp(thirdPersonInfo.actualZoomOffset.y, isGunZoomed ? thirdPersonInfo.zoomOffset.y : 0.f, glm::clamp(elapsedTime * zoomSpeed, 0.f, 1.f));
 
 
@@ -226,7 +228,7 @@ void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, f
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
-  auto finalCameraLocation = fromLocation + (newOrientation * thirdPersonInfo.additionalCameraOffset) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
+  auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
     
   gameapi -> setGameObjectRot(managedCamera.value().id, newOrientation, true);
   gameapi -> setGameObjectPosition(managedCamera.value().id, finalCameraLocation, true);

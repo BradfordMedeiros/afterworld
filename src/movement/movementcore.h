@@ -18,6 +18,7 @@ struct ThirdPersonCameraInfo {
   glm::vec3 additionalCameraOffset;
   glm::vec3 zoomOffset;
   glm::vec3 actualZoomOffset;
+  bool reverseCamera;
 };
 
 enum CrouchType { CROUCH_NONE, CROUCH_UP, CROUCH_DOWN };
