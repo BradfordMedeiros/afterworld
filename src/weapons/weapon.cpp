@@ -229,7 +229,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> playerId.value());
+    fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> weaponValues.muzzleId, weapons -> playerId.value());
     weapons -> fireOnce = false;
     swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId.value(), weapons -> lookVelocity, weapons -> movementVec);
     handlePickedUpItem(*weapons);

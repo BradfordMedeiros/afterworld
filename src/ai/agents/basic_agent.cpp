@@ -188,7 +188,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
 void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   modlog("basic agent", "firing projectile");
   if (agentAttackState.gunCore.has_value()){
-    fireGunAndVisualize(agentAttackState.gunCore.value(), false, true, std::nullopt, agentId);
+    fireGunAndVisualize(agentAttackState.gunCore.value(), false, true, std::nullopt, std::nullopt, agentId);
   }
 }
 

@@ -159,7 +159,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   return weaponParams;
 }
 
-objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId){
+objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId, std::string& weaponName){
   std::map<std::string, std::string> stringAttributes = { { "mesh", weaponParams.modelpath }, { "layer", "no_depth" } };
   if (weaponParams.script != ""){
     stringAttributes["script"] = weaponParams.script;
@@ -170,7 +170,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid play
     .vecAttr = {  .vec3 = {{ "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", weaponParams.scale }},  .vec4 = {{ "rotation", weaponParams.initialGunRotVec4 }}},
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto gunId = gameapi -> makeObjectAttr(sceneId, std::string("code-weapon-") + uniqueNameSuffix(), attr, submodelAttributes);
+  auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
   gameapi -> makeParent(gunId.value(), playerId);
   return gunId.value();
@@ -240,14 +240,19 @@ GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, in
   if (oldGunId.has_value()){
     gameapi -> removeObjectById(oldGunId.value());
   }
-  auto gunId = createWeaponInstance(weaponCore -> weaponParams, sceneId, playerId);
+  auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
+  auto gunId = createWeaponInstance(weaponCore -> weaponParams, sceneId, playerId, weaponName);
   if (weaponCore -> weaponParams.idleAnimation.has_value() && weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
     gameapi -> playAnimation(gunId, weaponCore -> weaponParams.idleAnimation.value(), LOOP);
   }
 
+  auto muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
+  modassert(muzzlePointId.has_value(), std::string("weapon muzzle not defined for: ") + gun);
+
   GunInstance gunInstance {
     .gunCore = gunCore,
     .gunId = gunId,
+    .muzzleId = muzzlePointId,
   };
   return gunInstance;
 }
@@ -373,7 +378,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
   }
 }
 
-bool tryFireGun(std::optional<objid> gunId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
+bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(gunCore, now);
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(gunCore.weaponCore -> weaponParams.firingRate));
@@ -396,10 +401,16 @@ bool tryFireGun(std::optional<objid> gunId, GunCore& gunCore, float bloomAmount,
   }
 
   if (gunCore.weaponCore -> muzzleParticle.has_value() && gunId.has_value()){
-    auto gunPosition = gameapi -> getGameObjectPos(gunId.value(), true);
-    glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
-    auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
-    gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation /* should this be the gun rotation? */, std::nullopt, std::nullopt, playerId);
+    if (muzzleId.has_value()){
+      auto muzzlePosition = gameapi -> getGameObjectPos(muzzleId.value(), true);
+      std::cout << "muzzle emit: " << print(muzzlePosition) << std::endl;
+      gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), muzzlePosition, playerRotation /* should this be the muzzle rotation? */, std::nullopt, std::nullopt, playerId);
+    }else{
+      auto gunPosition = gameapi -> getGameObjectPos(gunId.value(), true);
+      glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
+      auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
+      gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation /* should this be the gun rotation? */, std::nullopt, std::nullopt, playerId);
+    }
   }
   gunCore.weaponState.lastShootingTime = now;
   gunCore.weaponState.recoilStart = gameapi -> timeSeconds(false);
@@ -435,7 +446,7 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, objid id){
+bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id){
   if (!gunCore.weaponCore){
     return false;
   }
@@ -446,7 +457,7 @@ bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::opt
     auto playerRotation = gameapi -> getGameObjectRotation(id, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     auto playerPos = gameapi -> getGameObjectPos(id, true);
     //////////////////////
-    return tryFireGun(gunId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
+    return tryFireGun(gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
   }
   return false;
 }
