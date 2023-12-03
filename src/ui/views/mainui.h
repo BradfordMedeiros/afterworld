@@ -20,6 +20,7 @@
 #include "../components/scenemanager.h"
 #include "./uicontext.h"
 #include "../components/game/weaponwheel.h"
+#include "../components/game/compass.h"
 
 extern Component mainUI;
 
