@@ -67,12 +67,41 @@ void spawnProcMesh(objid sceneId){
   gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
 }
 
-bool printKey = false;
+struct PrintObjDebug {
+	std::string objname;
+	std::string attribute;
+	float interval;
+};
+
+std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>& args){
+	if (args.find("printdebug") == args.end()){
+		return std::nullopt;
+	}
+	auto values = split(args.at("printdebug"), ':');
+	modassert(values.size() == 2, "invalid value for printdebug");
+	return PrintObjDebug {
+		.objname = values.at(0),
+		.attribute = values.at(1),
+		.interval = parseFloat(args.at("printrate")) / 1000.f,
+	};
+}
+std::optional<objid> findObjByShortName(std::string name){
+  auto allSceneIds = gameapi -> listScenes(std::nullopt);
+  for (auto id : allSceneIds){
+  	auto objId = gameapi -> getGameObjectByName(name, id, true);
+  	if (objId.has_value()){
+  		return objId.value();
+  	}
+  }
+	return std::nullopt;
+}
+
 CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 	auto args = api.getArgs();
-	printKey = args.find("printkey") != args.end();
-  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+	auto printKey = args.find("printkey") != args.end();
+	auto printObjDebug = getPrintObjDebug(args);
+  binding.onKeyCallback = [printKey](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
    	if (printKey){
    		std::cout << "hotkeysBinding: key = " << key << ", action == " << action << ", scancode = " << scancode << ", mods = " << mods << std::endl;
    	}
@@ -81,5 +110,27 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
    		spawnProcMesh(gameapi -> listSceneId(id));
    	}
   };
+
+  if (printObjDebug.has_value()){
+  	binding.onFrame = [printObjDebug](int32_t id, void* data) -> void {
+  		static float lastPrintTime = 0;
+  		auto currTime = gameapi -> timeSeconds(false);
+  		if (currTime - lastPrintTime < printObjDebug.value().interval){
+  			return;
+  		}
+ 			lastPrintTime = currTime;
+  		auto objid = findObjByShortName(printObjDebug.value().objname);
+  		if (objid.has_value()){
+			  auto objAttr =  gameapi -> getGameObjectAttr(objid.value());
+			  auto attr = getAttr(objAttr, printObjDebug.value().attribute);
+			  if (!attr.has_value()){
+				  modlog("debug attribute", "no value");
+			  }else{
+				  modlog("debug attribute", print(attr.value()));
+			  }
+  		}
+  	};
+  }
+
 	return binding;
 }
