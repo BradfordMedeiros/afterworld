@@ -273,7 +273,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         movement -> controlParams.shiftModifier = false;
       }else if (action == 1){
         movement -> controlParams.shiftModifier = true;
-        if (activeEntity.has_value()){
+        if (activeEntity.has_value() && activeEntity.value().managedCamera.has_value()){
           activeEntity.value().managedCamera.value().reverseCamera = !activeEntity.value().managedCamera.value().reverseCamera;
         }
       }
