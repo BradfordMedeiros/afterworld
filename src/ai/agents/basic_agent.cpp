@@ -194,11 +194,13 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
 
 extern AIInterface aiInterface;
 
-const bool useMovementSystem = true;
+const bool useMovementSystem = false;
+const bool useAi = true;
 void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 1.f){
+  auto finalTargetPosition = useAi ? gameapi -> navPosition(agentId, targetPosition) : targetPosition;
   if (!useMovementSystem){  // simple behavior for debug
     auto agentPos = gameapi -> getGameObjectPos(agentId, true);
-    auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosition);
+    auto towardTarget = gameapi -> orientationFromPos(agentPos, finalTargetPosition);
     auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
     gameapi -> setGameObjectRot(agentId, towardTarget, true);
     gameapi -> setGameObjectPosition(agentId, newPos, true); 
