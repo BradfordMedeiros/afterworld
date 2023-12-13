@@ -431,6 +431,15 @@ std::vector<DockConfiguration> configurations {
       },
     }
   },
+  DockConfiguration {
+    .title = "Navmesh",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Navmesh",
+        .onClick = []() -> void { dockConfigApi.createNavmesh(); } ,
+      },
+    }
+  },
 
   // Gameplay Docks //////////////////////////////////////////////
   //////////////////////////////////////////////////////////////

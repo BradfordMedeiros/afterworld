@@ -19,6 +19,10 @@ std::vector<NavbarOption> navbarOptions = {
 		.dock = "Object Details",
 	},
 	NavbarOption {
+		.name = "Navmesh",
+		.dock = "Navmesh",
+	},
+	NavbarOption {
 		.name = "Cameras",
 		.dock = "Cameras",
 	},

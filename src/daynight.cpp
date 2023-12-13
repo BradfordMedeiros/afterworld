@@ -5,6 +5,8 @@ extern CustomApiBindings* gameapi;
 std::vector<glm::vec3> cycleColors = {
   glm::vec3(0.1f, 0.1f, 0.1f),
   glm::vec3(0.1f, 0.1f, 0.1f),
+  glm::vec3(0.1f, 0.1f, 0.1f),
+  glm::vec3(0.1f, 0.1f, 0.1f),
   glm::vec3(1.0f, 0.8f, 0.8f),
   glm::vec3(1.0f, 0.8f, 0.8f),
   glm::vec3(0.1f, 0.1f, 0.1f),
