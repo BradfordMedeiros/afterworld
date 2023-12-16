@@ -128,7 +128,7 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto id = uniqueMenuItemMappingId();
 
   auto strValue = strFromProp(props, valueSymbol, "");
-  auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+  auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 0.f));
   auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
   auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
   auto minheight = floatFromProp(props, minheightSymbol, 0.f);

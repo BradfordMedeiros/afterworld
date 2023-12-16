@@ -1,7 +1,7 @@
 #include "./list.h"
 
 
-Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, float minheight, int selectedIndex, float fontSize, float itemPadding){
+Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, float minheight, int selectedIndex, std::optional<float> fontSize, float layoutPadding, float itemPadding){
   std::vector<Component> elements;
   for (int i = 0 ; i < listItems.size(); i++){
     ListComponentData& listItemData = listItems.at(i);
@@ -10,12 +10,14 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
       .props = {
         PropPair { .symbol = valueSymbol, .value = listItemData.name },
         PropPair { .symbol = onclickSymbol, .value = onClick },
-        PropPair { .symbol = tintSymbol, .value = tint },
         PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f) },
-        PropPair { .symbol = fontsizeSymbol, .value = fontSize },
+        PropPair { .symbol = paddingSymbol, .value = itemPadding },
 
       },
     };
+    if (fontSize.has_value()){
+      listItemProps.props.push_back(PropPair { .symbol = fontsizeSymbol, .value = fontSize.value() });
+    }
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
     elements.push_back(listItemWithProps);
   }
@@ -32,7 +34,7 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
     .alignVertical = UILayoutFlowNone2,
     .spacing = 0.f,
     .minspacing = 0.f,
-    .padding = 0.f,
+    .padding = layoutPadding,
     .children = elements,
   };
   return layout;
@@ -60,9 +62,11 @@ Component listComponent {
 
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     auto minheight = floatFromProp(props, minheightSymbol, 0.f);
-    auto fontSize = floatFromProp(props, fontsizeSymbol, 0.f);
+    auto fontSize = floatFromProp(props, fontsizeSymbol);
+    auto padding = floatFromProp(props, paddingSymbol, 0.f);
+    auto itemPadding = floatFromProp(props, itemPaddingSymbol, 0.f);
 
-    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, minheight, selectedIndex, fontSize, 0.02f);
+    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, minheight, selectedIndex, fontSize, padding, itemPadding);
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },

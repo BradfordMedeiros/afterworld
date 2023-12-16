@@ -175,6 +175,14 @@ float floatFromProp(Props& props, int symbol, float defaultValue){
   }
   return defaultValue;
 }
+std::optional<float> floatFromProp(Props& props, int symbol){
+  auto propPair = propPairAtIndex(props.props, symbol);
+  if (propPair){
+    return floatFromProp(*propPair);
+  }
+  return std::nullopt;
+}
+
 glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
@@ -425,6 +433,7 @@ const int radioSymbol = getSymbol("radio");
 const int colorSymbol = getSymbol("color");
 const int routerMappingSymbol = getSymbol("router-mapping");
 const int paddingSymbol = getSymbol("padding");
+const int itemPaddingSymbol = getSymbol("item-padding");
 const int alignVertical = getSymbol("align-vertical");
 const int flowHorizontal = getSymbol("flow-horizontal");
 const int flowVertical = getSymbol("flow-vertical");

@@ -137,10 +137,12 @@ Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onCli
       PropPair { .symbol = minwidthSymbol,  .value = width },
       PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.2f) },
       PropPair { .symbol = horizontalSymbol,   .value = true },
-      PropPair { .symbol = paddingSymbol,      .value = 0.0f },
+      PropPair { .symbol = paddingSymbol,      .value = 0.02f },
       PropPair { .symbol = flowHorizontal, .value = UILayoutFlowPositive2 },
       PropPair { .symbol = flowVertical,     .value = UILayoutFlowNegative2 },
-      PropPair { .symbol = fontsizeSymbol,     .value = 0.04f },
+      PropPair { .symbol = fontsizeSymbol,     .value = 0.02f },
+      PropPair { .symbol = itemPaddingSymbol,     .value = 0.02f },
+
     },
   };
   return levelProps;
