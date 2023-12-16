@@ -124,7 +124,7 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
   auto onClick = fnFromProp(props, onclickSymbol);
   auto onClick2 = typeFromProps<std::function<void(int)>>(props, onclickRightSymbol);
-  auto padding = floatFromProp(props, paddingSymbol, 0.05f);
+  auto padding = floatFromProp(props, paddingSymbol, 0.0f);
   auto fontSize = floatFromProp(props, fontsizeSymbol, 0.015f);
   auto limit = intFromProp(props, limitSymbol, -1);
   auto focusTint = typeFromProps<glm::vec4>(props, focusTintSymbol);
