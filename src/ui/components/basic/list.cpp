@@ -1,7 +1,7 @@
 #include "./list.h"
 
 
-Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, float minheight, int selectedIndex){
+Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, float minheight, int selectedIndex, float fontSize, float itemPadding){
   std::vector<Component> elements;
   for (int i = 0 ; i < listItems.size(); i++){
     ListComponentData& listItemData = listItems.at(i);
@@ -12,6 +12,8 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
         PropPair { .symbol = onclickSymbol, .value = onClick },
         PropPair { .symbol = tintSymbol, .value = tint },
         PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f) },
+        PropPair { .symbol = fontsizeSymbol, .value = fontSize },
+
       },
     };
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
@@ -58,8 +60,9 @@ Component listComponent {
 
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     auto minheight = floatFromProp(props, minheightSymbol, 0.f);
+    auto fontSize = floatFromProp(props, fontsizeSymbol, 0.f);
 
-    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, minheight, selectedIndex);
+    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, minheight, selectedIndex, fontSize, 0.02f);
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },

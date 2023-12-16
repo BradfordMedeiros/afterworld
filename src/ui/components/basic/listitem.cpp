@@ -42,7 +42,7 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
     .width = rectWidth,
     .height = rectHeight,
   };
-  drawDebugBoundingBox(drawTools, boundingBox, glm::vec4(1.f, 0.f, 0.f, 1.f));
+  //drawDebugBoundingBox(drawTools, boundingBox, glm::vec4(1.f, 0.f, 0.f, 1.f));
   return boundingBox;
 }
 
