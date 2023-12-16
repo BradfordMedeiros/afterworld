@@ -47,7 +47,7 @@ Component listComponent {
       flowVerticalValue = *flowVerticalProp;
     }
 
-    auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+    auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 0.f, 0.f, 1.f));
     auto selectedIndex = intFromProp(props, selectedSymbol, -1);
 
     auto flowHorizontalProp = typeFromProps<UILayoutFlowType2>(props, flowHorizontal);

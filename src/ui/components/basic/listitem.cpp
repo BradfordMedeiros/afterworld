@@ -6,8 +6,12 @@ const float fontSizePerLetterNdi = 0.02f;
 BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 rectTint, glm::vec4 color, std::function<void(int)>* inputFn){
   std::optional<objid> mappingId = drawTools.selectedId;
   float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
-  auto height = fontSizePerLetterNdi;
-  auto width = glm::max(menuItem.value.size() * fontSize, minwidth);
+
+  float textWidth = 0.f;
+  float height = 0.f;
+  drawTools.getTextDimensionsNdi(menuItem.value, fontSize, true, std::nullopt, &textWidth, &height);
+
+  auto width = glm::max(textWidth, minwidth);
 
   auto rectX = (xoffset + (xoffset + width)) / 2.f;
   auto rectY = yoffset;
@@ -30,12 +34,15 @@ BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menu
 
   drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, rectTint, std::nullopt, true, menuItem.mappingId, std::nullopt, std::nullopt);
   drawCenteredText(drawTools, menuItem.value, xoffset, textY, fontSize, tint, menuItem.mappingId);
-  return BoundingBox2D {
+
+  BoundingBox2D boundingBox {
     .x = rectX,
     .y = rectY,
     .width = rectWidth,
     .height = rectHeight,
   };
+  drawDebugBoundingBox(drawTools, boundingBox, glm::vec4(1.f, 0.f, 0.f, 1.f));
+  return boundingBox;
 }
 
 BoundingBox2D drawImMenuList(DrawingTools& drawTools, std::vector<ImListItem> list, float xoffset, float yoffset2, float padding, std::optional<float> fontSizeStyle, float minwidth, glm::vec4 tint, glm::vec4 color){
@@ -117,7 +124,7 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto id = uniqueMenuItemMappingId();
 
   auto strValue = strFromProp(props, valueSymbol, "");
-  auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 1.f));
+  auto tint = vec4FromProp(props, tintSymbol, glm::vec4(1.f, 0.f, 0.f, 1.f));
   auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
   auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
   float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);

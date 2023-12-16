@@ -332,6 +332,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
+     .getTextDimensionsNdi = gameapi -> getTextDimensionsNdi,
      .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
       if (trackingId.has_value()){
         handlerFuncs.trackedLocationIds[trackingId.value()] = TrackedLocationData {

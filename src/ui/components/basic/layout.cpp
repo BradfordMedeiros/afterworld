@@ -67,6 +67,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
 			.selectionId = selectionId,
   	});
   };
+  drawTools.getTextDimensionsNdi = realTools.getTextDimensionsNdi;
   drawTools.drawRect = [&bufferedDrawingTools](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
   	bufferedDrawingTools.bufferedData.bufferedRect.push_back(BufferedRect{
  			.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
