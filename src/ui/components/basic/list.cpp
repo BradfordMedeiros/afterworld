@@ -1,7 +1,7 @@
 #include "./list.h"
 
 
-Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, int selectedIndex){
+Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, UILayoutFlowType2 flowVertical, UILayoutFlowType2 flowHorizontal, glm::vec4 tint, float minwidth, float minheight, int selectedIndex){
   std::vector<Component> elements;
   for (int i = 0 ; i < listItems.size(); i++){
     ListComponentData& listItemData = listItems.at(i);
@@ -22,7 +22,7 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
     .showBackpanel = true,
     .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
     .minwidth = minwidth,
-    .minheight = 0.f,
+    .minheight = minheight,
     .layoutType = horizontal ? LAYOUT_HORIZONTAL2 : LAYOUT_VERTICAL2,
     .layoutFlowHorizontal = flowHorizontal,
     .layoutFlowVertical = flowVertical,
@@ -57,8 +57,9 @@ Component listComponent {
     }
 
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
+    auto minheight = floatFromProp(props, minheightSymbol, 0.f);
 
-    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, selectedIndex);
+    auto layout = createLayout(*listItems, horizontal, flowVerticalValue, flowHorizontalValue, tint, minwidth, minheight, selectedIndex);
     Props listLayoutProps {
       .props = {
         { .symbol = layoutSymbol, .value = layout },

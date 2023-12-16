@@ -54,7 +54,7 @@ BoundingBox2D drawImNestedList(DrawingTools& drawTools, std::vector<NestedListIt
       items.push_back(value.item);
     }
 
-    auto boundingBox = drawImMenuList(drawTools, items, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth, tint);
+    auto boundingBox = drawImMenuList(drawTools, items, xoffset, yoffset + additionalYOffset, padding, fontSizePerLetterNdi, minwidth, 0.f, tint);
     if (i == -1){
       overallBounds = boundingBox;
     }
