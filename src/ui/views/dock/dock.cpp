@@ -309,7 +309,7 @@ std::vector<DockConfiguration> configurations {
         .onChecked = getOnCheckedGameobj("physics", "enabled", "disabled"),
       },    
 
-     /* DockImageGroup {
+      DockImageGroup {
         .groupName = "Depth of Field Blur",
         .onClick = createCollapsableOnClick("blur"),
         .collapse = createShouldBeCollapse("blur"),
@@ -345,7 +345,7 @@ std::vector<DockConfiguration> configurations {
             .onSlide = getSetFloatGameobj("bluramount"),
           },
         },
-      },*/
+      },
     },
   },
   DockConfiguration {
@@ -536,7 +536,7 @@ DockConfiguration* dockConfigByName(std::string name){
   return NULL;
 }
 
-Component textboxWithLabel = wrapWithLabel(textbox);
+Component textboxWithLabel = wrapWithLabel(textbox, 0.02f);
 
 void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Component>& elements);
 Component createDockComponent(DockConfig& config){
@@ -710,6 +710,7 @@ Component createDockComponent(DockConfig& config){
       .props = {
         PropPair { .symbol = valueSymbol, .value = value },
         PropPair { .symbol = onclickSymbol, .value = onClick },
+        PropPair { .symbol = paddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
       }
     };
     if (!gameobjSelectorOptions -> label.has_value()){
@@ -730,7 +731,8 @@ Component createDockComponent(DockConfig& config){
         PropPair { .symbol = onclickSymbol, .value = dockGroupOptions -> onClick },
         PropPair { .symbol = fontsizeSymbol, .value = 0.02f },
         PropPair { .symbol = paddingSymbol, .value = 0.015f },
-        PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.5f) },
+        PropPair { .symbol = tintSymbol, .value = styles.thirdColor },
+        PropPair { .symbol = minwidthSymbol, .value = 0.5f },
       }
     });
     elements.push_back(titleTextbox);
@@ -747,9 +749,11 @@ Component createDockComponent(DockConfig& config){
 
   auto dockTextboxNumeric = std::get_if<DockTextboxNumeric>(&config);
   if (dockTextboxNumeric){
+    // this is probably not the right type of display for this 
     Props textboxProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string(dockTextboxNumeric -> label) + std::to_string(dockTextboxNumeric -> value) },
+        PropPair { .symbol = valueSymbol, .value = std::string(dockTextboxNumeric -> label) + "       " + std::to_string(dockTextboxNumeric -> value) },
+        PropPair { .symbol = paddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
       }
     };
     auto textboxWithProps = withPropsCopy(textbox, textboxProps);

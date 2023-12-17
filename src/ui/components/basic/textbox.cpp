@@ -56,9 +56,10 @@ Component textbox {
     auto textData = typeFromProps<TextData>(props, textDataSymbol);
     auto strValue = strFromProp(props, valueSymbol, "default textbox");
     auto isEditable = boolFromProp(props, editableSymbol, false);
-    auto tint = vec4FromProp(props, tintSymbol, isEditable ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 0.f, 1.f));
+    auto tint = vec4FromProp(props, tintSymbol, isEditable ? styles.highlightColor : glm::vec4(0.f, 0.f, 0.f, 0.f));
     auto color = vec4FromProp(props, colorSymbol, isEditable ? glm::vec4(0.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f));
     auto onClick = fnFromProp(props, onclickSymbol);
+    auto padding = floatFromProp(props, paddingSymbol, 0.02f);
     modassert(!isEditable || textData, "textbox editable but no text data provided");
 
     auto onEditTextPtr = typeFromProps<std::function<void(TextData)>>(props, onInputSymbol);
@@ -72,7 +73,7 @@ Component textbox {
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol,   .value = newTextValue },
-        PropPair { .symbol = paddingSymbol, .value = 0.f },
+        PropPair { .symbol = paddingSymbol, .value = padding },
         PropPair { .symbol = tintSymbol, .value = tint },
         PropPair { .symbol = colorSymbol, .value = color },
       },

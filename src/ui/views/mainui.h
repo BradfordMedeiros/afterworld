@@ -14,7 +14,7 @@
 #include "./navlist.h"
 #include "./pausemenu.h"
 #include "./navbar.h"
-#include "./dock.h"
+#include "./dock/dock.h"
 #include "./windowmanager.h"
 #include "../components/worldplay.h"
 #include "../components/scenemanager.h"

@@ -3,6 +3,7 @@
 
 #include "../common.h"
 #include "./listitem.h"
+#include "../../views/style.h"
 
 extern Component textbox;
 extern const int textDataSymbol;
