@@ -3,7 +3,7 @@
 
 const float STYLE_UI_WINDOW_FONTSIZE = 0.02f;
 const float STYLE_UI_WINDOW_PADDING = 0.02f;
-const glm::vec4 STYLE_UI_WINDOW_TINT(0.f, 0.f, 1.f, 0.4f);
+const glm::vec4 STYLE_UI_WINDOW_TINT(0.f, 0.f, 1.f, 0.1f);
 
 Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment){
   Component componentUiWindow {
@@ -42,7 +42,7 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
       props.props.push_back(PropPair { yoffsetSymbol, windowOffset.y  });
 
 
-      auto boundingBox = simpleVerticalLayout(allComponents, glm::vec2(0.f, 0.f), alignment).draw(drawTools, props);
+      auto boundingBox = simpleVerticalLayout(allComponents, glm::vec2(0.f, 0.f), alignment, styles.mainBorderColor).draw(drawTools, props);
       drawWindowX(drawTools, boundingBox, onClickX);
 
       auto oldCoords = windowGetPreDragOffset(symbol);
