@@ -1,6 +1,10 @@
 #include "./uiwindow.h"
 
 
+const float STYLE_UI_WINDOW_FONTSIZE = 0.02f;
+const float STYLE_UI_WINDOW_PADDING = 0.02f;
+const glm::vec4 STYLE_UI_WINDOW_TINT(0.f, 0.f, 1.f, 0.4f);
+
 Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment){
   Component componentUiWindow {
     .draw = [&component, symbol, titleValue, alignment](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -22,8 +26,10 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
         .props = {
           PropPair { .symbol = valueSymbol, .value = titleValue },
           PropPair { .symbol = onclickSymbol, .value = onClick },
-          PropPair { .symbol = fontsizeSymbol, .value = 0.02f },
-          PropPair { .symbol = paddingSymbol, .value = 0.015f },
+          PropPair { .symbol = fontsizeSymbol, .value = STYLE_UI_WINDOW_FONTSIZE },
+          PropPair { .symbol = paddingSymbol, .value = STYLE_UI_WINDOW_PADDING },
+          PropPair { .symbol = tintSymbol, .value = STYLE_UI_WINDOW_TINT },
+          PropPair { .symbol = minwidthSymbol, .value = 0.5f - (STYLE_UI_WINDOW_PADDING * 2) },
         }
       });
 

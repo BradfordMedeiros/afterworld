@@ -109,6 +109,10 @@ std::vector<NavbarOption> navbarOptionsGameplay = {
 };
 
 
+const float STYLE_UI_NAVBAR_FONTSIZE = 0.02f;
+const float STYLE_UI_NAVBAR_ITEM_PADDING = 0.02f;
+const float STYLE_UI_NAVBAR_PADDING = 0.02f;
+
 Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onClickNavbar){
 	std::vector<NavbarOption>* navbarOptionsPtr = NULL;
 	if (type == MAIN_EDITOR){
@@ -135,13 +139,13 @@ Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onCli
       PropPair { .symbol = xoffsetSymbol,   .value = xoffset },
       PropPair { .symbol = yoffsetSymbol,   .value = 1.f },
       PropPair { .symbol = minwidthSymbol,  .value = width },
-      PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.2f) },
+      PropPair { .symbol = tintSymbol,      .value = styles.primaryColor },
       PropPair { .symbol = horizontalSymbol,   .value = true },
-      PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+      PropPair { .symbol = paddingSymbol,      .value = STYLE_UI_NAVBAR_PADDING },
       PropPair { .symbol = flowHorizontal, .value = UILayoutFlowPositive2 },
       PropPair { .symbol = flowVertical,     .value = UILayoutFlowNegative2 },
-      PropPair { .symbol = fontsizeSymbol,     .value = 0.02f },
-      PropPair { .symbol = itemPaddingSymbol,     .value = 0.02f },
+      PropPair { .symbol = fontsizeSymbol,     .value = STYLE_UI_NAVBAR_FONTSIZE },
+      PropPair { .symbol = itemPaddingSymbol,     .value = STYLE_UI_NAVBAR_ITEM_PADDING },
 
     },
   };

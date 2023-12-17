@@ -532,7 +532,6 @@ DockConfiguration* dockConfigByName(std::string name){
     }
   }
   return NULL;
-  //return &configurations.at(0);
 }
 
 Component textboxWithLabel = wrapWithLabel(textbox);
@@ -774,8 +773,8 @@ Component genericDockComponent {
 
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 1.f, 0.2f),
-      .showBackpanel = false,
-      .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
+      .showBackpanel = true,
+      .borderColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
       .minwidth = 0.5f,
       .minheight = 0.f,
       .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,
@@ -824,8 +823,8 @@ Component dockComponent {
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.88f);
 
     Layout layout {
-      .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
-      .showBackpanel = false,
+      .tint = glm::vec4(0.f, 1.f, 0.f, 0.5f),
+      .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,
       .minheight = 1.f,
