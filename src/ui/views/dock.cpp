@@ -778,7 +778,7 @@ Component genericDockComponent {
     Layout layout {
       .tint = styles.secondaryColor,
       .showBackpanel = true,
-      .borderColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
+      .borderColor = styles.highlightColor,
       .minwidth = 0.5f,
       .minheight = 0.f,
       .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,

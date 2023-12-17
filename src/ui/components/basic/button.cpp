@@ -11,7 +11,6 @@ Component button {
     Props buttonProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = strValue },
-        PropPair { .symbol = tintSymbol,      .value = styles.secondaryColor },
         PropPair { .symbol = paddingSymbol,      .value = paddingAmount },
         PropPair { .symbol = onclickSymbol, .value = *onClick },
       },
