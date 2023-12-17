@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_COMPONENTS_BUTTON
 
 #include "./list.h"
+#include "../../views/style.h"
 
 extern Component button;
 

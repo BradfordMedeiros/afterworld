@@ -3,7 +3,7 @@
 
 const float STYLE_UI_WINDOW_FONTSIZE = 0.02f;
 const float STYLE_UI_WINDOW_PADDING = 0.02f;
-const glm::vec4 STYLE_UI_WINDOW_TINT(0.f, 0.f, 1.f, 0.1f);
+const glm::vec4 STYLE_UI_WINDOW_TINT(0.f, 0.f, 0.f, 0.f);
 
 Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment){
   Component componentUiWindow {

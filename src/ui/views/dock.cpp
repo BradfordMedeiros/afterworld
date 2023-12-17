@@ -3,6 +3,8 @@
 extern CustomApiBindings* gameapi;
 extern DockConfigApi dockConfigApi;
 
+const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
+
 struct DockLabelConfig {
   std::string label;
 };
@@ -553,6 +555,7 @@ Component createDockComponent(DockConfig& config){
   if (dockButton){
     Props buttonProps {
       .props = {
+        PropPair { .symbol = paddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
         PropPair { .symbol = valueSymbol, .value = std::string(dockButton -> buttonText) },
         PropPair { .symbol = onclickSymbol, .value =  dockButton -> onClick }
       }
@@ -581,6 +584,7 @@ Component createDockComponent(DockConfig& config){
     Props optionsProps {
       .props = {
         PropPair { .symbol = optionsSymbol, .value = defaultOptions },
+        PropPair { .symbol = itemPaddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
       }
     };
     return withPropsCopy(options, optionsProps);
@@ -772,7 +776,7 @@ Component genericDockComponent {
     componentsForFields(dockConfig -> configFields, elements);
 
     Layout layout {
-      .tint = glm::vec4(0.f, 0.f, 1.f, 0.2f),
+      .tint = styles.secondaryColor,
       .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
       .minwidth = 0.5f,
@@ -823,7 +827,7 @@ Component dockComponent {
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.88f);
 
     Layout layout {
-      .tint = glm::vec4(0.f, 1.f, 0.f, 0.5f),
+      .tint = styles.primaryColor,
       .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,

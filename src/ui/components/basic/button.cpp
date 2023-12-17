@@ -1,16 +1,18 @@
 #include "./button.h"
 
+
 Component button {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::function<void()>* onClick = typeFromProps<std::function<void()>>(props, onclickSymbol);
     modassert(onClick, "on click not defined in button");
     auto strValue = strFromProp(props, valueSymbol, "button");
+    auto paddingAmount = floatFromProp(props, paddingSymbol, 0.f);
 
     Props buttonProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = strValue },
-        PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.2f, 0.2f, 0.2f, 0.8f) },
-        PropPair { .symbol = paddingSymbol,      .value = 0.02f },
+        PropPair { .symbol = tintSymbol,      .value = styles.secondaryColor },
+        PropPair { .symbol = paddingSymbol,      .value = paddingAmount },
         PropPair { .symbol = onclickSymbol, .value = *onClick },
       },
     };

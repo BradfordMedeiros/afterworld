@@ -7,6 +7,7 @@
 
 struct Styles {
 	glm::vec4 primaryColor;
+	glm::vec4 secondaryColor;
 	glm::vec4 highlightColor;
 	glm::vec4 debugColor;
 	glm::vec4 mainBorderColor;
