@@ -72,7 +72,7 @@ Component textbox {
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol,   .value = newTextValue },
-        PropPair { .symbol = paddingSymbol, .value = 0.02f },
+        PropPair { .symbol = paddingSymbol, .value = 0.f },
         PropPair { .symbol = tintSymbol, .value = tint },
         PropPair { .symbol = colorSymbol, .value = color },
       },

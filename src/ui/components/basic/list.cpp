@@ -92,7 +92,7 @@ Component wrapWithLabel(Component& innerComponent){
         .props = {
           PropPair { .symbol = valueSymbol, .value = strValue },
           PropPair { .symbol = onclickSymbol, .value = onClickTest },
-          PropPair { .symbol = paddingSymbol, .value = 0.025f },
+          PropPair { .symbol = paddingSymbol, .value = 0.f },
         },
       };
       auto listItemWithProps = withPropsCopy(listItem, listItemProps);
