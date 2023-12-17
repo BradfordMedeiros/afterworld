@@ -381,7 +381,7 @@ Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDi
   return withPropsCopy(layoutComponent, listLayoutProps);
 }
 
-Component simpleHorizontalLayout(std::vector<Component>& children){
+Component simpleHorizontalLayout(std::vector<Component>& children, float padding){
   Layout layout {
     .tint = styles.debugColor,
     .showBackpanel = true,
@@ -393,9 +393,9 @@ Component simpleHorizontalLayout(std::vector<Component>& children){
     .layoutFlowVertical = UILayoutFlowNone2,
     .alignHorizontal = UILayoutFlowNone2,
     .alignVertical = UILayoutFlowNone2,
-    .spacing = 0.f,
+    .spacing = 0.01f,
     .minspacing = 0.f,
-    .padding = 0.0f,
+    .padding = padding,
     .children = children,
   };
   Props listLayoutProps {

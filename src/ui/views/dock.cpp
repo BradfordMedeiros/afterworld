@@ -309,7 +309,7 @@ std::vector<DockConfiguration> configurations {
         .onChecked = getOnCheckedGameobj("physics", "enabled", "disabled"),
       },    
 
-      DockImageGroup {
+     /* DockImageGroup {
         .groupName = "Depth of Field Blur",
         .onClick = createCollapsableOnClick("blur"),
         .collapse = createShouldBeCollapse("blur"),
@@ -345,7 +345,7 @@ std::vector<DockConfiguration> configurations {
             .onSlide = getSetFloatGameobj("bluramount"),
           },
         },
-      },
+      },*/
     },
   },
   DockConfiguration {

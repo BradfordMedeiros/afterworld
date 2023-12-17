@@ -4,6 +4,7 @@
 #include "../common.h"
 #include "./listitem.h"
 #include "./layout.h"
+#include "../../views/style.h"
 
 struct ListComponentData {
 	std::string name;
@@ -11,7 +12,7 @@ struct ListComponentData {
 };
 extern Component listComponent;
 
-Component wrapWithLabel(Component& innerComponent);
+Component wrapWithLabel(Component& innerComponent, float minheight = 0.f);
 
 
 #endif
