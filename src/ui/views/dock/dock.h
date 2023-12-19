@@ -11,6 +11,13 @@
 #include "../../components/scenegraph.h"
 #include "../../../util.h"
 #include "./dock_util.h"
+#include "./types/dock_label.h"
+#include "./types/dock_button.h"
+#include "./types/dock_options.h"
+#include "./types/dock_slider.h"
+#include "./types/dock_textbox.h"
+#include "./types/dock_checkbox.h"
+#include "./types/dock_image.h"
 
 extern Component dockComponent;
 

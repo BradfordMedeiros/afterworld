@@ -5,44 +5,9 @@ extern DockConfigApi dockConfigApi;
 
 const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
 
-struct DockLabelConfig {
-  std::string label;
-};
-
-struct DockButtonConfig {
-  const char* buttonText;
-  std::function<void()> onClick;
-};
-struct DockOptionConfig {
-  std::vector<const char*> options;
-  std::function<void(std::string&, int)> onClick;
-  std::function<int(void)> getSelectedIndex;
-};
-struct DockSliderConfig {
-  std::string label;
-  float min;
-  float max;
-  std::function<float()> percentage;
-  std::function<void(float)> onSlide;
-};
-struct DockCheckboxConfig {
-  std::string label;
-  std::function<bool()> isChecked;
-  std::function<void(bool)> onChecked;
-};
-struct DockTextboxConfig {
-  std::string label;
-  std::function<std::string(void)> text;
-  std::function<void(std::string)> onEdit;
-};
 
 struct DockFileConfig {
   std::string label;
-};
-
-struct DockImageConfig {
-  std::string label;
-  std::function<void(std::string)> onImageSelect;
 };
 
 struct DockGameObjSelector {
@@ -542,13 +507,7 @@ void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Comp
 Component createDockComponent(DockConfig& config){
   auto dockLabel = std::get_if<DockLabelConfig>(&config);
   if (dockLabel){
-    Props textboxProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = dockLabel -> label },
-      }
-    };
-    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
-    return textboxWithProps;  
+    return createDockLabel(*dockLabel);
   }
 
   auto dockButton = std::get_if<DockButtonConfig>(&config);

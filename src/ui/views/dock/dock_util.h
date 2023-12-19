@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_COMPONENTS_DOCK_UTIL
 
 #include "../../../util.h"
+#include "../../components/common.h"
 
 struct DockConfigApi {
   std::function<void()> createCamera;
