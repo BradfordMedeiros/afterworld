@@ -20,6 +20,7 @@
 #include "./types/dock_checkbox.h"
 #include "./types/dock_image.h"
 #include "./types/dock_file.h"
+#include "./types/dock_gameobj.h"
 
 extern Component dockComponent;
 

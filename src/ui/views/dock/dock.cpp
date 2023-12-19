@@ -5,19 +5,13 @@ extern DockConfigApi dockConfigApi;
 
 const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
 
-
-struct DockGameObjSelector {
-  std::optional<std::string> label;
-  std::function<void(std::string&)> onSelect;
-};
-
 struct DockScenegraph {};
 
-struct DockImageGroup;
+struct DockGroup;
 
-typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockImageGroup, DockScenegraph, DockTextboxNumeric> DockConfig;
+typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockGroup, DockScenegraph, DockTextboxNumeric> DockConfig;
 
-struct DockImageGroup {
+struct DockGroup {
   std::string groupName;
   std::function<void()> onClick;  
   std::function<bool()> collapse;
@@ -265,7 +259,7 @@ std::vector<DockConfiguration> configurations {
         .onChecked = getOnCheckedGameobj("physics", "enabled", "disabled"),
       },    
 
-      DockImageGroup {
+      DockGroup {
         .groupName = "Depth of Field Blur",
         .onClick = createCollapsableOnClick("blur"),
         .collapse = createShouldBeCollapse("blur"),
@@ -531,53 +525,15 @@ Component createDockComponent(DockConfig& config){
 
   auto imageConfigOptions = std::get_if<DockImageConfig>(&config);
   if (imageConfigOptions){
-    std::function<void()> onClick =  [imageConfigOptions]() -> void {
-      dockConfigApi.openImagePicker([imageConfigOptions](bool justClosed, std::string image) -> void {
-        if (!justClosed){
-          imageConfigOptions -> label = image;
-          imageConfigOptions -> onImageSelect(image);
-        }
-      });
-    };
-    Props textboxProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = imageConfigOptions -> label },
-        PropPair { .symbol = onclickSymbol, .value = onClick },
-      }
-    };
-    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
-    return textboxWithProps; 
+    return createDockImage(*imageConfigOptions);
   }
 
   auto gameobjSelectorOptions = std::get_if<DockGameObjSelector>(&config);
   if (gameobjSelectorOptions){
-    std::function<void()> onClick =  [gameobjSelectorOptions]() -> void {
-      gameobjSelectorOptions -> label = std::nullopt;
-      dockConfigApi.pickGameObj([gameobjSelectorOptions](objid id, std::string value) -> void {
-        std::cout << "dock gameobjSelectorOptions onclick:  " << id << ", " << value << std::endl;
-        gameobjSelectorOptions -> label = value;
-        gameobjSelectorOptions -> onSelect(value);
-      });
-    };
-
-    std::string value = gameobjSelectorOptions -> label.has_value() ? (std::string("target: ") + gameobjSelectorOptions -> label.value()) : std::string("none");
-    Props textboxProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = value },
-        PropPair { .symbol = onclickSymbol, .value = onClick },
-        PropPair { .symbol = paddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
-      }
-    };
-    if (!gameobjSelectorOptions -> label.has_value()){
-      textboxProps.props.push_back(PropPair {
-        .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 1.f),
-      });
-    }
-    auto textboxWithProps = withPropsCopy(listItem, textboxProps);
-    return textboxWithProps; 
+    return createDockGameobj(*gameobjSelectorOptions);
   }
 
-  auto dockGroupOptions = std::get_if<DockImageGroup>(&config);
+  auto dockGroupOptions = std::get_if<DockGroup>(&config);
   if (dockGroupOptions){
     std::vector<Component> elements;
     auto titleTextbox = withPropsCopy(listItem, Props {
@@ -604,15 +560,7 @@ Component createDockComponent(DockConfig& config){
 
   auto dockTextboxNumeric = std::get_if<DockTextboxNumeric>(&config);
   if (dockTextboxNumeric){
-    // this is probably not the right type of display for this 
-    Props textboxProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string(dockTextboxNumeric -> label) + "       " + std::to_string(dockTextboxNumeric -> value) },
-        PropPair { .symbol = paddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
-      }
-    };
-    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
-    return textboxWithProps;  
+    return createDockTextboxNumeric(*dockTextboxNumeric);
   }
 
   modassert(false, "dock component not yet implemented");
