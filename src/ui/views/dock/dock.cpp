@@ -6,21 +6,12 @@ extern DockConfigApi dockConfigApi;
 const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
 
 
-struct DockFileConfig {
-  std::string label;
-};
-
 struct DockGameObjSelector {
   std::optional<std::string> label;
   std::function<void(std::string&)> onSelect;
 };
 
 struct DockScenegraph {};
-
-struct DockTextboxNumeric {
-  std::string label;
-  float value;
-};
 
 struct DockImageGroup;
 
@@ -501,8 +492,6 @@ DockConfiguration* dockConfigByName(std::string name){
   return NULL;
 }
 
-Component textboxWithLabel = wrapWithLabel(textbox, 0.02f);
-
 void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Component>& elements);
 Component createDockComponent(DockConfig& config){
   auto dockLabel = std::get_if<DockLabelConfig>(&config);
@@ -512,125 +501,32 @@ Component createDockComponent(DockConfig& config){
 
   auto dockButton = std::get_if<DockButtonConfig>(&config);
   if (dockButton){
-    Props buttonProps {
-      .props = {
-        PropPair { .symbol = paddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
-        PropPair { .symbol = valueSymbol, .value = std::string(dockButton -> buttonText) },
-        PropPair { .symbol = onclickSymbol, .value =  dockButton -> onClick }
-      }
-    };
-    return withPropsCopy(button, buttonProps);  
+    return createDockButton(*dockButton);
   }
 
   auto dockOptions = std::get_if<DockOptionConfig>(&config);
   if (dockOptions){
-    std::vector<Option> optionsData = {};
-    for (int i = 0; i < dockOptions -> options.size(); i++){
-      auto option = dockOptions -> options.at(i);
-      auto onClick = dockOptions -> onClick;
-      optionsData.push_back(Option {
-        .name = option,
-        .onClick = [onClick, option, i]() -> void {
-          std::string optionStr(option);
-          onClick(optionStr, i);
-        },
-      });
-    }
-    Options defaultOptions {
-      .options = optionsData,
-      .selectedIndex = dockOptions -> getSelectedIndex(),
-    };
-    Props optionsProps {
-      .props = {
-        PropPair { .symbol = optionsSymbol, .value = defaultOptions },
-        PropPair { .symbol = itemPaddingSymbol, .value = STYLE_UI_DOCK_ELEMENT_PADDING },
-      }
-    };
-    return withPropsCopy(options, optionsProps);
+    return createDockOptions(*dockOptions);
   }
 
   auto sliderOptions = std::get_if<DockSliderConfig>(&config);
   if (sliderOptions){
-    Slider sliderData {
-      .min = sliderOptions -> min,
-      .max = sliderOptions -> max,
-      .percentage = sliderOptions -> percentage(),
-      .onSlide = sliderOptions -> onSlide,
-    };
-    Props sliderProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = sliderOptions -> label },
-        PropPair { .symbol = sliderSymbol, .value = sliderData },
-      },
-    };
-    auto sliderWithProps = withPropsCopy(slider, sliderProps); 
-    return sliderWithProps;
+    return createDockSlider(*sliderOptions);
   }
 
   auto checkboxOptions = std::get_if<DockCheckboxConfig>(&config);
   if (checkboxOptions){
-    Props checkboxProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = checkboxOptions -> label },
-        PropPair { .symbol = checkedSymbol, .value = checkboxOptions -> isChecked() },
-        PropPair { .symbol = onclickSymbol, .value = checkboxOptions -> onChecked },
-      },
-    };
-    auto checkboxWithProps = withPropsCopy(checkbox, checkboxProps);
-    return checkboxWithProps;
+    return createDockCheckbox(*checkboxOptions);
   }
 
   auto textboxOptions = std::get_if<DockTextboxConfig>(&config);
   if (textboxOptions){
-    static TextData textboxConfigData {
-      .valueText = "somedebugtext",
-      .cursorLocation = 0,
-      .highlightLength = 0,
-      .maxchars = -1,
-    };
-
-    std::function<void(TextData)> onEdit = [textboxOptions](TextData textData) -> void {
-      textboxConfigData = textData;
-      textboxOptions -> onEdit(textData.valueText);
-    };
-
-    TextData textData {
-      .valueText = textboxOptions -> text(),
-      .cursorLocation = textboxConfigData.cursorLocation,
-      .highlightLength = textboxConfigData.highlightLength,
-      .maxchars = textboxConfigData.maxchars,
-    };
-
-    Props textboxProps {
-      .props = {
-        PropPair { .symbol = editableSymbol, .value = true },
-        PropPair { .symbol = textDataSymbol, .value = textData },
-        PropPair { .symbol = onInputSymbol, .value = onEdit },
-        PropPair { .symbol = valueSymbol, .value = textboxOptions -> label },
-      }
-    };
-    auto textboxWithProps = withPropsCopy(textboxWithLabel, textboxProps);
-    return textboxWithProps;
+    return createDockTextbox(*textboxOptions);
   }
 
   auto fileconfigOptions = std::get_if<DockFileConfig>(&config);
   if (fileconfigOptions){
-    std::function<void()> onClick =  [fileconfigOptions]() -> void {
-      dockConfigApi.openFilePicker([fileconfigOptions](bool justClosed, std::string file) -> void {
-        std::cout << "open file picker dialog mock: " << justClosed << ", file = " << file << std::endl;
-        if (!justClosed){
-          fileconfigOptions -> label = file;
-        }
-      }, [](bool isDirectory, std::string&) -> bool { return !isDirectory; });
-    };
-    Props textboxProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = fileconfigOptions -> label },
-        PropPair { .symbol = onclickSymbol, .value = onClick },
-      }
-    };
-    auto textboxWithProps = withPropsCopy(textbox, textboxProps);
-    return textboxWithProps; 
+    return createDockFile(*fileconfigOptions);
   }
 
   auto imageConfigOptions = std::get_if<DockImageConfig>(&config);

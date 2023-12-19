@@ -3,6 +3,7 @@
 
 #include "../../../util.h"
 #include "../../components/common.h"
+#include "../style.h"
 
 struct DockConfigApi {
   std::function<void()> createCamera;

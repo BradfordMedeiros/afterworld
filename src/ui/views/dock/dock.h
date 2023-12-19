@@ -16,8 +16,10 @@
 #include "./types/dock_options.h"
 #include "./types/dock_slider.h"
 #include "./types/dock_textbox.h"
+#include "./types/dock_textbox_numeric.h"
 #include "./types/dock_checkbox.h"
 #include "./types/dock_image.h"
+#include "./types/dock_file.h"
 
 extern Component dockComponent;
 

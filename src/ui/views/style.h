@@ -14,6 +14,8 @@ struct Styles {
 	glm::vec4 debugColor2;
 	glm::vec4 mainBorderColor;
 
+	float dockElementPadding;
+
 };
 
 extern Styles styles;
