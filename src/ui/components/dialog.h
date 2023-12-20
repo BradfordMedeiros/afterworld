@@ -5,7 +5,6 @@
 #include "./basic/listitem.h"
 #include "./basic/list.h"
 #include "./basic/textbox.h"
-#include "./basic/textbox.h"
 
 extern Component dialogComponent;
 

@@ -70,14 +70,16 @@ Component scenemanagerComponent  {
 
     auto selectorWithList = simpleVerticalLayout(
     	verticalElements, 
-    	glm::vec2(0.f, 0.f), 
+    	glm::vec2(0.5f, 0.f), 
     	AlignmentParams {
-  			.layoutFlowHorizontal = UILayoutFlowNegative2,
+  			.layoutFlowHorizontal = UILayoutFlowPositive2,
   			.layoutFlowVertical = UILayoutFlowNegative2,
-    	}
+    	},
+      styles.mainBorderColor,
+      0.f, 
+      glm::vec4(0.f, 0.f, 0.f, 0.4f)
     );
 
     return selectorWithList.draw(drawTools, props);
   },
 };
-

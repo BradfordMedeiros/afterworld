@@ -518,8 +518,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       Props sceneManagerProps {
         .props = {
           PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
-          PropPair { .symbol = xoffsetSymbol, .value = 1.f },
-          PropPair { .symbol = yoffsetSymbol, .value = 0.88f },
+          PropPair { .symbol = xoffsetSymbol, .value = -0.83f },
+          PropPair { .symbol = yoffsetSymbol, .value = 0.9f },
         },
       };
       scenemanagerComponent.draw(drawTools, sceneManagerProps);
