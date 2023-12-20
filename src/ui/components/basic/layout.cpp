@@ -356,9 +356,9 @@ AlignmentParams defaultAlignment {
   .layoutFlowHorizontal = UILayoutFlowNone2,
   .layoutFlowVertical = UILayoutFlowNone2,
 };
-Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding){
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding, glm::vec4 tint){
   Layout layout {
-    .tint = styles.debugColor,
+    .tint = tint,
     .showBackpanel = true,
     .borderColor = borderColor,
     .minwidth = minDim.x,
@@ -381,9 +381,9 @@ Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDi
   return withPropsCopy(layoutComponent, listLayoutProps);
 }
 
-Component simpleHorizontalLayout(std::vector<Component>& children, float padding){
+Component simpleHorizontalLayout(std::vector<Component>& children, float padding, glm::vec4 tint){
   Layout layout {
-    .tint = styles.debugColor,
+    .tint = tint,
     .showBackpanel = true,
     .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.f),
     .minwidth = 0.f,

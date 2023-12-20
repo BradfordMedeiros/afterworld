@@ -1,5 +1,7 @@
 #include "./fileexplorer.h"
 
+const float UI_STYLE_EXPLORER_BUTTON_PADDING = 0.02f;
+
 const int fileExplorerSymbol = getSymbol("file-explorer");
 const int fileChangeSymbol = getSymbol("file-change");
 const int fileFilterSymbol = getSymbol("filter-filter");
@@ -123,7 +125,7 @@ Component fileexplorerComponent {
       auto pathComponent = simpleVerticalLayout(pathElements, glm::vec2(0.5f, 0.5f), AlignmentParams {
         .layoutFlowHorizontal = UILayoutFlowNone2,
         .layoutFlowVertical = UILayoutFlowNegative2,
-      });
+      }, glm::vec4(0.f, 0.f, 1.f, 1.0f), 0.f, glm::vec4(0.f, 0.f, 1.f, 0.5f));
       elements.push_back(pathComponent);        
       
       modassert(elements.size() > 0, "need at least 1 elements in files for fileExplorer");
@@ -139,7 +141,8 @@ Component fileexplorerComponent {
           .props = {
             PropPair { .symbol = valueSymbol, .value = listItemData.name },
             PropPair { .symbol = onclickSymbol, .value = onClick },
-            PropPair { .symbol = tintSymbol, .value = glm::vec4(0.2f, 0.2f, 0.2f, 0.8f) },
+            PropPair { .symbol = tintSymbol, .value = glm::vec4(0.2f, 0.2f, 0.2f, 0.2f) },
+            PropPair { .symbol = paddingSymbol, .value = UI_STYLE_EXPLORER_BUTTON_PADDING },
           },
         };
         auto listItemWithProps = withPropsCopy(listItem, listItemProps);
@@ -150,7 +153,7 @@ Component fileexplorerComponent {
     }
     /////////////////////////
 
-    return simpleVerticalLayout(elements).draw(drawTools, props);
+    return simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(1.f, 1.f, 1.f, 0.4f), 0.f, glm::vec4(0.f, 0.f, 0.f, 0.8f)).draw(drawTools, props);
   },
 };
 
