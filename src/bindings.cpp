@@ -113,6 +113,9 @@ UiContext getUiContext(GameState& gameState){
    .isDebugMode = []() -> bool { 
      return getStrWorldState("editor", "debug").value() == "true"; 
    },
+   .showConsole = []() -> bool {
+     return getGlobalState().showConsole;
+   },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {

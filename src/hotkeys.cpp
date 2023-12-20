@@ -109,6 +109,10 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
    	if (key == 75){
    		spawnProcMesh(gameapi -> listSceneId(id));
    	}
+   	if (key == 96 /* ~ */  && action == 1){
+   		getGlobalState().showConsole = !getGlobalState().showConsole;
+   		modlog("console visibility", print(getGlobalState().showConsole));
+   	}
   };
 
   if (printObjDebug.has_value()){

@@ -8,6 +8,7 @@ struct GlobalState {
   bool paused;
   bool inGameMode;
   bool showScreenspaceGrid;
+  bool showConsole;
 
   float xNdc;
   float yNdc;

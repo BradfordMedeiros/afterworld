@@ -549,6 +549,11 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
 
+    if (uiContext.showConsole()){
+      auto consoleDefaultProps = getDefaultProps();
+      consoleComponent.draw(drawTools, consoleDefaultProps);      
+    }
+
     //auto weaponWheelProps = getDefaultProps();
     //weaponWheelComponent.draw(drawTools, weaponWheelProps);
     //auto compassProps = getDefaultProps();

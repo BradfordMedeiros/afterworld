@@ -21,6 +21,7 @@
 #include "./uicontext.h"
 #include "../components/game/weaponwheel.h"
 #include "../components/game/compass.h"
+#include "../components/console.h"
 
 extern Component mainUI;
 
@@ -41,7 +42,6 @@ void onObjectsChanged();
 void pushHistory(std::string route);
 std::string getCurrentPath();
 void sendUiAlert(std::string message);
-
 
 #endif
 

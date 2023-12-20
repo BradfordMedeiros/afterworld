@@ -229,7 +229,7 @@ BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Lay
 
 }
 
-BoundingBox2D calculateAdjustedBackpanel(BoundingBox2D& elementsBox, Layout& layout, float padding, float initialXOffset, float initialYOffset){  
+BoundingBox2D calculateAdjustedBackpanel(BoundingBox2D& elementsBox, Layout& layout, float padding, float initialXOffset, float initialYOffset){
   float outerWidth = elementsBox.width + (2 * padding);
   float outerHeight = elementsBox.height + (2 * padding);
   if (layout.minwidth > outerWidth){
@@ -303,7 +303,6 @@ FlowOffsets calculateFlowOffsets(Layout& layout, BoundingBox2D& elementsBox, Bou
   	.y = layoutFlowOffsetY,
   };
 }
-
 
 BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	auto layoutPtr = typeFromProps<Layout>(props, layoutSymbol);

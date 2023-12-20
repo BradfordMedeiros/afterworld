@@ -6,6 +6,7 @@ GlobalState global {
   .paused = true,
   .inGameMode = false,
   .showScreenspaceGrid = false,
+  .showConsole = false,
   .xNdc = 0.f,
   .yNdc = 0.f,
   .selectedId = std::nullopt,

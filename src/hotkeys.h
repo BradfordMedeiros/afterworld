@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
+#include "./global.h"
 
 CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name);
 
