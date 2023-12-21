@@ -608,7 +608,7 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
       onGameObjSelected = std::nullopt;
     }
 
-    if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() < handlerFns.maxManagedId){
+    if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() <= handlerFns.maxManagedId){
       focusedId = selectedId.value();
     }
 

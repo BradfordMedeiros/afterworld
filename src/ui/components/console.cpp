@@ -7,7 +7,7 @@ const float ELEMENT_WIDTH = 1.f;
 
 extern bool debugLayout;
 
-std::vector<std::string> commandHistory = {
+std::deque<std::string> commandHistory = {
   "poke some value", 
   "another test command",
   "wow",
@@ -23,6 +23,40 @@ std::vector<std::string> commandHistory = {
 };
 int selectedIndex = 0;
 
+struct CommandDispatch {
+  std::string command;
+  std::function<void()> fn;
+};
+
+std::vector<CommandDispatch> commands {
+  CommandDispatch {
+    .command = "quit",
+    .fn = []() -> void {
+      exit(1);
+    }, 
+  },
+};
+std::optional<CommandDispatch*> findCommand(std::string commandStr){
+  for (auto &command : commands){
+    std::transform(commandStr.begin(), commandStr.end(), commandStr.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+    if (commandStr == command.command){
+      return &command;
+    }
+  }
+  return std::nullopt;
+}
+
+
+void executeCommand(std::string& command){
+  commandHistory.pop_front();
+  commandHistory.push_back(command);
+  auto commandDispatch = findCommand(command);
+  if (commandDispatch.has_value()){
+    commandDispatch.value() -> fn();
+  }
+}
 
 Component createTitle(std::string&& item){
   Props listItemProps {
@@ -62,8 +96,7 @@ Component createConsoleItem(std::string& item,  int index){
   return listItemWithProps;
 }
 
-
-TextData textboxConfigData {
+TextData commandTextData {
   .valueText = "somedebugtext",
   .cursorLocation = 0,
   .highlightLength = 0,
@@ -79,25 +112,23 @@ Component consoleComponent {
       elements.push_back(createConsoleItem(commandHistory.at(i), i));
     }
 
-
     std::function<void(TextData)> onEdit = [](TextData textData) -> void {
-      std::cout << "on edit" << std::endl;
-      assert(false);
-      textboxConfigData = textData;
-      //textboxOptions.onEdit(textData.valueText);
+      if (textData.valueText.size() > 0 && static_cast<int>(textData.valueText.at(textData.valueText.size() - 1)) == 10 /* enter */ ){
+        auto commandStr = textData.valueText.substr(0, textData.valueText.size() -1);
+        commandTextData.valueText = "";
+        commandTextData.cursorLocation = 0;
+        commandTextData.highlightLength = 0;
+        executeCommand(commandStr);
+      }else{
+        commandTextData = textData;
+      }
     };
-    TextData textData {
-      .valueText = textboxConfigData.valueText,
-      .cursorLocation = textboxConfigData.cursorLocation,
-      .highlightLength = textboxConfigData.highlightLength,
-      .maxchars = textboxConfigData.maxchars,
-    };
+
     Props textboxProps {
       .props = {
         PropPair { .symbol = editableSymbol, .value = true },
-        PropPair { .symbol = textDataSymbol, .value = textData },
+        PropPair { .symbol = textDataSymbol, .value = commandTextData },
         PropPair { .symbol = onInputSymbol, .value = onEdit },
-        //PropPair { .symbol = valueSymbol, .value = textboxConfigData.valueText },
       }
     };
     auto textboxWithProps = withPropsCopy(textbox, textboxProps);
