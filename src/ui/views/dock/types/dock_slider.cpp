@@ -9,8 +9,8 @@ Component createDockSlider(DockSliderConfig& dockSlider){
   };
   Props sliderProps {
     .props = {
+      PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
       PropPair { .symbol = valueSymbol, .value = dockSlider.label },
-      PropPair { .symbol = sliderSymbol, .value = sliderData },
     },
   };
   auto sliderWithProps = withPropsCopy(slider, sliderProps); 

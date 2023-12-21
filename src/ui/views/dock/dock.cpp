@@ -543,7 +543,7 @@ Component createDockComponent(DockConfig& config){
         PropPair { .symbol = fontsizeSymbol, .value = 0.02f },
         PropPair { .symbol = paddingSymbol, .value = 0.015f },
         PropPair { .symbol = tintSymbol, .value = styles.thirdColor },
-        PropPair { .symbol = minwidthSymbol, .value = 0.5f },
+        PropPair { .symbol = minwidthSymbol, .value = 0.4f },
       }
     });
     elements.push_back(titleTextbox);

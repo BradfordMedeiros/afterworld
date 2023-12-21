@@ -79,9 +79,9 @@ Component listComponent {
 };
 
 
-Component wrapWithLabel(Component& innerComponent, float minheight){
+Component wrapWithLabel(Component& innerComponent, float padding){
   Component wrappedComponent {
-    .draw = [&innerComponent, minheight](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [&innerComponent, padding](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       auto innerCheckbox = withProps(innerComponent, props);
       Props childProps {
         .props = {},
@@ -92,7 +92,7 @@ Component wrapWithLabel(Component& innerComponent, float minheight){
         .props = {
           PropPair { .symbol = valueSymbol, .value = strValue },
           PropPair { .symbol = onclickSymbol, .value = onClickTest },
-          PropPair { .symbol = paddingSymbol, .value = minheight },
+          PropPair { .symbol = paddingSymbol, .value = padding },
         },
       };
       auto listItemWithProps = withPropsCopy(listItem, listItemProps);

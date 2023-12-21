@@ -12,7 +12,7 @@ struct ListComponentData {
 };
 extern Component listComponent;
 
-Component wrapWithLabel(Component& innerComponent, float minheight = 0.f);
+Component wrapWithLabel(Component& innerComponent, float padding = 0.f);
 
 
 #endif
