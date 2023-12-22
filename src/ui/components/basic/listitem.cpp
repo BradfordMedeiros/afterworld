@@ -130,6 +130,8 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto strValue = strFromProp(props, valueSymbol, "");
   auto tint = vec4FromProp(props, tintSymbol, glm::vec4(0.f, 0.f, 0.f, 0.f));
   auto color = vec4FromProp(props, colorSymbol, glm::vec4(1.f, 1.f, 1.f, 1.f));
+  auto borderColor = typeFromProps<glm::vec4>(props, borderColorSymbol) ;
+
   auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
   auto minheight = floatFromProp(props, minheightSymbol, 0.f);
   float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
@@ -155,7 +157,11 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   };
   auto box = drawImMenuListItem(drawTools, menuItem, xoffset, yoffset,  padding, fontSize, minwidth, minheight, tint, color, isFocused ? inputFnHandler : NULL);
   //auto yoffset = getProp<int>(props, symbolForName("yoffset"));
-  if (focusTint && isFocused){
+  
+  if (borderColor && !isFocused){
+    drawDebugBoundingBox(drawTools, box, *borderColor);
+  }
+  else if (focusTint && isFocused){
     drawDebugBoundingBox(drawTools, box, *focusTint);
   }
   return box;

@@ -175,5 +175,6 @@ extern const int fixedSizeSymbol;
 extern const int sizeSymbol;
 extern const int limitSymbol;
 extern const int focusTintSymbol;
+extern const int borderColorSymbol;
 
 #endif

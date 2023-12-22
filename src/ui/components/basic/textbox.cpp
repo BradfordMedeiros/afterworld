@@ -58,8 +58,11 @@ Component textbox {
     auto isEditable = boolFromProp(props, editableSymbol, false);
     auto tint = vec4FromProp(props, tintSymbol, isEditable ? styles.highlightColor : glm::vec4(0.f, 0.f, 0.f, 0.f));
     auto color = vec4FromProp(props, colorSymbol, isEditable ? glm::vec4(0.f, 0.f, 0.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f));
+    auto borderColor = typeFromProps<glm::vec4>(props, borderColorSymbol);
     auto onClick = fnFromProp(props, onclickSymbol);
     auto padding = floatFromProp(props, paddingSymbol, 0.02f);
+    auto minwidth = typeFromProps<float>(props, minwidthSymbol);
+
     modassert(!isEditable || textData, "textbox editable but no text data provided");
 
     auto onEditTextPtr = typeFromProps<std::function<void(TextData)>>(props, onInputSymbol);
@@ -78,6 +81,12 @@ Component textbox {
         PropPair { .symbol = colorSymbol, .value = color },
       },
     };
+    if (minwidth){
+      listItemProps.props.push_back(PropPair { .symbol = minwidthSymbol, .value = *minwidth });
+    }
+    if (borderColor){
+      listItemProps.props.push_back(PropPair { .symbol = borderColorSymbol, .value = *borderColor });
+    }
     if (isEditable && onEditTextPtr){
       auto onEditText = *onEditTextPtr;
 

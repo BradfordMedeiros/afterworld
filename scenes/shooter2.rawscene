@@ -338,19 +338,19 @@ poi_1:tint:0 1 0 1
 poi_1:position:2 -28 98
 poi_1:interest:generic
 
-poi_2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-poi_2:scale:0.25 0.05 1.25
-poi_2:texture:../gameresources/textures/controls/up-down.png
-poi_2:tint:0 1 0 1
-poi_2:position:75 -28 98
-poi_2:interest:generic
-
-poi_3:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-poi_3:scale:0.25 0.05 1.25
-poi_3:texture:../gameresources/textures/controls/up-down.png
-poi_3:tint:0 1 0 1
-poi_3:position:75 -28 50
-poi_3:interest:generic
+#poi_2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#poi_2:scale:0.25 0.05 1.25
+#poi_2:texture:../gameresources/textures/controls/up-down.png
+#poi_2:tint:0 1 0 1
+#poi_2:position:75 -28 98
+#poi_2:interest:generic
+#
+#poi_3:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#poi_3:scale:0.25 0.05 1.25
+#poi_3:texture:../gameresources/textures/controls/up-down.png
+#poi_3:tint:0 1 0 1
+#poi_3:position:75 -28 50
+#poi_3:interest:generic
 
 ##############################################
 
@@ -361,3 +361,14 @@ ai:script:native/ai
 movement:script:native/movement:1
 
 
+;navmesh1:position:-20 -27 70
+;navmesh1:physics:enabled
+;navmesh1:physics_shape:shape_exact
+
+#;navmesh2:position:-20 -27 70
+#;navmesh2:physics:enabled
+#;navmesh2:physics_shape:shape_exact
+
+#;navmesh3:position:-20 -27 70
+#;navmesh3:physics:enabled
+#;navmesh3:physics_shape:shape_exact

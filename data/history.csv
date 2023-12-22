@@ -1,0 +1,11 @@
+history.text:STRING,history.valid:STRING
+one,false
+two,false
+quit,true
+somedebugtext,false
+QUIT,true
+DEBUG,true
+DEBUG,true
+QUIT,true
+FSD FADD    Adebugtext,true
+THIS IS SOMETHING INTERESTING,true
