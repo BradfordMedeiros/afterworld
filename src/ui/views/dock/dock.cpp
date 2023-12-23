@@ -278,9 +278,13 @@ std::vector<DockConfiguration> configurations {
             .min = 0.f,
             .max = 1.f,
             .percentage = getFloatGameobj("minblur"),
-            .onSlide = getSetFloatGameobj("minblur"),
+            .onSlide = [](float amount) -> void {
+              auto setMinBlur = getSetFloatGameobj("minblur");
+              setMinBlur(amount);
+              modassert(false, std::string("set min blur, value = " ) + std::to_string(amount));
+            },
           },
-          DockSliderConfig {
+          /*DockSliderConfig {
             .label = "blur max",
             .min = 0.f,
             .max = 1.f,
@@ -293,7 +297,7 @@ std::vector<DockConfiguration> configurations {
             .max = 1.f,
             .percentage = getFloatGameobj("bluramount"),
             .onSlide = getSetFloatGameobj("bluramount"),
-          },
+          },*/
         },
       },
     },

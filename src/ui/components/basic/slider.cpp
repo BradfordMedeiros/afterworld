@@ -9,8 +9,10 @@ Component sliderInner  {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     float xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
+    glm::vec4* borderColor = typeFromProps<glm::vec4>(props, borderColorSymbol);
+    glm::vec4* barColor = typeFromProps<glm::vec4>(props, barColorSymbol);
     Slider* slider = typeFromProps<Slider>(props, sliderSymbol);
-    modassert(slider, "invalid slider prop");
+    modassert(slider, "invalid slider prop for sliderSymbol");
 
     float width = 0.2f;
     float height = 0.05f;
@@ -21,7 +23,7 @@ Component sliderInner  {
      
 
     auto barMappingId = uniqueMenuItemMappingId();
-    drawRight(drawTools, x, y, width * glm::min(1.f, glm::max(slider -> percentage, 0.f)), height, glm::vec4(0.4f, 0.4f, 0.4f, .8f), barMappingId);
+    drawRight(drawTools, x, y, width * glm::min(1.f, glm::max(slider -> percentage, 0.f)), height, barColor ? *barColor : glm::vec4(0.4f, 0.4f, 0.4f, .8f), barMappingId);
 
     auto mappingId = uniqueMenuItemMappingId();
     drawRight(drawTools, x, y, width, height, glm::vec4(0.f, 0.f, 0.f, .0f), mappingId);
@@ -45,7 +47,9 @@ Component sliderInner  {
       .width = width,
       .height = height,
     };
-    //drawDebugBoundingBox(drawTools, boundingBox);
+    if (borderColor){
+      drawDebugBoundingBox(drawTools, boundingBox, *borderColor);
+    }
     return boundingBox;
   },
 };

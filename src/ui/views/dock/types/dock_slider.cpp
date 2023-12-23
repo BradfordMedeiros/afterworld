@@ -11,6 +11,9 @@ Component createDockSlider(DockSliderConfig& dockSlider){
     .props = {
       PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
       PropPair { .symbol = valueSymbol, .value = dockSlider.label },
+      PropPair { .symbol = sliderSymbol, .value = sliderData },
+      PropPair { .symbol = borderColorSymbol, .value = styles.mainBorderColor },
+      PropPair { .symbol = barColorSymbol, .value = styles.highlightColor },
     },
   };
   auto sliderWithProps = withPropsCopy(slider, sliderProps); 

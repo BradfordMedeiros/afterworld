@@ -79,7 +79,7 @@ std::vector<CommandDispatch> commands {
     }, 
   },
   CommandDispatch {
-    .command = "bac",
+    .command = "background",
     .fn = [](std::string& command) -> bool {
       auto values = split(command, ' ');
       if (values.size() != 2){

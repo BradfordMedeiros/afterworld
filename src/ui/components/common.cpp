@@ -456,3 +456,4 @@ const int sizeSymbol = getSymbol("size");
 const int limitSymbol = getSymbol("limit");
 const int focusTintSymbol = getSymbol("focus-tint");
 const int borderColorSymbol = getSymbol("border-color");
+const int barColorSymbol = getSymbol("bar-color");

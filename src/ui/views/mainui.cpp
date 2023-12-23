@@ -25,6 +25,7 @@ Props createLevelListProps(UiContext& uiContext){
       PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.3f) },
       PropPair { .symbol = flowHorizontal,  .value = UILayoutFlowPositive2 },
       PropPair { .symbol = flowVertical,    .value = UILayoutFlowNegative2 },
+      PropPair { .symbol = itemPaddingSymbol, .value = 0.04f },
     },
   };
   return levelProps;
