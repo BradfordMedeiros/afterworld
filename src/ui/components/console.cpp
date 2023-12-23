@@ -42,7 +42,10 @@ void insertCommandHistory(std::string& command, bool valid){
 
 
 std::deque<HistoryInstance> commandHistory =  {};
+std::deque<HistoryInstance> logHistory = {};
+
 int selectedIndex = 0;
+bool showLog = false;
 
 struct CommandDispatch {
   std::string command;
@@ -64,12 +67,14 @@ std::vector<CommandDispatch> commands {
   CommandDispatch {
     .command = "log",
     .fn = [](std::string& commandStr) -> bool {
+      showLog = true;
       return true;
     }, 
   },
   CommandDispatch {
     .command = "history",
     .fn = [](std::string& commandStr) -> bool {
+      showLog = false;
       return true;
     }, 
   },
@@ -168,7 +173,7 @@ Component createConsoleItem(HistoryInstance& history,  int index){
 }
 
 TextData commandTextData {
-  .valueText = "somedebugtext",
+  .valueText = "",
   .cursorLocation = 0,
   .highlightLength = 0,
   .maxchars = -1,
@@ -178,16 +183,28 @@ Component consoleComponent {
     static bool firstTime = true;
     if (firstTime){
       commandHistory = loadCommandHistory();
+      gameapi -> setLogEndpoint([](std::string& message) -> void {
+        std::cout << "\n---------------------------------------\n" <<  message << "\n---------------------------\n\n";
+        if (logHistory.size() > CONSOLE_LOG_LIMIT){
+          logHistory.pop_front();
+        }
+        logHistory.push_back(HistoryInstance {
+          .command = message,
+          .valid = true,
+        });
+      });
     }
     firstTime = false;
   	std::vector<Component> elements = {};
 
-    elements.push_back(createTitle("History"));
+    elements.push_back(createTitle(showLog ? "Log" : "History"));
 
-    for (int i = 0; i < commandHistory.size(); i++){
-      elements.push_back(createConsoleItem(commandHistory.at(i), i));
+    std::deque<HistoryInstance>* consoleSource = showLog ? &logHistory : &commandHistory;
+
+    for (int i = 0; i < consoleSource -> size(); i++){
+      elements.push_back(createConsoleItem(consoleSource -> at(i), i));
     }
-    int paddingElements = CONSOLE_LOG_LIMIT - commandHistory.size();
+    int paddingElements = CONSOLE_LOG_LIMIT - consoleSource -> size();
     if (paddingElements > 0){
       for (int i = 0; i < paddingElements; i++){
         std::cout << "paddingElements: " << paddingElements << std::endl;
