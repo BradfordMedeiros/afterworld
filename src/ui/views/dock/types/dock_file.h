@@ -6,6 +6,7 @@
 
 struct DockFileConfig {
   std::string label;
+  std::optional<int> displayLimit;
 };
 
 Component createDockFile(DockFileConfig& dockFile);

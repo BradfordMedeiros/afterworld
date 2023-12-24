@@ -550,9 +550,21 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
 
-    if (uiContext.showConsole()){
+    bool shouldShowConsole = uiContext.showConsole();
+    static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
+    if (!shouldShowConsole){
+      startedShowingConsoleTime = std::nullopt;
+    }else if (!startedShowingConsoleTime.has_value()){
+      startedShowingConsoleTime = gameapi -> timeSeconds(true);
+    }
+    if (startedShowingConsoleTime.has_value()){
+      float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
+      std::cout << "console: " << elapsedTime << std::endl;
+    }
+
+    if (shouldShowConsole){
       auto consoleDefaultProps = getDefaultProps();
-      consoleComponent.draw(drawTools, consoleDefaultProps);      
+      consoleComponent.draw(drawTools, consoleDefaultProps);
     }
 
     //auto weaponWheelProps = getDefaultProps();

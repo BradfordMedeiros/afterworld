@@ -15,9 +15,18 @@ std::function<void()> onClick =  [&fileconfigOptions]() -> void {
         return true; 
       });
   };
+
+  std::string fileDisplay = fileconfigOptions.label;
+  if (fileconfigOptions.displayLimit.has_value()){
+    int firstIndex = fileDisplay.size() - fileconfigOptions.displayLimit.value();
+    if (firstIndex < 0){
+      firstIndex = 0;
+    }
+    fileDisplay = "[...] " + fileDisplay.substr(firstIndex, fileDisplay.size()) ; 
+  }
   Props textboxProps {
     .props = {
-      PropPair { .symbol = valueSymbol, .value = fileconfigOptions.label },
+      PropPair { .symbol = valueSymbol, .value = fileDisplay },
       PropPair { .symbol = onclickSymbol, .value = onClick },
     }
   };
