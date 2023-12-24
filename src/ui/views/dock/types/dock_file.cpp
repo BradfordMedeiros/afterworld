@@ -2,6 +2,18 @@
 
 extern DockConfigApi dockConfigApi;
 
+std::string limitDisplayFilePath(std::string& label, std::optional<int> displayLimit){
+  std::string fileDisplay = label;
+  if (displayLimit.has_value()){
+    int firstIndex = fileDisplay.size() - displayLimit.value();
+    if (firstIndex < 0){
+      firstIndex = 0;
+    }
+    fileDisplay = "[...] " + fileDisplay.substr(firstIndex, fileDisplay.size()) ; 
+  }
+  return fileDisplay;
+}
+
 Component createDockFile(DockFileConfig& fileconfigOptions){
 std::function<void()> onClick =  [&fileconfigOptions]() -> void {
     dockConfigApi.openFilePicker(
@@ -16,14 +28,8 @@ std::function<void()> onClick =  [&fileconfigOptions]() -> void {
       });
   };
 
-  std::string fileDisplay = fileconfigOptions.label;
-  if (fileconfigOptions.displayLimit.has_value()){
-    int firstIndex = fileDisplay.size() - fileconfigOptions.displayLimit.value();
-    if (firstIndex < 0){
-      firstIndex = 0;
-    }
-    fileDisplay = "[...] " + fileDisplay.substr(firstIndex, fileDisplay.size()) ; 
-  }
+  auto fileDisplay = limitDisplayFilePath(fileconfigOptions.label, fileconfigOptions.displayLimit);
+
   Props textboxProps {
     .props = {
       PropPair { .symbol = valueSymbol, .value = fileDisplay },
