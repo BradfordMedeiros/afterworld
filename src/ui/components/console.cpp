@@ -21,7 +21,13 @@ std::deque<HistoryInstance> loadCommandHistory(){
   modassert(validSql, "error executing sql query");
 
   std::deque<HistoryInstance> history;
-  for (auto &row : result){
+
+  int fromIndex = result.size() - CONSOLE_LOG_LIMIT;
+  if (fromIndex < 0){
+    fromIndex = 0;
+  }
+  for (int i = fromIndex; i < result.size(); i++){
+    auto row = result.at(i);
     history.push_back(
       HistoryInstance {
         .command = row.at(0),      
@@ -184,8 +190,7 @@ Component consoleComponent {
     if (firstTime){
       commandHistory = loadCommandHistory();
       gameapi -> setLogEndpoint([](std::string& message) -> void {
-        std::cout << "\n---------------------------------------\n" <<  message << "\n---------------------------\n\n";
-        if (logHistory.size() > CONSOLE_LOG_LIMIT){
+        if (logHistory.size() >= CONSOLE_LOG_LIMIT){
           logHistory.pop_front();
         }
         logHistory.push_back(HistoryInstance {
