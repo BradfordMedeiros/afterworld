@@ -103,6 +103,16 @@ std::optional<objid> activeSceneIdOpt(){
 
 const std::string sceneFolder = "./res/scenes/";
 
+
+bool queryConsoleCanEnable(){
+  auto query = gameapi -> compileSqlQuery("select console from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0) == "true";
+}
+
+
 bool showEditor = false;
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
@@ -119,6 +129,10 @@ UiContext getUiContext(GameState& gameState){
     return showEditor;
    },
    .showConsole = []() -> bool {
+     static bool canEnableConsole = queryConsoleCanEnable();
+     if (!canEnableConsole){
+      return false;
+     }
      return getGlobalState().showConsole;
    },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
@@ -168,6 +182,13 @@ UiContext getUiContext(GameState& gameState){
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool shouldShowEditor) -> void {
         showEditor = shouldShowEditor;
+        gameapi -> setWorldState({ 
+          ObjectValue {
+            .object = "editor",
+            .attribute = "disableinput",
+            .value = shouldShowEditor ? "false" : "true",
+          }
+        });
       }
     },
   };

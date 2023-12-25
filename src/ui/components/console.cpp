@@ -89,8 +89,10 @@ std::vector<CommandDispatch> commands {
       auto values = split(commandStr, ' ');
       if (values.at(1) == "on"){
         consoleInterface.setShowEditor(true);
+        return true;
       }else if (values.at(1) == "off"){ 
         consoleInterface.setShowEditor(false);
+        return true;
       }
       return false;
     }, 
