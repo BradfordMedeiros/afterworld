@@ -8,6 +8,10 @@
 #include "./basic/listitem.h"
 #include "./basic/textbox.h"
 
+struct ConsoleInterface {
+  std::function<void(bool)> setShowEditor;
+};
+
 extern Component consoleComponent;
 
 #endif

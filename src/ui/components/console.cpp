@@ -55,14 +55,13 @@ bool showLog = false;
 
 struct CommandDispatch {
   std::string command;
-  std::function<bool(std::string&)> fn;
+  std::function<bool(ConsoleInterface&, std::string&)> fn;
 };
-
 
 std::vector<CommandDispatch> commands {
   CommandDispatch {
     .command = "quit",
-    .fn = [](std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
       if (commandStr != "quit"){
         return false;
       }
@@ -72,21 +71,33 @@ std::vector<CommandDispatch> commands {
   },
   CommandDispatch {
     .command = "log",
-    .fn = [](std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
       showLog = true;
       return true;
     }, 
   },
   CommandDispatch {
     .command = "history",
-    .fn = [](std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
       showLog = false;
       return true;
     }, 
   },
   CommandDispatch {
+    .command = "editor",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
+      auto values = split(commandStr, ' ');
+      if (values.at(1) == "on"){
+        consoleInterface.setShowEditor(true);
+      }else if (values.at(1) == "off"){ 
+        consoleInterface.setShowEditor(false);
+      }
+      return false;
+    }, 
+  },
+  CommandDispatch {
     .command = "background",
-    .fn = [](std::string& command) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command) -> bool {
       auto values = split(command, ' ');
       if (values.size() != 2){
         return false;
@@ -102,9 +113,6 @@ std::optional<CommandDispatch*> findCommand(std::string commandStr){
   for (auto &command : commands){
     auto splitCommand = split(commandStr, ' ');
     auto mainCommand = splitCommand.at(0);
-    std::transform(mainCommand.begin(), mainCommand.end(), mainCommand.begin(), [](unsigned char c) {
-        return std::tolower(c);
-    });
     if (mainCommand == command.command){
       return &command;
     }
@@ -113,7 +121,7 @@ std::optional<CommandDispatch*> findCommand(std::string commandStr){
 }
 
 
-void executeCommand(std::string& command){
+void executeCommand(ConsoleInterface& consoleInterface, std::string command){
   if (commandHistory.size() >= CONSOLE_LOG_LIMIT){
     commandHistory.pop_front();
   }
@@ -121,9 +129,13 @@ void executeCommand(std::string& command){
   if (selectedIndex < 0){
     selectedIndex = -1;
   }
+
+  std::transform(command.begin(), command.end(), command.begin(), [](unsigned char c) {
+    return std::tolower(c);
+  });
   auto commandDispatch = findCommand(command);
   if (commandDispatch.has_value()){
-    bool valid = commandDispatch.value() -> fn(command);
+    bool valid = commandDispatch.value() -> fn(consoleInterface, command);
     commandHistory.push_back(HistoryInstance {
       .command = command,
       .valid = valid,
@@ -221,13 +233,16 @@ Component consoleComponent {
       }
     }
 
-    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
+    ConsoleInterface** consoleInterfacePtr = typeFromProps<ConsoleInterface*>(props, consoleInterfaceSymbol);
+    modassert(consoleInterfacePtr, "console interface not provided");
+    ConsoleInterface* consoleInterface = *consoleInterfacePtr;
+    std::function<void(TextData)> onEdit = [consoleInterface](TextData textData) -> void {
       if (textData.valueText.size() > 0 && static_cast<int>(textData.valueText.at(textData.valueText.size() - 1)) == 10 /* enter */ ){
         auto commandStr = textData.valueText.substr(0, textData.valueText.size() -1);
         commandTextData.valueText = "";
         commandTextData.cursorLocation = 0;
         commandTextData.highlightLength = 0;
-        executeCommand(commandStr);
+        executeCommand(*consoleInterface, commandStr);
       }else{
         commandTextData = textData;
       }

@@ -464,7 +464,27 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
-  if (uiContext.isDebugMode()){
+  bool shouldShowConsole = uiContext.showConsole();
+  static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
+  if (!shouldShowConsole){
+    startedShowingConsoleTime = std::nullopt;
+  }else if (!startedShowingConsoleTime.has_value()){
+    startedShowingConsoleTime = gameapi -> timeSeconds(true);
+  }
+  if (startedShowingConsoleTime.has_value()){
+    float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
+    std::cout << "console: " << elapsedTime << std::endl;
+  }
+  if (shouldShowConsole){
+    Props props {
+      .props = {
+        { .symbol = consoleInterfaceSymbol, .value = &uiContext.consoleInterface }
+      },
+    };
+    consoleComponent.draw(drawTools, props);
+  }
+
+  if (uiContext.showEditor()){
     {
       std::function<void(int)> onImageClick = [](int index) -> void {
         if (onFileAddedFn.has_value()){
@@ -549,23 +569,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     uiManagerContext.uiContext = &uiContext;
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
-
-    bool shouldShowConsole = uiContext.showConsole();
-    static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
-    if (!shouldShowConsole){
-      startedShowingConsoleTime = std::nullopt;
-    }else if (!startedShowingConsoleTime.has_value()){
-      startedShowingConsoleTime = gameapi -> timeSeconds(true);
-    }
-    if (startedShowingConsoleTime.has_value()){
-      float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
-      std::cout << "console: " << elapsedTime << std::endl;
-    }
-
-    if (shouldShowConsole){
-      auto consoleDefaultProps = getDefaultProps();
-      consoleComponent.draw(drawTools, consoleDefaultProps);
-    }
 
     //auto weaponWheelProps = getDefaultProps();
     //weaponWheelComponent.draw(drawTools, weaponWheelProps);

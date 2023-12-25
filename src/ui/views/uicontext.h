@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_COMPONENTS_UICONTEXT
 
 #include "../components/worldplay.h"
+#include "../components/console.h"
 
 struct Level {
   std::string scene;
@@ -20,6 +21,7 @@ struct PauseInterface {
 
 struct UiContext {
   std::function<bool()> isDebugMode;
+  std::function<bool()> showEditor;
   std::function<bool()> showConsole;
   std::function<bool()> showScreenspaceGrid;
   LevelUIInterface levels;
@@ -32,6 +34,8 @@ struct UiContext {
   std::function<void(std::string)> newScene;
   std::function<void()> resetScene;
   std::function<std::optional<objid>()> activeSceneId;
+
+  ConsoleInterface consoleInterface;
 };
 
 

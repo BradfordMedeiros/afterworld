@@ -102,6 +102,8 @@ std::optional<objid> activeSceneIdOpt(){
 }
 
 const std::string sceneFolder = "./res/scenes/";
+
+bool showEditor = false;
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -112,6 +114,9 @@ UiContext getUiContext(GameState& gameState){
   UiContext uiContext {
    .isDebugMode = []() -> bool { 
      return getStrWorldState("editor", "debug").value() == "true"; 
+   },
+   .showEditor = []() -> bool {
+    return showEditor;
    },
    .showConsole = []() -> bool {
      return getGlobalState().showConsole;
@@ -160,6 +165,11 @@ UiContext getUiContext(GameState& gameState){
       gameapi -> resetScene(sceneId.value());
     },
     .activeSceneId = activeSceneIdOpt,
+    .consoleInterface = ConsoleInterface {
+      .setShowEditor = [](bool shouldShowEditor) -> void {
+        showEditor = shouldShowEditor;
+      }
+    },
   };
   return uiContext;
 }

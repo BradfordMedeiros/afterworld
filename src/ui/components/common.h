@@ -177,5 +177,6 @@ extern const int limitSymbol;
 extern const int focusTintSymbol;
 extern const int borderColorSymbol;
 extern const int barColorSymbol;
+extern const int consoleInterfaceSymbol;
 
 #endif

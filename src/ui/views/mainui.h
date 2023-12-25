@@ -22,6 +22,7 @@
 #include "../components/game/weaponwheel.h"
 #include "../components/game/compass.h"
 #include "../components/console.h"
+#include "../components/uiwindow.h"
 
 extern Component mainUI;
 
