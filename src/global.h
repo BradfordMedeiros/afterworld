@@ -7,6 +7,7 @@
 struct GlobalState {
   bool paused;
   bool inGameMode;
+  bool showEditor;
   bool showScreenspaceGrid;
   bool showConsole;
 
@@ -23,5 +24,6 @@ void enterGameMode();
 void exitGameMode();
 GlobalState& getGlobalState();
 void initGlobal();
+void updateShowEditor(bool showEditor);
 
 #endif 

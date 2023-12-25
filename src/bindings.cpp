@@ -113,7 +113,15 @@ bool queryConsoleCanEnable(){
 }
 
 
-bool showEditor = false;
+void queryUpdateShowEditor(bool showEditor){
+  auto updateQuery = gameapi -> compileSqlQuery(
+    std::string("update session set ") + "editor = " + (showEditor ? "true" : "false"), {}
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+}
+
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -126,7 +134,7 @@ UiContext getUiContext(GameState& gameState){
      return getStrWorldState("editor", "debug").value() == "true"; 
    },
    .showEditor = []() -> bool {
-    return showEditor;
+    return getGlobalState().showEditor;
    },
    .showConsole = []() -> bool {
      static bool canEnableConsole = queryConsoleCanEnable();
@@ -181,14 +189,8 @@ UiContext getUiContext(GameState& gameState){
     .activeSceneId = activeSceneIdOpt,
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool shouldShowEditor) -> void {
-        showEditor = shouldShowEditor;
-        gameapi -> setWorldState({ 
-          ObjectValue {
-            .object = "editor",
-            .attribute = "disableinput",
-            .value = shouldShowEditor ? "false" : "true",
-          }
-        });
+        updateShowEditor(shouldShowEditor);
+        queryUpdateShowEditor(shouldShowEditor);
       }
     },
   };
