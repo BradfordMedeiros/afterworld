@@ -191,7 +191,10 @@ UiContext getUiContext(GameState& gameState){
       .setShowEditor = [](bool shouldShowEditor) -> void {
         updateShowEditor(shouldShowEditor);
         queryUpdateShowEditor(shouldShowEditor);
-      }
+      },
+      .setBackground = [](std::string background) -> void {
+        gameapi -> sendNotifyMessage("menu-background", background);
+      },
     },
   };
   return uiContext;

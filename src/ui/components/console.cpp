@@ -105,7 +105,7 @@ std::vector<CommandDispatch> commands {
         return false;
       }
       auto backgroundValue = values.at(1);
-      modlog("set background", backgroundValue);
+m      consoleInterface.setBackground(backgroundValue);
       return true;
     },
   },

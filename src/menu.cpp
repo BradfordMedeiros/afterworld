@@ -52,6 +52,40 @@ void scrollTexture(MenuState& menuState, objid id){
 	gameapi -> setGameObjectAttr(id, attr);
 }
 
+void updateBackground(objid id, std::string image){
+ 	GameobjAttributes attr {
+		.stringAttributes = {
+			{ "texture", image },
+		},
+		.numAttributes = {},
+		.vecAttr = {
+			.vec3 = {},
+			.vec4 = {
+				//{ "tint", glm::vec4(menuState.redness + 1, 0.4f, 0.4f, 1.f) },
+			},
+		},
+	};
+	gameapi -> setGameObjectAttr(id, attr);
+}
+
+std::string queryInitialBackground(){
+  auto query = gameapi -> compileSqlQuery("select background from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0);
+}
+
+void updateQueryBackground(std::string image){
+  auto updateQuery = gameapi -> compileSqlQuery(
+    std::string("update session set ") + "background = ?", { image }
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+}
+
+
 CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -65,6 +99,7 @@ CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   	if (args.find("silent") == args.end()){
   		gameapi -> playClip("&music", sceneId, std::nullopt, std::nullopt);
   	}
+  	updateBackground(id, queryInitialBackground());
     return state;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -81,19 +116,8 @@ CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
     if (key == "menu-background"){
     	auto newTexture = anycast<std::string>(value); 
     	modassert(newTexture, "menu-background invalid");
- 	    GameobjAttributes attr {
-	    	.stringAttributes = {
-	    		{ "texture", *newTexture },
-	    	},
-	    	.numAttributes = {},
-	    	.vecAttr = {
-	    		.vec3 = {},
-	    		.vec4 = {
-	    			//{ "tint", glm::vec4(menuState.redness + 1, 0.4f, 0.4f, 1.f) },
-	    		},
-	    	},
-	    };
-	    gameapi -> setGameObjectAttr(id, attr);
+    	updateBackground(id, *newTexture);
+    	updateQueryBackground(*newTexture);
     }
   };
   return binding;

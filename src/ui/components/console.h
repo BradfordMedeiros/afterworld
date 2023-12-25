@@ -10,6 +10,7 @@
 
 struct ConsoleInterface {
   std::function<void(bool)> setShowEditor;
+  std::function<void(std::string)> setBackground;
 };
 
 extern Component consoleComponent;
