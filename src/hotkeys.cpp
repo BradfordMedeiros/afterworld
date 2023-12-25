@@ -107,7 +107,7 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
    	}
    	handleHotkey(key, action);
    	if (key == 75){
-   		spawnProcMesh(gameapi -> listSceneId(id));
+   		//spawnProcMesh(gameapi -> listSceneId(id));
    	}
    	if (key == 96 /* ~ */  && action == 1){
    		getGlobalState().showConsole = !getGlobalState().showConsole;
