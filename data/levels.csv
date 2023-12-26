@@ -1,4 +1,4 @@
 filepath:STRING,name:STRING,shortcut:STRING
-../afterworld/scenes/shooter2.rawscene,Campaign,fps
-./res/scenes/features/physics/collisiontypes.p.rawscene,Settings,collision
-./res/scenes/features/physics/collisiontypes.p.rawscene,Quit,collision
+../afterworld/scenes/shooter2.rawscene,campaign,fps
+./res/scenes/features/physics/collisiontypes.p.rawscene,settings,collision
+./res/scenes/features/physics/collisiontypes.p.rawscene,quit,collision2

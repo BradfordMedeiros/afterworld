@@ -3,16 +3,17 @@
 int selectedLevel = 0;
 struct UILevel {
   std::string name;
+  std::string description;
 };
 std::vector<UILevel> levels = {
-  UILevel { .name = "Dreams and Reconciliation" },
-  UILevel { .name = "Arrival" },
-  UILevel { .name = "Ocean Diving and Submarine Voyages" },
-  UILevel { .name = "Departure" },
-  UILevel { .name = "Hybrid Nightmare" },
-  UILevel { .name = "Nightmare" },
-  UILevel { .name = "Dreams and Reconciliation II" },
-  UILevel { .name = "Odyssey" },
+  UILevel { .name = "Dreams and Reconciliation", .description = "Fall asleep and enter the realm of the dreamweavers.", },
+  UILevel { .name = "Arrival", .description = "You arrive to a port city and find demons.",},
+  UILevel { .name = "Ocean Diving and Submarine Voyages", .description = "Take voyage in a submarine and explore the dreamweavers domain.",},
+  UILevel { .name = "Departure", .description = "Go on a mission to retrive the dream catcher.", },
+  UILevel { .name = "Hybrid Nightmare", .description = "The dreamweaver has betrayed you.  Kill him.", },
+  UILevel { .name = "Nightmare", .description = "You have killed the dreamweaver.  Now what?", },
+  UILevel { .name = "Dreams and Reconciliation II", .description = "Go back in time and resurrect the dreamweaver to be able to escape. ", },
+  UILevel { .name = "Odyssey", .description = "Return home.", },
 };
 
 std::function<void(int)> onSelectLevel = [](int levelIndex) -> void {
@@ -54,7 +55,7 @@ Component levelMenu {
       Props listItemProps {
         .props = {
           PropPair { .symbol = valueSymbol, .value = levels.at(i).name },
-          PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.2f) },
+          PropPair { .symbol = tintSymbol, .value = ((i == selectedLevel) ? glm::vec4(1.f, 1.f, 0.f, 0.2f) : glm::vec4(0.f, 0.f, 0.f, 0.2f)) },
           PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
           PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
           PropPair { .symbol = onclickSymbol, .value = onClickLevel },
@@ -97,9 +98,24 @@ Component levelMenu {
   },
 };
 
+Component createDetailText(std::string&& detailText){
+  Props listItemProps {
+    .props = {
+      //PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.5f, 0.5f) },
+      PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.4f) },
+      PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
+      PropPair { .symbol = minwidthSymbol, .value = 1.f },
+      PropPair { .symbol = valueSymbol, .value = detailText },
+    },
+  };
+  auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+  return listItemWithProps;
+}
+
 Component levelDetail {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    std::string* levelName = typeFromProps<std::string>(props, valueSymbol);
+    UILevel* level = typeFromProps<UILevel>(props, valueSymbol);
+    modassert(level, "level must be supplied to level detail");
 
     std::vector<Component> detailElements;
 
@@ -112,24 +128,34 @@ Component levelDetail {
             PropPair { .symbol = minwidthSymbol, .value = 1.f },
             //PropPair { .symbol = onclickSymbol, .value = onClick },
           },
-        };
-        if (levelName){
-          listItemProps.props.push_back(PropPair {
-            .symbol = valueSymbol,
-            .value = *levelName,
-          });
-        }else{
-          listItemProps.props.push_back(PropPair {
-            .symbol = valueSymbol,
-            .value = std::string("no level selected"),
-          });
-        }
-  
+      };
+      
+      listItemProps.props.push_back(PropPair {
+        .symbol = valueSymbol,
+        .value = level -> name,
+      });
+     
       auto listItemWithProps = withPropsCopy(listItem, listItemProps);
       detailElements.push_back(listItemWithProps);
     }
 
+    {
+      Props listItemProps {
+        .props = {
+          //PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.5f, 0.5f) },
+          PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.4f) },
+          PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
+          PropPair { .symbol = minwidthSymbol, .value = 1.f },
+          PropPair { .symbol = valueSymbol, .value = level -> description },
+        },
+      };
+      auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+      detailElements.push_back(listItemWithProps);
+    }
 
+    
+    detailElements.push_back(createDetailText("Highest Difficulty Completed:  None"));
+    detailElements.push_back(createDetailText("High Score:  N/A"));
 
     Layout levelDisplayLayout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.2f),
@@ -174,15 +200,13 @@ Component levelSelectComponent {
 
     Props levelDetailProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = levels.at(selectedLevel).name },
+        PropPair { .symbol = valueSymbol, .value = levels.at(selectedLevel) },
       }
     };
     elements.push_back(withProps(levelDetail, levelDetailProps));
 
 
     /////////////////////////////////////////
-
-
 
     Layout outerLayout {
       .tint = glm::vec4(1.f, 1.f, 1.f, 0.f),

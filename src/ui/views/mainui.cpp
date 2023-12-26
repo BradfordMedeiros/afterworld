@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 
 auto routerHistory = createHistory("mainmenu");
 
-Props createLevelListProps(UiContext& uiContext){
+Props createLevelListProps(){
   std::vector<ListComponentData> levels;
 
 
@@ -57,12 +57,54 @@ Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   return props;
 }
 
+Component mainMenu {
+  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    Props listItemProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = std::string("AFTERWORLD") },
+        PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
+        PropPair { .symbol = fontsizeSymbol, .value = 0.1f }
+      },
+    };
+
+    auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+
+    std::vector<Component> children = { listItemWithProps };
+    Layout layout {
+      .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
+      .showBackpanel = false,
+      .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.f),
+      .minwidth = 0.f,
+      .minheight = 0.f,
+      .layoutType = LAYOUT_HORIZONTAL2,
+      .layoutFlowHorizontal = UILayoutFlowNone2,
+      .layoutFlowVertical = UILayoutFlowNone2,
+      .alignHorizontal = UILayoutFlowNone2,
+      .alignVertical = UILayoutFlowNone2,
+      .spacing = 0.01f,
+      .minspacing = 0.f,
+      .padding = 0.f,
+      .children = children,
+    };
+    Props listLayoutProps {
+      .props = {
+        { .symbol = yoffsetSymbol, .value = 0.4f },
+        { .symbol = layoutSymbol, .value = layout },
+      },
+    };
+    layoutComponent.draw(drawTools, listLayoutProps);
+
+    auto levelSelection = withPropsCopy(listComponent, createLevelListProps());
+    return levelSelection.draw(drawTools, props);
+  },
+};
+
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto props = pauseMenuProps(selectedId, uiContext);
   auto pauseComponent = withPropsCopy(pauseMenuComponent, props);
 
   std::map<std::string, Component> routeToComponent = {
-    { "mainmenu",  withPropsCopy(listComponent, createLevelListProps(uiContext)) },
+    { "mainmenu",  mainMenu },
     { "levelselect", levelSelectComponent },
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
