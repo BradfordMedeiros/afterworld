@@ -6,17 +6,32 @@ auto routerHistory = createHistory("mainmenu");
 
 Props createLevelListProps(UiContext& uiContext){
   std::vector<ListComponentData> levels;
-  auto levelDatas = uiContext.levels.getLevels();
 
-  for (auto &levelData : levelDatas){
-    levels.push_back(ListComponentData {
-      .name = levelData.name,
-      .onClick = [&uiContext, levelData]() -> void {
-        auto level = levelData;
-        uiContext.levels.goToLevel(level);
-      }
-    });
-  }
+
+
+  levels.push_back(ListComponentData {
+    .name = "Campaign",
+    .onClick = []() -> void {
+      pushHistory("levelselect");
+    }
+  });
+  levels.push_back(ListComponentData {
+    .name = "Settings",
+    .onClick = []() -> void {
+      modlog("error", "settings not yet implemented");
+      exit(0);    
+    }
+  });
+  
+  levels.push_back(ListComponentData {
+    .name = "Quit",
+    .onClick = []() -> void {
+      modlog("exit", "exit normally through main menu");
+      exit(0);
+    }
+  });
+
+
   Props levelProps {
     .props = {
       PropPair { .symbol = listItemsSymbol, .value = levels },
@@ -48,6 +63,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
 
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu",  withPropsCopy(listComponent, createLevelListProps(uiContext)) },
+    { "levelselect", levelSelectComponent },
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
     { "",  emptyComponent  },

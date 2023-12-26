@@ -13,6 +13,7 @@
 #include "./alert.h"
 #include "./navlist.h"
 #include "./pausemenu.h"
+#include "./levelselect.h"
 #include "./navbar.h"
 #include "./dock/dock.h"
 #include "./windowmanager.h"

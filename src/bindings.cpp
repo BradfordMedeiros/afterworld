@@ -195,6 +195,18 @@ UiContext getUiContext(GameState& gameState){
       .setBackground = [](std::string background) -> void {
         gameapi -> sendNotifyMessage("menu-background", background);
       },
+      .goToLevel = [&gameState](std::optional<std::string> level) -> void {
+        if (!level.has_value()){
+          goToMenu(gameState);
+          return;
+        }
+        auto scene = levelByShortcutName(level.value());
+        if (scene.has_value()){
+          goToLevel(gameState, scene.value());
+        }else{
+          std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
+        }
+      },
     },
   };
   return uiContext;

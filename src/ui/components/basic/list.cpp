@@ -24,7 +24,7 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
   Layout layout {
     .tint = tint,
     .showBackpanel = true,
-    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
+    .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.f),
     .minwidth = minwidth,
     .minheight = minheight,
     .layoutType = horizontal ? LAYOUT_HORIZONTAL2 : LAYOUT_VERTICAL2,

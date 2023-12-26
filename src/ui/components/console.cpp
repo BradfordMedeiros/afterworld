@@ -55,58 +55,97 @@ bool showLog = false;
 
 struct CommandDispatch {
   std::string command;
-  std::function<bool(ConsoleInterface&, std::string&)> fn;
+  std::function<std::optional<std::string>(ConsoleInterface&, std::string&, bool*)> fn;
 };
 
 std::vector<CommandDispatch> commands {
   CommandDispatch {
     .command = "quit",
-    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       if (commandStr != "quit"){
-        return false;
+        *valid = false;
+        return std::nullopt;
       }
       exit(1);
-      return true;
+      *valid = true;
+      return std::nullopt;
     }, 
   },
   CommandDispatch {
     .command = "log",
-    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       showLog = true;
-      return true;
+      *valid = true;
+      return std::nullopt;
     }, 
   },
   CommandDispatch {
     .command = "history",
-    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       showLog = false;
-      return true;
+      *valid = true;
+      return std::nullopt;
     }, 
   },
   CommandDispatch {
     .command = "editor",
-    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       auto values = split(commandStr, ' ');
+      *valid = false;
       if (values.at(1) == "on"){
         consoleInterface.setShowEditor(true);
-        return true;
+        *valid = true;
+        return std::nullopt;
       }else if (values.at(1) == "off"){ 
         consoleInterface.setShowEditor(false);
-        return true;
+        *valid = true;
+        return std::nullopt;
       }
-      return false;
+      return std::nullopt;
     }, 
   },
   CommandDispatch {
     .command = "background",
-    .fn = [](ConsoleInterface& consoleInterface, std::string& command) -> bool {
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
       auto values = split(command, ' ');
+      *valid = false;
       if (values.size() != 2){
-        return false;
+        return std::nullopt;
       }
       auto backgroundValue = values.at(1);
-m      consoleInterface.setBackground(backgroundValue);
-      return true;
+      consoleInterface.setBackground(backgroundValue);
+      *valid = true;
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
+    .command = "level",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      *valid = false;
+      auto values = split(command, ' ');
+      if (values.size() == 1){
+        consoleInterface.goToLevel(std::nullopt);
+        *valid = true;
+        return std::nullopt;
+      }
+      if (values.size() == 2){
+        auto levelName = values.at(1);
+        consoleInterface.goToLevel(levelName);
+        *valid = true;
+        return std::nullopt;
+      }
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
+    .command = "help",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      *valid = true;
+      std::string result = "[commands]\n\n";
+      for (auto &command : commands){
+        result += command.command + "  ";
+      }
+      return result;    
     },
   },
 };
@@ -137,12 +176,21 @@ void executeCommand(ConsoleInterface& consoleInterface, std::string command){
   });
   auto commandDispatch = findCommand(command);
   if (commandDispatch.has_value()){
-    bool valid = commandDispatch.value() -> fn(consoleInterface, command);
+    bool valid = false;
+    auto result = commandDispatch.value() -> fn(consoleInterface, command, &valid);
     commandHistory.push_back(HistoryInstance {
       .command = command,
       .valid = valid,
     });
     insertCommandHistory(command, valid);
+
+    if (result.has_value()){
+      commandHistory.push_back(HistoryInstance {
+        .command = result.value(),
+        .valid = valid,
+      });
+    }
+
   }else{
     commandHistory.push_back(HistoryInstance {
       .command = command,
