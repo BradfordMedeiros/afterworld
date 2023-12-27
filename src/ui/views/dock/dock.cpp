@@ -8,7 +8,11 @@ struct DockScenegraph {};
 
 struct DockGroup;
 
-typedef std::variant<DockLabelConfig, DockButtonConfig, DockOptionConfig, DockSliderConfig, DockCheckboxConfig, DockTextboxConfig, DockFileConfig, DockImageConfig, DockGameObjSelector, DockGroup, DockScenegraph, DockTextboxNumeric> DockConfig;
+typedef std::variant<
+  DockLabelConfig,   DockButtonConfig, DockOptionConfig, DockSliderConfig,    DockCheckboxConfig, 
+  DockTextboxConfig, DockFileConfig,   DockImageConfig,  DockGameObjSelector, DockGroup, 
+  DockScenegraph, DockTextboxNumeric, DockColorPickerConfig
+  > DockConfig;
 
 struct DockGroup {
   std::string groupName;
@@ -486,6 +490,20 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "COLORS",
     .configFields = {
+      DockColorPickerConfig {
+        .label = "primary",
+        .getColor = []() -> glm::vec4 { return glm::vec4(1.f, 0.f, 0.f, 1.f); },
+        .onColor = [](glm::vec4 color) -> void {
+          styles.primaryColor = color;
+        },
+      },
+      DockColorPickerConfig {
+        .label = "secondary",
+        .getColor = []() -> glm::vec4 { return glm::vec4(1.f, 0.f, 0.f, 1.f); },
+        .onColor = [](glm::vec4 color) -> void { 
+          styles.secondaryColor = color;
+        },
+      },
       DockTextboxNumeric {  // color selector for the main style elements i guess
         .label = "Red",
         .value = 1.f,
@@ -593,6 +611,11 @@ Component createDockComponent(DockConfig& config){
   auto dockTextboxNumeric = std::get_if<DockTextboxNumeric>(&config);
   if (dockTextboxNumeric){
     return createDockTextboxNumeric(*dockTextboxNumeric);
+  }
+
+  auto dockColorPickerConfig = std::get_if<DockColorPickerConfig>(&config);
+  if (dockColorPickerConfig){
+    return createDockColorPicker(*dockColorPickerConfig);
   }
 
   modassert(false, "dock component not yet implemented");

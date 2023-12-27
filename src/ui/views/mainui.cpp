@@ -163,7 +163,6 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
 };
 
 
-bool showColorPicker = true;
 std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
   *activeColor = value;
@@ -253,6 +252,16 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       onFileAddedFn = std::nullopt;
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
+  },
+  .openColorPicker = [](std::function<void(glm::vec4)>) -> void {
+    windowSetEnabled(windowColorPickerSymbol, true);
+    //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    //  onFileAdded(closedWithoutNewFile, file);
+    //  onFileAddedFn = std::nullopt;
+    //  fileFilter = std::nullopt;
+    //  windowSetEnabled(windowFileExplorerSymbol, false);
+    //};
+    //fileFilter = fileFilterFn;
   },
   .pickGameObj = [](std::function<void(objid, std::string)> selectGameObj) -> void {
     std::cout << "dock pick gameobj" << std::endl;
@@ -350,6 +359,10 @@ ImageList imageListDatas {
 };
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
+
+NavbarType loadNavbarType(){
+  return MAIN_EDITOR;
+}
 
 NavbarType navbarType = MAIN_EDITOR;
 NavListApi navListApi {

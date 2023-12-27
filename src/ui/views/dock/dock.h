@@ -21,6 +21,7 @@
 #include "./types/dock_image.h"
 #include "./types/dock_file.h"
 #include "./types/dock_gameobj.h"
+#include "./types/dock_colorpicker.h"
 
 extern Component dockComponent;
 
