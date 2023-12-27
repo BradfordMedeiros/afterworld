@@ -5,13 +5,41 @@ extern CustomApiBindings* gameapi;
 RouterHistory createHistory(std::string initialRoute){
 	return RouterHistory {
 		.currentPath = initialRoute,
+    .initialRoute = initialRoute,
     .currentRouteTime = 0.f,
+    .history = {},
 	};
 }
-void pushHistory(RouterHistory& history, std::string path){
+void pushHistory(RouterHistory& history, std::string path, bool replace){
   history.currentPath = path;
   history.currentRouteTime = gameapi -> timeSeconds(true);
+  if (replace){
+    history.history = {};
+  }
+  history.history.push_back(path);
 }
+
+void popHistory(RouterHistory& history){
+  if (history.history.size() == 0){
+    return;
+  }
+  history.history.pop_back();
+  if (history.history.size() == 0){
+    pushHistory(history, history.initialRoute, false);
+  }else{
+    history.currentPath = history.history.back();
+    history.currentRouteTime = gameapi -> timeSeconds(true);
+  }
+}
+
+std::string fullHistoryStr(RouterHistory& history){
+  std::string str = "";
+  for (auto &path : history.history){
+    str += path + "/";
+  }
+  return str;
+}
+
 std::string getCurrentPath(RouterHistory& history){
   return history.currentPath;
 }

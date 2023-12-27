@@ -148,6 +148,25 @@ std::vector<CommandDispatch> commands {
       return result;    
     },
   },
+  CommandDispatch {
+    .command = "router",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      *valid = false;
+      auto values = split(command, ' ');
+      if (values.size() == 1){
+        return std::nullopt;
+      }
+      if (values.at(1) == "pop"){
+        modassert(false, "command pop not yet implemented");
+      }else if (values.at(1) == "push"){
+        modassert(false, "command push not yet implemented");
+      }else if (values.at(1) == "replace"){
+        modassert(false, "command replace not yet implemented");
+      }
+
+      return std::nullopt;    
+    },
+  },
 };
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){

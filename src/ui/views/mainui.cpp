@@ -634,9 +634,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     //auto compassProps = getDefaultProps();
     //compassComponent.draw(drawTools, compassProps);
 
-    drawTools.drawText(std::string("route: ") + routerHistory.currentPath, .8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), .8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), .8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("route: ") + fullHistoryStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
@@ -724,8 +724,11 @@ void onObjectsChanged(){
   refreshScenegraph();
 }
 
-void pushHistory(std::string route){
-	pushHistory(routerHistory, route);
+void pushHistory(std::string route, bool replace){
+	pushHistory(routerHistory, route, replace);
+}
+void popHistory(){
+  popHistory(routerHistory);
 }
 
 std::string getCurrentPath(){

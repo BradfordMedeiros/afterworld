@@ -41,7 +41,8 @@ void onMainUiScroll(double amount);
 void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(HandlerFns& handlerFns, int key);
 void onObjectsChanged();
-void pushHistory(std::string route);
+void pushHistory(std::string route, bool replace = false);
+void popHistory();
 std::string getCurrentPath();
 void sendUiAlert(std::string message);
 

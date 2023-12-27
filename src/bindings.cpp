@@ -37,7 +37,7 @@ void goToLevel(GameState& gameState, std::string sceneName){
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
   setActivePlayer(gameapi -> getGameObjectByName(">maincamera", sceneId, false)); 
   enterGameMode();
-  pushHistory("playing");
+  pushHistory("playing", true);
 }
 std::optional<std::string> levelByShortcutName(std::string shortcut){
   auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels", {});
@@ -66,15 +66,15 @@ void goToMenu(GameState& gameState){
       "../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
     gameState.menuLoaded = true;
   }
-  pushHistory("mainmenu");
+  pushHistory("mainmenu", true);
 }
 
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
   setPaused(shouldBePaused);
   if (!shouldBePaused){
-    if (getCurrentPath() == "paused"){
-      pushHistory("playing");
+    if (getCurrentPath() == "paused"){  // probably shouldn't have the ui routing information here
+      popHistory();
     }
     downTime = gameapi -> timeSeconds(true);
   }else{
