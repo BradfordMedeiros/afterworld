@@ -157,11 +157,13 @@ std::vector<CommandDispatch> commands {
         return std::nullopt;
       }
       if (values.at(1) == "pop"){
-        modassert(false, "command pop not yet implemented");
-      }else if (values.at(1) == "push"){
-        modassert(false, "command push not yet implemented");
+        consoleInterface.routerPop();
+        return std::nullopt;
+      }else if (values.at(1) == "push" && values.size() == 3){
+        consoleInterface.routerPush(values.at(2), false);
+        return std::nullopt;
       }else if (values.at(1) == "replace"){
-        modassert(false, "command replace not yet implemented");
+        consoleInterface.routerPush(values.at(2), true);
       }
 
       return std::nullopt;    

@@ -207,6 +207,12 @@ UiContext getUiContext(GameState& gameState){
           std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
         }
       },
+      .routerPush = [](std::string route, bool replace) -> void {
+        pushHistory(route, replace);
+      },
+      .routerPop = []() -> void {
+        popHistory();
+      },
     },
   };
   return uiContext;
