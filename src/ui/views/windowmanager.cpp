@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
 const int windowColorPickerSymbol = getSymbol("window-symbol-colorpicker");
 const int windowDockSymbol = getSymbol("window-symbol-dock");
 const int windowFileExplorerSymbol = getSymbol("window-fileexplorer");

@@ -1,20 +1,32 @@
 #include "./levelselect.h"
 
+extern CustomApiBindings* gameapi;
+
 int selectedLevel = 0;
 struct UILevel {
   std::string name;
   std::string description;
+  std::string image;
+  std::string shortcut;
 };
-std::vector<UILevel> levels = {
-  UILevel { .name = "Dreams and Reconciliation", .description = "Fall asleep and enter the realm of the dreamweavers.", },
-  UILevel { .name = "Arrival", .description = "You arrive to a port city and find demons.",},
-  UILevel { .name = "Ocean Diving and Submarine Voyages", .description = "Take voyage in a submarine and explore the dreamweavers domain.",},
-  UILevel { .name = "Departure", .description = "Go on a mission to retrive the dream catcher.", },
-  UILevel { .name = "Hybrid Nightmare", .description = "The dreamweaver has betrayed you.  Kill him.", },
-  UILevel { .name = "Nightmare", .description = "You have killed the dreamweaver.  Now what?", },
-  UILevel { .name = "Dreams and Reconciliation II", .description = "Go back in time and resurrect the dreamweaver to be able to escape. ", },
-  UILevel { .name = "Odyssey", .description = "Return home.", },
-};
+
+std::vector<UILevel> queryLevels(){
+  auto query = gameapi -> compileSqlQuery("select name, description, image, shortcut from levels", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query queryLevels");
+
+  std::vector<UILevel> levels;
+  for (auto &row : result){
+    levels.push_back(UILevel{
+      .name = row.at(0),
+      .description = row.at(1),
+      .image = row.at(2),
+      .shortcut = row.at(3),
+    });
+  }
+  return levels;
+}
 
 std::function<void(int)> onSelectLevel = [](int levelIndex) -> void {
   std::cout << "on select level: " << levelIndex << std::endl;
@@ -23,13 +35,43 @@ std::function<void(int)> onSelectLevel = [](int levelIndex) -> void {
 
 const float selectorRatio = (1.f / 3.f);
 
+Component imageComponent {
+  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    std::string* imageName = typeFromProps<std::string>(props, valueSymbol);
+    modassert(imageName, "no imageName defined, must have valueSymbol");
+    //float* height = typeFromProps<float>(props, heightSymbol);
+    //float* width = typeFromProps<float(props, widthSymbol);
+    float width = (1.f - selectorRatio) * 2.f;
+    float height = 1.f;
+    BoundingBox2D boundingBox {
+      .x = 0.f,
+      .y = 0.f,
+      .width = width,
+      .height = height,
+    };
+    drawTools.drawRect(0.f, 0.f, width, height, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, *imageName, std::nullopt);
+
+    if (true){
+      drawDebugBoundingBox(drawTools, boundingBox, glm::vec4(0.f, 0.f, 0.f, 1.f));
+    }
+    return boundingBox;
+  }
+};
+
 Component levelMenu {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    std::vector<UILevel>** levelPtr = typeFromProps<std::vector<UILevel>*>(props, valueSymbol);
+    std::vector<UILevel>& levels = **levelPtr;
     std::function<void(int)>* onClickPtr = typeFromProps<std::function<void(int)>>(props, onclickSymbol);
     std::function<void(int)> onClick = *onClickPtr;
+    
+    std::function<void(std::optional<std::string>)>* playLevelPtr = typeFromProps<std::function<void(std::optional<std::string>)>>(props, playLevelSymbol);
+    modassert(playLevelPtr, "levelMenu playLevel not provided");
+    auto playLevel = *playLevelPtr;
 
     std::vector<Component> levelChoices;
 
+    // level header
     {
       Props listItemProps {
         .props = {
@@ -48,6 +90,7 @@ Component levelMenu {
       levelChoices.push_back(listItemWithProps);
     }
 
+    // level choices 
     for (int i = 0; i < levels.size(); i++){
       std::function<void()> onClickLevel = [i, onClick]() -> void {
         onClick(i);
@@ -60,11 +103,35 @@ Component levelMenu {
           PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
           PropPair { .symbol = onclickSymbol, .value = onClickLevel },
           PropPair { .symbol = minwidthSymbol, .value = 0.5f },
-          PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.1f) },
+          //PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.1f) },
           PropPair { .symbol = fontsizeSymbol, .value = 0.02f }
         },
       };
 
+      auto listItemWithProps = withPropsCopy(listItem, listItemProps);
+      levelChoices.push_back(listItemWithProps);
+    }
+
+    // play button
+    {
+
+      std::function<void()> onClickLevel = [&levels, selectedLevel, playLevel]() -> void {
+        modlog("ui play", std::to_string(selectedLevel) + " - " + levels.at(selectedLevel).shortcut);
+        playLevel(levels.at(selectedLevel).shortcut);
+      }; 
+      Props listItemProps {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = std::string("START") },
+          PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 1.f) },
+          PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
+          PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
+          PropPair { .symbol = onclickSymbol, .value = onClickLevel },
+          PropPair { .symbol = minwidthSymbol, .value = 0.5f },
+          //PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
+          PropPair { .symbol = fontsizeSymbol, .value = 0.02f }
+        },
+      };
+  
       auto listItemWithProps = withPropsCopy(listItem, listItemProps);
       levelChoices.push_back(listItemWithProps);
     }
@@ -118,26 +185,14 @@ Component levelDetail {
     modassert(level, "level must be supplied to level detail");
 
     std::vector<Component> detailElements;
-
-    {
-      Props listItemProps {
-          .props = {
-            PropPair { .symbol = tintSymbol, .value = glm::vec4(0.3f, 0.3f, 0.3f, 0.4f) },
-            PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.4f) },
-            PropPair { .symbol = paddingSymbol, .value = 0.2f },
-            PropPair { .symbol = minwidthSymbol, .value = 1.f },
-            //PropPair { .symbol = onclickSymbol, .value = onClick },
-          },
-      };
-      
-      listItemProps.props.push_back(PropPair {
-        .symbol = valueSymbol,
-        .value = level -> name,
-      });
-     
-      auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-      detailElements.push_back(listItemWithProps);
-    }
+    
+    Props imageProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = level -> image },
+      }
+    };
+    detailElements.push_back(withPropsCopy(imageComponent, imageProps));
+    
 
     {
       Props listItemProps {
@@ -158,9 +213,9 @@ Component levelDetail {
     detailElements.push_back(createDetailText("High Score:  N/A"));
 
     Layout levelDisplayLayout {
-      .tint = glm::vec4(0.f, 0.f, 0.f, 0.2f),
+      .tint = glm::vec4(0.f, 0.f, 1.f, 0.1f),
       .showBackpanel = true,
-      .borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f), //styles.highlightColor,
+      .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f), //styles.highlightColor,
       .minwidth = (1.f - selectorRatio) * 2.f,
       .minheight = 2.f,
       .layoutType = LAYOUT_VERTICAL2, // LAYOUT_VERTICAL2,
@@ -187,12 +242,17 @@ Component levelDetail {
 
 Component levelSelectComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    static std::vector<UILevel> levels = queryLevels();
     std::vector<Component> elements;
 
-   
+    std::function<void(std::optional<std::string>)>* playLevelPtr = typeFromProps<std::function<void(std::optional<std::string>)>>(props, playLevelSymbol);
+    modassert(playLevelPtr, "levelSelectComponent playLevel not provided");
+    
     Props levelSelectorProps {
       .props = {
+        PropPair { .symbol = valueSymbol, .value = &levels },
         PropPair { .symbol = onclickSymbol, .value = onSelectLevel },
+        PropPair { .symbol = playLevelSymbol, .value = *playLevelPtr },
       }
     };
     elements.push_back(withProps(levelMenu, levelSelectorProps));

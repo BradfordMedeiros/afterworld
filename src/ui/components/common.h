@@ -178,5 +178,6 @@ extern const int focusTintSymbol;
 extern const int borderColorSymbol;
 extern const int barColorSymbol;
 extern const int consoleInterfaceSymbol;
+extern const int playLevelSymbol;
 
 #endif
