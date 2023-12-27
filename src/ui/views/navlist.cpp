@@ -58,6 +58,16 @@ std::vector<NestedListItem> nestedListTest = {
             },
             .items = {},
           },
+          NestedListItem {
+            .item = ImListItem {
+              .value = "editor",
+              .onClick = []() -> void {
+                navListApi.changeLayout("editor");
+              }, 
+              .mappingId = mappingId++,
+            },
+            .items = {},
+          },
         },
       },
       NestedListItem {

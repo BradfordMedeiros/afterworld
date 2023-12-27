@@ -338,6 +338,9 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       },
     };
     gameapi -> setGameObjectAttr(id, newAttr);
+  },
+  .setEditorBackground = [](std::string& background){
+    gameapi -> sendNotifyMessage("menu-background", std::string(background));
   }
 
 };
@@ -355,6 +358,8 @@ NavListApi navListApi {
       navbarType = MAIN_EDITOR;
     }else if (layout == "gameplay"){
       navbarType = GAMEPLAY_EDITOR;
+    }else if (layout == "editor"){
+      navbarType = EDITOR_EDITOR;
     }else{
       modassert(false, std::string("invalid layout: ") + layout);
     }

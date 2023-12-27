@@ -1,6 +1,5 @@
 #include "./dock.h"
 
-extern CustomApiBindings* gameapi;
 extern DockConfigApi dockConfigApi;
 
 const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
@@ -478,6 +477,34 @@ std::vector<DockConfiguration> configurations {
         .value = 10.f,
         // gameobj:water-gravity  // positive number
       },
+    }
+  },
+
+
+  //// Editor Docks ////////////////
+  /////////////////////////////////////
+  DockConfiguration {
+    .title = "COLORS",
+    .configFields = {
+      DockTextboxNumeric {  // color selector for the main style elements i guess
+        .label = "Red",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "Green",
+        .value = 1.f,
+      },
+      DockTextboxNumeric {
+        .label = "Blue",
+        .value = 1.f,
+      },
+      DockImageConfig {
+        .label =  "[unset]",
+        .onImageSelect = [](std::string texture) -> void {
+          dockConfigApi.setEditorBackground(texture);
+        }
+      },
+      // then a background picker 
     }
   },
 };

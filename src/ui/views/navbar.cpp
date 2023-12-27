@@ -108,6 +108,20 @@ std::vector<NavbarOption> navbarOptionsGameplay = {
 	},
 };
 
+std::vector<NavbarOption> navbarOptionsEditor = {
+	NavbarOption {
+		.name = "Hide",
+		.dock = "",
+	},
+	NavbarOption {
+		.name = "COLORS",
+		.dock = "COLORS",
+	},
+};
+
+
+
+
 
 const float STYLE_UI_NAVBAR_FONTSIZE = 0.02f;
 const float STYLE_UI_NAVBAR_ITEM_PADDING = 0.02f;
@@ -119,6 +133,8 @@ Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onCli
 		navbarOptionsPtr = &navbarOptions;
 	}else if (type == GAMEPLAY_EDITOR){
 		navbarOptionsPtr = &navbarOptionsGameplay;
+	}else if (type == EDITOR_EDITOR){
+		navbarOptionsPtr = &navbarOptionsEditor;
 	}
 	modassert(navbarOptionsPtr != NULL, "navbar type null");
   std::vector<ListComponentData> levels;
