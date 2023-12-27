@@ -35,30 +35,6 @@ std::function<void(int)> onSelectLevel = [](int levelIndex) -> void {
 
 const float selectorRatio = (1.f / 3.f);
 
-
-Component imageComponent {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    std::string* imageName = typeFromProps<std::string>(props, valueSymbol);
-    modassert(imageName, "no imageName defined, must have valueSymbol");
-    //float* height = typeFromProps<float>(props, heightSymbol);
-    //float* width = typeFromProps<float(props, widthSymbol);
-    float width = (1.f - selectorRatio) * 2.f;
-    float height = 1.f;
-    BoundingBox2D boundingBox {
-      .x = 0.f,
-      .y = 0.f,
-      .width = width,
-      .height = height,
-    };
-    drawTools.drawRect(0.f, 0.f, width, height, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, *imageName, std::nullopt);
-
-    if (true){
-      drawDebugBoundingBox(drawTools, boundingBox, glm::vec4(0.f, 0.f, 0.f, 1.f));
-    }
-    return boundingBox;
-  }
-};
-
 Component levelMenu {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::vector<UILevel>** levelPtr = typeFromProps<std::vector<UILevel>*>(props, valueSymbol);
@@ -187,9 +163,11 @@ Component levelDetail {
 
     std::vector<Component> detailElements;
     
+    float width = (1.f - selectorRatio) * 2.f;
     Props imageProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = level -> image },
+        PropPair { .symbol = widthSymbol, .value = width },
       }
     };
     detailElements.push_back(withPropsCopy(imageComponent, imageProps));

@@ -14,6 +14,7 @@
 #include "./navlist.h"
 #include "./pausemenu.h"
 #include "./levelselect.h"
+#include "./settings.h"
 #include "./navbar.h"
 #include "./dock/dock.h"
 #include "./windowmanager.h"

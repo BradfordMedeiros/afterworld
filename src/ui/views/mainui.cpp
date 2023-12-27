@@ -15,8 +15,7 @@ Props createLevelListProps(){
   levels.push_back(ListComponentData {
     .name = "Settings",
     .onClick = []() -> void {
-      modlog("error", "settings not yet implemented");
-      exit(0);    
+      pushHistory("settings");
     }
   });
   levels.push_back(ListComponentData {
@@ -105,9 +104,17 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     }
   );
 
+  auto settingsMenu = withPropsCopy(
+    settingsComponent,
+    Props {
+      .props = {},
+    }
+  );
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu",  mainMenu },
     { "levelselect", levelSelect },
+    { "settings", settingsMenu },
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
     { "",  emptyComponent  },

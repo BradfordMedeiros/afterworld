@@ -459,3 +459,5 @@ const int borderColorSymbol = getSymbol("border-color");
 const int barColorSymbol = getSymbol("bar-color");
 const int consoleInterfaceSymbol = getSymbol("console-interface");
 const int playLevelSymbol = getSymbol("play-level");
+const int widthSymbol = getSymbol("width");
+const int heightSymbol = getSymbol("height");
