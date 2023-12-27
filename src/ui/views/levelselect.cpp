@@ -35,6 +35,7 @@ std::function<void(int)> onSelectLevel = [](int levelIndex) -> void {
 
 const float selectorRatio = (1.f / 3.f);
 
+
 Component imageComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::string* imageName = typeFromProps<std::string>(props, valueSymbol);
