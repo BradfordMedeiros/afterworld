@@ -492,14 +492,14 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockColorPickerConfig {
         .label = "primary",
-        .getColor = []() -> glm::vec4 { return glm::vec4(1.f, 0.f, 0.f, 1.f); },
+        .getColor = []() -> glm::vec4 { return styles.primaryColor; },
         .onColor = [](glm::vec4 color) -> void {
           styles.primaryColor = color;
         },
       },
       DockColorPickerConfig {
         .label = "secondary",
-        .getColor = []() -> glm::vec4 { return glm::vec4(1.f, 0.f, 0.f, 1.f); },
+        .getColor = []() -> glm::vec4 { return styles.secondaryColor; },
         .onColor = [](glm::vec4 color) -> void { 
           styles.secondaryColor = color;
         },

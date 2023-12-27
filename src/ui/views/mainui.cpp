@@ -360,22 +360,40 @@ ImageList imageListDatas {
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
 
-NavbarType loadNavbarType(){
+NavbarType strToNavbarType(std::string& layout){
+  if (layout == "main"){
+    return MAIN_EDITOR;
+  }
+  if (layout == "gameplay"){
+    return GAMEPLAY_EDITOR;
+  }
+  if (layout == "editor"){
+    return EDITOR_EDITOR;
+  }
+  modassert(false, std::string("invalid layout: ") + layout);
   return MAIN_EDITOR;
+}
+NavbarType queryLoadNavbarType(){
+  auto query = gameapi -> compileSqlQuery("select layout from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return strToNavbarType(result.at(0).at(0));
+}
+void queryUpdateNavbarType(std::string& layout){
+  auto updateQuery = gameapi -> compileSqlQuery(
+    "update session set layout = ?", { layout }
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  modassert(validSql, "error executing sql query");
 }
 
 NavbarType navbarType = MAIN_EDITOR;
 NavListApi navListApi {
   .changeLayout = [](std::string layout) -> void {
-    if (layout == "main"){
-      navbarType = MAIN_EDITOR;
-    }else if (layout == "gameplay"){
-      navbarType = GAMEPLAY_EDITOR;
-    }else if (layout == "editor"){
-      navbarType = EDITOR_EDITOR;
-    }else{
-      modassert(false, std::string("invalid layout: ") + layout);
-    }
+    navbarType = strToNavbarType(layout);
+    queryUpdateNavbarType(layout);
   }
 };
 
@@ -424,7 +442,15 @@ Component navigationComponent {
 };
 
 
+static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+  if (firstTime){
+    navbarType = queryLoadNavbarType();
+  }
+  firstTime = false;
+  //////////////////////////////
+
+
   HandlerFns handlerFuncs {
     .minManagedId = -1,
     .maxManagedId = -1,

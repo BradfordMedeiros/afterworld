@@ -1,2 +1,2 @@
-session.console:STRING,session.editor:STRING,session.background:STRING
-true,false,/home/brad/Desktop/test.png
+session.console:STRING,session.editor:STRING,session.background:STRING,session.layout:STRING
+true,true,/home/brad/Desktop/test3.png,editor
