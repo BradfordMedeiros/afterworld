@@ -28,7 +28,7 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
           PropPair { .symbol = fontsizeSymbol, .value = STYLE_UI_WINDOW_FONTSIZE },
           PropPair { .symbol = paddingSymbol, .value = STYLE_UI_WINDOW_PADDING },
           PropPair { .symbol = tintSymbol, .value = styles.primaryColor },
-          PropPair { .symbol = minwidthSymbol, .value = 0.5f - (STYLE_UI_WINDOW_PADDING * 2) },
+          //PropPair { .symbol = minwidthSymbol, .value = 0.5f - (STYLE_UI_WINDOW_PADDING * 2) },
         }
       });
 

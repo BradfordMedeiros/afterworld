@@ -1,6 +1,6 @@
 #include "./slider.h"
 
-void drawRight(DrawingTools& drawTools, float x, float y, float width, float height, glm::vec4 color, objid mappingId){
+void drawRight(DrawingTools& drawTools, float x, float y, float width, float height, glm::vec4 color, std::optional<objid> mappingId){
   drawTools.drawRect(x + (width * 0.5f), y, width, height, false, color, std::nullopt, true, mappingId /*radioButton.mappingId */, std::nullopt, mappingId);
 }
 
@@ -20,11 +20,15 @@ Component sliderInner  {
     float y = yoffset;
     float left = x;
     float right = x + width;
-     
 
+    // background
+    drawRight(drawTools, x, y, width, height, glm::vec4(0.f, 0.f, 0.f, 1.f), std::nullopt);
+
+    // bar filled part
     auto barMappingId = uniqueMenuItemMappingId();
     drawRight(drawTools, x, y, width * glm::min(1.f, glm::max(slider -> percentage, 0.f)), height, barColor ? *barColor : glm::vec4(0.4f, 0.4f, 0.4f, .8f), barMappingId);
 
+    // whole bar overlaid (transparent), for mapping stuff
     auto mappingId = uniqueMenuItemMappingId();
     drawRight(drawTools, x, y, width, height, glm::vec4(0.f, 0.f, 0.f, .0f), mappingId);
 

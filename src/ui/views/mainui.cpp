@@ -203,6 +203,7 @@ objid activeSceneId(){
 }
 
 glm::vec4 colorPickerColor(0.f, 0.f, 0.f, 1.f);
+std::string colorPickerTitle = "color picker";
 std::optional<std::function<void(glm::vec4)>> onNewColor = std::nullopt;
 std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   colorPickerColor = value;
@@ -257,9 +258,10 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
-  .openColorPicker = [](std::function<void(glm::vec4)> onColor) -> void {
+  .openColorPicker = [](std::function<void(glm::vec4)> onColor, std::string windowName) -> void {
     windowSetEnabled(windowColorPickerSymbol, true);
     onNewColor = onColor;
+    colorPickerTitle = windowName;
     //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
     //  onFileAdded(closedWithoutNewFile, file);
     //  onFileAddedFn = std::nullopt;
@@ -590,7 +592,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         PropPair { tintSymbol, colorPickerColor },
       }
     });
-    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, "color picker");
+    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, colorPickerTitle);
     auto defaultWindowProps = getDefaultProps();
     uiWindowComponent.draw(drawTools, defaultWindowProps);
   }

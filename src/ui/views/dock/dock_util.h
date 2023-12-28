@@ -11,7 +11,7 @@ struct DockConfigApi {
   std::function<void()> createNavmesh;
   std::function<void(std::function<void(bool, std::string)>, std::function<bool(bool, std::string&)>)> openFilePicker;
   std::function<void(std::function<void(bool, std::string)>)> openImagePicker;
-  std::function<void(std::function<void(glm::vec4)>)> openColorPicker;
+  std::function<void(std::function<void(glm::vec4)>, std::string)> openColorPicker;
   std::function<void(std::function<void(objid, std::string)>)> pickGameObj;
   std::function<void(std::string&)> setTexture;
 

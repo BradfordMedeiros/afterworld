@@ -21,12 +21,12 @@ Component createRgbSlider(std::string label, float percentage, std::function<voi
 Component colorDisplay {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
   	auto color = vec4FromProp(props, colorSymbol, glm::vec4(0.f, 0.f, 0.f, 0.f));
-    drawTools.drawRect(0.f, 0.f, 0.2f, 0.2f, false, color, std::nullopt, true, std::nullopt /* selection id */, std::nullopt  /* texture */, std::nullopt);
+    drawTools.drawRect(0.05f, 0.05f, 0.2f, 0.2f, false, color, std::nullopt, true, std::nullopt /* selection id */, std::nullopt  /* texture */, std::nullopt);
     BoundingBox2D boundingBox {
     	.x = 0.f,
     	.y = 0.f,
-    	.width = 0.2f,
-    	.height = 0.2f,
+    	.width = 0.3f,
+    	.height = 0.3f,
     };
     return boundingBox;
   },
@@ -66,7 +66,9 @@ Component colorPickerComponent {
     	}
     }));
 
-    auto colorPickInner = simpleVerticalLayout(elements);
+    auto colorPickInner = simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, styles.mainBorderColor, 0.f, styles.primaryColor);
     return  colorPickInner.draw(drawTools, props);
   },
 };
+
+

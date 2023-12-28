@@ -4,7 +4,7 @@ extern DockConfigApi dockConfigApi;
 
 Component createDockColorPicker(DockColorPickerConfig& dockColorPicker){
 	std::function<void()> onClick = [&dockColorPicker]() -> void {
-		dockConfigApi.openColorPicker(dockColorPicker.onColor);
+		dockConfigApi.openColorPicker(dockColorPicker.onColor, dockColorPicker.label);
 	};
   Props listItemProps {
     .props = {
