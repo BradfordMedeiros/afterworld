@@ -163,11 +163,6 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
 };
 
 
-std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
-  static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
-  *activeColor = value;
-};
-
 std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
 std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
@@ -206,6 +201,15 @@ objid activeSceneId(){
   modassert(activeScene.has_value(), "no active scene");
   return activeScene.value();
 }
+
+glm::vec4 colorPickerColor(0.f, 0.f, 0.f, 1.f);
+std::optional<std::function<void(glm::vec4)>> onNewColor = std::nullopt;
+std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
+  colorPickerColor = value;
+  if (onNewColor.has_value()){
+    onNewColor.value()(colorPickerColor);
+  }
+};
 
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
@@ -253,8 +257,9 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
-  .openColorPicker = [](std::function<void(glm::vec4)>) -> void {
+  .openColorPicker = [](std::function<void(glm::vec4)> onColor) -> void {
     windowSetEnabled(windowColorPickerSymbol, true);
+    onNewColor = onColor;
     //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
     //  onFileAdded(closedWithoutNewFile, file);
     //  onFileAddedFn = std::nullopt;
@@ -578,11 +583,10 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
 
   {
-    static glm::vec4* activeColor = static_cast<glm::vec4*>(uiConnect(color));
     auto colorPicker = withPropsCopy(colorPickerComponent, Props {
       .props = { 
         PropPair { onSlideSymbol,  onSlide },
-        PropPair { tintSymbol, *activeColor },
+        PropPair { tintSymbol, colorPickerColor },
       }
     });
     auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, "color picker");
