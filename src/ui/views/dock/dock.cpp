@@ -504,17 +504,19 @@ std::vector<DockConfiguration> configurations {
           styles.secondaryColor = color;
         },
       },
-      DockTextboxNumeric {  // color selector for the main style elements i guess
-        .label = "Red",
-        .value = 1.f,
+      DockColorPickerConfig {
+        .label = "border",
+        .getColor = []() -> glm::vec4 { return styles.mainBorderColor; },
+        .onColor = [](glm::vec4 color) -> void { 
+          styles.mainBorderColor = color;
+        },
       },
-      DockTextboxNumeric {
-        .label = "Green",
-        .value = 1.f,
-      },
-      DockTextboxNumeric {
-        .label = "Blue",
-        .value = 1.f,
+      DockColorPickerConfig {
+        .label = "highlight",
+        .getColor = []() -> glm::vec4 { return styles.highlightColor; },
+        .onColor = [](glm::vec4 color) -> void { 
+          styles.highlightColor = color;
+        },
       },
       DockImageConfig {
         .label =  "[unset]",

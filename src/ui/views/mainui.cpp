@@ -450,6 +450,7 @@ Component navigationComponent {
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
   if (firstTime){
+    initStyles();
     navbarType = queryLoadNavbarType();
   }
   firstTime = false;

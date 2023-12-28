@@ -18,6 +18,9 @@ struct Styles {
 
 };
 
+void initStyles();
+
+
 extern Styles styles;
 
 #endif
