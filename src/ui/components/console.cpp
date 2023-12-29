@@ -307,13 +307,15 @@ Component consoleComponent {
     ConsoleInterface** consoleInterfacePtr = typeFromProps<ConsoleInterface*>(props, consoleInterfaceSymbol);
     modassert(consoleInterfacePtr, "console interface not provided");
     ConsoleInterface* consoleInterface = *consoleInterfacePtr;
-    std::function<void(TextData)> onEdit = [consoleInterface](TextData textData) -> void {
-      if (textData.valueText.size() > 0 && static_cast<int>(textData.valueText.at(textData.valueText.size() - 1)) == 10 /* enter */ ){
-        auto commandStr = textData.valueText.substr(0, textData.valueText.size() -1);
-        commandTextData.valueText = "";
-        commandTextData.cursorLocation = 0;
-        commandTextData.highlightLength = 0;
-        executeCommand(*consoleInterface, commandStr);
+    std::function<void(TextData, int)> onEdit = [consoleInterface](TextData textData, int rawKey) -> void {
+      if (rawKey == 257 /* enter */ ){
+        if (commandTextData.valueText.size() > 0){
+          std::string commandStr = commandTextData.valueText;
+          commandTextData.valueText = "";
+          commandTextData.cursorLocation = 0;
+          commandTextData.highlightLength = 0;
+          executeCommand(*consoleInterface, commandStr);
+        }
       }else{
         commandTextData = textData;
       }

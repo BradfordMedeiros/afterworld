@@ -66,7 +66,7 @@ Component textbox {
 
     modassert(!isEditable || textData, "textbox editable but no text data provided");
 
-    auto onEditTextPtr = typeFromProps<std::function<void(TextData)>>(props, onInputSymbol);
+    auto onEditTextPtr = typeFromProps<std::function<void(TextData, int)>>(props, onInputSymbol);
 
     auto textValue = isEditable ? textData -> valueText : strValue;
     auto newTextValue = isEditable ?  insertString(textValue, textData -> cursorLocation, '|') : textValue;
@@ -99,32 +99,32 @@ Component textbox {
           if (textDataValue.cursorLocation < 0){
             textDataValue.cursorLocation = 0;
           }
-          onEditText(textDataValue);
+          onEditText(textDataValue, key);
         }else if (key == 262){  // right key
           textDataValue.cursorLocation++;
           if (textDataValue.cursorLocation > textDataValue.valueText.size()){
             textDataValue.cursorLocation = textDataValue.valueText.size();
           }
-          onEditText(textDataValue);
+          onEditText(textDataValue, key);
         }else if (key == 265){
           // up key
           textDataValue.highlightLength++;
-          onEditText(textDataValue);
+          onEditText(textDataValue, key);
         }else if (key == 264){
           // downkey
           textDataValue.highlightLength--;
           if (textDataValue.highlightLength < 0){
             textDataValue.highlightLength = 0;
           }
-          onEditText(textDataValue);
+          onEditText(textDataValue, key);
         }else if (key == 257){
-          onEditText(insertCharacter(textDataValue, '\n'));
+          onEditText(insertCharacter(textDataValue, '\n'), key);
         }else if (key == 261){
           // delete forward
         }else if (key == 259){
-          onEditText(deleteCharacter(textDataValue));
+          onEditText(deleteCharacter(textDataValue), key);
         }else{
-          onEditText(insertCharacter(textDataValue, key));
+          onEditText(insertCharacter(textDataValue, key), key);
         }
       };
       listItemProps.props.push_back(PropPair { .symbol = onInputSymbol, onKeyPress });
