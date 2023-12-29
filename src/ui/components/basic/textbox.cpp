@@ -1,5 +1,7 @@
 #include "./textbox.h"
 
+extern CustomApiBindings* gameapi; // get clipboard string, plumb this back to drawing tools
+
 std::string insertString(std::string& str, int index, char character){
   auto prefix = str.substr(0, index);
   auto suffixIndex = index;
@@ -93,14 +95,9 @@ Component textbox {
 
       TextData textDataValue2 = *textData;
       std::function<void(int, int)> onKeyPress = [onEditText, textDataValue2](int key, int mods) -> void {
-    
-        std::cout << "shift test: " << ((char)key) << ", aka " << key << std::endl;
-
         bool shouldCapitalize = (mods & 0x0001 /* shift */);
         key = shouldCapitalize ? std::toupper(key) : std::tolower(key);
-
         bool controlHeld = (mods & 0x0002);
-
 
         TextData textDataValue = textDataValue2;
 
@@ -108,8 +105,15 @@ Component textbox {
           textDataValue.cursorLocation = 0;
           textDataValue.highlightLength = textDataValue.valueText.size();
           onEditText(textDataValue, key);
-        }
-        else if (key == 263){        // left  key
+        }else if (controlHeld && key == 'c'){
+          std::cout << "clipboard string size: " << textDataValue.valueText.size() << std::endl;
+          gameapi -> setClipboardString(textDataValue.valueText.c_str());
+        }else if (controlHeld && key == 'v'){
+          textDataValue.valueText = gameapi -> getClipboardString();
+          textDataValue.cursorLocation = 0;
+          textDataValue.highlightLength = 0;
+          onEditText(textDataValue, key);
+        }else if (key == 263){        // left  key
           textDataValue.cursorLocation--;
           if (textDataValue.cursorLocation < 0){
             textDataValue.cursorLocation = 0;
