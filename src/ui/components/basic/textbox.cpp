@@ -108,7 +108,8 @@ Component textbox {
           onEditText(textDataValue, key);
         }else if (controlHeld && key == 'c'){
           std::cout << "clipboard string size: " << textDataValue.valueText.size() << std::endl;
-          setClipboardString(textDataValue.valueText.c_str());
+          auto substring = textDataValue.valueText.substr(textDataValue.cursorLocation, textDataValue.highlightLength);
+          setClipboardString(substring.c_str());
         }else if (controlHeld && key == 'v'){
           textDataValue.valueText = getClipboardString();
           textDataValue.cursorLocation = 0;
