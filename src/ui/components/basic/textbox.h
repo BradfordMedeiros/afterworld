@@ -8,8 +8,6 @@
 extern Component textbox;
 extern const int textDataSymbol;
 
-std::string insertString(std::string& str, int index, char character);
-
 struct TextData {
   std::string valueText;
   int cursorLocation;

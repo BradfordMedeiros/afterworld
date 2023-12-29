@@ -1,6 +1,6 @@
 #include "./textbox.h"
 
-std::string insertString(std::string& str, int index, char character){
+std::string insertString(std::string& str, int index, std::string character){
   auto prefix = str.substr(0, index);
   auto suffixIndex = index;
   if (suffixIndex >= str.size()){
@@ -13,7 +13,7 @@ std::string insertString(std::string& str, int index, char character){
 const int textDataSymbol = getSymbol("textdata");
 
 
-TextData deleteCharacter(TextData& textData){
+TextData deleteSelected(TextData& textData){
   bool deleteSelection = textData.highlightLength > 0;
   auto index = deleteSelection ? (textData.cursorLocation + 1) : textData.cursorLocation;
   if (index == 0){
@@ -42,9 +42,10 @@ TextData deleteCharacter(TextData& textData){
 }
 TextData insertCharacter(TextData& textData, char character){
   if (textData.highlightLength > 0){
-    textData = deleteCharacter(textData);
+    textData = deleteSelected(textData);
   }
-  auto newString = insertString(textData.valueText, textData.cursorLocation, character);
+
+  auto newString = insertString(textData.valueText, textData.cursorLocation, std::string(1, character));
   textData.valueText = newString;
   textData.cursorLocation++;
   return textData;
@@ -69,9 +70,9 @@ Component textbox {
     auto onEditTextPtr = typeFromProps<std::function<void(TextData, int)>>(props, onInputSymbol);
 
     auto textValue = isEditable ? textData -> valueText : strValue;
-    auto newTextValue = isEditable ?  insertString(textValue, textData -> cursorLocation, '|') : textValue;
+    auto newTextValue = isEditable ?  insertString(textValue, textData -> cursorLocation, std::string(1, '|')) : textValue;
     if (isEditable && textData -> highlightLength > 0 && textData -> cursorLocation != textValue.size()){
-      newTextValue = insertString(newTextValue, textData -> cursorLocation + textData -> highlightLength + 1, '|');
+      newTextValue = insertString(newTextValue, textData -> cursorLocation + textData -> highlightLength + 1, std::string(1, '|'));
     }
 
     Props listItemProps {
@@ -111,9 +112,12 @@ Component textbox {
           auto substring = textDataValue.valueText.substr(textDataValue.cursorLocation, textDataValue.highlightLength);
           setClipboardString(substring.c_str());
         }else if (controlHeld && key == 'v'){
-          textDataValue.valueText = getClipboardString();
-          textDataValue.cursorLocation = 0;
-          textDataValue.highlightLength = 0;
+          if (textDataValue.highlightLength > 0){
+            textDataValue = deleteSelected(textDataValue);
+          }
+          std::string clipboardStr = getClipboardString();
+          textDataValue.valueText = insertString(textDataValue.valueText, textDataValue.cursorLocation, clipboardStr);
+          textDataValue.cursorLocation = textDataValue.cursorLocation + clipboardStr.size();
           onEditText(textDataValue, key);
         }else if (key == 263){        // left  key
           textDataValue.cursorLocation--;
@@ -143,7 +147,7 @@ Component textbox {
         }else if (key == 261){
           // delete forward
         }else if (key == 259){
-          onEditText(deleteCharacter(textDataValue), key);
+          onEditText(deleteSelected(textDataValue), key);
         }else if (key == 340){
           // shift
         }else if (key == 280){
