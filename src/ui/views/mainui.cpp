@@ -507,6 +507,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
      },
      .selectedId = selectedId,
      .focusedId = focusedId,
+     .getClipboardString = gameapi -> getClipboardString,
+     .setClipboardString = gameapi -> setClipboardString,
   };
   resetMenuItemMappingId();
 

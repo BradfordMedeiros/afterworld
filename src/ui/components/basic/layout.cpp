@@ -104,6 +104,8 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   drawTools.registerAutoFocus = realTools.registerAutoFocus;
   drawTools.selectedId = realTools.selectedId;
   drawTools.focusedId = realTools.focusedId;
+  drawTools.getClipboardString = realTools.getClipboardString;
+  drawTools.setClipboardString = realTools.setClipboardString;
 
 	bufferedDrawingTools.drawTools = drawTools,
 	bufferedDrawingTools.realTools = &realTools,

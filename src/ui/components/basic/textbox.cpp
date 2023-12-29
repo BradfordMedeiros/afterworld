@@ -1,7 +1,5 @@
 #include "./textbox.h"
 
-extern CustomApiBindings* gameapi; // get clipboard string, plumb this back to drawing tools
-
 std::string insertString(std::string& str, int index, char character){
   auto prefix = str.substr(0, index);
   auto suffixIndex = index;
@@ -94,7 +92,10 @@ Component textbox {
       auto onEditText = *onEditTextPtr;
 
       TextData textDataValue2 = *textData;
-      std::function<void(int, int)> onKeyPress = [onEditText, textDataValue2](int key, int mods) -> void {
+
+      auto setClipboardString = drawTools.setClipboardString;
+      auto getClipboardString = drawTools.getClipboardString;
+      std::function<void(int, int)> onKeyPress = [&drawTools, onEditText, textDataValue2, getClipboardString, setClipboardString](int key, int mods) -> void {
         bool shouldCapitalize = (mods & 0x0001 /* shift */);
         key = shouldCapitalize ? std::toupper(key) : std::tolower(key);
         bool controlHeld = (mods & 0x0002);
@@ -107,9 +108,9 @@ Component textbox {
           onEditText(textDataValue, key);
         }else if (controlHeld && key == 'c'){
           std::cout << "clipboard string size: " << textDataValue.valueText.size() << std::endl;
-          gameapi -> setClipboardString(textDataValue.valueText.c_str());
+          setClipboardString(textDataValue.valueText.c_str());
         }else if (controlHeld && key == 'v'){
-          textDataValue.valueText = gameapi -> getClipboardString();
+          textDataValue.valueText = getClipboardString();
           textDataValue.cursorLocation = 0;
           textDataValue.highlightLength = 0;
           onEditText(textDataValue, key);
