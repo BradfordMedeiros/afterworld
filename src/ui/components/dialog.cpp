@@ -36,7 +36,7 @@ Component dialogComponent {
     auto textData = typeFromProps<TextData>(props, valueSymbol);
     modassert(textData, "text data is not defined dialog");
  
-    auto onEdit = typeFromProps<std::function<void(TextData)>>(props, onInputSymbol);
+    auto onEdit = typeFromProps<std::function<void(TextData, int)>>(props, onInputSymbol);
     modassert(onEdit, "on edit is not defined dialog");
 
     Props textboxProps {

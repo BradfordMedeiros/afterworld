@@ -92,9 +92,24 @@ Component textbox {
       auto onEditText = *onEditTextPtr;
 
       TextData textDataValue2 = *textData;
-      std::function<void(int)> onKeyPress = [onEditText, textDataValue2](int key) -> void {
+      std::function<void(int, int)> onKeyPress = [onEditText, textDataValue2](int key, int mods) -> void {
+    
+        std::cout << "shift test: " << ((char)key) << ", aka " << key << std::endl;
+
+        bool shouldCapitalize = (mods & 0x0001 /* shift */);
+        key = shouldCapitalize ? std::toupper(key) : std::tolower(key);
+
+        bool controlHeld = (mods & 0x0002);
+
+
         TextData textDataValue = textDataValue2;
-        if (key == 263){        // left  key
+
+        if (controlHeld && key == 97 /* ctrl-a - > select all */){
+          textDataValue.cursorLocation = 0;
+          textDataValue.highlightLength = textDataValue.valueText.size();
+          onEditText(textDataValue, key);
+        }
+        else if (key == 263){        // left  key
           textDataValue.cursorLocation--;
           if (textDataValue.cursorLocation < 0){
             textDataValue.cursorLocation = 0;
@@ -123,6 +138,12 @@ Component textbox {
           // delete forward
         }else if (key == 259){
           onEditText(deleteCharacter(textDataValue), key);
+        }else if (key == 340){
+          // shift
+        }else if (key == 280){
+          // caps lock
+        }else if (key == 341){
+          // ctrl 
         }else{
           onEditText(insertCharacter(textDataValue, key), key);
         }

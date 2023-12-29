@@ -39,14 +39,14 @@ struct HandlerFns {
   std::unordered_map<objid, std::function<void()>> handlerFns;
   std::unordered_map<objid, std::function<void(HandlerCallbackFn&)>> handlerCallbackFns;    
   std::unordered_map<objid, std::function<void(int)>> handlerFns2;
-  std::unordered_map<objid, std::function<void(int)>> inputFns;
+  std::unordered_map<objid, std::function<void(int, int)>> inputFns;
   std::unordered_map<objid, TrackedLocationData> trackedLocationIds;
   std::optional<AutoFocusObj> autofocus;
 };
 HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void onMainUiScroll(double amount);
 void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
-void onMainUiKeyPress(HandlerFns& handlerFns, int key);
+void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods);
 void onObjectsChanged();
 void pushHistory(std::string route, bool replace = false);
 void popHistory();

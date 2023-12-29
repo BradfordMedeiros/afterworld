@@ -22,7 +22,7 @@ struct DrawingTools {
   std::function<void(objid, std::function<void()>)> registerCallbackFns;
   std::function<void(objid, std::function<void(HandlerCallbackFn&)>)> registerCallbackFnsHandler;
   std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
-  std::function<void(objid, std::function<void(int)>)> registerInputFns;
+  std::function<void(objid, std::function<void(int key, int mods)>)> registerInputFns;
   std::function<void(objid, std::string& uniqueKey)> registerAutoFocus;
   std::optional<objid> selectedId;
   std::optional<objid> focusedId;

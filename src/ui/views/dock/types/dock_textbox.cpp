@@ -9,7 +9,7 @@ Component createDockTextbox(DockTextboxConfig& textboxOptions){
      .highlightLength = 0,
      .maxchars = -1,
    };
-   std::function<void(TextData)> onEdit = [&textboxOptions](TextData textData) -> void {
+   std::function<void(TextData, int)> onEdit = [&textboxOptions](TextData textData, int rawKey) -> void {
      textboxConfigData = textData;
      textboxOptions.onEdit(textData.valueText);
    };

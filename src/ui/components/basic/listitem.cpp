@@ -3,7 +3,7 @@
 const float fontSizePerLetterNdi = 0.02f;
 
 
-BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, float minheight, glm::vec4 rectTint, glm::vec4 color, std::function<void(int)>* inputFn){
+BoundingBox2D drawImMenuListItem(DrawingTools& drawTools, const ImListItem& menuItem, float xoffset, float yoffset, float padding, std::optional<float> fontSizeStyle, float minwidth, float minheight, glm::vec4 rectTint, glm::vec4 color, std::function<void(int, int)>* inputFn){
   std::optional<objid> mappingId = drawTools.selectedId;
   float fontSize = fontSizeStyle.has_value() ? fontSizeStyle.value() : fontSizePerLetterNdi;
 
@@ -142,7 +142,7 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto fontSize = floatFromProp(props, fontsizeSymbol, DEFAULT_FONT_SIZE_LISTITEM);
   auto limit = intFromProp(props, limitSymbol, -1);
   auto focusTint = typeFromProps<glm::vec4>(props, focusTintSymbol);
-  std::function<void(int)>* inputFnHandler = typeFromProps<std::function<void(int)>>(props, onInputSymbol);
+  std::function<void(int, int)>* inputFnHandler = typeFromProps<std::function<void(int, int)>>(props, onInputSymbol);
 
   auto autofocus = typeFromProps<std::string>(props, autofocusSymbol);
   if (autofocus){

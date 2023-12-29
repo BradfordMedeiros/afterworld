@@ -508,7 +508,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (action == 1){
-      onMainUiKeyPress(gameState -> uiCallbacks, key);
+      onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
 
   };

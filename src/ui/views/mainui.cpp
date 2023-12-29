@@ -496,7 +496,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
      .registerCallbackRightFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
         handlerFuncs.handlerFns2[id] = fn;
      },
-     .registerInputFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
+     .registerInputFns = [&handlerFuncs](objid id, std::function<void(int, int)> fn) -> void {
         handlerFuncs.inputFns[id] = fn;
      },
      .registerAutoFocus = [&handlerFuncs](objid id, std::string& key) -> void {
@@ -547,7 +547,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
    //////////////////////////////
 
 
-    std::function<void(TextData)> onEdit = [](TextData textData) -> void {
+    std::function<void(TextData, int)> onEdit = [](TextData textData, int rawKey) -> void {
       newSceneTextData = textData;
     };
 
@@ -628,7 +628,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
   if (startedShowingConsoleTime.has_value()){
     float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
-    std::cout << "console: " << elapsedTime << std::endl;
+    //std::cout << "console: " << elapsedTime << std::endl;
   }
   if (shouldShowConsole){
     Props props {
@@ -825,13 +825,13 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
   }
 }
 
-void onMainUiKeyPress(HandlerFns& handlerFns, int key){
+void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods){
   modlog("mainui key press", std::to_string(key));
   if (!focusedId.has_value()){
     return;
   }
   if (handlerFns.inputFns.find(focusedId.value()) != handlerFns.inputFns.end()){
-    handlerFns.inputFns.at(focusedId.value())(key);
+    handlerFns.inputFns.at(focusedId.value())(key, mods);
   }
 }
 
