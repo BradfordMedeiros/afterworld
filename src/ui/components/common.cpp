@@ -461,3 +461,4 @@ const int consoleInterfaceSymbol = getSymbol("console-interface");
 const int playLevelSymbol = getSymbol("play-level");
 const int widthSymbol = getSymbol("width");
 const int heightSymbol = getSymbol("height");
+const int autofocusSymbol = getSymbol("autofocus");

@@ -62,6 +62,7 @@ Component textbox {
     auto onClick = fnFromProp(props, onclickSymbol);
     auto padding = floatFromProp(props, paddingSymbol, 0.02f);
     auto minwidth = typeFromProps<float>(props, minwidthSymbol);
+    auto autofocus = typeFromProps<std::string>(props, autofocusSymbol);
 
     modassert(!isEditable || textData, "textbox editable but no text data provided");
 
@@ -134,6 +135,9 @@ Component textbox {
     }
     if (onClick.has_value()){
       listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = onClick.value() });
+    }
+    if (autofocus){
+      listItemProps.props.push_back(PropPair { .symbol = autofocusSymbol, .value = *autofocus });
     }
   	return listItem.draw(drawTools, listItemProps);
   },

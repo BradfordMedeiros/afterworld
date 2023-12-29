@@ -319,6 +319,8 @@ Component consoleComponent {
       }
     };
 
+
+    auto consoleKey = typeFromProps<std::string>(props, autofocusSymbol);
     Props textboxProps {
       .props = {
         PropPair { .symbol = editableSymbol, .value = true },
@@ -330,6 +332,9 @@ Component consoleComponent {
         PropPair { .symbol= borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 1.f) },
       }
     };
+    if (consoleKey){
+      textboxProps.props.push_back(PropPair { .symbol = autofocusSymbol, .value = *consoleKey });
+    }
 
     auto textboxWithProps = withPropsCopy(textbox, textboxProps);
     elements.push_back(textboxWithProps);

@@ -144,6 +144,11 @@ BoundingBox2D drawListItem(DrawingTools& drawTools, Props& props){
   auto focusTint = typeFromProps<glm::vec4>(props, focusTintSymbol);
   std::function<void(int)>* inputFnHandler = typeFromProps<std::function<void(int)>>(props, onInputSymbol);
 
+  auto autofocus = typeFromProps<std::string>(props, autofocusSymbol);
+  if (autofocus){
+    drawTools.registerAutoFocus(id, *autofocus);
+  }
+
   if (limit >= 0){
     strValue = strValue.substr(0, limit);
   }

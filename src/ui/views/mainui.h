@@ -28,6 +28,11 @@
 
 extern Component mainUI;
 
+struct AutoFocusObj {
+  objid id;
+  std::string key;
+};
+
 struct HandlerFns {
   int minManagedId;
   int maxManagedId;
@@ -36,6 +41,7 @@ struct HandlerFns {
   std::unordered_map<objid, std::function<void(int)>> handlerFns2;
   std::unordered_map<objid, std::function<void(int)>> inputFns;
   std::unordered_map<objid, TrackedLocationData> trackedLocationIds;
+  std::optional<AutoFocusObj> autofocus;
 };
 HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId);
 void onMainUiScroll(double amount);

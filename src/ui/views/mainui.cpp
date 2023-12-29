@@ -410,6 +410,9 @@ int offset = 2;
 int currentScene = -1;
 
 std::optional<objid> focusedId = std::nullopt;
+std::string lastAutofocusedKey = "";
+std::optional<std::string> consoleKey = std::nullopt;
+
 TextData newSceneTextData {
   .valueText = "",
   .cursorLocation = 0,
@@ -467,6 +470,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     .handlerFns2 = {},
     .inputFns = {},
     .trackedLocationIds = {},
+    .autofocus = std::nullopt,
   };
   //std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
 
@@ -494,6 +498,12 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
      },
      .registerInputFns = [&handlerFuncs](objid id, std::function<void(int)> fn) -> void {
         handlerFuncs.inputFns[id] = fn;
+     },
+     .registerAutoFocus = [&handlerFuncs](objid id, std::string& key) -> void {
+        handlerFuncs.autofocus = AutoFocusObj {
+          .id = id,
+          .key = key,
+        };
      },
      .selectedId = selectedId,
      .focusedId = focusedId,
@@ -603,6 +613,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   router.draw(drawTools, routerProps);
 
   bool shouldShowConsole = uiContext.showConsole();
+  if (!shouldShowConsole){
+    consoleKey = std::nullopt;
+  }else{
+    if (!consoleKey.has_value()){
+      consoleKey = std::string("console-") + uniqueNameSuffix();
+    }
+  }
   static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
   if (!shouldShowConsole){
     startedShowingConsoleTime = std::nullopt;
@@ -616,7 +633,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   if (shouldShowConsole){
     Props props {
       .props = {
-        { .symbol = consoleInterfaceSymbol, .value = &uiContext.consoleInterface }
+        { .symbol = consoleInterfaceSymbol, .value = &uiContext.consoleInterface },
+        { .symbol = autofocusSymbol, .value = consoleKey.value() },
       },
     };
     consoleComponent.draw(drawTools, props);
@@ -732,6 +750,14 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
+
+  if (handlerFuncs.autofocus.has_value()){
+    if (lastAutofocusedKey != handlerFuncs.autofocus.value().key){
+      focusedId = handlerFuncs.autofocus.value().id;
+      lastAutofocusedKey = handlerFuncs.autofocus.value().key;
+    }
+  }
+
 
   //std::cout << "location data: " << print(handlerFuncs.trackedLocationIds) << std::endl;
   return handlerFuncs;

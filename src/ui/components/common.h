@@ -23,6 +23,7 @@ struct DrawingTools {
   std::function<void(objid, std::function<void(HandlerCallbackFn&)>)> registerCallbackFnsHandler;
   std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
   std::function<void(objid, std::function<void(int)>)> registerInputFns;
+  std::function<void(objid, std::string& uniqueKey)> registerAutoFocus;
   std::optional<objid> selectedId;
   std::optional<objid> focusedId;
 };
@@ -181,5 +182,6 @@ extern const int consoleInterfaceSymbol;
 extern const int playLevelSymbol;
 extern const int widthSymbol;
 extern const int heightSymbol;
+extern const int autofocusSymbol;
 
 #endif
