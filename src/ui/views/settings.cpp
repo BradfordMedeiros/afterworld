@@ -1,5 +1,25 @@
 #include "./settings.h"
 
+struct SettingsSqlPersist {
+
+};
+
+struct SettingConfiguration {
+  DockConfig config;
+  std::optional<SettingsSqlPersist> sqlPersist;
+};
+
+std::vector<SettingConfiguration> settingsConfiguration = {
+  SettingConfiguration {
+    .config = DockCheckboxConfig {
+      .label = "Fullscreen",
+      .isChecked = getIsCheckedWorld("rendering", "fullscreen", "true", "false"),
+      .onChecked = getOnCheckedWorld("rendering", "fullscreen", "true", "false"),
+    },
+    .sqlPersist = std::nullopt,
+  }
+};
+
 std::vector<DockConfiguration> settingsConfigurations {
   DockConfiguration {
     .title = "Game",
@@ -141,7 +161,7 @@ Component settingsComponent {
     elements.push_back(settingsInner);
 
     Layout outerLayout {
-      .tint = styles.secondaryColor,
+      .tint = glm::vec4(0.f, 0.f, 0.f, 0.f),//styles.secondaryColor,
       .showBackpanel = true,
       .borderColor = styles.highlightColor,
       .minwidth = 2.f,
