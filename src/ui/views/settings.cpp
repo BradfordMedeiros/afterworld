@@ -1,7 +1,6 @@
 #include "./settings.h"
 
 struct SettingsSqlPersist {
-
 };
 
 struct SettingConfiguration {
@@ -9,80 +8,99 @@ struct SettingConfiguration {
   std::optional<SettingsSqlPersist> sqlPersist;
 };
 
-std::vector<SettingConfiguration> settingsConfiguration = {
-  SettingConfiguration {
-    .config = DockCheckboxConfig {
-      .label = "Fullscreen",
-      .isChecked = getIsCheckedWorld("rendering", "fullscreen", "true", "false"),
-      .onChecked = getOnCheckedWorld("rendering", "fullscreen", "true", "false"),
-    },
-    .sqlPersist = std::nullopt,
-  }
-};
-
-std::vector<DockConfiguration> settingsConfigurations {
-  DockConfiguration {
-    .title = "Game",
-    .configFields = {
-      DockCheckboxConfig {
+std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsItems {
+  { "Game", std::vector<SettingConfiguration> {
+    SettingConfiguration {
+      .config = DockCheckboxConfig {
         .label = "Invert Aim",
         .isChecked = []() -> bool { return false; },
         .onChecked = [](bool) -> void { },
       },
-      DockTextboxNumeric {
+      .sqlPersist = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
         .label = "X-Sensitivity",
         .value = 0.5f,
       },
-      DockTextboxNumeric {
+      .sqlPersist = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
         .label = "Y-Sensitivity",
         .value = 0.5f,
       },
+      .sqlPersist = std::nullopt,
     },
-  },
-  DockConfiguration {
-    .title = "Graphics",
-    .configFields = {
-      DockCheckboxConfig {
+  }},
+  { "Graphics", std::vector<SettingConfiguration> {
+    SettingConfiguration {
+      .config = DockCheckboxConfig {
         .label = "Fullscreen",
         .isChecked = getIsCheckedWorld("rendering", "fullscreen", "true", "false"),
         .onChecked = getOnCheckedWorld("rendering", "fullscreen", "true", "false"),
       },
-      DockTextboxNumeric {
+      .sqlPersist = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
         .label = "FOV",
         .value = 10.f,
       },
-      DockButtonConfig {
-        // resolution
-        .buttonText = "placeholder for resolution",
-        .onClick = []() -> void {},
-      },
+      .sqlPersist = std::nullopt,
     },
-  },
-  DockConfiguration {
-    .title = "Sound",
-    .configFields = {
-      DockCheckboxConfig {
+  }},
+  { "Controls", std::vector<SettingConfiguration> {
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Placeholder",
+        .value = 1.f,
+      },
+      .sqlPersist = std::nullopt,
+    },
+  }},
+  { "Sound", std::vector<SettingConfiguration> {
+    SettingConfiguration {
+      .config = DockCheckboxConfig {
         .label = "Sound Enabled",
         .isChecked = getIsCheckedWorld("sound", "mute", "false", "true"),
         .onChecked = getOnCheckedWorld("sound", "mute", "false", "true"),
       },
-      DockTextboxNumeric {
+      .sqlPersist = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
         .label = "Volume",
         .value = 1.f,
       },
+      .sqlPersist = std::nullopt,
     },
-  },
-  DockConfiguration {
-    .title = "Controls",
-    .configFields = {
-      // rebind all keys
-      DockButtonConfig {
-        .buttonText = "no panel available",
-        .onClick = []() -> void {},
-      },
-    },
-  },
+  }},
 };
+
+
+
+void addConfiguration(std::vector<DockConfiguration>& allConfigurations, std::vector<SettingConfiguration>& configuration, std::string title){
+  DockConfiguration dockConfig {
+    .title = title,
+    .configFields = {},
+  };
+  for (SettingConfiguration& config : configuration){
+    dockConfig.configFields.push_back(config.config);
+  }
+  allConfigurations.push_back(dockConfig);
+}
+
+std::vector<DockConfiguration> loadConfigurations(){
+  std::vector<DockConfiguration> settingsConfigurations {};
+  for (auto &settingsItem : settingsItems){
+    addConfiguration(settingsConfigurations, settingsItem.second, settingsItem.first);
+  }
+  return settingsConfigurations;
+}
+
+std::vector<DockConfiguration> settingsConfigurations = loadConfigurations();
+
 
 int selectedMenuIndex = -1;
 Component settingsInner {
