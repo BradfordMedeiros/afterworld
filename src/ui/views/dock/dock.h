@@ -23,7 +23,29 @@
 #include "./types/dock_gameobj.h"
 #include "./types/dock_colorpicker.h"
 
+struct DockScenegraph {};
+struct DockGroup;
+
+typedef std::variant<
+  DockLabelConfig,   DockButtonConfig, DockOptionConfig, DockSliderConfig,    DockCheckboxConfig, 
+  DockTextboxConfig, DockFileConfig,   DockImageConfig,  DockGameObjSelector, DockGroup, 
+  DockScenegraph, DockTextboxNumeric, DockColorPickerConfig
+  > DockConfig;
+
+struct DockGroup {
+  std::string groupName;
+  std::function<void()> onClick;  
+  std::function<bool()> collapse;
+  std::vector<DockConfig> configFields;
+};
+
+struct DockConfiguration {
+  std::string title;
+  std::vector<DockConfig> configFields;
+};
+
 extern Component dockComponent;
+extern Component dockFormComponent;
 
 #endif
 

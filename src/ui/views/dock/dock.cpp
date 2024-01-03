@@ -4,28 +4,6 @@ extern DockConfigApi dockConfigApi;
 
 const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
 
-struct DockScenegraph {};
-
-struct DockGroup;
-
-typedef std::variant<
-  DockLabelConfig,   DockButtonConfig, DockOptionConfig, DockSliderConfig,    DockCheckboxConfig, 
-  DockTextboxConfig, DockFileConfig,   DockImageConfig,  DockGameObjSelector, DockGroup, 
-  DockScenegraph, DockTextboxNumeric, DockColorPickerConfig
-  > DockConfig;
-
-struct DockGroup {
-  std::string groupName;
-  std::function<void()> onClick;  
-  std::function<bool()> collapse;
-  std::vector<DockConfig> configFields;
-};
-
-struct DockConfiguration {
-  std::string title;
-  std::vector<DockConfig> configFields;
-};
-
 int currentDebugMask(){
   auto value = dockConfigApi.getAttribute("editor", "debugmask");
   auto debugMaskFloat = std::get_if<float>(&value);
@@ -631,15 +609,16 @@ void componentsForFields(std::vector<DockConfig>& configFields, std::vector<Comp
   }
 }
 
-Component genericDockComponent {
+Component dockFormComponent {
   .draw = [](DrawingTools& drawTools, Props& props){
-    auto dockType = strFromProp(props, dockTypeSymbol, "");
-    auto dockConfig = dockConfigByName(dockType);
-    modassert(dockConfig, std::string("dock config is null for: " + dockType));
+    DockConfiguration** dockConfigPtr = typeFromProps<DockConfiguration*>(props, valueSymbol);
+    modassert(dockConfigPtr, "dockConfigPtr not provided");
+
     std::vector<Component> elements;
-    componentsForFields(dockConfig -> configFields, elements);
+    componentsForFields((*dockConfigPtr) -> configFields, elements);
 
     Layout layout {
+//      .tint = glm::vec4(1.f, 0.f, 0.f, 1.f),
       .tint = styles.secondaryColor,
       .showBackpanel = true,
       .borderColor = styles.highlightColor,
@@ -672,22 +651,24 @@ Component genericDockComponent {
 Component dockComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::vector<Component> elements;
-    auto dock = strFromProp(props, dockTypeSymbol, "");
+    auto dockType = strFromProp(props, dockTypeSymbol, "");
+    DockConfiguration* dockConfig = dockConfigByName(dockType);
+    modassert(dockConfig, std::string("dock config is null for: " + dockType));
 
     Props dockProps {
       .props = {
-        PropPair { .symbol = dockTypeSymbol, .value = dock },
+        PropPair { .symbol = valueSymbol, .value = dockConfig },
       }
     };
-    elements.push_back(withProps(genericDockComponent, dockProps));
+
+
+    elements.push_back(withProps(dockFormComponent, dockProps));
 
     // this interpolation (for animation) shouldn't be happening int he componnet here
     float xoffset = floatFromProp(props, xoffsetSymbol, 1.f);
     float xoffsetFrom = floatFromProp(props, xoffsetFromSymbol, xoffset);
     float interpAmount = floatFromProp(props, interpolationSymbol, 1.f);
-
     float xoffsetActual = (xoffset * interpAmount) + (xoffsetFrom * (1 - interpAmount));
-
     float yoffset = floatFromProp(props, yoffsetSymbol, 0.88f);
 
     Layout layout {
