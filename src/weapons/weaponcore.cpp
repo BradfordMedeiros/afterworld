@@ -247,7 +247,9 @@ GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, in
   }
 
   auto muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
-  modassert(muzzlePointId.has_value(), std::string("weapon muzzle not defined for: ") + gun);
+  if (!muzzlePointId.has_value()){
+    modlog("weapon core", std::string("no muzzle defined for: ") + gun);
+  }
 
   GunInstance gunInstance {
     .gunCore = gunCore,
