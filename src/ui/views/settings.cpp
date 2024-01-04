@@ -15,6 +15,20 @@ std::function<void()> getExecuteSqlBool(std::string field, std::string enabled, 
   };
 }
 
+
+std::function<void(bool)> persistSql(std::string column, std::string enabled, std::string disabled, std::function<void(bool)> onCheckedFn){
+  return [column, enabled, disabled, onCheckedFn](bool value) -> void {
+    onCheckedFn(value);
+    auto strValue = value ? enabled : disabled;
+    auto updateQuery = gameapi -> compileSqlQuery("update settings set ? = ?", { column, strValue });
+    bool validSql = false;
+    gameapi -> executeSqlQuery(updateQuery, &validSql);
+    modassert(validSql, "error executing sql query");
+
+  };
+};
+
+
 struct SettingConfiguration {
   DockConfig config;
   std::optional<std::function<void()>> initSetting;
@@ -50,7 +64,10 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
       .config = DockCheckboxConfig {
         .label = "Fullscreen",
         .isChecked = getIsCheckedWorld("rendering", "fullscreen", "true", "false"),
-        .onChecked = getOnCheckedWorld("rendering", "fullscreen", "true", "false"),
+        .onChecked = persistSql(
+          "fullscreen", "TRUE", "FALSE",
+          getOnCheckedWorld("rendering", "fullscreen", "true", "false")
+        ),
       },
       .initSetting = getExecuteSqlBool("fullscreen", "TRUE", "FALSE", "rendering", "fullscreen", "true", "false"),
     },
@@ -76,7 +93,10 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
       .config = DockCheckboxConfig {
         .label = "Sound Enabled",
         .isChecked = getIsCheckedWorld("sound", "mute", "false", "true"),
-        .onChecked = getOnCheckedWorld("sound", "mute", "false", "true"),
+        .onChecked = persistSql(
+          "mute", "FALSE", "TRUE",
+          getOnCheckedWorld("sound", "mute", "false", "true")
+        ),
       },
       .initSetting = getExecuteSqlBool("mute", "TRUE", "FALSE", "sound", "mute", "true", "false"),
     },
