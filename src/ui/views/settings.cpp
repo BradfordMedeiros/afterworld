@@ -1,11 +1,23 @@
 #include "./settings.h"
 
-struct SettingsSqlPersist {
-};
+extern DockConfigApi dockConfigApi;
+
+std::function<void()> getExecuteSqlBool(std::string field, std::string enabled, std::string disabled, std::string worldStateObj, std::string worldStateAttr, std::string valueEnabled, std::string valueDisabled){
+  return [field, enabled, disabled, worldStateObj, worldStateAttr, valueEnabled, valueDisabled]() -> void {
+    auto query = gameapi -> compileSqlQuery("select ? from settings", { field });
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(query, &validSql);
+    modassert(validSql, "error executing sql query");
+    std::string value = result.at(0).at(0);
+    modassert(value == enabled || value == disabled, "invalid value executeSqlPersist");
+    auto isEnabled = value == enabled;
+    dockConfigApi.setAttribute(worldStateObj, worldStateAttr, isEnabled ? valueEnabled : valueDisabled);
+  };
+}
 
 struct SettingConfiguration {
   DockConfig config;
-  std::optional<SettingsSqlPersist> sqlPersist;
+  std::optional<std::function<void()>> initSetting;
 };
 
 std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsItems {
@@ -16,21 +28,21 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = []() -> bool { return false; },
         .onChecked = [](bool) -> void { },
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = std::nullopt,
     },
     SettingConfiguration {
       .config = DockTextboxNumeric {
         .label = "X-Sensitivity",
         .value = 0.5f,
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = std::nullopt,
     },
     SettingConfiguration {
       .config = DockTextboxNumeric {
         .label = "Y-Sensitivity",
         .value = 0.5f,
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = std::nullopt,
     },
   }},
   { "Graphics", std::vector<SettingConfiguration> {
@@ -40,14 +52,14 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = getIsCheckedWorld("rendering", "fullscreen", "true", "false"),
         .onChecked = getOnCheckedWorld("rendering", "fullscreen", "true", "false"),
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = getExecuteSqlBool("fullscreen", "TRUE", "FALSE", "rendering", "fullscreen", "true", "false"),
     },
     SettingConfiguration {
       .config = DockTextboxNumeric {
         .label = "FOV",
         .value = 10.f,
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = std::nullopt,
     },
   }},
   { "Controls", std::vector<SettingConfiguration> {
@@ -56,7 +68,7 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .label = "Placeholder",
         .value = 1.f,
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = std::nullopt,
     },
   }},
   { "Sound", std::vector<SettingConfiguration> {
@@ -66,14 +78,14 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = getIsCheckedWorld("sound", "mute", "false", "true"),
         .onChecked = getOnCheckedWorld("sound", "mute", "false", "true"),
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = getExecuteSqlBool("mute", "TRUE", "FALSE", "sound", "mute", "true", "false"),
     },
     SettingConfiguration {
       .config = DockTextboxNumeric {
         .label = "Volume",
         .value = 1.f,
       },
-      .sqlPersist = std::nullopt,
+      .initSetting = std::nullopt,
     },
   }},
 };
@@ -100,6 +112,17 @@ std::vector<DockConfiguration> loadConfigurations(){
 }
 
 std::vector<DockConfiguration> settingsConfigurations = loadConfigurations();
+
+void initSettings(){
+  for (auto &settingsItem : settingsItems){
+    std::vector<SettingConfiguration>& settingsConfig = settingsItem.second;
+    for (auto &config : settingsConfig){
+      if (config.initSetting.has_value()){
+        config.initSetting.value()();
+      }
+    }
+  }
+}
 
 
 int selectedMenuIndex = -1;
@@ -174,6 +197,11 @@ Component menuList {
 
 Component settingsComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    static bool firstTime = true;
+    if (firstTime){
+      initSettings();
+      firstTime = false;
+    }
     std::vector<Component> elements;
     elements.push_back(menuList);
     elements.push_back(settingsInner);
