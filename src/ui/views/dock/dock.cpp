@@ -393,6 +393,8 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "WEAPONS",
     .configFields = {
+      DockSelectConfig {
+      },
       DockCheckboxConfig {
         .label = "Iron Sights",
         .isChecked = getIsCheckedWorld("editor", "groupselection", "true", "false"),
@@ -596,6 +598,11 @@ Component createDockComponent(DockConfig& config){
   auto dockColorPickerConfig = std::get_if<DockColorPickerConfig>(&config);
   if (dockColorPickerConfig){
     return createDockColorPicker(*dockColorPickerConfig);
+  }
+
+  auto dockSelectConfig = std::get_if<DockSelectConfig>(&config);
+  if (dockSelectConfig){
+    return createDockSelect(*dockSelectConfig);
   }
 
   modassert(false, "dock component not yet implemented");
