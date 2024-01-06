@@ -287,7 +287,10 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (!activeEntity.has_value()){
       return;
     }
-    movement -> controlParams.lookVelocity = glm::vec2(xPos, yPos);
+
+    float xsensitivity = getGlobalState().xsensitivity;
+    float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
+    movement -> controlParams.lookVelocity = glm::vec2(xsensitivity * xPos, ysensitivity * yPos);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {

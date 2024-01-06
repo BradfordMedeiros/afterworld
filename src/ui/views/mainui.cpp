@@ -358,7 +358,6 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   .setEditorBackground = [](std::string& background){
     gameapi -> sendNotifyMessage("menu-background", std::string(background));
   }
-
 };
 
 ImageList imageListDatas {

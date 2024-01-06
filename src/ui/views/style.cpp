@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-const bool DEBUG_STYLES = false;
 void initStyles(){
   auto query = gameapi -> compileSqlQuery("select style-primary, style-secondary, style-border, style-highlight from session", {});
   bool validSql = false;

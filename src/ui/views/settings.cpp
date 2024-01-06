@@ -1,6 +1,7 @@
 #include "./settings.h"
 
 extern DockConfigApi dockConfigApi;
+extern CustomApiBindings* gameapi;
 
 std::function<void()> getExecuteSqlBool(std::string field, std::string enabled, std::string disabled, std::string worldStateObj, std::string worldStateAttr, std::string valueEnabled, std::string valueDisabled){
   return [field, enabled, disabled, worldStateObj, worldStateAttr, valueEnabled, valueDisabled]() -> void {
@@ -15,7 +16,6 @@ std::function<void()> getExecuteSqlBool(std::string field, std::string enabled, 
   };
 }
 
-
 std::function<void(bool)> persistSql(std::string column, std::string enabled, std::string disabled, std::function<void(bool)> onCheckedFn){
   return [column, enabled, disabled, onCheckedFn](bool value) -> void {
     onCheckedFn(value);
@@ -28,35 +28,83 @@ std::function<void(bool)> persistSql(std::string column, std::string enabled, st
   };
 };
 
+void persistSqlFloat(std::string column, float value){
+  auto updateQuery = gameapi -> compileSqlQuery("update settings set ? = ?", { column, std::to_string(value) });
+  bool validSql = false;
+  gameapi -> executeSqlQuery(updateQuery, &validSql); 
+}
+
+std::string getSqlValue(std::string column){
+  auto query = gameapi -> compileSqlQuery("select ? from settings", { column });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0).c_str();
+}
+float getSqlFloatValue(std::string column){
+  auto query = gameapi -> compileSqlQuery("select ? from settings", { column });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  float value = std::atof(result.at(0).at(0).c_str());
+  return value;
+}
+
+float getWorldStateFloat(std::string object, std::string attribute){
+  auto valueAttr = dockConfigApi.getAttribute(object, attribute);
+  float* floatPtr = std::get_if<float>(&valueAttr);
+  modassert(floatPtr, object + " is not a float");
+  return *floatPtr;
+}
+
 
 struct SettingConfiguration {
   DockConfig config;
   std::optional<std::function<void()>> initSetting;
 };
 
+float currentFov = 45;
 std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsItems {
   { "Game", std::vector<SettingConfiguration> {
     SettingConfiguration {
       .config = DockCheckboxConfig {
         .label = "Invert Aim",
-        .isChecked = []() -> bool { return false; },
-        .onChecked = [](bool) -> void { },
+        .isChecked = []() -> bool { return getGlobalState().invertY; },
+        .onChecked = [](bool isChecked) -> void {
+          getGlobalState().invertY = isChecked;
+        },
       },
       .initSetting = std::nullopt,
     },
     SettingConfiguration {
-      .config = DockTextboxNumeric {
+      .config = DockSliderConfig {
         .label = "X-Sensitivity",
-        .value = 0.5f,
+        .min = 0.f,
+        .max = 5.f,
+        .percentage = []() -> float { return getGlobalState().xsensitivity; },
+        .onSlide = [](float amount) -> void {
+          getGlobalState().xsensitivity = amount;
+          persistSqlFloat("xsensitivity", amount);
+        },
       },
-      .initSetting = std::nullopt,
+      .initSetting = []() -> void {
+        getGlobalState().xsensitivity = getSqlFloatValue("xsensitivity");
+      },
     },
     SettingConfiguration {
-      .config = DockTextboxNumeric {
+      .config = DockSliderConfig {
         .label = "Y-Sensitivity",
-        .value = 0.5f,
+        .min = 0.f,
+        .max = 5.f,
+        .percentage = []() -> float { return getGlobalState().ysensitivity; },
+        .onSlide = [](float amount) -> void {
+          getGlobalState().ysensitivity = amount;
+          persistSqlFloat("ysensitivity", amount);
+        },
       },
-      .initSetting = std::nullopt,
+      .initSetting = []() -> void {
+        getGlobalState().ysensitivity = getSqlFloatValue("ysensitivity");
+      },
     },
   }},
   { "Graphics", std::vector<SettingConfiguration> {
@@ -72,11 +120,36 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
       .initSetting = getExecuteSqlBool("fullscreen", "TRUE", "FALSE", "rendering", "fullscreen", "true", "false"),
     },
     SettingConfiguration {
-      .config = DockTextboxNumeric {
+      .config = DockSliderConfig {
         .label = "FOV",
-        .value = 10.f,
+        .min = 20.f,
+        .max = 50.f,
+        .percentage = []() -> float { 
+          return currentFov;
+        },
+        .onSlide = [](float amount) -> void {
+          currentFov = amount;
+          persistSqlFloat("fov", currentFov);
+          gameapi -> setLayerState({
+            StrValues {
+              .target = "",
+              .attribute = "fov",
+              .payload = std::to_string(currentFov),
+            },
+          });         
+        },
       },
-      .initSetting = std::nullopt,
+      .initSetting = []() -> void {
+        auto fov = getSqlValue("fov");
+        currentFov = std::atof(fov.c_str());
+        gameapi -> setLayerState({
+          StrValues {
+            .target = "",
+            .attribute = "fov",
+            .payload = fov,
+          },
+        });
+      },
     },
   }},
   { "Controls", std::vector<SettingConfiguration> {
@@ -101,11 +174,24 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
       .initSetting = getExecuteSqlBool("mute", "TRUE", "FALSE", "sound", "mute", "true", "false"),
     },
     SettingConfiguration {
-      .config = DockTextboxNumeric {
+      .config = DockSliderConfig {
         .label = "Volume",
-        .value = 1.f,
+        .min = 0.f,
+        .max = 1.f,
+        .percentage = []() -> float { 
+          auto volume = getWorldStateFloat("sound", "volume");
+          return volume;
+        },
+        .onSlide = [](float amount) -> void {
+          // sound:volume:0.2
+          dockConfigApi.setAttribute("sound", "volume", amount);
+          persistSqlFloat("volume", amount);
+        },
       },
-      .initSetting = std::nullopt,
+      .initSetting = []() -> void {
+        auto volume = getSqlFloatValue("volume");
+        dockConfigApi.setAttribute("sound", "volume", volume);
+      },
     },
   }},
 };

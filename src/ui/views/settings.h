@@ -8,5 +8,7 @@
 
 extern Component settingsComponent;
 
+void initSettings();
+
 #endif
 

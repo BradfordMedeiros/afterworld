@@ -13,6 +13,10 @@ GlobalState global {
   .selectedId = std::nullopt,
 
   .godMode = false,
+
+  .xsensitivity = 1.f,
+  .ysensitivity = 1.f,
+  .invertY = false,
 };
 
 void setPaused(bool paused){

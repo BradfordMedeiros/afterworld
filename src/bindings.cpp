@@ -454,8 +454,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       gameState -> dragSelect = args.at("dragselect");
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
     }
-
     setPaused(true);
+    initSettings();
+
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

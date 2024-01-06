@@ -16,6 +16,11 @@ struct GlobalState {
   std::optional<objid> selectedId;
 
   bool godMode;
+
+
+  float xsensitivity;
+  float ysensitivity;
+  bool invertY;
 };
 
 void setPaused(bool paused);
