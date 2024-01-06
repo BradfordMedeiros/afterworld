@@ -238,17 +238,22 @@ Component createTitle(std::string&& item){
 }
 
 Component createConsoleItem(HistoryInstance& history,  int index){
-  std::function<void()> onClick = [index]() -> void {
-    std::cout << "on click" << std::endl;
-    selectedIndex = index;
+  std::function<void(int)> onClick2 = [index, &history](int value) -> void {
+    if (value == 0 /* left click*/){
+      selectedIndex = index;
+    }else if (value == 2 /* middle mouse click*/){
+      gameapi -> setClipboardString(history.command.c_str());
+      selectedIndex = index;
+    }
   };
+
   Props listItemProps {
     .props = {
       PropPair { .symbol = valueSymbol, .value = history.command },
       PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
       PropPair { .symbol = minwidthSymbol, .value = ELEMENT_WIDTH },
       PropPair { .symbol = paddingSymbol, .value = ELEMENT_PADDING },
-      PropPair { .symbol = onclickSymbol, .value = onClick },
+      PropPair { .symbol = onclickRightSymbol, .value = onClick2 },
       PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.2f) },
     },
   };
