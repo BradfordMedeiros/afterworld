@@ -4,9 +4,13 @@ Component selectComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {  
    	auto selectOptions = typeFromProps<SelectOptions>(props, valueSymbol);
   	modassert(selectOptions, "select options not provided to select");
-  	int selectedIndex = selectOptions -> currentSelection >= 0 ? selectOptions -> currentSelection : 0;
 
-  	bool isExpanded = selectOptions -> isExpanded;
+    int currentSelection = selectOptions -> currentSelection();
+  	int selectedIndex = currentSelection >= 0 ? currentSelection : 0;
+
+  	bool isExpanded = selectOptions -> isExpanded();
+    std::vector<std::string>& options = selectOptions -> getOptions();
+
     std::function<void(bool)> toggleExpanded = selectOptions -> toggleExpanded;;
 
   	std::function<void()> onClick = [isExpanded, toggleExpanded]() -> void {
@@ -14,7 +18,7 @@ Component selectComponent {
 	  };
     Props listItemProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = selectOptions -> options.at(selectedIndex) + " [ ]"},
+        PropPair { .symbol = valueSymbol, .value = options.at(selectedIndex) + " [ ]"},
         PropPair { .symbol = onclickSymbol, .value = onClick },
         //PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f) },
         PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
@@ -26,10 +30,10 @@ Component selectComponent {
     std::vector<Component> elements;
   	elements.push_back(listItemWithProps);
 
-  	if (selectOptions -> isExpanded){
-  		for (int i = 0; i < selectOptions -> options.size(); i++){
+  	if (selectOptions -> isExpanded()){
+  		for (int i = 0; i < options.size(); i++){
 
-  			std::string& element = selectOptions -> options.at(i);
+  			std::string& element = options.at(i);
  			  std::function<void(int, std::string&)> onSelect = selectOptions -> onSelect;
 
     		std::function<void()> onClick = [i, element, onSelect]() -> void {

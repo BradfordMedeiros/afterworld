@@ -4,6 +4,41 @@ extern DockConfigApi dockConfigApi;
 
 const float STYLE_UI_DOCK_ELEMENT_PADDING = 0.02f;
 
+void persistSqlFloat(std::string column, float value){
+  auto updateQuery = gameapi -> compileSqlQuery("update settings set ? = ?", { column, std::to_string(value) });
+  bool validSql = false;
+  gameapi -> executeSqlQuery(updateQuery, &validSql); 
+}
+
+struct SqlFilter {
+  std::string column;
+  std::string value;
+};
+void persistSql(std::string table, std::string column, std::string value, std::optional<SqlFilter> filter = std::nullopt){
+  if (filter.has_value()){
+    auto updateQuery = gameapi -> compileSqlQuery("update ? set ? = ?", { table, column, value });
+    bool validSql = false;
+    gameapi -> executeSqlQuery(updateQuery, &validSql); 
+    return;
+  }
+  auto updateQuery = gameapi -> compileSqlQuery("update ? set ? = ?", { table, column, value });
+  bool validSql = false;
+  gameapi -> executeSqlQuery(updateQuery, &validSql); 
+}
+
+std::string readSqlFirstRow(std::string table, std::string column, std::optional<SqlFilter> filter = std::nullopt){
+  if (filter.has_value()){
+    auto updateQuery = gameapi -> compileSqlQuery("select ? from ? where ? = ?", { column, table, filter.value().column, filter.value().value });
+    bool validSql = false;
+    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql); 
+    return result.at(0).at(0);
+  }
+  auto updateQuery = gameapi -> compileSqlQuery("select ? from ?", { column, table });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql); 
+  return result.at(0).at(0);
+}
+
 int currentDebugMask(){
   auto value = dockConfigApi.getAttribute("editor", "debugmask");
   auto debugMaskFloat = std::get_if<float>(&value);
@@ -116,6 +151,14 @@ std::function<void(std::string)> connectEditText(std::string key, TextEditType t
       textStore[key] = value;
     }
   };
+}
+
+bool weaponsExpanded = false;
+int weaponSelectIndex = -1;
+std::optional<std::string> selectedGun;
+std::vector<std::string> listGuns(){
+  std::vector<std::string> guns = { "none", "scrapgun", "electrogun", "pistol" };
+  return guns;
 }
 
 std::vector<DockConfiguration> configurations {
@@ -394,11 +437,39 @@ std::vector<DockConfiguration> configurations {
     .title = "WEAPONS",
     .configFields = {
       DockSelectConfig {
+        .selectOptions = SelectOptions {
+          .getOptions = []() -> std::vector<std::string>& {
+            static std::vector<std::string> options = listGuns();
+            return options;
+          },
+          .toggleExpanded = [](bool expanded) -> void {
+            weaponsExpanded = expanded;
+          },
+          .onSelect = [](int index, std::string& gun) -> void {
+            weaponSelectIndex = index;
+            weaponsExpanded = false;
+            selectedGun = gun;
+            modlog("editor gun", std::string("selected gun: ") + gun);
+          },
+          .currentSelection = []() -> int { return weaponSelectIndex; },
+          .isExpanded = []() -> bool { return weaponsExpanded; },
+        }
       },
       DockCheckboxConfig {
         .label = "Iron Sights",
-        .isChecked = getIsCheckedWorld("editor", "groupselection", "true", "false"),
-        .onChecked = getOnCheckedWorld("editor", "groupselection", "true", "false"),
+        .isChecked = []() -> bool {
+          if (!selectedGun.has_value()){
+            return false;
+          }
+          auto sqlValue = readSqlFirstRow("guns", "ironsight", SqlFilter { .column = "name", .value = selectedGun.value() });
+          return sqlValue == "TRUE";
+        },
+        .onChecked = [](bool checked) -> void {
+          if (!selectedGun.has_value()){
+            return;
+          }
+          persistSql("guns", "ironsight", checked ? "TRUE" : "FALSE", SqlFilter { .column = "name", .value = selectedGun.value() });
+        },
       },
       DockTextboxNumeric {
         .label = "Horizontal Sway",

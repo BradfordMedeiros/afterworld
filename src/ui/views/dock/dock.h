@@ -24,6 +24,9 @@
 #include "./types/dock_colorpicker.h"
 #include "./types/dock_select.h"
 
+void persistSqlFloat(std::string column, float value);
+
+
 struct DockScenegraph {};
 struct DockGroup;
 

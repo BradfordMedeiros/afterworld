@@ -5,7 +5,7 @@
 #include "../../../components/basic/select.h"
 
 struct DockSelectConfig {
-
+	SelectOptions selectOptions;
 };
 
 Component createDockSelect(DockSelectConfig& dockOption);

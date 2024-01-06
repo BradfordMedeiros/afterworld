@@ -28,12 +28,6 @@ std::function<void(bool)> persistSql(std::string column, std::string enabled, st
   };
 };
 
-void persistSqlFloat(std::string column, float value){
-  auto updateQuery = gameapi -> compileSqlQuery("update settings set ? = ?", { column, std::to_string(value) });
-  bool validSql = false;
-  gameapi -> executeSqlQuery(updateQuery, &validSql); 
-}
-
 std::string getSqlValue(std::string column){
   auto query = gameapi -> compileSqlQuery("select ? from settings", { column });
   bool validSql = false;

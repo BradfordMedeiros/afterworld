@@ -5,11 +5,11 @@
 #include "./layout.h"
 
 struct SelectOptions {
-  std::vector<std::string> options;
+  std::function<std::vector<std::string>&()> getOptions;
   std::function<void(bool)> toggleExpanded;
   std::function<void(int, std::string&)> onSelect;
-  int currentSelection;
-  bool isExpanded;
+  std::function<int()> currentSelection;
+  std::function<bool()> isExpanded;
 };
 
 extern Component selectComponent;
