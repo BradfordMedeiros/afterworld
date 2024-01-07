@@ -28,6 +28,11 @@ void setPaused(bool paused){
      .attribute = "paused",
      .value = paused ? "true" : "false",
    },
+   ObjectValue {
+     .object = "mouse",
+     .attribute = "cursor",
+     .value = paused ? "normal" : "capture",
+   },
  });
 }
 
@@ -38,10 +43,24 @@ bool isPaused(){
 void enterGameMode(){
   global.inGameMode = true;
   setPaused(false);
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "mouse",
+      .attribute = "cursor",
+      .value = "capture",
+    },
+  });
 }
 void exitGameMode(){
   global.inGameMode = false;
   setPaused(true);
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "mouse",
+      .attribute = "cursor",
+      .value = "normal",
+    },
+  });
 }
 
 GlobalState& getGlobalState(){
@@ -57,13 +76,14 @@ bool queryShowEditor(){
 }
 
 void updateShowEditor(bool showEditor){
+  modlog("update show editor", std::to_string(showEditor));
   global.showEditor = showEditor;
   gameapi -> setWorldState({ 
     ObjectValue {
       .object = "editor",
       .attribute = "disableinput",
       .value = showEditor ? "false" : "true",
-    }
+    },
   });
 }
 

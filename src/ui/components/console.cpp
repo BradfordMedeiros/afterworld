@@ -278,6 +278,7 @@ Component consoleComponent {
     if (firstTime){
       commandHistory = loadCommandHistory();
       gameapi -> setLogEndpoint([](std::string& message) -> void {
+        std::cout << message << std::endl;
         if (logHistory.size() >= CONSOLE_LOG_LIMIT){
           logHistory.pop_front();
         }
