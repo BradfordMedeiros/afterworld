@@ -16,7 +16,7 @@ struct SqlFilter {
 };
 void persistSql(std::string table, std::string column, std::string value, std::optional<SqlFilter> filter = std::nullopt){
   if (filter.has_value()){
-    auto updateQuery = gameapi -> compileSqlQuery("update ? set ? = ?", { table, column, value });
+    auto updateQuery = gameapi -> compileSqlQuery("update ? set ? = ? where ? = ?", { table, column, value, filter.value().column, filter.value().value });
     bool validSql = false;
     gameapi -> executeSqlQuery(updateQuery, &validSql); 
     return;
@@ -38,6 +38,50 @@ std::string readSqlFirstRow(std::string table, std::string column, std::optional
   auto result = gameapi -> executeSqlQuery(updateQuery, &validSql); 
   return result.at(0).at(0);
 }
+
+bool weaponsExpanded = false;
+int weaponSelectIndex = -1;
+std::optional<std::string> selectedGun;
+std::vector<std::string> listGuns(){
+  auto updateQuery = gameapi -> compileSqlQuery("select name from guns", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  std::vector<std::string> guns;
+  for (auto &gunRow : result){
+    guns.push_back(gunRow.at(0));
+  }
+  return guns;
+}
+
+DockCheckboxConfig createSimpleGunCheckbox(const char* label, const char* columnName){
+  DockCheckboxConfig checkbox {
+    .label = label,
+    .isChecked = [columnName]() -> bool {
+      if (!selectedGun.has_value()){
+        return false;
+      }
+      auto sqlValue = readSqlFirstRow("guns", columnName, SqlFilter { .column = "name", .value = selectedGun.value() });
+      return sqlValue == "TRUE";
+    },
+    .onChecked = [columnName](bool checked) -> void {
+      if (!selectedGun.has_value()){
+        return;
+      }
+      persistSql("guns", columnName, checked ? "TRUE" : "FALSE", SqlFilter { .column = "name", .value = selectedGun.value() });
+    },
+  };
+  return checkbox;
+}
+
+DockTextboxNumeric createSimpleGunTextboxNumeric(const char* label, const char* columnName){
+  DockTextboxNumeric textbox {
+    .label = label,
+    .value = 10.f,
+    // gameobj:water-viscosity  // positive number
+  };
+  return textbox;
+}
+
 
 int currentDebugMask(){
   auto value = dockConfigApi.getAttribute("editor", "debugmask");
@@ -151,14 +195,6 @@ std::function<void(std::string)> connectEditText(std::string key, TextEditType t
       textStore[key] = value;
     }
   };
-}
-
-bool weaponsExpanded = false;
-int weaponSelectIndex = -1;
-std::optional<std::string> selectedGun;
-std::vector<std::string> listGuns(){
-  std::vector<std::string> guns = { "none", "scrapgun", "electrogun", "pistol" };
-  return guns;
 }
 
 std::vector<DockConfiguration> configurations {
@@ -455,22 +491,13 @@ std::vector<DockConfiguration> configurations {
           .isExpanded = []() -> bool { return weaponsExpanded; },
         }
       },
-      DockCheckboxConfig {
-        .label = "Iron Sights",
-        .isChecked = []() -> bool {
-          if (!selectedGun.has_value()){
-            return false;
-          }
-          auto sqlValue = readSqlFirstRow("guns", "ironsight", SqlFilter { .column = "name", .value = selectedGun.value() });
-          return sqlValue == "TRUE";
-        },
-        .onChecked = [](bool checked) -> void {
-          if (!selectedGun.has_value()){
-            return;
-          }
-          persistSql("guns", "ironsight", checked ? "TRUE" : "FALSE", SqlFilter { .column = "name", .value = selectedGun.value() });
-        },
-      },
+      createSimpleGunCheckbox("Ironsight", "ironsight"),
+      createSimpleGunCheckbox("Raycast", "raycast"),
+      createSimpleGunCheckbox("Hold", "hold"),
+      createSimpleGunTextboxNumeric("Bloom", "bloom"),
+      createSimpleGunTextboxNumeric("Min Bloom", "minbloom"),
+      createSimpleGunTextboxNumeric("Bloom Length", "bloom-length"),
+
       DockTextboxNumeric {
         .label = "Horizontal Sway",
         .value = 10.f,

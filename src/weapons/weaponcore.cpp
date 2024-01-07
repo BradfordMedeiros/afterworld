@@ -546,12 +546,14 @@ void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::v
   if (!weaponValues.gunId.has_value()){
     return;
   }
+
+  bool shouldZoomGun = isGunZoomed && weaponValues.gunCore.weaponCore -> weaponParams.isIronsight;
   //modlog("weapon", "movement velocity: " + std::to_string(weapons.movementVelocity));
   //modlog("weapon", "sway velocity: " + print(swayVelocity));
   auto swayVelocity = getSwayVelocity(playerId, lookVelocity, movementVec);
-  swayGunTranslation(weaponValues, swayVelocity, isGunZoomed);
+  swayGunTranslation(weaponValues, swayVelocity, shouldZoomGun);
   if (swayRotation){
-    swayGunRotation(weaponValues, isGunZoomed, lookVelocity, movementVec);
+    swayGunRotation(weaponValues, shouldZoomGun, lookVelocity, movementVec);
   }
 }
 
