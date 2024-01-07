@@ -17,7 +17,58 @@ GlobalState global {
   .xsensitivity = 1.f,
   .ysensitivity = 1.f,
   .invertY = false,
+  .disableGameInput = false,
 };
+
+void updateMouse(){
+  global.disableGameInput = false;
+  if (!global.inGameMode){
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "normal",
+      },
+    });
+  }else{
+    if (global.showEditor || global.paused){
+      global.disableGameInput = true;
+      gameapi -> setWorldState({
+        ObjectValue {
+          .object = "mouse",
+          .attribute = "cursor",
+          .value = "normal",
+        },
+      });
+    }else{
+      gameapi -> setWorldState({
+        ObjectValue {
+          .object = "mouse",
+          .attribute = "cursor",
+          .value = "capture",
+        },
+      });    
+    }
+  }
+
+  if (global.showEditor){
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "false",
+      },
+    });    
+  }else{
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "true",
+      },
+    });  
+  }
+}
 
 void setPaused(bool paused){
   modlog("paused toggle", std::string("paused state: ") + print(paused));
@@ -27,13 +78,9 @@ void setPaused(bool paused){
      .object = "world",
      .attribute = "paused",
      .value = paused ? "true" : "false",
-   },
-   ObjectValue {
-     .object = "mouse",
-     .attribute = "cursor",
-     .value = paused ? "normal" : "capture",
-   },
- });
+   }
+  });
+  updateMouse();
 }
 
 bool isPaused(){
@@ -43,24 +90,12 @@ bool isPaused(){
 void enterGameMode(){
   global.inGameMode = true;
   setPaused(false);
-  gameapi -> setWorldState({ 
-    ObjectValue {
-      .object = "mouse",
-      .attribute = "cursor",
-      .value = "capture",
-    },
-  });
+  updateMouse();
 }
 void exitGameMode(){
   global.inGameMode = false;
   setPaused(true);
-  gameapi -> setWorldState({ 
-    ObjectValue {
-      .object = "mouse",
-      .attribute = "cursor",
-      .value = "normal",
-    },
-  });
+  updateMouse();
 }
 
 GlobalState& getGlobalState(){
@@ -78,13 +113,7 @@ bool queryShowEditor(){
 void updateShowEditor(bool showEditor){
   modlog("update show editor", std::to_string(showEditor));
   global.showEditor = showEditor;
-  gameapi -> setWorldState({ 
-    ObjectValue {
-      .object = "editor",
-      .attribute = "disableinput",
-      .value = showEditor ? "false" : "true",
-    },
-  });
+  updateMouse();
 }
 
 void initGlobal(){

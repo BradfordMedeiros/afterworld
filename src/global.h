@@ -21,6 +21,7 @@ struct GlobalState {
   float xsensitivity;
   float ysensitivity;
   bool invertY;
+  bool disableGameInput;
 };
 
 void setPaused(bool paused);

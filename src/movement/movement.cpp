@@ -200,7 +200,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     delete value;
   };
   binding.onKeyCallback = [](int32_t _, void* data, int key, int scancode, int action, int mods) -> void {
-    if (isPaused()){
+    if (isPaused() || getGlobalState().disableGameInput){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
@@ -280,7 +280,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
   };
   binding.onMouseMoveCallback = [](objid _, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
-    if (isPaused()){
+    if (isPaused() || getGlobalState().disableGameInput){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
