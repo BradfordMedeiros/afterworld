@@ -497,17 +497,8 @@ std::vector<DockConfiguration> configurations {
       createSimpleGunTextboxNumeric("Bloom", "bloom"),
       createSimpleGunTextboxNumeric("Min Bloom", "minbloom"),
       createSimpleGunTextboxNumeric("Bloom Length", "bloom-length"),
-
-      DockTextboxNumeric {
-        .label = "Horizontal Sway",
-        .value = 10.f,
-        // gameobj:water-viscosity  // positive number
-      },
-      DockTextboxNumeric {
-        .label = "Vertical Sway",
-        .value = 10.f,
-        // gameobj:water-viscosity  // positive number
-      },
+      createSimpleGunTextboxNumeric("Horizontal Sway", "bloom-length"),
+      createSimpleGunTextboxNumeric("Vertical Sway", "bloom-length"),
     }
   },
   DockConfiguration {
