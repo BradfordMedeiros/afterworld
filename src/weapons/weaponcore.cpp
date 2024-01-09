@@ -92,7 +92,7 @@ WeaponParams queryWeaponParams(std::string gunName){
     "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
     "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
     "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-    "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot, ammo " + 
+    "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot, ammo, damage " + 
     "from guns where name = ?",
     { gunName }
   );
@@ -121,6 +121,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   weaponParams.totalBloom = floatFromFirstSqlResult(result, 26);
   weaponParams.bloomLength = floatFromFirstSqlResult(result, 30);
   weaponParams.totalAmmo = intFromFirstSqlResult(result, 33);
+  weaponParams.damage = floatFromFirstSqlResult(result, 34);
 
   auto fireAnimation = strFromFirstSqlResult(result, 28);
   weaponParams.fireAnimation = std::nullopt;
@@ -154,7 +155,6 @@ WeaponParams queryWeaponParams(std::string gunName){
   weaponParams.hitParticleStr = strFromFirstSqlResult(result, 20);
   weaponParams.projectileParticleStr = strFromFirstSqlResult(result, 25);
 
-  weaponParams.damage = 200.f;
 
   return weaponParams;
 }
