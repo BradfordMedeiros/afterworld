@@ -24,6 +24,8 @@
 #include "./types/dock_colorpicker.h"
 #include "./types/dock_select.h"
 
+#include "../../../ModEngine/src/main_api.h"  // don't do this
+
 void persistSqlFloat(std::string column, float value);
 
 

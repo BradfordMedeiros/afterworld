@@ -254,6 +254,12 @@ std::vector<DockConfiguration> configurations {
         .text = connectGetTextVec2("textureoffset"),
         .onEdit = connectEditTextVec2("textureoffset", "textureoffset"),
       },
+      DockImageConfig {
+        .label =  "someimage-here",
+        .onImageSelect = [](std::string texture) -> void {
+          dockConfigApi.setTexture(texture);
+        }
+      },
     },
   },
   DockConfiguration {
@@ -389,12 +395,6 @@ std::vector<DockConfiguration> configurations {
         .label = "somefile-here",
         .displayLimit = 30,
       },
-      DockImageConfig {
-        .label =  "someimage-here",
-        .onImageSelect = [](std::string texture) -> void {
-          dockConfigApi.setTexture(texture);
-        }
-      },
     },
   },
   DockConfiguration {
@@ -445,6 +445,28 @@ std::vector<DockConfiguration> configurations {
         .options = { "x", "y", "z" },
         .onClick = optionsOnClick("tools", "manipulator-axis", { "x", "y", "z" }),
         .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-axis", { "x", "y", "z" }),
+      },
+      DockOptionConfig { 
+        .options = { "+x", "-x", "+y", "-y", "-z", "+z" },
+        .onClick = [](std::string& choice, int) -> void {
+          // this should use the manipulator api, so it can orient on the axises
+          if (choice == "+x"){
+            sendManipulatorEvent(OBJECT_ORIENT_RIGHT);
+          }else if (choice == "-x"){
+            sendManipulatorEvent(OBJECT_ORIENT_LEFT);
+          }else if (choice == "+y"){
+            sendManipulatorEvent(OBJECT_ORIENT_UP);
+          }else if (choice == "-y"){
+            sendManipulatorEvent(OBJECT_ORIENT_DOWN);
+          }else if (choice == "+z"){
+            sendManipulatorEvent(OBJECT_ORIENT_BACK);
+          }else if (choice == "-z"){
+            sendManipulatorEvent(OBJECT_ORIENT_FORWARD);
+          }
+        },
+        .getSelectedIndex = []() -> int {
+          return -1;
+        },
       },
     }
   },
