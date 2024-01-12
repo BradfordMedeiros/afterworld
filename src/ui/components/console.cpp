@@ -4,7 +4,11 @@ const int CONSOLE_WIDTH = 2.f;
 const int CONSOLE_HEIGHT = 2.f;
 const float ELEMENT_PADDING = 0.02f;
 const float ELEMENT_WIDTH = 1.f;
-const int CONSOLE_LOG_LIMIT = 10;
+const int CONSOLE_LOG_LIMIT = 50;
+const int CONSOLE_DISPLAY_LIMIT = 10;
+
+int consoleDisplayOffset = 0;
+int consoleSelectOffset = 0;
 
 extern CustomApiBindings* gameapi;
 
@@ -26,8 +30,14 @@ std::deque<HistoryInstance> loadCommandHistory(){
   if (fromIndex < 0){
     fromIndex = 0;
   }
+
+  for (auto &row : result){
+    std::cout << "pushing back value: " << row.at(0) << std::endl << std::endl;
+  }
+
   for (int i = fromIndex; i < result.size(); i++){
     auto row = result.at(i);
+    std::cout << "pushing back: " << i <<  ", " << row.at(0) << std::endl;
     history.push_back(
       HistoryInstance {
         .command = row.at(0),      
@@ -277,6 +287,11 @@ Component consoleComponent {
     static bool firstTime = true;
     if (firstTime){
       commandHistory = loadCommandHistory();
+      consoleDisplayOffset = commandHistory.size() - CONSOLE_DISPLAY_LIMIT;
+      if (consoleDisplayOffset < 0){
+        consoleDisplayOffset = 0;
+      }
+
       gameapi -> setLogEndpoint([](std::string& message) -> void {
         std::cout << message << std::endl;
         if (logHistory.size() >= CONSOLE_LOG_LIMIT){
@@ -295,25 +310,29 @@ Component consoleComponent {
 
     std::deque<HistoryInstance>* consoleSource = showLog ? &logHistory : &commandHistory;
 
-    for (int i = 0; i < consoleSource -> size(); i++){
+    int numElements = 0;
+    for (int i = static_cast<int>(consoleDisplayOffset); i < static_cast<int>(consoleSource -> size()); i++){
       elements.push_back(createConsoleItem(consoleSource -> at(i), i));
-    }
-    int paddingElements = CONSOLE_LOG_LIMIT - consoleSource -> size();
-    if (paddingElements > 0){
-      for (int i = 0; i < paddingElements; i++){
-        std::cout << "paddingElements: " << paddingElements << std::endl;
-        HistoryInstance instance {
-          .command = "",
-          .valid = true,
-        };
-        elements.push_back(createConsoleItem(instance, i));
+      numElements++;
+      if (numElements >= CONSOLE_DISPLAY_LIMIT){
+        break;
       }
     }
+    int paddingElements = CONSOLE_DISPLAY_LIMIT - numElements;
+    for (int i = 0; i < paddingElements; i++){
+      std::cout << "paddingElements: " << paddingElements << std::endl;
+      HistoryInstance instance {
+        .command = "",
+        .valid = true,
+      };
+      elements.push_back(createConsoleItem(instance, i));
+    }
+    
 
     ConsoleInterface** consoleInterfacePtr = typeFromProps<ConsoleInterface*>(props, consoleInterfaceSymbol);
     modassert(consoleInterfacePtr, "console interface not provided");
     ConsoleInterface* consoleInterface = *consoleInterfacePtr;
-    std::function<void(TextData, int)> onEdit = [consoleInterface](TextData textData, int rawKey) -> void {
+    std::function<void(TextData, int)> onEdit = [consoleInterface, consoleSource](TextData textData, int rawKey) -> void {
       if (rawKey == 257 /* enter */ ){
         if (commandTextData.valueText.size() > 0){
           std::string commandStr = commandTextData.valueText;
@@ -322,6 +341,34 @@ Component consoleComponent {
           commandTextData.highlightLength = 0;
           executeCommand(*consoleInterface, commandStr);
         }
+        consoleDisplayOffset = consoleSource -> size() - CONSOLE_DISPLAY_LIMIT;
+        if (consoleDisplayOffset < 0){
+          consoleDisplayOffset = 0;
+        }
+      }else if (rawKey == '`'){
+
+      }else if (rawKey == 264 /* down */){
+        if (consoleSelectOffset < (consoleSource -> size() - 1)){
+          consoleSelectOffset++;
+        }
+        commandTextData.valueText = consoleSource -> at(consoleSelectOffset).command;
+      }else if (rawKey == 265 /* up */){
+        consoleSelectOffset--;
+        if (consoleSelectOffset < 0){
+          consoleSelectOffset = 0;
+        }
+        commandTextData.valueText = consoleSource -> at(consoleSelectOffset).command;
+      }else if (rawKey == 262 /* right */){
+        if (consoleDisplayOffset < (consoleSource -> size() - CONSOLE_DISPLAY_LIMIT)){
+           consoleDisplayOffset++;
+        }
+        modlog("console - console display offset", std::to_string(consoleDisplayOffset));
+      }else if (rawKey == 263 /* left */){
+        consoleDisplayOffset--;
+        if (consoleDisplayOffset < 0){
+          consoleDisplayOffset = 0;
+        }
+        modlog("console - console display offset", std::to_string(consoleDisplayOffset));
       }else{
         commandTextData = textData;
       }

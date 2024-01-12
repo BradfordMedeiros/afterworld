@@ -276,7 +276,7 @@ std::vector<TagUpdater> tagupdates = {
 	  		auto sceneId = gameapi -> listSceneId(firstId);
 	  		auto clipToPlay = getSingleAttr(firstId, "ambient").value();
 	  		tags.audiozones.currentPlaying = CurrentPlayingData { .id = firstId, .sceneId = sceneId, .clipToPlay = clipToPlay };
-	  		gameapi -> playClip(clipToPlay, sceneId, std::nullopt, std::nullopt);
+	  		playGameplayClip(std::move(clipToPlay), sceneId, std::nullopt, std::nullopt);
 	  		startedClip = true;
   		}
 

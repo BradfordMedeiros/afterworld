@@ -399,7 +399,7 @@ bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCo
   });
 
   if (gunCore.weaponCore -> soundResource.has_value()){
-    gameapi -> playClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos);
+    playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos);
   }
 
   if (gunCore.weaponCore -> muzzleParticle.has_value() && gunId.has_value()){

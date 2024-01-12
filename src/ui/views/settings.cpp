@@ -187,6 +187,36 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         dockConfigApi.setAttribute("sound", "volume", volume);
       },
     },
+
+    SettingConfiguration {
+      .config = DockSliderConfig {
+        .label = "Gameplay Volume",
+        .min = 0.f,
+        .max = 1.f,
+        .percentage = []() -> float { 
+          return getGameplayVolume();
+        },
+        .onSlide = [](float amount) -> void {
+          setGameplayVolume(amount);
+        },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockSliderConfig {
+        .label = "Music Volume",
+        .min = 0.f,
+        .max = 1.f,
+        .percentage = []() -> float { 
+          return getMusicVolume();
+        },
+        .onSlide = [](float amount) -> void {
+          setMusicVolume(amount);
+        },
+      },
+      .initSetting = std::nullopt,
+    },
+
   }},
 };
 

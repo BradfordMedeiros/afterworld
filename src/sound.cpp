@@ -80,7 +80,7 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
       	return;
       }
       std::cout << "want to play clip: " << *clip << std::endl;
-      gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, soundPosition -> position); // should add playclip position
+      playGameplayClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, soundPosition -> position); // should add playclip position
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -101,7 +101,7 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
     std::string material = "wood";
     auto clip = getClipForMaterial(*sound, material);
     if (clip){
-      gameapi -> playClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, pos);
+      playGameplayClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, pos);
       auto attr1 = gameapi -> getGameObjectAttr(obj1);
       auto attr2 = gameapi -> getGameObjectAttr(obj2);
 

@@ -85,7 +85,7 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id){
   if (movementState.isGrounded){
     gameapi -> applyImpulse(id, impulse);
     if (getManagedSounds().jumpSoundObjId.has_value()){
-      gameapi -> playClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
+      playGameplayClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
     }
   }
   if (movementState.inWater){
@@ -99,7 +99,7 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id){
 
 void land(objid id){
   if (getManagedSounds().landSoundObjId.has_value()){
-    gameapi -> playClipById(getManagedSounds().landSoundObjId.value(), std::nullopt, std::nullopt);
+    playGameplayClipById(getManagedSounds().landSoundObjId.value(), std::nullopt, std::nullopt);
   }
 }
 
@@ -618,7 +618,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
     std::cout << "should play move clip" << std::endl;
-    gameapi -> playClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
+    playGameplayClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt);
     movementState.lastMoveSoundPlayTime = currTime;
     movementState.lastMoveSoundPlayLocation = currPos;
   }

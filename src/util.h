@@ -102,4 +102,16 @@ std::function<void()> getToggleWorldStateSetFloat(const char* object, const char
 
 void notYetImplementedAlert();
 
+
+void setMusicVolume(float volume);
+void setGameplayVolume(float volume);
+float getMusicVolume();
+float getGameplayVolume();
+
+void playMusicClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
+void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
+void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+
+
+
 #endif

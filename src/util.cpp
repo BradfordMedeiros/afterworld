@@ -278,3 +278,41 @@ std::function<void()> getToggleWorldStateSetFloat(const char* object, const char
 void notYetImplementedAlert(){
   gameapi -> sendNotifyMessage("alert", std::string("functionality not yet implemented"));
 }
+
+
+float musicVolume = 1.f;
+float gameplayVolume = 1.f;
+void setMusicVolume(float volume){
+  musicVolume = volume;
+}
+void setGameplayVolume(float volume){
+  gameplayVolume = volume;
+}
+float getMusicVolume(){
+  return musicVolume;
+}
+float getGameplayVolume(){
+  return gameplayVolume;
+}
+void playMusicClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
+  if (!volume.has_value()){
+    volume = 1.f;
+  }else
+  volume = volume.value() * musicVolume;
+  gameapi -> playClip(clipName, sceneId, volume, position);
+}
+void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
+  if (!volume.has_value()){
+    volume = 1.f;
+  }
+  volume = volume.value() * gameplayVolume;
+  gameapi -> playClip(clipName, sceneId, volume, position);
+}
+void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+  if (!volume.has_value()){
+    volume = 1.f;
+  }
+  volume = volume.value() * gameplayVolume;
+  gameapi -> playClipById(id, volume, position);
+}
+

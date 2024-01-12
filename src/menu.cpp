@@ -97,7 +97,7 @@ CScriptBinding menuBinding(CustomApiBindings& api, const char* name){
   	state -> elapsedTime = 0;
    	auto args = gameapi -> getArgs();
   	if (args.find("silent") == args.end()){
-  		gameapi -> playClip("&music", sceneId, std::nullopt, std::nullopt);
+  		playMusicClip("&music", sceneId, std::nullopt, std::nullopt);
   	}
   	updateBackground(id, queryInitialBackground());
     return state;
