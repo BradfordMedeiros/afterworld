@@ -115,10 +115,13 @@ Component textbox {
           if (textDataValue.highlightLength > 0){
             textDataValue = deleteSelected(textDataValue);
           }
-          std::string clipboardStr = getClipboardString();
-          textDataValue.valueText = insertString(textDataValue.valueText, textDataValue.cursorLocation, clipboardStr);
-          textDataValue.cursorLocation = textDataValue.cursorLocation + clipboardStr.size();
-          onEditText(textDataValue, key);
+          const char* clipboardStrPtr = getClipboardString();
+          if (clipboardStrPtr != NULL){
+            std::string clipboardStr = clipboardStrPtr;
+            textDataValue.valueText = insertString(textDataValue.valueText, textDataValue.cursorLocation, clipboardStr);
+            textDataValue.cursorLocation = textDataValue.cursorLocation + clipboardStr.size();
+            onEditText(textDataValue, key);
+          }
         }else if (key == 263){        // left  key
           textDataValue.cursorLocation--;
           if (textDataValue.cursorLocation < 0){

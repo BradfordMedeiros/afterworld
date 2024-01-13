@@ -7,7 +7,7 @@ const float ELEMENT_WIDTH = 1.f;
 const int CONSOLE_LOG_LIMIT = 50;
 const int CONSOLE_DISPLAY_LIMIT = 10;
 
-int consoleDisplayOffset = 0;
+int consoleScrollOffset = 0;
 int consoleSelectOffset = 0;
 
 extern CustomApiBindings* gameapi;
@@ -247,7 +247,7 @@ Component createTitle(std::string&& item){
   return listItemWithProps;
 }
 
-Component createConsoleItem(HistoryInstance& history,  int index){
+Component createConsoleItem(HistoryInstance& history,  int index, bool selected){
   std::function<void(int)> onClick2 = [index, &history](int value) -> void {
     if (value == 0 /* left click*/){
       selectedIndex = index;
@@ -267,6 +267,9 @@ Component createConsoleItem(HistoryInstance& history,  int index){
       PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.2f) },
     },
   };
+  if (selected){
+    listItemProps.props.push_back(PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 0.4f) });
+  }
   if (selectedIndex == index){
     listItemProps.props.push_back(PropPair { .symbol = tintSymbol, .value = glm::vec4(0.4f, 0.4f, 0.4f, 0.8f) });
   }else if (!history.valid){
@@ -287,10 +290,11 @@ Component consoleComponent {
     static bool firstTime = true;
     if (firstTime){
       commandHistory = loadCommandHistory();
-      consoleDisplayOffset = commandHistory.size() - CONSOLE_DISPLAY_LIMIT;
-      if (consoleDisplayOffset < 0){
-        consoleDisplayOffset = 0;
+      consoleScrollOffset = commandHistory.size() - CONSOLE_DISPLAY_LIMIT;
+      if (consoleScrollOffset < 0){
+        consoleScrollOffset = 0;
       }
+      consoleSelectOffset = consoleScrollOffset;
 
       gameapi -> setLogEndpoint([](std::string& message) -> void {
         std::cout << message << std::endl;
@@ -311,12 +315,12 @@ Component consoleComponent {
     std::deque<HistoryInstance>* consoleSource = showLog ? &logHistory : &commandHistory;
 
     int numElements = 0;
-    for (int i = static_cast<int>(consoleDisplayOffset); i < static_cast<int>(consoleSource -> size()); i++){
-      elements.push_back(createConsoleItem(consoleSource -> at(i), i));
-      numElements++;
-      if (numElements >= CONSOLE_DISPLAY_LIMIT){
+    for (int i = static_cast<int>(consoleScrollOffset); i < (consoleScrollOffset + CONSOLE_DISPLAY_LIMIT); i++){
+      if (i >= consoleSource -> size()){
         break;
       }
+      elements.push_back(createConsoleItem(consoleSource -> at(i), i, consoleSelectOffset == i));
+      numElements++;
     }
     int paddingElements = CONSOLE_DISPLAY_LIMIT - numElements;
     for (int i = 0; i < paddingElements; i++){
@@ -325,7 +329,7 @@ Component consoleComponent {
         .command = "",
         .valid = true,
       };
-      elements.push_back(createConsoleItem(instance, i));
+      elements.push_back(createConsoleItem(instance, i, consoleScrollOffset == i));
     }
     
 
@@ -341,34 +345,34 @@ Component consoleComponent {
           commandTextData.highlightLength = 0;
           executeCommand(*consoleInterface, commandStr);
         }
-        consoleDisplayOffset = consoleSource -> size() - CONSOLE_DISPLAY_LIMIT;
-        if (consoleDisplayOffset < 0){
-          consoleDisplayOffset = 0;
+        consoleScrollOffset = consoleSource -> size() - CONSOLE_DISPLAY_LIMIT;
+        if (consoleScrollOffset < 0){
+          consoleScrollOffset = 0;
         }
+        consoleSelectOffset = consoleScrollOffset;
       }else if (rawKey == '`'){
-
       }else if (rawKey == 264 /* down */){
         if (consoleSelectOffset < (consoleSource -> size() - 1)){
           consoleSelectOffset++;
         }
-        commandTextData.valueText = consoleSource -> at(consoleSelectOffset).command;
+        if (consoleSelectOffset > (consoleScrollOffset + CONSOLE_DISPLAY_LIMIT)){
+          consoleScrollOffset++;
+        }
+        commandTextData.valueText = consoleSource -> at(consoleScrollOffset).command;
+
+        std::cout << "(scroll = " << consoleScrollOffset << ", select = " << consoleSelectOffset << ", size = " << consoleSource -> size() << ")" << std::endl;
       }else if (rawKey == 265 /* up */){
         consoleSelectOffset--;
         if (consoleSelectOffset < 0){
           consoleSelectOffset = 0;
         }
-        commandTextData.valueText = consoleSource -> at(consoleSelectOffset).command;
+        if (consoleSelectOffset < consoleScrollOffset){
+          consoleScrollOffset--;
+        }
+        std::cout << "(scroll = " << consoleScrollOffset << ", select = " << consoleSelectOffset << ", size = " << consoleSource -> size() << ")" << std::endl;
+        //commandTextData.valueText = consoleSource -> at(consoleScrollOffset).command;
       }else if (rawKey == 262 /* right */){
-        if (consoleDisplayOffset < (consoleSource -> size() - CONSOLE_DISPLAY_LIMIT)){
-           consoleDisplayOffset++;
-        }
-        modlog("console - console display offset", std::to_string(consoleDisplayOffset));
       }else if (rawKey == 263 /* left */){
-        consoleDisplayOffset--;
-        if (consoleDisplayOffset < 0){
-          consoleDisplayOffset = 0;
-        }
-        modlog("console - console display offset", std::to_string(consoleDisplayOffset));
       }else{
         commandTextData = textData;
       }
