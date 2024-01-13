@@ -73,7 +73,21 @@ DockCheckboxConfig createSimpleGunCheckbox(const char* label, const char* column
   return checkbox;
 }
 
-DockTextboxNumeric createSimpleGunTextboxNumeric(const char* label, const char* columnName){
+DockCheckboxConfig createSimpleCheckbox(const char* table, const char* label, const char* columnName, std::optional<SqlFilter> filter){
+  DockCheckboxConfig checkbox {
+    .label = label,
+    .isChecked = [table, columnName, filter]() -> bool {
+      auto sqlValue = readSqlFirstRow(table, columnName, filter);
+      return sqlValue == "TRUE";
+    },
+    .onChecked = [table, columnName, filter](bool checked) -> void {
+      persistSql(table, columnName, checked ? "TRUE" : "FALSE", std::nullopt);
+    },
+  };
+  return checkbox;
+}
+
+DockTextboxNumeric createSimpleTextboxNumeric(const char* table, const char* label, const char* columnName){
   DockTextboxNumeric textbox {
     .label = label,
     .value = 10.f,
@@ -489,6 +503,17 @@ std::vector<DockConfiguration> configurations {
         .buttonText = "MOVEMENT",
         .onClick = []() -> void {},
       },
+      createSimpleTextboxNumeric("traits", "Speed", "speed"),
+      createSimpleTextboxNumeric("traits", "Speed Air", "speed-air"),
+      createSimpleTextboxNumeric("traits", "Jump Height", "jump-height"),
+      createSimpleTextboxNumeric("traits", "Gravity", "gravity"),
+      createSimpleTextboxNumeric("traits", "Mass", "mass"),
+      createSimpleTextboxNumeric("traits", "Friction", "friction"),
+      createSimpleTextboxNumeric("traits", "Restitution", "restitution"),
+
+
+      createSimpleCheckbox("traits", "Crouch", "crouch", SqlFilter { .column = "name", .value = "regular" }),
+      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", SqlFilter { .column = "name", .value = "regular" }),
     }
   },
   DockConfiguration {
@@ -516,11 +541,11 @@ std::vector<DockConfiguration> configurations {
       createSimpleGunCheckbox("Ironsight", "ironsight"),
       createSimpleGunCheckbox("Raycast", "raycast"),
       createSimpleGunCheckbox("Hold", "hold"),
-      createSimpleGunTextboxNumeric("Bloom", "bloom"),
-      createSimpleGunTextboxNumeric("Min Bloom", "minbloom"),
-      createSimpleGunTextboxNumeric("Bloom Length", "bloom-length"),
-      createSimpleGunTextboxNumeric("Horizontal Sway", "bloom-length"),
-      createSimpleGunTextboxNumeric("Vertical Sway", "bloom-length"),
+      createSimpleTextboxNumeric("guns","Bloom", "bloom"),
+      createSimpleTextboxNumeric("guns","Min Bloom", "minbloom"),
+      createSimpleTextboxNumeric("guns","Bloom Length", "bloom-length"),
+      createSimpleTextboxNumeric("guns","Horizontal Sway", "bloom-length"),
+      createSimpleTextboxNumeric("guns","Vertical Sway", "bloom-length"),
     }
   },
   DockConfiguration {
