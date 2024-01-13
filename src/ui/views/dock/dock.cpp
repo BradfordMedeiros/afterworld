@@ -615,6 +615,12 @@ std::vector<DockConfiguration> configurations {
           dockConfigApi.setEditorBackground(texture);
         }
       },
+      DockButtonConfig {
+        .buttonText = "Reset",
+        .onClick = []() -> void {
+          resetColors();
+        },
+      },
       // then a background picker 
     }
   },

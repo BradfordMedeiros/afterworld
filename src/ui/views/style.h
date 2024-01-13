@@ -22,6 +22,7 @@ void setPrimaryColor(glm::vec4 color);
 void setSecondaryColor(glm::vec4 color);
 void setMainBorderColor(glm::vec4 color);
 void setHighlightColor(glm::vec4 color);
+void resetColors();
 
 extern Styles styles;
 

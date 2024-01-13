@@ -18,7 +18,7 @@ void initStyles(){
   styles.highlightColor = highlightColor;
 }
 
-Styles style1 {
+Styles defaultStyle {
 	.primaryColor = glm::vec4(0.f, 0.f, 0.f, 0.5f),
 	.secondaryColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f),
 	.thirdColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.5f),
@@ -29,7 +29,7 @@ Styles style1 {
 	.dockElementPadding = 0.02f,
 };
 
-Styles styles = style1;
+Styles styles = defaultStyle;
 
 void updateColorQuery(){
   auto query = gameapi -> compileSqlQuery(
@@ -55,5 +55,9 @@ void setMainBorderColor(glm::vec4 color){
 }
 void setHighlightColor(glm::vec4 color){
   styles.highlightColor = color;
+  updateColorQuery();
+}
+void resetColors(){
+  styles = defaultStyle;
   updateColorQuery();
 }
