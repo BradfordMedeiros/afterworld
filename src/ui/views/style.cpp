@@ -31,4 +31,29 @@ Styles style1 {
 
 Styles styles = style1;
 
+void updateColorQuery(){
+  auto query = gameapi -> compileSqlQuery(
+    "update session set style-primary = ?, style-secondary = ?, style-border = ?, style-highlight = ?", 
+    { serializeVec(styles.primaryColor), serializeVec(styles.secondaryColor), serializeVec(styles.mainBorderColor), serializeVec(styles.highlightColor) }
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+}
 
+void setPrimaryColor(glm::vec4 color){
+  styles.primaryColor = color;
+  updateColorQuery();
+}
+void setSecondaryColor(glm::vec4 color){
+  styles.secondaryColor = color;
+  updateColorQuery();
+}
+void setMainBorderColor(glm::vec4 color){
+  styles.mainBorderColor = color;
+  updateColorQuery();
+}
+void setHighlightColor(glm::vec4 color){
+  styles.highlightColor = color;
+  updateColorQuery();
+}

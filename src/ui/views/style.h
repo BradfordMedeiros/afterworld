@@ -13,13 +13,15 @@ struct Styles {
 	glm::vec4 debugColor;
 	glm::vec4 debugColor2;
 	glm::vec4 mainBorderColor;
-
 	float dockElementPadding;
-
 };
 
 void initStyles();
 
+void setPrimaryColor(glm::vec4 color);
+void setSecondaryColor(glm::vec4 color);
+void setMainBorderColor(glm::vec4 color);
+void setHighlightColor(glm::vec4 color);
 
 extern Styles styles;
 

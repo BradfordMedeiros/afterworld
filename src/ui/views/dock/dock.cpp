@@ -585,28 +585,28 @@ std::vector<DockConfiguration> configurations {
         .label = "primary",
         .getColor = []() -> glm::vec4 { return styles.primaryColor; },
         .onColor = [](glm::vec4 color) -> void {
-          styles.primaryColor = color;
+          setPrimaryColor(color);
         },
       },
       DockColorPickerConfig {
         .label = "secondary",
         .getColor = []() -> glm::vec4 { return styles.secondaryColor; },
         .onColor = [](glm::vec4 color) -> void { 
-          styles.secondaryColor = color;
+          setSecondaryColor(color);
         },
       },
       DockColorPickerConfig {
         .label = "border",
         .getColor = []() -> glm::vec4 { return styles.mainBorderColor; },
         .onColor = [](glm::vec4 color) -> void { 
-          styles.mainBorderColor = color;
+          setMainBorderColor(color);
         },
       },
       DockColorPickerConfig {
         .label = "highlight",
         .getColor = []() -> glm::vec4 { return styles.highlightColor; },
         .onColor = [](glm::vec4 color) -> void { 
-          styles.highlightColor = color;
+          setHighlightColor(color);
         },
       },
       DockImageConfig {

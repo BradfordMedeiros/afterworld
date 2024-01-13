@@ -60,7 +60,6 @@ void insertCommandHistory(std::string& command, bool valid){
 std::deque<HistoryInstance> commandHistory =  {};
 std::deque<HistoryInstance> logHistory = {};
 
-int selectedIndex = 0;
 bool showLog = false;
 
 struct CommandDispatch {
@@ -197,10 +196,6 @@ void executeCommand(ConsoleInterface& consoleInterface, std::string command){
   if (commandHistory.size() >= CONSOLE_LOG_LIMIT){
     commandHistory.pop_front();
   }
-  selectedIndex--;
-  if (selectedIndex < 0){
-    selectedIndex = -1;
-  }
 
   std::transform(command.begin(), command.end(), command.begin(), [](unsigned char c) {
     return std::tolower(c);
@@ -249,11 +244,11 @@ Component createTitle(std::string&& item){
 
 Component createConsoleItem(HistoryInstance& history,  int index, bool selected){
   std::function<void(int)> onClick2 = [index, &history](int value) -> void {
-    if (value == 0 /* left click*/){
-      selectedIndex = index;
+    if (value == 1 /* right click*/){
+      consoleSelectOffset = index;
     }else if (value == 2 /* middle mouse click*/){
+      consoleSelectOffset = index;
       gameapi -> setClipboardString(history.command.c_str());
-      selectedIndex = index;
     }
   };
 
@@ -269,11 +264,6 @@ Component createConsoleItem(HistoryInstance& history,  int index, bool selected)
   };
   if (selected){
     listItemProps.props.push_back(PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 0.4f) });
-  }
-  if (selectedIndex == index){
-    listItemProps.props.push_back(PropPair { .symbol = tintSymbol, .value = glm::vec4(0.4f, 0.4f, 0.4f, 0.8f) });
-  }else if (!history.valid){
-    listItemProps.props.push_back(PropPair { .symbol = tintSymbol, .value = glm::vec4(1.f, 0.f, 0.f, 0.2f) });
   }
   auto listItemWithProps = withPropsCopy(listItem, listItemProps); 
   return listItemWithProps;
@@ -349,13 +339,13 @@ Component consoleComponent {
         if (consoleScrollOffset < 0){
           consoleScrollOffset = 0;
         }
-        consoleSelectOffset = consoleScrollOffset;
+        consoleSelectOffset = consoleScrollOffset + CONSOLE_DISPLAY_LIMIT - 1;
       }else if (rawKey == '`'){
       }else if (rawKey == 264 /* down */){
         if (consoleSelectOffset < (consoleSource -> size() - 1)){
           consoleSelectOffset++;
         }
-        if (consoleSelectOffset > (consoleScrollOffset + CONSOLE_DISPLAY_LIMIT)){
+        if (consoleSelectOffset > (consoleScrollOffset + CONSOLE_DISPLAY_LIMIT - 1)){
           consoleScrollOffset++;
         }
         commandTextData.valueText = consoleSource -> at(consoleScrollOffset).command;
