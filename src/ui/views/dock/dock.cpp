@@ -53,38 +53,34 @@ std::vector<std::string> listGuns(){
   return guns;
 }
 
-DockCheckboxConfig createSimpleGunCheckbox(const char* label, const char* columnName){
+DockCheckboxConfig createSimpleCheckbox(const char* table, const char* label, const char* columnName, std::function<std::optional<SqlFilter>()> getFilter){
   DockCheckboxConfig checkbox {
     .label = label,
-    .isChecked = [columnName]() -> bool {
-      if (!selectedGun.has_value()){
+    .isChecked = [table, columnName, getFilter]() -> bool {
+      auto filter = getFilter();
+      if (!filter.has_value()){
         return false;
       }
-      auto sqlValue = readSqlFirstRow("guns", columnName, SqlFilter { .column = "name", .value = selectedGun.value() });
+      auto sqlValue = readSqlFirstRow(table, columnName, filter.value());
       return sqlValue == "TRUE";
     },
-    .onChecked = [columnName](bool checked) -> void {
-      if (!selectedGun.has_value()){
+    .onChecked = [table, columnName, getFilter](bool checked) -> void {
+      auto filter = getFilter();
+      if (!filter.has_value()){
         return;
       }
-      persistSql("guns", columnName, checked ? "TRUE" : "FALSE", SqlFilter { .column = "name", .value = selectedGun.value() });
+      persistSql(table, columnName, checked ? "TRUE" : "FALSE", filter.value());
     },
   };
   return checkbox;
 }
-
-DockCheckboxConfig createSimpleCheckbox(const char* table, const char* label, const char* columnName, std::optional<SqlFilter> filter){
-  DockCheckboxConfig checkbox {
-    .label = label,
-    .isChecked = [table, columnName, filter]() -> bool {
-      auto sqlValue = readSqlFirstRow(table, columnName, filter);
-      return sqlValue == "TRUE";
-    },
-    .onChecked = [table, columnName, filter](bool checked) -> void {
-      persistSql(table, columnName, checked ? "TRUE" : "FALSE", std::nullopt);
-    },
-  };
-  return checkbox;
+DockCheckboxConfig createSimpleGunCheckbox(const char* label, const char* columnName){
+  return createSimpleCheckbox("guns", label, columnName, []() -> std::optional<SqlFilter> {
+    if (!selectedGun.has_value()){
+      return std::nullopt;
+    }
+    return SqlFilter { .column = "name", .value = selectedGun.value() }; 
+  });
 }
 
 DockTextboxNumeric createSimpleTextboxNumeric(const char* table, const char* label, const char* columnName){
@@ -512,8 +508,8 @@ std::vector<DockConfiguration> configurations {
       createSimpleTextboxNumeric("traits", "Restitution", "restitution"),
 
 
-      createSimpleCheckbox("traits", "Crouch", "crouch", SqlFilter { .column = "name", .value = "regular" }),
-      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", SqlFilter { .column = "name", .value = "regular" }),
+      createSimpleCheckbox("traits", "Crouch", "crouch", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "regular" }; }),
+      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "regular" }; }),
     }
   },
   DockConfiguration {
