@@ -150,7 +150,8 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
     SettingConfiguration {
       .config = DockTextboxNumeric {
         .label = "Placeholder",
-        .value = 1.f,
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
       .initSetting = std::nullopt,
     },

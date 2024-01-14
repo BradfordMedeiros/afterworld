@@ -83,10 +83,18 @@ DockCheckboxConfig createSimpleGunCheckbox(const char* label, const char* column
   });
 }
 
-DockTextboxNumeric createSimpleTextboxNumeric(const char* table, const char* label, const char* columnName){
+std::string gravityAmount = "10";
+DockTextboxNumeric createSimpleTextboxNumeric(const char* table, const char* label, const char* columnName, std::function<std::optional<SqlFilter>()> getFilter = []() -> std::optional<SqlFilter> { return std::nullopt; }){
   DockTextboxNumeric textbox {
     .label = label,
-    .value = 10.f,
+    .value = []() -> std::string { return gravityAmount; },
+    .onEdit = [table, columnName, getFilter](float newvalue, std::string& newStr) -> void {
+      gravityAmount = newStr;
+      if (!getFilter().has_value()){
+        return;
+      }
+      persistSql(table, columnName, serializeFloat(newvalue), getFilter().value());
+    },
     // gameobj:water-viscosity  // positive number
   };
   return textbox;
@@ -207,6 +215,8 @@ std::function<void(std::string)> connectEditText(std::string key, TextEditType t
   };
 }
 
+
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -222,27 +232,33 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockTextboxNumeric {
         .label = "position x",
-        .value = 1.f,
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
       DockTextboxNumeric {
         .label = "position y",
-        .value = 1.f,
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
       DockTextboxNumeric {
         .label = "position z",
-        .value = 1.f,
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
       DockTextboxNumeric {
         .label = "scale x",
-        .value = 1.f,
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
       DockTextboxNumeric {
         .label = "scale y",
-        .value = 1.f,
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
       DockTextboxNumeric {
         .label = "scale z",
-        .value = 1.f,
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
       },
     },
   },
@@ -499,17 +515,17 @@ std::vector<DockConfiguration> configurations {
         .buttonText = "MOVEMENT",
         .onClick = []() -> void {},
       },
-      createSimpleTextboxNumeric("traits", "Speed", "speed"),
-      createSimpleTextboxNumeric("traits", "Speed Air", "speed-air"),
-      createSimpleTextboxNumeric("traits", "Jump Height", "jump-height"),
-      createSimpleTextboxNumeric("traits", "Gravity", "gravity"),
-      createSimpleTextboxNumeric("traits", "Mass", "mass"),
-      createSimpleTextboxNumeric("traits", "Friction", "friction"),
-      createSimpleTextboxNumeric("traits", "Restitution", "restitution"),
+      createSimpleTextboxNumeric("traits", "Speed", "speed", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Speed Air", "speed-air", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Jump Height", "jump-height", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Gravity", "gravity", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Mass", "mass", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Friction", "friction", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Restitution", "restitution", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
 
 
-      createSimpleCheckbox("traits", "Crouch", "crouch", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "regular" }; }),
-      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "regular" }; }),
+      createSimpleCheckbox("traits", "Crouch", "crouch", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "default" }; }),
     }
   },
   DockConfiguration {
@@ -580,17 +596,20 @@ std::vector<DockConfiguration> configurations {
       },
       DockTextboxNumeric {
         .label = "Density",
-        .value = 10.f,
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
         // gameobj:water-density   // positive number
       },
       DockTextboxNumeric {
         .label = "Viscosity",
-        .value = 10.f,
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
         // gameobj:water-viscosity  // positive number
       },
       DockTextboxNumeric {
         .label = "Gravity",
-        .value = 10.f,
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void {  },
         // gameobj:water-gravity  // positive number
       },
     }
