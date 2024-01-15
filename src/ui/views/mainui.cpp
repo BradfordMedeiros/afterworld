@@ -738,15 +738,23 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
 
-    //auto weaponWheelProps = getDefaultProps();
-    //weaponWheelComponent.draw(drawTools, weaponWheelProps);
-    //auto compassProps = getDefaultProps();
-    //compassComponent.draw(drawTools, compassProps);
+
 
     drawTools.drawText(std::string("route: ") + fullHistoryStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }
+
+  if (true){  // in game 
+    //auto weaponWheelProps = getDefaultProps();
+    //weaponWheelComponent.draw(drawTools, weaponWheelProps);
+    //auto compassProps = getDefaultProps();
+    //compassComponent.draw(drawTools, compassProps);
+
+    auto hudProps = getDefaultProps();
+    hudComponent.draw(drawTools, hudProps);
+  }
+
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }

@@ -566,6 +566,21 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(strValue, "spawn not string value");
       spawnFromAllSpawnpoints("red", strValue -> c_str());
     }
+
+    if (key == "hud-health"){
+      auto floatValue = anycast<float>(value);
+      modassert(floatValue != NULL, "hud-health value invalid");
+      setHealth(*floatValue);
+    }
+    if (key == "current-gun"){
+      auto currentGunMessage = anycast<CurrentGunMessage>(value); 
+      modassert(currentGunMessage != NULL, "current-gun value invalid");
+      setAmmoCount(AmmoHudInfo {
+        .currentAmmo = currentGunMessage -> currentAmmo,
+        .totalAmmo = currentGunMessage -> totalAmmo,
+      });
+    }
+
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
@@ -635,7 +650,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(menuBinding(api, "native/menu"));
   bindings.push_back(weaponBinding(api, "native/weapon"));
   bindings.push_back(inventoryBinding(api, "native/inventory"));
-  bindings.push_back(hudBinding(api, "native/hud"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));

@@ -11,7 +11,6 @@
 #include "./movement/movement.h"
 #include "./vehicle.h"
 #include "./inventory.h"
-#include "./hud.h"
 #include "./tags.h"
 #include "./dialog.h"
 #include "./hotkeys.h"
