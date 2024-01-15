@@ -144,6 +144,7 @@ UiContext getUiContext(GameState& gameState){
      return getGlobalState().showConsole;
    },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
+   .showGameHud = []() -> bool { return !getGlobalState().paused && getGlobalState().inGameMode; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState, level.scene);

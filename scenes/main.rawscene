@@ -1,7 +1,6 @@
 # Resources that are expected to always be loaded
 
 # Scripts
-hud:script:native/hud
 dialog:script:native/dialog
 inventory:script:native/inventory
 daynight:script:native/daynight

@@ -25,10 +25,7 @@ void drawbar(DrawingTools& drawTools, float health, float yNdc){
 
 Component hudComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-
-    auto mappingId = uniqueMenuItemMappingId();
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, mappingId, "./res/textures/badhud.png", std::nullopt);
-
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/badhud.png", std::nullopt);
     drawTools.drawText("health: " + std::to_string(static_cast<int>(currentHealth)), -0.9, 0.2, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
 
     drawbar(drawTools, currentHealth, 0.1f);

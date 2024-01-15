@@ -745,7 +745,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   }
 
-  if (true){  // in game 
+  if (uiContext.showGameHud()){  // in game 
     //auto weaponWheelProps = getDefaultProps();
     //weaponWheelComponent.draw(drawTools, weaponWheelProps);
     //auto compassProps = getDefaultProps();
