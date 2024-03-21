@@ -368,7 +368,10 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   float uvWidth = toPoint.x - fromPoint.x;
   float uvHeight = toPoint.y - fromPoint.y;
 
+  modassert(false, "select with border needs to use async idatcoordapi");
+
   std::set<objid> ids;
+  /*
   for (int x = 0; x < 50; x++){
     for (int y = 0; y < 50; y++){    
       auto idAtCoord = gameapi -> idAtCoord(fromPoint.x + (x * uvWidth / 50.f), fromPoint.y + (y * uvHeight / 50.f), true);
@@ -379,7 +382,7 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
         }
       }
     } 
-  }
+  }*/
 
   modlog("dragselect", print(ids));
   gameapi -> setSelected(ids);
@@ -466,10 +469,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    auto selectedId = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
-    getGlobalState().selectedId = selectedId;
+    gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, [](std::optional<objid> selectedId) -> void {
+      getGlobalState().selectedId = selectedId;
+    });
 
-    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, selectedId);
+    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId );
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
@@ -477,6 +481,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onPlayerFrame();
 
   };
+
+  binding.onObjectHover = [](objid scriptId, void* data, int32_t index, bool hoverOn) -> void {
+    std::cout << "on object hover: " << index << ", hover = " << hoverOn << std::endl;
+
+  };
+  binding.onObjectSelected = [](objid scriptId, void* data, int32_t index, glm::vec3 color) -> void {
+    std::cout << "on selected: " << index << std::endl;
+  };
+
+
+
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     auto hasInputKey = gameapi -> unlock("input", id);
@@ -603,17 +618,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
-
-    //auto selectedId = gameapi -> idAtCoord(gameState -> xNdc, gameState -> yNdc, false);
-    //if (selectedId.has_value()){
-    //  std::cout << "hovered id is: " << selectedId.value() << std::endl;
-    //}
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    auto idAtCoord = gameapi -> idAtCoord(getGlobalState().xNdc, getGlobalState().yNdc, false);
-    onMainUiMousePress(gameState -> uiCallbacks, button, action, idAtCoord);
+    onMainUiMousePress(gameState -> uiCallbacks, button, action, getGlobalState().selectedId);
 
     if (button == 1){
       if (action == 0){
