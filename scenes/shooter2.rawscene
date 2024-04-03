@@ -228,12 +228,11 @@ item3:dragselect:ai
 
 
 console:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-console:position:5 -15 -1
+console:position:10 -25 -1
 console:scale:3 3 3
 console:rotation:0 0 1 180
-#console:texture:../gameresources/textures/controls/up-down.png
-#console:texture:gentexture-ingame-ui-texture
 console:tint:0 0.6 1 1
+console:in-game-ui:test
 
 >maincamera:position:0 50 100
 >maincamera:physics_angle:0.000000 0.000000 0.000000
@@ -359,7 +358,6 @@ gunlogic:script:native/weapon
 tags:script:native/tags
 ai:script:native/ai
 movement:script:native/movement:1
-
 
 ;navmesh1:position:-20 -27 70
 ;navmesh1:physics:enabled

@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 std::optional<objid> activePlayerId = std::nullopt;
 std::optional<objid> tempCameraId = std::nullopt;
+std::optional<objid> tempViewpoint = std::nullopt;
 
 std::optional<objid> getActivePlayerId(){
 	return activePlayerId;
@@ -86,6 +87,13 @@ void onActivePlayerRemoved(objid id){
   		displayGameOver = false;
   	});
 	}
+}
+
+void setTempViewpoint(glm::vec3 position, glm::quat rotation){
+
+}
+void popTempViewpoint(){
+
 }
 
 void printActivePlayer(){

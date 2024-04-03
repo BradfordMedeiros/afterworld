@@ -315,6 +315,23 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = [](Tags& tags) -> void {},
   	.onMessage = std::nullopt,
 	},
+	TagUpdater {
+		.attribute = "in-game-ui",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+			createInGamesUiInstance(id);
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		freeInGameUiInstance(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+			if (key == "interact-ingame-ui"){
+				zoomIntoGameUi();
+			} 		
+  	},
+	}
 };
 
 

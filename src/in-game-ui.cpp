@@ -2,39 +2,45 @@
 
 extern CustomApiBindings* gameapi;
 
-struct GameUiBinding {
-	std::vector<objid> ids;
+
+std::string ingameUiTextureName(objid id){
+	return std::string("gentexture-ingame-ui-texture-test");
+}
+void createInGamesUiInstance(objid id){
+	std::cout << "create in game texture" << std::endl;
+	std::string texture = ingameUiTextureName(id);
+	auto uiTexture = gameapi -> createTexture(texture, 512, 512, id);
+	gameapi -> clearTexture(uiTexture, true, std::nullopt, "../gameresources/textures/controls/up-down.png");
+
+ 	GameobjAttributes attr {
+ 	   .stringAttributes = {
+ 	     { "texture", texture },
+ 	   },
+ 	   .numAttributes = {},
+ 	   .vecAttr = {
+ 	     .vec3 = {},
+ 	     .vec4 = {},
+ 	   },
+ 	};
+ 	gameapi -> setGameObjectAttr(id, attr);  
 };
 
-bool isInGameUi(GameUiBinding& uiBinding, objid id){
-	for (auto uiObjId : uiBinding.ids){
-		if (uiObjId == id){
-			return true;
-		}
-	}
-	return false;
+void freeInGameUiInstance(objid id){
+	gameapi -> freeTexture(ingameUiTextureName(id), id);
 }
 
-//void (*freeTexture)(std::string name, objid ownerId);
-
-void createInGamesUiInstances(objid id){
-	auto uiTexture = gameapi -> createTexture("gentexture-ingame-ui-texture", 512, 512, id);
-	gameapi -> clearTexture(uiTexture, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
+struct PosAndRot {
+	glm::vec3 position;
+	glm::quat rotation;
+};
+PosAndRot uiPosAndRot(){
+ 	return PosAndRot {
+ 		.position = glm::vec3(0.f, 0.f, 0.f),
+ 		.rotation = glm::identity<glm::quat>(),
+ 	};
 }
 
-CScriptBinding inGameUiBinding(CustomApiBindings& api, const char* name){
-	auto binding = createCScriptBinding(name, api);
-  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    GameUiBinding* uiBinding = new GameUiBinding;
-    uiBinding -> ids = { id };
-    createInGamesUiInstances(id);
-  	return uiBinding;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    GameUiBinding* gameUi = static_cast<GameUiBinding*>(data);
-    delete gameUi;
-  };
-
-	return binding;
+void zoomIntoGameUi(){
+	auto posAndRot = uiPosAndRot();
+	setTempViewpoint(posAndRot.position, posAndRot.rotation);
 }
-

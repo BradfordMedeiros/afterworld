@@ -3,9 +3,17 @@
 
 #include <iostream>
 #include <vector>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "./activeplayer.h"
 
-CScriptBinding inGameUiBinding(CustomApiBindings& api, const char* name);
+struct InGameUi {
+
+};
+
+
+
+void createInGamesUiInstance(objid id);
+void freeInGameUiInstance(objid id);
+void zoomIntoGameUi();
 
 #endif 
