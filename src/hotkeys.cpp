@@ -34,6 +34,20 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "request-change-gun",
 		.valueToPublish = "scrapgun",
 	},
+
+	HotkeyToMessage {
+		.key = '4',  // 3
+		.action = 0,
+		.keyToPublish = "interact-ingame-ui",
+		.valueToPublish = "",
+	},
+	HotkeyToMessage {
+		.key = '5',  // 3
+		.action = 0,
+		.keyToPublish = "ui-next",
+		.valueToPublish = "",
+	},
+
 };
 
 void handleHotkey(int key, int action){

@@ -6,14 +6,24 @@
 #include "./util.h"
 #include "./activeplayer.h"
 
-struct InGameUi {
 
+struct TestUiInstance {
+	glm::vec2 cursorLocation;
+	objid textureId;
+	bool upSelected;
+};
+
+struct InGameUi {
+	std::set<objid> ids;
+	std::optional<TestUiInstance> uiInstance;
 };
 
 
-
-void createInGamesUiInstance(objid id);
-void freeInGameUiInstance(objid id);
-void zoomIntoGameUi();
+void createInGamesUiInstance(InGameUi& inGameUi, objid id);
+void freeInGameUiInstance(InGameUi& inGameUi, objid id);
+void onInGameUiFrame(InGameUi& inGameUi);
+void zoomIntoGameUi(objid id);
+std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
+void onInGameUiMessage(InGameUi& inGameUi, std::string& message);
 
 #endif 

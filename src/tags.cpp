@@ -22,9 +22,9 @@ struct Tags {
 	std::unordered_map<objid, HitPoints> hitpoints;
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
+	InGameUi inGameUi;
 
 	StateController animationController;
-
 };
 
 struct TagUpdater {
@@ -318,18 +318,24 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "in-game-ui",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-			createInGamesUiInstance(id);
+  		Tags* tags = static_cast<Tags*>(data);
+			createInGamesUiInstance(tags -> inGameUi, id);
 		},
   	.onRemove = [](void* data, int32_t id) -> void {
-  		freeInGameUiInstance(id);
+  		Tags* tags = static_cast<Tags*>(data);
+  		freeInGameUiInstance(tags -> inGameUi, id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-
+  		onInGameUiFrame(tags.inGameUi);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		onInGameUiMessage(tags.inGameUi, key);
+
 			if (key == "interact-ingame-ui"){
-				zoomIntoGameUi();
-			} 		
+				//objid* objidPtr = std::get_if<objid>(&value);
+				//modassert(objidPtr, "invalid value for interact-ingame-ui");
+				zoomIntoGameUi(getAnyUiInstance(tags.inGameUi).value());
+			}
   	},
 	}
 };
@@ -362,7 +368,11 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     	.audiozoneIds = {},
     	.currentPlaying = std::nullopt,
     };
-    
+    tags -> inGameUi = InGameUi {
+    	.ids = {},
+    	.uiInstance = std::nullopt,
+    };
+
     ///// animations ////
     tags -> animationController = createStateController();
 

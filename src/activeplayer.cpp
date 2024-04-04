@@ -90,10 +90,22 @@ void onActivePlayerRemoved(objid id){
 }
 
 void setTempViewpoint(glm::vec3 position, glm::quat rotation){
-
+	modassert(!tempViewpoint.has_value(), "already have a temp viewpoint");
+	auto id = getActivePlayerId().value();
+  std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
+  GameobjAttributes attr {
+    .stringAttributes = { },
+    .numAttributes = {},
+    .vecAttr = {  .vec3 = { { "position", position }},  .vec4 = {} },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), cameraName, attr, submodelAttributes).value();
+  gameapi -> setActiveCamera(cameraId, -1);
+  gameapi -> setGameObjectRot(cameraId, rotation, true);
+  tempViewpoint = cameraId;
 }
 void popTempViewpoint(){
-
+	modassert(false, "pop temp viewpoint not yet implemented");
 }
 
 void printActivePlayer(){

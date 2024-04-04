@@ -196,6 +196,11 @@ std::optional<std::string> getSingleAttr(objid id, const char* key){
   auto attrValue = getStrAttr(objattr, key);
   return attrValue;
 }
+std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key){
+  auto objattr = gameapi -> getGameObjectAttr(id);
+  auto attrValue = getVec3Attr(objattr, key);
+  return attrValue;
+}
 std::optional<float> getSingleFloatAttr(objid id, const char* key){
   auto objattr = gameapi -> getGameObjectAttr(id);
   auto attrValue = getFloatAttr(objattr, key);

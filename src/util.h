@@ -89,6 +89,7 @@ struct ItemAcquiredMessage {
 };
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
+std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);
 std::optional<float> getSingleFloatAttr(objid id, const char* key);
 
 std::string uniqueNameSuffix();
