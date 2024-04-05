@@ -16,6 +16,7 @@ struct TextDisplay {
 	bool needsRefresh;
 };
 
+
 struct InGameUi {
 	std::map<objid, TextDisplay> textDisplays;
 };

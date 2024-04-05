@@ -334,7 +334,11 @@ std::vector<TagUpdater> tagupdates = {
 			if (key == "interact-ingame-ui"){
 				//objid* objidPtr = std::get_if<objid>(&value);
 				//modassert(objidPtr, "invalid value for interact-ingame-ui");
-				zoomIntoGameUi(getAnyUiInstance(tags.inGameUi).value());
+				if (hasTempViewpoint()){
+					popTempViewpoint();
+				}else{
+					zoomIntoGameUi(getAnyUiInstance(tags.inGameUi).value());
+				}
 			}
   	},
 	}

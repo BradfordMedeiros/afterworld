@@ -3,10 +3,15 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> activePlayerId = std::nullopt;
+bool activePlayerTempDisabled = false;
+
 std::optional<objid> tempCameraId = std::nullopt;
 std::optional<objid> tempViewpoint = std::nullopt;
 
 std::optional<objid> getActivePlayerId(){
+	if (activePlayerTempDisabled){
+		return std::nullopt;
+	}
 	return activePlayerId;
 }
 
@@ -70,15 +75,12 @@ void onActivePlayerRemoved(objid id){
 	if (activePlayerId.has_value() && activePlayerId.value() == id){
 		activePlayerId = std::nullopt;
 
-
 		auto playerScene = gameapi -> listSceneId(id);
 		auto playerPos = gameapi -> getGameObjectPos(id, true);
 	
 		// check if scene exists
-		
 	
 		modlog("active player, create dead camera at: ", print(playerPos));
-
 		auto createdObjId = id;
 
 		displayGameOver = true;
@@ -91,7 +93,8 @@ void onActivePlayerRemoved(objid id){
 
 void setTempViewpoint(glm::vec3 position, glm::quat rotation){
 	modassert(!tempViewpoint.has_value(), "already have a temp viewpoint");
-	auto id = getActivePlayerId().value();
+	activePlayerTempDisabled = true;
+	auto id = activePlayerId.value();
   std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
   GameobjAttributes attr {
     .stringAttributes = { },
@@ -104,8 +107,19 @@ void setTempViewpoint(glm::vec3 position, glm::quat rotation){
   gameapi -> setGameObjectRot(cameraId, rotation, true);
   tempViewpoint = cameraId;
 }
+bool hasTempViewpoint(){
+	return tempViewpoint.has_value();
+}
 void popTempViewpoint(){
-	modassert(false, "pop temp viewpoint not yet implemented");
+	activePlayerTempDisabled = false;
+	gameapi -> removeObjectById(tempViewpoint.value());
+	tempViewpoint = std::nullopt;
+
+	if (tempCameraId.has_value()){
+		gameapi -> setActiveCamera(tempCameraId.value(), -1);
+	}else{
+		gameapi -> setActiveCamera(activePlayerId.value(), -1);
+	}
 }
 
 void printActivePlayer(){
