@@ -42,7 +42,7 @@ void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 
 void onInGameUiFrame(InGameUi& inGameUi){
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
-		if (textDisplay.needsRefresh){
+		if (true || textDisplay.needsRefresh){
 			float width = 0.f;
 			float height = 0.f;
 			gameapi -> getTextDimensionsNdi(textDisplay.text, 40 / 500.f, true, std::nullopt, &width, &height);
@@ -51,6 +51,12 @@ void onInGameUiFrame(InGameUi& inGameUi){
 			gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
 			gameapi -> drawText(textDisplay.text, textDisplay.textPosition.x - (width * 0.5f), textDisplay.textPosition.y, 40, false, std::nullopt /*tint */, textDisplay.textureId, true, std::nullopt, std::nullopt);
 			textDisplay.needsRefresh = false;
+
+			auto uvCoord = getGlobalState().texCoordUv;
+
+  		gameapi -> drawRect(uvCoord.x * 2 - 1, uvCoord.y * 2 - 1, 0.1f, 0.1f, false, glm::vec4(0.f, 0.f, 1.f, 1.f), textDisplay.textureId, true, std::nullopt, std::nullopt);
+
+
 		}
 
 	}
