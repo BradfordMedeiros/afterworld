@@ -6,12 +6,10 @@ std::string ingameUiTextureName(objid id){
 	return std::string("gentexture-ingame-ui-texture-test");
 }
 void createInGamesUiInstance(InGameUi& inGameUi, objid id){
-	std::cout << "create in game texture" << std::endl;
-	modassert(inGameUi.ids.find(id) == inGameUi.ids.end(), "id already added");
-	inGameUi.ids.insert(id);
+	modassert(inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end(), "id already exists");
+
 	std::string texture = ingameUiTextureName(id);
 	auto uiTexture = gameapi -> createTexture(texture, 512, 512, id);
-	gameapi -> clearTexture(uiTexture, true, std::nullopt, "../gameresources/textures/controls/up-down.png");
 
  	GameobjAttributes attr {
  	   .stringAttributes = {
@@ -25,26 +23,43 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  	};
  	gameapi -> setGameObjectAttr(id, attr);  
 
- 	inGameUi.uiInstance =  TestUiInstance {
-		.cursorLocation = glm::vec2(0.f, 0.f),
-		.textureId = uiTexture,
-		.upSelected = true,
-	};
+ 	inGameUi.textDisplays[id] = TextDisplay{
+ 		.texture = "../gameresources/textures/controls/up-down.png",
+ 		.channel = "ui-debug-text",
+ 		.text = "hello world",
+ 		.textPosition = glm::vec2(0.f, 0.f),
+ 		.textureId = uiTexture,
+ 		.needsRefresh = true,
+ 	};
 };
 
+
+
 void freeInGameUiInstance(InGameUi& inGameUi, objid id){
-	inGameUi.ids.erase(id);
 	gameapi -> freeTexture(ingameUiTextureName(id), id);
+	inGameUi.textDisplays.erase(id);
 }
 
 void onInGameUiFrame(InGameUi& inGameUi){
-	if (!inGameUi.uiInstance.has_value()){
-		return;
+	for (auto &[id, textDisplay] : inGameUi.textDisplays){
+		if (textDisplay.needsRefresh){
+			float width = 0.f;
+			float height = 0.f;
+			gameapi -> getTextDimensionsNdi(textDisplay.text, 40 / 500.f, true, std::nullopt, &width, &height);
+			std::cout << "text: " << width << ", " << height << std::endl;
+
+			gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
+			gameapi -> drawText(textDisplay.text, textDisplay.textPosition.x - (width * 0.5f), textDisplay.textPosition.y, 40, false, std::nullopt /*tint */, textDisplay.textureId, true, std::nullopt, std::nullopt);
+			textDisplay.needsRefresh = false;
+		}
+
 	}
-	inGameUi.uiInstance.value().cursorLocation = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
-	bool upSelected = inGameUi.uiInstance.value().upSelected;
-  gameapi -> drawRect(0.f, 0.f, 1.f, 1.f, false, upSelected ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f), inGameUi.uiInstance.value().textureId, true, std::nullopt, std::nullopt);
-	gameapi -> drawText("hello", inGameUi.uiInstance.value().cursorLocation.x, inGameUi.uiInstance.value().cursorLocation.y, 20, false, std::nullopt /*tint */, inGameUi.uiInstance.value().textureId, true, std::nullopt, std::nullopt);
+
+
+
+	//inGameUi.uiInstance.value().cursorLocation = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+	//bool upSelected = inGameUi.uiInstance.value().upSelected;
+  //gameapi -> drawRect(0.f, 0.f, 1.f, 1.f, false, upSelected ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f), inGameUi.uiInstance.value().textureId, true, std::nullopt, std::nullopt);
 }
 
 void zoomIntoGameUi(objid id){
@@ -58,16 +73,21 @@ void zoomIntoGameUi(objid id){
 }
 
 std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
-	if (inGameUi.ids.size() == 0){
+	if (inGameUi.textDisplays.size() == 0){
 		return std::nullopt;
 	}
-	auto firstElement = *(inGameUi.ids.begin()); // will return the first set<int>
+	auto firstElement = inGameUi.textDisplays.begin() -> first; // will return the first set<int>
 	return firstElement;
 }
 
 
-void onInGameUiMessage(InGameUi& inGameUi, std::string& message){
-	if (inGameUi.uiInstance.has_value() && message == "ui-next"){
-		inGameUi.uiInstance.value().upSelected = !inGameUi.uiInstance.value().upSelected;
+void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value){
+	for (auto &[_, textDisplay] : inGameUi.textDisplays){
+		if (key == textDisplay.channel){
+      std::string* channelValue = anycast<std::string>(value);
+      modassert(channelValue, "invalid type for channelValue");
+      textDisplay.text = *channelValue;
+      textDisplay.needsRefresh = true;
+		}
 	}
 }

@@ -329,7 +329,7 @@ std::vector<TagUpdater> tagupdates = {
   		onInGameUiFrame(tags.inGameUi);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		onInGameUiMessage(tags.inGameUi, key);
+  		onInGameUiMessage(tags.inGameUi, key, value);
 
 			if (key == "interact-ingame-ui"){
 				//objid* objidPtr = std::get_if<objid>(&value);
@@ -369,8 +369,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     	.currentPlaying = std::nullopt,
     };
     tags -> inGameUi = InGameUi {
-    	.ids = {},
-    	.uiInstance = std::nullopt,
+    	.textDisplays = {},
     };
 
     ///// animations ////

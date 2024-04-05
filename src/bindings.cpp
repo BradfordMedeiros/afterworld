@@ -615,6 +615,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
+    std::cout << "(xNdc, yNdc)" << xNdc << ", " << yNdc << std::endl;
     GameState* gameState = static_cast<GameState*>(data);
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;

@@ -44,8 +44,8 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = '5',  // 3
 		.action = 0,
-		.keyToPublish = "ui-next",
-		.valueToPublish = "",
+		.keyToPublish = "ui-debug-text",
+		.valueToPublish = "textvalue",
 	},
 
 };
