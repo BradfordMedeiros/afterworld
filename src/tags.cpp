@@ -93,6 +93,31 @@ bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead, std::optiona
 	return true;
 }
 
+objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
+	std::cout << "create prefab placeholder: " << print(position) << ", " << prefab << std::endl;
+
+  GameobjAttributes attr = {
+    .stringAttributes = {
+      { "scene", prefab },
+    },
+    .numAttributes = {
+    },
+    .vecAttr = {
+      .vec3 = {
+        { "position", position },
+      },
+      .vec4 = {},
+    },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  return gameapi -> makeObjectAttr(
+    sceneId, 
+    std::string("[instance-") + uniqueNameSuffix(), 
+    attr, 
+    submodelAttributes
+  ).value();
+}
+
 
 std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
@@ -311,6 +336,18 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
   	.onRemove = [](void* data, int32_t id) -> void {
   		spawnRemoveId(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {},
+  	.onMessage = std::nullopt,
+	},
+	TagUpdater {
+		.attribute = "destroy",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		 // when this object it removed, get the position, and spawn a prefab there 
+  		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+  		auto sceneId = gameapi -> listSceneId(id);
+  		createPrefab(position, "../afterworld/scenes/prefabs/enemy/sentinel.rawscene", sceneId);
   	},
   	.onFrame = [](Tags& tags) -> void {},
   	.onMessage = std::nullopt,

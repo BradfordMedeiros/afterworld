@@ -475,6 +475,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       std::cout << "tex coord: " << print(texCoordUv) << std::endl;
     });
 
+    gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+      getGlobalState().texCoordUvView = texCoordUv;
+    });
+
     gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId );
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
