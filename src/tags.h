@@ -10,6 +10,7 @@
 #include "./global.h"
 #include "./activeplayer.h"
 #include "./in-game-ui.h"
+#include "./conditional_spawn.h"
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
 

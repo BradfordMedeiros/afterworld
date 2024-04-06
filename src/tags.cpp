@@ -349,9 +349,22 @@ std::vector<TagUpdater> tagupdates = {
   		auto sceneId = gameapi -> listSceneId(id);
   		createPrefab(position, "../afterworld/scenes/prefabs/enemy/sentinel.rawscene", sceneId);
   	},
-  	.onFrame = [](Tags& tags) -> void {},
+  	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
+
+	TagUpdater {
+		.attribute = "condition",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+			onAddConditionId(id, value);
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
+
 	TagUpdater {
 		.attribute = "in-game-ui",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
