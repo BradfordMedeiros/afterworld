@@ -1,2 +1,2 @@
 session.console:STRING,session.editor:STRING,session.background:STRING,session.layout:STRING,session.style-primary:STRING,session.style-secondary:STRING,session.style-border:STRING,session.style-highlight:STRING
-true,true,/home/brad/Desktop/test3.png,main,0 0 0 0.5,0.2 0.2 0.2 0.5,0 0 0 1,0 1 0 0.5
+true,true,/home/brad/Desktop/test5.png,gameplay,0.879647 0.729035 0.337336 0.31909,0.2 0.2 0.2 0.5,0.8907 0.9718 0.311737 0.347275,0.691481 0.487425 0.311737 0.843369

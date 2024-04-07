@@ -1,2 +1,2 @@
 settings.profile:STRING,settings.xsensitivity:STRING,settings.ysensitivity:STRING,settings.fullscreen:STRING,settings.mute:STRING,setting.yinvert:STRING,settings.volume:STRING,settings.fov:STRING
-default,0.729435,0.174772,FALSE,TRUE,TRUE,0.432799,45
+default,0.413607,0.417513,FALSE,FALSE,TRUE,0.241161,45
