@@ -49,7 +49,7 @@ wall:condition:gem
 wall:gem:0
 
 [crate:scene:../afterworld/scenes/prefabs/objects/crate.rawscene
-[crate:position:5 -20 0
+[crate:position:5 -25 0
 
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
