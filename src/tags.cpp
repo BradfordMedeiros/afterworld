@@ -347,7 +347,7 @@ std::vector<TagUpdater> tagupdates = {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
   		auto sceneId = gameapi -> listSceneId(id);
-  		createPrefab(position, "../afterworld/scenes/prefabs/enemy/sentinel.rawscene", sceneId);
+  		createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,

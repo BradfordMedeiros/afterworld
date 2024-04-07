@@ -36,14 +36,21 @@ audiozone2:ambient:&ambient_space
 #[audiozone1:position:-40 0 30
 
 
-#wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-#wall:position:0 0 0
-#wall:scale:10 20 200
-#wall:rotation:0 -1 0 0
-#wall:texture:../gameresources/textures/wood.jpg
-#wall:physics:enabled
-#wall:chatnode:npc1
-#wall:material:wood
+wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+wall:position:10 -10 0
+wall:scale:10 20 10
+wall:rotation:0 -1 0 0
+wall:texture:../gameresources/textures/wood.jpg
+wall:physics:enabled
+wall:chatnode:npc1
+wall:material:wood
+wall:health:1
+wall:condition:gem
+wall:gem:0
+
+[crate:scene:../afterworld/scenes/prefabs/objects/crate.rawscene
+[crate:position:5 -20 0
+
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 ladder:position:-40 -10 0
@@ -233,6 +240,7 @@ console:scale:3 3 3
 console:rotation:0 0 1 180
 console:tint:0 0.6 1 1
 console:in-game-ui:test
+console:in-game-ui-offset:0 0 -5
 
 >maincamera:position:0 50 100
 >maincamera:physics_angle:0.000000 0.000000 0.000000

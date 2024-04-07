@@ -1,0 +1,5 @@
+crate:mesh:./res/models/box/crate.gltf
+#crate:physics_type:dynamic
+crate:physics:enabled
+crate:health:1
+crate:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
