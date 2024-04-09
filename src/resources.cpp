@@ -32,20 +32,20 @@ objid createSound(objid sceneId, std::string soundObjName, std::string clip){
 void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
   if (jumpClip != ""){
     if (sounds.jumpSoundObjId.has_value()){
-      gameapi -> removeObjectById(sounds.jumpSoundObjId.value());
+      gameapi -> removeByGroupId(sounds.jumpSoundObjId.value());
     }
     sounds.jumpSoundObjId = createSound(sceneId, std::string("&code-movement-jump") + uniqueNameSuffix(), jumpClip);    
   }
   if (landClip != ""){
     if (sounds.landSoundObjId.has_value()){
-      gameapi -> removeObjectById(sounds.landSoundObjId.value());
+      gameapi -> removeByGroupId(sounds.landSoundObjId.value());
     }
     sounds.landSoundObjId = createSound(sceneId, ("&code-movement-land") + uniqueNameSuffix(), landClip);
   }
 
   if (moveClip != ""){
     if (sounds.moveSoundObjId.has_value()){
-      gameapi -> removeObjectById(sounds.moveSoundObjId.value());
+      gameapi -> removeByGroupId(sounds.moveSoundObjId.value());
     }
     sounds.moveSoundObjId = createSound(sceneId, ("&code-move") + uniqueNameSuffix(), moveClip);
   }
@@ -56,7 +56,7 @@ void ensureSoundUnloaded(objid sceneId, std::optional<objid>* sound){  // this s
 		if (gameapi -> gameobjExists(sound -> value())){
 			auto objSceneId = gameapi -> listSceneId(sound -> value());
 			if (objSceneId == sceneId){
-				gameapi -> removeObjectById(sound -> value());
+				gameapi -> removeByGroupId(sound -> value());
 			}
 		}
 		sounds.jumpSoundObjId = std::nullopt;

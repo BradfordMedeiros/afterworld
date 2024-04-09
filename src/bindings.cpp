@@ -297,7 +297,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 
     gameapi -> sendNotifyMessage(key, switchEnter1.value());
     if (switchRemove1.has_value() && switchRemove1.value() == removeKey){
-      gameapi -> removeObjectById(obj1);
+      gameapi -> removeByGroupId(obj1);
     }
   }
 
@@ -312,7 +312,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
     
     gameapi -> sendNotifyMessage(key, switchEnter2.value());
     if (switchRemove2.has_value() && switchRemove2.value() == removeKey){
-      gameapi -> removeObjectById(obj2);
+      gameapi -> removeByGroupId(obj2);
     }
   }
 }
@@ -328,7 +328,7 @@ void handleDamageCollision(objid obj1, objid obj2){
         .amount = damageAmount.value(),
       };
       gameapi -> sendNotifyMessage("damage", damageMessage);
-      gameapi -> removeObjectById(obj1);
+      gameapi -> removeByGroupId(obj1);
     }
   }
    
@@ -341,7 +341,7 @@ void handleDamageCollision(objid obj1, objid obj2){
         .amount = damageAmount2.value(),
       };
       gameapi -> sendNotifyMessage("damage", damageMessage);
-      gameapi -> removeObjectById(obj2);
+      gameapi -> removeByGroupId(obj2);
     }
   }
 }

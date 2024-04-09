@@ -224,7 +224,28 @@ std::vector<TagUpdater> tagupdates = {
       	auto nohealthMessage = anycast<NoHealthMessage>(value);
       	modassert(nohealthMessage, "nohealth target id null");
       	modlog("health", "removing object: " + std::to_string(nohealthMessage -> targetId));
-      	gameapi -> removeObjectById(nohealthMessage -> targetId);
+      	auto removeType = getSingleAttr(nohealthMessage -> targetId, "health-remove");
+      	if (removeType.has_value() && removeType.value() == "self"){
+      		// check if the parent of the group of id has no children, if so delete it 
+      		auto allChildren = gameapi -> idsInGroupById(nohealthMessage -> targetId);
+      		auto groupId = gameapi -> groupId(nohealthMessage -> targetId);
+      		gameapi -> removeObjectById(nohealthMessage -> targetId);
+      		if (allChildren.size() == 2){
+      			if (allChildren.at(0) == nohealthMessage -> targetId){
+      				auto healthCleanup = getSingleAttr(allChildren.at(1), "health-cleanup");
+      				if (healthCleanup.has_value() && healthCleanup.value() == "no-children"){
+      					gameapi -> removeByGroupId(groupId);
+      				}
+      			}else if (allChildren.at(1) == nohealthMessage -> targetId){
+      				auto healthCleanup = getSingleAttr(allChildren.at(0), "health-cleanup");
+      				if (healthCleanup.has_value() && healthCleanup.value() == "no-children"){
+      					gameapi -> removeByGroupId(groupId);
+      				}
+      			}
+      		}
+      	}else{
+	      	gameapi -> removeByGroupId(nohealthMessage -> targetId);
+      	}
       }
   	},
 	},

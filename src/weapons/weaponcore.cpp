@@ -65,16 +65,16 @@ void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponPa
 
 void unloadWeaponCore(WeaponCore& weaponCore){
   if (weaponCore.soundResource.has_value()){
-    gameapi -> removeObjectById(weaponCore.soundResource.value().clipObjectId);
+    gameapi -> removeByGroupId(weaponCore.soundResource.value().clipObjectId);
   }
   if (weaponCore.muzzleParticle.has_value()){
-    gameapi -> removeObjectById(weaponCore.muzzleParticle.value());
+    gameapi -> removeByGroupId(weaponCore.muzzleParticle.value());
   }
   if (weaponCore.hitParticles.has_value()){
-    gameapi -> removeObjectById(weaponCore.hitParticles.value());
+    gameapi -> removeByGroupId(weaponCore.hitParticles.value());
   }
   if (weaponCore.projectileParticles.has_value() && weaponCore.removeProjectileOnExit){
-    gameapi -> removeObjectById(weaponCore.projectileParticles.value());
+    gameapi -> removeByGroupId(weaponCore.projectileParticles.value());
   }
 }
 
@@ -238,7 +238,7 @@ GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, in
   auto weaponCore = gunCore.weaponCore;
 
   if (oldGunId.has_value()){
-    gameapi -> removeObjectById(oldGunId.value());
+    gameapi -> removeByGroupId(oldGunId.value());
   }
   auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
   auto gunId = createWeaponInstance(weaponCore -> weaponParams, sceneId, playerId, weaponName);
@@ -274,7 +274,7 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
 }
 void removeGun(GunInstance& weaponValues){
   if (weaponValues.gunId.has_value()){
-    gameapi -> removeObjectById(weaponValues.gunId.value());
+    gameapi -> removeByGroupId(weaponValues.gunId.value());
     weaponValues.gunId = std::nullopt;
   }
 }

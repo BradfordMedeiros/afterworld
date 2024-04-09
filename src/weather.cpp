@@ -10,7 +10,7 @@ struct Weather {
 
 void changeWeather(Weather& weather, std::string name, objid sceneId){
   if (weather.weatherEmitter.has_value()){
-    gameapi -> removeObjectById(weather.weatherEmitter.value());
+    gameapi -> removeByGroupId(weather.weatherEmitter.value());
   }
   weather.weatherEmitter = std::nullopt;
   if (name == "none"){

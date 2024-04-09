@@ -1,12 +1,19 @@
 crate:mesh:./res/models/box/crate_split.gltf
 crate:scale:0.2 0.2 0.2
+crate:health-cleanup:no-children
 
-crate/Cube.001:tint:1 0 0 1
 crate/Cube.001:physics:enabled
 crate/Cube.001:physics_type:dynamic
+crate/Cube.001:physics_shape:shape_hull
+crate/Cube.001:physics_mass:10
 crate/Cube.001:position:0 0.5 0
+crate/Cube.001:health:1
+crate/Cube.001:health-remove:self
+crate/Cube.001:health
 
-crate/Cube.002:tint:0 0 1 1
 crate/Cube.002:physics:enabled
 crate/Cube.002:physics_type:dynamic
-crate/Cube.002:physics_velocity:0 0 -5
+crate/Cube.002:physics_shape:shape_hull
+crate/Cube.002:physics_mass:1000
+crate/Cube.002:health:1
+crate/Cube.002:health-remove:self

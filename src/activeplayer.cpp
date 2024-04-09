@@ -17,7 +17,7 @@ std::optional<objid> getActivePlayerId(){
 
 std::optional<objid> setCameraOrMakeTemp(objid id){
 	if (tempCameraId.has_value()){
-		gameapi -> removeObjectById(tempCameraId.value());
+		gameapi -> removeByGroupId(tempCameraId.value());
 	}
 	auto name = gameapi -> getGameObjNameForId(id).value();
 	auto isCamera = name.at(0) == '>';
@@ -112,7 +112,7 @@ bool hasTempViewpoint(){
 }
 void popTempViewpoint(){
 	activePlayerTempDisabled = false;
-	gameapi -> removeObjectById(tempViewpoint.value());
+	gameapi -> removeByGroupId(tempViewpoint.value());
 	tempViewpoint = std::nullopt;
 
 	if (tempCameraId.has_value()){

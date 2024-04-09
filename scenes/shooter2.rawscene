@@ -176,6 +176,7 @@ item:physics:enabled
 item:health:10
 item:team:red
 item:dragselect:ai
+item:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
 
 item2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 item2:position:-21 -15 50
@@ -185,6 +186,8 @@ item2:physics:enabled
 item2:health:10
 item2:team:red
 item2:dragselect:ai
+item2:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
+
 
 item3:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 item3:position:-20 -15 50
@@ -197,6 +200,8 @@ item3:dragselect:ai
 #item3:pickup-trigger:ammo
 
 #item:pickup-trigger:scrapgun
+item3:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
+
 
 #
 #controlpanel:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf

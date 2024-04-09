@@ -212,7 +212,7 @@ void spawnFromRandomSpawnpoint(const char* team, const char* tag){
 void removeAllSpawnedEntities(){
   auto spawnpointIds  = gameapi -> getObjectsByAttr("spawn-managed", std::nullopt, std::nullopt);
   for (auto spawnpointId : spawnpointIds){
-    gameapi -> removeObjectById(spawnpointId);
+    gameapi -> removeByGroupId(spawnpointId);
   }  
 }
 

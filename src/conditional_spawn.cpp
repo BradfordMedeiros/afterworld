@@ -26,6 +26,6 @@ void onAddConditionId(objid id, std::string& value){
 		modassert(false, std::string("invalid condition: ") + value);
 	}
 
-	gameapi -> removeObjectById(id);
+	gameapi -> removeByGroupId(id);
 	
 }
