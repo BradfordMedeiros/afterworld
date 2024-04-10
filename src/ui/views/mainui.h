@@ -15,6 +15,7 @@
 #include "./pausemenu.h"
 #include "./levelselect.h"
 #include "./settings.h"
+#include "./modelviewer.h"
 #include "./navbar.h"
 #include "./dock/dock.h"
 #include "./windowmanager.h"

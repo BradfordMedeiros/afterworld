@@ -19,6 +19,12 @@ Props createLevelListProps(){
     }
   });
   levels.push_back(ListComponentData {
+    .name = "Model Viewer",
+    .onClick = []() -> void {
+      pushHistory("modelviewer");
+    }
+  });
+  levels.push_back(ListComponentData {
     .name = "Quit",
     .onClick = []() -> void {
       modlog("exit", "exit normally through main menu");
@@ -94,6 +100,7 @@ Component mainMenu {
   },
 };
 
+
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto levelSelect = withPropsCopy(
@@ -117,6 +124,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     { "settings", settingsMenu },
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
+    { "modelviewer", modelViewerComponent },
     { "",  emptyComponent  },
   };
 

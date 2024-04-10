@@ -29,6 +29,7 @@ void loadDefaultScenes(){
   }
 }
 
+
 void goToLevel(GameState& gameState, std::string sceneName){
   unloadAllManagedScenes();
   gameState.menuLoaded = false;
@@ -148,9 +149,6 @@ UiContext getUiContext(GameState& gameState){
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState, level.scene);
-      },
-      .getLevels = [&gameState]() -> std::vector<Level> {
-        return gameState.levels; 
       },
       .goToMenu = [&gameState]() -> void {
         goToMenu(gameState);

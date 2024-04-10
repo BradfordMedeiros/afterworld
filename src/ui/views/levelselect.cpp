@@ -245,8 +245,6 @@ Component levelSelectComponent {
     elements.push_back(withProps(levelDetail, levelDetailProps));
 
 
-    /////////////////////////////////////////
-
     Layout outerLayout {
       .tint = glm::vec4(1.f, 1.f, 1.f, 0.f),
       .showBackpanel = true,
