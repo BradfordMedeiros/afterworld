@@ -8,6 +8,7 @@ debug:script:native/debug
 water:script:native/water
 sounds:script:native/sound
 weather:script:native/weather
+tags:script:native/tags
 
 
 # Texture resources

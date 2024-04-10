@@ -368,7 +368,6 @@ poi_1:interest:generic
 
 vehicles:script:native/vehicle
 gunlogic:script:native/weapon
-tags:script:native/tags
 ai:script:native/ai
 movement:script:native/movement:1
 
