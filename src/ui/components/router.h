@@ -15,6 +15,7 @@ void popHistory(RouterHistory& history);
 std::string fullHistoryStr(RouterHistory& history);
 std::string getCurrentPath(RouterHistory& history);
 Component withAnimator(RouterHistory& history, Component& component, float duration);
+void registerOnRouteChanged(std::function<void()> onRouteChanged);
 
 extern Component router;
 

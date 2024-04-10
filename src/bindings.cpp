@@ -9,9 +9,11 @@ struct GameState {
   std::optional<std::string> loadedLevel;
   std::vector<Level> levels;
   bool menuLoaded;
+  std::optional<objid> modelViewerScene;
 
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
+
 
   HandlerFns uiCallbacks;
   UiContext uiContext;
@@ -63,8 +65,7 @@ void goToMenu(GameState& gameState){
     unloadAllManagedScenes();
   }
   if (!gameState.menuLoaded){
-    gameapi -> loadScene(
-      "../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
+    gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
     gameState.menuLoaded = true;
   }
   pushHistory("mainmenu", true);
@@ -420,6 +421,21 @@ AIInterface aiInterface {
 };
 
 
+void ensureModelViewerLoaded(GameState& gameState, bool loadModelViewer){
+  if (!loadModelViewer && gameState.modelViewerScene.has_value()){
+    gameapi -> unloadScene(gameState.modelViewerScene.value());
+    gameState.modelViewerScene = std::nullopt;
+    return;
+  }
+  if (loadModelViewer && !gameState.modelViewerScene.has_value()){
+    unloadAllManagedScenes();
+    gameState.menuLoaded = false;
+    gameState.modelViewerScene = gameapi -> loadScene("../afterworld/scenes/dev/models.rawscene", {}, std::nullopt, managedTags);
+    return;
+  }
+}
+
+
 glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -430,6 +446,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = new GameState;
     gameState -> loadedLevel = std::nullopt;
     gameState -> menuLoaded = false;
+    gameState -> modelViewerScene = std::nullopt,
     gameState -> selecting = std::nullopt;
     gameState -> uiCallbacks = HandlerFns {
       .handlerFns = {},
@@ -458,6 +475,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     setPaused(true);
     initSettings();
+
+    registerOnRouteChanged([gameState]() -> void {
+      auto currentPath = getCurrentPath();
+      ensureModelViewerLoaded(*gameState, currentPath == "modelviewer");
+      std::cout << "registerOnRouteChanged: , new route: " << getCurrentPath() << std::endl;
+    });
 
     return gameState;
   };

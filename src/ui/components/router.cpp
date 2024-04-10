@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+std::optional<std::function<void()>> registerOnRouteChangedFn;
 RouterHistory createHistory(std::string initialRoute){
 	return RouterHistory {
 		.currentPath = initialRoute,
@@ -17,6 +18,9 @@ void pushHistory(RouterHistory& history, std::string path, bool replace){
     history.history = {};
   }
   history.history.push_back(path);
+  if (registerOnRouteChangedFn.has_value()){
+    registerOnRouteChangedFn.value()();
+  }
 }
 
 void popHistory(RouterHistory& history){
@@ -29,6 +33,9 @@ void popHistory(RouterHistory& history){
   }else{
     history.currentPath = history.history.back();
     history.currentRouteTime = gameapi -> timeSeconds(true);
+    if (registerOnRouteChangedFn.has_value()){
+      registerOnRouteChangedFn.value()();
+    }
   }
 }
 
@@ -101,4 +108,9 @@ Component withAnimator(RouterHistory& history, Component& component, float durat
     },
   };
   return withPropsCopy(component, props);
+}
+
+void registerOnRouteChanged(std::function<void()> onRouteChanged){
+  modassert(!registerOnRouteChangedFn.has_value(), "can only register a single route");
+  registerOnRouteChangedFn = onRouteChanged;
 }
