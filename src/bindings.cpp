@@ -188,10 +188,10 @@ UiContext getUiContext(GameState& gameState){
     },
     .activeSceneId = activeSceneIdOpt,
     .showPreviousModel = []() -> void {
-      modassert(false, "show previous model");
+      gameapi -> sendNotifyMessage("prev-model", NULL);
     },
     .showNextModel = []() -> void {
-      modassert(false, "show next model");
+      gameapi -> sendNotifyMessage("next-model", NULL);
     },
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool shouldShowEditor) -> void {
@@ -523,8 +523,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     std::cout << "on selected: " << index << std::endl;
   };
 
-
-
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     auto hasInputKey = gameapi -> unlock("input", id);
@@ -560,7 +558,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1){
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
-
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -702,6 +699,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(soundBinding(api, "native/sound"));
   bindings.push_back(waterBinding(api, "native/water"));
   bindings.push_back(gametypesBinding(api, "native/gametypes"));
+  bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
   return bindings;
 } 
 

@@ -4,7 +4,7 @@ menu:position:0 0 -100
 menu:scale:200 200 200
 menu:rotation:0 0 1 180
 menu:texture:/home/brad/Desktop/art/oldmanrender.png
-menu:tint:0 0 0.2 0.4
+menu:tint:0.6 0.6 0.6 0.4
 menu:shader:../afterworld/shaders/menu/fragment.glsl
 menu:scrollspeed:0.02
 menu:script:native/menu
@@ -13,5 +13,5 @@ menu:shader:../afterworld/shaders/menu/fragment.glsl
 &music:clip:/home/brad/Desktop/music.wav
 &music:volume:0
 
-viewer:modelviewer:true
+viewer:script:native/modelviewer
 viewer:position:0 0 -25

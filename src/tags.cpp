@@ -23,7 +23,6 @@ struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
 	InGameUi inGameUi;
-	std::set<objid> modelViewers;
 
 	StateController animationController;
 };
@@ -388,40 +387,6 @@ std::vector<TagUpdater> tagupdates = {
 	},
 
 	TagUpdater {
-		.attribute = "modelviewer",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		tags -> modelViewers.insert(id);
-
-  		auto position = gameapi -> getGameObjectPos(id, true);
-  		GameobjAttributes attr = {
-  		  .stringAttributes = {{ "mesh", "./res/models/box/crate.gltf" }},
-  		  .numAttributes = {},
-  		  .vecAttr = { .vec3 = {{ "position", position }}, .vec4 = {}},
-  		};
-  		std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  		auto objectId = gameapi -> makeObjectAttr(
-    		gameapi -> listSceneId(id), 
-    		std::string("model-viewer-") + uniqueNameSuffix(), 
-    		attr, 
-    		submodelAttributes
-  		).value();
-		},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-   		tags -> modelViewers.erase(id);
-  	},
-  	.onFrame = std::nullopt,
- 		.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-			//if (key == "interact-ingame-ui"){
-			//	
-			//}
-  	},
-	},
-
-
-
-	TagUpdater {
 		.attribute = "in-game-ui",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
   		Tags* tags = static_cast<Tags*>(data);
@@ -481,7 +446,6 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     tags -> inGameUi = InGameUi {
     	.textDisplays = {},
     };
-    tags -> modelViewers = {};
 
     ///// animations ////
     tags -> animationController = createStateController();
