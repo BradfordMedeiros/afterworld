@@ -187,6 +187,12 @@ UiContext getUiContext(GameState& gameState){
       gameapi -> resetScene(sceneId.value());
     },
     .activeSceneId = activeSceneIdOpt,
+    .showPreviousModel = []() -> void {
+      modassert(false, "show previous model");
+    },
+    .showNextModel = []() -> void {
+      modassert(false, "show next model");
+    },
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool shouldShowEditor) -> void {
         updateShowEditor(shouldShowEditor);

@@ -7,6 +7,9 @@
 #include "../components/basic/button.h"
 #include "./style.h"
 
+extern const int rightButtonSymbol;
+extern const int leftButtonSymbol;
+
 extern Component modelViewerComponent;
 
 #endif

@@ -35,6 +35,9 @@ struct UiContext {
   std::function<void()> resetScene;
   std::function<std::optional<objid>()> activeSceneId;
 
+  std::function<void()> showPreviousModel;
+  std::function<void()> showNextModel;
+
   ConsoleInterface consoleInterface;
 };
 

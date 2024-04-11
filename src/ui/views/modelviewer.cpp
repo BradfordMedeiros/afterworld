@@ -1,6 +1,9 @@
 #include "./modelviewer.h"
 
 const float modelViewerButtonPadding = 0.02f;
+const int rightButtonSymbol = getSymbol("right-button");
+const int leftButtonSymbol = getSymbol("left-button");
+
 Component modelViewerComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     Props listItemProps {
@@ -14,25 +17,21 @@ Component modelViewerComponent {
 
     auto currentModelLabel = withPropsCopy(listItem, listItemProps);
 
-    std::function<void()> onPrevModel = []() -> void {
-    	std::cout << "on previous model" << std::endl;
-    };
-
-
+    std::function<void()>* leftButton = typeFromProps<std::function<void()>>(props, leftButtonSymbol);
+    modassert(leftButton, "left button not defined");
     Props prevButtonProps { .props = { 
     	PropPair { .symbol = valueSymbol, .value = std::string("PREV") },
-    	PropPair { .symbol = onclickSymbol, .value = onPrevModel },
+    	PropPair { .symbol = onclickSymbol, .value = *leftButton },
      	PropPair { .symbol = paddingSymbol, .value = modelViewerButtonPadding },
     }};
     auto previousModelButton = withPropsCopy(button, prevButtonProps);
 
 
-    std::function<void()> onNextModel = []() -> void {
-    	std::cout << "on next model" << std::endl;
-    };
+    std::function<void()>* rightButton = typeFromProps<std::function<void()>>(props, rightButtonSymbol);
+    modassert(rightButton, "right button not defined");
     Props nextButtonProps { .props = { 
     	PropPair { .symbol = valueSymbol, .value = std::string("NEXT") },
-    	PropPair { .symbol = onclickSymbol, .value = onNextModel },
+    	PropPair { .symbol = onclickSymbol, .value = *rightButton },
      	PropPair { .symbol = paddingSymbol, .value = modelViewerButtonPadding },
     }};
     auto nextModelButton = withPropsCopy(button, nextButtonProps);

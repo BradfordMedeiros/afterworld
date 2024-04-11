@@ -118,13 +118,23 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     }
   );
 
+  auto modelViewer = withPropsCopy(
+    modelViewerComponent,
+    Props {
+      .props = {
+        PropPair { .symbol = leftButtonSymbol, .value = uiContext.showPreviousModel },
+        PropPair { .symbol = rightButtonSymbol, .value = uiContext.showNextModel },
+      },
+    }
+  );
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu",  mainMenu },
     { "levelselect", levelSelect },
     { "settings", settingsMenu },
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
-    { "modelviewer", modelViewerComponent },
+    { "modelviewer", modelViewer },
     { "",  emptyComponent  },
   };
 
