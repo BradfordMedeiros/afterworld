@@ -10,6 +10,10 @@ float scale = 1.f;
 float minScale = 0.1f;
 float maxScale = 5.f;
 
+int currentModelIndex = 0;
+std::vector<std::string> models;
+
+
 void enforceObjectTransform(objid id){
   auto floatX = glm::cos(glm::radians(rotationXDegrees));
   auto floatY = glm::sin(glm::radians(rotationXDegrees));
@@ -59,14 +63,14 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
 
   	changeObject(id, "./res/models/box/crate.gltf");
-
+    models = gameapi -> listResources("models");
   	return NULL;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
   	managedObject = std::nullopt;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
-
+    gameapi -> drawText(std::string("model: ") + models.at(currentModelIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
   	rotationXDegrees += xPos;
@@ -109,10 +113,23 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   		return;
   	}
 		if (key == "prev-model"){
-			changeObject(id, "../gameresources/build/weapons/pistol3.gltf");
+      currentModelIndex--;
  		}else if (key == "next-model"){
- 			changeObject(id, "../gameresources/build/characters/plaguerobot.gltf");
- 		}  	
+      currentModelIndex++;
+ 		}
+
+    if (currentModelIndex < 0){
+      currentModelIndex = models.size() - 1; 
+    }
+    if (currentModelIndex >= models.size()){
+      currentModelIndex = 0;
+    }
+   
+    modlog("modelviewer", std::string("currentModelIndex: ") + std::to_string(currentModelIndex));
+
+    modassert(currentModelIndex >= 0 && currentModelIndex < models.size(), "invalid model index size");
+    auto model = models.at(currentModelIndex);
+    changeObject(id, model);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
