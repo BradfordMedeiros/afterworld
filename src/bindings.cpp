@@ -655,12 +655,27 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     onMainUiMousePress(gameState -> uiCallbacks, button, action, getGlobalState().selectedId);
 
+    std::cout << "on mouse down: button = " << button << ", action = " << action << std::endl;
     if (button == 1){
       if (action == 0){
         gameState -> selecting = std::nullopt;
+        getGlobalState().rightMouseDown = false;
       }else if (action == 1){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+        getGlobalState().rightMouseDown = true;
         raycastAndMoveTo();
+      }
+    }else if (button == 0){
+      if (action == 0){
+        getGlobalState().leftMouseDown = false;
+      }else if (action == 1){
+        getGlobalState().leftMouseDown = true;
+      }
+    }else if (button == 2){
+      if (action == 0){
+        getGlobalState().middleMouseDown = false;
+      }else if (action == 1){
+        getGlobalState().middleMouseDown = true;
       }
     }
   };

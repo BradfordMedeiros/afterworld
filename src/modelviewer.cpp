@@ -71,41 +71,36 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     gameapi -> drawText(std::string("model: ") + models.at(currentModelIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+
+    std::cout << "left, right " << leftMouseDown() << ", " << rightMouseDown() << std::endl;
+
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
-  	rotationXDegrees += xPos;
-  	std::cout << "rotationX: " << rotationXDegrees << std::endl;
-  	if (rotationXDegrees < 0){
-  		rotationXDegrees += 360;
-  	}
-  	if (rotationXDegrees > 360){
-  		rotationXDegrees -= 360;
-  	}
-  	rotationYDegrees += yPos;
-  	std::cout << "rotationY: " << rotationXDegrees << std::endl;
-  	if (rotationXDegrees < 0){
-  		rotationYDegrees += 360;
-  	}
-  	if (rotationXDegrees > 360){
-  		rotationYDegrees -= 360;
-  	}
-
-    enforceObjectTransform(id);
-
-  };
-
-  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
-    std::cout << "key is: " << key << std::endl;
-    if (key == 87){
-      objectOffset = objectOffset + glm::vec3(0.f, 0.2f, 0.f);
-    }else if (key == 65){
-      objectOffset = objectOffset + glm::vec3(-0.2f, 0.f, 0.f);
-    }else if (key == 83){
-      objectOffset = objectOffset + glm::vec3(0.f, -0.2f, 0.f);
-    }else if (key == 68){
-      objectOffset = objectOffset + glm::vec3(0.2f, 0.f, 0.f);
+    if (rightMouseDown() || leftMouseDown()){
+      rotationXDegrees += xPos;
+      std::cout << "rotationX: " << rotationXDegrees << std::endl;
+      if (rotationXDegrees < 0){
+        rotationXDegrees += 360;
+      }
+      if (rotationXDegrees > 360){
+        rotationXDegrees -= 360;
+      }
+      rotationYDegrees += yPos;
+      std::cout << "rotationY: " << rotationXDegrees << std::endl;
+      if (rotationXDegrees < 0){
+        rotationYDegrees += 360;
+      }
+      if (rotationXDegrees > 360){
+        rotationYDegrees -= 360;
+      }
+      enforceObjectTransform(id);
     }
-    enforceObjectTransform(id);
+
+    if (middleMouseDown()){
+      const float speed = 0.01f;
+      objectOffset += glm::vec3(speed * xPos, speed * yPos, 0.f);
+      enforceObjectTransform(id);
+    }
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){

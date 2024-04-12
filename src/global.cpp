@@ -20,6 +20,10 @@ GlobalState global {
   .ysensitivity = 1.f,
   .invertY = false,
   .disableGameInput = false,
+
+  .leftMouseDown = false,
+  .rightMouseDown = false,
+  .middleMouseDown = false,
 };
 
 void updateMouse(){
@@ -126,3 +130,13 @@ void initGlobal(){
   updateShowEditor(queryShowEditor());
 }
 
+
+bool leftMouseDown(){
+  return global.leftMouseDown;
+}
+bool rightMouseDown(){
+  return global.rightMouseDown;
+}
+bool middleMouseDown(){
+  return global.middleMouseDown;
+}

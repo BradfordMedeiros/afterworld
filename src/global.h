@@ -24,6 +24,10 @@ struct GlobalState {
   float ysensitivity;
   bool invertY;
   bool disableGameInput;
+
+  bool leftMouseDown;
+  bool rightMouseDown;
+  bool middleMouseDown;
 };
 
 void setPaused(bool paused);
@@ -33,5 +37,9 @@ void exitGameMode();
 GlobalState& getGlobalState();
 void initGlobal();
 void updateShowEditor(bool showEditor);
+
+bool leftMouseDown();
+bool rightMouseDown();
+bool middleMouseDown();
 
 #endif 
