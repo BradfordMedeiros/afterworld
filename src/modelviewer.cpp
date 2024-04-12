@@ -3,12 +3,16 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> managedObject = std::nullopt;
+
 float rotationXDegrees = 0.f;
 float rotationYDegrees = 0.f;
 glm::vec3 objectOffset(0.f, 0.f, 0.f);
 float scale = 1.f;
 float minScale = 0.1f;
 float maxScale = 5.f;
+
+glm::vec3 initialCameraPos(0.f, 0.f, 0.f);
+float cameraRotationXDegrees = 0.f;
 
 int currentModelIndex = 0;
 std::vector<std::string> models;
@@ -31,7 +35,22 @@ void enforceObjectTransform(objid id){
   gameapi -> setGameObjectScale(managedObject.value(), glm::vec3(scale, scale, scale), true);
 
   auto position = gameapi -> getGameObjectPos(id, true);
-  gameapi -> setGameObjectPosition(managedObject.value(), position + objectOffset, true);
+  gameapi -> setGameObjectPosition(managedObject.value(), position, true);
+
+  auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
+
+  auto newCameraPosition = initialCameraPos ;
+
+  auto distance = glm::distance(initialCameraPos, position);
+  auto cameraAngleOffsetX = distance * glm::cos(glm::radians(cameraRotationXDegrees));
+  auto cameraAngleOffsetY = distance * glm::sin(glm::radians(cameraRotationXDegrees));
+
+  std::cout << "camera, angle = " << cameraRotationXDegrees << ", x = " << cameraAngleOffsetX << ", y = " << cameraAngleOffsetY << std::endl;
+
+  auto finalCameraPosition = newCameraPosition + glm::vec3(cameraAngleOffsetX, 0.f, cameraAngleOffsetY) + objectOffset;
+  auto orientation = gameapi -> orientationFromPos(finalCameraPosition, position + objectOffset);
+  gameapi -> setGameObjectPosition(cameraId, finalCameraPosition, true); 
+  gameapi -> setGameObjectRot(cameraId, orientation, true);
 
 }
 
@@ -61,9 +80,10 @@ void changeObject(objid id, std::string model){
 CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-
-  	changeObject(id, "./res/models/box/crate.gltf");
     models = gameapi -> listResources("models");
+    auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
+    initialCameraPos = gameapi -> getGameObjectPos(cameraId, true);
+    changeObject(id, "./res/models/box/crate.gltf");
   	return NULL;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -76,7 +96,7 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
 
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
-    if (rightMouseDown() || leftMouseDown()){
+    if (leftMouseDown()){
       rotationXDegrees += xPos;
       std::cout << "rotationX: " << rotationXDegrees << std::endl;
       if (rotationXDegrees < 0){
@@ -96,9 +116,20 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
       enforceObjectTransform(id);
     }
 
+    if (rightMouseDown()){
+      cameraRotationXDegrees += xPos;
+      std::cout << "cameraRotationXDegrees: " << cameraRotationXDegrees << std::endl;
+      if (cameraRotationXDegrees < 0){
+        cameraRotationXDegrees += 360;
+      }
+      if (cameraRotationXDegrees > 360){
+        cameraRotationXDegrees -= 360;
+      }
+    }
+
     if (middleMouseDown()){
       const float speed = 0.01f;
-      objectOffset += glm::vec3(speed * xPos, speed * yPos, 0.f);
+      objectOffset -= glm::vec3(speed * xPos, speed * yPos, 0.f);
       enforceObjectTransform(id);
     }
   };

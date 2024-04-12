@@ -369,7 +369,6 @@ poi_1:interest:generic
 vehicles:script:native/vehicle
 gunlogic:script:native/weapon
 ai:script:native/ai
-movement:script:native/movement:1
 
 ;navmesh1:position:-20 -27 70
 ;navmesh1:physics:enabled

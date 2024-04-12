@@ -437,6 +437,8 @@ void ensureModelViewerLoaded(GameState& gameState, bool loadModelViewer){
     unloadAllManagedScenes();
     gameState.menuLoaded = false;
     gameState.modelViewerScene = gameapi -> loadScene("../afterworld/scenes/dev/models.rawscene", {}, std::nullopt, managedTags);
+    auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameState.modelViewerScene.value(), false).value();
+    setActivePlayer(cameraId);
     return;
   }
 }
