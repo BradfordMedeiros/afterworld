@@ -662,6 +662,28 @@ std::vector<DockConfiguration> configurations {
       // then a background picker 
     }
   },
+
+  DockConfiguration {
+    .title = "Particle Viewer",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Emit One",
+        .onClick = []() -> void {
+          dockConfigApi.emitParticleViewerParticle();
+        },
+      },
+      DockCheckboxConfig {
+        .label = "Emit Particles",
+        .isChecked = []() -> bool {
+          return dockConfigApi.getParticlesViewerShouldEmit();
+        },
+        .onChecked = [](bool isChecked) -> void { 
+          dockConfigApi.setParticlesViewerShouldEmit(isChecked);
+        },
+      },
+      // then a background picker 
+    }
+  },
 };
 
 DockConfiguration* dockConfigByName(std::string name){

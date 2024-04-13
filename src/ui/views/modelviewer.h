@@ -11,6 +11,7 @@ extern const int rightButtonSymbol;
 extern const int leftButtonSymbol;
 
 extern Component modelViewerComponent;
+extern Component particleViewerComponent;
 
 #endif
 

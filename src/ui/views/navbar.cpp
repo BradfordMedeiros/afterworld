@@ -117,6 +117,11 @@ std::vector<NavbarOption> navbarOptionsEditor = {
 		.name = "COLORS",
 		.dock = "COLORS",
 	},
+	NavbarOption {
+		.name = "Particle Viewer",
+		.dock = "Particle Viewer",
+	},
+	
 };
 
 

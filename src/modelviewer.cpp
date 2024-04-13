@@ -17,6 +17,16 @@ float cameraRotationXDegrees = 0.f;
 int currentModelIndex = 0;
 std::vector<std::string> models;
 
+std::vector<std::string> particleScenes = {
+  "../afterworld/scenes/prefabs/particles/blood.rawscene",
+  "../afterworld/scenes/prefabs/particles/electricity.rawscene",
+  "../afterworld/scenes/prefabs/particles/fire.rawscene",
+  "../afterworld/scenes/prefabs/particles/smoke.rawscene",
+  "../afterworld/scenes/prefabs/particles/water.rawscene",
+};
+
+enum ModelViewerType { MODELVIEWER_NONE, MODELVIEWER_MODEL, MODELVIEWER_PARTICLES };
+ModelViewerType modelViewerType = MODELVIEWER_NONE;
 
 void enforceObjectTransform(objid id){
   auto floatX = glm::cos(glm::radians(rotationXDegrees));
@@ -54,7 +64,12 @@ void enforceObjectTransform(objid id){
 
 }
 
-void changeObject(objid id, std::string model){
+
+
+void changeObject(objid id){
+  modassert(currentModelIndex >= 0 && currentModelIndex < models.size(), "invalid model index size");
+  auto model = models.at(currentModelIndex);
+
 	if (managedObject.has_value()){
 		gameapi -> removeByGroupId(managedObject.value());
 	}
@@ -80,10 +95,19 @@ void changeObject(objid id, std::string model){
 CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    models = gameapi -> listResources("models");
+    auto type = getSingleAttr(id, "modelviewer").value();
+    if (type == "models"){
+      modelViewerType = MODELVIEWER_MODEL;
+    }else if (type == "particles"){
+      modelViewerType = MODELVIEWER_PARTICLES;
+    }
+    modassert(modelViewerType != MODELVIEWER_NONE, std::string("invalid modelviewer type: ") + type);
+
     auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
     initialCameraPos = gameapi -> getGameObjectPos(cameraId, true);
-    changeObject(id, "./res/models/box/crate.gltf");
+
+    models = gameapi -> listResources("models");
+    changeObject(id);
   	return NULL;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -125,6 +149,8 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
       if (cameraRotationXDegrees > 360){
         cameraRotationXDegrees -= 360;
       }
+      enforceObjectTransform(id);
+
     }
 
     if (middleMouseDown()){
@@ -142,7 +168,19 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
       currentModelIndex--;
  		}else if (key == "next-model"){
       currentModelIndex++;
- 		}
+ 		}else if (key == "modelviewer-emit"){
+      auto shouldEmitPtr = anycast<bool>(value); 
+      modassert(shouldEmitPtr, "shouldEmitPtr not a bool");
+      bool shouldEmit = *shouldEmitPtr;
+    
+      modassert(false, std::string("should emit: " ) + print(shouldEmit));
+
+    }else if (key == "modelviewer-emit-one"){
+      modassert(false, "emit one not yet implemented");
+    }
+    // modelviewer-emit  , true / false
+    // modelviewer-emit-one  , true / false
+
 
     if (currentModelIndex < 0){
       currentModelIndex = models.size() - 1; 
@@ -153,9 +191,7 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
    
     modlog("modelviewer", std::string("currentModelIndex: ") + std::to_string(currentModelIndex));
 
-    modassert(currentModelIndex >= 0 && currentModelIndex < models.size(), "invalid model index size");
-    auto model = models.at(currentModelIndex);
-    changeObject(id, model);
+    changeObject(id);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {

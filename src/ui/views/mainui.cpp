@@ -134,6 +134,16 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     }
   );
 
+  auto particleViewer = withPropsCopy(
+    particleViewerComponent,
+    Props {
+      .props = {
+        PropPair { .symbol = leftButtonSymbol, .value = uiContext.showPreviousModel },
+        PropPair { .symbol = rightButtonSymbol, .value = uiContext.showNextModel },
+      },
+    }
+  );
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu",  mainMenu },
     { "levelselect", levelSelect },
@@ -141,6 +151,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
     { "modelviewer", modelViewer },
+    { "particleviewer", particleViewer },
     { "",  emptyComponent  },
   };
 
@@ -236,6 +247,8 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
   }
 };
 
+
+static bool shouldEmitParticleViewerParticles = false;
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -381,7 +394,17 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   },
   .setEditorBackground = [](std::string& background){
     gameapi -> sendNotifyMessage("menu-background", std::string(background));
-  }
+  },
+  .emitParticleViewerParticle = []() -> void {
+    gameapi -> sendNotifyMessage("modelviewer-emit-one", NULL);
+  },
+  .setParticlesViewerShouldEmit = [](bool shouldEmit) -> void {
+    shouldEmitParticleViewerParticles = shouldEmit;
+    gameapi -> sendNotifyMessage("modelviewer-emit", shouldEmit);
+  },
+  .getParticlesViewerShouldEmit = []() -> bool {
+    return shouldEmitParticleViewerParticles;
+  },
 };
 
 ImageList imageListDatas {

@@ -21,6 +21,10 @@ struct DockConfigApi {
   std::function<std::optional<AttributeValue>(std::string)> getObjAttr;
   std::function<void(std::string, AttributeValue)> setObjAttr;
   std::function<void(std::string&)> setEditorBackground;
+
+  std::function<void()> emitParticleViewerParticle;
+  std::function<void(bool)> setParticlesViewerShouldEmit;
+  std::function<bool()> getParticlesViewerShouldEmit;
 };
 
 std::optional<glm::vec2> toVec2(std::string& text);
