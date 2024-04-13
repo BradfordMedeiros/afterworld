@@ -2,20 +2,25 @@
 
 extern CustomApiBindings* gameapi;
 
-std::optional<objid> managedObject = std::nullopt;
+const float minScale = 0.1f;
+const float maxScale = 5.f;
 
-float rotationXDegrees = 0.f;
-float rotationYDegrees = 0.f;
-glm::vec3 objectOffset(0.f, 0.f, 0.f);
-float scale = 1.f;
-float minScale = 0.1f;
-float maxScale = 5.f;
+struct CameraData {
+  glm::vec3 initialCameraPos;
+  float rotationXDegrees;
+  float rotationYDegrees;
+  float cameraRotationXDegrees;
+  float scale;
+  glm::vec3 objectOffset;
 
-glm::vec3 initialCameraPos(0.f, 0.f, 0.f);
-float cameraRotationXDegrees = 0.f;
+};
 
-int currentModelIndex = 0;
-std::vector<std::string> models;
+struct ModelViewerData {
+  std::optional<objid> managedObject;
+  std::vector<std::string> models;
+  int currentModelIndex;
+  CameraData cameraData;
+};
 
 std::vector<std::string> particleScenes = {
   "../afterworld/scenes/prefabs/particles/blood.rawscene",
@@ -25,15 +30,12 @@ std::vector<std::string> particleScenes = {
   "../afterworld/scenes/prefabs/particles/water.rawscene",
 };
 
-enum ModelViewerType { MODELVIEWER_NONE, MODELVIEWER_MODEL, MODELVIEWER_PARTICLES };
-ModelViewerType modelViewerType = MODELVIEWER_NONE;
+void enforceObjectTransform(ModelViewerData& modelViewer, objid id){
+  auto floatX = glm::cos(glm::radians(modelViewer.cameraData.rotationXDegrees));
+  auto floatY = glm::sin(glm::radians(modelViewer.cameraData.rotationXDegrees));
 
-void enforceObjectTransform(objid id){
-  auto floatX = glm::cos(glm::radians(rotationXDegrees));
-  auto floatY = glm::sin(glm::radians(rotationXDegrees));
-
-  auto floatXAroundX = glm::cos(glm::radians(rotationYDegrees));
-  auto floatYAroundX = glm::sin(glm::radians(rotationYDegrees));
+  auto floatXAroundX = glm::cos(glm::radians(modelViewer.cameraData.rotationYDegrees));
+  auto floatYAroundX = glm::sin(glm::radians(modelViewer.cameraData.rotationYDegrees));
 
   auto rotationAroundY = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(floatX, 0.f, floatY));
   auto rotationAroundX = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, floatXAroundX, floatYAroundX));
@@ -41,37 +43,35 @@ void enforceObjectTransform(objid id){
   //glm::vec3 rotationVec(xPos, yPos, 0.f);
   //auto rotation = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), rotationVec);
   //auto newOrientation = rotation * orientation;
-  gameapi -> setGameObjectRot(managedObject.value(), rotationAroundX * rotationAroundY, true);
-  gameapi -> setGameObjectScale(managedObject.value(), glm::vec3(scale, scale, scale), true);
+  gameapi -> setGameObjectRot(modelViewer.managedObject.value(), rotationAroundX * rotationAroundY, true);
+  gameapi -> setGameObjectScale(modelViewer.managedObject.value(), glm::vec3(modelViewer.cameraData.scale, modelViewer.cameraData.scale, modelViewer.cameraData.scale), true);
 
   auto position = gameapi -> getGameObjectPos(id, true);
-  gameapi -> setGameObjectPosition(managedObject.value(), position, true);
+  gameapi -> setGameObjectPosition(modelViewer.managedObject.value(), position, true);
 
   auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
 
-  auto newCameraPosition = initialCameraPos ;
+  auto newCameraPosition = modelViewer.cameraData.initialCameraPos ;
 
-  auto distance = glm::distance(initialCameraPos, position);
-  auto cameraAngleOffsetX = distance * glm::cos(glm::radians(cameraRotationXDegrees));
-  auto cameraAngleOffsetY = distance * glm::sin(glm::radians(cameraRotationXDegrees));
+  auto distance = glm::distance(modelViewer.cameraData.initialCameraPos, position) * 2;
+  auto cameraAngleOffsetX = distance * glm::cos(glm::radians(modelViewer.cameraData.cameraRotationXDegrees));
+  auto cameraAngleOffsetY = distance * glm::sin(glm::radians(modelViewer.cameraData.cameraRotationXDegrees));
 
-  std::cout << "camera, angle = " << cameraRotationXDegrees << ", x = " << cameraAngleOffsetX << ", y = " << cameraAngleOffsetY << std::endl;
+  std::cout << "camera, angle = " << modelViewer.cameraData.cameraRotationXDegrees << ", x = " << cameraAngleOffsetX << ", y = " << cameraAngleOffsetY << std::endl;
 
-  auto finalCameraPosition = newCameraPosition + glm::vec3(cameraAngleOffsetX, 0.f, cameraAngleOffsetY) + objectOffset;
-  auto orientation = gameapi -> orientationFromPos(finalCameraPosition, position + objectOffset);
+  auto finalCameraPosition = newCameraPosition + glm::vec3(cameraAngleOffsetX, 0.f, cameraAngleOffsetY) + modelViewer.cameraData.objectOffset + glm::vec3(0.f, 0.f, -0.5f * distance);
+  auto orientation = gameapi -> orientationFromPos(finalCameraPosition, position);
   gameapi -> setGameObjectPosition(cameraId, finalCameraPosition, true); 
   gameapi -> setGameObjectRot(cameraId, orientation, true);
 
 }
 
+void changeObject(ModelViewerData& modelViewer, objid id){
+  modassert(modelViewer.currentModelIndex >= 0 && modelViewer.currentModelIndex < modelViewer.models.size(), "invalid model index size");
+  auto model = modelViewer.models.at(modelViewer.currentModelIndex);
 
-
-void changeObject(objid id){
-  modassert(currentModelIndex >= 0 && currentModelIndex < models.size(), "invalid model index size");
-  auto model = models.at(currentModelIndex);
-
-	if (managedObject.has_value()){
-		gameapi -> removeByGroupId(managedObject.value());
+	if (modelViewer.managedObject.has_value()){
+		gameapi -> removeByGroupId(modelViewer.managedObject.value());
 	}
   GameobjAttributes attr = {
     .stringAttributes = {{ "mesh", model }},
@@ -79,95 +79,108 @@ void changeObject(objid id){
     .vecAttr = { .vec3 = {}, .vec4 = {}},
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
-   managedObject = gameapi -> makeObjectAttr(
+   modelViewer.managedObject = gameapi -> makeObjectAttr(
    	gameapi -> listSceneId(id), 
    	std::string("model-viewer-") + uniqueNameSuffix(), 
    	attr, 
    	submodelAttributes
   ).value();
 
-   enforceObjectTransform(id);
+   enforceObjectTransform(modelViewer, id);
 }
 
+ModelViewerData createModelViewerData(){
+  ModelViewerData modelViewer {
+    .managedObject = std::nullopt,
+    .models = {},
+    .currentModelIndex = 0,
+    .cameraData = {
+      .initialCameraPos = glm::vec3(0.f, 0.f, 0.f),
+      .rotationXDegrees = 0.f,
+      .rotationYDegrees = 0.f,
+      .cameraRotationXDegrees = 0.f,
+      .scale = 1.f,
+      .objectOffset = glm::vec3(0.f, 0.f, 0.f),
+    },
+  };
+  return modelViewer;
 
-
+}
 
 CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    auto type = getSingleAttr(id, "modelviewer").value();
-    if (type == "models"){
-      modelViewerType = MODELVIEWER_MODEL;
-    }else if (type == "particles"){
-      modelViewerType = MODELVIEWER_PARTICLES;
-    }
-    modassert(modelViewerType != MODELVIEWER_NONE, std::string("invalid modelviewer type: ") + type);
+    ModelViewerData* modelViewer = new ModelViewerData;
+    *modelViewer = createModelViewerData();
 
     auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
-    initialCameraPos = gameapi -> getGameObjectPos(cameraId, true);
-
-    models = gameapi -> listResources("models");
-    changeObject(id);
-  	return NULL;
+    modelViewer -> cameraData.initialCameraPos = gameapi -> getGameObjectPos(cameraId, true);
+    modelViewer -> models = gameapi -> listResources("models");
+    changeObject(*modelViewer, id);
+  	return modelViewer;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-  	managedObject = std::nullopt;
+    ModelViewerData* modelViewer = static_cast<ModelViewerData*>(data);
+    delete modelViewer;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
-    gameapi -> drawText(std::string("model: ") + models.at(currentModelIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-
-    std::cout << "left, right " << leftMouseDown() << ", " << rightMouseDown() << std::endl;
-
+    ModelViewerData* modelViewer = static_cast<ModelViewerData*>(data);
+    gameapi -> drawText(std::string("model: ") + modelViewer -> models.at(modelViewer -> currentModelIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
+    ModelViewerData* modelViewer = static_cast<ModelViewerData*>(data);
+
     if (leftMouseDown()){
-      rotationXDegrees += xPos;
-      std::cout << "rotationX: " << rotationXDegrees << std::endl;
-      if (rotationXDegrees < 0){
-        rotationXDegrees += 360;
+      modelViewer -> cameraData.rotationXDegrees += xPos;
+      std::cout << "rotationX: " << modelViewer -> cameraData.rotationXDegrees << std::endl;
+      if (modelViewer -> cameraData.rotationXDegrees < 0){
+        modelViewer -> cameraData.rotationXDegrees += 360;
       }
-      if (rotationXDegrees > 360){
-        rotationXDegrees -= 360;
+      if (modelViewer -> cameraData.rotationXDegrees > 360){
+        modelViewer -> cameraData.rotationXDegrees -= 360;
       }
-      rotationYDegrees += yPos;
-      std::cout << "rotationY: " << rotationXDegrees << std::endl;
-      if (rotationXDegrees < 0){
-        rotationYDegrees += 360;
+      modelViewer -> cameraData.rotationYDegrees += yPos;
+      std::cout << "rotationY: " << modelViewer -> cameraData.rotationYDegrees << std::endl;
+      if (modelViewer -> cameraData.rotationYDegrees < 0){
+        modelViewer -> cameraData.rotationYDegrees += 360;
       }
-      if (rotationXDegrees > 360){
-        rotationYDegrees -= 360;
+      if (modelViewer -> cameraData.rotationYDegrees > 360){
+        modelViewer -> cameraData.rotationYDegrees -= 360;
       }
-      enforceObjectTransform(id);
+      enforceObjectTransform(*modelViewer, id);
     }
 
     if (rightMouseDown()){
-      cameraRotationXDegrees += xPos;
-      std::cout << "cameraRotationXDegrees: " << cameraRotationXDegrees << std::endl;
-      if (cameraRotationXDegrees < 0){
-        cameraRotationXDegrees += 360;
+      modelViewer -> cameraData.cameraRotationXDegrees += xPos;
+      std::cout << "cameraRotationXDegrees: " << modelViewer -> cameraData.cameraRotationXDegrees << std::endl;
+      if (modelViewer -> cameraData.cameraRotationXDegrees < 0){
+        modelViewer -> cameraData.cameraRotationXDegrees += 360;
       }
-      if (cameraRotationXDegrees > 360){
-        cameraRotationXDegrees -= 360;
+      if (modelViewer -> cameraData.cameraRotationXDegrees > 360){
+        modelViewer -> cameraData.cameraRotationXDegrees -= 360;
       }
-      enforceObjectTransform(id);
+      enforceObjectTransform(*modelViewer, id);
 
     }
 
     if (middleMouseDown()){
       const float speed = 0.01f;
-      objectOffset -= glm::vec3(speed * xPos, speed * yPos, 0.f);
-      enforceObjectTransform(id);
+      modelViewer -> cameraData.objectOffset -= glm::vec3(speed * xPos, speed * yPos, 0.f);
+      enforceObjectTransform(*modelViewer, id);
     }
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-  	if (!managedObject.has_value()){
+    ModelViewerData* modelViewerData = static_cast<ModelViewerData*>(data);
+    ModelViewerData& modelViewer = *modelViewerData;
+
+  	if (!modelViewer.managedObject.has_value()){
   		return;
   	}
 		if (key == "prev-model"){
-      currentModelIndex--;
+      modelViewer.currentModelIndex--;
  		}else if (key == "next-model"){
-      currentModelIndex++;
+      modelViewer.currentModelIndex++;
  		}else if (key == "modelviewer-emit"){
       auto shouldEmitPtr = anycast<bool>(value); 
       modassert(shouldEmitPtr, "shouldEmitPtr not a bool");
@@ -182,27 +195,30 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
     // modelviewer-emit-one  , true / false
 
 
-    if (currentModelIndex < 0){
-      currentModelIndex = models.size() - 1; 
+    if (modelViewer.currentModelIndex < 0){
+      modelViewer.currentModelIndex = modelViewer.models.size() - 1; 
     }
-    if (currentModelIndex >= models.size()){
-      currentModelIndex = 0;
+    if (modelViewer.currentModelIndex >= modelViewer.models.size()){
+      modelViewer.currentModelIndex = 0;
     }
    
-    modlog("modelviewer", std::string("currentModelIndex: ") + std::to_string(currentModelIndex));
+    modlog("modelviewer", std::string("currentModelIndex: ") + std::to_string(modelViewer.currentModelIndex));
 
-    changeObject(id);
+    changeObject(modelViewer, id);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    scale += amount;
-    if (scale > maxScale){
-      scale = maxScale;
+    ModelViewerData* modelViewerData = static_cast<ModelViewerData*>(data);
+    ModelViewerData& modelViewer = *modelViewerData;
+
+    modelViewer.cameraData.scale += amount;
+    if (modelViewer.cameraData.scale > maxScale){
+      modelViewer.cameraData.scale = maxScale;
     }
-    if (scale < minScale){
-      scale = minScale;
+    if (modelViewer.cameraData.scale < minScale){
+      modelViewer.cameraData.scale = minScale;
     }
-    enforceObjectTransform(id);
+    enforceObjectTransform(modelViewer, id);
   };
 
 
