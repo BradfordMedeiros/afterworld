@@ -10,6 +10,7 @@ struct GameState {
   std::vector<Level> levels;
   bool menuLoaded;
   std::optional<objid> modelViewerScene;
+  std::optional<objid> particleViewerScene;
 
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
@@ -427,20 +428,26 @@ AIInterface aiInterface {
 };
 
 
-void ensureModelViewerLoaded(GameState& gameState, bool loadModelViewer){
-  if (!loadModelViewer && gameState.modelViewerScene.has_value()){
-    gameapi -> unloadScene(gameState.modelViewerScene.value());
-    gameState.modelViewerScene = std::nullopt;
+void ensureViewLoaded(GameState& gameState, bool loadViewer, const char* scene, std::optional<objid>& sceneId){
+  if (!loadViewer && sceneId.has_value()){
+    gameapi -> unloadScene(sceneId.value());
+    sceneId = std::nullopt;
     return;
   }
-  if (loadModelViewer && !gameState.modelViewerScene.has_value()){
+  if (loadViewer && !sceneId.has_value()){
     unloadAllManagedScenes();
     gameState.menuLoaded = false;
-    gameState.modelViewerScene = gameapi -> loadScene("../afterworld/scenes/dev/models.rawscene", {}, std::nullopt, managedTags);
-    auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameState.modelViewerScene.value(), false).value();
+    sceneId = gameapi -> loadScene(scene, {}, std::nullopt, managedTags);
+    auto cameraId = gameapi -> getGameObjectByName(">maincamera", sceneId.value(), false).value();
     setActivePlayer(cameraId);
     return;
-  }
+  }  
+}
+void ensureModelViewerLoaded(GameState& gameState, bool loadModelViewer){
+  ensureViewLoaded(gameState, loadModelViewer, "../afterworld/scenes/dev/models.rawscene", gameState.modelViewerScene);
+}
+void ensureParticleViewerLoaded(GameState& gameState, bool loadParticleViewer){
+  ensureViewLoaded(gameState, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", gameState.particleViewerScene);
 }
 
 
@@ -487,6 +494,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = getCurrentPath();
       ensureModelViewerLoaded(*gameState, currentPath == "modelviewer");
+      ensureParticleViewerLoaded(*gameState, currentPath == "particleviewer");
       std::cout << "registerOnRouteChanged: , new route: " << getCurrentPath() << std::endl;
     });
 

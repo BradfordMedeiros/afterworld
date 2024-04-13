@@ -53,6 +53,9 @@ void scrollTexture(MenuState& menuState, objid id){
 }
 
 void updateBackground(objid id, std::string image){
+	if (!getSingleAttr(id, "background").has_value()){
+		return;
+	}
  	GameobjAttributes attr {
 		.stringAttributes = {
 			{ "texture", image },

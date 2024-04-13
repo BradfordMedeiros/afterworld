@@ -39,7 +39,7 @@ Component modelViewerComponent {
     std::vector<Component> children = { previousModelButton, currentModelLabel, nextModelButton };
     Layout layout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.2f),
-      .showBackpanel = true,
+      .showBackpanel = false,
       .borderColor = std::nullopt,
       .minwidth = 2.f * (2.f / 3.f),
       .minheight = 2.f,
