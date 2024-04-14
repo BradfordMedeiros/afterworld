@@ -143,61 +143,64 @@ ViewerData createViewerData(objid id){
   return viewer;
 }
 
-void handleScroll(ModelViewerData& modelViewer, objid id, double amount){
-  modelViewer.viewer.cameraData.scale += amount;
-  if (modelViewer.viewer.cameraData.scale > maxScale){
-    modelViewer.viewer.cameraData.scale = maxScale;
+void handleScroll(ViewerData& viewer, objid id, double amount){
+  viewer.cameraData.scale += amount;
+  if (viewer.cameraData.scale > maxScale){
+    viewer.cameraData.scale = maxScale;
   }
-  if (modelViewer.viewer.cameraData.scale < minScale){
-    modelViewer.viewer.cameraData.scale = minScale;
+  if (viewer.cameraData.scale < minScale){
+    viewer.cameraData.scale = minScale;
   }
-  enforceObjectTransform(modelViewer.viewer, id);
+  enforceObjectTransform(viewer, id);
 }
 
-void handleMouseRotate(ModelViewerData& modelViewer, objid id, double xPos, double yPos){
+void handleMouseRotate(ViewerData& viewer, objid id, double xPos, double yPos){
   if (leftMouseDown()){
-    modelViewer.viewer.cameraData.rotationXDegrees += xPos;
-    std::cout << "rotationX: " << modelViewer.viewer.cameraData.rotationXDegrees << std::endl;
-    if (modelViewer.viewer.cameraData.rotationXDegrees < 0){
-      modelViewer.viewer.cameraData.rotationXDegrees += 360;
+    viewer.cameraData.rotationXDegrees += xPos;
+    std::cout << "rotationX: " << viewer.cameraData.rotationXDegrees << std::endl;
+    if (viewer.cameraData.rotationXDegrees < 0){
+      viewer.cameraData.rotationXDegrees += 360;
     }
-    if (modelViewer.viewer.cameraData.rotationXDegrees > 360){
-      modelViewer.viewer.cameraData.rotationXDegrees -= 360;
+    if (viewer.cameraData.rotationXDegrees > 360){
+      viewer.cameraData.rotationXDegrees -= 360;
     }
-    modelViewer.viewer.cameraData.rotationYDegrees += yPos;
-    std::cout << "rotationY: " << modelViewer.viewer.cameraData.rotationYDegrees << std::endl;
-    if (modelViewer.viewer.cameraData.rotationYDegrees < 0){
-      modelViewer.viewer.cameraData.rotationYDegrees += 360;
+    viewer.cameraData.rotationYDegrees += yPos;
+    std::cout << "rotationY: " << viewer.cameraData.rotationYDegrees << std::endl;
+    if (viewer.cameraData.rotationYDegrees < 0){
+      viewer.cameraData.rotationYDegrees += 360;
     }
-    if (modelViewer.viewer.cameraData.rotationYDegrees > 360){
-      modelViewer.viewer.cameraData.rotationYDegrees -= 360;
+    if (viewer.cameraData.rotationYDegrees > 360){
+      viewer.cameraData.rotationYDegrees -= 360;
     }
-    enforceObjectTransform(modelViewer.viewer, id);
+    enforceObjectTransform(viewer, id);
   }
   if (rightMouseDown()){
-    modelViewer.viewer.cameraData.cameraRotationXDegrees += xPos;
-    std::cout << "cameraRotationXDegrees: " << modelViewer.viewer.cameraData.cameraRotationXDegrees << std::endl;
-    if (modelViewer.viewer.cameraData.cameraRotationXDegrees < 0){
-      modelViewer.viewer.cameraData.cameraRotationXDegrees += 360;
+    viewer.cameraData.cameraRotationXDegrees += xPos;
+    std::cout << "cameraRotationXDegrees: " << viewer.cameraData.cameraRotationXDegrees << std::endl;
+    if (viewer.cameraData.cameraRotationXDegrees < 0){
+      viewer.cameraData.cameraRotationXDegrees += 360;
     }
-    if (modelViewer.viewer.cameraData.cameraRotationXDegrees > 360){
-      modelViewer.viewer.cameraData.cameraRotationXDegrees -= 360;
+    if (viewer.cameraData.cameraRotationXDegrees > 360){
+      viewer.cameraData.cameraRotationXDegrees -= 360;
     }
-    enforceObjectTransform(modelViewer.viewer, id);
+    enforceObjectTransform(viewer, id);
   }
 
   if (middleMouseDown()){
     const float speed = 0.01f;
-    modelViewer.viewer.cameraData.objectOffset -= glm::vec3(speed * xPos, speed * yPos, 0.f);
-    enforceObjectTransform(modelViewer.viewer, id);
+    viewer.cameraData.objectOffset -= glm::vec3(speed * xPos, speed * yPos, 0.f);
+    enforceObjectTransform(viewer, id);
   }
 }
 
-void onViewerMessage(ViewerData& viewer, int sizeLimit, std::string& key, std::any& value){
+bool onViewerMessage(ViewerData& viewer, int sizeLimit, std::string& key, std::any& value){
+  bool changedIndex = false;
   if (key == "prev-model"){
     viewer.currentIndex--;
+    changedIndex = true;
   }else if (key == "next-model"){
     viewer.currentIndex++;
+    changedIndex = true;
   }
   if (viewer.currentIndex < 0){
     viewer.currentIndex = sizeLimit - 1; 
@@ -205,6 +208,7 @@ void onViewerMessage(ViewerData& viewer, int sizeLimit, std::string& key, std::a
   if (viewer.currentIndex >= sizeLimit){
     viewer.currentIndex = 0;
   }
+  return changedIndex;
 }
 
 CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
@@ -226,18 +230,19 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     ModelViewerData* modelViewer = static_cast<ModelViewerData*>(data);
-    handleMouseRotate(*modelViewer, id, xPos, yPos);
+    handleMouseRotate(modelViewer -> viewer, id, xPos, yPos);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     ModelViewerData* modelViewerData = static_cast<ModelViewerData*>(data);
     ModelViewerData& modelViewer = *modelViewerData;
-    onViewerMessage(modelViewer.viewer, modelViewer.models.size(), key, value); 
-    changeObject(modelViewer, id);
+    bool changedObject = onViewerMessage(modelViewer.viewer, modelViewer.models.size(), key, value);
+    if (changedObject){
+      changeObject(modelViewer, id);
+    }
   };
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
     ModelViewerData* modelViewerData = static_cast<ModelViewerData*>(data);
-    ModelViewerData& modelViewer = *modelViewerData;
-    handleScroll(modelViewer, id, amount);
+    handleScroll(modelViewerData -> viewer, id, amount);
   };
   return binding;
 }
@@ -263,14 +268,16 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
     gameapi -> drawText(std::string("particles: ") + particleViewer -> particleScenes.at(particleViewer -> viewer.currentIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
-    //ParticleViewerData* modelViewer = static_cast<ParticleViewerData*>(data);
-    //handleMouseRotate(*modelViewer, id, xPos, yPos);
+    ParticleViewerData* particleViewer = static_cast<ParticleViewerData*>(data);
+    handleMouseRotate(particleViewer -> viewer, id, xPos, yPos);
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     ParticleViewerData* particleViewerData = static_cast<ParticleViewerData*>(data);
-    onViewerMessage(particleViewerData -> viewer, particleViewerData -> particleScenes.size(), key, value);
-
+    bool changedObject = onViewerMessage(particleViewerData -> viewer, particleViewerData -> particleScenes.size(), key, value);
+    if (changedObject){
+      changeObject(*particleViewerData, id);
+    }
     if (key == "modelviewer-emit"){
       auto shouldEmitPtr = anycast<bool>(value); 
       modassert(shouldEmitPtr, "shouldEmitPtr not a bool");
@@ -280,14 +287,11 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
     }else if (key == "modelviewer-emit"){
       modassert(false, "emit particle placeholder");
     }
-
-    //changeObject(modelViewer, id);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    //ParticleViewerData* modelViewerData = static_cast<ModelViewerData*>(data);
-    //ParticleViewerData& modelViewer = *modelViewerData;
-    //handleScroll(modelViewer, id, amount);
+    ParticleViewerData* particleViewerData = static_cast<ParticleViewerData*>(data);
+    handleScroll(particleViewerData -> viewer, id, amount);
   };
   return binding;
 }
