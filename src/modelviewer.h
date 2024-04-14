@@ -6,5 +6,6 @@
 #include "./global.h"
 
 CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name);
+CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name);
 
 #endif

@@ -1,0 +1,2 @@
+crate:mesh:./res/models/box/crate.gltf
+crate:health-cleanup:no-children
