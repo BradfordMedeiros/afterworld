@@ -1,2 +1,14 @@
-crate:mesh:./res/models/box/crate.gltf
-crate:health-cleanup:no-children
+
++particles:position:0 0 0
++particles:limit:20
++particles:rate:0.3
++particles:duration:2
++particles:state:enabled
+
++particles:+mesh:./res/models/box/box.obj
++particles:+physics_type:dynamic
++particles:+physics:enabled
++particles:+physics_collision:nocollide
+
++particles:+Cube/tint:0 0 1 1
++particles:+Cube/texture:./res/textures/blacktop.jpg

@@ -35,7 +35,6 @@ std::vector<std::string> particleScenes = {
   "../afterworld/scenes/prefabs/particles/water.rawscene",
 };
 struct ParticleViewerData {
-  bool emitParticles;
   std::vector<std::string> particleScenes;
   ViewerData viewer;
 };
@@ -97,7 +96,11 @@ void changeObject(ModelViewerData& modelViewer, objid id){
    	attr, 
    	submodelAttributes
   ).value();
-   enforceObjectTransform(modelViewer.viewer, id);
+
+  auto rootId = gameapi -> rootIdForScene(gameapi -> listSceneId(id));
+  gameapi -> makeParent(modelViewer.viewer.managedObject.value(), rootId);
+
+  enforceObjectTransform(modelViewer.viewer, id);
 }
 
 void changeObject(ParticleViewerData& particleViewer, objid id){
@@ -120,8 +123,12 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
     submodelAttributes
   ).value();
 
-  enforceObjectTransform(particleViewer.viewer, id);
 
+  // this is only needed b/c bug with adding an object to an existing scene programmatically 
+  auto rootId = gameapi -> rootIdForScene(gameapi -> listSceneId(id));  
+  gameapi -> makeParent(particleViewer.viewer.managedObject.value(), rootId);
+
+  enforceObjectTransform(particleViewer.viewer, id);
 }
 
 ViewerData createViewerData(objid id){
@@ -248,13 +255,26 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
 }
 
 
+std::optional<objid> getEmitterId(objid rootObjId){
+  modlog("emitter child scenes of: ", gameapi -> getGameObjNameForId(rootObjId).value());
+  auto prefabScenes = gameapi -> childScenes(gameapi -> listSceneId(rootObjId));
+
+  modlog("emitter", std::string("checking num scenes: " ) + std::to_string(prefabScenes.size()));
+  std::optional<objid> emitterId;
+  for (auto &prefabSceneId : prefabScenes){
+    modassert(!emitterId.has_value(), "multiple emitters across the scenes");
+    modlog("emitter", std::string("checking scene: ") + std::to_string(prefabSceneId));
+    emitterId = gameapi -> getGameObjectByName("+particles", prefabSceneId, false).value();
+  }
+  return emitterId;
+}
+
 
 CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     ParticleViewerData* particleViewer = new ParticleViewerData;
     particleViewer -> viewer = createViewerData(id);
-    particleViewer -> emitParticles = false;
     particleViewer -> particleScenes = particleScenes;
     changeObject(*particleViewer, id);
     return particleViewer;
@@ -282,10 +302,18 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
       auto shouldEmitPtr = anycast<bool>(value); 
       modassert(shouldEmitPtr, "shouldEmitPtr not a bool");
       bool shouldEmit = *shouldEmitPtr;
-      modassert(false, std::string("should emit: " ) + print(shouldEmit));
-      particleViewerData -> emitParticles = shouldEmit;
-    }else if (key == "modelviewer-emit"){
-      modassert(false, "emit particle placeholder");
+      GameobjAttributes attr {
+        .stringAttributes = {{ "state", shouldEmit? "enabled" : "disabled" }},
+        .numAttributes = {},
+        .vecAttr = { 
+          .vec3 = {}, 
+          .vec4 = {} 
+        },
+      };
+      gameapi -> setGameObjectAttr(getEmitterId(particleViewerData -> viewer.managedObject.value()).value(), attr);
+    }else if (key == "modelviewer-emit-one"){
+      
+      gameapi -> emit(getEmitterId(particleViewerData -> viewer.managedObject.value()).value(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
   };
 

@@ -2,8 +2,7 @@
 +particles:position:0 0 0
 +particles:limit:20
 +particles:rate:0.3
-+particles:duration:2
-+particles:state:enabled
++particles:duration:1
 
 +particles:+mesh:./res/models/box/box.obj
 +particles:+physics_type:dynamic
