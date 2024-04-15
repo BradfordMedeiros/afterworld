@@ -681,7 +681,51 @@ std::vector<DockConfiguration> configurations {
           dockConfigApi.setParticlesViewerShouldEmit(isChecked);
         },
       },
-      // then a background picker 
+      DockGroup {
+        .groupName = "Base Particle",
+        .onClick = createCollapsableOnClick("particle"),
+        .collapse = createShouldBeCollapse("particle"),
+        .configFields = {
+          DockColorPickerConfig {
+            .label = "tint",
+            .getColor = []() -> glm::vec4 { return styles.primaryColor; },
+            .onColor = [](glm::vec4 color) -> void {
+            },
+          },
+          DockImageConfig {
+            .label =  "texture",
+            .onImageSelect = [](std::string texture) -> void {
+              dockConfigApi.setTexture(texture);
+            }
+          },
+          DockCheckboxConfig {
+            .label = "Billboard",
+            .isChecked = getIsCheckedWorld("tools", "position-mirror", "true", "false"),
+            .onChecked = getOnCheckedWorld("tools", "position-mirror", "true", "false"),
+          },
+          DockFileConfig {
+            .label = "model-here",
+            .displayLimit = 30,
+          },
+        },
+      },
+      DockGroup {
+        .groupName = "Particle Variance",
+        .onClick = createCollapsableOnClick("particle"),
+        .collapse = createShouldBeCollapse("particle"),
+        .configFields = {
+          DockTextboxNumeric {
+            .label = "position",
+            .value = []() -> std::string{ return "1.0"; },
+            .onEdit = [](float, std::string&) -> void { },
+          },
+          DockTextboxNumeric {
+            .label = "scale",
+            .value = []() -> std::string{ return "1.0"; },
+            .onEdit = [](float, std::string&) -> void { },
+          },
+        }
+      }
     }
   },
 };

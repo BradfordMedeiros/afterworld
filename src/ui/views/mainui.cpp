@@ -248,7 +248,7 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
 };
 
 
-static bool shouldEmitParticleViewerParticles = false;
+static bool shouldEmitParticleViewerParticles = true;
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;

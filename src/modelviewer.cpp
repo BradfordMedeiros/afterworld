@@ -269,6 +269,18 @@ std::optional<objid> getEmitterId(objid rootObjId){
   return emitterId;
 }
 
+void setEmitterState(objid emitterId, bool shouldEmit){
+  GameobjAttributes attr {
+    .stringAttributes = {{ "state", shouldEmit ? "enabled" : "disabled" }},
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = {}, 
+      .vec4 = {} 
+    },
+  };
+  gameapi -> setGameObjectAttr(emitterId, attr);
+}
+
 
 CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -277,6 +289,10 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
     particleViewer -> viewer = createViewerData(id);
     particleViewer -> particleScenes = particleScenes;
     changeObject(*particleViewer, id);
+    auto emitterId = getEmitterId(particleViewer -> viewer.managedObject.value());
+    if (emitterId.has_value()){
+      setEmitterState(emitterId.value(), true);
+    }
     return particleViewer;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -302,18 +318,15 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
       auto shouldEmitPtr = anycast<bool>(value); 
       modassert(shouldEmitPtr, "shouldEmitPtr not a bool");
       bool shouldEmit = *shouldEmitPtr;
-      GameobjAttributes attr {
-        .stringAttributes = {{ "state", shouldEmit? "enabled" : "disabled" }},
-        .numAttributes = {},
-        .vecAttr = { 
-          .vec3 = {}, 
-          .vec4 = {} 
-        },
-      };
-      gameapi -> setGameObjectAttr(getEmitterId(particleViewerData -> viewer.managedObject.value()).value(), attr);
+      auto emitterId = getEmitterId(particleViewerData -> viewer.managedObject.value());
+      if (emitterId.has_value()){
+        setEmitterState(emitterId.value(), shouldEmit);
+      }
     }else if (key == "modelviewer-emit-one"){
-      
-      gameapi -> emit(getEmitterId(particleViewerData -> viewer.managedObject.value()).value(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      auto emitterId = getEmitterId(particleViewerData -> viewer.managedObject.value());
+      if (emitterId.has_value()){
+        gameapi -> emit(emitterId.value(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      }
     }
   };
 
