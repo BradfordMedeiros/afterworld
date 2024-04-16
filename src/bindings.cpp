@@ -242,7 +242,7 @@ void loadConfig(GameState& gameState){
 }
 
 void handleInteract(objid gameObjId){
-  auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+  auto objAttr = getAttrHandle(gameObjId);
   auto chatNode = getStrAttr(objAttr, "chatnode");
   if (chatNode.has_value()){
     gameapi -> sendNotifyMessage("dialog:talk", chatNode.value());
@@ -269,7 +269,7 @@ void handleSwitch(std::string switchValue){
     std::cout << "handle switch: " << id << std::endl;
     //wall:switch-recording:somerecording
     // supposed to play recording here, setting tint for now to test
-    auto objAttr =  gameapi -> getGameObjectAttr(id);
+    auto objAttr = getAttrHandle(id);
     auto switchRecording = getStrAttr(objAttr, "switch-recording");
     if (switchRecording.has_value()){
       gameapi -> playRecording(id, switchRecording.value(), std::nullopt);
@@ -326,7 +326,7 @@ void handleDamageCollision(objid obj1, objid obj2){
   modlog("damage collision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
   
   {
-    auto objAttr1 =  gameapi -> getGameObjectAttr(obj1);
+    auto objAttr1 = getAttrHandle(obj1);
     auto damageAmount = getFloatAttr(objAttr1, "touch-damage");
     if (damageAmount.has_value()){
       DamageMessage damageMessage {
@@ -339,7 +339,7 @@ void handleDamageCollision(objid obj1, objid obj2){
   }
    
   {
-    auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
+    auto objAttr2 = getAttrHandle(obj2);
     auto damageAmount2 = getFloatAttr(objAttr2, "touch-damage");
     if (damageAmount2.has_value()){
       DamageMessage damageMessage {
