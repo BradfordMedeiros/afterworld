@@ -19,12 +19,13 @@ void applyWaterForces(Water& water){
 		auto aabb = gameapi -> getModAABB(waterId);
 		modassert(aabb.has_value(), std::string("water does not have an aabb, does exist: ") + print(gameapi -> gameobjExists(waterId)));
 		auto topOfWater = aabb.value().max.y;
-    auto waterObjAttr = gameapi -> getGameObjectAttr(waterId);
-    auto waterDensityOpt = getFloatAttr(waterObjAttr, "water-density");
+
+		auto waterObjAttrHandle = getAttrHandle(waterId);
+    auto waterDensityOpt = getFloatAttr(waterObjAttrHandle, "water-density");
     auto waterDensity = waterDensityOpt.has_value() ? waterDensityOpt.value() : 10.f;
-    auto waterGravityOpt = getFloatAttr(waterObjAttr, "water-gravity");
+    auto waterGravityOpt = getFloatAttr(waterObjAttrHandle, "water-gravity");
     auto waterGravity = waterGravityOpt.has_value() ? waterGravityOpt.value() : -9.81;
-		auto fluidViscosityOpt = getFloatAttr(waterObjAttr, "water-viscosity");
+		auto fluidViscosityOpt = getFloatAttr(waterObjAttrHandle, "water-viscosity");
 		auto fluidViscosity = fluidViscosityOpt.has_value() ? fluidViscosityOpt.value() : 0.1f;
 
 		std::vector<objid> idsToErase = {};
@@ -33,7 +34,8 @@ void applyWaterForces(Water& water){
 				idsToErase.push_back(submergedObjId);
 				continue;
 			}
-			auto submergedAttr = gameapi -> getGameObjectAttr(submergedObjId);
+
+			auto submergedAttrHandle = getAttrHandle(submergedObjId);
 			
 			// Get percentage of the object submerged by volume.  Uses AABS of water + submerged object, determines based upon if in object and y values only 
 			auto submergedAabb = gameapi -> getModAABB(submergedObjId);
@@ -48,7 +50,7 @@ void applyWaterForces(Water& water){
 
 
 			// Fluid Drag
-			auto submergedObjVelocity = getVec3Attr(submergedAttr, "physics_velocity").value();
+			auto submergedObjVelocity = getVec3Attr(submergedAttrHandle, "physics_velocity").value();
 			//modlog("water", "submerged velocity: " + print(submergedObjVelocity));
 
 			auto crossSectionalAreaYZ = submergedHeight * submergedObjDepth;
@@ -74,7 +76,7 @@ void applyWaterForces(Water& water){
 			//modlog("water", "fluid drag: " + print(totalDrag));
 
 			// calculate new forces based on percentage
-			auto submergedGravity = getVec3Attr(submergedAttr, "physics_gravity").value().y;
+			auto submergedGravity = getVec3Attr(submergedAttrHandle, "physics_gravity").value().y;
 
 			// Water gravity could be just the same as world gravity, but because i want to have tunable control this is separate 
 			float upwardForce =  waterDensity * waterGravity * (submergedVolume * percentage /* volume of part of object submerged (based on AABB)*/);  
@@ -85,7 +87,7 @@ void applyWaterForces(Water& water){
       gameapi -> applyForce(submergedObjId, forceVec);
 
 
-			auto submergedObjAVelocity = getVec3Attr(submergedAttr, "physics_avelocity").value();
+			auto submergedObjAVelocity = getVec3Attr(submergedAttrHandle, "physics_avelocity").value();
 			auto areaCube =  std::cbrt(submergedObjWidth * submergedObjHeight * submergedObjDepth);
 			auto crossSectionalArea =  areaCube * areaCube;
 			auto fluidADragX = (submergedObjAVelocity.x * submergedObjAVelocity.x) * crossSectionalArea;
@@ -136,9 +138,9 @@ CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
     Water* water = static_cast<Water*>(data);
-    auto obj1Attr = gameapi -> getGameObjectAttr(obj1);
+    auto obj1Attr = getAttrHandle(obj1);
     auto obj1IsWater = getStrAttr(obj1Attr, "water").has_value();
-    auto obj2Attr = gameapi -> getGameObjectAttr(obj2);
+    auto obj2Attr = getAttrHandle(obj2);
     auto obj2IsWater = getStrAttr(obj2Attr, "water").has_value();
     modlog("water", "obj1 water: " + print(obj1IsWater) + ", obj2 water: " + print(obj2IsWater));
     if (obj1IsWater){

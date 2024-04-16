@@ -208,6 +208,10 @@ std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* 
   auto attrValue = getStrAttr(attrHandle.attr, key);
   return attrValue; 
 }
+std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getFloatAttr(attrHandle.attr, key);
+  return attrValue; 
+}
 
 std::optional<std::string> getSingleAttr(objid id, const char* key){
   auto objattr = getAttrHandle(id);

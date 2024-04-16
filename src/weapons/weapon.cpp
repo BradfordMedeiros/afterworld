@@ -165,10 +165,10 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
             auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
             auto hitpoint = hitpoints.at(closestHitpointIndex);
             float distance = glm::length(cameraPos - hitpoint.point);
-            auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
-            auto physicsEnabled = getStrAttr(attr, "physics").value() == "enabled";
-            auto physicsDynamic = getStrAttr(attr, "physics_type").value() == "dynamic";
-            auto physicsCollide = getStrAttr(attr, "physics_collision").value() == "collide";
+            auto attrHandle = getAttrHandle(hitpoint.id);
+            auto physicsEnabled = getStrAttr(attrHandle, "physics").value() == "enabled";
+            auto physicsDynamic = getStrAttr(attrHandle, "physics_type").value() == "dynamic";
+            auto physicsCollide = getStrAttr(attrHandle, "physics_collision").value() == "collide";
             auto canPickup = physicsEnabled && physicsDynamic && physicsCollide ;
             modlog("weapons", "pickup item: " + std::to_string(hitpoint.id) + " can pickup: " + print(canPickup) + " distance = " + std::to_string(distance));
             if (canPickup && distance < 5.f){
