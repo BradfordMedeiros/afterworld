@@ -191,21 +191,37 @@ void debugAssertForNow(bool valid, const char* message){
   }
 }
 
+ObjectAttrHandle getAttrHandle(objid id){
+  return ObjectAttrHandle {
+    .attr = gameapi -> getGameObjectAttr(id),
+  };
+}
+std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key){
+  auto attrValue = getVec3Attr(attrHandle.attr, key);
+  return attrValue; 
+}
+std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getStrAttr(attrHandle.attr, key);
+  return attrValue; 
+}
+
 std::optional<std::string> getSingleAttr(objid id, const char* key){
-  auto objattr = gameapi -> getGameObjectAttr(id);
+  auto objattr = getAttrHandle(id);
   auto attrValue = getStrAttr(objattr, key);
   return attrValue;
 }
 std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key){
-  auto objattr = gameapi -> getGameObjectAttr(id);
+  auto objattr = getAttrHandle(id);
   auto attrValue = getVec3Attr(objattr, key);
   return attrValue;
 }
 std::optional<float> getSingleFloatAttr(objid id, const char* key){
-  auto objattr = gameapi -> getGameObjectAttr(id);
+  auto objattr = getAttrHandle(id).attr;
   auto attrValue = getFloatAttr(objattr, key);
   return attrValue;
 }
+
+
 
 
 std::string uniqueNameSuffix(){

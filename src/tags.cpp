@@ -37,13 +37,14 @@ struct TagUpdater {
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
-		//modlog("tags", "scroll object: " + std::to_string(id));
-		auto objAttr =  gameapi -> getGameObjectAttr(id);
-		auto scrollSpeed = getVec3Attr(objAttr, "scrollspeed").value();
+		modlog("tags", "scroll object: " + std::to_string(id));
+		auto attrHandle = getAttrHandle(id);
+		auto scrollSpeed = getVec3Attr(attrHandle, "scrollspeed").value();
+		auto textureOffsetStr = getStrAttr(attrHandle, "textureoffset").value();
+
 		auto elapsedTime = gameapi -> timeElapsed();
 		scrollSpeed.x *= elapsedTime;
 		scrollSpeed.y *= elapsedTime;
-		auto textureOffsetStr = getStrAttr(objAttr, "textureoffset").value();
 		auto offset = parseVec2(textureOffsetStr);
 		offset.x += scrollSpeed.x;
 		offset.y += scrollSpeed.y;
@@ -63,8 +64,7 @@ void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid
 	if (hitpoints.find(id) != hitpoints.end()){
 		return;
 	}
-	auto attr = gameapi -> getGameObjectAttr(id);
-	auto totalHealth = getFloatAttr(attr, "health");
+	auto totalHealth = getSingleFloatAttr(id, "health");
 	if (totalHealth.has_value()){
 		auto healthPoints = totalHealth.value();
 		hitpoints[id] = HitPoints {
@@ -158,13 +158,16 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "scrollspeed",
 		.onAdd = [](void* data, int32_t id, glm::vec3 value) -> void {
   		Tags* tags = static_cast<Tags*>(data);
+
+  		std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
   		tags -> textureScrollObjIds.insert(id);
   	},
   	.onRemove = [](void* data, int32_t id) -> void {
  			Tags* tags = static_cast<Tags*>(data);
  			tags -> textureScrollObjIds.erase(id);
   	},
-  	.onFrame = [](Tags& tags) -> void {  
+  	.onFrame = [](Tags& tags) -> void {
+  		std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
 			handleScroll(tags.textureScrollObjIds);
   	},
   	.onMessage = std::nullopt,
@@ -197,13 +200,11 @@ std::vector<TagUpdater> tagupdates = {
       	std::optional<std::string>* eventName = NULL;
       	float remainingHealth = 0.f;
       	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
-				auto objAttr =  gameapi -> getGameObjectAttr(targetId);
 
       	NoHealthMessage nohealth {
       		.targetId = targetId,
-      		.team = getStrAttr(objAttr, "team"),
+      		.team = getSingleAttr(targetId, "team"),
       	};
-
 
       	if (valid && enemyDead){
       		gameapi -> sendNotifyMessage("nohealth", nohealth);

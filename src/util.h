@@ -88,6 +88,13 @@ struct ItemAcquiredMessage {
 	int amount;
 };
 
+struct ObjectAttrHandle { 
+  GameobjAttributes attr;
+};
+ObjectAttrHandle getAttrHandle(objid id);
+std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key);
+std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key);
+
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);
 std::optional<float> getSingleFloatAttr(objid id, const char* key);
@@ -102,7 +109,6 @@ std::function<void()> getToggleWorldStateSetStr(const char* object, const char* 
 std::function<void()> getToggleWorldStateSetFloat(const char* object, const char* attribute, float value);
 
 void notYetImplementedAlert();
-
 
 void setMusicVolume(float volume);
 void setGameplayVolume(float volume);
