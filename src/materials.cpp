@@ -3,7 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<std::string> materialTypeForObj(objid id){
-  auto attr = gameapi -> getGameObjectAttr(id);
+  auto attr = getAttrHandle(id);
   return getStrAttr(attr, "material");
 }
 
@@ -26,8 +26,7 @@ GameobjAttributes particleAttributes(std::string& particle){
       { "layer", "no_depth" },    ///////
     },
     .numAttributes = { { "duration", 10.f } },
-    .vecAttr = {  
-    },
+    .vecAttr = { },
   };
 
   for (auto &line : templateEmitLine){

@@ -156,7 +156,7 @@ void updateFacingWall(MovementState& movementState, objid id){
   if (hitpoints.size() > 0){
     movementState.facingWall = true;
     auto hitpoint = hitpoints.at(closestHitpoint(hitpoints, mainobjPos));
-    auto attr = gameapi -> getGameObjectAttr(hitpoint.id);
+    auto attr = getAttrHandle(hitpoint.id);
     movementState.facingLadder = getStrAttr(attr, "ladder").has_value();
   }else{
     movementState.facingWall = false;
@@ -166,7 +166,7 @@ void updateFacingWall(MovementState& movementState, objid id){
 
 void restrictLadderMovement(MovementState& movementState, objid id, bool movingDown){
   if (movementState.attachedToLadder){
-    auto attr = gameapi -> getGameObjectAttr(id);
+    auto attr = getAttrHandle(id);
     auto velocity = getVec3Attr(attr, "physics_velocity").value();
     if (velocity.y > 0.f){
       return;

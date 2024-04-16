@@ -102,8 +102,8 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
     auto clip = getClipForMaterial(*sound, material);
     if (clip){
       playGameplayClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, pos);
-      auto attr1 = gameapi -> getGameObjectAttr(obj1);
-      auto attr2 = gameapi -> getGameObjectAttr(obj2);
+      auto attr1 = getAttrHandle(obj1);
+      auto attr2 = getAttrHandle(obj2);
 
       auto vel1 = getVec3Attr(attr1, "physics_velocity").value();
       auto vel2 = getVec3Attr(attr2, "physics_velocity").value();

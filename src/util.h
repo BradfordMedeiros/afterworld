@@ -96,6 +96,7 @@ std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string k
 std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key);
 std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key);
 std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key);
+std::optional<float> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key);
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);

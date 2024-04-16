@@ -62,7 +62,7 @@ bool isPickup(objid id){
 }
 
 void tryPickupItem(objid gameObjId, objid playerId){
-  auto objAttr =  gameapi -> getGameObjectAttr(gameObjId);
+  auto objAttr = getAttrHandle(gameObjId);
   auto pickup = getStrAttr(objAttr, "pickup");
   if (pickup.has_value()){
     auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");

@@ -115,7 +115,7 @@ std::set<std::string> spawnTags(std::optional<std::string>&& value){
 }
 
 void spawnAddId(objid id){
-  auto attr = gameapi -> getGameObjectAttr(id);
+  auto attr = getAttrHandle(id);
   modlog("spawn spawner add id", std::to_string(id));
   managedSpawnpoints[id] = Spawnpoint {
     .type = spawnTypeFromAttr(getStrAttr(attr, "spawn")),
