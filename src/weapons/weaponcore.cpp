@@ -183,10 +183,11 @@ void saveGunTransform(GunInstance& weaponValues){
   if (weaponValues.gunId.has_value()){
     auto gunId = weaponValues.gunId.value();
     auto gun = weaponValues.gunCore.weaponCore -> weaponParams.name;
-    auto attr = gameapi -> getGameObjectAttr(gunId);
-    auto position = attr.vecAttr.vec3.at("position");  
-    auto scale = attr.vecAttr.vec3.at("scale");
-    auto rotation = attr.vecAttr.vec4.at("rotation");
+
+    auto attrHandle = getAttrHandle(gunId);
+    auto position = getVec3Attr(attrHandle, "position").value();  
+    auto scale = getVec3Attr(attrHandle, "scale").value();
+    auto rotation = getVec4Attr(attrHandle, "rotation").value();
 
     modlog("weapons", "save gun, name = " + weaponValues.gunCore.weaponCore -> weaponParams.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
 

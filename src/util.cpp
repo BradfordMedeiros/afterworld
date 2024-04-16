@@ -200,6 +200,10 @@ std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string k
   auto attrValue = getVec3Attr(attrHandle.attr, key);
   return attrValue; 
 }
+std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key){
+  auto attrValue = getVec4Attr(attrHandle.attr, key);
+  return attrValue; 
+}
 std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key){
   auto attrValue = getStrAttr(attrHandle.attr, key);
   return attrValue; 
