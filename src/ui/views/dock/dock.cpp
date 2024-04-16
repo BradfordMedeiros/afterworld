@@ -437,11 +437,6 @@ std::vector<DockConfiguration> configurations {
         .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
         .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
       },
-
-      //     if(objectValue.object == "editor" && objectValue.attribute == "debugmask"){
-      //   debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-cameras", 0b10);
-      //debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-sound", 0b100);
-      //debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-lights", 0b1000);
       DockCheckboxConfig {
         .label = "Show Cameras",
         .isChecked = getIsDebugMaskEnabled(0b10),
@@ -456,6 +451,11 @@ std::vector<DockConfiguration> configurations {
         .label = "Show Sound",
         .isChecked = getIsDebugMaskEnabled(0b100),
         .onChecked = getOnDebugMaskEnabled(0b100),
+      },
+      DockCheckboxConfig {
+        .label = "Show Emitters",
+        .isChecked = getIsDebugMaskEnabled(0b100000),
+        .onChecked = getOnDebugMaskEnabled(0b100000),
       },   
     },
   },
@@ -686,7 +686,13 @@ std::vector<DockConfiguration> configurations {
         .onClick = createCollapsableOnClick("particle"),
         .collapse = createShouldBeCollapse("particle"),
         .configFields = {
-          DockColorPickerConfig {
+          DockCheckboxConfig {
+            .label = "enable physics",
+            .isChecked = getIsCheckedGameobj("+physics", "enabled", "disabled"),
+            .onChecked = getOnCheckedGameobj("+physics", "enabled", "disabled"),
+          },    
+
+          /*DockColorPickerConfig {
             .label = "tint",
             .getColor = []() -> glm::vec4 { return styles.primaryColor; },
             .onColor = [](glm::vec4 color) -> void {
@@ -706,10 +712,10 @@ std::vector<DockConfiguration> configurations {
           DockFileConfig {
             .label = "model-here",
             .displayLimit = 30,
-          },
+          },*/
         },
       },
-      DockGroup {
+      /*DockGroup {
         .groupName = "Particle Variance",
         .onClick = createCollapsableOnClick("particle"),
         .collapse = createShouldBeCollapse("particle"),
@@ -725,7 +731,7 @@ std::vector<DockConfiguration> configurations {
             .onEdit = [](float, std::string&) -> void { },
           },
         }
-      }
+      }*/
     }
   },
 };
