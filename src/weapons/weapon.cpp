@@ -60,24 +60,6 @@ void handlePickedUpItem(Weapons& weapons){
   gameapi -> applyForce(weapons.heldItem.value(), amountToMove);
 }
 
-void modifyPhysicsForHeldItem(Weapons& weapons){
-  GameobjAttributes newAttr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { 
-      .vec3 = { 
-        { "physics_avelocity", glm::vec3(0.f, 0.f, 0.f) }, 
-        { "physics_velocity", glm::vec3(0.f, 0.f, 0.f) },
-        { "physics_angle", glm::vec3(0.f, 0.f, 0.f) }, 
-        { "physics_linear", glm::vec3(1.f, 1.f, 1.f) }, 
-        { "physics_gravity", glm::vec3(0.f, 0.f, 0.f) }, 
-      }, 
-      .vec4 = { } 
-    },
-  };
-  gameapi -> setGameObjectAttr(weapons.heldItem.value(), newAttr);
-}
-
 bool isGunZoomed = false;
 bool getIsGunZoomed(){
   return isGunZoomed;
@@ -173,7 +155,14 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
             modlog("weapons", "pickup item: " + std::to_string(hitpoint.id) + " can pickup: " + print(canPickup) + " distance = " + std::to_string(distance));
             if (canPickup && distance < 5.f){
               weapons -> heldItem = hitpoint.id;
-              modifyPhysicsForHeldItem(*weapons);
+              setGameObjectPhysicsOptions(
+                weapons -> heldItem.value(), 
+                glm::vec3(0.f, 0.f, 0.f), 
+                glm::vec3(0.f, 0.f, 0.f), 
+                glm::vec3(0.f, 0.f, 0.f), 
+                glm::vec3(1.f, 1.f, 1.f), 
+                glm::vec3(0.f, 0.f, 0.f)
+              );
             }
           }
         }

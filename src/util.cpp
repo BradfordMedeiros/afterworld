@@ -327,6 +327,23 @@ void setGameObjectPhysics(objid id, float mass, float restitution, float frictio
   };
   gameapi -> setGameObjectAttr(id, attr);
 }
+void setGameObjectPhysicsOptions(objid id, glm::vec3 avelocity, glm::vec3 velocity, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity){
+  GameobjAttributes newAttr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = { 
+        { "physics_avelocity", avelocity }, 
+        { "physics_velocity", velocity },
+        { "physics_angle", angle }, 
+        { "physics_linear", linear }, 
+        { "physics_gravity", gravity }, 
+      }, 
+      .vec4 = { } 
+    },
+  };
+  gameapi -> setGameObjectAttr(id, newAttr);
+}
 
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());
