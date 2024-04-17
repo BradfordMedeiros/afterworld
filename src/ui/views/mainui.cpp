@@ -350,37 +350,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       return;
     }
     objid id = selected.at(0);
-    std::map<std::string, std::string> stringAttributes;
-    std::map<std::string, double> numAttributes;
-    std::map<std::string, glm::vec3> vec3Attributes;
-    std::map<std::string, glm::vec4> vec4Attributes;
-
-    auto strAttr = std::get_if<std::string>(&value);
-    if (strAttr){
-      std::cout << "setting string attr: " << key << ", " << *strAttr << std::endl;
-      stringAttributes[key] = (*strAttr);
-    }
-    auto numAttr = std::get_if<float>(&value);
-    if (numAttr){
-      numAttributes[key] = (*numAttr);
-    }
-    auto vec3Attr = std::get_if<glm::vec3>(&value);
-    if (vec3Attr){
-      vec3Attributes[key] = (*vec3Attr);
-    }
-    auto vec4Attr = std::get_if<glm::vec4>(&value);
-    if (vec4Attr){
-      vec4Attributes[key] = (*vec4Attr);
-    }
-    GameobjAttributes newAttr {
-      .stringAttributes = stringAttributes,
-      .numAttributes = numAttributes,
-      .vecAttr = { 
-        .vec3 = vec3Attributes, 
-        .vec4 = vec4Attributes, 
-      },
-    };
-    gameapi -> setGameObjectAttr(id, newAttr);
+    setGameobjAttribute(id, key, value);
   },
   .setEditorBackground = [](std::string& background){
     gameapi -> sendNotifyMessage("menu-background", std::string(background));
