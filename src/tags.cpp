@@ -48,15 +48,7 @@ void handleScroll(std::set<objid>& textureScrollObjIds){
 		auto offset = parseVec2(textureOffsetStr);
 		offset.x += scrollSpeed.x;
 		offset.y += scrollSpeed.y;
-		auto textureOffset = serializeVec(offset);
-		GameobjAttributes attr {
-			.stringAttributes = {
-				{ "textureoffset", textureOffset },
-			},
-			.numAttributes = {},
-			.vecAttr = { .vec3 = {}, .vec4 = {} },
-		};
-		gameapi -> setGameObjectAttr(id, attr);
+		setGameObjectTextureOffset(id, offset);
 	}
 }
 

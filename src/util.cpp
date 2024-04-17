@@ -238,8 +238,54 @@ std::optional<float> getSingleFloatAttr(objid id, const char* key){
   return attrValue;
 }
 
-
-
+void setGameObjectTexture(objid id, std::string texture){
+  GameobjAttributes attr {
+    .stringAttributes = {
+      { "texture", texture },
+    },
+    .numAttributes = {},
+    .vecAttr = {
+      .vec3 = {},
+      .vec4 = {},
+    },
+  };
+  gameapi -> setGameObjectAttr(id, attr);
+}
+void setGameObjectTextureOffset(objid id, glm::vec2 offset){
+  auto textureOffset = serializeVec(offset);
+  GameobjAttributes attr {
+    .stringAttributes = {
+      { "textureoffset", textureOffset },
+    },
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  gameapi -> setGameObjectAttr(id, attr);
+}
+void setGameObjectFriction(objid id, float friction){
+  GameobjAttributes newAttr {
+    .stringAttributes = {},
+    .numAttributes = {
+      { "physics_friction", friction },
+    },
+    .vecAttr = { 
+      .vec3 = {},
+      .vec4 = {} 
+    },
+  };
+  gameapi -> setGameObjectAttr(id, newAttr);
+}
+void setGameObjectVelocity(objid id, glm::vec3 velocity){
+  GameobjAttributes newAttr {
+     .stringAttributes = {},
+     .numAttributes = {},
+     .vecAttr = { 
+       .vec3 = { { "physics_velocity", velocity }}, 
+       .vec4 = { } 
+     },
+  };
+  gameapi -> setGameObjectAttr(id, newAttr);
+}
 
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());

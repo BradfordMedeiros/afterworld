@@ -103,6 +103,11 @@ std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);
 std::optional<float> getSingleFloatAttr(objid id, const char* key);
 
+void setGameObjectTexture(objid id, std::string texture);
+void setGameObjectTextureOffset(objid id, glm::vec2 offset);
+void setGameObjectFriction(objid id, float friction);
+void setGameObjectVelocity(objid id, glm::vec3 velocity);
+
 std::string uniqueNameSuffix();
 
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);

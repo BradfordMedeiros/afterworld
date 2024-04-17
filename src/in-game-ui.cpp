@@ -10,18 +10,7 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 
 	std::string texture = ingameUiTextureName(id);
 	auto uiTexture = gameapi -> createTexture(texture, 512, 512, id);
-
- 	GameobjAttributes attr {
- 	   .stringAttributes = {
- 	     { "texture", texture },
- 	   },
- 	   .numAttributes = {},
- 	   .vecAttr = {
- 	     .vec3 = {},
- 	     .vec4 = {},
- 	   },
- 	};
- 	gameapi -> setGameObjectAttr(id, attr);  
+ 	setGameObjectTexture(id, texture);
 
  	inGameUi.textDisplays[id] = TextDisplay{
  		.texture = "../gameresources/textures/controls/up-down.png",

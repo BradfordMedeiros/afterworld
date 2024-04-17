@@ -172,16 +172,7 @@ void restrictLadderMovement(MovementState& movementState, objid id, bool movingD
       return;
     }
     velocity.y = 0.f;
-
-    GameobjAttributes newAttr {
-      .stringAttributes = {},
-      .numAttributes = {},
-      .vecAttr = { 
-        .vec3 = { { "physics_velocity", velocity }}, 
-        .vec4 = { } 
-      },
-    };
-    gameapi -> setGameObjectAttr(id, newAttr);
+    setGameObjectVelocity(id, velocity);
   }
 }
 
@@ -252,17 +243,9 @@ void toggleCrouch(MovementParams& moveParams, MovementState& movementState, obji
   modlog("movement", "toggle crouch: " + print(shouldCrouch));
   auto crouchScale = moveParams.crouchScale;
   auto scale = shouldCrouch ? (crouchScale * movementState.initialScale) : movementState.initialScale;
-  GameobjAttributes newAttr {
-    .stringAttributes = {},
-    .numAttributes = {
-      { "physics_friction", shouldCrouch ? moveParams.crouchFriction : moveParams.friction },
-    },
-    .vecAttr = { 
-      .vec3 = {},
-      .vec4 = {} 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, newAttr);
+  float friction = shouldCrouch ? moveParams.crouchFriction : moveParams.friction;
+  setGameObjectFriction(id, friction);
+
   gameapi -> setGameObjectScale(id, scale, true);
   if (shouldCrouch){
     // two reasons: 

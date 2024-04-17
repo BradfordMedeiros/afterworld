@@ -6,17 +6,7 @@ void updateBackground(objid id, std::string image){
 	if (!getSingleAttr(id, "background").has_value()){
 		return;
 	}
- 	GameobjAttributes attr {
-		.stringAttributes = {
-			{ "texture", image },
-		},
-		.numAttributes = {},
-		.vecAttr = {
-			.vec3 = {},
-			.vec4 = {},
-		},
-	};
-	gameapi -> setGameObjectAttr(id, attr);
+  setGameObjectTexture(id, image);
 }
 
 std::string queryInitialBackground(){

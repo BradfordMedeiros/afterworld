@@ -318,17 +318,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     std::cout << "dock mock set texture: " << texture << std::endl;
     auto selectedIds = gameapi -> selected();
     for (auto id : selectedIds){
-      GameobjAttributes attr {
-        .stringAttributes = {
-          { "texture", texture },
-        },
-        .numAttributes = {},
-        .vecAttr = {
-          .vec3 = {},
-          .vec4 = {},
-        },
-      };
-      gameapi -> setGameObjectAttr(id, attr);     
+      setGameObjectTexture(id, texture);     
     }
   },
   .getAttribute = [](std::string key, std::string attribute) -> AttributeValue {
