@@ -292,9 +292,9 @@ void handleSwitch(std::string switchValue){
 
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey){
   modlog("main collision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-  auto objAttr1 =  gameapi -> getGameObjectAttr(obj1);
-  auto switchEnter1 = getAttr(objAttr1, attrForValue);
-  auto switchEnter1Key = getStrAttr(objAttr1, attrForKey);
+  auto objAttr1 =  getAttrHandle(obj1);
+  auto switchEnter1 = getAttr(objAttr1, attrForValue.c_str());
+  auto switchEnter1Key = getStrAttr(objAttr1, attrForKey.c_str());
   auto switchRemove1 = getStrAttr(objAttr1, "switch-remove");
   if (switchEnter1.has_value()){
     //std::cout << "race publishing 1: " << switchEnter1.value() << std::endl;
@@ -307,9 +307,9 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
     }
   }
 
-  auto objAttr2 =  gameapi -> getGameObjectAttr(obj2);
-  auto switchEnter2 = getAttr(objAttr2, attrForValue);
-  auto switchEnter2Key = getStrAttr(objAttr2, attrForKey);
+  auto objAttr2 = getAttrHandle(obj2);
+  auto switchEnter2 = getAttr(objAttr2, attrForValue.c_str());
+  auto switchEnter2Key = getStrAttr(objAttr2, attrForKey.c_str());
   auto switchRemove2 = getStrAttr(objAttr2, "switch-remove");
   if (switchEnter2.has_value()){
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;

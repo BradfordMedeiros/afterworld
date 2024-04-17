@@ -350,8 +350,8 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       return std::nullopt;
     }
     objid id = selected.at(0);
-    auto gameobjAttr =  gameapi -> getGameObjectAttr(id);
-    auto attr = getAttr(gameobjAttr, key);
+    auto gameobjAttr = getAttrHandle(id);
+    auto attr = getAttr(gameobjAttr, key.c_str());
     return attr;
   },
   .setObjAttr = [](std::string key, AttributeValue value) -> void {

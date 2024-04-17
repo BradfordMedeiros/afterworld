@@ -92,11 +92,12 @@ std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>
 		return std::nullopt;
 	}
 	auto values = split(args.at("printdebug"), ':');
+	auto printRateStr = args.find("printrate") == args.end() ? "1000" : args.at("printrate");
 	modassert(values.size() == 2, "invalid value for printdebug");
 	return PrintObjDebug {
 		.objname = values.at(0),
 		.attribute = values.at(1),
-		.interval = parseFloat(args.at("printrate")) / 1000.f,
+		.interval = parseFloat(printRateStr) / 1000.f,
 	};
 }
 std::optional<objid> findObjByShortName(std::string name){
@@ -132,20 +133,22 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
   if (printObjDebug.has_value()){
   	binding.onFrame = [printObjDebug](int32_t id, void* data) -> void {
   		static float lastPrintTime = 0;
-  		auto currTime = gameapi -> timeSeconds(false);
+  		auto currTime = gameapi -> timeSeconds(true);
   		if (currTime - lastPrintTime < printObjDebug.value().interval){
   			return;
   		}
  			lastPrintTime = currTime;
   		auto objid = findObjByShortName(printObjDebug.value().objname);
   		if (objid.has_value()){
-			  auto objAttr =  gameapi -> getGameObjectAttr(objid.value());
-			  auto attr = getAttr(objAttr, printObjDebug.value().attribute);
+			  auto objAttr = getAttrHandle(objid.value());
+			  auto attr = getAttr(objAttr, printObjDebug.value().attribute.c_str());
 			  if (!attr.has_value()){
 				  modlog("debug attribute", "no value");
 			  }else{
 				  modlog("debug attribute", print(attr.value()));
 			  }
+  		}else{
+				  modlog("debug attribute", "no gameobj");
   		}
   	};
   }

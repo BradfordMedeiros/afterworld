@@ -212,9 +212,14 @@ std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key)
   auto attrValue = getFloatAttr(attrHandle.attr, key);
   return attrValue; 
 }
-std::optional<float> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key){
+std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key){
   auto attrValue = getIntFromAttr(attrHandle.attr, key);
   return attrValue; 
+}
+
+std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getAttr(attrHandle.attr, key);
+  return attrValue;
 }
 
 std::optional<std::string> getSingleAttr(objid id, const char* key){
