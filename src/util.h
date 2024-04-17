@@ -4,6 +4,8 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "../../ModEngine/src/translations.h"
 #include "../../ModEngine/src/common/symbols.h"
+#include "../../ModEngine/src/main_api.h"
+
 #include <bits/stdc++.h>
 
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);
@@ -87,17 +89,6 @@ struct ItemAcquiredMessage {
 	objid targetId;
 	int amount;
 };
-
-struct ObjectAttrHandle { 
-  GameobjAttributes attr;
-};
-ObjectAttrHandle getAttrHandle(objid id);
-std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key);
-std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key);
-std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key);
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);
 std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);
