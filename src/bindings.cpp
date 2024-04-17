@@ -274,19 +274,7 @@ void handleSwitch(std::string switchValue){
     if (switchRecording.has_value()){
       gameapi -> playRecording(id, switchRecording.value(), std::nullopt);
     }
-    
-    GameobjAttributes attr {
-      .stringAttributes = {},
-      .numAttributes = {},
-      .vecAttr = {
-        .vec3 = {},
-        .vec4 = {
-          { "tint", glm::vec4(randomNum(), randomNum(), randomNum(), 1.f) },
-        },
-      },
-    };
-    gameapi -> setGameObjectAttr(id, attr);
-
+    setGameObjectTint(id, glm::vec4(randomNum(), randomNum(), randomNum(), 1.f));
   }
 }
 

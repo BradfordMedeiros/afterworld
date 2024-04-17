@@ -286,6 +286,47 @@ void setGameObjectVelocity(objid id, glm::vec3 velocity){
   };
   gameapi -> setGameObjectAttr(id, newAttr);
 }
+void setGameObjectTint(objid id, glm::vec4 tint){
+  GameobjAttributes attr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = {
+      .vec3 = {},
+      .vec4 = {
+        { "tint", tint },
+      },
+    },
+  };
+  gameapi -> setGameObjectAttr(id, attr);
+}
+void setGameObjectStateEnabled(objid id, bool enable){
+  GameobjAttributes attr {
+    .stringAttributes = {{ "state", enable ? "enabled" : "disabled" }},
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = {}, 
+      .vec4 = {} 
+    },
+  };
+  gameapi -> setGameObjectAttr(id, attr);  
+}
+void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity){
+  GameobjAttributes attr {
+    .stringAttributes = {},
+    .numAttributes = {
+      { "physics_mass", mass },
+      { "physics_restitution", restitution },
+      { "physics_friction", friction },
+    },
+    .vecAttr = { 
+      .vec3 = {
+        { "physics_gravity", gravity },
+      }, 
+      .vec4 = {} 
+    },
+  };
+  gameapi -> setGameObjectAttr(id, attr);
+}
 
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());

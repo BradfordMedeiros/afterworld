@@ -269,19 +269,6 @@ std::optional<objid> getEmitterId(objid rootObjId){
   return emitterId;
 }
 
-void setEmitterState(objid emitterId, bool shouldEmit){
-  GameobjAttributes attr {
-    .stringAttributes = {{ "state", shouldEmit ? "enabled" : "disabled" }},
-    .numAttributes = {},
-    .vecAttr = { 
-      .vec3 = {}, 
-      .vec4 = {} 
-    },
-  };
-  gameapi -> setGameObjectAttr(emitterId, attr);
-}
-
-
 CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -291,7 +278,7 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
     changeObject(*particleViewer, id);
     auto emitterId = getEmitterId(particleViewer -> viewer.managedObject.value());
     if (emitterId.has_value()){
-      setEmitterState(emitterId.value(), true);
+      setGameObjectStateEnabled(emitterId.value(), true);
     }
     return particleViewer;
   };
@@ -320,7 +307,7 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
       bool shouldEmit = *shouldEmitPtr;
       auto emitterId = getEmitterId(particleViewerData -> viewer.managedObject.value());
       if (emitterId.has_value()){
-        setEmitterState(emitterId.value(), shouldEmit);
+        setGameObjectStateEnabled(emitterId.value(), shouldEmit);
       }
     }else if (key == "modelviewer-emit-one"){
       auto emitterId = getEmitterId(particleViewerData -> viewer.managedObject.value());

@@ -77,25 +77,6 @@ void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRe
   }
 }
 
-
-void updateObjectProperties(objid id, MovementParams& moveParams){
-  GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {
-      { "physics_mass", moveParams.physicsMass },
-      { "physics_restitution", moveParams.physicsRestitution },
-      { "physics_friction", moveParams.friction },
-    },
-    .vecAttr = { 
-      .vec3 = {
-        { "physics_gravity", moveParams.gravity },
-      }, 
-      .vec4 = {} 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, attr);
-}
-
 MovementEntity createMovementEntity(objid id, std::string&& name){
   MovementEntity movementEntity {
     .playerId = id,
@@ -107,9 +88,7 @@ MovementEntity createMovementEntity(objid id, std::string&& name){
   modassert(movementEntity.moveParams, "could not find movement core");
   movementEntity.movementState.lastMoveSoundPlayTime = 0.f;
   movementEntity.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
-
-  updateObjectProperties(id, *movementEntity.moveParams);
-
+  setGameObjectPhysics(id, movementEntity.moveParams -> physicsMass, movementEntity.moveParams -> physicsRestitution, movementEntity.moveParams -> friction, movementEntity.moveParams -> gravity);
   return movementEntity;
 }
 

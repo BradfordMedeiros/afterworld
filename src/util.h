@@ -107,6 +107,9 @@ void setGameObjectTexture(objid id, std::string texture);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);
 void setGameObjectFriction(objid id, float friction);
 void setGameObjectVelocity(objid id, glm::vec3 velocity);
+void setGameObjectTint(objid id, glm::vec4 tint);
+void setGameObjectStateEnabled(objid id, bool enable);
+void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity);
 
 std::string uniqueNameSuffix();
 
