@@ -120,13 +120,12 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
   };
 }
 
-
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
   return [attrFuncs](int32_t _, void* data, int32_t idRemoved) -> void {
     std::cout << "tags: id removed: " << idRemoved << std::endl;
-    auto objAttrs = gameapi -> getGameObjectAttr(idRemoved);
+    auto objAttrs = getAttrHandle(idRemoved);
     for (auto &attrFunc : attrFuncs){
-      if (hasAttribute(objAttrs, attrFunc.attr)){
+      if (hasAttribute(objAttrs, attrFunc.attr.c_str())){
         attrFunc.fn(data, idRemoved);
       }
     }

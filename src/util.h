@@ -38,7 +38,6 @@ struct AttrFunc {
 	std::string attr;
 	std::function<void(void*, int32_t idAdded)> fn;
 };
-bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs);
 
 float randomNumber(float min, float max);
