@@ -111,6 +111,7 @@ std::optional<objid> findObjByShortName(std::string name){
 	return std::nullopt;
 }
 
+
 CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 	auto args = api.getArgs();
@@ -127,6 +128,26 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
    	if (key == 96 /* ~ */  && action == 1){
    		getGlobalState().showConsole = !getGlobalState().showConsole;
    		modlog("console visibility", print(getGlobalState().showConsole));
+   	}
+
+   	auto testObject = findObjByShortName("testobject");
+   	if (testObject.has_value()){
+   		std::optional<glm::vec4*> tintValue = getTypeFromAttr<glm::vec4>(getObjectAttributePtr(testObject.value(), "tint"));
+   		if (tintValue.has_value()){
+	   		std::cout << "tintValue: " << print(*tintValue.value()) << std::endl;
+   		}
+   		std::optional<glm::vec3*> positionValue = getTypeFromAttr<glm::vec3>(getObjectAttributePtr(testObject.value(), "position"));
+   		if (positionValue.has_value()){
+	   		std::cout << "positionValue: " << print(*positionValue.value()) << std::endl;
+   		}
+   		std::optional<std::string*> layerValue = getTypeFromAttr<std::string>(getObjectAttributePtr(testObject.value(), "layer"));
+   		if (layerValue.has_value()){
+	   		std::cout << "layerValue: " << print(*layerValue.value()) << std::endl;
+   		}
+   		std::optional<double*> massValue = getTypeFromAttr<double>(getObjectAttributePtr(testObject.value(), "physics_mass"));
+   		if (massValue.has_value()){
+	   		std::cout << "massValue: " << *(massValue.value()) << std::endl;
+   		}
    	}
   };
 
