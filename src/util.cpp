@@ -208,7 +208,7 @@ std::optional<float> getSingleFloatAttr(objid id, const char* key){
 
 void setGameobjAttribute(objid id, std::string key, AttributeValue value){
   std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, double> numAttributes;
+  std::map<std::string, float> numAttributes;
   std::map<std::string, glm::vec3> vec3Attributes;
   std::map<std::string, glm::vec4> vec4Attributes;
   auto strAttr = std::get_if<std::string>(&value);
