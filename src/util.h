@@ -94,7 +94,6 @@ std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);
 std::optional<float> getSingleFloatAttr(objid id, const char* key);
 
 
-void setGameobjAttribute(objid id, std::string key, AttributeValue value);
 void setGameObjectTexture(objid id, std::string texture);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);
 void setGameObjectFriction(objid id, float friction);

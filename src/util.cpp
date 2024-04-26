@@ -206,109 +206,23 @@ std::optional<float> getSingleFloatAttr(objid id, const char* key){
   return attrValue;
 }
 
-void setGameobjAttribute(objid id, std::string key, AttributeValue value){
-  std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, float> numAttributes;
-  std::map<std::string, glm::vec3> vec3Attributes;
-  std::map<std::string, glm::vec4> vec4Attributes;
-  auto strAttr = std::get_if<std::string>(&value);
-  if (strAttr){
-    std::cout << "setting string attr: " << key << ", " << *strAttr << std::endl;
-    stringAttributes[key] = (*strAttr);
-  }
-  auto numAttr = std::get_if<float>(&value);
-  if (numAttr){
-    numAttributes[key] = (*numAttr);
-  }
-  auto vec3Attr = std::get_if<glm::vec3>(&value);
-  if (vec3Attr){
-    vec3Attributes[key] = (*vec3Attr);
-  }
-  auto vec4Attr = std::get_if<glm::vec4>(&value);
-  if (vec4Attr){
-    vec4Attributes[key] = (*vec4Attr);
-  }
-  GameobjAttributes newAttr {
-    .stringAttributes = stringAttributes,
-    .numAttributes = numAttributes,
-    .vecAttr = { 
-      .vec3 = vec3Attributes, 
-      .vec4 = vec4Attributes, 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, newAttr);
-}
 void setGameObjectTexture(objid id, std::string texture){
-  GameobjAttributes attr {
-    .stringAttributes = {
-      { "texture", texture },
-    },
-    .numAttributes = {},
-    .vecAttr = {
-      .vec3 = {},
-      .vec4 = {},
-    },
-  };
-  gameapi -> setGameObjectAttr(id, attr);
+  gameapi -> setSingleGameObjectAttr(id, "texture", texture);
 }
 void setGameObjectTextureOffset(objid id, glm::vec2 offset){
-  auto textureOffset = serializeVec(offset);
-  GameobjAttributes attr {
-    .stringAttributes = {
-      { "textureoffset", textureOffset },
-    },
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
-  };
-  gameapi -> setGameObjectAttr(id, attr);
+  gameapi -> setSingleGameObjectAttr(id, "textureoffset", serializeVec(offset));
 }
 void setGameObjectFriction(objid id, float friction){
-  GameobjAttributes newAttr {
-    .stringAttributes = {},
-    .numAttributes = {
-      { "physics_friction", friction },
-    },
-    .vecAttr = { 
-      .vec3 = {},
-      .vec4 = {} 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, newAttr);
+  gameapi -> setSingleGameObjectAttr(id, "physics_friction", friction);
 }
 void setGameObjectVelocity(objid id, glm::vec3 velocity){
-  GameobjAttributes newAttr {
-     .stringAttributes = {},
-     .numAttributes = {},
-     .vecAttr = { 
-       .vec3 = { { "physics_velocity", velocity }}, 
-       .vec4 = { } 
-     },
-  };
-  gameapi -> setGameObjectAttr(id, newAttr);
+  gameapi -> setSingleGameObjectAttr(id, "physics_velocity", velocity);
 }
 void setGameObjectTint(objid id, glm::vec4 tint){
-  GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = {
-      .vec3 = {},
-      .vec4 = {
-        { "tint", tint },
-      },
-    },
-  };
-  gameapi -> setGameObjectAttr(id, attr);
+  gameapi -> setSingleGameObjectAttr(id, "tint", tint);
 }
 void setGameObjectStateEnabled(objid id, bool enable){
-  GameobjAttributes attr {
-    .stringAttributes = {{ "state", enable ? "enabled" : "disabled" }},
-    .numAttributes = {},
-    .vecAttr = { 
-      .vec3 = {}, 
-      .vec4 = {} 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, attr);  
+  gameapi -> setSingleGameObjectAttr(id, "state", enable ? std::string("enabled") : std::string("disabled"));
 }
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity){
   GameobjAttributes attr {

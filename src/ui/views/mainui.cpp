@@ -350,7 +350,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
       return;
     }
     objid id = selected.at(0);
-    setGameobjAttribute(id, key, value);
+    gameapi -> setSingleGameObjectAttr(id, key.c_str(), value);
   },
   .setEditorBackground = [](std::string& background){
     gameapi -> sendNotifyMessage("menu-background", std::string(background));

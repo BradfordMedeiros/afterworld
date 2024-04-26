@@ -132,6 +132,17 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
 
    	auto testObject = findObjByShortName("testobject");
    	if (testObject.has_value()){
+	   	if (key == 340 /* shift */ && action == 1){
+	   		gameapi -> setSingleGameObjectAttr(testObject.value(), "position", glm::vec3(0.f, 2.f, 0.f));
+	   		gameapi -> setSingleGameObjectAttr(testObject.value(), "physics_mass", 10.f);
+	   		gameapi -> setSingleGameObjectAttr(testObject.value(), "tint", glm::vec4(1.f, 0.f, 0.f, 1.f));
+	   		gameapi -> setSingleGameObjectAttr(testObject.value(), "custom_string", "cool gamer");
+	   	}
+   		if (key == 340 /* shift */ && action == 1){
+	   		//gameapi -> setSingleGameObjectAttr(testObject.value(), "tint", glm::vec4(0.f, 1.f, 0.f, 1.f));
+	   	}
+
+
    		std::optional<glm::vec4*> tintValue = getTypeFromAttr<glm::vec4>(getObjectAttributePtr(testObject.value(), "tint"));
    		if (tintValue.has_value()){
 	   		std::cout << "tintValue: " << print(*tintValue.value()) << std::endl;
@@ -144,10 +155,28 @@ CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
    		if (layerValue.has_value()){
 	   		std::cout << "layerValue: " << print(*layerValue.value()) << std::endl;
    		}
-   		std::optional<double*> massValue = getTypeFromAttr<double>(getObjectAttributePtr(testObject.value(), "physics_mass"));
+
+   		
+   		std::optional<bool*> physicsEnabledValue = getTypeFromAttr<bool>(getObjectAttributePtr(testObject.value(), "physics"));
+   		if (physicsEnabledValue.has_value()){
+	   		std::cout << "physicsEnabledValue: " << print(*physicsEnabledValue.value()) << std::endl;
+   		}
+
+   		//auto objAttr = gameapi -> getGameObjectAttr(testObject.value());
+   		//std::cout << "Value objAttr: " << print(objAttr) << std::endl;
+
+   		std::optional<float*> massValue = getTypeFromAttr<float>(getObjectAttributePtr(testObject.value(), "physics_mass"));
    		if (massValue.has_value()){
 	   		std::cout << "massValue: " << *(massValue.value()) << std::endl;
    		}
+
+   		std::optional<std::string*> customStrValue = getTypeFromAttr<std::string>(getObjectAttributePtr(testObject.value(), "custom_string"));
+   		if (customStrValue.has_value()){
+	   		std::cout << "customStrValue: " << *(customStrValue.value()) << std::endl;
+   		}else{
+	   		std::cout << "customStrValue: " << "none" << std::endl;
+   		}
+
    	}
   };
 
