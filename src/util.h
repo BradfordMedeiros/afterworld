@@ -94,6 +94,19 @@ std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key);
 std::optional<float> getSingleFloatAttr(objid id, const char* key);
 
 
+struct ObjectAttrHandle { 
+  GameobjAttributes attr;
+  objid id;
+};
+ObjectAttrHandle getAttrHandle(objid id);
+std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key);
+std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key);
+std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key);
+std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key);
+std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key);
+std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key);
+bool hasAttribute(objid id, const char* key);
+
 void setGameObjectTexture(objid id, std::string texture);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);
 void setGameObjectFriction(objid id, float friction);

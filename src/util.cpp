@@ -123,9 +123,8 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
   return [attrFuncs](int32_t _, void* data, int32_t idRemoved) -> void {
     std::cout << "tags: id removed: " << idRemoved << std::endl;
-    auto objAttrs = getAttrHandle(idRemoved);
     for (auto &attrFunc : attrFuncs){
-      if (hasAttribute(objAttrs, attrFunc.attr.c_str())){
+      if (hasAttribute(idRemoved, attrFunc.attr.c_str())){
         attrFunc.fn(data, idRemoved);
       }
     }
@@ -188,6 +187,41 @@ void debugAssertForNow(bool valid, const char* message){
   if (assertDebug){
     modassert(valid, message);
   }
+}
+
+ObjectAttrHandle getAttrHandle(objid id){
+  return ObjectAttrHandle {
+    .attr = getGameObjectAttr(id),
+    .id = id,
+  };
+}
+std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key){
+  auto attrValue = getVec3Attr(attrHandle.attr, key);
+  return attrValue; 
+}
+std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key){
+  auto attrValue = getVec4Attr(attrHandle.attr, key);
+  return attrValue; 
+}
+std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getStrAttr(attrHandle.attr, key);
+  return attrValue; 
+}
+std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getFloatAttr(attrHandle.attr, key);
+  return attrValue; 
+}
+std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getIntFromAttr(attrHandle.attr, key);
+  return attrValue; 
+}
+
+std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key){
+  auto attrValue = getAttr(attrHandle.attr, key);
+  return attrValue;
+}
+bool hasAttribute(objid id, const char* key){
+  return getObjectAttributePtr(id, key).has_value();
 }
 
 std::optional<std::string> getSingleAttr(objid id, const char* key){
