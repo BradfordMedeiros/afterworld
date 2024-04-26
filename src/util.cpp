@@ -191,29 +191,54 @@ void debugAssertForNow(bool valid, const char* message){
 
 ObjectAttrHandle getAttrHandle(objid id){
   return ObjectAttrHandle {
-    .attr = getGameObjectAttr(id),
+    .attr = gameapi -> getGameObjectAttr(id),
     .id = id,
   };
 }
+std::optional<glm::vec2> getVec2Attr(ObjectAttrHandle& attrHandle, std::string key){
+  std::optional<glm::vec2*> value = getTypeFromAttr<glm::vec2>(getObjectAttributePtr(attrHandle.id, key.c_str()));
+  if (value.has_value()){
+   return *(value.value());
+  }
+  return std::nullopt; 
+}
 std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key){
-  auto attrValue = getVec3Attr(attrHandle.attr, key);
-  return attrValue; 
+  std::optional<glm::vec3*> value = getTypeFromAttr<glm::vec3>(getObjectAttributePtr(attrHandle.id, key.c_str()));
+  if (value.has_value()){
+   return *(value.value());
+  }
+  return std::nullopt; 
 }
 std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key){
-  auto attrValue = getVec4Attr(attrHandle.attr, key);
-  return attrValue; 
+  std::optional<glm::vec4*> value = getTypeFromAttr<glm::vec4>(getObjectAttributePtr(attrHandle.id, key.c_str()));
+  if (value.has_value()){
+   return *(value.value());
+  }
+  return std::nullopt; 
 }
 std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getStrAttr(attrHandle.attr, key);
-  return attrValue; 
+  std::cout << "getting key: " << key << std::endl;
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(attrHandle.id, key));
+  if (value.has_value()){
+   return *(value.value());
+  }
+  return std::nullopt; 
 }
 std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getFloatAttr(attrHandle.attr, key);
-  return attrValue; 
+  std::cout << "getting key: " << key << std::endl;
+  std::optional<float*> value = getTypeFromAttr<float>(getObjectAttributePtr(attrHandle.id, key));
+  if (value.has_value()){
+   return *(value.value());
+  }
+  return std::nullopt; 
 }
-std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getIntFromAttr(attrHandle.attr, key);
-  return attrValue; 
+std::optional<bool> getBoolAttr(ObjectAttrHandle& attrHandle, const char* key){
+  std::cout << "getting key: " << key << std::endl;
+  std::optional<bool*> value = getTypeFromAttr<bool>(getObjectAttributePtr(attrHandle.id, key));
+  if (value.has_value()){
+   return *(value.value());
+  }
+  return std::nullopt; 
 }
 
 std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key){

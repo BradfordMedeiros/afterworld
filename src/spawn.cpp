@@ -117,11 +117,16 @@ std::set<std::string> spawnTags(std::optional<std::string>&& value){
 void spawnAddId(objid id){
   auto attr = getAttrHandle(id);
   modlog("spawn spawner add id", std::to_string(id));
+  std::optional<float> spawnLimitFloat = getFloatAttr(attr, "spawnlimit");
+  std::optional<int> spawnLimit;
+  if (spawnLimitFloat.has_value()){
+    spawnLimit = static_cast<int>(spawnLimitFloat.value());
+  }
   managedSpawnpoints[id] = Spawnpoint {
     .type = spawnTypeFromAttr(getStrAttr(attr, "spawn")),
     .tags = spawnTags(getStrAttr(attr, "spawntags")),
     .respawnRate = getFloatAttr(attr, "spawnrate"),
-    .itemLimit = getIntFromAttr(attr, "spawnlimit"),
+    .itemLimit = spawnLimit,
     .lastSlotFreeTime = std::nullopt,
     .managedIds = {},
   };

@@ -40,12 +40,11 @@ void handleScroll(std::set<objid>& textureScrollObjIds){
 		modlog("tags", "scroll object: " + std::to_string(id));
 		auto attrHandle = getAttrHandle(id);
 		auto scrollSpeed = getVec3Attr(attrHandle, "scrollspeed").value();
-		auto textureOffsetStr = getStrAttr(attrHandle, "textureoffset").value();
+		auto offset = getVec2Attr(attrHandle, "textureoffset").value();
 
 		auto elapsedTime = gameapi -> timeElapsed();
 		scrollSpeed.x *= elapsedTime;
 		scrollSpeed.y *= elapsedTime;
-		auto offset = parseVec2(textureOffsetStr);
 		offset.x += scrollSpeed.x;
 		offset.y += scrollSpeed.y;
 		setGameObjectTextureOffset(id, offset);

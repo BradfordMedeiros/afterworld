@@ -99,11 +99,12 @@ struct ObjectAttrHandle {
   objid id;
 };
 ObjectAttrHandle getAttrHandle(objid id);
+std::optional<glm::vec2> getVec2Attr(ObjectAttrHandle& attrHandle, std::string key);
 std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key);
 std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key);
 std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key);
 std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key);
+std::optional<bool> getBoolAttr(ObjectAttrHandle& attrHandle, const char* key);
 std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key);
 bool hasAttribute(objid id, const char* key);
 
