@@ -94,15 +94,19 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
     for (auto &attrFunc : attrFuncs){
       auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);
       if (stringFn != NULL){
-        auto stringValue = getStrAttr(objHandle, attrFunc.attr.c_str());
+        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+        auto stringValue = maybeUnwrapAttrOpt<std::string>(attrValue);
         if (stringValue.has_value()){
           (*stringFn)(data, idAdded, stringValue.value());
+        }else{
+         // modassert(false, std::string("invalid type for: ") + attrFunc.attr);
         }
         continue;
       }
       auto floatFn = std::get_if<floatAttrFuncValue>(&attrFunc.fn);
       if (floatFn != NULL){
-        auto floatValue = getFloatAttr(objHandle, attrFunc.attr.c_str());
+        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+        auto floatValue = maybeUnwrapAttrOpt<float>(attrValue);
         if (floatValue.has_value()){
           (*floatFn)(data, idAdded, floatValue.value());
         }
@@ -110,7 +114,8 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
       }
       auto vec3Fn = std::get_if<vec3AttrFuncValue>(&attrFunc.fn);
       if (vec3Fn != NULL){
-        auto vec3Value = getVec3Attr(objHandle, attrFunc.attr.c_str());
+        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+        auto vec3Value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
         if (vec3Value.has_value()){
           (*vec3Fn)(data, idAdded, vec3Value.value());
         }

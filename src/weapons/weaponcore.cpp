@@ -465,7 +465,7 @@ bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::opt
   return false;
 }
 
-bool swayFromMouse = false;
+bool swayFromMouse = true;
 glm::vec3 getSwayVelocity(objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec){
   if (swayFromMouse){
     debugAssertForNow(false, "sway from mouse should take into account sensitivity");
