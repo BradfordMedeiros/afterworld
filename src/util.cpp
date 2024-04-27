@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index){
   auto value = sqlResult.at(0).at(index);
   return value ;
@@ -87,14 +88,13 @@ void clickMouse(objid id){
   });
 }
 
-
 std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs){
   return [attrFuncs](int32_t _, void* data, int32_t idAdded) -> void { 
-    auto objAttrs = gameapi -> getGameObjectAttr(idAdded);
+    auto objHandle = getAttrHandle(idAdded);
     for (auto &attrFunc : attrFuncs){
       auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);
       if (stringFn != NULL){
-        auto stringValue = getStrAttr(objAttrs, attrFunc.attr);
+        auto stringValue = getStrAttr(objHandle, attrFunc.attr.c_str());
         if (stringValue.has_value()){
           (*stringFn)(data, idAdded, stringValue.value());
         }
@@ -102,7 +102,7 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
       }
       auto floatFn = std::get_if<floatAttrFuncValue>(&attrFunc.fn);
       if (floatFn != NULL){
-        auto floatValue = getFloatAttr(objAttrs, attrFunc.attr);
+        auto floatValue = getFloatAttr(objHandle, attrFunc.attr.c_str());
         if (floatValue.has_value()){
           (*floatFn)(data, idAdded, floatValue.value());
         }
@@ -110,7 +110,7 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
       }
       auto vec3Fn = std::get_if<vec3AttrFuncValue>(&attrFunc.fn);
       if (vec3Fn != NULL){
-        auto vec3Value = getVec3Attr(objAttrs, attrFunc.attr);
+        auto vec3Value = getVec3Attr(objHandle, attrFunc.attr.c_str());
         if (vec3Value.has_value()){
           (*vec3Fn)(data, idAdded, vec3Value.value());
         }
@@ -191,7 +191,6 @@ void debugAssertForNow(bool valid, const char* message){
 
 ObjectAttrHandle getAttrHandle(objid id){
   return ObjectAttrHandle {
-    .attr = gameapi -> getGameObjectAttr(id),
     .id = id,
   };
 }
@@ -242,7 +241,7 @@ std::optional<bool> getBoolAttr(ObjectAttrHandle& attrHandle, const char* key){
 }
 
 std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getAttr(attrHandle.attr, key);
+  auto attrValue = getObjectAttribute(attrHandle.id, key);
   return attrValue;
 }
 bool hasAttribute(objid id, const char* key){
@@ -260,7 +259,7 @@ std::optional<glm::vec3> getSingleVec3Attr(objid id, const char* key){
   return attrValue;
 }
 std::optional<float> getSingleFloatAttr(objid id, const char* key){
-  auto objattr = getAttrHandle(id).attr;
+  auto objattr = getAttrHandle(id);
   auto attrValue = getFloatAttr(objattr, key);
   return attrValue;
 }
@@ -284,38 +283,27 @@ void setGameObjectStateEnabled(objid id, bool enable){
   gameapi -> setSingleGameObjectAttr(id, "state", enable ? std::string("enabled") : std::string("disabled"));
 }
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity){
-  GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {
-      { "physics_mass", mass },
-      { "physics_restitution", restitution },
-      { "physics_friction", friction },
-    },
-    .vecAttr = { 
-      .vec3 = {
-        { "physics_gravity", gravity },
-      }, 
-      .vec4 = {} 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, attr);
+  gameapi -> setGameObjectAttr(
+    id, 
+    {
+      GameobjAttribute { .field = "physics_mass", .attributeValue = mass },
+      GameobjAttribute { .field = "physics_restitution", .attributeValue = restitution },
+      GameobjAttribute { .field = "physics_friction", .attributeValue = friction },
+      GameobjAttribute { .field = "physics_gravity", .attributeValue = gravity },
+    }
+  );
 }
 void setGameObjectPhysicsOptions(objid id, glm::vec3 avelocity, glm::vec3 velocity, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity){
-  GameobjAttributes newAttr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { 
-      .vec3 = { 
-        { "physics_avelocity", avelocity }, 
-        { "physics_velocity", velocity },
-        { "physics_angle", angle }, 
-        { "physics_linear", linear }, 
-        { "physics_gravity", gravity }, 
-      }, 
-      .vec4 = { } 
-    },
-  };
-  gameapi -> setGameObjectAttr(id, newAttr);
+  gameapi -> setGameObjectAttr(
+    id, 
+    {
+      GameobjAttribute { .field = "physics_avelocity", .attributeValue = avelocity },
+      GameobjAttribute { .field = "physics_velocity", .attributeValue = velocity },
+      GameobjAttribute { .field = "physics_angle", .attributeValue = angle },
+      GameobjAttribute { .field = "physics_linear", .attributeValue = linear },
+      GameobjAttribute { .field = "physics_gravity", .attributeValue = gravity },
+    }
+  );
 }
 
 std::string uniqueNameSuffix(){

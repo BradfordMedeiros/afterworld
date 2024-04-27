@@ -32,12 +32,13 @@ struct AttrFuncValue {
 	std::string attr;
 	attrFuncValue fn;
 };
-
-std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs);
 struct AttrFunc {
 	std::string attr;
 	std::function<void(void*, int32_t idAdded)> fn;
 };
+
+std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs);
+
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs);
 
 float randomNumber(float min, float max);
@@ -95,7 +96,6 @@ std::optional<float> getSingleFloatAttr(objid id, const char* key);
 
 
 struct ObjectAttrHandle { 
-  GameobjAttributes attr;
   objid id;
 };
 ObjectAttrHandle getAttrHandle(objid id);
