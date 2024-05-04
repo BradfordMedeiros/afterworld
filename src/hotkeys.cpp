@@ -70,10 +70,10 @@ void spawnProcMesh(objid sceneId){
 	gameapi -> generateMesh(faces, points, "proc-sometest-mesh");
 
 
-	std::map<std::string, std::string> stringAttributes = { { "mesh", "proc-sometest-mesh" } };
+	std::map<std::string, AttributeValue> attributes = { { "mesh", "proc-sometest-mesh" } };
 
   GameobjAttributes attr {
-    .stringAttributes = stringAttributes,
+    .attr = attributes,
     .numAttributes = {},
     .vecAttr = {  .vec3 = {{ "position", glm::vec3(0.f, 0.f, 0.f) }, { "scale", glm::vec3(1.f, 1.f, 1.f) }},  .vec4 = {}},
   };

@@ -24,7 +24,7 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
   GameobjAttributes particleAttr {
-    .stringAttributes = { 
+    .attr = { 
       { "state", "enabled" },    
       { "+physics", "enabled" },
       { "+physics_type", "dynamic" },  

@@ -85,7 +85,7 @@ void changeObject(ModelViewerData& modelViewer, objid id){
 		gameapi -> removeByGroupId(modelViewer.viewer.managedObject.value());
 	}
   GameobjAttributes attr = {
-    .stringAttributes = {{ "mesh", model }},
+    .attr = {{ "mesh", model }},
     .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {}},
   };
@@ -111,7 +111,7 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
     gameapi -> removeByGroupId(particleViewer.viewer.managedObject.value());
   }
   GameobjAttributes attr = {
-    .stringAttributes = {{ "scene", scene }},
+    .attr = {{ "scene", scene }},
     .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {}},
   };

@@ -14,7 +14,7 @@ struct Spawnpoint {
 
 objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
   GameobjAttributes attr = {
-    .stringAttributes = {
+    .attr = {
       { "scene", prefab },
       { "+item", "pickup-remove:prefab" },
     },
@@ -41,7 +41,7 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
   // replace with   createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
   // when fix physics bug, add data attributes
   GameobjAttributes attr = {
-    .stringAttributes = {
+    .attr = {
       { "mesh", "../gameresources/build/characters/plaguerobot.gltf" },
       { "physics", "enabled" },
       { "physics_type", "dynamic" },

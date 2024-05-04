@@ -22,14 +22,14 @@ std::string* getClipForMaterial(Sound& sound, std::string& material){
 
 void loadAllSounds(std::vector<MaterialToSound>& sounds, objid sceneId){
   GameobjAttributes attr {
-    .stringAttributes = {},
+    .attr = {},
     .numAttributes = {},
     .vecAttr = { .vec3 = {},  .vec4 = {} },
   };
 	std::map<std::string, GameobjAttributes> submodelAttributes;
 
 	for (auto &sound : sounds){
-		attr.stringAttributes["clip"] = sound.clip;
+		attr.attr["clip"] = sound.clip;
 		auto id = gameapi -> makeObjectAttr(sceneId, std::string("&material-") + sound.material, attr, submodelAttributes);
 	  modassert(id.has_value(), "could not make material");
   }
