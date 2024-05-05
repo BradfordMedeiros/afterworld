@@ -110,8 +110,15 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
 
   GameobjAttributes attr {
-    .attr = { { "mesh", model }, { "physics", "enabled" }, { "physics_type", "dynamic" }, { "mass", mass } },
-    .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }, { "physics_linear", physicsLinear }} },
+    .attr = { 
+      { "mesh", model }, 
+      { "physics", "enabled" }, 
+      { "physics_type", "dynamic" }, 
+      { "mass", mass },
+      { "position", position },
+      { "physics_angle", physicsAngle },
+      { "physics_linear", physicsLinear },
+    },
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -119,10 +126,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
   modassert(vehicleId.has_value(), "could not make vehicle");
   vehicle.vehicleId = vehicleId;
 
-  GameobjAttributes camAttr {
-    .attr = {},
-    .vecAttr = {  .vec3 = {} },
-  };
+  GameobjAttributes camAttr { .attr = {} };
 
   auto cameraId = gameapi -> makeObjectAttr(sceneId, std::string(">code-vehicle-cam-") + uniqueNameSuffix(), camAttr, submodelAttributes);
   gameapi -> makeParent(cameraId.value(), vehicleId.value());

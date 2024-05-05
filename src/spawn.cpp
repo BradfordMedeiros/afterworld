@@ -18,11 +18,7 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
       { "scene", prefab },
       { "+item", "pickup-remove:prefab" },
       { "spawn-managed", static_cast<float>(spawnOwnerId)},
-    },
-    .vecAttr = {
-      .vec3 = {
-        { "position", pos },
-      },
+      { "position", pos },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
@@ -46,12 +42,8 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
       { "goal-info", "target" },
       { "health", 130.f },
       { "spawn-managed", static_cast<float>(spawnOwnerId) },
-    },
-    .vecAttr = {
-      .vec3 = {
-        { "position", pos },
-        { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
-      },
+      { "position", pos },
+      { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;

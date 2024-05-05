@@ -86,7 +86,6 @@ void changeObject(ModelViewerData& modelViewer, objid id){
 	}
   GameobjAttributes attr = {
     .attr = {{ "mesh", model }},
-    .vecAttr = { .vec3 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   modelViewer.viewer.managedObject = gameapi -> makeObjectAttr(
@@ -111,7 +110,6 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
   }
   GameobjAttributes attr = {
     .attr = {{ "scene", scene }},
-    .vecAttr = { .vec3 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   particleViewer.viewer.managedObject = gameapi -> makeObjectAttr(

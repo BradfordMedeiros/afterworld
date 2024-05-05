@@ -25,8 +25,9 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
 		gameapi -> setActiveCamera(id, -1);
 	}else{
     GameobjAttributes attr {
-      .attr = { },
-      .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 20.f) }} },
+      .attr = { 
+				{ "position", glm::vec3(0.f, 0.f, 20.f) },
+      },
     };
     std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -96,8 +97,7 @@ void setTempViewpoint(glm::vec3 position, glm::quat rotation){
 	auto id = activePlayerId.value();
   std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
   GameobjAttributes attr {
-    .attr = { },
-    .vecAttr = {  .vec3 = { { "position", position }} },
+    .attr = { { "position", position } },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), cameraName, attr, submodelAttributes).value();

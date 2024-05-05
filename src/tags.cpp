@@ -90,11 +90,7 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
   GameobjAttributes attr = {
     .attr = {
       { "scene", prefab },
-    },
-    .vecAttr = {
-      .vec3 = {
-        { "position", position },
-      },
+			{ "position", position },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};

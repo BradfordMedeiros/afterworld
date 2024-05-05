@@ -31,7 +31,6 @@ void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponPa
   if (weaponParams.soundpath != ""){
     GameobjAttributes soundAttr {
       .attr = { { "clip", weaponParams.soundpath }, { "physics", "disabled" }},
-      .vecAttr = {  .vec3 = {} },
     };
     std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -163,15 +162,14 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid play
     { "mesh", weaponParams.modelpath }, 
     { "layer", "no_depth" },
     { "rotation", weaponParams.initialGunRotVec4 },
+    { "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) },
+    { "scale", weaponParams.scale },
   };
   if (weaponParams.script != ""){
     attrAttributes["script"] = weaponParams.script;
   }
   GameobjAttributes attr {
     .attr = attrAttributes,
-    .vecAttr = {  
-      .vec3 = {{ "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", weaponParams.scale }},  
-    },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);

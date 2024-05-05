@@ -26,7 +26,6 @@ GameobjAttributes particleAttributes(std::string& particle){
       { "layer", "no_depth" },    ///////
       { "duration", 10.f }
     },
-    .vecAttr = { },
   };
 
   for (auto &line : templateEmitLine){
