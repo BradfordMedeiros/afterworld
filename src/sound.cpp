@@ -23,7 +23,6 @@ std::string* getClipForMaterial(Sound& sound, std::string& material){
 void loadAllSounds(std::vector<MaterialToSound>& sounds, objid sceneId){
   GameobjAttributes attr {
     .attr = {},
-    .numAttributes = {},
     .vecAttr = { .vec3 = {},  .vec4 = {} },
   };
 	std::map<std::string, GameobjAttributes> submodelAttributes;

@@ -91,8 +91,6 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
     .attr = {
       { "scene", prefab },
     },
-    .numAttributes = {
-    },
     .vecAttr = {
       .vec3 = {
         { "position", position },

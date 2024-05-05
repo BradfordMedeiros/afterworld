@@ -31,8 +31,6 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
       { "+layer", "basicui" },    ///////
       { "+mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf"},
       { "+texture", strFromFirstSqlResult(result, 0) },
-    },
-    .numAttributes = { 
       { "duration", floatFromFirstSqlResult(result, 1) },
       { "rate", floatFromFirstSqlResult(result, 2) },
       { "limit", floatFromFirstSqlResult(result, 3) },

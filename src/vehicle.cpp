@@ -110,8 +110,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
 
   GameobjAttributes attr {
-    .attr = { { "mesh", model }, { "physics", "enabled" }, { "physics_type", "dynamic" } },
-    .numAttributes = { { "mass", mass }},
+    .attr = { { "mesh", model }, { "physics", "enabled" }, { "physics_type", "dynamic" }, { "mass", mass } },
     .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }, { "physics_linear", physicsLinear }},  .vec4 = {} },
   };
 
@@ -122,7 +121,6 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
   GameobjAttributes camAttr {
     .attr = {},
-    .numAttributes = {},
     .vecAttr = {  .vec3 = {},  .vec4 = {} },
   };
 

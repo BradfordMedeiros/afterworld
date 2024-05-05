@@ -74,7 +74,6 @@ void spawnProcMesh(objid sceneId){
 
   GameobjAttributes attr {
     .attr = attributes,
-    .numAttributes = {},
     .vecAttr = {  .vec3 = {{ "position", glm::vec3(0.f, 0.f, 0.f) }, { "scale", glm::vec3(1.f, 1.f, 1.f) }},  .vec4 = {}},
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;

@@ -17,9 +17,7 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
     .attr = {
       { "scene", prefab },
       { "+item", "pickup-remove:prefab" },
-    },
-    .numAttributes = {
-      { "spawn-managed", spawnOwnerId},
+      { "spawn-managed", static_cast<float>(spawnOwnerId)},
     },
     .vecAttr = {
       .vec3 = {
@@ -47,10 +45,8 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
       { "physics_type", "dynamic" },
       { "agent", "basic" },
       { "goal-info", "target" },
-    },
-    .numAttributes = {
       { "health", 130.f },
-      { "spawn-managed", spawnOwnerId },
+      { "spawn-managed", static_cast<float>(spawnOwnerId) },
     },
     .vecAttr = {
       .vec3 = {

@@ -24,8 +24,8 @@ GameobjAttributes particleAttributes(std::string& particle){
       { "state", "disabled" },    // default should keep
       { "physics", "disabled" },  
       { "layer", "no_depth" },    ///////
+      { "duration", 10.f }
     },
-    .numAttributes = { { "duration", 10.f } },
     .vecAttr = { },
   };
 

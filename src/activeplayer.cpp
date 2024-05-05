@@ -26,7 +26,6 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
 	}else{
     GameobjAttributes attr {
       .attr = { },
-      .numAttributes = {},
       .vecAttr = {  .vec3 = { { "position", glm::vec3(0.f, 0.f, 20.f) }},  .vec4 = {} },
     };
     std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
@@ -98,7 +97,6 @@ void setTempViewpoint(glm::vec3 position, glm::quat rotation){
   std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
   GameobjAttributes attr {
     .attr = { },
-    .numAttributes = {},
     .vecAttr = {  .vec3 = { { "position", position }},  .vec4 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
