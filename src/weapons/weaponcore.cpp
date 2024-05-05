@@ -31,7 +31,7 @@ void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponPa
   if (weaponParams.soundpath != ""){
     GameobjAttributes soundAttr {
       .attr = { { "clip", weaponParams.soundpath }, { "physics", "disabled" }},
-      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+      .vecAttr = {  .vec3 = {} },
     };
     std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -159,13 +159,19 @@ WeaponParams queryWeaponParams(std::string gunName){
 }
 
 objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId, std::string& weaponName){
-  std::map<std::string, AttributeValue> vecAttributes = { { "mesh", weaponParams.modelpath }, { "layer", "no_depth" } };
+  std::map<std::string, AttributeValue> attrAttributes = { 
+    { "mesh", weaponParams.modelpath }, 
+    { "layer", "no_depth" },
+    { "rotation", weaponParams.initialGunRotVec4 },
+  };
   if (weaponParams.script != ""){
-    vecAttributes["script"] = weaponParams.script;
+    attrAttributes["script"] = weaponParams.script;
   }
   GameobjAttributes attr {
-    .attr = vecAttributes,
-    .vecAttr = {  .vec3 = {{ "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", weaponParams.scale }},  .vec4 = {{ "rotation", weaponParams.initialGunRotVec4 }}},
+    .attr = attrAttributes,
+    .vecAttr = {  
+      .vec3 = {{ "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) }, { "scale", weaponParams.scale }},  
+    },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);

@@ -34,6 +34,7 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
       { "duration", floatFromFirstSqlResult(result, 1) },
       { "rate", floatFromFirstSqlResult(result, 2) },
       { "limit", floatFromFirstSqlResult(result, 3) },
+      {"+tint", vec4FromFirstSqlResult(result, 4)  },
     },
     .vecAttr = {  
       .vec3 = { 
@@ -43,9 +44,6 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
         {"!position", glm::vec3(0.001f, 0.001f, 0.001f) },
         {"?position", glm::vec3(0.1f, 0.001f, 0.001f) },
       },  
-      .vec4 = {
-        {"+tint", vec4FromFirstSqlResult(result, 4)  },
-      } 
     },
   };
   weather.weatherEmitter = gameapi -> makeObjectAttr(sceneId, std::string("+code-weather-") + uniqueNameSuffix(), particleAttr, submodelAttributes); 

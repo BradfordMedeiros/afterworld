@@ -19,7 +19,7 @@ objid createSound(objid sceneId, std::string soundObjName, std::string clip){
       { "clip", clip },
       { "center", "true" },
     },
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
+    .vecAttr = { .vec3 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto soundObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);

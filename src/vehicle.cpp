@@ -111,7 +111,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
   GameobjAttributes attr {
     .attr = { { "mesh", model }, { "physics", "enabled" }, { "physics_type", "dynamic" }, { "mass", mass } },
-    .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }, { "physics_linear", physicsLinear }},  .vec4 = {} },
+    .vecAttr = {  .vec3 = { { "position", position }, { "physics_angle", physicsAngle }, { "physics_linear", physicsLinear }} },
   };
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -121,7 +121,7 @@ void createVehicle(Vehicle& vehicle, std::string name, objid sceneId, glm::vec3 
 
   GameobjAttributes camAttr {
     .attr = {},
-    .vecAttr = {  .vec3 = {},  .vec4 = {} },
+    .vecAttr = {  .vec3 = {} },
   };
 
   auto cameraId = gameapi -> makeObjectAttr(sceneId, std::string(">code-vehicle-cam-") + uniqueNameSuffix(), camAttr, submodelAttributes);

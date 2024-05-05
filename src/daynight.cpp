@@ -28,8 +28,6 @@ void spawnLight(objid sceneId, glm::vec3 color){
         { "position", glm::vec3(2.f, 0.f, 0.f) },
         { "color", color },
       }, 
-      .vec4 = { 
-      } 
     },
   };
 

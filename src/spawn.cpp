@@ -23,7 +23,6 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
       .vec3 = {
         { "position", pos },
       },
-      .vec4 = {},
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
@@ -52,8 +51,6 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
       .vec3 = {
         { "position", pos },
         { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
-      },
-      .vec4 = {
       },
     },
   };
