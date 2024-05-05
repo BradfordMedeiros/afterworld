@@ -20,13 +20,12 @@ GameobjAttributes particleAttributes(std::string& particle){
   auto templateEmitLine = split(particle, ';');
 
   GameobjAttributes particleAttr {
-    .stringAttributes = { 
+    .attr = { 
       { "state", "disabled" },    // default should keep
       { "physics", "disabled" },  
       { "layer", "no_depth" },    ///////
+      { "duration", 10.f }
     },
-    .numAttributes = { { "duration", 10.f } },
-    .vecAttr = { },
   };
 
   for (auto &line : templateEmitLine){

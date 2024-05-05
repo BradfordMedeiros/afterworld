@@ -253,27 +253,21 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr {
-      .stringAttributes = {},
-      .numAttributes = {},
-      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+      .attr = {},
     };
     gameapi -> makeObjectAttr(activeSceneId(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createLight = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr {
-      .stringAttributes = {},
-      .numAttributes = {},
-      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+      .attr = {},
     };
     gameapi -> makeObjectAttr(activeSceneId(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createNavmesh = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr {
-      .stringAttributes = {},
-      .numAttributes = {},
-      .vecAttr = {  .vec3 = {},  .vec4 = {} },
+      .attr = {},
     };
     gameapi -> makeObjectAttr(activeSceneId(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
   },

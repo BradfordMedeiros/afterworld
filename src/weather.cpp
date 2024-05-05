@@ -24,30 +24,22 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
   GameobjAttributes particleAttr {
-    .stringAttributes = { 
+    .attr = { 
       { "state", "enabled" },    
       { "+physics", "enabled" },
       { "+physics_type", "dynamic" },  
       { "+layer", "basicui" },    ///////
       { "+mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf"},
       { "+texture", strFromFirstSqlResult(result, 0) },
-    },
-    .numAttributes = { 
       { "duration", floatFromFirstSqlResult(result, 1) },
       { "rate", floatFromFirstSqlResult(result, 2) },
       { "limit", floatFromFirstSqlResult(result, 3) },
-    },
-    .vecAttr = {  
-      .vec3 = { 
-        {"position", glm::vec3(0, 1.5f, -1.f) }, 
-        {"+scale", glm::vec3(0.2f, 0.2f, 0.2f) },
-        { "+physics_gravity", glm::vec3(0.f, -1.f, -1.f) },
-        {"!position", glm::vec3(0.001f, 0.001f, 0.001f) },
-        {"?position", glm::vec3(0.1f, 0.001f, 0.001f) },
-      },  
-      .vec4 = {
-        {"+tint", vec4FromFirstSqlResult(result, 4)  },
-      } 
+      {"+tint", vec4FromFirstSqlResult(result, 4)  },
+      {"position", glm::vec3(0, 1.5f, -1.f) }, 
+      {"+scale", glm::vec3(0.2f, 0.2f, 0.2f) },
+      { "+physics_gravity", glm::vec3(0.f, -1.f, -1.f) },
+      {"!position", glm::vec3(0.001f, 0.001f, 0.001f) },
+      {"?position", glm::vec3(0.1f, 0.001f, 0.001f) },
     },
   };
   weather.weatherEmitter = gameapi -> makeObjectAttr(sceneId, std::string("+code-weather-") + uniqueNameSuffix(), particleAttr, submodelAttributes); 

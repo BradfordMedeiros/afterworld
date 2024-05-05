@@ -22,17 +22,9 @@ const float maxMinutePerDay = 60 * 24;
 
 void spawnLight(objid sceneId, glm::vec3 color){
   GameobjAttributes attr {
-    .stringAttributes = {
-    },
-    .numAttributes = {
-    },
-    .vecAttr = { 
-      .vec3 = {
-        { "position", glm::vec3(2.f, 0.f, 0.f) },
-        { "color", color },
-      }, 
-      .vec4 = { 
-      } 
+    .attr = {
+      { "position", glm::vec3(2.f, 0.f, 0.f) },
+      { "color", color },      
     },
   };
 

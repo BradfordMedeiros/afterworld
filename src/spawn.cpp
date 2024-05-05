@@ -14,18 +14,11 @@ struct Spawnpoint {
 
 objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
   GameobjAttributes attr = {
-    .stringAttributes = {
+    .attr = {
       { "scene", prefab },
       { "+item", "pickup-remove:prefab" },
-    },
-    .numAttributes = {
-      { "spawn-managed", spawnOwnerId},
-    },
-    .vecAttr = {
-      .vec3 = {
-        { "position", pos },
-      },
-      .vec4 = {},
+      { "spawn-managed", static_cast<float>(spawnOwnerId)},
+      { "position", pos },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
@@ -41,24 +34,16 @@ objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm:
   // replace with   createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
   // when fix physics bug, add data attributes
   GameobjAttributes attr = {
-    .stringAttributes = {
+    .attr = {
       { "mesh", "../gameresources/build/characters/plaguerobot.gltf" },
       { "physics", "enabled" },
       { "physics_type", "dynamic" },
       { "agent", "basic" },
       { "goal-info", "target" },
-    },
-    .numAttributes = {
       { "health", 130.f },
-      { "spawn-managed", spawnOwnerId },
-    },
-    .vecAttr = {
-      .vec3 = {
-        { "position", pos },
-        { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
-      },
-      .vec4 = {
-      },
+      { "spawn-managed", static_cast<float>(spawnOwnerId) },
+      { "position", pos },
+      { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;

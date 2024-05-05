@@ -88,16 +88,9 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
 	std::cout << "create prefab placeholder: " << print(position) << ", " << prefab << std::endl;
 
   GameobjAttributes attr = {
-    .stringAttributes = {
+    .attr = {
       { "scene", prefab },
-    },
-    .numAttributes = {
-    },
-    .vecAttr = {
-      .vec3 = {
-        { "position", position },
-      },
-      .vec4 = {},
+			{ "position", position },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};

@@ -85,9 +85,7 @@ void changeObject(ModelViewerData& modelViewer, objid id){
 		gameapi -> removeByGroupId(modelViewer.viewer.managedObject.value());
 	}
   GameobjAttributes attr = {
-    .stringAttributes = {{ "mesh", model }},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {}},
+    .attr = {{ "mesh", model }},
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   modelViewer.viewer.managedObject = gameapi -> makeObjectAttr(
@@ -111,9 +109,7 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
     gameapi -> removeByGroupId(particleViewer.viewer.managedObject.value());
   }
   GameobjAttributes attr = {
-    .stringAttributes = {{ "scene", scene }},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {}},
+    .attr = {{ "scene", scene }},
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   particleViewer.viewer.managedObject = gameapi -> makeObjectAttr(

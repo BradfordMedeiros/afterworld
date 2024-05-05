@@ -15,12 +15,10 @@ ManagedSounds& getManagedSounds(){
 objid createSound(objid sceneId, std::string soundObjName, std::string clip){
   modassert(soundObjName.at(0) == '&', "sound obj must start with &");
   GameobjAttributes attr {
-    .stringAttributes = {
+    .attr = {
       { "clip", clip },
       { "center", "true" },
     },
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto soundObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
