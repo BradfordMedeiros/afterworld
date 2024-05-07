@@ -681,6 +681,21 @@ std::vector<DockConfiguration> configurations {
           dockConfigApi.setParticlesViewerShouldEmit(isChecked);
         },
       },
+      DockTextboxNumeric {
+        .label = "rate",
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      DockTextboxNumeric {
+        .label = "duration",
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      DockTextboxNumeric {
+        .label = "limit",
+        .value = []() -> std::string{ return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
       DockGroup {
         .groupName = "Base Particle",
         .onClick = createCollapsableOnClick("particle"),
@@ -692,13 +707,13 @@ std::vector<DockConfiguration> configurations {
             .onChecked = getOnCheckedGameobj("+physics", "enabled", "disabled"),
           },    
 
-          /*DockColorPickerConfig {
+          DockColorPickerConfig {
             .label = "tint",
             .getColor = []() -> glm::vec4 { return styles.primaryColor; },
             .onColor = [](glm::vec4 color) -> void {
             },
           },
-          DockImageConfig {
+          /*DockImageConfig {
             .label =  "texture",
             .onImageSelect = [](std::string texture) -> void {
               dockConfigApi.setTexture(texture);
@@ -715,7 +730,7 @@ std::vector<DockConfiguration> configurations {
           },*/
         },
       },
-      /*DockGroup {
+      DockGroup {
         .groupName = "Particle Variance",
         .onClick = createCollapsableOnClick("particle"),
         .collapse = createShouldBeCollapse("particle"),
@@ -731,7 +746,7 @@ std::vector<DockConfiguration> configurations {
             .onEdit = [](float, std::string&) -> void { },
           },
         }
-      }*/
+      }
     }
   },
 };

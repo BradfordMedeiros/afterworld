@@ -661,7 +661,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else if (action == 1){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
-        raycastAndMoveTo();
+        if (false){
+          raycastAndMoveTo();
+        }
       }
     }else if (button == 0){
       if (action == 0){

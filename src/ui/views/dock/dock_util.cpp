@@ -29,8 +29,6 @@ std::optional<glm::vec2> toVec2(std::string& text){
   }
   return value;
 }
-
-
 std::optional<glm::vec3> toVec3(std::string& text){
   auto parts = split(text, ' ');
   if (parts.size() > 3){
@@ -131,7 +129,6 @@ std::optional<int> toPositiveInteger(std::string& text){
   }
   return asInt;
 }
-
 
 std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
   return [key, attribute, enabledValue, disabledValue]() -> bool {

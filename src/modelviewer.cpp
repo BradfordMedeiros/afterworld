@@ -135,7 +135,7 @@ ViewerData createViewerData(objid id){
       .initialCameraPos = glm::vec3(0.f, 0.f, 0.f),
       .rotationXDegrees = 0.f,
       .rotationYDegrees = 0.f,
-      .cameraRotationXDegrees = 0.f,
+      .cameraRotationXDegrees = 90.f,
       .scale = 1.f,
       .objectOffset = glm::vec3(0.f, 0.f, 0.f),
     },
