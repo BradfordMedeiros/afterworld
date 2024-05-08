@@ -13,7 +13,6 @@ extern const int windowDialogSymbol;
 struct WindowData {
   glm::vec2 windowOffset;
   std::optional<glm::vec2> initialDragPos;
-  bool enable;
   bool horizontal;
   bool vertical;
 };

@@ -185,15 +185,13 @@ Props navListProps {
   }
 };
 
-std::string dockedDock = "";
+std::set<std::string> dockedDocks = {};
 std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   //pushQueryParam(routerHistory, "dockedDock");
-  dockedDock = value;
-  modlog("dock", std::string("new dock: ") + dockedDock);
-  if (dockedDock == ""){
-    windowSetEnabled(windowDockSymbol, false);
-  }else{
-    windowSetEnabled(windowDockSymbol, true);
+  dockedDocks.insert(value);
+  for (auto &dock : dockedDocks){
+    auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
+    windowSetEnabled(windowDockSymbol, true);    
   }
 };
 
@@ -201,7 +199,6 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
 std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
 std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
-
 std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn = std::nullopt;
 
 
@@ -512,7 +509,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   };
   resetMenuItemMappingId();
 
-  if (dockedDock != ""){
+  for (auto &dockedDock : dockedDocks){
     Props dockProps { 
       .props = {
         { dockTypeSymbol, dockedDock }, 
@@ -521,9 +518,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     };
     auto dock = withProps(dockComponent, dockProps);
     auto defaultWindowProps = getDefaultProps();
-    createUiWindow(dock, windowDockSymbol, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }).draw(drawTools, defaultWindowProps);
-  }
 
+    auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dockedDock);
+    std::function<void()> onClickX = [dockedDock]() -> void {
+      dockedDocks.erase(dockedDock);
+    };
+    createUiWindow(dock, windowDockSymbol, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }, onClickX).draw(drawTools, defaultWindowProps);
+  }
 
   {
     std::vector<ListComponentData> dialogOptions = {

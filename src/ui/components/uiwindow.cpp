@@ -4,19 +4,19 @@
 const float STYLE_UI_WINDOW_FONTSIZE = 0.02f;
 const float STYLE_UI_WINDOW_PADDING = 0.02f;
 
-Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment){
+Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment, std::function<void()> onClickX){
   Component componentUiWindow {
-    .draw = [&component, symbol, titleValue, alignment](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [&component, symbol, titleValue, alignment, onClickX ](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       auto enable = windowEnabled(symbol);
       if (!enable){
         return BoundingBox2D { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
       }
 
-      std::function<void()> onClickX = [symbol]() -> void {
-        windowSetEnabled(symbol, false);
+      std::function<void()> onClickWindowX = [symbol, onClickX]() -> void {
+        onClickX();
       };
 
-      std::function<void()> onClick = [symbol]() -> void {
+      std::function<void()> onClick =  [symbol]() -> void {
           std::cout << "on window drag" << std::endl;
           windowOnDrag(symbol);
       };
@@ -42,7 +42,7 @@ Component createUiWindow(Component& component, int symbol, std::string titleValu
 
 
       auto boundingBox = simpleVerticalLayout(allComponents, glm::vec2(0.f, 0.f), alignment, styles.mainBorderColor).draw(drawTools, props);
-      drawWindowX(drawTools, boundingBox, onClickX);
+      drawWindowX(drawTools, boundingBox, onClickWindowX);
 
       auto oldCoords = windowGetPreDragOffset(symbol);
       BoundingBox2D copyBoundingBox = boundingBox;

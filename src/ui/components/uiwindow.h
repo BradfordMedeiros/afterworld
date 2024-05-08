@@ -7,5 +7,5 @@
 #include "../views/windowmanager.h"
 #include "../views/style.h"
 
-Component createUiWindow(Component& component, int symbol, std::string titleValue = "Untitled Window", AlignmentParams alignment = defaultAlignment);
+Component createUiWindow(Component& component, int symbol, std::string titleValue = "Untitled Window", AlignmentParams alignment = defaultAlignment, std::function<void()> onClickX = []() -> void {});
 #endif

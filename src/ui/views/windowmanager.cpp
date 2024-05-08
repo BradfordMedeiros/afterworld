@@ -3,54 +3,29 @@
 extern CustomApiBindings* gameapi;
 
 const int windowColorPickerSymbol = getSymbol("window-symbol-colorpicker");
-const int windowDockSymbol = getSymbol("window-symbol-dock");
 const int windowFileExplorerSymbol = getSymbol("window-fileexplorer");
 const int windowImageExplorerSymbol = getSymbol("window-imageexplorer");
 const int windowDialogSymbol = getSymbol("window-dialogsymbol");
 
-std::map<int, WindowData> windowData = {
-  { windowColorPickerSymbol, WindowData {
-    .windowOffset = glm::vec2(0.f, 0.f),
-    .initialDragPos = std::nullopt,
-    .enable = false,
-    .horizontal = true,
-    .vertical = true,
-  }},
-  { windowDockSymbol, WindowData {
-    .windowOffset = glm::vec2(1.f, 0.9f),
-    .initialDragPos = std::nullopt,
-    .enable = false,
-    .horizontal = true,
-    .vertical = true,
-  }},
-  { windowFileExplorerSymbol, WindowData {
-    .windowOffset = glm::vec2(0.f, 0.f),
-    .initialDragPos = std::nullopt,
-    .enable = false,
-    .horizontal = true,
-    .vertical = true,
-  }},
-  { windowImageExplorerSymbol, WindowData {
-    .windowOffset = glm::vec2(0.f, 0.f),
-    .initialDragPos = std::nullopt,
-    .enable = false,
-    .horizontal = true,
-    .vertical = true,
-  }},
-  { windowDialogSymbol, WindowData {
-    .windowOffset = glm::vec2(0.f, 0.f),
-    .initialDragPos = std::nullopt,
-    .enable = false,
-    .horizontal = true,
-    .vertical = true,
-  }},
-};
+std::map<int, WindowData> windowData = {};
 
 bool windowEnabled(int symbol){
-  return windowData.at(symbol).enable;
+  return windowData.find(symbol) != windowData.end();
 }
 void windowSetEnabled(int symbol, bool enable){
-  windowData.at(symbol).enable = enable;
+  if (enable){
+    if (windowData.find(symbol) == windowData.end()){
+      windowData[symbol] = WindowData {
+        .windowOffset = glm::vec2(0.f, 0.f),
+        .initialDragPos = std::nullopt,
+        .horizontal = true,
+        .vertical = true,
+      };
+    }
+  }else{
+    windowData.erase(symbol);
+  }
+
 }
 void windowOnDrag(int symbol){
   auto position = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
