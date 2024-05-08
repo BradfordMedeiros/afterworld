@@ -20,7 +20,7 @@ struct WindowData {
 extern std::map<int, WindowData> windowData;
 
 bool windowEnabled(int symbol);
-void windowSetEnabled(int symbol, bool enable);
+void windowSetEnabled(int symbol, bool enable, glm::vec2 initialPos = glm::vec2(0.f, 0.f));
 void windowOnDrag(int symbol);
 bool windowIsBeingDragged(int symbol);
 void windowOnRelease();

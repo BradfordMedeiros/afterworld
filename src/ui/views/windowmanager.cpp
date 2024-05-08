@@ -12,11 +12,11 @@ std::map<int, WindowData> windowData = {};
 bool windowEnabled(int symbol){
   return windowData.find(symbol) != windowData.end();
 }
-void windowSetEnabled(int symbol, bool enable){
+void windowSetEnabled(int symbol, bool enable, glm::vec2 initialPos){
   if (enable){
     if (windowData.find(symbol) == windowData.end()){
       windowData[symbol] = WindowData {
-        .windowOffset = glm::vec2(0.f, 0.f),
+        .windowOffset = initialPos,
         .initialDragPos = std::nullopt,
         .horizontal = true,
         .vertical = true,

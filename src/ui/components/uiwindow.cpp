@@ -4,7 +4,7 @@
 const float STYLE_UI_WINDOW_FONTSIZE = 0.02f;
 const float STYLE_UI_WINDOW_PADDING = 0.02f;
 
-Component createUiWindow(Component& component, int symbol, std::string titleValue, AlignmentParams alignment, std::function<void()> onClickX){
+Component createUiWindow(Component& component, int symbol, std::function<void()> onClickX, std::string titleValue, AlignmentParams alignment){
   Component componentUiWindow {
     .draw = [&component, symbol, titleValue, alignment, onClickX ](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       auto enable = windowEnabled(symbol);

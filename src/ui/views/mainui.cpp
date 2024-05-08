@@ -191,7 +191,7 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   dockedDocks.insert(value);
   for (auto &dock : dockedDocks){
     auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
-    windowSetEnabled(windowDockSymbol, true);    
+    windowSetEnabled(windowDockSymbol, true, glm::vec2(1.f, 0.9f));    
   }
 };
 
@@ -523,7 +523,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     std::function<void()> onClickX = [dockedDock]() -> void {
       dockedDocks.erase(dockedDock);
     };
-    createUiWindow(dock, windowDockSymbol, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }, onClickX).draw(drawTools, defaultWindowProps);
+    createUiWindow(dock, windowDockSymbol, onClickX, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }).draw(drawTools, defaultWindowProps);
   }
 
   {
@@ -566,7 +566,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     };
 
     auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
-    auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, "New Scene");
+    auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, []() -> void { windowSetEnabled(windowDialogSymbol, false); }, "New Scene");
 
     auto defaultProps = getDefaultProps();
     dialogWindow.draw(drawTools, defaultProps);
@@ -592,7 +592,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       filexplorerProps.props.push_back(PropPair { .symbol = fileFilterSymbol, .value = fileFilter.value() });
     }
     auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);
-    auto fileExplorerWindow = createUiWindow(fileExplorer, windowFileExplorerSymbol, "File Explorer");
+    auto fileExplorerWindow = createUiWindow(fileExplorer, windowFileExplorerSymbol, []() -> void { windowSetEnabled(windowFileExplorerSymbol, false); }, "File Explorer");
     auto defaultWindowProps = getDefaultProps();
     fileExplorerWindow.draw(drawTools, defaultWindowProps);
   }
@@ -605,7 +605,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         PropPair { tintSymbol, colorPickerColor },
       }
     });
-    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, colorPickerTitle);
+    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, []() -> void { windowSetEnabled(windowColorPickerSymbol, false); }, colorPickerTitle);
     auto defaultWindowProps = getDefaultProps();
     uiWindowComponent.draw(drawTools, defaultWindowProps);
   }
@@ -715,7 +715,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       };
       scenemanagerComponent.draw(drawTools, sceneManagerProps);
 
-      auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, "Image Explorer");
+      auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, []() -> void { windowSetEnabled(windowImageExplorerSymbol, false); }, "Image Explorer");
       auto defaultWindowProps = getDefaultProps();
       uiWindowComponent.draw(drawTools, defaultWindowProps);
     }
