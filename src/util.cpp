@@ -424,3 +424,13 @@ void playGameplayClipById(objid id, std::optional<float> volume, std::optional<g
   gameapi -> playClipById(id, volume, position);
 }
 
+std::optional<objid> findObjByShortName(std::string name){
+  auto allSceneIds = gameapi -> listScenes(std::nullopt);
+  for (auto id : allSceneIds){
+    auto objId = gameapi -> getGameObjectByName(name, id, true);
+    if (objId.has_value()){
+      return objId.value();
+    }
+  }
+  return std::nullopt;
+}

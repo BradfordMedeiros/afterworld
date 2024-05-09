@@ -99,17 +99,6 @@ std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>
 		.interval = parseFloat(printRateStr) / 1000.f,
 	};
 }
-std::optional<objid> findObjByShortName(std::string name){
-  auto allSceneIds = gameapi -> listScenes(std::nullopt);
-  for (auto id : allSceneIds){
-  	auto objId = gameapi -> getGameObjectByName(name, id, true);
-  	if (objId.has_value()){
-  		return objId.value();
-  	}
-  }
-	return std::nullopt;
-}
-
 
 CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);

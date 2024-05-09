@@ -28,6 +28,9 @@
 #include "../components/console.h"
 #include "../components/uiwindow.h"
 
+//// organize this into a single file for dock config api
+#include "../../modelviewer.h";
+
 extern Component mainUI;
 
 struct AutoFocusObj {

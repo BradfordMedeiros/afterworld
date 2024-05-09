@@ -114,7 +114,7 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   particleViewer.viewer.managedObject = gameapi -> makeObjectAttr(
     gameapi -> listSceneId(id), 
-    std::string("[particle-viewer-") + uniqueNameSuffix(), 
+    std::string("[particle-viewer"), 
     attr, 
     submodelAttributes
   ).value();
@@ -305,11 +305,6 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
       if (emitterId.has_value()){
         setGameObjectStateEnabled(emitterId.value(), shouldEmit);
       }
-    }else if (key == "modelviewer-emit-one"){
-      auto emitterId = getEmitterId(particleViewerData -> viewer.managedObject.value());
-      if (emitterId.has_value()){
-        gameapi -> emit(emitterId.value(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-      }
     }
   };
 
@@ -321,5 +316,49 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
 }
 
 
+std::optional<objid> getEmitter(){
+  auto emitterPrefab = findObjByShortName("[particle-viewer");
+  if (!emitterPrefab.has_value()){
+    return std::nullopt;
+  }
+
+  auto emitterId = getEmitterId(emitterPrefab.value());
+  return emitterId;
+}
 
 
+bool shouldEmitParticleViewerParticles = true;
+void emitNewParticleViewerParticle(){
+  auto emitterId = getEmitter();
+  if (emitterId.has_value()){
+    gameapi -> emit(emitterId.value(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  }
+}
+
+
+void setParticlesViewerShouldEmit(bool shouldEmit){
+  auto emitterId = getEmitter();
+  if (emitterId.has_value()){
+    gameapi -> setSingleGameObjectAttr(emitterId.value(), "state", shouldEmit ? std::string("enabled") : std::string("disabled"));
+    shouldEmitParticleViewerParticles = shouldEmit;    
+  }
+}
+
+bool getParticlesViewerShouldEmit(){
+  return shouldEmitParticleViewerParticles;
+}
+
+void setParticleAttribute(std::string field, AttributeValue value){
+  auto emitterId = getEmitter();
+  if (emitterId.has_value()){
+    gameapi -> setSingleGameObjectAttr(emitterId.value(), field.c_str(), value);
+  }
+}
+std::optional<AttributeValue> getParticleAttribute(std::string field){
+  auto emitterId = getEmitter();
+  if (!emitterId.has_value()){
+    return std::nullopt;
+  }
+
+  return getObjectAttribute(emitterId.value(), field.c_str());
+}

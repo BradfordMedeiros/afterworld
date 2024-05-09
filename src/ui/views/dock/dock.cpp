@@ -216,7 +216,6 @@ std::function<void(std::string)> connectEditText(std::string key, TextEditType t
 }
 
 
-
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -925,7 +924,7 @@ Component dockComponent {
       .showBackpanel = true,
       .borderColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
       .minwidth = 0.5f,
-      .minheight = 1.f,
+      .minheight = 0.f,
       .layoutType = LAYOUT_VERTICAL2,
       .layoutFlowHorizontal = UILayoutFlowNegative2,
       .layoutFlowVertical = UILayoutFlowNegative2,

@@ -346,16 +346,11 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   .setEditorBackground = [](std::string& background){
     gameapi -> sendNotifyMessage("menu-background", std::string(background));
   },
-  .emitParticleViewerParticle = []() -> void {
-    gameapi -> sendNotifyMessage("modelviewer-emit-one", NULL);
-  },
-  .setParticlesViewerShouldEmit = [](bool shouldEmit) -> void {
-    shouldEmitParticleViewerParticles = shouldEmit;
-    gameapi -> sendNotifyMessage("modelviewer-emit", shouldEmit);
-  },
-  .getParticlesViewerShouldEmit = []() -> bool {
-    return shouldEmitParticleViewerParticles;
-  },
+  .emitParticleViewerParticle = emitNewParticleViewerParticle,
+  .setParticlesViewerShouldEmit = setParticlesViewerShouldEmit,
+  .getParticlesViewerShouldEmit = getParticlesViewerShouldEmit,
+  .setParticleAttribute = setParticleAttribute,
+  .getParticleAttribute = getParticleAttribute,
 };
 
 ImageList imageListDatas {

@@ -137,6 +137,7 @@ void playMusicClip(std::string&& clipName, objid sceneId, std::optional<float> v
 void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 
+std::optional<objid> findObjByShortName(std::string name);
 
 
 #endif
