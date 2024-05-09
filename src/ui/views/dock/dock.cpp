@@ -215,6 +215,27 @@ std::function<void(std::string)> connectEditText(std::string key, TextEditType t
   };
 }
 
+std::function<std::string()> floatParticleGetValue(const char* field){
+  return [field]() -> std::string {
+    auto floatAttribute = dockConfigApi.getParticleAttribute(field);
+    if (!floatAttribute.has_value()){
+      return "0.0";
+    }
+    auto floatAttr = std::get_if<float>(&floatAttribute.value());
+    modassert(floatAttr, "invalid value floatParticleGetValue");
+    return std::to_string(*floatAttr); 
+  };
+}
+
+std::function<void(float, std::string&)> floatParticleSetValue(const char* field){
+  return [field](float value, std::string&) -> void { 
+    dockConfigApi.setParticleAttribute(field, value);
+  };
+}
+
+
+
+
 
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
@@ -682,13 +703,13 @@ std::vector<DockConfiguration> configurations {
       },
       DockTextboxNumeric {
         .label = "rate",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
+        .value = floatParticleGetValue("rate"),
+        .onEdit = floatParticleSetValue("rate"),
       },
       DockTextboxNumeric {
         .label = "duration",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
+        .value = floatParticleGetValue("duration"),
+        .onEdit = floatParticleSetValue("duration"),
       },
       DockTextboxNumeric {
         .label = "limit",
@@ -705,7 +726,6 @@ std::vector<DockConfiguration> configurations {
             .isChecked = getIsCheckedGameobj("+physics", "enabled", "disabled"),
             .onChecked = getOnCheckedGameobj("+physics", "enabled", "disabled"),
           },    
-
           DockColorPickerConfig {
             .label = "tint",
             .getColor = []() -> glm::vec4 { return styles.primaryColor; },
