@@ -690,7 +690,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       SceneManagerInterface sceneManagerInterface2 {
         .showScenes = showScenes,
         .offset = offset,
-        .onSelectScene = [&uiContext, &currentScene](int index, std::string scene) -> void {
+        .onSelectScene = [&uiContext](int index, std::string scene) -> void {
           uiContext.loadScene(scene);
           currentScene = index;
           showScenes = false;

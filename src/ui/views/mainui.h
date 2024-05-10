@@ -29,7 +29,7 @@
 #include "../components/uiwindow.h"
 
 //// organize this into a single file for dock config api
-#include "../../modelviewer.h";
+#include "../../modelviewer.h"
 
 extern Component mainUI;
 

@@ -728,17 +728,27 @@ std::vector<DockConfiguration> configurations {
           },    
           DockColorPickerConfig {
             .label = "tint",
-            .getColor = []() -> glm::vec4 { return styles.primaryColor; },
+            .getColor = []() -> glm::vec4 { 
+
+              auto attr = dockConfigApi.getParticleAttribute("+tint");
+              if (!attr.has_value()){
+                return glm::vec4(0.f, 0.f, 0.f, 0.f);
+              }
+              auto vec4Value = std::get_if<glm::vec4>(&attr.value());
+              modassert(vec4Value, "has tint but not a vec4");
+              return *vec4Value;
+            },
             .onColor = [](glm::vec4 color) -> void {
+              dockConfigApi.setParticleAttribute("+tint", color);
             },
           },
-          /*DockImageConfig {
+          DockImageConfig {
             .label =  "texture",
             .onImageSelect = [](std::string texture) -> void {
               dockConfigApi.setTexture(texture);
             }
           },
-          DockCheckboxConfig {
+          /*DockCheckboxConfig {
             .label = "Billboard",
             .isChecked = getIsCheckedWorld("tools", "position-mirror", "true", "false"),
             .onChecked = getOnCheckedWorld("tools", "position-mirror", "true", "false"),
