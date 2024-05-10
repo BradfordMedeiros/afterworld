@@ -713,8 +713,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockTextboxNumeric {
         .label = "limit",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
+        .value = floatParticleGetValue("limit"),
+        .onEdit = floatParticleSetValue("limit"),
       },
       DockGroup {
         .groupName = "Base Particle",
