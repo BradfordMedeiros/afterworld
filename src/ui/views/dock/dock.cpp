@@ -723,13 +723,16 @@ std::vector<DockConfiguration> configurations {
         .configFields = {
           DockCheckboxConfig {
             .label = "enable physics",
-            .isChecked = getIsCheckedGameobj("+physics", "enabled", "disabled"),
-            .onChecked = getOnCheckedGameobj("+physics", "enabled", "disabled"),
+            .isChecked = []() -> bool {
+              return false;
+            },
+            .onChecked = [](bool) -> void {
+
+            },
           },    
           DockColorPickerConfig {
             .label = "tint",
             .getColor = []() -> glm::vec4 { 
-
               auto attr = dockConfigApi.getParticleAttribute("+tint");
               if (!attr.has_value()){
                 return glm::vec4(0.f, 0.f, 0.f, 0.f);
@@ -745,8 +748,13 @@ std::vector<DockConfiguration> configurations {
           DockImageConfig {
             .label =  "texture",
             .onImageSelect = [](std::string texture) -> void {
-              dockConfigApi.setTexture(texture);
+              dockConfigApi.setParticleAttribute("+texture", texture);
             }
+          },
+          DockTextboxNumeric {
+            .label = "velocity",
+            .value = floatParticleGetValue("rate"),
+            .onEdit = floatParticleSetValue("rate"),
           },
           /*DockCheckboxConfig {
             .label = "Billboard",
