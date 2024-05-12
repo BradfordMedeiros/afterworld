@@ -233,9 +233,55 @@ std::function<void(float, std::string&)> floatParticleSetValue(const char* field
   };
 }
 
+std::function<std::string()> floatParticleGetValueVec3(const char* field, int index){
+  return [field, index]() -> std::string {
+    auto vec3Attribute = dockConfigApi.getParticleAttribute(field);
+    if (!vec3Attribute.has_value()){
+      return "0.0";
+    }
+    auto vecAttr = std::get_if<glm::vec3>(&vec3Attribute.value());
+    modassert(vecAttr, "invalid value vecAttr");
+    return std::to_string((*vecAttr)[index]); 
+  };
+}
 
+std::function<void(float, std::string&)> floatParticleSetValueVec3(const char* field, int index){
+  return [field, index](float value, std::string&) -> void { 
+    auto vec3Attribute = dockConfigApi.getParticleAttribute(field);
+    modassert(vec3Attribute.has_value(), "vec3Attribute is null");
+    auto vecAttr = std::get_if<glm::vec3>(&vec3Attribute.value());
+    modassert(vecAttr, "vecAttr is null");
+    glm::vec3 vecValue = *vecAttr;
+    vecValue[index] = value;
+    dockConfigApi.setParticleAttribute(field, vecValue);
+  };
+}
 
+std::function<bool()> floatParticleGetValueBool(const char* field, const char* enabled, const char* disabled){
+  return [field, enabled, disabled]() -> bool {
+    auto attr = dockConfigApi.getParticleAttribute(field);
+    if (attr.has_value()){
+      auto strValue = std::get_if<std::string>(&attr.value());
+      if (strValue){
+        if (*strValue == enabled){
+          return true;
+        }else if (*strValue == disabled){
+          return false;
+        }else{
+          modassert(false, std::string("invalid value: ") + std::string(field));
+        }
+      }
+      return false;
+    }
+    return false;
+  };
+}
 
+std::function<void(bool)> floatParticleSetValueBool(const char* field, const char* enabled, const char* disabled){
+  return [field, enabled, disabled](bool isChecked) -> void {
+    dockConfigApi.setParticleAttribute(field, isChecked ? enabled : disabled);
+  };
+}
 
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
@@ -718,17 +764,18 @@ std::vector<DockConfiguration> configurations {
       },
       DockGroup {
         .groupName = "Base Particle",
-        .onClick = createCollapsableOnClick("particle"),
-        .collapse = createShouldBeCollapse("particle"),
+        .onClick = createCollapsableOnClick("particle-base"),
+        .collapse = createShouldBeCollapse("particle-base"),
         .configFields = {
           DockCheckboxConfig {
             .label = "enable physics",
-            .isChecked = []() -> bool {
-              return false;
-            },
-            .onChecked = [](bool) -> void {
-
-            },
+            .isChecked = floatParticleGetValueBool("+physics", "enabled", "disabled"),
+            .onChecked = floatParticleSetValueBool("+physics", "enabled", "disabled"),
+          },    
+          DockCheckboxConfig {
+            .label = "enable collision",
+            .isChecked = floatParticleGetValueBool("+physics_collision", "collide", "nocollide"),
+            .onChecked = floatParticleSetValueBool("+physics_collision", "collide", "nocollide"),
           },    
           DockColorPickerConfig {
             .label = "tint",
@@ -752,9 +799,49 @@ std::vector<DockConfiguration> configurations {
             }
           },
           DockTextboxNumeric {
-            .label = "velocity",
-            .value = floatParticleGetValue("rate"),
-            .onEdit = floatParticleSetValue("rate"),
+            .label = "gravity-x",
+            .value = floatParticleGetValueVec3("+physics_gravity", 0),
+            .onEdit = floatParticleSetValueVec3("+physics_gravity", 0),
+          },
+          DockTextboxNumeric {
+            .label = "gravity-y",
+            .value = floatParticleGetValueVec3("+physics_gravity", 1),
+            .onEdit = floatParticleSetValueVec3("+physics_gravity", 1),
+          },
+          DockTextboxNumeric {
+            .label = "gravity-z",
+            .value = floatParticleGetValueVec3("+physics_gravity", 2),
+            .onEdit = floatParticleSetValueVec3("+physics_gravity", 2),
+          },
+          DockTextboxNumeric {
+            .label = "velocity-x",
+            .value = floatParticleGetValueVec3("+physics_velocity", 0),
+            .onEdit = floatParticleSetValueVec3("+physics_velocity", 0),
+          },
+          DockTextboxNumeric {
+            .label = "velocity-y",
+            .value = floatParticleGetValueVec3("+physics_velocity", 1),
+            .onEdit = floatParticleSetValueVec3("+physics_velocity", 1),
+          },
+          DockTextboxNumeric {
+            .label = "velocity-z",
+            .value = floatParticleGetValueVec3("+physics_velocity", 2),
+            .onEdit = floatParticleSetValueVec3("+physics_velocity", 2),
+          },
+          DockTextboxNumeric {
+            .label = "scale-x",
+            .value = floatParticleGetValueVec3("+scale", 0),
+            .onEdit = floatParticleSetValueVec3("+scale", 0),
+          },
+          DockTextboxNumeric {
+            .label = "scale-y",
+            .value = floatParticleGetValueVec3("+scale", 1),
+            .onEdit = floatParticleSetValueVec3("+scale", 1),
+          },
+          DockTextboxNumeric {
+            .label = "scale-z",
+            .value = floatParticleGetValueVec3("+scale", 2),
+            .onEdit = floatParticleSetValueVec3("+scale", 2),
           },
           /*DockCheckboxConfig {
             .label = "Billboard",
@@ -768,9 +855,31 @@ std::vector<DockConfiguration> configurations {
         },
       },
       DockGroup {
+        .groupName = "Particle Values",
+        .onClick = createCollapsableOnClick("particle-values"),
+        .collapse = createShouldBeCollapse("particle-values"),
+        .configFields = {
+          DockTextboxNumeric {
+            .label = "scale-x",
+            .value = floatParticleGetValueVec3("!scale", 0),
+            .onEdit = floatParticleSetValueVec3("!scale", 0),
+          },
+          DockTextboxNumeric {
+            .label = "scale-y",
+            .value = floatParticleGetValueVec3("!scale", 1),
+            .onEdit = floatParticleSetValueVec3("!scale", 1),
+          },
+          DockTextboxNumeric {
+            .label = "scale-z",
+            .value = floatParticleGetValueVec3("!scale", 2),
+            .onEdit = floatParticleSetValueVec3("!scale", 2),
+          },
+        }
+      }, 
+      DockGroup {
         .groupName = "Particle Variance",
-        .onClick = createCollapsableOnClick("particle"),
-        .collapse = createShouldBeCollapse("particle"),
+        .onClick = createCollapsableOnClick("particle-variance"),
+        .collapse = createShouldBeCollapse("particle-variance"),
         .configFields = {
           DockTextboxNumeric {
             .label = "position",
