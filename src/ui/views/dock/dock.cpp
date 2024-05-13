@@ -860,6 +860,21 @@ std::vector<DockConfiguration> configurations {
         .collapse = createShouldBeCollapse("particle-values"),
         .configFields = {
           DockTextboxNumeric {
+            .label = "position-x",
+            .value = floatParticleGetValueVec3("!position", 0),
+            .onEdit = floatParticleSetValueVec3("!position", 0),
+          },
+          DockTextboxNumeric {
+            .label = "position-y",
+            .value = floatParticleGetValueVec3("!position", 1),
+            .onEdit = floatParticleSetValueVec3("!position", 1),
+          },
+          DockTextboxNumeric {
+            .label = "position-z",
+            .value = floatParticleGetValueVec3("!position", 2),
+            .onEdit = floatParticleSetValueVec3("!position", 2),
+          },
+          DockTextboxNumeric {
             .label = "scale-x",
             .value = floatParticleGetValueVec3("!scale", 0),
             .onEdit = floatParticleSetValueVec3("!scale", 0),
