@@ -138,6 +138,6 @@ void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 
 std::optional<objid> findObjByShortName(std::string name);
-
+std::optional<objid> activeSceneForSelected();
 
 #endif

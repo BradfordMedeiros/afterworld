@@ -32,7 +32,6 @@ void loadDefaultScenes(){
   }
 }
 
-
 void goToLevel(GameState& gameState, std::string sceneName){
   unloadAllManagedScenes();
   gameState.menuLoaded = false;
@@ -88,23 +87,10 @@ void setPausedMode(bool shouldBePaused){
   }
 }
 
-
 void togglePauseMode(GameState& gameState){
   bool paused = isPaused();
   setPausedMode(!paused);
 }
-
-std::optional<objid> activeSceneIdOpt(){
-  auto selected = gameapi -> selected();
-  if (selected.size() == 0){
-    return std::nullopt;
-  }
-  auto selectedId = gameapi -> selected().at(0);
-  auto sceneId = gameapi -> listSceneId(selectedId);
-  return sceneId;
-}
-
-const std::string sceneFolder = "./res/scenes/";
 
 
 bool queryConsoleCanEnable(){
@@ -169,7 +155,7 @@ UiContext getUiContext(GameState& gameState){
       .pause = pause,
       .resume = resume,
       .saveScene = []() -> void {
-        auto sceneId = activeSceneIdOpt();
+        auto sceneId = activeSceneForSelected();
         modassert(sceneId.has_value(), "save scene - no active scene");
         gameapi -> saveScene(false /*include ids */, sceneId.value(), std::nullopt /* filename */);
       },
@@ -180,14 +166,15 @@ UiContext getUiContext(GameState& gameState){
       goToLevel(gameState, scene);
     },
     .newScene = [](std::string sceneName) -> void {
+      const std::string sceneFolder = "./res/scenes/";
       gameapi -> createScene(sceneFolder + sceneName + ".rawscene");
     },
     .resetScene = []() -> void {
-      auto sceneId = activeSceneIdOpt();
+      auto sceneId = activeSceneForSelected();
       modassert(sceneId.has_value(), "resetScene  - no active scene");
       gameapi -> resetScene(sceneId.value());
     },
-    .activeSceneId = activeSceneIdOpt,
+    .activeSceneId = activeSceneForSelected,
     .showPreviousModel = []() -> void {
       gameapi -> sendNotifyMessage("prev-model", NULL);
     },
@@ -224,7 +211,6 @@ UiContext getUiContext(GameState& gameState){
   };
   return uiContext;
 }
-
 
 void loadConfig(GameState& gameState){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -382,22 +368,6 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   gameapi -> setSelected(ids);
 }
 
-void raycastAndMoveTo(){
-  auto currentTransform = gameapi -> getCameraTransform();
-  auto hitpoints = gameapi -> raycast(currentTransform.position, currentTransform.rotation, 100.f);
-
-  if (hitpoints.size() > 0){
-    glm::vec3 location = hitpoints.at(0).point;
-    setEntityTargetLocation(getActivePlayerId().value(), MovementRequest {
-      .position = location,
-      .speed = 0.5f,
-    });
-    showDebugHitmark(hitpoints.at(0), -1);
-  }
-
-
-}
-
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
@@ -500,15 +470,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
     onPlayerFrame();
-
-  };
-
-  binding.onObjectHover = [](objid scriptId, void* data, int32_t index, bool hoverOn) -> void {
-    std::cout << "on object hover: " << index << ", hover = " << hoverOn << std::endl;
-
-  };
-  binding.onObjectSelected = [](objid scriptId, void* data, int32_t index, glm::vec3 color) -> void {
-    std::cout << "on selected: " << index << std::endl;
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -517,29 +478,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (!hasInputKey){
       return;
     }
-    std::cout << "key is: " << key << std::endl;
+
     if (action == 1){
       if (isPauseKey(key)){
         togglePauseMode(*gameState);
       }
-    }
-
-    if (key == 'M' && action == 0){
-      spawnFromRandomSpawnpoint("red");
-    }else if (key == ',' && action == 0){
-      spawnFromAllSpawnpoints("red");
-    }else if (key == '.' && action == 0){
-      spawnFromAllSpawnpoints("blue");
-    }else if (key == '/' && action == 0){
-      removeAllSpawnedEntities();
-    }else if (key == '-' && action == 0){
-      setActivePlayerNext();
-    }
-
-    if (action == 1){
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
     handleHotkey(key, action);
+
+
+    if (key == '-' && action == 0){
+      setActivePlayerNext();
+    }
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -646,7 +597,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
         if (false){
-          raycastAndMoveTo();
+          raycastFromCameraAndMoveTo();
         }
       }
     }else if (button == 0){
@@ -667,7 +618,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
     onMainUiScroll(amount);
   };
-
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     onObjectsChanged();
   };

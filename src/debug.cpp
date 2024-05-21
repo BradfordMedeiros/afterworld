@@ -54,6 +54,18 @@ CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
    	if (printKey){
    		std::cout << "debugBinding: key = " << key << ", action == " << action << ", scancode = " << scancode << ", mods = " << mods << std::endl;
    	}
+    std::cout << "key is: " << key << std::endl;
+ 
+    if (key == 'M' && action == 0){
+      spawnFromRandomSpawnpoint("red");
+    }else if (key == ',' && action == 0){
+      spawnFromAllSpawnpoints("red");
+    }else if (key == '.' && action == 0){
+      spawnFromAllSpawnpoints("blue");
+    }else if (key == '/' && action == 0){
+      removeAllSpawnedEntities();
+    }
+    
    	if (key == 75){
    		//spawnProcMesh(gameapi -> listSceneId(id));
    	}

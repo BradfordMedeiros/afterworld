@@ -16,6 +16,7 @@ struct MovementRequest {
   float speed;
 };
 void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRequest);
+void raycastFromCameraAndMoveTo();
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 

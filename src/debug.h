@@ -6,6 +6,7 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./global.h"
 #include "./controls.h"
+#include "./spawn.h"
 
 CScriptBinding debugBinding(CustomApiBindings& api, const char* name);
 

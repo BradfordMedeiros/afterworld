@@ -77,6 +77,20 @@ void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRe
   }
 }
 
+void raycastFromCameraAndMoveTo(){
+  auto currentTransform = gameapi -> getCameraTransform();
+  auto hitpoints = gameapi -> raycast(currentTransform.position, currentTransform.rotation, 100.f);
+
+  if (hitpoints.size() > 0){
+    glm::vec3 location = hitpoints.at(0).point;
+    setEntityTargetLocation(getActivePlayerId().value(), MovementRequest {
+      .position = location,
+      .speed = 0.5f,
+    });
+    showDebugHitmark(hitpoints.at(0), -1);
+  }
+}
+
 MovementEntity createMovementEntity(objid id, std::string&& name){
   MovementEntity movementEntity {
     .playerId = id,

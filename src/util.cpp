@@ -434,3 +434,13 @@ std::optional<objid> findObjByShortName(std::string name){
   }
   return std::nullopt;
 }
+
+std::optional<objid> activeSceneForSelected(){
+  auto selected = gameapi -> selected();
+  if (selected.size() == 0){
+    return std::nullopt;
+  }
+  auto selectedId = gameapi -> selected().at(0);
+  auto sceneId = gameapi -> listSceneId(selectedId);
+  return sceneId;
+}
