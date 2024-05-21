@@ -69,6 +69,9 @@ bool isCrouchKey(int key){
 bool isInteractKey(int key){
 	return key == interactKey;
 }
+bool isPauseKey(int key){
+	return key == 256; // escape 
+}
 
 bool isFireButton(int button){
 	return button == fireButton;

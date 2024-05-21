@@ -398,13 +398,6 @@ void raycastAndMoveTo(){
 
 }
 
-TextData textData {
-  .valueText = "default \n textbox",
-  .cursorLocation = 2,
-  .highlightLength = 0,
-  .maxchars = -1,
-};
-
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
@@ -439,11 +432,8 @@ void ensureParticleViewerLoaded(GameState& gameState, bool loadParticleViewer){
 }
 
 
-glm::vec4 activeColor(1.f, 0.f, 0.f, 0.5f);
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
-  registerUiSource(textEditorDefault, static_cast<void*>(&textData));
-  registerUiSource(color, static_cast<void*>(&activeColor), VEC4);
   
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
@@ -529,17 +519,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     std::cout << "key is: " << key << std::endl;
     if (action == 1){
-      if (key == 256 /* escape */ ){
+      if (isPauseKey(key)){
         togglePauseMode(*gameState);
       }
     }
-
-    if (key == 263){        // left  key
-      activeColor.a += 0.01f;
-    }else if (key == 262){  // right key
-      activeColor.a -= 0.01f;
-    }
-
 
     if (key == 'M' && action == 0){
       spawnFromRandomSpawnpoint("red");
