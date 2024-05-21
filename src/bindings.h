@@ -13,7 +13,7 @@
 #include "./inventory.h"
 #include "./tags.h"
 #include "./dialog.h"
-#include "./hotkeys.h"
+#include "./debug.h"
 #include "./weather.h"
 #include "./in-game-ui.h"
 #include "./sound.h"

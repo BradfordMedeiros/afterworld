@@ -1,62 +1,7 @@
-#include "./hotkeys.h"
+#include "./debug.h"
 
 extern CustomApiBindings* gameapi;
 
-struct HotkeyToMessage {
-	int key;
-	std::optional<int> action;
-	std::string keyToPublish;
-	std::string valueToPublish;
-};
-
-std::vector<HotkeyToMessage> hotkeys = {
-	HotkeyToMessage {
-		.key = 48,  // 0
-		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "none",
-	},
-	HotkeyToMessage {
-		.key = 49,  // 1
-		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "pistol",
-	},
-	HotkeyToMessage {
-		.key = 50,  // 2 
-		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "electrogun",
-	},
-	HotkeyToMessage {
-		.key = 51,  // 3
-		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "scrapgun",
-	},
-
-	HotkeyToMessage {
-		.key = '4',  // 3
-		.action = 0,
-		.keyToPublish = "interact-ingame-ui",
-		.valueToPublish = "",
-	},
-	HotkeyToMessage {
-		.key = '5',  // 3
-		.action = 0,
-		.keyToPublish = "ui-debug-text",
-		.valueToPublish = "textvalue",
-	},
-
-};
-
-void handleHotkey(int key, int action){
-	for (auto &hotkey : hotkeys){
-		if (hotkey.key == key && hotkey.action == action){
-			gameapi -> sendNotifyMessage(hotkey.keyToPublish, hotkey.valueToPublish);
-		}
-	}
-}
 
 void spawnProcMesh(objid sceneId){
 	std::vector<glm::vec3> faces = {
@@ -100,16 +45,15 @@ std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>
 	};
 }
 
-CScriptBinding hotkeysBinding(CustomApiBindings& api, const char* name){
+CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 	auto args = api.getArgs();
 	auto printKey = args.find("printkey") != args.end();
 	auto printObjDebug = getPrintObjDebug(args);
   binding.onKeyCallback = [printKey](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
    	if (printKey){
-   		std::cout << "hotkeysBinding: key = " << key << ", action == " << action << ", scancode = " << scancode << ", mods = " << mods << std::endl;
+   		std::cout << "debugBinding: key = " << key << ", action == " << action << ", scancode = " << scancode << ", mods = " << mods << std::endl;
    	}
-   	handleHotkey(key, action);
    	if (key == 75){
    		//spawnProcMesh(gameapi -> listSceneId(id));
    	}

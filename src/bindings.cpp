@@ -556,6 +556,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (action == 1){
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
+    handleHotkey(key, action);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -709,7 +710,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));
-  bindings.push_back(hotkeysBinding(api, "native/debug"));
+  bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(weatherBinding(api, "native/weather"));
   bindings.push_back(soundBinding(api, "native/sound"));
   bindings.push_back(waterBinding(api, "native/water"));

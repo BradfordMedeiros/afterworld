@@ -1,5 +1,7 @@
 #include "./controls.h"
 
+extern CustomApiBindings* gameapi;
+
 int jumpKey = 32;
 int moveFowardKey = 'W';
 int moveBackwardKey = 'S';
@@ -73,4 +75,61 @@ bool isFireButton(int button){
 }
 bool isAimButton(int button){
 	return button == aimButton;
+}
+
+
+struct HotkeyToMessage {
+	int key;
+	std::optional<int> action;
+	std::string keyToPublish;
+	std::string valueToPublish;
+};
+
+std::vector<HotkeyToMessage> hotkeys = {
+	HotkeyToMessage {
+		.key = 48,  // 0
+		.action = 0,
+		.keyToPublish = "request-change-gun",
+		.valueToPublish = "none",
+	},
+	HotkeyToMessage {
+		.key = 49,  // 1
+		.action = 0,
+		.keyToPublish = "request-change-gun",
+		.valueToPublish = "pistol",
+	},
+	HotkeyToMessage {
+		.key = 50,  // 2 
+		.action = 0,
+		.keyToPublish = "request-change-gun",
+		.valueToPublish = "electrogun",
+	},
+	HotkeyToMessage {
+		.key = 51,  // 3
+		.action = 0,
+		.keyToPublish = "request-change-gun",
+		.valueToPublish = "scrapgun",
+	},
+
+	HotkeyToMessage {
+		.key = '4',  // 3
+		.action = 0,
+		.keyToPublish = "interact-ingame-ui",
+		.valueToPublish = "",
+	},
+	HotkeyToMessage {
+		.key = '5',  // 3
+		.action = 0,
+		.keyToPublish = "ui-debug-text",
+		.valueToPublish = "textvalue",
+	},
+
+};
+
+void handleHotkey(int key, int action){
+	for (auto &hotkey : hotkeys){
+		if (hotkey.key == key && hotkey.action == action){
+			gameapi -> sendNotifyMessage(hotkey.keyToPublish, hotkey.valueToPublish);
+		}
+	}
 }

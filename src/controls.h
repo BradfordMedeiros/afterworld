@@ -15,4 +15,6 @@ bool isInteractKey(int key);
 bool isFireButton(int button);
 bool isAimButton(int button);
 
+void handleHotkey(int key, int action);
+
 #endif
