@@ -92,25 +92,6 @@ void togglePauseMode(GameState& gameState){
   setPausedMode(!paused);
 }
 
-
-bool queryConsoleCanEnable(){
-  auto query = gameapi -> compileSqlQuery("select console from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0) == "true";
-}
-
-
-void queryUpdateShowEditor(bool showEditor){
-  auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update session set ") + "editor = " + (showEditor ? "true" : "false"), {}
-  );
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-}
-
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -368,7 +349,6 @@ void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoi
   gameapi -> setSelected(ids);
 }
 
-
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
     setEntityTargetLocation(agentId, MovementRequest {
@@ -578,8 +558,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
-    std::cout << "(xNdc, yNdc)" << xNdc << ", " << yNdc << std::endl;
-    GameState* gameState = static_cast<GameState*>(data);
+    //std::cout << "(xNdc, yNdc)" << xNdc << ", " << yNdc << std::endl;
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
   };
@@ -597,7 +576,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
         if (false){
-          raycastFromCameraAndMoveTo();
+          raycastFromCameraAndMoveTo(getActivePlayerId().value());
         }
       }
     }else if (button == 0){

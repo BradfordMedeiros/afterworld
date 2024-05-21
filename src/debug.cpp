@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
 void spawnProcMesh(objid sceneId){
 	std::vector<glm::vec3> faces = {
 		{ glm::vec3(0.f, 0.f, 0.f) },

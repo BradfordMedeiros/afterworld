@@ -37,6 +37,8 @@ void exitGameMode();
 GlobalState& getGlobalState();
 void initGlobal();
 void updateShowEditor(bool showEditor);
+void queryUpdateShowEditor(bool showEditor);
+bool queryConsoleCanEnable();
 
 bool leftMouseDown();
 bool rightMouseDown();

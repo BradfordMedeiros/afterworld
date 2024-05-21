@@ -8,6 +8,7 @@
 #include "./controls.h"
 #include "./spawn.h"
 
+
 CScriptBinding debugBinding(CustomApiBindings& api, const char* name);
 
 #endif 

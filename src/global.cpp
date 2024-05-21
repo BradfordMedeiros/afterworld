@@ -121,6 +121,23 @@ void updateShowEditor(bool showEditor){
   global.showEditor = showEditor;
   updateMouse();
 }
+void queryUpdateShowEditor(bool showEditor){
+  auto updateQuery = gameapi -> compileSqlQuery(
+    std::string("update session set ") + "editor = " + (showEditor ? "true" : "false"), {}
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+}
+
+bool queryConsoleCanEnable(){
+  auto query = gameapi -> compileSqlQuery("select console from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0) == "true";
+}
+
 
 void initGlobal(){
   auto args = gameapi -> getArgs();
