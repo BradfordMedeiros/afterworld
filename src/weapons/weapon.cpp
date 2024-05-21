@@ -98,14 +98,14 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Weapons* weapons = static_cast<Weapons*>(data);
-    if (button == 0){
+    if (isFireButton(button)){
       if (action == 0){
         weapons -> isHoldingLeftMouse = false;
       }else if (action == 1){
         weapons -> isHoldingLeftMouse = true;
         weapons -> fireOnce = true;
       }
-    }else if (button == 1){
+    }else if (isAimButton(button)){
       if (action == 0){
         weapons -> isHoldingRightMouse = false;
         isGunZoomed = false;
@@ -135,7 +135,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     if (!weapons -> playerId.has_value()){
       return;
     }
-    if (key == 'E') { 
+    if (isInteractKey(key)) { 
       if (action == 1){
         if (weapons -> heldItem.has_value()){
           modlog("weapons", "pickup released held item: " + std::to_string(weapons -> heldItem.value()));
