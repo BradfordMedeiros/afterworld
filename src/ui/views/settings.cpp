@@ -328,11 +328,6 @@ Component menuList {
 
 Component settingsComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    static bool firstTime = true;
-    if (firstTime){
-      initSettings();
-      firstTime = false;
-    }
     std::vector<Component> elements;
     elements.push_back(menuList);
     elements.push_back(settingsInner);
