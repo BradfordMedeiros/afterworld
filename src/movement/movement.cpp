@@ -189,7 +189,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
     std::cout << "key is: " << key << std::endl;
 
-    if (key == 341){  // ctrl
+    if (isCrouchKey(key)){  // ctrl
       if (action == 0 || action == 1){
         if (action == 0){
           movement -> controlParams.crouchType = CROUCH_UP;
@@ -208,7 +208,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == 'W'){
+    if (isMoveForwardKey(key)){
       if (action == 0){
         movement -> controlParams.goForward = false;
       }else if (action == 1){
@@ -216,7 +216,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
       return;
     }
-    if (key == 'S'){
+    if (isMoveBackwardKey(key)){
       if (action == 0){
         movement -> controlParams.goBackward = false;
       }else if (action == 1){
@@ -224,7 +224,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
       return;
     }
-    if (key == 'A'){
+    if (isMoveLeftKey(key)){
       if (action == 0){
         movement -> controlParams.goLeft = false;
       }else if (action == 1){
@@ -232,7 +232,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
       return;
     }
-    if (key == 'D'){
+    if (isMoveRightKey(key)){
       if (action == 0){
         movement -> controlParams.goRight = false;
       }else if (action == 1){
@@ -241,7 +241,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == 32 /* space */ && action == 1){
+    if (isJumpKey(key) /* space */ && action == 1){
       Movement* movement = static_cast<Movement*>(data);
       movement -> controlParams.doJump = true;
       return;

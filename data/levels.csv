@@ -7,5 +7,3 @@ filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING
 ../afterworld/scenes/shooter2.rawscene,Nightmare,fps,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg
 ../afterworld/scenes/shooter2.rawscene,Dreams and Reconciliation II,fps,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg
 ../afterworld/scenes/shooter2.rawscene,Odyssey,fps,Return home.,./res/textures/wood.jpg
-../afterworld/scenes/dev/models.rawscene,Model Viewer,model,View different in game models.,./res/textures/wood.jpg
-../afterworld/scenes/dev/particles.rawscene,Particle Mode,particle,View particle systems.,./res/textures/wood.jpg

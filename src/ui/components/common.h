@@ -166,8 +166,6 @@ extern const int xoffsetFromSymbol;
 extern const int interpolationSymbol;
 extern const int checkedSymbol;
 extern const int editableSymbol;
-extern const int textEditorDefault;
-extern const int color;
 extern const int onWindowDragSymbol;
 extern const int onSlideSymbol;
 extern const int enableSymbol;
