@@ -68,7 +68,9 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
           getGlobalState().invertY = isChecked;
         },
       },
-      .initSetting = std::nullopt,
+      .initSetting = []() -> void {
+
+      },
     },
     SettingConfiguration {
       .config = DockSliderConfig {
@@ -149,7 +151,71 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
   { "Controls", std::vector<SettingConfiguration> {
     SettingConfiguration {
       .config = DockTextboxNumeric {
-        .label = "Placeholder",
+        .label = "Jump",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Up",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Down",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Left",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Right",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Shoot",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Aim",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Crouch",
+        .value = []() -> std::string { return "1.0"; },
+        .onEdit = [](float, std::string&) -> void { },
+      },
+      .initSetting = std::nullopt,
+    },
+    SettingConfiguration {
+      .config = DockTextboxNumeric {
+        .label = "Pickup",
         .value = []() -> std::string { return "1.0"; },
         .onEdit = [](float, std::string&) -> void { },
       },
