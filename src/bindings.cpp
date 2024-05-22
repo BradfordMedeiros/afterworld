@@ -128,6 +128,27 @@ void ensureParticleViewerLoaded(SceneManagement& sceneManagement, bool loadParti
   ensureViewLoaded(sceneManagement, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", sceneManagement.particleViewerScene);
 }
 
+struct SceneRouterPath {
+  std::string path;
+  std::string scene;
+  // probably game mode, pause or not paused, what to set main character etc
+};
+
+std::vector<SceneRouterPath> routerPaths = {
+  SceneRouterPath {
+    .path = "modelviewer",
+    .scene = "../afterworld/scenes/dev/models.rawscene",
+  },
+  SceneRouterPath {
+    .path = "particleviewer",
+    .scene = "../afterworld/scenes/dev/particles.rawscene",
+  },
+  SceneRouterPath {
+    .path = "mainmenu",
+    .scene = "../afterworld/scenes/menu.rawscene",
+  },
+};
+
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
   modlog("scenerouter", std::string("path is: ") + currentPath);
   ensureModelViewerLoaded(sceneManagement, currentPath == "modelviewer");
