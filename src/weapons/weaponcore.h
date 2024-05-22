@@ -7,6 +7,7 @@
 #include "../util.h"
 #include "../materials.h"
 #include "./weapon_vector.h"
+#include "../inventory.h"
 
 struct WeaponParams {
   // gun intrinsic stuff

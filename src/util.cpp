@@ -444,3 +444,50 @@ std::optional<objid> activeSceneForSelected(){
   auto sceneId = gameapi -> listSceneId(selectedId);
   return sceneId;
 }
+
+void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint){
+  float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
+  float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
+
+  float topY = fromPoint.y < toPoint.y ? fromPoint.y : toPoint.y;
+  float bottomY = fromPoint.y > toPoint.y ? fromPoint.y : toPoint.y;
+
+  float width = rightX - leftX;;
+  float height = bottomY - topY;
+
+  //std::cout << "selection: leftX = " << leftX << ", rightX = " << rightX << ", topY = " << topY << ", bottomY = " << bottomY << ", width = " << width << ", height = " << height << std::endl;
+  float borderSize = 0.005f;
+  float borderWidth = width - borderSize;
+  float borderHeight = height - borderSize;
+
+  gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), width, height, false, glm::vec4(0.9f, 0.9f, 0.9f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), borderWidth, borderHeight, false, glm::vec4(0.1f, 0.1f, 0.1f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
+
+  // this can be amortized over multiple 
+  float uvWidth = toPoint.x - fromPoint.x;
+  float uvHeight = toPoint.y - fromPoint.y;
+
+
+  std::set<objid> ids;
+
+  /*for (int x = 0; x < 50; x++){
+    for (int y = 0; y < 50; y++){    
+      gameapi -> idAtCoordAsync(fromPoint.x + (x * uvWidth / 50.f), fromPoint.y + (y * uvHeight / 50.f), true, [&gameState](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+        if (!selectedId.has_value()){
+          return;
+        }
+        auto selectableValue = getSingleAttr(selectedId.value(), "dragselect");
+        if (selectableValue.has_value() && selectableValue.value() == gameState.dragSelect.value()){
+          ids.insert(idAtCoord.value());
+        }
+      });
+    } 
+  }*/
+
+  //modlog("dragselect", print(ids));
+  //gameapi -> setSelected(ids);
+}
+
+float randomNum(){
+  return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX));
+}

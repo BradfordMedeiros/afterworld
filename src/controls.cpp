@@ -86,32 +86,45 @@ struct HotkeyToMessage {
 	std::optional<int> action;
 	std::string keyToPublish;
 	std::string valueToPublish;
+	std::function<void()> fn;
 };
 
 std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
 		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "none",
+		.keyToPublish = "",
+		.valueToPublish = "",
+		.fn = []() -> void {
+			requestChangeGun("none");
+		},
 	},
 	HotkeyToMessage {
 		.key = 49,  // 1
 		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "pistol",
+		.keyToPublish = "",
+		.valueToPublish = "",
+		.fn = []() -> void {
+			requestChangeGun("pistol");
+		},
 	},
 	HotkeyToMessage {
 		.key = 50,  // 2 
 		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "electrogun",
+		.keyToPublish = "",
+		.valueToPublish = "",
+		.fn = []() -> void {
+			requestChangeGun("electrogun");
+		},
 	},
 	HotkeyToMessage {
 		.key = 51,  // 3
 		.action = 0,
-		.keyToPublish = "request-change-gun",
-		.valueToPublish = "scrapgun",
+		.keyToPublish = "",
+		.valueToPublish = "",
+		.fn = []() -> void {
+			requestChangeGun("scrapgun");
+		},
 	},
 
 	HotkeyToMessage {
@@ -119,12 +132,14 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.action = 0,
 		.keyToPublish = "interact-ingame-ui",
 		.valueToPublish = "",
+		.fn = []() -> void {},
 	},
 	HotkeyToMessage {
 		.key = '5',  // 3
 		.action = 0,
 		.keyToPublish = "ui-debug-text",
 		.valueToPublish = "textvalue",
+		.fn = []() -> void {},
 	},
 
 };
@@ -132,7 +147,10 @@ std::vector<HotkeyToMessage> hotkeys = {
 void handleHotkey(int key, int action){
 	for (auto &hotkey : hotkeys){
 		if (hotkey.key == key && hotkey.action == action){
-			gameapi -> sendNotifyMessage(hotkey.keyToPublish, hotkey.valueToPublish);
+			if (hotkey.keyToPublish != ""){
+				gameapi -> sendNotifyMessage(hotkey.keyToPublish, hotkey.valueToPublish);
+			}
+			hotkey.fn();
 		}
 	}
 }

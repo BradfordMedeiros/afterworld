@@ -93,49 +93,31 @@ void tryPickupItem(objid gameObjId, objid playerId){
   }
 }
 
-
-
-CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name){
-	 auto binding = createCScriptBinding(name, api);
-   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-   	if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
-      auto gameObjId = anycast<objid>(value); 
-      modassert(gameObjId != NULL, "inventory selected value invalid");
-      if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
-        return;
-      }
-      tryPickupItem(*gameObjId, id);
-    }
-
-    if (key == "request-change-gun"){
-      auto strValue = anycast<std::string>(value); 
-      modassert(strValue != NULL, "selected value invalid");
-      if (hasGun(*strValue)){
-        ChangeGunMessage changeGun {
-          .currentAmmo = ammoForGun(*strValue),
-          .gun = *strValue,
-        };
-        gameapi -> sendNotifyMessage("change-gun", changeGun);
-      }
-    }
-    if (key == "set-gun-ammo"){
-      auto setAmmoMessage = anycast<SetAmmoMessage>(value); 
-      modassert(setAmmoMessage != NULL, "setAmmoMessage invalid");
-      updateItemCount(setAmmoMessage -> gun + "-ammo", setAmmoMessage -> currentAmmo);
-    }
-  };
-
-  binding.onCollisionEnter = [](objid _, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
-    auto obj1IsPlayer = isPlayer(obj1);
-    auto obj2IsPlayer = isPlayer(obj2);
-    auto obj1IsPickup = isPickup(obj1);
-    auto obj2IsPickup = isPickup(obj2);
-    if (obj1IsPlayer && obj2IsPickup){
-      tryPickupItem(obj2, obj1);
-    }else if (obj2IsPlayer && obj1IsPickup){
-      tryPickupItem(obj1, obj2);
-    }
-  };
-
-	return binding;
+void inventoryOnCollision(int32_t obj1, int32_t obj2){
+  auto obj1IsPlayer = isPlayer(obj1);
+  auto obj2IsPlayer = isPlayer(obj2);
+  auto obj1IsPickup = isPickup(obj1);
+  auto obj2IsPickup = isPickup(obj2);
+  if (obj1IsPlayer && obj2IsPickup){
+    tryPickupItem(obj2, obj1);
+  }else if (obj2IsPlayer && obj1IsPickup){
+    tryPickupItem(obj1, obj2);
+  }
 }
+
+void setGunAmmo(std::string gun, int currentAmmo){
+  updateItemCount(gun + "-ammo", currentAmmo);
+}
+
+
+void requestChangeGun(std::string gun){
+  if (hasGun(gun)){
+    ChangeGunMessage changeGun {
+      .currentAmmo = ammoForGun(gun),
+      .gun = gun,
+    };
+    gameapi -> sendNotifyMessage("change-gun", changeGun);
+  }
+}
+
+

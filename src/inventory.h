@@ -6,6 +6,8 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 
-CScriptBinding inventoryBinding(CustomApiBindings& api, const char* name);
+void inventoryOnCollision(int32_t obj1, int32_t obj2);
+void setGunAmmo(std::string gun, int currentAmmo);
+void requestChangeGun(std::string gun);
 
 #endif

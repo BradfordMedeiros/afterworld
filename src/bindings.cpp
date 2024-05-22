@@ -15,7 +15,6 @@ struct GameState {
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
 
-
   HandlerFns uiCallbacks;
   UiContext uiContext;
 };
@@ -220,10 +219,6 @@ void handleInteract(objid gameObjId){
   }
 }
 
-float randomNum(){
-  return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX));
-}
-
 // should work globally but needs lsobj-attr modifications, and probably should create a way to index these
 void handleSwitch(std::string switchValue){ 
   //wall:switch:someswitch
@@ -307,47 +302,6 @@ void handleDamageCollision(objid obj1, objid obj2){
   }
 }
 
-void selectWithBorder(GameState& gameState, glm::vec2 fromPoint, glm::vec2 toPoint){
-  float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
-  float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;
-
-  float topY = fromPoint.y < toPoint.y ? fromPoint.y : toPoint.y;
-  float bottomY = fromPoint.y > toPoint.y ? fromPoint.y : toPoint.y;
-
-  float width = rightX - leftX;;
-  float height = bottomY - topY;
-
-  //std::cout << "selection: leftX = " << leftX << ", rightX = " << rightX << ", topY = " << topY << ", bottomY = " << bottomY << ", width = " << width << ", height = " << height << std::endl;
-  float borderSize = 0.005f;
-  float borderWidth = width - borderSize;
-  float borderHeight = height - borderSize;
-
-  gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), width, height, false, glm::vec4(0.9f, 0.9f, 0.9f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawRect(leftX + (width * 0.5f), topY + (height * 0.5f), borderWidth, borderHeight, false, glm::vec4(0.1f, 0.1f, 0.1f, 0.1f), std::nullopt, true, std::nullopt, std::nullopt);
-
-  // this can be amortized over multiple 
-  float uvWidth = toPoint.x - fromPoint.x;
-  float uvHeight = toPoint.y - fromPoint.y;
-
-  modassert(false, "select with border needs to use async idatcoordapi");
-
-  std::set<objid> ids;
-  /*
-  for (int x = 0; x < 50; x++){
-    for (int y = 0; y < 50; y++){    
-      auto idAtCoord = gameapi -> idAtCoord(fromPoint.x + (x * uvWidth / 50.f), fromPoint.y + (y * uvHeight / 50.f), true);
-      if (idAtCoord.has_value()){
-        auto selectableValue = getSingleAttr(idAtCoord.value(), "dragselect");
-        if (selectableValue.has_value() && selectableValue.value() == gameState.dragSelect.value()){
-          ids.insert(idAtCoord.value());
-        }
-      }
-    } 
-  }*/
-
-  modlog("dragselect", print(ids));
-  gameapi -> setSelected(ids);
-}
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
@@ -447,7 +401,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId );
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
-      selectWithBorder(*gameState, gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
+      selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
     onPlayerFrame();
   };
@@ -548,6 +502,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modassert(gameobj1Exists && gameobj2Exists, "collision enter: objs do not exist");
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
+    inventoryOnCollision(obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1);
@@ -617,7 +572,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(movementBinding(api, "native/movement"));
   bindings.push_back(menuBinding(api, "native/menu"));
   bindings.push_back(weaponBinding(api, "native/weapon"));
-  bindings.push_back(inventoryBinding(api, "native/inventory"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));

@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_CONTROLS
 
 #include "./util.h"
+#include "./inventory.h"
 
 
 bool isJumpKey(int key);
