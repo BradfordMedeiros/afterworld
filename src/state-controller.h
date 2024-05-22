@@ -41,8 +41,4 @@ bool hasControllerState(StateController& controller, objid entityId);
 bool triggerControllerState(StateController& controller, objid entityId, int transition);
 ControllerStateAnimation* stateAnimationForController(StateController& controller, objid entityId);
 
-//objid controller = gameapi -> createController(id, {{ "walking", "running", "start-running"}, {"running", "walking", "stop-running" }})
-//  gameapi -> triggerControllerState(controller, "start-running");
-//  gameapi -> getControllerState(controller)
-
 #endif 

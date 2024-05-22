@@ -4,7 +4,7 @@ AmmoHudInfo ammoInfo {
   .currentAmmo = 0,
   .totalAmmo = 0,
 };
-void setAmmoCount(AmmoHudInfo newAmmoInfo){
+void setUIAmmoCount(AmmoHudInfo newAmmoInfo){
   ammoInfo = newAmmoInfo;
 }
 

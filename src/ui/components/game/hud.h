@@ -8,7 +8,7 @@ struct AmmoHudInfo {
   int currentAmmo;
   int totalAmmo;
 };
-void setAmmoCount(AmmoHudInfo ammoInfo);
+void setUIAmmoCount(AmmoHudInfo ammoInfo);
 void setHealth(float health);
 
 extern Component hudComponent;

@@ -488,7 +488,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "current-gun"){
       auto currentGunMessage = anycast<CurrentGunMessage>(value); 
       modassert(currentGunMessage != NULL, "current-gun value invalid");
-      setAmmoCount(AmmoHudInfo {
+      setUIAmmoCount(AmmoHudInfo {
         .currentAmmo = currentGunMessage -> currentAmmo,
         .totalAmmo = currentGunMessage -> totalAmmo,
       });
