@@ -39,20 +39,7 @@ SceneManagement createSceneManagement(){
 }
 
 
-
-
-/////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
 std::vector<std::string> managedTags = { "game-level" };
-
 void unloadAllManagedScenes(){
   auto managedScenes = gameapi -> listScenes(managedTags);
   for (auto sceneId : managedScenes){
@@ -96,7 +83,6 @@ void goToMenu(SceneManagement& sceneManagement){
     gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
     sceneManagement.menuLoaded = true;
   }
-  pushHistory("mainmenu", true);
 }
 
 double downTime = 0;
@@ -118,6 +104,37 @@ void setPausedMode(bool shouldBePaused){
 void togglePauseMode(){
   bool paused = isPaused();
   setPausedMode(!paused);
+}
+
+void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, const char* scene, std::optional<objid>& sceneId){
+  if (!loadViewer && sceneId.has_value()){
+    gameapi -> unloadScene(sceneId.value());
+    sceneId = std::nullopt;
+    return;
+  }
+  if (loadViewer && !sceneId.has_value()){
+    unloadAllManagedScenes();
+    sceneManagement.menuLoaded = false;
+    sceneId = gameapi -> loadScene(scene, {}, std::nullopt, managedTags);
+    auto cameraId = gameapi -> getGameObjectByName(">maincamera", sceneId.value(), false).value();
+    setActivePlayer(cameraId);
+    return;
+  }  
+}
+void ensureModelViewerLoaded(SceneManagement& sceneManagement, bool loadModelViewer){
+  ensureViewLoaded(sceneManagement, loadModelViewer, "../afterworld/scenes/dev/models.rawscene", sceneManagement.modelViewerScene);
+}
+void ensureParticleViewerLoaded(SceneManagement& sceneManagement, bool loadParticleViewer){
+  ensureViewLoaded(sceneManagement, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", sceneManagement.particleViewerScene);
+}
+
+void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
+  modlog("scenerouter", std::string("path is: ") + currentPath);
+  ensureModelViewerLoaded(sceneManagement, currentPath == "modelviewer");
+  ensureParticleViewerLoaded(sceneManagement, currentPath == "particleviewer");
+  if (currentPath == "mainmenu"){
+    goToMenu(sceneManagement);
+  }
 }
 
 
@@ -160,7 +177,7 @@ UiContext getUiContext(GameState& gameState){
         goToLevel(gameState.sceneManagement, level.scene);
       },
       .goToMenu = [&gameState]() -> void {
-        goToMenu(gameState.sceneManagement);
+        pushHistory("mainmenu", true);
       }
     },
     .pauseInterface = PauseInterface {
@@ -212,7 +229,7 @@ UiContext getUiContext(GameState& gameState){
       },
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         if (!level.has_value()){
-          goToMenu(gameState.sceneManagement);
+          pushHistory("mainmenu", true);
           return;
         }
         auto scene = levelByShortcutName(level.value());
@@ -244,29 +261,6 @@ AIInterface aiInterface {
 };
 
 
-void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, const char* scene, std::optional<objid>& sceneId){
-  if (!loadViewer && sceneId.has_value()){
-    gameapi -> unloadScene(sceneId.value());
-    sceneId = std::nullopt;
-    return;
-  }
-  if (loadViewer && !sceneId.has_value()){
-    unloadAllManagedScenes();
-    sceneManagement.menuLoaded = false;
-    sceneId = gameapi -> loadScene(scene, {}, std::nullopt, managedTags);
-    auto cameraId = gameapi -> getGameObjectByName(">maincamera", sceneId.value(), false).value();
-    setActivePlayer(cameraId);
-    return;
-  }  
-}
-void ensureModelViewerLoaded(SceneManagement& sceneManagement, bool loadModelViewer){
-  ensureViewLoaded(sceneManagement, loadModelViewer, "../afterworld/scenes/dev/models.rawscene", sceneManagement.modelViewerScene);
-}
-void ensureParticleViewerLoaded(SceneManagement& sceneManagement, bool loadParticleViewer){
-  ensureViewLoaded(sceneManagement, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", sceneManagement.particleViewerScene);
-}
-
-
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -281,8 +275,23 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     };
     gameState -> uiContext = {};
     initGlobal();
-    goToMenu(gameState -> sceneManagement);
+    gameState -> dragSelect = std::nullopt;
+    gameState -> uiContext = getUiContext(*gameState);    
+    
     auto args = gameapi -> getArgs();
+    if (args.find("dragselect") != args.end()){
+      gameState -> dragSelect = args.at("dragselect");
+      modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
+    }
+    initSettings();
+    registerOnRouteChanged([gameState]() -> void {
+      auto currentPath = getCurrentPath();
+      onSceneRouteChange(gameState -> sceneManagement, currentPath);
+      std::cout << "registerOnRouteChanged: , new route: " << getCurrentPath() << std::endl;
+    });
+
+    pushHistory("mainmenu", true);
+
     if (args.find("level") != args.end()){
       auto scene = levelByShortcutName(args.at("level"));
       if (scene.has_value()){
@@ -291,21 +300,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
       }
     }
-    gameState -> dragSelect = std::nullopt;
-    gameState -> uiContext = getUiContext(*gameState);    
-    if (args.find("dragselect") != args.end()){
-      gameState -> dragSelect = args.at("dragselect");
-      modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
-    }
     setPaused(true);
-    initSettings();
 
-    registerOnRouteChanged([gameState]() -> void {
-      auto currentPath = getCurrentPath();
-      ensureModelViewerLoaded(gameState -> sceneManagement, currentPath == "modelviewer");
-      ensureParticleViewerLoaded(gameState -> sceneManagement, currentPath == "particleviewer");
-      std::cout << "registerOnRouteChanged: , new route: " << getCurrentPath() << std::endl;
-    });
 
     return gameState;
   };
@@ -356,11 +352,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
-      goToMenu(gameState -> sceneManagement);
+      pushHistory("mainmenu", true);
       return;
     }
     if (key == "game-over"){
-      goToMenu(gameState -> sceneManagement);
+      pushHistory("mainmenu", true);
       return;
     }
     if (key == "reload-config:levels"){

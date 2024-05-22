@@ -2,7 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
-auto routerHistory = createHistory("mainmenu");
+auto routerHistory = createHistory("");
 
 Props createLevelListProps(){
   std::vector<ListComponentData> levels;
