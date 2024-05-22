@@ -22,8 +22,6 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  	};
 };
 
-
-
 void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 	gameapi -> freeTexture(ingameUiTextureName(id), id);
 	inGameUi.textDisplays.erase(id);
