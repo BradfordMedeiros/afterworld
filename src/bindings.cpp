@@ -1,23 +1,57 @@
 #include "./bindings.h"
 
+
 CustomApiBindings* gameapi = NULL;
 
-std::vector<std::string> defaultScenes = { };
-std::vector<std::string> managedTags = { "game-level" };
-
-struct GameState {
-  std::optional<std::string> loadedLevel;
+struct SceneManagement {
   std::vector<Level> levels;
+  std::optional<std::string> loadedLevel;
   bool menuLoaded;
   std::optional<objid> modelViewerScene;
   std::optional<objid> particleViewerScene;
-
-  std::optional<std::string> dragSelect;
-  std::optional<glm::vec2> selecting;
-
-  HandlerFns uiCallbacks;
-  UiContext uiContext;
 };
+
+
+std::vector<Level> loadLevels(){
+  auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  std::vector<Level> levels = {};
+  for (auto &row : result){
+    levels.push_back(Level {
+      .scene = row.at(0),
+      .name = row.at(1),
+    });
+  }
+  return levels;
+}
+
+
+SceneManagement createSceneManagement(){
+  return SceneManagement {
+    .levels = loadLevels(),
+    .loadedLevel = std::nullopt,
+    .menuLoaded = false,
+    .modelViewerScene = std::nullopt,
+    .particleViewerScene = std::nullopt,
+  };
+}
+
+
+
+
+/////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+std::vector<std::string> managedTags = { "game-level" };
 
 void unloadAllManagedScenes(){
   auto managedScenes = gameapi -> listScenes(managedTags);
@@ -25,28 +59,23 @@ void unloadAllManagedScenes(){
     gameapi -> unloadScene(sceneId);
   }
 }
-void loadDefaultScenes(){
-  for (auto &defaultScene : defaultScenes){
-    gameapi -> loadScene(defaultScene, {}, std::nullopt, std::nullopt);
-  }
-}
 
-void goToLevel(GameState& gameState, std::string sceneName){
+void goToLevel(SceneManagement& sceneManagement, std::string sceneName){
   unloadAllManagedScenes();
-  gameState.menuLoaded = false;
+  sceneManagement.menuLoaded = false;
   setPaused(false);
-  gameState.loadedLevel = sceneName;
+  sceneManagement.loadedLevel = sceneName;
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
   setActivePlayer(gameapi -> getGameObjectByName(">maincamera", sceneId, false)); 
   enterGameMode();
   pushHistory("playing", true);
 }
+
 std::optional<std::string> levelByShortcutName(std::string shortcut){
   auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
-
   for (auto row : result){
     auto filepath = row.at(0);
     auto shortcutResult = row.at(1);
@@ -54,18 +83,18 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
       return filepath;
     }
   }
-
   return std::nullopt;
 }
-void goToMenu(GameState& gameState){
+
+void goToMenu(SceneManagement& sceneManagement){
   exitGameMode();
-  if (gameState.loadedLevel.has_value()){
-    gameState.loadedLevel = std::nullopt;
+  if (sceneManagement.loadedLevel.has_value()){
+    sceneManagement.loadedLevel = std::nullopt;
     unloadAllManagedScenes();
   }
-  if (!gameState.menuLoaded){
+  if (!sceneManagement.menuLoaded){
     gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
-    gameState.menuLoaded = true;
+    sceneManagement.menuLoaded = true;
   }
   pushHistory("mainmenu", true);
 }
@@ -86,10 +115,22 @@ void setPausedMode(bool shouldBePaused){
   }
 }
 
-void togglePauseMode(GameState& gameState){
+void togglePauseMode(){
   bool paused = isPaused();
   setPausedMode(!paused);
 }
+
+
+struct GameState {
+  SceneManagement sceneManagement;
+
+  std::optional<std::string> dragSelect;
+  std::optional<glm::vec2> selecting;
+
+  HandlerFns uiCallbacks;
+  UiContext uiContext;
+};
+
 
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
@@ -116,10 +157,10 @@ UiContext getUiContext(GameState& gameState){
    .showGameHud = []() -> bool { return !getGlobalState().paused && getGlobalState().inGameMode; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
-        goToLevel(gameState, level.scene);
+        goToLevel(gameState.sceneManagement, level.scene);
       },
       .goToMenu = [&gameState]() -> void {
-        goToMenu(gameState);
+        goToMenu(gameState.sceneManagement);
       }
     },
     .pauseInterface = PauseInterface {
@@ -143,7 +184,7 @@ UiContext getUiContext(GameState& gameState){
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [&gameState](std::string scene) -> void {
       std::cout << "load scene placeholder: " << scene << std::endl;
-      goToLevel(gameState, scene);
+      goToLevel(gameState.sceneManagement, scene);
     },
     .newScene = [](std::string sceneName) -> void {
       const std::string sceneFolder = "./res/scenes/";
@@ -171,12 +212,12 @@ UiContext getUiContext(GameState& gameState){
       },
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         if (!level.has_value()){
-          goToMenu(gameState);
+          goToMenu(gameState.sceneManagement);
           return;
         }
         auto scene = levelByShortcutName(level.value());
         if (scene.has_value()){
-          goToLevel(gameState, scene.value());
+          goToLevel(gameState.sceneManagement, scene.value());
         }else{
           std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
         }
@@ -192,21 +233,6 @@ UiContext getUiContext(GameState& gameState){
   return uiContext;
 }
 
-void loadConfig(GameState& gameState){
-  auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  std::vector<Level> levels = {};
-  for (auto &row : result){
-    levels.push_back(Level {
-      .scene = row.at(0),
-      .name = row.at(1),
-    });
-  }
-  gameState.levels = levels;
-}
-
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
@@ -218,7 +244,7 @@ AIInterface aiInterface {
 };
 
 
-void ensureViewLoaded(GameState& gameState, bool loadViewer, const char* scene, std::optional<objid>& sceneId){
+void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, const char* scene, std::optional<objid>& sceneId){
   if (!loadViewer && sceneId.has_value()){
     gameapi -> unloadScene(sceneId.value());
     sceneId = std::nullopt;
@@ -226,18 +252,18 @@ void ensureViewLoaded(GameState& gameState, bool loadViewer, const char* scene, 
   }
   if (loadViewer && !sceneId.has_value()){
     unloadAllManagedScenes();
-    gameState.menuLoaded = false;
+    sceneManagement.menuLoaded = false;
     sceneId = gameapi -> loadScene(scene, {}, std::nullopt, managedTags);
     auto cameraId = gameapi -> getGameObjectByName(">maincamera", sceneId.value(), false).value();
     setActivePlayer(cameraId);
     return;
   }  
 }
-void ensureModelViewerLoaded(GameState& gameState, bool loadModelViewer){
-  ensureViewLoaded(gameState, loadModelViewer, "../afterworld/scenes/dev/models.rawscene", gameState.modelViewerScene);
+void ensureModelViewerLoaded(SceneManagement& sceneManagement, bool loadModelViewer){
+  ensureViewLoaded(sceneManagement, loadModelViewer, "../afterworld/scenes/dev/models.rawscene", sceneManagement.modelViewerScene);
 }
-void ensureParticleViewerLoaded(GameState& gameState, bool loadParticleViewer){
-  ensureViewLoaded(gameState, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", gameState.particleViewerScene);
+void ensureParticleViewerLoaded(SceneManagement& sceneManagement, bool loadParticleViewer){
+  ensureViewLoaded(sceneManagement, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", sceneManagement.particleViewerScene);
 }
 
 
@@ -246,9 +272,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
-    gameState -> loadedLevel = std::nullopt;
-    gameState -> menuLoaded = false;
-    gameState -> modelViewerScene = std::nullopt,
+    gameState -> sceneManagement = createSceneManagement();
     gameState -> selecting = std::nullopt;
     gameState -> uiCallbacks = HandlerFns {
       .handlerFns = {},
@@ -257,14 +281,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     };
     gameState -> uiContext = {};
     initGlobal();
-    loadConfig(*gameState);
-    loadDefaultScenes();
-    goToMenu(*gameState);
+    goToMenu(gameState -> sceneManagement);
     auto args = gameapi -> getArgs();
     if (args.find("level") != args.end()){
       auto scene = levelByShortcutName(args.at("level"));
       if (scene.has_value()){
-        goToLevel(*gameState, scene.value());
+        goToLevel(gameState -> sceneManagement, scene.value());
       }else{
         std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
       }
@@ -280,8 +302,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = getCurrentPath();
-      ensureModelViewerLoaded(*gameState, currentPath == "modelviewer");
-      ensureParticleViewerLoaded(*gameState, currentPath == "particleviewer");
+      ensureModelViewerLoaded(gameState -> sceneManagement, currentPath == "modelviewer");
+      ensureParticleViewerLoaded(gameState -> sceneManagement, currentPath == "particleviewer");
       std::cout << "registerOnRouteChanged: , new route: " << getCurrentPath() << std::endl;
     });
 
@@ -320,7 +342,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (action == 1){
       if (isPauseKey(key)){
-        togglePauseMode(*gameState);
+        togglePauseMode();
       }
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
@@ -334,15 +356,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
-      goToMenu(*gameState);
+      goToMenu(gameState -> sceneManagement);
       return;
     }
     if (key == "game-over"){
-      goToMenu(*gameState);
+      goToMenu(gameState -> sceneManagement);
       return;
     }
     if (key == "reload-config:levels"){
-      loadConfig(*gameState);
+      gameState -> sceneManagement.levels = loadLevels();
       return;
     }
 
