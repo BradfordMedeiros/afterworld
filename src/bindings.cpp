@@ -32,7 +32,6 @@ std::vector<Level> loadLevels(){
   return levels;
 }
 
-
 SceneManagement createSceneManagement(){
   return SceneManagement {
     .levels = loadLevels(),
@@ -99,7 +98,7 @@ void togglePauseMode(){
 
 
 struct SceneRouterPath {
-  std::string path;
+  std::vector<std::string> paths;
   std::string scene;
   std::optional<std::string> camera;
   // probably game mode, pause or not paused, what to set main character etc
@@ -107,22 +106,17 @@ struct SceneRouterPath {
 
 std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
-    .path = "mainmenu/",
+    .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/"},
     .scene = "../afterworld/scenes/menu.rawscene",
     .camera = std::nullopt,
   },
   SceneRouterPath {
-    .path = "mainmenu/settings/",
-    .scene = "../afterworld/scenes/menu.rawscene",
-    .camera = std::nullopt,
-  },
-  SceneRouterPath {
-    .path = "modelviewer/",
+    .paths = { "modelviewer/" },
     .scene = "../afterworld/scenes/dev/models.rawscene",
     .camera = ">maincamera",
   },
   SceneRouterPath {
-    .path = "particleviewer/",
+    .paths = { "particleviewer/" },
     .scene = "../afterworld/scenes/dev/particles.rawscene",
     .camera = ">maincamera",
   },
@@ -132,9 +126,11 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index){
   *_index = 0;
   for (int i = 0; i < routerPaths.size(); i++){
     auto &router = routerPaths.at(i);
-    if (router.path == path){
-      *_index = i;
-      return &router;
+    for (int j = 0; j < router.paths.size(); j++){
+      if (router.paths.at(j) == path){
+        *_index = i;
+        return &router;
+      }
     }
   }
   return std::nullopt;
@@ -170,14 +166,8 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
       setActivePlayer(cameraId.value());      
     }
-
   }
-  //ensureViewLoaded(sceneManagement, currentPath == "modelviewer", "../afterworld/scenes/dev/models.rawscene");
-  //ensureViewLoaded(sceneManagement, currentPath == "particleviewer", "../afterworld/scenes/dev/particles.rawscene");
 
-  //if (currentPath == "mainmenu"){
-  //  goToMenu(sceneManagement);
-  //}
 }
 
 
