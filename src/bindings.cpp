@@ -6,6 +6,7 @@ CustomApiBindings* gameapi = NULL;
 
 struct ManagedScene {
   objid id; 
+  int index;
   std::string path;
 };
 struct SceneManagement {
@@ -106,52 +107,48 @@ struct SceneRouterPath {
 
 std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
-    .path = "mainmenu",
+    .path = "mainmenu/",
     .scene = "../afterworld/scenes/menu.rawscene",
     .camera = std::nullopt,
   },
   SceneRouterPath {
-    .path = "modelviewer",
+    .path = "mainmenu/settings/",
+    .scene = "../afterworld/scenes/menu.rawscene",
+    .camera = std::nullopt,
+  },
+  SceneRouterPath {
+    .path = "modelviewer/",
     .scene = "../afterworld/scenes/dev/models.rawscene",
     .camera = ">maincamera",
   },
   SceneRouterPath {
-    .path = "particleviewer",
+    .path = "particleviewer/",
     .scene = "../afterworld/scenes/dev/particles.rawscene",
     .camera = ">maincamera",
   },
 };
 
-std::optional<SceneRouterPath*> getSceneRouter(std::string& path){
-  for (auto &router : routerPaths){
+std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index){
+  *_index = 0;
+  for (int i = 0; i < routerPaths.size(); i++){
+    auto &router = routerPaths.at(i);
     if (router.path == path){
+      *_index = i;
       return &router;
     }
   }
   return std::nullopt;
 }
 
-
-/*void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, std::string scene){
-  if (!loadViewer && sceneId.has_value()){
-    gameapi -> unloadScene(sceneId.value());
-    sceneId = std::nullopt;
-    return;
-  }
-  if (loadViewer && !sceneId.has_value()){
-    unloadAllManagedScenes();
-    sceneId = gameapi -> loadScene(scene, {}, std::nullopt, managedTags);
-    auto cameraId = gameapi -> getGameObjectByName(">maincamera", sceneId.value(), false).value();
-    setActivePlayer(cameraId);
-    return;
-  }  
-}*/
-
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
-  modlog("scenerouter", std::string("path is: ") + currentPath);
+  modlog("scene route", std::string("path is: ") + currentPath);
+
+  int currentIndex = 0;
+  auto router = getSceneRouter(currentPath, &currentIndex);
+  modlog("scene route, router, has router = ", print(router.has_value()));
 
   if (sceneManagement.managedScene.has_value()){
-    if (sceneManagement.managedScene.value().path == currentPath){
+    if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex){
       return;
     }else{
       modlog("scene route unload", sceneManagement.managedScene.value().path);
@@ -160,11 +157,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }
   }
 
-  auto router = getSceneRouter(currentPath);
   if (router.has_value()){
     auto sceneId = gameapi -> loadScene(router.value() -> scene, {}, std::nullopt, {});
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
+      .index = currentIndex,
       .path = currentPath,
     };
     modlog("scene route load", sceneManagement.managedScene.value().path);
@@ -331,9 +328,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
-      auto currentPath = getCurrentPath();
+      auto currentPath = fullHistoryStr();
       onSceneRouteChange(gameState -> sceneManagement, currentPath);
-      std::cout << "registerOnRouteChanged: , new route: " << getCurrentPath() << std::endl;
+      std::cout << "scene route registerOnRouteChanged: , new route: " << currentPath << std::endl;
     });
 
     pushHistory("mainmenu", true);

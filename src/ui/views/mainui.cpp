@@ -866,6 +866,10 @@ std::string getCurrentPath(){
   return getCurrentPath(routerHistory);
 }
 
+std::string fullHistoryStr(){
+  return fullHistoryStr(routerHistory);
+}
+
 void sendUiAlert(std::string message){
   std::cout << "dock: alert: " << message << std::endl;
   pushAlertMessage(message, ALERT_DETAIL);
