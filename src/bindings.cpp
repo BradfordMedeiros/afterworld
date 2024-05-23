@@ -3,12 +3,16 @@
 
 CustomApiBindings* gameapi = NULL;
 
+
+struct ManagedScene {
+  objid id; 
+  std::string path;
+};
 struct SceneManagement {
   std::vector<Level> levels;
   std::optional<std::string> loadedLevel;
-  bool menuLoaded;
-  std::optional<objid> modelViewerScene;
-  std::optional<objid> particleViewerScene;
+
+  std::optional<ManagedScene> managedScene;
 };
 
 
@@ -32,9 +36,7 @@ SceneManagement createSceneManagement(){
   return SceneManagement {
     .levels = loadLevels(),
     .loadedLevel = std::nullopt,
-    .menuLoaded = false,
-    .modelViewerScene = std::nullopt,
-    .particleViewerScene = std::nullopt,
+    .managedScene = std::nullopt,
   };
 }
 
@@ -49,7 +51,6 @@ void unloadAllManagedScenes(){
 
 void goToLevel(SceneManagement& sceneManagement, std::string sceneName){
   unloadAllManagedScenes();
-  sceneManagement.menuLoaded = false;
   setPaused(false);
   sceneManagement.loadedLevel = sceneName;
   auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
@@ -73,17 +74,6 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
   return std::nullopt;
 }
 
-void goToMenu(SceneManagement& sceneManagement){
-  exitGameMode();
-  if (sceneManagement.loadedLevel.has_value()){
-    sceneManagement.loadedLevel = std::nullopt;
-    unloadAllManagedScenes();
-  }
-  if (!sceneManagement.menuLoaded){
-    gameapi -> loadScene("../afterworld/scenes/menu.rawscene", {}, std::nullopt, managedTags);
-    sceneManagement.menuLoaded = true;
-  }
-}
 
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
@@ -106,7 +96,43 @@ void togglePauseMode(){
   setPausedMode(!paused);
 }
 
-void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, const char* scene, std::optional<objid>& sceneId){
+
+struct SceneRouterPath {
+  std::string path;
+  std::string scene;
+  std::optional<std::string> camera;
+  // probably game mode, pause or not paused, what to set main character etc
+};
+
+std::vector<SceneRouterPath> routerPaths = {
+  SceneRouterPath {
+    .path = "mainmenu",
+    .scene = "../afterworld/scenes/menu.rawscene",
+    .camera = std::nullopt,
+  },
+  SceneRouterPath {
+    .path = "modelviewer",
+    .scene = "../afterworld/scenes/dev/models.rawscene",
+    .camera = ">maincamera",
+  },
+  SceneRouterPath {
+    .path = "particleviewer",
+    .scene = "../afterworld/scenes/dev/particles.rawscene",
+    .camera = ">maincamera",
+  },
+};
+
+std::optional<SceneRouterPath*> getSceneRouter(std::string& path){
+  for (auto &router : routerPaths){
+    if (router.path == path){
+      return &router;
+    }
+  }
+  return std::nullopt;
+}
+
+
+/*void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, std::string scene){
   if (!loadViewer && sceneId.has_value()){
     gameapi -> unloadScene(sceneId.value());
     sceneId = std::nullopt;
@@ -114,48 +140,47 @@ void ensureViewLoaded(SceneManagement& sceneManagement, bool loadViewer, const c
   }
   if (loadViewer && !sceneId.has_value()){
     unloadAllManagedScenes();
-    sceneManagement.menuLoaded = false;
     sceneId = gameapi -> loadScene(scene, {}, std::nullopt, managedTags);
     auto cameraId = gameapi -> getGameObjectByName(">maincamera", sceneId.value(), false).value();
     setActivePlayer(cameraId);
     return;
   }  
-}
-void ensureModelViewerLoaded(SceneManagement& sceneManagement, bool loadModelViewer){
-  ensureViewLoaded(sceneManagement, loadModelViewer, "../afterworld/scenes/dev/models.rawscene", sceneManagement.modelViewerScene);
-}
-void ensureParticleViewerLoaded(SceneManagement& sceneManagement, bool loadParticleViewer){
-  ensureViewLoaded(sceneManagement, loadParticleViewer, "../afterworld/scenes/dev/particles.rawscene", sceneManagement.particleViewerScene);
-}
-
-struct SceneRouterPath {
-  std::string path;
-  std::string scene;
-  // probably game mode, pause or not paused, what to set main character etc
-};
-
-std::vector<SceneRouterPath> routerPaths = {
-  SceneRouterPath {
-    .path = "modelviewer",
-    .scene = "../afterworld/scenes/dev/models.rawscene",
-  },
-  SceneRouterPath {
-    .path = "particleviewer",
-    .scene = "../afterworld/scenes/dev/particles.rawscene",
-  },
-  SceneRouterPath {
-    .path = "mainmenu",
-    .scene = "../afterworld/scenes/menu.rawscene",
-  },
-};
+}*/
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
   modlog("scenerouter", std::string("path is: ") + currentPath);
-  ensureModelViewerLoaded(sceneManagement, currentPath == "modelviewer");
-  ensureParticleViewerLoaded(sceneManagement, currentPath == "particleviewer");
-  if (currentPath == "mainmenu"){
-    goToMenu(sceneManagement);
+
+  if (sceneManagement.managedScene.has_value()){
+    if (sceneManagement.managedScene.value().path == currentPath){
+      return;
+    }else{
+      modlog("scene route unload", sceneManagement.managedScene.value().path);
+      gameapi -> unloadScene(sceneManagement.managedScene.value().id);
+      sceneManagement.managedScene = std::nullopt;
+    }
   }
+
+  auto router = getSceneRouter(currentPath);
+  if (router.has_value()){
+    auto sceneId = gameapi -> loadScene(router.value() -> scene, {}, std::nullopt, {});
+    sceneManagement.managedScene = ManagedScene {
+      .id = sceneId,
+      .path = currentPath,
+    };
+    modlog("scene route load", sceneManagement.managedScene.value().path);
+    if (router.value() -> camera.has_value()){
+      auto cameraId = gameapi -> getGameObjectByName(router.value() -> camera.value(), sceneId, false);
+      modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
+      setActivePlayer(cameraId.value());      
+    }
+
+  }
+  //ensureViewLoaded(sceneManagement, currentPath == "modelviewer", "../afterworld/scenes/dev/models.rawscene");
+  //ensureViewLoaded(sceneManagement, currentPath == "particleviewer", "../afterworld/scenes/dev/particles.rawscene");
+
+  //if (currentPath == "mainmenu"){
+  //  goToMenu(sceneManagement);
+  //}
 }
 
 
