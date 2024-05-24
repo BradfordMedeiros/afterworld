@@ -113,14 +113,14 @@ std::vector<SceneRouterPath> routerPaths = {
     .gameMode = true,
   },
   SceneRouterPath {
-    .paths = { "modelviewer/" },
+    .paths = { "mainmenu/modelviewer/" },
     .scene = "../afterworld/scenes/dev/models.rawscene",
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
   },
   SceneRouterPath {
-    .paths = { "particleviewer/" },
+    .paths = { "mainmenu/particleviewer/" },
     .scene = "../afterworld/scenes/dev/particles.rawscene",
     .camera = ">maincamera",
     .startPaused = false,

@@ -186,13 +186,13 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   );
 
   std::map<std::string, Component> routeToComponent = {
-    { "mainmenu",  mainMenu },
-    { "levelselect", withNavigation(uiContext, levelSelect) },
-    { "settings", withNavigation(uiContext, settingsMenu) },
+    { "mainmenu/",  mainMenu },
+    { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
+    { "mainmenu/settings/", withNavigation(uiContext, settingsMenu) },
     { "playing",  emptyComponent },
     { "paused", pauseComponent },
-    { "modelviewer", withNavigation(uiContext, modelViewer) },
-    { "particleviewer", withNavigation(uiContext, particleViewer) },
+    { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
+    { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "",  emptyComponent  },
   };
 
