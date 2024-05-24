@@ -130,7 +130,7 @@ void maybeRemoveMovementEntity(objid id){
     MovementEntity& movementEntity = movementEntities.at(i);
     if (movementEntity.playerId != id){
       newEntities.push_back(movementEntity);
-    }else if (i == activeEntity.value().index){
+    }else if (activeEntity.has_value() && (i == activeEntity.value().index)){
       activeEntity = std::nullopt;
     }
   }

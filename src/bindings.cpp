@@ -38,15 +38,6 @@ SceneManagement createSceneManagement(){
   };
 }
 
-
-std::vector<std::string> managedTags = { "game-level" };
-void unloadAllManagedScenes(){
-  auto managedScenes = gameapi -> listScenes(managedTags);
-  for (auto sceneId : managedScenes){
-    gameapi -> unloadScene(sceneId);
-  }
-}
-
 void goToLevel(SceneManagement& sceneManagement, std::string sceneName){
   pushHistory("playing", true);
 }
@@ -83,7 +74,7 @@ void setPausedMode(bool shouldBePaused){
   }
 }
 
-void togglePauseMode(){
+void togglePauseIfInGame(){
   bool paused = isPaused();
   setPausedMode(!paused);
 }
@@ -386,7 +377,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     if (action == 1){
       if (isPauseKey(key)){
-        togglePauseMode();
+        togglePauseIfInGame();
       }
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
