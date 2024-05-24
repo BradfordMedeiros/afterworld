@@ -96,12 +96,10 @@ bool isPaused(){
 void enterGameMode(){
   global.inGameMode = true;
   setPaused(false);
-  updateMouse();
 }
 void exitGameMode(){
   global.inGameMode = false;
   setPaused(true);
-  updateMouse();
 }
 
 GlobalState& getGlobalState(){
