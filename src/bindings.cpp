@@ -106,7 +106,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .gameMode = false,
   },
   SceneRouterPath {
-    .paths = { "playing/" },
+    .paths = { "playing/",  "playing/paused/" },
     .scene = "../afterworld/scenes/shooter2.rawscene",
     .camera = ">maincamera",
     .startPaused = false,
@@ -149,6 +149,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   int currentIndex = 0;
   auto router = getSceneRouter(currentPath, &currentIndex);
   modlog("scene route, router, has router = ", print(router.has_value()));
+  modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
   if (sceneManagement.managedScene.has_value()){
     if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex){
@@ -383,7 +384,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (!hasInputKey){
       return;
     }
-
     if (action == 1){
       if (isPauseKey(key)){
         togglePauseMode();

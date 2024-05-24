@@ -190,7 +190,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
     { "mainmenu/settings/", withNavigation(uiContext, settingsMenu) },
     { "playing",  emptyComponent },
-    { "paused", pauseComponent },
+    { "playing/paused/", pauseComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "",  emptyComponent  },
