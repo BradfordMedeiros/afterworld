@@ -86,6 +86,7 @@ struct SceneRouterPath {
   std::optional<std::string> camera;
   bool startPaused;
   bool gameMode;
+  bool showMouse;
 };
 
 std::vector<SceneRouterPath> routerPaths = {
@@ -95,6 +96,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = std::nullopt,
     .startPaused = true,
     .gameMode = false,
+    .showMouse = true,
   },
   SceneRouterPath {
     .paths = { "playing/",  "playing/paused/" },
@@ -102,6 +104,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = true,
+    .showMouse = false,
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
@@ -109,6 +112,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
+    .showMouse = true,
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
@@ -116,6 +120,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
+    .showMouse = true,
   },
   
 };
@@ -164,6 +169,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         exitGameMode();
       }
       setPaused(router.value() -> startPaused);
+      updateShowMouse(router.value() -> showMouse);
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,

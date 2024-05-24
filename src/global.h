@@ -30,6 +30,7 @@ struct GlobalState {
   bool middleMouseDown;
 };
 
+void updateShowMouse(bool showMouse);
 void setPaused(bool paused);
 bool isPaused();
 void enterGameMode();

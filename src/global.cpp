@@ -26,6 +26,26 @@ GlobalState global {
   .middleMouseDown = false,
 };
 
+void updateShowMouse(bool showMouse){
+  if (showMouse){
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "normal",
+      },
+    });
+  }else{
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "capture",
+      },
+    });    
+  }
+}
+
 void updateMouse(){
   global.disableGameInput = false;
   if (!global.inGameMode){
@@ -86,7 +106,25 @@ void setPaused(bool paused){
      .value = paused ? "true" : "false",
    }
   });
-  updateMouse();
+
+  if (global.showEditor){
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "false",
+      },
+    });    
+  }else{
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "true",
+      },
+    });  
+  }
+  //updateMouse();
 }
 
 bool isPaused(){
@@ -117,7 +155,7 @@ bool queryShowEditor(){
 void updateShowEditor(bool showEditor){
   modlog("update show editor", std::to_string(showEditor));
   global.showEditor = showEditor;
-  updateMouse();
+  //updateMouse();
 }
 void queryUpdateShowEditor(bool showEditor){
   auto updateQuery = gameapi -> compileSqlQuery(
