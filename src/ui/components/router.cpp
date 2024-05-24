@@ -72,12 +72,12 @@ std::map<std::string, Component>* routerMapping(Props& props){
 }
 
 
-const Component* componentAtRoute(const std::map<std::string, Component>& routeToComponent, RouterHistory& history){
-  auto hasRoute = routeToComponent.find(history.currentPath) != routeToComponent.end();
+const Component* componentAtRoute(const std::map<std::string, Component>& routeToComponent, std::string& path){
+  auto hasRoute = routeToComponent.find(path) != routeToComponent.end();
   if (!hasRoute){
     return NULL;
   }
-  return &routeToComponent.at(history.currentPath);
+  return &routeToComponent.at(path);
 }
 
 Component router {
@@ -89,9 +89,11 @@ Component router {
   	}
     auto routeToComponent = routerMapping(props);
     modassert(routeToComponent, "router - no router mapping");
-    auto component = componentAtRoute(*routeToComponent, *history);
+
+    auto fullPath = fullHistoryStr(*history);
+    auto component = componentAtRoute(*routeToComponent, fullPath);
   	if (!component){
-  		modlog("router", std::string("no path for: ") + history -> currentPath);
+  		modlog("router", std::string("no path for: ") + fullPath);
   		return BoundingBox2D { .x = 0.f, .y = 0.f, .width = 0.f, .height = 0.f };
   	}
     return component -> draw(drawTools, props);

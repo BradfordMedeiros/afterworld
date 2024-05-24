@@ -56,6 +56,7 @@ void onObjectsChanged();
 void pushHistory(std::string route, bool replace = false);
 void popHistory();
 std::string getCurrentPath();
+std::string fullHistoryStr();
 void sendUiAlert(std::string message);
 
 #endif
