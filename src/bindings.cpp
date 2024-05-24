@@ -1,11 +1,10 @@
 #include "./bindings.h"
 
-
 CustomApiBindings* gameapi = NULL;
 
 
 struct ManagedScene {
-  objid id; 
+  std::optional<objid> id; 
   int index;
   std::string path;
 };
@@ -15,7 +14,6 @@ struct SceneManagement {
 
   std::optional<ManagedScene> managedScene;
 };
-
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -50,12 +48,6 @@ void unloadAllManagedScenes(){
 }
 
 void goToLevel(SceneManagement& sceneManagement, std::string sceneName){
-  unloadAllManagedScenes();
-  setPaused(false);
-  sceneManagement.loadedLevel = sceneName;
-  auto sceneId = gameapi -> loadScene(sceneName, {}, std::nullopt, managedTags);
-  setActivePlayer(gameapi -> getGameObjectByName(">maincamera", sceneId, false)); 
-  enterGameMode();
   pushHistory("playing", true);
 }
 
@@ -99,27 +91,42 @@ void togglePauseMode(){
 
 struct SceneRouterPath {
   std::vector<std::string> paths;
-  std::string scene;
+  std::optional<std::string> scene;
   std::optional<std::string> camera;
-  // probably game mode, pause or not paused, what to set main character etc
+  bool startPaused;
+  bool gameMode;
 };
 
 std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
-    .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/"},
+    .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
     .scene = "../afterworld/scenes/menu.rawscene",
     .camera = std::nullopt,
+    .startPaused = true,
+    .gameMode = false,
+  },
+  SceneRouterPath {
+    .paths = { "playing/" },
+    .scene = "../afterworld/scenes/shooter2.rawscene",
+    .camera = ">maincamera",
+    .startPaused = false,
+    .gameMode = true,
   },
   SceneRouterPath {
     .paths = { "modelviewer/" },
     .scene = "../afterworld/scenes/dev/models.rawscene",
     .camera = ">maincamera",
+    .startPaused = false,
+    .gameMode = false,
   },
   SceneRouterPath {
     .paths = { "particleviewer/" },
     .scene = "../afterworld/scenes/dev/particles.rawscene",
     .camera = ">maincamera",
+    .startPaused = false,
+    .gameMode = false,
   },
+  
 };
 
 std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index){
@@ -148,21 +155,32 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       return;
     }else{
       modlog("scene route unload", sceneManagement.managedScene.value().path);
-      gameapi -> unloadScene(sceneManagement.managedScene.value().id);
+      if (sceneManagement.managedScene.value().id.has_value()){
+        gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
+      }
       sceneManagement.managedScene = std::nullopt;
     }
   }
 
   if (router.has_value()){
-    auto sceneId = gameapi -> loadScene(router.value() -> scene, {}, std::nullopt, {});
+    std::optional<objid> sceneId;
+    if (router.value() -> scene.has_value()){
+      sceneId = gameapi -> loadScene(router.value() -> scene.value(), {}, std::nullopt, {});
+      if (router.value() -> gameMode){
+        enterGameMode();
+      }else{
+        exitGameMode();
+      }
+      setPaused(router.value() -> startPaused);
+    }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
       .index = currentIndex,
       .path = currentPath,
     };
     modlog("scene route load", sceneManagement.managedScene.value().path);
-    if (router.value() -> camera.has_value()){
-      auto cameraId = gameapi -> getGameObjectByName(router.value() -> camera.value(), sceneId, false);
+    if (router.value() -> camera.has_value() && sceneId.has_value()){
+      auto cameraId = gameapi -> getGameObjectByName(router.value() -> camera.value(), sceneId.value(), false);
       modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
       setActivePlayer(cameraId.value());      
     }
@@ -261,16 +279,13 @@ UiContext getUiContext(GameState& gameState){
         gameapi -> sendNotifyMessage("menu-background", background);
       },
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
-        if (!level.has_value()){
-          pushHistory("mainmenu", true);
-          return;
-        }
-        auto scene = levelByShortcutName(level.value());
-        if (scene.has_value()){
-          goToLevel(gameState.sceneManagement, scene.value());
-        }else{
-          std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
-        }
+        //auto scene = levelByShortcutName(level.value());
+        //if (scene.has_value()){
+        //  goToLevel(gameState.sceneManagement, scene.value());
+        //}else{
+        //  std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
+        //}
+        pushHistory("playing", true);
       },
       .routerPush = [](std::string route, bool replace) -> void {
         pushHistory(route, replace);
