@@ -12,10 +12,10 @@ struct RouteState {
 
 struct GlobalState {
   bool paused;
-  bool inGameMode;
   bool showEditor;
   bool showScreenspaceGrid;
   bool showConsole;
+  bool showGameHud;
 
   float xNdc;
   float yNdc;

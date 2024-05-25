@@ -127,7 +127,7 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
 
 std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
   return [attrFuncs](int32_t _, void* data, int32_t idRemoved) -> void {
-    std::cout << "tags: id removed: " << idRemoved << std::endl;
+    modlog("tags id removed", std::to_string(idRemoved));
     for (auto &attrFunc : attrFuncs){
       if (hasAttribute(idRemoved, attrFunc.attr.c_str())){
         attrFunc.fn(data, idRemoved);
@@ -221,7 +221,6 @@ std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string k
   return std::nullopt; 
 }
 std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key){
-  std::cout << "getting key: " << key << std::endl;
   std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(attrHandle.id, key));
   if (value.has_value()){
    return *(value.value());
@@ -229,7 +228,6 @@ std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* 
   return std::nullopt; 
 }
 std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key){
-  std::cout << "getting key: " << key << std::endl;
   std::optional<float*> value = getTypeFromAttr<float>(getObjectAttributePtr(attrHandle.id, key));
   if (value.has_value()){
    return *(value.value());
@@ -237,7 +235,6 @@ std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key)
   return std::nullopt; 
 }
 std::optional<bool> getBoolAttr(ObjectAttrHandle& attrHandle, const char* key){
-  std::cout << "getting key: " << key << std::endl;
   std::optional<bool*> value = getTypeFromAttr<bool>(getObjectAttributePtr(attrHandle.id, key));
   if (value.has_value()){
    return *(value.value());
@@ -359,7 +356,6 @@ std::function<void()> getToggleWorldStateBoolStr(const char* object, const char*
 
 std::function<void()> getToggleWorldStateSetStr(const char* object, const char* attribute, const char* value){
   return [object, attribute, value]() -> void {
-    std::cout << "toggle world state set str" << std::endl;
     gameapi -> setWorldState({ 
       ObjectValue {
         .object = std::string(object),
@@ -372,7 +368,6 @@ std::function<void()> getToggleWorldStateSetStr(const char* object, const char* 
 
 std::function<void()> getToggleWorldStateSetFloat(const char* object, const char* attribute, float value){
   return [object, attribute, value]() -> void {
-    std::cout << "toggle world state set str" << std::endl;
     gameapi -> setWorldState({ 
       ObjectValue {
         .object = std::string(object),

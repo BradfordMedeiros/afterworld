@@ -163,11 +163,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     std::optional<objid> sceneId;
     if (router.value() -> scene.has_value()){
       sceneId = gameapi -> loadScene(router.value() -> scene.value(), {}, std::nullopt, {});
-      if (router.value() -> gameMode){
-        enterGameMode();
-      }else{
-        exitGameMode();
-      }
       setPaused(router.value() -> startPaused);
       setRouterGameState(RouteState{
         .startPaused = router.value() -> startPaused,
@@ -218,7 +213,7 @@ UiContext getUiContext(GameState& gameState){
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
-   .showGameHud = []() -> bool { return !getGlobalState().paused && getGlobalState().inGameMode; },
+   .showGameHud = []() -> bool { return getGlobalState().showGameHud; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         goToLevel(gameState.sceneManagement, level.scene);
@@ -233,7 +228,7 @@ UiContext getUiContext(GameState& gameState){
       .resume = resume,
     },
     .worldPlayInterface = WorldPlayInterface {
-      .isGameMode = []() -> bool { return getGlobalState().inGameMode; },
+      .isGameMode = []() -> bool { return getGlobalState().routeState.inGameMode; },
       .isPaused = isPaused,
       .enterGameMode = enterGameMode,
       .exitGameMode = exitGameMode,
@@ -355,7 +350,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
-      std::cout << "tex coord: " << print(texCoordUv) << std::endl;
+      //std::cout << "tex coord: " << print(texCoordUv) << std::endl;
     });
 
     gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {

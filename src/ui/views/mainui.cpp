@@ -871,6 +871,6 @@ std::string fullHistoryStr(){
 }
 
 void sendUiAlert(std::string message){
-  std::cout << "dock: alert: " << message << std::endl;
+  modlog("dock alert", message);
   pushAlertMessage(message, ALERT_DETAIL);
 }

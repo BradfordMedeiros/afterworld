@@ -4,10 +4,10 @@ extern CustomApiBindings* gameapi;
 
 GlobalState global {
   .paused = true,
-  .inGameMode = false,
   .showEditor = false,
   .showScreenspaceGrid = false,
   .showConsole = false,
+  .showGameHud = false,
   .xNdc = 0.f,
   .yNdc = 0.f,
   .texCoordUv = glm::vec2(0.f, 0.f),
@@ -35,7 +35,6 @@ GlobalState global {
 std::string print(GlobalState& globalState){
   std::string value;
   value += "paused = " + print(globalState.paused) + "\n";
-  value += "inGameMode = " + print(globalState.inGameMode) + "\n";
   value += "showEditor = " + print(globalState.showEditor) + "\n";
   value += "showConsole = " + print(globalState.showConsole) + "\n";
   value += "disableGameInput = " + print(globalState.disableGameInput) + "\n";
@@ -48,7 +47,8 @@ std::string print(GlobalState& globalState){
 }
 
 void updateState(){
-  global.disableGameInput = global.showConsole || !global.inGameMode || global.showEditor;
+  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.paused;
+  global.showGameHud = !global.disableGameInput;
 
   if (global.routeState.showMouse){
     gameapi -> setWorldState({
@@ -87,7 +87,7 @@ void updateState(){
   }
 
 
-  if (!global.inGameMode){
+  if (!global.routeState.inGameMode){
     gameapi -> setWorldState({
       ObjectValue {
         .object = "mouse",
@@ -139,14 +139,10 @@ bool isPaused(){
 }
 
 void enterGameMode(){
-  global.inGameMode = true;
-  global.paused = false;
-  updateState();
+  modassert(false, "enter game mode not yet implemented");
 }
 void exitGameMode(){
-  global.inGameMode = false;
-  global.paused = true;
-  updateState();
+  modassert(false, "exit game mode not yet implemented");
 }
 
 void setRouterGameState(RouteState routeState){

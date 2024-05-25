@@ -142,8 +142,7 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "scrollspeed",
 		.onAdd = [](void* data, int32_t id, glm::vec3 value) -> void {
   		Tags* tags = static_cast<Tags*>(data);
-
-  		std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
+  		//std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
   		tags -> textureScrollObjIds.insert(id);
   	},
   	.onRemove = [](void* data, int32_t id) -> void {
@@ -151,7 +150,7 @@ std::vector<TagUpdater> tagupdates = {
  			tags -> textureScrollObjIds.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
+  		//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
 			handleScroll(tags.textureScrollObjIds);
   	},
   	.onMessage = std::nullopt,
