@@ -24,11 +24,33 @@ GlobalState global {
   .leftMouseDown = false,
   .rightMouseDown = false,
   .middleMouseDown = false,
+
+  .routeState = RouteState {
+    .startPaused = true,
+    .inGameMode = false,
+    .showMouse = true,
+  },
 };
 
-void updateMouse(){
-  global.disableGameInput = false;
-  if (!global.inGameMode){
+std::string print(GlobalState& globalState){
+  std::string value;
+  value += "paused = " + print(globalState.paused) + "\n";
+  value += "inGameMode = " + print(globalState.inGameMode) + "\n";
+  value += "showEditor = " + print(globalState.showEditor) + "\n";
+  value += "showConsole = " + print(globalState.showConsole) + "\n";
+  value += "disableGameInput = " + print(globalState.disableGameInput) + "\n";
+
+  value += "startPaused = " + print(globalState.routeState.startPaused) + "\n";
+  value += "inGameMode = " + print(globalState.routeState.inGameMode) + "\n";
+  value += "showMouse = " + print(globalState.routeState.showMouse) + "\n";
+
+  return value;
+}
+
+void updateState(){
+  global.disableGameInput = global.showConsole || !global.inGameMode || global.showEditor;
+
+  if (global.routeState.showMouse){
     gameapi -> setWorldState({
       ObjectValue {
         .object = "mouse",
@@ -37,24 +59,13 @@ void updateMouse(){
       },
     });
   }else{
-    if (global.showEditor || global.paused){
-      global.disableGameInput = true;
-      gameapi -> setWorldState({
-        ObjectValue {
-          .object = "mouse",
-          .attribute = "cursor",
-          .value = "normal",
-        },
-      });
-    }else{
-      gameapi -> setWorldState({
-        ObjectValue {
-          .object = "mouse",
-          .attribute = "cursor",
-          .value = "capture",
-        },
-      });    
-    }
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "capture",
+      },
+    });    
   }
 
   if (global.showEditor){
@@ -74,19 +85,53 @@ void updateMouse(){
       },
     });  
   }
-}
 
-void setPaused(bool paused){
-  modlog("paused toggle", std::string("paused state: ") + print(paused));
-  global.paused = paused;
+
+  if (!global.inGameMode){
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "normal",
+      },
+    });
+  }else{
+    if (global.showEditor || global.paused){
+      gameapi -> setWorldState({
+        ObjectValue {
+          .object = "mouse",
+          .attribute = "cursor",
+          .value = "normal",
+        },
+      });
+    }else{
+      gameapi -> setWorldState({
+        ObjectValue {
+          .object = "mouse",
+          .attribute = "cursor",
+          .value = "capture",
+        },
+      });    
+    }
+  }
+
   gameapi -> setWorldState({
    ObjectValue {
      .object = "world",
      .attribute = "paused",
-     .value = paused ? "true" : "false",
+     .value = global.paused ? "true" : "false",
    }
   });
-  updateMouse();
+
+  std::cout << print(global) << std::endl;
+}
+
+
+
+void setPaused(bool paused){
+  modlog("paused toggle", std::string("paused state: ") + print(paused));
+  global.paused = paused;
+  updateState();
 }
 
 bool isPaused(){
@@ -95,11 +140,18 @@ bool isPaused(){
 
 void enterGameMode(){
   global.inGameMode = true;
-  setPaused(false);
+  global.paused = false;
+  updateState();
 }
 void exitGameMode(){
   global.inGameMode = false;
-  setPaused(true);
+  global.paused = true;
+  updateState();
+}
+
+void setRouterGameState(RouteState routeState){
+  global.routeState = routeState;
+  updateState();
 }
 
 GlobalState& getGlobalState(){
@@ -114,11 +166,6 @@ bool queryShowEditor(){
   return result.at(0).at(0) == "true";
 }
 
-void updateShowEditor(bool showEditor){
-  modlog("update show editor", std::to_string(showEditor));
-  global.showEditor = showEditor;
-  updateMouse();
-}
 void queryUpdateShowEditor(bool showEditor){
   auto updateQuery = gameapi -> compileSqlQuery(
     std::string("update session set ") + "editor = " + (showEditor ? "true" : "false"), {}
@@ -128,21 +175,20 @@ void queryUpdateShowEditor(bool showEditor){
   modassert(validSql, "error executing sql query");
 }
 
-bool queryConsoleCanEnable(){
-  auto query = gameapi -> compileSqlQuery("select console from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0) == "true";
+void setShowEditor(bool shouldShowEditor){
+  modlog("update show editor", std::to_string(shouldShowEditor));
+  global.showEditor = shouldShowEditor;
+  queryUpdateShowEditor(shouldShowEditor);
+  updateState();
 }
-
 
 void initGlobal(){
   auto args = gameapi -> getArgs();
   if (args.find("godmode") != args.end()){
     global.godMode = args.at("godmode") == "true";
   }
-  updateShowEditor(queryShowEditor());
+  global.showEditor = queryShowEditor();
+  updateState();
 }
 
 
@@ -154,4 +200,29 @@ bool rightMouseDown(){
 }
 bool middleMouseDown(){
   return global.middleMouseDown;
+}
+
+
+bool queryConsoleCanEnable(){
+  auto query = gameapi -> compileSqlQuery("select console from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0) == "true";
+}
+bool showConsole(){
+  static bool canEnableConsole = queryConsoleCanEnable();
+  if (!canEnableConsole){
+   return false;
+  }
+  return getGlobalState().showConsole;
+}
+
+void setShowConsole(bool showConsole){
+  static bool canEnableConsole = queryConsoleCanEnable();
+  if (!canEnableConsole){
+    return;
+  }
+  global.showConsole = showConsole;
+  updateState();
 }

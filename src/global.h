@@ -4,6 +4,12 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 
+struct RouteState {
+  bool startPaused;
+  bool inGameMode;
+  bool showMouse;
+};
+
 struct GlobalState {
   bool paused;
   bool inGameMode;
@@ -28,20 +34,26 @@ struct GlobalState {
   bool leftMouseDown;
   bool rightMouseDown;
   bool middleMouseDown;
+
+  RouteState routeState;
 };
 
 void setPaused(bool paused);
 bool isPaused();
 void enterGameMode();
 void exitGameMode();
+
+void setRouterGameState(RouteState routeState);
+
 GlobalState& getGlobalState();
 void initGlobal();
-void updateShowEditor(bool showEditor);
-void queryUpdateShowEditor(bool showEditor);
-bool queryConsoleCanEnable();
+void setShowEditor(bool shouldShowEditor);
 
 bool leftMouseDown();
 bool rightMouseDown();
 bool middleMouseDown();
+
+bool showConsole();
+void setShowConsole(bool showConsole);
 
 #endif 

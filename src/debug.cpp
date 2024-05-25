@@ -69,7 +69,7 @@ CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
    		//spawnProcMesh(gameapi -> listSceneId(id));
    	}
    	if (key == 96 /* ~ */  && action == 1){
-   		getGlobalState().showConsole = !getGlobalState().showConsole;
+   		setShowConsole(!showConsole());
    		modlog("console visibility", print(getGlobalState().showConsole));
    	}
 
