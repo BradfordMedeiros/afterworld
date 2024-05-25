@@ -169,7 +169,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         exitGameMode();
       }
       setPaused(router.value() -> startPaused);
-      updateShowMouse(router.value() -> showMouse);
+      setRouterGameState(RouteState{
+        .startPaused = router.value() -> startPaused,
+        .inGameMode = router.value() -> gameMode,
+        .showMouse = router.value() -> showMouse,
+      });
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
@@ -212,13 +216,7 @@ UiContext getUiContext(GameState& gameState){
    .showEditor = []() -> bool {
     return getGlobalState().showEditor;
    },
-   .showConsole = []() -> bool {
-     static bool canEnableConsole = queryConsoleCanEnable();
-     if (!canEnableConsole){
-      return false;
-     }
-     return getGlobalState().showConsole;
-   },
+   .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .showGameHud = []() -> bool { return !getGlobalState().paused && getGlobalState().inGameMode; },
    .levels = LevelUIInterface {
@@ -269,10 +267,7 @@ UiContext getUiContext(GameState& gameState){
       gameapi -> sendNotifyMessage("next-model", NULL);
     },
     .consoleInterface = ConsoleInterface {
-      .setShowEditor = [](bool shouldShowEditor) -> void {
-        updateShowEditor(shouldShowEditor);
-        queryUpdateShowEditor(shouldShowEditor);
-      },
+      .setShowEditor = setShowEditor,
       .setBackground = [](std::string background) -> void {
         gameapi -> sendNotifyMessage("menu-background", background);
       },
