@@ -82,25 +82,28 @@ void togglePauseIfInGame(){
 
 struct SceneRouterPath {
   std::vector<std::string> paths;
-  std::optional<std::string> scene;
+  std::optional<std::function<std::string(std::vector<std::string> params)>> scene;
   std::optional<std::string> camera;
   bool startPaused;
   bool gameMode;
   bool showMouse;
 };
 
+
 std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
     .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
-    .scene = "../afterworld/scenes/menu.rawscene",
+    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
     .camera = std::nullopt,
     .startPaused = true,
     .gameMode = false,
     .showMouse = true,
   },
   SceneRouterPath {
-    .paths = { "playing/",  "playing/paused/" },
-    .scene = "../afterworld/scenes/shooter2.rawscene",
+    .paths = { "playing/",  "playing/*/" },
+    .scene = [](std::vector<std::string> params) -> std::string { 
+      return "../afterworld/scenes/shooter2.rawscene";
+    },
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = true,
@@ -108,7 +111,7 @@ std::vector<SceneRouterPath> routerPaths = {
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
-    .scene = "../afterworld/scenes/dev/models.rawscene",
+    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
@@ -116,22 +119,62 @@ std::vector<SceneRouterPath> routerPaths = {
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
-    .scene = "../afterworld/scenes/dev/particles.rawscene",
+    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
     .showMouse = true,
   },
-  
 };
 
-std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index){
+
+struct PathMatch {
+  bool matches;
+  std::vector<std::string> params;
+
+};
+
+// can insert * instead of the subpath and that will match anything
+// not a regex
+PathMatch matchPath(std::string path, std::string expression){
+  auto pathSplit = split(path, '/');
+  auto expressionSplit = split(expression, '/');
+
+  PathMatch noMatch {
+    .matches = false,
+    .params = {},
+  };
+
+  if (pathSplit.size() != expressionSplit.size()){
+    return noMatch;
+  }
+
+  std::vector<std::string> params;
+  for (int i = 0; i < pathSplit.size(); i++){
+    if (expressionSplit.at(i) != pathSplit.at(i)){
+      if (expressionSplit.at(i) == "*"){
+        params.push_back(pathSplit.at(i));
+      }else{
+        return noMatch;
+      }
+    }
+  }
+
+  return PathMatch {
+    .matches = true,
+    .params = params,
+  };
+}
+
+std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, std::vector<std::string>* _params){
   *_index = 0;
   for (int i = 0; i < routerPaths.size(); i++){
     auto &router = routerPaths.at(i);
     for (int j = 0; j < router.paths.size(); j++){
-      if (router.paths.at(j) == path){
+      auto pathMatch = matchPath(path, router.paths.at(j));
+      if (pathMatch.matches){
         *_index = i;
+        *_params = pathMatch.params;
         return &router;
       }
     }
@@ -143,7 +186,8 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   modlog("scene route", std::string("path is: ") + currentPath);
 
   int currentIndex = 0;
-  auto router = getSceneRouter(currentPath, &currentIndex);
+  std::vector<std::string> params;
+  auto router = getSceneRouter(currentPath, &currentIndex, &params);
   modlog("scene route, router, has router = ", print(router.has_value()));
   modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
@@ -162,7 +206,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   if (router.has_value()){
     std::optional<objid> sceneId;
     if (router.value() -> scene.has_value()){
-      sceneId = gameapi -> loadScene(router.value() -> scene.value(), {}, std::nullopt, {});
+      sceneId = gameapi -> loadScene(router.value() -> scene.value()(params), {}, std::nullopt, {});
       setPaused(router.value() -> startPaused);
       setRouterGameState(RouteState{
         .startPaused = router.value() -> startPaused,
@@ -336,8 +380,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
       }
     }
-    setPaused(true);
-
 
     return gameState;
   };
