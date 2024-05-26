@@ -11,13 +11,16 @@ RouterHistory createHistory(std::string initialRoute){
     .history = {},
 	};
 }
-void pushHistory(RouterHistory& history, std::string path, bool replace){
-  history.currentPath = path;
+
+void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace){
+  history.currentPath = newPath.at(0);
   history.currentRouteTime = gameapi -> timeSeconds(true);
   if (replace){
     history.history = {};
   }
-  history.history.push_back(path);
+  for (auto &path : newPath){
+    history.history.push_back(path);
+  }
   if (registerOnRouteChangedFn.has_value()){
     registerOnRouteChangedFn.value()();
   }
@@ -29,7 +32,7 @@ void popHistory(RouterHistory& history){
   }
   history.history.pop_back();
   if (history.history.size() == 0){
-    pushHistory(history, history.initialRoute, false);
+    pushHistory(history, { history.initialRoute }, false);
   }else{
     history.currentPath = history.history.back();
     history.currentRouteTime = gameapi -> timeSeconds(true);
@@ -48,7 +51,14 @@ std::string fullHistoryStr(RouterHistory& history){
 }
 
 std::string getCurrentPath(RouterHistory& history){
-  return history.currentPath;
+  return history.history.at(history.history.size() - 1);
+}
+
+std::optional<std::string> getPathParts(RouterHistory& history, int index){
+  if (history.history.size() <= index){
+    return std::nullopt;
+  }
+  return history.history.at(index);
 }
 
 RouterHistory* routerHistory(Props& props){

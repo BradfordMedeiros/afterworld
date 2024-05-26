@@ -10,10 +10,11 @@ struct RouterHistory {
   std::deque<std::string> history;
 };
 RouterHistory createHistory(std::string initialRoute);
-void pushHistory(RouterHistory& history, std::string path, bool replace = false);
+void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace = false);
 void popHistory(RouterHistory& history);
 std::string fullHistoryStr(RouterHistory& history);
 std::string getCurrentPath(RouterHistory& history);
+std::optional<std::string> getPathParts(RouterHistory& history, int index);
 Component withAnimator(RouterHistory& history, Component& component, float duration);
 void registerOnRouteChanged(std::function<void()> onRouteChanged);
 

@@ -9,25 +9,25 @@ Props createLevelListProps(){
   levels.push_back(ListComponentData {
     .name = "Campaign",
     .onClick = []() -> void {
-      pushHistory("levelselect");
+      pushHistory({ "levelselect" });
     }
   });
   levels.push_back(ListComponentData {
     .name = "Settings",
     .onClick = []() -> void {
-      pushHistory("settings");
+      pushHistory({ "settings" });
     }
   });
   levels.push_back(ListComponentData {
     .name = "Model Viewer",
     .onClick = []() -> void {
-      pushHistory("modelviewer");
+      pushHistory({ "modelviewer" });
     }
   });
   levels.push_back(ListComponentData {
     .name = "Particle Viewer",
     .onClick = []() -> void {
-      pushHistory("particleviewer");
+      pushHistory({ "particleviewer" });
     }
   });
   levels.push_back(ListComponentData {
@@ -189,8 +189,8 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
     { "mainmenu/settings/", withNavigation(uiContext, settingsMenu) },
-    { "playing",  emptyComponent },
-    { "playing/paused/", pauseComponent },
+    { "playing/fps",  emptyComponent },
+    { "playing/fps/paused/", pauseComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "",  emptyComponent  },
@@ -855,8 +855,9 @@ void onObjectsChanged(){
   refreshScenegraph();
 }
 
-void pushHistory(std::string route, bool replace){
-	pushHistory(routerHistory, route, replace);
+
+void pushHistory(std::vector<std::string> route, bool replace){
+  pushHistory(routerHistory, route, replace);
 }
 void popHistory(){
   popHistory(routerHistory);
@@ -868,6 +869,10 @@ std::string getCurrentPath(){
 
 std::string fullHistoryStr(){
   return fullHistoryStr(routerHistory);
+}
+
+std::optional<std::string> getPathParts(int index){
+  return getPathParts(routerHistory, index);
 }
 
 void sendUiAlert(std::string message){

@@ -39,7 +39,7 @@ SceneManagement createSceneManagement(){
 }
 
 void goToLevel(SceneManagement& sceneManagement, std::string sceneName){
-  pushHistory("playing", true);
+  pushHistory({ "playing", "fps" }, true);
 }
 
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -61,14 +61,16 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
   setPaused(shouldBePaused);
+  auto pausedPath = getPathParts(2);
   if (!shouldBePaused){
-    if (getCurrentPath() == "paused"){  // probably shouldn't have the ui routing information here
+    if (pausedPath.has_value() && pausedPath.value() == "paused"){  // probably shouldn't have the ui routing information here
       popHistory();
     }
     downTime = gameapi -> timeSeconds(true);
   }else{
-    if (getCurrentPath() == "playing"){
-      pushHistory("paused");
+    auto playingPath = getPathParts(0);
+    if (playingPath.has_value() && playingPath.value() == "playing"){
+      pushHistory({ "paused" });
     }
     downTime = gameapi -> timeSeconds(true);
   }
@@ -100,7 +102,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .showMouse = true,
   },
   SceneRouterPath {
-    .paths = { "playing/",  "playing/*/" },
+    .paths = { "playing/fps/",  "playing/fps/paused/" },
     .scene = [](std::vector<std::string> params) -> std::string { 
       return "../afterworld/scenes/shooter2.rawscene";
     },
@@ -263,7 +265,7 @@ UiContext getUiContext(GameState& gameState){
         goToLevel(gameState.sceneManagement, level.scene);
       },
       .goToMenu = [&gameState]() -> void {
-        pushHistory("mainmenu", true);
+        pushHistory({ "mainmenu" }, true);
       }
     },
     .pauseInterface = PauseInterface {
@@ -317,10 +319,10 @@ UiContext getUiContext(GameState& gameState){
         //}else{
         //  std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
         //}
-        pushHistory("playing", true);
+        pushHistory({ "playing", "fps" }, true);
       },
       .routerPush = [](std::string route, bool replace) -> void {
-        pushHistory(route, replace);
+        pushHistory({ route }, replace);
       },
       .routerPop = []() -> void {
         popHistory();
@@ -370,7 +372,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       std::cout << "scene route registerOnRouteChanged: , new route: " << currentPath << std::endl;
     });
 
-    pushHistory("mainmenu", true);
+    pushHistory({ "mainmenu" }, true);
 
     if (args.find("level") != args.end()){
       auto scene = levelByShortcutName(args.at("level"));
@@ -429,11 +431,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
     if (key == "reset"){
-      pushHistory("mainmenu", true);
+      pushHistory({ "mainmenu" }, true);
       return;
     }
     if (key == "game-over"){
-      pushHistory("mainmenu", true);
+      pushHistory({ "mainmenu" }, true);
       return;
     }
     if (key == "reload-config:levels"){

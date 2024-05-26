@@ -53,10 +53,12 @@ void onMainUiScroll(double amount);
 void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods);
 void onObjectsChanged();
-void pushHistory(std::string route, bool replace = false);
+void pushHistory(std::vector<std::string> route, bool replace = false);
+
 void popHistory();
 std::string getCurrentPath();
 std::string fullHistoryStr();
+std::optional<std::string> getPathParts(int index);
 void sendUiAlert(std::string message);
 
 #endif
