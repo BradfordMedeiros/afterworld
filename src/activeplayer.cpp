@@ -52,6 +52,7 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
 	}
 	return std::nullopt;
 }
+
 void setActivePlayer(std::optional<objid> id){
 	if (!id.has_value()){
 		return;
@@ -71,24 +72,18 @@ void setActivePlayerNext(){
 }
 
 void onPlayerFrame(){
+	//modlog("active player", print(activePlayerId));
 	if (controlledPlayer.displayGameOver){
 	  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.1f, 0.1f, 0.1f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/testgradient.png");
 		drawCenteredText("GAME OVER", 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
 	}
-	//modlog("active player", print(activePlayerId));
 }
 void onActivePlayerRemoved(objid id){
 	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
 		controlledPlayer.activePlayerId = std::nullopt;
-
 		auto playerScene = gameapi -> listSceneId(id);
 		auto playerPos = gameapi -> getGameObjectPos(id, true);
-	
-		// check if scene exists
-	
-		modlog("active player, create dead camera at: ", print(playerPos));
 		auto createdObjId = id;
-
 		controlledPlayer.displayGameOver = true;
   	gameapi -> schedule(createdObjId, 5000, NULL, [](void*) -> void {
   	 	gameapi -> sendNotifyMessage("game-over", (int)1);
