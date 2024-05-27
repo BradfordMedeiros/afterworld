@@ -253,7 +253,6 @@ UiContext getUiContext(GameState& gameState){
     },
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [&gameState](std::string scene) -> void {
-      std::cout << "load scene placeholder: " << scene << std::endl;
       modassert(false, "load scene not yet implemented");
       goToLevel(gameState.sceneManagement, scene);
     },
@@ -279,12 +278,6 @@ UiContext getUiContext(GameState& gameState){
         gameapi -> sendNotifyMessage("menu-background", background);
       },
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
-        //auto scene = levelByShortcutName(level.value());
-        //if (scene.has_value()){
-        //  goToLevel(gameState.sceneManagement, scene.value());
-        //}else{
-        //  std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
-        //}
         modlog("gotolevel", std::string("level loading: ") + level.value());
         pushHistory({ "playing", level.value() }, true);
       },
@@ -336,7 +329,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = fullHistoryStr();
       onSceneRouteChange(gameState -> sceneManagement, currentPath);
-      std::cout << "scene route registerOnRouteChanged: , new route: " << currentPath << std::endl;
+      modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
     });
 
     pushHistory({ "mainmenu" }, true);
@@ -346,7 +339,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (scene.has_value()){
         goToLevel(gameState -> sceneManagement, scene.value());
       }else{
-        std::cout << "AFTERWORLD: no level found for shortcut: " << args.at("level") << std::endl;
+        modlog("routing", std::string("AFTERWORLD: no level found for shortcut: ") + args.at("level"));
       }
     }
 
@@ -361,7 +354,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
-      //std::cout << "tex coord: " << print(texCoordUv) << std::endl;
+      modlog("texcoord", print(glm::vec2(texCoordUv)));
     });
 
     gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
@@ -481,8 +474,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
-    //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
-    //std::cout << "(xNdc, yNdc)" << xNdc << ", " << yNdc << std::endl;
+    //modlog("input", std::string("mouse move: ") + print(glm::vec2(xPos, yPos)));
+    //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
   };
@@ -491,7 +484,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     onMainUiMousePress(gameState -> uiCallbacks, button, action, getGlobalState().selectedId);
 
-    std::cout << "on mouse down: button = " << button << ", action = " << action << std::endl;
+    modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
     if (button == 1){
       if (action == 0){
         gameState -> selecting = std::nullopt;
