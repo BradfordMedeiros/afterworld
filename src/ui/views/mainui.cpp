@@ -2,7 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
-auto routerHistory = createHistory("");
+auto routerHistory = createHistory();
 
 Props createLevelListProps(){
   std::vector<ListComponentData> levels;
@@ -189,8 +189,8 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
     { "mainmenu/settings/", withNavigation(uiContext, settingsMenu) },
-    { "playing/fps",  emptyComponent },
-    { "playing/fps/paused/", pauseComponent },
+    { "playing/*/",  emptyComponent },
+    { "playing/*/paused/", pauseComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "",  emptyComponent  },

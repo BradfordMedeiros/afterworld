@@ -38,8 +38,8 @@ SceneManagement createSceneManagement(){
   };
 }
 
-void goToLevel(SceneManagement& sceneManagement, std::string sceneName){
-  pushHistory({ "playing", "fps" }, true);
+void goToLevel(SceneManagement& sceneManagement, std::string levelShortName){
+  pushHistory({ "playing", levelShortName }, true);
 }
 
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -102,9 +102,11 @@ std::vector<SceneRouterPath> routerPaths = {
     .showMouse = true,
   },
   SceneRouterPath {
-    .paths = { "playing/fps/",  "playing/fps/paused/" },
-    .scene = [](std::vector<std::string> params) -> std::string { 
-      return "../afterworld/scenes/shooter2.rawscene";
+    .paths = { "playing/*/",  "playing/*/paused/" },
+    .scene = [](std::vector<std::string> params) -> std::string {
+      auto sceneFile = levelByShortcutName(params.at(0));
+      modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
+      return sceneFile.value();
     },
     .camera = ">maincamera",
     .startPaused = false,
@@ -129,44 +131,6 @@ std::vector<SceneRouterPath> routerPaths = {
   },
 };
 
-
-struct PathMatch {
-  bool matches;
-  std::vector<std::string> params;
-
-};
-
-// can insert * instead of the subpath and that will match anything
-// not a regex
-PathMatch matchPath(std::string path, std::string expression){
-  auto pathSplit = split(path, '/');
-  auto expressionSplit = split(expression, '/');
-
-  PathMatch noMatch {
-    .matches = false,
-    .params = {},
-  };
-
-  if (pathSplit.size() != expressionSplit.size()){
-    return noMatch;
-  }
-
-  std::vector<std::string> params;
-  for (int i = 0; i < pathSplit.size(); i++){
-    if (expressionSplit.at(i) != pathSplit.at(i)){
-      if (expressionSplit.at(i) == "*"){
-        params.push_back(pathSplit.at(i));
-      }else{
-        return noMatch;
-      }
-    }
-  }
-
-  return PathMatch {
-    .matches = true,
-    .params = params,
-  };
-}
 
 std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, std::vector<std::string>* _params){
   *_index = 0;
@@ -262,7 +226,8 @@ UiContext getUiContext(GameState& gameState){
    .showGameHud = []() -> bool { return getGlobalState().showGameHud; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
-        goToLevel(gameState.sceneManagement, level.scene);
+        modassert(false, std::string("level ui goToLevel: ") + level.name);
+        goToLevel(gameState.sceneManagement, level.name);
       },
       .goToMenu = [&gameState]() -> void {
         pushHistory({ "mainmenu" }, true);
@@ -289,6 +254,7 @@ UiContext getUiContext(GameState& gameState){
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [&gameState](std::string scene) -> void {
       std::cout << "load scene placeholder: " << scene << std::endl;
+      modassert(false, "load scene not yet implemented");
       goToLevel(gameState.sceneManagement, scene);
     },
     .newScene = [](std::string sceneName) -> void {
@@ -319,7 +285,8 @@ UiContext getUiContext(GameState& gameState){
         //}else{
         //  std::cout << "AFTERWORLD: no level found for shortcut: " << level.value() << std::endl;
         //}
-        pushHistory({ "playing", "fps" }, true);
+        modlog("gotolevel", std::string("level loading: ") + level.value());
+        pushHistory({ "playing", level.value() }, true);
       },
       .routerPush = [](std::string route, bool replace) -> void {
         pushHistory({ route }, replace);

@@ -3,17 +3,14 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<std::function<void()>> registerOnRouteChangedFn;
-RouterHistory createHistory(std::string initialRoute){
+RouterHistory createHistory(){
 	return RouterHistory {
-		.currentPath = initialRoute,
-    .initialRoute = initialRoute,
     .currentRouteTime = 0.f,
     .history = {},
 	};
 }
 
 void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace){
-  history.currentPath = newPath.at(0);
   history.currentRouteTime = gameapi -> timeSeconds(true);
   if (replace){
     history.history = {};
@@ -31,15 +28,11 @@ void popHistory(RouterHistory& history){
     return;
   }
   history.history.pop_back();
-  if (history.history.size() == 0){
-    pushHistory(history, { history.initialRoute }, false);
-  }else{
-    history.currentPath = history.history.back();
-    history.currentRouteTime = gameapi -> timeSeconds(true);
-    if (registerOnRouteChangedFn.has_value()){
-      registerOnRouteChangedFn.value()();
-    }
+  history.currentRouteTime = gameapi -> timeSeconds(true);
+  if (registerOnRouteChangedFn.has_value()){
+    registerOnRouteChangedFn.value()();
   }
+  
 }
 
 std::string fullHistoryStr(RouterHistory& history){
@@ -82,12 +75,44 @@ std::map<std::string, Component>* routerMapping(Props& props){
 }
 
 
-const Component* componentAtRoute(const std::map<std::string, Component>& routeToComponent, std::string& path){
-  auto hasRoute = routeToComponent.find(path) != routeToComponent.end();
-  if (!hasRoute){
-    return NULL;
+// can insert * instead of the subpath and that will match anything
+PathMatch matchPath(std::string path, std::string expression){
+  auto pathSplit = split(path, '/');
+  auto expressionSplit = split(expression, '/');
+
+  PathMatch noMatch {
+    .matches = false,
+    .params = {},
+  };
+
+  if (pathSplit.size() != expressionSplit.size()){
+    return noMatch;
   }
-  return &routeToComponent.at(path);
+
+  std::vector<std::string> params;
+  for (int i = 0; i < pathSplit.size(); i++){
+    if (expressionSplit.at(i) != pathSplit.at(i)){
+      if (expressionSplit.at(i) == "*"){
+        params.push_back(pathSplit.at(i));
+      }else{
+        return noMatch;
+      }
+    }
+  }
+
+  return PathMatch {
+    .matches = true,
+    .params = params,
+  };
+}
+
+const Component* componentAtRoute(const std::map<std::string, Component>& routeToComponent, std::string& path){
+  for (auto &[routePath, component] : routeToComponent){
+    if (matchPath(path, routePath).matches){
+      return &component;
+    }
+  }
+  return NULL;
 }
 
 Component router {

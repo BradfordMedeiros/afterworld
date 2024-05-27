@@ -2,6 +2,12 @@
 
 extern CustomApiBindings* gameapi;
 
+
+struct ControlledPlayer {
+	
+};
+
+
 std::optional<objid> activePlayerId = std::nullopt;
 bool activePlayerTempDisabled = false;
 
@@ -69,7 +75,7 @@ void onPlayerFrame(){
 	  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.1f, 0.1f, 0.1f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/testgradient.png");
 		drawCenteredText("GAME OVER", 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
 	}
-  //printActivePlayer();
+	//modlog("active player", print(activePlayerId));
 }
 void onActivePlayerRemoved(objid id){
 	if (activePlayerId.has_value() && activePlayerId.value() == id){
@@ -117,14 +123,6 @@ void popTempViewpoint(){
 		gameapi -> setActiveCamera(tempCameraId.value(), -1);
 	}else{
 		gameapi -> setActiveCamera(activePlayerId.value(), -1);
-	}
-}
-
-void printActivePlayer(){
-	if (activePlayerId.has_value()){
-		modlog("activeplayer", std::to_string(activePlayerId.value()));
-	}else{
-		modlog("activeplayer", "none");
 	}
 }
 

@@ -4,12 +4,11 @@
 #include "./common.h"
 
 struct RouterHistory {
-  std::string currentPath;
   std::string initialRoute;
   float currentRouteTime;
   std::deque<std::string> history;
 };
-RouterHistory createHistory(std::string initialRoute);
+RouterHistory createHistory();
 void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace = false);
 void popHistory(RouterHistory& history);
 std::string fullHistoryStr(RouterHistory& history);
@@ -17,6 +16,16 @@ std::string getCurrentPath(RouterHistory& history);
 std::optional<std::string> getPathParts(RouterHistory& history, int index);
 Component withAnimator(RouterHistory& history, Component& component, float duration);
 void registerOnRouteChanged(std::function<void()> onRouteChanged);
+
+
+struct PathMatch {
+  bool matches;
+  std::vector<std::string> params;
+};
+
+// can insert * instead of the subpath and that will match anything
+PathMatch matchPath(std::string path, std::string expression);
+
 
 extern Component router;
 
