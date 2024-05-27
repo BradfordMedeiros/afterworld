@@ -486,3 +486,9 @@ void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint){
 float randomNum(){
   return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX));
 }
+
+void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
+  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
+  float approximateWidth = text.size() * ndiSize;
+  gameapi -> drawText(text, ndiOffsetX - (approximateWidth * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId);
+}
