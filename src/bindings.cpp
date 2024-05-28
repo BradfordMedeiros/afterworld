@@ -295,7 +295,7 @@ UiContext getUiContext(GameState& gameState){
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
-    setEntityTargetLocation(agentId, MovementRequest {
+    setEntityTargetLocation(getMovementData(), agentId, MovementRequest {
       .position = targetPosition,
       .speed = speed,
     });
@@ -493,7 +493,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
         if (false){
-          raycastFromCameraAndMoveTo(getActivePlayerId().value());
+          raycastFromCameraAndMoveTo(getMovementData(), getActivePlayerId().value());
         }
       }
     }else if (button == 0){

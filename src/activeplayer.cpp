@@ -63,12 +63,12 @@ void setActivePlayer(std::optional<objid> id){
 	auto newCameraId = setCameraOrMakeTemp(id.value());
   gameapi -> sendNotifyMessage("ai-deactivate", id.value());
 	controlledPlayer.activePlayerId = id.value();
-	setActiveEntity(id.value(), newCameraId);
+	setActiveEntity(getMovementData(), id.value(), newCameraId);
   gameapi -> sendNotifyMessage("active-player-change", id.value());
 }
 
 void setActivePlayerNext(){
-	setActivePlayer(getNextEntity());
+	setActivePlayer(getNextEntity(getMovementData()));
 }
 
 void onPlayerFrame(){

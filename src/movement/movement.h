@@ -26,12 +26,17 @@ struct ActiveEntity {
   std::optional<ThirdPersonCameraInfo> managedCamera;
 };
 
-void setActiveEntity(objid id, std::optional<objid> managedCamera);
-std::optional<objid> getNextEntity();
+struct MovementEntityData {
+  std::unordered_map<objid, MovementEntity> movementEntities;
+  std::optional<ActiveEntity> activeEntity;
+};
 
+MovementEntityData& getMovementData();
+void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
+std::optional<objid> getNextEntity(MovementEntityData& movementEntityData);
 
-void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRequest);
-void raycastFromCameraAndMoveTo(objid entityId);
+void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
+void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 
