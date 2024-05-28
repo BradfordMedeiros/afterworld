@@ -5,7 +5,6 @@
 #include "../util.h"
 #include "../global.h"
 #include "../resources.h"
-#include "../activeplayer.h"
 
 struct ThirdPersonCameraInfo {
   objid id;

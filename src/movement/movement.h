@@ -7,14 +7,29 @@
 #include "../weapons/weapon.h"
 #include "../controls.h"
 
-
-void setActiveEntity(objid id, std::optional<objid> managedCamera);
-std::optional<objid> getNextEntity();
-
 struct MovementRequest {
   glm::vec3 position;
   float speed;
 };
+
+struct MovementEntity {
+  objid playerId;
+  MovementParams* moveParams;
+  MovementState movementState;
+
+  // when set the entity navigates to this location
+  std::optional<MovementRequest> targetLocation;
+};
+
+struct ActiveEntity {
+  int index;
+  std::optional<ThirdPersonCameraInfo> managedCamera;
+};
+
+void setActiveEntity(objid id, std::optional<objid> managedCamera);
+std::optional<objid> getNextEntity();
+
+
 void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRequest);
 void raycastFromCameraAndMoveTo(objid entityId);
 

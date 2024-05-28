@@ -2,25 +2,11 @@
 
 extern CustomApiBindings* gameapi;
 
-
-struct MovementEntity {
-  objid playerId;
-  MovementParams* moveParams;
-  MovementState movementState;
-
-  // when set the entity navigates to this location
-  std::optional<MovementRequest> targetLocation;
-};
-
 struct Movement {
   ControlParams controlParams;
 };
 
-struct ActiveEntity {
-  int index;
-  std::optional<ThirdPersonCameraInfo> managedCamera;
 
-};
 std::optional<ActiveEntity> activeEntity;
 std::vector<MovementEntity> movementEntities;
 
