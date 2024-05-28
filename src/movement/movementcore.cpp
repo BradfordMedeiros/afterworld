@@ -76,9 +76,6 @@ void removeAllMovementCores(){
   ensureSoundsUnloaded(gameapi -> rootSceneId());
 }
 
-///////////////////////////////
-
-
 void jump(MovementParams& moveParams, MovementState& movementState, objid id){
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
   modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
@@ -108,7 +105,6 @@ void moveUp(objid id, glm::vec2 direction){
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
 }
 
-
 void moveAbsolute(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
   //modlog("editor: move xz: ", print(direction));
   float time = gameapi -> timeElapsed();
@@ -122,9 +118,6 @@ void moveAbsolute(objid id, glm::vec3 direction){ // i wonder if i should make t
   }
   gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
 }
-
-
-
 
 
 float ironsightSpeedMultiplier = 0.4f;

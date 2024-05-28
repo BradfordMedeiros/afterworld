@@ -88,13 +88,6 @@ MovementParams* findMovementCore(std::string& name);
 void loadMovementCore(std::string& coreName);
 void removeAllMovementCores();
 
-MovementParams getMovementParams(std::string name);
-
-void jump(MovementParams& moveParams, MovementState& movementState, objid id);
-void attachToLadder(MovementState& movementState);
-void releaseFromLadder(MovementState& movementState);
-void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown);
-
 struct MovementControlData {
   glm::vec3 moveVec;
   bool isWalking;
@@ -115,6 +108,5 @@ void onMovementFrame(MovementParams& moveParams, MovementState& movementState, o
 
 MovementState getInitialMovementState(objid playerId);
 
-std::string movementToStr(ControlParams& controlParams);
 
 #endif
