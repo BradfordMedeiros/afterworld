@@ -10,7 +10,6 @@ struct Movement {
 MovementEntityData& getMovementData();
 
 
-
 void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
   movementEntityData.activeEntity = ActiveEntity {
     .playerId = id,
@@ -27,8 +26,10 @@ void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::opti
       .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
       .reverseCamera = false,
     },
-  }; 
+  };
+  gameapi -> sendNotifyMessage("active-player-change", id); 
 }
+
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData){
   if (movementEntityData.movementEntities.size() == 0){
     return std::nullopt;
@@ -167,8 +168,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    std::cout << "key is: " << key << std::endl;
-
     if (isCrouchKey(key)){  // ctrl
       if (action == 0 || action == 1){
         if (action == 0){
@@ -178,7 +177,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
-
     if (isClimbKey(key)) { 
       if (action == 1){
         movement -> controlParams.doAttachToLadder = true;
@@ -187,7 +185,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
       return;
     }
-
     if (isMoveForwardKey(key)){
       if (action == 0){
         movement -> controlParams.goForward = false;
@@ -300,5 +297,3 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
 
   return binding;
 }
-
-
