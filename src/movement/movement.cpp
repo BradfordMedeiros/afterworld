@@ -8,21 +8,11 @@ struct Movement {
 
 
 std::optional<ActiveEntity> activeEntity;
-std::vector<MovementEntity> movementEntities;
-
-
-std::optional<int> entityIndex(objid playerId){
-  for (int i = 0; i < movementEntities.size(); i++){
-    if (movementEntities.at(i).playerId == playerId){
-      return i;
-    }
-  }
-  return std::nullopt;
-}
+std::unordered_map<objid, MovementEntity> movementEntities;
 
 void setActiveEntity(objid id, std::optional<objid> managedCamera){
   activeEntity = ActiveEntity {
-    .index = entityIndex(id).value(),
+    .playerId = id,
     .managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
       .id = managedCamera.value(),
       .distanceFromTarget = -5.f,
@@ -39,28 +29,34 @@ void setActiveEntity(objid id, std::optional<objid> managedCamera){
   }; 
 }
 std::optional<objid> getNextEntity(){
-  if (!activeEntity.has_value()){
-    if (movementEntities.size() > 0){
-      activeEntity = ActiveEntity {
-        .index = 0,
-      };
-      return movementEntities.at(0).playerId;
-    }
+  if (movementEntities.size() == 0){
     return std::nullopt;
   }
-  auto nextIndex = activeEntity.value().index + 1;
-  if (nextIndex >= movementEntities.size()){
-    nextIndex = 0;
+  std::vector<objid> allEntities;
+  for (auto &[id, _] : movementEntities){
+    allEntities.push_back(id);
   }
-  return movementEntities.at(nextIndex).playerId;
+  if (!activeEntity.has_value()){
+    return allEntities.at(0);
+  }
+  auto currId = activeEntity.value().playerId;
+  std::optional<int> currentIndex = 0;
+  for (int i = 0; i < allEntities.size(); i++){
+    if (currId == allEntities.at(i)){
+      currentIndex = i;
+      break;
+    }
+  }
+  auto index = currentIndex.value() + 1;
+  if (index >= allEntities.size()){
+    index = 0;
+  }
+
+  return allEntities.at(index);
 }
 
 void setEntityTargetLocation(objid id, std::optional<MovementRequest> movementRequest){
-  for (auto &movementEntity : movementEntities){
-    if (movementEntity.playerId == id){
-      movementEntity.targetLocation = movementRequest;
-    }
-  }
+  movementEntities.at(id).targetLocation = movementRequest;
 }
 
 void raycastFromCameraAndMoveTo(objid entityId){
@@ -92,35 +88,21 @@ MovementEntity createMovementEntity(objid id, std::string&& name){
   return movementEntity;
 }
 
-bool movementEntityExists(objid id){
-  for (auto &movementEntity : movementEntities){
-    if (movementEntity.playerId == id){
-      return true;
-    }
-  }
-  return false;
-}
 void maybeAddMovementEntity(objid id){
-  if (movementEntityExists(id)){
+  if (movementEntities.find(id) != movementEntities.end()){
     return;
   }
   auto player = getSingleAttr(id, "player");
   if (player.has_value()){
     auto playerProfile = getSingleAttr(id, "player-profile");
-    movementEntities.push_back(createMovementEntity(id, playerProfile.has_value() ? playerProfile.value() : "default"));
+    movementEntities[id] = createMovementEntity(id, playerProfile.has_value() ? playerProfile.value() : "default");
   }
 }
 void maybeRemoveMovementEntity(objid id){
-  std::vector<MovementEntity> newEntities;
-  for (int i = 0; i < movementEntities.size(); i++){
-    MovementEntity& movementEntity = movementEntities.at(i);
-    if (movementEntity.playerId != id){
-      newEntities.push_back(movementEntity);
-    }else if (activeEntity.has_value() && (i == activeEntity.value().index)){
-      activeEntity = std::nullopt;
-    }
+  if (activeEntity.has_value() && activeEntity.value().playerId == id){
+    activeEntity = std::nullopt;
   }
-  movementEntities = newEntities;
+  movementEntities.erase(id);
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -286,7 +268,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     if (!activeEntity.has_value()){
       return;
     }
-    MovementEntity& entity = movementEntities.at(activeEntity.value().index);
+    MovementEntity& entity = movementEntities.at(activeEntity.value().playerId);
 
     auto controlData = getMovementControlData(movement -> controlParams, entity.movementState, *entity.moveParams);
     onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, activeEntity.value().managedCamera, getIsGunZoomed());

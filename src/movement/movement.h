@@ -22,7 +22,7 @@ struct MovementEntity {
 };
 
 struct ActiveEntity {
-  int index;
+  int playerId;
   std::optional<ThirdPersonCameraInfo> managedCamera;
 };
 
