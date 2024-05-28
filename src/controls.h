@@ -11,6 +11,7 @@ bool isMoveBackwardKey(int key);
 bool isMoveLeftKey(int key);
 bool isMoveRightKey(int key);
 bool isCrouchKey(int key);
+bool isClimbKey(int key);
 bool isInteractKey(int key);
 bool isPauseKey(int key);
 

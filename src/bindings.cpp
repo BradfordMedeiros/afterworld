@@ -15,6 +15,7 @@ struct SceneManagement {
   std::optional<ManagedScene> managedScene;
 };
 
+
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
   bool validSql = false;
@@ -192,12 +193,12 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       setActivePlayer(cameraId.value());      
     }
   }
-
 }
 
 
 struct GameState {
   SceneManagement sceneManagement;
+  MovementEntityData movementEntities;
 
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
@@ -205,6 +206,16 @@ struct GameState {
   HandlerFns uiCallbacks;
   UiContext uiContext;
 };
+
+MovementEntityData movementEntityData {
+  .movementEntities = {},
+  .activeEntity = std::nullopt,
+};
+
+MovementEntityData& getMovementData(){
+  return movementEntityData;
+}
+
 
 
 UiContext getUiContext(GameState& gameState){
@@ -515,9 +526,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMainUiScroll(amount);
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
+    maybeAddMovementEntity(getMovementData(), idAdded);
     onObjectsChanged();
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+    maybeRemoveMovementEntity(getMovementData(), idRemoved);
     onActivePlayerRemoved(idRemoved);
     onObjectsChanged();
   };

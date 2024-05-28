@@ -7,15 +7,9 @@ struct Movement {
 };
 
 
-MovementEntityData movementEntityData {
-  .movementEntities = {},
-  .activeEntity = std::nullopt,
-};
+MovementEntityData& getMovementData();
 
 
-MovementEntityData& getMovementData(){
-  return movementEntityData;
-}
 
 void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
   movementEntityData.activeEntity = ActiveEntity {
@@ -157,9 +151,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.doReleaseFromLadder = false;
     movement -> controlParams.crouchType = CROUCH_NONE;
 
-    for (auto id : gameapi -> getObjectsByAttr("player", std::nullopt, std::nullopt)){
-      maybeAddMovementEntity(movementEntityData, id);
-    }
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -172,7 +163,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    if (!movementEntityData.activeEntity.has_value()){
+    if (!getMovementData().activeEntity.has_value()){
       return;
     }
 
@@ -188,7 +179,7 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       }
     }
 
-    if (key == 'R') { 
+    if (isClimbKey(key)) { 
       if (action == 1){
         movement -> controlParams.doAttachToLadder = true;
       }else if (action == 0){
@@ -231,7 +222,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
 
     if (isJumpKey(key) /* space */ && action == 1){
-      Movement* movement = static_cast<Movement*>(data);
       movement -> controlParams.doJump = true;
       return;
     }
@@ -241,8 +231,8 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
         movement -> controlParams.shiftModifier = false;
       }else if (action == 1){
         movement -> controlParams.shiftModifier = true;
-        if (movementEntityData.activeEntity.has_value() && movementEntityData.activeEntity.value().managedCamera.has_value()){
-          movementEntityData.activeEntity.value().managedCamera.value().reverseCamera = !movementEntityData.activeEntity.value().managedCamera.value().reverseCamera;
+        if (getMovementData().activeEntity.has_value() && getMovementData().activeEntity.value().managedCamera.has_value()){
+          getMovementData().activeEntity.value().managedCamera.value().reverseCamera = !getMovementData().activeEntity.value().managedCamera.value().reverseCamera;
         }
       }
     }
@@ -252,10 +242,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       return;
     }
     Movement* movement = static_cast<Movement*>(data);
-    if (!movementEntityData.activeEntity.has_value()){
+    if (!getMovementData().activeEntity.has_value()){
       return;
     }
-
     float xsensitivity = getGlobalState().xsensitivity;
     float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
     movement -> controlParams.lookVelocity = glm::vec2(xsensitivity * xPos, ysensitivity * yPos);
@@ -272,13 +261,13 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     }
     Movement* movement = static_cast<Movement*>(data);
     //checkMovementCollisions(*movement);
-    if (!movementEntityData.activeEntity.has_value()){
+    if (!getMovementData().activeEntity.has_value()){
       return;
     }
-    MovementEntity& entity = movementEntityData.movementEntities.at(movementEntityData.activeEntity.value().playerId);
+    MovementEntity& entity = getMovementData().movementEntities.at(getMovementData().activeEntity.value().playerId);
 
     auto controlData = getMovementControlData(movement -> controlParams, entity.movementState, *entity.moveParams);
-    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.activeEntity.value().managedCamera, getIsGunZoomed());
+    onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, getMovementData().activeEntity.value().managedCamera, getIsGunZoomed());
     
     //for (MovementEntity& movementEntity : movementEntities){
     //  if (movementEntity.targetLocation.has_value()){
@@ -291,15 +280,12 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     //  }
     //}
 
-
     movement -> controlParams.lookVelocity = glm::vec2(0.f, 0.f);
     movement -> controlParams.zoom_delta = 0.f;
     movement -> controlParams.doJump = false;
     movement -> controlParams.doAttachToLadder = false;
     movement -> controlParams.doReleaseFromLadder = false;
     movement -> controlParams.crouchType = CROUCH_NONE;
-
-    //modlog("movement num entitiies: ", std::to_string(movementEntities.size()));
   };
 
   binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
@@ -310,13 +296,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
       modassert(objIdValue != NULL, "movement - request change control value invalid");
       changeTargetId(*movement, *objIdValue);
     }
-  };
-
-  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
-    maybeAddMovementEntity(movementEntityData, idAdded);
-  };
-  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    maybeRemoveMovementEntity(movementEntityData, idRemoved);
   };
 
   return binding;

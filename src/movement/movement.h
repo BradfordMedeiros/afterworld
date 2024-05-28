@@ -38,6 +38,9 @@ std::optional<objid> getNextEntity(MovementEntityData& movementEntityData);
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);
 
+void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
+void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
+
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 
 #endif

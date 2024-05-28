@@ -66,6 +66,9 @@ bool isMoveRightKey(int key){
 bool isCrouchKey(int key){
 	return key == crouchKey; // left-ctrl
 }
+bool isClimbKey(int key){
+	return key == 'R';
+}
 bool isInteractKey(int key){
 	return key == interactKey;
 }
