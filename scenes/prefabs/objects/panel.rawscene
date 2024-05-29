@@ -1,0 +1,8 @@
+
+panel:mesh:./res/models/box/crate.gltf
+panel:texture:./res/textures/hexglow.png
+panel:physics:enabled
+panel:scale:0.5 0.25 0.2
+panel:physics:enabled
+panel:tint:0 0 1 0.5
+panel:layer:transparency
