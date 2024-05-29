@@ -2,7 +2,6 @@
 
 # Scripts
 dialog:script:native/dialog
-inventory:script:native/inventory
 daynight:script:native/daynight
 debug:script:native/debug
 water:script:native/water
@@ -15,6 +14,10 @@ movement:script:native/movement:1
 # Texture resources
 loadtexture:texture:../gameresources/textures/controls/up-down.png
 
+testobject:position:5 4 3
+testobject:layer:somedebug
+testobject:tint:1 3 7 0.1
+testobject:physics:disabled
 
 # Sounds
 

@@ -1,2 +1,17 @@
-crate:mesh:./res/models/box/crate.gltf
-crate:health-cleanup:no-children
+
++particles:position:0 2 0
++particles:limit:10
++particles:rate:0.3
++particles:duration:0.4
+
++particles:+mesh:./res/models/unit_rect/unit_rect.obj
++particles:!scale:0.1 0 0
++particles:+physics_type:dynamic
++particles:+physics:enabled
+
++particles:+position:1 0 0
++particles:!position:0.2 0 0
+
++particles:+tint:1 0 0 1
++particles:!tint:0.02 -0.02 0.004 -0.01
+

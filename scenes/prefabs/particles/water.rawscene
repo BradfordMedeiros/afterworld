@@ -1,14 +1,16 @@
-
-+particles:position:0 0 0
-+particles:limit:20
++particles:position:0 2 0
++particles:limit:10
 +particles:rate:0.3
-+particles:duration:2
-+particles:state:enabled
++particles:duration:0.4
 
-+particles:+mesh:./res/models/box/box.obj
-+particles:+physics_type:dynamic
-+particles:+physics:enabled
-+particles:+physics_collision:nocollide
++particles:+mesh:./res/models/unit_rect/unit_rect.obj
+#+particles:!scale:0.1 0 0
+#+particles:+physics_type:dynamic
+#+particles:+physics:enabled
 
-+particles:+Cube/tint:0 0 1 1
-+particles:+Cube/texture:./res/textures/blacktop.jpg
+#+particles:+position:1 0 0
+#+particles:!position:0.2 0 0
+
+#+particles:+tint:1 0 0 1
+#+particles:!tint:0.02 -0.02 0.004 -0.01
+

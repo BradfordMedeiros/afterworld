@@ -18,11 +18,16 @@ struct AudioZones {
 	std::optional<CurrentPlayingData> currentPlaying;
 };
 
+struct OpenableType {
+	std::string signal;
+};
+
 struct Tags {
 	std::unordered_map<objid, HitPoints> hitpoints;
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
 	InGameUi inGameUi;
+	std::unordered_map<objid, OpenableType> openable;
 
 	StateController animationController;
 };
@@ -137,6 +142,36 @@ std::vector<TagUpdater> tagupdates = {
   		}
   	},
 	},
+
+	TagUpdater {
+		.attribute = "open",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		tags -> openable[id] = OpenableType {
+  			.signal = value,
+  		};
+  	},
+  	.onRemove = [](void* data, int32_t id) -> void {
+ 			Tags* tags = static_cast<Tags*>(data);
+ 			tags -> openable.erase(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		if (key == "some-message"){
+  		//	modassert(false, "got some message");
+  		}
+	  	for (auto &[id, openable] : tags.openable){
+	  		if (!gameapi -> gameobjExists(id)){
+	  			continue;
+	  		}
+	  		if (key == openable.signal){
+	  			auto groupId = gameapi -> groupId(id);
+      		gameapi -> removeByGroupId(groupId);
+	  		}
+	  	}
+  	},
+	},
+
 
 	TagUpdater {
 		.attribute = "scrollspeed",
@@ -430,6 +465,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     tags -> inGameUi = InGameUi {
     	.textDisplays = {},
     };
+    tags -> openable = {};
 
     ///// animations ////
     tags -> animationController = createStateController();

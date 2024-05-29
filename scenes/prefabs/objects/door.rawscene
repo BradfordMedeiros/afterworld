@@ -1,0 +1,23 @@
+
+crate:mesh:./res/models/box/crate.gltf
+crate:texture:./res/textures/hexglow.png
+crate:physics:enabled
+crate:scale:1 4 0.2
+crate:physics:enabled
+crate:open:open-door-trigger
+
+#[door:open-signal:message
+
+
+controlpanel:layer:transparency
+controlpanel:mesh:./res/models/box/crate.gltf
+controlpanel:scale:1 4 4
+controlpanel:tint:1 1 0 0.4
+controlpanel:texture:../gameresources/textures/blacktop.jpg
+controlpanel:physics:enabled
+controlpanel:physics_collision:nocollide
+controlpanel:switch-enter-key:open-door-trigger
+controlpanel:switch-enter:type1
+controlpanel:switch-filter:player
+
+#spawn_trigger:switch-remove:enter

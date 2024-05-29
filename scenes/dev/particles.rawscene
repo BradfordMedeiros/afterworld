@@ -1,12 +1,4 @@
 
-menu:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-menu:position:0 0 -100
-menu:scale:200 200 200
-menu:rotation:0 0 -1 0
-menu:texture:/home/brad/Desktop/art/oldmanrender.png
-menu:scrollspeed:0.02
-menu:script:native/menu
-menu:shader:../afterworld/shaders/menu/fragment.glsl
 
 &music:clip:/home/brad/Desktop/music.wav
 &music:volume:0
@@ -20,4 +12,3 @@ viewer:position:0 0 -25
 
 >maincamera:position:0 5 -10
 >maincamera:player:true
->maincamera:rotation:0 -0.4 -1 0

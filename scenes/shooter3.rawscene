@@ -5,20 +5,8 @@ platform:scale:100 100 100
 platform:rotation:0 0 -1 0
 platform:texture:../gameresources/textures/wood.jpg
 platform:physics:enabled
-
 platform:material:metal
 
-#
-wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-wall:position:0 0 0
-wall:scale:200 200 200
-wall:rotation:0 -1 0 0
-wall:texture:../gameresources/textures/wood.jpg
-wall:physics:enabled
-wall:material:metal
-
-
->maincamera:script:native/movement
 >maincamera:position:0 50 100
 >maincamera:physics_angle:0.000000 0.000000 0.000000
 >maincamera:physics:enabled
@@ -26,28 +14,11 @@ wall:material:metal
 >maincamera:physics_type:dynamic
 >maincamera:physics_gravity:0 -9.81 0
 >maincamera:physics_shape:shape_sphere
->maincamera:goal:player
+>maincamera:goal-info:target
 >maincamera:goal-type:move
 >maincamera:goal-value:5
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
-
-#!light:position:0 -5 5
-
-
-
-loadtexture:texture:../gameresources/textures/controls/up-down.png
-
-hud:script:native/hud
-dialog:script:native/dialog
-inventory:script:native/inventory
-#vehicles:script:native/vehicle
-#vehicles2:script:native/vehicle
-daynight:script:native/daynight
-debug:script:native/debug
-weather:script:native/weather
-gunlogic:script:native/weapon
-ingame:script:native/in-game-ui
-tags:script:native/tags
-sounds:script:native/sound
-water:script:native/water
+>maincamera:team:blue
+>maincamera:health:20
+>maincamera:player:true

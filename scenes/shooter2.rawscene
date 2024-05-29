@@ -51,6 +51,10 @@ wall:gem:0
 [crate:scene:../afterworld/scenes/prefabs/objects/crate.rawscene
 [crate:position:5 -25 0
 
+[door:scene:../afterworld/scenes/prefabs/objects/door.rawscene
+[door:position:5 -25 0
+
+
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 ladder:position:-40 -10 0
@@ -90,11 +94,6 @@ race_marker2:switch-enter:2
 #######################################
 
 
-floatbox_above:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-floatbox_above:position:10 -12 30
-floatbox_above:scale:5 5 5
-floatbox_above:texture:../gameresources/textures/wood.jpg
-floatbox_above:physics:enabled
 
 floatbox_small:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox_small:position:10 -22.8 40
@@ -366,13 +365,12 @@ poi_1:interest:generic
 
 ##############################################
 
-vehicles:script:native/vehicle
 gunlogic:script:native/weapon
 ai:script:native/ai
 
-;navmesh1:position:-20 -27 70
-;navmesh1:physics:enabled
-;navmesh1:physics_shape:shape_exact
+#;navmesh1:position:-20 -27 70
+#;navmesh1:physics:enabled
+#;navmesh1:physics_shape:shape_exact
 
 #;navmesh2:position:-20 -27 70
 #;navmesh2:physics:enabled
