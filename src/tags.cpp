@@ -18,8 +18,14 @@ struct AudioZones {
 	std::optional<CurrentPlayingData> currentPlaying;
 };
 
+enum OpenBehavior {
+		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP
+};
 struct OpenableType {
 	std::string signal;
+	std::string closeSignal;
+	OpenBehavior behavior;
+	bool stateUp;
 };
 
 struct Tags {
@@ -149,6 +155,9 @@ std::vector<TagUpdater> tagupdates = {
   		Tags* tags = static_cast<Tags*>(data);
   		tags -> openable[id] = OpenableType {
   			.signal = value,
+  			.closeSignal = "close-door-trigger",
+  			.behavior = OPEN_BEHAVIOR_UP,
+  			.stateUp = false,
   		};
   	},
   	.onRemove = [](void* data, int32_t id) -> void {
@@ -157,16 +166,35 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		if (key == "some-message"){
-  		//	modassert(false, "got some message");
-  		}
 	  	for (auto &[id, openable] : tags.openable){
 	  		if (!gameapi -> gameobjExists(id)){
 	  			continue;
 	  		}
 	  		if (key == openable.signal){
-	  			auto groupId = gameapi -> groupId(id);
-      		gameapi -> removeByGroupId(groupId);
+	  			if (openable.behavior == OPEN_BEHAVIOR_DELETE){
+	  				auto groupId = gameapi -> groupId(id);
+      			gameapi -> removeByGroupId(groupId);
+	  			}else if (openable.behavior == OPEN_BEHAVIOR_UP){
+	  				if (!openable.stateUp){
+			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, 5.f, 0.f), true);
+		  				openable.stateUp = true;
+	  				}
+	  			}else{
+	  				modassert(false, "open behavior not yet implemented");
+	  			}
+	  		}else if (key == openable.closeSignal){
+	  			if (openable.behavior == OPEN_BEHAVIOR_DELETE){
+	  				// do nothing
+	  			}else if (openable.behavior == OPEN_BEHAVIOR_UP){
+	  				if (openable.stateUp){
+			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, -5.f, 0.f), true);
+		  				openable.stateUp = false;
+	  				}
+	  			}else{
+	  				modassert(false, "open behavior not yet implemented");
+	  			}	
 	  		}
 	  	}
   	},
