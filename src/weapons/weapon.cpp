@@ -161,6 +161,15 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }
     if (isInteractKey(key)) { 
       if (action == 1){
+        if (activateableItem.has_value()){
+          auto attrHandle = getAttrHandle(activateableItem.value());
+          auto activateKey = getStrAttr(attrHandle, "activate");
+          if (activateKey.has_value()){
+            auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true);
+            playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
+            gameapi -> sendNotifyMessage(activateKey.value(), "default");
+          }
+        }
         if (weapons -> heldItem.has_value()){
           modlog("weapons", "pickup released held item: " + std::to_string(weapons -> heldItem.value()));
           weapons -> heldItem = std::nullopt;

@@ -6,6 +6,7 @@ ManagedSounds sounds {
   .jumpSoundObjId = std::nullopt,
   .landSoundObjId = std::nullopt,
   .moveSoundObjId = std::nullopt,
+  .activateSoundObjId = std::nullopt,
 };
 
 ManagedSounds& getManagedSounds(){
@@ -47,6 +48,14 @@ void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landCli
     }
     sounds.moveSoundObjId = createSound(sceneId, ("&code-move") + uniqueNameSuffix(), moveClip);
   }
+
+  std::string activateClip = moveClip;
+  if (activateClip != ""){
+    if (sounds.activateSoundObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.activateSoundObjId.value());
+    }
+    sounds.activateSoundObjId = createSound(sceneId, ("&code-activate") + uniqueNameSuffix(), activateClip);
+  }
 }
 
 void ensureSoundUnloaded(objid sceneId, std::optional<objid>* sound){  // this should just centrally loading into a scene, and then can detect
@@ -64,4 +73,5 @@ void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading
 	ensureSoundUnloaded(sceneId, &sounds.jumpSoundObjId);
 	ensureSoundUnloaded(sceneId, &sounds.landSoundObjId);
 	ensureSoundUnloaded(sceneId, &sounds.moveSoundObjId);
+  ensureSoundUnloaded(sceneId, &sounds.activateSoundObjId);
 }
