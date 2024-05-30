@@ -13,6 +13,11 @@ void setHealth(float health){
   currentHealth = health;
 }
 
+bool showActivate = false;
+void setShowActivate(bool show){
+  showActivate = show;
+}
+
 void drawbar(DrawingTools& drawTools, float health){
   float width = 0.4f;
   float aspectRatio = 0.2f;
@@ -36,6 +41,10 @@ Component hudComponent {
 
     drawTools.drawText("health: " + std::to_string(static_cast<int>(currentHealth)), 0.85f, -0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, -0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+
+    if (showActivate){
+      drawTools.drawText("press e to activate", 0.75f, 0.7f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    }
 
   	return BoundingBox2D {
   		.x = 0.f,

@@ -328,6 +328,11 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::vec3 orientati
   return hitpoints;
 }
 
+std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId){
+  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
+  return doRaycastClosest(mainobjPos, orientationOffset, playerId); 
+}
+
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }

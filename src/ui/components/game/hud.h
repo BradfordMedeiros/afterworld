@@ -10,6 +10,7 @@ struct AmmoHudInfo {
 };
 void setUIAmmoCount(AmmoHudInfo ammoInfo);
 void setHealth(float health);
+void setShowActivate(bool showActivate);
 
 extern Component hudComponent;
 

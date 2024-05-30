@@ -103,6 +103,7 @@ void deliverAmmo(GunCore& _gunCore, int ammo);
 void saveGunTransform(GunInstance& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
+std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId);
 
 bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id);
 

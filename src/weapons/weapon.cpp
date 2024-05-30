@@ -71,6 +71,30 @@ void changeWeaponTargetId(Weapons& weapons, objid id){
   //changeGun(weapons, id, gameapi -> listSceneId(id), "pistol", 10);
 }
 
+
+std::optional<objid> activateableItem;
+void setShowActivate(bool showActivate);
+void handleActivateItem(objid playerId){
+  auto hitpoints = doRaycastClosest(glm::vec3(0.f, 0.f, -1.f), playerId);
+  if (hitpoints.size() > 0){
+    auto hitpoint = hitpoints.at(0);
+    auto playerPos = gameapi -> getGameObjectPos(playerId, true);
+    auto distance = glm::distance(hitpoint.point, playerPos);
+    if (distance < 2){
+      modlog("active", "found item close");
+      auto attrHandle = getAttrHandle(hitpoint.id);
+      auto activateKey = getStrAttr(attrHandle, "activate");
+      if (activateKey.has_value()){
+        setShowActivate(true);
+        activateableItem = hitpoint.id;
+        return;        
+      }
+    }
+  }
+  activateableItem = std::nullopt;
+  setShowActivate(false);  
+}
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -225,6 +249,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> fireOnce = false;
     swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId.value(), weapons -> lookVelocity, weapons -> movementVec);
     handlePickedUpItem(*weapons);
+    handleActivateItem(weapons -> playerId.value());
     //std::cout << weaponsToString(*weapons) << std::endl;
   };
 
