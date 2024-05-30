@@ -19,7 +19,7 @@ struct AudioZones {
 };
 
 enum OpenBehavior {
-		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP
+		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP, OPEN_BEHAVIOR_TOGGLE
 };
 struct OpenableType {
 	std::string signal;
@@ -156,7 +156,7 @@ std::vector<TagUpdater> tagupdates = {
   		tags -> openable[id] = OpenableType {
   			.signal = value,
   			.closeSignal = "close-door-trigger",
-  			.behavior = OPEN_BEHAVIOR_UP,
+  			.behavior = OPEN_BEHAVIOR_TOGGLE,
   			.stateUp = false,
   		};
   	},
@@ -180,6 +180,16 @@ std::vector<TagUpdater> tagupdates = {
 	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, 5.f, 0.f), true);
 		  				openable.stateUp = true;
 	  				}
+	  			}else if (openable.behavior == OPEN_BEHAVIOR_TOGGLE){
+	  				if (!openable.stateUp){
+			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, 5.f, 0.f), true);
+		  				openable.stateUp = true;
+	  				}else{
+			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, -5.f, 0.f), true);
+		  				openable.stateUp = false; 					
+	  				}
 	  			}else{
 	  				modassert(false, "open behavior not yet implemented");
 	  			}
@@ -192,6 +202,8 @@ std::vector<TagUpdater> tagupdates = {
 	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, -5.f, 0.f), true);
 		  				openable.stateUp = false;
 	  				}
+	  			}else if (openable.behavior == OPEN_BEHAVIOR_TOGGLE){
+	  				//modassert(false, "close signal for a toggle door");
 	  			}else{
 	  				modassert(false, "open behavior not yet implemented");
 	  			}	
