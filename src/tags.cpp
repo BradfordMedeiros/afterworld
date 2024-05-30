@@ -432,7 +432,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "condition",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
