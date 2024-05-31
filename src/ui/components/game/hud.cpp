@@ -38,7 +38,7 @@ std::optional<float> letterBoxStartTime = std::nullopt;
 const float LETTER_BOX_ANIMATION_DURATION = 5.f;
 const float LETTER_BOX_TOTAL_DISPLAY_TIME = 10.f;
 const glm::vec4 LETTER_BOX_COLOR(0.f, 0.f, 0.f, 0.8f);
-const float LETTER_BOX_FONT_SIZE = 12.f;
+const float LETTER_BOX_FONT_SIZE = 0.04f;
 
 void showLetterBox(){
   letterBoxStartTime = gameapi -> timeSeconds(false);
@@ -49,7 +49,11 @@ void drawTitleBorders(DrawingTools& drawTools, float percentage, std::string&& t
   float barHeight = 0.2f * percentage;
   drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, LETTER_BOX_COLOR, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, LETTER_BOX_COLOR, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawText(title, 0.f, -1.f + (barHeight * 0.5f), LETTER_BOX_FONT_SIZE, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+  //drawTools.drawText(title, 0.f, -1.f + (barHeight * 0.5f), LETTER_BOX_FONT_SIZE, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+
+  drawLeftText(drawTools, title, 1.f, -1.f + (barHeight * 0.5f), LETTER_BOX_FONT_SIZE, std::nullopt, std::nullopt);
+
+
 }
 
 void drawFadeAnimation(DrawingTools& drawTools, float percentage){
