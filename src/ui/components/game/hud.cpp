@@ -31,33 +31,79 @@ void drawbar(DrawingTools& drawTools, float health){
   drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), widthPercentage * width, barHeight, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
 
+
 //std::optional<std::string> imageForHud = "./res/textures/badhud.png";
 std::optional<std::string> imageForHud = std::nullopt;
 
-std::optional<float> letterBoxStartTime = std::nullopt;
-const float LETTER_BOX_ANIMATION_DURATION = 5.f;
-const float LETTER_BOX_TOTAL_DISPLAY_TIME = 10.f;
-const glm::vec4 LETTER_BOX_COLOR(0.f, 0.f, 0.f, 0.8f);
-const float LETTER_BOX_FONT_SIZE = 0.04f;
 
-void showLetterBox(){
-  letterBoxStartTime = gameapi -> timeSeconds(false);
-}
+struct LetterboxFade {
+  std::optional<float> animationDuration;
+  std::optional<float> animationHold;
+  std::optional<float> fadeOutDuration;
+  glm::vec4 boxColor;
+  glm::vec4 fadeColor;
+  float fontSize;
+};
+
+LetterboxFade letterbox {
+  .animationDuration = 2.f,
+  .animationHold = std::nullopt,
+  .fadeOutDuration = 2.f,
+  .boxColor = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+  .fadeColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.6f),
+  .fontSize = 0.02f,
+};
+
 
 void drawTitleBorders(DrawingTools& drawTools, float percentage, std::string&& title){
   modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
   float barHeight = 0.2f * percentage;
-  drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, LETTER_BOX_COLOR, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, LETTER_BOX_COLOR, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  //drawTools.drawText(title, 0.f, -1.f + (barHeight * 0.5f), LETTER_BOX_FONT_SIZE, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
-
-  drawLeftText(drawTools, title, 1.f, -1.f + (barHeight * 0.5f), LETTER_BOX_FONT_SIZE, std::nullopt, std::nullopt);
-
-
+  drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  const float textPaddingRight = 0.04f;
+  drawLeftText(drawTools, title, 1.f - textPaddingRight, -1.f + (barHeight * 0.5f), letterbox.fontSize, std::nullopt, std::nullopt);
 }
 
 void drawFadeAnimation(DrawingTools& drawTools, float percentage){
-  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.9f, 0.9f, 0.9f, 1.f * percentage), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.x, letterbox.fadeColor.y, letterbox.fadeColor.z, letterbox.fadeColor.w * percentage), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+}
+
+struct FadeResult {
+  float barPercentage;
+  float fadePercentage;
+};
+
+std::optional<float> calculateFade(LetterboxFade& fade, std::optional<float> letterBoxStartTime){
+  if (!letterBoxStartTime.has_value()){
+    return std::nullopt;
+  }
+  float elapsedTime = gameapi -> timeSeconds(false) - letterBoxStartTime.value();
+  float holdStart = (letterbox.animationDuration.has_value() ? letterbox.animationDuration.value() : 0.f);
+  float fadeOutStart = holdStart + (letterbox.animationHold.has_value() ? letterbox.animationHold.value() : 0.f);
+  float fadeEnd = fadeOutStart + (letterbox.fadeOutDuration.has_value() ? letterbox.fadeOutDuration.value() : 0.f);
+
+  if (elapsedTime < holdStart){
+    if (!letterbox.animationDuration.has_value()){
+      return 1.f;
+    }
+    float percentage = elapsedTime / letterbox.animationDuration.value();
+    return percentage;
+  }else if (elapsedTime >= holdStart && elapsedTime < fadeOutStart){
+    return 1.f;
+  }else if (elapsedTime < fadeEnd) {
+    if (!letterbox.fadeOutDuration.has_value()){
+      return 0.f;
+    }
+    float percentage = (elapsedTime - fadeOutStart) / letterbox.animationDuration.value();
+    return (1.f - percentage);
+  }
+
+  return std::nullopt;
+}
+
+std::optional<float> letterBoxStartTime = std::nullopt;
+void showLetterBox(){
+  letterBoxStartTime = gameapi -> timeSeconds(false);
 }
 
 
@@ -81,18 +127,14 @@ Component hudComponent {
       drawTools.drawText("press e to activate", 0.75f, 0.7f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
     }
 
-    if (letterBoxStartTime.has_value()){
-      auto elapsedTime = gameapi -> timeSeconds(false) - letterBoxStartTime.value();
-      float percentage = elapsedTime / LETTER_BOX_ANIMATION_DURATION;
-      if (percentage > 1){
-        percentage = 1.f;
-      }
-      if (elapsedTime > LETTER_BOX_TOTAL_DISPLAY_TIME){
-        letterBoxStartTime = std::nullopt;
-      }
-      drawFadeAnimation(drawTools, percentage);
-      drawTitleBorders(drawTools, percentage, "No Revelations");
+    auto fade = calculateFade(letterbox, letterBoxStartTime);
+    if (fade.has_value()){
+      drawFadeAnimation(drawTools, fade.value());
+      drawTitleBorders(drawTools, fade.value(), "No Revelations");
+    }else {
+      letterBoxStartTime = std::nullopt;
     }
+
 
   	return BoundingBox2D {
   		.x = 0.f,
