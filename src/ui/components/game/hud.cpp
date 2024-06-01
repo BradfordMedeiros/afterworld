@@ -47,7 +47,7 @@ struct LetterboxFade {
 
 LetterboxFade letterbox {
   .animationDuration = 2.f,
-  .animationHold = std::nullopt,
+  .animationHold = 4.f,
   .fadeOutDuration = 2.f,
   .boxColor = glm::vec4(0.f, 0.f, 0.f, 0.8f),
   .fadeColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.6f),
@@ -55,7 +55,7 @@ LetterboxFade letterbox {
 };
 
 
-void drawTitleBorders(DrawingTools& drawTools, float percentage, std::string&& title){
+void drawTitleBorders(DrawingTools& drawTools, float percentage, std::string& title){
   modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
   float barHeight = 0.2f * percentage;
   drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
@@ -102,6 +102,7 @@ std::optional<float> calculateFade(LetterboxFade& fade, std::optional<float> let
 }
 
 std::optional<float> letterBoxStartTime = std::nullopt;
+std::string title = "no Revelations";
 void showLetterBox(){
   letterBoxStartTime = gameapi -> timeSeconds(false);
 }
@@ -130,7 +131,7 @@ Component hudComponent {
     auto fade = calculateFade(letterbox, letterBoxStartTime);
     if (fade.has_value()){
       drawFadeAnimation(drawTools, fade.value());
-      drawTitleBorders(drawTools, fade.value(), "No Revelations");
+      drawTitleBorders(drawTools, fade.value(), title);
     }else {
       letterBoxStartTime = std::nullopt;
     }

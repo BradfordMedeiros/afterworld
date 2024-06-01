@@ -31,6 +31,7 @@
 #include "./activeplayer.h"
 #include "./modelviewer.h"
 #include "./collision.h"
+#include "./cutscene.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

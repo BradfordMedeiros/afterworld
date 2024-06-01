@@ -3,4 +3,7 @@
 
 #include "./util.h"
 
+void playCutscene(float startTime);
+void tickCutscenes(float time);
+
 #endif

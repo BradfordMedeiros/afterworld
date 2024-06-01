@@ -377,7 +377,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
+
     onPlayerFrame();
+
+
+    static bool callOnce = true;
+    if (callOnce){
+      playCutscene(gameapi -> timeSeconds(true));
+      callOnce = false;
+    }
+    tickCutscenes(gameapi -> timeSeconds(true));
+
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
