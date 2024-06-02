@@ -2,10 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-struct ShowTitle {
-	float duration;
-	std::optional<std::string> title;
-};
 struct BackgroundFill {
 	float duration;
 	glm::vec4 color;
@@ -16,11 +12,24 @@ struct DebugTextDisplay {
 };
 struct EmptyEvent {};
 
-typedef std::variant<ShowTitle, DebugTextDisplay, BackgroundFill, EmptyEvent> CutsceneEventType;
+typedef std::variant<DebugTextDisplay, BackgroundFill, EmptyEvent> CutsceneEventType;
+
+
+struct TriggerTime { 
+	float time;
+};
+struct TriggerTimeDuration {
+	float time;
+	float duration;
+};
+struct TriggerFromLastEvent {
+	float timeOffset;
+};
+typedef std::variant<TriggerTime, TriggerFromLastEvent> TriggerType;
 
 struct CutsceneEvent {
 	std::string name;
-	float time;
+	TriggerType time;
 	CutsceneEventType type;
 };
 
@@ -42,16 +51,14 @@ std::unordered_map<objid, std::function<void()>> perFrameEvents;
 
 
 void doCutsceneEvent(CutsceneEvent& event){
-	auto showTitlePtr = std::get_if<ShowTitle>(&event.type);
 	auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
 	auto backgroundFillPtr = std::get_if<BackgroundFill>(&event.type);
 	auto emptyEventPtr = std::get_if<DebugTextDisplay>(&event.type);
-	if (showTitlePtr){
-
-	}else if (debugTextDisplayPtr){
+	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
-		perFrameEvents[id] = []() -> void {
-			drawCenteredText("hello", 0.f, 0.f, 0.2f, std::nullopt /* tint */, std::nullopt);
+		std::string text = debugTextDisplayPtr -> text;
+		perFrameEvents[id] = [text]() -> void {
+			drawCenteredText(text, 0.f, 0.f, 0.05f, std::nullopt /* tint */, std::nullopt);
 		};
   	gameapi -> schedule(-1, debugTextDisplayPtr -> duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
@@ -76,7 +83,7 @@ Cutscene cutscene {
 	.events = {
 		CutsceneEvent {
 			.name = "initial title text",
-			.time = 0.f,
+			.time = TriggerTime { .time = 0.f },
 			.type = DebugTextDisplay {
 				.duration = 5.f,
 				.text = "Welcome to the Afterworld",
@@ -84,23 +91,23 @@ Cutscene cutscene {
 		},
 		CutsceneEvent {
 			.name = "backgroundfill",
-			.time = 5.f,
+			.time = TriggerTime { .time = 5.f },
 			.type = BackgroundFill {
 				.duration = 5.f,
-				.color = glm::vec4(0.f, 0.f, 0.f, 0.4f),
+				.color = glm::vec4(0.f, 0.f, 0.f, 0.9f),
 			},
 		},
 		CutsceneEvent {
 			.name = "second text",
-			.time = 10.f,
+			.time = TriggerTime { .time = 10.f },
 			.type = DebugTextDisplay {
-				.duration = 5.f,
+				.duration = 15.f,
 				.text = "Don't you visit here every day?",
 			},
 		},
 		CutsceneEvent {
 			.name = "ending",
-			.time = 25.f,
+			.time = TriggerTime { .time = 0.f },
 			.type = EmptyEvent{},
 		},
 	},
@@ -125,7 +132,9 @@ std::optional<int> getNextEventIndex(CutsceneInstance& instance, float time, boo
 		return std::nullopt;
 	}
 	for (int i = (instance.lastPlayedIndex + 1); i < cutscene.events.size(); i++){
-		if (time >= (instance.startTime + cutscene.events.at(i).time)) {
+		auto timeValue = std::get_if<TriggerTime>(&cutscene.events.at(i).time);
+		modassert(timeValue, std::string("trigger is not time: ") + cutscene.events.at(i).name);
+		if (time >= (instance.startTime + timeValue -> time)) {
 			return i;
 		}else{
 			break;
