@@ -7,6 +7,7 @@
 #include "./global.h"
 #include "./controls.h"
 #include "./spawn.h"
+#include "./cutscene.h"
 
 
 CScriptBinding debugBinding(CustomApiBindings& api, const char* name);

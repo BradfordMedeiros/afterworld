@@ -103,19 +103,15 @@ std::optional<float> calculateFade(LetterboxFade& fade, std::optional<float> let
 
 std::optional<float> letterBoxStartTime = std::nullopt;
 std::string title = "no Revelations";
-void showLetterBox(){
+
+void showLetterBox(std::string titleStr){
+  title = titleStr;
   letterBoxStartTime = gameapi -> timeSeconds(false);
 }
 
 
 Component hudComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    static bool shouldShowLetterBox = false;
-    if (shouldShowLetterBox){
-      showLetterBox();
-    }
-    shouldShowLetterBox = false;
-
     if (imageForHud.has_value()){
       drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, imageForHud.value(), std::nullopt);
     }

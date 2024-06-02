@@ -11,6 +11,7 @@ struct AmmoHudInfo {
 void setUIAmmoCount(AmmoHudInfo ammoInfo);
 void setHealth(float health);
 void setShowActivate(bool showActivate);
+void showLetterBox(std::string title);
 
 extern Component hudComponent;
 

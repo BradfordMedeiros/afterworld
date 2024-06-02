@@ -313,6 +313,9 @@ AIInterface aiInterface {
   },
 };
 
+CutsceneApi cutsceneApi {
+  .showLetterBox = showLetterBox,
+};
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -379,15 +382,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onPlayerFrame();
-
-
-    //static bool callOnce = true;
-    //if (callOnce){
-    //  playCutscene(gameapi -> timeSeconds(true));
-    //  callOnce = false;
-    //}
-    //tickCutscenes(gameapi -> timeSeconds(true));
-
+    tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {

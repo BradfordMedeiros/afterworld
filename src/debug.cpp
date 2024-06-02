@@ -65,6 +65,9 @@ CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
       removeAllSpawnedEntities();
     }
     
+    if (key == 'Y'){
+    	playCutscene("test", gameapi -> timeSeconds(true));
+    }
    	if (key == 75){
    		//spawnProcMesh(gameapi -> listSceneId(id));
    	}

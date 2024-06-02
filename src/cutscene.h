@@ -3,7 +3,12 @@
 
 #include "./util.h"
 
-void playCutscene(float startTime);
-void tickCutscenes(float time);
+struct CutsceneApi {
+	std::function<void(std::string)> showLetterBox;
+
+};
+
+void playCutscene(std::string&& cutsceneName, float startTime);
+void tickCutscenes(CutsceneApi& api, float time);
 
 #endif
