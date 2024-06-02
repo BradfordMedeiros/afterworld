@@ -65,7 +65,7 @@ CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
       removeAllSpawnedEntities();
     }
     
-    if (key == 'Y'){
+    if (key == 'Y' && action == 0){
     	playCutscene("test", gameapi -> timeSeconds(true));
     }
    	if (key == 75){

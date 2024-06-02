@@ -9,6 +9,7 @@ struct BackgroundFill {
 struct DebugTextDisplay {
 	float duration;
 	std::string text;
+	float rate;
 };
 struct Letterbox {
 	std::string text;
@@ -49,7 +50,7 @@ struct CutsceneInstance {
 std::unordered_map<objid, std::function<void()>> perFrameEvents;
 
 
-void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event){
+void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time){
 	auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
 	auto backgroundFillPtr = std::get_if<BackgroundFill>(&event.type);
 	auto letterboxPtr = std::get_if<Letterbox>(&event.type);
@@ -57,8 +58,11 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event){
 	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
 		std::string text = debugTextDisplayPtr -> text;
-		perFrameEvents[id] = [text]() -> void {
-			drawCenteredText(text, 0.f, 0.f, 0.05f, std::nullopt /* tint */, std::nullopt);
+
+		perFrameEvents[id] = [text, time]() -> void {
+			auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - time) * 100.f);
+			auto textSubtr = text.substr(0, currIndex);
+			drawRightText(textSubtr, 0.f, 0.f, 0.05f, std::nullopt /* tint */, std::nullopt);
 		};
   	gameapi -> schedule(-1, debugTextDisplayPtr -> duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
@@ -91,6 +95,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = DebugTextDisplay {
 						.duration = 5.f,
 						.text = "Welcome to the Afterworld",
+						.rate = 100.f,
 					},
 				},
 				CutsceneEvent {
@@ -107,6 +112,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = DebugTextDisplay {
 						.duration = 15.f,
 						.text = "Don't you visit here every day?",
+						.rate = 100.f,
 					},
 				},
 				CutsceneEvent {
@@ -174,7 +180,7 @@ void tickCutscenes(CutsceneApi& api, float time){
 		if (nextEventIndex.has_value()){
 			CutsceneEvent& event = instance.cutscene -> events.at(nextEventIndex.value());
 			instance.lastPlayedIndex = nextEventIndex.value();
-			doCutsceneEvent(api, event);			
+			doCutsceneEvent(api, event, time);			
 		}
 	}
 
