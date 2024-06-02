@@ -114,6 +114,7 @@ void setGameObjectFriction(objid id, float friction);
 void setGameObjectVelocity(objid id, glm::vec3 velocity);
 void setGameObjectTint(objid id, glm::vec4 tint);
 void setGameObjectStateEnabled(objid id, bool enable);
+void setGameObjectPhysicsDynamic(objid id);
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity);
 void setGameObjectPhysicsOptions(objid id, glm::vec3 avelocity, glm::vec3 velocity, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity);
 

@@ -381,12 +381,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onPlayerFrame();
 
 
-    static bool callOnce = true;
-    if (callOnce){
-      playCutscene(gameapi -> timeSeconds(true));
-      callOnce = false;
-    }
-    tickCutscenes(gameapi -> timeSeconds(true));
+    //static bool callOnce = true;
+    //if (callOnce){
+    //  playCutscene(gameapi -> timeSeconds(true));
+    //  callOnce = false;
+    //}
+    //tickCutscenes(gameapi -> timeSeconds(true));
 
   };
 

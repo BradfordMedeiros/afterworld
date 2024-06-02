@@ -110,7 +110,7 @@ void showLetterBox(){
 
 Component hudComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    static bool shouldShowLetterBox = true;
+    static bool shouldShowLetterBox = false;
     if (shouldShowLetterBox){
       showLetterBox();
     }

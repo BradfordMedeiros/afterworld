@@ -284,6 +284,10 @@ void setGameObjectTint(objid id, glm::vec4 tint){
 void setGameObjectStateEnabled(objid id, bool enable){
   gameapi -> setSingleGameObjectAttr(id, "state", enable ? std::string("enabled") : std::string("disabled"));
 }
+void setGameObjectPhysicsDynamic(objid id){
+  gameapi -> setSingleGameObjectAttr(id, "physics_type", "dynamic");
+}
+
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity){
   gameapi -> setGameObjectAttr(
     id, 

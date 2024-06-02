@@ -259,13 +259,22 @@ std::vector<TagUpdater> tagupdates = {
       	float remainingHealth = 0.f;
       	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
 
+
+
+      	auto healthBehavior = getSingleAttr(targetId, "health-behavior");
+      	if (valid && enemyDead && healthBehavior.has_value() && healthBehavior.value() == "make-dynamic"){
+      		setGameObjectPhysicsDynamic(targetId);
+      		return;
+      	}
+
+
       	NoHealthMessage nohealth {
       		.targetId = targetId,
       		.team = getSingleAttr(targetId, "team"),
       	};
 
       	if (valid && enemyDead){
-      		gameapi -> sendNotifyMessage("nohealth", nohealth);
+      		gameapi -> sendNotifyMessage("nohealth", nohealth); // why don't i just...remove it directly? 
       	}
       	if (valid && eventName -> has_value()){
       		gameapi -> sendNotifyMessage(eventName -> value(), remainingHealth);
