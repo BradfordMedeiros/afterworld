@@ -273,6 +273,10 @@ void updateCrouch(MovementParams& moveParams, MovementState& movementState, obji
   }
 }
 
+bool isCollideable(objid id){
+  auto attrHandle = getAttrHandle(id);
+  return getBoolAttr(attrHandle, "physics_collision").value();
+}
 
 bool shouldStepUp(objid id){ // check this logic 
   auto playerPos = gameapi -> getGameObjectPos(id, true);
@@ -291,11 +295,19 @@ bool shouldStepUp(objid id){ // check this logic
   auto belowHitpoints = gameapi -> raycast(belowPos, belowDir, 2.f);
   auto aboveHitpoints = gameapi -> raycast(abovePos, aboveDir, 2.f);
 
+  bool anyCollideableBelow = false;
+  for (auto &hitpoint : belowHitpoints){
+    if (isCollideable(hitpoint.id)){
+      anyCollideableBelow = true;
+      break;
+    }
+  }
+
   //gameapi -> drawLine(belowPos, gameapi -> moveRelative(belowPos, belowDir, 2.f), true, id, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt);
   //gameapi -> drawLine(abovePos, gameapi -> moveRelative(abovePos, aboveDir, 2.f), true, id, glm::vec4(0.f, 0.f, 1.f, 1.f),  std::nullopt, std::nullopt);
 
   //std::cout << "hitpoints:  low = " << belowHitpoints.size() << ", high = " << aboveHitpoints.size() << std::endl;
-  return belowHitpoints.size() > 0 && aboveHitpoints.size() == 0;
+  return anyCollideableBelow && aboveHitpoints.size() == 0;
 }
 
 enum COLLISION_SPACE_INDEX { COLLISION_SPACE_LEFT = 0, COLLISION_SPACE_RIGHT = 1, COLLISION_SPACE_DOWN = 3 };
@@ -361,7 +373,8 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
   return values;
 }
 
-MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat>& hitDirections, glm::quat rotationWithoutY){
+
+MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat>& _hitDirections, glm::quat rotationWithoutY){
   auto hitpoints = gameapi -> contactTest(playerId);
   //std::cout << "hitpoints: [ ";
 
@@ -373,8 +386,10 @@ MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat
 
   std::vector<objid> allCollisions;
   for (auto &hitpoint : hitpoints){
-    hitDirections.push_back(hitpoint.normal);
-    allCollisions.push_back(hitpoint.id);
+    if (isCollideable(hitpoint.id)){
+      _hitDirections.push_back(hitpoint.normal);
+      allCollisions.push_back(hitpoint.id);
+    }
   }
 
   auto collisions = getCollisionSpaces(hitpoints, rotationWithoutY);
