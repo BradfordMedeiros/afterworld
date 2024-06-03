@@ -81,7 +81,7 @@ CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
       playGameplayClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, soundPosition -> position); // should add playclip position
     }
   };
-  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
     std::cout << "sound: on collision enter: " << obj1 << ", " << obj2 << std::endl;
     Sound* sound = static_cast<Sound*>(data);
     std::string material = "wood";

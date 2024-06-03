@@ -136,7 +136,7 @@ CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
     delete water;
   };
 
-  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
     Water* water = static_cast<Water*>(data);
     auto obj1Attr = getAttrHandle(obj1);
     auto obj1IsWater = getStrAttr(obj1Attr, "water").has_value();

@@ -474,12 +474,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   };
 
-  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {
+  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1); // this check shouldn't be necessary, is bug
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
     modassert(gameobj1Exists && gameobj2Exists, "collision enter: objs do not exist");
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
+    handleMomentumCollision(obj1, obj2);
     inventoryOnCollision(obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {

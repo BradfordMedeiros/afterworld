@@ -108,3 +108,7 @@ void handleDamageCollision(objid obj1, objid obj2){
     }
   }
 }
+
+void handleMomentumCollision(objid obj1, objid obj2){
+  
+}
