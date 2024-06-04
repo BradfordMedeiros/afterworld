@@ -103,11 +103,24 @@ floatbox_small:scale:5 5 5
 floatbox_small:texture:../gameresources/textures/wood.jpg
 floatbox_small:physics:enabled
 
+
+floatbox_small_top:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+floatbox_small_top:position:10 -17 40
+floatbox_small_top:scale:0.5 0.5 2
+floatbox_small_top:texture:../gameresources/textures/wood.jpg
+floatbox_small_top:physics:enabled
+floatbox_small_top:physics_type:dynamic
+floatbox_small_top:collide_damage:true
+floatbox_small_top:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
+floatbox_small_top:health:100
+
 floatbox_small_light:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox_small_light:position:10 -22.8 38
 floatbox_small_light:scale:0.5 0.5 2
 floatbox_small_light:texture:../gameresources/textures/wood.jpg
 floatbox_small_light:physics:enabled
+floatbox_small_light:health:100
+floatbox_small_light:health-behavior:make-dynamic
 
 floatbox:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floatbox:position:10 -22.9 50
@@ -387,3 +400,4 @@ ai:script:native/ai
 #;navmesh3:position:-20 -27 70
 #;navmesh3:physics:enabled
 #;navmesh3:physics_shape:shape_exact
+

@@ -109,6 +109,49 @@ void handleDamageCollision(objid obj1, objid obj2){
   }
 }
 
-void handleMomentumCollision(objid obj1, objid obj2){
-  
+float lastForce = 0.f;
+void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force){
+  if (force > 1){
+    lastForce  = force;
+  }
+
+  if (force > 10){
+    {
+      float volume = 1.f;  // should adjust based on force, how much? 
+      playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position);
+
+
+      auto attr = getAttrHandle(obj1);
+      if (getStrAttr(attr, "collide_damage").has_value()){
+        DamageMessage damageMessage {
+          .id = obj1,
+          .amount = 1000.f,
+        };
+        gameapi -> sendNotifyMessage("damage", damageMessage);      
+      }
+    }
+    {
+      auto attr = getAttrHandle(obj2);
+      if (getStrAttr(attr, "collide_damage").has_value()){
+        DamageMessage damageMessage {
+          .id = obj2,
+          .amount = 1000.f,
+        };
+        gameapi -> sendNotifyMessage("damage", damageMessage);      
+      }
+    }
+
+  }
+
+
+  // i think could calculate the area (which maybe just simplify from volume), and that gives a rough value for pressure
+  // then from that pressure, 
+  // and then use some sort of that value, maybe mass?  and some coefficient?  to dtermine if should break
+  // can also be used to inflict damage on another object
+
+
+}
+
+void onCollisionFrame(){
+  drawRightText(std::string("last force > 1 : ") + std::to_string(lastForce), -0.9f, 0.9f, 0.05f, std::nullopt /* tint */, std::nullopt);
 }

@@ -383,6 +383,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
+    onCollisionFrame();
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -480,7 +481,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modassert(gameobj1Exists && gameobj2Exists, "collision enter: objs do not exist");
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
-    handleMomentumCollision(obj1, obj2);
+    handleMomentumCollision(obj1, obj2, pos, normal, force);
     inventoryOnCollision(obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {

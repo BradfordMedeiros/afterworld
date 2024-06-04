@@ -5,7 +5,7 @@ door:physics:enabled
 door:scale:1 4 0.2
 door:physics:enabled
 door:open:open-door-trigger
-door:open-behavior:simple-up
+door:open-behavior:toggle
 
 trigger:layer:transparency
 trigger:mesh:./res/models/box/crate.gltf
