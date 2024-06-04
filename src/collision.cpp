@@ -109,11 +109,15 @@ void handleDamageCollision(objid obj1, objid obj2){
   }
 }
 
-float lastForce = 0.f;
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force){
+  static float lastForce = 0.f;
   if (force > 1){
     lastForce  = force;
   }
+
+
+  static unsigned int forceStat = gameapi -> stat("last-force");
+  gameapi -> logStat(forceStat, lastForce);
 
   if (force > 10){
     {
@@ -150,8 +154,4 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   // can also be used to inflict damage on another object
 
 
-}
-
-void onCollisionFrame(){
-  drawRightText(std::string("last force > 1 : ") + std::to_string(lastForce), -0.9f, 0.9f, 0.05f, std::nullopt /* tint */, std::nullopt);
 }
