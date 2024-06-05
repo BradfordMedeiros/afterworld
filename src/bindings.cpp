@@ -383,12 +383,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
-
-    static unsigned int forceStat = gameapi -> stat("last-force");
-    auto forceValue = gameapi -> statValue(forceStat);
-    auto forceAmount = std::get_if<float>(&forceValue);
-    modassert(forceAmount, "force amount");
-    drawRightText(std::string("last force > 1 : ") + std::to_string(*forceAmount), -0.9f, 0.9f, 0.05f, std::nullopt /* tint */, std::nullopt);
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
