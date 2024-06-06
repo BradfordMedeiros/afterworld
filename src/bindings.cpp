@@ -313,6 +313,8 @@ AIInterface aiInterface {
 
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
+  .setCameraPosition = setTempViewpoint,
+  .popTempViewpoint = popTempViewpoint,
 };
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){

@@ -15,7 +15,13 @@ struct Letterbox {
 	std::string text;
 };
 
-typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox> CutsceneEventType;
+struct CameraView {
+	glm::vec3 position;
+	glm::quat rotation;
+};
+struct PopCameraView {};
+
+typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, CameraView, PopCameraView> CutsceneEventType;
 
 
 
@@ -54,6 +60,8 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 	auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
 	auto backgroundFillPtr = std::get_if<BackgroundFill>(&event.type);
 	auto letterboxPtr = std::get_if<Letterbox>(&event.type);
+	auto cameraViewPtr = std::get_if<CameraView>(&event.type);
+	auto popcameraPtr = std::get_if<PopCameraView>(&event.type);
 	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
 		std::string text = debugTextDisplayPtr -> text;
@@ -77,6 +85,10 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
   	});
 	}else if (letterboxPtr){
 		api.showLetterBox(letterboxPtr -> text, duration);
+	}else if (cameraViewPtr){
+		api.setCameraPosition(cameraViewPtr -> position, cameraViewPtr -> rotation);
+	}else if (popcameraPtr){
+		api.popTempViewpoint();
 	}
 
 	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
@@ -108,8 +120,44 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						.waitForMessage = "nohealth",
 					},
 					.type = BackgroundFill {
-						.color = glm::vec4(1.f, 0.f, 0.f, 0.5f),
+						.color = glm::vec4(0.f, 0.f, 0.f, 0.5f),
 					},
+				},
+				CutsceneEvent {
+					.name = "camera-view-1",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = CameraView {
+						.position = glm::vec3(0.f, 10.f, 10.f),
+						.rotation = parseQuat(glm::vec4(0.f, -1.f, -1.f, 0.f)),
+					},
+				},
+				CutsceneEvent {
+					.name = "camera-view-2",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = CameraView {
+						.position = glm::vec3(3.f, 10.f, 10.f),
+						.rotation = parseQuat(glm::vec4(-1.f, -1.f, 0.f, 0.f)),
+					},
+				},
+				CutsceneEvent {
+					.name = "camera-view-3",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = PopCameraView{},
 				},
 				CutsceneEvent {
 					.name = "letterbox",
@@ -123,18 +171,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						.text = "letter box hello",
 					},
 				},
-				CutsceneEvent {
-					.name = "backgroundfill blue",
-					.duration = 2.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = true,
-						.waitForMessage = std::nullopt,
-					},
-					.type = BackgroundFill {
-						.color = glm::vec4(0.f, 0.f, 1.f, 0.5f),
-					},
-				},
+				
 			},
 		} 
 	}

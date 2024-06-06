@@ -92,7 +92,9 @@ void onActivePlayerRemoved(objid id){
 }
 
 void setTempViewpoint(glm::vec3 position, glm::quat rotation){
-	modassert(!controlledPlayer.tempViewpoint.has_value(), "already have a temp viewpoint");
+	if (controlledPlayer.tempViewpoint.has_value()){
+		popTempViewpoint();
+	}
 	controlledPlayer.activePlayerTempDisabled = true;
 	auto id = controlledPlayer.activePlayerId.value();
   std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
