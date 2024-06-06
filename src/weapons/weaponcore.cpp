@@ -13,8 +13,9 @@ WeaponCore* findWeaponCore(std::string& name){
   return NULL;
 }
 
-bool firstTimeCalled = true;
+
 void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponParams){
+  static bool firstTimeCalled = true;
   if (firstTimeCalled){
     loadAllMaterials(gameapi -> rootSceneId()); // this should be moved into a core resource management code, not just on demand on fire gun
     loadParticleEmitters(gameapi -> rootSceneId());
@@ -375,7 +376,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
-
+    
     DamageMessage damageMessage {
       .id = hitpoint.id,
       .amount = gunCore.weaponCore -> weaponParams.damage,

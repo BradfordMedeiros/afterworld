@@ -88,8 +88,23 @@ std::vector<MaterialToParticle>& getMaterials(){
   return materials;
 }
 
+void emitBloodTest(objid sceneId){
+  gameapi -> schedule(sceneId, 1000, NULL, [sceneId](void*) -> void {
+    emitBlood(sceneId, glm::vec3(0.f, 0.f, 0.f));
+    emitBloodTest(sceneId);
+  });
+}
+
+
+
 std::vector<ParticleAndEmitter> particleEmitters;
 void loadParticleEmitters(objid rootSceneId){
+  /// temp code hackey hook here
+
+  emitBloodTest(rootSceneId);
+  ///////////////////////
+
+
   auto query = gameapi -> compileSqlQuery("select name, projectile from particles", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
@@ -117,4 +132,20 @@ std::optional<objid> getParticleEmitter(std::string& emitterName){
     }
   }
   return std::nullopt;
+}
+
+
+std::optional<objid> bloodEmitter = std::nullopt;
+void emitBlood(objid sceneId, glm::vec3 position){
+  modlog("blood", "blood emitter");
+  //modassert(false, "emit blood not yet implemented");
+  static bool callOnce = true;
+  if (callOnce){
+    callOnce = false;
+    std::string particleStr("+scale:0.1 0.1 0.1;+mesh:./res/models/box/box.obj;+physics:enabled;+physics_type:dynamic;+Cube/tint:1 0 0 1;+physics_gravity:0 -10 0;+physics_collision:nocollide");
+    bloodEmitter = createParticleEmitter(sceneId, particleStr, "+blood-emitter");
+  }
+  if (bloodEmitter.has_value()){
+    gameapi -> emit(bloodEmitter.value(), position, std::nullopt /* normal */, std::nullopt, std::nullopt, std::nullopt);
+  }
 }

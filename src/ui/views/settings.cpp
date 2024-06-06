@@ -57,7 +57,23 @@ struct SettingConfiguration {
   std::optional<std::function<void()>> initSetting;
 };
 
-float currentFov = 45;
+float originalFov = 45;
+void setZoom(bool zoomIn){
+  gameapi -> setLayerState({
+      StrValues {
+        .target = "",
+        .attribute = "fov",
+        .payload = zoomIn ? std::to_string(originalFov * 0.5f) :  std::to_string(originalFov),
+      },
+      StrValues {
+        .target = "transparency",
+        .attribute = "fov",
+        .payload = zoomIn ? std::to_string(originalFov * 0.5f) :  std::to_string(originalFov),
+      },
+  });    
+}
+
+//float currentFov = 45;
 std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsItems {
   { "Game", std::vector<SettingConfiguration> {
     SettingConfiguration {
@@ -121,30 +137,18 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .min = 20.f,
         .max = 50.f,
         .percentage = []() -> float { 
-          return currentFov;
+          return originalFov;
         },
         .onSlide = [](float amount) -> void {
-          currentFov = amount;
-          persistSqlFloat("fov", currentFov);
-          gameapi -> setLayerState({
-            StrValues {
-              .target = "",
-              .attribute = "fov",
-              .payload = std::to_string(currentFov),
-            },
-          });         
+          originalFov = amount;
+          persistSqlFloat("fov", originalFov);
+          setZoom(false);
         },
       },
       .initSetting = []() -> void {
         auto fov = getSqlValue("fov");
-        currentFov = std::atof(fov.c_str());
-        gameapi -> setLayerState({
-          StrValues {
-            .target = "",
-            .attribute = "fov",
-            .payload = fov,
-          },
-        });
+        originalFov = std::atof(fov.c_str());
+        setZoom(false);
       },
     },
   }},

@@ -95,6 +95,8 @@ void handleActivateItem(objid playerId){
   setShowActivate(false);  
 }
 
+void setZoom(bool);
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -132,10 +134,12 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (isAimButton(button)){
       if (action == 0){
         weapons -> isHoldingRightMouse = false;
+        setZoom(false);
         isGunZoomed = false;
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
+        setZoom(true);
         isGunZoomed = true;
         if (weapons -> playerId.has_value()){
           auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());

@@ -4,7 +4,7 @@
 #include "./util.h"
 
 struct CutsceneApi {
-	std::function<void(std::string)> showLetterBox;
+	std::function<void(std::string title, float duration)> showLetterBox;
 
 };
 

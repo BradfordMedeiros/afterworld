@@ -35,22 +35,13 @@ void drawbar(DrawingTools& drawTools, float health){
 //std::optional<std::string> imageForHud = "./res/textures/badhud.png";
 std::optional<std::string> imageForHud = std::nullopt;
 
-
-struct LetterboxFade {
-  std::optional<float> animationDuration;
-  std::optional<float> animationHold;
-  std::optional<float> fadeOutDuration;
-  glm::vec4 boxColor;
-  glm::vec4 fadeColor;
-  float fontSize;
-};
-
 LetterboxFade letterbox {
-  .animationDuration = 2.f,
-  .animationHold = 4.f,
-  .fadeOutDuration = 2.f,
+  .title = "",
+  .animationDuration = 0.f,
+  .animationHold = 0.f,
+  .fadeOutDuration = 0.f,
   .boxColor = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-  .fadeColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.6f),
+  .fadeColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.0f),
   .fontSize = 0.02f,
 };
 
@@ -102,10 +93,17 @@ std::optional<float> calculateFade(LetterboxFade& fade, std::optional<float> let
 }
 
 std::optional<float> letterBoxStartTime = std::nullopt;
-std::string title = "no Revelations";
 
-void showLetterBox(std::string titleStr){
-  title = titleStr;
+void showLetterBox(std::string title, float duration){
+  letterbox = LetterboxFade {
+    .title = title,
+    .animationDuration = duration * 0.25f,
+    .animationHold = duration * 0.5f,
+    .fadeOutDuration = duration * 0.25f ,
+    .boxColor = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+    .fadeColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.6f),
+    .fontSize = 0.02f,
+  };
   letterBoxStartTime = gameapi -> timeSeconds(false);
 }
 
@@ -127,7 +125,7 @@ Component hudComponent {
     auto fade = calculateFade(letterbox, letterBoxStartTime);
     if (fade.has_value()){
       drawFadeAnimation(drawTools, fade.value());
-      drawTitleBorders(drawTools, fade.value(), title);
+      drawTitleBorders(drawTools, fade.value(), letterbox.title);
     }else {
       letterBoxStartTime = std::nullopt;
     }

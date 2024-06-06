@@ -11,7 +11,6 @@ struct ManagedScene {
 struct SceneManagement {
   std::vector<Level> levels;
   std::optional<std::string> loadedLevel;
-
   std::optional<ManagedScene> managedScene;
 };
 
@@ -215,7 +214,6 @@ MovementEntityData movementEntityData {
 MovementEntityData& getMovementData(){
   return movementEntityData;
 }
-
 
 
 UiContext getUiContext(GameState& gameState){

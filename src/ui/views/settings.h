@@ -9,6 +9,7 @@
 extern Component settingsComponent;
 
 void initSettings();
+void setZoom(bool zoomIn);
 
 #endif
 

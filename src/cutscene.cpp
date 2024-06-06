@@ -14,25 +14,20 @@ struct DebugTextDisplay {
 struct Letterbox {
 	std::string text;
 };
-struct EmptyEvent {};
 
-typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, EmptyEvent> CutsceneEventType;
+typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox> CutsceneEventType;
 
 
-struct TriggerTime { 
-	float time;
+
+struct TriggerType {
+	std::optional<float> time;
+	bool waitForLastEvent;
+	std::optional<std::string> waitForMessage;
 };
-struct TriggerTimeDuration {
-	float time;
-	float duration;
-};
-struct TriggerFromLastEvent {
-	float timeOffset;
-};
-typedef std::variant<TriggerTime, TriggerFromLastEvent> TriggerType;
 
 struct CutsceneEvent {
 	std::string name;
+	float duration;
 	TriggerType time;
 	CutsceneEventType type;
 };
@@ -41,20 +36,23 @@ struct Cutscene {
 	std::vector<CutsceneEvent> events;
 };
 
+struct CutsceneTiming {
+	float startTime;
+	std::optional<float> endTime;
+};
 struct CutsceneInstance {
 	float startTime;
-	int lastPlayedIndex;
+	std::unordered_map<int, CutsceneTiming> playedEvents;
 	Cutscene* cutscene;
 };
 
 std::unordered_map<objid, std::function<void()>> perFrameEvents;
 
 
-void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time){
+void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float duration){
 	auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
 	auto backgroundFillPtr = std::get_if<BackgroundFill>(&event.type);
 	auto letterboxPtr = std::get_if<Letterbox>(&event.type);
-	auto emptyEventPtr = std::get_if<DebugTextDisplay>(&event.type);
 	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
 		std::string text = debugTextDisplayPtr -> text;
@@ -64,7 +62,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time){
 			auto textSubtr = text.substr(0, currIndex);
 			drawRightText(textSubtr, 0.f, 0.f, 0.05f, std::nullopt /* tint */, std::nullopt);
 		};
-  	gameapi -> schedule(-1, debugTextDisplayPtr -> duration * 1000, NULL, [id](void*) -> void {
+  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
 	}else if (backgroundFillPtr){
@@ -73,16 +71,14 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time){
 		perFrameEvents[id] = [color]() -> void {
 			gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt);
 		};
-  	gameapi -> schedule(-1, backgroundFillPtr -> duration * 1000, NULL, [id](void*) -> void {
+  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
 	}else if (letterboxPtr){
-		api.showLetterBox(letterboxPtr -> text);
-	}else if (emptyEventPtr){
-
+		api.showLetterBox(letterboxPtr -> text, duration);
 	}
 
-	modlog("cutscene", std::string("event - name") + event.name);
+	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
 }
 
 std::unordered_map<std::string, Cutscene> cutscenes {
@@ -91,41 +87,52 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 			.events = {
 				CutsceneEvent {
 					.name = "initial title text",
-					.time = TriggerTime { .time = 0.f },
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = false,
+						.waitForMessage = std::nullopt,
+					},
 					.type = DebugTextDisplay {
-						.duration = 5.f,
 						.text = "Welcome to the Afterworld",
 						.rate = 100.f,
 					},
 				},
 				CutsceneEvent {
-					.name = "backgroundfill",
-					.time = TriggerTime { .time = 5.f },
+					.name = "backgroundfill red",
+					.duration = 2.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
 					.type = BackgroundFill {
-						.duration = 1.f,
-						.color = glm::vec4(1.f, 0.f, 0.f, 0.1f),
+						.color = glm::vec4(1.f, 0.f, 0.f, 0.5f),
 					},
 				},
 				CutsceneEvent {
-					.name = "second text",
-					.time = TriggerTime { .time = 10.f },
-					.type = DebugTextDisplay {
-						.duration = 15.f,
-						.text = "Don't you visit here every day?",
-						.rate = 100.f,
+					.name = "letterbox",
+					.duration = 2.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
 					},
-				},
-				CutsceneEvent {
-					.name = "second text",
-					.time = TriggerTime { .time = 10.f },
 					.type = Letterbox {
-						.text = "and so it starts..."
+						.text = "letter box hello",
 					},
 				},
 				CutsceneEvent {
-					.name = "ending",
-					.time = TriggerTime { .time = 0.f },
-					.type = EmptyEvent{},
+					.name = "backgroundfill blue",
+					.duration = 2.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = BackgroundFill {
+						.color = glm::vec4(0.f, 0.f, 1.f, 0.5f),
+					},
 				},
 			},
 		} 
@@ -141,7 +148,7 @@ void playCutscene(std::string&& cutsceneName, float startTime){
 
 	CutsceneInstance cutsceneInstance { 
 		.startTime = startTime, 
-		.lastPlayedIndex = -1,
+		.playedEvents = {},
 		.cutscene = &cutscenes.at(cutsceneName),
 	};
 	auto cutsceneId = getUniqueObjId();
@@ -150,19 +157,71 @@ void playCutscene(std::string&& cutsceneName, float startTime){
 }
 
 
-std::optional<int> getNextEventIndex(CutsceneInstance& instance, float time, bool* _finished){
+struct NextEvent {
+	int index;
+	TriggerType* trigger;
+};
+
+bool cutscenesFinished(CutsceneInstance& instance, float time){
+	if (instance.playedEvents.size() != instance.cutscene -> events.size()){
+		return false;
+	}
+	for (auto &[_, timing] : instance.playedEvents){
+		if (!timing.endTime.has_value()){
+			return false;
+		}
+		if (timing.endTime.value() > time){
+			return false;
+		}
+	}
+	return true;
+}
+
+
+bool passesWaitFor(CutsceneInstance& instance, TriggerType& triggerType, int index, float time){
+	if (!triggerType.waitForLastEvent){
+		return true;
+	}
+	auto lastIndex = index - 1;
+	if (lastIndex < 0){
+		return true;
+	}
+	bool eventAlreadyPlayed = instance.playedEvents.find(lastIndex) != instance.playedEvents.end();
+	if (eventAlreadyPlayed){
+		CutsceneTiming& timing = instance.playedEvents.at(lastIndex);
+		if (timing.endTime.has_value() && time >= timing.endTime.value()){
+			return true;
+		} 
+	}
+	return false;
+}
+std::optional<NextEvent> getNextEventIndex(CutsceneInstance& instance, float time, bool* _finished){
 	Cutscene& cutscene = *instance.cutscene;
-	*_finished = instance.lastPlayedIndex == cutscene.events.size() - 1;
+	*_finished = instance.playedEvents.size() == cutscene.events.size();
 	if (*_finished){
 		return std::nullopt;
 	}
-	for (int i = (instance.lastPlayedIndex + 1); i < cutscene.events.size(); i++){
-		auto timeValue = std::get_if<TriggerTime>(&cutscene.events.at(i).time);
-		modassert(timeValue, std::string("trigger is not time: ") + cutscene.events.at(i).name);
-		if (time >= (instance.startTime + timeValue -> time)) {
-			return i;
-		}else{
-			break;
+
+	*_finished = cutscenesFinished(instance, time);
+	if (*_finished ){
+		return std::nullopt;
+	}
+
+	for (int i = 0; i < cutscene.events.size(); i++){
+		bool eventAlreadyPlayed = instance.playedEvents.find(i) != instance.playedEvents.end();
+		if (eventAlreadyPlayed){
+			continue;
+		}
+
+		TriggerType& triggerType = cutscene.events.at(i).time;
+
+		bool passesTime = !triggerType.time.has_value() || time >= (instance.startTime + triggerType.time.value());
+		bool passesWait = passesWaitFor(instance, triggerType, i, time);
+		if (passesTime && passesWait){
+			return NextEvent {
+				.index = i,
+				.trigger = &cutscene.events.at(i).time,
+			};
 		}
 	}
 	return std::nullopt;
@@ -178,9 +237,13 @@ void tickCutscenes(CutsceneApi& api, float time){
 			continue;
 		}
 		if (nextEventIndex.has_value()){
-			CutsceneEvent& event = instance.cutscene -> events.at(nextEventIndex.value());
-			instance.lastPlayedIndex = nextEventIndex.value();
-			doCutsceneEvent(api, event, time);			
+			auto index = nextEventIndex.value().index;
+			CutsceneEvent& event = instance.cutscene -> events.at(index);
+			doCutsceneEvent(api, event, time, event.duration);
+			instance.playedEvents[index] = CutsceneTiming {
+				.startTime = time,
+				.endTime = time + event.duration,
+			};
 		}
 	}
 

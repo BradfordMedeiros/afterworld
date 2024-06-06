@@ -11,7 +11,17 @@ struct AmmoHudInfo {
 void setUIAmmoCount(AmmoHudInfo ammoInfo);
 void setHealth(float health);
 void setShowActivate(bool showActivate);
-void showLetterBox(std::string title);
+
+struct LetterboxFade {
+  std::string title;
+  std::optional<float> animationDuration;
+  std::optional<float> animationHold;
+  std::optional<float> fadeOutDuration;
+  glm::vec4 boxColor;
+  glm::vec4 fadeColor;
+  float fontSize;
+};
+void showLetterBox(std::string title, float duration);
 
 extern Component hudComponent;
 
