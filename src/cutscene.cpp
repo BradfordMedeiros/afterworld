@@ -42,6 +42,7 @@ struct CutsceneTiming {
 };
 struct CutsceneInstance {
 	float startTime;
+	std::set<std::string> messages;
 	std::unordered_map<int, CutsceneTiming> playedEvents;
 	Cutscene* cutscene;
 };
@@ -104,7 +105,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.time = TriggerType {
 						.time = 0.f,
 						.waitForLastEvent = true,
-						.waitForMessage = std::nullopt,
+						.waitForMessage = "nohealth",
 					},
 					.type = BackgroundFill {
 						.color = glm::vec4(1.f, 0.f, 0.f, 0.5f),
@@ -147,7 +148,8 @@ void playCutscene(std::string&& cutsceneName, float startTime){
 	modassert(cutscenes.find(cutsceneName) != cutscenes.end(), std::string("play custscene, cutscene does not exist: ") + cutsceneName)
 
 	CutsceneInstance cutsceneInstance { 
-		.startTime = startTime, 
+		.startTime = startTime,
+		.messages = {},
 		.playedEvents = {},
 		.cutscene = &cutscenes.at(cutsceneName),
 	};
@@ -195,6 +197,14 @@ bool passesWaitFor(CutsceneInstance& instance, TriggerType& triggerType, int ind
 	}
 	return false;
 }
+bool passesWaitForMessage(CutsceneInstance& instance, TriggerType& triggerType, int index){
+	CutsceneEvent& event = instance.cutscene -> events.at(index);
+	if (!event.time.waitForMessage.has_value()){
+		return true;
+	}
+	return instance.messages.find(event.time.waitForMessage.value()) != instance.messages.end();
+}
+
 std::optional<NextEvent> getNextEventIndex(CutsceneInstance& instance, float time, bool* _finished){
 	Cutscene& cutscene = *instance.cutscene;
 	*_finished = instance.playedEvents.size() == cutscene.events.size();
@@ -217,7 +227,8 @@ std::optional<NextEvent> getNextEventIndex(CutsceneInstance& instance, float tim
 
 		bool passesTime = !triggerType.time.has_value() || time >= (instance.startTime + triggerType.time.value());
 		bool passesWait = passesWaitFor(instance, triggerType, i, time);
-		if (passesTime && passesWait){
+		bool passesWaitMessage = passesWaitForMessage(instance, triggerType, i);
+		if (passesTime && passesWait && passesWaitMessage){
 			return NextEvent {
 				.index = i,
 				.trigger = &cutscene.events.at(i).time,
@@ -254,5 +265,16 @@ void tickCutscenes(CutsceneApi& api, float time){
 
 	for (auto &[_, fn] : perFrameEvents){
 		fn();
+	}
+}
+
+void onCutsceneMessages(std::string& key){
+	for (auto &[_, instance] : playingCutscenes){
+		for (int i = 0; i < instance.cutscene -> events.size(); i++){
+//			if (event.time.waitForMessage.has_value() && event.time.waitForMessage.value() == key){
+			if (instance.cutscene -> events.at(i).time.waitForMessage.has_value() && instance.cutscene -> events.at(i).time.waitForMessage.value() == key){
+				instance.messages.insert(key);
+			}
+		}
 	}
 }

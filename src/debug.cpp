@@ -63,6 +63,8 @@ CScriptBinding debugBinding(CustomApiBindings& api, const char* name){
       spawnFromAllSpawnpoints("blue");
     }else if (key == '/' && action == 0){
       removeAllSpawnedEntities();
+    }else if (key == 'U' && action == 0){
+    	gameapi -> sendNotifyMessage("red-background", 0);
     }
     
     if (key == 'Y' && action == 0){

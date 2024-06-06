@@ -10,5 +10,6 @@ struct CutsceneApi {
 
 void playCutscene(std::string&& cutsceneName, float startTime);
 void tickCutscenes(CutsceneApi& api, float time);
+void onCutsceneMessages(std::string& key);
 
 #endif

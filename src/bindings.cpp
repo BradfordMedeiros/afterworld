@@ -470,6 +470,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       });
     }
 
+    onCutsceneMessages(key);
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
