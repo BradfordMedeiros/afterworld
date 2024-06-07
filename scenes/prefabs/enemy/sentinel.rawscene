@@ -11,7 +11,6 @@ enemy:health:30
 enemy:goal-info:target
 enemy:physics_gravity:0 0 0
 enemy:tint:1 0 0 0.5
-enemy:layer:transparency
 enemy:physics_damping_linear:0.9
 enemy:move-vertical:true
 enemy:player:true

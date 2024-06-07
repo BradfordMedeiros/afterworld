@@ -85,6 +85,7 @@ void togglePauseIfInGame(){
 struct SceneRouterPath {
   std::vector<std::string> paths;
   std::optional<std::function<std::string(std::vector<std::string> params)>> scene;
+  bool makePlayer;
   std::optional<std::string> camera;
   bool startPaused;
   bool gameMode;
@@ -96,6 +97,7 @@ std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
     .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
+    .makePlayer = false,
     .camera = std::nullopt,
     .startPaused = true,
     .gameMode = false,
@@ -108,6 +110,7 @@ std::vector<SceneRouterPath> routerPaths = {
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
       return sceneFile.value();
     },
+    .makePlayer = true,
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = true,
@@ -116,6 +119,7 @@ std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
+    .makePlayer = false,
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
@@ -124,6 +128,7 @@ std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
+    .makePlayer = false,
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
@@ -146,6 +151,23 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
     }
   }
   return std::nullopt;
+}
+
+
+objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
+  GameobjAttributes attr = {
+    .attr = {
+      { "scene", prefab },
+      { "position", pos },
+    },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  return gameapi -> makeObjectAttr(
+    sceneId, 
+    std::string("[spawned-instance-") + uniqueNameSuffix(), 
+    attr, 
+    submodelAttributes
+  ).value();
 }
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
@@ -186,10 +208,15 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .path = currentPath,
     };
     modlog("scene route load", sceneManagement.managedScene.value().path);
-    if (router.value() -> camera.has_value() && sceneId.has_value()){
-      auto cameraId = gameapi -> getGameObjectByName(router.value() -> camera.value(), sceneId.value(), false);
-      modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
-      setActivePlayer(cameraId.value());      
+    if (sceneId.has_value()){
+      if (router.value() -> makePlayer){
+        createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  glm::vec3(0.f, 50.f, 100.f));
+      }
+      if (router.value() -> camera.has_value()){
+        auto cameraId = findObjByShortName(router.value() -> camera.value());
+        modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
+        setActivePlayer(cameraId.value());      
+      }
     }
   }
 }

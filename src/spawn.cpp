@@ -30,41 +30,13 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
   ).value();
 }
 
-objid createEnemyInstance(objid sceneId, objid spawnOwnerId, glm::vec3 pos, glm::quat rotation){
-  // replace with   createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy.rawscene", pos, rotation);
-  // when fix physics bug, add data attributes
-  GameobjAttributes attr = {
-    .attr = {
-      { "mesh", "../gameresources/build/characters/plaguerobot.gltf" },
-      { "physics", "enabled" },
-      { "physics_type", "dynamic" },
-      { "agent", "basic" },
-      { "goal-info", "target" },
-      { "health", 130.f },
-      { "spawn-managed", static_cast<float>(spawnOwnerId) },
-      { "position", pos },
-      { "physics_angle", glm::vec3(0.f, 0.f, 0.f) },
-    },
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  return gameapi -> makeObjectAttr(
-    sceneId, 
-    std::string("spawned-instance-") + uniqueNameSuffix(), 
-    attr, 
-    submodelAttributes
-  ).value();
-}
-
-
 const int basicEnemyInstance = getSymbol("enemy");
 const int ammoInstance = getSymbol("ammo");
 
 objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::vec3 pos, glm::quat rotation){
   std::cout << "do spawn entity: " << nameForSymbol(spawnTypeSymbol) << std::endl;
   if (spawnTypeSymbol == basicEnemyInstance){
-    //return createEnemyInstance(sceneId, spawnOwnerId, pos, rotation);
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy/sentinel.rawscene", pos, rotation);
-
   }else if (spawnTypeSymbol == ammoInstance){
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/ammo.rawscene", pos, rotation);
   }

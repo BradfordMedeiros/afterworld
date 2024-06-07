@@ -1,0 +1,14 @@
+>maincamera:physics_angle:0.000000 0.000000 0.000000
+>maincamera:physics:enabled
+>maincamera:physics_velocity:0 0 -10
+>maincamera:physics_type:dynamic
+>maincamera:physics_gravity:0 -9.81 0
+>maincamera:physics_shape:shape_sphere
+>maincamera:goal-info:target
+>maincamera:goal-type:move
+>maincamera:goal-value:5
+>maincamera:goal-conditions:in-range
+>maincamera:goal-conditions-val:20
+>maincamera:team:blue
+>maincamera:health:20
+>maincamera:player:true

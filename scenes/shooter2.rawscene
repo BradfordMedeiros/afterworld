@@ -267,40 +267,6 @@ console:tint:0 0.6 1 1
 console:in-game-ui:test
 console:in-game-ui-offset:0 0 -5
 
->maincamera:position:0 50 100
->maincamera:physics_angle:0.000000 0.000000 0.000000
->maincamera:physics:enabled
->maincamera:physics_velocity:0 0 -10
->maincamera:physics_type:dynamic
->maincamera:physics_gravity:0 -9.81 0
->maincamera:physics_shape:shape_sphere
->maincamera:goal-info:target
->maincamera:goal-type:move
->maincamera:goal-value:5
->maincamera:goal-conditions:in-range
->maincamera:goal-conditions-val:20
->maincamera:team:blue
->maincamera:health:20
->maincamera:player:true
-
-#>maincamera2:position:2 50 100
-#>maincamera2:physics_angle:0.000000 0.000000 0.000000
-#>maincamera2:physics:enabled
-#>maincamera2:physics_velocity:0 0 -10
-#>maincamera2:physics_type:dynamic
-#>maincamera2:physics_gravity:0 -9.81 0
-#>maincamera2:physics_shape:shape_sphere
-#>maincamera2:goal-info:target
-#>maincamera2:goal-type:move
-#>maincamera2:goal-value:5
-#>maincamera2:goal-conditions:in-range
-#>maincamera2:goal-conditions-val:20
-#>maincamera2:team:blue
-#>maincamera2:health:200
-#>maincamera2:player:true
-
-
-
 
 #!light:position:0 -5 5
 
