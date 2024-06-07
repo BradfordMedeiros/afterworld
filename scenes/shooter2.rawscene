@@ -352,7 +352,6 @@ poi_1:interest:generic
 
 ##############################################
 
-ai:script:native/ai
 
 #;navmesh1:position:-20 -27 70
 #;navmesh1:physics:enabled
