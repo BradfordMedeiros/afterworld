@@ -9,7 +9,7 @@ sounds:script:native/sound
 weather:script:native/weather
 tags:script:native/tags
 movement:script:native/movement:1
-
+gunlogic:script:native/weapon
 
 # Texture resources
 loadtexture:texture:../gameresources/textures/controls/up-down.png
