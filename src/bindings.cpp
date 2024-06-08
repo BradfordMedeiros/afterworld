@@ -210,11 +210,14 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     modlog("scene route load", sceneManagement.managedScene.value().path);
     if (sceneId.has_value()){
       if (router.value() -> makePlayer){
-        createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  glm::vec3(0.f, 50.f, 100.f));
+        auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId.value());
+        modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
+        glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
+        createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
       }
       if (router.value() -> camera.has_value()){
         auto cameraId = findObjByShortName(router.value() -> camera.value());
-        modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
+        modassert(cameraId.has_value(), "lonSceneRouteChange, no camera in scene to load");
         setActivePlayer(cameraId.value());      
       }
     }
