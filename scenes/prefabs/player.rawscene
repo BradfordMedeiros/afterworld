@@ -10,5 +10,7 @@
 >maincamera:goal-conditions:in-range
 >maincamera:goal-conditions-val:20
 >maincamera:team:blue
->maincamera:health:20
+>maincamera:health:90
 >maincamera:player:true
+
+>maincamera:collide_damage:50

@@ -134,13 +134,13 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (isAimButton(button)){
       if (action == 0){
         weapons -> isHoldingRightMouse = false;
-        setZoom(false);
         isGunZoomed = false;
+        setZoom(isGunZoomed);
       }else if (action == 1){
         // select item
         weapons -> isHoldingRightMouse = true;
-        setZoom(true);
         isGunZoomed = true;
+        setZoom(isGunZoomed);
         if (weapons -> playerId.has_value()){
           auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
           if (hitpoints.size() > 0){

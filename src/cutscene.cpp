@@ -117,13 +117,13 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.time = TriggerType {
 						.time = 0.f,
 						.waitForLastEvent = true,
-						.waitForMessage = "nohealth",
+						.waitForMessage = std::nullopt,
 					},
 					.type = BackgroundFill {
 						.color = glm::vec4(0.f, 0.f, 0.f, 0.5f),
 					},
 				},
-				CutsceneEvent {
+				/*CutsceneEvent {
 					.name = "camera-view-1",
 					.duration = 5.f,
 					.time = TriggerType {
@@ -158,7 +158,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						.waitForMessage = std::nullopt,
 					},
 					.type = PopCameraView{},
-				},
+				},*/
 				CutsceneEvent {
 					.name = "letterbox",
 					.duration = 2.f,

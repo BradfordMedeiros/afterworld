@@ -12,6 +12,7 @@ int interactKey = 'E';
 
 int fireButton = 0;
 int aimButton = 1;
+int modifierButton = 'T';  // shift
 
 void setControl(int controlSymbol, int key){
 	static int jumpSymbol = getSymbol("control-jump");
@@ -24,6 +25,7 @@ void setControl(int controlSymbol, int key){
 
 	static int fireSymbol = getSymbol("control-fire");
 	static int aimSymbol = getSymbol("control-aim");
+	static int modifierSymbol = getSymbol("control-modifier");
 
 	if (controlSymbol == jumpSymbol){
 		jumpKey = key;
@@ -43,6 +45,8 @@ void setControl(int controlSymbol, int key){
 		fireButton = key;
 	}else if (controlSymbol == aimSymbol){
 		aimButton = key;
+	}else if (controlSymbol == modifierSymbol){
+		modifierButton = key;
 	}else {
 		modassert(false, std::string("invalid control symbol: ") + nameForSymbol(controlSymbol));
 	}
@@ -82,7 +86,9 @@ bool isFireButton(int button){
 bool isAimButton(int button){
 	return button == aimButton;
 }
-
+bool isModifierButton(int button){
+	return button == modifierButton;
+}
 
 struct HotkeyToMessage {
 	int key;

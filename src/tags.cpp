@@ -34,6 +34,7 @@ struct Tags {
 	AudioZones audiozones;
 	InGameUi inGameUi;
 	std::unordered_map<objid, OpenableType> openable;
+	std::unordered_map<objid, float> gunIdToRotateTimeAdded;
 
 	StateController animationController;
 };
@@ -479,7 +480,38 @@ std::vector<TagUpdater> tagupdates = {
 				}
 			}
   	},
-	}
+	},
+
+	TagUpdater {
+		.attribute = "gunpickup",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		tags -> gunIdToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		tags -> gunIdToRotateTimeAdded.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		for (auto &[id, time] : tags.gunIdToRotateTimeAdded){
+  			auto timeElapsed = gameapi -> timeSeconds(false) - time;
+  			float degrees = (360.f * timeElapsed) * 0.2f; // 0.2f is the turns per seconds 
+  			std::cout << "gun id, rotate degrees: " << degrees << std::endl;
+  			float angle = glm::radians(degrees);
+	  		float x = glm::cos(angle);
+	  		float z = glm::sin(angle);
+  			auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
+  			auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
+  			auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+  			gameapi -> setGameObjectRot(id, newOrientation, true);
+  		}
+
+  	},
+  	.onMessage =  std::nullopt,
+	},
+
+	
+
 };
 
 
@@ -514,6 +546,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     	.textDisplays = {},
     };
     tags -> openable = {};
+    tags -> gunIdToRotateTimeAdded = {};
 
     ///// animations ////
     tags -> animationController = createStateController();

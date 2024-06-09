@@ -110,7 +110,7 @@ floatbox_small_top:scale:0.5 0.5 2
 floatbox_small_top:texture:../gameresources/textures/wood.jpg
 floatbox_small_top:physics:enabled
 floatbox_small_top:physics_type:dynamic
-floatbox_small_top:collide_damage:true
+floatbox_small_top:collide_damage:30
 floatbox_small_top:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
 floatbox_small_top:health:100
 
@@ -330,7 +330,19 @@ spawnpoint:spawnlimit:3
 
 
 playerspawn:playerspawn:true
-playerspawn:position:0 300 0
+playerspawn:position:250 50 -175
+
+)pickup-scrapgun:value:scrapgun
+)pickup-scrapgun:position:260 42 -175
+)pickup-scrapgun:scale:0.2 0.2 0.2
+)pickup-scrapgun:tint:1 0 0 0.8
+)pickup-scrapgun:physics:enabled
+)pickup-scrapgun:physics_type:dynamic
+#)pickup-scrapgun:physics_collision:nocollide
+)pickup-scrapgun:gunpickup:scrapgun
+
+)pickup-pistol:value:pistol
+)pickup-pistol:position:250 50 -175
 
 poi_1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 poi_1:scale:0.25 0.05 1.25
@@ -353,6 +365,8 @@ poi_1:interest:generic
 #poi_3:position:75 -28 50
 #poi_3:interest:generic
 
+
+
 ##############################################
 
 
@@ -369,7 +383,7 @@ poi_1:interest:generic
 #;navmesh3:physics_shape:shape_exact
 
 
-*octree:position:0 0 0
+*octree:position:-150 -150 -100
 *octree:scale:500 500 500
 *octree:physics:enabled
 *octree:map:./res/octrees/testoctree.map

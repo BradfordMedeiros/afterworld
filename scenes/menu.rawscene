@@ -20,6 +20,6 @@ menu:background:true
 #z_1_menu:shader:../afterworld/shaders/menu/fragment.glsl
 
 
-&music:clip:/home/brad/Desktop/music.wav
+&music:clip:/home/brad/Desktop/bones.wav
 &music:volume:5
 
