@@ -111,7 +111,9 @@ void setGunAmmo(std::string gun, int currentAmmo){
 
 
 void requestChangeGun(std::string gun){
-  if (hasGun(gun)){
+  auto gunInInventory = hasGun(gun);
+  modlog("inventory", std::string("change gun to ") + gun + ", has gun = " + print(gunInInventory));
+  if (gunInInventory){
     ChangeGunMessage changeGun {
       .currentAmmo = ammoForGun(gun),
       .gun = gun,

@@ -161,14 +161,14 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 				},*/
 				CutsceneEvent {
 					.name = "letterbox",
-					.duration = 2.f,
+					.duration = 5.f,
 					.time = TriggerType {
 						.time = 0.f,
 						.waitForLastEvent = true,
 						.waitForMessage = std::nullopt,
 					},
 					.type = Letterbox {
-						.text = "letter box hello",
+						.text = "no Revelations",
 					},
 				},
 				

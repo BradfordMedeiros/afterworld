@@ -1,5 +1,5 @@
 filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING
-../afterworld/scenes/shooter2.rawscene,Dreams and Reconciliation,fps,Fall asleep and enter the realm of the dreamweavers.,./res/textures/trippyflash.png
+../afterworld/scenes/shooter3.rawscene,Dreams and Reconciliation,fps1,Fall asleep and enter the realm of the dreamweavers.,./res/textures/trippyflash.png
 ../afterworld/scenes/shooter2.rawscene,Arrival,fps,You arrive to a port city and find demons.,./res/textures/water.jpg
 ../afterworld/scenes/shooter2.rawscene,Ocean Diving and Submarine Voyages,fps,Take voyage in a submarine and explore the dreamweavers domain.,./res/textures/maxresdefault.jpg
 ../afterworld/scenes/shooter2.rawscene,Departure,fps,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg

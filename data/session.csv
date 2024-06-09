@@ -1,2 +1,2 @@
 session.console:STRING,session.editor:STRING,session.background:STRING,session.layout:STRING,session.style-primary:STRING,session.style-secondary:STRING,session.style-border:STRING,session.style-highlight:STRING
-true,false,/home/brad/Desktop/art/arcade3.png,editor,0.147275 0.269012 0.791786 0.196392,0.2 0.2 0.2 0.5,0.812674 0.845691 0.93754 0.348483,0 1 0 0.5
+true,false,/home/brad/Desktop/test3.png,main,0.175356 0.217907 0.304718 0.227236,0.229242 0.654092 0.949758 0.14415,0.953961 0.881414 0.352112 0.173073,0 1 0 0.5

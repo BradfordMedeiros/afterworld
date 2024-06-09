@@ -109,7 +109,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		},
 	},
 	HotkeyToMessage {
-		.key = 49,  // 1
+		.key = '1',  // 1
 		.action = 0,
 		.keyToPublish = "",
 		.valueToPublish = "",
@@ -118,7 +118,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		},
 	},
 	HotkeyToMessage {
-		.key = 50,  // 2 
+		.key = '2',  // 2 
 		.action = 0,
 		.keyToPublish = "",
 		.valueToPublish = "",
@@ -127,7 +127,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		},
 	},
 	HotkeyToMessage {
-		.key = 51,  // 3
+		.key = '3',  // 3
 		.action = 0,
 		.keyToPublish = "",
 		.valueToPublish = "",
@@ -135,16 +135,25 @@ std::vector<HotkeyToMessage> hotkeys = {
 			requestChangeGun("scrapgun");
 		},
 	},
+	HotkeyToMessage {
+		.key = '4',  
+		.action = 0,
+		.keyToPublish = "",
+		.valueToPublish = "",
+		.fn = []() -> void {
+			requestChangeGun("fork");
+		},
+	},
 
 	HotkeyToMessage {
-		.key = '4',  // 3
+		.key = '5',  // 3
 		.action = 0,
 		.keyToPublish = "interact-ingame-ui",
 		.valueToPublish = "",
 		.fn = []() -> void {},
 	},
 	HotkeyToMessage {
-		.key = '5',  // 3
+		.key = '6',  // 3
 		.action = 0,
 		.keyToPublish = "ui-debug-text",
 		.valueToPublish = "textvalue",
