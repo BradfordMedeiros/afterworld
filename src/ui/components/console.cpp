@@ -178,6 +178,14 @@ std::vector<CommandDispatch> commands {
       return std::nullopt;    
     },
   },
+  CommandDispatch {
+    .command = "die",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      *valid = true;
+      consoleInterface.die();
+      return std::nullopt;    
+    },
+  },
 };
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){

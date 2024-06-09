@@ -119,27 +119,29 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   static unsigned int forceStat = gameapi -> stat("last-force");
   gameapi -> logStat(forceStat, lastForce);
 
-  if (force > 10){
+  if (force > 50){
     {
       float volume = 1.f;  // should adjust based on force, how much? 
       playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position);
 
 
       auto attr = getAttrHandle(obj1);
-      if (getStrAttr(attr, "collide_damage").has_value()){
+      auto collideDamage = getFloatAttr(attr, "collide_damage"); 
+      if (collideDamage.has_value()){
         DamageMessage damageMessage {
           .id = obj1,
-          .amount = 1000.f,
+          .amount = collideDamage.value(),
         };
         gameapi -> sendNotifyMessage("damage", damageMessage);      
       }
     }
     {
       auto attr = getAttrHandle(obj2);
-      if (getStrAttr(attr, "collide_damage").has_value()){
+      auto collideDamage = getFloatAttr(attr, "collide_damage"); 
+      if (collideDamage.has_value()){
         DamageMessage damageMessage {
           .id = obj2,
-          .amount = 1000.f,
+          .amount = collideDamage.value(),
         };
         gameapi -> sendNotifyMessage("damage", damageMessage);      
       }

@@ -326,6 +326,16 @@ UiContext getUiContext(GameState& gameState){
       .routerPop = []() -> void {
         popHistory();
       },
+      .die = []() -> void {
+        auto activePlayerId = getActivePlayerId();
+        if (activePlayerId.has_value()){
+          DamageMessage damageMessage {
+            .id = activePlayerId.value(),
+            .amount = 100000.f,
+          };
+          gameapi -> sendNotifyMessage("damage", damageMessage);      
+        }
+      },
     },
   };
   return uiContext;
