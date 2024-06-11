@@ -761,6 +761,12 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     hudComponent.draw(drawTools, hudProps);
   }
 
+  bool showTerminal = false;
+  if (showTerminal){
+    auto terminalProps = getDefaultProps();
+    terminalComponent.draw(drawTools, terminalProps);    
+  }
+
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }

@@ -18,6 +18,7 @@ bool isPauseKey(int key);
 bool isFireButton(int button);
 bool isAimButton(int button);
 bool isModifierButton(int button);
+bool isTeleportButton(int button);
 
 void handleHotkey(int key, int action);
 

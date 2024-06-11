@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+
 struct BackgroundFill {
 	float duration;
 	glm::vec4 color;
@@ -21,7 +22,9 @@ struct CameraView {
 };
 struct PopCameraView {};
 
-typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, CameraView, PopCameraView> CutsceneEventType;
+struct TerminalDisplay {};
+
+typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, CameraView, PopCameraView, TerminalDisplay> CutsceneEventType;
 
 
 
@@ -62,6 +65,8 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 	auto letterboxPtr = std::get_if<Letterbox>(&event.type);
 	auto cameraViewPtr = std::get_if<CameraView>(&event.type);
 	auto popcameraPtr = std::get_if<PopCameraView>(&event.type);
+	auto terminalPtr = std::get_if<TerminalDisplay>(&event.type);
+
 	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
 		std::string text = debugTextDisplayPtr -> text;
@@ -89,6 +94,19 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		api.setCameraPosition(cameraViewPtr -> position, cameraViewPtr -> rotation);
 	}else if (popcameraPtr){
 		api.popTempViewpoint();
+	}else if (terminalPtr){
+		auto id = getUniqueObjId();
+		std::string text = "hello world";
+		perFrameEvents[id] = [text, time]() -> void {
+			auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - time) * 100.f);
+			auto textSubtr = text.substr(0, currIndex);
+			gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.98f), std::nullopt, true, std::nullopt, std::nullopt);
+			drawRightText(textSubtr, -1.f, 0.f, 0.02f, std::nullopt /* tint */, std::nullopt);
+		};
+  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
+  		perFrameEvents.erase(id);
+  	});
+
 	}
 
 	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
@@ -111,18 +129,16 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						.rate = 100.f,
 					},
 				},
-				CutsceneEvent {
-					.name = "backgroundfill red",
-					.duration = 2.f,
+				/*CutsceneEvent {
+					.name = "test-terminal",
+					.duration = 10.f,
 					.time = TriggerType {
 						.time = 0.f,
 						.waitForLastEvent = true,
 						.waitForMessage = std::nullopt,
 					},
-					.type = BackgroundFill {
-						.color = glm::vec4(0.f, 0.f, 0.f, 0.5f),
-					},
-				},
+					.type = TerminalDisplay {},
+				},*/
 				/*CutsceneEvent {
 					.name = "camera-view-1",
 					.duration = 5.f,

@@ -1,0 +1,9 @@
+terminal:mesh:./res/models/box/crate.gltf
+terminal:physics:enabled
+terminal:tint:0 0 1 1
+terminal:physics_type:dynamic
+terminal:texture:./res/textures/hexglow.png
+terminal:scale:0.5 0.5 0.2
+terminal:physics_mass:100
+
+terminal:activate:terminal

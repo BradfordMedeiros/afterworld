@@ -481,7 +481,6 @@ std::vector<TagUpdater> tagupdates = {
 			}
   	},
 	},
-
 	TagUpdater {
 		.attribute = "gunpickup",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {

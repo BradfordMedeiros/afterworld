@@ -14,6 +14,7 @@ ai:script:native/ai
 
 # Texture resources
 loadtexture:texture:../gameresources/textures/controls/up-down.png
+loadtexture-terminal:texture:../gameresources/build/terminals/terminal.png
 
 testobject:position:5 4 3
 testobject:layer:somedebug

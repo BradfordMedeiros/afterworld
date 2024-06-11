@@ -435,6 +435,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (isPauseKey(key)){
         togglePauseIfInGame();
       }
+      if (isTeleportButton(key)){
+        auto playerId = getActivePlayerId();
+        if (playerId.has_value()){
+          gameapi -> setGameObjectPosition(playerId.value(), glm::vec3(250.f, 50.f, -175.f), true);
+        }
+      }
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
     handleHotkey(key, action);
@@ -443,6 +449,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == '-' && action == 0){
       setActivePlayerNext();
     }
+
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -522,6 +529,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
+    handleBouncepadCollision(obj1, obj2, normal);
     inventoryOnCollision(obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {

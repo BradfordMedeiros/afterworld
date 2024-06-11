@@ -154,6 +154,28 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   // then from that pressure, 
   // and then use some sort of that value, maybe mass?  and some coefficient?  to dtermine if should break
   // can also be used to inflict damage on another object
+}
+
+void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
+
+  {
+    glm::vec3 oppositeNormal(normal.x * -1, normal.y * -1, normal.z * -1);
+    auto attr = getAttrHandle(obj1);
+    auto bounceAmount = getVec3Attr(attr, "bounce");
+    if (bounceAmount.has_value()){
+      auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), oppositeNormal) * bounceAmount.value();
+      gameapi -> applyImpulse(obj2, impulse);
+    }    
+  }
+
+  {
+    auto attr = getAttrHandle(obj2);
+    auto bounceAmount = getVec3Attr(attr, "bounce");
+    if (bounceAmount.has_value()){
+      auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * bounceAmount.value();
+      gameapi -> applyImpulse(obj1, impulse);
+    }    
+  }
 
 
 }

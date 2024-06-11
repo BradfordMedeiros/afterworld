@@ -25,6 +25,7 @@
 #include "../components/game/weaponwheel.h"
 #include "../components/game/compass.h"
 #include "../components/game/hud.h"
+#include "../components/game/terminal.h"
 #include "../components/console.h"
 #include "../components/uiwindow.h"
 
