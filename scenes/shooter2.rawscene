@@ -331,6 +331,7 @@ spawnpoint:spawnlimit:3
 
 playerspawn:playerspawn:true
 playerspawn:position:250 50 -175
+playerspawn:teleport:true
 
 [terminal:scene:../afterworld/scenes/prefabs/objects/terminal.rawscene
 [terminal:position:250 50 -175

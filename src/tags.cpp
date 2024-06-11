@@ -35,6 +35,7 @@ struct Tags {
 	InGameUi inGameUi;
 	std::unordered_map<objid, OpenableType> openable;
 	std::unordered_map<objid, float> gunIdToRotateTimeAdded;
+	std::set<objid> teleportObjs;
 
 	StateController animationController;
 };
@@ -508,12 +509,26 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage =  std::nullopt,
 	},
-
+	TagUpdater {
+		.attribute = "teleport",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		tags -> teleportObjs.insert(id);
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		Tags* tags = static_cast<Tags*>(data);
+  		tags -> teleportObjs.erase(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage =  std::nullopt,
+	},
 	
+
 
 };
 
 
+Tags* tagsPtr = NULL;
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	  auto binding = createCScriptBinding(name, api);
@@ -535,6 +550,8 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 
     binding.create = [onAddFns](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
+    tagsPtr = tags;
+
     tags -> hitpoints = {};
     tags -> textureScrollObjIds = {};
     tags -> audiozones = AudioZones {
@@ -546,6 +563,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     };
     tags -> openable = {};
     tags -> gunIdToRotateTimeAdded = {};
+    tags -> teleportObjs = {};
 
     ///// animations ////
     tags -> animationController = createStateController();
@@ -648,6 +666,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     Tags* tags = static_cast<Tags*>(data);
     delete tags;
+    tagsPtr = NULL;
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
   	Tags* tags = static_cast<Tags*>(data);
@@ -673,3 +692,22 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	return binding;
 }
 
+std::optional<glm::vec3> getTeleportPosition(){
+	if (tagsPtr == NULL){
+		return std::nullopt;
+	}
+	if (tagsPtr -> teleportObjs.size() == 0){
+		return std::nullopt;
+	}
+
+	auto index = randomNumber(0, tagsPtr -> teleportObjs.size() - 1);
+	int currIndex = 0;
+	for(auto id : tagsPtr -> teleportObjs){
+		if (currIndex == index){
+			auto position = gameapi -> getGameObjectPos(id, true);
+			return position;
+		}
+		currIndex++;
+	}
+	return std::nullopt;
+}

@@ -437,9 +437,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
       if (isTeleportButton(key)){
         auto playerId = getActivePlayerId();
-        if (playerId.has_value()){
+        auto teleportPosition = getTeleportPosition();
+        if (playerId.has_value() && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
-          gameapi -> setGameObjectPosition(playerId.value(), glm::vec3(250.f, 50.f, -175.f), true);
+          gameapi -> setGameObjectPosition(playerId.value(), teleportPosition.value(), true);
         }
       }
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);

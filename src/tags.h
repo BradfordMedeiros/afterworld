@@ -14,4 +14,6 @@
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
 
+std::optional<glm::vec3> getTeleportPosition();
+
 #endif 
