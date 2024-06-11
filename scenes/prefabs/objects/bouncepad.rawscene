@@ -1,7 +1,8 @@
 bouncepad:mesh:./res/models/box/crate.gltf
 bouncepad:physics:enabled
 bouncepad:tint:0 0 1 1
-bouncepad:physics_type:dynamic
+#bouncepad:physics_type:dynamic
 bouncepad:texture:./res/textures/hexglow.png
 bouncepad:scale:2 0.1 2
 bouncepad:bounce:0 0 -20
+bouncepad:rotation:-1 1 0 0

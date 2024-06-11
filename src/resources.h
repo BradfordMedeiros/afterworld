@@ -10,6 +10,7 @@ struct ManagedSounds {
   std::optional<objid> landSoundObjId;
   std::optional<objid> moveSoundObjId;
   std::optional<objid> activateSoundObjId;
+  std::optional<objid> soundObjId;
 };
 
 ManagedSounds& getManagedSounds();

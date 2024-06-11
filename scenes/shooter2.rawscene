@@ -336,7 +336,7 @@ playerspawn:position:250 50 -175
 [terminal:position:250 50 -175
 
 [bouncepad:scene:../afterworld/scenes/prefabs/objects/bouncepad.rawscene
-[bouncepad:position:252 50 -175
+[bouncepad:position:230 50 -175
 
 
 )pickup-scrapgun:value:scrapgun
