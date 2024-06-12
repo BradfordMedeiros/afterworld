@@ -437,6 +437,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
       if (isTeleportButton(key)){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
+        // maybe raycast down, and then set the position so it fits 
         auto playerId = getActivePlayerId();
         auto teleportPosition = getTeleportPosition();
         if (playerId.has_value() && teleportPosition.has_value()){
