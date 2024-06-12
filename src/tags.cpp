@@ -692,7 +692,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	return binding;
 }
 
-std::optional<glm::vec3> getTeleportPosition(){
+std::optional<TeleportInfo> getTeleportPosition(){
 	if (tagsPtr == NULL){
 		return std::nullopt;
 	}
@@ -705,7 +705,10 @@ std::optional<glm::vec3> getTeleportPosition(){
 	for(auto id : tagsPtr -> teleportObjs){
 		if (currIndex == index){
 			auto position = gameapi -> getGameObjectPos(id, true);
-			return position;
+			return TeleportInfo {
+				.id = id,
+				.position = position
+			};
 		}
 		currIndex++;
 	}

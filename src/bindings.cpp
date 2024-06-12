@@ -436,11 +436,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         togglePauseIfInGame();
       }
       if (isTeleportButton(key)){
+        // this probably should be aware of the bounds, an not allow to clip into wall for example
         auto playerId = getActivePlayerId();
         auto teleportPosition = getTeleportPosition();
         if (playerId.has_value() && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
-          gameapi -> setGameObjectPosition(playerId.value(), teleportPosition.value(), true);
+          gameapi -> setGameObjectPosition(playerId.value(), teleportPosition.value().position, true);
+          gameapi -> removeByGroupId(teleportPosition.value().id);
         }
       }
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
