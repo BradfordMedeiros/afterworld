@@ -3,6 +3,7 @@
 
 #include "./util.h"
 #include "./resources.h"
+#include "./inventory.h"
 
 void handleInteract(objid gameObjId);
 void handleSwitch(std::string switchValue);
@@ -10,5 +11,6 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 void handleDamageCollision(objid obj1, objid obj2);
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force);
 void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal);
+void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
 
 #endif 

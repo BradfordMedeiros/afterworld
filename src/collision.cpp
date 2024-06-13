@@ -176,6 +176,59 @@ void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
       gameapi -> applyImpulse(obj1, impulse);
     }    
   }
-
-
 }
+
+
+
+bool isPlayer(objid id){
+  auto playerAttr = getSingleAttr(id, "player");
+  return playerAttr.has_value() && playerAttr.value() == "true";
+}
+bool isPickup(objid id){
+  auto playerAttr = getSingleAttr(id, "pickup");
+  return playerAttr.has_value();
+}
+void tryPickupItem(objid gameObjId, objid playerId){
+  auto objAttr = getAttrHandle(gameObjId);
+  auto pickup = getStrAttr(objAttr, "pickup");
+  if (pickup.has_value()){
+    auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
+    auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
+    auto pickupType = getStrAttr(objAttr, "pickup-type");
+    auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
+    auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
+
+    auto oldItemCount = ensureItemExists(pickup.value());
+    auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
+    updateItemCount(pickup.value(), newItemCount);
+
+    if (!pickupRemove.has_value()){
+      gameapi -> removeByGroupId(gameObjId);
+    }else if (pickupRemove.value() == "prefab"){
+      auto prefabRootId = gameapi -> prefabId(gameObjId);
+      modassert(prefabRootId.has_value(), "inventory remove prefab, but object id is not a prefab type");
+      gameapi -> removeByGroupId(prefabRootId.value());
+    }
+    
+    if (pickupTrigger.has_value()){
+      ItemAcquiredMessage itemAcquiredMessage {
+        .targetId = playerId,
+        .amount = static_cast<int>(newItemCount),
+      };
+      gameapi -> sendNotifyMessage(pickupTrigger.value(), itemAcquiredMessage);
+    }
+  }
+}
+void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
+  auto obj1IsPlayer = isPlayer(obj1);
+  auto obj2IsPlayer = isPlayer(obj2);
+  auto obj1IsPickup = isPickup(obj1);
+  auto obj2IsPickup = isPickup(obj2);
+  if (obj1IsPlayer && obj2IsPickup){
+    tryPickupItem(obj2, obj1);
+  }else if (obj2IsPlayer && obj1IsPickup){
+    tryPickupItem(obj1, obj2);
+  }
+}
+
+

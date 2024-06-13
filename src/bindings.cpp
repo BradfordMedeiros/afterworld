@@ -535,7 +535,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleDamageCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
     handleBouncepadCollision(obj1, obj2, normal);
-    inventoryOnCollision(obj1, obj2);
+    handleInventoryOnCollision(obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1);
