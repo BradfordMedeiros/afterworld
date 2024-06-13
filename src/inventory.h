@@ -12,7 +12,7 @@ struct GunInfo {
 std::optional<GunInfo> getGunInventoryInfo(std::string gun);
 void setGunAmmo(std::string gun, int currentAmmo);
 
-int ensureItemExists(std::string name);
+int currentItemCount(std::string name);
 void updateItemCount(std::string name, int count);
 
 #endif

@@ -282,15 +282,13 @@ void removeGun(GunInstance& weaponValues){
 }
 
 
+void setUIAmmoCount(int currentAmmo, int totalAmmo);
 void deliverAmmo(GunCore& _gunCore, int ammo){
   if (!_gunCore.weaponCore){
     return;
   }
   _gunCore.weaponState.currentAmmo += ammo;
-  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
-    .currentAmmo = _gunCore.weaponState.currentAmmo,
-    .totalAmmo = _gunCore.weaponCore -> weaponParams.totalAmmo,
-  });
+  setUIAmmoCount(_gunCore.weaponState.currentAmmo, _gunCore.weaponCore -> weaponParams.totalAmmo);
 }
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){

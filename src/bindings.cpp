@@ -513,15 +513,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "hud-health"){
       auto floatValue = anycast<float>(value);
       modassert(floatValue != NULL, "hud-health value invalid");
-      setHealth(*floatValue);
-    }
-    if (key == "current-gun"){
-      auto currentGunMessage = anycast<CurrentGunMessage>(value); 
-      modassert(currentGunMessage != NULL, "current-gun value invalid");
-      setUIAmmoCount(AmmoHudInfo {
-        .currentAmmo = currentGunMessage -> currentAmmo,
-        .totalAmmo = currentGunMessage -> totalAmmo,
-      });
+      setUiHealth(*floatValue);
     }
 
     onCutsceneMessages(key);

@@ -2,16 +2,24 @@
 
 extern CustomApiBindings* gameapi;
 
+struct AmmoHudInfo {
+  int currentAmmo;
+  int totalAmmo;
+};
+
 AmmoHudInfo ammoInfo {
   .currentAmmo = 0,
   .totalAmmo = 0,
 };
-void setUIAmmoCount(AmmoHudInfo newAmmoInfo){
-  ammoInfo = newAmmoInfo;
+void setUIAmmoCount(int currentAmmo, int totalAmmo){
+  ammoInfo =  AmmoHudInfo {
+    .currentAmmo = currentAmmo,
+    .totalAmmo = totalAmmo,
+  };
 }
 
 float currentHealth = 0.f;
-void setHealth(float health){
+void setUiHealth(float health){
   currentHealth = health;
 }
 

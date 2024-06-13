@@ -4,12 +4,8 @@
 #include "../common.h"
 #include "../../../global.h"
 
-struct AmmoHudInfo {
-  int currentAmmo;
-  int totalAmmo;
-};
-void setUIAmmoCount(AmmoHudInfo ammoInfo);
-void setHealth(float health);
+void setUIAmmoCount(int currentAmmo, int totalAmmo);
+void setUiHealth(float health);
 void setShowActivate(bool showActivate);
 
 struct LetterboxFade {

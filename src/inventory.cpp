@@ -2,8 +2,9 @@
 
 extern CustomApiBindings* gameapi;
 
+std::unordered_map<int, float> inventoryCount {};
 
-int ensureItemExists(std::string name){
+int currentItemCount(std::string name){
   auto query = gameapi -> compileSqlQuery(std::string("select item, count from inventory where item = ") +  name, {});
 	bool validSql = false;
 	auto result = gameapi -> executeSqlQuery(query, &validSql);

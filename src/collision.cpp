@@ -198,7 +198,7 @@ void tryPickupItem(objid gameObjId, objid playerId){
     auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
     auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
 
-    auto oldItemCount = ensureItemExists(pickup.value());
+    auto oldItemCount = currentItemCount(pickup.value());
     auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
     updateItemCount(pickup.value(), newItemCount);
 
