@@ -3,6 +3,7 @@
 
 #include "./util.h"
 #include "./inventory.h"
+#include "./weapons/weapon.h"
 
 
 bool isJumpKey(int key);

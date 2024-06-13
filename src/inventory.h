@@ -8,6 +8,10 @@
 
 void inventoryOnCollision(int32_t obj1, int32_t obj2);
 void setGunAmmo(std::string gun, int currentAmmo);
-void requestChangeGun(std::string gun);
+
+struct GunInfo {
+  float ammo;
+};
+std::optional<GunInfo> getGunInventoryInfo(std::string gun);
 
 #endif

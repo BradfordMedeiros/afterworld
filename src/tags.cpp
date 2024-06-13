@@ -505,7 +505,6 @@ std::vector<TagUpdater> tagupdates = {
   			auto newOrientation = orientationFromPos(fromLocation, targetLocation);
   			gameapi -> setGameObjectRot(id, newOrientation, true);
   		}
-
   	},
   	.onMessage =  std::nullopt,
 	},

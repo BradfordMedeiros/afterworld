@@ -11,6 +11,7 @@
 #include "../activeplayer.h"
 
 bool getIsGunZoomed();
+void maybeChangeGun(std::string gun);
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
 

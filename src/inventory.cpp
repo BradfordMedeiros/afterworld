@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+
 int ensureItemExists(std::string name){
   auto query = gameapi -> compileSqlQuery(std::string("select item, count from inventory where item = ") +  name, {});
 	bool validSql = false;
@@ -109,17 +110,13 @@ void setGunAmmo(std::string gun, int currentAmmo){
   updateItemCount(gun + "-ammo", currentAmmo);
 }
 
-
-void requestChangeGun(std::string gun){
+std::optional<GunInfo> getGunInventoryInfo(std::string gun){
   auto gunInInventory = hasGun(gun);
-  modlog("inventory", std::string("change gun to ") + gun + ", has gun = " + print(gunInInventory));
-  if (gunInInventory){
-    ChangeGunMessage changeGun {
-      .currentAmmo = ammoForGun(gun),
-      .gun = gun,
-    };
-    gameapi -> sendNotifyMessage("change-gun", changeGun);
+  if (!gunInInventory){
+    return std::nullopt;
   }
+  auto currentAmmo = ammoForGun(gun);
+  return GunInfo {
+    .ammo = currentAmmo,
+  };
 }
-
-

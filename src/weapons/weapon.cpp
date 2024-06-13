@@ -97,10 +97,23 @@ void handleActivateItem(objid playerId){
 
 void setZoom(bool);
 
+
+Weapons* weaponsPtr = NULL;
+void maybeChangeGun(std::string gun){
+  if (weaponsPtr == NULL){
+    return;
+  }
+  auto gunInfo = getGunInventoryInfo(gun);
+  if (gunInfo.has_value()){
+    changeGunAnimate(weaponsPtr -> weaponValues, gun, gunInfo.value().ammo, gameapi -> listSceneId(weaponsPtr -> playerId.value()), weaponsPtr -> playerId.value());
+  }
+}
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Weapons* weapons = new Weapons;
+    weaponsPtr = weapons; 
 
     weapons -> playerId = std::nullopt;
     weapons -> isHoldingLeftMouse = false;
@@ -117,6 +130,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     Weapons* weapons = static_cast<Weapons*>(data);
+    weaponsPtr = NULL;
     delete weapons;
   };
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
@@ -210,11 +224,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     Weapons* weapons = static_cast<Weapons*>(data);
-    if (key == "change-gun"){
-      auto changeGunMessage = anycast<ChangeGunMessage>(value); 
-      modassert(changeGunMessage != NULL, "change-gun value invalid");
-      changeGunAnimate(weapons -> weaponValues, changeGunMessage -> gun, changeGunMessage -> currentAmmo, gameapi -> listSceneId(id), weapons -> playerId.value());
-    }else if (key == "ammo"){
+    if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
       if (weapons -> playerId.has_value() && itemAcquiredMessage -> targetId == weapons -> playerId.value()){
