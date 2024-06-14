@@ -333,6 +333,10 @@ playerspawn:playerspawn:true
 playerspawn:position:250 50 -175
 playerspawn:teleport:true
 
+wires:mesh:../gameresources/build/uncategorized/darkwires.gltf
+wires:position:250 50 -400
+wires:scale:10 10 10
+
 [terminal:scene:../afterworld/scenes/prefabs/objects/terminal.rawscene
 [terminal:position:250 50 -175
 
@@ -347,10 +351,11 @@ playerspawn:teleport:true
 )pickup-scrapgun:physics:enabled
 )pickup-scrapgun:physics_type:dynamic
 #)pickup-scrapgun:physics_collision:nocollide
-)pickup-scrapgun:gunpickup:scrapgun
 
-)pickup-pistol:value:pistol
-)pickup-pistol:position:250 50 -175
+)pickup-scrapgun:spin:true
+)pickup-scrapgun:pickup:scrapgun
+
+
 
 poi_1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 poi_1:scale:0.25 0.05 1.25

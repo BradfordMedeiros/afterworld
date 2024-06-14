@@ -6,7 +6,6 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
   { "player", {
       { "gold",  100 },
       { "pistol",  30 },
-      { "scrapgun",  5 },
       { "fork",  100 },
       { "pistol-ammo", 50 },
       { "fork-ammo", 50 },
@@ -22,6 +21,9 @@ std::unordered_map<std::string, float>& defaultInventory(){
 }
 
 int currentItemCount(std::string name){
+  if (defaultInventory().find(name) == defaultInventory().end()){
+    return 0;
+  }
   return defaultInventory().at(name);
 }
 
