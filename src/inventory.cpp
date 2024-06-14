@@ -2,28 +2,31 @@
 
 extern CustomApiBindings* gameapi;
 
-
-std::unordered_map<std::string, float> loadInventory(){
-  return {};
-}
-
-std::unordered_map<std::string, float> inventoryCount {
-  { "gold",  100 },
-  { "pistol",  30 },
-  { "scrapgun",  5 },
-  { "fork",  100 },
-  { "pistol-ammo", 50 },
-  { "fork-ammo", 50 },
-  { "electrogun",  100 },
-  { "electrogun-ammo", 10000 },
+std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenameToInventory {
+  { "player", {
+      { "gold",  100 },
+      { "pistol",  30 },
+      { "scrapgun",  5 },
+      { "fork",  100 },
+      { "pistol-ammo", 50 },
+      { "fork-ammo", 50 },
+      { "electrogun",  100 },
+      { "electrogun-ammo", 10000 },
+    }
+  }
 };
 
+
+std::unordered_map<std::string, float>& defaultInventory(){
+  return scopenameToInventory.at("player");
+}
+
 int currentItemCount(std::string name){
-  return inventoryCount.at(name);
+  return defaultInventory().at(name);
 }
 
 void updateItemCount(std::string name, int count){
-  inventoryCount[name] = count;
+  defaultInventory()[name] = count;
 }
 
 
@@ -31,7 +34,7 @@ void updateItemCount(std::string name, int count){
 // Gun logic
 
 bool hasGun(std::string& gun){
-  return inventoryCount.find(gun) != inventoryCount.end();
+  return defaultInventory().find(gun) != defaultInventory().end();
 }
 
 std::string ammoNameForGun(std::string& gun){
@@ -40,10 +43,10 @@ std::string ammoNameForGun(std::string& gun){
 int ammoForGun(std::string& gun){
   std::cout << "gun is: " << gun << std::endl;
   std::string ammoName = ammoNameForGun(gun);
-  if (inventoryCount.find(ammoName) == inventoryCount.end()){
+  if (defaultInventory().find(ammoName) == defaultInventory().end()){
     return 0;
   }
-  return static_cast<int>(inventoryCount.at(ammoName));
+  return static_cast<int>(defaultInventory().at(ammoName));
 }
 
 
