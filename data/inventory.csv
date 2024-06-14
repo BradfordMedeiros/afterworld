@@ -1,9 +1,0 @@
-inventory.item:STRING,inventory.count:INT
-gold,100
-pistol,30
-scrapgun,100
-fork,100
-pistol-ammo,50
-fork-ammo,50
-electrogun,100
-electrogun-ammo,10000

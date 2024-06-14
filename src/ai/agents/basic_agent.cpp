@@ -167,9 +167,9 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
         .goaltype = getAmmoGoal,
         .goalData = NULL,
         .score = [&agent, &worldInfo, symbol, attackState](std::any&) -> int {
-
             if (attackState -> gunCore.has_value()){
-              auto currentAmmo = attackState -> gunCore.value().weaponState.currentAmmo;
+              //modassert(attackState -> gunCore.value().weaponCore, "weapon core is null tho");
+              auto currentAmmo = 100; //ammoForGun(attackState -> gunCore.value().weaponCore -> name);
               if (currentAmmo <= 0){
                 return 150;
               }

@@ -103,9 +103,8 @@ void maybeChangeGun(std::string gun){
   if (weaponsPtr == NULL){
     return;
   }
-  auto gunInfo = getGunInventoryInfo(gun);
-  if (gunInfo.has_value()){
-    changeGunAnimate(weaponsPtr -> weaponValues, gun, gunInfo.value().ammo, gameapi -> listSceneId(weaponsPtr -> playerId.value()), weaponsPtr -> playerId.value());
+  if (hasGun(gun)){
+    changeGunAnimate(weaponsPtr -> weaponValues, gun, ammoForGun(gun), gameapi -> listSceneId(weaponsPtr -> playerId.value()), weaponsPtr -> playerId.value());
   }
 }
 

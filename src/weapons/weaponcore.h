@@ -65,7 +65,6 @@ enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponState {
   float lastShootingTime;
   float recoilStart;
-  int currentAmmo;
   GunAnimation gunState;
 };
 

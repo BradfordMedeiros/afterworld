@@ -222,13 +222,8 @@ GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId){
   WeaponState newState {
     .lastShootingTime = -1.f * weaponCore -> weaponParams.firingRate, // so you can shoot immediately
     .recoilStart = 0.f,
-    .currentAmmo = ammo,
     .gunState = GUN_RAISED,
   };
-  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
-    .currentAmmo = newState.currentAmmo,
-    .totalAmmo = weaponCore -> weaponParams.totalAmmo,
-  });
 
   GunCore gunCore {
     .weaponCore = weaponCore,
@@ -287,8 +282,9 @@ void deliverAmmo(GunCore& _gunCore, int ammo){
   if (!_gunCore.weaponCore){
     return;
   }
-  _gunCore.weaponState.currentAmmo += ammo;
-  setUIAmmoCount(_gunCore.weaponState.currentAmmo, _gunCore.weaponCore -> weaponParams.totalAmmo);
+  auto oldAmmo = ammoForGun(_gunCore.weaponCore -> name);
+  setGunAmmo(_gunCore.weaponCore -> name, oldAmmo + ammo);
+  setUIAmmoCount(ammoForGun(_gunCore.weaponCore -> name), _gunCore.weaponCore -> weaponParams.totalAmmo);
 }
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
@@ -392,16 +388,12 @@ bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCo
   if (!canFireGun){
     return false;
   }
-  bool hasAmmo = gunCore.weaponState.currentAmmo > 0;
+  bool hasAmmo = ammoForGun(gunCore.weaponCore -> name) > 0;
   if (!hasAmmo){
     modlog("weapons", "no ammo, tried to fire, should play sound");
     return false;
   }
   deliverAmmo(gunCore, -1);
-  gameapi -> sendNotifyMessage("current-gun", CurrentGunMessage {
-    .currentAmmo = gunCore.weaponState.currentAmmo,
-    .totalAmmo = gunCore.weaponCore -> weaponParams.totalAmmo,
-  });
 
   if (gunCore.weaponCore -> soundResource.has_value()){
     playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos);

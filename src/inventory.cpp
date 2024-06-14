@@ -2,70 +2,52 @@
 
 extern CustomApiBindings* gameapi;
 
-std::unordered_map<int, float> inventoryCount {};
+
+std::unordered_map<std::string, float> loadInventory(){
+  return {};
+}
+
+std::unordered_map<std::string, float> inventoryCount {
+  { "gold",  100 },
+  { "pistol",  30 },
+  { "scrapgun",  5 },
+  { "fork",  100 },
+  { "pistol-ammo", 50 },
+  { "fork-ammo", 50 },
+  { "electrogun",  100 },
+  { "electrogun-ammo", 10000 },
+};
 
 int currentItemCount(std::string name){
-  auto query = gameapi -> compileSqlQuery(std::string("select item, count from inventory where item = ") +  name, {});
-	bool validSql = false;
-	auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  modassert(result.size() == 0 || result.size() == 1, "more than 1 entry for item exists");
-
-  if (result.size() == 0){
-   	auto insertQuery = gameapi -> compileSqlQuery(
-  	  std::string("insert into inventory (item, count) values (") +  name + ", 0)",
-      {}
-  	);
-
-		bool validSql = false;
-	  gameapi -> executeSqlQuery(insertQuery, &validSql);
-  	modassert(validSql, "error executing sql query");	
-  }
-
-  auto count = result.size() == 0 ? 0 : std::atoi(result.at(0).at(1).c_str());
-	return count;
+  return inventoryCount.at(name);
 }
 
 void updateItemCount(std::string name, int count){
-  auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update inventory set count = " + std::to_string(count) + " where item = " + name),
-    {}
-  );
-	bool validSql = false;
-	auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-  modassert(validSql, "error executing sql query");
+  inventoryCount[name] = count;
 }
 
+
+///////////////////
+// Gun logic
+
 bool hasGun(std::string& gun){
-  auto query = gameapi -> compileSqlQuery("select count from inventory where item = ?", { gun });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.size() > 0;
+  return inventoryCount.find(gun) != inventoryCount.end();
+}
+
+std::string ammoNameForGun(std::string& gun){
+  return gun + "-ammo";
 }
 int ammoForGun(std::string& gun){
-  auto query = gameapi -> compileSqlQuery("select count from inventory where item = ?", { gun + "-ammo" });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  if (result.size() == 0){
+  std::cout << "gun is: " << gun << std::endl;
+  std::string ammoName = ammoNameForGun(gun);
+  if (inventoryCount.find(ammoName) == inventoryCount.end()){
     return 0;
   }
-  return std::atoi(result.at(0).at(0).c_str());
+  return static_cast<int>(inventoryCount.at(ammoName));
 }
 
 
 void setGunAmmo(std::string gun, int currentAmmo){
-  updateItemCount(gun + "-ammo", currentAmmo);
+  updateItemCount(ammoNameForGun(gun), currentAmmo);
 }
 
-std::optional<GunInfo> getGunInventoryInfo(std::string gun){
-  auto gunInInventory = hasGun(gun);
-  if (!gunInInventory){
-    return std::nullopt;
-  }
-  auto currentAmmo = ammoForGun(gun);
-  return GunInfo {
-    .ammo = currentAmmo,
-  };
-}
