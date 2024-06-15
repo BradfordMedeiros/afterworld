@@ -1,6 +1,8 @@
 #include "./collision.h"
 
 extern CustomApiBindings* gameapi;
+void doDamageMessage(objid targetId, float damage);
+
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -86,11 +88,7 @@ void handleDamageCollision(objid obj1, objid obj2){
     auto objAttr1 = getAttrHandle(obj1);
     auto damageAmount = getFloatAttr(objAttr1, "touch-damage");
     if (damageAmount.has_value()){
-      DamageMessage damageMessage {
-        .id = obj2,
-        .amount = damageAmount.value(),
-      };
-      gameapi -> sendNotifyMessage("damage", damageMessage);
+      doDamageMessage(obj2, damageAmount.value());
       gameapi -> removeByGroupId(obj1);
     }
   }
@@ -99,11 +97,7 @@ void handleDamageCollision(objid obj1, objid obj2){
     auto objAttr2 = getAttrHandle(obj2);
     auto damageAmount2 = getFloatAttr(objAttr2, "touch-damage");
     if (damageAmount2.has_value()){
-      DamageMessage damageMessage {
-        .id = obj1,
-        .amount = damageAmount2.value(),
-      };
-      gameapi -> sendNotifyMessage("damage", damageMessage);
+      doDamageMessage(obj1, damageAmount2.value());
       gameapi -> removeByGroupId(obj2);
     }
   }
@@ -128,22 +122,14 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
       auto attr = getAttrHandle(obj1);
       auto collideDamage = getFloatAttr(attr, "collide_damage"); 
       if (collideDamage.has_value()){
-        DamageMessage damageMessage {
-          .id = obj1,
-          .amount = collideDamage.value(),
-        };
-        gameapi -> sendNotifyMessage("damage", damageMessage);      
+        doDamageMessage(obj1, collideDamage.value());   
       }
     }
     {
       auto attr = getAttrHandle(obj2);
       auto collideDamage = getFloatAttr(attr, "collide_damage"); 
       if (collideDamage.has_value()){
-        DamageMessage damageMessage {
-          .id = obj2,
-          .amount = collideDamage.value(),
-        };
-        gameapi -> sendNotifyMessage("damage", damageMessage);      
+        doDamageMessage(obj2, collideDamage.value());   
       }
     }
 

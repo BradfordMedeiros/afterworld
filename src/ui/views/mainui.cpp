@@ -762,7 +762,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
   bool showTerminal = false;
-  if (showTerminal){
+  if (uiContext.showTerminal()){
     auto terminalProps = getDefaultProps();
     terminalComponent.draw(drawTools, terminalProps);    
   }

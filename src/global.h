@@ -17,6 +17,9 @@ struct GlobalState {
   bool showConsole;
   bool showGameHud;
 
+  bool showTerminal;
+  float lastToggleTerminalTime;
+
   float xNdc;
   float yNdc;
   glm::vec2 texCoordUv;
@@ -55,5 +58,5 @@ bool middleMouseDown();
 
 bool showConsole();
 void setShowConsole(bool showConsole);
-
+void setShowTerminal(bool showTerminal);
 #endif 

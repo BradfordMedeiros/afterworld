@@ -8,6 +8,8 @@ GlobalState global {
   .showScreenspaceGrid = false,
   .showConsole = false,
   .showGameHud = false,
+  .showTerminal = false,
+  .lastToggleTerminalTime = 0.f,
   .xNdc = 0.f,
   .yNdc = 0.f,
   .texCoordUv = glm::vec2(0.f, 0.f),
@@ -221,4 +223,16 @@ void setShowConsole(bool showConsole){
   }
   global.showConsole = showConsole;
   updateState();
+}
+
+void setShowTerminal(bool showTerminal){
+  if (showTerminal == getGlobalState().showTerminal){
+    return;
+  }
+  auto currTime = gameapi -> timeSeconds(false);
+  if (currTime - getGlobalState().lastToggleTerminalTime > 0.1f){
+    getGlobalState().lastToggleTerminalTime = currTime;
+    getGlobalState().showTerminal = showTerminal;
+    updateState();
+  }
 }

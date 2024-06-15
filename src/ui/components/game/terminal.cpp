@@ -31,7 +31,7 @@ TerminalDisplayOptions terminalOptions {
 
 Component terminalComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt);
 
     for (int i = 0; i < testTerminal.pages.at(terminalOptions.pageIndex).size(); i++){
       std::string& text = testTerminal.pages.at(terminalOptions.pageIndex).at(i);

@@ -14,6 +14,7 @@ int fireButton = 0;
 int aimButton = 1;
 int modifierButton = 'I';  // shift
 int teleportButton = 'T';
+int exitTerminalButton = 'E';
 
 void setControl(int controlSymbol, int key){
 	static int jumpSymbol = getSymbol("control-jump");
@@ -28,6 +29,7 @@ void setControl(int controlSymbol, int key){
 	static int aimSymbol = getSymbol("control-aim");
 	static int modifierSymbol = getSymbol("control-modifier");
 	static int teleportSymbol = getSymbol("control-teleport");
+	static int exitTerminalSymbol = getSymbol("control-exit-terminal");
 
 	if (controlSymbol == jumpSymbol){
 		jumpKey = key;
@@ -51,6 +53,8 @@ void setControl(int controlSymbol, int key){
 		modifierButton = key;
 	}else if (controlSymbol == teleportSymbol){
 		teleportButton = key;
+	}else if (controlSymbol == exitTerminalSymbol){
+		exitTerminalSymbol = key;
 	}else {
 		modassert(false, std::string("invalid control symbol: ") + nameForSymbol(controlSymbol));
 	}
@@ -95,6 +99,9 @@ bool isModifierButton(int button){
 }
 bool isTeleportButton(int button){
 	return button == teleportButton;
+}
+bool isExitTerminalKey(int button){
+	return button == exitTerminalButton;
 }
 
 struct HotkeyToMessage {

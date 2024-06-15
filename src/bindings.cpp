@@ -263,6 +263,7 @@ UiContext getUiContext(GameState& gameState){
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .showGameHud = []() -> bool { return getGlobalState().showGameHud; },
+   .showTerminal = []() -> bool { return getGlobalState().showTerminal; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);
@@ -329,11 +330,7 @@ UiContext getUiContext(GameState& gameState){
       .die = []() -> void {
         auto activePlayerId = getActivePlayerId();
         if (activePlayerId.has_value()){
-          DamageMessage damageMessage {
-            .id = activePlayerId.value(),
-            .amount = 100000.f,
-          };
-          gameapi -> sendNotifyMessage("damage", damageMessage);      
+          doDamageMessage(activePlayerId.value(), 10000.f);   
         }
       },
     },
@@ -432,19 +429,22 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
     if (action == 1){
+      auto playerId = getActivePlayerId();
       if (isPauseKey(key)){
         togglePauseIfInGame();
       }
       if (isTeleportButton(key)){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
         // maybe raycast down, and then set the position so it fits 
-        auto playerId = getActivePlayerId();
         auto teleportPosition = getTeleportPosition();
         if (playerId.has_value() && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
           gameapi -> setGameObjectPosition(playerId.value(), teleportPosition.value().position, true);
           gameapi -> removeByGroupId(teleportPosition.value().id);
         }
+      }
+      if (isExitTerminalKey(key)){
+        setShowTerminal(false);
       }
       onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
     }
@@ -510,10 +510,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       spawnFromAllSpawnpoints("red", strValue -> c_str());
     }
 
-    if (key == "hud-health"){
-      auto floatValue = anycast<float>(value);
-      modassert(floatValue != NULL, "hud-health value invalid");
-      setUiHealth(*floatValue);
+    if (key == "terminal" && !getGlobalState().showTerminal){
+      setShowTerminal(true);
     }
 
     onCutsceneMessages(key);

@@ -1,6 +1,8 @@
 #include "./weaponcore.h"
 
 extern CustomApiBindings* gameapi;
+void doDamageMessage(objid targetId, float damage);
+
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -371,12 +373,9 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
-    
-    DamageMessage damageMessage {
-      .id = hitpoint.id,
-      .amount = gunCore.weaponCore -> weaponParams.damage,
-    };
-    gameapi -> sendNotifyMessage("damage", damageMessage);
+
+    doDamageMessage(hitpoint.id, gunCore.weaponCore -> weaponParams.damage);
+
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
 }

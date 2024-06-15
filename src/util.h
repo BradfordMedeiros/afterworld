@@ -49,16 +49,6 @@ void showDebugHitmark(HitObject& hitpoint, objid playerId);
 
 void debugAssertForNow(bool valid, const char* message);
 
-struct DamageMessage {
-  objid id;
-  float amount;
-};
-
-struct NoHealthMessage {
-  objid targetId;
-  std::optional<std::string> team;
-};
-
 struct HealthChangeMessage {
 	objid targetId;
 	std::optional<objid> originId;

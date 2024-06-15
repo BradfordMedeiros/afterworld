@@ -2,12 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-struct HitPoints {
-	float current;
-	float total;
-	std::optional<std::string> eventName;
-};
-
 struct CurrentPlayingData {
 	objid id;
 	objid sceneId;
@@ -29,7 +23,6 @@ struct OpenableType {
 };
 
 struct Tags {
-	std::unordered_map<objid, HitPoints> hitpoints;
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
 	InGameUi inGameUi;
@@ -48,6 +41,8 @@ struct TagUpdater {
 	std::optional<std::function<void(Tags&, std::string& key, std::any& value)>> onMessage;
 };
 
+Tags* tagsPtr = NULL;
+
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
 		modlog("tags", "scroll object: " + std::to_string(id));
@@ -62,39 +57,6 @@ void handleScroll(std::set<objid>& textureScrollObjIds){
 		offset.y += scrollSpeed.y;
 		setGameObjectTextureOffset(id, offset);
 	}
-}
-
-void addEntityIdHitpoints(std::unordered_map<objid, HitPoints>& hitpoints, objid id){
-	if (hitpoints.find(id) != hitpoints.end()){
-		return;
-	}
-	auto totalHealth = getSingleFloatAttr(id, "health");
-	if (totalHealth.has_value()){
-		auto healthPoints = totalHealth.value();
-		hitpoints[id] = HitPoints {
-			.current = healthPoints,
-			.total = healthPoints,
-			.eventName = "hud-health",
-		};
-	}
-}
-
-bool doDamage(Tags& tags, objid id, float amount, bool* _enemyDead, std::optional<std::string>** _eventName, float* _remainingHealth){
-	if (tags.hitpoints.find(id) == tags.hitpoints.end()){
-		modlog("health", "not an enemy with tracked health: " + std::to_string(id) + ", " + gameapi -> getGameObjNameForId(id).value());
-		return false;
-	}
-	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
-
-	auto activePlayerId = getActivePlayerId();
-	float adjustedDamageAmount = (getGlobalState().godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
-
-	auto newHealthAmount = tags.hitpoints.at(id).current - adjustedDamageAmount;
-	tags.hitpoints.at(id).current = newHealthAmount;
-	*_enemyDead = newHealthAmount <= 0;
-	*_eventName = &tags.hitpoints.at(id).eventName;
-	*_remainingHealth = newHealthAmount;
-	return true;
 }
 
 objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
@@ -114,7 +76,6 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
     submodelAttributes
   ).value();
 }
-
 
 std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
@@ -150,7 +111,6 @@ std::vector<TagUpdater> tagupdates = {
   		}
   	},
 	},
-
 	TagUpdater {
 		.attribute = "open",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
@@ -213,8 +173,6 @@ std::vector<TagUpdater> tagupdates = {
 	  	}
   	},
 	},
-
-
 	TagUpdater {
 		.attribute = "scrollspeed",
 		.onAdd = [](void* data, int32_t id, glm::vec3 value) -> void {
@@ -237,87 +195,15 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](void* data, int32_t id, float value) -> void {
   		Tags* tags = static_cast<Tags*>(data);
  			modlog("health", "entity added: " + std::to_string(id));
- 			addEntityIdHitpoints(tags -> hitpoints, id);
+ 			addEntityIdHitpoints(id);
   	},
   	.onRemove = [](void* data, int32_t id) -> void {
   		Tags* tags = static_cast<Tags*>(data);
 			modlog("health", "entity removed: " + std::to_string(id));
-			if (tags -> hitpoints.find(id) == tags -> hitpoints.end()){
-				return;
-			}
-			tags -> hitpoints.erase(id);
+			removeEntityIdHitpoints(id);
   	},
   	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		if (key == "damage"){
-      	DamageMessage* dMessage = anycast<DamageMessage>(value);
-	    	modassert(dMessage, "dMessage was null");
-
-      	auto targetId = dMessage -> id;
-      	modlog("health", "got damange for: " + std::to_string(targetId));
-      	auto floatValue = &dMessage -> amount;
-      	bool enemyDead = false;
-      	std::optional<std::string>* eventName = NULL;
-      	float remainingHealth = 0.f;
-      	bool valid = doDamage(tags, targetId, *floatValue, &enemyDead, &eventName, &remainingHealth);
-
-
-
-      	auto healthBehavior = getSingleAttr(targetId, "health-behavior");
-      	if (valid && enemyDead && healthBehavior.has_value() && healthBehavior.value() == "make-dynamic"){
-      		setGameObjectPhysicsDynamic(targetId);
-      		return;
-      	}
-
-
-      	NoHealthMessage nohealth {
-      		.targetId = targetId,
-      		.team = getSingleAttr(targetId, "team"),
-      	};
-
-      	if (valid && enemyDead){
-      		gameapi -> sendNotifyMessage("nohealth", nohealth); // why don't i just...remove it directly? 
-      	}
-      	if (valid && eventName -> has_value()){
-      		gameapi -> sendNotifyMessage(eventName -> value(), remainingHealth);
-      	}
-
-				HealthChangeMessage healthMessage {
-					.targetId = targetId,
-					.originId = std::nullopt,
-					.damageAmount = *floatValue,
-					.remainingHealth = remainingHealth,
-				};
-     		gameapi -> sendNotifyMessage("health-change", healthMessage);
-
-      }else if (key == "nohealth"){
-      	auto nohealthMessage = anycast<NoHealthMessage>(value);
-      	modassert(nohealthMessage, "nohealth target id null");
-      	modlog("health", "removing object: " + std::to_string(nohealthMessage -> targetId));
-      	auto removeType = getSingleAttr(nohealthMessage -> targetId, "health-remove");
-      	if (removeType.has_value() && removeType.value() == "self"){
-      		// check if the parent of the group of id has no children, if so delete it 
-      		auto allChildren = gameapi -> idsInGroupById(nohealthMessage -> targetId);
-      		auto groupId = gameapi -> groupId(nohealthMessage -> targetId);
-      		gameapi -> removeObjectById(nohealthMessage -> targetId);
-      		if (allChildren.size() == 2){
-      			if (allChildren.at(0) == nohealthMessage -> targetId){
-      				auto healthCleanup = getSingleAttr(allChildren.at(1), "health-cleanup");
-      				if (healthCleanup.has_value() && healthCleanup.value() == "no-children"){
-      					gameapi -> removeByGroupId(groupId);
-      				}
-      			}else if (allChildren.at(1) == nohealthMessage -> targetId){
-      				auto healthCleanup = getSingleAttr(allChildren.at(0), "health-cleanup");
-      				if (healthCleanup.has_value() && healthCleanup.value() == "no-children"){
-      					gameapi -> removeByGroupId(groupId);
-      				}
-      			}
-      		}
-      	}else{
-	      	gameapi -> removeByGroupId(nohealthMessage -> targetId);
-      	}
-      }
-  	},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "game-control",
@@ -454,7 +340,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "in-game-ui",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
@@ -521,13 +406,8 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
 	},
-	
-
-
 };
 
-
-Tags* tagsPtr = NULL;
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	  auto binding = createCScriptBinding(name, api);
@@ -551,7 +431,6 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     Tags* tags = new Tags;
     tagsPtr = tags;
 
-    tags -> hitpoints = {};
     tags -> textureScrollObjIds = {};
     tags -> audiozones = AudioZones {
     	.audiozoneIds = {},

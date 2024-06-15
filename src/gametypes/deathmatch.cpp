@@ -19,9 +19,8 @@ std::string* getWinner(DeathmatchMode& mode){
 	return NULL;
 }
 
-std::optional<int> lookupTeam(DeathmatchMode& deathmatchMode, NoHealthMessage& message){
+std::optional<int> lookupTeam(DeathmatchMode& deathmatchMode, std::optional<std::string> team){
 	//std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
-	auto team = message.team;
 	if (team.has_value()){
 		auto teamName = team.value();
 		for (int i = 0; i < deathmatchMode.teamNames.size(); i++){
@@ -58,16 +57,16 @@ GameTypeInfo getDeathmatchMode(){
 	    }; 
 	  },
 	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
-	    DeathmatchMode* deathmatchMode = std::any_cast<DeathmatchMode>(&gametype);
-	    modassert(deathmatchMode, "deatchmatchMode mode null");
-	    if (event == "nohealth"){
-      	auto nohealthMessage = anycast<NoHealthMessage>(value);
-      	modassert(nohealthMessage, "deathmatch nohealth target id null");
-	      auto teamId = lookupTeam(*deathmatchMode, *nohealthMessage);
-	      if (teamId.has_value()){
-	      	deathmatchMode -> scores.at(teamId.value())++;
-	      }
-	    }
+	    //DeathmatchMode* deathmatchMode = std::any_cast<DeathmatchMode>(&gametype);
+	    //modassert(deathmatchMode, "deatchmatchMode mode null");
+	    //if (event == "nohealth"){
+      //	auto nohealthMessage = anycast<NoHealthMessage>(value);
+      //	modassert(nohealthMessage, "deathmatch nohealth target id null");
+	    //  auto teamId = lookupTeam(*deathmatchMode, *nohealthMessage);
+	    //  if (teamId.has_value()){
+	    //  	deathmatchMode -> scores.at(teamId.value())++;
+	    //  }
+	    //}
 	   	return false;
 	  },
 	  .getDebugText = [](std::any& gametype) -> std::string {
