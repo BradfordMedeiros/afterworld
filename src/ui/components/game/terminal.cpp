@@ -33,14 +33,12 @@ TerminalDisplayType terminalDisplay = TerminalText {
 
 Component terminalComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.99f), std::nullopt, true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt);
-
     auto terminalImagePtr = std::get_if<TerminalImage>(&terminalDisplay);
     auto terminalImageLeftTextRightPtr = std::get_if<TerminalImageLeftTextRight>(&terminalDisplay);
     auto terminalTextPtr = std::get_if<TerminalText>(&terminalDisplay);
     modassert(terminalImagePtr || terminalImageLeftTextRightPtr || terminalTextPtr, "invalid terminal type");
 
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.99f), std::nullopt, true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt);
     if (terminalImagePtr){
       drawTools.drawRect(0.f, 0.f, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, terminalImagePtr -> image, std::nullopt);
     }else if (terminalImageLeftTextRightPtr){
@@ -51,22 +49,9 @@ Component terminalComponent {
       static float initialTime = gameapi -> timeSeconds(true);
       auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - initialTime) * 100.f);
       auto textSubtr = terminalTextPtr -> text.substr(0, currIndex);
-      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-      drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 1.f);
+      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.f, 0.f, 0.f, 0.7f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 100.f);
     }
-
-    //modassert(terminalOptions.has_value(), "terminal options does not have a value");
-    //TerminalDisplayOptions& terminalOpts = terminalOptions.value();
-    //for (int i = 0; i < testTerminal.pages.at(terminalOpts.pageIndex).size(); i++){
-    //  std::string& text = testTerminal.pages.at(terminalOpts.pageIndex).at(i);
-    //  static float initialTime = gameapi -> timeSeconds(true);
-    //  auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - initialTime) * 10.f);
-    //  auto textSubtr = text.substr(0, currIndex);
-    //  modlog("terminal", std::string("draw text: ") + std::to_string(i));
-    //  drawCenteredTextReal(drawTools, textSubtr, 0.f, 0.4f + i * 0.1f, 0.04f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
-    //}
-
-
   	return BoundingBox2D {
       .x = 0.f,
       .y = 0.f,

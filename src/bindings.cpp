@@ -511,7 +511,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == "terminal" && !getGlobalState().showTerminal){
-      playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
       setShowTerminal(true);
     }
 

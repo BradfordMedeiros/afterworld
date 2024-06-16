@@ -50,7 +50,7 @@ void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landCli
     sounds.moveSoundObjId = createSound(sceneId, ("&code-move") + uniqueNameSuffix(), moveClip);
   }
 
-  std::string activateClip = moveClip;
+  std::string activateClip = "../gameresources/sound/click.wav";
   if (activateClip != ""){
     if (sounds.activateSoundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.activateSoundObjId.value());
