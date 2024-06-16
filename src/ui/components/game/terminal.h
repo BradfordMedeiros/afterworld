@@ -16,6 +16,7 @@ struct TerminalText {
 };
 typedef std::variant<TerminalImage, TerminalImageLeftTextRight, TerminalText> TerminalDisplayType;
 struct TerminalConfig {
+	int pageIndex;
 	TerminalDisplayType terminalDisplay;
 };
 
