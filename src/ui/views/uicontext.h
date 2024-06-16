@@ -18,13 +18,14 @@ struct PauseInterface {
   std::function<void()> resume;
 };
 
+struct TerminalConfig;
 struct UiContext {
   std::function<bool()> isDebugMode;
   std::function<bool()> showEditor;
   std::function<bool()> showConsole;
   std::function<bool()> showScreenspaceGrid;
   std::function<bool()> showGameHud;
-  std::function<bool()> showTerminal;
+  std::function<std::optional<TerminalConfig>()> showTerminal;
   LevelUIInterface levels;
   PauseInterface pauseInterface;
   WorldPlayInterface worldPlayInterface;
