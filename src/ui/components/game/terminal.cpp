@@ -46,12 +46,13 @@ Component terminalComponent {
     }else if (terminalImageLeftTextRightPtr){
       drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.4f, 0.4f, 0.8f, 1.f), std::nullopt, true, std::nullopt, terminalImageLeftTextRightPtr -> image, std::nullopt);
       drawTools.drawRect(0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.9f), std::nullopt, true, std::nullopt, terminalImageLeftTextRightPtr -> image, std::nullopt);
-      drawRightText(drawTools, terminalImageLeftTextRightPtr -> text, 0.f, 0.4f, 0.02f, terminalFontColor, std::nullopt);
+      drawRightText(drawTools, terminalImageLeftTextRightPtr -> text, 0.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, std::nullopt);
     }else if (terminalTextPtr){
       static float initialTime = gameapi -> timeSeconds(true);
       auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - initialTime) * 100.f);
       auto textSubtr = terminalTextPtr -> text.substr(0, currIndex);
-      drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt);
+      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 1.f);
     }
 
     //modassert(terminalOptions.has_value(), "terminal options does not have a value");

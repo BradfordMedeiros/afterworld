@@ -240,7 +240,7 @@ CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
     }
     AiData* aiData = static_cast<AiData*>(data);
     onAiFrame(*aiData);
-    gameapi -> drawText("agents: " + std::to_string(aiData -> agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+    gameapi -> drawText("agents: " + std::to_string(aiData -> agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {

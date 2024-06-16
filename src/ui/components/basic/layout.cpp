@@ -13,6 +13,7 @@ struct BufferedText {
 	bool ndi;
 	std::optional<std::string> fontFamily;
 	std::optional<objid> selectionId;
+	std::optional<float> maxWidth;
 };
 struct BufferedRect {
 	int drawOrder;
@@ -52,7 +53,7 @@ struct BufferedDrawingTools {
 };
 void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, DrawingTools& realTools){
 	DrawingTools drawTools {};
-  drawTools.drawText = [&bufferedDrawingTools](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId) -> void {
+  drawTools.drawText = [&bufferedDrawingTools](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth) -> void {
   	bufferedDrawingTools.bufferedData.bufferedText.push_back(BufferedText{
  			.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
  			.word = word,
@@ -65,6 +66,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
 			.ndi = ndi,
 			.fontFamily = fontFamily,
 			.selectionId = selectionId,
+			.maxWidth = maxWidth,
   	});
   };
   drawTools.getTextDimensionsNdi = realTools.getTextDimensionsNdi;
@@ -124,7 +126,7 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	for (int i = 0; i < bufferedTools.bufferedData.bufferedIndex; i++){
 		if (bufferedTools.bufferedData.bufferedText.size() > bufferedTextIndex && bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex).drawOrder == i){
 			BufferedText& bufferedText = bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex);
-			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId);
+			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId, bufferedText.maxWidth);
 			bufferedTextIndex++;
 		}else if(bufferedTools.bufferedData.bufferedRect.size() > bufferedRectIndex && bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex).drawOrder == i){
 			BufferedRect& bufferedRect = bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex);

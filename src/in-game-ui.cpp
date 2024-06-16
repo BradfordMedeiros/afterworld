@@ -36,7 +36,7 @@ void onInGameUiFrame(InGameUi& inGameUi){
 			std::cout << "text: " << width << ", " << height << std::endl;
 
 			gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
-			gameapi -> drawText(textDisplay.text, textDisplay.textPosition.x - (width * 0.5f), textDisplay.textPosition.y, 40, false, std::nullopt /*tint */, textDisplay.textureId, true, std::nullopt, std::nullopt);
+			gameapi -> drawText(textDisplay.text, textDisplay.textPosition.x - (width * 0.5f), textDisplay.textPosition.y, 40, false, std::nullopt /*tint */, textDisplay.textureId, true, std::nullopt, std::nullopt, std::nullopt);
 			textDisplay.needsRefresh = false;
 
 			auto uvCoord = getGlobalState().texCoordUvView;

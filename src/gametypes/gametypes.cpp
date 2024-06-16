@@ -70,9 +70,9 @@ CScriptBinding gametypesBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameTypes* gametype = static_cast<GameTypes*>(data);
     if (!gametype -> meta){
-      gameapi -> drawText("gametype: no gametype", -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+      gameapi -> drawText("gametype: no gametype", -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
     }else{
-      gameapi -> drawText("gametype: " + gametype -> meta -> getDebugText(gametype -> gametype), -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt);
+      gameapi -> drawText("gametype: " + gametype -> meta -> getDebugText(gametype -> gametype), -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
     }
   };
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
