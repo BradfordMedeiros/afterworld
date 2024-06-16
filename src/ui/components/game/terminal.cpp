@@ -50,7 +50,7 @@ Component terminalComponent {
       auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - initialTime) * 100.f);
       auto textSubtr = terminalTextPtr -> text.substr(0, currIndex);
       drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.f, 0.f, 0.f, 0.7f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-      drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 100.f);
+      drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 1.f);
     }
   	return BoundingBox2D {
       .x = 0.f,
