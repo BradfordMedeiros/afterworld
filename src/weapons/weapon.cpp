@@ -64,9 +64,12 @@ bool getIsGunZoomed(){
   return isGunZoomed;
 }
 
-void changeWeaponTargetId(Weapons& weapons, objid id){
-  weapons.playerId = id;
-  reloadTraitsValues(weapons);
+Weapons* weaponsPtr = NULL;
+
+void changeWeaponTargetId(objid id){
+  modassert(weaponsPtr, "weaponsptr is null");
+  weaponsPtr -> playerId = id;
+  reloadTraitsValues(*weaponsPtr);
   //changeGun(weapons, id, gameapi -> listSceneId(id), "pistol", 10);
 }
 
@@ -97,7 +100,6 @@ void handleActivateItem(objid playerId){
 void setZoom(bool);
 
 
-Weapons* weaponsPtr = NULL;
 void maybeChangeGun(std::string gun){
   if (weaponsPtr == NULL){
     return;
@@ -232,12 +234,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
       reloadTraitsValues(*weapons);
-    }else if (key == "active-player-change"){
-      Weapons* weapons = static_cast<Weapons*>(data);
-      auto objIdValue = anycast<objid>(value); 
-      modassert(objIdValue != NULL, "weapons - request change control value invalid");
-      std::cout << "weapons want to change value: " << objIdValue << std::endl;
-      changeWeaponTargetId(*weapons, *objIdValue);
     }
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {

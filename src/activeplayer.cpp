@@ -64,6 +64,7 @@ void setActivePlayer(std::optional<objid> id){
   gameapi -> sendNotifyMessage("ai-deactivate", id.value());
 	controlledPlayer.activePlayerId = id.value();
 	setActiveMovementEntity(getMovementData(), id.value(), newCameraId);
+	changeWeaponTargetId(id.value());
 }
 
 void setActivePlayerNext(){

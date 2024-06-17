@@ -57,7 +57,6 @@ void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, s
     },
   };
   changeTargetId(*movementPtr, id);
-  gameapi -> sendNotifyMessage("active-player-change", id); 
 }
 
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData){

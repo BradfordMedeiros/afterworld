@@ -12,6 +12,7 @@
 
 bool getIsGunZoomed();
 void maybeChangeGun(std::string gun);
+void changeWeaponTargetId(objid id);
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
 
