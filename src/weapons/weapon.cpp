@@ -109,6 +109,13 @@ void maybeChangeGun(std::string gun){
   }
 }
 
+void deliverAmmoToCurrentGun(objid targetId, int amount){
+  modassert(weaponsPtr, "weaponsptr is null");
+  if (weaponsPtr -> playerId.has_value() && targetId == weaponsPtr -> playerId.value()){
+    deliverAmmo(weaponsPtr -> weaponValues.gunCore, amount);
+  }
+}
+
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
@@ -223,13 +230,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     Weapons* weapons = static_cast<Weapons*>(data);
-    if (key == "ammo"){
-      auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
-      modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      if (weapons -> playerId.has_value() && itemAcquiredMessage -> targetId == weapons -> playerId.value()){
-        deliverAmmo(weapons -> weaponValues.gunCore, itemAcquiredMessage -> amount);
-      }
-    }else if (key == "save-gun"){
+    if (key == "save-gun"){
       saveGunTransform(weapons -> weaponValues);
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
