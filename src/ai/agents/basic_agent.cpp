@@ -283,30 +283,23 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }
 }
 
-void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
-  // i prefer ai to just defer to some static ammo management system, but messaging ok for now
-
-  if(key == "ammo"){
-    auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
-    modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-    if (itemAcquiredMessage -> targetId == agent.id){
-      AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
-      modassert(attackState, "attackState invalid");
-      if (attackState -> gunCore.has_value()){
-        deliverAmmo(attackState -> gunCore.value(), itemAcquiredMessage -> amount);
-      }
+void onAiAmmo(Agent& agent, objid targetId, int amount){
+  if (targetId == agent.id){
+    AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+    modassert(attackState, "attackState invalid");
+    if (attackState -> gunCore.has_value()){
+      deliverAmmo(attackState -> gunCore.value(), amount);
     }
-  }else if (key == "health-change"){
-    auto healthChangeMessage = anycast<HealthChangeMessage>(value);
-    modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");    
-    if (healthChangeMessage -> targetId == agent.id){
-      AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
-      modassert(attackState, "attackState invalid");
-      attackState -> aggravated = true;
-      float currHealthPercentage = healthChangeMessage -> remainingHealth / attackState -> initialHealth;
-      if (currHealthPercentage < 0.2f){
-        attackState -> scared = true;
-      }
+  }
+}
+void onAiHealthChange(Agent& agent, objid targetId, float remainingHealth){
+  if (targetId == agent.id){
+    AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
+    modassert(attackState, "attackState invalid");
+    attackState -> aggravated = true;
+    float currHealthPercentage = remainingHealth / attackState -> initialHealth;
+    if (currHealthPercentage < 0.2f){
+      attackState -> scared = true;
     }
   }
 }
