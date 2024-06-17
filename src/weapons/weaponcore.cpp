@@ -280,13 +280,10 @@ void removeGun(GunInstance& weaponValues){
 
 
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
-void deliverAmmo(GunCore& _gunCore, int ammo){
-  if (!_gunCore.weaponCore){
-    return;
-  }
-  auto oldAmmo = ammoForGun(_gunCore.weaponCore -> name);
-  setGunAmmo(_gunCore.weaponCore -> name, oldAmmo + ammo);
-  setUIAmmoCount(ammoForGun(_gunCore.weaponCore -> name), _gunCore.weaponCore -> weaponParams.totalAmmo);
+void deliverAmmo(std::string gunName, int ammo, int totalAmmo){
+  auto oldAmmo = ammoForGun(gunName);
+  setGunAmmo(gunName, oldAmmo + ammo);
+  setUIAmmoCount(ammoForGun(gunName), totalAmmo);
 }
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
@@ -392,7 +389,10 @@ bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCo
     modlog("weapons", "no ammo, tried to fire, should play sound");
     return false;
   }
-  deliverAmmo(gunCore, -1);
+
+  if (gunCore.weaponCore != NULL){
+    deliverAmmo(gunCore.weaponCore -> weaponParams.name, -1, gunCore.weaponCore -> weaponParams.totalAmmo);
+  }
 
   if (gunCore.weaponCore -> soundResource.has_value()){
     playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos);

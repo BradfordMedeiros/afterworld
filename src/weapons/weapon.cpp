@@ -112,9 +112,11 @@ void maybeChangeGun(std::string gun){
 void deliverAmmoToCurrentGun(objid targetId, int amount){
   modassert(weaponsPtr, "weaponsptr is null");
   if (weaponsPtr -> playerId.has_value() && targetId == weaponsPtr -> playerId.value()){
-    deliverAmmo(weaponsPtr -> weaponValues.gunCore, amount);
+    deliverAmmo(weaponsPtr -> weaponValues.gunCore.weaponCore -> weaponParams.name, amount, weaponsPtr -> weaponValues.gunCore.weaponCore -> weaponParams.totalAmmo);
   }
 }
+
+
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);

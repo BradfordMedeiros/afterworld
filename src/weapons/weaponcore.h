@@ -97,7 +97,7 @@ GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 void removeGun(GunInstance& weaponValues);
 
-void deliverAmmo(GunCore& _gunCore, int ammo);
+void deliverAmmo(std::string gunName, int ammo, int totalAmmo);
 
 void saveGunTransform(GunInstance& weaponValues);
 
