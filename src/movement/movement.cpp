@@ -9,8 +9,37 @@ struct Movement {
 
 MovementEntityData& getMovementData();
 
+void reloadSettingsConfig(Movement& movement, std::string name){
+  auto settingQuery = gameapi -> compileSqlQuery(
+    "select xsensitivity, ysensitivity from settings where profile = " + name,
+    {}
+  );
+  bool validSettingsSql = false;
+  auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
+  modassert(validSettingsSql, "error executing sql query");
+  movement.controlParams.xsensitivity = floatFromFirstSqlResult(settingsResult, 0);
+  movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
+}
+
+void changeTargetId(Movement& movement, objid id){
+  movement.controlParams.goForward = false;
+  movement.controlParams.goBackward = false;
+  movement.controlParams.goLeft = false;
+  movement.controlParams.goRight = false;
+  movement.controlParams.shiftModifier = false;
+  movement.controlParams.doJump = false;
+  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+  movement.controlParams.zoom_delta = 0.f;
+  movement.controlParams.doAttachToLadder = false;
+  movement.controlParams.doReleaseFromLadder = false;
+  movement.controlParams.crouchType = CROUCH_NONE;
+  reloadSettingsConfig(movement, "default");
+}
+
+Movement* movementPtr = NULL;
 
 void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
+  modassert(movementPtr, "movement is null");
   movementEntityData.activeEntity = ActiveEntity {
     .playerId = id,
     .managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
@@ -27,6 +56,7 @@ void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, s
       .reverseCamera = false,
     },
   };
+  changeTargetId(*movementPtr, id);
   gameapi -> sendNotifyMessage("active-player-change", id); 
 }
 
@@ -107,37 +137,12 @@ void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id)
   movementEntityData.movementEntities.erase(id);
 }
 
-void reloadSettingsConfig(Movement& movement, std::string name){
-  auto settingQuery = gameapi -> compileSqlQuery(
-    "select xsensitivity, ysensitivity from settings where profile = " + name,
-    {}
-  );
-  bool validSettingsSql = false;
-  auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
-  modassert(validSettingsSql, "error executing sql query");
-  movement.controlParams.xsensitivity = floatFromFirstSqlResult(settingsResult, 0);
-  movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
-}
-
-void changeTargetId(Movement& movement, objid id){
-  movement.controlParams.goForward = false;
-  movement.controlParams.goBackward = false;
-  movement.controlParams.goLeft = false;
-  movement.controlParams.goRight = false;
-  movement.controlParams.shiftModifier = false;
-  movement.controlParams.doJump = false;
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.controlParams.zoom_delta = 0.f;
-  movement.controlParams.doAttachToLadder = false;
-  movement.controlParams.doReleaseFromLadder = false;
-  movement.controlParams.crouchType = CROUCH_NONE;
-  reloadSettingsConfig(movement, "default");
-}
 
 CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Movement* movement = new Movement;
+    movementPtr = movement;
 
     movement -> controlParams.goForward = false;
     movement -> controlParams.goBackward = false;
@@ -155,8 +160,9 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     return movement;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Movement* value = (Movement*)data;
+    Movement* value = static_cast<Movement*>(data);
     removeAllMovementCores();
+    movementPtr = NULL;
     delete value;
   };
   binding.onKeyCallback = [](int32_t _, void* data, int key, int scancode, int action, int mods) -> void {
@@ -283,16 +289,6 @@ CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
     movement -> controlParams.doAttachToLadder = false;
     movement -> controlParams.doReleaseFromLadder = false;
     movement -> controlParams.crouchType = CROUCH_NONE;
-  };
-
-  binding.onMessage = [](int32_t _, void* data, std::string& key, std::any& value){
-    Movement* movement = static_cast<Movement*>(data);
-    if (key == "active-player-change"){
-      Movement* movement = static_cast<Movement*>(data);
-      auto objIdValue = anycast<objid>(value); 
-      modassert(objIdValue != NULL, "movement - request change control value invalid");
-      changeTargetId(*movement, *objIdValue);
-    }
   };
 
   return binding;
