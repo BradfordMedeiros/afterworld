@@ -10,7 +10,7 @@ struct Movement {
 MovementEntityData& getMovementData();
 
 
-void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
+void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
   movementEntityData.activeEntity = ActiveEntity {
     .playerId = id,
     .managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {

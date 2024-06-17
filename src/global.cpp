@@ -32,6 +32,8 @@ GlobalState global {
     .inGameMode = false,
     .showMouse = true,
   },
+
+  .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
 };
 
 std::string print(GlobalState& globalState){
@@ -235,4 +237,12 @@ void setShowTerminal(bool showTerminal){
     getGlobalState().showTerminal = showTerminal;
     updateState();
   }
+}
+
+void setPlayerVelocity(glm::vec3 velocity){
+  getGlobalState().playerVelocity = velocity;
+}
+
+glm::vec3 getPlayerVelocity(){
+  return getGlobalState().playerVelocity;
 }

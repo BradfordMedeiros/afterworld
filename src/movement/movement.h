@@ -32,7 +32,7 @@ struct MovementEntityData {
 };
 
 MovementEntityData& getMovementData();
-void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
+void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData);
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);

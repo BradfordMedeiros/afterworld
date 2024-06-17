@@ -12,7 +12,6 @@ struct Weapons {
   GunInstance weaponValues;
 
   glm::vec2 lookVelocity;
-  glm::vec3 movementVec;
   std::optional<objid> heldItem;
 };
 
@@ -120,7 +119,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
     weapons -> fireOnce = false;
 
     weapons -> lookVelocity = glm::vec2(0.f, 0.f);
-    weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
 
     weapons -> weaponValues.gunCore.weaponState = WeaponState {};
     weapons -> heldItem = std::nullopt;
@@ -231,10 +229,6 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
       }
     }else if (key == "save-gun"){
       saveGunTransform(weapons -> weaponValues);
-    }else if (key == "velocity"){
-      auto strValue = anycast<std::string>(value);   // would be nice to send the vec3 directly, but notifySend does not support
-      modassert(strValue != NULL, "velocity value invalid");  
-      weapons -> movementVec = parseVec(*strValue);
     }else if (key == "reload-config:weapon:traits"){
       Weapons* weapons = static_cast<Weapons*>(data);
       reloadTraitsValues(*weapons);
@@ -269,7 +263,7 @@ CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
 
     fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> weaponValues.muzzleId, weapons -> playerId.value());
     weapons -> fireOnce = false;
-    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId.value(), weapons -> lookVelocity, weapons -> movementVec);
+    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId.value(), weapons -> lookVelocity, getPlayerVelocity());
     handlePickedUpItem(*weapons);
     handleActivateItem(weapons -> playerId.value());
     //std::cout << weaponsToString(*weapons) << std::endl;

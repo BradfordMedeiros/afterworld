@@ -136,7 +136,8 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
   //auto speed = glm::length(displacement);
   movementState.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
-  gameapi -> sendNotifyMessage("velocity", serializeVec(displacement));
+  setPlayerVelocity(displacement);
+
   *_movingDown = displacement.y < 0.f;
 }
 
