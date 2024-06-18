@@ -2,11 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-struct Movement {
-  ControlParams controlParams;
-};
-
-
 MovementEntityData& getMovementData();
 
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -37,9 +32,11 @@ void changeTargetId(Movement& movement, objid id){
 }
 
 Movement* movementPtr = NULL;
+Movement& getMovementPtr(){
+  return *movementPtr;
+}
 
-void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
-  modassert(movementPtr, "movement is null");
+void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
   movementEntityData.activeEntity = ActiveEntity {
     .playerId = id,
     .managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
@@ -56,7 +53,7 @@ void setActiveMovementEntity(MovementEntityData& movementEntityData, objid id, s
       .reverseCamera = false,
     },
   };
-  changeTargetId(*movementPtr, id);
+  changeTargetId(movement, id);
 }
 
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData){
