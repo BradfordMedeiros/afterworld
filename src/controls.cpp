@@ -119,7 +119,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun("none");
+			maybeChangeGun(getWeaponsPtr(), "none");
 		},
 	},
 	HotkeyToMessage {
@@ -128,7 +128,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun("pistol");
+			maybeChangeGun(getWeaponsPtr(), "pistol");
 		},
 	},
 	HotkeyToMessage {
@@ -137,7 +137,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun("electrogun");
+			maybeChangeGun(getWeaponsPtr(), "electrogun");
 		},
 	},
 	HotkeyToMessage {
@@ -146,7 +146,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun("scrapgun");
+			maybeChangeGun(getWeaponsPtr(), "scrapgun");
 		},
 	},
 	HotkeyToMessage {
@@ -155,7 +155,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun("fork");
+			maybeChangeGun(getWeaponsPtr(), "fork");
 		},
 	},
 

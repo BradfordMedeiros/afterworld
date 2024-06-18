@@ -10,10 +10,26 @@
 #include "./weapon_vector.h"
 #include "../activeplayer.h"
 
+struct Weapons {
+  std::optional<objid> playerId;
+  bool isHoldingLeftMouse;
+  bool isHoldingRightMouse;
+  bool fireOnce;
+  float selectDistance;
+
+  GunInstance weaponValues;
+
+  glm::vec2 lookVelocity;
+  std::optional<objid> heldItem;
+};
+
+Weapons createWeapons();
+Weapons& getWeaponsPtr();
+
 bool getIsGunZoomed();
-void maybeChangeGun(std::string gun);
+void maybeChangeGun(Weapons& weapons, std::string gun);
 void changeWeaponTargetId(objid id);
-void deliverAmmoToCurrentGun(objid targetId, int amount);
+void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
 
 CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
 

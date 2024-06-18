@@ -3,6 +3,8 @@
 CustomApiBindings* gameapi = NULL;
 
 
+Weapons weapons = createWeapons();
+
 struct ManagedScene {
   std::optional<objid> id; 
   int index;
@@ -591,7 +593,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      deliverAmmoToCurrentGun(itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
+      deliverAmmoToCurrentGun(getWeaponsPtr(), itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
     }
 
     onCutsceneMessages(key);

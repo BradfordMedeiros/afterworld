@@ -279,11 +279,17 @@ void removeGun(GunInstance& weaponValues){
 }
 
 
-void setUIAmmoCount(int currentAmmo, int totalAmmo);
-void deliverAmmo(std::string gunName, int ammo, int totalAmmo){
+void deliverAmmo(std::string gunName, int ammo){
+  // weaponsPtr -> weaponValues.gunCore.weaponCore -> weaponParams.totalAmmo
   auto oldAmmo = ammoForGun(gunName);
   setGunAmmo(gunName, oldAmmo + ammo);
-  setUIAmmoCount(ammoForGun(gunName), totalAmmo);
+}
+
+AmmoInfo currentAmmoInfo(){
+  return AmmoInfo {
+    .currentAmmo = 49,
+    .totalAmmo = 101,
+  };
 }
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
@@ -391,7 +397,7 @@ bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCo
   }
 
   if (gunCore.weaponCore != NULL){
-    deliverAmmo(gunCore.weaponCore -> weaponParams.name, -1, gunCore.weaponCore -> weaponParams.totalAmmo);
+    deliverAmmo(gunCore.weaponCore -> weaponParams.name, -1);
   }
 
   if (gunCore.weaponCore -> soundResource.has_value()){

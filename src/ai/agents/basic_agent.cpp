@@ -288,7 +288,7 @@ void onAiAmmo(Agent& agent, objid targetId, int amount){
     AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
     modassert(attackState, "attackState invalid");
     if (attackState -> gunCore.has_value()){
-      deliverAmmo(attackState -> gunCore.value().weaponCore -> weaponParams.name, amount, attackState -> gunCore.value().weaponCore -> weaponParams.totalAmmo);
+      deliverAmmo(attackState -> gunCore.value().weaponCore -> weaponParams.name, amount);
     }
   }
 }
