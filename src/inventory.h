@@ -11,7 +11,7 @@ int currentItemCount(std::string name);
 void updateItemCount(std::string name, int count);
 
 bool hasGun(std::string& gun);
-int ammoForGun(std::string& gun);
-void setGunAmmo(std::string gun, int currentAmmo);
+int ammoForGun(std::string inventory, std::string& gun);
+void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
 
 #endif

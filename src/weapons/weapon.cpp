@@ -86,7 +86,7 @@ void setZoom(bool);
 
 void maybeChangeGun(Weapons& weapons, std::string gun){
   if (hasGun(gun)){
-    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(gun), gameapi -> listSceneId(weapons.playerId.value()), weapons.playerId.value());
+    changeGunAnimate(weapons.weaponValues, gun, ammoForGun("default", gun), gameapi -> listSceneId(weapons.playerId.value()), weapons.playerId.value());
   }
 }
 
@@ -121,22 +121,19 @@ Weapons createWeapons(){
   return weapons;
 }
 
-void onWeaponsFrame(Weapons& weapons){
+std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
   if (isPaused()){
-    return;
+    return std::nullopt;
   }
   if (!weapons.playerId.has_value()){
-    return;
+    return std::nullopt;
   }
   bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.playerId.value());
-  if (didFire){
-    auto ammo = currentAmmoInfo();
-    setUIAmmoCount(ammo.currentAmmo, ammo.totalAmmo);
-  }
   weapons.fireOnce = false;
   swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.playerId.value(), weapons.lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons);
   handleActivateItem(weapons.playerId.value());
+  return didFire ? currentAmmoInfo() : std::optional<AmmoInfo>(std::nullopt);
 }
 
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){

@@ -3,8 +3,8 @@
 extern CustomApiBindings* gameapi;
 
 void doDamageMessage(objid targetId, float damage);
-int ammoForGun(std::string&);
-void setGunAmmo(std::string gun, int currentAmmo);
+int ammoForGun(std::string inventory, std::string& gun);
+void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
 
 ////////////////////////////////////
 
@@ -271,7 +271,7 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
 
   weaponValues.gunCore.weaponState.gunState = GUN_LOWERING;
   gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId](void* weaponData) -> void {
-    setGunAmmo(gun, ammo);
+    setGunAmmo("default", gun, ammo);
     auto newWeaponValues = changeGunInstance(weaponValues.gunId, gun, ammo, sceneId, playerId);
     weaponValues = newWeaponValues;
   });
@@ -286,8 +286,8 @@ void removeGun(GunInstance& weaponValues){
 
 void deliverAmmo(std::string gunName, int ammo){
   // weaponsPtr -> weaponValues.gunCore.weaponCore -> weaponParams.totalAmmo
-  auto oldAmmo = ammoForGun(gunName);
-  setGunAmmo(gunName, oldAmmo + ammo);
+  auto oldAmmo = ammoForGun("default", gunName);
+  setGunAmmo("default", gunName, oldAmmo + ammo);
 }
 
 AmmoInfo currentAmmoInfo(){
@@ -395,7 +395,7 @@ bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCo
   if (!canFireGun){
     return false;
   }
-  bool hasAmmo = ammoForGun(gunCore.weaponCore -> name) > 0;
+  bool hasAmmo = ammoForGun("default", gunCore.weaponCore -> name) > 0;
   if (!hasAmmo){
     modlog("weapons", "no ammo, tried to fire, should play sound");
     return false;

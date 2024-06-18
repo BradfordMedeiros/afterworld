@@ -30,7 +30,7 @@ void maybeChangeGun(Weapons& weapons, std::string gun);
 void changeWeaponTargetId(Weapons& weapons, objid id);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
 
-void onWeaponsFrame(Weapons& weapons);
+std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons);
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved);
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action);
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action);

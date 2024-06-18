@@ -497,7 +497,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
-    onWeaponsFrame(weapons);
+    auto ammoInfo = onWeaponsFrame(weapons);
+    if (ammoInfo.has_value()){
+      setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
+    }
     onMovementFrame(movement);
   };
 
