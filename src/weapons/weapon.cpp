@@ -1,6 +1,8 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
+void setZoom(bool);
+
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -81,8 +83,6 @@ void handleActivateItem(objid playerId){
   setShowActivate(false);  
 }
 
-void setZoom(bool);
-
 
 void maybeChangeGun(Weapons& weapons, std::string gun){
   if (hasGun(gun)){
@@ -95,17 +95,6 @@ void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
     deliverAmmo(weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
   }
 }
-
-void setUIAmmoCount(int currentAmmo, int totalAmmo);
-
-
-//  bool fireOnce;
-//  float selectDistance;
-//
-//  GunInstance weaponValues;
-//
-//  glm::vec2 lookVelocity;
-//  std::optional<objid> heldItem;
 
 Weapons createWeapons(){
   Weapons weapons {

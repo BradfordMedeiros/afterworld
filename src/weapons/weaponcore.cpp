@@ -271,7 +271,6 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
 
   weaponValues.gunCore.weaponState.gunState = GUN_LOWERING;
   gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId](void* weaponData) -> void {
-    setGunAmmo("default", gun, ammo);
     auto newWeaponValues = changeGunInstance(weaponValues.gunId, gun, ammo, sceneId, playerId);
     weaponValues = newWeaponValues;
   });
