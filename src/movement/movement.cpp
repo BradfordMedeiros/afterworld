@@ -31,11 +31,6 @@ void changeTargetId(Movement& movement, objid id){
   reloadSettingsConfig(movement, "default");
 }
 
-Movement* movementPtr = NULL;
-Movement& getMovementPtr(){
-  return *movementPtr;
-}
-
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
   movementEntityData.activeEntity = ActiveEntity {
     .playerId = id,
@@ -132,7 +127,6 @@ void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id)
   }
   movementEntityData.movementEntities.erase(id);
 }
-
 
 Movement createMovement(){
   Movement movement {};
@@ -270,38 +264,4 @@ void onMovementFrame(Movement& movement){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
-}
-
-CScriptBinding movementBinding(CustomApiBindings& api, const char* name){
-  auto binding = createCScriptBinding(name, api);
-  binding.create = [](std::string scriptname, objid _, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Movement* movement = new Movement;
-    movementPtr = movement;
-    *movement = createMovement();
-    return movement;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Movement* value = static_cast<Movement*>(data);
-    removeAllMovementCores();
-    movementPtr = NULL;
-    delete value;
-  };
-  binding.onKeyCallback = [](int32_t _, void* data, int key, int scancode, int action, int mods) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    onMovementKeyCallback(*movement, key, action);
-  };
-  binding.onMouseMoveCallback = [](objid _, void* data, double xPos, double yPos, float, float) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    onMovementMouseMoveCallback(*movement, xPos, yPos);
-  };
-  binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    onMovementScrollCallback(*movement, amount);
-  };
-  binding.onFrame = [](int32_t _, void* data) -> void {
-    Movement* movement = static_cast<Movement*>(data);
-    onMovementFrame(*movement);
-  };
-
-  return binding;
 }

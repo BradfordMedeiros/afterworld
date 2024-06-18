@@ -8,7 +8,6 @@ water:script:native/water
 sounds:script:native/sound
 weather:script:native/weather
 tags:script:native/tags
-movement:script:native/movement:1
 ai:script:native/ai
 
 # Texture resources

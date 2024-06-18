@@ -4,6 +4,7 @@ CustomApiBindings* gameapi = NULL;
 
 
 Weapons weapons = createWeapons();
+Movement movement = createMovement();
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -473,6 +474,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+    removeAllMovementCores();  // is this pointless?
     delete gameState;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -496,6 +498,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     onWeaponsFrame(weapons);
+    onMovementFrame(movement);
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -532,7 +535,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onWeaponsKeyCallback(weapons, key, action);
-
+    onMovementKeyCallback(movement, key, action);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -628,6 +631,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     onWeaponsMouseMove(weapons, xPos, yPos);
+    onMovementMouseMoveCallback(movement, xPos, yPos);
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
@@ -666,6 +670,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
     onMainUiScroll(amount);
+    onMovementScrollCallback(movement, amount);
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     maybeAddMovementEntity(getMovementData(), idAdded);
@@ -688,7 +693,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
   bindings.push_back(aiBinding(api, "native/ai"));
-  bindings.push_back(movementBinding(api, "native/movement"));
   bindings.push_back(menuBinding(api, "native/menu"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));

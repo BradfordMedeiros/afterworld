@@ -700,7 +700,6 @@ MovementState getInitialMovementState(objid playerId){
   auto scale = gameapi -> getGameObjectScale(playerId, false);
   movementState.initialScale = scale;
 
-
   return movementState;
 }
 

@@ -36,7 +36,11 @@ struct MovementEntityData {
   std::optional<ActiveEntity> activeEntity;
 };
 
-Movement& getMovementPtr();
+Movement createMovement();
+void onMovementKeyCallback(Movement& movement, int key, int action);
+void onMovementMouseMoveCallback(Movement& movement, double xPos, double yPos);
+void onMovementScrollCallback(Movement& movement, double amount);
+void onMovementFrame(Movement& movement);
 
 MovementEntityData& getMovementData();
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
@@ -47,7 +51,5 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
 
 void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
-
-CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 
 #endif
