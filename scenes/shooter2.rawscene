@@ -338,7 +338,7 @@ wires:position:250 50 -400
 wires:scale:10 10 10
 
 [terminal:scene:../afterworld/scenes/prefabs/objects/terminal.rawscene
-[terminal:position:250 50 -175
+[terminal:position:250 50 -177
 
 [bouncepad:scene:../afterworld/scenes/prefabs/objects/bouncepad.rawscene
 [bouncepad:position:230 50 -175

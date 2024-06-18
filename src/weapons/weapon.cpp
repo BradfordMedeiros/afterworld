@@ -51,16 +51,9 @@ bool getIsGunZoomed(){
   return isGunZoomed;
 }
 
-Weapons* weaponsPtr = NULL;
-
-Weapons& getWeaponsPtr(){
-  modassert(weaponsPtr, "weapons ptr is null");
-  return *weaponsPtr;
-}
-
-void changeWeaponTargetId(objid id){
-  getWeaponsPtr().playerId = id;
-  reloadTraitsValues(*weaponsPtr);
+void changeWeaponTargetId(Weapons& weapons, objid id){
+  weapons.playerId = id;
+  reloadTraitsValues(weapons);
   //changeGun(weapons, id, gameapi -> listSceneId(id), "pistol", 10);
 }
 
@@ -258,51 +251,5 @@ void onWeaponsMessage(Weapons& weapons, std::string& key){
   }else if (key == "reload-config:weapon:traits"){
     reloadTraitsValues(weapons);
   }
-}
-
-CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
-  auto binding = createCScriptBinding(name, api);
-  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Weapons* weapons = new Weapons;
-    *weapons = createWeapons();
-    weaponsPtr = weapons; 
-  	return weapons;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Weapons* weapons = static_cast<Weapons*>(data);
-    weaponsPtr = NULL;
-    delete weapons;
-  };
-  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
-    Weapons* weaponsPtr = static_cast<Weapons*>(data);
-    Weapons& weapons = *weaponsPtr;
-    onWeaponsMouseCallback(weapons, button, action);
-  };
-  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
-    Weapons* weaponsPtr = static_cast<Weapons*>(data);
-    Weapons& weapons = *weaponsPtr;
-    onWeaponsKeyCallback(weapons, key, action);
-  };
-
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    Weapons* weapons = static_cast<Weapons*>(data);
-    onWeaponsMessage(*weapons, key);
-  };
-  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
-    Weapons* weapons = static_cast<Weapons*>(data);
-    onWeaponsMouseMove(*weapons, xPos, yPos);
-  };
-  binding.onFrame = [](int32_t, void* data) -> void {
-    Weapons* weaponsPtr = static_cast<Weapons*>(data);
-    onWeaponsFrame(*weaponsPtr);
-  };
-
-  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    // pretty sure i dont need this
-    Weapons* weapons = static_cast<Weapons*>(data);
-    onWeaponsObjectRemoved(*weapons, idRemoved);
-  };
-
-  return binding;
 }
 

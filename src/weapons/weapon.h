@@ -24,14 +24,17 @@ struct Weapons {
 };
 
 Weapons createWeapons();
-Weapons& getWeaponsPtr();
 
 bool getIsGunZoomed();
 void maybeChangeGun(Weapons& weapons, std::string gun);
-void changeWeaponTargetId(objid id);
+void changeWeaponTargetId(Weapons& weapons, objid id);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
 
-CScriptBinding weaponBinding(CustomApiBindings& api, const char* name);
-
+void onWeaponsFrame(Weapons& weapons);
+void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved);
+void onWeaponsMouseCallback(Weapons& weapons, int button, int action);
+void onWeaponsKeyCallback(Weapons& weapons, int key, int action);
+void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos);
+void onWeaponsMessage(Weapons& weapons, std::string& key);
 
 #endif

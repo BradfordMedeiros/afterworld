@@ -1,6 +1,7 @@
 #include "./controls.h"
 
 extern CustomApiBindings* gameapi;
+extern Weapons weapons;
 
 int jumpKey = 32;
 int moveFowardKey = 'W';
@@ -119,7 +120,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(getWeaponsPtr(), "none");
+			maybeChangeGun(weapons, "none");
 		},
 	},
 	HotkeyToMessage {
@@ -128,7 +129,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(getWeaponsPtr(), "pistol");
+			maybeChangeGun(weapons, "pistol");
 		},
 	},
 	HotkeyToMessage {
@@ -137,7 +138,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(getWeaponsPtr(), "electrogun");
+			maybeChangeGun(weapons, "electrogun");
 		},
 	},
 	HotkeyToMessage {
@@ -146,7 +147,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(getWeaponsPtr(), "scrapgun");
+			maybeChangeGun(weapons, "scrapgun");
 		},
 	},
 	HotkeyToMessage {
@@ -155,7 +156,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(getWeaponsPtr(), "fork");
+			maybeChangeGun(weapons, "fork");
 		},
 	},
 

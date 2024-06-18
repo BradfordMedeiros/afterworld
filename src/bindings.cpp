@@ -495,6 +495,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
+    onWeaponsFrame(weapons);
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -530,9 +531,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setActivePlayerNext();
     }
 
+    onWeaponsKeyCallback(weapons, key, action);
+
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
+
+    onWeaponsMessage(weapons, key);
+
     if (key == "reset"){
       pushHistory({ "mainmenu" }, true);
       return;
@@ -593,7 +599,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      deliverAmmoToCurrentGun(getWeaponsPtr(), itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
+      deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
     }
 
     onCutsceneMessages(key);
@@ -621,6 +627,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
+    onWeaponsMouseMove(weapons, xPos, yPos);
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
@@ -654,6 +661,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getGlobalState().middleMouseDown = true;
       }
     }
+    onWeaponsMouseCallback(weapons, button, action);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
@@ -667,6 +675,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     maybeRemoveMovementEntity(getMovementData(), idRemoved);
     onActivePlayerRemoved(idRemoved);
     onObjectsChanged();
+
+    onWeaponsObjectRemoved(weapons, idRemoved);
   };
 
   return binding;
@@ -680,7 +690,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(aiBinding(api, "native/ai"));
   bindings.push_back(movementBinding(api, "native/movement"));
   bindings.push_back(menuBinding(api, "native/menu"));
-  bindings.push_back(weaponBinding(api, "native/weapon"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));

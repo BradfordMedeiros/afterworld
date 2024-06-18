@@ -1,7 +1,7 @@
 #include "./activeplayer.h"
 
 extern CustomApiBindings* gameapi;
-
+extern Weapons weapons;
 
 struct ControlledPlayer {
 	std::optional<objid> activePlayerId;
@@ -64,7 +64,7 @@ void setActivePlayer(std::optional<objid> id){
   gameapi -> sendNotifyMessage("ai-deactivate", id.value());
 	controlledPlayer.activePlayerId = id.value();
 	setActiveMovementEntity(getMovementData(), id.value(), newCameraId);
-	changeWeaponTargetId(id.value());
+	changeWeaponTargetId(weapons, id.value());
 }
 
 void setActivePlayerNext(){
