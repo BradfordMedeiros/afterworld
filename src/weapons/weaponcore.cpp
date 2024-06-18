@@ -1,7 +1,12 @@
 #include "./weaponcore.h"
 
 extern CustomApiBindings* gameapi;
+
 void doDamageMessage(objid targetId, float damage);
+int ammoForGun(std::string&);
+void setGunAmmo(std::string gun, int currentAmmo);
+
+////////////////////////////////////
 
 
 std::vector<WeaponCore> weaponCores = {};
