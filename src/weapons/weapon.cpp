@@ -1,20 +1,8 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
+void setZoom(bool);
 
-struct Weapons {
-  std::optional<objid> playerId;
-  bool isHoldingLeftMouse;
-  bool isHoldingRightMouse;
-  bool fireOnce;
-  float selectDistance;
-
-  GunInstance weaponValues;
-
-  glm::vec2 lookVelocity;
-  glm::vec3 movementVec;
-  std::optional<objid> heldItem;
-};
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -95,195 +83,161 @@ void handleActivateItem(objid playerId){
   setShowActivate(false);  
 }
 
-void setZoom(bool);
 
-
-Weapons* weaponsPtr = NULL;
-void maybeChangeGun(std::string gun){
-  if (weaponsPtr == NULL){
-    return;
-  }
-  if (hasGun(gun)){
-    changeGunAnimate(weaponsPtr -> weaponValues, gun, ammoForGun(gun), gameapi -> listSceneId(weaponsPtr -> playerId.value()), weaponsPtr -> playerId.value());
+void maybeChangeGun(Weapons& weapons, std::string gun){
+  std::string inventory = "default";
+  if (hasGun(inventory, gun)){
+    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(inventory, gun), gameapi -> listSceneId(weapons.playerId.value()), weapons.playerId.value());
   }
 }
 
-CScriptBinding weaponBinding(CustomApiBindings& api, const char* name){
-  auto binding = createCScriptBinding(name, api);
-  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Weapons* weapons = new Weapons;
-    weaponsPtr = weapons; 
+void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
+  std::string inventory = "default";
+  if (weapons.playerId.has_value() && targetId == weapons.playerId.value()){
+    deliverAmmo(inventory, weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
+  }
+}
 
-    weapons -> playerId = std::nullopt;
-    weapons -> isHoldingLeftMouse = false;
-    weapons -> isHoldingRightMouse = false;
-    weapons -> fireOnce = false;
-
-    weapons -> lookVelocity = glm::vec2(0.f, 0.f);
-    weapons -> movementVec = glm::vec3(0.f, 0.f, 0.f);
-
-    weapons -> weaponValues.gunCore.weaponState = WeaponState {};
-    weapons -> heldItem = std::nullopt;
-
-  	return weapons;
+Weapons createWeapons(){
+  Weapons weapons {
+    .playerId = std::nullopt,
+    .isHoldingLeftMouse = false,
+    .isHoldingRightMouse = false,
+    .fireOnce = false,
+    .lookVelocity = glm::vec2(0.f, 0.f),
+    .heldItem = std::nullopt,
   };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Weapons* weapons = static_cast<Weapons*>(data);
-    weaponsPtr = NULL;
-    delete weapons;
-  };
-  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
-    if (isPaused() || getGlobalState().disableGameInput){
-      return;
+  weapons.weaponValues.gunCore.weaponState = WeaponState {};
+
+  return weapons;
+}
+
+std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
+  if (isPaused()){
+    return std::nullopt;
+  }
+  if (!weapons.playerId.has_value()){
+    return std::nullopt;
+  }
+  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.playerId.value(), "default");
+  weapons.fireOnce = false;
+  swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.playerId.value(), weapons.lookVelocity, getPlayerVelocity());
+  handlePickedUpItem(weapons);
+  handleActivateItem(weapons.playerId.value());
+  return didFire ? currentAmmoInfo() : std::optional<AmmoInfo>(std::nullopt);
+}
+
+void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
+  if (weapons.playerId.has_value() && weapons.playerId.value() == idRemoved){
+    weapons.playerId = std::nullopt;
+    removeGun(weapons.weaponValues);
+  }
+}
+
+void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
+  if (isPaused() || getGlobalState().disableGameInput){
+    return;
+  }
+  if (isFireButton(button)){
+    if (action == 0){
+      weapons.isHoldingLeftMouse = false;
+    }else if (action == 1){
+      weapons.isHoldingLeftMouse = true;
+      weapons.fireOnce = true;
     }
-    Weapons* weapons = static_cast<Weapons*>(data);
-    if (isFireButton(button)){
-      if (action == 0){
-        weapons -> isHoldingLeftMouse = false;
-      }else if (action == 1){
-        weapons -> isHoldingLeftMouse = true;
-        weapons -> fireOnce = true;
-      }
-    }else if (isAimButton(button)){
-      if (action == 0){
-        weapons -> isHoldingRightMouse = false;
-        isGunZoomed = false;
-        setZoom(isGunZoomed);
-      }else if (action == 1){
-        // select item
-        weapons -> isHoldingRightMouse = true;
-        isGunZoomed = true;
-        setZoom(isGunZoomed);
-        if (weapons -> playerId.has_value()){
-          auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
-          if (hitpoints.size() > 0){
-            auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId.value(), true);
-            auto closestIndex = closestHitpoint(hitpoints, cameraPos);
-            float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
-            if (distance <= weapons -> selectDistance){
-              gameapi -> sendNotifyMessage("selected", hitpoints.at(closestIndex).id);
-            }
-          }
-        }
-      }
-    }
-  };
-  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
-    if (isPaused() || getGlobalState().disableGameInput){
-      return;
-    }
-    Weapons* weapons = static_cast<Weapons*>(data);
-    if (!weapons -> playerId.has_value()){
-      return;
-    }
-    if (isInteractKey(key)) { 
-      if (action == 1){
-        if (activateableItem.has_value()){
-          auto attrHandle = getAttrHandle(activateableItem.value());
-          auto activateKey = getStrAttr(attrHandle, "activate");
-          if (activateKey.has_value()){
-            auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true);
-            playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
-            gameapi -> sendNotifyMessage(activateKey.value(), "default");
-          }
-        }
-        if (weapons -> heldItem.has_value()){
-          modlog("weapons", "pickup released held item: " + std::to_string(weapons -> heldItem.value()));
-          weapons -> heldItem = std::nullopt;
-        }else{
-        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons -> playerId.value());
+  }else if (isAimButton(button)){
+    if (action == 0){
+      weapons.isHoldingRightMouse = false;
+      isGunZoomed = false;
+      setZoom(isGunZoomed);
+    }else if (action == 1){
+      // select item
+      weapons.isHoldingRightMouse = true;
+      isGunZoomed = true;
+      setZoom(isGunZoomed);
+      if (weapons.playerId.has_value()){
+        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.playerId.value());
         if (hitpoints.size() > 0){
-            auto cameraPos = gameapi -> getGameObjectPos(weapons -> playerId.value(), true);
-            auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
-            auto hitpoint = hitpoints.at(closestHitpointIndex);
-            float distance = glm::length(cameraPos - hitpoint.point);
-            auto attrHandle = getAttrHandle(hitpoint.id);
-            auto physicsEnabled = getBoolAttr(attrHandle, "physics").value();
-            auto physicsDynamic = getBoolAttr(attrHandle, "physics_type").value() == false;
-            auto physicsCollide = getBoolAttr(attrHandle, "physics_collision").value() == true;
-            auto canPickup = physicsEnabled && physicsDynamic && physicsCollide ;
-            modlog("weapons", "pickup item: " + std::to_string(hitpoint.id) + " can pickup: " + print(canPickup) + " distance = " + std::to_string(distance));
-            if (canPickup && distance < 5.f){
-              weapons -> heldItem = hitpoint.id;
-              setGameObjectPhysicsOptions(
-                weapons -> heldItem.value(), 
-                glm::vec3(0.f, 0.f, 0.f), 
-                glm::vec3(0.f, 0.f, 0.f), 
-                glm::vec3(0.f, 0.f, 0.f), 
-                glm::vec3(1.f, 1.f, 1.f), 
-                glm::vec3(0.f, 0.f, 0.f)
-              );
-            }
+          auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId.value(), true);
+          auto closestIndex = closestHitpoint(hitpoints, cameraPos);
+          float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
+          if (distance <= weapons.selectDistance){
+            gameapi -> sendNotifyMessage("selected", hitpoints.at(closestIndex).id);
           }
         }
       }
-      return;
     }
-  };
+  }
+}
 
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    Weapons* weapons = static_cast<Weapons*>(data);
-    if (key == "ammo"){
-      auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
-      modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      if (weapons -> playerId.has_value() && itemAcquiredMessage -> targetId == weapons -> playerId.value()){
-        deliverAmmo(weapons -> weaponValues.gunCore, itemAcquiredMessage -> amount);
+void onWeaponsKeyCallback(Weapons& weapons, int key, int action){
+  if (isPaused() || getGlobalState().disableGameInput){
+    return;
+  }
+  if (!weapons.playerId.has_value()){
+    return;
+  }
+  if (isInteractKey(key)) { 
+    if (action == 1){
+      if (activateableItem.has_value()){
+        auto attrHandle = getAttrHandle(activateableItem.value());
+        auto activateKey = getStrAttr(attrHandle, "activate");
+        if (activateKey.has_value()){
+          auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true);
+          playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
+          gameapi -> sendNotifyMessage(activateKey.value(), "default");
+        }
       }
-    }else if (key == "save-gun"){
-      saveGunTransform(weapons -> weaponValues);
-    }else if (key == "velocity"){
-      auto strValue = anycast<std::string>(value);   // would be nice to send the vec3 directly, but notifySend does not support
-      modassert(strValue != NULL, "velocity value invalid");  
-      weapons -> movementVec = parseVec(*strValue);
-    }else if (key == "reload-config:weapon:traits"){
-      Weapons* weapons = static_cast<Weapons*>(data);
-      reloadTraitsValues(*weapons);
-    }else if (key == "active-player-change"){
-      Weapons* weapons = static_cast<Weapons*>(data);
-      auto objIdValue = anycast<objid>(value); 
-      modassert(objIdValue != NULL, "weapons - request change control value invalid");
-      std::cout << "weapons want to change value: " << objIdValue << std::endl;
-      changeWeaponTargetId(*weapons, *objIdValue);
+      if (weapons.heldItem.has_value()){
+        modlog("weapons", "pickup released held item: " + std::to_string(weapons.heldItem.value()));
+        weapons.heldItem = std::nullopt;
+      }else{
+      auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.playerId.value());
+      if (hitpoints.size() > 0){
+          auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId.value(), true);
+          auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
+          auto hitpoint = hitpoints.at(closestHitpointIndex);
+          float distance = glm::length(cameraPos - hitpoint.point);
+          auto attrHandle = getAttrHandle(hitpoint.id);
+          auto physicsEnabled = getBoolAttr(attrHandle, "physics").value();
+          auto physicsDynamic = getBoolAttr(attrHandle, "physics_type").value() == false;
+          auto physicsCollide = getBoolAttr(attrHandle, "physics_collision").value() == true;
+          auto canPickup = physicsEnabled && physicsDynamic && physicsCollide ;
+          modlog("weapons", "pickup item: " + std::to_string(hitpoint.id) + " can pickup: " + print(canPickup) + " distance = " + std::to_string(distance));
+          if (canPickup && distance < 5.f){
+            weapons.heldItem = hitpoint.id;
+            setGameObjectPhysicsOptions(
+              weapons.heldItem.value(), 
+              glm::vec3(0.f, 0.f, 0.f), 
+              glm::vec3(0.f, 0.f, 0.f), 
+              glm::vec3(0.f, 0.f, 0.f), 
+              glm::vec3(1.f, 1.f, 1.f), 
+              glm::vec3(0.f, 0.f, 0.f)
+            );
+          }
+        }
+      }
     }
-  };
-  binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void {
-    if (isPaused() || getGlobalState().disableGameInput){
-      return;
-    }
-    //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
-    Weapons* weapons = static_cast<Weapons*>(data);
-    if (!weapons -> playerId.has_value()){
-      return;
-    }
+    return;
+  }
+}
 
-    weapons -> lookVelocity = glm::vec2(xPos, yPos);
-  };
-  binding.onFrame = [](int32_t id, void* data) -> void {
-    if (isPaused()){
-      return;
-    }
-    Weapons* weapons = static_cast<Weapons*>(data);
-    if (!weapons -> playerId.has_value()){
-      return;
-    }
+void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos){
+  if (isPaused() || getGlobalState().disableGameInput){
+    return;
+  }
+  //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
+  if (!weapons.playerId.has_value()){
+    return;
+  }
+  weapons.lookVelocity = glm::vec2(xPos, yPos);
+}
 
-    fireGunAndVisualize(weapons -> weaponValues.gunCore, weapons -> isHoldingLeftMouse, weapons -> fireOnce, weapons -> weaponValues.gunId, weapons -> weaponValues.muzzleId, weapons -> playerId.value());
-    weapons -> fireOnce = false;
-    swayGun(weapons -> weaponValues, weapons -> isHoldingRightMouse, weapons -> playerId.value(), weapons -> lookVelocity, weapons -> movementVec);
-    handlePickedUpItem(*weapons);
-    handleActivateItem(weapons -> playerId.value());
-    //std::cout << weaponsToString(*weapons) << std::endl;
-  };
-
-  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    // pretty sure i dont need this
-    Weapons* weapons = static_cast<Weapons*>(data);
-    if (weapons -> playerId.has_value() && weapons -> playerId.value() == idRemoved){
-      weapons -> playerId = std::nullopt;
-      removeGun(weapons -> weaponValues);
-    }
-  };
-
-  return binding;
+void onWeaponsMessage(Weapons& weapons, std::string& key){
+  if (key == "save-gun"){
+    saveGunTransform(weapons.weaponValues);
+  }else if (key == "reload-config:weapon:traits"){
+    reloadTraitsValues(weapons);
+  }
 }
 

@@ -39,6 +39,8 @@ struct GlobalState {
   bool middleMouseDown;
 
   RouteState routeState;
+
+  glm::vec3 playerVelocity;
 };
 
 void setPaused(bool paused);
@@ -59,4 +61,8 @@ bool middleMouseDown();
 bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
+
+void setPlayerVelocity(glm::vec3 velocity);
+glm::vec3 getPlayerVelocity();
+
 #endif 

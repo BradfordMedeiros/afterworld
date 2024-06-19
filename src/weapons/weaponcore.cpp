@@ -1,7 +1,12 @@
 #include "./weaponcore.h"
 
 extern CustomApiBindings* gameapi;
+
 void doDamageMessage(objid targetId, float damage);
+int ammoForGun(std::string inventory, std::string& gun);
+void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
+
+////////////////////////////////////
 
 
 std::vector<WeaponCore> weaponCores = {};
@@ -266,7 +271,6 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
 
   weaponValues.gunCore.weaponState.gunState = GUN_LOWERING;
   gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId](void* weaponData) -> void {
-    setGunAmmo(gun, ammo);
     auto newWeaponValues = changeGunInstance(weaponValues.gunId, gun, ammo, sceneId, playerId);
     weaponValues = newWeaponValues;
   });
@@ -279,14 +283,17 @@ void removeGun(GunInstance& weaponValues){
 }
 
 
-void setUIAmmoCount(int currentAmmo, int totalAmmo);
-void deliverAmmo(GunCore& _gunCore, int ammo){
-  if (!_gunCore.weaponCore){
-    return;
-  }
-  auto oldAmmo = ammoForGun(_gunCore.weaponCore -> name);
-  setGunAmmo(_gunCore.weaponCore -> name, oldAmmo + ammo);
-  setUIAmmoCount(ammoForGun(_gunCore.weaponCore -> name), _gunCore.weaponCore -> weaponParams.totalAmmo);
+void deliverAmmo(std::string inventory, std::string gunName, int ammo){
+  // weaponsPtr -> weaponValues.gunCore.weaponCore -> weaponParams.totalAmmo
+  auto oldAmmo = ammoForGun(inventory, gunName);
+  setGunAmmo(inventory, gunName, oldAmmo + ammo);
+}
+
+AmmoInfo currentAmmoInfo(){
+  return AmmoInfo {
+    .currentAmmo = 49,
+    .totalAmmo = 101,
+  };
 }
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
@@ -380,19 +387,22 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
   }
 }
 
-bool tryFireGun(std::optional<objid> gunId, std::optional<objid> muzzleId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
+bool tryFireGun(std::string inventory, std::optional<objid> gunId, std::optional<objid> muzzleId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(gunCore, now);
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(gunCore.weaponCore -> weaponParams.firingRate));
   if (!canFireGun){
     return false;
   }
-  bool hasAmmo = ammoForGun(gunCore.weaponCore -> name) > 0;
+  bool hasAmmo = ammoForGun(inventory, gunCore.weaponCore -> name) > 0;
   if (!hasAmmo){
     modlog("weapons", "no ammo, tried to fire, should play sound");
     return false;
   }
-  deliverAmmo(gunCore, -1);
+
+  if (gunCore.weaponCore != NULL){
+    deliverAmmo(inventory, gunCore.weaponCore -> weaponParams.name, -1);
+  }
 
   if (gunCore.weaponCore -> soundResource.has_value()){
     playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos);
@@ -444,7 +454,7 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id){
+bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory){
   if (!gunCore.weaponCore){
     return false;
   }
@@ -455,7 +465,7 @@ bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::opt
     auto playerRotation = gameapi -> getGameObjectRotation(id, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     auto playerPos = gameapi -> getGameObjectPos(id, true);
     //////////////////////
-    return tryFireGun(gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
+    return tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
   }
   return false;
 }

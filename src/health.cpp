@@ -91,8 +91,6 @@ void doDamageMessage(objid targetId, float damageAmount){
     setUiHealth(remainingHealth);
   }
 
-
-
 	HealthChangeMessage healthMessage {
 		.targetId = targetId,
 		.originId = std::nullopt,

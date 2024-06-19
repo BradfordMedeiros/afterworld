@@ -7,7 +7,6 @@
 #include "../util.h"
 #include "../materials.h"
 #include "./weapon_vector.h"
-#include "../inventory.h"
 
 struct WeaponParams {
   // gun intrinsic stuff
@@ -97,14 +96,20 @@ GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
 void removeGun(GunInstance& weaponValues);
 
-void deliverAmmo(GunCore& _gunCore, int ammo);
+void deliverAmmo(std::string inventory, std::string gunName, int ammo);
+
+struct AmmoInfo { 
+  int currentAmmo;
+  int totalAmmo;
+};
+AmmoInfo currentAmmoInfo();
 
 void saveGunTransform(GunInstance& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
 std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId);
 
-bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id);
+bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory);
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);

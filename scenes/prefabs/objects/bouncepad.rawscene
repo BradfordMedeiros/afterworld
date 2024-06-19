@@ -6,3 +6,6 @@ bouncepad:texture:./res/textures/hexglow.png
 bouncepad:scale:2 0.1 2
 bouncepad:bounce:0 0 -20
 bouncepad:rotation:-1 1 0 0
+
+
+bouncepad:spin:true

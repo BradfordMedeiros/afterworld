@@ -7,6 +7,11 @@
 #include "../weapons/weapon.h"
 #include "../controls.h"
 
+struct Movement {
+  ControlParams controlParams;
+};
+
+
 struct MovementRequest {
   glm::vec3 position;
   float speed;
@@ -31,8 +36,14 @@ struct MovementEntityData {
   std::optional<ActiveEntity> activeEntity;
 };
 
+Movement createMovement();
+void onMovementKeyCallback(Movement& movement, int key, int action);
+void onMovementMouseMoveCallback(Movement& movement, double xPos, double yPos);
+void onMovementScrollCallback(Movement& movement, double amount);
+void onMovementFrame(Movement& movement);
+
 MovementEntityData& getMovementData();
-void setActiveEntity(MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
+void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData);
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
@@ -40,7 +51,5 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
 
 void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
-
-CScriptBinding movementBinding(CustomApiBindings& api, const char* name);
 
 #endif

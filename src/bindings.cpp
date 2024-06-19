@@ -3,6 +3,9 @@
 CustomApiBindings* gameapi = NULL;
 
 
+Weapons weapons = createWeapons();
+Movement movement = createMovement();
+
 struct ManagedScene {
   std::optional<objid> id; 
   int index;
@@ -245,28 +248,73 @@ MovementEntityData& getMovementData(){
   return movementEntityData;
 }
 
-std::unordered_map<std::string, TerminalConfig> terminals {
-  { "test", TerminalConfig {
-    .terminalDisplay = TerminalImageLeftTextRight {
+std::unordered_map<std::string, std::vector<TerminalDisplayType>> terminals {
+  { "test", {
+    TerminalImage {
+        .image = "../gameresources/build/textures/moonman.jpg",
+    },
+    TerminalImageLeftTextRight {
       .image = "../gameresources/build/textures/moonman.jpg",
       .text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Blandit cursus risus at ultrices mi tempus. Quam viverra orci sagittis eu volutpat odio. Non consectetur a erat nam at lectus. Sed tempus urna et pharetra pharetra massa. Eu volutpat odio facilisis mauris sit amet massa vitae tortor. Purus non enim praesent elementum facilisis leo vel. Tellus rutrum tellus pellentesque eu tincidunt tortor aliquam. Eu lobortis elementum nibh tellus molestie nunc non. Arcu dui vivamus arcu felis. Aliquam vestibulum morbi blandit cursus risus at ultrices mi. Urna et pharetra pharetra massa massa ultricies mi. Feugiat sed lectus vestibulum mattis ullamcorper. Senectus et netus et malesuada. Feugiat vivamus at augue eget arcu. Suspendisse sed nisi lacus sed viverra tellus. In nulla posuere sollicitudin aliquam ultrices sagittis orci. Vulputate eu scelerisque felis imperdiet proin fermentum leo vel. Tellus id interdum velit laoreet id donec ultrices tincidunt arcu.",
+    },
+    TerminalText {
+      .text = "This is another page of text",
     }
   }}
 };
-std::optional<TerminalConfig> terminalConfig;
+
+struct TerminalInterface {
+  std::string name;
+  int pageIndex;
+  TerminalConfig terminalConfig;
+};
+std::optional<TerminalInterface> terminalInterface;
+
+TerminalConfig getTerminalConfig(std::string name, int pageIndex){
+  return TerminalConfig {
+    .time = gameapi -> timeSeconds(false),
+    .terminalDisplay = terminals.at(name).at(pageIndex),
+  };
+}
 
 void showTerminal(std::optional<std::string> name){
   if (!name.has_value()){
-    terminalConfig = std::nullopt;
+    terminalInterface = std::nullopt;
     setShowTerminal(false);
     return;
   }
-  terminalConfig = terminals.at(name.value());
+  int pageIndex = 0;
+  terminalInterface = TerminalInterface {
+    .name = name.value(),
+    .pageIndex = pageIndex,
+    .terminalConfig = getTerminalConfig(name.value(), pageIndex),
+  };
   setShowTerminal(true);
 }
 void nextTerminalPage(){
-  
+  if (terminalInterface.has_value()){
+    TerminalInterface& terminal = terminalInterface.value();
+    auto& terminalConfigs = terminals.at(terminalInterface.value().name);
+    if (terminal.pageIndex < terminalConfigs.size() - 1){
+      terminal.pageIndex++;
+    }else{
+      showTerminal(std::nullopt);
+      return;
+    }
+    terminal.terminalConfig = getTerminalConfig(terminalInterface.value().name, terminal.pageIndex);
+  }
 }
+void prevTerminalPage(){
+  if (terminalInterface.has_value()){
+    TerminalInterface& terminal = terminalInterface.value();
+    auto& terminalConfigs = terminals.at(terminalInterface.value().name);
+    if (terminal.pageIndex > 0){
+      terminal.pageIndex--;
+    }
+    terminal.terminalConfig = getTerminalConfig(terminalInterface.value().name, terminal.pageIndex);
+  }
+}
+
 
 
 UiContext getUiContext(GameState& gameState){
@@ -286,8 +334,11 @@ UiContext getUiContext(GameState& gameState){
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .showGameHud = []() -> bool { return getGlobalState().showGameHud; },
-   .showTerminal = []() -> std::optional<TerminalConfig> { 
-      return getGlobalState().showTerminal ? terminalConfig : std::optional<TerminalConfig>(std::nullopt); 
+   .showTerminal = []() -> std::optional<TerminalConfig> {
+      if (!terminalInterface.has_value()){
+        return std::optional<TerminalConfig>(std::nullopt); 
+      }
+      return getGlobalState().showTerminal ? terminalInterface.value().terminalConfig : std::optional<TerminalConfig>(std::nullopt); 
    },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
@@ -423,6 +474,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+    removeAllMovementCores();  // is this pointless?
     delete gameState;
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -445,6 +497,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
+    auto ammoInfo = onWeaponsFrame(weapons);
+    if (ammoInfo.has_value()){
+      setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
+    }
+    onMovementFrame(movement);
+
+    // debug
+    debugPrintInventory();
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -480,9 +540,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setActivePlayerNext();
     }
 
+    onWeaponsKeyCallback(weapons, key, action);
+    onMovementKeyCallback(movement, key, action);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
+
+    onWeaponsMessage(weapons, key);
+
     if (key == "reset"){
       pushHistory({ "mainmenu" }, true);
       return;
@@ -540,6 +605,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       showTerminal("test");
     }
 
+    if (key == "ammo"){
+      auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
+      modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
+      deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
+    }
+
     onCutsceneMessages(key);
   };
 
@@ -565,6 +636,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
+    onWeaponsMouseMove(weapons, xPos, yPos);
+    onMovementMouseMoveCallback(movement, xPos, yPos);
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
@@ -582,12 +655,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (false){
           raycastFromCameraAndMoveTo(getMovementData(), getActivePlayerId().value());
         }
+        nextTerminalPage();
       }
     }else if (button == 0){
       if (action == 0){
         getGlobalState().leftMouseDown = false;
       }else if (action == 1){
         getGlobalState().leftMouseDown = true;
+        prevTerminalPage();
       }
     }else if (button == 2){
       if (action == 0){
@@ -596,10 +671,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getGlobalState().middleMouseDown = true;
       }
     }
+    onWeaponsMouseCallback(weapons, button, action);
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
     onMainUiScroll(amount);
+    onMovementScrollCallback(movement, amount);
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     maybeAddMovementEntity(getMovementData(), idAdded);
@@ -609,6 +686,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     maybeRemoveMovementEntity(getMovementData(), idRemoved);
     onActivePlayerRemoved(idRemoved);
     onObjectsChanged();
+
+    onWeaponsObjectRemoved(weapons, idRemoved);
   };
 
   return binding;
@@ -620,9 +699,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
   bindings.push_back(aiBinding(api, "native/ai"));
-  bindings.push_back(movementBinding(api, "native/movement"));
   bindings.push_back(menuBinding(api, "native/menu"));
-  bindings.push_back(weaponBinding(api, "native/weapon"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));
