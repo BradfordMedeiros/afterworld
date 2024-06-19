@@ -7,8 +7,8 @@
 #include "./util.h"
 
 // Inventory should be scoped toward different entities
-int currentItemCount(std::string name);
-void updateItemCount(std::string name, int count);
+int currentItemCount(std::string inventory, std::string name);
+void updateItemCount(std::string inventory, std::string name, int count);
 
 bool hasGun(std::string inventory, std::string& gun);
 int ammoForGun(std::string inventory, std::string& gun);

@@ -16,7 +16,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
         { "gold",  100 },
         { "pistol",  10 },
         { "fork",  100 },
-        { "pistol-ammo", 50 },
+        { "pistol-ammo", 5 },
         { "fork-ammo", 50 },
         { "electrogun",  100 },
         { "electrogun-ammo", 10000 },
@@ -24,19 +24,15 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
 };
 
 
-std::unordered_map<std::string, float>& defaultInventory(){
-  return scopenameToInventory.at("default");
-}
-
-int currentItemCount(std::string name){
-  if (defaultInventory().find(name) == defaultInventory().end()){
+int currentItemCount(std::string inventory, std::string name){
+  if (scopenameToInventory.at(inventory).find(name) == scopenameToInventory.at(inventory).end()){
     return 0;
   }
-  return defaultInventory().at(name);
+  return scopenameToInventory.at(inventory).at(name);
 }
 
-void updateItemCount(std::string name, int count){
-  defaultInventory()[name] = count;
+void updateItemCount(std::string inventory, std::string name, int count){
+  scopenameToInventory.at(inventory)[name] = count;
 }
 
 
@@ -44,7 +40,7 @@ void updateItemCount(std::string name, int count){
 // Gun logic
 
 bool hasGun(std::string inventory, std::string& gun){
-  return scopenameToInventory.at(inventory).find(gun) != defaultInventory().end();
+  return scopenameToInventory.at(inventory).find(gun) != scopenameToInventory.at(inventory).end();
 }
 
 std::string ammoNameForGun(std::string& gun){
@@ -53,7 +49,7 @@ std::string ammoNameForGun(std::string& gun){
 int ammoForGun(std::string inventory, std::string& gun){
   std::cout << "gun is: " << gun << std::endl;
   std::string ammoName = ammoNameForGun(gun);
-  if (scopenameToInventory.at(inventory).find(ammoName) == defaultInventory().end()){
+  if (scopenameToInventory.at(inventory).find(ammoName) == scopenameToInventory.at(inventory).end()){
     return 0;
   }
   return static_cast<int>(scopenameToInventory.at(inventory).at(ammoName));
@@ -61,7 +57,7 @@ int ammoForGun(std::string inventory, std::string& gun){
 
 
 void setGunAmmo(std::string inventory, std::string gun, int currentAmmo){
-  updateItemCount(ammoNameForGun(gun), currentAmmo);
+  updateItemCount(inventory, ammoNameForGun(gun), currentAmmo);
 }
 
 

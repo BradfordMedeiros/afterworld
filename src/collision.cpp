@@ -175,6 +175,8 @@ bool isPickup(objid id){
   return playerAttr.has_value();
 }
 void tryPickupItem(objid gameObjId, objid playerId){
+  std::string inventory = "default";
+
   auto objAttr = getAttrHandle(gameObjId);
   auto pickup = getStrAttr(objAttr, "pickup");
   if (pickup.has_value()){
@@ -184,9 +186,9 @@ void tryPickupItem(objid gameObjId, objid playerId){
     auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
     auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
 
-    auto oldItemCount = currentItemCount(pickup.value());
+    auto oldItemCount = currentItemCount(inventory, pickup.value());
     auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
-    updateItemCount(pickup.value(), newItemCount);
+    updateItemCount(inventory, pickup.value(), newItemCount);
 
     if (!pickupRemove.has_value()){
       gameapi -> removeByGroupId(gameObjId);

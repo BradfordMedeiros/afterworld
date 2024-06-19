@@ -237,6 +237,8 @@ struct GameState {
 
   HandlerFns uiCallbacks;
   UiContext uiContext;
+
+  bool printInventory;
 };
 
 MovementEntityData movementEntityData {
@@ -445,13 +447,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> uiContext = {};
     initGlobal();
     gameState -> dragSelect = std::nullopt;
-    gameState -> uiContext = getUiContext(*gameState);    
-    
+    gameState -> uiContext = getUiContext(*gameState);
+
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
     }
+
+    gameState -> printInventory = args.find("print-inventory") != args.end();
+
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = fullHistoryStr();
@@ -504,7 +509,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMovementFrame(movement);
 
     // debug
-    debugPrintInventory();
+    if (gameState -> printInventory){
+      debugPrintInventory();
+    }
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {

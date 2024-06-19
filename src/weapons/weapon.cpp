@@ -26,8 +26,8 @@ void handlePickedUpItem(Weapons& weapons){
     return;
   }
 
-  auto playerPos = gameapi -> getGameObjectPos(weapons.playerId.value(), true);
-  auto playerRotation = gameapi -> getGameObjectRotation(weapons.playerId.value(), true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+  auto playerPos = gameapi -> getGameObjectPos(weapons.player.value().playerId, true);
+  auto playerRotation = gameapi -> getGameObjectRotation(weapons.player.value().playerId, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
   auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
 
@@ -53,8 +53,11 @@ bool getIsGunZoomed(){
   return isGunZoomed;
 }
 
-void changeWeaponTargetId(Weapons& weapons, objid id){
-  weapons.playerId = id;
+void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory){
+  weapons.player = PlayerInfo {
+    .playerId = id,
+    .inventory = inventory,
+  };
   reloadTraitsValues(weapons);
   //changeGun(weapons, id, gameapi -> listSceneId(id), "pistol", 10);
 }
@@ -85,22 +88,20 @@ void handleActivateItem(objid playerId){
 
 
 void maybeChangeGun(Weapons& weapons, std::string gun){
-  std::string inventory = "default";
-  if (hasGun(inventory, gun)){
-    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(inventory, gun), gameapi -> listSceneId(weapons.playerId.value()), weapons.playerId.value());
+  if (hasGun(weapons.player.value().inventory, gun)){
+    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId);
   }
 }
 
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
-  std::string inventory = "default";
-  if (weapons.playerId.has_value() && targetId == weapons.playerId.value()){
-    deliverAmmo(inventory, weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
+  if (weapons.player.has_value() && targetId == weapons.player.value().playerId){
+    deliverAmmo(weapons.player.value().inventory, weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
   }
 }
 
 Weapons createWeapons(){
   Weapons weapons {
-    .playerId = std::nullopt,
+    .player = std::nullopt,
     .isHoldingLeftMouse = false,
     .isHoldingRightMouse = false,
     .fireOnce = false,
@@ -116,20 +117,20 @@ std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
   if (isPaused()){
     return std::nullopt;
   }
-  if (!weapons.playerId.has_value()){
+  if (!weapons.player.has_value()){
     return std::nullopt;
   }
-  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.playerId.value(), "default");
+  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.player.value().playerId, weapons.player.value().inventory);
   weapons.fireOnce = false;
-  swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.playerId.value(), weapons.lookVelocity, getPlayerVelocity());
+  swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.player.value().playerId, weapons.lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons);
-  handleActivateItem(weapons.playerId.value());
+  handleActivateItem(weapons.player.value().playerId);
   return didFire ? currentAmmoInfo() : std::optional<AmmoInfo>(std::nullopt);
 }
 
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
-  if (weapons.playerId.has_value() && weapons.playerId.value() == idRemoved){
-    weapons.playerId = std::nullopt;
+  if (weapons.player.has_value() && weapons.player.value().playerId == idRemoved){
+    weapons.player = std::nullopt;
     removeGun(weapons.weaponValues);
   }
 }
@@ -155,10 +156,10 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
       weapons.isHoldingRightMouse = true;
       isGunZoomed = true;
       setZoom(isGunZoomed);
-      if (weapons.playerId.has_value()){
-        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.playerId.value());
+      if (weapons.player.has_value()){
+        auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.player.value().playerId);
         if (hitpoints.size() > 0){
-          auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId.value(), true);
+          auto cameraPos = gameapi -> getGameObjectPos(weapons.player.value().playerId, true);
           auto closestIndex = closestHitpoint(hitpoints, cameraPos);
           float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons.selectDistance){
@@ -174,7 +175,7 @@ void onWeaponsKeyCallback(Weapons& weapons, int key, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
-  if (!weapons.playerId.has_value()){
+  if (!weapons.player.has_value()){
     return;
   }
   if (isInteractKey(key)) { 
@@ -192,9 +193,9 @@ void onWeaponsKeyCallback(Weapons& weapons, int key, int action){
         modlog("weapons", "pickup released held item: " + std::to_string(weapons.heldItem.value()));
         weapons.heldItem = std::nullopt;
       }else{
-      auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.playerId.value());
+      auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.player.value().playerId);
       if (hitpoints.size() > 0){
-          auto cameraPos = gameapi -> getGameObjectPos(weapons.playerId.value(), true);
+          auto cameraPos = gameapi -> getGameObjectPos(weapons.player.value().playerId, true);
           auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
           auto hitpoint = hitpoints.at(closestHitpointIndex);
           float distance = glm::length(cameraPos - hitpoint.point);
@@ -227,7 +228,7 @@ void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos){
     return;
   }
   //std::cout << "mouse move: xPos = " << xPos << ", yPos = " << yPos << std::endl;
-  if (!weapons.playerId.has_value()){
+  if (!weapons.player.has_value()){
     return;
   }
   weapons.lookVelocity = glm::vec2(xPos, yPos);

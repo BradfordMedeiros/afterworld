@@ -10,8 +10,12 @@
 #include "./weapon_vector.h"
 #include "../activeplayer.h"
 
+struct PlayerInfo {
+  objid playerId;
+  std::string inventory;
+};
 struct Weapons {
-  std::optional<objid> playerId;
+  std::optional<PlayerInfo> player;
   bool isHoldingLeftMouse;
   bool isHoldingRightMouse;
   bool fireOnce;
@@ -27,7 +31,7 @@ Weapons createWeapons();
 
 bool getIsGunZoomed();
 void maybeChangeGun(Weapons& weapons, std::string gun);
-void changeWeaponTargetId(Weapons& weapons, objid id);
+void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
 
 std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons);
