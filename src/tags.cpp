@@ -229,17 +229,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
-		.attribute = "game-control",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
-  	.onRemove = [](void* data, int32_t id) -> void { 
-  		gameapi -> sendNotifyMessage("game-over", (int)1);
-  		gameapi -> sendNotifyMessage("alert", "gameover");
-
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
-	},
-	TagUpdater {
 		.attribute = "ambient",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
   		Tags* tags = static_cast<Tags*>(data);
