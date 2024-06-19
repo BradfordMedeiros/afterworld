@@ -188,7 +188,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
 void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   modlog("basic agent", "firing projectile");
   if (agentAttackState.gunCore.has_value()){
-    fireGunAndVisualize(agentAttackState.gunCore.value(), false, true, std::nullopt, std::nullopt, agentId);
+    fireGunAndVisualize(agentAttackState.gunCore.value(), false, true, std::nullopt, std::nullopt, agentId, "default");
   }
 }
 
@@ -288,7 +288,7 @@ void onAiAmmo(Agent& agent, objid targetId, int amount){
     AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
     modassert(attackState, "attackState invalid");
     if (attackState -> gunCore.has_value()){
-      deliverAmmo(attackState -> gunCore.value().weaponCore -> weaponParams.name, amount);
+      deliverAmmo("default", attackState -> gunCore.value().weaponCore -> weaponParams.name, amount);
     }
   }
 }

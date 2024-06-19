@@ -502,6 +502,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
     }
     onMovementFrame(movement);
+
+    // debug
+    debugPrintInventory();
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {

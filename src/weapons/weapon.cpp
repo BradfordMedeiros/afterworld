@@ -85,14 +85,16 @@ void handleActivateItem(objid playerId){
 
 
 void maybeChangeGun(Weapons& weapons, std::string gun){
-  if (hasGun(gun)){
-    changeGunAnimate(weapons.weaponValues, gun, ammoForGun("default", gun), gameapi -> listSceneId(weapons.playerId.value()), weapons.playerId.value());
+  std::string inventory = "default";
+  if (hasGun(inventory, gun)){
+    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(inventory, gun), gameapi -> listSceneId(weapons.playerId.value()), weapons.playerId.value());
   }
 }
 
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
+  std::string inventory = "default";
   if (weapons.playerId.has_value() && targetId == weapons.playerId.value()){
-    deliverAmmo(weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
+    deliverAmmo(inventory, weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
   }
 }
 
@@ -117,7 +119,7 @@ std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
   if (!weapons.playerId.has_value()){
     return std::nullopt;
   }
-  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.playerId.value());
+  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.playerId.value(), "default");
   weapons.fireOnce = false;
   swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.playerId.value(), weapons.lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons);

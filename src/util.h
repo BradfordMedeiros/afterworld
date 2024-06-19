@@ -135,6 +135,7 @@ void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint);
 float randomNum();
 
 void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
+
 void drawRightText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 
 #endif
