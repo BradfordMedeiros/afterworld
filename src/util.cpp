@@ -408,6 +408,13 @@ void playMusicClip(std::string&& clipName, objid sceneId, std::optional<float> v
   volume = volume.value() * musicVolume;
   gameapi -> playClip(clipName, sceneId, volume, position);
 }
+void playMusicClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+  if (!volume.has_value()){
+    volume = 1.f;
+  }
+  volume = volume.value() * musicVolume;
+  gameapi -> playClipById(id, volume, position);
+}
 void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   if (!volume.has_value()){
     volume = 1.f;

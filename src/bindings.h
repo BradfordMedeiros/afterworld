@@ -5,7 +5,6 @@
 #include <vector>
 #include <stack>
 #include "./ai/ai.h"
-#include "./menu.h"
 #include "./daynight.h"
 #include "./weapons/weapon.h"
 #include "./movement/movement.h"

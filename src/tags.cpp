@@ -77,6 +77,29 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
   ).value();
 }
 
+std::string queryInitialBackground(){
+  auto query = gameapi -> compileSqlQuery("select background from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0);
+}
+void updateQueryBackground(std::string image){
+  auto updateQuery = gameapi -> compileSqlQuery(
+    std::string("update session set ") + "background = ?", { image }
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+}
+void updateBackground(objid id, std::string image){
+	if (!getSingleAttr(id, "background").has_value()){
+		return;
+	}
+  setGameObjectTexture(id, image);
+}
+
+
 std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "animation",
@@ -406,6 +429,41 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
 	},
+
+	TagUpdater {
+		.attribute = "autoplay",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+  		playMusicClipById(id, std::nullopt, std::nullopt);
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {},
+  	.onFrame = std::nullopt,
+  	.onMessage =  std::nullopt,
+	},
+
+	TagUpdater {
+		.attribute = "background",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+	  	updateBackground(id, queryInitialBackground());
+		},
+  	.onRemove = [](void* data, int32_t id) -> void {},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+    	if (key == "menu-background"){
+    		auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);
+    		for (auto id : backgrounds){
+    			auto newTexture = anycast<std::string>(value); 
+    			modassert(newTexture, "menu-background invalid");
+    			updateBackground(id, *newTexture);
+    			updateQueryBackground(*newTexture);    			
+    		}
+
+    	}
+  	},
+	},
+
+
+
+
 };
 
 
