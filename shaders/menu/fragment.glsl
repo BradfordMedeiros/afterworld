@@ -54,7 +54,7 @@ uniform float emissionAmount;
 uniform float discardTexAmount;
 uniform float time;
 uniform float bloomThreshold;
-uniform vec3 mouseCoordVal;
+//uniform vec3 mouseCoordVal;
 
 bool enableAttenutation = false;
 
@@ -213,7 +213,7 @@ void main(){
       totalRipple += rippleAmount;
     }
     if (enableMouseRipple){
-      totalRipple += calcRipple(vec2(mouseCoordVal.x, mouseCoordVal.y), 0.0005);
+      //totalRipple += calcRipple(vec2(mouseCoordVal.x, mouseCoordVal.y), 0.0005);
     }
 
     adjustedTexCoord += totalRipple;
