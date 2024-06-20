@@ -101,6 +101,10 @@ struct SceneRouterPath {
   std::optional<std::string> camera;
   bool startPaused;
   bool gameMode;
+};
+
+struct SceneRouterOptions {
+  std::vector<std::string> paths;
   bool showMouse;
 };
 
@@ -111,9 +115,8 @@ std::vector<SceneRouterPath> routerPaths = {
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
     .makePlayer = false,
     .camera = std::nullopt,
-    .startPaused = true,
+    .startPaused = false,
     .gameMode = false,
-    .showMouse = true,
   },
   SceneRouterPath {
     .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
@@ -126,7 +129,6 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = true,
-    .showMouse = false,
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
@@ -135,7 +137,6 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
-    .showMouse = true,
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
@@ -144,10 +145,24 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = ">maincamera",
     .startPaused = false,
     .gameMode = false,
-    .showMouse = true,
   },
 };
 
+
+std::vector<SceneRouterOptions> routerPathOptions = {
+    SceneRouterOptions {
+      .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
+      .showMouse = true,
+    },
+    SceneRouterOptions {
+      .paths = {  "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
+      .showMouse = true,
+    },
+    SceneRouterOptions {
+      .paths = { "mainmenu/modelviewer/",  "mainmenu/particleviewer/" },
+      .showMouse = true,
+    },
+};
 
 std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, std::vector<std::string>* _params){
   *_index = 0;
@@ -164,6 +179,23 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
   }
   return std::nullopt;
 }
+
+std::optional<SceneRouterOptions*> getRouterOptions(std::string& path){
+  for (int i = 0; i < routerPathOptions.size(); i++){
+    auto &routerOptions = routerPathOptions.at(i);
+    for (int j = 0; j < routerOptions.paths.size(); j++){
+      auto pathMatch = matchPath(path, routerOptions.paths.at(j));
+      if (pathMatch.matches){
+        return &routerOptions;
+      }
+    }
+  }
+  modassert(false, std::string("no router options for: ") + path);
+  return std::nullopt;
+}
+
+
+
 
 
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
@@ -203,15 +235,18 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }
   }
 
+  modassert(router.has_value(), "router not found");
   if (router.has_value()){
     std::optional<objid> sceneId;
     if (router.value() -> scene.has_value()){
       sceneId = gameapi -> loadScene(router.value() -> scene.value()(params), {}, std::nullopt, {});
       setPaused(router.value() -> startPaused);
+
+      auto routerOptions = getRouterOptions(currentPath);
       setRouterGameState(RouteState{
         .startPaused = router.value() -> startPaused,
         .inGameMode = router.value() -> gameMode,
-        .showMouse = router.value() -> showMouse,
+        .showMouse = routerOptions.value() -> showMouse,
       });
     }
     sceneManagement.managedScene = ManagedScene {
