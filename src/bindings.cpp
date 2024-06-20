@@ -99,12 +99,12 @@ struct SceneRouterPath {
   std::optional<std::function<std::string(std::vector<std::string> params)>> scene;
   bool makePlayer;
   std::optional<std::string> camera;
-  bool startPaused;
-  bool gameMode;
 };
 
 struct SceneRouterOptions {
   std::vector<std::string> paths;
+  bool paused;
+  bool inGameMode;
   bool showMouse;
 };
 
@@ -115,8 +115,6 @@ std::vector<SceneRouterPath> routerPaths = {
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
     .makePlayer = false,
     .camera = std::nullopt,
-    .startPaused = false,
-    .gameMode = false,
   },
   SceneRouterPath {
     .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
@@ -127,39 +125,44 @@ std::vector<SceneRouterPath> routerPaths = {
     },
     .makePlayer = true,
     .camera = ">maincamera",
-    .startPaused = false,
-    .gameMode = true,
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
     .makePlayer = false,
     .camera = ">maincamera",
-    .startPaused = false,
-    .gameMode = false,
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
     .makePlayer = false,
     .camera = ">maincamera",
-    .startPaused = false,
-    .gameMode = false,
   },
 };
-
 
 std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
+      .paused = false,
+      .inGameMode = false,
       .showMouse = true,
     },
     SceneRouterOptions {
-      .paths = {  "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
+      .paths = {  "playing/*/" },
+      .paused = false,
+      .inGameMode = true,
+      .showMouse = false,
+    },
+    SceneRouterOptions {
+      .paths = {  "playing/*/paused/", "playing/*/dead/" },
+      .paused = true,
+      .inGameMode = true,
       .showMouse = true,
     },
     SceneRouterOptions {
       .paths = { "mainmenu/modelviewer/",  "mainmenu/particleviewer/" },
+      .paused = false,
+      .inGameMode = false,
       .showMouse = true,
     },
 };
@@ -223,6 +226,16 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   modlog("scene route, router, has router = ", print(router.has_value()));
   modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
+
+  auto routerOptions = getRouterOptions(currentPath);
+  setRouterGameState(RouteState{
+    .paused = routerOptions.value() -> paused,
+    .inGameMode = routerOptions.value() -> inGameMode,
+    .showMouse = routerOptions.value() -> showMouse,
+  });
+  setPaused(routerOptions.value() -> paused);
+
+
   if (sceneManagement.managedScene.has_value()){
     if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex){
       return;
@@ -240,14 +253,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     std::optional<objid> sceneId;
     if (router.value() -> scene.has_value()){
       sceneId = gameapi -> loadScene(router.value() -> scene.value()(params), {}, std::nullopt, {});
-      setPaused(router.value() -> startPaused);
-
-      auto routerOptions = getRouterOptions(currentPath);
-      setRouterGameState(RouteState{
-        .startPaused = router.value() -> startPaused,
-        .inGameMode = router.value() -> gameMode,
-        .showMouse = routerOptions.value() -> showMouse,
-      });
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
@@ -269,6 +274,8 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       }
     }
   }
+
+
 }
 
 
@@ -283,6 +290,7 @@ struct GameState {
   UiContext uiContext;
 
   bool printInventory;
+  bool printGlobal;
 };
 
 MovementEntityData movementEntityData {
@@ -509,6 +517,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     gameState -> printInventory = args.find("print-inventory") != args.end();
+    gameState -> printGlobal = args.find("print-global") != args.end();
 
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
@@ -564,6 +573,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     // debug
     if (gameState -> printInventory){
       debugPrintInventory();
+    }
+    if (gameState -> printGlobal){
+      debugPrintGlobal();
     }
   };
 

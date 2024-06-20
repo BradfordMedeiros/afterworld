@@ -3,7 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 GlobalState global {
-  .paused = true,
   .showEditor = false,
   .showScreenspaceGrid = false,
   .showConsole = false,
@@ -28,7 +27,7 @@ GlobalState global {
   .middleMouseDown = false,
 
   .routeState = RouteState {
-    .startPaused = true,
+    .paused = true,
     .inGameMode = false,
     .showMouse = true,
   },
@@ -38,20 +37,43 @@ GlobalState global {
 
 std::string print(GlobalState& globalState){
   std::string value;
-  value += "paused = " + print(globalState.paused) + "\n";
   value += "showEditor = " + print(globalState.showEditor) + "\n";
   value += "showConsole = " + print(globalState.showConsole) + "\n";
   value += "disableGameInput = " + print(globalState.disableGameInput) + "\n";
 
-  value += "startPaused = " + print(globalState.routeState.startPaused) + "\n";
+  value += "paused = " + print(globalState.routeState.paused) + "\n";
   value += "inGameMode = " + print(globalState.routeState.inGameMode) + "\n";
   value += "showMouse = " + print(globalState.routeState.showMouse) + "\n";
 
   return value;
 }
 
+void debugPrintGlobal(){
+    const float fontSize = 0.02f;
+    drawRightText("global\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt);
+
+    std::vector<std::string> valuesToPrint;
+    valuesToPrint.push_back(std::string("showEditor : ") + print(global.showEditor));
+    valuesToPrint.push_back(std::string("showConsole : ") + print(global.showConsole));
+    valuesToPrint.push_back(std::string("showGameHud : ") + print(global.showGameHud));
+    valuesToPrint.push_back(std::string("showTerminal : ") + print(global.showTerminal));
+    valuesToPrint.push_back(std::string("disableGameInput : ") + print(global.disableGameInput));
+    valuesToPrint.push_back(std::string("routeState.paused : ") + print(global.routeState.paused));
+    valuesToPrint.push_back(std::string("routeState.inGameMode : ") + print(global.routeState.inGameMode));
+    valuesToPrint.push_back(std::string("routeState.showMouse : ") + print(global.routeState.showMouse));
+
+
+
+    int offset = 0;
+    for (int i = 0; i < valuesToPrint.size(); i++){
+      drawRightText(valuesToPrint.at(i), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt);
+      offset++;
+    }
+}
+
+
 void updateState(){
-  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.paused || global.showTerminal;
+  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal;
   global.showGameHud = !global.disableGameInput;
 
   if (global.routeState.showMouse){
@@ -100,7 +122,7 @@ void updateState(){
       },
     });
   }else{
-    if (global.showEditor || global.paused){
+    if (global.showEditor || global.routeState.paused){
       gameapi -> setWorldState({
         ObjectValue {
           .object = "mouse",
@@ -123,7 +145,7 @@ void updateState(){
    ObjectValue {
      .object = "world",
      .attribute = "paused",
-     .value = global.paused ? "true" : "false",
+     .value = global.routeState.paused ? "true" : "false",
    }
   });
 
@@ -134,12 +156,12 @@ void updateState(){
 
 void setPaused(bool paused){
   modlog("paused toggle", std::string("paused state: ") + print(paused));
-  global.paused = paused;
+  global.routeState.paused = paused;
   updateState();
 }
 
 bool isPaused(){
-	return global.paused;
+	return global.routeState.paused;
 }
 
 void enterGameMode(){

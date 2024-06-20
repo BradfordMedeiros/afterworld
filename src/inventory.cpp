@@ -16,7 +16,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
         { "gold",  100 },
         { "pistol",  10 },
         { "fork",  100 },
-        { "pistol-ammo", 5 },
+        { "pistol-ammo", 30 },
         { "fork-ammo", 50 },
         { "electrogun",  100 },
         { "electrogun-ammo", 10000 },
