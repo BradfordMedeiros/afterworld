@@ -51,7 +51,7 @@ std::string print(GlobalState& globalState){
 }
 
 void updateState(){
-  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.paused;
+  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.paused || global.showTerminal;
   global.showGameHud = !global.disableGameInput;
 
   if (global.routeState.showMouse){

@@ -74,6 +74,7 @@ void setPausedMode(bool shouldBePaused){
     auto playingPath = getPathParts(0);
     if (playingPath.has_value() && playingPath.value() == "playing"){
       pushHistory({ "paused" });
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
     }
     downTime = gameapi -> timeSeconds(true);
   }
@@ -336,7 +337,12 @@ UiContext getUiContext(GameState& gameState){
   };
   UiContext uiContext {
    .isDebugMode = []() -> bool { 
-     return getStrWorldState("editor", "debug").value() == "true"; 
+    auto args = gameapi -> getArgs();
+    bool debugUi = args.find("debug-ui") != args.end();
+    if (debugUi){
+      return true;
+    }
+    return getStrWorldState("editor", "debug").value() == "true"; 
    },
    .showEditor = []() -> bool {
     return getGlobalState().showEditor;
