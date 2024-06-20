@@ -53,16 +53,43 @@ Props createLevelListProps(){
 }
 
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
+  std::vector<ImListItem> listItems;
+  listItems.push_back(ImListItem {
+    .value = "Resume",
+    .onClick = uiContext.pauseInterface.resume,
+    .mappingId = uniqueMenuItemMappingId(),
+  });
+  listItems.push_back(ImListItem {
+    .value = "Main Menu",
+    .onClick = uiContext.levels.goToMenu,
+    .mappingId = uniqueMenuItemMappingId(),
+  });
   Props props {
     .props = {
       { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
-      { .symbol = goToMainMenuSymbol, .value = uiContext.levels.goToMenu } ,
-      { .symbol = resumeSymbol, .value = uiContext.pauseInterface.resume },
+      { .symbol = valueSymbol, .value = listItems } ,
       { .symbol = yoffsetSymbol, .value = 0.2f },
     },
   };
   return props;
 }
+Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
+  std::vector<ImListItem> listItems;
+  listItems.push_back(ImListItem {
+    .value = "Main Menu",
+    .onClick = uiContext.levels.goToMenu,
+    .mappingId = uniqueMenuItemMappingId(),
+  });
+  Props props {
+    .props = {
+      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
+      { .symbol = valueSymbol, .value = listItems } ,
+      { .symbol = yoffsetSymbol, .value = 0.2f },
+    },
+  };
+  return props;
+}
+
 
 Component mainMenu {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -150,6 +177,8 @@ Component withNavigation(UiContext& uiContext, Component& wrappedComponent){
 
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
+  auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
+
   auto levelSelect = withPropsCopy(
     levelSelectComponent, 
     Props { .props = {
@@ -184,8 +213,6 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
       },
     }
   );
-
-  auto deadComponent = pauseComponent;
 
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },

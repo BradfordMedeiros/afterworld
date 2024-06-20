@@ -1,23 +1,10 @@
 #include "./pausemenu.h"
 
-std::vector<ImListItem> createPauseMenu(std::function<void()> resume, std::function<void()> goToMainMenu){
-  std::vector<ImListItem> listItems;
-  listItems.push_back(ImListItem {
-    .value = "Resume",
-    .onClick = resume,
-    .mappingId = uniqueMenuItemMappingId(),
-  });
-  listItems.push_back(ImListItem {
-    .value = "Main Menu",
-    .onClick = goToMainMenu,
-    .mappingId = uniqueMenuItemMappingId(),
-  });
-  return listItems;
-}
-
 Component pauseMenuComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-  	auto pauseMenu = createPauseMenu(fnFromProp(props, resumeSymbol).value(), fnFromProp(props, goToMainMenuSymbol).value());
+    auto pauseMenuPtr = typeFromProps<std::vector<ImListItem>>(props, valueSymbol);
+    modassert(pauseMenuPtr, "no valueSymbol for pause menu");
+    auto pauseMenu = *pauseMenuPtr;
     auto minwidth = floatFromProp(props, minwidthSymbol, 0.f);
     auto xoffset = floatFromProp(props, xoffsetSymbol, 0.f);
     auto yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
