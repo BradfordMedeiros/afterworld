@@ -55,7 +55,7 @@ Props createLevelListProps(){
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   Props props {
     .props = {
-      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime },
+      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
       { .symbol = goToMainMenuSymbol, .value = uiContext.levels.goToMenu } ,
       { .symbol = resumeSymbol, .value = uiContext.pauseInterface.resume },
       { .symbol = yoffsetSymbol, .value = 0.2f },
@@ -185,12 +185,15 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     }
   );
 
+  auto deadComponent = pauseComponent;
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
     { "mainmenu/settings/", withNavigation(uiContext, settingsMenu) },
     { "playing/*/",  emptyComponent },
     { "playing/*/paused/", pauseComponent },
+    { "playing/*/dead/", deadComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "",  emptyComponent  },
@@ -863,7 +866,7 @@ void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action,
 }
 
 
-void onObjectsChanged(){
+void onMainUiObjectsChanged(){
   refreshScenegraph();
 }
 

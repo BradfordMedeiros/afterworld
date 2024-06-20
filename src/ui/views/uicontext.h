@@ -13,7 +13,7 @@ struct LevelUIInterface {
   std::function<void()> goToMenu;
 };
 struct PauseInterface {
-  float elapsedTime;
+  std::function<float()> elapsedTime;
   std::function<void()> pause;
   std::function<void()> resume;
 };

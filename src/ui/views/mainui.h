@@ -53,7 +53,7 @@ HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> select
 void onMainUiScroll(double amount);
 void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods);
-void onObjectsChanged();
+void onMainUiObjectsChanged();
 void pushHistory(std::vector<std::string> route, bool replace = false);
 
 void popHistory();

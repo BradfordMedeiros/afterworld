@@ -20,6 +20,7 @@ glm::vec3 vec3FromSqlRow(std::vector<std::string>& sqlRow, int index);
 glm::quat quatFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);
 
 float limitAngle(float angleRadians, std::optional<float> minAngle, std::optional<float> maxAngle);
+float interpolateDuration(float min, float max, float elapsedTime, float duration);
 
 void clickMouse(objid id);
 

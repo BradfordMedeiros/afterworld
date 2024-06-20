@@ -81,6 +81,18 @@ float limitAngle(float angleRadians, std::optional<float> minAngle, std::optiona
   return targetRot;
 }
 
+float interpolateDuration(float min, float max, float elapsedTime, float duration){
+  auto percentage = elapsedTime / duration;
+  if (percentage < 0){
+    percentage = 0.f;
+  }else if (percentage > 1.f){
+    percentage = 1.f;
+  }
+  auto diff = max - min;
+  return (percentage * diff) + min;
+}
+
+
 void clickMouse(objid id){
   gameapi ->  click(0, 1); // mouse down
   gameapi -> schedule(id, 5000, NULL, [](void*) -> void {

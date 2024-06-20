@@ -84,6 +84,14 @@ void togglePauseIfInGame(){
   setPausedMode(!paused);
 }
 
+void displayGameOverMenu(){
+  auto playingPath = getPathParts(0);
+  bool isPlaying = playingPath.has_value() && playingPath.value() == "playing";
+  if (isPlaying){
+    pushHistory({ "dead" });
+  }
+}
+
 
 struct SceneRouterPath {
   std::vector<std::string> paths;
@@ -107,7 +115,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .showMouse = true,
   },
   SceneRouterPath {
-    .paths = { "playing/*/",  "playing/*/paused/" },
+    .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
     .scene = [](std::vector<std::string> params) -> std::string {
       auto sceneFile = levelByShortcutName(params.at(0));
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
@@ -352,7 +360,7 @@ UiContext getUiContext(GameState& gameState){
       }
     },
     .pauseInterface = PauseInterface {
-      .elapsedTime = gameapi -> timeSeconds(true) - downTime,
+      .elapsedTime = []() -> float { return gameapi -> timeSeconds(true) - downTime; },
       .pause = pause,
       .resume = resume,
     },
@@ -431,6 +439,10 @@ CutsceneApi cutsceneApi {
   .setCameraPosition = setTempViewpoint,
   .popTempViewpoint = popTempViewpoint,
 };
+
+void goBackMainMenu(){
+  pushHistory({ "mainmenu" }, true);
+}
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -559,10 +571,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       pushHistory({ "mainmenu" }, true);
       return;
     }
-    if (key == "game-over"){
-      pushHistory({ "mainmenu" }, true);
-      return;
-    }
     if (key == "reload-config:levels"){
       gameState -> sceneManagement.levels = loadLevels();
       return;
@@ -687,13 +695,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     maybeAddMovementEntity(getMovementData(), idAdded);
-    onObjectsChanged();
+    onMainUiObjectsChanged();
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     maybeRemoveMovementEntity(getMovementData(), idRemoved);
     onActivePlayerRemoved(idRemoved);
-    onObjectsChanged();
-
+    onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
   };
 

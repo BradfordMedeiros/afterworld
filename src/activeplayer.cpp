@@ -3,13 +3,14 @@
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
 extern Movement movement;
+void goBackMainMenu();
+void displayGameOverMenu();
 
 struct ControlledPlayer {
 	std::optional<objid> activePlayerId;
 	bool activePlayerTempDisabled;
 	std::optional<objid> tempCameraId;
 	std::optional<objid> tempViewpoint;
-	bool displayGameOver;
 
 };
 
@@ -18,7 +19,6 @@ ControlledPlayer controlledPlayer {
 	.activePlayerTempDisabled = false,
 	.tempCameraId = std::nullopt,
 	.tempViewpoint = std::nullopt,
-	.displayGameOver = false,
 };
 
 
@@ -74,10 +74,7 @@ void setActivePlayerNext(){
 
 void onPlayerFrame(){
 	//modlog("active player", print(activePlayerId));
-	if (controlledPlayer.displayGameOver){
-	  gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.1f, 0.1f, 0.1f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/testgradient.png");
-		drawCenteredText("GAME OVER", 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
-	}
+
 }
 void onActivePlayerRemoved(objid id){
 	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
@@ -85,11 +82,7 @@ void onActivePlayerRemoved(objid id){
 		auto playerScene = gameapi -> listSceneId(id);
 		auto playerPos = gameapi -> getGameObjectPos(id, true);
 		auto createdObjId = id;
-		controlledPlayer.displayGameOver = true;
-  	gameapi -> schedule(createdObjId, 5000, NULL, [](void*) -> void {
-  	 	gameapi -> sendNotifyMessage("game-over", (int)1);
-  		controlledPlayer.displayGameOver = false;
-  	});
+		displayGameOverMenu();
 	}
 }
 
