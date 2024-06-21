@@ -101,8 +101,12 @@ struct SceneRouterPath {
   std::optional<std::string> camera;
 };
 
+struct PathAndParams {
+  std::string path;
+  std::vector<std::string> params;
+};
 struct SceneRouterOptions {
-  std::vector<std::string> paths;
+  std::vector<PathAndParams> paths;
   bool paused;
   bool inGameMode;
   bool showMouse;
@@ -142,25 +146,38 @@ std::vector<SceneRouterPath> routerPaths = {
 
 std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
-      .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
+      .paths = { 
+        PathAndParams { .path = "mainmenu/", .params = {} }, 
+        PathAndParams { .path = "mainmenu/levelselect/", .params = {} }, 
+        PathAndParams { .path = "mainmenu/settings/", .params = {} }, 
+      },
       .paused = false,
       .inGameMode = false,
       .showMouse = true,
     },
     SceneRouterOptions {
-      .paths = {  "playing/*/" },
+      .paths = {  
+        PathAndParams { .path = "playing/*/", .params = {} }, 
+      },
       .paused = false,
       .inGameMode = true,
       .showMouse = false,
     },
     SceneRouterOptions {
-      .paths = {  "playing/*/paused/", "playing/*/dead/" },
+      .paths = {  
+        PathAndParams { .path = "playing/*/paused/", .params = {} }, 
+        PathAndParams { .path = "playing/*/dead/", .params = {} },
+      },
+      //.params = { { "#terminal" } },
       .paused = true,
       .inGameMode = true,
       .showMouse = true,
     },
     SceneRouterOptions {
-      .paths = { "mainmenu/modelviewer/",  "mainmenu/particleviewer/" },
+      .paths = { 
+        PathAndParams { .path = "mainmenu/modelviewer/", .params = {} },  
+        PathAndParams { .path = "mainmenu/particleviewer/", .params = {} },
+      },
       .paused = false,
       .inGameMode = false,
       .showMouse = true,
@@ -187,7 +204,7 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path){
   for (int i = 0; i < routerPathOptions.size(); i++){
     auto &routerOptions = routerPathOptions.at(i);
     for (int j = 0; j < routerOptions.paths.size(); j++){
-      auto pathMatch = matchPath(path, routerOptions.paths.at(j));
+      auto pathMatch = matchPath(path, routerOptions.paths.at(j).path);
       if (pathMatch.matches){
         return &routerOptions;
       }

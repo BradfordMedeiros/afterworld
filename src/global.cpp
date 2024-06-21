@@ -249,10 +249,20 @@ void setShowConsole(bool showConsole){
   updateState();
 }
 
+
+void pushHistoryParam(std::string);
+void rmHistoryParam(std::string);
+
 void setShowTerminal(bool showTerminal){
+  if (showTerminal){
+    pushHistoryParam("terminal");
+  }else{
+    rmHistoryParam("terminal");
+  }
   if (showTerminal == getGlobalState().showTerminal){
     return;
   }
+
   auto currTime = gameapi -> timeSeconds(false);
   if (currTime - getGlobalState().lastToggleTerminalTime > 0.1f){
     getGlobalState().lastToggleTerminalTime = currTime;

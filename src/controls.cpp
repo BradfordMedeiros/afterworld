@@ -15,7 +15,7 @@ int fireButton = 0;
 int aimButton = 1;
 int modifierButton = 'I';  // shift
 int teleportButton = 'T';
-int exitTerminalButton = 'E';
+int exitTerminalButton = 'R';
 
 void setControl(int controlSymbol, int key){
 	static int jumpSymbol = getSymbol("control-jump");

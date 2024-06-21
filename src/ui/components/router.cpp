@@ -7,10 +7,11 @@ RouterHistory createHistory(){
 	return RouterHistory {
     .currentRouteTime = 0.f,
     .history = {},
+    .params = {},
 	};
 }
 
-void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace){
+void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace, bool removeParams){
   history.currentRouteTime = gameapi -> timeSeconds(true);
   if (replace){
     history.history = {};
@@ -20,6 +21,9 @@ void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool 
   }
   if (registerOnRouteChangedFn.has_value()){
     registerOnRouteChangedFn.value()();
+  }
+  if (removeParams){
+    history.params = {};
   }
 }
 
@@ -31,8 +35,35 @@ void popHistory(RouterHistory& history){
   history.currentRouteTime = gameapi -> timeSeconds(true);
   if (registerOnRouteChangedFn.has_value()){
     registerOnRouteChangedFn.value()();
+  }  
+}
+
+void pushHistoryParam(RouterHistory& history, std::string param){
+  for (auto &paramVal : history.params){
+    if (paramVal ==  param){
+      return;
+    }
   }
-  
+  history.params.push_back(param);
+  if (registerOnRouteChangedFn.has_value()){
+    registerOnRouteChangedFn.value()();
+  }  
+}
+
+void rmHistoryParam(RouterHistory& history, std::string param){
+  auto originalSize = history.params.size();
+  std::vector<std::string> newParams;
+  for (auto &paramVal : history.params){
+    if (paramVal != param){
+      newParams.push_back(paramVal);
+    }
+  }
+  history.params = newParams;
+  if (history.params.size() != originalSize){
+    if (registerOnRouteChangedFn.has_value()){
+      registerOnRouteChangedFn.value()();
+    }  
+  }
 }
 
 std::string fullHistoryStr(RouterHistory& history){
@@ -41,6 +72,18 @@ std::string fullHistoryStr(RouterHistory& history){
     str += path + "/";
   }
   return str;
+}
+
+std::string fullDebugStr(RouterHistory& history){
+  std::string str = "";
+  for (auto &path : history.history){
+    str += path + "/";
+  }
+  str += "#";
+  for (auto &param : history.params){
+    str += param + "/";
+  }
+  return str; 
 }
 
 std::string getCurrentPath(RouterHistory& history){

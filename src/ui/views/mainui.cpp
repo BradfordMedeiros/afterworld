@@ -775,12 +775,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
   }
-  if (uiContext.isDebugMode()){
-    drawTools.drawText(std::string("route: ") + fullHistoryStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  }
-
   if (uiContext.showGameHud()){  // in game 
     //auto weaponWheelProps = getDefaultProps();
     //weaponWheelComponent.draw(drawTools, weaponWheelProps);
@@ -815,6 +809,12 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       focusedId = handlerFuncs.autofocus.value().id;
       lastAutofocusedKey = handlerFuncs.autofocus.value().key;
     }
+  }
+
+  if (uiContext.isDebugMode()){
+    drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   }
 
 
@@ -905,6 +905,13 @@ void pushHistory(std::vector<std::string> route, bool replace){
 }
 void popHistory(){
   popHistory(routerHistory);
+}
+
+void pushHistoryParam(std::string param){
+  pushHistoryParam(routerHistory, param);
+}
+void rmHistoryParam(std::string param){
+  rmHistoryParam(routerHistory, param);
 }
 
 std::string getCurrentPath(){

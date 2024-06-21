@@ -55,6 +55,9 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
 void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods);
 void onMainUiObjectsChanged();
 void pushHistory(std::vector<std::string> route, bool replace = false);
+void pushHistoryParam(std::string param);
+void rmHistoryParam(std::string param);
+
 
 void popHistory();
 std::string getCurrentPath();

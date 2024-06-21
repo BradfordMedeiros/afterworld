@@ -4,14 +4,19 @@
 #include "./common.h"
 
 struct RouterHistory {
-  std::string initialRoute;
   float currentRouteTime;
   std::deque<std::string> history;
+  std::vector<std::string> params;
 };
 RouterHistory createHistory();
-void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace = false);
+void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace = false, bool removeParams = false);
 void popHistory(RouterHistory& history);
+
+void pushHistoryParam(RouterHistory& history, std::string param);
+void rmHistoryParam(RouterHistory& history, std::string param);
+
 std::string fullHistoryStr(RouterHistory& history);
+std::string fullDebugStr(RouterHistory& history);
 std::string getCurrentPath(RouterHistory& history);
 std::optional<std::string> getPathParts(RouterHistory& history, int index);
 Component withAnimator(RouterHistory& history, Component& component, float duration);
