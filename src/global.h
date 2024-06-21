@@ -5,13 +5,12 @@
 #include "./util.h"
 
 struct RouteState {
-  bool startPaused;
+  bool paused;
   bool inGameMode;
   bool showMouse;
 };
 
 struct GlobalState {
-  bool paused;
   bool showEditor;
   bool showScreenspaceGrid;
   bool showConsole;
@@ -64,5 +63,7 @@ void setShowTerminal(bool showTerminal);
 
 void setPlayerVelocity(glm::vec3 velocity);
 glm::vec3 getPlayerVelocity();
+
+void debugPrintGlobal();
 
 #endif 
