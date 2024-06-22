@@ -58,7 +58,7 @@ struct SettingConfiguration {
 };
 
 float originalFov = 45;
-void setZoom(float percentage){
+void setZoom(float percentage, bool hideGun){
   gameapi -> setLayerState({
       StrValues {
         .target = "",
@@ -73,6 +73,14 @@ void setZoom(float percentage){
         .payload = std::to_string(originalFov * percentage),
       },
   });    
+
+  gameapi -> setLayerState({
+      StrValues {
+        .target = "no_depth",
+        .attribute = "visible",
+        .payload = hideGun ? "false" : "true",
+      },
+  });  
 }
 
 //float currentFov = 45;
@@ -144,13 +152,13 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .onSlide = [](float amount) -> void {
           originalFov = amount;
           persistSqlFloat("fov", originalFov);
-          setZoom(1.f);
+          setZoom(1.f, false);
         },
       },
       .initSetting = []() -> void {
         auto fov = getSqlValue("fov");
         originalFov = std::atof(fov.c_str());
-        setZoom(1.f);
+        setZoom(1.f, false);
       },
     },
   }},

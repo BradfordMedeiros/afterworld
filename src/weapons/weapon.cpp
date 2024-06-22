@@ -1,11 +1,11 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
-void setZoom(float);
+void setZoom(float percentage, bool hideGun);
 void setZoomSensitivity(float multiplier);
 
 void setTotalZoom(float multiplier){
-  setZoom(multiplier);
+  setZoom(multiplier, multiplier < 1.f);
   setZoomSensitivity(multiplier);
 }
 
@@ -140,7 +140,7 @@ void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
   }
 }
 
-float zoomAmount = 15.f;
+float zoomAmount = 4.f;
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;

@@ -9,7 +9,7 @@
 extern Component settingsComponent;
 
 void initSettings();
-void setZoom(float percentage);
+void setZoom(float percentage, bool hideGun);
 
 #endif
 
