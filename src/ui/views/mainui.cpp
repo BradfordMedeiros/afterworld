@@ -918,6 +918,10 @@ std::string getCurrentPath(){
   return getCurrentPath(routerHistory);
 }
 
+std::vector<std::string> historyParams(){
+  return historyParams(routerHistory);
+}
+
 std::string fullHistoryStr(){
   return fullHistoryStr(routerHistory);
 }

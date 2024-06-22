@@ -147,12 +147,30 @@ std::vector<SceneRouterPath> routerPaths = {
 std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = { 
+        PathAndParams { .path = "*/", .params = { "console" }}, 
+        PathAndParams { .path = "*/*/", .params = { "console" }}, 
+      },
+      .paused = true,
+      .inGameMode = false,
+      .showMouse = true,
+    },
+    SceneRouterOptions {
+      .paths = { 
         PathAndParams { .path = "mainmenu/", .params = {} }, 
         PathAndParams { .path = "mainmenu/levelselect/", .params = {} }, 
         PathAndParams { .path = "mainmenu/settings/", .params = {} }, 
       },
       .paused = false,
       .inGameMode = false,
+      .showMouse = true,
+    },
+    SceneRouterOptions {
+      .paths = {  
+        PathAndParams { .path = "playing/*/", .params = { "editor" } }, 
+        PathAndParams { .path = "playing/*/", .params = { "terminal" } }, 
+      },
+      .paused = false,
+      .inGameMode = true,
       .showMouse = true,
     },
     SceneRouterOptions {
@@ -168,7 +186,6 @@ std::vector<SceneRouterOptions> routerPathOptions = {
         PathAndParams { .path = "playing/*/paused/", .params = {} }, 
         PathAndParams { .path = "playing/*/dead/", .params = {} },
       },
-      //.params = { { "#terminal" } },
       .paused = true,
       .inGameMode = true,
       .showMouse = true,
@@ -200,12 +217,31 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
   return std::nullopt;
 }
 
-std::optional<SceneRouterOptions*> getRouterOptions(std::string& path){
+bool matchQueryParams(std::vector<std::string>& queryParams, std::vector<std::string>& routerParams){
+  for (auto &routerParam : routerParams){
+    bool foundMatch = false;
+    for (auto &queryParam : queryParams){
+      if (queryParam == routerParam){
+        foundMatch = true;
+        break;
+      }
+    }
+    if (!foundMatch){
+      return false;
+    }
+  }
+  return true;
+}
+
+std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vector<std::string>& queryParams, int * _index){
+  *_index = 0;
   for (int i = 0; i < routerPathOptions.size(); i++){
     auto &routerOptions = routerPathOptions.at(i);
     for (int j = 0; j < routerOptions.paths.size(); j++){
       auto pathMatch = matchPath(path, routerOptions.paths.at(j).path);
-      if (pathMatch.matches){
+      auto queryParamsMatch = matchQueryParams(queryParams, routerOptions.paths.at(j).params);
+      if (pathMatch.matches && queryParamsMatch){
+        *_index = i;
         return &routerOptions;
       }
     }
@@ -234,7 +270,7 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
   ).value();
 }
 
-void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
+void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, std::vector<std::string>& queryParams){
   modlog("scene route", std::string("path is: ") + currentPath);
 
   int currentIndex = 0;
@@ -243,15 +279,15 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   modlog("scene route, router, has router = ", print(router.has_value()));
   modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
-
-  auto routerOptions = getRouterOptions(currentPath);
+  int matchedRouterOption = 0;
+  auto routerOptions = getRouterOptions(currentPath, queryParams, &matchedRouterOption);
+  modlog("router", std::string("matched router option: ") + std::to_string(matchedRouterOption));
   setRouterGameState(RouteState{
     .paused = routerOptions.value() -> paused,
     .inGameMode = routerOptions.value() -> inGameMode,
     .showMouse = routerOptions.value() -> showMouse,
   });
   setPaused(routerOptions.value() -> paused);
-
 
   if (sceneManagement.managedScene.has_value()){
     if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex){
@@ -539,7 +575,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = fullHistoryStr();
-      onSceneRouteChange(gameState -> sceneManagement, currentPath);
+      auto queryParams = historyParams();
+      onSceneRouteChange(gameState -> sceneManagement, currentPath, queryParams);
       modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
     });
 

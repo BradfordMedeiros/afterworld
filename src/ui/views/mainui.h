@@ -61,6 +61,7 @@ void rmHistoryParam(std::string param);
 
 void popHistory();
 std::string getCurrentPath();
+std::vector<std::string> historyParams();
 std::string fullHistoryStr();
 std::optional<std::string> getPathParts(int index);
 void sendUiAlert(std::string message);

@@ -18,6 +18,8 @@ void rmHistoryParam(RouterHistory& history, std::string param);
 std::string fullHistoryStr(RouterHistory& history);
 std::string fullDebugStr(RouterHistory& history);
 std::string getCurrentPath(RouterHistory& history);
+std::vector<std::string> historyParams(RouterHistory& history);
+
 std::optional<std::string> getPathParts(RouterHistory& history, int index);
 Component withAnimator(RouterHistory& history, Component& component, float duration);
 void registerOnRouteChanged(std::function<void()> onRouteChanged);

@@ -90,6 +90,10 @@ std::string getCurrentPath(RouterHistory& history){
   return history.history.at(history.history.size() - 1);
 }
 
+std::vector<std::string> historyParams(RouterHistory& history){
+  return history.params;
+}
+
 std::optional<std::string> getPathParts(RouterHistory& history, int index){
   if (history.history.size() <= index){
     return std::nullopt;

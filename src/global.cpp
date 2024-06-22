@@ -1,6 +1,9 @@
 #include "./global.h"
 
 extern CustomApiBindings* gameapi;
+void pushHistoryParam(std::string);
+void rmHistoryParam(std::string);
+
 
 GlobalState global {
   .showEditor = false,
@@ -94,6 +97,28 @@ void updateState(){
     });    
   }
 
+
+  /*if (global.showEditor){
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "normal",
+      },
+    });
+  }else{
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "capture",
+      },
+    });    
+  }*/
+  
+
+
+
   if (global.showEditor){
     gameapi -> setWorldState({ 
       ObjectValue {
@@ -110,35 +135,6 @@ void updateState(){
         .value = "true",
       },
     });  
-  }
-
-
-  if (!global.routeState.inGameMode){
-    gameapi -> setWorldState({
-      ObjectValue {
-        .object = "mouse",
-        .attribute = "cursor",
-        .value = "normal",
-      },
-    });
-  }else{
-    if (global.showEditor || global.routeState.paused){
-      gameapi -> setWorldState({
-        ObjectValue {
-          .object = "mouse",
-          .attribute = "cursor",
-          .value = "normal",
-        },
-      });
-    }else{
-      gameapi -> setWorldState({
-        ObjectValue {
-          .object = "mouse",
-          .attribute = "cursor",
-          .value = "capture",
-        },
-      });    
-    }
   }
 
   gameapi -> setWorldState({
@@ -201,7 +197,12 @@ void setShowEditor(bool shouldShowEditor){
   modlog("update show editor", std::to_string(shouldShowEditor));
   global.showEditor = shouldShowEditor;
   queryUpdateShowEditor(shouldShowEditor);
-  updateState();
+
+  if (shouldShowEditor){
+    pushHistoryParam("editor");
+  }else{
+    rmHistoryParam("editor");
+  }
 }
 
 void initGlobal(){
@@ -246,12 +247,15 @@ void setShowConsole(bool showConsole){
     return;
   }
   global.showConsole = showConsole;
+  if (showConsole){
+    pushHistoryParam("console");
+  }else{
+    rmHistoryParam("console");
+  }
   updateState();
 }
 
 
-void pushHistoryParam(std::string);
-void rmHistoryParam(std::string);
 
 void setShowTerminal(bool showTerminal){
   if (showTerminal){
