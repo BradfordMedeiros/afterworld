@@ -9,7 +9,7 @@
 extern Component settingsComponent;
 
 void initSettings();
-void setZoom(bool zoomIn);
+void setZoom(float percentage);
 
 #endif
 

@@ -219,6 +219,7 @@ void onMovementKeyCallback(Movement& movement, int key, int action){
   }
 }
 
+float zoomSensitivity = 1.f;
 void onMovementMouseMoveCallback(Movement& movement, double xPos, double yPos){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
@@ -228,7 +229,7 @@ void onMovementMouseMoveCallback(Movement& movement, double xPos, double yPos){
   }
   float xsensitivity = getGlobalState().xsensitivity;
   float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
-  movement.controlParams.lookVelocity = glm::vec2(xsensitivity * xPos, ysensitivity * yPos);
+  movement.controlParams.lookVelocity = glm::vec2(zoomSensitivity * xsensitivity * xPos, zoomSensitivity * ysensitivity * yPos);
 }
 
 void onMovementScrollCallback(Movement& movement, double amount){
@@ -264,4 +265,8 @@ void onMovementFrame(Movement& movement){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
+}
+
+void setZoomSensitivity(float multiplier){
+  zoomSensitivity = multiplier;
 }

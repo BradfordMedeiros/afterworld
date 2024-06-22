@@ -52,4 +52,6 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
 void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
 
+void setZoomSensitivity(float multiplier);
+
 #endif

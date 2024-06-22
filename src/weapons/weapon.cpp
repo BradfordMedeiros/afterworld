@@ -1,8 +1,13 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
-void setZoom(bool);
+void setZoom(float);
+void setZoomSensitivity(float multiplier);
 
+void setTotalZoom(float multiplier){
+  setZoom(multiplier);
+  setZoomSensitivity(multiplier);
+}
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -135,6 +140,7 @@ void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
   }
 }
 
+float zoomAmount = 15.f;
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
@@ -150,12 +156,12 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
     if (action == 0){
       weapons.isHoldingRightMouse = false;
       isGunZoomed = false;
-      setZoom(isGunZoomed);
+      setTotalZoom(isGunZoomed ? (1.f / zoomAmount) : 1.f);
     }else if (action == 1){
       // select item
       weapons.isHoldingRightMouse = true;
       isGunZoomed = true;
-      setZoom(isGunZoomed);
+      setTotalZoom(isGunZoomed ? (1.f / zoomAmount) : 1.f);
       if (weapons.player.has_value()){
         auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.player.value().playerId);
         if (hitpoints.size() > 0){
