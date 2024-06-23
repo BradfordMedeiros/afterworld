@@ -19,6 +19,7 @@ struct PauseInterface {
 };
 
 struct TerminalConfig;
+struct ZoomOptions;
 struct UiContext {
   std::function<bool()> isDebugMode;
   std::function<bool()> showEditor;
@@ -26,7 +27,7 @@ struct UiContext {
   std::function<bool()> showScreenspaceGrid;
   std::function<bool()> showGameHud;
   std::function<std::optional<TerminalConfig>()> showTerminal;
-  std::function<bool()> showZoomOverlay;
+  std::function<std::optional<ZoomOptions>()> showZoomOverlay;
 
   LevelUIInterface levels;
   PauseInterface pauseInterface;

@@ -799,17 +799,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     terminalComponent.draw(drawTools, terminalProps);    
   }
 
-  if (uiContext.showZoomOverlay()){
-    glm::vec4 backgroundColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
-    drawTools.drawRect(0.75f, 0.f, 0.5f, 2.f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawRect(-0.75f, 0.f, 0.5f, 2.f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawRect(0, 0.75f, 1.f, 0.5f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawRect(0, -0.75f, 1.f, 0.5f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-
-    drawTools.drawRect(0, 0, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 0.2f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-
-    drawTools.drawText("2x zoom", -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-
+  if (uiContext.showZoomOverlay().has_value()){
+    Props zoomProps { 
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = uiContext.showZoomOverlay().value() },
+      },
+    };
+    zoomComponent.draw(drawTools, zoomProps);    
   }
 
   if (uiContext.showScreenspaceGrid()){

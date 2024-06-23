@@ -17,10 +17,16 @@ struct SceneManagement {
   std::optional<ManagedScene> managedScene;
 };
 
-bool zoomIn = false;
+std::optional<ZoomOptions> zoomOptions;
 void setTotalZoom(float multiplier){
   bool isZoomedIn = multiplier < 1.f;
-  zoomIn = isZoomedIn;
+  if (isZoomedIn){
+    zoomOptions = ZoomOptions {
+      .zoomAmount = static_cast<int>((1.f / multiplier)),
+    };
+  }else{
+    zoomOptions = std::nullopt;
+  }
   setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(multiplier);
   playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
@@ -460,7 +466,9 @@ UiContext getUiContext(GameState& gameState){
       }
       return getGlobalState().showTerminal ? terminalInterface.value().terminalConfig : std::optional<TerminalConfig>(std::nullopt); 
    },
-   .showZoomOverlay = []() -> bool { return zoomIn; },
+   .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
+      return zoomOptions; 
+   },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);
