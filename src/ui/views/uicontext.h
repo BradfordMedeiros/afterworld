@@ -26,6 +26,8 @@ struct UiContext {
   std::function<bool()> showScreenspaceGrid;
   std::function<bool()> showGameHud;
   std::function<std::optional<TerminalConfig>()> showTerminal;
+  std::function<bool()> showZoomOverlay;
+
   LevelUIInterface levels;
   PauseInterface pauseInterface;
   WorldPlayInterface worldPlayInterface;

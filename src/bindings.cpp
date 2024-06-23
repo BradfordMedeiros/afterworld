@@ -17,6 +17,14 @@ struct SceneManagement {
   std::optional<ManagedScene> managedScene;
 };
 
+bool zoomIn = false;
+void setTotalZoom(float multiplier){
+  bool isZoomedIn = multiplier < 1.f;
+  zoomIn = isZoomedIn;
+  setZoom(multiplier, isZoomedIn);
+  setZoomSensitivity(multiplier);
+  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+}
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -452,6 +460,7 @@ UiContext getUiContext(GameState& gameState){
       }
       return getGlobalState().showTerminal ? terminalInterface.value().terminalConfig : std::optional<TerminalConfig>(std::nullopt); 
    },
+   .showZoomOverlay = []() -> bool { return zoomIn; },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);

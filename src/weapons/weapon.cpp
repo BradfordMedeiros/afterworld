@@ -1,13 +1,7 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
-void setZoom(float percentage, bool hideGun);
-void setZoomSensitivity(float multiplier);
-
-void setTotalZoom(float multiplier){
-  setZoom(multiplier, multiplier < 1.f);
-  setZoomSensitivity(multiplier);
-}
+void setTotalZoom(float multiplier);
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
