@@ -33,6 +33,7 @@ bool getIsGunZoomed();
 void maybeChangeGun(Weapons& weapons, std::string gun);
 void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
+AmmoInfo currentAmmoInfo(Weapons& weapons);
 
 std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons);
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved);

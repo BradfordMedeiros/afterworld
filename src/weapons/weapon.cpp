@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 void setTotalZoom(float multiplier);
+void setUIAmmoCount(int currentAmmo, int totalAmmo);
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -89,13 +90,24 @@ void handleActivateItem(objid playerId){
 void maybeChangeGun(Weapons& weapons, std::string gun){
   if (hasGun(weapons.player.value().inventory, gun)){
     changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId);
-  }
+  }  
 }
 
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
   if (weapons.player.has_value() && targetId == weapons.player.value().playerId){
     deliverAmmo(weapons.player.value().inventory, weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
   }
+}
+
+AmmoInfo currentAmmoInfo(Weapons& weapons){
+  auto gunName = weapons.weaponValues.gunCore.weaponCore -> weaponParams.name;
+  auto currentAmmo = ammoForGun(weapons.player.value().inventory, gunName);
+  auto totalAmmo = weapons.weaponValues.gunCore.weaponCore  -> weaponParams.totalAmmo;
+
+  return AmmoInfo {
+    .currentAmmo = currentAmmo,
+    .totalAmmo = totalAmmo,
+  };
 }
 
 Weapons createWeapons(){
@@ -124,7 +136,7 @@ std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
   swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.player.value().playerId, weapons.lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons);
   handleActivateItem(weapons.player.value().playerId);
-  return didFire ? currentAmmoInfo() : std::optional<AmmoInfo>(std::nullopt);
+  return didFire ? currentAmmoInfo(weapons) : std::optional<AmmoInfo>(std::nullopt);
 }
 
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){

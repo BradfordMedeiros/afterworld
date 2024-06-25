@@ -102,7 +102,6 @@ struct AmmoInfo {
   int currentAmmo;
   int totalAmmo;
 };
-AmmoInfo currentAmmoInfo();
 
 void saveGunTransform(GunInstance& weaponValues);
 

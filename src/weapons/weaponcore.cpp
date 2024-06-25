@@ -284,17 +284,11 @@ void removeGun(GunInstance& weaponValues){
 
 
 void deliverAmmo(std::string inventory, std::string gunName, int ammo){
-  // weaponsPtr -> weaponValues.gunCore.weaponCore -> weaponParams.totalAmmo
   auto oldAmmo = ammoForGun(inventory, gunName);
   setGunAmmo(inventory, gunName, oldAmmo + ammo);
 }
 
-AmmoInfo currentAmmoInfo(){
-  return AmmoInfo {
-    .currentAmmo = 49,
-    .totalAmmo = 101,
-  };
-}
+
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
   auto timeSinceLastShot = elapsedMilliseconds - gunCore.weaponState.lastShootingTime;
