@@ -99,7 +99,6 @@ void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);
 }
 
-
 std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "animation",
@@ -113,26 +112,7 @@ std::vector<TagUpdater> tagupdates = {
 		 	removeEntityController(tags -> animationController, id);
   	},
   	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		if (key == "trigger"){
-  			AnimationTrigger* animationTriggerMessage = anycast<AnimationTrigger>(value);
-  			if (!hasControllerState(tags.animationController, animationTriggerMessage -> entityId)){
-  				return;
-  			}
-        bool changedState = triggerControllerState(tags.animationController, animationTriggerMessage -> entityId, getSymbol(animationTriggerMessage -> transition));
-        if (changedState){
-        	auto stateAnimation = stateAnimationForController(tags.animationController, animationTriggerMessage -> entityId);
-        	if (stateAnimation){
-	        	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
-        		if (stateAnimation -> animation.has_value()){
-        			gameapi -> playAnimation(animationTriggerMessage -> entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
-        		}else{
-        			gameapi -> stopAnimation(animationTriggerMessage -> entityId);
-        		}
-        	}
-        }
-  		}
-  	},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "open",
@@ -449,10 +429,6 @@ std::vector<TagUpdater> tagupdates = {
     	}
   	},
 	},
-
-
-
-
 };
 
 
@@ -638,4 +614,24 @@ std::optional<TeleportInfo> getTeleportPosition(){
 		currIndex++;
 	}
 	return std::nullopt;
+}
+
+void doAnimationTrigger(objid entityId, const char* transition){
+	modassert(tagsPtr, "tagsPtr is null");
+	Tags& tags = *tagsPtr;
+  if (!hasControllerState(tags.animationController, entityId)){
+  	return;
+  }
+  bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
+  if (changedState){
+  	auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
+  	if (stateAnimation){
+	  	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
+  		if (stateAnimation -> animation.has_value()){
+  			gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
+  		}else{
+  			gameapi -> stopAnimation(entityId);
+  		}
+  	}
+  }
 }

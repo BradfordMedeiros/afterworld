@@ -57,11 +57,6 @@ struct HealthChangeMessage {
 	float remainingHealth;
 };
 
-struct AnimationTrigger {
-	objid entityId;
-	std::string transition;
-};
-
 struct ChangeGunMessage {
 	int currentAmmo;
 	std::string gun;

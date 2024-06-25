@@ -1,6 +1,7 @@
 #include "./movementcore.h"
 
 extern CustomApiBindings* gameapi;
+void doAnimationTrigger(objid id, const char* transition);
 
 struct MovementCore {
   std::string name;
@@ -88,10 +89,8 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id){
   if (movementState.inWater){
     gameapi -> applyImpulse(id, impulse);
   }
-  gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-    .entityId = id,
-    .transition = "jump",
-  });
+  doAnimationTrigger(id, "jump");
+
 }
 
 void land(objid id){
@@ -556,10 +555,7 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
 
   if (movementState.isGrounded && !movementState.lastFrameIsGrounded){
     modlog("animation controller", "land");
-    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-      .entityId = playerId,
-      .transition = "land",
-    });
+    doAnimationTrigger(playerId, "land");
     land(playerId);
   }
 
@@ -577,30 +573,13 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   if (controlData.isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
-
     bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.z);
-    if (isSideStepping){
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = playerId,
-        .transition = "sidestep",
-      });
-    }else{
-      gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-        .entityId = playerId,
-        .transition = "walking",
-      });
-    }
+    doAnimationTrigger(playerId, isSideStepping ? "sidestep" : "walking");
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     moveUp(playerId, controlData.moveVec);
-    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-      .entityId = playerId,
-      .transition = "not-walking",
-    });
+    doAnimationTrigger(playerId, "not-walking");
   }else{
-    gameapi -> sendNotifyMessage("trigger", AnimationTrigger {
-      .entityId = playerId,
-      .transition = "not-walking",
-    });
+    doAnimationTrigger(playerId, "not-walking");
   }
 
 

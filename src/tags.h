@@ -22,4 +22,6 @@ struct TeleportInfo {
 
 std::optional<TeleportInfo> getTeleportPosition();
 
+void doAnimationTrigger(objid entityId, const char* transition);
+
 #endif 
