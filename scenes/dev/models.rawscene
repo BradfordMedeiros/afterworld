@@ -5,7 +5,6 @@ z_1_menu:position:0 0 -0.8
 z_1_menu:rotation:0 0 1 180
 z_1_menu:texture:/home/brad/Desktop/test2.png
 z_1_menu:tint:0 0 1 0.03
-z_1_menu:script:native/menu
 
 z_1_menu:shader:../afterworld/shaders/menu/fragment.glsl
 
