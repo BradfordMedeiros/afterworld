@@ -398,7 +398,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "autoplay",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
@@ -408,7 +407,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "background",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
@@ -425,7 +423,6 @@ std::vector<TagUpdater> tagupdates = {
     			updateBackground(id, *newTexture);
     			updateQueryBackground(*newTexture);    			
     		}
-
     	}
   	},
 	},

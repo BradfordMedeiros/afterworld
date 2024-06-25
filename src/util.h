@@ -57,20 +57,6 @@ struct HealthChangeMessage {
 	float remainingHealth;
 };
 
-struct ChangeGunMessage {
-	int currentAmmo;
-	std::string gun;
-};
-
-struct CurrentGunMessage {
-	int currentAmmo;
-	int totalAmmo;
-};
-
-struct SetAmmoMessage {
-	int currentAmmo;
-	std::string gun;
-};
 struct ItemAcquiredMessage {
 	objid targetId;
 	int amount;
@@ -120,7 +106,6 @@ void setGameplayVolume(float volume);
 float getMusicVolume();
 float getGameplayVolume();
 
-void playMusicClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 void playMusicClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
