@@ -87,9 +87,9 @@ void handleActivateItem(objid playerId){
 }
 
 
-void maybeChangeGun(Weapons& weapons, std::string gun){
+void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn){
   if (hasGun(weapons.player.value().inventory, gun)){
-    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId);
+    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId, fn);
   }  
 }
 

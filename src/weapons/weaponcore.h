@@ -93,7 +93,7 @@ struct GunInstance {
 };
 
 GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId);
-void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
+void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId, std::function<void()> fn);
 void removeGun(GunInstance& weaponValues);
 
 void deliverAmmo(std::string inventory, std::string gunName, int ammo);

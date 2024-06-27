@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
+void setUIAmmoCount(int currentAmmo, int totalAmmo);
 
 int jumpKey = 32;
 int moveFowardKey = 'W';
@@ -113,6 +114,13 @@ struct HotkeyToMessage {
 	std::function<void()> fn;
 };
 
+void maybeChangeGunUpdateUi(const char* gun){
+	maybeChangeGun(weapons, gun, []() -> void {
+		auto ammoInfo = currentAmmoInfo(weapons);
+    setUIAmmoCount(ammoInfo.currentAmmo, ammoInfo.totalAmmo);
+	});
+}
+
 std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
@@ -120,7 +128,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(weapons, "none");
+			maybeChangeGunUpdateUi("none");
 		},
 	},
 	HotkeyToMessage {
@@ -129,7 +137,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(weapons, "pistol");
+			maybeChangeGunUpdateUi("pistol");
 		},
 	},
 	HotkeyToMessage {
@@ -138,7 +146,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(weapons, "electrogun");
+			maybeChangeGunUpdateUi("electrogun");
 		},
 	},
 	HotkeyToMessage {
@@ -147,7 +155,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(weapons, "scrapgun");
+			maybeChangeGunUpdateUi("scrapgun");
 		},
 	},
 	HotkeyToMessage {
@@ -156,7 +164,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.keyToPublish = "",
 		.valueToPublish = "",
 		.fn = []() -> void {
-			maybeChangeGun(weapons, "fork");
+			maybeChangeGunUpdateUi("fork");
 		},
 	},
 

@@ -30,7 +30,7 @@ struct Weapons {
 Weapons createWeapons();
 
 bool getIsGunZoomed();
-void maybeChangeGun(Weapons& weapons, std::string gun);
+void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn);
 void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
 AmmoInfo currentAmmoInfo(Weapons& weapons);
