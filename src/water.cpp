@@ -2,12 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
-struct Water {
-	std::map<objid, std::set<objid>> objectsInWater;
-};
-
-
 // needs improvement taking into account masses, etc, but about the right idea. 
 // get bounding box 
 // rotation of bounding box 
@@ -163,36 +157,4 @@ void onFrameWater(Water& water){
  		return;
  	}
  	applyWaterForces(water);
-}
-
-CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
-	auto binding = createCScriptBinding(name, api);
-	binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Water* water = new Water;
-    return water;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Water* water = static_cast<Water*>(data);
-    delete water;
-  };
-
-  binding.onCollisionEnter = [](objid, void* data, int32_t obj1, int32_t obj2, glm::vec3, glm::vec3, glm::vec3, float) -> void {
-    Water* water = static_cast<Water*>(data);
-    onCollisionEnterWater(*water, obj1, obj2);
-  };
-  binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
-    Water* water = static_cast<Water*>(data);
-    onCollisionExitWater(*water, obj1, obj2);
-  };
-  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-  	Water* water = static_cast<Water*>(data);
-  	onObjectRemovedWater(*water, idRemoved);
-  };
-
-  binding.onFrame = [](int32_t id, void* data) -> void {
-  	Water* water = static_cast<Water*>(data);
-  	onFrameWater(*water);
-  };
-
-	 return binding;
 }

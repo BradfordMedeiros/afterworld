@@ -5,6 +5,7 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons = createWeapons();
 Movement movement = createMovement();
+Water water;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -642,6 +643,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
     }
     onMovementFrame(movement);
+    onFrameWater(water);
 
     // debug
     if (gameState -> printInventory){
@@ -765,12 +767,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleMomentumCollision(obj1, obj2, pos, normal, force);
     handleBouncepadCollision(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);
+    onCollisionEnterWater(water, obj1, obj2);
+
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1);
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
     modassert(gameobj1Exists && gameobj2Exists, "collision exit: objs do not exist");
     handleCollision(obj1, obj2, "switch-exit", "switch-exit-key", "exit");
+    onCollisionExitWater(water, obj1, obj2);
   };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
@@ -829,6 +834,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onActivePlayerRemoved(idRemoved);
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
+    onObjectRemovedWater(water, idRemoved);
   };
 
   return binding;
@@ -844,7 +850,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(weatherBinding(api, "native/weather"));
   bindings.push_back(soundBinding(api, "native/sound"));
-  bindings.push_back(waterBinding(api, "native/water"));
   bindings.push_back(gametypesBinding(api, "native/gametypes"));
   bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
   bindings.push_back(particleviewerBinding(api, "native/particleviewer"));
