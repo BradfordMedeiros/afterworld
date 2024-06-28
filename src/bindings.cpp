@@ -608,6 +608,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
 
+    loadDialogTree();
+
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -751,6 +753,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onCutsceneMessages(key);
+    onDialogMessage(key, value);
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
@@ -831,14 +834,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   return binding;
 }
 
-
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
   bindings.push_back(aiBinding(api, "native/ai"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
-  bindings.push_back(dialogBinding(api, "native/dialog"));
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(weatherBinding(api, "native/weather"));

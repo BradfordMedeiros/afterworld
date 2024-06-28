@@ -124,11 +124,51 @@ void printWaterElements(Water& water){
 	std::cout << " ]" << std::endl;
 }
 
+void onCollisionEnterWater(Water& water, int32_t obj1, int32_t obj2){
+   auto obj1Attr = getAttrHandle(obj1);
+   auto obj1IsWater = getStrAttr(obj1Attr, "water").has_value();
+   auto obj2Attr = getAttrHandle(obj2);
+   auto obj2IsWater = getStrAttr(obj2Attr, "water").has_value();
+   modlog("water", "obj1 water: " + print(obj1IsWater) + ", obj2 water: " + print(obj2IsWater));
+   if (obj1IsWater){
+   	if (water.objectsInWater.find(obj1) == water.objectsInWater.end()){
+   		water.objectsInWater[obj1] = {};
+   	}
+   	water.objectsInWater.at(obj1).insert(obj2);
+   }else if (obj2IsWater){
+   	if (water.objectsInWater.find(obj2) == water.objectsInWater.end()){
+      	water.objectsInWater[obj2] = {};
+   	}
+   	water.objectsInWater.at(obj2).insert(obj1);
+   }
+   printWaterElements(water);
+}
+
+void onCollisionExitWater(Water& water, int32_t obj1, int32_t obj2){
+  if (water.objectsInWater.find(obj1) != water.objectsInWater.end()){
+  	water.objectsInWater.at(obj1).erase(obj2);
+  }
+  if (water.objectsInWater.find(obj2) != water.objectsInWater.end()){
+  	water.objectsInWater.at(obj2).erase(obj1);
+  }
+  printWaterElements(water);
+}
+
+void onObjectRemovedWater(Water& water, objid idRemoved){
+ 	water.objectsInWater.erase(idRemoved);
+}
+
+void onFrameWater(Water& water){
+ 	if (isPaused()){
+ 		return;
+ 	}
+ 	applyWaterForces(water);
+}
+
 CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 	binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Water* water = new Water;
-    water -> objectsInWater = {};
     return water;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -136,47 +176,22 @@ CScriptBinding waterBinding(CustomApiBindings& api, const char* name){
     delete water;
   };
 
-  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
+  binding.onCollisionEnter = [](objid, void* data, int32_t obj1, int32_t obj2, glm::vec3, glm::vec3, glm::vec3, float) -> void {
     Water* water = static_cast<Water*>(data);
-    auto obj1Attr = getAttrHandle(obj1);
-    auto obj1IsWater = getStrAttr(obj1Attr, "water").has_value();
-    auto obj2Attr = getAttrHandle(obj2);
-    auto obj2IsWater = getStrAttr(obj2Attr, "water").has_value();
-    modlog("water", "obj1 water: " + print(obj1IsWater) + ", obj2 water: " + print(obj2IsWater));
-    if (obj1IsWater){
-    	if (water -> objectsInWater.find(obj1) == water -> objectsInWater.end()){
-    		water -> objectsInWater[obj1] = {};
-    	}
-    	water -> objectsInWater.at(obj1).insert(obj2);
-    }else if (obj2IsWater){
-    	if (water -> objectsInWater.find(obj2) == water -> objectsInWater.end()){
-       	water -> objectsInWater[obj2] = {};
-    	}
-    	water -> objectsInWater.at(obj2).insert(obj1);
-    }
-    printWaterElements(*water);
+    onCollisionEnterWater(*water, obj1, obj2);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     Water* water = static_cast<Water*>(data);
-    if (water -> objectsInWater.find(obj1) != water -> objectsInWater.end()){
-    	water -> objectsInWater.at(obj1).erase(obj2);
-    }
-    if (water -> objectsInWater.find(obj2) != water -> objectsInWater.end()){
-    	water -> objectsInWater.at(obj2).erase(obj1);
-    }
-    printWaterElements(*water);
+    onCollisionExitWater(*water, obj1, obj2);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
   	Water* water = static_cast<Water*>(data);
-  	water -> objectsInWater.erase(idRemoved);
+  	onObjectRemovedWater(*water, idRemoved);
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
-  	if (isPaused()){
-  		return;
-  	}
   	Water* water = static_cast<Water*>(data);
-  	applyWaterForces(*water);
+  	onFrameWater(*water);
   };
 
 	 return binding;

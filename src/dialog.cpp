@@ -183,21 +183,17 @@ std::optional<std::string> getChatText(std::string nodename){
 	return property;
 }
 
-CScriptBinding dialogBinding(CustomApiBindings& api, const char* name){
-	auto binding = createCScriptBinding(name, api);
-	if (!dialogTree.has_value()){
-		dialogTree = createDialogTree(deserializeDialogData());
-		// dumpDotFormat(dialogTree);
-	}
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    if (key == "dialog:talk"){
-    	auto strValue = anycast<std::string>(value); 
-      modassert(strValue != NULL, "dialog:talk value invalid");
-   		auto chatText = getChatText(*strValue);
-   		gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : ("error: no chat text available for node: " + *strValue) ));
-    }
-  };
-	return binding;
+void loadDialogTree(){
+  if (!dialogTree.has_value()){
+    dialogTree = createDialogTree(deserializeDialogData());
+    // dumpDotFormat(dialogTree);
+  }
 }
-
-
+void onDialogMessage(std::string& key, std::any& value){
+  if (key == "dialog:talk"){
+    auto strValue = anycast<std::string>(value); 
+    modassert(strValue != NULL, "dialog:talk value invalid");
+    auto chatText = getChatText(*strValue);
+    gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : ("error: no chat text available for node: " + *strValue) ));
+  }
+}
