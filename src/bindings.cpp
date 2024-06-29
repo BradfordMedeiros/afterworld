@@ -6,6 +6,8 @@ CustomApiBindings* gameapi = NULL;
 Weapons weapons = createWeapons();
 Movement movement = createMovement();
 Water water;
+SoundData soundData;
+GameTypes gametypeSystem;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -610,6 +612,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     loadDialogTree();
+    soundData = createSoundData(gameapi -> rootSceneId());
+    gametypeSystem = createGametypes();
 
     return gameState;
   };
@@ -644,6 +648,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     onMovementFrame(movement);
     onFrameWater(water);
+    gametypesOnFrame(gametypeSystem);
 
     // debug
     if (gameState -> printInventory){
@@ -689,6 +694,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onWeaponsKeyCallback(weapons, key, action);
     onMovementKeyCallback(movement, key, action);
+    gametypesOnKey(gametypeSystem, key, action);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -756,6 +762,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onCutsceneMessages(key);
     onDialogMessage(key, value);
+    onMessageSound(soundData, gameapi -> rootSceneId(), key, value);
+    gametypesOnMessage(gametypeSystem, key, value);
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
@@ -768,7 +776,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleBouncepadCollision(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);
     onCollisionEnterWater(water, obj1, obj2);
-
+    onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);
   };
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1);
@@ -849,8 +857,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(weatherBinding(api, "native/weather"));
-  bindings.push_back(soundBinding(api, "native/sound"));
-  bindings.push_back(gametypesBinding(api, "native/gametypes"));
   bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
   bindings.push_back(particleviewerBinding(api, "native/particleviewer"));
   return bindings;

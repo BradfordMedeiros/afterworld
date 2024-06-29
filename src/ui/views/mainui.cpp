@@ -799,6 +799,11 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     terminalComponent.draw(drawTools, terminalProps);    
   }
 
+  Props scoreProps {
+    .props = {},
+  };
+  scoreComponent.draw(drawTools, scoreProps);
+
   if (uiContext.showZoomOverlay().has_value()){
     Props zoomProps { 
       .props = {

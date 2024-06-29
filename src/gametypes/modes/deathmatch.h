@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_GAMETYPES_DEATHMATCH
 #define MOD_AFTERWORLD_GAMETYPES_DEATHMATCH
 
-#include "./common.h"
+#include "../common.h"
 
 GameTypeInfo getDeathmatchMode();
 

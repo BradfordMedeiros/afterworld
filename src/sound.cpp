@@ -2,16 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
-struct MaterialToSound {
-	std::string material;
-	std::string clip;
-};
 
-struct Sound {
-	std::vector<MaterialToSound> sounds;
-};
-
-std::string* getClipForMaterial(Sound& sound, std::string& material){
+std::string* getClipForMaterial(SoundData& sound, std::string& material){
 	for (auto &sound : sound.sounds){
 		if (material == sound.material){
 			return &sound.clip;
@@ -38,7 +30,7 @@ struct MessagePlaySound {
   std::string material;
 };
 
-void onMessageSound(Sound& sound, int32_t id, std::string& key, std::any& value){
+void onMessageSound(SoundData& sound, int32_t sceneId, std::string& key, std::any& value){
   if (key == "play-material-sound"){
     auto soundPosition = anycast<MessagePlaySound>(value);
     modassert(soundPosition != NULL, "sound position not given");
@@ -48,15 +40,15 @@ void onMessageSound(Sound& sound, int32_t id, std::string& key, std::any& value)
       return;
     }
     std::cout << "want to play clip: " << *clip << std::endl;
-    playGameplayClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, soundPosition -> position); // should add playclip position
+    playGameplayClip(std::string("&material-" + material), sceneId, std::nullopt, soundPosition -> position); // should add playclip position
   }
 }
 
-void onCollisionEnterSound(Sound& sound, int32_t id, int32_t obj1, int32_t obj2, glm::vec3 pos){
+void onCollisionEnterSound(SoundData& sound, int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos){
   std::string material = "wood";
   auto clip = getClipForMaterial(sound, material);
   if (clip){
-    playGameplayClip(std::string("&material-" + material), gameapi -> listSceneId(id), std::nullopt, pos);
+    playGameplayClip(std::string("&material-" + material), sceneId, std::nullopt, pos);
     auto attr1 = getAttrHandle(obj1);
     auto attr2 = getAttrHandle(obj2);
     auto vel1 = getVec3Attr(attr1, "physics_velocity").value();
@@ -65,8 +57,8 @@ void onCollisionEnterSound(Sound& sound, int32_t id, int32_t obj1, int32_t obj2,
   }
 }
 
-Sound createSound(objid sceneId){
-  Sound sound;
+SoundData createSoundData(objid sceneId){
+  SoundData sound;
   auto soundsQuery = gameapi -> compileSqlQuery("select material, walk-sound from materials", {});
   bool validSql = false;
   auto soundsResult = gameapi -> executeSqlQuery(soundsQuery, &validSql);
@@ -88,26 +80,3 @@ Sound createSound(objid sceneId){
   return sound;
 }
 
-CScriptBinding soundBinding(CustomApiBindings& api, const char* name){
-	 auto binding = createCScriptBinding(name, api);
-    binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Sound* sound = new Sound;
-    *sound = createSound(sceneId);
-    return sound;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Sound* value = static_cast<Sound*>(data);
-    delete value;
-  };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    Sound* sound = static_cast<Sound*>(data);
-    onMessageSound(*sound, id, key, value);
-  };
-  binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3, glm::vec3, float) -> void {
-    std::cout << "sound: on collision enter: " << obj1 << ", " << obj2 << std::endl;
-    Sound* sound = static_cast<Sound*>(data);
-    onCollisionEnterSound(*sound, id, obj1, obj2, pos);
-  };
-
-	return binding;
-}
