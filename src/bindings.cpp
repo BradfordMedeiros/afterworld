@@ -725,7 +725,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMovementKeyCallback(movement, key, action);
 
     if (key == 'R' && action == 1) {
-      changeGameType(gametypeSystem, "race");
+      changeGameType(gametypeSystem, "targetkill");
     } 
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){

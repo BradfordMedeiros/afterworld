@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
 struct DeathmatchMode {
 	int scoreLimit;
 	std::vector<std::string> teamNames;
@@ -76,7 +75,7 @@ GameTypeInfo getDeathmatchMode(){
 
 	    return std::string("deathmatch mode: ") + (winner ? (*winner + " won!") : "in progress") + generateScoreStr(*deathmatchMode);
 	  },
-	  .getScoreInfo = []() -> std::optional<GametypeData> { return std::nullopt; },
+	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
 	};
 	return deathmatchMode;
 }

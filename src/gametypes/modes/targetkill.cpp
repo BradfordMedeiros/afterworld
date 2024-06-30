@@ -1,5 +1,7 @@
 #include "./targetkill.h"
 
+extern CustomApiBindings* gameapi;
+
 struct TargetKillMode {
   int numTargets;
   float startTime;
@@ -29,7 +31,19 @@ GameTypeInfo getTargetKill(){
 	    modassert(targetKillMode, "target kill mode null");
 	    return std::string("targets remaining: ") + std::to_string(targetKillMode -> numTargets);
 	  },
-	  .getScoreInfo = []() -> std::optional<GametypeData> { return std::nullopt; },
+	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> {
+	    TargetKillMode* targetKillMode = std::any_cast<TargetKillMode>(&gametype);
+	    modassert(targetKillMode, "target kill mode null");
+  		float gametypeLength = 200.f;
+  		GametypeData gametypeData {
+  		  .gametypeName = "targetkill",
+  		  .score1 = 0,
+  		  .score2 = 0,
+  		  .totalScore = targetKillMode -> numTargets,
+  		  .remainingTime = gametypeLength + (startTime - gameapi -> timeSeconds(false)),
+  		};
+  		return gametypeData;
+	  },
 	};
 	return targetKill;
 }

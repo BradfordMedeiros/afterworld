@@ -18,7 +18,7 @@ struct GameTypeInfo {
   std::function<std::any()> createGametype;
   std::function<bool(std::any&, std::string& event, std::any& value)> onEvent;
   std::function<std::string(std::any&)> getDebugText;
-  std::function<std::optional<GametypeData>()> getScoreInfo;
+  std::function<std::optional<GametypeData>(std::any& gametype, float startTime)> getScoreInfo;
 }; 
 
 

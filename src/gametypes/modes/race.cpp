@@ -63,7 +63,20 @@ GameTypeInfo getRaceMode(){
 	    std::string checkpointStr = std::to_string(raceMode -> currentCheckpoint) + "/" + std::to_string(raceMode -> checkpoints.size());
 	  	return std::string("checkpoint done: ") + checkpointStr + ": time remaining: " + timeRemaining;
 	  },
-	  .getScoreInfo = []() -> std::optional<GametypeData> { return std::nullopt; },
+	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> {
+	    RaceMode* raceMode = std::any_cast<RaceMode>(&gametype);
+	  	modassert(raceMode, "race mode any value invalid");
+
+  		float gametypeLength = 200.f;
+  		GametypeData gametypeData {
+  		  .gametypeName = "race",
+  		  .score1 = raceMode -> currentCheckpoint,
+  		  .score2 = static_cast<int>(raceMode -> checkpoints.size()),
+  		  .totalScore = static_cast<int>(raceMode -> checkpoints.size()),
+  		  .remainingTime = gametypeLength + (startTime - gameapi -> timeSeconds(false)),
+  		};
+  		return gametypeData;
+	  },
 	};
 	return race;
 }

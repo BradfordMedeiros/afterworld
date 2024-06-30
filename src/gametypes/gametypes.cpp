@@ -63,16 +63,13 @@ std::vector<std::vector<std::string>> debugPrintGametypes(GameTypes& gametype){
 }
 
 std::optional<GametypeData> getGametypeData(GameTypes& gametypes){
+  if (gametypes.meta == NULL){
+    return std::nullopt;
+  }
   if (!gametypes.startTime.has_value()){
     return std::nullopt;
   }
-  float gametypeLength = 200.f;
-  GametypeData gametypeData {
-    .gametypeName = gametypes.name.c_str(),
-    .score1 = 10,
-    .score2 = 121,
-    .totalScore = 200,
-    .remainingTime = gametypeLength + (gametypes.startTime.value() - gameapi -> timeSeconds(false)),
-  };
-  return gametypeData;
+
+  auto scoreInfo = gametypes.meta -> getScoreInfo(gametypes.gametype, gametypes.startTime.value());
+  return scoreInfo;
 }
