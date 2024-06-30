@@ -8,6 +8,7 @@ Movement movement = createMovement();
 Water water;
 SoundData soundData;
 GameTypes gametypeSystem;
+AiData aiData;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -639,6 +640,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadDialogTree();
     soundData = createSoundData(gameapi -> rootSceneId());
     gametypeSystem = createGametypes();
+    aiData = createAiData();
 
     return gameState;
   };
@@ -673,6 +675,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     onMovementFrame(movement);
     onFrameWater(water);
+    onFrameAi(aiData);
+
 
     // debug
     if (gameState -> printGametypes){
@@ -726,7 +730,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (key == 'R' && action == 1) {
       changeGameType(gametypeSystem, "targetkill");
-    } 
+    }
+
+    if (key == 'Q' && action == 0) { 
+      printWorldInfo(aiData.worldInfo);
+    }
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -796,6 +804,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onDialogMessage(key, value);
     onMessageSound(soundData, gameapi -> rootSceneId(), key, value);
     gametypesOnMessage(gametypeSystem, key, value);
+    onAiOnMessage(aiData, key, value);
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
@@ -868,6 +877,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     maybeAddMovementEntity(getMovementData(), idAdded);
     onMainUiObjectsChanged();
+    onAiObjectAdded(aiData, idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     maybeRemoveMovementEntity(getMovementData(), idRemoved);
@@ -875,6 +885,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
+    onAiObjectRemoved(aiData, idRemoved);
   };
 
   return binding;
@@ -884,7 +895,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
-  bindings.push_back(aiBinding(api, "native/ai"));
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));

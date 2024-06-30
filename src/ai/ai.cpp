@@ -26,10 +26,7 @@ extern CustomApiBindings* gameapi;
 */
 
 
-struct AiData {
-  WorldInfo worldInfo;
-  std::vector<Agent> agents;
-};
+
 
 
 // based on goal-info:targets update vec3 position for each - target-pos-<objid> with team symbol from attr
@@ -226,75 +223,45 @@ void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
 }
 
 
+AiData createAiData(){
+  AiData aiData;
+  aiData.worldInfo = WorldInfo {
+    .anyValues = {},
+  };
+  aiData.agents = {};
+  return aiData;
+}
+void onFrameAi(AiData& aiData){
+  if (isPaused()){
+    return;
+  }
+  onAiFrame(aiData);
+  gameapi -> drawText("agents: " + std::to_string(aiData.agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+}
+void onAiObjectAdded(AiData& aiData, int32_t idAdded){
+  maybeAddAgent(aiData, idAdded);
+}
+void onAiObjectRemoved(AiData& aiData, int32_t idRemoved){
+  maybeRemoveAgent(aiData, idRemoved);
+  freeState(aiData.worldInfo, idRemoved);
+}
+void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
+  if (key == "ai-activate"){
+    objid* id = anycast<objid>(value);
+    modassert(id, "ai-activate null");
+    maybeReEnableAi(aiData, *id);
+  }else if (key == "ai-deactivate"){
+    objid* id = anycast<objid>(value);
+    modassert(id, "ai-deactivate null");
+    maybeDisableAi(aiData, *id);
+  }
 
-CScriptBinding aiBinding(CustomApiBindings& api, const char* name){
-  auto binding = createCScriptBinding(name, api);
-  
-  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    AiData* aiData = new AiData;
-    aiData -> worldInfo = WorldInfo {
-      .anyValues = {},
-    };
-    aiData -> agents = {};
-    for (auto &agentId : gameapi -> getObjectsByAttr("agent", std::nullopt, std::nullopt)){
-      maybeAddAgent(*aiData, agentId);
+  for (auto &agent : aiData.agents){
+    if (agent.type == AGENT_BASIC_AGENT){
+      onMessageBasicAgent(agent, key, value);
+      continue;
+    }else if (agent.type == AGENT_TURRET){
+      continue;
     }
-
-    return aiData;
-  };
-
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    AiData* aiData = static_cast<AiData*>(data);
-    delete aiData;
-  };
-
-  binding.onFrame = [](int32_t id, void* data) -> void {
-    if (isPaused()){
-      return;
-    }
-    AiData* aiData = static_cast<AiData*>(data);
-    onAiFrame(*aiData);
-    gameapi -> drawText("agents: " + std::to_string(aiData -> agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  };
-
-  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
-    AiData* aiData = static_cast<AiData*>(data);
-    if (key == 'Q' && action == 0) { 
-      printWorldInfo(aiData -> worldInfo);
-    }
-  };
-
-  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
-    AiData* aiData = static_cast<AiData*>(data);
-    maybeAddAgent(*aiData, idAdded);
-  };
-  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    AiData* aiData = static_cast<AiData*>(data);
-    maybeRemoveAgent(*aiData, idRemoved);
-    freeState(aiData -> worldInfo, idRemoved);
-  };
-
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    AiData* aiData = static_cast<AiData*>(data);
-    if (key == "ai-activate"){
-      objid* id = anycast<objid>(value);
-      modassert(id, "ai-activate null");
-      maybeReEnableAi(*aiData, *id);
-    }else if (key == "ai-deactivate"){
-      objid* id = anycast<objid>(value);
-      modassert(id, "ai-deactivate null");
-      maybeDisableAi(*aiData, *id);
-    }
-
-    for (auto &agent : aiData -> agents){
-      if (agent.type == AGENT_BASIC_AGENT){
-        onMessageBasicAgent(agent, key, value);
-        continue;
-      }else if (agent.type == AGENT_TURRET){
-        continue;
-      }
-    }
-  };
-
-  return binding;
+  }
 }

@@ -5,16 +5,13 @@ daynight:script:native/daynight
 debug:script:native/debug
 weather:script:native/weather
 tags:script:native/tags
-ai:script:native/ai
 
 # Texture resources
 loadtexture:texture:../gameresources/textures/controls/up-down.png
 loadtexture-terminal:texture:../gameresources/build/terminals/terminal.png
 loadtexture-terminal2:texture:../gameresources/build/textures/moonman.jpg
 
-
 loadtexture-terminal3:texture:../gameresources/ui/zoom.png
-
 
 testobject:position:5 4 3
 testobject:layer:somedebug

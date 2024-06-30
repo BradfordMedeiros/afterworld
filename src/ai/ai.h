@@ -7,6 +7,15 @@
 #include "./agents/turret.h"
 #include "../global.h"
 
-CScriptBinding aiBinding(CustomApiBindings& api, const char* name);
+struct AiData {
+  WorldInfo worldInfo;
+  std::vector<Agent> agents;
+};
+
+AiData createAiData();
+void onFrameAi(AiData& aiData);
+void onAiObjectAdded(AiData& aiData, int32_t idAdded);
+void onAiObjectRemoved(AiData& aiData, int32_t idRemoved);
+void onAiOnMessage(AiData& aiData, std::string& key, std::any& value);
 
 #endif
