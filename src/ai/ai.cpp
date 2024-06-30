@@ -185,31 +185,6 @@ void doGoal(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 }
 
 
-// probably most of this doesn't need to run on every frame except probably doGoal
-// (which could probably not run every frame too if everything in it is only a state transition
-//   as opposed to eg actually doing the movement)
-
-void onAiFrame(AiData& aiData){  
-  detectWorldInfo(aiData.worldInfo, aiData.agents);
-
-  for (auto &agent : aiData.agents){
-    if (!agent.enabled){
-      continue;
-    }
-    if (!gameapi -> gameobjExists(agent.id)){ 
-      continue;
-    }
-    auto goals = getGoalsForAgent(aiData.worldInfo, agent);
-    auto optimalGoal = getOptimalGoal(goals);
-    //modassert(optimalGoal, "no goal for agent");
-    if (optimalGoal){
-      //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
-      doGoal(aiData.worldInfo, *optimalGoal, agent);  
-    }
-  }
-}
-
-
 void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
   if(key == "ammo"){
     auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
@@ -231,13 +206,34 @@ AiData createAiData(){
   aiData.agents = {};
   return aiData;
 }
+
+// probably most of this doesn't need to run on every frame except probably doGoal
+// (which could probably not run every frame too if everything in it is only a state transition
+//   as opposed to eg actually doing the movement)
 void onFrameAi(AiData& aiData){
   if (isPaused()){
     return;
   }
-  onAiFrame(aiData);
-  gameapi -> drawText("agents: " + std::to_string(aiData.agents.size()), -0.9, 0.0, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  
+  detectWorldInfo(aiData.worldInfo, aiData.agents);
+
+  for (auto &agent : aiData.agents){
+    if (!agent.enabled){
+      continue;
+    }
+    if (!gameapi -> gameobjExists(agent.id)){ 
+      continue;
+    }
+    auto goals = getGoalsForAgent(aiData.worldInfo, agent);
+    auto optimalGoal = getOptimalGoal(goals);
+    //modassert(optimalGoal, "no goal for agent");
+    if (optimalGoal){
+      //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
+      doGoal(aiData.worldInfo, *optimalGoal, agent);  
+    }
+  }
 }
+
 void onAiObjectAdded(AiData& aiData, int32_t idAdded){
   maybeAddAgent(aiData, idAdded);
 }
@@ -264,4 +260,8 @@ void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
       continue;
     }
   }
+}
+
+std::vector<std::vector<std::string>> debugPrintAi(AiData& aiData){
+  return { { "agents", std::to_string(aiData.agents.size()) }};
 }

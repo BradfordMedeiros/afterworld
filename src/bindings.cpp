@@ -363,6 +363,7 @@ struct GameState {
   bool printInventory;
   bool printGlobal;
   bool printGametypes;
+  bool printAi;
 };
 
 MovementEntityData movementEntityData {
@@ -617,6 +618,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> printInventory = args.find("print-inventory") != args.end();
     gameState -> printGlobal = args.find("print-global") != args.end();
     gameState -> printGametypes = args.find("print-gametypes") != args.end();
+    gameState -> printAi = args.find("print-ai") != args.end();
 
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
@@ -689,6 +691,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> printGlobal){
       auto globalDebug = debugPrintGlobal();
       printDebugStr(globalDebug);
+    }
+    if (gameState -> printAi){
+      auto aiDebug = debugPrintAi(aiData);
+      printDebugStr(aiDebug);
     }
   };
 
