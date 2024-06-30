@@ -16,6 +16,7 @@ GameTypeInfo* gametypeByName(const char* name) {
   }
   return NULL;
 }
+
 void changeGameType(GameTypes& gametypes, const char* name){
   gametypes.name = name;
   auto gametypeInfo = gametypeByName(name);
@@ -25,23 +26,18 @@ void changeGameType(GameTypes& gametypes, const char* name){
   }
   gametypes.meta = gametypeInfo;
   gametypes.gametype = gametypeInfo -> createGametype();
+  gametypes.startTime = gameapi -> timeSeconds(false);
 }
 
 GameTypes createGametypes(){
   GameTypes gametypes;
+  gametypes.startTime = std::nullopt;
   gametypes.meta = NULL;
-  changeGameType(gametypes, "deathmatch");
   return gametypes;
 }
 
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value){
   modlog("gametypes", std::string("on message: ") + key);
-  if (key == "change-gametype"){
-    auto gametypeName = anycast<std::string>(value);
-    modassert(gametypeName, "gametypeName null");
-    changeGameType(gametypes, gametypeName -> c_str());
-    return;
-  }
   if (gametypes.meta){
     for (auto &event : gametypes.meta -> events){
       if (key == event){
@@ -54,18 +50,29 @@ void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value)
     }
   }
 }
-void gametypesOnFrame(GameTypes& gametype){
+
+
+std::vector<std::vector<std::string>> debugPrintGametypes(GameTypes& gametype){
+  std::vector<std::vector<std::string>> debugStr;
   if (!gametype.meta){
-    gameapi -> drawText("gametype: no gametype", -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    debugStr.push_back({ "gametype", "no gametype" });
   }else{
-    gameapi -> drawText("gametype: " + gametype.meta -> getDebugText(gametype.gametype), -0.9, 0.3, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    debugStr.push_back({ "gametype", gametype.meta -> getDebugText(gametype.gametype) });
   }
+  return debugStr;
 }
 
-void gametypesOnKey(GameTypes& gametypes, int key, int action){
-  if (key == 'R') { 
-    if (action == 1){
-      changeGameType(gametypes, gametypes.name.c_str());
-    }
+std::optional<GametypeData> getGametypeData(GameTypes& gametypes){
+  if (!gametypes.startTime.has_value()){
+    return std::nullopt;
   }
+  float gametypeLength = 200.f;
+  GametypeData gametypeData {
+    .gametypeName = gametypes.name.c_str(),
+    .score1 = 10,
+    .score2 = 121,
+    .totalScore = 200,
+    .remainingTime = gametypeLength + (gametypes.startTime.value() - gameapi -> timeSeconds(false)),
+  };
+  return gametypeData;
 }

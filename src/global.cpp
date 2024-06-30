@@ -51,27 +51,17 @@ std::string print(GlobalState& globalState){
   return value;
 }
 
-void debugPrintGlobal(){
-    const float fontSize = 0.02f;
-    drawRightText("global\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt);
-
-    std::vector<std::string> valuesToPrint;
-    valuesToPrint.push_back(std::string("showEditor : ") + print(global.showEditor));
-    valuesToPrint.push_back(std::string("showConsole : ") + print(global.showConsole));
-    valuesToPrint.push_back(std::string("showGameHud : ") + print(global.showGameHud));
-    valuesToPrint.push_back(std::string("showTerminal : ") + print(global.showTerminal));
-    valuesToPrint.push_back(std::string("disableGameInput : ") + print(global.disableGameInput));
-    valuesToPrint.push_back(std::string("routeState.paused : ") + print(global.routeState.paused));
-    valuesToPrint.push_back(std::string("routeState.inGameMode : ") + print(global.routeState.inGameMode));
-    valuesToPrint.push_back(std::string("routeState.showMouse : ") + print(global.routeState.showMouse));
-
-
-
-    int offset = 0;
-    for (int i = 0; i < valuesToPrint.size(); i++){
-      drawRightText(valuesToPrint.at(i), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt);
-      offset++;
-    }
+std::vector<std::vector<std::string>> debugPrintGlobal(){
+    std::vector<std::vector<std::string>> values;
+    values.push_back({ "showEditor", print(global.showEditor) });
+    values.push_back({ "showConsole", print(global.showConsole) });
+    values.push_back({ "showGameHud" , print(global.showGameHud) });
+    values.push_back({ "showTerminal" , print(global.showTerminal) });
+    values.push_back({ "disableGameInput", print(global.disableGameInput) });
+    values.push_back({ "routeState.paused", print(global.routeState.paused) });
+    values.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });
+    values.push_back({ "routeState.showMouse", print(global.routeState.showMouse) });
+    return values;
 }
 
 

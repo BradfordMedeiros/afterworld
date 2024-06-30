@@ -361,6 +361,7 @@ struct GameState {
 
   bool printInventory;
   bool printGlobal;
+  bool printGametypes;
 };
 
 MovementEntityData movementEntityData {
@@ -472,6 +473,20 @@ UiContext getUiContext(GameState& gameState){
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
       return zoomOptions; 
    },
+   .getScoreConfig = []() -> std::optional<ScoreOptions> {
+      auto gametypeData = getGametypeData(gametypeSystem);
+      if (!gametypeData.has_value()){
+        return std::nullopt;
+      }
+      ScoreOptions scoreOptions {
+        .timeRemaining = gametypeData.value().remainingTime,
+        .gametypeName = gametypeData.value().gametypeName,
+        .score1 = gametypeData.value().score1,
+        .score2 = gametypeData.value().score2,
+        .totalScore = gametypeData.value().totalScore,
+      };
+      return scoreOptions;
+   },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);
@@ -566,6 +581,15 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
+void printDebugStr(std::vector<std::vector<std::string>>& debugStr){
+  for (int i = 0; i < debugStr.size(); i++){
+    auto& row = debugStr.at(i);
+    auto rowStr = join(row, ' ');
+    std::cout << "printing: " << rowStr << std::endl;
+    gameapi -> drawText(rowStr, -0.9f, 0.9 + (i * -0.1), 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  }
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -591,6 +615,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     gameState -> printInventory = args.find("print-inventory") != args.end();
     gameState -> printGlobal = args.find("print-global") != args.end();
+    gameState -> printGametypes = args.find("print-gametypes") != args.end();
 
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
@@ -648,14 +673,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     onMovementFrame(movement);
     onFrameWater(water);
-    gametypesOnFrame(gametypeSystem);
 
     // debug
+    if (gameState -> printGametypes){
+      auto debugGametypeInfo = debugPrintGametypes(gametypeSystem);
+      printDebugStr(debugGametypeInfo);
+    }
     if (gameState -> printInventory){
       debugPrintInventory();
     }
     if (gameState -> printGlobal){
-      debugPrintGlobal();
+      auto globalDebug = debugPrintGlobal();
+      printDebugStr(globalDebug);
     }
   };
 
@@ -694,7 +723,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onWeaponsKeyCallback(weapons, key, action);
     onMovementKeyCallback(movement, key, action);
-    gametypesOnKey(gametypeSystem, key, action);
+
+    if (key == 'R' && action == 1) {
+      changeGameType(gametypeSystem, "race");
+    } 
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);

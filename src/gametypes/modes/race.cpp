@@ -62,7 +62,8 @@ GameTypeInfo getRaceMode(){
 	    modassert(raceMode, "raceMode mode null");
 	    std::string checkpointStr = std::to_string(raceMode -> currentCheckpoint) + "/" + std::to_string(raceMode -> checkpoints.size());
 	  	return std::string("checkpoint done: ") + checkpointStr + ": time remaining: " + timeRemaining;
-	  }
+	  },
+	  .getScoreInfo = []() -> std::optional<GametypeData> { return std::nullopt; },
 	};
 	return race;
 }

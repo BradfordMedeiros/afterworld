@@ -28,7 +28,8 @@ GameTypeInfo getTargetKill(){
 	    TargetKillMode* targetKillMode = std::any_cast<TargetKillMode>(&gametype);
 	    modassert(targetKillMode, "target kill mode null");
 	    return std::string("targets remaining: ") + std::to_string(targetKillMode -> numTargets);
-	  }
+	  },
+	  .getScoreInfo = []() -> std::optional<GametypeData> { return std::nullopt; },
 	};
 	return targetKill;
 }

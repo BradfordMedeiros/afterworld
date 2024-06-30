@@ -799,10 +799,18 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     terminalComponent.draw(drawTools, terminalProps);    
   }
 
-  Props scoreProps {
-    .props = {},
-  };
-  scoreComponent.draw(drawTools, scoreProps);
+  std::optional<ScoreOptions> scoreOptions = uiContext.getScoreConfig();
+  if (scoreOptions.has_value()){
+    float scorePadding = 0.02f;
+    Props scoreProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = scoreOptions.value() },
+        PropPair { .symbol = xoffsetSymbol, .value = 1.f - scorePadding },
+        PropPair { .symbol = yoffsetSymbol, .value = -1.f + scorePadding },
+      },
+    };
+    scoreComponent.draw(drawTools, scoreProps);
+  }
 
   if (uiContext.showZoomOverlay().has_value()){
     Props zoomProps { 

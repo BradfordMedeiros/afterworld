@@ -20,6 +20,7 @@ struct PauseInterface {
 
 struct TerminalConfig;
 struct ZoomOptions;
+struct ScoreOptions;
 struct UiContext {
   std::function<bool()> isDebugMode;
   std::function<bool()> showEditor;
@@ -28,6 +29,8 @@ struct UiContext {
   std::function<bool()> showGameHud;
   std::function<std::optional<TerminalConfig>()> showTerminal;
   std::function<std::optional<ZoomOptions>()> showZoomOverlay;
+
+  std::function<std::optional<ScoreOptions>()> getScoreConfig;
 
   LevelUIInterface levels;
   PauseInterface pauseInterface;

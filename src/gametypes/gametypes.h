@@ -10,12 +10,15 @@
 struct GameTypes  {
   std::string name;
   std::any gametype;
+  std::optional<float> startTime;
   GameTypeInfo* meta;
 };
 
 GameTypes createGametypes();
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value);
-void gametypesOnFrame(GameTypes& gametype);
-void gametypesOnKey(GameTypes& gametypes, int key, int action);
+std::vector<std::vector<std::string>> debugPrintGametypes(GameTypes& gametype);
+
+void changeGameType(GameTypes& gametypes, const char* name);
+std::optional<GametypeData> getGametypeData(GameTypes&);
 
 #endif 

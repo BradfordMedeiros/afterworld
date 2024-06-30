@@ -4,12 +4,21 @@
 #include <functional>
 #include "../util.h"
 
+struct GametypeData {
+  const char* gametypeName;
+  int score1;
+  int score2;
+  int totalScore;
+  float remainingTime;
+};
+
 struct GameTypeInfo {
   std::string gametypeName;
   std::vector<std::string> events;
   std::function<std::any()> createGametype;
   std::function<bool(std::any&, std::string& event, std::any& value)> onEvent;
   std::function<std::string(std::any&)> getDebugText;
+  std::function<std::optional<GametypeData>()> getScoreInfo;
 }; 
 
 

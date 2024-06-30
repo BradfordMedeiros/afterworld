@@ -75,7 +75,8 @@ GameTypeInfo getDeathmatchMode(){
 	  	auto winner = getWinner(*deathmatchMode);
 
 	    return std::string("deathmatch mode: ") + (winner ? (*winner + " won!") : "in progress") + generateScoreStr(*deathmatchMode);
-	  }
+	  },
+	  .getScoreInfo = []() -> std::optional<GametypeData> { return std::nullopt; },
 	};
 	return deathmatchMode;
 }

@@ -123,8 +123,8 @@ Component hudComponent {
     }
     drawbar(drawTools, currentHealth);
 
-    drawTools.drawText("health: " + std::to_string(static_cast<int>(currentHealth)), 0.85f, -0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, -0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText("health: " + std::to_string(static_cast<int>(currentHealth)), 0.85f, 0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 
     if (showActivate){
       drawTools.drawText("press e to activate", 0.75f, 0.7f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
