@@ -3,7 +3,6 @@
 # Scripts
 daynight:script:native/daynight
 debug:script:native/debug
-sounds:script:native/sound
 weather:script:native/weather
 tags:script:native/tags
 ai:script:native/ai
