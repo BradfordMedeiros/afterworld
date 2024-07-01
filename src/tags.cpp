@@ -416,20 +416,18 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
     	if (key == "menu-background"){
-    		auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);
-    		for (auto id : backgrounds){
-    			auto newTexture = anycast<std::string>(value); 
-    			modassert(newTexture, "menu-background invalid");
-    			updateBackground(id, *newTexture);
-    			updateQueryBackground(*newTexture);    			
-    		}
+
     	}
   	},
 	},
 };
 
 void setMenuBackground(std::string background){
-	gameapi -> sendNotifyMessage("menu-background", background);
+  auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);
+  for (auto id : backgrounds){
+  	updateBackground(id, background);
+  }
+ 	updateQueryBackground(background);
 }
 
 
