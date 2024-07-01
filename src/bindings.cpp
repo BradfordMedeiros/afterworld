@@ -675,6 +675,21 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (ammoInfo.has_value()){
       setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
     }
+
+
+    std::optional<UiHealth> uiHealth;
+    auto activePlayer = getActivePlayerId();
+    if (activePlayer.has_value()){
+      auto health = getHealth(activePlayer.value());
+      if (health.has_value()){
+        uiHealth = UiHealth {
+          .health = health.value().current,
+          .totalHealth = health.value().total,
+        };
+      }
+    }
+    setUiHealth(uiHealth);
+    
     onMovementFrame(movement);
     onFrameWater(water);
     onFrameAi(aiData);

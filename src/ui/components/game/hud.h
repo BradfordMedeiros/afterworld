@@ -5,7 +5,13 @@
 #include "../../../global.h"
 
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
-void setUiHealth(float health);
+
+struct UiHealth {
+  float health;
+  float totalHealth;
+};
+
+void setUiHealth(std::optional<UiHealth> health);
 void setShowActivate(bool showActivate);
 
 struct LetterboxFade {

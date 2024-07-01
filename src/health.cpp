@@ -1,13 +1,7 @@
 #include "./health.h"
 
 extern CustomApiBindings* gameapi;
-void setUiHealth(float);
 
-
-struct HitPoints {
-	float current;
-	float total;
-};
 std::unordered_map<objid, HitPoints> hitpoints = {};
 
 void addEntityIdHitpoints(objid id){
@@ -48,7 +42,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	return true;
 }
 
-void onNoHealth(objid targetId, std::optional<std::string> team){
+void onNoHealth(objid targetId){
   modlog("health", "removing object: " + std::to_string(targetId));
   auto removeType = getSingleAttr(targetId, "health-remove");
   if (removeType.has_value() && removeType.value() == "self"){
@@ -85,10 +79,7 @@ void doDamageMessage(objid targetId, float damageAmount){
   	return;
   }
   if (valid && enemyDead){
-   	onNoHealth(targetId, getSingleAttr(targetId, "team"));
-  }
-  if (valid){
-    setUiHealth(remainingHealth);
+   	onNoHealth(targetId);
   }
 
 	HealthChangeMessage healthMessage {
@@ -98,4 +89,11 @@ void doDamageMessage(objid targetId, float damageAmount){
 		.remainingHealth = remainingHealth,
 	};
   gameapi -> sendNotifyMessage("health-change", healthMessage);
+}
+
+std::optional<HitPoints> getHealth(objid id){
+	if (hitpoints.find(id) == hitpoints.end()){
+		return std::nullopt;
+	}
+	return hitpoints.at(id);
 }

@@ -8,8 +8,14 @@
 #include "./global.h"
 #include "./activeplayer.h"
 
+struct HitPoints {
+	float current;
+	float total;
+};
+
 void addEntityIdHitpoints(objid id);
 void removeEntityIdHitpoints(objid id);
 void doDamageMessage(objid targetId, float damageAmount);
+std::optional<HitPoints> getHealth(objid id);
 
 #endif

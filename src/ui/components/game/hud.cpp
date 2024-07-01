@@ -18,9 +18,11 @@ void setUIAmmoCount(int currentAmmo, int totalAmmo){
   };
 }
 
-float currentHealth = 0.f;
-void setUiHealth(float health){
-  currentHealth = health;
+std::optional<UiHealth> uiHealth;
+
+void setUiHealth(std::optional<UiHealth> health){
+  uiHealth = health;
+  //modlog("ui health", std::to_string(health) + ", " + std::to_string(totalHealth));
 }
 
 bool showActivate = false;
@@ -28,15 +30,16 @@ void setShowActivate(bool show){
   showActivate = show;
 }
 
-void drawbar(DrawingTools& drawTools, float health){
+void drawbar(DrawingTools& drawTools, float percentage){
   float width = 0.4f;
   float aspectRatio = 0.2f;
-  float widthPercentage = glm::max(0.f, health / 100.f);
+  float widthPercentage = glm::min(1.f, glm::max(0.f, percentage));
   float yNdc = 1.f;
 
   float barHeight = width * aspectRatio;
   drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), width, barHeight, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.5f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), widthPercentage * width, barHeight, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  //modlog("ui health percentage", std::to_string(widthPercentage));
 }
 
 
@@ -121,9 +124,11 @@ Component hudComponent {
     if (imageForHud.has_value()){
       drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, imageForHud.value(), std::nullopt);
     }
-    drawbar(drawTools, currentHealth);
 
-    drawTools.drawText("health: " + std::to_string(static_cast<int>(currentHealth)), 0.85f, 0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    if (uiHealth.has_value()){
+      drawbar(drawTools, uiHealth.value().health / uiHealth.value().totalHealth);
+      drawTools.drawText("health: " + std::to_string(static_cast<int>(uiHealth.value().health)), 0.85f, 0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    }
     drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 
     if (showActivate){
