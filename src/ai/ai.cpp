@@ -242,16 +242,6 @@ void onAiObjectRemoved(AiData& aiData, int32_t idRemoved){
   freeState(aiData.worldInfo, idRemoved);
 }
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
-  if (key == "ai-activate"){
-    objid* id = anycast<objid>(value);
-    modassert(id, "ai-activate null");
-    maybeReEnableAi(aiData, *id);
-  }else if (key == "ai-deactivate"){
-    objid* id = anycast<objid>(value);
-    modassert(id, "ai-deactivate null");
-    maybeDisableAi(aiData, *id);
-  }
-
   for (auto &agent : aiData.agents){
     if (agent.type == AGENT_BASIC_AGENT){
       onMessageBasicAgent(agent, key, value);
