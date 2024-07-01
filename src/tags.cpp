@@ -428,6 +428,10 @@ std::vector<TagUpdater> tagupdates = {
 	},
 };
 
+void setMenuBackground(std::string background){
+	gameapi -> sendNotifyMessage("menu-background", background);
+}
+
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	  auto binding = createCScriptBinding(name, api);

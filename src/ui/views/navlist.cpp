@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern NavListApi navListApi;
 extern UiManagerContext uiManagerContext;
+void setMenuBackground(std::string background);
 
 
 int mappingId = 999995;
@@ -487,8 +488,8 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "dark-trippy",
-              .onClick = []() -> void { 
-                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test3.png"));
+              .onClick = []() -> void {
+                setMenuBackground("/home/brad/Desktop/test3.png");
               },
               .mappingId = mappingId++,
             },
@@ -497,8 +498,8 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "dark-trippy-invert",
-              .onClick = []() -> void { 
-                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test5.png"));
+              .onClick = []() -> void {
+                setMenuBackground("/home/brad/Desktop/test5.png");
               },
               .mappingId = mappingId++,
             },
@@ -507,8 +508,8 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "dark-trippy2",
-              .onClick = []() -> void { 
-                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test4.png"));
+              .onClick = []() -> void {
+                setMenuBackground("/home/brad/Desktop/test4.png");
               },
               .mappingId = mappingId++,
             },
@@ -517,8 +518,8 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "cybertek",
-              .onClick = []() -> void { 
-                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/test.png"));
+              .onClick = []() -> void {
+                setMenuBackground("/home/brad/Desktop/test.png");
               },
               .mappingId = mappingId++,
             },
@@ -527,8 +528,8 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "scifi",
-              .onClick = []() -> void { 
-                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/testhelmet.jpg"));
+              .onClick = []() -> void {
+                setMenuBackground("/home/brad/Desktop/testhelmet.jpg");
               },
               .mappingId = mappingId++,
             },
@@ -537,8 +538,8 @@ std::vector<NestedListItem> nestedListTest = {
           NestedListItem {
             .item = ImListItem {
               .value = "arcade",
-              .onClick = []() -> void { 
-                gameapi -> sendNotifyMessage("menu-background", std::string("/home/brad/Desktop/art/arcade3.png"));
+              .onClick = []() -> void {
+                setMenuBackground("/home/brad/Desktop/art/arcade3.png");
               },
               .mappingId = mappingId++,
             },

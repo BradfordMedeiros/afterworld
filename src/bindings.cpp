@@ -539,9 +539,7 @@ UiContext getUiContext(GameState& gameState){
     },
     .consoleInterface = ConsoleInterface {
       .setShowEditor = setShowEditor,
-      .setBackground = [](std::string background) -> void {
-        gameapi -> sendNotifyMessage("menu-background", background);
-      },
+      .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
         pushHistory({ "playing", level.value() }, true);

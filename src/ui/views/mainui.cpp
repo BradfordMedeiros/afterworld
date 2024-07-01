@@ -1,6 +1,8 @@
 #include "./mainui.h"
 
 extern CustomApiBindings* gameapi;
+void setMenuBackground(std::string background);
+
 
 auto routerHistory = createHistory();
 
@@ -415,9 +417,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     objid id = selected.at(0);
     gameapi -> setSingleGameObjectAttr(id, key.c_str(), value);
   },
-  .setEditorBackground = [](std::string& background){
-    gameapi -> sendNotifyMessage("menu-background", std::string(background));
-  },
+  .setEditorBackground = setMenuBackground,
   .emitParticleViewerParticle = emitNewParticleViewerParticle,
   .setParticlesViewerShouldEmit = setParticlesViewerShouldEmit,
   .getParticlesViewerShouldEmit = getParticlesViewerShouldEmit,
