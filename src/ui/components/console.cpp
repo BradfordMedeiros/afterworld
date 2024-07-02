@@ -186,6 +186,14 @@ std::vector<CommandDispatch> commands {
       return std::nullopt;    
     },
   },
+  CommandDispatch {
+    .command = "dump",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      gameapi -> debugInfo(std::nullopt);
+      exit(1);
+      return std::nullopt;    
+    },
+  }
 };
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){

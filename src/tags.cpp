@@ -426,26 +426,40 @@ void setMenuBackground(std::string background){
  	updateQueryBackground(background);
 }
 
+void onTagsMessage(Tags& tags, std::string& key, std::any& value){
+  for (auto &tagUpdate : tagupdates){
+  	if (tagUpdate.onMessage.has_value()){
+  		tagUpdate.onMessage.value()(tags, key, value);
+  	}
+  }
+}
+void onTagsFrame(Tags& tags){
+	for (auto &tagUpdate : tagupdates){
+		if (tagUpdate.onFrame.has_value()){
+			tagUpdate.onFrame.value()(tags);
+		}
+	}
+}
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
-	  auto binding = createCScriptBinding(name, api);
+	auto binding = createCScriptBinding(name, api);
 
-		std::vector<AttrFunc> attrFuncs = {};
-		std::vector<AttrFuncValue> attrAddFuncs = {};
-		for (auto &tagUpdate : tagupdates){
-			attrAddFuncs.push_back(AttrFuncValue {
-				.attr = tagUpdate.attribute,
-				.fn = tagUpdate.onAdd,
-			});
-			attrFuncs.push_back(AttrFunc {
-				.attr = tagUpdate.attribute,
-				.fn = tagUpdate.onRemove,
-			});
-		}
+	std::vector<AttrFunc> attrFuncs = {};
+	std::vector<AttrFuncValue> attrAddFuncs = {};
+	for (auto &tagUpdate : tagupdates){
+		attrAddFuncs.push_back(AttrFuncValue {
+			.attr = tagUpdate.attribute,
+			.fn = tagUpdate.onAdd,
+		});
+		attrFuncs.push_back(AttrFunc {
+			.attr = tagUpdate.attribute,
+			.fn = tagUpdate.onRemove,
+		});
+	}
 
-	  auto onAddFns = getOnAttrAdds(attrAddFuncs);
+	auto onAddFns = getOnAttrAdds(attrAddFuncs);
 
-    binding.create = [onAddFns](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+  binding.create = [onAddFns](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
     tagsPtr = tags;
 
@@ -460,7 +474,6 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     tags -> openable = {};
     tags -> idToRotateTimeAdded = {};
     tags -> teleportObjs = {};
-
     ///// animations ////
     tags -> animationController = createStateController();
 
@@ -543,9 +556,6 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
    		}
    	);
 
-    ////////////////////////////////
-
-
     std::set<objid> idsAlreadyExisting;
     for (auto &tagUpdate : tagupdates){
     	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
@@ -556,7 +566,6 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     for (auto idAdded : idsAlreadyExisting){
    		onAddFns(id, (void*)tags, idAdded);
     }
-
     return tags;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -566,11 +575,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
   	Tags* tags = static_cast<Tags*>(data);
-  	for (auto &tagUpdate : tagupdates){
-  		if (tagUpdate.onMessage.has_value()){
-  			tagUpdate.onMessage.value()(*tags, key, value);
-  		}
-  	}
+  	onTagsMessage(*tags, key, value);
   };
 
   binding.onObjectAdded = onAddFns;
@@ -578,11 +583,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrame = [](int32_t id, void* data) -> void {
 		Tags* tags = static_cast<Tags*>(data);
-		for (auto &tagUpdate : tagupdates){
-			if (tagUpdate.onFrame.has_value()){
-				tagUpdate.onFrame.value()(*tags);
-			}
-		}
+		onTagsFrame(*tags);
   };
 
 	return binding;
