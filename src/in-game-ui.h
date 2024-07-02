@@ -6,7 +6,6 @@
 #include "./util.h"
 #include "./activeplayer.h"
 
-
 struct TextDisplay {
 	std::string texture;
 	std::string channel;
@@ -28,5 +27,6 @@ void onInGameUiFrame(InGameUi& inGameUi);
 void zoomIntoGameUi(objid id);
 std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
 void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value);
+void testInGameUiSetText(std::string value);
 
 #endif 

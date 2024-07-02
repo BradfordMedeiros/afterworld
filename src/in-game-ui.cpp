@@ -80,3 +80,7 @@ void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value){
 		}
 	}
 }
+
+void testInGameUiSetText(std::string value){
+	gameapi -> sendNotifyMessage("ui-debug-text", std::string("textvalue"));
+}

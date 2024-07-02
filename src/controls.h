@@ -4,6 +4,7 @@
 #include "./util.h"
 #include "./inventory.h"
 #include "./weapons/weapon.h"
+#include "./in-game-ui.h"
 
 
 bool isJumpKey(int key);

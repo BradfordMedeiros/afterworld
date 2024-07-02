@@ -414,11 +414,7 @@ std::vector<TagUpdater> tagupdates = {
 		},
   	.onRemove = [](void* data, int32_t id) -> void {},
   	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-    	if (key == "menu-background"){
-
-    	}
-  	},
+  	.onMessage = std::nullopt,
 	},
 };
 
