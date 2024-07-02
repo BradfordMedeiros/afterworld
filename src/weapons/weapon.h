@@ -25,11 +25,14 @@ struct Weapons {
 
   glm::vec2 lookVelocity;
   std::optional<objid> heldItem;
+
+  bool isGunZoomed;
+  std::optional<objid> activateableItem;
 };
 
 Weapons createWeapons();
 
-bool getIsGunZoomed();
+bool getIsGunZoomed(Weapons& weapons);
 void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn);
 void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
@@ -40,6 +43,7 @@ void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved);
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action);
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action);
 void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos);
-void onWeaponsMessage(Weapons& weapons, std::string& key);
+
+void reloadTraitsValues(Weapons& weapons);
 
 #endif

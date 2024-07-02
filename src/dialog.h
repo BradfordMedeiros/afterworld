@@ -6,6 +6,6 @@
 #include "./util.h"
 
 void loadDialogTree();
-void onDialogMessage(std::string& key, std::any& value);
+void doDialogMessage(std::string& value);
 
 #endif 

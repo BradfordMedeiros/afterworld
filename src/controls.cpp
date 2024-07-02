@@ -109,8 +109,6 @@ bool isExitTerminalKey(int button){
 struct HotkeyToMessage {
 	int key;
 	std::optional<int> action;
-	std::string keyToPublish;
-	std::string valueToPublish;
 	std::function<void()> fn;
 };
 
@@ -125,8 +123,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
 		.action = 0,
-		.keyToPublish = "",
-		.valueToPublish = "",
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("none");
 		},
@@ -134,8 +130,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = '1',  // 1
 		.action = 0,
-		.keyToPublish = "",
-		.valueToPublish = "",
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("pistol");
 		},
@@ -143,8 +137,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = '2',  // 2 
 		.action = 0,
-		.keyToPublish = "",
-		.valueToPublish = "",
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("electrogun");
 		},
@@ -152,8 +144,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = '3',  // 3
 		.action = 0,
-		.keyToPublish = "",
-		.valueToPublish = "",
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("scrapgun");
 		},
@@ -161,8 +151,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = '4',  
 		.action = 0,
-		.keyToPublish = "",
-		.valueToPublish = "",
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("fork");
 		},
@@ -171,16 +159,16 @@ std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = '5',  // 3
 		.action = 0,
-		.keyToPublish = "interact-ingame-ui",
-		.valueToPublish = "",
-		.fn = []() -> void {},
+		.fn = []() -> void {
+			gameapi -> sendNotifyMessage("interact-ingame-ui", std::string(""));
+		},
 	},
 	HotkeyToMessage {
 		.key = '6',  // 3
 		.action = 0,
-		.keyToPublish = "ui-debug-text",
-		.valueToPublish = "textvalue",
-		.fn = []() -> void {},
+		.fn = []() -> void {
+			gameapi -> sendNotifyMessage("ui-debug-text", std::string("textvalue"));
+		},
 	},
 
 };
@@ -188,9 +176,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 void handleHotkey(int key, int action){
 	for (auto &hotkey : hotkeys){
 		if (hotkey.key == key && hotkey.action == action){
-			if (hotkey.keyToPublish != ""){
-				gameapi -> sendNotifyMessage(hotkey.keyToPublish, hotkey.valueToPublish);
-			}
 			hotkey.fn();
 		}
 	}

@@ -25,23 +25,13 @@ void loadAllSounds(std::vector<MaterialToSound>& sounds, objid sceneId){
   }
 }
 
-struct MessagePlaySound {
-  glm::vec3 position;
-  std::string material;
-};
-
-void onMessageSound(SoundData& sound, int32_t sceneId, std::string& key, std::any& value){
-  if (key == "play-material-sound"){
-    auto soundPosition = anycast<MessagePlaySound>(value);
-    modassert(soundPosition != NULL, "sound position not given");
-    auto material = soundPosition -> material;
-    auto clip = getClipForMaterial(sound, material);
-    if (!clip){
-      return;
-    }
-    std::cout << "want to play clip: " << *clip << std::endl;
-    playGameplayClip(std::string("&material-" + material), sceneId, std::nullopt, soundPosition -> position); // should add playclip position
+void playMaterialSound(SoundData& sound, int32_t sceneId, glm::vec3 position, std::string& material){
+  auto clip = getClipForMaterial(sound, material);
+  if (!clip){
+    return;
   }
+  std::cout << "want to play clip: " << *clip << std::endl;
+  playGameplayClip(std::string("&material-" + material), sceneId, std::nullopt, position); // should add playclip position
 }
 
 void onCollisionEnterSound(SoundData& sound, int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos){

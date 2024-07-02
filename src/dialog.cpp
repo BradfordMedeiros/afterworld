@@ -189,11 +189,8 @@ void loadDialogTree(){
     // dumpDotFormat(dialogTree);
   }
 }
-void onDialogMessage(std::string& key, std::any& value){
-  if (key == "dialog:talk"){
-    auto strValue = anycast<std::string>(value); 
-    modassert(strValue != NULL, "dialog:talk value invalid");
-    auto chatText = getChatText(*strValue);
-    gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : ("error: no chat text available for node: " + *strValue) ));
-  }
+
+void doDialogMessage(std::string& value){
+  auto chatText = getChatText(value);
+  gameapi -> sendNotifyMessage("alert", "dialog chat: " + (chatText.has_value() ? chatText.value() : ("error: no chat text available for node: " + value) ));
 }

@@ -269,7 +269,9 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 }
 
 
-
+bool getIsGunZoomed(){
+  return getIsGunZoomed(weapons);
+}
 
 
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
@@ -531,12 +533,8 @@ UiContext getUiContext(GameState& gameState){
       gameapi -> resetScene(sceneId.value());
     },
     .activeSceneId = activeSceneForSelected,
-    .showPreviousModel = []() -> void {
-      gameapi -> sendNotifyMessage("prev-model", NULL);
-    },
-    .showNextModel = []() -> void {
-      gameapi -> sendNotifyMessage("next-model", NULL);
-    },
+    .showPreviousModel = modelViewerPrevModel,
+    .showNextModel = modelViewerNextModel,
     .consoleInterface = ConsoleInterface {
       .setShowEditor = setShowEditor,
       .setBackground = setMenuBackground,
@@ -588,6 +586,11 @@ void printDebugStr(std::vector<std::vector<std::string>>& debugStr){
     std::cout << "printing: " << rowStr << std::endl;
     gameapi -> drawText(rowStr, -0.9f, 0.9 + (i * -0.1), 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   }
+}
+
+
+void handleSelectItem(objid id){
+  gameapi -> sendNotifyMessage("selected", id);
 }
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -758,7 +761,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
 
-    onWeaponsMessage(weapons, key);
+    if (key == "save-gun"){
+      saveGunTransform(weapons.weaponValues);
+    }else if (key == "reload-config:weapon:traits"){
+      reloadTraitsValues(weapons);
+    }
 
     if (key == "reset"){
       pushHistory({ "mainmenu" }, true);
@@ -819,9 +826,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
     }
 
+    if (key == "play-material-sound"){
+      auto soundPosition = anycast<MessagePlaySound>(value);
+      modassert(soundPosition != NULL, "sound position not given");
+      playMaterialSound(soundData, gameapi -> rootSceneId(), soundPosition -> position, soundPosition -> material);
+    }
+
     onCutsceneMessages(key);
-    onDialogMessage(key, value);
-    onMessageSound(soundData, gameapi -> rootSceneId(), key, value);
     gametypesOnMessage(gametypeSystem, key, value);
     onAiOnMessage(aiData, key, value);
   };

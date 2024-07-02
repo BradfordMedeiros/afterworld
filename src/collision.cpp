@@ -2,19 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 void doDamageMessage(objid targetId, float damage);
+void doDialogMessage(std::string& value);
 
-
-void handleInteract(objid gameObjId){
-  auto objAttr = getAttrHandle(gameObjId);
-  auto chatNode = getStrAttr(objAttr, "chatnode");
-  if (chatNode.has_value()){
-    gameapi -> sendNotifyMessage("dialog:talk", chatNode.value());
-  }
-  auto triggerSwitch = getStrAttr(objAttr, "trigger-switch");
-  if (triggerSwitch.has_value()){
-    gameapi -> sendNotifyMessage("switch", triggerSwitch.value());
-  }
-}
 
 // should work globally but needs lsobj-attr modifications, and probably should create a way to index these
 void handleSwitch(std::string switchValue){ 
@@ -36,6 +25,19 @@ void handleSwitch(std::string switchValue){
     setGameObjectTint(id, glm::vec4(randomNum(), randomNum(), randomNum(), 1.f));
   }
 }
+
+void handleInteract(objid gameObjId){
+  auto objAttr = getAttrHandle(gameObjId);
+  auto chatNode = getStrAttr(objAttr, "chatnode");
+  if (chatNode.has_value()){
+    doDialogMessage(chatNode.value());
+  }
+  auto triggerSwitch = getStrAttr(objAttr, "trigger-switch");
+  if (triggerSwitch.has_value()){
+    gameapi -> sendNotifyMessage("switch", triggerSwitch.value());
+  }
+}
+
 
 bool passesSwitchFilter(ObjectAttrHandle& handle, objid otherObjId){
   auto switchFilter = getStrAttr(handle, "switch-filter");

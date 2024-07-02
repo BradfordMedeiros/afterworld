@@ -1,6 +1,7 @@
 #include "./movement.h"
 
 extern CustomApiBindings* gameapi;
+bool getIsGunZoomed();
 
 MovementEntityData& getMovementData();
 

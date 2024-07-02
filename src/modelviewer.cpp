@@ -196,6 +196,13 @@ void handleMouseRotate(ViewerData& viewer, objid id, double xPos, double yPos){
   }
 }
 
+void modelViewerNextModel(){
+  gameapi -> sendNotifyMessage("next-model", NULL);
+}
+void modelViewerPrevModel(){
+  gameapi -> sendNotifyMessage("prev-model", NULL);
+}
+
 bool onViewerMessage(ViewerData& viewer, int sizeLimit, std::string& key, std::any& value){
   bool changedIndex = false;
   if (key == "prev-model"){

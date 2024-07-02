@@ -15,8 +15,13 @@ struct SoundData {
 	std::vector<MaterialToSound> sounds;
 };
 
+struct MessagePlaySound {
+  glm::vec3 position;
+  std::string material;
+};
+
 SoundData createSoundData(objid sceneId);
-void onMessageSound(SoundData& sound, int32_t sceneId, std::string& key, std::any& value);
+void playMaterialSound(SoundData& sound, int32_t sceneId, glm::vec3 position, std::string& material);
 void onCollisionEnterSound(SoundData& sound, int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos);
 
 #endif 

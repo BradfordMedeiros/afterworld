@@ -3,6 +3,8 @@
 extern CustomApiBindings* gameapi;
 void setTotalZoom(float multiplier);
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
+void handleSelectItem(objid id);
+void setShowActivate(bool showActivate);
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -48,9 +50,8 @@ void handlePickedUpItem(Weapons& weapons){
   gameapi -> applyForce(weapons.heldItem.value(), amountToMove);
 }
 
-bool isGunZoomed = false;
-bool getIsGunZoomed(){
-  return isGunZoomed;
+bool getIsGunZoomed(Weapons& weapons){
+  return weapons.isGunZoomed;
 }
 
 void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory){
@@ -63,9 +64,7 @@ void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory){
 }
 
 
-std::optional<objid> activateableItem;
-void setShowActivate(bool showActivate);
-void handleActivateItem(objid playerId){
+void handleActivateItem(Weapons& weapons, objid playerId){
   auto hitpoints = doRaycastClosest(glm::vec3(0.f, 0.f, -1.f), playerId);
   if (hitpoints.size() > 0){
     auto hitpoint = hitpoints.at(0);
@@ -77,12 +76,12 @@ void handleActivateItem(objid playerId){
       auto activateKey = getStrAttr(attrHandle, "activate");
       if (activateKey.has_value()){
         setShowActivate(true);
-        activateableItem = hitpoint.id;
+        weapons.activateableItem = hitpoint.id;
         return;        
       }
     }
   }
-  activateableItem = std::nullopt;
+  weapons.activateableItem = std::nullopt;
   setShowActivate(false);  
 }
 
@@ -118,6 +117,8 @@ Weapons createWeapons(){
     .fireOnce = false,
     .lookVelocity = glm::vec2(0.f, 0.f),
     .heldItem = std::nullopt,
+    .isGunZoomed = false,
+    .activateableItem = std::nullopt,
   };
   weapons.weaponValues.gunCore.weaponState = WeaponState {};
 
@@ -135,7 +136,7 @@ std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
   weapons.fireOnce = false;
   swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.player.value().playerId, weapons.lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons);
-  handleActivateItem(weapons.player.value().playerId);
+  handleActivateItem(weapons, weapons.player.value().playerId);
   return didFire ? currentAmmoInfo(weapons) : std::optional<AmmoInfo>(std::nullopt);
 }
 
@@ -146,7 +147,7 @@ void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
   }
 }
 
-float zoomAmount = 4.f;
+const float zoomAmount = 4.f;
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
@@ -161,13 +162,13 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
   }else if (isAimButton(button)){
     if (action == 0){
       weapons.isHoldingRightMouse = false;
-      isGunZoomed = false;
-      setTotalZoom(isGunZoomed ? (1.f / zoomAmount) : 1.f);
+      weapons.isGunZoomed = false;
+      setTotalZoom(weapons.isGunZoomed ? (1.f / zoomAmount) : 1.f);
     }else if (action == 1){
       // select item
       weapons.isHoldingRightMouse = true;
-      isGunZoomed = true;
-      setTotalZoom(isGunZoomed ? (1.f / zoomAmount) : 1.f);
+      weapons.isGunZoomed = true;
+      setTotalZoom(weapons.isGunZoomed ? (1.f / zoomAmount) : 1.f);
       if (weapons.player.has_value()){
         auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), weapons.player.value().playerId);
         if (hitpoints.size() > 0){
@@ -175,7 +176,7 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action){
           auto closestIndex = closestHitpoint(hitpoints, cameraPos);
           float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
           if (distance <= weapons.selectDistance){
-            gameapi -> sendNotifyMessage("selected", hitpoints.at(closestIndex).id);
+            handleSelectItem(hitpoints.at(closestIndex).id);
           }
         }
       }
@@ -192,11 +193,11 @@ void onWeaponsKeyCallback(Weapons& weapons, int key, int action){
   }
   if (isInteractKey(key)) { 
     if (action == 1){
-      if (activateableItem.has_value()){
-        auto attrHandle = getAttrHandle(activateableItem.value());
+      if (weapons.activateableItem.has_value()){
+        auto attrHandle = getAttrHandle(weapons.activateableItem.value());
         auto activateKey = getStrAttr(attrHandle, "activate");
         if (activateKey.has_value()){
-          auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true);
+          auto pos = gameapi -> getGameObjectPos(weapons.activateableItem.value(), true);
           playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
           gameapi -> sendNotifyMessage(activateKey.value(), "default");
         }
@@ -245,12 +246,3 @@ void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos){
   }
   weapons.lookVelocity = glm::vec2(xPos, yPos);
 }
-
-void onWeaponsMessage(Weapons& weapons, std::string& key){
-  if (key == "save-gun"){
-    saveGunTransform(weapons.weaponValues);
-  }else if (key == "reload-config:weapon:traits"){
-    reloadTraitsValues(weapons);
-  }
-}
-
