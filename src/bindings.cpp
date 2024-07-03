@@ -9,6 +9,7 @@ Water water;
 SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
+Weather weather;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -835,6 +836,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onCutsceneMessages(key);
     gametypesOnMessage(gametypeSystem, key, value);
     onAiOnMessage(aiData, key, value);
+
+    if (key == "weather"){
+      onWeatherMessage(weather, value, gameapi -> rootSceneId());
+    }
+
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
@@ -928,7 +934,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));
-  bindings.push_back(weatherBinding(api, "native/weather"));
   bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
   bindings.push_back(particleviewerBinding(api, "native/particleviewer"));
   return bindings;

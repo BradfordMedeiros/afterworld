@@ -4,10 +4,6 @@
 
 extern CustomApiBindings* gameapi;
 
-struct Weather {
-	std::optional<objid> weatherEmitter;
-};
-
 void changeWeather(Weather& weather, std::string name, objid sceneId){
   if (weather.weatherEmitter.has_value()){
     gameapi -> removeByGroupId(weather.weatherEmitter.value());
@@ -45,26 +41,9 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
   weather.weatherEmitter = gameapi -> makeObjectAttr(sceneId, std::string("+code-weather-") + uniqueNameSuffix(), particleAttr, submodelAttributes); 
 }
 
-CScriptBinding weatherBinding(CustomApiBindings& api, const char* name){
-	auto binding = createCScriptBinding(name, api);
-	binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Weather* weather = new Weather;
-    weather -> weatherEmitter = std::nullopt;
-    changeWeather(*weather, "none", sceneId);
-    return weather;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Weather* weather = static_cast<Weather*>(data);
-    delete weather;
-  };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    if (key == "weather"){
-      Weather* weather = static_cast<Weather*>(data);
-      auto strValue = anycast<std::string>(value);
-      modassert(strValue, "weather strValue is NULL");
-      auto sceneId = gameapi -> listSceneId(id);
-      changeWeather(*weather, *strValue, sceneId);
-    }
-  };
-	 return binding;
+void onWeatherMessage(Weather& weather, std::any& value, objid sceneId){
+  auto strValue = anycast<std::string>(value);
+  modassert(strValue, "weather strValue is NULL");
+  changeWeather(weather, *strValue, sceneId);
 }
+

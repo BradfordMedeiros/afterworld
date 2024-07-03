@@ -3,7 +3,6 @@
 # Scripts
 daynight:script:native/daynight
 debug:script:native/debug
-weather:script:native/weather
 tags:script:native/tags
 
 # Texture resources

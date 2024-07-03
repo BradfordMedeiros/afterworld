@@ -7,6 +7,7 @@ BINARY="./build/modengine"
 COMMAND_ARGS="\
   -x native/main \
   -a sqldir=../afterworld/data/ \
+  -a 'light=1 1 1' \
   -r ../afterworld/scenes/main.rawscene \
   --font ./res/fonts/Walby-Regular.ttf \
   $@"

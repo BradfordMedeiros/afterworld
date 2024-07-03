@@ -4,6 +4,11 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 
-CScriptBinding weatherBinding(CustomApiBindings& api, const char* name);
+struct Weather {
+	std::optional<objid> weatherEmitter;
+};
+
+void onWeatherMessage(Weather& weather, std::any& value, objid sceneId);
+
 
 #endif
