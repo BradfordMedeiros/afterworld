@@ -1,7 +1,6 @@
 # Resources that are expected to always be loaded
 
 # Scripts
-daynight:script:native/daynight
 debug:script:native/debug
 tags:script:native/tags
 

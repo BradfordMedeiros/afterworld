@@ -645,6 +645,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     soundData = createSoundData(gameapi -> rootSceneId());
     gametypeSystem = createGametypes();
     aiData = createAiData();
+    maybeSpawnLightFromArgs();
 
     return gameState;
   };
@@ -695,7 +696,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMovementFrame(movement);
     onFrameWater(water);
     onFrameAi(aiData);
-
+    onFrameDaynight();
 
     // debug
     if (gameState -> printGametypes){
@@ -931,7 +932,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
-  bindings.push_back(daynightBinding(api, "native/daynight"));
   bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
