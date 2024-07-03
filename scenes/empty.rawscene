@@ -1,0 +1,15 @@
+
+platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert:position:-20 -30 0
+platform_lowert:scale:100 100 10
+platform_lowert:rotation:0 -1 0 0
+platform_lowert:texture:../gameresources/textures/wood.jpg
+platform_lowert:physics:enabled
+platform_lowert:material:metal
+
+playerspawn:playerspawn:true
+playerspawn:position:0 10 0
+playerspawn:teleport:true
+
+[bouncepad:scene:../afterworld/scenes/prefabs/objects/bouncepad.rawscene
+[bouncepad:position:0 15 0
