@@ -1,7 +1,6 @@
 # Resources that are expected to always be loaded
 
 # Scripts
-debug:script:native/debug
 tags:script:native/tags
 
 # Texture resources

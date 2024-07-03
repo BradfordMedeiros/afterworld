@@ -9,7 +9,8 @@
 #include "./spawn.h"
 #include "./cutscene.h"
 
+void debugOnFrame();
+void debugOnKey(int key, int scancode, int action, int mods);
 
-CScriptBinding debugBinding(CustomApiBindings& api, const char* name);
 
 #endif 

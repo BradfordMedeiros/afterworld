@@ -698,7 +698,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onFrameAi(aiData);
     onFrameDaynight();
 
+
     // debug
+    debugOnFrame();
     if (gameState -> printGametypes){
       auto debugGametypeInfo = debugPrintGametypes(gametypeSystem);
       printDebugStr(debugGametypeInfo);
@@ -759,6 +761,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData.worldInfo);
     }
+    debugOnKey(key, scancode, action, mods);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -933,7 +936,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
   bindings.push_back(tagsBinding(api, "native/tags"));
-  bindings.push_back(debugBinding(api, "native/debug"));
   bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
   bindings.push_back(particleviewerBinding(api, "native/particleviewer"));
   return bindings;
