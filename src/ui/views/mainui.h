@@ -28,6 +28,7 @@
 #include "../components/game/terminal.h"
 #include "../components/game/zoom.h"
 #include "../components/game/score.h"
+#include "../components/game/keyboard.h"
 #include "../components/console.h"
 #include "../components/uiwindow.h"
 

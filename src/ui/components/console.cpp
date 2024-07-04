@@ -193,6 +193,13 @@ std::vector<CommandDispatch> commands {
       exit(1);
       return std::nullopt;    
     },
+  },
+  CommandDispatch {
+    .command = "keyboard",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      consoleInterface.toggleKeyboard();
+      return std::nullopt;    
+    },
   }
 };
 

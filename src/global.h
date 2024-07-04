@@ -14,6 +14,8 @@ struct GlobalState {
   bool showEditor;
   bool showScreenspaceGrid;
   bool showConsole;
+  bool showKeyboard;
+
   bool showGameHud;
 
   bool showTerminal;
@@ -52,6 +54,7 @@ void setRouterGameState(RouteState routeState);
 GlobalState& getGlobalState();
 void initGlobal();
 void setShowEditor(bool shouldShowEditor);
+void toggleKeyboard();
 
 bool leftMouseDown();
 bool rightMouseDown();

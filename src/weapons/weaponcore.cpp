@@ -172,6 +172,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid play
     { "rotation", weaponParams.initialGunRotVec4 },
     { "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) },
     { "scale", weaponParams.scale },
+    { "tint", glm::vec4(1.f, 1.f, 1.f, 0.4f) },
   };
   if (weaponParams.script != ""){
     attrAttributes["script"] = weaponParams.script;

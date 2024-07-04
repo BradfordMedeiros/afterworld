@@ -9,6 +9,7 @@ GlobalState global {
   .showEditor = false,
   .showScreenspaceGrid = false,
   .showConsole = false,
+  .showKeyboard = false,
   .showGameHud = false,
   .showTerminal = false,
   .lastToggleTerminalTime = 0.f,
@@ -55,6 +56,7 @@ std::vector<std::vector<std::string>> debugPrintGlobal(){
     std::vector<std::vector<std::string>> values;
     values.push_back({ "showEditor", print(global.showEditor) });
     values.push_back({ "showConsole", print(global.showConsole) });
+    values.push_back({ "showKeyboard" , print(global.showKeyboard) });
     values.push_back({ "showGameHud" , print(global.showGameHud) });
     values.push_back({ "showTerminal" , print(global.showTerminal) });
     values.push_back({ "disableGameInput", print(global.disableGameInput) });
@@ -193,6 +195,10 @@ void setShowEditor(bool shouldShowEditor){
   }else{
     rmHistoryParam("editor");
   }
+}
+
+void toggleKeyboard(){
+  global.showKeyboard = !global.showKeyboard;
 }
 
 void initGlobal(){

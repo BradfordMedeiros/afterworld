@@ -821,6 +821,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     zoomComponent.draw(drawTools, zoomProps);    
   }
 
+  if (uiContext.showKeyboard()){
+    Props keyboardProps { 
+      .props = {},
+    };
+    keyboardComponent.draw(drawTools, keyboardProps);     
+  }
+
   if (uiContext.showScreenspaceGrid()){
     drawScreenspaceGrid(ImGrid{ .numCells = 10 });
   }

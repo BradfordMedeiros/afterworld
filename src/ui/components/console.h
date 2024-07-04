@@ -17,6 +17,7 @@ struct ConsoleInterface {
   std::function<void()> routerPop;
 
   std::function<void()> die;
+  std::function<void()> toggleKeyboard;
 };
 
 extern Component consoleComponent;

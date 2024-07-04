@@ -445,6 +445,10 @@ void prevTerminalPage(){
   }
 }
 
+bool keyIsDown(char key){
+  extern GLFWwindow* window;
+  return glfwGetKey(window, key) == GLFW_PRESS;
+}
 
 
 UiContext getUiContext(GameState& gameState){
@@ -477,6 +481,9 @@ UiContext getUiContext(GameState& gameState){
    },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
       return zoomOptions; 
+   },
+   .showKeyboard = []() -> bool { 
+      return getGlobalState().showKeyboard;
    },
    .getScoreConfig = []() -> std::optional<ScoreOptions> {
       auto gametypeData = getGametypeData(gametypeSystem);
@@ -554,6 +561,9 @@ UiContext getUiContext(GameState& gameState){
         if (activePlayerId.has_value()){
           doDamageMessage(activePlayerId.value(), 10000.f);   
         }
+      },
+      .toggleKeyboard = []() -> void {
+        toggleKeyboard();
       },
     },
   };

@@ -44,7 +44,29 @@ std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>
 	};
 }
 
+
+struct NdiPoint {
+	std::optional<glm::vec2> point1;
+	std::optional<glm::vec2> point2;
+};
+struct NdiPrintInfo {
+	bool debugNdiPrintMode;
+	NdiPoint ndiPoint;
+};
+NdiPrintInfo ndiPrintInfo {
+	.debugNdiPrintMode = false,
+	.ndiPoint = NdiPoint {},
+};
+
+
+
 void debugOnFrame(){
+  if (ndiPrintInfo.debugNdiPrintMode){
+  	modlog("ndi print info", print(ndiPrintInfo.ndiPoint.point1) + " " + print(ndiPrintInfo.ndiPoint.point2));
+  }else{
+  	modlog("ndi print info", "not enabled");
+  }
+
 	auto args = gameapi -> getArgs();
 	static std::optional<PrintObjDebug> printObjDebug = getPrintObjDebug(args);
 	if (!printObjDebug.has_value()){
@@ -68,6 +90,8 @@ void debugOnFrame(){
   }else{
 		  modlog("debug attribute", "no gameobj");
   }
+
+
 }
 
 void debugOnKey(int key, int scancode, int action, int mods){
@@ -94,9 +118,25 @@ void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 75){
   	//spawnProcMesh(gameapi -> listSceneId(id));
   }
-  if (key == 96 /* ~ */  && action == 1){
+  if (key == 96 /* ~ */  && action == 0){
   	setShowConsole(!showConsole());
   	modlog("console visibility", print(getGlobalState().showConsole));
+  }
+
+  if (key == 'U' && action == 0){
+  	ndiPrintInfo.debugNdiPrintMode = !ndiPrintInfo.debugNdiPrintMode;
+  	ndiPrintInfo.ndiPoint.point1 = std::nullopt;
+  	ndiPrintInfo.ndiPoint.point2 = std::nullopt;
+  }
+  if (key == 'I' && action == 0){
+  	if (ndiPrintInfo.debugNdiPrintMode){
+ 			glm::vec2 ndiCoord(getGlobalState().xNdc, getGlobalState().yNdc);
+  		if (!ndiPrintInfo.ndiPoint.point1.has_value() || ndiPrintInfo.ndiPoint.point2.has_value()){
+  			ndiPrintInfo.ndiPoint.point1 = ndiCoord;
+  		}else {
+  			ndiPrintInfo.ndiPoint.point2 = ndiCoord;
+  		}
+  	}
   }
 
   auto testObject = findObjByShortName("testobject");
