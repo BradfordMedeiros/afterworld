@@ -322,6 +322,18 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
+		.attribute = "explode",
+		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+  	.onRemove = [](void* data, int32_t id) -> void {
+  		 // when this object it removed, get the position, and spawn a prefab there 
+  		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+  		auto sceneId = gameapi -> listSceneId(id);
+  		modassert(false, "create explode not yet implemented");
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
+	TagUpdater {
 		.attribute = "condition",
 		.onAdd = [](void* data, int32_t id, std::string value) -> void {
 			onAddConditionId(id, value);

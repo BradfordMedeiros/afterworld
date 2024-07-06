@@ -1,8 +1,10 @@
-crate:mesh:../gameresources/build/uncategorized/darkwires4.gltf 
+crate:mesh:../gameresources/build/misc/barrel.gltf
 crate:physics:enabled
 #crate:health:1
-crate:physics_mass:1000
-crate:physics_shape:shape_exact
-crate:scale:10 10 10
-#crate:tint:1 0 0 0.8
-#crate:texture:./res/textures/hexglow.png
+crate:physics_mass:10
+crate:physics_type:dynamic
+crate:physics_shape:shape_cylinder
+crate:scale:0.3 0.3 0.3
+crate:tint:1 0.2 0.2 1
+crate:health:50
+crate:explode:50
