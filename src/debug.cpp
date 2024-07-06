@@ -48,24 +48,43 @@ std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>
 struct NdiPoint {
 	std::optional<glm::vec2> point1;
 	std::optional<glm::vec2> point2;
+	std::optional<char> mappedKey;
 };
+
+enum NdiSelectMode { NDI_SELECT_NONE, NDI_SELECT_KEY, NDI_SELECT_TOP_LEFT, NDI_SELECT_BOTTOM_RIGHT };
 struct NdiPrintInfo {
-	bool debugNdiPrintMode;
+	NdiSelectMode selectMode;
+	bool selectKey;
 	NdiPoint ndiPoint;
 };
+
+std::vector<NdiPoint> allMappedKeys;
 NdiPrintInfo ndiPrintInfo {
-	.debugNdiPrintMode = false,
+	.selectMode = NDI_SELECT_NONE,
+	.selectKey = false,
 	.ndiPoint = NdiPoint {},
 };
 
-
+std::string print(NdiPrintInfo& ndiPrintInfo){
+	std::string selectModeStr = "";
+	if (ndiPrintInfo.selectMode == NDI_SELECT_NONE){
+		selectModeStr = "none";
+	}else if (ndiPrintInfo.selectMode == NDI_SELECT_KEY){
+		selectModeStr = "key";
+	}else if (ndiPrintInfo.selectMode == NDI_SELECT_TOP_LEFT){
+		selectModeStr = "top_left";
+	}else if (ndiPrintInfo.selectMode == NDI_SELECT_BOTTOM_RIGHT){
+		selectModeStr = "bottom_right";
+	}
+	return selectModeStr + " " + print(ndiPrintInfo.ndiPoint.point1) + " " + print(ndiPrintInfo.ndiPoint.point2) + " " + print(ndiPrintInfo.ndiPoint.mappedKey);
+}
 
 void debugOnFrame(){
-  if (ndiPrintInfo.debugNdiPrintMode){
-  	modlog("ndi print info", print(ndiPrintInfo.ndiPoint.point1) + " " + print(ndiPrintInfo.ndiPoint.point2));
-  }else{
-  	modlog("ndi print info", "not enabled");
-  }
+  //if (ndiPrintInfo.debugNdiPrintMode){
+  //	modlog("ndi print info", print(ndiPrintInfo.ndiPoint.point1) + " " + print(ndiPrintInfo.ndiPoint.point2) + " " + print(ndiPrintInfo.ndiPoint.mappedKey));
+  //}else{
+  //	modlog("ndi print info", "not enabled");
+  //}
 
 	auto args = gameapi -> getArgs();
 	static std::optional<PrintObjDebug> printObjDebug = getPrintObjDebug(args);
@@ -91,7 +110,11 @@ void debugOnFrame(){
 		  modlog("debug attribute", "no gameobj");
   }
 
+}
 
+
+std::string printCode(glm::vec2 vec){
+	return std::string("glm::vec2(") + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }
 
 void debugOnKey(int key, int scancode, int action, int mods){
@@ -123,23 +146,61 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	modlog("console visibility", print(getGlobalState().showConsole));
   }
 
-  if (key == 'U' && action == 0){
-  	ndiPrintInfo.debugNdiPrintMode = !ndiPrintInfo.debugNdiPrintMode;
-  	ndiPrintInfo.ndiPoint.point1 = std::nullopt;
-  	ndiPrintInfo.ndiPoint.point2 = std::nullopt;
+  if (key == 'T'){
+  	std::cout << "currentmappingkeys\n------------------------------" << std::endl;
+    modlog("ndi print info", print(ndiPrintInfo));
+  	std::cout << "all mapped keys\n------------------------------" << std::endl;
+  	for (auto &key : allMappedKeys){
+
+  		std::cout << "KeyLocation {\n";
+  		std::cout << "  .key = '" << key.mappedKey.value() << "',\n";
+  		std::cout << "  .topLeft = " << printCode(key.point1.value()) << ",\n";
+  		std::cout << "  .bottomRight = " << printCode(key.point2.value()) << ",\n";
+  		std::cout << "},\n";
+  	}
+  	std::cout << "\n------------------------------------------" << std::endl;
+  	return;
+  	//allMappedKeys = {};
   }
+  if (key == 'U' && action == 0){
+  	if (ndiPrintInfo.selectMode == NDI_SELECT_NONE){
+  		ndiPrintInfo.selectMode = NDI_SELECT_KEY;
+  		ndiPrintInfo.ndiPoint.point1 = std::nullopt;
+	  	ndiPrintInfo.ndiPoint.point2 = std::nullopt;
+	  	ndiPrintInfo.ndiPoint.mappedKey = std::nullopt;
+  	}else{
+  		ndiPrintInfo.selectMode = NDI_SELECT_NONE;
+   		ndiPrintInfo.ndiPoint.point1 = std::nullopt;
+	  	ndiPrintInfo.ndiPoint.point2 = std::nullopt;
+	  	ndiPrintInfo.ndiPoint.mappedKey = std::nullopt;
+	  	allMappedKeys = {};
+  	}
+  }
+  if (ndiPrintInfo.selectMode == NDI_SELECT_KEY && action == 1){
+  	ndiPrintInfo.selectKey = false;
+  	ndiPrintInfo.ndiPoint.mappedKey = key;
+		ndiPrintInfo.selectMode = NDI_SELECT_TOP_LEFT;
+  }
+
   if (key == 'I' && action == 0){
-  	if (ndiPrintInfo.debugNdiPrintMode){
- 			glm::vec2 ndiCoord(getGlobalState().xNdc, getGlobalState().yNdc);
-  		if (!ndiPrintInfo.ndiPoint.point1.has_value() || ndiPrintInfo.ndiPoint.point2.has_value()){
-  			ndiPrintInfo.ndiPoint.point1 = ndiCoord;
-  		}else {
-  			ndiPrintInfo.ndiPoint.point2 = ndiCoord;
-  		}
+		glm::vec2 ndiCoord(getGlobalState().xNdc, getGlobalState().yNdc);
+  	if (ndiPrintInfo.selectMode == NDI_SELECT_TOP_LEFT){
+ 			ndiPrintInfo.ndiPoint.point1 = ndiCoord;
+ 			ndiPrintInfo.selectMode = NDI_SELECT_BOTTOM_RIGHT;
+  	}else if (ndiPrintInfo.selectMode == NDI_SELECT_BOTTOM_RIGHT){
+  		ndiPrintInfo.ndiPoint.point2 = ndiCoord;
+	  	bool mappingComplete = ndiPrintInfo.ndiPoint.point1.has_value() && ndiPrintInfo.ndiPoint.point2.has_value() && ndiPrintInfo.ndiPoint.mappedKey.has_value();
+	  	modassert(mappingComplete, "mapping not complete, code error");
+  		allMappedKeys.push_back(ndiPrintInfo.ndiPoint);
+  		ndiPrintInfo.ndiPoint.point1 = std::nullopt;
+  		ndiPrintInfo.ndiPoint.point2 = std::nullopt;
+  		ndiPrintInfo.ndiPoint.mappedKey = std::nullopt;
+ 			ndiPrintInfo.selectMode = NDI_SELECT_KEY;
   	}
   }
 
-  auto testObject = findObjByShortName("testobject");
+
+  auto testObject = findObjByShortName("testobject-no-exist");
   if (testObject.has_value()){
 	  if (key == 340 /* shift */ && action == 1){
 	  	gameapi -> setSingleGameObjectAttr(testObject.value(), "position", glm::vec3(0.f, 2.f, 0.f));

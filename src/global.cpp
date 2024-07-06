@@ -178,7 +178,7 @@ bool queryShowEditor(){
 
 void queryUpdateShowEditor(bool showEditor){
   auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update session set ") + "editor = " + (showEditor ? "true" : "false"), {}
+    std::string("update session set ") + "editor = ?", { (showEditor ? "true" : "false") }
   );
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
@@ -197,8 +197,25 @@ void setShowEditor(bool shouldShowEditor){
   }
 }
 
+bool queryShowKeyboard(){
+  auto query = gameapi -> compileSqlQuery("select keyboard from session", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  return result.at(0).at(0) == "true";
+}
+void queryUpdateShowKeyboard(bool showKeyboard){
+  auto updateQuery = gameapi -> compileSqlQuery(
+    std::string("update session set ") + "keyboard = ?" , { (showKeyboard ? "true" : "false") }
+  );
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+}
+
 void toggleKeyboard(){
   global.showKeyboard = !global.showKeyboard;
+  queryUpdateShowKeyboard(global.showKeyboard);
 }
 
 void initGlobal(){
@@ -207,6 +224,7 @@ void initGlobal(){
     global.godMode = args.at("godmode") == "true";
   }
   global.showEditor = queryShowEditor();
+  global.showKeyboard = queryShowKeyboard();
   updateState();
 }
 

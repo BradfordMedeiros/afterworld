@@ -823,7 +823,10 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
   if (uiContext.showKeyboard()){
     Props keyboardProps { 
-      .props = {},
+      .props = {
+        PropPair { .symbol = xoffsetSymbol, .value = -1.f },
+        PropPair { .symbol = yoffsetSymbol, .value = -1.f },
+      },
     };
     keyboardComponent.draw(drawTools, keyboardProps);     
   }

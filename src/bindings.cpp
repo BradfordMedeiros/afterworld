@@ -450,7 +450,6 @@ bool keyIsDown(char key){
   return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
-
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -669,7 +668,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
-      modlog("texcoord", print(glm::vec2(texCoordUv)));
+      //modlog("texcoord", print(glm::vec2(texCoordUv)));
     });
 
     gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {

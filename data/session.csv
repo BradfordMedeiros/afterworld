@@ -1,2 +1,2 @@
-session.console:STRING,session.editor:STRING,session.background:STRING,session.layout:STRING,session.style-primary:STRING,session.style-secondary:STRING,session.style-border:STRING,session.style-highlight:STRING
-true,false,/home/brad/Desktop/test3.png,main,0.175356 0.217907 0.304718 0.227236,0.229242 0.654092 0.949758 0.14415,0.953961 0.881414 0.352112 0.173073,0 1 0 0.5
+session.console:STRING,session.editor:STRING,session.keyboard:STRING,session.background:STRING,session.layout:STRING,session.style-primary:STRING,session.style-secondary:STRING,session.style-border:STRING,session.style-highlight:STRING
+true,false,false,/home/brad/Desktop/test3.png,editor,0.654134 0.465959 0.398113 0.0848621,1.05133 0.606146 0.736898 0.0848621,1.05133 0.979977 0.509094 0.160797,0.379602 0.979977 0.509094 0.160797
