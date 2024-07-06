@@ -22,7 +22,6 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(-0.615228f, 0.343885f),
     .bottomRight = glm::vec2(-0.513256f, 0.0964029f),
   },
-
   KeyLocation {
     .key = GLFW_KEY_ESCAPE,
     .topLeft = glm::vec2(-0.953912, 0.926489),
@@ -153,11 +152,6 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(0.619174, 0.032258),
     .bottomRight = glm::vec2(0.727031, -0.240143),
   },
-  //KeyLocation {
-  //  .key = 13,  // enter
-  //  .topLeft = glm::vec2(0.750999, 0.032258),
-  //  .bottomRight = glm::vec2(0.958722, -0.230585),
-  //},
   KeyLocation {
     .key = 'Z',
     .topLeft = glm::vec2(-0.654877, -0.300380),
@@ -240,21 +234,16 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(0.452364f, 0.347291f),
     .bottomRight = glm::vec2(0.561044f, 0.0960591f),
   },
-
   KeyLocation {
     .key = 'U',
     .topLeft = glm::vec2(0.052519, 0.372340),
     .bottomRight = glm::vec2(0.160772, 0.111702),
   },
-
   KeyLocation {
     .key = 'I',
     .topLeft = glm::vec2(0.185077, 0.373810),
     .bottomRight = glm::vec2(0.297732, 0.104762),
   },
-
-
-
   KeyLocation {
     .key = '[',
     .topLeft = glm::vec2(0.584906, 0.355603),
@@ -270,165 +259,143 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(0.854953, 0.355603),
     .bottomRight = glm::vec2(0.966981, 0.088362),
   },
-KeyLocation {
-  .key = '`',
-  .topLeft = glm::vec2(-0.957128, 0.691489),
-  .bottomRight = glm::vec2(-0.844587, 0.428191),
-},
-KeyLocation {
-  .key = '1',
-  .topLeft = glm::vec2(-0.822079, 0.678074),
-  .bottomRight = glm::vec2(-0.713826, 0.404309),
-},
-KeyLocation {
-  .key = '2',
-  .topLeft = glm::vec2(-0.687031, 0.678074),
-  .bottomRight = glm::vec2(-0.574491, 0.404309),
-},
-KeyLocation {
-  .key = '3',
-  .topLeft = glm::vec2(-0.549839, 0.678074),
-  .bottomRight = glm::vec2(-0.440514, 0.404309),
-},
-KeyLocation {
-  .key = '4',
-  .topLeft = glm::vec2(-0.414791, 0.678074),
-  .bottomRight = glm::vec2(-0.306538, 0.404309),
-},
-KeyLocation {
-  .key = '5',
-  .topLeft = glm::vec2(-0.281886, 0.691489),
-  .bottomRight = glm::vec2(-0.171490, 0.438830),
-},
-KeyLocation {
-  .key = '6',
-  .topLeft = glm::vec2(-0.144695, 0.696809),
-  .bottomRight = glm::vec2(-0.040729, 0.444149),
-},
-KeyLocation {
-  .key = '7',
-  .topLeft = glm::vec2(-0.016077, 0.678074),
-  .bottomRight = glm::vec2(0.098607, 0.404309),
-},
-KeyLocation {
-  .key = '8',
-  .topLeft = glm::vec2(0.118971, 0.678074),
-  .bottomRight = glm::vec2(0.227224, 0.404309),
-},
-KeyLocation {
-  .key = '9',
-  .topLeft = glm::vec2(0.251876, 0.678074),
-  .bottomRight = glm::vec2(0.363344, 0.404309),
-},
-
-KeyLocation {
-  .key = '0',
-  .topLeft = glm::vec2(0.386924, 0.696809),
-  .bottomRight = glm::vec2(0.493033, 0.441489),
-},
-KeyLocation {
-  .key = '-',
-  .topLeft = glm::vec2(0.518757, 0.696809),
-  .bottomRight = glm::vec2(0.628081, 0.433511),
-},
-KeyLocation {
-  .key = '=',
-  .topLeft = glm::vec2(0.652733, 0.691489),
-  .bottomRight = glm::vec2(0.765273, 0.430851),
-},
-
-
-/*
-fn keys
-KeyLocation {
-  .key = '-',
-  .topLeft = glm::vec2(0.712755, 0.898606),
-  .bottomRight = glm::vec2(0.824223, 0.733840),
-},
-KeyLocation {
-  .key = ',',
-  .topLeft = glm::vec2(0.572347, 0.901141),
-  .bottomRight = glm::vec2(0.688103, 0.738910),
-},
-KeyLocation {
-  .key = '+',
-  .topLeft = glm::vec2(0.433012, 0.901141),
-  .bottomRight = glm::vec2(0.546624, 0.738910),
-},
-KeyLocation {
-  .key = '*',
-  .topLeft = glm::vec2(0.301179, 0.891001),
-  .bottomRight = glm::vec2(0.408360, 0.741445),
-},
-KeyLocation {
-  .key = ')',
-  .topLeft = glm::vec2(0.157556, 0.898606),
-  .bottomRight = glm::vec2(0.270096, 0.728771),
-},
-KeyLocation {
-  .key = '(',
-  .topLeft = glm::vec2(0.019293, 0.898606),
-  .bottomRight = glm::vec2(0.132905, 0.741445),
-},
-KeyLocation {
-  .key = ''',
-  .topLeft = glm::vec2(-0.122186, 0.898606),
-  .bottomRight = glm::vec2(-0.007503, 0.738910),
-},
-KeyLocation {
-  .key = '&',
-  .topLeft = glm::vec2(-0.259378, 0.903676),
-  .bottomRight = glm::vec2(-0.144695, 0.736375),
-},
-KeyLocation {
-  .key = '%',
-  .topLeft = glm::vec2(-0.399786, 0.896071),
-  .bottomRight = glm::vec2(-0.284030, 0.733840),
-},
-KeyLocation {
-  .key = '$',
-  .topLeft = glm::vec2(-0.534834, 0.906210),
-  .bottomRight = glm::vec2(-0.421222, 0.733840),
-},
-KeyLocation {
-  .key = '#',
-  .topLeft = glm::vec2(-0.558414, 0.835234),
-  .bottomRight = glm::vec2(-0.586281, 0.728771),
-},
-KeyLocation {
-  .key = '"',
-  .topLeft = glm::vec2(-0.814577, 0.898606),
-  .bottomRight = glm::vec2(-0.700965, 0.731305),
-},
-KeyLocation {
-  .key = '',
-  .topLeft = glm::vec2(-0.936763, 0.860583),
-  .bottomRight = glm::vec2(-0.840300, 0.731305),
-},
-
-*/
-  //KeyLocation {
-  //  .key = GLFW_KEY_LEFT,
-  //  .topLeft = glm::vec2(0.723473, -0.619772),
-  //  .bottomRight = glm::vec2(0.831726, -0.759189),
-  //},
-  /*
   KeyLocation {
-    .key = static_cast<char>(263),
-    .topLeft = glm::vec2(0.717042, -0.776933),
-    .bottomRight = glm::vec2(0.828510, -0.929024),
+    .key = '`',
+    .topLeft = glm::vec2(-0.957128, 0.691489),
+    .bottomRight = glm::vec2(-0.844587, 0.428191),
   },
   KeyLocation {
-    .key = static_cast<char>(264),
-    .topLeft = glm::vec2(0.640943, -0.860583),
-    .bottomRight = glm::vec2(0.694534, -0.926489),
+    .key = '1',
+    .topLeft = glm::vec2(-0.822079, 0.678074),
+    .bottomRight = glm::vec2(-0.713826, 0.404309),
   },
   KeyLocation {
-    .key = static_cast<char>(265),
-    .topLeft = glm::vec2(0.853162, -0.784537),
-    .bottomRight = glm::vec2(0.963558, -0.934094),
-  },*/
-  // fill out the rest of these
+    .key = '2',
+    .topLeft = glm::vec2(-0.687031, 0.678074),
+    .bottomRight = glm::vec2(-0.574491, 0.404309),
+  },
+  KeyLocation {
+    .key = '3',
+    .topLeft = glm::vec2(-0.549839, 0.678074),
+    .bottomRight = glm::vec2(-0.440514, 0.404309),
+  },
+  KeyLocation {
+    .key = '4',
+    .topLeft = glm::vec2(-0.414791, 0.678074),
+    .bottomRight = glm::vec2(-0.306538, 0.404309),
+  },
+  KeyLocation {
+    .key = '5',
+    .topLeft = glm::vec2(-0.281886, 0.691489),
+    .bottomRight = glm::vec2(-0.171490, 0.438830),
+  },
+  KeyLocation {
+    .key = '6',
+    .topLeft = glm::vec2(-0.144695, 0.696809),
+    .bottomRight = glm::vec2(-0.040729, 0.444149),
+  },
+  KeyLocation {
+    .key = '7',
+    .topLeft = glm::vec2(-0.016077, 0.678074),
+    .bottomRight = glm::vec2(0.098607, 0.404309),
+  },
+  KeyLocation {
+    .key = '8',
+    .topLeft = glm::vec2(0.118971, 0.678074),
+    .bottomRight = glm::vec2(0.227224, 0.404309),
+  },
+  KeyLocation {
+    .key = '9',
+    .topLeft = glm::vec2(0.251876, 0.678074),
+    .bottomRight = glm::vec2(0.363344, 0.404309),
+  },
+  KeyLocation {
+    .key = '0',
+    .topLeft = glm::vec2(0.386924, 0.696809),
+    .bottomRight = glm::vec2(0.493033, 0.441489),
+  },
+  KeyLocation {
+    .key = '-',
+    .topLeft = glm::vec2(0.518757, 0.696809),
+    .bottomRight = glm::vec2(0.628081, 0.433511),
+  },
+  KeyLocation {
+    .key = '=',
+    .topLeft = glm::vec2(0.652733, 0.691489),
+    .bottomRight = glm::vec2(0.765273, 0.430851),
+  },
+
+
+////
+
+  KeyLocation {
+  .key = GLFW_KEY_TAB,
+  .topLeft = glm::vec2(-0.957128, 0.373891),
+  .bottomRight = glm::vec2(-0.778135, 0.102662),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_CAPS_LOCK,
+    .topLeft = glm::vec2(-0.954984, 0.044360),
+    .bottomRight = glm::vec2(-0.747053, -0.214195),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_LEFT_SHIFT,
+    .topLeft = glm::vec2(-0.957128, -0.287706),
+    .bottomRight = glm::vec2(-0.679528, -0.541191),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_LEFT_CONTROL,
+    .topLeft = glm::vec2(-0.958199, -0.604563),
+    .bottomRight = glm::vec2(-0.845659, -0.918885),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_LEFT_ALT,
+    .topLeft = glm::vec2(-0.688103, -0.604563),
+    .bottomRight = glm::vec2(-0.572347, -0.918885),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_RIGHT_ALT,
+    .topLeft = glm::vec2(0.451233, -0.595745),
+    .bottomRight = glm::vec2(0.565916, -0.912234),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_LEFT,
+    .topLeft = glm::vec2(0.587353, -0.766793),
+    .bottomRight = glm::vec2(0.697749, -0.901141),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_RIGHT,
+    .topLeft = glm::vec2(0.854234, -0.754119),
+    .bottomRight = glm::vec2(0.964630, -0.908745),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_UP,
+    .topLeft = glm::vec2(0.719185, -0.596958),
+    .bottomRight = glm::vec2(0.832797, -0.738910),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_DOWN,
+    .topLeft = glm::vec2(0.722401, -0.754119),
+    .bottomRight = glm::vec2(0.830654, -0.916350),
+  },
+
+  KeyLocation {
+    .key = GLFW_KEY_ENTER,
+    .topLeft = glm::vec2(0.752412, 0.053191),
+    .bottomRight = glm::vec2(0.961415, -0.215425),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_RIGHT_SHIFT,
+    .topLeft = glm::vec2(0.684887, -0.263298),
+    .bottomRight = glm::vec2(0.964630, -0.545213),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_BACKSPACE,
+    .topLeft = glm::vec2(0.784566, 0.696809),
+    .bottomRight = glm::vec2(0.963558, 0.420213),
+  },
+
+
 };
 
  
@@ -454,13 +421,11 @@ Component keyboardComponentInner {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     glm::vec2 size(0.5f, 0.5f);
     drawTools.drawRect(0.f, 0.f, size.x, size.y, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, "../gameresources/build/misc/keyboard.png", std::nullopt);
-
     for (auto &key : keys){
       if (keyIsDown(key.key)){
         drawKeyHighlighted(drawTools, key, size * 0.5f); // 0.5f since this is using ndi
       }
     }
-
     return BoundingBox2D {
       .x = 0.f,
       .y = 0.f,
@@ -503,4 +468,4 @@ AlignmentParams keyboardAlignment {
   .layoutFlowVertical = UILayoutFlowPositive2,
 };
 
-Component keyboardComponent = simpleVerticalLayout(keyboardComponents, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(1.f, 1.f, 1.f, 1.f), 0.01f, glm::vec4(0.f, 0.f, 1.f, 0.2f));
+Component keyboardComponent = simpleVerticalLayout(keyboardComponents, glm::vec2(0.f, 0.f), keyboardAlignment, glm::vec4(1.f, 1.f, 1.f, 1.f), 0.01f, glm::vec4(0.f, 0.f, 1.f, 0.2f));
