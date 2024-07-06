@@ -100,7 +100,9 @@ void updateBackground(objid id, std::string image){
 }
 
 void createExplosion(glm::vec3 position){
-	
+	simpleOnFrame([]() -> void {
+		std::cout << "on explosion test" << std::endl;
+	}, 5.f);
 }
 
 std::vector<TagUpdater> tagupdates = {

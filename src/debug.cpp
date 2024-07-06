@@ -30,6 +30,51 @@ struct PrintObjDebug {
 	float interval;
 };
 
+struct SimpleOnFrame {
+	float initialTime;
+	float duration;
+	std::function<void()> fn;
+};
+std::vector<SimpleOnFrame> onFrames;
+
+
+template <typename T>
+std::vector<T> removeIndexs(std::vector<T>& vec, std::vector<int> indexs){
+	std::vector<T> remainingElements;
+	for (int i = 0; i < vec.size(); i++){
+		bool foundMatch = false;
+		for(auto index : indexs){
+			if (index == i){
+				foundMatch = true;
+				break;
+			}
+		}
+		if (!foundMatch){
+			remainingElements.push_back(vec.at(i));
+		}
+	}
+	return remainingElements;
+}
+
+void handleSimpleOnFrame(){
+	float currTime = gameapi -> timeSeconds(false);
+	std::vector<int> indexsToRemove;
+	for (int i = 0; i < onFrames.size(); i++){
+		SimpleOnFrame& frame = onFrames.at(i);
+		if ((currTime - frame.initialTime) > frame.duration){
+			indexsToRemove.push_back(i);
+		}
+	}
+	if (indexsToRemove.size() > 0){
+		onFrames = removeIndexs(onFrames, indexsToRemove);
+	}
+
+	for (int i = 0; i < onFrames.size(); i++){
+		SimpleOnFrame& frame = onFrames.at(i);
+		frame.fn();
+	}
+}
+
 std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>& args){
 	if (args.find("printdebug") == args.end()){
 		return std::nullopt;
@@ -85,6 +130,7 @@ void debugOnFrame(){
   //}else{
   //	modlog("ndi print info", "not enabled");
   //}
+  handleSimpleOnFrame();
 
 	auto args = gameapi -> getArgs();
 	static std::optional<PrintObjDebug> printObjDebug = getPrintObjDebug(args);
@@ -109,7 +155,6 @@ void debugOnFrame(){
   }else{
 		  modlog("debug attribute", "no gameobj");
   }
-
 }
 
 
@@ -249,3 +294,11 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 }
 
+
+void simpleOnFrame(std::function<void()> fn, float duration){
+	onFrames.push_back(SimpleOnFrame {
+		.initialTime = gameapi -> timeSeconds(false),
+		.duration = duration,
+		.fn = fn,
+	});
+}

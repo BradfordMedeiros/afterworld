@@ -12,5 +12,8 @@
 void debugOnFrame();
 void debugOnKey(int key, int scancode, int action, int mods);
 
+// nice for debugging, but don't use permanently 
+// since hard to eg save state etc 
+void simpleOnFrame(std::function<void()> fn, float duration);
 
 #endif 

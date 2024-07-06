@@ -54,3 +54,7 @@ void drawBloom(objid playerId, objid id, float distance, float bloomAmount){
     drawCircle(id, toPos, radius, mainobjRot);
   }
 }
+
+void drawSphere(glm::vec3 position, float radius){
+	
+}

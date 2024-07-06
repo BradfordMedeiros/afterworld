@@ -12,6 +12,7 @@
 #include "./in-game-ui.h"
 #include "./conditional_spawn.h"
 #include "./health.h"
+#include "./debug.h"
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
 
