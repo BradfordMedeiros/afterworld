@@ -99,6 +99,10 @@ void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);
 }
 
+void createExplosion(glm::vec3 position){
+	
+}
+
 std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "animation",
@@ -327,8 +331,7 @@ std::vector<TagUpdater> tagupdates = {
   	.onRemove = [](void* data, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
-  		auto sceneId = gameapi -> listSceneId(id);
-  		modassert(false, "create explode not yet implemented");
+  		createExplosion(position);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,

@@ -1,4 +1,6 @@
-#include "./weapon_vector.h"
+#include "./vector_gfx.h"
+
+extern CustomApiBindings* gameapi;
 
 extern CustomApiBindings* gameapi;
 

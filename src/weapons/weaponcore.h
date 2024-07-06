@@ -6,7 +6,6 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../materials.h"
-#include "./weapon_vector.h"
 
 struct WeaponParams {
   // gun intrinsic stuff
