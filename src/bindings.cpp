@@ -445,7 +445,7 @@ void prevTerminalPage(){
   }
 }
 
-bool keyIsDown(char key){
+bool keyIsDown(int key){
   extern GLFWwindow* window;
   return glfwGetKey(window, key) == GLFW_PRESS;
 }

@@ -87,6 +87,9 @@ void handleActivateItem(Weapons& weapons, objid playerId){
 
 
 void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn){
+  if (!weapons.player.has_value()){
+    return;
+  }
   if (hasGun(weapons.player.value().inventory, gun)){
     changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId, fn);
   }  

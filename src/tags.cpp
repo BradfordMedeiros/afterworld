@@ -354,7 +354,10 @@ std::vector<TagUpdater> tagupdates = {
 				if (hasTempViewpoint()){
 					popTempViewpoint();
 				}else{
-					zoomIntoGameUi(getAnyUiInstance(tags.inGameUi).value());
+					auto uiInstance = getAnyUiInstance(tags.inGameUi);
+					if (uiInstance.has_value()){
+						zoomIntoGameUi(uiInstance.value());
+					}
 				}
 			}
   	},

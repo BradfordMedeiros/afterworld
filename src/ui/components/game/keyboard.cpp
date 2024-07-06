@@ -1,12 +1,12 @@
 #include "./keyboard.h"
 
-bool keyIsDown(char key);
+bool keyIsDown(int key);
 bool leftMouseDown();
 bool middleMouseDown();
 bool rightMouseDown();
 
 struct KeyLocation {
-  char key;
+  int key;
   glm::vec2 topLeft;
   glm::vec2 bottomRight;
 };
@@ -22,8 +22,74 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(-0.615228f, 0.343885f),
     .bottomRight = glm::vec2(-0.513256f, 0.0964029f),
   },
+
   KeyLocation {
-    .key = 32,
+    .key = GLFW_KEY_ESCAPE,
+    .topLeft = glm::vec2(-0.953912, 0.926489),
+    .bottomRight = glm::vec2(-0.842444, 0.764259),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F1,
+    .topLeft = glm::vec2(-0.815648, 0.921420),
+    .bottomRight = glm::vec2(-0.700965, 0.764259),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F2,
+    .topLeft = glm::vec2(-0.677385, 0.923954),
+    .bottomRight = glm::vec2(-0.561629, 0.764259),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F3,
+    .topLeft = glm::vec2(-0.539121, 0.916350),
+    .bottomRight = glm::vec2(-0.425509, 0.764259),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F4,
+    .topLeft = glm::vec2(-0.399786, 0.926489),
+    .bottomRight = glm::vec2(-0.286174, 0.751584),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F5,
+    .topLeft = glm::vec2(-0.257235, 0.923954),
+    .bottomRight = glm::vec2(-0.141479, 0.759189),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F6,
+    .topLeft = glm::vec2(-0.113612, 0.918885),
+    .bottomRight = glm::vec2(-0.005359, 0.759189),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F7,
+    .topLeft = glm::vec2(0.031083, 0.898606),
+    .bottomRight = glm::vec2(0.132905, 0.751584),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F8,
+    .topLeft = glm::vec2(0.178993, 0.903676),
+    .bottomRight = glm::vec2(0.273312, 0.756654),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F9,
+    .topLeft = glm::vec2(0.323687, 0.908745),
+    .bottomRight = glm::vec2(0.410504, 0.759189),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F10,
+    .topLeft = glm::vec2(0.440514, 0.906210),
+    .bottomRight = glm::vec2(0.547696, 0.759189),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F11,
+    .topLeft = glm::vec2(0.572347, 0.923954),
+    .bottomRight = glm::vec2(0.685959, 0.761724),
+  },
+  KeyLocation {
+    .key = GLFW_KEY_F12,
+    .topLeft = glm::vec2(0.712755, 0.929024),
+    .bottomRight = glm::vec2(0.827438, 0.759189),
+  },
+  KeyLocation {
+    .key = 32, // spacebar
     .topLeft = glm::vec2(-0.381457f, -0.626635f),
     .bottomRight = glm::vec2(0.255629f, -0.921522f),
   },
@@ -143,21 +209,6 @@ std::vector<KeyLocation> keys {
     .bottomRight = glm::vec2(0.665354, -0.559494),
   },
 
-  KeyLocation {
-    .key = '7',
-    .topLeft = glm::vec2(-0.016077, 0.673004),
-    .bottomRight = glm::vec2(0.098607, 0.411914),
-  },
-  KeyLocation {
-    .key = '8',
-    .topLeft = glm::vec2(0.118971, 0.678074),
-    .bottomRight = glm::vec2(0.227224, 0.404309),
-  },
-  KeyLocation {
-    .key = '9',
-    .topLeft = glm::vec2(0.251876, 0.673004),
-    .bottomRight = glm::vec2(0.363344, 0.414449),
-  },
 
   KeyLocation {
     .key = 'E',
@@ -189,6 +240,21 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(0.452364f, 0.347291f),
     .bottomRight = glm::vec2(0.561044f, 0.0960591f),
   },
+
+  KeyLocation {
+    .key = 'U',
+    .topLeft = glm::vec2(0.052519, 0.372340),
+    .bottomRight = glm::vec2(0.160772, 0.111702),
+  },
+
+  KeyLocation {
+    .key = 'I',
+    .topLeft = glm::vec2(0.185077, 0.373810),
+    .bottomRight = glm::vec2(0.297732, 0.104762),
+  },
+
+
+
   KeyLocation {
     .key = '[',
     .topLeft = glm::vec2(0.584906, 0.355603),
@@ -204,7 +270,72 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(0.854953, 0.355603),
     .bottomRight = glm::vec2(0.966981, 0.088362),
   },
-  
+KeyLocation {
+  .key = '`',
+  .topLeft = glm::vec2(-0.957128, 0.691489),
+  .bottomRight = glm::vec2(-0.844587, 0.428191),
+},
+KeyLocation {
+  .key = '1',
+  .topLeft = glm::vec2(-0.822079, 0.678074),
+  .bottomRight = glm::vec2(-0.713826, 0.404309),
+},
+KeyLocation {
+  .key = '2',
+  .topLeft = glm::vec2(-0.687031, 0.678074),
+  .bottomRight = glm::vec2(-0.574491, 0.404309),
+},
+KeyLocation {
+  .key = '3',
+  .topLeft = glm::vec2(-0.549839, 0.678074),
+  .bottomRight = glm::vec2(-0.440514, 0.404309),
+},
+KeyLocation {
+  .key = '4',
+  .topLeft = glm::vec2(-0.414791, 0.678074),
+  .bottomRight = glm::vec2(-0.306538, 0.404309),
+},
+KeyLocation {
+  .key = '5',
+  .topLeft = glm::vec2(-0.281886, 0.691489),
+  .bottomRight = glm::vec2(-0.171490, 0.438830),
+},
+KeyLocation {
+  .key = '6',
+  .topLeft = glm::vec2(-0.144695, 0.696809),
+  .bottomRight = glm::vec2(-0.040729, 0.444149),
+},
+KeyLocation {
+  .key = '7',
+  .topLeft = glm::vec2(-0.016077, 0.678074),
+  .bottomRight = glm::vec2(0.098607, 0.404309),
+},
+KeyLocation {
+  .key = '8',
+  .topLeft = glm::vec2(0.118971, 0.678074),
+  .bottomRight = glm::vec2(0.227224, 0.404309),
+},
+KeyLocation {
+  .key = '9',
+  .topLeft = glm::vec2(0.251876, 0.678074),
+  .bottomRight = glm::vec2(0.363344, 0.404309),
+},
+
+KeyLocation {
+  .key = '0',
+  .topLeft = glm::vec2(0.386924, 0.696809),
+  .bottomRight = glm::vec2(0.493033, 0.441489),
+},
+KeyLocation {
+  .key = '-',
+  .topLeft = glm::vec2(0.518757, 0.696809),
+  .bottomRight = glm::vec2(0.628081, 0.433511),
+},
+KeyLocation {
+  .key = '=',
+  .topLeft = glm::vec2(0.652733, 0.691489),
+  .bottomRight = glm::vec2(0.765273, 0.430851),
+},
 
 
 /*
@@ -372,4 +503,4 @@ AlignmentParams keyboardAlignment {
   .layoutFlowVertical = UILayoutFlowPositive2,
 };
 
-Component keyboardComponent = simpleVerticalLayout(keyboardComponents, glm::vec2(0.f, 0.f), keyboardAlignment, glm::vec4(1.f, 1.f, 1.f, 1.f), 0.01f, glm::vec4(0.f, 0.f, 1.f, 0.2f));
+Component keyboardComponent = simpleVerticalLayout(keyboardComponents, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(1.f, 1.f, 1.f, 1.f), 0.01f, glm::vec4(0.f, 0.f, 1.f, 0.2f));
