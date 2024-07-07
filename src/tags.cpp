@@ -104,7 +104,12 @@ void createExplosion(glm::vec3 position){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
 	for (auto &hitobject : hitObjects){
 		doDamageMessage(hitobject.id, 20.f);
+
+		float force = 10.f;
+		auto dirVec = glm::normalize(hitobject.point - position);
+		gameapi -> applyImpulse(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
 	}
+
 	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position);
 
 	std::cout << "hitobjects: [";

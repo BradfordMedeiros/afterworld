@@ -65,9 +65,11 @@ void onNoHealth(objid targetId){
   	}
   }else{
 	  modlog("health", "removing group object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
-  	if (gameapi -> gameobjExists(targetId)){
-	  	gameapi -> removeByGroupId(gameapi -> groupId(targetId));
-  	}
+  	gameapi -> schedule(-1, 1, NULL, [targetId](void*) -> void {
+  		if (gameapi -> gameobjExists(targetId)){
+	  		gameapi -> removeByGroupId(gameapi -> groupId(targetId));
+  		}
+  	});
   }
 }
 
