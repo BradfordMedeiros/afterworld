@@ -744,7 +744,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (isPauseKey(key)){
         togglePauseIfInGame();
       }
-      if (isTeleportButton(key)){
+      if (isTeleportButton(key) && !isPaused()){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
         // maybe raycast down, and then set the position so it fits 
         auto teleportPosition = getTeleportPosition();

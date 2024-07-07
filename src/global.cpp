@@ -39,19 +39,6 @@ GlobalState global {
   .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
 };
 
-std::string print(GlobalState& globalState){
-  std::string value;
-  value += "showEditor = " + print(globalState.showEditor) + "\n";
-  value += "showConsole = " + print(globalState.showConsole) + "\n";
-  value += "disableGameInput = " + print(globalState.disableGameInput) + "\n";
-
-  value += "paused = " + print(globalState.routeState.paused) + "\n";
-  value += "inGameMode = " + print(globalState.routeState.inGameMode) + "\n";
-  value += "showMouse = " + print(globalState.routeState.showMouse) + "\n";
-
-  return value;
-}
-
 std::vector<std::vector<std::string>> debugPrintGlobal(){
     std::vector<std::vector<std::string>> values;
     values.push_back({ "showEditor", print(global.showEditor) });
@@ -89,28 +76,6 @@ void updateState(){
     });    
   }
 
-
-  /*if (global.showEditor){
-    gameapi -> setWorldState({
-      ObjectValue {
-        .object = "mouse",
-        .attribute = "cursor",
-        .value = "normal",
-      },
-    });
-  }else{
-    gameapi -> setWorldState({
-      ObjectValue {
-        .object = "mouse",
-        .attribute = "cursor",
-        .value = "capture",
-      },
-    });    
-  }*/
-  
-
-
-
   if (global.showEditor){
     gameapi -> setWorldState({ 
       ObjectValue {
@@ -136,11 +101,7 @@ void updateState(){
      .value = global.routeState.paused ? "true" : "false",
    }
   });
-
-  std::cout << print(global) << std::endl;
 }
-
-
 
 void setPaused(bool paused){
   modlog("paused toggle", std::string("paused state: ") + print(paused));
