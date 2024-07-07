@@ -52,8 +52,6 @@ void debugAssertForNow(bool valid, const char* message);
 
 struct HealthChangeMessage {
 	objid targetId;
-	std::optional<objid> originId;
-	float damageAmount;
 	float remainingHealth;
 };
 

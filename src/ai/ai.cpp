@@ -184,6 +184,13 @@ void doGoal(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   modassert(false, "do goal invalid agent");
 }
 
+void onAiHealthChange(objid targetId, float remainingHealth){
+  HealthChangeMessage healthMessage {
+    .targetId = targetId,
+    .remainingHealth = remainingHealth,
+  };
+  gameapi -> sendNotifyMessage("health-change", healthMessage);
+}
 
 void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
   if(key == "ammo"){

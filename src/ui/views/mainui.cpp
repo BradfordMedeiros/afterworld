@@ -87,7 +87,7 @@ Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
       { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
       { .symbol = valueSymbol, .value = listItems } ,
       { .symbol = yoffsetSymbol, .value = 0.2f },
-      { .symbol = tintSymbol, .value = glm::vec4(1.f, 0.f, 0.f, 0.4f ) },
+      { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.8f ) },
     },
   };
   return props;

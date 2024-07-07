@@ -1,6 +1,7 @@
 #include "./health.h"
 
 extern CustomApiBindings* gameapi;
+void onAiHealthChange(objid targetId, float remainingHealth);
 
 std::unordered_map<objid, HitPoints> hitpoints = {};
 
@@ -88,14 +89,7 @@ void doDamageMessage(objid targetId, float damageAmount){
   if (valid && enemyDead){
    	onNoHealth(targetId);
   }
-
-	HealthChangeMessage healthMessage {
-		.targetId = targetId,
-		.originId = std::nullopt,
-		.damageAmount = damageAmount,
-		.remainingHealth = remainingHealth,
-	};
-  gameapi -> sendNotifyMessage("health-change", healthMessage);
+  onAiHealthChange(targetId, remainingHealth); // this shouldn't know about ai system
 }
 
 std::optional<HitPoints> getHealth(objid id){
