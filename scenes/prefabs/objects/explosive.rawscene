@@ -1,9 +1,11 @@
 red_barrel:mesh:../gameresources/build/misc/barrel.gltf
 red_barrel:physics:enabled
 red_barrel:physics_mass:20
-red_barrel:physics_type:dynamic
+#red_barrel:physics_type:dynamic
 red_barrel:physics_shape:shape_cylinder
 red_barrel:scale:0.3 0.3 0.3
 red_barrel:tint:1 0.2 0.2 1
-red_barrel:health:50
-red_barrel:explode:50
+red_barrel:health:10
+red_barrel:explode:20
+red_barrel:explode-radius:5
+red_barrel:health-tint-to:1 0.2 1 1

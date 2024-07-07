@@ -99,11 +99,10 @@ void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);
 }
 
-void createExplosion(glm::vec3 position){
-	float outerRadius = 2.f;
+void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
 	for (auto &hitobject : hitObjects){
-		doDamageMessage(hitobject.id, 20.f);
+		doDamageMessage(hitobject.id, damage);
 
 		float force = 10.f;
 		auto dirVec = glm::normalize(hitobject.point - position);
@@ -350,7 +349,11 @@ std::vector<TagUpdater> tagupdates = {
   	.onRemove = [](void* data, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
-  		createExplosion(position);
+
+  		auto attrHandle = getAttrHandle(id);
+			auto explodeDamage = getFloatAttr(attrHandle, "explode").value();
+			auto explodeRadius = getFloatAttr(attrHandle, "explode-radius");
+  		createExplosion(position, explodeRadius.has_value() ? explodeRadius.value() : 5.f, explodeDamage);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,

@@ -343,13 +343,13 @@ wires:scale:10 10 10
 [bouncepad:scene:../afterworld/scenes/prefabs/objects/bouncepad.rawscene
 [bouncepad:position:230 50 -175
 
-[explosive1:position:232 45 -175
+[explosive1:position:232 38 -175
 [explosive1:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
 
-[explosive2:position:233 45 -175
+[explosive2:position:233 38 -175
 [explosive2:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
 
-[explosive3:position:234 45 -175
+[explosive3:position:234 38 -175
 [explosive3:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
 
 )pickup-scrapgun:value:scrapgun
