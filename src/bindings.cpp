@@ -368,6 +368,7 @@ struct GameState {
   bool printGametypes;
   bool printAi;
   bool printHealth;
+  bool printActivePlayer;
 };
 
 MovementEntityData movementEntityData {
@@ -632,7 +633,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> printGametypes = args.find("print-gametypes") != args.end();
     gameState -> printAi = args.find("print-ai") != args.end();
     gameState -> printHealth = args.find("print-health") != args.end();
-
+    gameState -> printActivePlayer = args.find("print-active") != args.end();
+    
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = fullHistoryStr();
@@ -730,6 +732,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (gameState -> printHealth){
       auto healthDebug = debugPrintHealth();
       printDebugStr(healthDebug);
+    }
+    if (gameState -> printActivePlayer){
+      auto activePlayerDebug = debugPrintActivePlayer();
+      printDebugStr(activePlayerDebug);
     }
   };
 

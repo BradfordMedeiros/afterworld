@@ -119,3 +119,21 @@ void popTempViewpoint(){
 	}
 }
 
+std::vector<std::vector<std::string>> debugPrintActivePlayer(){
+	//ControlledPlayer controlledPlayer {
+	//	.activePlayerId = std::nullopt,
+	//	.activePlayerTempDisabled = false,
+	//	.tempCameraId = std::nullopt,
+	//	.tempViewpoint = std::nullopt,
+	//};
+
+	return { 
+		{"activeplayer id", print(controlledPlayer.activePlayerId) },
+		{"activePlayerTempDisabled", print(controlledPlayer.activePlayerTempDisabled) },
+		{"tempCameraId id", print(controlledPlayer.activePlayerId) },
+		{"tempViewpoint", print(controlledPlayer.tempViewpoint) },
+
+	//	. = std::nullopt,
+
+	};
+}
