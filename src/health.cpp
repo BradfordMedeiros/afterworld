@@ -43,9 +43,9 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 }
 
 void onNoHealth(objid targetId){
-  modlog("health", "removing object: " + std::to_string(targetId));
   auto removeType = getSingleAttr(targetId, "health-remove");
   if (removeType.has_value() && removeType.value() == "self"){
+	  modlog("health", "removing self object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
   	// check if the parent of the group of id has no children, if so delete it 
   	auto allChildren = gameapi -> idsInGroupById(targetId);
   	auto groupId = gameapi -> groupId(targetId);
@@ -64,7 +64,10 @@ void onNoHealth(objid targetId){
   		}
   	}
   }else{
-	 	gameapi -> removeByGroupId(targetId);
+	  modlog("health", "removing group object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
+  	if (gameapi -> gameobjExists(targetId)){
+	  	gameapi -> removeByGroupId(gameapi -> groupId(targetId));
+  	}
   }
 }
 
@@ -72,6 +75,8 @@ void doDamageMessage(objid targetId, float damageAmount){
   bool enemyDead = false;
   float remainingHealth = 0.f;
   bool valid = doDamage(hitpoints, targetId, damageAmount, &enemyDead, &remainingHealth);
+
+  std::cout << gameapi -> getGameObjNameForId(targetId).value() << ": dead: " << enemyDead << std::endl;
 
   auto healthBehavior = getSingleAttr(targetId, "health-behavior");
   if (valid && enemyDead && healthBehavior.has_value() && healthBehavior.value() == "make-dynamic"){
@@ -103,7 +108,7 @@ std::vector<std::vector<std::string>> debugPrintHealth(){
 	for (auto &[id, hitpoint] : hitpoints){
 		healthValues.push_back({ 
 			gameapi -> getGameObjNameForId(id).value(), 
-			std::to_string(hitpoint.current) 
+			std::to_string(hitpoint.current) + "    " + std::to_string(id)
 		});
 	}
 	return healthValues;	

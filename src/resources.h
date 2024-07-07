@@ -11,6 +11,7 @@ struct ManagedSounds {
   std::optional<objid> moveSoundObjId;
   std::optional<objid> activateSoundObjId;
   std::optional<objid> soundObjId;
+  std::optional<objid> explosionSoundObjId;
 };
 
 ManagedSounds& getManagedSounds();

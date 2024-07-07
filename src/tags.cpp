@@ -100,11 +100,12 @@ void updateBackground(objid id, std::string image){
 }
 
 void createExplosion(glm::vec3 position){
-	float outerRadius = 10.f;
+	float outerRadius = 2.f;
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
 	for (auto &hitobject : hitObjects){
-		doDamageMessage(hitobject.id, 100.f);
+		doDamageMessage(hitobject.id, 20.f);
 	}
+	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position);
 
 	std::cout << "hitobjects: [";
 	for (auto &hitobject : hitObjects){
@@ -113,8 +114,7 @@ void createExplosion(glm::vec3 position){
 	std::cout << "]" << std::endl;
 	simpleOnFrame([position, outerRadius]() -> void {
 		drawSphereVecGfx(position, outerRadius, glm::vec4(0.f, 0.f, 1.f, 1.f));
-		drawSphereVecGfx(position, 2.f, glm::vec4(1.f, 0.f, 0.f, 1.f));
-	}, 2.f);
+	}, 0.2f);
 }
 
 std::vector<TagUpdater> tagupdates = {

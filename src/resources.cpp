@@ -8,6 +8,7 @@ ManagedSounds sounds {
   .moveSoundObjId = std::nullopt,
   .activateSoundObjId = std::nullopt,
   .soundObjId = std::nullopt,
+  .explosionSoundObjId = std::nullopt,
 };
 
 ManagedSounds& getManagedSounds(){
@@ -66,6 +67,13 @@ void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landCli
     sounds.soundObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), teleportClip);
   }
 
+  std::string explosionClip = "../ModEngine/res/sounds/silenced-gunshot.wav";
+  if (explosionClip != ""){
+    if (sounds.explosionSoundObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.explosionSoundObjId.value());
+    }
+    sounds.explosionSoundObjId = createSound(sceneId, ("&code-explosion") + uniqueNameSuffix(), explosionClip);
+  }
 }
 
 void ensureSoundUnloaded(objid sceneId, std::optional<objid>* sound){  // this should just centrally loading into a scene, and then can detect
@@ -85,4 +93,6 @@ void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading
 	ensureSoundUnloaded(sceneId, &sounds.moveSoundObjId);
   ensureSoundUnloaded(sceneId, &sounds.activateSoundObjId);
   ensureSoundUnloaded(sceneId, &sounds.soundObjId);
+  ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
 }
+
