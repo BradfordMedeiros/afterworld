@@ -2,22 +2,20 @@
 
 extern CustomApiBindings* gameapi;
 
-extern CustomApiBindings* gameapi;
-
 glm::vec3 calculatePoint(float radians, float radius, glm::quat orientation){
   float x = glm::cos(radians) * radius;
   float y = glm::sin(radians) * radius;
   return orientation * glm::vec3(x, y, 0.f);
 }
 const int CIRCLE_RESOLUTION = 20;
-void drawCircle(objid id, glm::vec3 pos, float radius, glm::quat orientation){
+void drawCircle(objid id, glm::vec3 pos, float radius, glm::quat orientation, std::optional<glm::vec4> tint = std::nullopt){
   auto lastPoint = calculatePoint(0, radius, orientation);
   //std::cout << std::endl;
   for (int i = 1; i <= CIRCLE_RESOLUTION; i++){
     auto radians = i * ((2 * MODPI) / static_cast<float>(CIRCLE_RESOLUTION));
     auto newPoint = calculatePoint(radians, radius, orientation);
     //std::cout << "radians = " << radians << ", new point is: " << print(newPoint) << std::endl;
-    gameapi -> drawLine(lastPoint + pos,  newPoint + pos, false, id, std::nullopt, std::nullopt, std::nullopt);
+    gameapi -> drawLine(lastPoint + pos,  newPoint + pos, false, id, tint, std::nullopt, std::nullopt);
     lastPoint = newPoint;
   } 
 }
@@ -55,6 +53,8 @@ void drawBloom(objid playerId, objid id, float distance, float bloomAmount){
   }
 }
 
-void drawSphere(glm::vec3 position, float radius){
-	
+void drawSphereVecGfx(glm::vec3 position, float radius, glm::vec4 tint){
+  drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), tint);
+  drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f)), tint);
+  drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f)), tint);
 }

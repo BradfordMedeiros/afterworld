@@ -97,3 +97,14 @@ std::optional<HitPoints> getHealth(objid id){
 	}
 	return hitpoints.at(id);
 }
+
+std::vector<std::vector<std::string>> debugPrintHealth(){
+	std::vector<std::vector<std::string>> healthValues;
+	for (auto &[id, hitpoint] : hitpoints){
+		healthValues.push_back({ 
+			gameapi -> getGameObjNameForId(id).value(), 
+			std::to_string(hitpoint.current) 
+		});
+	}
+	return healthValues;	
+}

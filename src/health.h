@@ -17,5 +17,6 @@ void addEntityIdHitpoints(objid id);
 void removeEntityIdHitpoints(objid id);
 void doDamageMessage(objid targetId, float damageAmount);
 std::optional<HitPoints> getHealth(objid id);
+std::vector<std::vector<std::string>> debugPrintHealth();
 
 #endif

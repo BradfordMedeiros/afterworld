@@ -4,6 +4,6 @@
 #include "./util.h"
 
 void drawBloom(objid playerId, objid id, float distance, float bloomAmount);
-void drawSphere(glm::vec3 position, float radius);
+void drawSphereVecGfx(glm::vec3 position, float radius, glm::vec4 tint);
 
 #endif

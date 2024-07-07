@@ -13,6 +13,7 @@
 #include "./conditional_spawn.h"
 #include "./health.h"
 #include "./debug.h"
+#include "./vector_gfx.h"
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
 
