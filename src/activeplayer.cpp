@@ -85,14 +85,6 @@ void setActivePlayer(std::optional<objid> id){
 	maybeDisableAi(aiData, id.value());
 }
 
-void setActivePlayerNext(){
-	setActivePlayer(getNextEntity(getMovementData()));
-}
-
-void onPlayerFrame(){
-	//modlog("active player", print(activePlayerId));
-
-}
 void onActivePlayerRemoved(objid id){
 	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
 		controlledPlayer.activePlayerId = std::nullopt;
@@ -134,19 +126,9 @@ void setActivePlayerEditorMode(bool editorMode){
 }
 
 std::vector<std::vector<std::string>> debugPrintActivePlayer(){
-	//ControlledPlayer controlledPlayer {
-	//	.activePlayerId = std::nullopt,
-	//	.activePlayerTempDisabled = false,
-	//	.tempCameraId = std::nullopt,
-	//	.tempViewpoint = std::nullopt,
-	//};
-
 	return { 
 		{"activeplayer id", print(controlledPlayer.activePlayerId) },
 		{"tempCameraId id", print(controlledPlayer.activePlayerId) },
 		{"tempViewpoint", print(controlledPlayer.tempViewpoint) },
-
-	//	. = std::nullopt,
-
 	};
 }

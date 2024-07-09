@@ -608,6 +608,10 @@ void handleSelectItem(objid id){
   gameapi -> sendNotifyMessage("selected", id);
 }
 
+void setActivePlayerNext(){
+  setActivePlayer(getNextEntity(getMovementData()));
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -688,7 +692,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
 
-    onPlayerFrame();
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     auto ammoInfo = onWeaponsFrame(weapons);
     if (ammoInfo.has_value()){

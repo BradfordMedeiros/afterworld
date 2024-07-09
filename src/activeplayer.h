@@ -9,12 +9,10 @@
 
 std::optional<objid> getActivePlayerId();
 void setActivePlayer(std::optional<objid> id);
-void setActivePlayerNext();
 void onActivePlayerRemoved(objid id);
 void setTempViewpoint(glm::vec3 position, glm::quat rotation);
 bool hasTempViewpoint();
 void popTempViewpoint();
-void onPlayerFrame();
 
 void setActivePlayerEditorMode(bool editorMode);
 
