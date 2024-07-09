@@ -16,6 +16,8 @@ bool hasTempViewpoint();
 void popTempViewpoint();
 void onPlayerFrame();
 
+void setActivePlayerEditorMode(bool editorMode);
+
 std::vector<std::vector<std::string>> debugPrintActivePlayer();
 
 

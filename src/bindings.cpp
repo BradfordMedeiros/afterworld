@@ -545,7 +545,10 @@ UiContext getUiContext(GameState& gameState){
     .showPreviousModel = modelViewerPrevModel,
     .showNextModel = modelViewerNextModel,
     .consoleInterface = ConsoleInterface {
-      .setShowEditor = setShowEditor,
+      .setShowEditor = [](bool showEditor) -> bool {
+        setActivePlayerEditorMode(showEditor);
+        setShowEditor(showEditor);
+      },
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
