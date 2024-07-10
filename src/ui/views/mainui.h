@@ -31,6 +31,7 @@
 #include "../components/game/keyboard.h"
 #include "../components/console.h"
 #include "../components/uiwindow.h"
+#include "./debug.h"
 
 //// organize this into a single file for dock config api
 #include "../../modelviewer.h"

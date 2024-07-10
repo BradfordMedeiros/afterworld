@@ -655,6 +655,9 @@ std::optional<TeleportInfo> getTeleportPosition(){
 void doAnimationTrigger(objid entityId, const char* transition){
 	modassert(tagsPtr, "tagsPtr is null");
 	Tags& tags = *tagsPtr;
+ 
+
+	return;
   if (!hasControllerState(tags.animationController, entityId)){
   	return;
   }

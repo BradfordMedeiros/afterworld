@@ -486,6 +486,15 @@ UiContext getUiContext(GameState& gameState){
    .showKeyboard = []() -> bool { 
       return getGlobalState().showKeyboard;
    },
+   .debugConfig = []() -> std::optional<DebugConfig> {
+      DebugConfig config {
+        .data = {
+          { "walk", "10s", "do" },
+          { "run", "5s", DebugItem { .text = "execute", .onClick = []() -> void {} } },
+        },
+      };
+      return config;
+   },
    .getScoreConfig = []() -> std::optional<ScoreOptions> {
       auto gametypeData = getGametypeData(gametypeSystem);
       if (!gametypeData.has_value()){
@@ -545,7 +554,7 @@ UiContext getUiContext(GameState& gameState){
     .showPreviousModel = modelViewerPrevModel,
     .showNextModel = modelViewerNextModel,
     .consoleInterface = ConsoleInterface {
-      .setShowEditor = [](bool showEditor) -> bool {
+      .setShowEditor = [](bool showEditor) -> void {
         setActivePlayerEditorMode(showEditor);
         setShowEditor(showEditor);
       },

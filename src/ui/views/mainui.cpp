@@ -787,12 +787,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
   bool showTerminal = false;
   if (uiContext.showTerminal().has_value()){
-    TerminalConfig terminalConfig {
-      .terminalDisplay = TerminalImageLeftTextRight {
-        .image = "../gameresources/build/textures/moonman.jpg",
-        .text = "Wow this is something\nI'm not sure, nobody knows this isn't exactly a way.",
-      }
-    };
     Props terminalProps { 
       .props = { PropPair { .symbol = valueSymbol, .value = uiContext.showTerminal().value() }},
     };
@@ -829,6 +823,15 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       },
     };
     keyboardComponent.draw(drawTools, keyboardProps);     
+  }
+
+  if (uiContext.debugConfig().has_value()){
+    Props props {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = uiContext.debugConfig().value() },
+      },
+    };
+    debugComponent.draw(drawTools, props);
   }
 
   if (uiContext.showScreenspaceGrid()){
