@@ -620,25 +620,6 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
-void printDebugStr(DebugConfig& debugConfig){
-  for (int i = 0; i < debugConfig.data.size(); i++){
-    auto& row = debugConfig.data.at(i);
-    std::string rowStr = "";
-    for (auto &col : row){
-      auto strVal = std::get_if<std::string>(&col);
-      auto debugItem = std::get_if<DebugItem>(&col);
-      modassert(strVal || debugItem, "invalid type to config");
-      if(strVal){
-        rowStr += *strVal + " ";
-      }else if (debugItem){
-        rowStr += debugItem -> text + " ";
-      }
-    }
-    gameapi -> drawText(rowStr, -0.9f, 0.9 + (i * -0.1), 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  }
-}
-
-
 void handleSelectItem(objid id){
   gameapi -> sendNotifyMessage("selected", id);
 }
@@ -686,7 +667,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else if (printType == "active"){
         gameState -> printType = DEBUG_ACTIVEPLAYER;
       }else{
-        modassert(false, "invalid");
+        modassert(false, "invalid print type");
       }
     }
 
