@@ -829,6 +829,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     Props props {
       .props = {
         PropPair { .symbol = valueSymbol, .value = uiContext.debugConfig().value() },
+        PropPair { .symbol = xoffsetSymbol, .value = -1.f },
       },
     };
     debugComponent.draw(drawTools, props);

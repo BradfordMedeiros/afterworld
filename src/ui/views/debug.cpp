@@ -2,20 +2,24 @@
 
 extern CustomApiBindings* gameapi;
 
+struct RowItem {
+  std::string value;
+  std::optional<std::function<void()>> fn;
+};
 
-Component createRow(std::vector<std::string> values){
+Component createRow(std::vector<RowItem> values){
   std::vector<Component> elements;
   for (int i = 0 ; i < values.size(); i++){
    // ListComponentData& listItemData = listItems.at(i);
-   // auto onClick = listItemData.onClick.has_value() ? listItemData.onClick.value() : []() -> void {};
+    std::function<void()> onClick = []() -> void {};
     Props listItemProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = values.at(i) },
-        //PropPair { .symbol = onclickSymbol, .value = onClick },
-        //PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f) },
-        //PropPair { .symbol = paddingSymbol, .value = itemPadding },
+        PropPair { .symbol = valueSymbol, .value = values.at(i).value },
       },
     };
+    if (values.at(i).fn.has_value()){
+      listItemProps.props.push_back(PropPair { .symbol = onclickSymbol, .value = values.at(i).fn.value() });
+    }
     auto listItemWithProps = withPropsCopy(listItem, listItemProps);
     elements.push_back(listItemWithProps);
   }
@@ -52,7 +56,7 @@ Component createGrid(std::vector<Component> rows){
     .minwidth = 0.f,
     .minheight = 0.f,
     .layoutType = LAYOUT_VERTICAL2,
-    .layoutFlowHorizontal = UILayoutFlowNone2,
+    .layoutFlowHorizontal = UILayoutFlowPositive2,
     .layoutFlowVertical = UILayoutFlowNone2,
     .alignHorizontal = UILayoutFlowNegative2,
     .alignVertical = UILayoutFlowNone2,
@@ -70,10 +74,10 @@ Component createGrid(std::vector<Component> rows){
   return withPropsCopy(layoutComponent, listLayoutProps); 
 }
 
-Component createGrid(std::vector<std::vector<std::string>> gridConfig){
+Component createGrid(std::vector<std::vector<RowItem>> gridConfig){
   std::vector<Component> rows;
   for (int y = 0; y < gridConfig.size(); y++){
-    std::vector<std::string> values;
+    std::vector<RowItem> values;
     for (int x = 0; x < gridConfig.at(y).size(); x++){
       values.push_back(gridConfig.at(y).at(x));
     }
@@ -88,18 +92,18 @@ Component debugComponent {
 	  auto config = typeFromProps<DebugConfig>(props, valueSymbol);
     modassert(config, "debugConfig must be defined for debugComponent");
 
-    std::vector<std::vector<std::string>> values;
+    std::vector<std::vector<RowItem>> values;
     for (int i = 0; i < config -> data.size(); i++){
       auto& row = config -> data.at(i);
-      std::vector<std::string> rowValue;
+      std::vector<RowItem> rowValue;
       for (auto &col : row){
         auto strVal = std::get_if<std::string>(&col);
         auto debugItem = std::get_if<DebugItem>(&col);
         modassert(strVal || debugItem, "invalid type to config");
         if(strVal){
-          rowValue.push_back(*strVal);
+          rowValue.push_back(RowItem { .value = *strVal });
         }else if (debugItem){
-          rowValue.push_back(debugItem -> text);
+          rowValue.push_back(RowItem { .value = debugItem -> text, .fn = debugItem -> onClick });
         }
       }
       values.push_back(rowValue);

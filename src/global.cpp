@@ -44,7 +44,12 @@ DebugConfig debugPrintGlobal(){
   DebugConfig debugConfig { .data = {} };
   debugConfig.data.push_back({ "showEditor", print(global.showEditor) });
   debugConfig.data.push_back({ "showConsole", print(global.showConsole) });
-  debugConfig.data.push_back({ "showKeyboard" , print(global.showKeyboard) });
+  debugConfig.data.push_back({ "showKeyboard" , print(global.showKeyboard), DebugItem {
+    .text = "TOGGLE",
+    .onClick = []() -> void {
+      toggleKeyboard();
+    },
+  }});
   debugConfig.data.push_back({ "showGameHud" , print(global.showGameHud) });
   debugConfig.data.push_back({ "showTerminal" , print(global.showTerminal) });
   debugConfig.data.push_back({ "disableGameInput", print(global.disableGameInput) });
