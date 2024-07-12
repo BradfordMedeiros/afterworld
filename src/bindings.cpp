@@ -603,11 +603,20 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
-void printDebugStr(std::vector<std::vector<std::string>>& debugStr){
-  for (int i = 0; i < debugStr.size(); i++){
-    auto& row = debugStr.at(i);
-    auto rowStr = join(row, ' ');
-    std::cout << "printing: " << rowStr << std::endl;
+void printDebugStr(DebugConfig& debugConfig){
+  for (int i = 0; i < debugConfig.data.size(); i++){
+    auto& row = debugConfig.data.at(i);
+    std::string rowStr = "";
+    for (auto &col : row){
+      auto strVal = std::get_if<std::string>(&col);
+      auto debugItem = std::get_if<DebugItem>(&col);
+      modassert(strVal || debugItem, "invalid type to config");
+      if(strVal){
+        rowStr += *strVal + " ";
+      }else if (debugItem){
+        rowStr += debugItem -> text + " ";
+      }
+    }
     gameapi -> drawText(rowStr, -0.9f, 0.9 + (i * -0.1), 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   }
 }

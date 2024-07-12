@@ -17,7 +17,7 @@ void onFrameAi(AiData& aiData);
 void onAiObjectAdded(AiData& aiData, int32_t idAdded);
 void onAiObjectRemoved(AiData& aiData, int32_t idRemoved);
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value);
-std::vector<std::vector<std::string>> debugPrintAi(AiData& aiData);
+DebugConfig debugPrintAi(AiData& aiData);
 
 void maybeReEnableAi(AiData& aiData, objid id);
 void maybeDisableAi(AiData& aiData, objid id);

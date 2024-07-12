@@ -16,7 +16,7 @@ struct GameTypes  {
 
 GameTypes createGametypes();
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value);
-std::vector<std::vector<std::string>> debugPrintGametypes(GameTypes& gametype);
+DebugConfig debugPrintGametypes(GameTypes& gametype);
 
 void changeGameType(GameTypes& gametypes, const char* name);
 std::optional<GametypeData> getGametypeData(GameTypes&);

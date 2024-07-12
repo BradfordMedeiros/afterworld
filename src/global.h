@@ -67,6 +67,6 @@ void setShowTerminal(bool showTerminal);
 void setPlayerVelocity(glm::vec3 velocity);
 glm::vec3 getPlayerVelocity();
 
-std::vector<std::vector<std::string>> debugPrintGlobal();
+DebugConfig debugPrintGlobal();
 
 #endif 

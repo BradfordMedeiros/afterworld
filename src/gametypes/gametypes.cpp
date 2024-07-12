@@ -52,14 +52,14 @@ void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value)
 }
 
 
-std::vector<std::vector<std::string>> debugPrintGametypes(GameTypes& gametype){
-  std::vector<std::vector<std::string>> debugStr;
+DebugConfig debugPrintGametypes(GameTypes& gametype){
+  DebugConfig debugConfig { .data = {} };
   if (!gametype.meta){
-    debugStr.push_back({ "gametype", "no gametype" });
+    debugConfig.data.push_back({ "gametype", "no gametype" });
   }else{
-    debugStr.push_back({ "gametype", gametype.meta -> getDebugText(gametype.gametype) });
+    debugConfig.data.push_back({ "gametype", gametype.meta -> getDebugText(gametype.gametype) });
   }
-  return debugStr;
+  return debugConfig;
 }
 
 std::optional<GametypeData> getGametypeData(GameTypes& gametypes){

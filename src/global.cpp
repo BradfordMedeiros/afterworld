@@ -39,18 +39,19 @@ GlobalState global {
   .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
 };
 
-std::vector<std::vector<std::string>> debugPrintGlobal(){
-    std::vector<std::vector<std::string>> values;
-    values.push_back({ "showEditor", print(global.showEditor) });
-    values.push_back({ "showConsole", print(global.showConsole) });
-    values.push_back({ "showKeyboard" , print(global.showKeyboard) });
-    values.push_back({ "showGameHud" , print(global.showGameHud) });
-    values.push_back({ "showTerminal" , print(global.showTerminal) });
-    values.push_back({ "disableGameInput", print(global.disableGameInput) });
-    values.push_back({ "routeState.paused", print(global.routeState.paused) });
-    values.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });
-    values.push_back({ "routeState.showMouse", print(global.routeState.showMouse) });
-    return values;
+
+DebugConfig debugPrintGlobal(){
+  DebugConfig debugConfig { .data = {} };
+  debugConfig.data.push_back({ "showEditor", print(global.showEditor) });
+  debugConfig.data.push_back({ "showConsole", print(global.showConsole) });
+  debugConfig.data.push_back({ "showKeyboard" , print(global.showKeyboard) });
+  debugConfig.data.push_back({ "showGameHud" , print(global.showGameHud) });
+  debugConfig.data.push_back({ "showTerminal" , print(global.showTerminal) });
+  debugConfig.data.push_back({ "disableGameInput", print(global.disableGameInput) });
+  debugConfig.data.push_back({ "routeState.paused", print(global.routeState.paused) });
+  debugConfig.data.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });
+  debugConfig.data.push_back({ "routeState.showMouse", print(global.routeState.showMouse) });
+  return debugConfig;
 }
 
 

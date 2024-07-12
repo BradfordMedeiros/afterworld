@@ -125,10 +125,10 @@ void setActivePlayerEditorMode(bool editorMode){
 	updateCamera();
 }
 
-std::vector<std::vector<std::string>> debugPrintActivePlayer(){
-	return { 
-		{"activeplayer id", print(controlledPlayer.activePlayerId) },
-		{"tempCameraId id", print(controlledPlayer.activePlayerId) },
-		{"tempViewpoint", print(controlledPlayer.tempViewpoint) },
-	};
+DebugConfig debugPrintActivePlayer(){
+  DebugConfig debugConfig { .data = {} };
+  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.activePlayerId) });
+  debugConfig.data.push_back({"tempCameraId id", print(controlledPlayer.activePlayerId) });
+  debugConfig.data.push_back({"tempViewpoint", print(controlledPlayer.tempViewpoint) });
+  return debugConfig;
 }

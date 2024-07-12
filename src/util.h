@@ -118,4 +118,14 @@ void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, floa
 
 void drawRightText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 
+struct DebugItem {
+	std::string text;
+	std::function<void()> onClick;
+};
+typedef std::variant<std::string, DebugItem> DebugConfigType;
+struct DebugConfig {
+	std::vector<std::vector<DebugConfigType>> data;
+};
+
+
 #endif

@@ -16,7 +16,7 @@ void popTempViewpoint();
 
 void setActivePlayerEditorMode(bool editorMode);
 
-std::vector<std::vector<std::string>> debugPrintActivePlayer();
+DebugConfig debugPrintActivePlayer();
 
 
 
