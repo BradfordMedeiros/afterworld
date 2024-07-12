@@ -353,6 +353,15 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
 }
 
 
+enum DebugPrintType {
+  DEBUG_NONE,
+  DEBUG_GLOBAL,
+  DEBUG_INVENTORY,
+  DEBUG_GAMETYPE,
+  DEBUG_AI,
+  DEBUG_HEALTH,
+  DEBUG_ACTIVEPLAYER,
+};
 struct GameState {
   SceneManagement sceneManagement;
   MovementEntityData movementEntities;
@@ -363,12 +372,7 @@ struct GameState {
   HandlerFns uiCallbacks;
   UiContext uiContext;
 
-  bool printInventory;
-  bool printGlobal;
-  bool printGametypes;
-  bool printAi;
-  bool printHealth;
-  bool printActivePlayer;
+  DebugPrintType printType;
 };
 
 MovementEntityData movementEntityData {
@@ -486,14 +490,27 @@ UiContext getUiContext(GameState& gameState){
    .showKeyboard = []() -> bool { 
       return getGlobalState().showKeyboard;
    },
-   .debugConfig = []() -> std::optional<DebugConfig> {
-      DebugConfig config {
-        .data = {
-          { "walk", "10s", "do" },
-          { "run", "5s", DebugItem { .text = "execute", .onClick = []() -> void {} } },
-        },
-      };
-      return config;
+   .debugConfig = [&gameState]() -> std::optional<DebugConfig> {
+      if (gameState.printType == DEBUG_GLOBAL){
+        return debugPrintGlobal();
+      }
+      if (gameState.printType == DEBUG_INVENTORY){
+        debugPrintInventory();
+        return std::nullopt;
+      }
+      if (gameState.printType == DEBUG_GAMETYPE){
+        return debugPrintGametypes(gametypeSystem);
+      }
+      if (gameState.printType == DEBUG_AI){
+        return debugPrintAi(aiData);
+      }
+      if (gameState.printType == DEBUG_HEALTH){
+        return debugPrintHealth();
+      }
+      if (gameState.printType == DEBUG_ACTIVEPLAYER){
+        return debugPrintActivePlayer();
+      }
+      return std::nullopt;
    },
    .getScoreConfig = []() -> std::optional<ScoreOptions> {
       auto gametypeData = getGametypeData(gametypeSystem);
@@ -653,13 +670,26 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
     }
 
-    gameState -> printInventory = args.find("print-inventory") != args.end();
-    gameState -> printGlobal = args.find("print-global") != args.end();
-    gameState -> printGametypes = args.find("print-gametypes") != args.end();
-    gameState -> printAi = args.find("print-ai") != args.end();
-    gameState -> printHealth = args.find("print-health") != args.end();
-    gameState -> printActivePlayer = args.find("print-active") != args.end();
-    
+    gameState -> printType = DEBUG_NONE;
+    if (args.find("print-type") != args.end()){
+      auto printType = args.at("print-type");
+      if (printType == "inventory"){
+        gameState -> printType = DEBUG_INVENTORY;
+      }else if (printType == "global"){
+        gameState -> printType = DEBUG_GLOBAL;
+      }else if (printType == "gametype"){
+        gameState -> printType = DEBUG_GAMETYPE;
+      }else if (printType == "ai"){
+        gameState -> printType = DEBUG_AI;
+      }else if (printType == "health"){
+        gameState -> printType = DEBUG_HEALTH;
+      }else if (printType == "active"){
+        gameState -> printType = DEBUG_ACTIVEPLAYER;
+      }else{
+        modassert(false, "invalid");
+      }
+    }
+
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
       auto currentPath = fullHistoryStr();
@@ -738,29 +768,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     // debug
     debugOnFrame();
-    if (gameState -> printGametypes){
-      auto debugGametypeInfo = debugPrintGametypes(gametypeSystem);
-      printDebugStr(debugGametypeInfo);
-    }
-    if (gameState -> printInventory){
-      debugPrintInventory();
-    }
-    if (gameState -> printGlobal){
-      auto globalDebug = debugPrintGlobal();
-      printDebugStr(globalDebug);
-    }
-    if (gameState -> printAi){
-      auto aiDebug = debugPrintAi(aiData);
-      printDebugStr(aiDebug);
-    }
-    if (gameState -> printHealth){
-      auto healthDebug = debugPrintHealth();
-      printDebugStr(healthDebug);
-    }
-    if (gameState -> printActivePlayer){
-      auto activePlayerDebug = debugPrintActivePlayer();
-      printDebugStr(activePlayerDebug);
-    }
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
