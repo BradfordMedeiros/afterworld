@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 void pushHistoryParam(std::string);
 void rmHistoryParam(std::string);
+void setActivePlayerEditorMode(bool);
 
 
 GlobalState global {
@@ -185,12 +186,14 @@ void toggleKeyboard(){
   queryUpdateShowKeyboard(global.showKeyboard);
 }
 
+
 void initGlobal(){
   auto args = gameapi -> getArgs();
   if (args.find("godmode") != args.end()){
     global.godMode = args.at("godmode") == "true";
   }
   global.showEditor = queryShowEditor();
+  setActivePlayerEditorMode(global.showEditor);
   global.showKeyboard = queryShowKeyboard();
   updateState();
 }

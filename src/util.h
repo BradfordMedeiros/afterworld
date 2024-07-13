@@ -46,7 +46,7 @@ float randomNumber(float min, float max);
 int randomNumber(int min, int max);
 
 int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos);
-void showDebugHitmark(HitObject& hitpoint, objid playerId);
+void drawDebugHitmark(HitObject& hitpoint, objid playerId);
 
 void debugAssertForNow(bool valid, const char* message);
 

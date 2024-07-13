@@ -305,19 +305,7 @@ std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
   auto rot = gameapi -> getGameObjectRotation(playerId, true) *  orientationOffsetQuat;
-  //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
-
-  //if (weapons.raycastLine.has_value()){
-  //  gameapi -> freeLine(weapons.raycastLine.value());
-  //}
-  
-  //auto raycastLineId = gameapi -> drawLine(mainobjPos, gameapi -> moveRelative(mainobjPos, rot, maxRaycastDistance), true, playerId.value(), std::nullopt,  std::nullopt, std::nullopt);
-  //weapons.raycastLine = raycastLineId;
-  //for (auto &hitpoint : hitpoints){
-  //  std::cout << "raycast hit: " << hitpoint.id << "- point: " << print(hitpoint.point) << ", normal: " << print(hitpoint.normal) << std::endl;
-  //  showDebugHitmark(hitpoint, weapons.playerId);
-  //}
   return hitpoints;
 }
 

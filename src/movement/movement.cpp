@@ -93,7 +93,7 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
       .position = location,
       .speed = 0.5f,
     });
-    showDebugHitmark(hitpoints.at(0), -1);
+    drawDebugHitmark(hitpoints.at(0), -1);
   }
 }
 

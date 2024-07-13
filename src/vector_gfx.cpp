@@ -58,3 +58,28 @@ void drawSphereVecGfx(glm::vec3 position, float radius, glm::vec4 tint){
   drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f)), tint);
   drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f)), tint);
 }
+
+float debugMarkerHitlength = 2;
+void drawDebugHitmark(HitObject& hitpoint, objid playerId){
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(0.f, -1.f * debugMarkerHitlength,  0.f),
+    hitpoint.point + glm::vec3(0.f, 1.f * debugMarkerHitlength,  0.f),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(-1.f * debugMarkerHitlength, 0.f, 0.f),
+    hitpoint.point + glm::vec3(1.f * debugMarkerHitlength, 0.f, 0.f),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    hitpoint.point + glm::vec3(0.f, 0.f, -1.f * debugMarkerHitlength),
+    hitpoint.point + glm::vec3(0.f, 0.f, 1.f * debugMarkerHitlength),
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
+
+  gameapi -> drawLine(
+    hitpoint.point,
+    hitpoint.point + (10.f * (hitpoint.normal * glm::vec3(0.f, 0.f, -1.f))),
+    true, playerId, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt
+  );
+}

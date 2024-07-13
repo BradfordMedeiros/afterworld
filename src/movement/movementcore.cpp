@@ -303,9 +303,6 @@ bool shouldStepUp(objid id){ // check this logic
     }
   }
 
-  //gameapi -> drawLine(belowPos, gameapi -> moveRelative(belowPos, belowDir, 2.f), true, id, glm::vec4(1.f, 0.f, 0.f, 1.f),  std::nullopt, std::nullopt);
-  //gameapi -> drawLine(abovePos, gameapi -> moveRelative(abovePos, aboveDir, 2.f), true, id, glm::vec4(0.f, 0.f, 1.f, 1.f),  std::nullopt, std::nullopt);
-
   //std::cout << "hitpoints:  low = " << belowHitpoints.size() << ", high = " << aboveHitpoints.size() << std::endl;
   return anyCollideableBelow && aboveHitpoints.size() == 0;
 }
@@ -350,7 +347,6 @@ std::vector<CollisionSpace> collisionSpaces = {
 };
 
 bool checkCollision(HitObject& hitpoint, CollisionSpace& collisionSpace, glm::quat rotationWithoutY){
-  //     gameapi -> drawLine(hitpoint.point,  hitpoint.point + normal, true, movement.playerId, std::nullopt, std::nullopt, std::nullopt);
   auto direction = glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
   auto checkAgainstDirection = rotationWithoutY * collisionSpace.direction;
   float value = glm::dot(direction, checkAgainstDirection);
@@ -376,14 +372,6 @@ std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::qua
 
 MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat>& _hitDirections, glm::quat rotationWithoutY){
   auto hitpoints = gameapi -> contactTest(playerId);
-  //std::cout << "hitpoints: [ ";
-
-  //for (auto &hitpoint : hitpoints){
-  //  std::cout << "\n[ id = " << hitpoint.id << ", pos = " << print(hitpoint.point) << ", normal = " << serializeQuat(hitpoint.normal) << " ] " << std::endl;
-  //  auto normal = 10.f * glm::normalize(hitpoint.normal * glm::vec3(0.f, 0.f, -1.f));
-  //  gameapi -> drawLine(hitpoint.point,  hitpoint.point + normal, true, movement.playerId, std::nullopt, std::nullopt, std::nullopt);
-  //}
-
   std::vector<objid> allCollisions;
   for (auto &hitpoint : hitpoints){
     if (isCollideable(hitpoint.id)){
