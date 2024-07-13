@@ -200,6 +200,40 @@ std::vector<CommandDispatch> commands {
       consoleInterface.toggleKeyboard();
       return std::nullopt;    
     },
+  },
+  CommandDispatch {
+    .command = "debugui",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      auto values = split(command, ' ');
+      if (values.size() == 1){
+        consoleInterface.setShowDebugUi(DEBUG_NONE);
+        return std::nullopt;
+      }
+      auto uiType = values.at(1);
+      if (uiType == "global"){
+        consoleInterface.setShowDebugUi(DEBUG_GLOBAL);
+        return std::nullopt;
+      }else if (uiType == "inventory"){
+        consoleInterface.setShowDebugUi(DEBUG_INVENTORY);
+        return std::nullopt;
+      }else if (uiType == "ai"){
+        consoleInterface.setShowDebugUi(DEBUG_AI);
+        return std::nullopt;
+      }else if (uiType == "gametype"){
+        consoleInterface.setShowDebugUi(DEBUG_GAMETYPE);
+        return std::nullopt;
+      }else if (uiType == "health"){
+        consoleInterface.setShowDebugUi(DEBUG_HEALTH);
+        return std::nullopt;
+      }else if (uiType == "player"){
+        consoleInterface.setShowDebugUi(DEBUG_ACTIVEPLAYER);
+        return std::nullopt;      
+      }else if (uiType == "animation"){
+        consoleInterface.setShowDebugUi(DEBUG_ANIMATION);
+        return std::nullopt;
+      }
+      return "invalid type";      
+    },
   }
 };
 

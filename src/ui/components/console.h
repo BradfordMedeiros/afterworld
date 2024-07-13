@@ -8,6 +8,17 @@
 #include "./basic/listitem.h"
 #include "./basic/textbox.h"
 
+enum DebugPrintType {
+  DEBUG_NONE,
+  DEBUG_GLOBAL,
+  DEBUG_INVENTORY,
+  DEBUG_GAMETYPE,
+  DEBUG_AI,
+  DEBUG_HEALTH,
+  DEBUG_ACTIVEPLAYER,
+  DEBUG_ANIMATION,
+};
+
 struct ConsoleInterface {
   std::function<void(bool)> setShowEditor;
   std::function<void(std::string)> setBackground;
@@ -18,6 +29,7 @@ struct ConsoleInterface {
 
   std::function<void()> die;
   std::function<void()> toggleKeyboard;
+  std::function<void(DebugPrintType printType)> setShowDebugUi;
 };
 
 extern Component consoleComponent;

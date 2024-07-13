@@ -348,20 +348,9 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       }
     }
   }
-
-
 }
 
 
-enum DebugPrintType {
-  DEBUG_NONE,
-  DEBUG_GLOBAL,
-  DEBUG_INVENTORY,
-  DEBUG_GAMETYPE,
-  DEBUG_AI,
-  DEBUG_HEALTH,
-  DEBUG_ACTIVEPLAYER,
-};
 struct GameState {
   SceneManagement sceneManagement;
   MovementEntityData movementEntities;
@@ -456,6 +445,31 @@ bool keyIsDown(int key){
   return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
+DebugConfig debugPrintAnimations(){
+  DebugConfig debugConfig { .data = {} };
+  auto ids = gameapi -> selected();
+  if (ids.size() > 0){
+    auto id = ids.at(0);
+    auto name = gameapi -> getGameObjNameForId(id).value();
+    debugConfig.data.push_back({"object", name });
+    auto animationNames = gameapi -> listAnimations(id);
+    for (auto &animation : animationNames){
+      debugConfig.data.push_back({ animation, DebugItem {
+        .text = "[PLAY]",
+        .onClick = [id, animation]() -> void {
+          gameapi -> playAnimation(id, animation, ONESHOT);
+        },
+      }});
+    }
+    if (animationNames.size() == 0){
+      debugConfig.data.push_back({ "[no-animations]" });
+    }
+  }else{
+    debugConfig.data.push_back({ "animations" });
+  }
+  return debugConfig;
+}
+
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -509,6 +523,9 @@ UiContext getUiContext(GameState& gameState){
       }
       if (gameState.printType == DEBUG_ACTIVEPLAYER){
         return debugPrintActivePlayer();
+      }
+      if (gameState.printType == DEBUG_ANIMATION){
+        return debugPrintAnimations();
       }
       return std::nullopt;
    },
@@ -594,6 +611,9 @@ UiContext getUiContext(GameState& gameState){
       },
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
+      },
+      .setShowDebugUi = [&gameState](DebugPrintType printType) -> void {
+        gameState.printType = printType;
       },
     },
   };

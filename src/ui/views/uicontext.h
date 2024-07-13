@@ -18,6 +18,7 @@ struct PauseInterface {
   std::function<void()> resume;
 };
 
+
 struct TerminalConfig;
 struct ZoomOptions;
 struct ScoreOptions;
