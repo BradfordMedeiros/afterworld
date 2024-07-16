@@ -487,7 +487,7 @@ UiContext getUiContext(GameState& gameState){
     return getStrWorldState("editor", "debug").value() == "true"; 
    },
    .showEditor = []() -> bool {
-    return getGlobalState().showEditor;
+      return getGlobalState().showEditor;
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
@@ -531,7 +531,7 @@ UiContext getUiContext(GameState& gameState){
    },
    .getScoreConfig = []() -> std::optional<ScoreOptions> {
       auto gametypeData = getGametypeData(gametypeSystem);
-      if (!gametypeData.has_value()){
+      if (!gametypeData.has_value() || getGlobalState().showEditor){
         return std::nullopt;
       }
       ScoreOptions scoreOptions {

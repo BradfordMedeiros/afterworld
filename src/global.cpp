@@ -193,6 +193,7 @@ void initGlobal(){
     global.godMode = args.at("godmode") == "true";
   }
   global.showEditor = queryShowEditor();
+  setShowEditor(global.showEditor);
   setActivePlayerEditorMode(global.showEditor);
   global.showKeyboard = queryShowKeyboard();
   updateState();
