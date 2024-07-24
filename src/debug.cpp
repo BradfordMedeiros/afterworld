@@ -178,6 +178,20 @@ void debugOnKey(int key, int scancode, int action, int mods){
     spawnFromAllSpawnpoints("blue");
   }else if (key == '/' && action == 0){
     removeAllSpawnedEntities();
+  }else if (key == 'L' && action == 0){
+  	 auto id = findObjByShortName("boxfront/Cube");
+
+  	 float duration = 5.f;
+  	 if (id.has_value()){
+  	 		auto idValue = id.value();
+  	 		float startTime = gameapi -> timeSeconds(false);
+	  	 	simpleOnFrame([idValue, startTime, duration]() -> void {
+	  	 		auto percentage = (gameapi -> timeSeconds(false) - startTime) / duration;
+	  	 		static glm::vec3 emissionAmount(0.f, 0.f, 0.f);
+  	 		 	setGameObjectEmission(idValue, glm::vec3(percentage * 5.f, 0.f, 0.f));
+	  	 	}, duration);
+  	 }
+
   }
     
   if (key == 'Y' && action == 0){

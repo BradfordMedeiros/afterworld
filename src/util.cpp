@@ -300,6 +300,16 @@ void setGameObjectPhysicsOptions(objid id, glm::vec3 avelocity, glm::vec3 veloci
   );
 }
 
+void setGameObjectEmission(objid id, std::optional<glm::vec3> emission){
+  gameapi -> setGameObjectAttr(
+    id,
+    {
+       GameobjAttribute { .field = "emission", .attributeValue = emission.has_value() ? emission.value() : glm::vec3(0.f, 0.f, 0.f) },
+    }
+  );
+}
+
+
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());
 }
