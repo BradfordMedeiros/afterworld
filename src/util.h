@@ -89,6 +89,8 @@ void setGameObjectPhysics(objid id, float mass, float restitution, float frictio
 void setGameObjectPhysicsOptions(objid id, glm::vec3 avelocity, glm::vec3 velocity, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity);
 void setGameObjectEmission(objid id, std::optional<glm::vec3> emission);
 
+void setAmbientLight(glm::vec3 light);
+
 std::string uniqueNameSuffix();
 
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);

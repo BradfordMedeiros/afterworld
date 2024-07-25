@@ -189,6 +189,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  	 		auto percentage = (gameapi -> timeSeconds(false) - startTime) / duration;
 	  	 		static glm::vec3 emissionAmount(0.f, 0.f, 0.f);
   	 		 	setGameObjectEmission(idValue, glm::vec3(percentage * 5.f, 0.f, 0.f));
+  	 		 	setAmbientLight(glm::vec3((1.f - percentage) * 1.f, (1.f - percentage) * 1.f, (1.f - percentage) * 1.f));
 	  	 	}, duration);
   	 }
 

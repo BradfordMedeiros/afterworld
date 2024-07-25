@@ -309,6 +309,16 @@ void setGameObjectEmission(objid id, std::optional<glm::vec3> emission){
   );
 }
 
+void setAmbientLight(glm::vec3 light){
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "light",
+      .attribute = "amount",
+      .value = light,
+    }
+  });  
+}
+
 
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());

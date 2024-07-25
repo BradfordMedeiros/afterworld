@@ -71,9 +71,6 @@ std::vector<NavbarOption> navbarOptions = {
 		.name = "Portal",
 	},
 	NavbarOption {
-		.name = "Heightmap",
-	},
-	NavbarOption {
 		.name = "Voxels",
 	},
 	NavbarOption {

@@ -336,14 +336,6 @@ std::vector<NestedListItem> nestedListTest = {
           },
           NestedListItem {
             .item = ImListItem {
-              .value = "heightmap",
-              .onClick = std::nullopt,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
               .value = "portal",
               .onClick = std::nullopt,
               .mappingId = mappingId++,
@@ -519,7 +511,7 @@ std::vector<NestedListItem> nestedListTest = {
             .item = ImListItem {
               .value = "cybertek",
               .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/test.png");
+                setMenuBackground("/home/brad/Desktop/tvs.png");
               },
               .mappingId = mappingId++,
             },
