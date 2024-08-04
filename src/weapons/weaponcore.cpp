@@ -23,13 +23,6 @@ WeaponCore* findWeaponCore(std::string& name){
 
 
 void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponParams){
-  static bool firstTimeCalled = true;
-  if (firstTimeCalled){
-    loadAllMaterials(gameapi -> rootSceneId()); // this should be moved into a core resource management code, not just on demand on fire gun
-    loadParticleEmitters(gameapi -> rootSceneId());
-  }
-  firstTimeCalled = false;
-  
   modlog("weapons", std::string("load weapon core: ") + coreName);
   if (findWeaponCore(coreName)){
     return;

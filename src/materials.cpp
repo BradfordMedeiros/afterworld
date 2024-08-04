@@ -101,7 +101,7 @@ std::vector<ParticleAndEmitter> particleEmitters;
 void loadParticleEmitters(objid rootSceneId){
   /// temp code hackey hook here
 
-  emitBloodTest(rootSceneId);
+  //emitBloodTest(rootSceneId);
   ///////////////////////
 
 

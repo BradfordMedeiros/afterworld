@@ -316,6 +316,9 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }else{
       modlog("scene route unload", sceneManagement.managedScene.value().path);
       if (sceneManagement.managedScene.value().id.has_value()){
+        auto sceneFileName = gameapi -> listSceneFiles(sceneManagement.managedScene.value().id.value()).at(0);
+        auto sceneName = gameapi -> sceneNameById(sceneManagement.managedScene.value().id.value());
+        modlog("scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
         gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
       }
       sceneManagement.managedScene = std::nullopt;
@@ -326,7 +329,10 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   if (router.has_value()){
     std::optional<objid> sceneId;
     if (router.value() -> scene.has_value()){
-      sceneId = gameapi -> loadScene(router.value() -> scene.value()(params), {}, std::nullopt, {});
+      auto sceneToLoad = router.value() -> scene.value()(params);
+      std::cout << sceneToLoad << std::endl;
+      modlog("scene route load", sceneToLoad);
+      sceneId = gameapi -> loadScene(sceneToLoad, {}, std::nullopt, {});
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
@@ -716,6 +722,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     aiData = createAiData();
     maybeSpawnLightFromArgs();
 
+    loadAllMaterials(gameapi -> rootSceneId());
+    loadParticleEmitters(gameapi -> rootSceneId());
+  
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
