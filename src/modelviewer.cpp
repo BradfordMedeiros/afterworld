@@ -95,8 +95,9 @@ void changeObject(ModelViewerData& modelViewer, objid id){
    	submodelAttributes
   ).value();
 
-  auto rootId = gameapi -> rootIdForScene(gameapi -> listSceneId(id));
-  gameapi -> makeParent(modelViewer.viewer.managedObject.value(), rootId);
+  modassert(false, "fix this");
+  //auto rootId = gameapi -> rootIdForScene(gameapi -> listSceneId(id));
+  //gameapi -> makeParent(modelViewer.viewer.managedObject.value(), rootId);
 
   enforceObjectTransform(modelViewer.viewer, id);
 }
@@ -121,10 +122,10 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
 
 
   // this is only needed b/c bug with adding an object to an existing scene programmatically 
-  auto rootId = gameapi -> rootIdForScene(gameapi -> listSceneId(id));  
-  gameapi -> makeParent(particleViewer.viewer.managedObject.value(), rootId);
-
-  enforceObjectTransform(particleViewer.viewer, id);
+  modassert(false, "todo fix");
+  //auto rootId = gameapi -> rootIdForScene(gameapi -> listSceneId(id));  
+  //gameapi -> makeParent(particleViewer.viewer.managedObject.value(), rootId);
+  //enforceObjectTransform(particleViewer.viewer, id);
 }
 
 ViewerData createViewerData(objid id){
@@ -259,17 +260,17 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
 
 
 std::optional<objid> getEmitterId(objid rootObjId){
-  modlog("emitter child scenes of: ", gameapi -> getGameObjNameForId(rootObjId).value());
-  auto prefabScenes = gameapi -> childScenes(gameapi -> listSceneId(rootObjId));
-
-  modlog("emitter", std::string("checking num scenes: " ) + std::to_string(prefabScenes.size()));
-  std::optional<objid> emitterId;
-  for (auto &prefabSceneId : prefabScenes){
-    modassert(!emitterId.has_value(), "multiple emitters across the scenes");
-    modlog("emitter", std::string("checking scene: ") + std::to_string(prefabSceneId));
-    emitterId = gameapi -> getGameObjectByName("+particles", prefabSceneId, false).value();
-  }
-  return emitterId;
+  return std::nullopt;
+  //modlog("emitter child scenes of: ", gameapi -> getGameObjNameForId(rootObjId).value());
+  //auto prefabScenes = gameapi -> childScenes(gameapi -> listSceneId(rootObjId));
+  //modlog("emitter", std::string("checking num scenes: " ) + std::to_string(prefabScenes.size()));
+  //std::optional<objid> emitterId;
+  //for (auto &prefabSceneId : prefabScenes){
+  //  modassert(!emitterId.has_value(), "multiple emitters across the scenes");
+  //  modlog("emitter", std::string("checking scene: ") + std::to_string(prefabSceneId));
+  //  emitterId = gameapi -> getGameObjectByName("+particles", prefabSceneId, false).value();
+  //}
+  //return emitterId;
 }
 
 CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
