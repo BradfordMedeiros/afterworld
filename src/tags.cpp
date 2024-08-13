@@ -657,7 +657,6 @@ void doAnimationTrigger(objid entityId, const char* transition){
 	Tags& tags = *tagsPtr;
  
 
-	return;
   if (!hasControllerState(tags.animationController, entityId)){
   	return;
   }
