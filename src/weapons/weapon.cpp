@@ -91,8 +91,11 @@ void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn)
     return;
   }
   if (hasGun(weapons.player.value().inventory, gun)){
+    modlog("weapons change gun confirm", gun);
     changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId, fn);
-  }  
+  }else{
+    modlog("weapons change gun - not in inventory", gun);
+  }
 }
 
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
@@ -145,6 +148,7 @@ std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
 
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
   if (weapons.player.has_value() && weapons.player.value().playerId == idRemoved){
+    modlog("weapons", "remove player");
     weapons.player = std::nullopt;
     removeGun(weapons.weaponValues);
   }

@@ -139,8 +139,16 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
 
 std::function<void(int32_t, void*, int32_t)>  getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
   return [attrFuncs](int32_t _, void* data, int32_t idRemoved) -> void {
-    //modassert(gameapi -> gameobjExists(idRemoved), std::string("gameobj is supposed to exist on remove: ") + std::to_string(idRemoved));
-    modlog("tags id removed", std::to_string(idRemoved) + std::string(" ") + gameapi -> getGameObjNameForId(idRemoved).value());
+
+    auto name = gameapi -> getGameObjNameForId(idRemoved).value();
+    if (name == ">maincamera"){
+      //modassert(gameapi -> gameobjExists(idRemoved), std::string("gameobj is supposed to exist on remove: ") + std::to_string(idRemoved));
+      modlog("tags id removed", std::to_string(idRemoved) + std::string(" ") + gameapi -> getGameObjNameForId(idRemoved).value());
+      modlog("tags debug info", gameapi -> dumpDebugInfo(false));  
+      modlog("tags position removed", print(getSingleVec3Attr(idRemoved, "position").value()));
+      modlog("tags maxblur removed", print(getSingleFloatAttr(idRemoved, "maxblur").value()));
+    }
+    
     for (auto &attrFunc : attrFuncs){
       if (hasAttribute(idRemoved, attrFunc.attr.c_str())){
         attrFunc.fn(data, idRemoved);

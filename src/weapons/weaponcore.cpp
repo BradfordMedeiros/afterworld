@@ -260,7 +260,8 @@ GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, in
   return gunInstance;
 }
 void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId, std::function<void()> fn){
-  if (weaponValues.gunCore.weaponCore != NULL &&  weaponValues.gunCore.weaponCore -> weaponParams.name == gun){
+  if (weaponValues.gunCore.weaponCore != NULL && weaponValues.gunCore.weaponCore -> weaponParams.name == gun){
+    modlog("weapons change gun animation - weapon already equipped", gun);
     return;
   }
 
@@ -271,13 +272,17 @@ void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, obji
     fn();
   });
 }
+
+// probably this shouldn't reset the state, just remove objects 
 void removeGun(GunInstance& weaponValues){
   if (weaponValues.gunId.has_value()){
+    modlog("weapons core", "remove gun");
     gameapi -> removeByGroupId(weaponValues.gunId.value());
     weaponValues.gunId = std::nullopt;
+    weaponValues.muzzleId = std::nullopt; 
+    weaponValues.gunCore.weaponCore = NULL;
   }
 }
-
 
 void deliverAmmo(std::string inventory, std::string gunName, int ammo){
   auto oldAmmo = ammoForGun(inventory, gunName);
