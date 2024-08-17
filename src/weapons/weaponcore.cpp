@@ -235,7 +235,7 @@ GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId){
 }
 
 GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, int ammo, objid sceneId, objid playerId){
-  auto gunCore = createGunCoreInstance(gun, ammo, sceneId);
+  auto gunCore = createGunCoreInstance(gun, ammo, 0); // would be better to preload all gun cores
   auto weaponCore = gunCore.weaponCore;
 
   if (oldGunId.has_value()){
