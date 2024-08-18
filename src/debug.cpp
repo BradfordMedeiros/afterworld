@@ -178,6 +178,9 @@ void debugOnKey(int key, int scancode, int action, int mods){
     spawnFromAllSpawnpoints("blue");
   }else if (key == '/' && action == 0){
     removeAllSpawnedEntities();
+  }else if (key == 'P' && action == 0){
+  	auto shader = gameapi -> shaderByName("testshader");
+  	modlog("shader is: ", shader.has_value() ? std::to_string(shader.value()) : "no shader");
   }else if (key == 'L' && action == 0){
   	 auto id = findObjByShortName("boxfront/Cube");
 
