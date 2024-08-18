@@ -527,7 +527,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
           .size = glm::vec2(width, height),
         };
       }
-      gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture);
+      gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture, std::nullopt);
      },
      .drawLine2D = gameapi -> drawLine2D,
      .registerCallbackFns = [&handlerFuncs](objid id, std::function<void()> fn) -> void {

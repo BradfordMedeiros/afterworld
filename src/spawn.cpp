@@ -207,6 +207,6 @@ std::vector<RespawnInfo> getRespawnInfos(float currentTime){
 void drawDebugRespawnInfo(RespawnInfo& respawnInfo){
   float percentage = respawnInfo.blocked ? 1.f : (respawnInfo.elapsedTime / respawnInfo.totalTime);
   std::cout << "spawn percentage :  " << percentage << std::endl;
-  gameapi -> drawRect(0.f, 0.f, 0.2f, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawRect(0.f, 0.f, 0.2f * percentage, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.8f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(0.f, 0.f, 0.2f, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  gameapi -> drawRect(0.f, 0.f, 0.2f * percentage, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.8f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }

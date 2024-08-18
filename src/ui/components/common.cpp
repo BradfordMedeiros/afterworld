@@ -20,7 +20,7 @@ void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optio
 }
 
 void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){
-  gameapi -> drawRect(box.x, box.y, box.width, box.height, false, tint, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawRect(box.x, box.y, box.width, box.height, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
 
 std::string print(BoundingBox2D& box){

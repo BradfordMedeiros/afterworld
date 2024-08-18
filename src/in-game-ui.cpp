@@ -40,7 +40,7 @@ void onInGameUiFrame(InGameUi& inGameUi){
 			textDisplay.needsRefresh = false;
 
 			auto uvCoord = getGlobalState().texCoordUvView;
-  		gameapi -> drawRect(uvCoord.x * 2 - 1, uvCoord.y * 2 - 1, 0.1f, 0.1f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textDisplay.textureId, true, std::nullopt, "./res/textures/crosshairs/crosshair008.png");
+  		gameapi -> drawRect(uvCoord.x * 2 - 1, uvCoord.y * 2 - 1, 0.1f, 0.1f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textDisplay.textureId, true, std::nullopt, "./res/textures/crosshairs/crosshair008.png", std::nullopt);
 		}
 	}
 

@@ -201,7 +201,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 75){
   	//spawnProcMesh(gameapi -> listSceneId(id));
   }
-  if (key == 96 /* ~ */  && action == 0){
+  if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
   	modlog("console visibility", print(getGlobalState().showConsole));
   }
