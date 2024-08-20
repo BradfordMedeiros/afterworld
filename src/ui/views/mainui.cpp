@@ -520,7 +520,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   DrawingTools drawTools {
      .drawText = gameapi -> drawText,
      .getTextDimensionsNdi = gameapi -> getTextDimensionsNdi,
-     .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<unsigned int> shaderId, std::optional<objid> trackingId) -> void {
+     .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId) -> void {
       if (trackingId.has_value()){
         handlerFuncs.trackedLocationIds[trackingId.value()] = TrackedLocationData {
           .position = glm::vec2(centerX, centerY),
@@ -528,7 +528,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         };
       }
 
-      std::cout << "draw rect: " << print(shaderId) << std::endl;
       gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture, shaderId);
      },
      .drawLine2D = gameapi -> drawLine2D,
@@ -852,13 +851,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   if (uiContext.isDebugMode()){
 
     auto shader = gameapi -> shaderByName("ui2");
-    drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, shader);
-    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, shader);
-    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, shader);
+    drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
+    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
+    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
 
-    drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, shader);
+    drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
     
-    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, shader, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader }, std::nullopt);
 
   }
 
