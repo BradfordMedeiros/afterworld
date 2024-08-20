@@ -33,19 +33,19 @@ Component terminalComponent {
     modassert(terminalImagePtr || terminalImageLeftTextRightPtr || terminalTextPtr, "invalid terminal type");
 
     std::cout << "terminal time: " << terminalConfig -> time << std::endl;
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt, std::nullopt);
     if (terminalImagePtr){
-      drawTools.drawRect(0.f, 0.f, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, terminalImagePtr -> image, std::nullopt);
+      drawTools.drawRect(0.f, 0.f, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, terminalImagePtr -> image, std::nullopt, std::nullopt);
     }else if (terminalImageLeftTextRightPtr){
-      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.4f, 0.4f, 0.8f, 1.f), std::nullopt, true, std::nullopt, terminalImageLeftTextRightPtr -> image, std::nullopt);
-      drawTools.drawRect(0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.9f), std::nullopt, true, std::nullopt, terminalImageLeftTextRightPtr -> image, std::nullopt);
+      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.4f, 0.4f, 0.8f, 1.f), std::nullopt, true, std::nullopt, terminalImageLeftTextRightPtr -> image, std::nullopt, std::nullopt);
+      drawTools.drawRect(0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.9f), std::nullopt, true, std::nullopt, terminalImageLeftTextRightPtr -> image, std::nullopt, std::nullopt);
       auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - terminalConfig -> time) * 100.f);
       auto textSubtr = terminalImageLeftTextRightPtr -> text.substr(0, currIndex);
       drawRightText(drawTools, textSubtr, 0.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 1.f);
     }else if (terminalTextPtr){
       auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - terminalConfig -> time) * 100.f);
       auto textSubtr = terminalTextPtr -> text.substr(0, currIndex);
-      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.f, 0.f, 0.f, 0.7f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      drawTools.drawRect(-0.5f, 0.f, 1.f, 1.5f, false, glm::vec4(0.f, 0.f, 0.f, 0.7f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
       drawRightText(drawTools, textSubtr, -1.f, 0.4f, 0.02f, terminalFontColor, std::nullopt, 1.f);
     }
   	return BoundingBox2D {

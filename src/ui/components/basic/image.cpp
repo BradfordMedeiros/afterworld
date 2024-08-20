@@ -13,7 +13,7 @@ Component imageComponent {
       .width = width,
       .height = height,
     };
-    drawTools.drawRect(0.f, 0.f, width, height, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, *imageName, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, width, height, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, *imageName, std::nullopt, std::nullopt);
 
     if (true){
       drawDebugBoundingBox(drawTools, boundingBox, glm::vec4(0.f, 0.f, 0.f, 1.f));

@@ -237,7 +237,7 @@ CScriptBinding modelviewerBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     ModelViewerData* modelViewer = static_cast<ModelViewerData*>(data);
-    gameapi -> drawText(std::string("model: ") + modelViewer -> models.at(modelViewer -> viewer.currentIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    gameapi -> drawText(std::string("model: ") + modelViewer -> models.at(modelViewer -> viewer.currentIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     ModelViewerData* modelViewer = static_cast<ModelViewerData*>(data);
@@ -292,7 +292,7 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     ParticleViewerData* particleViewer = static_cast<ParticleViewerData*>(data);
-    gameapi -> drawText(std::string("particles: ") + particleViewer -> particleScenes.at(particleViewer -> viewer.currentIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    gameapi -> drawText(std::string("particles: ") + particleViewer -> particleScenes.at(particleViewer -> viewer.currentIndex), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   };
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     ParticleViewerData* particleViewer = static_cast<ParticleViewerData*>(data);

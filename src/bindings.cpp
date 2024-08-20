@@ -671,6 +671,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> dragSelect = std::nullopt;
     gameState -> uiContext = getUiContext(*gameState);
 
+    gameapi -> loadShader("ui2", "./res/shaders/ui2");
+
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");

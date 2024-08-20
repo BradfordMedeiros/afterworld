@@ -14,6 +14,7 @@ struct BufferedText {
 	std::optional<std::string> fontFamily;
 	std::optional<objid> selectionId;
 	std::optional<float> maxWidth;
+  std::optional<unsigned int> shaderId;
 };
 struct BufferedRect {
 	int drawOrder;
@@ -27,6 +28,7 @@ struct BufferedRect {
   bool ndi;
   std::optional<objid> selectionId;
   std::optional<std::string> texture;
+  std::optional<unsigned int> shaderId;
   std::optional<objid> trackingId;
 };
 struct BufferedLine2D {
@@ -39,6 +41,7 @@ struct BufferedLine2D {
   bool ndi;
   std::optional<objid> selectionId;
   std::optional<std::string> texture;
+  std::optional<unsigned int> shaderId;
 };
 struct BufferedData {
 	int bufferedIndex;
@@ -53,7 +56,7 @@ struct BufferedDrawingTools {
 };
 void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, DrawingTools& realTools){
 	DrawingTools drawTools {};
-  drawTools.drawText = [&bufferedDrawingTools](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth) -> void {
+  drawTools.drawText = [&bufferedDrawingTools](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth, std::optional<unsigned int> shaderId) -> void {
   	bufferedDrawingTools.bufferedData.bufferedText.push_back(BufferedText{
  			.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
  			.word = word,
@@ -67,10 +70,11 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
 			.fontFamily = fontFamily,
 			.selectionId = selectionId,
 			.maxWidth = maxWidth,
+			.shaderId = shaderId,
   	});
   };
   drawTools.getTextDimensionsNdi = realTools.getTextDimensionsNdi;
-  drawTools.drawRect = [&bufferedDrawingTools](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<objid> trackingId) -> void {
+  drawTools.drawRect = [&bufferedDrawingTools](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<unsigned int> shaderId, std::optional<objid> trackingId) -> void {
   	bufferedDrawingTools.bufferedData.bufferedRect.push_back(BufferedRect{
  			.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
   		.centerX = centerX,
@@ -83,10 +87,11 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   		.ndi = ndi,
   		.selectionId = selectionId,
   		.texture = texture,
+  		.shaderId = shaderId,
   		.trackingId = trackingId,
   	});  	
   };
-  drawTools.drawLine2D = [&bufferedDrawingTools](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture) -> void {
+  drawTools.drawLine2D = [&bufferedDrawingTools](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<unsigned int> shaderId) -> void {
   	bufferedDrawingTools.bufferedData.buffered2DLines.push_back(BufferedLine2D{
   		.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
   		.fromPos = fromPos,
@@ -97,6 +102,7 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   		.ndi = ndi,
   		.selectionId = selectionId,
   		.texture = texture,
+  		.shaderId = shaderId,
   	});
   };
   drawTools.registerCallbackFns = realTools.registerCallbackFns;
@@ -126,15 +132,15 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 	for (int i = 0; i < bufferedTools.bufferedData.bufferedIndex; i++){
 		if (bufferedTools.bufferedData.bufferedText.size() > bufferedTextIndex && bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex).drawOrder == i){
 			BufferedText& bufferedText = bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex);
-			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId, bufferedText.maxWidth);
+			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId, bufferedText.maxWidth, bufferedText.shaderId);
 			bufferedTextIndex++;
 		}else if(bufferedTools.bufferedData.bufferedRect.size() > bufferedRectIndex && bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex).drawOrder == i){
 			BufferedRect& bufferedRect = bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex);
-			bufferedTools.realTools -> drawRect(bufferedRect.centerX + positionOffset.x, bufferedRect.centerY + positionOffset.y, bufferedRect.width, bufferedRect.height, bufferedRect.perma, bufferedRect.tint, bufferedRect.textureId, bufferedRect.ndi, bufferedRect.selectionId, bufferedRect.texture, bufferedRect.trackingId);
+			bufferedTools.realTools -> drawRect(bufferedRect.centerX + positionOffset.x, bufferedRect.centerY + positionOffset.y, bufferedRect.width, bufferedRect.height, bufferedRect.perma, bufferedRect.tint, bufferedRect.textureId, bufferedRect.ndi, bufferedRect.selectionId, bufferedRect.texture, bufferedRect.shaderId, bufferedRect.trackingId);
 			bufferedRectIndex++;
 		}else if (bufferedTools.bufferedData.buffered2DLines.size() > bufferedLine2DIndex && bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex).drawOrder == i){
 			BufferedLine2D bufferedLine2D = bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex);
-			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.textureId, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture);
+			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.textureId, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture, bufferedLine2D.shaderId);
 			bufferedLine2DIndex++;
 		}
 	}
@@ -343,7 +349,7 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
   }
 
   if (layout.showBackpanel){
-   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt, std::nullopt);
+   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt, std::nullopt, std::nullopt);
   }
  	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y));
 

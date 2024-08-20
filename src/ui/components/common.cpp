@@ -13,10 +13,10 @@ void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optio
   float right = box.x + (box.width * 0.5f);
   float up = box.y + (box.height * 0.5f);
   float down = box.y - (box.height * 0.5f);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
 
 void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){
@@ -34,13 +34,13 @@ void drawScreenspaceGrid(ImGrid grid){
   for (int y = 0; y < numLines; y ++){
     float unitLineNdi = ndiSpacePerLine * (y + 1);
     float ndiY = (unitLineNdi * 2.f) - 1.f;
-    gameapi -> drawLine2D(glm::vec3(-1.f, ndiY, 0.f), glm::vec3(1.f, ndiY, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    gameapi -> drawLine2D(glm::vec3(-1.f, ndiY, 0.f), glm::vec3(1.f, ndiY, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
     //modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
   }
   for (int x = 0; x < numLines; x ++){
     float unitLineNdi = ndiSpacePerLine * (x + 1);
     float ndiX = (unitLineNdi * 2.f) - 1.f;
-    gameapi -> drawLine2D(glm::vec3(ndiX, -1.f, 0.f), glm::vec3(ndiX, 1.f, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
+    gameapi -> drawLine2D(glm::vec3(ndiX, -1.f, 0.f), glm::vec3(ndiX, 1.f, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
     //modlog("drawscreenspace", std::string("draw line: - ") + std::to_string(unitLineNdi));
   }
 }
@@ -329,32 +329,32 @@ void getMenuMappingData(int* _minId, int* _currentId){
 // this is actually down right aligned, but vert centered
 void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt);
+  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 void drawCenteredTextReal(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   float width = 0.f;
   float height = 0.f;
   gameapi -> getTextDimensionsNdi(text, ndiSize, true, std::nullopt, &width, &height);
-  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt);
+  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 void drawLeftText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   float width = 0.f;
   float height = 0.f;
   gameapi -> getTextDimensionsNdi(text, ndiSize, true, std::nullopt, &width, &height);
-  drawTools.drawText(text, ndiOffsetX - width, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt);
+  drawTools.drawText(text, ndiOffsetX - width, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 void drawRightText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<float> maxWidth){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, maxWidth);
+  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, maxWidth, std::nullopt);
 }
 
 void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   float width = text.size() * ndiSize;
   float height = text.size() * ndiSize;
-  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY - (height * 0.5f), fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt);
+  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY - (height * 0.5f), fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 
 void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::function<void()>& onClickX){

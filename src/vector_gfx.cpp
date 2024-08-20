@@ -27,10 +27,10 @@ bool shouldDrawMarkers = true;
 void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
   float marketInner = radius * 10.f;
   float markerOuter = radius * 10.f + markerLineLength; //
-  gameapi -> drawLine2D(glm::vec3(0.f, marketInner, 0.f), glm::vec3(0.f, markerOuter, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(0.f, -1 * marketInner, 0.f), glm::vec3(0.f, -1 * markerOuter, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(marketInner, 0.f, 0.f), glm::vec3(markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
-  gameapi -> drawLine2D(glm::vec3(-1 * marketInner, 0.f, 0.f), glm::vec3(-1 * markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(0.f, marketInner, 0.f), glm::vec3(0.f, markerOuter, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(0.f, -1 * marketInner, 0.f), glm::vec3(0.f, -1 * markerOuter, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(marketInner, 0.f, 0.f), glm::vec3(markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  gameapi -> drawLine2D(glm::vec3(-1 * marketInner, 0.f, 0.f), glm::vec3(-1 * markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
 
 

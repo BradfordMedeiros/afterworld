@@ -48,6 +48,7 @@ void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer
 			true, 
 			std::nullopt, 
 			std::nullopt,
+			std::nullopt,
 			std::nullopt
 		);
 		break;

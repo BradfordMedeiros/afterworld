@@ -50,7 +50,7 @@ Component imageList  {
       if (image.tint.has_value()){
         tint = image.tint.value();
       }
-    	drawTools.drawRect(x, y, width, height, false, tint, std::nullopt, true, mappingId, image.image, std::nullopt);
+    	drawTools.drawRect(x, y, width, height, false, tint, std::nullopt, true, mappingId, image.image, std::nullopt, std::nullopt);
       BoundingBox2D box {
         .x = x,
         .y = y,

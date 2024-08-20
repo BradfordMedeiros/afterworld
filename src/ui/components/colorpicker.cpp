@@ -21,7 +21,7 @@ Component createRgbSlider(std::string label, float percentage, std::function<voi
 Component colorDisplay {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
   	auto color = vec4FromProp(props, colorSymbol, glm::vec4(0.f, 0.f, 0.f, 0.f));
-    drawTools.drawRect(0.05f, 0.05f, 0.2f, 0.2f, false, color, std::nullopt, true, std::nullopt /* selection id */, std::nullopt  /* texture */, std::nullopt);
+    drawTools.drawRect(0.05f, 0.05f, 0.2f, 0.2f, false, color, std::nullopt, true, std::nullopt /* selection id */, std::nullopt  /* texture */, std::nullopt, std::nullopt);
     BoundingBox2D boundingBox {
     	.x = 0.f,
     	.y = 0.f,
