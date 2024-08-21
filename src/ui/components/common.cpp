@@ -6,17 +6,17 @@ std::string print(TrackedLocationData& data){
   return print(data.position) + ", "  + print(data.size);
 }
 
-void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){
+void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint, std::optional<ShapeOptions> shapeOptions){
   //gameapi -> drawRect(box.x, box.y, box.width, box.height, false, glm::vec4(1.f, 0.f, 1.f, 0.2f), std::nullopt, true, std::nullopt, std::nullopt);
   //gameapi -> drawRect(-0.915000, -0.795, 0.17f, 0.15f, false, glm::vec4(1.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
   float left = box.x - (box.width * 0.5f);
   float right = box.x + (box.width * 0.5f);
   float up = box.y + (box.height * 0.5f);
   float down = box.y - (box.height * 0.5f);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
 }
 
 void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){

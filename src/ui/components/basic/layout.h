@@ -34,6 +34,7 @@ struct Layout {
   float spacing;
   float minspacing;
   std::optional<float> padding;
+  std::optional<ShapeOptions> shapeOptions;
 
   std::vector<Component> children;
 };
@@ -47,7 +48,7 @@ struct AlignmentParams {
 
 extern AlignmentParams defaultAlignment;
 
-Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim = glm::vec2(0.f, 0.f), AlignmentParams defaultAlignment = defaultAlignment, glm::vec4 borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f), float padding = 0.f, glm::vec4 tint = glm::vec4(0.f, 0.f, 0.f, 0.f));
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim = glm::vec2(0.f, 0.f), AlignmentParams defaultAlignment = defaultAlignment, glm::vec4 borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f), float padding = 0.f, glm::vec4 tint = glm::vec4(0.f, 0.f, 0.f, 0.f), std::optional<ShapeOptions> styleOptions = std::nullopt);
 Component simpleHorizontalLayout(std::vector<Component>& children, float padding = 0.f, glm::vec4 tint = glm::vec4(0.f, 0.f, 0.f, 0.f));
 Component simpleLayout(Component& component, glm::vec2 minDim = glm::vec2(0.f, 0.f), AlignmentParams defaultAlignment = defaultAlignment, glm::vec4 borderColor = glm::vec4(0.f, 0.f, 0.f, 0.f), float padding = 0.f);
 

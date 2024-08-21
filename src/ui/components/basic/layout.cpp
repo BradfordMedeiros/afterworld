@@ -125,22 +125,22 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
 	};
 }
 
-void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOffset){
+void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOffset, std::optional<ShapeOptions> shapeOptions){
 	int bufferedTextIndex = 0;
 	int bufferedRectIndex = 0;
 	int bufferedLine2DIndex = 0;
 	for (int i = 0; i < bufferedTools.bufferedData.bufferedIndex; i++){
 		if (bufferedTools.bufferedData.bufferedText.size() > bufferedTextIndex && bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex).drawOrder == i){
 			BufferedText& bufferedText = bufferedTools.bufferedData.bufferedText.at(bufferedTextIndex);
-			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId, bufferedText.maxWidth, bufferedText.shaderId);
+			bufferedTools.realTools -> drawText(bufferedText.word, bufferedText.left + positionOffset.x, bufferedText.top + positionOffset.y, bufferedText.fontSize, bufferedText.permatext, bufferedText.tint, bufferedText.textureId, bufferedText.ndi, bufferedText.fontFamily, bufferedText.selectionId, bufferedText.maxWidth, shapeOptions.has_value() ? shapeOptions.value() : bufferedText.shaderId);
 			bufferedTextIndex++;
 		}else if(bufferedTools.bufferedData.bufferedRect.size() > bufferedRectIndex && bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex).drawOrder == i){
 			BufferedRect& bufferedRect = bufferedTools.bufferedData.bufferedRect.at(bufferedRectIndex);
-			bufferedTools.realTools -> drawRect(bufferedRect.centerX + positionOffset.x, bufferedRect.centerY + positionOffset.y, bufferedRect.width, bufferedRect.height, bufferedRect.perma, bufferedRect.tint, bufferedRect.textureId, bufferedRect.ndi, bufferedRect.selectionId, bufferedRect.texture, bufferedRect.shaderId, bufferedRect.trackingId);
+			bufferedTools.realTools -> drawRect(bufferedRect.centerX + positionOffset.x, bufferedRect.centerY + positionOffset.y, bufferedRect.width, bufferedRect.height, bufferedRect.perma, bufferedRect.tint, bufferedRect.textureId, bufferedRect.ndi, bufferedRect.selectionId, bufferedRect.texture, shapeOptions.has_value() ? shapeOptions.value() : bufferedRect.shaderId, bufferedRect.trackingId);
 			bufferedRectIndex++;
 		}else if (bufferedTools.bufferedData.buffered2DLines.size() > bufferedLine2DIndex && bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex).drawOrder == i){
 			BufferedLine2D bufferedLine2D = bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex);
-			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.textureId, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture, bufferedLine2D.shaderId);
+			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.textureId, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture, shapeOptions.has_value() ? shapeOptions.value() : bufferedLine2D.shaderId);
 			bufferedLine2DIndex++;
 		}
 	}
@@ -335,7 +335,7 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
 	//auto flowOffsets = glm::vec2(0.f, 0.f);
 
 	if (layout.borderColor.has_value()){
-	 	drawDebugBoundingBox(drawTools, outerBox, layout.borderColor);
+	 	drawDebugBoundingBox(drawTools, outerBox, layout.borderColor, layout.shapeOptions);
 	}
 
   if (false){
@@ -349,9 +349,9 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
   }
 
   if (layout.showBackpanel){
-   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt, std::nullopt, std::nullopt);
+   	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, std::nullopt, true, std::nullopt /* mapping id */, std::nullopt, layout.shapeOptions, std::nullopt);
   }
- 	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y));
+ 	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y), layout.shapeOptions);
 
  	return outerBox;
 }
@@ -366,7 +366,7 @@ AlignmentParams defaultAlignment {
   .layoutFlowHorizontal = UILayoutFlowNone2,
   .layoutFlowVertical = UILayoutFlowNone2,
 };
-Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding, glm::vec4 tint){
+Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDim, AlignmentParams defaultAlignment, glm::vec4 borderColor, float padding, glm::vec4 tint, std::optional<ShapeOptions> shapeOptions){
   Layout layout {
     .tint = tint,
     .showBackpanel = true,
@@ -381,6 +381,7 @@ Component simpleVerticalLayout(std::vector<Component>& children, glm::vec2 minDi
     .spacing = 0.f,
     .minspacing = 0.f,
     .padding = padding,
+    .shapeOptions = shapeOptions,
     .children = children,
   };
   Props listLayoutProps {

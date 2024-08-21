@@ -1095,6 +1095,7 @@ Component dockComponent {
       .spacing = 0.f,
       .minspacing = 0.f,
       .padding = 0.f,
+      .shapeOptions = ShapeOptions {  .zIndex = styles.zIndexs.middleLayer },
       .children = elements,
     };
 

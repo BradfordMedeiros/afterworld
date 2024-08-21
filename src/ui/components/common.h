@@ -80,7 +80,7 @@ struct Component {
   std::function<BoundingBox2D(DrawingTools&, Props&)> draw;
 };
 
-void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt);
+void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt, std::optional<ShapeOptions> shapeOptions = std::nullopt);
 void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = glm::vec4(0.f, 0.f, 0.f, 0.2f));
 std::string print(BoundingBox2D& box);
 

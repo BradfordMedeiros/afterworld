@@ -66,8 +66,8 @@ Component colorPickerComponent {
     	}
     }));
 
-    auto colorPickInner = simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, styles.mainBorderColor, 0.f, styles.primaryColor);
-    return  colorPickInner.draw(drawTools, props);
+    auto colorPickInner = simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, styles.mainBorderColor, 0.f, styles.primaryColor, ShapeOptions { .zIndex = styles.zIndexs.topLayer });
+    return colorPickInner.draw(drawTools, props);
   },
 };
 
