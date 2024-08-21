@@ -19,6 +19,11 @@ void initStyles(){
 }
 
 Styles defaultStyle {
+  .zIndexs = {
+    .lowLayer = 0,
+    .middleLayer = 1,
+    .topLayer = 2,
+  },
 	.primaryColor = glm::vec4(0.f, 0.f, 0.f, 0.5f),
 	.secondaryColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f),
 	.thirdColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.5f),
@@ -61,3 +66,4 @@ void resetColors(){
   styles = defaultStyle;
   updateColorQuery();
 }
+

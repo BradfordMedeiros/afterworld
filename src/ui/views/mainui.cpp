@@ -857,7 +857,10 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
     drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
     
-    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader }, std::nullopt);
+    //drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader }, std::nullopt);
+    drawTools.drawRect(0.5f, 0.5f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 1 }, std::nullopt);
+    drawTools.drawRect(0.25f, 0.25f, 0.5f, 0.5f, false, glm::vec4(0.f, 1.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 5 }, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = -1 }, std::nullopt);
 
   }
 

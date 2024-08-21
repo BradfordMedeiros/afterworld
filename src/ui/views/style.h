@@ -5,7 +5,14 @@
 
 // grep -r "STYLE_UI" for elements that should probably be pulled into here
 
+struct ZIndexs {
+	int lowLayer;
+	int middleLayer;
+	int topLayer;
+};
+
 struct Styles {
+	ZIndexs zIndexs;
 	glm::vec4 primaryColor;
 	glm::vec4 secondaryColor;
 	glm::vec4 thirdColor;
