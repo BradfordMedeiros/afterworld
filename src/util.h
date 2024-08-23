@@ -38,10 +38,6 @@ struct AttrFunc {
 	std::function<void(void*, int32_t idAdded)> fn;
 };
 
-std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs);
-
-std::function<void(int32_t, void*, int32_t)> getOnAttrRemoved(std::vector<AttrFunc> attrFuncs);
-
 float randomNumber(float min, float max);
 int randomNumber(int min, int max);
 

@@ -481,18 +481,49 @@ void onTagsFrame(Tags& tags){
 	}
 }
 
+std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs){
+  return [attrFuncs](int32_t _, void* data, int32_t idAdded) -> void { 
+    auto objHandle = getAttrHandle(idAdded);
+    for (auto &attrFunc : attrFuncs){
+      auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);
+      if (stringFn != NULL){
+        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+        auto stringValue = maybeUnwrapAttrOpt<std::string>(attrValue);
+        if (stringValue.has_value()){
+          (*stringFn)(data, idAdded, stringValue.value());
+        }else{
+         // modassert(false, std::string("invalid type for: ") + attrFunc.attr);
+        }
+        continue;
+      }
+      auto floatFn = std::get_if<floatAttrFuncValue>(&attrFunc.fn);
+      if (floatFn != NULL){
+        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+        auto floatValue = maybeUnwrapAttrOpt<float>(attrValue);
+        if (floatValue.has_value()){
+          (*floatFn)(data, idAdded, floatValue.value());
+        }
+        continue;
+      }
+      auto vec3Fn = std::get_if<vec3AttrFuncValue>(&attrFunc.fn);
+      if (vec3Fn != NULL){
+        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+        auto vec3Value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
+        if (vec3Value.has_value()){
+          (*vec3Fn)(data, idAdded, vec3Value.value());
+        }
+        continue;
+      }
+    }
+  };
+}
 
 void createTags(Tags& tags, objid id){
-	std::vector<AttrFunc> attrFuncs = {};
 	std::vector<AttrFuncValue> attrAddFuncs = {};
 	for (auto &tagUpdate : tagupdates){
 		attrAddFuncs.push_back(AttrFuncValue {
 			.attr = tagUpdate.attribute,
 			.fn = tagUpdate.onAdd,
-		});
-		attrFuncs.push_back(AttrFunc {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onRemove,
 		});
 	}
 
@@ -607,16 +638,11 @@ void createTags(Tags& tags, objid id){
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 
-	std::vector<AttrFunc> attrFuncs = {};
 	std::vector<AttrFuncValue> attrAddFuncs = {};
 	for (auto &tagUpdate : tagupdates){
 		attrAddFuncs.push_back(AttrFuncValue {
 			.attr = tagUpdate.attribute,
 			.fn = tagUpdate.onAdd,
-		});
-		attrFuncs.push_back(AttrFunc {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onRemove,
 		});
 	}
 
@@ -639,7 +665,13 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onObjectAdded = onAddFns;
-  binding.onObjectRemoved = getOnAttrRemoved(attrFuncs);
+  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
+ 		for (auto &tagUpdate : tagupdates){
+		  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
+        tagUpdate.onRemove(data, idRemoved);
+      }
+		}
+  };
 
   binding.onFrame = [](int32_t id, void* data) -> void {
 		Tags* tags = static_cast<Tags*>(data);

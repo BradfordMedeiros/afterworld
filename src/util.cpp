@@ -100,63 +100,6 @@ void clickMouse(objid id){
   });
 }
 
-std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs){
-  return [attrFuncs](int32_t _, void* data, int32_t idAdded) -> void { 
-    auto objHandle = getAttrHandle(idAdded);
-    for (auto &attrFunc : attrFuncs){
-      auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);
-      if (stringFn != NULL){
-        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-        auto stringValue = maybeUnwrapAttrOpt<std::string>(attrValue);
-        if (stringValue.has_value()){
-          (*stringFn)(data, idAdded, stringValue.value());
-        }else{
-         // modassert(false, std::string("invalid type for: ") + attrFunc.attr);
-        }
-        continue;
-      }
-      auto floatFn = std::get_if<floatAttrFuncValue>(&attrFunc.fn);
-      if (floatFn != NULL){
-        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-        auto floatValue = maybeUnwrapAttrOpt<float>(attrValue);
-        if (floatValue.has_value()){
-          (*floatFn)(data, idAdded, floatValue.value());
-        }
-        continue;
-      }
-      auto vec3Fn = std::get_if<vec3AttrFuncValue>(&attrFunc.fn);
-      if (vec3Fn != NULL){
-        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-        auto vec3Value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
-        if (vec3Value.has_value()){
-          (*vec3Fn)(data, idAdded, vec3Value.value());
-        }
-        continue;
-      }
-    }
-  };
-}
-
-std::function<void(int32_t, void*, int32_t)>  getOnAttrRemoved(std::vector<AttrFunc> attrFuncs){
-  return [attrFuncs](int32_t _, void* data, int32_t idRemoved) -> void {
-
-    auto name = gameapi -> getGameObjNameForId(idRemoved).value();
-    if (name == ">maincamera"){
-      //modassert(gameapi -> gameobjExists(idRemoved), std::string("gameobj is supposed to exist on remove: ") + std::to_string(idRemoved));
-      modlog("tags id removed", std::to_string(idRemoved) + std::string(" ") + gameapi -> getGameObjNameForId(idRemoved).value());
-      modlog("tags debug info", gameapi -> dumpDebugInfo(false));  
-      modlog("tags position removed", print(getSingleVec3Attr(idRemoved, "position").value()));
-      modlog("tags maxblur removed", print(getSingleFloatAttr(idRemoved, "maxblur").value()));
-    }
-    
-    for (auto &attrFunc : attrFuncs){
-      if (hasAttribute(idRemoved, attrFunc.attr.c_str())){
-        attrFunc.fn(data, idRemoved);
-      }
-    }
-  };
-}
-
 float randomNumber(float min, float max){
   static std::default_random_engine gen;
   std::uniform_real_distribution<double> distribution(min, max);
