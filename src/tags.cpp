@@ -481,6 +481,129 @@ void onTagsFrame(Tags& tags){
 	}
 }
 
+
+void createTags(Tags& tags, objid id){
+	std::vector<AttrFunc> attrFuncs = {};
+	std::vector<AttrFuncValue> attrAddFuncs = {};
+	for (auto &tagUpdate : tagupdates){
+		attrAddFuncs.push_back(AttrFuncValue {
+			.attr = tagUpdate.attribute,
+			.fn = tagUpdate.onAdd,
+		});
+		attrFuncs.push_back(AttrFunc {
+			.attr = tagUpdate.attribute,
+			.fn = tagUpdate.onRemove,
+		});
+	}
+
+	auto onAddFns = getOnAttrAdds(attrAddFuncs);
+
+  tags.textureScrollObjIds = {};
+  tags.audiozones = AudioZones {
+  	.audiozoneIds = {},
+  	.currentPlaying = std::nullopt,
+  };
+  tags.inGameUi = InGameUi {
+  	.textDisplays = {},
+  };
+  tags.openable = {};
+  tags.idToRotateTimeAdded = {};
+  tags.teleportObjs = {};
+  ///// animations ////
+  tags.animationController = createStateController();
+
+  addStateController(
+   	tags.animationController, 
+   	"character",
+   	{
+  	  ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("walking"),
+				.transition = getSymbol("walking"),
+			},
+   		ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("sidestep"),
+				.transition = getSymbol("sidestep"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("not-walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("not-walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep"),
+				.toState = getSymbol("walking"),
+				.transition = getSymbol("walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("sidestep"),
+				.transition = getSymbol("sidestep"),
+			},
+   		 ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+   		 ControllerState{
+				.fromState = getSymbol("jump"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("land"),
+			}
+		},
+   	{
+   		ControllerStateAnimation {
+   			.state = getSymbol("idle"),
+   			.animation = std::nullopt,
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking"),
+   			.animation = "walk",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("sidestep"),
+   			.animation = "sidestep",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("jump"),
+   			.animation = "jump",
+   			.animationBehavior = FORWARDS,
+   		},
+   	}
+  );
+
+  std::set<objid> idsAlreadyExisting;
+  for (auto &tagUpdate : tagupdates){
+  	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
+  	for (auto idAdded : ids){
+	  	idsAlreadyExisting.insert(idAdded);
+  	}
+  }
+  for (auto idAdded : idsAlreadyExisting){
+  	onAddFns(id, (void*)&tags, idAdded);
+  }
+}
+
+
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 
@@ -499,113 +622,10 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 
 	auto onAddFns = getOnAttrAdds(attrAddFuncs);
 
-  binding.create = [onAddFns](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
+    createTags(*tags, id);
     tagsPtr = tags;
-
-    tags -> textureScrollObjIds = {};
-    tags -> audiozones = AudioZones {
-    	.audiozoneIds = {},
-    	.currentPlaying = std::nullopt,
-    };
-    tags -> inGameUi = InGameUi {
-    	.textDisplays = {},
-    };
-    tags -> openable = {};
-    tags -> idToRotateTimeAdded = {};
-    tags -> teleportObjs = {};
-    ///// animations ////
-    tags -> animationController = createStateController();
-
-    addStateController(
-    	tags -> animationController, 
-    	"character",
-    	{
-   		  ControllerState{
-					.fromState = getSymbol("idle"),
-					.toState = getSymbol("walking"),
-					.transition = getSymbol("walking"),
-				},
-   		  ControllerState{
-					.fromState = getSymbol("idle"),
-					.toState = getSymbol("sidestep"),
-					.transition = getSymbol("sidestep"),
-				},
-				ControllerState{
-					.fromState = getSymbol("walking"),
-					.toState = getSymbol("idle"),
-					.transition = getSymbol("not-walking"),
-				},
-				ControllerState{
-					.fromState = getSymbol("walking"),
-					.toState = getSymbol("jump"),
-					.transition = getSymbol("jump"),
-				},
-				ControllerState{
-					.fromState = getSymbol("sidestep"),
-					.toState = getSymbol("jump"),
-					.transition = getSymbol("jump"),
-				},
-				ControllerState{
-					.fromState = getSymbol("sidestep"),
-					.toState = getSymbol("idle"),
-					.transition = getSymbol("not-walking"),
-				},
-				ControllerState{
-					.fromState = getSymbol("sidestep"),
-					.toState = getSymbol("walking"),
-					.transition = getSymbol("walking"),
-				},
-				ControllerState{
-					.fromState = getSymbol("walking"),
-					.toState = getSymbol("sidestep"),
-					.transition = getSymbol("sidestep"),
-				},
-   		  ControllerState{
-					.fromState = getSymbol("idle"),
-					.toState = getSymbol("jump"),
-					.transition = getSymbol("jump"),
-				},
-   		  ControllerState{
-					.fromState = getSymbol("jump"),
-					.toState = getSymbol("idle"),
-					.transition = getSymbol("land"),
-				},
-   		},
-   		{
-   			ControllerStateAnimation {
-   				.state = getSymbol("idle"),
-   				.animation = std::nullopt,
-   				.animationBehavior = LOOP,
-   			},
-   			ControllerStateAnimation {
-   				.state = getSymbol("walking"),
-   				.animation = "walk",
-   				.animationBehavior = LOOP,
-   			},
-   			ControllerStateAnimation {
-   				.state = getSymbol("sidestep"),
-   				.animation = "sidestep",
-   				.animationBehavior = LOOP,
-   			},
-   			ControllerStateAnimation {
-   				.state = getSymbol("jump"),
-   				.animation = "jump",
-   				.animationBehavior = FORWARDS,
-   			},
-   		}
-   	);
-
-    std::set<objid> idsAlreadyExisting;
-    for (auto &tagUpdate : tagupdates){
-    	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
-    	for (auto idAdded : ids){
-	    	idsAlreadyExisting.insert(idAdded);
-    	}
-    }
-    for (auto idAdded : idsAlreadyExisting){
-   		onAddFns(id, (void*)tags, idAdded);
-    }
     return tags;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
