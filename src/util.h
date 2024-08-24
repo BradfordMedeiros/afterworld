@@ -24,12 +24,6 @@ float interpolateDuration(float min, float max, float elapsedTime, float duratio
 
 void clickMouse(objid id);
 
-typedef std::function<void(void*, int32_t idAdded, AttributeValue value)> attrFuncValue;
-struct AttrFuncValue {
-	std::string attr;
-	attrFuncValue fn;
-};
-
 
 float randomNumber(float min, float max);
 int randomNumber(int min, int max);
