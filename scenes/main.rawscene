@@ -1,8 +1,5 @@
 # Resources that are expected to always be loaded
 
-# Scripts
-tags:script:native/tags
-
 # Texture resources
 loadtexture:texture:../gameresources/textures/controls/up-down.png
 loadtexture-terminal:texture:../gameresources/build/terminals/terminal.png
