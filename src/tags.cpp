@@ -2,46 +2,13 @@
 
 extern CustomApiBindings* gameapi;
 
-struct CurrentPlayingData {
-	objid id;
-	objid sceneId;
-	std::string clipToPlay;
-};
-struct AudioZones {
-	std::set<objid> audiozoneIds;
-	std::optional<CurrentPlayingData> currentPlaying;
-};
-
-enum OpenBehavior {
-		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP, OPEN_BEHAVIOR_TOGGLE
-};
-struct OpenableType {
-	std::string signal;
-	std::string closeSignal;
-	OpenBehavior behavior;
-	bool stateUp;
-};
-
-struct Tags {
-	std::set<objid> textureScrollObjIds;
-	AudioZones audiozones;
-	InGameUi inGameUi;
-	std::unordered_map<objid, OpenableType> openable;
-	std::unordered_map<objid, float> idToRotateTimeAdded;
-	std::set<objid> teleportObjs;
-
-	StateController animationController;
-};
-
 struct TagUpdater {
 	std::string attribute;
-	attrFuncValue onAdd;
-	std::function<void(void*, int32_t idAdded)> onRemove;
+	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
+	std::function<void(Tags& tags, int32_t idAdded)> onRemove;
 	std::optional<std::function<void(Tags&)>> onFrame;
 	std::optional<std::function<void(Tags&, std::string& key, std::any& value)>> onMessage;
 };
-
-Tags* tagsPtr = NULL;
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
@@ -121,35 +88,33 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	}, 0.2f);
 }
 
-std::vector<TagUpdater> tagupdates = {
+std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "animation",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
   		auto animationController = getSingleAttr(id, "animation");
-  		addEntityController(tags -> animationController, id, getSymbol(animationController.value()));
+  		addEntityController(tags.animationController, id, getSymbol(animationController.value()));
   	},
-  	.onRemove = [](void* data, int32_t id) -> void {
- 			Tags* tags = static_cast<Tags*>(data);
-		 	removeEntityController(tags -> animationController, id);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+		 	removeEntityController(tags.animationController, id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "open",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		tags -> openable[id] = OpenableType {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+ 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
+  		tags.openable[id] = OpenableType {
   			.signal = value,
   			.closeSignal = "close-door-trigger",
   			.behavior = OPEN_BEHAVIOR_TOGGLE,
   			.stateUp = false,
   		};
   	},
-  	.onRemove = [](void* data, int32_t id) -> void {
- 			Tags* tags = static_cast<Tags*>(data);
- 			tags -> openable.erase(id);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+ 			tags.openable.erase(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
@@ -200,14 +165,14 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "scrollspeed",
-		.onAdd = [](void* data, int32_t id, glm::vec3 value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+			auto value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
+			modassert(value.has_value(), "scrollspeed not vec3");
   		//std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
-  		tags -> textureScrollObjIds.insert(id);
+  		tags.textureScrollObjIds.insert(id);
   	},
-  	.onRemove = [](void* data, int32_t id) -> void {
- 			Tags* tags = static_cast<Tags*>(data);
- 			tags -> textureScrollObjIds.erase(id);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+ 			tags.textureScrollObjIds.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
@@ -217,13 +182,11 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "health",
-		.onAdd = [](void* data, int32_t id, float value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
  			modlog("health", "entity added: " + std::to_string(id));
  			addEntityIdHitpoints(id);
   	},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
 			modlog("health", "entity removed: " + std::to_string(id));
 			removeEntityIdHitpoints(id);
   	},
@@ -232,23 +195,21 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "ambient",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
   		//modassert(false, "on add ambient");
   		modlog("ambient", std::string("entity added") + gameapi -> getGameObjNameForId(id).value());
-  		tags -> audiozones.audiozoneIds.insert(id);
-  		std::cout << "audio zones: " << print(tags -> audiozones.audiozoneIds) << std::endl;
+  		tags.audiozones.audiozoneIds.insert(id);
+  		std::cout << "audio zones: " << print(tags.audiozones.audiozoneIds) << std::endl;
   	},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
   		modlog("ambient", std::string("entity removed") + std::to_string(id));
-  		tags -> audiozones.audiozoneIds.erase(id);
-  		if (tags -> audiozones.currentPlaying.has_value()){
+  		tags.audiozones.audiozoneIds.erase(id);
+  		if (tags.audiozones.currentPlaying.has_value()){
   			// clip might have already been removed. 
-  			gameapi -> stopClip(tags -> audiozones.currentPlaying.value().clipToPlay, tags -> audiozones.currentPlaying.value().sceneId);
-	  		tags -> audiozones.currentPlaying = std::nullopt;
+  			gameapi -> stopClip(tags.audiozones.currentPlaying.value().clipToPlay, tags.audiozones.currentPlaying.value().sceneId);
+	  		tags.audiozones.currentPlaying = std::nullopt;
   		}
-  		std::cout << "audio zones: " << print(tags -> audiozones.audiozoneIds) << std::endl;
+  		std::cout << "audio zones: " << print(tags.audiozones.audiozoneIds) << std::endl;
   	},
   	.onFrame = [](Tags& tags) -> void {  
   		auto transform = gameapi -> getView();
@@ -311,10 +272,10 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spawn",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
 			spawnAddId(id);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
   		spawnRemoveId(id);
   	},
   	.onFrame = [](Tags& tags) -> void {  
@@ -324,8 +285,8 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spawn-managed",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
-  	.onRemove = [](void* data, int32_t id) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
   		spawnRemoveId(id);
   	},
   	.onFrame = [](Tags& tags) -> void {},
@@ -333,8 +294,8 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "destroy",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
-  	.onRemove = [](void* data, int32_t id) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
   		auto sceneId = gameapi -> listSceneId(id);
@@ -345,8 +306,8 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "explode",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
-  	.onRemove = [](void* data, int32_t id) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
 
@@ -360,24 +321,21 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "condition",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+ 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
 			onAddConditionId(id, value);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		
-  	},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "in-game-ui",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-			createInGamesUiInstance(tags -> inGameUi, id);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+			createInGamesUiInstance(tags.inGameUi, id);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		freeInGameUiInstance(tags -> inGameUi, id);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		freeInGameUiInstance(tags.inGameUi, id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		onInGameUiFrame(tags.inGameUi);
@@ -401,13 +359,11 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spin",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		tags -> idToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+  		tags.idToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		tags -> idToRotateTimeAdded.erase(id);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.idToRotateTimeAdded.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		for (auto &[id, time] : tags.idToRotateTimeAdded){
@@ -427,32 +383,30 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "teleport",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		tags -> teleportObjs.insert(id);
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+  		tags.teleportObjs.insert(id);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		Tags* tags = static_cast<Tags*>(data);
-  		tags -> teleportObjs.erase(id);
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.teleportObjs.erase(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "autoplay",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
   		playMusicClipById(id, std::nullopt, std::nullopt);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {},
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "background",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
 	  	updateBackground(id, queryInitialBackground());
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
@@ -481,165 +435,143 @@ void onTagsFrame(Tags& tags){
 	}
 }
 
-CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
-	auto binding = createCScriptBinding(name, api);
-
-	std::vector<AttrFunc> attrFuncs = {};
-	std::vector<AttrFuncValue> attrAddFuncs = {};
+void handleOnAddedTags(Tags& tags, int32_t idAdded){
+  auto objHandle = getAttrHandle(idAdded);
 	for (auto &tagUpdate : tagupdates){
-		attrAddFuncs.push_back(AttrFuncValue {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onAdd,
-		});
-		attrFuncs.push_back(AttrFunc {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onRemove,
-		});
+    auto attrValue = getAttr(objHandle, tagUpdate.attribute.c_str());
+    if (attrValue.has_value()){
+	    tagUpdate.onAdd(tags, idAdded, attrValue.value());
+    }
 	}
-
-	auto onAddFns = getOnAttrAdds(attrAddFuncs);
-
-  binding.create = [onAddFns](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Tags* tags = new Tags;
-    tagsPtr = tags;
-
-    tags -> textureScrollObjIds = {};
-    tags -> audiozones = AudioZones {
-    	.audiozoneIds = {},
-    	.currentPlaying = std::nullopt,
-    };
-    tags -> inGameUi = InGameUi {
-    	.textDisplays = {},
-    };
-    tags -> openable = {};
-    tags -> idToRotateTimeAdded = {};
-    tags -> teleportObjs = {};
-    ///// animations ////
-    tags -> animationController = createStateController();
-
-    addStateController(
-    	tags -> animationController, 
-    	"character",
-    	{
-   		  ControllerState{
-					.fromState = getSymbol("idle"),
-					.toState = getSymbol("walking"),
-					.transition = getSymbol("walking"),
-				},
-   		  ControllerState{
-					.fromState = getSymbol("idle"),
-					.toState = getSymbol("sidestep"),
-					.transition = getSymbol("sidestep"),
-				},
-				ControllerState{
-					.fromState = getSymbol("walking"),
-					.toState = getSymbol("idle"),
-					.transition = getSymbol("not-walking"),
-				},
-				ControllerState{
-					.fromState = getSymbol("walking"),
-					.toState = getSymbol("jump"),
-					.transition = getSymbol("jump"),
-				},
-				ControllerState{
-					.fromState = getSymbol("sidestep"),
-					.toState = getSymbol("jump"),
-					.transition = getSymbol("jump"),
-				},
-				ControllerState{
-					.fromState = getSymbol("sidestep"),
-					.toState = getSymbol("idle"),
-					.transition = getSymbol("not-walking"),
-				},
-				ControllerState{
-					.fromState = getSymbol("sidestep"),
-					.toState = getSymbol("walking"),
-					.transition = getSymbol("walking"),
-				},
-				ControllerState{
-					.fromState = getSymbol("walking"),
-					.toState = getSymbol("sidestep"),
-					.transition = getSymbol("sidestep"),
-				},
-   		  ControllerState{
-					.fromState = getSymbol("idle"),
-					.toState = getSymbol("jump"),
-					.transition = getSymbol("jump"),
-				},
-   		  ControllerState{
-					.fromState = getSymbol("jump"),
-					.toState = getSymbol("idle"),
-					.transition = getSymbol("land"),
-				},
-   		},
-   		{
-   			ControllerStateAnimation {
-   				.state = getSymbol("idle"),
-   				.animation = std::nullopt,
-   				.animationBehavior = LOOP,
-   			},
-   			ControllerStateAnimation {
-   				.state = getSymbol("walking"),
-   				.animation = "walk",
-   				.animationBehavior = LOOP,
-   			},
-   			ControllerStateAnimation {
-   				.state = getSymbol("sidestep"),
-   				.animation = "sidestep",
-   				.animationBehavior = LOOP,
-   			},
-   			ControllerStateAnimation {
-   				.state = getSymbol("jump"),
-   				.animation = "jump",
-   				.animationBehavior = FORWARDS,
-   			},
-   		}
-   	);
-
-    std::set<objid> idsAlreadyExisting;
-    for (auto &tagUpdate : tagupdates){
-    	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
-    	for (auto idAdded : ids){
-	    	idsAlreadyExisting.insert(idAdded);
-    	}
-    }
-    for (auto idAdded : idsAlreadyExisting){
-   		onAddFns(id, (void*)tags, idAdded);
-    }
-    return tags;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Tags* tags = static_cast<Tags*>(data);
-    delete tags;
-    tagsPtr = NULL;
-  };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-  	Tags* tags = static_cast<Tags*>(data);
-  	onTagsMessage(*tags, key, value);
-  };
-
-  binding.onObjectAdded = onAddFns;
-  binding.onObjectRemoved = getOnAttrRemoved(attrFuncs);
-
-  binding.onFrame = [](int32_t id, void* data) -> void {
-		Tags* tags = static_cast<Tags*>(data);
-		onTagsFrame(*tags);
-  };
-
-	return binding;
+}
+void handleOnAddedTagsInitial(Tags& tags){
+  std::set<objid> idsAlreadyExisting;
+  for (auto &tagUpdate : tagupdates){
+  	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
+  	for (auto idAdded : ids){
+	  	idsAlreadyExisting.insert(idAdded);
+  	}
+  }
+  for (auto idAdded : idsAlreadyExisting){
+  	handleOnAddedTags(tags, idAdded);
+  }
 }
 
-std::optional<TeleportInfo> getTeleportPosition(){
-	if (tagsPtr == NULL){
-		return std::nullopt;
+Tags createTags(){
+	Tags tags{};
+
+  tags.textureScrollObjIds = {};
+  tags.audiozones = AudioZones {
+  	.audiozoneIds = {},
+  	.currentPlaying = std::nullopt,
+  };
+  tags.inGameUi = InGameUi {
+  	.textDisplays = {},
+  };
+  tags.openable = {};
+  tags.idToRotateTimeAdded = {};
+  tags.teleportObjs = {};
+  ///// animations ////
+  tags.animationController = createStateController();
+
+  addStateController(
+   	tags.animationController, 
+   	"character",
+   	{
+  	  ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("walking"),
+				.transition = getSymbol("walking"),
+			},
+   		ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("sidestep"),
+				.transition = getSymbol("sidestep"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("not-walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("not-walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep"),
+				.toState = getSymbol("walking"),
+				.transition = getSymbol("walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("sidestep"),
+				.transition = getSymbol("sidestep"),
+			},
+   		 ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+   		 ControllerState{
+				.fromState = getSymbol("jump"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("land"),
+			}
+		},
+   	{
+   		ControllerStateAnimation {
+   			.state = getSymbol("idle"),
+   			.animation = std::nullopt,
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking"),
+   			.animation = "walk",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("sidestep"),
+   			.animation = "sidestep",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("jump"),
+   			.animation = "jump",
+   			.animationBehavior = FORWARDS,
+   		},
+   	}
+  );
+  return tags;
+}
+
+void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
+ 	for (auto &tagUpdate : tagupdates){
+	  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
+      tagUpdate.onRemove(tags, idRemoved);
+    }
 	}
-	if (tagsPtr -> teleportObjs.size() == 0){
+}
+
+
+std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
+	if (tags.teleportObjs.size() == 0){
 		return std::nullopt;
 	}
 
-	auto index = randomNumber(0, tagsPtr -> teleportObjs.size() - 1);
+	auto index = randomNumber(0, tags.teleportObjs.size() - 1);
 	int currIndex = 0;
-	for(auto id : tagsPtr -> teleportObjs){
+	for(auto id : tags.teleportObjs){
 		if (currIndex == index){
 			auto position = gameapi -> getGameObjectPos(id, true);
 			return TeleportInfo {
@@ -650,26 +582,4 @@ std::optional<TeleportInfo> getTeleportPosition(){
 		currIndex++;
 	}
 	return std::nullopt;
-}
-
-void doAnimationTrigger(objid entityId, const char* transition){
-	modassert(tagsPtr, "tagsPtr is null");
-	Tags& tags = *tagsPtr;
- 
-
-  if (!hasControllerState(tags.animationController, entityId)){
-  	return;
-  }
-  bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
-  if (changedState){
-  	auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
-  	if (stateAnimation){
-	  	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
-  		if (stateAnimation -> animation.has_value()){
-  			gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
-  		}else{
-  			gameapi -> stopAnimation(entityId);
-  		}
-  	}
-  }
 }

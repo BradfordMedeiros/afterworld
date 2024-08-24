@@ -15,16 +15,51 @@
 #include "./debug.h"
 #include "./vector_gfx.h"
 
-CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
+struct CurrentPlayingData {
+	objid id;
+	objid sceneId;
+	std::string clipToPlay;
+};
+struct AudioZones {
+	std::set<objid> audiozoneIds;
+	std::optional<CurrentPlayingData> currentPlaying;
+};
+
+enum OpenBehavior {
+		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP, OPEN_BEHAVIOR_TOGGLE
+};
+struct OpenableType {
+	std::string signal;
+	std::string closeSignal;
+	OpenBehavior behavior;
+	bool stateUp;
+};
+
+struct Tags {
+	std::set<objid> textureScrollObjIds;
+	AudioZones audiozones;
+	InGameUi inGameUi;
+	std::unordered_map<objid, OpenableType> openable;
+	std::unordered_map<objid, float> idToRotateTimeAdded;
+	std::set<objid> teleportObjs;
+
+	StateController animationController;
+};
+
+Tags createTags();
+void onTagsMessage(Tags& tags, std::string& key, std::any& value);
+void onTagsFrame(Tags& tags);
+void handleOnAddedTags(Tags& tags, int32_t idAdded);
+void handleOnAddedTagsInitial(Tags& tags);
+void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved);
+
+void setMenuBackground(std::string background);
 
 struct TeleportInfo {
 	objid id;
 	glm::vec3 position;
 };
 
-std::optional<TeleportInfo> getTeleportPosition();
-
-void doAnimationTrigger(objid entityId, const char* transition);
-void setMenuBackground(std::string background);
+std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 
 #endif 
