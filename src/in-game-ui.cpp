@@ -26,7 +26,7 @@ void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<obj
 	// should make sure the texture id is the same
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
 		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
-		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId);
+		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId, ndiCoord);
 	}
 }
 

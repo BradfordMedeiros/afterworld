@@ -340,7 +340,10 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = [](Tags& tags) -> void {
   		modassert(tags.uiContext, "tags.UiContext NULL");
 
-  		onInGameUiFrame(tags.inGameUi, *tags.uiContext, std::nullopt, getGlobalState().texCoordUv);
+
+  		auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
+  		modlog("in game ui uv", print(ndiCoord));
+  		onInGameUiFrame(tags.inGameUi, *tags.uiContext, std::nullopt, ndiCoord);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   		onInGameUiMessage(tags.inGameUi, key, value);
