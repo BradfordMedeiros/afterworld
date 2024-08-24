@@ -37,8 +37,8 @@ void drawbar(DrawingTools& drawTools, float percentage){
   float yNdc = 1.f;
 
   float barHeight = width * aspectRatio;
-  drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), width, barHeight, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.5f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), widthPercentage * width, barHeight, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), width, barHeight, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.5f),true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), widthPercentage * width, barHeight, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   //modlog("ui health percentage", std::to_string(widthPercentage));
 }
 
@@ -60,14 +60,14 @@ LetterboxFade letterbox {
 void drawTitleBorders(DrawingTools& drawTools, float percentage, std::string& title){
   modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
   float barHeight = 0.2f * percentage;
-  drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   const float textPaddingRight = 0.04f;
   drawLeftText(drawTools, title, 1.f - textPaddingRight, -1.f + (barHeight * 0.5f), letterbox.fontSize, std::nullopt, std::nullopt);
 }
 
 void drawFadeAnimation(DrawingTools& drawTools, float percentage){
-  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.x, letterbox.fadeColor.y, letterbox.fadeColor.z, letterbox.fadeColor.w * percentage), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.x, letterbox.fadeColor.y, letterbox.fadeColor.z, letterbox.fadeColor.w * percentage), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 }
 
 struct FadeResult {
@@ -122,7 +122,7 @@ void showLetterBox(std::string title, float duration){
 Component hudComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     if (imageForHud.has_value()){
-      drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, imageForHud.value(), std::nullopt, std::nullopt);
+      drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, imageForHud.value(), std::nullopt, std::nullopt);
     }
 
     if (uiHealth.has_value()){

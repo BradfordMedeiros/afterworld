@@ -11,7 +11,7 @@ const float compassNeedleLength = 0.1f;
 Component compassComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
   	auto mappingId = uniqueMenuItemMappingId();
-    drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, glm::vec4(0.f, 0.f, 1.f, 0.1f), std::nullopt, true, mappingId, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawRect(rectX, rectY, rectWidth, rectHeight, false, glm::vec4(0.f, 0.f, 1.f, 0.1f), true, mappingId, std::nullopt, std::nullopt, std::nullopt);
     BoundingBox2D boundingBox {
       .x = rectX,
       .y = rectY,

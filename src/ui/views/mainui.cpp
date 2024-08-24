@@ -522,7 +522,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         gameapi -> drawText(word, left, top, fontSize, permatext, tint, textureId, ndi, fontFamily, selectionId, maxWidth, shaderId);
      },
      .getTextDimensionsNdi = gameapi -> getTextDimensionsNdi,
-     .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId) -> void {
+     .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId) -> void {
       if (trackingId.has_value()){
         handlerFuncs.trackedLocationIds[trackingId.value()] = TrackedLocationData {
           .position = glm::vec2(centerX, centerY),
@@ -530,7 +530,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         };
       }
 
-      gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture, shaderId);
+      gameapi -> drawRect(centerX, centerY, width, height, perma, tint, std::nullopt /* texture id*/, ndi, selectionId, texture, shaderId);
      },
      .drawLine2D = [](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId) -> void {
         gameapi -> drawLine2D(fromPos, toPos, perma, tint, textureId, ndi, selectionId, texture, shaderId);
@@ -862,9 +862,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
     
     //drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader }, std::nullopt);
-    drawTools.drawRect(0.5f, 0.5f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 1 }, std::nullopt);
-    drawTools.drawRect(0.25f, 0.25f, 0.5f, 0.5f, false, glm::vec4(0.f, 1.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 5 }, std::nullopt);
-    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = -1 }, std::nullopt);
+    drawTools.drawRect(0.5f, 0.5f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 1 }, std::nullopt);
+    drawTools.drawRect(0.25f, 0.25f, 0.5f, 0.5f, false, glm::vec4(0.f, 1.f, 0.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 5 }, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = -1 }, std::nullopt);
 
   }
 

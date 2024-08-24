@@ -1,7 +1,7 @@
 #include "./slider.h"
 
 void drawRight(DrawingTools& drawTools, float x, float y, float width, float height, glm::vec4 color, std::optional<objid> mappingId){
-  drawTools.drawRect(x + (width * 0.5f), y, width, height, false, color, std::nullopt, true, mappingId /*radioButton.mappingId */, std::nullopt, std::nullopt, mappingId);
+  drawTools.drawRect(x + (width * 0.5f), y, width, height, false, color, true, mappingId /*radioButton.mappingId */, std::nullopt, std::nullopt, mappingId);
 }
 
 
