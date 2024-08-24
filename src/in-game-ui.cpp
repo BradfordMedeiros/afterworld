@@ -9,7 +9,7 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 	modassert(inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end(), "id already exists");
 
 	std::string texture = ingameUiTextureName(id);
-	auto uiTexture = gameapi -> createTexture(texture, 512, 512, id);
+	auto uiTexture = gameapi -> createTexture(texture, 1920, 1080, id);
  	setGameObjectTexture(id, texture);
 
  	inGameUi.textDisplays[id] = TextDisplay{
@@ -28,19 +28,10 @@ void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 }
 
 void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext){
-
-	//			gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
-  // 	gameapi -> drawRect(uvCoord.x * 2 - 1, uvCoord.y * 2 - 1, 0.1f, 0.1f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textDisplay.textureId, true, std::nullopt, "./res/textures/crosshairs/crosshair008.png", std::nullopt);
-
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
-		handleDrawMainUi(uiContext, getGlobalState().selectedId, std::nullopt);
+		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
+		handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId);
 	}
-
-
-
-	//inGameUi.uiInstance.value().cursorLocation = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
-	//bool upSelected = inGameUi.uiInstance.value().upSelected;
-  //gameapi -> drawRect(0.f, 0.f, 1.f, 1.f, false, upSelected ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f), inGameUi.uiInstance.value().textureId, true, std::nullopt, std::nullopt);
 }
 
 void zoomIntoGameUi(objid id){
