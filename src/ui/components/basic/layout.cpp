@@ -36,7 +36,6 @@ struct BufferedLine2D {
   glm::vec3 toPos;
   bool perma;
   std::optional<glm::vec4> tint;
-  std::optional<unsigned int> textureId;
   bool ndi;
   std::optional<objid> selectionId;
   std::optional<std::string> texture;
@@ -89,14 +88,13 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   		.trackingId = trackingId,
   	});  	
   };
-  drawTools.drawLine2D = [&bufferedDrawingTools](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId) -> void {
+  drawTools.drawLine2D = [&bufferedDrawingTools](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId) -> void {
   	bufferedDrawingTools.bufferedData.buffered2DLines.push_back(BufferedLine2D{
   		.drawOrder = bufferedDrawingTools.bufferedData.bufferedIndex++,
   		.fromPos = fromPos,
   		.toPos = toPos,
   		.perma = perma,
   		.tint = tint,
-  		.textureId = textureId,
   		.ndi = ndi,
   		.selectionId = selectionId,
   		.texture = texture,
@@ -138,7 +136,7 @@ void drawBufferedData(BufferedDrawingTools& bufferedTools, glm::vec2 positionOff
 			bufferedRectIndex++;
 		}else if (bufferedTools.bufferedData.buffered2DLines.size() > bufferedLine2DIndex && bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex).drawOrder == i){
 			BufferedLine2D bufferedLine2D = bufferedTools.bufferedData.buffered2DLines.at(bufferedLine2DIndex);
-			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.textureId, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture, shapeOptions.has_value() ? shapeOptions.value() : bufferedLine2D.shaderId);
+			bufferedTools.realTools -> drawLine2D(bufferedLine2D.fromPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.toPos + glm::vec3(positionOffset.x, positionOffset.y, 0.f), bufferedLine2D.perma, bufferedLine2D.tint, bufferedLine2D.ndi, bufferedLine2D.selectionId, bufferedLine2D.texture, shapeOptions.has_value() ? shapeOptions.value() : bufferedLine2D.shaderId);
 			bufferedLine2DIndex++;
 		}
 	}

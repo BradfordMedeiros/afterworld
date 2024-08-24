@@ -46,9 +46,9 @@ void drawCirclePartition(DrawingTools& drawTools, int i, int mappingId, glm::vec
   float nextValue = (i + 1) * (2 * M_PI) / RESOLUTION;
   glm::vec3 fromPos(rectWidth * glm::cos(value), rectHeight * glm::sin(value), 0.f);
   glm::vec3 toPos(rectWidth * glm::cos(nextValue), rectHeight * glm::sin(nextValue), 0.f);
-  drawTools.drawLine2D(fromPos, toPos, false, tint, std::nullopt, true, mappingId, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), fromPos, false, tint, std::nullopt, true, mappingId, std::nullopt, std::nullopt);
-  drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), toPos, false, tint, std::nullopt, true, mappingId, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(fromPos, toPos, false, tint, true, mappingId, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), fromPos, false, tint, true, mappingId, std::nullopt, std::nullopt);
+  drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), toPos, false, tint, true, mappingId, std::nullopt, std::nullopt);
 }
 
 Component weaponWheelComponent {
