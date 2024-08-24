@@ -121,11 +121,12 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	}, 0.2f);
 }
 
-std::vector<TagUpdater> tagupdates = {
+std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "animation",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue attrValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
+			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
   		auto animationController = getSingleAttr(id, "animation");
   		addEntityController(tags -> animationController, id, getSymbol(animationController.value()));
   	},
@@ -138,8 +139,9 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "open",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue attrValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
+ 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
   		tags -> openable[id] = OpenableType {
   			.signal = value,
   			.closeSignal = "close-door-trigger",
@@ -200,8 +202,10 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "scrollspeed",
-		.onAdd = [](void* data, int32_t id, glm::vec3 value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue attrValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
+			auto value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
+			modassert(value.has_value(), "scrollspeed not vec3");
   		//std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
   		tags -> textureScrollObjIds.insert(id);
   	},
@@ -217,7 +221,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "health",
-		.onAdd = [](void* data, int32_t id, float value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
  			modlog("health", "entity added: " + std::to_string(id));
  			addEntityIdHitpoints(id);
@@ -232,7 +236,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "ambient",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
   		//modassert(false, "on add ambient");
   		modlog("ambient", std::string("entity added") + gameapi -> getGameObjNameForId(id).value());
@@ -311,7 +315,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spawn",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
 			spawnAddId(id);
 		},
   	.onRemove = [](void* data, int32_t id) -> void {
@@ -324,7 +328,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spawn-managed",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](void* data, int32_t id) -> void {
   		spawnRemoveId(id);
   	},
@@ -333,7 +337,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "destroy",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](void* data, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
@@ -345,7 +349,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "explode",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {},
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](void* data, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
@@ -360,18 +364,17 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "condition",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue attrValue) -> void {
+ 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
 			onAddConditionId(id, value);
 		},
-  	.onRemove = [](void* data, int32_t id) -> void {
-  		
-  	},
+  	.onRemove = [](void* data, int32_t id) -> void {},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "in-game-ui",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
 			createInGamesUiInstance(tags -> inGameUi, id);
 		},
@@ -401,7 +404,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spin",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
   		tags -> idToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
 		},
@@ -427,7 +430,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "teleport",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
   		Tags* tags = static_cast<Tags*>(data);
   		tags -> teleportObjs.insert(id);
 		},
@@ -440,7 +443,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "autoplay",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
   		playMusicClipById(id, std::nullopt, std::nullopt);
 		},
   	.onRemove = [](void* data, int32_t id) -> void {},
@@ -449,7 +452,7 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "background",
-		.onAdd = [](void* data, int32_t id, std::string value) -> void {
+		.onAdd = [](void* data, int32_t id, AttributeValue) -> void {
 	  	updateBackground(id, queryInitialBackground());
 		},
   	.onRemove = [](void* data, int32_t id) -> void {},
@@ -485,34 +488,9 @@ std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncV
   return [attrFuncs](int32_t _, void* data, int32_t idAdded) -> void { 
     auto objHandle = getAttrHandle(idAdded);
     for (auto &attrFunc : attrFuncs){
-      auto stringFn = std::get_if<stringAttrFuncValue>(&attrFunc.fn);
-      if (stringFn != NULL){
-        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-        auto stringValue = maybeUnwrapAttrOpt<std::string>(attrValue);
-        if (stringValue.has_value()){
-          (*stringFn)(data, idAdded, stringValue.value());
-        }else{
-         // modassert(false, std::string("invalid type for: ") + attrFunc.attr);
-        }
-        continue;
-      }
-      auto floatFn = std::get_if<floatAttrFuncValue>(&attrFunc.fn);
-      if (floatFn != NULL){
-        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-        auto floatValue = maybeUnwrapAttrOpt<float>(attrValue);
-        if (floatValue.has_value()){
-          (*floatFn)(data, idAdded, floatValue.value());
-        }
-        continue;
-      }
-      auto vec3Fn = std::get_if<vec3AttrFuncValue>(&attrFunc.fn);
-      if (vec3Fn != NULL){
-        auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-        auto vec3Value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
-        if (vec3Value.has_value()){
-          (*vec3Fn)(data, idAdded, vec3Value.value());
-        }
-        continue;
+      auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
+      if (attrValue.has_value()){
+	      attrFunc.fn(data, idAdded, attrValue.value());
       }
     }
   };
