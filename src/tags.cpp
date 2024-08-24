@@ -496,7 +496,8 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-void createTags(Tags& tags, objid id){
+Tags createTags(objid id){
+	Tags tags{};
 	std::vector<AttrFuncValue> attrAddFuncs = {};
 	for (auto &tagUpdate : tagupdates){
 		attrAddFuncs.push_back(AttrFuncValue {
@@ -597,8 +598,7 @@ void createTags(Tags& tags, objid id){
    		},
    	}
   );
-
-  handleOnAddedTagsInitial(tags);
+  return tags;
 }
 
 
@@ -607,7 +607,8 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
-    createTags(*tags, id);
+    *tags = createTags(id);
+    handleOnAddedTagsInitial(*tags);
     tagsPtr = tags;
     return tags;
   };
