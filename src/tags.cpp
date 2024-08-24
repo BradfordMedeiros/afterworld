@@ -2,36 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-struct CurrentPlayingData {
-	objid id;
-	objid sceneId;
-	std::string clipToPlay;
-};
-struct AudioZones {
-	std::set<objid> audiozoneIds;
-	std::optional<CurrentPlayingData> currentPlaying;
-};
-
-enum OpenBehavior {
-		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP, OPEN_BEHAVIOR_TOGGLE
-};
-struct OpenableType {
-	std::string signal;
-	std::string closeSignal;
-	OpenBehavior behavior;
-	bool stateUp;
-};
-
-struct Tags {
-	std::set<objid> textureScrollObjIds;
-	AudioZones audiozones;
-	InGameUi inGameUi;
-	std::unordered_map<objid, OpenableType> openable;
-	std::unordered_map<objid, float> idToRotateTimeAdded;
-	std::set<objid> teleportObjs;
-
-	StateController animationController;
-};
 
 typedef std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> attrFuncValue;
 struct AttrFuncValue {
@@ -48,6 +18,10 @@ struct TagUpdater {
 };
 
 Tags* tagsPtr = NULL;
+Tags& getTags(){
+	modassert(tagsPtr, "tagsPtr is null");
+	return *tagsPtr;
+}
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
@@ -496,7 +470,7 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-Tags createTags(objid id){
+Tags createTags(){
 	Tags tags{};
 	std::vector<AttrFuncValue> attrAddFuncs = {};
 	for (auto &tagUpdate : tagupdates){
@@ -601,13 +575,20 @@ Tags createTags(objid id){
   return tags;
 }
 
+void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
+ 	for (auto &tagUpdate : tagupdates){
+	  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
+      tagUpdate.onRemove(getTags(), idRemoved);
+    }
+	}
+}
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
 
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
-    *tags = createTags(id);
+    *tags = createTags();
     handleOnAddedTagsInitial(*tags);
     tagsPtr = tags;
     return tags;
@@ -617,26 +598,7 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
     delete tags;
     tagsPtr = NULL;
   };
-  binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-  	Tags* tags = static_cast<Tags*>(data);
-  	onTagsMessage(*tags, key, value);
-  };
-  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
-  	Tags* tags = static_cast<Tags*>(data);
-  	handleOnAddedTags(*tags, idAdded);
-  };  
-  binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-  	Tags* tags = static_cast<Tags*>(data);
- 		for (auto &tagUpdate : tagupdates){
-		  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
-        tagUpdate.onRemove(*tags, idRemoved);
-      }
-		}
-  };
-  binding.onFrame = [](int32_t id, void* data) -> void {
-		Tags* tags = static_cast<Tags*>(data);
-		onTagsFrame(*tags);
-  };
+
 	return binding;
 }
 

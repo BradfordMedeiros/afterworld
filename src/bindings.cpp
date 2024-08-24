@@ -776,7 +776,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onFrameWater(water);
     onFrameAi(aiData);
     onFrameDaynight();
-
+    onTagsFrame(getTags());
 
     // debug
     debugOnFrame();
@@ -909,6 +909,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onWeatherMessage(weather, value, gameapi -> rootSceneId());
     }
 
+    onTagsMessage(getTags(), key, value);
+
   };
 
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
@@ -982,6 +984,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     maybeAddMovementEntity(getMovementData(), idAdded);
     onMainUiObjectsChanged();
     onAiObjectAdded(aiData, idAdded);
+    handleOnAddedTags(getTags(), idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     maybeRemoveMovementEntity(getMovementData(), idRemoved);
@@ -990,6 +993,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
     onAiObjectRemoved(aiData, idRemoved);
+    handleTagsOnObjectRemoved(getTags(), idRemoved);
   };
 
   return binding;
