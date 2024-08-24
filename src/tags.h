@@ -15,15 +15,6 @@
 #include "./debug.h"
 #include "./vector_gfx.h"
 
-CScriptBinding tagsBinding(CustomApiBindings& api, const char* name);
-
-struct TeleportInfo {
-	objid id;
-	glm::vec3 position;
-};
-
-std::optional<TeleportInfo> getTeleportPosition();
-
 struct CurrentPlayingData {
 	objid id;
 	objid sceneId;
@@ -55,7 +46,6 @@ struct Tags {
 	StateController animationController;
 };
 
-Tags& getTags();
 Tags createTags();
 void onTagsMessage(Tags& tags, std::string& key, std::any& value);
 void onTagsFrame(Tags& tags);
@@ -63,7 +53,13 @@ void handleOnAddedTags(Tags& tags, int32_t idAdded);
 void handleOnAddedTagsInitial(Tags& tags);
 void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved);
 
-void doAnimationTrigger(objid entityId, const char* transition);
 void setMenuBackground(std::string background);
+
+struct TeleportInfo {
+	objid id;
+	glm::vec3 position;
+};
+
+std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 
 #endif 

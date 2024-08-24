@@ -10,6 +10,7 @@ SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
+Tags tags = createTags();
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -654,6 +655,24 @@ void setActivePlayerNext(){
   setActivePlayer(getNextEntity(getMovementData()));
 }
 
+void doAnimationTrigger(objid entityId, const char* transition){
+  if (!hasControllerState(tags.animationController, entityId)){
+    return;
+  }
+  bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
+  if (changedState){
+    auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
+    if (stateAnimation){
+      modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
+      if (stateAnimation -> animation.has_value()){
+        gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
+      }else{
+        gameapi -> stopAnimation(entityId);
+      }
+    }
+  }
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -727,6 +746,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
   
+    handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
+
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -776,7 +797,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onFrameWater(water);
     onFrameAi(aiData);
     onFrameDaynight();
-    onTagsFrame(getTags());
+    onTagsFrame(tags);
 
     // debug
     debugOnFrame();
@@ -796,7 +817,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (isTeleportButton(key) && !isPaused()){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
         // maybe raycast down, and then set the position so it fits 
-        auto teleportPosition = getTeleportPosition();
+        auto teleportPosition = getTeleportPosition(tags);
         if (playerId.has_value() && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
           gameapi -> setGameObjectPosition(playerId.value(), teleportPosition.value().position, true);
@@ -909,7 +930,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onWeatherMessage(weather, value, gameapi -> rootSceneId());
     }
 
-    onTagsMessage(getTags(), key, value);
+    onTagsMessage(tags, key, value);
 
   };
 
@@ -984,7 +1005,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     maybeAddMovementEntity(getMovementData(), idAdded);
     onMainUiObjectsChanged();
     onAiObjectAdded(aiData, idAdded);
-    handleOnAddedTags(getTags(), idAdded);
+    handleOnAddedTags(tags, idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     maybeRemoveMovementEntity(getMovementData(), idRemoved);
@@ -993,7 +1014,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
     onAiObjectRemoved(aiData, idRemoved);
-    handleTagsOnObjectRemoved(getTags(), idRemoved);
+    handleTagsOnObjectRemoved(tags, idRemoved);
   };
 
   return binding;
@@ -1003,7 +1024,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
-  bindings.push_back(tagsBinding(api, "native/tags"));
   bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
   bindings.push_back(particleviewerBinding(api, "native/particleviewer"));
   return bindings;

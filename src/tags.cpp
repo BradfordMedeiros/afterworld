@@ -2,26 +2,13 @@
 
 extern CustomApiBindings* gameapi;
 
-
-typedef std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> attrFuncValue;
-struct AttrFuncValue {
-	std::string attr;
-	attrFuncValue fn;
-};
-
 struct TagUpdater {
 	std::string attribute;
-	attrFuncValue onAdd;
+	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
 	std::function<void(Tags& tags, int32_t idAdded)> onRemove;
 	std::optional<std::function<void(Tags&)>> onFrame;
 	std::optional<std::function<void(Tags&, std::string& key, std::any& value)>> onMessage;
 };
-
-Tags* tagsPtr = NULL;
-Tags& getTags(){
-	modassert(tagsPtr, "tagsPtr is null");
-	return *tagsPtr;
-}
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
@@ -472,13 +459,6 @@ void handleOnAddedTagsInitial(Tags& tags){
 
 Tags createTags(){
 	Tags tags{};
-	std::vector<AttrFuncValue> attrAddFuncs = {};
-	for (auto &tagUpdate : tagupdates){
-		attrAddFuncs.push_back(AttrFuncValue {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onAdd,
-		});
-	}
 
   tags.textureScrollObjIds = {};
   tags.audiozones = AudioZones {
@@ -578,41 +558,20 @@ Tags createTags(){
 void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
  	for (auto &tagUpdate : tagupdates){
 	  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
-      tagUpdate.onRemove(getTags(), idRemoved);
+      tagUpdate.onRemove(tags, idRemoved);
     }
 	}
 }
 
-CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
-	auto binding = createCScriptBinding(name, api);
 
-  binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    Tags* tags = new Tags;
-    *tags = createTags();
-    handleOnAddedTagsInitial(*tags);
-    tagsPtr = tags;
-    return tags;
-  };
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    Tags* tags = static_cast<Tags*>(data);
-    delete tags;
-    tagsPtr = NULL;
-  };
-
-	return binding;
-}
-
-std::optional<TeleportInfo> getTeleportPosition(){
-	if (tagsPtr == NULL){
-		return std::nullopt;
-	}
-	if (tagsPtr -> teleportObjs.size() == 0){
+std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
+	if (tags.teleportObjs.size() == 0){
 		return std::nullopt;
 	}
 
-	auto index = randomNumber(0, tagsPtr -> teleportObjs.size() - 1);
+	auto index = randomNumber(0, tags.teleportObjs.size() - 1);
 	int currIndex = 0;
-	for(auto id : tagsPtr -> teleportObjs){
+	for(auto id : tags.teleportObjs){
 		if (currIndex == index){
 			auto position = gameapi -> getGameObjectPos(id, true);
 			return TeleportInfo {
@@ -623,26 +582,4 @@ std::optional<TeleportInfo> getTeleportPosition(){
 		currIndex++;
 	}
 	return std::nullopt;
-}
-
-void doAnimationTrigger(objid entityId, const char* transition){
-	modassert(tagsPtr, "tagsPtr is null");
-	Tags& tags = *tagsPtr;
- 
-
-  if (!hasControllerState(tags.animationController, entityId)){
-  	return;
-  }
-  bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
-  if (changedState){
-  	auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
-  	if (stateAnimation){
-	  	modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
-  		if (stateAnimation -> animation.has_value()){
-  			gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
-  		}else{
-  			gameapi -> stopAnimation(entityId);
-  		}
-  	}
-  }
 }
