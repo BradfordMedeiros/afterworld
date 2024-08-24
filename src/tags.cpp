@@ -339,7 +339,8 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = [](Tags& tags) -> void {
   		modassert(tags.uiContext, "tags.UiContext NULL");
-  		onInGameUiFrame(tags.inGameUi, *tags.uiContext);
+
+  		onInGameUiFrame(tags.inGameUi, *tags.uiContext, std::nullopt, getGlobalState().texCoordUv);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   		onInGameUiMessage(tags.inGameUi, key, value);

@@ -13,12 +13,7 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  	setGameObjectTexture(id, texture);
 
  	inGameUi.textDisplays[id] = TextDisplay{
- 		.texture = "../gameresources/textures/controls/up-down.png",
- 		.channel = "ui-debug-text",
- 		.text = "hello world",
- 		.textPosition = glm::vec2(0.f, 0.f),
  		.textureId = uiTexture,
- 		.needsRefresh = true,
  	};
 };
 
@@ -27,10 +22,11 @@ void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 	inGameUi.textDisplays.erase(id);
 }
 
-void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext){
+void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
+	// should make sure the texture id is the same
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
 		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
-		handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId);
+		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId);
 	}
 }
 
@@ -55,12 +51,7 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 
 void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value){
 	for (auto &[_, textDisplay] : inGameUi.textDisplays){
-		if (key == textDisplay.channel){
-      std::string* channelValue = anycast<std::string>(value);
-      modassert(channelValue, "invalid type for channelValue");
-      textDisplay.text = *channelValue;
-      textDisplay.needsRefresh = true;
-		}
+		
 	}
 }
 
