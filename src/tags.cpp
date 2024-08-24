@@ -484,16 +484,14 @@ void onTagsFrame(Tags& tags){
 	}
 }
 
-std::function<void(int32_t, void*, int32_t)> getOnAttrAdds(std::vector<AttrFuncValue> attrFuncs){
-  return [attrFuncs](int32_t _, void* data, int32_t idAdded) -> void { 
-    auto objHandle = getAttrHandle(idAdded);
-    for (auto &attrFunc : attrFuncs){
-      auto attrValue = getAttr(objHandle, attrFunc.attr.c_str());
-      if (attrValue.has_value()){
-	      attrFunc.fn(data, idAdded, attrValue.value());
-      }
+void handleOnAddedTags(void* data, int32_t idAdded){
+  auto objHandle = getAttrHandle(idAdded);
+	for (auto &tagUpdate : tagupdates){
+    auto attrValue = getAttr(objHandle, tagUpdate.attribute.c_str());
+    if (attrValue.has_value()){
+	    tagUpdate.onAdd(data, idAdded, attrValue.value());
     }
-  };
+	}
 }
 
 void createTags(Tags& tags, objid id){
@@ -504,8 +502,6 @@ void createTags(Tags& tags, objid id){
 			.fn = tagUpdate.onAdd,
 		});
 	}
-
-	auto onAddFns = getOnAttrAdds(attrAddFuncs);
 
   tags.textureScrollObjIds = {};
   tags.audiozones = AudioZones {
@@ -608,23 +604,13 @@ void createTags(Tags& tags, objid id){
   	}
   }
   for (auto idAdded : idsAlreadyExisting){
-  	onAddFns(id, (void*)&tags, idAdded);
+  	handleOnAddedTags((void*)&tags, idAdded);
   }
 }
 
 
 CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
 	auto binding = createCScriptBinding(name, api);
-
-	std::vector<AttrFuncValue> attrAddFuncs = {};
-	for (auto &tagUpdate : tagupdates){
-		attrAddFuncs.push_back(AttrFuncValue {
-			.attr = tagUpdate.attribute,
-			.fn = tagUpdate.onAdd,
-		});
-	}
-
-	auto onAddFns = getOnAttrAdds(attrAddFuncs);
 
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     Tags* tags = new Tags;
@@ -641,8 +627,10 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
   	Tags* tags = static_cast<Tags*>(data);
   	onTagsMessage(*tags, key, value);
   };
-
-  binding.onObjectAdded = onAddFns;
+  binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
+  	Tags* tags = static_cast<Tags*>(data);
+  	handleOnAddedTags((void*)tags, idAdded);
+  };  
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
  		for (auto &tagUpdate : tagupdates){
 		  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
@@ -650,12 +638,10 @@ CScriptBinding tagsBinding(CustomApiBindings& api, const char* name){
       }
 		}
   };
-
   binding.onFrame = [](int32_t id, void* data) -> void {
 		Tags* tags = static_cast<Tags*>(data);
 		onTagsFrame(*tags);
   };
-
 	return binding;
 }
 
