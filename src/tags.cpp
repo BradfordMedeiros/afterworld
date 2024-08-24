@@ -338,7 +338,8 @@ std::vector<TagUpdater> tagupdates = {
   		freeInGameUiInstance(tags.inGameUi, id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		onInGameUiFrame(tags.inGameUi);
+  		modassert(tags.uiContext, "tags.UiContext NULL");
+  		onInGameUiFrame(tags.inGameUi, *tags.uiContext);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   		onInGameUiMessage(tags.inGameUi, key, value);
@@ -457,8 +458,10 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-Tags createTags(){
+Tags createTags(UiContext* uiContext){
 	Tags tags{};
+
+	tags.uiContext = uiContext;
 
   tags.textureScrollObjIds = {};
   tags.audiozones = AudioZones {

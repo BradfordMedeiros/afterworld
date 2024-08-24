@@ -5,6 +5,7 @@
 #include <vector>
 #include "./util.h"
 #include "./activeplayer.h"
+#include "./ui/views/mainui.h"
 
 struct TextDisplay {
 	std::string texture;
@@ -23,7 +24,7 @@ struct InGameUi {
 
 void createInGamesUiInstance(InGameUi& inGameUi, objid id);
 void freeInGameUiInstance(InGameUi& inGameUi, objid id);
-void onInGameUiFrame(InGameUi& inGameUi);
+void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext);
 void zoomIntoGameUi(objid id);
 std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
 void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value);

@@ -10,7 +10,7 @@ SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
-Tags tags = createTags();
+Tags tags{};
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -746,6 +746,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
   
+    tags = createTags(&gameState -> uiContext);
+
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
 
     return gameState;
@@ -767,7 +769,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId );
+    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId, std::nullopt);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));

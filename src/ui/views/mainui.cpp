@@ -496,7 +496,7 @@ std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocatio
 
 
 static bool firstTime = true;
-HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId){
   if (firstTime){
     initStyles();
     navbarType = queryLoadNavbarType();
@@ -518,7 +518,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   //std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
 
   DrawingTools drawTools {
-     .drawText = gameapi -> drawText,
+     .drawText = [](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth, std::optional<ShapeOptions> shaderId) -> void {
+        gameapi -> drawText(word, left, top, fontSize, permatext, tint, textureId, ndi, fontFamily, selectionId, maxWidth, shaderId);
+     },
      .getTextDimensionsNdi = gameapi -> getTextDimensionsNdi,
      .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId) -> void {
       if (trackingId.has_value()){
@@ -530,7 +532,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
       gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture, shaderId);
      },
-     .drawLine2D = gameapi -> drawLine2D,
+     .drawLine2D = [](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId) -> void {
+        gameapi -> drawLine2D(fromPos, toPos, perma, tint, textureId, ndi, selectionId, texture, shaderId);
+     },
      .registerCallbackFns = [&handlerFuncs](objid id, std::function<void()> fn) -> void {
         handlerFuncs.handlerFns[id] = fn;
      },
