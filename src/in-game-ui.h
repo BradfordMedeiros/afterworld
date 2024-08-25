@@ -24,6 +24,7 @@ void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<obj
 void zoomIntoGameUi(objid id);
 std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
 void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value);
+void onInGameUiSelect(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId);
 void testInGameUiSetText(std::string value);
 
 #endif 

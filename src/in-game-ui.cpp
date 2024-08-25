@@ -30,6 +30,8 @@ void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<obj
 	}
 }
 
+
+
 void zoomIntoGameUi(objid id){
 	auto rotation = gameapi -> getGameObjectRotation(id, true);
 	auto objectPosition = gameapi -> getGameObjectPos(id, true);
@@ -53,6 +55,18 @@ void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value){
 	for (auto &[_, textDisplay] : inGameUi.textDisplays){
 		
 	}
+}
+
+void onInGameUiSelect(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
+	if (!selectedId.has_value()){
+		return;
+	}
+	auto id = selectedId.value();
+	if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
+		return;
+	}
+	auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns;
+  onMainUiMousePress(handlerFns, button, action, selectedId);
 }
 
 void testInGameUiSetText(std::string value){

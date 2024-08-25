@@ -868,7 +868,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
+    if (key == "selected"){
       auto gameObjId = anycast<objid>(value); 
       modassert(gameObjId, "selected value invalid");
       if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){

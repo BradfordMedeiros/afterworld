@@ -348,6 +348,9 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   		onInGameUiMessage(tags.inGameUi, key, value);
 
+  		if (key == "select-ingame-ui"){
+	  		onInGameUiSelect(tags.inGameUi, 0, 0, getGlobalState().selectedId);
+  		}
 			if (key == "interact-ingame-ui"){
 				//objid* objidPtr = std::get_if<objid>(&value);
 				//modassert(objidPtr, "invalid value for interact-ingame-ui");
