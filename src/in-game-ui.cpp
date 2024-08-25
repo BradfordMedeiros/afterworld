@@ -51,16 +51,13 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 }
 
 
-void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value){
-	for (auto &[_, textDisplay] : inGameUi.textDisplays){
-		
-	}
-}
-
 void onInGameUiSelect(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
 	if (!selectedId.has_value()){
 		return;
 	}
+
+	modlog("on game ui onInGameUiSelect", print(selectedId));
+
 	auto id = selectedId.value();
 	if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
 		return;

@@ -766,6 +766,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     });
 
     gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+      getGlobalState().lookAtId = selectedId;
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
@@ -968,6 +969,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     onMainUiMousePress(gameState -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onInGameUiSelect(tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
     if (button == 1){
@@ -997,6 +999,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
     onWeaponsMouseCallback(weapons, button, action);
+
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {

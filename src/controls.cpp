@@ -160,9 +160,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.key = '5',  // 3
 		.action = 0,
 		.fn = []() -> void {
-			// gameapi -> sendNotifyMessage("interact-ingame-ui", std::string(""));
-			// gameapi -> sendNotifyMessage("interact-ingame-ui", std::string(""));
-			gameapi -> sendNotifyMessage("select-ingame-ui", std::string(""));
+			gameapi -> sendNotifyMessage("interact-ingame-ui", std::string(""));
 		},
 	},
 	HotkeyToMessage {
