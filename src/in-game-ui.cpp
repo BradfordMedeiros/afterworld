@@ -2,15 +2,21 @@
 
 extern CustomApiBindings* gameapi;
 
+bool showSelectionTexture = true;
 std::string ingameUiTextureName(objid id){
-	return std::string("gentexture-ingame-ui-texture-test");
+	return "gentexture-ingame-ui-texture-test";
 }
+std::string selectionTextureName(std::string textureName){
+	return textureName + "_selection_texture";
+
+}
+
 void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 	modassert(inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end(), "id already exists");
 
 	std::string texture = ingameUiTextureName(id);
 	auto uiTexture = gameapi -> createTexture(texture, 1920, 1080, id);
- 	setGameObjectTexture(id, texture);
+ 	setGameObjectTexture(id, showSelectionTexture ? selectionTextureName(texture) : texture);
 
  	inGameUi.textDisplays[id] = TextDisplay{
  		.textureId = uiTexture,
@@ -27,6 +33,13 @@ void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<obj
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
 		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
 		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId, ndiCoord);
+
+		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
+    gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+			modlog("on game ui", std::to_string(selectedId.value()));
+			modlog("on game ui", print(ndiCoords));
+    });
+
 	}
 }
 

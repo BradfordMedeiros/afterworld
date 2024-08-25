@@ -759,13 +759,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+    gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
       //modlog("texcoord", print(glm::vec2(texCoordUv)));
     });
 
-    gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+    gameapi -> idAtCoordAsync(0.f, 0.f, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().lookAtId = selectedId;
       getGlobalState().texCoordUvView = texCoordUv;
     });
