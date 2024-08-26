@@ -2,7 +2,12 @@
 
 extern CustomApiBindings* gameapi;
 
-bool showSelectionTexture = true;
+bool showSelectionTexture = false;
+
+void setShowSelectionTexture(bool shouldShow){
+	showSelectionTexture = shouldShow;
+}
+
 std::string ingameUiTextureName(objid id){
 	return "gentexture-ingame-ui-texture-test";
 }
@@ -36,8 +41,8 @@ void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<obj
 
 		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
     gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
-			modlog("on game ui", std::to_string(selectedId.value()));
-			modlog("on game ui", print(ndiCoords));
+			modlog("on game ui id", std::to_string(selectedId.value()));
+			modlog("on game ui uv", print(ndiCoords));
     });
 
 	}

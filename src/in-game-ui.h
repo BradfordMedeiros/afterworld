@@ -17,7 +17,7 @@ struct InGameUi {
 	std::map<objid, TextDisplay> textDisplays;
 };
 
-
+void setShowSelectionTexture(bool shouldShow);
 void createInGamesUiInstance(InGameUi& inGameUi, objid id);
 void freeInGameUiInstance(InGameUi& inGameUi, objid id);
 void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord);

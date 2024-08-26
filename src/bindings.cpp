@@ -717,6 +717,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         modassert(false, "invalid print type");
       }
     }
+    if (args.find("uiselection-texture") != args.end()){
+      setShowSelectionTexture(true);
+    }
 
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
