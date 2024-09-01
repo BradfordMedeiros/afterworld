@@ -58,6 +58,9 @@ uniform float bloomThreshold;
 
 bool enableAttenutation = false;
 
+uniform vec4 encodedid;
+uniform vec4 encodedid2;
+
 int getNumLights(){
   return min(numlights, MAX_LIGHTS);
 }
