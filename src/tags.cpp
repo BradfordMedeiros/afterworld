@@ -338,11 +338,12 @@ std::vector<TagUpdater> tagupdates = {
   		freeInGameUiInstance(tags.inGameUi, id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		onInGameUiFrame(tags.inGameUi);
+  		modassert(tags.uiContext, "tags.UiContext NULL");
+  		auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
+  		modlog("in game ui uv", print(ndiCoord));
+  		onInGameUiFrame(tags.inGameUi, *tags.uiContext, std::nullopt, ndiCoord);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		onInGameUiMessage(tags.inGameUi, key, value);
-
 			if (key == "interact-ingame-ui"){
 				//objid* objidPtr = std::get_if<objid>(&value);
 				//modassert(objidPtr, "invalid value for interact-ingame-ui");
@@ -457,8 +458,10 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-Tags createTags(){
+Tags createTags(UiContext* uiContext){
 	Tags tags{};
+
+	tags.uiContext = uiContext;
 
   tags.textureScrollObjIds = {};
   tags.audiozones = AudioZones {

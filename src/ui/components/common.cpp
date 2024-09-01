@@ -13,10 +13,10 @@ void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optio
   float right = box.x + (box.width * 0.5f);
   float up = box.y + (box.height * 0.5f);
   float down = box.y - (box.height * 0.5f);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
-  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
-  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, std::nullopt, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
+  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
 }
 
 void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){

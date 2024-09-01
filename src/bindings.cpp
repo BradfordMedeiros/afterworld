@@ -10,7 +10,7 @@ SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
-Tags tags = createTags();
+Tags tags{};
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -717,6 +717,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         modassert(false, "invalid print type");
       }
     }
+    if (args.find("uiselection-texture") != args.end()){
+      setShowSelectionTexture(true);
+    }
 
     initSettings();
     registerOnRouteChanged([gameState]() -> void {
@@ -746,6 +749,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
   
+    tags = createTags(&gameState -> uiContext);
+
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
 
     return gameState;
@@ -757,17 +762,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+    gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
       //modlog("texcoord", print(glm::vec2(texCoordUv)));
     });
 
-    gameapi -> idAtCoordAsync(0.f, 0.f, false, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+    gameapi -> idAtCoordAsync(0.f, 0.f, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+      getGlobalState().lookAtId = selectedId;
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId );
+    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
@@ -866,7 +872,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
 
-    if (key == "selected"){  // maybe this logic should be somewhere else and not be in dialog
+    if (key == "selected"){
       auto gameObjId = anycast<objid>(value); 
       modassert(gameObjId, "selected value invalid");
       if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
@@ -966,6 +972,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     onMainUiMousePress(gameState -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onInGameUiSelect(tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
     if (button == 1){
@@ -995,6 +1002,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
     onWeaponsMouseCallback(weapons, button, action);
+
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {

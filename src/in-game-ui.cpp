@@ -2,23 +2,29 @@
 
 extern CustomApiBindings* gameapi;
 
-std::string ingameUiTextureName(objid id){
-	return std::string("gentexture-ingame-ui-texture-test");
+bool showSelectionTexture = false;
+
+void setShowSelectionTexture(bool shouldShow){
+	showSelectionTexture = shouldShow;
 }
+
+std::string ingameUiTextureName(objid id){
+	return "gentexture-ingame-ui-texture-test";
+}
+std::string selectionTextureName(std::string textureName){
+	return textureName + "_selection_texture";
+
+}
+
 void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 	modassert(inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end(), "id already exists");
 
 	std::string texture = ingameUiTextureName(id);
-	auto uiTexture = gameapi -> createTexture(texture, 512, 512, id);
- 	setGameObjectTexture(id, texture);
+	auto uiTexture = gameapi -> createTexture(texture, 1920, 1080, id);
+ 	setGameObjectTexture(id, showSelectionTexture ? selectionTextureName(texture) : texture);
 
  	inGameUi.textDisplays[id] = TextDisplay{
- 		.texture = "../gameresources/textures/controls/up-down.png",
- 		.channel = "ui-debug-text",
- 		.text = "hello world",
- 		.textPosition = glm::vec2(0.f, 0.f),
  		.textureId = uiTexture,
- 		.needsRefresh = true,
  	};
 };
 
@@ -27,29 +33,22 @@ void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 	inGameUi.textDisplays.erase(id);
 }
 
-void onInGameUiFrame(InGameUi& inGameUi){
+void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
+	// should make sure the texture id is the same
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
-		if (true || textDisplay.needsRefresh){
-			float width = 0.f;
-			float height = 0.f;
-			gameapi -> getTextDimensionsNdi(textDisplay.text, 40 / 500.f, true, std::nullopt, &width, &height);
-			std::cout << "text: " << width << ", " << height << std::endl;
+		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
+		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId, ndiCoord);
 
-			gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, "../gameresources/textures/controls/up-down.png");
-			gameapi -> drawText(textDisplay.text, textDisplay.textPosition.x - (width * 0.5f), textDisplay.textPosition.y, 40, false, std::nullopt /*tint */, textDisplay.textureId, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-			textDisplay.needsRefresh = false;
+		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
+    gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+			modlog("on game ui id", std::to_string(selectedId.value()));
+			modlog("on game ui uv", print(ndiCoords));
+    });
 
-			auto uvCoord = getGlobalState().texCoordUvView;
-  		gameapi -> drawRect(uvCoord.x * 2 - 1, uvCoord.y * 2 - 1, 0.1f, 0.1f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textDisplay.textureId, true, std::nullopt, "./res/textures/crosshairs/crosshair008.png", std::nullopt);
-		}
 	}
-
-
-
-	//inGameUi.uiInstance.value().cursorLocation = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
-	//bool upSelected = inGameUi.uiInstance.value().upSelected;
-  //gameapi -> drawRect(0.f, 0.f, 1.f, 1.f, false, upSelected ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f), inGameUi.uiInstance.value().textureId, true, std::nullopt, std::nullopt);
 }
+
+
 
 void zoomIntoGameUi(objid id){
 	auto rotation = gameapi -> getGameObjectRotation(id, true);
@@ -70,15 +69,19 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 }
 
 
-void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value){
-	for (auto &[_, textDisplay] : inGameUi.textDisplays){
-		if (key == textDisplay.channel){
-      std::string* channelValue = anycast<std::string>(value);
-      modassert(channelValue, "invalid type for channelValue");
-      textDisplay.text = *channelValue;
-      textDisplay.needsRefresh = true;
-		}
+void onInGameUiSelect(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
+	if (!selectedId.has_value()){
+		return;
 	}
+
+	modlog("on game ui onInGameUiSelect", print(selectedId));
+
+	auto id = selectedId.value();
+	if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
+		return;
+	}
+	auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns;
+  onMainUiMousePress(handlerFns, button, action, selectedId);
 }
 
 void testInGameUiSetText(std::string value){

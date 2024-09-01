@@ -17,7 +17,7 @@ BoundingBox2D drawRadioButtons(DrawingTools& drawTools, std::vector<RadioButton>
     if (radioButton.selected){
       radioButtonColor = glm::vec4(0.f, 0.f, 1.f, 0.6f);
     }
-    drawTools.drawRect(x, yoffset, width, height, false, radioButtonColor, std::nullopt, true, radioButton.mappingId, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawRect(x, yoffset, width, height, false, radioButtonColor, true, radioButton.mappingId, std::nullopt, std::nullopt, std::nullopt);
     if (radioButton.mappingId.has_value() && radioButton.onClick.has_value()){
       drawTools.registerCallbackFns(radioButton.mappingId.value(), radioButton.onClick.value());
     }

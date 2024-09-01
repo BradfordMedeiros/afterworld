@@ -414,13 +414,13 @@ void drawKeyHighlighted(DrawingTools& drawTools, KeyLocation& key, glm::vec2 siz
   float midpointX = (topLeft.x + bottomRight.x) / 2.f;
   float midpointY = (bottomRight.y + topLeft.y) / 2.f;
 
-  drawTools.drawRect(midpointX, midpointY, width, height, false, glm::vec4(0.f, 0.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(midpointX, midpointY, width, height, false, glm::vec4(0.f, 0.f, 1.f, 0.6f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 }
 
 Component keyboardComponentInner {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     glm::vec2 size(0.5f, 0.5f);
-    drawTools.drawRect(0.f, 0.f, size.x, size.y, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, "../gameresources/build/misc/keyboard.png", std::nullopt, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, size.x, size.y, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), true, std::nullopt, "../gameresources/build/misc/keyboard.png", std::nullopt, std::nullopt);
     for (auto &key : keys){
       if (keyIsDown(key.key)){
         drawKeyHighlighted(drawTools, key, size * 0.5f); // 0.5f since this is using ndi
@@ -436,7 +436,7 @@ Component keyboardComponentInner {
 };
 
 void drawMouseButtonValue(DrawingTools& drawTools, glm::vec2 size, float xoffset, bool selected){
-  drawTools.drawRect(xoffset, 0.f, size.x, size.y, false, selected ? glm::vec4(0.f, 0.f, 1.f, 0.8f) : glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(xoffset, 0.f, size.x, size.y, false, selected ? glm::vec4(0.f, 0.f, 1.f, 0.8f) : glm::vec4(1.f, 1.f, 1.f, 0.6f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 }
 
 Component mouseComponentInner {

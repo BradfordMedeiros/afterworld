@@ -26,6 +26,7 @@ struct GlobalState {
   glm::vec2 texCoordUv;
   glm::vec2 texCoordUvView;
   std::optional<objid> selectedId;
+  std::optional<objid> lookAtId;
 
   bool godMode;
 

@@ -5,14 +5,11 @@
 #include <vector>
 #include "./util.h"
 #include "./activeplayer.h"
+#include "./ui/views/mainui.h"
 
 struct TextDisplay {
-	std::string texture;
-	std::string channel;
-	std::string text;
-	glm::vec2 textPosition;
 	objid textureId;
-	bool needsRefresh;
+	HandlerFns handlerFns;
 };
 
 
@@ -20,13 +17,13 @@ struct InGameUi {
 	std::map<objid, TextDisplay> textDisplays;
 };
 
-
+void setShowSelectionTexture(bool shouldShow);
 void createInGamesUiInstance(InGameUi& inGameUi, objid id);
 void freeInGameUiInstance(InGameUi& inGameUi, objid id);
-void onInGameUiFrame(InGameUi& inGameUi);
+void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord);
 void zoomIntoGameUi(objid id);
 std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
-void onInGameUiMessage(InGameUi& inGameUi, std::string& key, std::any& value);
+void onInGameUiSelect(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId);
 void testInGameUiSetText(std::string value);
 
 #endif 

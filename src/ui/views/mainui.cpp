@@ -496,7 +496,7 @@ std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocatio
 
 
 static bool firstTime = true;
-HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId){
+HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
   if (firstTime){
     initStyles();
     navbarType = queryLoadNavbarType();
@@ -518,9 +518,11 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   //std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
 
   DrawingTools drawTools {
-     .drawText = gameapi -> drawText,
+     .drawText = [&textureId](std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int>, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth, std::optional<ShapeOptions> shaderId) -> void {
+        gameapi -> drawText(word, left, top, fontSize, permatext, tint, textureId, ndi, fontFamily, selectionId, maxWidth, shaderId);
+     },
      .getTextDimensionsNdi = gameapi -> getTextDimensionsNdi,
-     .drawRect = [&handlerFuncs](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId) -> void {
+     .drawRect = [&handlerFuncs, &textureId](float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId) -> void {
       if (trackingId.has_value()){
         handlerFuncs.trackedLocationIds[trackingId.value()] = TrackedLocationData {
           .position = glm::vec2(centerX, centerY),
@@ -530,7 +532,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
       gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture, shaderId);
      },
-     .drawLine2D = gameapi -> drawLine2D,
+     .drawLine2D = [&textureId](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId) -> void {
+        gameapi -> drawLine2D(fromPos, toPos, perma, tint, textureId, ndi, selectionId, texture, shaderId);
+     },
      .registerCallbackFns = [&handlerFuncs](objid id, std::function<void()> fn) -> void {
         handlerFuncs.handlerFns[id] = fn;
      },
@@ -855,15 +859,17 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
 
-    drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
+    drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
     
     //drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader }, std::nullopt);
-    drawTools.drawRect(0.5f, 0.5f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 1 }, std::nullopt);
-    drawTools.drawRect(0.25f, 0.25f, 0.5f, 0.5f, false, glm::vec4(0.f, 1.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 5 }, std::nullopt);
-    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = -1 }, std::nullopt);
-
+    drawTools.drawRect(0.5f, 0.5f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 1 }, std::nullopt);
+    drawTools.drawRect(0.25f, 0.25f, 0.5f, 0.5f, false, glm::vec4(0.f, 1.f, 0.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 5 }, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = -1 }, std::nullopt);
   }
 
+  if (ndiCursor.has_value()){
+    drawTools.drawRect(ndiCursor.value().x, ndiCursor.value().y, 0.01f, 0.01f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 6 }, std::nullopt);
+  }
 
   //std::cout << "location data: " << print(handlerFuncs.trackedLocationIds) << std::endl;
   return handlerFuncs;

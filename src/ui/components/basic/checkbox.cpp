@@ -20,9 +20,9 @@ Component checkboxInner {
     
     auto innerMappingId = uniqueMenuItemMappingId();
     if (isChecked){
-      drawTools.drawRect(0.f, 0.f, STYLE_UI_CHECKBOX_WIDTH * 0.8, STYLE_UI_CHECKBOX_WIDTH * 0.8, false, styles.highlightColor, std::nullopt, true, innerMappingId, "./res/scenes/editor/dock/images/checked.png", std::nullopt, std::nullopt);
+      drawTools.drawRect(0.f, 0.f, STYLE_UI_CHECKBOX_WIDTH * 0.8, STYLE_UI_CHECKBOX_WIDTH * 0.8, false, styles.highlightColor, true, innerMappingId, "./res/scenes/editor/dock/images/checked.png", std::nullopt, std::nullopt);
     }else{
-      drawTools.drawRect(0.f, 0.f, STYLE_UI_CHECKBOX_WIDTH * 0.8, STYLE_UI_CHECKBOX_WIDTH * 0.8, false, styles.thirdColor, std::nullopt, true, innerMappingId, std::nullopt, std::nullopt, std::nullopt);
+      drawTools.drawRect(0.f, 0.f, STYLE_UI_CHECKBOX_WIDTH * 0.8, STYLE_UI_CHECKBOX_WIDTH * 0.8, false, styles.thirdColor, true, innerMappingId, std::nullopt, std::nullopt, std::nullopt);
     }
 
     auto onCheckValue = [onCheck, isChecked]() -> void {

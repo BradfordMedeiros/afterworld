@@ -15,8 +15,8 @@ Component scoreBarComponent {
   	modassert(scoreConfigPtr, "score bar - no score config");
 
     float barWidth = width * scoreConfigPtr -> percentage;
-    drawTools.drawRect(0.f, 0.f, width, height, false, glm::vec4(0.1f, 0.1f, 0.1f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawRect(0.f - (width * 0.5f) + (barWidth * 0.5f), 0.f, barWidth, height, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, "./res/textures/testgradient2.png", std::nullopt, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, width, height, false, glm::vec4(0.1f, 0.1f, 0.1f, 0.9f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawRect(0.f - (width * 0.5f) + (barWidth * 0.5f), 0.f, barWidth, height, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), true, std::nullopt, "./res/textures/testgradient2.png", std::nullopt, std::nullopt);
 
 		drawCenteredTextReal(drawTools, scoreConfigPtr -> score, 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
 
