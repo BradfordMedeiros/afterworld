@@ -55,11 +55,8 @@ uniform float discardTexAmount;
 uniform float time;
 uniform float bloomThreshold;
 //uniform vec3 mouseCoordVal;
+uniform bool enableAttenutation;
 
-bool enableAttenutation = false;
-
-uniform vec4 encodedid;
-uniform vec4 encodedid2;
 
 int getNumLights(){
   return min(numlights, MAX_LIGHTS);
