@@ -13,6 +13,7 @@ struct HandlerCallbackFn {
   TrackedLocationData trackedLocationData;
 };
 std::string print(TrackedLocationData& data);
+std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocationIds);
 
 struct DrawingTools {
   std::function<void(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth, std::optional<ShapeOptions> shaderId)> drawText;

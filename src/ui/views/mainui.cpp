@@ -1,48 +1,10 @@
 #include "./mainui.h"
 
 extern CustomApiBindings* gameapi;
+
 void setMenuBackground(std::string background);
 
 auto routerHistory = createHistory();
-
-Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
-  std::vector<ImListItem> listItems;
-  listItems.push_back(ImListItem {
-    .value = "Resume",
-    .onClick = uiContext.pauseInterface.resume,
-    .mappingId = uniqueMenuItemMappingId(),
-  });
-  listItems.push_back(ImListItem {
-    .value = "Main Menu",
-    .onClick = uiContext.levels.goToMenu,
-    .mappingId = uniqueMenuItemMappingId(),
-  });
-  Props props {
-    .props = {
-      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
-      { .symbol = valueSymbol, .value = listItems } ,
-      { .symbol = yoffsetSymbol, .value = 0.2f },
-    },
-  };
-  return props;
-}
-Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
-  std::vector<ImListItem> listItems;
-  listItems.push_back(ImListItem {
-    .value = "Main Menu",
-    .onClick = uiContext.levels.goToMenu,
-    .mappingId = uniqueMenuItemMappingId(),
-  });
-  Props props {
-    .props = {
-      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
-      { .symbol = valueSymbol, .value = listItems } ,
-      { .symbol = yoffsetSymbol, .value = 0.2f },
-      { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.8f ) },
-    },
-  };
-  return props;
-}
 
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
@@ -171,7 +133,6 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
 };
 
 
-static bool shouldEmitParticleViewerParticles = true;
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
@@ -335,17 +296,6 @@ TextData newSceneTextData {
   .highlightLength = 0,
   .maxchars = -1,
 };
-
-
-std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocationIds){
-  std::string value = "[";
-  for (auto &[id, data] : trackedLocationIds){
-    value += "(" + print(data.position) + ", " + print(data.size) + ") ";
-  }
-  return value + "]";
-}
-
-
 
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){

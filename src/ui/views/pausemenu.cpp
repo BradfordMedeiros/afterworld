@@ -24,4 +24,42 @@ Component pauseMenuComponent {
   },
 };
 
+Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
+  std::vector<ImListItem> listItems;
+  listItems.push_back(ImListItem {
+    .value = "Resume",
+    .onClick = uiContext.pauseInterface.resume,
+    .mappingId = uniqueMenuItemMappingId(),
+  });
+  listItems.push_back(ImListItem {
+    .value = "Main Menu",
+    .onClick = uiContext.levels.goToMenu,
+    .mappingId = uniqueMenuItemMappingId(),
+  });
+  Props props {
+    .props = {
+      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
+      { .symbol = valueSymbol, .value = listItems } ,
+      { .symbol = yoffsetSymbol, .value = 0.2f },
+    },
+  };
+  return props;
+}
 
+Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
+  std::vector<ImListItem> listItems;
+  listItems.push_back(ImListItem {
+    .value = "Main Menu",
+    .onClick = uiContext.levels.goToMenu,
+    .mappingId = uniqueMenuItemMappingId(),
+  });
+  Props props {
+    .props = {
+      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
+      { .symbol = valueSymbol, .value = listItems } ,
+      { .symbol = yoffsetSymbol, .value = 0.2f },
+      { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.8f ) },
+    },
+  };
+  return props;
+}
