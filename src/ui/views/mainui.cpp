@@ -44,7 +44,6 @@ Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   return props;
 }
 
-
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
@@ -129,7 +128,6 @@ std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   }
 };
 
-
 std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
 std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
@@ -161,12 +159,6 @@ UiManagerContext uiManagerContext {
     }
   }
 };
-objid activeSceneId(){
-  modassert(uiManagerContext.uiContext, "uicontext null - active scene");
-  auto activeScene = uiManagerContext.uiContext -> activeSceneId();
-  modassert(activeScene.has_value(), "no active scene");
-  return activeScene.value();
-}
 
 glm::vec4 colorPickerColor(0.f, 0.f, 0.f, 1.f);
 std::string colorPickerTitle = "color picker";
@@ -186,21 +178,21 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     GameobjAttributes attr {
       .attr = {},
     };
-    gameapi -> makeObjectAttr(activeSceneId(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
+    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createLight = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr {
       .attr = {},
     };
-    gameapi -> makeObjectAttr(activeSceneId(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
+    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createNavmesh = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr {
       .attr = {},
     };
-    gameapi -> makeObjectAttr(activeSceneId(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
+    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
