@@ -47,6 +47,8 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
           .value = PlayingOptions { 
             .showHud = uiContext.showGameHud(),
             .showZoomOverlay = uiContext.showZoomOverlay(),
+            .scoreOptions = uiContext.getScoreConfig(),
+            .terminalConfig = uiContext.showTerminal(),
           } 
         },
       },
@@ -560,28 +562,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
   }
-
-  bool showTerminal = false;
-  if (uiContext.showTerminal().has_value()){
-    Props terminalProps { 
-      .props = { PropPair { .symbol = valueSymbol, .value = uiContext.showTerminal().value() }},
-    };
-    terminalComponent.draw(drawTools, terminalProps);    
-  }
-
-  std::optional<ScoreOptions> scoreOptions = uiContext.getScoreConfig();
-  if (scoreOptions.has_value()){
-    float scorePadding = 0.02f;
-    Props scoreProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = scoreOptions.value() },
-        PropPair { .symbol = xoffsetSymbol, .value = 1.f - scorePadding },
-        PropPair { .symbol = yoffsetSymbol, .value = -1.f + scorePadding },
-      },
-    };
-    scoreComponent.draw(drawTools, scoreProps);
-  }
-
 
   if (uiContext.showKeyboard()){
     Props keyboardProps { 
