@@ -25,6 +25,8 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 
  	inGameUi.textDisplays[id] = TextDisplay{
  		.textureId = uiTexture,
+ 		.handlerFns = {},
+ 		.mouseCoordNdc = glm::vec2(0.f, 0.f),
  	};
 };
 
@@ -32,22 +34,6 @@ void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 	gameapi -> freeTexture(ingameUiTextureName(id), id);
 	inGameUi.textDisplays.erase(id);
 }
-
-void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
-	// should make sure the texture id is the same
-	for (auto &[id, textDisplay] : inGameUi.textDisplays){
-		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
-		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId, ndiCoord);
-
-		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
-    gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
-			modlog("on game ui id", std::to_string(selectedId.value()));
-			modlog("on game ui uv", print(ndiCoords));
-    });
-
-	}
-}
-
 
 
 void zoomIntoGameUi(objid id){
@@ -69,19 +55,65 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 }
 
 
-void onInGameUiSelect(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
+void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
+	// should make sure the texture id is the same
+	bool drawCursor = false;
+	for (auto &[id, textDisplay] : inGameUi.textDisplays){
+		textDisplay.mouseCoordNdc = ndiCoord;
+
+		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
+		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId, drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt));
+
+		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
+    gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
+			modlog("ui pick color on game ui id", std::to_string(selectedId.value()));
+			if (selectedId.has_value()){
+				modlog("ui pick color on game ui id", std::to_string(selectedId.value()));
+				modlog("ui pick color on game ui uv", print(ndiCoords));
+			}
+    });
+	}
+}
+
+void onInGameUiMouseClick(InGameUi& inGameUi, objid id, int button, int action, glm::vec2 ndiCoords){
+  gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, inGameUi.textDisplays.at(id).textureId, [id, ndiCoords, &inGameUi, button, action](std::optional<objid> uiId, glm::vec2 texCoordUv) -> void {
+		if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
+			return;
+		}
+		auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns; // should probably check this still exists
+		if (uiId.has_value()){
+			modlog("ui pick color on game ui id", std::to_string(uiId.value()));
+			onMainUiMousePress(handlerFns, button, action, uiId.value());
+		}
+  });
+}
+
+void onInGameUiMouseCallback(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
 	if (!selectedId.has_value()){
 		return;
 	}
-
-	modlog("on game ui onInGameUiSelect", print(selectedId));
-
 	auto id = selectedId.value();
 	if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
 		return;
 	}
-	auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns;
-  onMainUiMousePress(handlerFns, button, action, selectedId);
+	auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
+	onInGameUiMouseClick(inGameUi, id, button, action, ndiCoords);
+}
+
+void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, float xNdc, float yNdc){
+	for (auto &[id, textDisplay] : inGameUi.textDisplays){
+		//textDisplay.mouseCoordNdc.x += (xPos / 100.f);
+		//textDisplay.mouseCoordNdc.y += (yPos / 100.f);
+		modlog("onInGameUiMouseMoveCallback", print(textDisplay.mouseCoordNdc));
+	}
+}
+
+void onInGameUiScrollCallback(InGameUi& inGameUi, double amount){
+
+}
+
+void onInGameUiKeyCallback(int key, int scancode, int action, int mods){
+
 }
 
 void testInGameUiSetText(std::string value){

@@ -337,12 +337,7 @@ std::vector<TagUpdater> tagupdates = {
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		freeInGameUiInstance(tags.inGameUi, id);
   	},
-  	.onFrame = [](Tags& tags) -> void {
-  		modassert(tags.uiContext, "tags.UiContext NULL");
-  		auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-  		modlog("in game ui uv", print(ndiCoord));
-  		onInGameUiFrame(tags.inGameUi, *tags.uiContext, std::nullopt, ndiCoord);
-  	},
+  	.onFrame = [](Tags& tags) -> void {},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
 			if (key == "interact-ingame-ui"){
 				//objid* objidPtr = std::get_if<objid>(&value);
