@@ -35,6 +35,11 @@ struct OpenableType {
 	bool stateUp;
 };
 
+struct UiData {
+  UiContext uiContext;
+  HandlerFns uiCallbacks;
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -43,12 +48,12 @@ struct Tags {
 	std::unordered_map<objid, float> idToRotateTimeAdded;
 	std::set<objid> teleportObjs;
 
-	UiContext* uiContext;
+	UiData* uiData;
 
 	StateController animationController;
 };
 
-Tags createTags(UiContext* uiContext);
+Tags createTags(UiData* uiData);
 void onTagsMessage(Tags& tags, std::string& key, std::any& value);
 void onTagsFrame(Tags& tags);
 void handleOnAddedTags(Tags& tags, int32_t idAdded);

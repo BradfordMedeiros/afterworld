@@ -453,11 +453,9 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-Tags createTags(UiContext* uiContext){
+Tags createTags(UiData* uiData){
 	Tags tags{};
-
-	tags.uiContext = uiContext;
-
+	tags.uiData = uiData;
   tags.textureScrollObjIds = {};
   tags.audiozones = AudioZones {
   	.audiozoneIds = {},

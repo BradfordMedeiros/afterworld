@@ -357,10 +357,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   }
 }
 
-struct UiData {
-  UiContext uiContext;
-  HandlerFns uiCallbacks;
-};
 
 struct GameState {
   SceneManagement sceneManagement;
@@ -754,7 +750,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
   
-    tags = createTags(&gameState -> uiData.uiContext);
+    tags = createTags(&gameState -> uiData);
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
 
@@ -778,11 +774,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiData.uiCallbacks = handleDrawMainUi(gameState -> uiData.uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
-    
-    modassert(tags.uiContext, "tags.UiContext NULL");
+    gameState -> uiData.uiCallbacks = handleDrawMainUi(tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
+    modassert(tags.uiData, "tags.uiData NULL");
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-    onInGameUiFrame(tags.inGameUi, *tags.uiContext, std::nullopt, ndiCoord);
+    onInGameUiFrame(tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
@@ -981,7 +976,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    onMainUiMousePress(gameState -> uiData.uiCallbacks, button, action, getGlobalState().selectedId);
+    onMainUiMousePress(tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
     onInGameUiMouseCallback(tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
