@@ -357,6 +357,10 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   }
 }
 
+struct UiData {
+  UiContext uiContext;
+  HandlerFns uiCallbacks;
+};
 
 struct GameState {
   SceneManagement sceneManagement;
@@ -365,8 +369,7 @@ struct GameState {
   std::optional<std::string> dragSelect;
   std::optional<glm::vec2> selecting;
 
-  HandlerFns uiCallbacks;
-  UiContext uiContext;
+  UiData uiData;
 
   DebugPrintType printType;
 };
@@ -680,15 +683,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = new GameState;
     gameState -> sceneManagement = createSceneManagement();
     gameState -> selecting = std::nullopt;
-    gameState -> uiCallbacks = HandlerFns {
-      .handlerFns = {},
-      .handlerFns2 = {},
-      .inputFns = {},
+    gameState -> uiData = {
+      .uiContext = {},
+      .uiCallbacks = HandlerFns {
+        .handlerFns = {},
+        .handlerFns2 = {},
+        .inputFns = {},
+      }
     };
-    gameState -> uiContext = {};
     initGlobal();
     gameState -> dragSelect = std::nullopt;
-    gameState -> uiContext = getUiContext(*gameState);
+    gameState -> uiData.uiContext = getUiContext(*gameState);
 
     //gameapi -> loadShader("ui2", "./res/shaders/ui2");
 
@@ -749,7 +754,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
   
-    tags = createTags(&gameState -> uiContext);
+    tags = createTags(&gameState -> uiData.uiContext);
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
 
@@ -773,7 +778,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiCallbacks = handleDrawMainUi(gameState -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
+    gameState -> uiData.uiCallbacks = handleDrawMainUi(gameState -> uiData.uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
     
     modassert(tags.uiContext, "tags.UiContext NULL");
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
@@ -837,7 +842,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (isExitTerminalKey(key)){
         showTerminal(std::nullopt);
       }
-      onMainUiKeyPress(gameState -> uiCallbacks, key, scancode, action, mods);
+      onMainUiKeyPress(gameState -> uiData.uiCallbacks, key, scancode, action, mods);
       onInGameUiKeyCallback(key, scancode, action, mods);
     }
     handleHotkey(key, action);
@@ -976,7 +981,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    onMainUiMousePress(gameState -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onMainUiMousePress(gameState -> uiData.uiCallbacks, button, action, getGlobalState().selectedId);
     onInGameUiMouseCallback(tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
