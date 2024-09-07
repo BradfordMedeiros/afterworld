@@ -17,4 +17,6 @@ struct NavListApi {
 };
 extern Component navList;
 
+extern Props navListProps;
+
 #endif

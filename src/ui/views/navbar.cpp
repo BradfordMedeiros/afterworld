@@ -121,8 +121,19 @@ std::vector<NavbarOption> navbarOptionsEditor = {
 	
 };
 
-
-
+NavbarType strToNavbarType(std::string& layout){
+  if (layout == "main"){
+    return MAIN_EDITOR;
+  }
+  if (layout == "gameplay"){
+    return GAMEPLAY_EDITOR;
+  }
+  if (layout == "editor"){
+    return EDITOR_EDITOR;
+  }
+  modassert(false, std::string("invalid layout: ") + layout);
+  return MAIN_EDITOR;
+}
 
 
 const float STYLE_UI_NAVBAR_FONTSIZE = 0.02f;

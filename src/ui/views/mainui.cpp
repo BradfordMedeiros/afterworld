@@ -38,11 +38,26 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     }
   );
 
+  auto playingView = withPropsCopy(
+    playingComponent,
+    Props {
+      .props = {
+        PropPair { 
+          .symbol = valueSymbol, 
+          .value = PlayingOptions { 
+            .showHud = uiContext.showGameHud(),
+            .showZoomOverlay = uiContext.showZoomOverlay(),
+          } 
+        },
+      },
+    }
+  );
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
     { "mainmenu/settings/", withNavigation(uiContext, settingsComponent) },
-    { "playing/*/",  emptyComponent },
+    { "playing/*/",  playingView },
     { "playing/*/paused/", pauseComponent },
     { "playing/*/dead/", deadComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
@@ -59,27 +74,6 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   return routerProps;
 }
 
-Props navListProps { 
-  .props = {
-    PropPair {
-      .symbol = tintSymbol,
-      .value = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-    },
-    PropPair {
-      .symbol = minwidthSymbol,
-      .value = 0.15f,
-    },
-    PropPair {
-      .symbol = xoffsetSymbol,
-      .value = -0.99f,
-    },
-    PropPair {
-      .symbol = yoffsetSymbol,
-      .value = 0.98f,  
-    }
-  }
-};
-
 std::set<std::string> dockedDocks = {};
 std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
   //pushQueryParam(routerHistory, "dockedDock");
@@ -94,7 +88,6 @@ std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> 
 std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
 std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
 std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn = std::nullopt;
-
 
 std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
@@ -244,19 +237,6 @@ ImageList imageListDatas {
 int imageListScrollAmount = 0;
 int fileexplorerScrollAmount = 0;
 
-NavbarType strToNavbarType(std::string& layout){
-  if (layout == "main"){
-    return MAIN_EDITOR;
-  }
-  if (layout == "gameplay"){
-    return GAMEPLAY_EDITOR;
-  }
-  if (layout == "editor"){
-    return EDITOR_EDITOR;
-  }
-  modassert(false, std::string("invalid layout: ") + layout);
-  return MAIN_EDITOR;
-}
 NavbarType queryLoadNavbarType(){
   auto query = gameapi -> compileSqlQuery("select layout from session", {});
   bool validSql = false;
@@ -305,7 +285,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
   firstTime = false;
   //////////////////////////////
-
 
   HandlerFns handlerFuncs {
     .minManagedId = -1,
@@ -464,7 +443,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
 
-
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
@@ -582,15 +560,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
   }
-  if (uiContext.showGameHud()){  // in game 
-    //auto weaponWheelProps = getDefaultProps();
-    //weaponWheelComponent.draw(drawTools, weaponWheelProps);
-    //auto compassProps = getDefaultProps();
-    //compassComponent.draw(drawTools, compassProps);
-
-    auto hudProps = getDefaultProps();
-    hudComponent.draw(drawTools, hudProps);
-  }
 
   bool showTerminal = false;
   if (uiContext.showTerminal().has_value()){
@@ -613,14 +582,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     scoreComponent.draw(drawTools, scoreProps);
   }
 
-  if (uiContext.showZoomOverlay().has_value()){
-    Props zoomProps { 
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = uiContext.showZoomOverlay().value() },
-      },
-    };
-    zoomComponent.draw(drawTools, zoomProps);    
-  }
 
   if (uiContext.showKeyboard()){
     Props keyboardProps { 
@@ -655,7 +616,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
   if (uiContext.isDebugMode()){
-
     auto shader = gameapi -> shaderByName("ui");
     drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, ShapeOptions { .shaderId = shader });
@@ -749,11 +709,9 @@ void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action,
   }
 }
 
-
 void onMainUiObjectsChanged(){
   refreshScenegraph();
 }
-
 
 void pushHistory(std::vector<std::string> route, bool replace){
   pushHistory(routerHistory, route, replace);

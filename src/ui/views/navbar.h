@@ -6,6 +6,7 @@
 #include "./style.h"
 
 enum NavbarType { MAIN_EDITOR, GAMEPLAY_EDITOR, EDITOR_EDITOR }; 
+NavbarType strToNavbarType(std::string& layout);
 
 extern Component navbarComponent;
 

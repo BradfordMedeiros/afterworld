@@ -14,6 +14,7 @@
 #include "./navlist.h"
 #include "./pausemenu.h"
 #include "./levelselect.h"
+#include "./playing.h"
 #include "./mainmenu.h"
 #include "./settings.h"
 #include "./modelviewer.h"

@@ -613,4 +613,24 @@ Props nestedListProps {
 };
 Component navList = withProps(nestedList, nestedListProps);
 
+Props navListProps { 
+  .props = {
+    PropPair {
+      .symbol = tintSymbol,
+      .value = glm::vec4(0.f, 0.f, 0.f, 0.8f),
+    },
+    PropPair {
+      .symbol = minwidthSymbol,
+      .value = 0.15f,
+    },
+    PropPair {
+      .symbol = xoffsetSymbol,
+      .value = -0.99f,
+    },
+    PropPair {
+      .symbol = yoffsetSymbol,
+      .value = 0.98f,  
+    }
+  }
+};
 
