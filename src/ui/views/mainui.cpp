@@ -3,56 +3,7 @@
 extern CustomApiBindings* gameapi;
 void setMenuBackground(std::string background);
 
-
 auto routerHistory = createHistory();
-
-Props createLevelListProps(){
-  std::vector<ListComponentData> levels;
-  levels.push_back(ListComponentData {
-    .name = "Campaign",
-    .onClick = []() -> void {
-      pushHistory({ "levelselect" });
-    }
-  });
-  levels.push_back(ListComponentData {
-    .name = "Settings",
-    .onClick = []() -> void {
-      pushHistory({ "settings" });
-    }
-  });
-  levels.push_back(ListComponentData {
-    .name = "Model Viewer",
-    .onClick = []() -> void {
-      pushHistory({ "modelviewer" });
-    }
-  });
-  levels.push_back(ListComponentData {
-    .name = "Particle Viewer",
-    .onClick = []() -> void {
-      pushHistory({ "particleviewer" });
-    }
-  });
-  levels.push_back(ListComponentData {
-    .name = "Quit",
-    .onClick = []() -> void {
-      modlog("exit", "exit normally through main menu");
-      exit(0);
-    }
-  });
-
-
-  Props levelProps {
-    .props = {
-      PropPair { .symbol = listItemsSymbol, .value = levels },
-      //PropPair { .symbol = xoffsetSymbol,   .value = 0.f },
-      PropPair { .symbol = yoffsetSymbol,   .value = 0.2f },
-      //PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.3f) },
-      PropPair { .symbol = flowVertical,    .value = UILayoutFlowNegative2 },
-      PropPair { .symbol = itemPaddingSymbol, .value = 0.04f },
-    },
-  };
-  return levelProps;
-}
 
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
   std::vector<ImListItem> listItems;
@@ -94,90 +45,6 @@ Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
 }
 
 
-Component mainMenu {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    Props listItemProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string("AFTERWORLD") },
-        PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
-        PropPair { .symbol = fontsizeSymbol, .value = 0.1f }
-      },
-    };
-
-    auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-
-    std::vector<Component> children = { listItemWithProps };
-    Layout layout {
-      .tint = glm::vec4(0.f, 0.f, 0.f, 0.5f),
-      .showBackpanel = false,
-      .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.f),
-      .minwidth = 0.f,
-      .minheight = 0.f,
-      .layoutType = LAYOUT_HORIZONTAL2,
-      .layoutFlowHorizontal = UILayoutFlowNone2,
-      .layoutFlowVertical = UILayoutFlowNone2,
-      .alignHorizontal = UILayoutFlowNone2,
-      .alignVertical = UILayoutFlowNone2,
-      .spacing = 0.01f,
-      .minspacing = 0.f,
-      .padding = 0.f,
-      .children = children,
-    };
-    Props listLayoutProps {
-      .props = {
-        { .symbol = yoffsetSymbol, .value = 0.4f },
-        { .symbol = layoutSymbol, .value = layout },
-      },
-    };
-    layoutComponent.draw(drawTools, listLayoutProps);
-
-    auto levelSelection = withPropsCopy(listComponent, createLevelListProps());
-    return levelSelection.draw(drawTools, props);
-  },
-};
-
-
-Component navigationComponent {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    std::function<void()>* onClick = typeFromProps<std::function<void()>>(props, onclickSymbol);
-    modassert(onClick, "on click symbol not provided to navigationComponent");
-    Props listItemProps {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string("BACK") },
-        PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.2f) },
-        PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
-        PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
-        PropPair { .symbol = onclickSymbol, .value = *onClick },
-        PropPair { .symbol = minwidthSymbol, .value = 0.5f },
-        PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.1f) },
-        PropPair { .symbol = fontsizeSymbol, .value = 0.03f }
-      },
-    };
-    auto listItemWithProps = withPropsCopy(listItem, listItemProps);
-    return listItemWithProps.draw(drawTools, props);
-  }
-};
-
-Component withNavigation(UiContext& uiContext, Component& wrappedComponent){
-  Component component {
-    .draw = [&uiContext, wrappedComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-  
-      Props emptyProps {
-        .props = {
-          PropPair { .symbol = xoffsetSymbol, .value = -0.95f },
-          PropPair { .symbol = yoffsetSymbol, .value = -0.9f },
-          PropPair { .symbol = onclickSymbol, .value = uiContext.consoleInterface.routerPop },
-        }
-      };
-      auto boundingBox = wrappedComponent.draw(drawTools, props);
-      navigationComponent.draw(drawTools, emptyProps);
-      return boundingBox;
-    }
-  };
-  return component;
-}
-
-
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
@@ -187,13 +54,6 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     Props { .props = {
         { .symbol = playLevelSymbol, .value = uiContext.consoleInterface.goToLevel } 
       }
-    }
-  );
-
-  auto settingsMenu = withPropsCopy(
-    settingsComponent,
-    Props {
-      .props = {},
     }
   );
 
@@ -220,7 +80,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
-    { "mainmenu/settings/", withNavigation(uiContext, settingsMenu) },
+    { "mainmenu/settings/", withNavigation(uiContext, settingsComponent) },
     { "playing/*/",  emptyComponent },
     { "playing/*/paused/", pauseComponent },
     { "playing/*/dead/", deadComponent },

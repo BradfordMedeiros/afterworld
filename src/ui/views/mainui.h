@@ -14,6 +14,7 @@
 #include "./navlist.h"
 #include "./pausemenu.h"
 #include "./levelselect.h"
+#include "./mainmenu.h"
 #include "./settings.h"
 #include "./modelviewer.h"
 #include "./navbar.h"
@@ -31,6 +32,7 @@
 #include "../components/game/keyboard.h"
 #include "../components/console.h"
 #include "../components/uiwindow.h"
+#include "./navigation.h"
 #include "./debug.h"
 
 //// organize this into a single file for dock config api
