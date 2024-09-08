@@ -6,6 +6,7 @@
 #include "../components/colorpicker.h"
 #include "../components/uiwindow.h"
 #include "../components/fileexplorer.h"
+#include "../components/dialog.h"
 #include "./navlist.h"
 #include "./navbar.h"
 
@@ -21,6 +22,8 @@ struct EditorViewOptions {
 
   int fileexplorerScrollAmount;
   std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter;
+
+  std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn;
 };
 extern Component editorViewComponent;
 

@@ -258,13 +258,6 @@ int currentScene = -1;
 std::optional<objid> focusedId = std::nullopt;
 std::string lastAutofocusedKey = "";
 
-TextData newSceneTextData {
-  .valueText = "",
-  .cursorLocation = 0,
-  .highlightLength = 0,
-  .maxchars = -1,
-};
-
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
   if (firstTime){
@@ -352,46 +345,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     ).draw(drawTools, defaultWindowProps);
   }
 
-  {
-    std::vector<ListComponentData> dialogOptions = {
-      ListComponentData {
-        .name = "confirm",
-        .onClick = []() -> void {
-          std::cout << "dialog confirm on click" << std::endl;
-          if (onInputBoxFn.has_value()){
-            onInputBoxFn.value()(false, newSceneTextData.valueText);
-          }
-        },      
-      },
-      ListComponentData {
-        .name = "cancel",
-        .onClick = []() -> void {
-          if (onInputBoxFn.has_value()){
-            onInputBoxFn.value()(true, "");
-          }
-        },      
-      },
-    };
-
-    {
-      std::function<void(TextData, int)> onEdit = [](TextData textData, int rawKey) -> void {
-        newSceneTextData = textData;
-      };
-      Props dialogProps {
-        .props = {
-          PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
-          PropPair { .symbol = detailSymbol, .value = std::string("Enter Name of New Scene") },
-          PropPair { .symbol = valueSymbol, .value =  newSceneTextData },
-          PropPair { .symbol = onInputSymbol, .value = onEdit },
-        },
-      };
-      auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
-      auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, []() -> void { windowSetEnabled(windowDialogSymbol, false); }, "New Scene");
-      auto defaultProps = getDefaultProps();
-      dialogWindow.draw(drawTools, defaultProps);
-    }
-  }
-
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
@@ -428,6 +381,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
                 .onFileAddedFn = onFileAddedFn,
                 .fileexplorerScrollAmount = fileexplorerScrollAmount,
                 .fileFilter = fileFilter,
+                .onInputBoxFn = onInputBoxFn,
               } 
             },
           }
@@ -435,7 +389,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         editorViewComponent.draw(drawTools, editorViewProps);
       }
 
-      
+
       std::function<void(int)> onImageClick = [](int index) -> void {
         if (onFileAddedFn.has_value()){
           onFileAddedFn.value()(false, imageListDatas.images.at(index).image);

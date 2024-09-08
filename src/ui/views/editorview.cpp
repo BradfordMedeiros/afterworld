@@ -2,6 +2,13 @@
 
 glm::vec4 colorPickerColor(0.f, 0.f, 0.f, 1.f);
 
+TextData newSceneTextData {
+  .valueText = "",
+  .cursorLocation = 0,
+  .highlightLength = 0,
+  .maxchars = -1,
+};
+
 Component editorViewComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     EditorViewOptions* editorOptions = typeFromProps<EditorViewOptions>(props, valueSymbol);
@@ -59,6 +66,48 @@ Component editorViewComponent {
       fileExplorerWindow.draw(drawTools, defaultWindowProps);
     }
     ////////////////////////////////////////////////////
+    
+  {
+    auto onInputBoxFn = editorOptions -> onInputBoxFn;
+    std::vector<ListComponentData> dialogOptions = {
+      ListComponentData {
+        .name = "confirm",
+        .onClick = [onInputBoxFn]() -> void {
+          std::cout << "dialog confirm on click" << std::endl;
+          if (onInputBoxFn.has_value()){
+            onInputBoxFn.value()(false, newSceneTextData.valueText);
+          }
+        },      
+      },
+      ListComponentData {
+        .name = "cancel",
+        .onClick = [onInputBoxFn]() -> void {
+          if (onInputBoxFn.has_value()){
+            onInputBoxFn.value()(true, "");
+          }
+        },      
+      },
+    };
+    {
+      std::function<void(TextData, int)> onEdit = [](TextData textData, int rawKey) -> void {
+        newSceneTextData = textData;
+      };
+      Props dialogProps {
+        .props = {
+          PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
+          PropPair { .symbol = detailSymbol, .value = std::string("Enter Name of New Scene") },
+          PropPair { .symbol = valueSymbol, .value =  newSceneTextData },
+          PropPair { .symbol = onInputSymbol, .value = onEdit },
+        },
+      };
+      auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
+      auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, []() -> void { windowSetEnabled(windowDialogSymbol, false); }, "New Scene");
+      auto defaultProps = getDefaultProps();
+      dialogWindow.draw(drawTools, defaultProps);
+    }
+  }
+
+
 
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
