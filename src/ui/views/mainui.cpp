@@ -42,7 +42,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
     playingComponent,
     Props {
       .props = {
-        PropPair { 
+        PropPair {
           .symbol = valueSymbol, 
           .value = PlayingOptions { 
             .showHud = uiContext.showGameHud(),
@@ -131,23 +131,17 @@ std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
-    GameobjAttributes attr {
-      .attr = {},
-    };
+    GameobjAttributes attr { .attr = {} };
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createLight = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
-    GameobjAttributes attr {
-      .attr = {},
-    };
+    GameobjAttributes attr { .attr = {} };
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createNavmesh = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
-    GameobjAttributes attr {
-      .attr = {},
-    };
+    GameobjAttributes attr { .attr = {} };
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
@@ -381,14 +375,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       },
     };
 
-   //////////////////////////////
-
-
     std::function<void(TextData, int)> onEdit = [](TextData textData, int rawKey) -> void {
       newSceneTextData = textData;
     };
-
-
 
     Props dialogProps {
       .props = {
@@ -431,7 +420,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     fileExplorerWindow.draw(drawTools, defaultWindowProps);
   }
 
-
   {
     auto colorPicker = withPropsCopy(colorPickerComponent, Props {
       .props = { 
@@ -448,33 +436,52 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
-  bool shouldShowConsole = uiContext.showConsole();
-  if (!shouldShowConsole){
-    consoleKey = std::nullopt;
-  }else{
-    if (!consoleKey.has_value()){
-      consoleKey = std::string("console-") + uniqueNameSuffix();
+  {
+    bool shouldShowConsole = uiContext.showConsole();
+    if (!shouldShowConsole){
+      consoleKey = std::nullopt;
+    }else{
+      if (!consoleKey.has_value()){
+        consoleKey = std::string("console-") + uniqueNameSuffix();
+      }
+    }
+    static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
+    if (!shouldShowConsole){
+      startedShowingConsoleTime = std::nullopt;
+    }else if (!startedShowingConsoleTime.has_value()){
+      startedShowingConsoleTime = gameapi -> timeSeconds(true);
+    }
+    if (startedShowingConsoleTime.has_value()){
+      float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
+      //std::cout << "console: " << elapsedTime << std::endl;
+    }
+    if (shouldShowConsole){
+      Props props {
+        .props = {
+          { .symbol = consoleInterfaceSymbol, .value = &uiContext.consoleInterface },
+          { .symbol = autofocusSymbol, .value = consoleKey.value() },
+        },
+      };
+      consoleComponent.draw(drawTools, props);
+    }
+    if (uiContext.showKeyboard()){
+      Props keyboardProps { 
+        .props = {
+          PropPair { .symbol = xoffsetSymbol, .value = -1.f },
+          PropPair { .symbol = yoffsetSymbol, .value = -1.f },
+        },
+      };
+      keyboardComponent.draw(drawTools, keyboardProps);     
+    }
+
+    {
+      Props defaultProps {
+        .props = {},
+      };
+      alertComponent.draw(drawTools, defaultProps);
     }
   }
-  static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
-  if (!shouldShowConsole){
-    startedShowingConsoleTime = std::nullopt;
-  }else if (!startedShowingConsoleTime.has_value()){
-    startedShowingConsoleTime = gameapi -> timeSeconds(true);
-  }
-  if (startedShowingConsoleTime.has_value()){
-    float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
-    //std::cout << "console: " << elapsedTime << std::endl;
-  }
-  if (shouldShowConsole){
-    Props props {
-      .props = {
-        { .symbol = consoleInterfaceSymbol, .value = &uiContext.consoleInterface },
-        { .symbol = autofocusSymbol, .value = consoleKey.value() },
-      },
-    };
-    consoleComponent.draw(drawTools, props);
-  }
+
 
   if (uiContext.showEditor()){
     {
@@ -541,12 +548,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       auto defaultWindowProps = getDefaultProps();
       uiWindowComponent.draw(drawTools, defaultWindowProps);
     }
-    {
-      Props defaultProps {
-        .props = {},
-      };
-      alertComponent.draw(drawTools, defaultProps);
-    }
+
     {
       Props navbarProps { 
         .props = {
@@ -561,16 +563,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     uiManagerContext.uiContext = &uiContext;
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);
-  }
-
-  if (uiContext.showKeyboard()){
-    Props keyboardProps { 
-      .props = {
-        PropPair { .symbol = xoffsetSymbol, .value = -1.f },
-        PropPair { .symbol = yoffsetSymbol, .value = -1.f },
-      },
-    };
-    keyboardComponent.draw(drawTools, keyboardProps);     
   }
 
   if (uiContext.debugConfig().has_value()){
