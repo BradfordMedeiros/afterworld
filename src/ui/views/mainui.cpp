@@ -264,7 +264,6 @@ int currentScene = -1;
 
 std::optional<objid> focusedId = std::nullopt;
 std::string lastAutofocusedKey = "";
-std::optional<std::string> consoleKey = std::nullopt;
 
 TextData newSceneTextData {
   .valueText = "",
@@ -437,50 +436,22 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   router.draw(drawTools, routerProps);
 
   {
-    bool shouldShowConsole = uiContext.showConsole();
-    if (!shouldShowConsole){
-      consoleKey = std::nullopt;
-    }else{
-      if (!consoleKey.has_value()){
-        consoleKey = std::string("console-") + uniqueNameSuffix();
-      }
-    }
-    static std::optional<float> startedShowingConsoleTime = shouldShowConsole ? gameapi -> timeSeconds(true) : false;
-    if (!shouldShowConsole){
-      startedShowingConsoleTime = std::nullopt;
-    }else if (!startedShowingConsoleTime.has_value()){
-      startedShowingConsoleTime = gameapi -> timeSeconds(true);
-    }
-    if (startedShowingConsoleTime.has_value()){
-      float elapsedTime = gameapi -> timeSeconds(true) - startedShowingConsoleTime.value();
-      //std::cout << "console: " << elapsedTime << std::endl;
-    }
-    if (shouldShowConsole){
-      Props props {
-        .props = {
-          { .symbol = consoleInterfaceSymbol, .value = &uiContext.consoleInterface },
-          { .symbol = autofocusSymbol, .value = consoleKey.value() },
+    Props defaultProps {
+      .props = {
+        PropPair {
+          .symbol = valueSymbol, 
+          .value = UtilViewOptions {
+            .showKeyboard = uiContext.showKeyboard(),
+            .showConsole = uiContext.showConsole(),
+            .consoleKeyName = (std::string("console-") + uniqueNameSuffix()),
+            .consoleInterface = &uiContext.consoleInterface,
+          } 
         },
-      };
-      consoleComponent.draw(drawTools, props);
-    }
-
-    {
-      Props defaultProps {
-        .props = {
-          PropPair {
-            .symbol = valueSymbol, 
-            .value = UtilViewOptions {
-              .showKeyboard = uiContext.showKeyboard(),
-            } 
-          },
-        },
-      };
-      utilViewComponent.draw(drawTools, defaultProps);
-    }
+      },
+    };
+    utilViewComponent.draw(drawTools, defaultProps);
   }
-
-
+  
   if (uiContext.showEditor()){
     {
       std::function<void(int)> onImageClick = [](int index) -> void {

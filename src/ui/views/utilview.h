@@ -4,9 +4,13 @@
 #include "../components/common.h"
 #include "./alert.h"
 #include "../components/game/keyboard.h"
+#include "../components/console.h"
 
 struct UtilViewOptions {
 	bool showKeyboard;
+	bool showConsole;
+	std::string consoleKeyName;
+	ConsoleInterface* consoleInterface;
 };
 
 extern Component utilViewComponent;

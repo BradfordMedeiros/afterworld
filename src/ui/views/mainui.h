@@ -30,7 +30,6 @@
 #include "../components/game/terminal.h"
 #include "../components/game/zoom.h"
 #include "../components/game/score.h"
-#include "../components/console.h"
 #include "../components/uiwindow.h"
 #include "./navigation.h"
 #include "./debug.h"

@@ -4,6 +4,16 @@ Component utilViewComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     UtilViewOptions* utilViewOptions = typeFromProps<UtilViewOptions>(props, valueSymbol);
 
+    if (utilViewOptions -> showConsole){
+      Props props {
+        .props = {
+          { .symbol = consoleInterfaceSymbol, .value = utilViewOptions -> consoleInterface },
+          { .symbol = autofocusSymbol, .value = utilViewOptions -> consoleKeyName  },
+        },
+      };
+      consoleComponent.draw(drawTools, props);
+    }
+
     if (utilViewOptions -> showKeyboard){
       Props keyboardProps { 
         .props = {
@@ -13,6 +23,7 @@ Component utilViewComponent {
       };
       keyboardComponent.draw(drawTools, keyboardProps);     
     }
+    
     {
       Props defaultProps {
         .props = {},
