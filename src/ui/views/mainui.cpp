@@ -464,21 +464,19 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       };
       consoleComponent.draw(drawTools, props);
     }
-    if (uiContext.showKeyboard()){
-      Props keyboardProps { 
-        .props = {
-          PropPair { .symbol = xoffsetSymbol, .value = -1.f },
-          PropPair { .symbol = yoffsetSymbol, .value = -1.f },
-        },
-      };
-      keyboardComponent.draw(drawTools, keyboardProps);     
-    }
 
     {
       Props defaultProps {
-        .props = {},
+        .props = {
+          PropPair {
+            .symbol = valueSymbol, 
+            .value = UtilViewOptions {
+              .showKeyboard = uiContext.showKeyboard(),
+            } 
+          },
+        },
       };
-      alertComponent.draw(drawTools, defaultProps);
+      utilViewComponent.draw(drawTools, defaultProps);
     }
   }
 
