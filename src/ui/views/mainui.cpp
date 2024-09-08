@@ -117,15 +117,8 @@ UiManagerContext uiManagerContext {
   }
 };
 
-glm::vec4 colorPickerColor(0.f, 0.f, 0.f, 1.f);
 std::string colorPickerTitle = "color picker";
 std::optional<std::function<void(glm::vec4)>> onNewColor = std::nullopt;
-std::function<void(glm::vec4)> onSlide = [](glm::vec4 value) -> void {
-  colorPickerColor = value;
-  if (onNewColor.has_value()){
-    onNewColor.value()(colorPickerColor);
-  }
-};
 
 
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
@@ -380,24 +373,23 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       },
     };
 
-    std::function<void(TextData, int)> onEdit = [](TextData textData, int rawKey) -> void {
-      newSceneTextData = textData;
-    };
-
-    Props dialogProps {
-      .props = {
-        PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
-        PropPair { .symbol = detailSymbol, .value = std::string("Enter Name of New Scene") },
-        PropPair { .symbol = valueSymbol, .value =  newSceneTextData },
-        PropPair { .symbol = onInputSymbol, .value = onEdit },
-      },
-    };
-
-    auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
-    auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, []() -> void { windowSetEnabled(windowDialogSymbol, false); }, "New Scene");
-
-    auto defaultProps = getDefaultProps();
-    dialogWindow.draw(drawTools, defaultProps);
+    {
+      std::function<void(TextData, int)> onEdit = [](TextData textData, int rawKey) -> void {
+        newSceneTextData = textData;
+      };
+      Props dialogProps {
+        .props = {
+          PropPair { .symbol = listItemsSymbol, .value = dialogOptions },
+          PropPair { .symbol = detailSymbol, .value = std::string("Enter Name of New Scene") },
+          PropPair { .symbol = valueSymbol, .value =  newSceneTextData },
+          PropPair { .symbol = onInputSymbol, .value = onEdit },
+        },
+      };
+      auto dialogWithProps = withPropsCopy(dialogComponent, dialogProps);
+      auto dialogWindow = createUiWindow(dialogWithProps, windowDialogSymbol, []() -> void { windowSetEnabled(windowDialogSymbol, false); }, "New Scene");
+      auto defaultProps = getDefaultProps();
+      dialogWindow.draw(drawTools, defaultProps);
+    }
   }
 
   {
@@ -424,19 +416,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     auto defaultWindowProps = getDefaultProps();
     fileExplorerWindow.draw(drawTools, defaultWindowProps);
   }
-
-  {
-    auto colorPicker = withPropsCopy(colorPickerComponent, Props {
-      .props = { 
-        PropPair { onSlideSymbol,  onSlide },
-        PropPair { tintSymbol, colorPickerColor },
-      }
-    });
-    auto uiWindowComponent = createUiWindow(colorPicker, windowColorPickerSymbol, []() -> void { windowSetEnabled(windowColorPickerSymbol, false); }, colorPickerTitle);
-    auto defaultWindowProps = getDefaultProps();
-    uiWindowComponent.draw(drawTools, defaultWindowProps);
-  }
-
 
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
@@ -494,6 +473,10 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
               .symbol = valueSymbol, 
               .value = EditorViewOptions { 
                 .worldPlayInterface = &uiContext.worldPlayInterface,
+                .onNewColor = onNewColor,
+                .colorPickerTitle = &colorPickerTitle,
+                .navbarType = navbarType,
+                .onClickNavbar = onClickNavbar,
               } 
             },
           }
@@ -530,15 +513,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       uiWindowComponent.draw(drawTools, defaultWindowProps);
     }
 
-    {
-      Props navbarProps { 
-        .props = {
-          { onclickSymbol, onClickNavbar },
-          { valueSymbol, navbarType },
-        }
-      };
-      navbarComponent.draw(drawTools, navbarProps);
-    }
+ 
 
     // navlist uses this via extern
     uiManagerContext.uiContext = &uiContext;
