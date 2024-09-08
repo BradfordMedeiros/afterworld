@@ -392,31 +392,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     }
   }
 
-  {
-    FileCallback onFileSelect = [](bool isDirectory, std::string file) -> void {
-      modassert(!isDirectory, "on file select gave something not a file");
-      modlog("dock - file select", std::string(isDirectory ? "dir" : "file") + " " + file);
-      if (onFileAddedFn.has_value()){
-        onFileAddedFn.value()(false, file);
-      }
-    };
-
-    Props filexplorerProps {
-      .props = {
-        PropPair { .symbol = fileExplorerSymbol, .value = testExplorer },
-        PropPair { .symbol = fileChangeSymbol, .value = onFileSelect },
-        PropPair { offsetSymbol,  fileexplorerScrollAmount },
-      },
-    };
-    if (fileFilter.has_value()){
-      filexplorerProps.props.push_back(PropPair { .symbol = fileFilterSymbol, .value = fileFilter.value() });
-    }
-    auto fileExplorer = withProps(fileexplorerComponent, filexplorerProps);
-    auto fileExplorerWindow = createUiWindow(fileExplorer, windowFileExplorerSymbol, []() -> void { windowSetEnabled(windowFileExplorerSymbol, false); }, "File Explorer");
-    auto defaultWindowProps = getDefaultProps();
-    fileExplorerWindow.draw(drawTools, defaultWindowProps);
-  }
-
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
@@ -439,6 +414,28 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   
   if (uiContext.showEditor()){
     {
+      {
+        Props editorViewProps {
+          .props = {
+            PropPair {
+              .symbol = valueSymbol, 
+              .value = EditorViewOptions { 
+                .worldPlayInterface = &uiContext.worldPlayInterface,
+                .onNewColor = onNewColor,
+                .colorPickerTitle = &colorPickerTitle,
+                .navbarType = navbarType,
+                .onClickNavbar = onClickNavbar,
+                .onFileAddedFn = onFileAddedFn,
+                .fileexplorerScrollAmount = fileexplorerScrollAmount,
+                .fileFilter = fileFilter,
+              } 
+            },
+          }
+        };
+        editorViewComponent.draw(drawTools, editorViewProps);
+      }
+
+      
       std::function<void(int)> onImageClick = [](int index) -> void {
         if (onFileAddedFn.has_value()){
           onFileAddedFn.value()(false, imageListDatas.images.at(index).image);
@@ -466,48 +463,31 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         }
       });
 
+
       {
-        Props editorViewProps {
-          .props = {
-            PropPair {
-              .symbol = valueSymbol, 
-              .value = EditorViewOptions { 
-                .worldPlayInterface = &uiContext.worldPlayInterface,
-                .onNewColor = onNewColor,
-                .colorPickerTitle = &colorPickerTitle,
-                .navbarType = navbarType,
-                .onClickNavbar = onClickNavbar,
-              } 
-            },
-          }
+        SceneManagerInterface sceneManagerInterface2 {
+          .showScenes = showScenes,
+          .offset = offset,
+          .onSelectScene = [&uiContext](int index, std::string scene) -> void {
+            uiContext.loadScene(scene);
+            currentScene = index;
+            showScenes = false;
+          },
+          .toggleShowScenes = []() -> void {
+            showScenes = !showScenes;
+          },
+          .scenes = uiContext.listScenes(),
+          .currentScene = currentScene,
         };
-        editorViewComponent.draw(drawTools, editorViewProps);
+        Props sceneManagerProps {
+          .props = {
+            PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
+            PropPair { .symbol = xoffsetSymbol, .value = -0.83f },
+            PropPair { .symbol = yoffsetSymbol, .value = 0.9f },
+          },
+        };
+        scenemanagerComponent.draw(drawTools, sceneManagerProps);
       }
-
-
-      SceneManagerInterface sceneManagerInterface2 {
-        .showScenes = showScenes,
-        .offset = offset,
-        .onSelectScene = [&uiContext](int index, std::string scene) -> void {
-          uiContext.loadScene(scene);
-          currentScene = index;
-          showScenes = false;
-        },
-        .toggleShowScenes = []() -> void {
-          showScenes = !showScenes;
-        },
-        .scenes = uiContext.listScenes(),
-        .currentScene = currentScene,
-      };
-      Props sceneManagerProps {
-        .props = {
-          PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
-          PropPair { .symbol = xoffsetSymbol, .value = -0.83f },
-          PropPair { .symbol = yoffsetSymbol, .value = 0.9f },
-        },
-      };
-      scenemanagerComponent.draw(drawTools, sceneManagerProps);
-
       auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, []() -> void { windowSetEnabled(windowImageExplorerSymbol, false); }, "Image Explorer");
       auto defaultWindowProps = getDefaultProps();
       uiWindowComponent.draw(drawTools, defaultWindowProps);
@@ -517,8 +497,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 
     // navlist uses this via extern
     uiManagerContext.uiContext = &uiContext;
-    auto defaultProps = getDefaultProps();
-    withProps(navList, navListProps).draw(drawTools, defaultProps);
+
   }
 
   if (uiContext.debugConfig().has_value()){
