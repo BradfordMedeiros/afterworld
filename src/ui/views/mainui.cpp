@@ -350,7 +350,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     std::function<void()> onClickX = [dockedDock]() -> void {
       dockedDocks.erase(dockedDock);
     };
-    createUiWindow(dock, windowDockSymbol, onClickX, dockedDock, AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }).draw(drawTools, defaultWindowProps);
+    createUiWindow(
+      dock, 
+      windowDockSymbol, 
+      onClickX, 
+      dockedDock, 
+      AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }
+    ).draw(drawTools, defaultWindowProps);
   }
 
   {
@@ -481,14 +487,20 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         }
       });
 
-      Props worldPlayProps {
-        .props = {
-          PropPair { .symbol = xoffsetSymbol, .value = 0.f },
-          PropPair { .symbol = yoffsetSymbol, .value = -1.f },
-          PropPair { .symbol = valueSymbol, .value = &uiContext.worldPlayInterface },
-        }
-      };
-      worldplay.draw(drawTools, worldPlayProps);
+      {
+        Props editorViewProps {
+          .props = {
+            PropPair {
+              .symbol = valueSymbol, 
+              .value = EditorViewOptions { 
+                .worldPlayInterface = &uiContext.worldPlayInterface,
+              } 
+            },
+          }
+        };
+        editorViewComponent.draw(drawTools, editorViewProps);
+      }
+
 
       SceneManagerInterface sceneManagerInterface2 {
         .showScenes = showScenes,
