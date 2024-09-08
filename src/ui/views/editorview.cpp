@@ -106,6 +106,27 @@ Component editorViewComponent {
       }
     }
 
+    /////////////////////
+    {
+      auto imageListDatas = editorOptions -> imageListDatas;
+      std::function<void(int)> onImageClick = [onFileAddedFn, imageListDatas](int index) -> void {
+        if (onFileAddedFn.has_value()){
+          onFileAddedFn.value()(false, imageListDatas -> images.at(index).image);
+        }
+      };
+      auto imageListComponent = withPropsCopy(imageList, Props {
+        .props = { 
+          PropPair { imagesSymbol,  *imageListDatas },
+          PropPair { onclickSymbol, onImageClick },
+          PropPair { offsetSymbol,  editorOptions -> imageListScrollAmount },
+        }
+      });
+      auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, []() -> void { windowSetEnabled(windowImageExplorerSymbol, false); }, "Image Explorer");
+      auto defaultWindowProps = getDefaultProps();
+      uiWindowComponent.draw(drawTools, defaultWindowProps);
+    }
+
+    /////////////////
 
     auto defaultProps = getDefaultProps();
     withProps(navList, navListProps).draw(drawTools, defaultProps);

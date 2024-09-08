@@ -382,6 +382,8 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
                 .fileexplorerScrollAmount = fileexplorerScrollAmount,
                 .fileFilter = fileFilter,
                 .onInputBoxFn = onInputBoxFn,
+                .imageListDatas = &imageListDatas,
+                .imageListScrollAmount = imageListScrollAmount,
               } 
             },
           }
@@ -390,33 +392,19 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       }
 
 
-      std::function<void(int)> onImageClick = [](int index) -> void {
-        if (onFileAddedFn.has_value()){
-          onFileAddedFn.value()(false, imageListDatas.images.at(index).image);
-        }
-      };
-
-      static bool loadedImages = false;
-      if (!loadedImages){
-        loadedImages = true;
-        auto allTextures = gameapi -> listResources("textures");;
-        
-        imageListDatas.images = {};
-        for (auto &texture : allTextures){
-          imageListDatas.images.push_back(ImageListImage {
-            .image = texture,
-          });
+      {
+        static bool loadedImages = false;
+        if (!loadedImages){
+          loadedImages = true;
+          auto allTextures = gameapi -> listResources("textures");;
+          imageListDatas.images = {};
+          for (auto &texture : allTextures){
+            imageListDatas.images.push_back(ImageListImage {
+              .image = texture,
+            });
+          }
         }
       }
-
-      auto imageListComponent = withPropsCopy(imageList, Props {
-        .props = { 
-          PropPair { imagesSymbol,  imageListDatas },
-          PropPair { onclickSymbol, onImageClick },
-          PropPair { offsetSymbol,  imageListScrollAmount },
-        }
-      });
-
 
       {
         SceneManagerInterface sceneManagerInterface2 {
@@ -442,9 +430,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         };
         scenemanagerComponent.draw(drawTools, sceneManagerProps);
       }
-      auto uiWindowComponent = createUiWindow(imageListComponent, windowImageExplorerSymbol, []() -> void { windowSetEnabled(windowImageExplorerSymbol, false); }, "Image Explorer");
-      auto defaultWindowProps = getDefaultProps();
-      uiWindowComponent.draw(drawTools, defaultWindowProps);
+
     }
 
  

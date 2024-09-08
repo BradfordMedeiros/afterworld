@@ -24,6 +24,9 @@ struct EditorViewOptions {
   std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter;
 
   std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn;
+  ImageList* imageListDatas;
+  int imageListScrollAmount;
+
 };
 extern Component editorViewComponent;
 
