@@ -9,8 +9,10 @@
 struct UtilViewOptions {
 	bool showKeyboard;
 	bool showConsole;
+	bool showScreenspaceGrid;
 	std::string consoleKeyName;
 	ConsoleInterface* consoleInterface;
+	std::optional<glm::vec2> ndiCursor;
 };
 
 extern Component utilViewComponent;

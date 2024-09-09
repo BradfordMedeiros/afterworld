@@ -266,6 +266,9 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
   firstTime = false;
   //////////////////////////////
+  // navlist uses this via extern
+
+  uiManagerContext.uiContext = &uiContext;
 
   HandlerFns handlerFuncs {
     .minManagedId = -1,
@@ -291,7 +294,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
           .size = glm::vec2(width, height),
         };
       }
-
       gameapi -> drawRect(centerX, centerY, width, height, perma, tint, textureId, ndi, selectionId, texture, shaderId);
      },
      .drawLine2D = [&textureId](glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId) -> void {
@@ -333,8 +335,10 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
           .value = UtilViewOptions {
             .showKeyboard = uiContext.showKeyboard(),
             .showConsole = uiContext.showConsole(),
+            .showScreenspaceGrid = uiContext.showScreenspaceGrid(),
             .consoleKeyName = (std::string("console-") + uniqueNameSuffix()),
             .consoleInterface = &uiContext.consoleInterface,
+            .ndiCursor = ndiCursor,
           } 
         },
       },
@@ -395,9 +399,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
       }
     };
     editorViewComponent.draw(drawTools, editorViewProps);
-
-    // navlist uses this via extern
-    uiManagerContext.uiContext = &uiContext;
   }
 
   if (uiContext.debugConfig().has_value()){
@@ -410,9 +411,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     debugComponent.draw(drawTools, props);
   }
 
-  if (uiContext.showScreenspaceGrid()){
-    drawScreenspaceGrid(ImGrid{ .numCells = 10 });
-  }
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
 
   if (handlerFuncs.autofocus.has_value()){
@@ -434,10 +432,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     drawTools.drawRect(0.5f, 0.5f, 0.5f, 0.5f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 1 }, std::nullopt);
     drawTools.drawRect(0.25f, 0.25f, 0.5f, 0.5f, false, glm::vec4(0.f, 1.f, 0.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 5 }, std::nullopt);
     drawTools.drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 0.f, 0.f, 0.8f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = -1 }, std::nullopt);
-  }
-
-  if (ndiCursor.has_value()){
-    drawTools.drawRect(ndiCursor.value().x, ndiCursor.value().y, 0.01f, 0.01f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 6 }, std::nullopt);
   }
 
   //std::cout << "location data: " << print(handlerFuncs.trackedLocationIds) << std::endl;
