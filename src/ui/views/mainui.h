@@ -14,7 +14,6 @@
 #include "./uicontext.h"
 #include "../components/uiwindow.h"
 #include "./navigation.h"
-#include "./debug.h"
 #include "../../modelviewer.h"
 
 extern Component mainUI;
@@ -50,6 +49,29 @@ std::vector<std::string> historyParams();
 std::string fullHistoryStr();
 std::optional<std::string> getPathParts(int index);
 void sendUiAlert(std::string message);
+
+
+struct UiState {
+  int imageListScrollAmount;
+  int fileexplorerScrollAmount;
+  std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn;
+  std::optional<std::function<void(objid, std::string)>> onGameObjSelected;
+  std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter;
+  std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn;
+
+  std::string colorPickerTitle;
+  std::optional<std::function<void(glm::vec4)>> onNewColor;
+
+  std::optional<objid> focusedId;
+  std::string lastAutofocusedKey;
+
+  bool showScenes;
+  int offset;
+  int currentScene;
+
+  NavbarType navbarType;
+  std::set<std::string> dockedDocks;
+};
 
 #endif
 

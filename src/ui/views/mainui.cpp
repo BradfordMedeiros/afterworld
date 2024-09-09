@@ -76,20 +76,36 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   return routerProps;
 }
 
-std::set<std::string> dockedDocks = {};
-std::function<void(const char*)> onClickNavbar = [](const char* value) -> void {
+UiState uiState {
+  .imageListScrollAmount = 0,
+  .fileexplorerScrollAmount = 0,
+  .onFileAddedFn = std::nullopt,
+  .onGameObjSelected = std::nullopt,
+  .fileFilter = std::nullopt,
+  .onInputBoxFn = std::nullopt,
+
+  .colorPickerTitle = "color picker",
+  .onNewColor = std::nullopt,
+
+  .focusedId = std::nullopt,
+  .lastAutofocusedKey = "",
+
+  .showScenes = false,
+  .offset = 2,
+  .currentScene = -1,
+
+  .navbarType = MAIN_EDITOR,
+  .dockedDocks = {},
+};
+
+void onClickNavbar(const char* value) {
   //pushQueryParam(routerHistory, "dockedDock");
-  dockedDocks.insert(value);
-  for (auto &dock : dockedDocks){
+  uiState.dockedDocks.insert(value);
+  for (auto &dock : uiState.dockedDocks){
     auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
     windowSetEnabled(windowDockSymbol, true, glm::vec2(1.f, 0.9f));    
   }
 };
-
-std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn = std::nullopt;
-std::optional<std::function<void(objid, std::string)>> onGameObjSelected = std::nullopt;
-std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter = std::nullopt;
-std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn = std::nullopt;
 
 std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
@@ -106,19 +122,16 @@ UiManagerContext uiManagerContext {
   .uiMainContext = UiMainContext {
     .openNewSceneMenu = [](std::function<void(bool closedWithoutInput, std::string input)> onInputBox) -> void { // replace with onInputBoxFn
       windowSetEnabled(windowDialogSymbol, true);
-      onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
+      uiState.onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
         onInputBox(closedWithoutNewFile, userInput);
         std::cout << "open new scene user input is: " << userInput << std::endl;;
-        onInputBoxFn = std::nullopt;
+        uiState.onInputBoxFn = std::nullopt;
         windowSetEnabled(windowDialogSymbol, false);
       };
       std::cout << "open new scene placeholder" << std::endl;
     }
   }
 };
-
-std::string colorPickerTitle = "color picker";
-std::optional<std::function<void(glm::vec4)>> onNewColor = std::nullopt;
 
 
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
@@ -139,26 +152,26 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
-    onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    uiState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      onFileAddedFn = std::nullopt;
-      fileFilter = std::nullopt;
+      uiState.onFileAddedFn = std::nullopt;
+      uiState.fileFilter = std::nullopt;
       windowSetEnabled(windowFileExplorerSymbol, false);
     };
-    fileFilter = fileFilterFn;
+    uiState.fileFilter = fileFilterFn;
   },
   .openImagePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
     windowSetEnabled(windowImageExplorerSymbol, true);
-    onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    uiState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      onFileAddedFn = std::nullopt;
+      uiState.onFileAddedFn = std::nullopt;
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
   .openColorPicker = [](std::function<void(glm::vec4)> onColor, std::string windowName) -> void {
     windowSetEnabled(windowColorPickerSymbol, true);
-    onNewColor = onColor;
-    colorPickerTitle = windowName;
+    uiState.onNewColor = onColor;
+    uiState.colorPickerTitle = windowName;
     //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
     //  onFileAdded(closedWithoutNewFile, file);
     //  onFileAddedFn = std::nullopt;
@@ -171,7 +184,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     std::cout << "dock pick gameobj" << std::endl;
     // kind of hack, otherwise it would select the object just clicked due to ordering of binding callbacks
     gameapi -> schedule(-1, 100, NULL, [selectGameObj](void*) -> void { 
-      onGameObjSelected = selectGameObj;
+      uiState.onGameObjSelected = selectGameObj;
     });
   },
   .setTexture = [](std::string& texture) -> void {
@@ -220,11 +233,6 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   .getParticleAttribute = getParticleAttribute,
 };
 
-ImageList imageListDatas {
-  .images = {},
-};
-int imageListScrollAmount = 0;
-int fileexplorerScrollAmount = 0;
 
 NavbarType queryLoadNavbarType(){
   auto query = gameapi -> compileSqlQuery("select layout from session", {});
@@ -242,27 +250,33 @@ void queryUpdateNavbarType(std::string& layout){
   modassert(validSql, "error executing sql query");
 }
 
-NavbarType navbarType = MAIN_EDITOR;
 NavListApi navListApi {
   .changeLayout = [](std::string layout) -> void {
-    navbarType = strToNavbarType(layout);
+    uiState.navbarType = strToNavbarType(layout);
     queryUpdateNavbarType(layout);
   }
 };
 
-
-bool showScenes = false;
-int offset = 2;
-int currentScene = -1;
-
-std::optional<objid> focusedId = std::nullopt;
-std::string lastAutofocusedKey = "";
+ImageList loadImageListTextures(){
+  ImageList imageListDatas {
+    .images = {},
+  };
+  auto allTextures = gameapi -> listResources("textures");;
+  imageListDatas.images = {};
+  for (auto &texture : allTextures){
+    imageListDatas.images.push_back(ImageListImage {
+      .image = texture,
+    });
+  }
+  modlog("mainui", "loadImageListTextures");
+  return imageListDatas;
+}
 
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
   if (firstTime){
     initStyles();
-    navbarType = queryLoadNavbarType();
+    uiState.navbarType = queryLoadNavbarType();
   }
   firstTime = false;
   //////////////////////////////
@@ -318,7 +332,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
         };
      },
      .selectedId = selectedId,
-     .focusedId = focusedId,
+     .focusedId = uiState.focusedId,
      .getClipboardString = gameapi -> getClipboardString,
      .setClipboardString = gameapi -> setClipboardString,
   };
@@ -347,20 +361,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
 
-  {
-    static bool loadedImages = false;
-    if (!loadedImages){
-      loadedImages = true;
-      auto allTextures = gameapi -> listResources("textures");;
-      imageListDatas.images = {};
-      for (auto &texture : allTextures){
-        imageListDatas.images.push_back(ImageListImage {
-          .image = texture,
-        });
-      }
-    }
-  }
-
+  static ImageList imageListDatas = loadImageListTextures();
 
   if (uiContext.showEditor()){
     Props editorViewProps {
@@ -369,31 +370,32 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
           .symbol = valueSymbol, 
           .value = EditorViewOptions { 
             .worldPlayInterface = &uiContext.worldPlayInterface,
-            .onNewColor = onNewColor,
-            .colorPickerTitle = &colorPickerTitle,
-            .navbarType = navbarType,
+            .onNewColor = uiState.onNewColor,
+            .colorPickerTitle = &uiState.colorPickerTitle,
+            .navbarType = uiState.navbarType,
             .onClickNavbar = onClickNavbar,
-            .onFileAddedFn = onFileAddedFn,
-            .fileexplorerScrollAmount = fileexplorerScrollAmount,
-            .fileFilter = fileFilter,
-            .onInputBoxFn = onInputBoxFn,
+            .onFileAddedFn = uiState.onFileAddedFn,
+            .fileexplorerScrollAmount = uiState.fileexplorerScrollAmount,
+            .fileFilter = uiState.fileFilter,
+            .onInputBoxFn = uiState.onInputBoxFn,
             .imageListDatas = &imageListDatas,
-            .imageListScrollAmount = imageListScrollAmount,
-            .dockedDocks = &dockedDocks,
+            .imageListScrollAmount = uiState.imageListScrollAmount,
+            .dockedDocks = &uiState.dockedDocks,
             .sceneManagerInterface = SceneManagerInterface {
-              .showScenes = showScenes,
-              .offset = offset,
+              .showScenes = uiState.showScenes,
+              .offset = uiState.offset,
               .onSelectScene = [&uiContext](int index, std::string scene) -> void {
                 uiContext.loadScene(scene);
-                currentScene = index;
-                showScenes = false;
+                uiState.currentScene = index;
+                uiState.showScenes = false;
               },
               .toggleShowScenes = []() -> void {
-                showScenes = !showScenes;
+                uiState.showScenes = !uiState.showScenes;
               },
               .scenes = uiContext.listScenes(),
-              .currentScene = currentScene,
+              .currentScene = uiState.currentScene,
             },
+            .debugConfig = uiContext.debugConfig(),
           } 
         },
       }
@@ -401,22 +403,13 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     editorViewComponent.draw(drawTools, editorViewProps);
   }
 
-  if (uiContext.debugConfig().has_value()){
-    Props props {
-      .props = {
-        PropPair { .symbol = valueSymbol, .value = uiContext.debugConfig().value() },
-        PropPair { .symbol = xoffsetSymbol, .value = -1.f },
-      },
-    };
-    debugComponent.draw(drawTools, props);
-  }
 
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
 
   if (handlerFuncs.autofocus.has_value()){
-    if (lastAutofocusedKey != handlerFuncs.autofocus.value().key){
-      focusedId = handlerFuncs.autofocus.value().id;
-      lastAutofocusedKey = handlerFuncs.autofocus.value().key;
+    if (uiState.lastAutofocusedKey != handlerFuncs.autofocus.value().key){
+      uiState.focusedId = handlerFuncs.autofocus.value().id;
+      uiState.lastAutofocusedKey = handlerFuncs.autofocus.value().key;
     }
   }
 
@@ -441,19 +434,19 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
 void onMainUiScroll(double amount){
   auto scrollValue = static_cast<int>(amount);
   std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
-  imageListScrollAmount += (scrollValue * 5);
-  if (imageListScrollAmount < 0){
-    imageListScrollAmount = 0;
+  uiState.imageListScrollAmount += (scrollValue * 5);
+  if (uiState.imageListScrollAmount < 0){
+    uiState.imageListScrollAmount = 0;
   }
 
-  fileexplorerScrollAmount += scrollValue;
-  if (fileexplorerScrollAmount < 0){
-    fileexplorerScrollAmount = 0;
+  uiState.fileexplorerScrollAmount += scrollValue;
+  if (uiState.fileexplorerScrollAmount < 0){
+    uiState.fileexplorerScrollAmount = 0;
   }
 
-  offset += scrollValue;
-  if (offset < 0){
-    offset = 0;
+  uiState.offset += scrollValue;
+  if (uiState.offset < 0){
+    uiState.offset = 0;
   }
   scenegraphScroll(scrollValue);
 }
@@ -468,14 +461,14 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
     std::cout << uiStoreToStr() << std::endl;
   }
   if (button == 0 && action == 1){
-    if (selectedId.has_value() && onGameObjSelected.has_value()){
+    if (selectedId.has_value() && uiState.onGameObjSelected.has_value()){
       auto gameobjName = gameapi -> getGameObjNameForId(selectedId.value()).value();
-      onGameObjSelected.value()(selectedId.value(), gameobjName);
-      onGameObjSelected = std::nullopt;
+      uiState.onGameObjSelected.value()(selectedId.value(), gameobjName);
+      uiState.onGameObjSelected = std::nullopt;
     }
 
     if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() <= handlerFns.maxManagedId){
-      focusedId = selectedId.value();
+      uiState.focusedId = selectedId.value();
     }
 
     if (selectedId.has_value()){
@@ -502,11 +495,11 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
 
 void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods){
   modlog("mainui key press", std::to_string(key));
-  if (!focusedId.has_value()){
+  if (!uiState.focusedId.has_value()){
     return;
   }
-  if (handlerFns.inputFns.find(focusedId.value()) != handlerFns.inputFns.end()){
-    handlerFns.inputFns.at(focusedId.value())(key, mods);
+  if (handlerFns.inputFns.find(uiState.focusedId.value()) != handlerFns.inputFns.end()){
+    handlerFns.inputFns.at(uiState.focusedId.value())(key, mods);
   }
 }
 

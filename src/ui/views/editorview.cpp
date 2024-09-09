@@ -188,6 +188,16 @@ Component editorViewComponent {
     };
     worldplay.draw(drawTools, worldPlayProps);
 
+    if (editorOptions -> debugConfig.has_value()){
+      Props props {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = editorOptions -> debugConfig.value() },
+          PropPair { .symbol = xoffsetSymbol, .value = -1.f },
+        },
+      };
+      debugComponent.draw(drawTools, props);
+    }
+
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },
 };
