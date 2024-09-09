@@ -7,8 +7,10 @@
 #include "../components/uiwindow.h"
 #include "../components/fileexplorer.h"
 #include "../components/dialog.h"
+#include "../components/scenemanager.h"
 #include "./navlist.h"
 #include "./navbar.h"
+#include "./dock/dock.h"
 
 struct EditorViewOptions {
   WorldPlayInterface* worldPlayInterface;
@@ -26,6 +28,10 @@ struct EditorViewOptions {
   std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn;
   ImageList* imageListDatas;
   int imageListScrollAmount;
+  
+  std::set<std::string>* dockedDocks;
+
+  SceneManagerInterface sceneManagerInterface;
 
 };
 extern Component editorViewComponent;

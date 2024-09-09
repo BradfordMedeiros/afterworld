@@ -13,6 +13,44 @@ Component editorViewComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     EditorViewOptions* editorOptions = typeFromProps<EditorViewOptions>(props, valueSymbol);
 
+    for (auto &dockedDock : (*editorOptions -> dockedDocks)){
+      Props dockProps { 
+        .props = {
+          { dockTypeSymbol, dockedDock }, 
+          { xoffsetFromSymbol, 1.5f },
+        }
+      };    
+      auto dock = withProps(dockComponent, dockProps);
+      auto defaultWindowProps = getDefaultProps();
+
+      auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dockedDock);
+
+      std::set<std::string>* dockedDocksPtr = editorOptions -> dockedDocks;
+      auto dockDockPtr = &dockedDock;
+      std::function<void()> onClickX = [editorOptions, dockedDocksPtr, dockDockPtr]() -> void {
+        dockedDocksPtr -> erase(*dockDockPtr);
+      };
+
+      createUiWindow(
+        dock, 
+        windowDockSymbol, 
+        onClickX, 
+        dockedDock, 
+        AlignmentParams { 
+          .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 
+        }
+      ).draw(drawTools, defaultWindowProps);
+    }
+
+    Props sceneManagerProps {
+      .props = {
+        PropPair { .symbol = valueSymbol, .value = editorOptions -> sceneManagerInterface },
+        PropPair { .symbol = xoffsetSymbol, .value = -0.83f },
+        PropPair { .symbol = yoffsetSymbol, .value = 0.9f },
+      },
+    };
+    scenemanagerComponent.draw(drawTools, sceneManagerProps);
+
     // Pop up windows.... this probably could be org better
     // color picker /////////////////////
     auto onNewColor = editorOptions -> onNewColor;

@@ -322,29 +322,6 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   };
   resetMenuItemMappingId();
 
-  for (auto &dockedDock : dockedDocks){
-    Props dockProps { 
-      .props = {
-        { dockTypeSymbol, dockedDock }, 
-        { xoffsetFromSymbol, 1.5f },
-      }
-    };
-    auto dock = withProps(dockComponent, dockProps);
-    auto defaultWindowProps = getDefaultProps();
-
-    auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dockedDock);
-    std::function<void()> onClickX = [dockedDock]() -> void {
-      dockedDocks.erase(dockedDock);
-    };
-    createUiWindow(
-      dock, 
-      windowDockSymbol, 
-      onClickX, 
-      dockedDock, 
-      AlignmentParams { .layoutFlowHorizontal = UILayoutFlowNegative2, .layoutFlowVertical = UILayoutFlowNegative2 }
-    ).draw(drawTools, defaultWindowProps);
-  }
-
   auto routerProps = createRouterProps(uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
@@ -364,80 +341,63 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
     };
     utilViewComponent.draw(drawTools, defaultProps);
   }
-  
-  if (uiContext.showEditor()){
-    {
-      {
-        Props editorViewProps {
-          .props = {
-            PropPair {
-              .symbol = valueSymbol, 
-              .value = EditorViewOptions { 
-                .worldPlayInterface = &uiContext.worldPlayInterface,
-                .onNewColor = onNewColor,
-                .colorPickerTitle = &colorPickerTitle,
-                .navbarType = navbarType,
-                .onClickNavbar = onClickNavbar,
-                .onFileAddedFn = onFileAddedFn,
-                .fileexplorerScrollAmount = fileexplorerScrollAmount,
-                .fileFilter = fileFilter,
-                .onInputBoxFn = onInputBoxFn,
-                .imageListDatas = &imageListDatas,
-                .imageListScrollAmount = imageListScrollAmount,
-              } 
-            },
-          }
-        };
-        editorViewComponent.draw(drawTools, editorViewProps);
+
+
+  {
+    static bool loadedImages = false;
+    if (!loadedImages){
+      loadedImages = true;
+      auto allTextures = gameapi -> listResources("textures");;
+      imageListDatas.images = {};
+      for (auto &texture : allTextures){
+        imageListDatas.images.push_back(ImageListImage {
+          .image = texture,
+        });
       }
-
-
-      {
-        static bool loadedImages = false;
-        if (!loadedImages){
-          loadedImages = true;
-          auto allTextures = gameapi -> listResources("textures");;
-          imageListDatas.images = {};
-          for (auto &texture : allTextures){
-            imageListDatas.images.push_back(ImageListImage {
-              .image = texture,
-            });
-          }
-        }
-      }
-
-      {
-        SceneManagerInterface sceneManagerInterface2 {
-          .showScenes = showScenes,
-          .offset = offset,
-          .onSelectScene = [&uiContext](int index, std::string scene) -> void {
-            uiContext.loadScene(scene);
-            currentScene = index;
-            showScenes = false;
-          },
-          .toggleShowScenes = []() -> void {
-            showScenes = !showScenes;
-          },
-          .scenes = uiContext.listScenes(),
-          .currentScene = currentScene,
-        };
-        Props sceneManagerProps {
-          .props = {
-            PropPair { .symbol = valueSymbol, .value = sceneManagerInterface2 },
-            PropPair { .symbol = xoffsetSymbol, .value = -0.83f },
-            PropPair { .symbol = yoffsetSymbol, .value = 0.9f },
-          },
-        };
-        scenemanagerComponent.draw(drawTools, sceneManagerProps);
-      }
-
     }
+  }
 
- 
+
+  if (uiContext.showEditor()){
+    Props editorViewProps {
+      .props = {
+        PropPair {
+          .symbol = valueSymbol, 
+          .value = EditorViewOptions { 
+            .worldPlayInterface = &uiContext.worldPlayInterface,
+            .onNewColor = onNewColor,
+            .colorPickerTitle = &colorPickerTitle,
+            .navbarType = navbarType,
+            .onClickNavbar = onClickNavbar,
+            .onFileAddedFn = onFileAddedFn,
+            .fileexplorerScrollAmount = fileexplorerScrollAmount,
+            .fileFilter = fileFilter,
+            .onInputBoxFn = onInputBoxFn,
+            .imageListDatas = &imageListDatas,
+            .imageListScrollAmount = imageListScrollAmount,
+            .dockedDocks = &dockedDocks,
+            .sceneManagerInterface = SceneManagerInterface {
+              .showScenes = showScenes,
+              .offset = offset,
+              .onSelectScene = [&uiContext](int index, std::string scene) -> void {
+                uiContext.loadScene(scene);
+                currentScene = index;
+                showScenes = false;
+              },
+              .toggleShowScenes = []() -> void {
+                showScenes = !showScenes;
+              },
+              .scenes = uiContext.listScenes(),
+              .currentScene = currentScene,
+            },
+          } 
+        },
+      }
+    };
+    editorViewComponent.draw(drawTools, editorViewProps);
 
     // navlist uses this via extern
     uiManagerContext.uiContext = &uiContext;
-
   }
 
   if (uiContext.debugConfig().has_value()){
