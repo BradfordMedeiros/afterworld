@@ -484,6 +484,7 @@ UiContext getUiContext(GameState& gameState){
     setPausedMode(false); 
   };
   UiContext uiContext {
+   .routerHistory = &getRouterHistory(),
    .isDebugMode = []() -> bool { 
     auto args = gameapi -> getArgs();
     bool debugUi = args.find("debug-ui") != args.end();
@@ -593,6 +594,11 @@ UiContext getUiContext(GameState& gameState){
     .activeSceneId = activeSceneForSelected,
     .showPreviousModel = modelViewerPrevModel,
     .showNextModel = modelViewerNextModel,
+    .playSound = []() -> void {
+      if (getManagedSounds().activateSoundObjId.has_value()){
+        playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+      }
+    },
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool showEditor) -> void {
         setActivePlayerEditorMode(showEditor);
@@ -723,12 +729,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     initSettings();
-    registerOnRouteChanged([gameState]() -> void {
-      auto currentPath = fullHistoryStr();
-      auto queryParams = historyParams();
-      onSceneRouteChange(gameState -> sceneManagement, currentPath, queryParams);
-      modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
-    });
+    registerOnRouteChanged(
+      getRouterHistory(),
+      [gameState]() -> void {
+        auto currentPath = fullHistoryStr();
+        auto queryParams = historyParams();
+        onSceneRouteChange(gameState -> sceneManagement, currentPath, queryParams);
+        modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
+      }
+    );
 
     pushHistory({ "mainmenu" }, true);
 
@@ -976,8 +985,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    onMainUiMousePress(tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
-    onInGameUiMouseCallback(tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
+    onMainUiMousePress(gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onInGameUiMouseCallback(tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
     if (button == 1){

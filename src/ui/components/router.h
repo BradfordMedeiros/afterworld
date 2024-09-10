@@ -22,7 +22,7 @@ std::vector<std::string> historyParams(RouterHistory& history);
 
 std::optional<std::string> getPathParts(RouterHistory& history, int index);
 Component withAnimator(RouterHistory& history, Component& component, float duration);
-void registerOnRouteChanged(std::function<void()> onRouteChanged);
+void registerOnRouteChanged(RouterHistory& history, std::function<void()> onRouteChanged);
 
 
 struct PathMatch {

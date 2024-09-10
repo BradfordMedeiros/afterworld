@@ -194,7 +194,7 @@ Component withAnimator(RouterHistory& history, Component& component, float durat
   return withPropsCopy(component, props);
 }
 
-void registerOnRouteChanged(std::function<void()> onRouteChanged){
+void registerOnRouteChanged(RouterHistory& history, std::function<void()> onRouteChanged){
   modassert(!registerOnRouteChangedFn.has_value(), "can only register a single route");
   registerOnRouteChangedFn = onRouteChanged;
 }

@@ -4,8 +4,6 @@ extern CustomApiBindings* gameapi;
 
 void setMenuBackground(std::string background);
 
-auto routerHistory = createHistory();
-
 Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
@@ -69,7 +67,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
 
   Props routerProps {
     .props = {
-      { routerSymbol, routerHistory },
+      { routerSymbol, (*uiContext.routerHistory) },
       { routerMappingSymbol, routeToComponent },
     },
   };
@@ -272,6 +270,7 @@ ImageList loadImageListTextures(){
   return imageListDatas;
 }
 
+
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
   if (firstTime){
@@ -413,7 +412,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
   if (uiContext.isDebugMode()){
-    drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("route: ") + fullDebugStr(*uiContext.routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   }
@@ -441,7 +440,7 @@ void onMainUiScroll(double amount){
   scenegraphScroll(scrollValue);
 }
 
-void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
+void onMainUiMousePress(UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
   modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
   modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
 
@@ -464,6 +463,7 @@ void onMainUiMousePress(HandlerFns& handlerFns, int button, int action, std::opt
     if (selectedId.has_value()){
       if (handlerFns.handlerFns.find(selectedId.value()) != handlerFns.handlerFns.end()){
         handlerFns.handlerFns.at(selectedId.value())();
+        uiContext.playSound();
       }
       if (handlerFns.handlerCallbackFns.find(selectedId.value()) != handlerFns.handlerCallbackFns.end()){\
         HandlerCallbackFn data{
@@ -497,34 +497,39 @@ void onMainUiObjectsChanged(){
   refreshScenegraph();
 }
 
+auto mainRouterHistory = createHistory();
+RouterHistory& getRouterHistory(){
+  return mainRouterHistory;
+}
+
 void pushHistory(std::vector<std::string> route, bool replace){
-  pushHistory(routerHistory, route, replace);
+  pushHistory(mainRouterHistory, route, replace);
 }
 void popHistory(){
-  popHistory(routerHistory);
+  popHistory(mainRouterHistory);
 }
 
 void pushHistoryParam(std::string param){
-  pushHistoryParam(routerHistory, param);
+  pushHistoryParam(mainRouterHistory, param);
 }
 void rmHistoryParam(std::string param){
-  rmHistoryParam(routerHistory, param);
+  rmHistoryParam(mainRouterHistory, param);
 }
 
 std::string getCurrentPath(){
-  return getCurrentPath(routerHistory);
+  return getCurrentPath(mainRouterHistory);
 }
 
 std::vector<std::string> historyParams(){
-  return historyParams(routerHistory);
+  return historyParams(mainRouterHistory);
 }
 
 std::string fullHistoryStr(){
-  return fullHistoryStr(routerHistory);
+  return fullHistoryStr(mainRouterHistory);
 }
 
 std::optional<std::string> getPathParts(int index){
-  return getPathParts(routerHistory, index);
+  return getPathParts(mainRouterHistory, index);
 }
 
 void sendUiAlert(std::string message){

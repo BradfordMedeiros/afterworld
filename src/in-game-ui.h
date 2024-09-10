@@ -24,7 +24,7 @@ void freeInGameUiInstance(InGameUi& inGameUi, objid id);
 void zoomIntoGameUi(objid id);
 std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
 void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord);
-void onInGameUiMouseCallback(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId);
+void onInGameUiMouseCallback(UiContext& uiContext, InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId);
 void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, float xNdc, float yNdc);
 void onInGameUiScrollCallback(InGameUi& inGameUi, double amount);
 void onInGameUiKeyCallback(int key, int scancode, int action, int mods);

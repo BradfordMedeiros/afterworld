@@ -75,20 +75,20 @@ void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<obj
 	}
 }
 
-void onInGameUiMouseClick(InGameUi& inGameUi, objid id, int button, int action, glm::vec2 ndiCoords){
-  gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, inGameUi.textDisplays.at(id).textureId, [id, ndiCoords, &inGameUi, button, action](std::optional<objid> uiId, glm::vec2 texCoordUv) -> void {
+void onInGameUiMouseClick(UiContext& uiContext, InGameUi& inGameUi, objid id, int button, int action, glm::vec2 ndiCoords){
+  gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, inGameUi.textDisplays.at(id).textureId, [id, ndiCoords, &inGameUi, &uiContext, button, action](std::optional<objid> uiId, glm::vec2 texCoordUv) -> void {
 		if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
 			return;
 		}
 		auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns; // should probably check this still exists
 		if (uiId.has_value()){
 			modlog("ui pick color on game ui id", std::to_string(uiId.value()));
-			onMainUiMousePress(handlerFns, button, action, uiId.value());
+			onMainUiMousePress(uiContext, handlerFns, button, action, uiId.value());
 		}
   });
 }
 
-void onInGameUiMouseCallback(InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
+void onInGameUiMouseCallback(UiContext& uiContext, InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
 	if (!selectedId.has_value()){
 		return;
 	}
@@ -97,7 +97,7 @@ void onInGameUiMouseCallback(InGameUi& inGameUi, int button, int action, std::op
 		return;
 	}
 	auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
-	onInGameUiMouseClick(inGameUi, id, button, action, ndiCoords);
+	onInGameUiMouseClick(uiContext, inGameUi, id, button, action, ndiCoords);
 }
 
 void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, float xNdc, float yNdc){

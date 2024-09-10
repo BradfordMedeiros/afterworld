@@ -23,7 +23,12 @@ struct TerminalConfig;
 struct ZoomOptions;
 struct ScoreOptions;
 struct DebugConfig;
+struct RouterHistory;
+
 struct UiContext {
+  // UI Options
+  RouterHistory* routerHistory;
+
   std::function<bool()> isDebugMode;
   std::function<bool()> showEditor;
   std::function<bool()> showConsole;
@@ -36,6 +41,7 @@ struct UiContext {
 
   std::function<std::optional<ScoreOptions>()> getScoreConfig;
 
+  // api for the ui
   LevelUIInterface levels;
   PauseInterface pauseInterface;
   WorldPlayInterface worldPlayInterface;
@@ -49,6 +55,8 @@ struct UiContext {
 
   std::function<void()> showPreviousModel;
   std::function<void()> showNextModel;
+
+  std::function<void()> playSound;
 
   ConsoleInterface consoleInterface;
 };
