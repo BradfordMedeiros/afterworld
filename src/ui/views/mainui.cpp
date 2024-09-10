@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 
 void setMenuBackground(std::string background);
 
-Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
+Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
 
@@ -67,7 +67,7 @@ Props createRouterProps(UiContext& uiContext, std::optional<objid> selectedId){
 
   Props routerProps {
     .props = {
-      { routerSymbol, (*uiContext.routerHistory) },
+      { routerSymbol, routerHistory },
       { routerMappingSymbol, routeToComponent },
     },
   };
@@ -272,7 +272,7 @@ ImageList loadImageListTextures(){
 
 
 static bool firstTime = true;
-HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
+HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
   if (firstTime){
     initStyles();
     uiState.navbarType = queryLoadNavbarType();
@@ -339,7 +339,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   };
   resetMenuItemMappingId();
 
-  auto routerProps = createRouterProps(uiContext, selectedId);
+  auto routerProps = createRouterProps(routerHistory, uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
   {
@@ -412,7 +412,7 @@ HandlerFns handleDrawMainUi(UiContext& uiContext, std::optional<objid> selectedI
   }
 
   if (uiContext.isDebugMode()){
-    drawTools.drawText(std::string("route: ") + fullDebugStr(*uiContext.routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   }
@@ -498,7 +498,7 @@ void onMainUiObjectsChanged(){
 }
 
 auto mainRouterHistory = createHistory();
-RouterHistory& getRouterHistory(){
+RouterHistory& getMainRouterHistory(){
   return mainRouterHistory;
 }
 

@@ -2,12 +2,12 @@
 
 extern CustomApiBindings* gameapi;
 
-std::optional<std::function<void()>> registerOnRouteChangedFn;
 RouterHistory createHistory(){
 	return RouterHistory {
     .currentRouteTime = 0.f,
     .history = {},
     .params = {},
+    .registerOnRouteChangedFn = std::nullopt,
 	};
 }
 
@@ -19,8 +19,8 @@ void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool 
   for (auto &path : newPath){
     history.history.push_back(path);
   }
-  if (registerOnRouteChangedFn.has_value()){
-    registerOnRouteChangedFn.value()();
+  if (history.registerOnRouteChangedFn.has_value()){
+    history.registerOnRouteChangedFn.value()();
   }
   if (removeParams){
     history.params = {};
@@ -33,8 +33,8 @@ void popHistory(RouterHistory& history){
   }
   history.history.pop_back();
   history.currentRouteTime = gameapi -> timeSeconds(true);
-  if (registerOnRouteChangedFn.has_value()){
-    registerOnRouteChangedFn.value()();
+  if (history.registerOnRouteChangedFn.has_value()){
+    history.registerOnRouteChangedFn.value()();
   }  
 }
 
@@ -45,8 +45,8 @@ void pushHistoryParam(RouterHistory& history, std::string param){
     }
   }
   history.params.push_back(param);
-  if (registerOnRouteChangedFn.has_value()){
-    registerOnRouteChangedFn.value()();
+  if (history.registerOnRouteChangedFn.has_value()){
+    history.registerOnRouteChangedFn.value()();
   }  
 }
 
@@ -60,8 +60,8 @@ void rmHistoryParam(RouterHistory& history, std::string param){
   }
   history.params = newParams;
   if (history.params.size() != originalSize){
-    if (registerOnRouteChangedFn.has_value()){
-      registerOnRouteChangedFn.value()();
+    if (history.registerOnRouteChangedFn.has_value()){
+      history.registerOnRouteChangedFn.value()();
     }  
   }
 }
@@ -195,6 +195,6 @@ Component withAnimator(RouterHistory& history, Component& component, float durat
 }
 
 void registerOnRouteChanged(RouterHistory& history, std::function<void()> onRouteChanged){
-  modassert(!registerOnRouteChangedFn.has_value(), "can only register a single route");
-  registerOnRouteChangedFn = onRouteChanged;
+  modassert(!history.registerOnRouteChangedFn.has_value(), "can only register a single route");
+  history.registerOnRouteChangedFn = onRouteChanged;
 }

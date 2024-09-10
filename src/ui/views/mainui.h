@@ -34,8 +34,8 @@ struct HandlerFns {
   std::optional<AutoFocusObj> autofocus;
 };
 
-RouterHistory& getRouterHistory();
-HandlerFns handleDrawMainUi(UiContext& pauseContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
+RouterHistory& getMainRouterHistory();
+HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& pauseContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
 void onMainUiScroll(double amount);
 void onMainUiMousePress(UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods);

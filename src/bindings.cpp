@@ -484,7 +484,6 @@ UiContext getUiContext(GameState& gameState){
     setPausedMode(false); 
   };
   UiContext uiContext {
-   .routerHistory = &getRouterHistory(),
    .isDebugMode = []() -> bool { 
     auto args = gameapi -> getArgs();
     bool debugUi = args.find("debug-ui") != args.end();
@@ -730,7 +729,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     initSettings();
     registerOnRouteChanged(
-      getRouterHistory(),
+      getMainRouterHistory(),
       [gameState]() -> void {
         auto currentPath = fullHistoryStr();
         auto queryParams = historyParams();
@@ -783,10 +782,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiData.uiCallbacks = handleDrawMainUi(tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
+    gameState -> uiData.uiCallbacks = handleDrawMainUi(getMainRouterHistory(), tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
     modassert(tags.uiData, "tags.uiData NULL");
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-    onInGameUiFrame(tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
+    onInGameUiFrame(getMainRouterHistory(), tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));

@@ -7,6 +7,7 @@ struct RouterHistory {
   float currentRouteTime;
   std::deque<std::string> history;
   std::vector<std::string> params;
+  std::optional<std::function<void()>> registerOnRouteChangedFn;
 };
 RouterHistory createHistory();
 void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace = false, bool removeParams = false);

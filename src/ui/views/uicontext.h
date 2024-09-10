@@ -27,8 +27,6 @@ struct RouterHistory;
 
 struct UiContext {
   // UI Options
-  RouterHistory* routerHistory;
-
   std::function<bool()> isDebugMode;
   std::function<bool()> showEditor;
   std::function<bool()> showConsole;

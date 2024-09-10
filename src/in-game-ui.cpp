@@ -27,7 +27,11 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  		.textureId = uiTexture,
  		.handlerFns = {},
  		.mouseCoordNdc = glm::vec2(0.f, 0.f),
+ 		.routerHistory = createHistory(),
  	};
+
+ 	// initial route
+  pushHistory(inGameUi.textDisplays.at(id).routerHistory.value(), { "mainmenu", "settings" }, true);
 };
 
 void freeInGameUiInstance(InGameUi& inGameUi, objid id){
@@ -55,14 +59,20 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 }
 
 
-void onInGameUiFrame(InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
+void onInGameUiFrame(RouterHistory& routerHistory, InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
 	// should make sure the texture id is the same
 	bool drawCursor = true;
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
 		textDisplay.mouseCoordNdc = ndiCoord;
 
 		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
-		textDisplay.handlerFns = handleDrawMainUi(uiContext, getGlobalState().selectedId, textDisplay.textureId, drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt));
+		textDisplay.handlerFns = handleDrawMainUi(
+			textDisplay.routerHistory.has_value() ? textDisplay.routerHistory.value() : routerHistory, 
+			uiContext, 
+			getGlobalState().selectedId, 
+			textDisplay.textureId, 
+			drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt)
+		);
 
 		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
     gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
