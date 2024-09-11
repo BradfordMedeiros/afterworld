@@ -11,7 +11,7 @@ Component button {
     Props buttonProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = strValue },
-        PropPair { .symbol = paddingSymbol,      .value = paddingAmount },
+        PropPair { .symbol = paddingSymbol, .value = paddingAmount },
         PropPair { .symbol = onclickSymbol, .value = *onClick },
       },
     };

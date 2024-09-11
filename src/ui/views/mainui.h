@@ -13,6 +13,7 @@
 #include "./windowmanager.h"
 #include "./uicontext.h"
 #include "../components/uiwindow.h"
+#include "../components/game/elevator.h"
 #include "./navigation.h"
 #include "../../modelviewer.h"
 

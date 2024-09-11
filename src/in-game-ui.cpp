@@ -29,9 +29,8 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  		.mouseCoordNdc = glm::vec2(0.f, 0.f),
  		.routerHistory = createHistory(),
  	};
-
  	// initial route
-  pushHistory(inGameUi.textDisplays.at(id).routerHistory.value(), { "mainmenu", "settings" }, true);
+  pushHistory(inGameUi.textDisplays.at(id).routerHistory.value(), { "gamemenu", "elevatorcontrol" }, true);
 };
 
 void freeInGameUiInstance(InGameUi& inGameUi, objid id){
@@ -61,7 +60,7 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 
 void onInGameUiFrame(RouterHistory& routerHistory, InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
 	// should make sure the texture id is the same
-	bool drawCursor = true;
+	bool drawCursor = false;
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
 		textDisplay.mouseCoordNdc = ndiCoord;
 

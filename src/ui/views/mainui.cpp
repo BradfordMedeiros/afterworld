@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 void setMenuBackground(std::string background);
 
+
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
@@ -62,6 +63,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "playing/*/dead/", deadComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
+    { "gamemenu/elevatorcontrol/", elevatorComponent },
     { "",  emptyComponent  },
   };
 
