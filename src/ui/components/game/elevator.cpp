@@ -3,17 +3,13 @@
 Component elevatorComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "./res/textures/test.png", std::nullopt, std::nullopt);
-    
-    std::function<void()> upButtonClick = []() -> void {
-    	modlog("main ui game", "elevator up");
-    };
-    std::function<void()> downButtonClick = []() -> void {
-    	modlog("main ui game", "elevator down");
-    };
+    ElevatorUiOptions* elevatorOptions = typeFromProps<ElevatorUiOptions>(props, valueSymbol);
+    modassert(elevatorOptions, "elevator options not passed in");
+
     Props upButtonProps { 
       .props = { 
         PropPair { .symbol = valueSymbol, .value = std::string("UP") },
-        PropPair { .symbol = onclickSymbol, .value = upButtonClick },
+        PropPair { .symbol = onclickSymbol, .value = elevatorOptions -> onClickUp },
         PropPair { .symbol = paddingSymbol, .value = 0.4f },
       }
     };
@@ -22,7 +18,7 @@ Component elevatorComponent {
     Props downButtonProps { 
       .props = { 
         PropPair { .symbol = valueSymbol, .value = std::string("DOWN") },
-        PropPair { .symbol = onclickSymbol, .value = downButtonClick },
+        PropPair { .symbol = onclickSymbol, .value = elevatorOptions -> onClickDown },
         PropPair { .symbol = paddingSymbol, .value = 0.4f },
       }
     };

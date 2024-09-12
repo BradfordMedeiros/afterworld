@@ -6,6 +6,11 @@
 #include "../basic/layout.h"
 #include "../basic/button.h"
 
+struct ElevatorUiOptions {
+	std::function<void()> onClickUp;
+	std::function<void()> onClickDown;
+};
+
 extern Component elevatorComponent;
 
 #endif

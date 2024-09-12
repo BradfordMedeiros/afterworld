@@ -54,6 +54,27 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     }
   );
 
+  auto elevatorView = withPropsCopy(
+    elevatorComponent,
+    Props {
+      .props = {
+        PropPair {
+          .symbol = valueSymbol, 
+          .value = ElevatorUiOptions {
+            .onClickUp = []() -> void {
+              modlog("main ui game", "elevator up");
+              gameapi -> sendNotifyMessage("open-door-trigger", "open");
+            },
+            .onClickDown = []() -> void {
+              modlog("main ui game", "elevator down");
+              gameapi -> sendNotifyMessage("open-door-trigger", "open");
+            },
+          },
+        },
+      },
+    }   
+  );
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
@@ -63,7 +84,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "playing/*/dead/", deadComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
-    { "gamemenu/elevatorcontrol/", elevatorComponent },
+    { "gamemenu/elevatorcontrol/", elevatorView },
     { "",  emptyComponent  },
   };
 
