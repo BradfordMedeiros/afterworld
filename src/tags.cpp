@@ -66,6 +66,13 @@ void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);
 }
 
+void doRecording(objid id, std::unordered_map<objid, ManagedRecording>& recordings, std::string& signal){
+}
+bool recordingInProgress(objid id, std::unordered_map<objid, ManagedRecording>& recordings, std::optional<std::string>& signal){
+	return false;
+}
+
+
 void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
 	for (auto &hitobject : hitObjects){
@@ -101,6 +108,30 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
+	},
+	TagUpdater {
+		.attribute = "recording",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+			auto signal = maybeUnwrapAttrOpt<std::string>(attrValue).value();
+ 			tags.recordings[id] = ManagedRecording{
+ 				.signal = signal,
+ 			};
+  	},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.recordings.erase(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+	  	if (key == "playrecording"){
+				std::string* recordingSignal = anycast<std::string>(value);
+				modassert(recordingSignal, "recording signal not string");
+	  		for (auto &[id, recording] : tags.recordings){
+	  			if (recording.signal == *recordingSignal){
+		  			gameapi -> playRecording(id, "../afterworld/data/recordings/move.rec", std::nullopt);
+	  			}
+	  		}
+	  	}
+  	},
 	},
 	TagUpdater {
 		.attribute = "open",
@@ -467,6 +498,7 @@ Tags createTags(UiData* uiData){
   tags.openable = {};
   tags.idToRotateTimeAdded = {};
   tags.teleportObjs = {};
+  tags.recordings = {};
   ///// animations ////
   tags.animationController = createStateController();
 

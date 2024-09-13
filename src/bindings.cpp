@@ -894,7 +894,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       handleInteract(*gameObjId);
       return;
     }
-    if (key == "switch"){ // should be moved
+    if (key == "switch"){
       auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "switch value invalid");
       handleSwitch(*strValue);

@@ -64,10 +64,12 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
             .onClickUp = []() -> void {
               modlog("main ui game", "elevator up");
               gameapi -> sendNotifyMessage("open-door-trigger", "open");
+              gameapi -> sendNotifyMessage("playrecording", std::string("test"));
             },
             .onClickDown = []() -> void {
               modlog("main ui game", "elevator down");
               gameapi -> sendNotifyMessage("open-door-trigger", "open");
+              gameapi -> sendNotifyMessage("playrecording", std::string("test"));
             },
           },
         },

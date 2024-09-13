@@ -35,6 +35,10 @@ struct OpenableType {
 	bool stateUp;
 };
 
+struct ManagedRecording{
+	std::string signal;
+};
+
 struct UiData {
   UiContext uiContext;
   HandlerFns uiCallbacks;
@@ -47,6 +51,8 @@ struct Tags {
 	std::unordered_map<objid, OpenableType> openable;
 	std::unordered_map<objid, float> idToRotateTimeAdded;
 	std::set<objid> teleportObjs;
+
+	std::unordered_map<objid, ManagedRecording> recordings;
 
 	UiData* uiData;
 
