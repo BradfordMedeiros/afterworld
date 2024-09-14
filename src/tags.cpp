@@ -2,6 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
+extern Tags tags;
+
 struct TagUpdater {
 	std::string attribute;
 	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
@@ -66,12 +68,35 @@ void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);
 }
 
-void doRecording(objid id, std::unordered_map<objid, ManagedRecording>& recordings, std::string& signal){
-}
-bool recordingInProgress(objid id, std::unordered_map<objid, ManagedRecording>& recordings, std::optional<std::string>& signal){
-	return false;
-}
+struct Signal {
+	bool locked;   // should remove on unloading 
+};
+std::map<std::string, Signal> lockedSignals {};
 
+bool isSignalLocked(std::string signal){
+	if(lockedSignals.find(signal) == lockedSignals.end()){
+		return false;
+	}
+	return lockedSignals.at(signal).locked;
+};
+// RECORDING_PLAY_ONCE, RECORDING_PLAY_LOOP 
+// RECORDING_PLAY_ONCE_REVERSE
+void playRecordingBySignal(std::string signal, std::string rec, bool reverse){
+	for (auto &[id, recording] : tags.recordings){
+		if (recording.signal == signal){
+			auto length = gameapi -> recordingLength(rec);
+			gameapi -> playRecording(id, rec, reverse ? RECORDING_PLAY_ONCE_REVERSE : RECORDING_PLAY_ONCE);
+			modlog("play recording playback length", std::to_string(length));
+			lockedSignals[signal] = Signal {
+				.locked = true,
+			};
+  		gameapi -> schedule(-1, length * 1000, NULL, [id, signal](void*) -> void {
+				modlog("play recording playback stopped", "done");
+				lockedSignals.erase(signal);
+  		});
+		}
+	}
+}
 
 void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
@@ -121,17 +146,7 @@ std::vector<TagUpdater> tagupdates = {
   		tags.recordings.erase(id);
   	},
   	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-	  	if (key == "playrecording"){
-				std::string* recordingSignal = anycast<std::string>(value);
-				modassert(recordingSignal, "recording signal not string");
-	  		for (auto &[id, recording] : tags.recordings){
-	  			if (recording.signal == *recordingSignal){
-		  			gameapi -> playRecording(id, "../afterworld/data/recordings/move.rec", std::nullopt);
-	  			}
-	  		}
-	  	}
-  	},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "open",

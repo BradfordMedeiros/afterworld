@@ -9,6 +9,8 @@
 struct ElevatorUiOptions {
 	std::function<void()> onClickUp;
 	std::function<void()> onClickDown;
+	bool canClickUp;
+	bool canClickDown;
 };
 
 extern Component elevatorComponent;

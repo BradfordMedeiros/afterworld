@@ -75,4 +75,6 @@ struct TeleportInfo {
 
 std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 
+void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
+
 #endif 

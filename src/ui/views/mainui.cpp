@@ -3,7 +3,8 @@
 extern CustomApiBindings* gameapi;
 
 void setMenuBackground(std::string background);
-
+void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
+bool isSignalLocked(std::string signal);
 
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
@@ -63,14 +64,14 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
           .value = ElevatorUiOptions {
             .onClickUp = []() -> void {
               modlog("main ui game", "elevator up");
-              gameapi -> sendNotifyMessage("open-door-trigger", "open");
-              gameapi -> sendNotifyMessage("playrecording", std::string("test"));
+              playRecordingBySignal("test", "../afterworld/data/recordings/move.rec", false);
             },
             .onClickDown = []() -> void {
               modlog("main ui game", "elevator down");
-              gameapi -> sendNotifyMessage("open-door-trigger", "open");
-              gameapi -> sendNotifyMessage("playrecording", std::string("test"));
+              playRecordingBySignal("test", "../afterworld/data/recordings/move.rec", true);
             },
+            .canClickUp = !isSignalLocked("test"),
+            .canClickDown = !isSignalLocked("test"),
           },
         },
       },
