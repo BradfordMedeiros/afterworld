@@ -75,6 +75,7 @@ struct UiState {
   NavbarType navbarType;
   std::set<std::string> dockedDocks;
 };
+UiState createUiState();
 
 #endif
 

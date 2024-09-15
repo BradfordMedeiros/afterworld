@@ -100,27 +100,31 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
   return routerProps;
 }
 
-UiState uiState {
-  .imageListScrollAmount = 0,
-  .fileexplorerScrollAmount = 0,
-  .onFileAddedFn = std::nullopt,
-  .onGameObjSelected = std::nullopt,
-  .fileFilter = std::nullopt,
-  .onInputBoxFn = std::nullopt,
-
-  .colorPickerTitle = "color picker",
-  .onNewColor = std::nullopt,
-
-  .focusedId = std::nullopt,
-  .lastAutofocusedKey = "",
-
-  .showScenes = false,
-  .offset = 2,
-  .currentScene = -1,
-
-  .navbarType = MAIN_EDITOR,
-  .dockedDocks = {},
-};
+UiState createUiState(){
+  UiState uiState {
+    .imageListScrollAmount = 0,
+    .fileexplorerScrollAmount = 0,
+    .onFileAddedFn = std::nullopt,
+    .onGameObjSelected = std::nullopt,
+    .fileFilter = std::nullopt,
+    .onInputBoxFn = std::nullopt,
+  
+    .colorPickerTitle = "color picker",
+    .onNewColor = std::nullopt,
+  
+    .focusedId = std::nullopt,
+    .lastAutofocusedKey = "",
+  
+    .showScenes = false,
+    .offset = 2,
+    .currentScene = -1,
+  
+    .navbarType = MAIN_EDITOR,
+    .dockedDocks = {},
+  };
+  return uiState;
+}
+UiState uiState = createUiState();
 
 void onClickNavbar(const char* value) {
   //pushQueryParam(routerHistory, "dockedDock");
@@ -511,6 +515,7 @@ void onMainUiMousePress(UiContext& uiContext, HandlerFns& handlerFns, int button
 
 void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods){
   modlog("mainui key press", std::to_string(key));
+  modlog("mainui key press focused", print(uiState.focusedId));
   if (!uiState.focusedId.has_value()){
     return;
   }
