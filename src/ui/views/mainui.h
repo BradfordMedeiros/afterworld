@@ -59,11 +59,10 @@ struct UiState {
   std::set<std::string> dockedDocks;
 };
 UiState createUiState();
-UiState& getMainUiState();
 
 struct UiStateContext {
   RouterHistory* routerHistory;
-  UiState* uiState;
+  UiState uiState;
 };
 HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
 void onMainUiScroll(UiStateContext& uiStateContext, double amount);

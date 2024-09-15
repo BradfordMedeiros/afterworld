@@ -28,7 +28,11 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  		.handlerFns = {},
  		.mouseCoordNdc = glm::vec2(0.f, 0.f),
  		.routerHistory = createHistory(),
+ 		.uiStateContext = UiStateContext {
+ 			.uiState = createUiState(),
+ 		},
  	};
+ 	inGameUi.textDisplays.at(id).uiStateContext.value().routerHistory = &inGameUi.textDisplays.at(id).routerHistory.value();
  	// initial route
   pushHistory(inGameUi.textDisplays.at(id).routerHistory.value(), { "gamemenu", "elevatorcontrol" }, true);
 };
@@ -64,12 +68,9 @@ void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiC
 		textDisplay.mouseCoordNdc = ndiCoord;
 
 		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
-    UiStateContext uiStateContext {
-      .routerHistory = textDisplay.routerHistory.has_value() ? &textDisplay.routerHistory.value() : uiState.routerHistory,
-      .uiState = uiState.uiState,
-    };
+    UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
 		textDisplay.handlerFns = handleDrawMainUi(
-			uiStateContext, 
+			actualUiState, 
 			uiContext, 
 			getGlobalState().selectedId, 
 			textDisplay.textureId, 
@@ -94,8 +95,10 @@ void onInGameUiMouseClick(UiStateContext& uiState, UiContext& uiContext, InGameU
 		}
 		auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns; // should probably check this still exists
 		if (uiId.has_value()){
+			TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
+	  	UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
 			modlog("ui pick color on game ui id", std::to_string(uiId.value()));
-			onMainUiMousePress(uiState, uiContext, handlerFns, button, action, uiId.value());
+			onMainUiMousePress(actualUiState, uiContext, handlerFns, button, action, uiId.value());
 		}
   });
 }
@@ -109,7 +112,10 @@ void onInGameUiMouseCallback(UiStateContext& uiState, UiContext& uiContext, InGa
 		return;
 	}
 	auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
-	onInGameUiMouseClick(uiState, uiContext, inGameUi, id, button, action, ndiCoords);
+
+	TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
+  UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
+	onInGameUiMouseClick(actualUiState, uiContext, inGameUi, id, button, action, ndiCoords);
 }
 
 void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, float xNdc, float yNdc){

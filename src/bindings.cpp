@@ -677,13 +677,10 @@ void doAnimationTrigger(objid entityId, const char* transition){
   }
 }
 
-UiStateContext getUiStateContext(){
-  static UiStateContext uiStateContext {
-    .routerHistory = &getMainRouterHistory(),
-    .uiState = &getMainUiState(),
-  };
-  return uiStateContext;
-}
+UiStateContext uiStateContext {
+  .routerHistory = &getMainRouterHistory(),
+  .uiState = createUiState(),
+};
 
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -791,7 +788,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    auto uiStateContext = getUiStateContext();
     gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
     modassert(tags.uiData, "tags.uiData NULL");
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
@@ -856,7 +852,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         showTerminal(std::nullopt);
       }
 
-      auto uiStateContext = getUiStateContext();
       onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
       onInGameUiKeyCallback(key, scancode, action, mods);
     }
@@ -996,7 +991,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    static auto uiStateContext = getUiStateContext();
     onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
     onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
@@ -1031,7 +1025,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    auto uiStateContext = getUiStateContext();
     onMainUiScroll(uiStateContext, amount);
     onInGameUiScrollCallback(tags.inGameUi, amount);
     onMovementScrollCallback(movement, amount);

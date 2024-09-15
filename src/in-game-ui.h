@@ -11,7 +11,9 @@ struct TextDisplay {
 	objid textureId;
 	HandlerFns handlerFns;
 	glm::vec2 mouseCoordNdc;
+
 	std::optional<RouterHistory> routerHistory;
+	std::optional<UiStateContext> uiStateContext; 
 };
 
 

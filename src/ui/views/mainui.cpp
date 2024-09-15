@@ -124,10 +124,7 @@ UiState createUiState(){
   };
   return uiState;
 }
-UiState commonState = createUiState();
-UiState& getMainUiState(){
-  return commonState;
-}
+UiState* commonState = NULL;
 
 std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
@@ -143,11 +140,12 @@ UiManagerContext uiManagerContext {
   .uiContext = NULL,
   .uiMainContext = UiMainContext {
     .openNewSceneMenu = [](std::function<void(bool closedWithoutInput, std::string input)> onInputBox) -> void { // replace with onInputBoxFn
+      modassert(commonState, "commonState is NULL");
       windowSetEnabled(windowDialogSymbol, true);
-      commonState.onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
+      commonState -> onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
         onInputBox(closedWithoutNewFile, userInput);
         std::cout << "open new scene user input is: " << userInput << std::endl;;
-        commonState.onInputBoxFn = std::nullopt;
+        commonState -> onInputBoxFn = std::nullopt;
         windowSetEnabled(windowDialogSymbol, false);
       };
       std::cout << "open new scene placeholder" << std::endl;
@@ -174,26 +172,26 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
-    commonState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    commonState -> onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      commonState.onFileAddedFn = std::nullopt;
-      commonState.fileFilter = std::nullopt;
+      commonState -> onFileAddedFn = std::nullopt;
+      commonState -> fileFilter = std::nullopt;
       windowSetEnabled(windowFileExplorerSymbol, false);
     };
-    commonState.fileFilter = fileFilterFn;
+    commonState -> fileFilter = fileFilterFn;
   },
   .openImagePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
     windowSetEnabled(windowImageExplorerSymbol, true);
-    commonState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    commonState -> onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      commonState.onFileAddedFn = std::nullopt;
+      commonState -> onFileAddedFn = std::nullopt;
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
   .openColorPicker = [](std::function<void(glm::vec4)> onColor, std::string windowName) -> void {
     windowSetEnabled(windowColorPickerSymbol, true);
-    commonState.onNewColor = onColor;
-    commonState.colorPickerTitle = windowName;
+    commonState -> onNewColor = onColor;
+    commonState -> colorPickerTitle = windowName;
     //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
     //  onFileAdded(closedWithoutNewFile, file);
     //  onFileAddedFn = std::nullopt;
@@ -206,7 +204,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     std::cout << "dock pick gameobj" << std::endl;
     // kind of hack, otherwise it would select the object just clicked due to ordering of binding callbacks
     gameapi -> schedule(-1, 100, NULL, [selectGameObj](void*) -> void { 
-      commonState.onGameObjSelected = selectGameObj;
+      commonState -> onGameObjSelected = selectGameObj;
     });
   },
   .setTexture = [](std::string& texture) -> void {
@@ -274,7 +272,7 @@ void queryUpdateNavbarType(std::string& layout){
 
 NavListApi navListApi {
   .changeLayout = [](std::string layout) -> void {
-    commonState.navbarType = strToNavbarType(layout);
+    commonState -> navbarType = strToNavbarType(layout);
     queryUpdateNavbarType(layout);
   }
 };
@@ -297,7 +295,8 @@ ImageList loadImageListTextures(){
 
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
-  UiState& uiState = *(uiStateContext.uiState);
+  UiState& uiState = uiStateContext.uiState;
+  commonState = &uiState;
 
   if (firstTime){
     initStyles();
@@ -455,7 +454,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
 }
 
 void onMainUiScroll(UiStateContext& uiStateContext, double amount){
-  UiState& uiState = *uiStateContext.uiState;
+  UiState& uiState = uiStateContext.uiState;
   auto scrollValue = static_cast<int>(amount);
   std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
   uiState.imageListScrollAmount += (scrollValue * 5);
@@ -479,7 +478,7 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
   modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
   modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
 
-  UiState& uiState = *(uiStateContext.uiState);
+  UiState& uiState = uiStateContext.uiState;
 
   std::cout << "button: " << button << ", action: " << action << std::endl;
   if (button == 0 && action == 0){
@@ -521,7 +520,7 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
 }
 
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods){
-  UiState& uiState = *(uiStateContext.uiState);
+  UiState& uiState = uiStateContext.uiState;
 
   modlog("mainui key press", std::to_string(key));
   modlog("mainui key press focused", print(uiState.focusedId));
