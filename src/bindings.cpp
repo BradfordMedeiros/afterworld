@@ -678,7 +678,7 @@ void doAnimationTrigger(objid entityId, const char* transition){
 }
 
 UiStateContext getUiStateContext(){
-  UiStateContext uiStateContext {
+  static UiStateContext uiStateContext {
     .routerHistory = &getMainRouterHistory(),
     .uiState = &getMainUiState(),
   };

@@ -129,15 +129,6 @@ UiState& getMainUiState(){
   return commonState;
 }
 
-void onClickNavbar(const char* value) {
-  //pushQueryParam(routerHistory, "dockedDock");
-  commonState.dockedDocks.insert(value);
-  for (auto &dock : commonState.dockedDocks){
-    auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
-    windowSetEnabled(windowDockSymbol, true, glm::vec2(1.f, 0.9f));    
-  }
-};
-
 std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
   for (auto &worldState : worldStates){
@@ -397,6 +388,14 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
   }
 
   if (uiContext.showEditor()){
+    auto onClickNavbar = [&uiState](const char* value) -> void {
+      uiState.dockedDocks.insert(value);
+      for (auto &dock : uiState.dockedDocks){
+        auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
+        windowSetEnabled(windowDockSymbol, true, glm::vec2(1.f, 0.9f));    
+      }
+    };
+
     Props editorViewProps {
       .props = {
         PropPair {
