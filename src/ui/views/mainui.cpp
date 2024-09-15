@@ -455,6 +455,8 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
 
 void onMainUiScroll(UiStateContext& uiStateContext, double amount){
   UiState& uiState = uiStateContext.uiState;
+  commonState = &uiState;
+
   auto scrollValue = static_cast<int>(amount);
   std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
   uiState.imageListScrollAmount += (scrollValue * 5);
@@ -479,6 +481,7 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
   modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
 
   UiState& uiState = uiStateContext.uiState;
+  commonState = &uiState;
 
   std::cout << "button: " << button << ", action: " << action << std::endl;
   if (button == 0 && action == 0){
@@ -521,6 +524,7 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
 
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods){
   UiState& uiState = uiStateContext.uiState;
+  commonState = &uiState;
 
   modlog("mainui key press", std::to_string(key));
   modlog("mainui key press focused", print(uiState.focusedId));

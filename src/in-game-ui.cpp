@@ -35,6 +35,7 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  	inGameUi.textDisplays.at(id).uiStateContext.value().routerHistory = &inGameUi.textDisplays.at(id).routerHistory.value();
  	// initial route
   pushHistory(inGameUi.textDisplays.at(id).routerHistory.value(), { "gamemenu", "elevatorcontrol" }, true);
+
 };
 
 void freeInGameUiInstance(InGameUi& inGameUi, objid id){
