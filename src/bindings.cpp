@@ -677,6 +677,15 @@ void doAnimationTrigger(objid entityId, const char* transition){
   }
 }
 
+UiStateContext getUiStateContext(){
+  UiStateContext uiStateContext {
+    .routerHistory = &getMainRouterHistory(),
+    .uiState = &getMainUiState(),
+  };
+  return uiStateContext;
+}
+
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -782,10 +791,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiData.uiCallbacks = handleDrawMainUi(getMainRouterHistory(), tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
+    auto uiStateContext = getUiStateContext();
+    gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
     modassert(tags.uiData, "tags.uiData NULL");
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-    onInGameUiFrame(getMainRouterHistory(), tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
+    onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
@@ -845,7 +855,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (isExitTerminalKey(key)){
         showTerminal(std::nullopt);
       }
-      onMainUiKeyPress(gameState -> uiData.uiCallbacks, key, scancode, action, mods);
+
+      auto uiStateContext = getUiStateContext();
+      onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
       onInGameUiKeyCallback(key, scancode, action, mods);
     }
     handleHotkey(key, action);
@@ -984,8 +996,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    onMainUiMousePress(gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
-    onInGameUiMouseCallback(tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
+    static auto uiStateContext = getUiStateContext();
+    onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
     if (button == 1){
@@ -1018,9 +1031,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    onMainUiScroll(amount);
-    onMovementScrollCallback(movement, amount);
+    auto uiStateContext = getUiStateContext();
+    onMainUiScroll(uiStateContext, amount);
     onInGameUiScrollCallback(tags.inGameUi, amount);
+    onMovementScrollCallback(movement, amount);
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     maybeAddMovementEntity(getMovementData(), idAdded);

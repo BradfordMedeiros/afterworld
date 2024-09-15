@@ -36,23 +36,6 @@ struct HandlerFns {
 };
 
 RouterHistory& getMainRouterHistory();
-HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& pauseContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
-void onMainUiScroll(double amount);
-void onMainUiMousePress(UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
-void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods);
-void onMainUiObjectsChanged();
-void pushHistory(std::vector<std::string> route, bool replace = false);
-void pushHistoryParam(std::string param);
-void rmHistoryParam(std::string param);
-
-
-void popHistory();
-std::string getCurrentPath();
-std::vector<std::string> historyParams();
-std::string fullHistoryStr();
-std::optional<std::string> getPathParts(int index);
-void sendUiAlert(std::string message);
-
 
 struct UiState {
   int imageListScrollAmount;
@@ -76,6 +59,29 @@ struct UiState {
   std::set<std::string> dockedDocks;
 };
 UiState createUiState();
+UiState& getMainUiState();
+
+struct UiStateContext {
+  RouterHistory* routerHistory;
+  UiState* uiState;
+};
+HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
+void onMainUiScroll(UiStateContext& uiStateContext, double amount);
+void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
+void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);
+void onMainUiObjectsChanged();
+void pushHistory(std::vector<std::string> route, bool replace = false);
+void pushHistoryParam(std::string param);
+void rmHistoryParam(std::string param);
+
+
+void popHistory();
+std::string getCurrentPath();
+std::vector<std::string> historyParams();
+std::string fullHistoryStr();
+std::optional<std::string> getPathParts(int index);
+void sendUiAlert(std::string message);
+
 
 #endif
 

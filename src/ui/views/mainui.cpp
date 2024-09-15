@@ -124,12 +124,15 @@ UiState createUiState(){
   };
   return uiState;
 }
-UiState uiState = createUiState();
+UiState commonState = createUiState();
+UiState& getMainUiState(){
+  return commonState;
+}
 
 void onClickNavbar(const char* value) {
   //pushQueryParam(routerHistory, "dockedDock");
-  uiState.dockedDocks.insert(value);
-  for (auto &dock : uiState.dockedDocks){
+  commonState.dockedDocks.insert(value);
+  for (auto &dock : commonState.dockedDocks){
     auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
     windowSetEnabled(windowDockSymbol, true, glm::vec2(1.f, 0.9f));    
   }
@@ -150,10 +153,10 @@ UiManagerContext uiManagerContext {
   .uiMainContext = UiMainContext {
     .openNewSceneMenu = [](std::function<void(bool closedWithoutInput, std::string input)> onInputBox) -> void { // replace with onInputBoxFn
       windowSetEnabled(windowDialogSymbol, true);
-      uiState.onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
+      commonState.onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
         onInputBox(closedWithoutNewFile, userInput);
         std::cout << "open new scene user input is: " << userInput << std::endl;;
-        uiState.onInputBoxFn = std::nullopt;
+        commonState.onInputBoxFn = std::nullopt;
         windowSetEnabled(windowDialogSymbol, false);
       };
       std::cout << "open new scene placeholder" << std::endl;
@@ -180,26 +183,26 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
-    uiState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    commonState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      uiState.onFileAddedFn = std::nullopt;
-      uiState.fileFilter = std::nullopt;
+      commonState.onFileAddedFn = std::nullopt;
+      commonState.fileFilter = std::nullopt;
       windowSetEnabled(windowFileExplorerSymbol, false);
     };
-    uiState.fileFilter = fileFilterFn;
+    commonState.fileFilter = fileFilterFn;
   },
   .openImagePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
     windowSetEnabled(windowImageExplorerSymbol, true);
-    uiState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
+    commonState.onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
       onFileAdded(closedWithoutNewFile, file);
-      uiState.onFileAddedFn = std::nullopt;
+      commonState.onFileAddedFn = std::nullopt;
       windowSetEnabled(windowImageExplorerSymbol, false);
     };
   },
   .openColorPicker = [](std::function<void(glm::vec4)> onColor, std::string windowName) -> void {
     windowSetEnabled(windowColorPickerSymbol, true);
-    uiState.onNewColor = onColor;
-    uiState.colorPickerTitle = windowName;
+    commonState.onNewColor = onColor;
+    commonState.colorPickerTitle = windowName;
     //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
     //  onFileAdded(closedWithoutNewFile, file);
     //  onFileAddedFn = std::nullopt;
@@ -212,7 +215,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     std::cout << "dock pick gameobj" << std::endl;
     // kind of hack, otherwise it would select the object just clicked due to ordering of binding callbacks
     gameapi -> schedule(-1, 100, NULL, [selectGameObj](void*) -> void { 
-      uiState.onGameObjSelected = selectGameObj;
+      commonState.onGameObjSelected = selectGameObj;
     });
   },
   .setTexture = [](std::string& texture) -> void {
@@ -280,7 +283,7 @@ void queryUpdateNavbarType(std::string& layout){
 
 NavListApi navListApi {
   .changeLayout = [](std::string layout) -> void {
-    uiState.navbarType = strToNavbarType(layout);
+    commonState.navbarType = strToNavbarType(layout);
     queryUpdateNavbarType(layout);
   }
 };
@@ -302,7 +305,9 @@ ImageList loadImageListTextures(){
 
 
 static bool firstTime = true;
-HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
+HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
+  UiState& uiState = *(uiStateContext.uiState);
+
   if (firstTime){
     initStyles();
     uiState.navbarType = queryLoadNavbarType();
@@ -369,7 +374,7 @@ HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& uiContext, 
   };
   resetMenuItemMappingId();
 
-  auto routerProps = createRouterProps(routerHistory, uiContext, selectedId);
+  auto routerProps = createRouterProps(*(uiStateContext.routerHistory), uiContext, selectedId);
   router.draw(drawTools, routerProps);
 
   {
@@ -412,12 +417,12 @@ HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& uiContext, 
             .sceneManagerInterface = SceneManagerInterface {
               .showScenes = uiState.showScenes,
               .offset = uiState.offset,
-              .onSelectScene = [&uiContext](int index, std::string scene) -> void {
+              .onSelectScene = [&uiState, &uiContext](int index, std::string scene) -> void {
                 uiContext.loadScene(scene);
                 uiState.currentScene = index;
                 uiState.showScenes = false;
               },
-              .toggleShowScenes = []() -> void {
+              .toggleShowScenes = [&uiState]() -> void {
                 uiState.showScenes = !uiState.showScenes;
               },
               .scenes = uiContext.listScenes(),
@@ -442,7 +447,7 @@ HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& uiContext, 
   }
 
   if (uiContext.isDebugMode()){
-    drawTools.drawText(std::string("route: ") + fullDebugStr(routerHistory), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    drawTools.drawText(std::string("route: ") + fullDebugStr(*(uiStateContext.routerHistory)), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   }
@@ -450,7 +455,8 @@ HandlerFns handleDrawMainUi(RouterHistory& routerHistory, UiContext& uiContext, 
   return handlerFuncs;
 }
 
-void onMainUiScroll(double amount){
+void onMainUiScroll(UiStateContext& uiStateContext, double amount){
+  UiState& uiState = *uiStateContext.uiState;
   auto scrollValue = static_cast<int>(amount);
   std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
   uiState.imageListScrollAmount += (scrollValue * 5);
@@ -470,9 +476,11 @@ void onMainUiScroll(double amount){
   scenegraphScroll(scrollValue);
 }
 
-void onMainUiMousePress(UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
+void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
   modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
   modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
+
+  UiState& uiState = *(uiStateContext.uiState);
 
   std::cout << "button: " << button << ", action: " << action << std::endl;
   if (button == 0 && action == 0){
@@ -513,7 +521,9 @@ void onMainUiMousePress(UiContext& uiContext, HandlerFns& handlerFns, int button
   }
 }
 
-void onMainUiKeyPress(HandlerFns& handlerFns, int key, int scancode, int action, int mods){
+void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods){
+  UiState& uiState = *(uiStateContext.uiState);
+
   modlog("mainui key press", std::to_string(key));
   modlog("mainui key press focused", print(uiState.focusedId));
   if (!uiState.focusedId.has_value()){
