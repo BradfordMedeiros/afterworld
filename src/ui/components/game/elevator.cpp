@@ -10,7 +10,12 @@ Component noClickButton = withPropsCopy(button, noClickButtonProps);
   
 Component elevatorComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "./res/textures/test.png", std::nullopt, std::nullopt);
+
+    ShapeOptions backgroundOptions {
+      .zIndex = -1,
+    };
+
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "./res/textures/test.png", backgroundOptions, std::nullopt);
     ElevatorUiOptions* elevatorOptions = typeFromProps<ElevatorUiOptions>(props, valueSymbol);
     modassert(elevatorOptions, "elevator options not passed in");
 
@@ -46,7 +51,7 @@ Component elevatorComponent {
 
 
     Layout layout {
-      .tint = glm::vec4(0.f, 0.f, 1.f, 0.5f),
+      .tint = glm::vec4(0.f, 0.f, 1.f, 0.8f),
       .showBackpanel = true,
       .borderColor = std::nullopt,
       .minwidth = 0.f,

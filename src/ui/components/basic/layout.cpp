@@ -348,7 +348,6 @@ BoundingBox2D drawLayout(DrawingTools& drawTools, Props& props){
    	drawTools.drawRect(outerBox.x, outerBox.y, outerBox.width, outerBox.height, false, layout.tint, true, std::nullopt /* mapping id */, std::nullopt, layout.shapeOptions, std::nullopt);
   }
  	drawBufferedData(bufferedDrawingTools, glm::vec2(flowOffsets.x, flowOffsets.y), layout.shapeOptions);
-
  	return outerBox;
 }
 
