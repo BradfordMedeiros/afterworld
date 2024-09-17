@@ -37,10 +37,10 @@ struct MovementEntityData {
 };
 
 Movement createMovement();
-void onMovementKeyCallback(Movement& movement, int key, int action);
-void onMovementMouseMoveCallback(Movement& movement, double xPos, double yPos);
+void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, int key, int action);
+void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, double xPos, double yPos);
 void onMovementScrollCallback(Movement& movement, double amount);
-void onMovementFrame(Movement& movement);
+void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement);
 
 MovementEntityData& getMovementData();
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);

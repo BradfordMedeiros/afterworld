@@ -6,6 +6,7 @@ extern Movement movement;
 extern AiData aiData;
 
 void displayGameOverMenu();
+MovementEntityData& getMovementData();
 
 struct ControlledPlayer {
 	std::optional<objid> activePlayerId;

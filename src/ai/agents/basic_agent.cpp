@@ -1,6 +1,9 @@
 #include "./basic_agent.h"
 
 extern CustomApiBindings* gameapi;
+extern AIInterface aiInterface;
+
+
 void doAnimationTrigger(objid id, const char* transition);
 
 struct AgentAttackState {
@@ -193,12 +196,11 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   }
 }
 
-extern AIInterface aiInterface;
 
 const bool useMovementSystem = false;
-const bool useAi = true;
+const bool useAiPathing = true;
 void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 1.f){
-  auto finalTargetPosition = useAi ? gameapi -> navPosition(agentId, targetPosition) : targetPosition;
+  auto finalTargetPosition = useAiPathing ? gameapi -> navPosition(agentId, targetPosition) : targetPosition;
   if (!useMovementSystem){  // simple behavior for debug
     auto agentPos = gameapi -> getGameObjectPos(agentId, true);
     auto towardTarget = gameapi -> orientationFromPos(agentPos, finalTargetPosition);

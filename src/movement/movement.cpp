@@ -3,8 +3,6 @@
 extern CustomApiBindings* gameapi;
 bool getIsGunZoomed();
 
-MovementEntityData& getMovementData();
-
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
     "select xsensitivity, ysensitivity from settings where profile = " + name,
@@ -146,11 +144,11 @@ Movement createMovement(){
   return movement;
 }
 
-void onMovementKeyCallback(Movement& movement, int key, int action){
+void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, int key, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
-  if (!getMovementData().activeEntity.has_value()){
+  if (!movementEntityData.activeEntity.has_value()){
     return;
   }
   if (isCrouchKey(key)){  // ctrl
@@ -213,19 +211,19 @@ void onMovementKeyCallback(Movement& movement, int key, int action){
       movement.controlParams.shiftModifier = false;
     }else if (action == 1){
       movement.controlParams.shiftModifier = true;
-      if (getMovementData().activeEntity.has_value() && getMovementData().activeEntity.value().managedCamera.has_value()){
-        getMovementData().activeEntity.value().managedCamera.value().reverseCamera = !getMovementData().activeEntity.value().managedCamera.value().reverseCamera;
+      if (movementEntityData.activeEntity.has_value() && movementEntityData.activeEntity.value().managedCamera.has_value()){
+        movementEntityData.activeEntity.value().managedCamera.value().reverseCamera = !movementEntityData.activeEntity.value().managedCamera.value().reverseCamera;
       }
     }
   }
 }
 
 float zoomSensitivity = 1.f;
-void onMovementMouseMoveCallback(Movement& movement, double xPos, double yPos){
+void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, double xPos, double yPos){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
-  if (!getMovementData().activeEntity.has_value()){
+  if (!movementEntityData.activeEntity.has_value()){
     return;
   }
   float xsensitivity = getGlobalState().xsensitivity;
@@ -237,18 +235,18 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
-void onMovementFrame(Movement& movement){
+void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement){
   if (isPaused()){
     return;
   }
   //checkMovementCollisions(*movement);
-  if (!getMovementData().activeEntity.has_value()){
+  if (!movementEntityData.activeEntity.has_value()){
     return;
   }
-  MovementEntity& entity = getMovementData().movementEntities.at(getMovementData().activeEntity.value().playerId);
+  MovementEntity& entity = movementEntityData.movementEntities.at(movementEntityData.activeEntity.value().playerId);
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, getMovementData().activeEntity.value().managedCamera, getIsGunZoomed());
+  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.activeEntity.value().managedCamera, getIsGunZoomed());
     
   //for (MovementEntity& movementEntity : movementEntities){
   //  if (movementEntity.targetLocation.has_value()){

@@ -370,14 +370,12 @@ struct GameState {
   DebugPrintType printType;
 };
 
-MovementEntityData movementEntityData {
-  .movementEntities = {},
-  .activeEntity = std::nullopt,
-};
+GameState* gameStatePtr = NULL;
 
 MovementEntityData& getMovementData(){
-  return movementEntityData;
+  return gameStatePtr -> movementEntities;
 }
+
 
 std::unordered_map<std::string, std::vector<TerminalDisplayType>> terminals {
   { "test", {
@@ -634,7 +632,7 @@ UiContext getUiContext(GameState& gameState){
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
-    setEntityTargetLocation(getMovementData(), agentId, MovementRequest {
+    setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
       .position = targetPosition,
       .speed = speed,
     });
@@ -656,7 +654,7 @@ void handleSelectItem(objid id){
 }
 
 void setActivePlayerNext(){
-  setActivePlayer(getNextEntity(getMovementData()));
+  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities));
 }
 
 void doAnimationTrigger(objid entityId, const char* transition){
@@ -688,7 +686,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
+    gameStatePtr = gameState;
+
     gameState -> sceneManagement = createSceneManagement();
+    gameState -> movementEntities = MovementEntityData {};
     gameState -> selecting = std::nullopt;
     gameState -> uiData = {
       .uiContext = {},
@@ -817,7 +818,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     setUiHealth(uiHealth);
     
-    onMovementFrame(movement);
+    onMovementFrame(gameState -> movementEntities, movement);
     onFrameWater(water);
     onFrameAi(aiData);
     onFrameDaynight();
@@ -863,7 +864,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onWeaponsKeyCallback(weapons, key, action);
-    onMovementKeyCallback(movement, key, action);
+    onMovementKeyCallback(gameState -> movementEntities, movement, key, action);
 
     if (key == 'R' && action == 1) {
       changeGameType(gametypeSystem, "targetkill");
@@ -982,10 +983,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseMoveCallback = [](objid id, void* data, double xPos, double yPos, float xNdc, float yNdc) -> void { 
     //modlog("input", std::string("mouse move: ") + print(glm::vec2(xPos, yPos)));
     //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
+    GameState* gameState = static_cast<GameState*>(data);
+
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     onWeaponsMouseMove(weapons, xPos, yPos);
-    onMovementMouseMoveCallback(movement, xPos, yPos);
+    onMovementMouseMoveCallback(gameState -> movementEntities, movement, xPos, yPos);
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
   };
 
@@ -1003,7 +1006,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
         if (false){
-          raycastFromCameraAndMoveTo(getMovementData(), getActivePlayerId().value());
+          raycastFromCameraAndMoveTo(gameState -> movementEntities, getActivePlayerId().value());
         }
         nextTerminalPage();
       }
@@ -1030,13 +1033,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMovementScrollCallback(movement, amount);
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
-    maybeAddMovementEntity(getMovementData(), idAdded);
+    GameState* gameState = static_cast<GameState*>(data);
+
+    maybeAddMovementEntity(gameState -> movementEntities, idAdded);
     onMainUiObjectsChanged();
     onAiObjectAdded(aiData, idAdded);
     handleOnAddedTags(tags, idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    maybeRemoveMovementEntity(getMovementData(), idRemoved);
+    GameState* gameState = static_cast<GameState*>(data);
+
+    maybeRemoveMovementEntity(gameState -> movementEntities, idRemoved);
     onActivePlayerRemoved(idRemoved);
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
