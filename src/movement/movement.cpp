@@ -16,8 +16,6 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 }
 
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
-  movementEntityData.activeEntity = id;
-
   movementEntityData.movementEntities.at(id).managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
     .id = managedCamera.value(),
     .distanceFromTarget = -5.f,
@@ -118,9 +116,6 @@ void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id){
   }
 }
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id){
-  if (movementEntityData.activeEntity.has_value() && movementEntityData.activeEntity.value() == id){
-    movementEntityData.activeEntity = std::nullopt;
-  }
   movementEntityData.movementEntities.erase(id);
 }
 

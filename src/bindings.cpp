@@ -5,6 +5,8 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons = createWeapons();
 Movement movement = createMovement();
+std::optional<int> activeEntity;
+
 Water water;
 SoundData soundData;
 GameTypes gametypeSystem;
@@ -654,7 +656,7 @@ void handleSelectItem(objid id){
 }
 
 void setActivePlayerNext(){
-  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities, gameStatePtr -> movementEntities.activeEntity));
+  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities, activeEntity));
 }
 
 void doAnimationTrigger(objid entityId, const char* transition){
@@ -818,8 +820,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     setUiHealth(uiHealth);
     
-    if (gameState -> movementEntities.activeEntity.has_value()){
-      onMovementFrame(gameState -> movementEntities, movement, gameState -> movementEntities.activeEntity.value());
+    if (activeEntity.has_value()){
+      onMovementFrame(gameState -> movementEntities, movement, activeEntity.value());
     }
     onFrameWater(water);
     onFrameAi(aiData);
@@ -866,8 +868,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onWeaponsKeyCallback(weapons, key, action);
-    if (gameState -> movementEntities.activeEntity.has_value()){
-      onMovementKeyCallback(gameState -> movementEntities, movement, gameState -> movementEntities.activeEntity.value(), key, action);
+    if (activeEntity.has_value()){
+      onMovementKeyCallback(gameState -> movementEntities, movement, activeEntity.value(), key, action);
     }
 
     if (key == 'R' && action == 1) {
@@ -992,8 +994,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     onWeaponsMouseMove(weapons, xPos, yPos);
-    if (gameState -> movementEntities.activeEntity.has_value()){
-      onMovementMouseMoveCallback(gameState -> movementEntities, movement, gameState -> movementEntities.activeEntity.value(), xPos, yPos);
+    if (activeEntity.has_value()){
+      onMovementMouseMoveCallback(gameState -> movementEntities, movement, activeEntity.value(), xPos, yPos);
     }
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
   };
@@ -1049,7 +1051,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
+    if (activeEntity.has_value() && activeEntity.value() == idRemoved){
+      activeEntity = std::nullopt;
+    }
     maybeRemoveMovementEntity(gameState -> movementEntities, idRemoved);
+
     onActivePlayerRemoved(idRemoved);
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);

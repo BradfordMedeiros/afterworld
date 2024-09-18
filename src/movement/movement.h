@@ -30,7 +30,6 @@ struct MovementEntity {
 
 struct MovementEntityData {
   std::unordered_map<objid, MovementEntity> movementEntities;
-  std::optional<int> activeEntity;
 };
 
 Movement createMovement();

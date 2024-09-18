@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
 extern Movement movement;
+extern std::optional<int> activeEntity;
 extern AiData aiData;
 
 void displayGameOverMenu();
@@ -81,7 +82,10 @@ void setActivePlayer(std::optional<objid> id){
 	}
 	controlledPlayer.activePlayerId = id.value();
 	auto newCameraId = setCameraOrMakeTemp(id.value());
+
+  activeEntity = id;
 	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
+
 	changeWeaponTargetId(weapons, id.value(), "another");
 	maybeDisableAi(aiData, id.value());
 }
