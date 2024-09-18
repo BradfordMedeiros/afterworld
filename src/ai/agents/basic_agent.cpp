@@ -211,7 +211,6 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, fl
     return;
   }
 
-  auto agentPos = gameapi -> getGameObjectPos(agentId, true);
   aiInterface.move(agentId, targetPosition, speed);
 }
 void attackTarget(Agent& agent){

@@ -15,33 +15,10 @@ void reloadSettingsConfig(Movement& movement, std::string name){
   movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
-void changeTargetId(Movement& movement, objid id){
-  movement.controlParams.goForward = false;
-  movement.controlParams.goBackward = false;
-  movement.controlParams.goLeft = false;
-  movement.controlParams.goRight = false;
-  movement.controlParams.shiftModifier = false;
-  movement.controlParams.doJump = false;
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.controlParams.zoom_delta = 0.f;
-  movement.controlParams.doAttachToLadder = false;
-  movement.controlParams.doReleaseFromLadder = false;
-  movement.controlParams.crouchType = CROUCH_NONE;
-  reloadSettingsConfig(movement, "default");
-}
-
-std::optional<MovementEntity*> activeMoveEntity(MovementEntityData& movementEntityData){
-  if (!movementEntityData.activeEntity.has_value()){
-    return std::nullopt;
-  }
-  MovementEntity& entity = movementEntityData.movementEntities.at(movementEntityData.activeEntity.value());
-  return &entity;
-}
-
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
   movementEntityData.activeEntity = id;
 
-  activeMoveEntity(movementEntityData).value() -> managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
+  movementEntityData.movementEntities.at(id).managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
     .id = managedCamera.value(),
     .distanceFromTarget = -5.f,
     .angleX = 0.f,
@@ -54,10 +31,23 @@ void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEnt
     .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
     .reverseCamera = false,
   };
-  changeTargetId(movement, id);
+
+  movement.controlParams.goForward = false;
+  movement.controlParams.goBackward = false;
+  movement.controlParams.goLeft = false;
+  movement.controlParams.goRight = false;
+  movement.controlParams.shiftModifier = false;
+  movement.controlParams.doJump = false;
+  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+  movement.controlParams.zoom_delta = 0.f;
+  movement.controlParams.doAttachToLadder = false;
+  movement.controlParams.doReleaseFromLadder = false;
+  movement.controlParams.crouchType = CROUCH_NONE;
+  reloadSettingsConfig(movement, "default");
+
 }
 
-std::optional<objid> getNextEntity(MovementEntityData& movementEntityData){
+std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
   if (movementEntityData.movementEntities.size() == 0){
     return std::nullopt;
   }
@@ -65,10 +55,10 @@ std::optional<objid> getNextEntity(MovementEntityData& movementEntityData){
   for (auto &[id, _] : movementEntityData.movementEntities){
     allEntities.push_back(id);
   }
-  if (!movementEntityData.activeEntity.has_value()){
+  if (!activeId.has_value()){
     return allEntities.at(0);
   }
-  auto currId = movementEntityData.activeEntity.value();
+  auto currId = activeId.value();
   std::optional<int> currentIndex = 0;
   for (int i = 0; i < allEntities.size(); i++){
     if (currId == allEntities.at(i)){
@@ -151,13 +141,11 @@ Movement createMovement(){
   return movement;
 }
 
-void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, int key, int action){
+void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, int key, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
-  if (!movementEntityData.activeEntity.has_value()){
-    return;
-  }
+
   if (isCrouchKey(key)){  // ctrl
     if (action == 0 || action == 1){
       if (action == 0){
@@ -218,22 +206,20 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
       movement.controlParams.shiftModifier = false;
     }else if (action == 1){
       movement.controlParams.shiftModifier = true;
-      auto activeEntity = activeMoveEntity(movementEntityData);
-      if (activeEntity.has_value() && activeEntity.value() -> managedCamera.has_value()){
-        activeEntity.value() -> managedCamera.value().reverseCamera = !activeEntity.value() -> managedCamera.value().reverseCamera;
+      MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+      if (entity.managedCamera.has_value()){
+        entity.managedCamera.value().reverseCamera = !entity.managedCamera.value().reverseCamera;
       }
     }
   }
 }
 
 float zoomSensitivity = 1.f;
-void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, double xPos, double yPos){
+void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
-  if (!movementEntityData.activeEntity.has_value()){
-    return;
-  }
+
   float xsensitivity = getGlobalState().xsensitivity;
   float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
   movement.controlParams.lookVelocity = glm::vec2(zoomSensitivity * xsensitivity * xPos, zoomSensitivity * ysensitivity * yPos);
@@ -243,19 +229,16 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
-void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement){
+// This should move all movement entities not just the active one
+void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId){
   if (isPaused()){
     return;
   }
-  //checkMovementCollisions(*movement);
-  if (!movementEntityData.activeEntity.has_value()){
-    return;
-  }
-  MovementEntity& entity = movementEntityData.movementEntities.at(movementEntityData.activeEntity.value());
+
+  MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-
-  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, activeMoveEntity(movementEntityData).value() -> managedCamera, getIsGunZoomed());
+  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, getIsGunZoomed());
     
   //for (MovementEntity& movementEntity : movementEntities){
   //  if (movementEntity.targetLocation.has_value()){

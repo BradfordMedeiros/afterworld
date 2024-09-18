@@ -34,14 +34,14 @@ struct MovementEntityData {
 };
 
 Movement createMovement();
-void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, int key, int action);
-void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, double xPos, double yPos);
+void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action);
+void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos);
 void onMovementScrollCallback(Movement& movement, double amount);
-void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement);
+void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity);
 
 MovementEntityData& getMovementData();
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
-std::optional<objid> getNextEntity(MovementEntityData& movementEntityData);
+std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);

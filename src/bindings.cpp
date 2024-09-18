@@ -654,7 +654,7 @@ void handleSelectItem(objid id){
 }
 
 void setActivePlayerNext(){
-  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities));
+  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities, gameStatePtr -> movementEntities.activeEntity));
 }
 
 void doAnimationTrigger(objid entityId, const char* transition){
@@ -818,7 +818,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     setUiHealth(uiHealth);
     
-    onMovementFrame(gameState -> movementEntities, movement);
+    if (gameState -> movementEntities.activeEntity.has_value()){
+      onMovementFrame(gameState -> movementEntities, movement, gameState -> movementEntities.activeEntity.value());
+    }
     onFrameWater(water);
     onFrameAi(aiData);
     onFrameDaynight();
@@ -864,7 +866,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onWeaponsKeyCallback(weapons, key, action);
-    onMovementKeyCallback(gameState -> movementEntities, movement, key, action);
+    if (gameState -> movementEntities.activeEntity.has_value()){
+      onMovementKeyCallback(gameState -> movementEntities, movement, gameState -> movementEntities.activeEntity.value(), key, action);
+    }
 
     if (key == 'R' && action == 1) {
       changeGameType(gametypeSystem, "targetkill");
@@ -988,7 +992,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     onWeaponsMouseMove(weapons, xPos, yPos);
-    onMovementMouseMoveCallback(gameState -> movementEntities, movement, xPos, yPos);
+    if (gameState -> movementEntities.activeEntity.has_value()){
+      onMovementMouseMoveCallback(gameState -> movementEntities, movement, gameState -> movementEntities.activeEntity.value(), xPos, yPos);
+    }
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
   };
 
