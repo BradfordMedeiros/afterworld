@@ -273,7 +273,7 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 }
 
 
-bool getIsGunZoomed(){
+bool getIsGunZoomed(objid id){
   return getIsGunZoomed(weapons);
 }
 

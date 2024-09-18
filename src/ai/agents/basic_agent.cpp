@@ -197,7 +197,7 @@ void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
 }
 
 
-const bool useMovementSystem = false;
+const bool useMovementSystem = true;
 const bool useAiPathing = true;
 void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 1.f){
   auto finalTargetPosition = useAiPathing ? gameapi -> navPosition(agentId, targetPosition) : targetPosition;

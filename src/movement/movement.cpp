@@ -1,7 +1,7 @@
 #include "./movement.h"
 
 extern CustomApiBindings* gameapi;
-bool getIsGunZoomed();
+bool getIsGunZoomed(objid id);
 
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
@@ -233,18 +233,22 @@ void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement,
   MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, getIsGunZoomed());
+  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, getIsGunZoomed(activeId));
     
-  //for (MovementEntity& movementEntity : movementEntities){
-  //  if (movementEntity.targetLocation.has_value()){
-  //    bool atTarget = false;
-  //    auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, entity.movementState, entity.playerId, &atTarget);
-  //    if (atTarget){
-  //      movementEntity.targetLocation = std::nullopt;
-  //    }
-  //    onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData);  
-  //  }
-  //}
+  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    if (id == activeId){
+      continue;
+    }
+    if (movementEntity.targetLocation.has_value()){
+      bool atTarget = false;
+      auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, movementEntity.movementState, movementEntity.playerId, &atTarget);
+      if (atTarget){
+        movementEntity.targetLocation = std::nullopt;
+      }
+      onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, getIsGunZoomed(id));  
+    }
+  }
+
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
   movement.controlParams.zoom_delta = 0.f;
   movement.controlParams.doJump = false;
