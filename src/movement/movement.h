@@ -21,19 +21,16 @@ struct MovementEntity {
   objid playerId;
   MovementParams* moveParams;
   MovementState movementState;
+  std::optional<ThirdPersonCameraInfo> managedCamera;
 
   // when set the entity navigates to this location
   std::optional<MovementRequest> targetLocation;
-};
 
-struct ActiveEntity {
-  int playerId;
-  std::optional<ThirdPersonCameraInfo> managedCamera;
 };
 
 struct MovementEntityData {
   std::unordered_map<objid, MovementEntity> movementEntities;
-  std::optional<ActiveEntity> activeEntity;
+  std::optional<int> activeEntity;
 };
 
 Movement createMovement();
