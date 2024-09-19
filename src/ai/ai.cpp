@@ -96,24 +96,18 @@ bool agentExists(AiData& aiData, objid id){
   }
   return false;
 }
-void maybeAddAgent(AiData& aiData, objid id){
-  if (agentExists(aiData, id)){
-    return;
-  }
-  auto agent = getSingleAttr(id, "agent");
-  if (agent.has_value()){
-    auto agentType = agent.value();
-    if (agentType == "basic"){
-      aiData.agents.push_back(createBasicAgent(id));
-    }else if (agentType == "turret"){
-      aiData.agents.push_back(createTurretAgent(id));
-    }else{
-      modassert(false, std::string("invalid agent type: ") + agentType);
-    }
+void addAiAgent(AiData& aiData, objid id, std::string agentType){
+  modassert(!agentExists(aiData, id), std::string("agent already exists: ") + std::to_string(id));
+  if (agentType == "basic"){
+    aiData.agents.push_back(createBasicAgent(id));
+  }else if (agentType == "turret"){
+    aiData.agents.push_back(createTurretAgent(id));
+  }else{
+    modassert(false, std::string("invalid agent type: ") + agentType);
   }
 }
 
-void maybeRemoveAgent(AiData& aiData, objid id){
+void maybeRemoveAiAgent(AiData& aiData, objid id){
   std::vector<Agent> newAgents;
   for (auto &agent : aiData.agents){
     if(agent.id != id){
@@ -121,8 +115,9 @@ void maybeRemoveAgent(AiData& aiData, objid id){
     }
   }
   aiData.agents = newAgents;
-}
 
+  freeState(aiData.worldInfo, id);
+}
 
 void maybeDisableAi(AiData& aiData, objid id){
   //modassert(false, std::string("disable ai placeholder: ") + gameapi -> getGameObjNameForId(id).value());
@@ -200,7 +195,8 @@ void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
   }else if (key == "health-change"){
     auto healthChangeMessage = anycast<HealthChangeMessage>(value);
     modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");
-    onAiHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);
+    onAiBasicAgentHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);
+    modlog("health change", "health changed called");
   }
 }
 
@@ -241,13 +237,6 @@ void onFrameAi(AiData& aiData){
   }
 }
 
-void onAiObjectAdded(AiData& aiData, int32_t idAdded){
-  maybeAddAgent(aiData, idAdded);
-}
-void onAiObjectRemoved(AiData& aiData, int32_t idRemoved){
-  maybeRemoveAgent(aiData, idRemoved);
-  freeState(aiData.worldInfo, idRemoved);
-}
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
   for (auto &agent : aiData.agents){
     if (agent.type == AGENT_BASIC_AGENT){

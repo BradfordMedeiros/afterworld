@@ -3,12 +3,10 @@
 extern CustomApiBindings* gameapi;
 extern AIInterface aiInterface;
 
-
 void doAnimationTrigger(objid id, const char* transition);
 
 struct AgentAttackState {
   float lastAttackTime;
-  std::optional<GunCore> gunCore;
   float initialHealth;
   bool moveVertical;
   bool aggravated;
@@ -25,7 +23,6 @@ Agent createBasicAgent(objid id){
     .type = AGENT_BASIC_AGENT,
     .agentData = AgentAttackState {
       .lastAttackTime = 0.f,
-      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(id)),
       .initialHealth = initialHealth,
       .moveVertical = moveVerticalAttr.has_value() && moveVerticalAttr.value() == "true",
       .aggravated = false,
@@ -171,29 +168,22 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
         .goaltype = getAmmoGoal,
         .goalData = NULL,
         .score = [&agent, &worldInfo, symbol, attackState](std::any&) -> int {
-            if (attackState -> gunCore.has_value()){
-              //modassert(attackState -> gunCore.value().weaponCore, "weapon core is null tho");
-              auto currentAmmo = 100; //ammoForGun(attackState -> gunCore.value().weaponCore -> name);
-              if (currentAmmo <= 0){
-                return 150;
-              }
+            auto currentAmmo = 100;
+            if (currentAmmo <= 0){
+              return 150;
             }
             return 0;
         }
       }
     );    
   }
-
-
   return goals;
 }
 
 
 void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
   modlog("basic agent", "firing projectile");
-  if (agentAttackState.gunCore.has_value()){
-    fireGunAndVisualize(agentAttackState.gunCore.value(), false, true, std::nullopt, std::nullopt, agentId, "default");
-  }
+  aiInterface.fireGun(agentId);
 }
 
 
@@ -278,16 +268,11 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
 void onAiAmmo(Agent& agent, objid targetId, int amount){
   if (targetId == agent.id){
-    AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
-    modassert(attackState, "attackState invalid");
-    if (attackState -> gunCore.has_value()){
-      deliverAmmo("default", attackState -> gunCore.value().weaponCore -> weaponParams.name, amount);
-    }
+    aiInterface.deliverAmmo(agent.id, amount);
   }
 }
 
-
-void onAiHealthChange(Agent& agent, objid targetId, float remainingHealth){
+void onAiBasicAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
   if (targetId == agent.id){
     AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
     modassert(attackState, "attackState invalid");

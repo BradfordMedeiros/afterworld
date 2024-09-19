@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 void setTotalZoom(float multiplier);
-void setUIAmmoCount(int currentAmmo, int totalAmmo);
 void handleSelectItem(objid id);
 void setShowActivate(bool showActivate);
 

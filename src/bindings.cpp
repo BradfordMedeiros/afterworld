@@ -632,15 +632,6 @@ UiContext getUiContext(GameState& gameState){
 }
 
 
-AIInterface aiInterface {
-  .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
-    setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
-      .position = targetPosition,
-      .speed = speed,
-    });
-  },
-};
-
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
   .setCameraPosition = setTempViewpoint,
@@ -682,10 +673,40 @@ UiStateContext uiStateContext {
   .uiState = createUiState(),
 };
 
-// onAiObjectAdded
+struct ControllableEntity {
+  std::optional<GunCore> gunCore;
+};
+std::unordered_map<objid, ControllableEntity> controllableEntities;
+
 void onAddControllableEntity(objid idAdded){
-  onAiObjectAdded(aiData, idAdded);
+  auto agent = getSingleAttr(idAdded, "agent");
+  if (agent.has_value()){
+    addAiAgent(aiData, idAdded, agent.value());
+    controllableEntities[idAdded] = ControllableEntity {
+      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(idAdded)),
+    };
+  }
 }
+void maybeRemoveControllableEntity(objid idRemoved){
+  maybeRemoveAiAgent(aiData, idRemoved);
+  controllableEntities.erase(idRemoved);
+}
+
+AIInterface aiInterface {
+  .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
+    setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
+      .position = targetPosition,
+      .speed = speed,
+    });
+  },
+  .fireGun = [](objid agentId) -> void {
+    fireGunAndVisualize(controllableEntities.at(agentId).gunCore.value(), false, true, std::nullopt, std::nullopt, agentId, "default");
+  },
+  .deliverAmmo = [](objid agentId, int amount) -> void {
+    deliverAmmo("default", controllableEntities.at(agentId).gunCore.value().weaponCore -> weaponParams.name, amount);
+  },
+};
+
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -1063,7 +1084,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
-    onAiObjectRemoved(aiData, idRemoved);
+    maybeRemoveControllableEntity(idRemoved);
     handleTagsOnObjectRemoved(tags, idRemoved);
   };
 

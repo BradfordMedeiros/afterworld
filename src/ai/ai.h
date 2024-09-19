@@ -14,8 +14,9 @@ struct AiData {
 
 AiData createAiData();
 void onFrameAi(AiData& aiData);
-void onAiObjectAdded(AiData& aiData, int32_t idAdded);
-void onAiObjectRemoved(AiData& aiData, int32_t idRemoved);
+void addAiAgent(AiData& aiData, objid id, std::string agentType);
+void maybeRemoveAiAgent(AiData& aiData, objid id);
+
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value);
 DebugConfig debugPrintAi(AiData& aiData);
 
