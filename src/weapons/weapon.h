@@ -43,6 +43,4 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action);
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action);
 void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos);
 
-void reloadTraitsValues(Weapons& weapons);
-
 #endif

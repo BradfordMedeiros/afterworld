@@ -682,6 +682,10 @@ UiStateContext uiStateContext {
   .uiState = createUiState(),
 };
 
+// onAiObjectAdded
+void onAddControllableEntity(objid idAdded){
+  onAiObjectAdded(aiData, idAdded);
+}
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -886,8 +890,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (key == "save-gun"){
       saveGunTransform(weapons.weaponValues);
-    }else if (key == "reload-config:weapon:traits"){
-      reloadTraitsValues(weapons);
     }
 
     if (key == "reset"){
@@ -1044,9 +1046,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
 
     maybeAddMovementEntity(gameState -> movementEntities, idAdded);
-    onMainUiObjectsChanged();
-    onAiObjectAdded(aiData, idAdded);
+    onAddControllableEntity(idAdded);
     handleOnAddedTags(tags, idAdded);
+
+    onMainUiObjectsChanged();
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);

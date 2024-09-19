@@ -13,14 +13,6 @@ std::string weaponsToString(Weapons& weapons){
   return str;
 }
 
-void reloadTraitsValues(Weapons& weapons){
-  auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(traitQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-  weapons.selectDistance = floatFromFirstSqlResult(result, 0);
-}
-
 // Should interpolate.  Looks better + prevent clipping bugs
 // Might be interesting to incorporate things like mass and stuff
 void handlePickedUpItem(Weapons& weapons){
@@ -59,8 +51,12 @@ void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory){
     .playerId = id,
     .inventory = inventory,
   };
-  reloadTraitsValues(weapons);
-  //changeGun(weapons, id, gameapi -> listSceneId(id), "pistol", 10);
+
+  auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(traitQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+  weapons.selectDistance = floatFromFirstSqlResult(result, 0);
 }
 
 
