@@ -679,6 +679,8 @@ struct ControllableEntity {
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 
 void onAddControllableEntity(objid idAdded){
+  maybeAddMovementEntity(gameStatePtr -> movementEntities, idAdded);
+
   auto agent = getSingleAttr(idAdded, "agent");
   if (agent.has_value()){
     addAiAgent(aiData, idAdded, agent.value());
@@ -688,6 +690,7 @@ void onAddControllableEntity(objid idAdded){
   }
 }
 void maybeRemoveControllableEntity(objid idRemoved){
+  maybeRemoveMovementEntity(gameStatePtr -> movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
   controllableEntities.erase(idRemoved);
 }
@@ -1066,7 +1069,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    maybeAddMovementEntity(gameState -> movementEntities, idAdded);
     onAddControllableEntity(idAdded);
     handleOnAddedTags(tags, idAdded);
 
@@ -1078,13 +1080,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (activeEntity.has_value() && activeEntity.value() == idRemoved){
       activeEntity = std::nullopt;
     }
-    maybeRemoveMovementEntity(gameState -> movementEntities, idRemoved);
+    maybeRemoveControllableEntity(idRemoved);
 
     onActivePlayerRemoved(idRemoved);
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
-    maybeRemoveControllableEntity(idRemoved);
     handleTagsOnObjectRemoved(tags, idRemoved);
   };
 
