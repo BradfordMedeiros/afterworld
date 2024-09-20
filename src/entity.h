@@ -4,6 +4,7 @@
 #include "./weapons/weaponcore.h"
 #include "./movement/movement.h"
 #include "./ai/ai.h"
+#include "./health.h"
 
 struct ControlledPlayer {
 	std::optional<objid> activePlayerId;
@@ -20,14 +21,17 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
 
 std::optional<objid> getActivePlayerId();
-void setActivePlayer(std::optional<objid> id);
-void onActivePlayerRemoved(objid id);
-
+void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id);
+void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
+bool onActivePlayerRemoved(objid id);
 
 void setTempViewpoint(glm::vec3 position, glm::quat rotation);
 bool hasTempViewpoint();
 void popTempViewpoint();
 void setActivePlayerEditorMode(bool editorMode);
+
+void killActivePlayer();
+
 DebugConfig debugPrintActivePlayer();
 
 

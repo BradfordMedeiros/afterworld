@@ -353,7 +353,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       if (router.value() -> camera.has_value()){
         auto cameraId = findObjByShortName(router.value() -> camera.value());
         modassert(cameraId.has_value(), "lonSceneRouteChange, no camera in scene to load");
-        setActivePlayer(cameraId.value());      
+        setActivePlayer(movement, weapons, aiData, cameraId.value());      
       }
     }
   }
@@ -614,12 +614,7 @@ UiContext getUiContext(GameState& gameState){
       .routerPop = []() -> void {
         popHistory();
       },
-      .die = []() -> void {
-        auto activePlayerId = getActivePlayerId();
-        if (activePlayerId.has_value()){
-          doDamageMessage(activePlayerId.value(), 10000.f);   
-        }
-      },
+      .die = killActivePlayer,
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
       },
@@ -644,10 +639,6 @@ void goBackMainMenu(){
 
 void handleSelectItem(objid id){
   gameapi -> sendNotifyMessage("selected", id);
-}
-
-void setActivePlayerNext(){
-  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities, activeEntity));
 }
 
 void doAnimationTrigger(objid entityId, const char* transition){
@@ -872,7 +863,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
 
     if (key == '-' && action == 0){
-      setActivePlayerNext();
+      setActivePlayerNext(movement, weapons, aiData);
     }
 
     onWeaponsKeyCallback(weapons, key, action);
@@ -1062,7 +1053,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 
-    onActivePlayerRemoved(idRemoved);
+    auto playerKilled = onActivePlayerRemoved(idRemoved);
+    if (playerKilled){
+      displayGameOverMenu();
+    }
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
