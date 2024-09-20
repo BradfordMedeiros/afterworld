@@ -678,8 +678,8 @@ struct ControllableEntity {
 };
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 
-void onAddControllableEntity(objid idAdded){
-  maybeAddMovementEntity(gameStatePtr -> movementEntities, idAdded);
+void onAddControllableEntity(MovementEntityData& movementEntities, objid idAdded){
+  maybeAddMovementEntity(movementEntities, idAdded);
 
   auto agent = getSingleAttr(idAdded, "agent");
   if (agent.has_value()){
@@ -689,8 +689,8 @@ void onAddControllableEntity(objid idAdded){
     };
   }
 }
-void maybeRemoveControllableEntity(objid idRemoved){
-  maybeRemoveMovementEntity(gameStatePtr -> movementEntities, idRemoved);
+void maybeRemoveControllableEntity(MovementEntityData& movementEntities, objid idRemoved){
+  maybeRemoveMovementEntity(movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
   controllableEntities.erase(idRemoved);
 }
@@ -1069,7 +1069,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    onAddControllableEntity(idAdded);
+    onAddControllableEntity(gameStatePtr -> movementEntities, idAdded);
     handleOnAddedTags(tags, idAdded);
 
     onMainUiObjectsChanged();
@@ -1080,7 +1080,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (activeEntity.has_value() && activeEntity.value() == idRemoved){
       activeEntity = std::nullopt;
     }
-    maybeRemoveControllableEntity(idRemoved);
+    maybeRemoveControllableEntity(gameStatePtr -> movementEntities, idRemoved);
 
     onActivePlayerRemoved(idRemoved);
     onMainUiObjectsChanged();
