@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include "./util.h"
-#include "./activeplayer.h"
 #include "./ui/views/mainui.h"
 
 struct TextDisplay {

@@ -7,7 +7,9 @@
 #include "../global.h"
 #include "../materials.h"
 #include "./weaponcore.h"
-#include "../activeplayer.h"
+#include "../resources.h"
+#include "../inventory.h"
+#include "../controls.h"
 
 struct PlayerInfo {
   objid playerId;

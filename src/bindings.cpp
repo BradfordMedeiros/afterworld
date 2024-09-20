@@ -5,7 +5,7 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons = createWeapons();
 Movement movement = createMovement();
-std::optional<int> activeEntity;
+extern std::optional<int> activeEntity;
 
 Water water;
 SoundData soundData;

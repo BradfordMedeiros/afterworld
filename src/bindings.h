@@ -28,7 +28,6 @@
 #include "./ui/components/router.h"
 #include "./ui/views/mainui.h"
 #include "./ui/views/pausemenu.h"
-#include "./activeplayer.h"
 #include "./modelviewer.h"
 #include "./collision.h"
 #include "./cutscene.h"

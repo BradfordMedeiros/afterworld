@@ -8,7 +8,6 @@
 #include "./state-controller.h"
 #include "./spawn.h"
 #include "./global.h"
-#include "./activeplayer.h"
 #include "./in-game-ui.h"
 #include "./conditional_spawn.h"
 #include "./health.h"

@@ -38,7 +38,6 @@ void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movemen
 void onMovementScrollCallback(Movement& movement, double amount);
 void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity);
 
-MovementEntityData& getMovementData();
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
 
