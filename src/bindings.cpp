@@ -673,28 +673,8 @@ UiStateContext uiStateContext {
   .uiState = createUiState(),
 };
 
-struct ControllableEntity {
-  std::optional<GunCore> gunCore;
-};
-std::unordered_map<objid, ControllableEntity> controllableEntities;
 
-void onAddControllableEntity(MovementEntityData& movementEntities, objid idAdded){
-  maybeAddMovementEntity(movementEntities, idAdded);
-
-  auto agent = getSingleAttr(idAdded, "agent");
-  if (agent.has_value()){
-    addAiAgent(aiData, idAdded, agent.value());
-    controllableEntities[idAdded] = ControllableEntity {
-      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(idAdded)),
-    };
-  }
-}
-void maybeRemoveControllableEntity(MovementEntityData& movementEntities, objid idRemoved){
-  maybeRemoveMovementEntity(movementEntities, idRemoved);
-  maybeRemoveAiAgent(aiData, idRemoved);
-  controllableEntities.erase(idRemoved);
-}
-
+extern std::unordered_map<objid, ControllableEntity> controllableEntities;
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
     setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
@@ -1069,7 +1049,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    onAddControllableEntity(gameStatePtr -> movementEntities, idAdded);
+    onAddControllableEntity(aiData, gameStatePtr -> movementEntities, idAdded);
     handleOnAddedTags(tags, idAdded);
 
     onMainUiObjectsChanged();
@@ -1080,7 +1060,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (activeEntity.has_value() && activeEntity.value() == idRemoved){
       activeEntity = std::nullopt;
     }
-    maybeRemoveControllableEntity(gameStatePtr -> movementEntities, idRemoved);
+    maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 
     onActivePlayerRemoved(idRemoved);
     onMainUiObjectsChanged();
