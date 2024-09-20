@@ -1,20 +1,10 @@
-#include "./activeplayer.h"
+#include "./entity.h"
 
 extern CustomApiBindings* gameapi;
-extern Weapons weapons;
-extern Movement movement;
-extern std::optional<int> activeEntity;
-extern AiData aiData;
-
-void displayGameOverMenu();
 MovementEntityData& getMovementData();
 
-struct ControlledPlayer {
-	std::optional<objid> activePlayerId;
-	std::optional<objid> activePlayerManagedCameraId;
-	std::optional<objid> tempViewpoint;
-	bool editorMode;
-};
+std::optional<int> activeEntity;
+std::unordered_map<objid, ControllableEntity> controllableEntities;
 
 ControlledPlayer controlledPlayer {
 	.activePlayerId = std::nullopt,
@@ -22,6 +12,24 @@ ControlledPlayer controlledPlayer {
 	.tempViewpoint = std::nullopt,
 	.editorMode = false,
 };
+
+void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
+  maybeAddMovementEntity(movementEntities, idAdded);
+
+  auto agent = getSingleAttr(idAdded, "agent");
+  if (agent.has_value()){
+    addAiAgent(aiData, idAdded, agent.value());
+    controllableEntities[idAdded] = ControllableEntity {
+      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(idAdded)),
+    };
+  }
+}
+
+void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
+  maybeRemoveMovementEntity(movementEntities, idRemoved);
+  maybeRemoveAiAgent(aiData, idRemoved);
+  controllableEntities.erase(idRemoved);
+}
 
 void updateCamera(){
 	if (controlledPlayer.editorMode){
@@ -38,13 +46,6 @@ void updateCamera(){
 		modassert(isCamera, "not a camera, but not managed cameras");
 		gameapi -> setActiveCamera(controlledPlayer.activePlayerId.value(), -1);
 	}
-}
-
-std::optional<objid> getActivePlayerId(){
-	if (controlledPlayer.tempViewpoint.has_value()){
-		return std::nullopt;
-	}
-	return controlledPlayer.activePlayerId;
 }
 
 std::optional<objid> setCameraOrMakeTemp(objid id){
@@ -73,34 +74,6 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
 	return std::nullopt;
 }
 
-void setActivePlayer(std::optional<objid> id){
-	if (!id.has_value()){
-		return;
-	}
-	if (controlledPlayer.activePlayerId.has_value()){
-    maybeReEnableAi(aiData, controlledPlayer.activePlayerId.value());
-	}
-	controlledPlayer.activePlayerId = id.value();
-	auto newCameraId = setCameraOrMakeTemp(id.value());
-
-  activeEntity = id;
-	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
-
-	changeWeaponTargetId(weapons, id.value(), "another");
-	maybeDisableAi(aiData, id.value());
-}
-
-void onActivePlayerRemoved(objid id){
-	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
-		controlledPlayer.activePlayerId = std::nullopt;
-		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
-		auto playerScene = gameapi -> listSceneId(id);
-		auto playerPos = gameapi -> getGameObjectPos(id, true);
-		auto createdObjId = id;
-		displayGameOverMenu();
-	}
-}
-
 void setTempViewpoint(glm::vec3 position, glm::quat rotation){
 	if (controlledPlayer.tempViewpoint.has_value()){
 		popTempViewpoint();
@@ -125,9 +98,56 @@ void popTempViewpoint(){
 	updateCamera();
 }
 
+void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
+	if (!id.has_value()){
+		return;
+	}
+	if (controlledPlayer.activePlayerId.has_value()){
+    maybeReEnableAi(aiData, controlledPlayer.activePlayerId.value());
+	}
+	controlledPlayer.activePlayerId = id.value();
+	auto newCameraId = setCameraOrMakeTemp(id.value());
+
+  activeEntity = id;
+	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
+
+	changeWeaponTargetId(weapons, id.value(), "another");
+	maybeDisableAi(aiData, id.value());
+}
+void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
+  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), activeEntity));
+}
+
+std::optional<objid> getActivePlayerId(){
+	if (controlledPlayer.tempViewpoint.has_value()){
+		return std::nullopt;
+	}
+	return controlledPlayer.activePlayerId;
+}
+
+bool onActivePlayerRemoved(objid id){
+	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
+		controlledPlayer.activePlayerId = std::nullopt;
+		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
+		auto playerScene = gameapi -> listSceneId(id);
+		auto playerPos = gameapi -> getGameObjectPos(id, true);
+		auto createdObjId = id;
+		return true;
+	}
+	return false;
+}
+
+
 void setActivePlayerEditorMode(bool editorMode){
 	controlledPlayer.editorMode = editorMode;
 	updateCamera();
+}
+
+void killActivePlayer(){
+	auto activePlayerId = getActivePlayerId();
+  if (activePlayerId.has_value()){
+    doDamageMessage(activePlayerId.value(), 10000.f);   
+  }
 }
 
 DebugConfig debugPrintActivePlayer(){

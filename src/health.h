@@ -6,7 +6,7 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./global.h"
-#include "./activeplayer.h"
+#include "./entity.h"
 
 struct HitPoints {
 	float current;

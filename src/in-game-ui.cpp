@@ -1,6 +1,8 @@
 #include "./in-game-ui.h"
 
 extern CustomApiBindings* gameapi;
+void setTempViewpoint(glm::vec3 position, glm::quat rotation);
+
 
 bool showSelectionTexture = false;
 

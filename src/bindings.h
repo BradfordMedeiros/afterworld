@@ -5,6 +5,7 @@
 #include <vector>
 #include <stack>
 #include "./ai/ai.h"
+#include "./entity.h"
 #include "./daynight.h"
 #include "./weapons/weapon.h"
 #include "./movement/movement.h"
@@ -27,7 +28,6 @@
 #include "./ui/components/router.h"
 #include "./ui/views/mainui.h"
 #include "./ui/views/pausemenu.h"
-#include "./activeplayer.h"
 #include "./modelviewer.h"
 #include "./collision.h"
 #include "./cutscene.h"

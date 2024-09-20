@@ -5,7 +5,7 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons = createWeapons();
 Movement movement = createMovement();
-std::optional<int> activeEntity;
+extern std::optional<int> activeEntity;
 
 Water water;
 SoundData soundData;
@@ -353,7 +353,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       if (router.value() -> camera.has_value()){
         auto cameraId = findObjByShortName(router.value() -> camera.value());
         modassert(cameraId.has_value(), "lonSceneRouteChange, no camera in scene to load");
-        setActivePlayer(cameraId.value());      
+        setActivePlayer(movement, weapons, aiData, cameraId.value());      
       }
     }
   }
@@ -614,12 +614,7 @@ UiContext getUiContext(GameState& gameState){
       .routerPop = []() -> void {
         popHistory();
       },
-      .die = []() -> void {
-        auto activePlayerId = getActivePlayerId();
-        if (activePlayerId.has_value()){
-          doDamageMessage(activePlayerId.value(), 10000.f);   
-        }
-      },
+      .die = killActivePlayer,
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
       },
@@ -646,10 +641,6 @@ void handleSelectItem(objid id){
   gameapi -> sendNotifyMessage("selected", id);
 }
 
-void setActivePlayerNext(){
-  setActivePlayer(getNextEntity(gameStatePtr -> movementEntities, activeEntity));
-}
-
 void doAnimationTrigger(objid entityId, const char* transition){
   if (!hasControllerState(tags.animationController, entityId)){
     return;
@@ -673,28 +664,8 @@ UiStateContext uiStateContext {
   .uiState = createUiState(),
 };
 
-struct ControllableEntity {
-  std::optional<GunCore> gunCore;
-};
-std::unordered_map<objid, ControllableEntity> controllableEntities;
 
-void onAddControllableEntity(objid idAdded){
-  maybeAddMovementEntity(gameStatePtr -> movementEntities, idAdded);
-
-  auto agent = getSingleAttr(idAdded, "agent");
-  if (agent.has_value()){
-    addAiAgent(aiData, idAdded, agent.value());
-    controllableEntities[idAdded] = ControllableEntity {
-      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(idAdded)),
-    };
-  }
-}
-void maybeRemoveControllableEntity(objid idRemoved){
-  maybeRemoveMovementEntity(gameStatePtr -> movementEntities, idRemoved);
-  maybeRemoveAiAgent(aiData, idRemoved);
-  controllableEntities.erase(idRemoved);
-}
-
+extern std::unordered_map<objid, ControllableEntity> controllableEntities;
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
     setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
@@ -892,7 +863,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
 
     if (key == '-' && action == 0){
-      setActivePlayerNext();
+      setActivePlayerNext(movement, weapons, aiData);
     }
 
     onWeaponsKeyCallback(weapons, key, action);
@@ -1069,7 +1040,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    onAddControllableEntity(idAdded);
+    onAddControllableEntity(aiData, gameStatePtr -> movementEntities, idAdded);
     handleOnAddedTags(tags, idAdded);
 
     onMainUiObjectsChanged();
@@ -1080,9 +1051,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (activeEntity.has_value() && activeEntity.value() == idRemoved){
       activeEntity = std::nullopt;
     }
-    maybeRemoveControllableEntity(idRemoved);
+    maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 
-    onActivePlayerRemoved(idRemoved);
+    auto playerKilled = onActivePlayerRemoved(idRemoved);
+    if (playerKilled){
+      displayGameOverMenu();
+    }
     onMainUiObjectsChanged();
     onWeaponsObjectRemoved(weapons, idRemoved);
     onObjectRemovedWater(water, idRemoved);
