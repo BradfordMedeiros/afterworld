@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
+std::string& activePlayerInventory();
 
 int jumpKey = 32;
 int moveFowardKey = 'W';
@@ -113,10 +114,7 @@ struct HotkeyToMessage {
 };
 
 void maybeChangeGunUpdateUi(const char* gun){
-	maybeChangeGun(weapons, gun, []() -> void {
-		auto ammoInfo = currentAmmoInfo(weapons);
-    setUIAmmoCount(ammoInfo.currentAmmo, ammoInfo.totalAmmo);
-	});
+	maybeChangeGun(weapons, gun, activePlayerInventory());
 }
 
 std::vector<HotkeyToMessage> hotkeys = {

@@ -259,17 +259,16 @@ GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, in
   };
   return gunInstance;
 }
-void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId, std::function<void()> fn){
+void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId){
   if (weaponValues.gunCore.weaponCore != NULL && weaponValues.gunCore.weaponCore -> weaponParams.name == gun){
     modlog("weapons change gun animation - weapon already equipped", gun);
     return;
   }
 
   weaponValues.gunCore.weaponState.gunState = GUN_LOWERING;
-  gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId, fn](void* weaponData) -> void {
+  gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId](void* weaponData) -> void {
     auto newWeaponValues = changeGunInstance(weaponValues.gunId, gun, ammo, sceneId, playerId);
     weaponValues = newWeaponValues;
-    fn();
   });
 }
 

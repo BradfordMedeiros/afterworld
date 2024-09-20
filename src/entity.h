@@ -32,6 +32,8 @@ void setActivePlayerEditorMode(bool editorMode);
 
 void killActivePlayer();
 
+std::string& activePlayerInventory();
+
 DebugConfig debugPrintActivePlayer();
 
 

@@ -150,6 +150,11 @@ void killActivePlayer(){
   }
 }
 
+std::string defaultInventory = "default";
+std::string& activePlayerInventory(){
+	return defaultInventory;
+}
+
 DebugConfig debugPrintActivePlayer(){
   DebugConfig debugConfig { .data = {} };
   debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.activePlayerId) });

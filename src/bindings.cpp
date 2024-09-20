@@ -800,9 +800,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
-    auto ammoInfo = onWeaponsFrame(weapons);
+    auto ammoInfo = onWeaponsFrame(weapons, activePlayerInventory());
     if (ammoInfo.has_value()){
       setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
+    }else{
+      setUIAmmoCount(0, 0);
     }
 
 
@@ -943,7 +945,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
+      deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount, activePlayerInventory());
     }
 
     if (key == "play-material-sound"){

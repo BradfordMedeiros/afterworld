@@ -8,12 +8,10 @@
 #include "../materials.h"
 #include "./weaponcore.h"
 #include "../resources.h"
-#include "../inventory.h"
 #include "../controls.h"
 
 struct PlayerInfo {
   objid playerId;
-  std::string inventory;
 };
 struct Weapons {
   std::optional<PlayerInfo> player;
@@ -34,12 +32,12 @@ struct Weapons {
 Weapons createWeapons();
 
 bool getIsGunZoomed(Weapons& weapons);
-void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn);
+void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory);
 void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory);
-void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount);
-AmmoInfo currentAmmoInfo(Weapons& weapons);
+void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory);
+AmmoInfo currentAmmoInfo(Weapons& weapons, std::string& inventory);
 
-std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons);
+std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons, std::string& inventory);
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved);
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action);
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action);

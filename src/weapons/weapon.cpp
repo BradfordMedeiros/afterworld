@@ -48,7 +48,6 @@ bool getIsGunZoomed(Weapons& weapons){
 void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory){
   weapons.player = PlayerInfo {
     .playerId = id,
-    .inventory = inventory,
   };
 
   auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
@@ -81,27 +80,36 @@ void handleActivateItem(Weapons& weapons, objid playerId){
 }
 
 
-void maybeChangeGun(Weapons& weapons, std::string gun, std::function<void()> fn){
+void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory){
   if (!weapons.player.has_value()){
     return;
   }
-  if (hasGun(weapons.player.value().inventory, gun)){
+  if (hasGun(inventory, gun)){
     modlog("weapons change gun confirm", gun);
-    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(weapons.player.value().inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId, fn);
+    changeGunAnimate(weapons.weaponValues, gun, ammoForGun(inventory, gun), gameapi -> listSceneId(weapons.player.value().playerId), weapons.player.value().playerId);
   }else{
     modlog("weapons change gun - not in inventory", gun);
   }
 }
 
-void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount){
+std::optional<std::string*> getCurrentGunName(Weapons& weapons){
+  if (!weapons.weaponValues.gunCore.weaponCore){
+    return std::nullopt;
+  }
+  return &weapons.weaponValues.gunCore.weaponCore -> weaponParams.name;
+}
+void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory){
   if (weapons.player.has_value() && targetId == weapons.player.value().playerId){
-    deliverAmmo(weapons.player.value().inventory, weapons.weaponValues.gunCore.weaponCore -> weaponParams.name, amount);
+    auto weaponName = getCurrentGunName(weapons);
+    if (weaponName.has_value()){
+      deliverAmmo(inventory, *weaponName.value(), amount);
+    }
   }
 }
 
-AmmoInfo currentAmmoInfo(Weapons& weapons){
+AmmoInfo currentAmmoInfo(Weapons& weapons, std::string& inventory){
   auto gunName = weapons.weaponValues.gunCore.weaponCore -> weaponParams.name;
-  auto currentAmmo = ammoForGun(weapons.player.value().inventory, gunName);
+  auto currentAmmo = ammoForGun(inventory, gunName);
   auto totalAmmo = weapons.weaponValues.gunCore.weaponCore  -> weaponParams.totalAmmo;
 
   return AmmoInfo {
@@ -126,19 +134,23 @@ Weapons createWeapons(){
   return weapons;
 }
 
-std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons){
+std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons, std::string& inventory){
   if (isPaused()){
     return std::nullopt;
   }
   if (!weapons.player.has_value()){
     return std::nullopt;
   }
-  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.player.value().playerId, weapons.player.value().inventory);
+  bool didFire = fireGunAndVisualize(weapons.weaponValues.gunCore, weapons.isHoldingLeftMouse, weapons.fireOnce, weapons.weaponValues.gunId, weapons.weaponValues.muzzleId, weapons.player.value().playerId, inventory);
   weapons.fireOnce = false;
   swayGun(weapons.weaponValues, weapons.isHoldingRightMouse, weapons.player.value().playerId, weapons.lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons);
   handleActivateItem(weapons, weapons.player.value().playerId);
-  return didFire ? currentAmmoInfo(weapons) : std::optional<AmmoInfo>(std::nullopt);
+
+  if (!getCurrentGunName(weapons).has_value()){
+    return std::nullopt;
+  }
+  return currentAmmoInfo(weapons, inventory);
 }
 
 void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved){
