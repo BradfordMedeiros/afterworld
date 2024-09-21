@@ -10,37 +10,42 @@
 #include "../resources.h"
 #include "../controls.h"
 
-struct PlayerInfo {
-  objid playerId;
+struct WeaponControls {
+  bool isHoldingLeftMouse;  // control param
+  bool isHoldingRightMouse; // control param
+  bool fireOnce;            // control param
 };
+
+struct WeaponEntityState {
+
+};
+
 struct Weapons {
-  std::optional<PlayerInfo> player;
-  bool isHoldingLeftMouse;
-  bool isHoldingRightMouse;
-  bool fireOnce;
-  float selectDistance;
+  WeaponControls controls;
 
-  GunInstance weaponValues;
+  GunInstance weaponValues; // state
 
-  glm::vec2 lookVelocity;
-  std::optional<objid> heldItem;
+  std::optional<objid> heldItem;  // state
 
-  bool isGunZoomed;
-  std::optional<objid> activateableItem;
+  bool isGunZoomed; // state 
+  std::optional<objid> activateableItem; //state
 };
 
 Weapons createWeapons();
 
 bool getIsGunZoomed(Weapons& weapons);
-void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory);
-void changeWeaponTargetId(Weapons& weapons, objid id, std::string inventory);
-void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory);
+void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory, objid playerId);
+void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory, objid playerId);
 AmmoInfo currentAmmoInfo(Weapons& weapons, std::string& inventory);
 
-std::optional<AmmoInfo> onWeaponsFrame(Weapons& weapons, std::string& inventory);
-void onWeaponsObjectRemoved(Weapons& weapons, objid idRemoved);
-void onWeaponsMouseCallback(Weapons& weapons, int button, int action);
-void onWeaponsKeyCallback(Weapons& weapons, int key, int action);
-void onWeaponsMouseMove(Weapons& weapons, double xPos, double yPos);
+struct WeaponsUiUpdate {
+  std::optional<AmmoInfo> ammoInfo;
+  bool showActivateUi;
+};
+
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, std::string& inventory, objid playerId, glm::vec2 lookVelocity);
+void removeActiveGun(Weapons& weapons);
+void onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance);
+void onWeaponsKeyCallback(Weapons& weapons, int key, int action, objid playerId);
 
 #endif

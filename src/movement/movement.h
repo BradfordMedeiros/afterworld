@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include "./movementcore.h"
-#include "../weapons/weapon.h"
 #include "../controls.h"
 
 struct Movement {
@@ -36,7 +35,7 @@ Movement createMovement();
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action);
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos);
 void onMovementScrollCallback(Movement& movement, double amount);
-void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity);
+void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed);
 
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);

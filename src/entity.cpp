@@ -5,6 +5,8 @@ MovementEntityData& getMovementData();
 
 std::optional<int> activeEntity;
 std::unordered_map<objid, ControllableEntity> controllableEntities;
+std::optional<objid> playerId;
+glm::vec2 lookVelocity(0.f, 0.f);
 
 ControlledPlayer controlledPlayer {
 	.activePlayerId = std::nullopt,
@@ -111,7 +113,8 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
   activeEntity = id;
 	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
 
-	changeWeaponTargetId(weapons, id.value(), "another");
+	playerId = id.value();
+
 	maybeDisableAi(aiData, id.value());
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
@@ -129,9 +132,6 @@ bool onActivePlayerRemoved(objid id){
 	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
 		controlledPlayer.activePlayerId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
-		auto playerScene = gameapi -> listSceneId(id);
-		auto playerPos = gameapi -> getGameObjectPos(id, true);
-		auto createdObjId = id;
 		return true;
 	}
 	return false;

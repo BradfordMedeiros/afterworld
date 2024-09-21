@@ -1,7 +1,6 @@
 #include "./movement.h"
 
 extern CustomApiBindings* gameapi;
-bool getIsGunZoomed(objid id);
 
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
@@ -224,8 +223,7 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
-// This should move all movement entities not just the active one
-void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId){
+void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed){
   if (isPaused()){
     return;
   }
@@ -233,7 +231,7 @@ void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement,
   MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, getIsGunZoomed(activeId));
+  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, isGunZoomed(activeId));
     
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
@@ -245,7 +243,7 @@ void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement,
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
       }
-      onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, getIsGunZoomed(id));  
+      onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, isGunZoomed(id));  
     }
   }
 

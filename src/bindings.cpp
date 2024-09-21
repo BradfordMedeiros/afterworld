@@ -3,9 +3,11 @@
 CustomApiBindings* gameapi = NULL;
 
 
-Weapons weapons = createWeapons();
+Weapons weapons{};
 Movement movement = createMovement();
 extern std::optional<int> activeEntity;
+extern std::optional<objid> playerId;
+extern glm::vec2 lookVelocity;
 
 Water water;
 SoundData soundData;
@@ -273,8 +275,8 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 }
 
 
-bool getIsGunZoomed(objid id){
-  return getIsGunZoomed(weapons);
+bool isGunZoomed(objid id){
+  return weapons.isGunZoomed;
 }
 
 
@@ -681,6 +683,16 @@ AIInterface aiInterface {
   },
 };
 
+float querySelectDistance(){
+  auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(traitQuery, &validSql);
+  modassert(validSql, "error executing sql query");
+  float selectDistance = floatFromFirstSqlResult(result, 0);
+  return selectDistance;
+}
+
+
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -688,6 +700,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
     gameStatePtr = gameState;
+
+    weapons = createWeapons();
 
     gameState -> sceneManagement = createSceneManagement();
     gameState -> movementEntities = MovementEntityData {};
@@ -800,12 +814,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
-    auto ammoInfo = onWeaponsFrame(weapons, activePlayerInventory());
-    if (ammoInfo.has_value()){
-      setUIAmmoCount(ammoInfo.value().currentAmmo, ammoInfo.value().totalAmmo);
+    if (playerId.has_value()){
+      auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), playerId.value(), lookVelocity);
+      setShowActivate(uiUpdate.showActivateUi);
+      if (uiUpdate.ammoInfo.has_value()){
+        setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
+      }else{
+        setUIAmmoCount(0, 0);
+      }
+
     }else{
-      setUIAmmoCount(0, 0);
+      // hide hud
     }
+
 
 
     std::optional<UiHealth> uiHealth;
@@ -822,7 +843,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     setUiHealth(uiHealth);
     
     if (activeEntity.has_value()){
-      onMovementFrame(gameState -> movementEntities, movement, activeEntity.value());
+      onMovementFrame(gameState -> movementEntities, movement, activeEntity.value(), isGunZoomed);
     }
     onFrameWater(water);
     onFrameAi(aiData);
@@ -868,7 +889,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setActivePlayerNext(movement, weapons, aiData);
     }
 
-    onWeaponsKeyCallback(weapons, key, action);
+    if (playerId.has_value()){
+      onWeaponsKeyCallback(weapons, key, action, playerId.value());
+    }
     if (activeEntity.has_value()){
       onMovementKeyCallback(gameState -> movementEntities, movement, activeEntity.value(), key, action);
     }
@@ -945,7 +968,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount, activePlayerInventory());
+      if (playerId.has_value()){
+        deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount, activePlayerInventory(), playerId.value());
+      }
     }
 
     if (key == "play-material-sound"){
@@ -992,7 +1017,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
-    onWeaponsMouseMove(weapons, xPos, yPos);
+    if (playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
+      lookVelocity = glm::vec2(xPos, yPos);
+    }
     if (activeEntity.has_value()){
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, activeEntity.value(), xPos, yPos);
     }
@@ -1031,7 +1058,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getGlobalState().middleMouseDown = true;
       }
     }
-    onWeaponsMouseCallback(weapons, button, action);
+    if (playerId.has_value()){
+      static float selectDistance = querySelectDistance();
+      onWeaponsMouseCallback(weapons, button, action, playerId.value(), selectDistance);
+    }
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
@@ -1060,7 +1090,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       displayGameOverMenu();
     }
     onMainUiObjectsChanged();
-    onWeaponsObjectRemoved(weapons, idRemoved);
+    if (playerId.has_value()){
+      if (playerId.value() == idRemoved){
+        modlog("weapons", "remove player");
+        playerId = std::nullopt;
+        removeActiveGun(weapons);
+      }
+    }
+
     onObjectRemovedWater(water, idRemoved);
     handleTagsOnObjectRemoved(tags, idRemoved);
   };
