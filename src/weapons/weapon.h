@@ -11,32 +11,26 @@
 #include "../controls.h"
 
 struct WeaponControls {
-  bool isHoldingLeftMouse;  // control param
-  bool isHoldingRightMouse; // control param
-  bool fireOnce;            // control param
+  bool isHoldingLeftMouse;
+  bool isHoldingRightMouse;
+  bool fireOnce;
 };
 
 struct WeaponEntityState {
-
+  std::optional<objid> heldItem;
+  bool isGunZoomed;
+  GunInstance weaponValues;
 };
 
 struct Weapons {
   WeaponControls controls;
-
-  GunInstance weaponValues; // state
-
-  std::optional<objid> heldItem;  // state
-
-  bool isGunZoomed; // state 
-  std::optional<objid> activateableItem; //state
+  WeaponEntityState state;
 };
 
 Weapons createWeapons();
 
-bool getIsGunZoomed(Weapons& weapons);
 void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory, objid playerId);
 void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory, objid playerId);
-AmmoInfo currentAmmoInfo(Weapons& weapons, std::string& inventory);
 
 struct WeaponsUiUpdate {
   std::optional<AmmoInfo> ammoInfo;

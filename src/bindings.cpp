@@ -276,7 +276,7 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 
 
 bool isGunZoomed(objid id){
-  return weapons.isGunZoomed;
+  return weapons.state.isGunZoomed;
 }
 
 
@@ -909,7 +909,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
 
     if (key == "save-gun"){
-      saveGunTransform(weapons.weaponValues);
+      saveGunTransform(weapons.state.weaponValues);
     }
 
     if (key == "reset"){
