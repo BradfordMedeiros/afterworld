@@ -814,7 +814,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
-    if (playerId.has_value()){
+    if (playerId.has_value() && !isPaused()){  
       auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), playerId.value(), lookVelocity);
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
@@ -822,9 +822,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else{
         setUIAmmoCount(0, 0);
       }
-
     }else{
-      // hide hud
+      setShowActivate(false);
+      setUIAmmoCount(0, 0);
     }
 
 
@@ -890,7 +890,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (playerId.has_value()){
-      onWeaponsKeyCallback(weapons, key, action, playerId.value());
+      if (!(isPaused() || getGlobalState().disableGameInput)){
+        onWeaponsKeyCallback(weapons, key, action, playerId.value());
+      }
     }
     if (activeEntity.has_value()){
       onMovementKeyCallback(gameState -> movementEntities, movement, activeEntity.value(), key, action);
@@ -968,8 +970,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      if (playerId.has_value()){
-        deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount, activePlayerInventory(), playerId.value());
+      if (playerId.has_value() && (playerId.value() == itemAcquiredMessage -> targetId)){
+        deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> amount, activePlayerInventory());
       }
     }
 
@@ -1060,7 +1062,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     if (playerId.has_value()){
       static float selectDistance = querySelectDistance();
-      onWeaponsMouseCallback(weapons, button, action, playerId.value(), selectDistance);
+      if (!isPaused() && !getGlobalState().disableGameInput){
+        onWeaponsMouseCallback(weapons, button, action, playerId.value(), selectDistance);
+      }
     }
   };
 

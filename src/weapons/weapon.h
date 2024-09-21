@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "../global.h"
 #include "../materials.h"
 #include "./weaponcore.h"
 #include "../resources.h"
@@ -30,7 +29,7 @@ struct Weapons {
 Weapons createWeapons();
 
 void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory, objid playerId);
-void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory, objid playerId);
+void deliverAmmoToCurrentGun(Weapons& weapons, int amount, std::string& inventory);
 
 struct WeaponsUiUpdate {
   std::optional<AmmoInfo> ammoInfo;

@@ -7,8 +7,6 @@ int ammoForGun(std::string inventory, std::string& gun);
 void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
 void drawBloom(objid playerId, objid id, float distance, float bloomAmount);
 
-////////////////////////////////////
-
 
 std::vector<WeaponCore> weaponCores = {};
 

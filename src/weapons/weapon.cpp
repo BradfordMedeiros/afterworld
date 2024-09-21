@@ -73,19 +73,16 @@ std::optional<std::string*> getCurrentGunName(Weapons& weapons){
   }
   return &weapons.state.weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
-void deliverAmmoToCurrentGun(Weapons& weapons, objid targetId, int amount, std::string& inventory, objid playerId){
-  if (targetId == playerId){
-    auto weaponName = getCurrentGunName(weapons);
-    if (weaponName.has_value()){
-      deliverAmmo(inventory, *weaponName.value(), amount);
-    }
+void deliverAmmoToCurrentGun(Weapons& weapons, int amount, std::string& inventory){
+  auto weaponName = getCurrentGunName(weapons);
+  if (weaponName.has_value()){
+    deliverAmmo(inventory, *weaponName.value(), amount);
   }
 }
 AmmoInfo currentAmmoInfo(Weapons& weapons, std::string& inventory){
   auto gunName = weapons.state.weaponValues.gunCore.weaponCore -> weaponParams.name;
   auto currentAmmo = ammoForGun(inventory, gunName);
   auto totalAmmo = weapons.state.weaponValues.gunCore.weaponCore  -> weaponParams.totalAmmo;
-
   return AmmoInfo {
     .currentAmmo = currentAmmo,
     .totalAmmo = totalAmmo,
@@ -109,12 +106,6 @@ Weapons createWeapons(){
 }
 
 WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, std::string& inventory, objid playerId, glm::vec2 lookVelocity){
-  if (isPaused()){
-    return WeaponsUiUpdate { 
-      .ammoInfo = std::nullopt,
-      .showActivateUi = false,
-    };
-  }
   bool didFire = fireGunAndVisualize(weapons.state.weaponValues.gunCore, weapons.controls.isHoldingLeftMouse, weapons.controls.fireOnce, weapons.state.weaponValues.gunId, weapons.state.weaponValues.muzzleId, playerId, inventory);
   weapons.controls.fireOnce = false;
   swayGun(weapons.state.weaponValues, weapons.controls.isHoldingRightMouse, playerId, lookVelocity, getPlayerVelocity());
@@ -139,9 +130,6 @@ void removeActiveGun(Weapons& weapons){
 
 const float zoomAmount = 4.f;
 void onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance){
-  if (isPaused() || getGlobalState().disableGameInput){
-    return;
-  }
   if (isFireButton(button)){
     if (action == 0){
       weapons.controls.isHoldingLeftMouse = false;
@@ -173,9 +161,6 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid play
 }
 
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action, objid playerId){
-  if (isPaused() || getGlobalState().disableGameInput){
-    return;
-  }
   if (isInteractKey(key)) { 
     if (action == 1){
       auto activateableItem = raycastActivateableItem(weapons, playerId);
