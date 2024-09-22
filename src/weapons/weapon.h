@@ -38,7 +38,12 @@ struct WeaponsUiUpdate {
 
 WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, std::string& inventory, objid playerId, glm::vec2 lookVelocity);
 void removeActiveGun(Weapons& weapons);
-void onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance);
+
+struct WeaponsMouseUpdate {
+  std::optional<float> zoomAmount;
+  std::optional<objid> selectItem;
+};
+WeaponsMouseUpdate onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance);
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action, objid playerId);
 
 #endif

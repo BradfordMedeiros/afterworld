@@ -1063,7 +1063,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (playerId.has_value()){
       static float selectDistance = querySelectDistance();
       if (!isPaused() && !getGlobalState().disableGameInput){
-        onWeaponsMouseCallback(weapons, button, action, playerId.value(), selectDistance);
+        auto uiUpdate = onWeaponsMouseCallback(weapons, button, action, playerId.value(), selectDistance);
+        if (uiUpdate.zoomAmount.has_value()){
+          setTotalZoom(uiUpdate.zoomAmount.value());
+        }
+        if (uiUpdate.selectItem.has_value()){
+          handleSelectItem(uiUpdate.selectItem.value());
+        }
       }
     }
   };

@@ -1,8 +1,6 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
-void setTotalZoom(float multiplier);
-void handleSelectItem(objid id);
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
@@ -129,7 +127,9 @@ void removeActiveGun(Weapons& weapons){
 }
 
 const float zoomAmount = 4.f;
-void onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance){
+WeaponsMouseUpdate onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance){
+  std::optional<float> zoomUpdateAmount;
+  std::optional<objid> selectItem;
   if (isFireButton(button)){
     if (action == 0){
       weapons.controls.isHoldingLeftMouse = false;
@@ -141,23 +141,27 @@ void onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid play
     if (action == 0){
       weapons.controls.isHoldingRightMouse = false;
       weapons.state.isGunZoomed = false;
-      setTotalZoom(weapons.state.isGunZoomed ? (1.f / zoomAmount) : 1.f);
+      zoomUpdateAmount = 1.f;
     }else if (action == 1){
       // select item
       weapons.controls.isHoldingRightMouse = true;
       weapons.state.isGunZoomed = true;
-      setTotalZoom(weapons.state.isGunZoomed ? (1.f / zoomAmount) : 1.f);
+      zoomUpdateAmount = 1.f / zoomAmount;
       auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), playerId);
       if (hitpoints.size() > 0){
         auto cameraPos = gameapi -> getGameObjectPos(playerId, true);
         auto closestIndex = closestHitpoint(hitpoints, cameraPos);
         float distance = glm::length(cameraPos - hitpoints.at(closestIndex).point);
         if (distance <= selectDistance){
-          handleSelectItem(hitpoints.at(closestIndex).id);
+          selectItem = hitpoints.at(closestIndex).id;
         }
       }
     }
   }
+  return WeaponsMouseUpdate {
+    .zoomAmount = zoomUpdateAmount,
+    .selectItem = selectItem,
+  };
 }
 
 void onWeaponsKeyCallback(Weapons& weapons, int key, int action, objid playerId){
