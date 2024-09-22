@@ -7,6 +7,7 @@
 #include "./health.h"
 
 struct ControlledPlayer {
+  glm::vec3 playerVelocity;
 	glm::vec2 lookVelocity;
 	std::optional<int> activeEntity;
 	std::optional<objid> activePlayerId;

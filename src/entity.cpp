@@ -7,6 +7,7 @@ std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::optional<objid> playerId;
 
 ControlledPlayer controlledPlayer {
+  .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
 	.lookVelocity = glm::vec2(0.f, 0.f),
 	.activeEntity = std::nullopt,
 	.activePlayerId = std::nullopt,
@@ -148,6 +149,14 @@ void killActivePlayer(){
   if (activePlayerId.has_value()){
     doDamageMessage(activePlayerId.value(), 10000.f);   
   }
+}
+
+void setPlayerVelocity(glm::vec3 velocity){
+  controlledPlayer.playerVelocity = velocity;
+}
+
+glm::vec3 getPlayerVelocity(){
+  return controlledPlayer.playerVelocity;
 }
 
 std::string defaultInventory = "default";

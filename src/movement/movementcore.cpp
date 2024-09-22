@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
+void setPlayerVelocity(glm::vec3 velocity);
 
 struct MovementCore {
   std::string name;

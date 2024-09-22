@@ -1,6 +1,8 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
+glm::vec3 getPlayerVelocity();
+
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
