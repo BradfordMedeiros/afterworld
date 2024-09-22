@@ -9,20 +9,15 @@
 #include "../resources.h"
 #include "../controls.h"
 
-struct WeaponControls {
-  bool isHoldingLeftMouse;
-  bool isHoldingRightMouse;
-  bool fireOnce;
-};
-
 struct WeaponEntityState {
+  bool isHoldingFire;
+  bool fireOnce;
   std::optional<objid> heldItem;
   bool isGunZoomed;
   GunInstance weaponValues;
 };
 
 struct Weapons {
-  WeaponControls controls;
   WeaponEntityState state;
 };
 

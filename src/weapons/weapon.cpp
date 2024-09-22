@@ -4,8 +4,8 @@ extern CustomApiBindings* gameapi;
 
 std::string weaponsToString(Weapons& weapons){
   std::string str;
-  str += std::string("isHoldingLeftMouse: ") + (weapons.controls.isHoldingLeftMouse ? "true" : "false") + "\n";
-  str += std::string("isHoldingRightMouseo: ") + (weapons.controls.isHoldingRightMouse ? "true" : "false") + "\n";
+  str += std::string("isHoldingFire: ") + (weapons.state.isHoldingFire ? "true" : "false") + "\n";
+  str += std::string("isGunZoomed: ") + (weapons.state.isGunZoomed ? "true" : "false") + "\n";
   return str;
 }
 
@@ -89,12 +89,9 @@ AmmoInfo currentAmmoInfo(Weapons& weapons, std::string& inventory){
 
 Weapons createWeapons(){
   Weapons weapons {
-    .controls = WeaponControls{
-      .isHoldingLeftMouse = false,
-      .isHoldingRightMouse = false,
-      .fireOnce = false,
-    },
     .state = WeaponEntityState {
+      .isHoldingFire = false,
+      .fireOnce = false,
       .heldItem = std::nullopt,
       .isGunZoomed = false,
     },
@@ -104,9 +101,9 @@ Weapons createWeapons(){
 }
 
 WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, std::string& inventory, objid playerId, glm::vec2 lookVelocity){
-  bool didFire = fireGunAndVisualize(weapons.state.weaponValues.gunCore, weapons.controls.isHoldingLeftMouse, weapons.controls.fireOnce, weapons.state.weaponValues.gunId, weapons.state.weaponValues.muzzleId, playerId, inventory);
-  weapons.controls.fireOnce = false;
-  swayGun(weapons.state.weaponValues, weapons.controls.isHoldingRightMouse, playerId, lookVelocity, getPlayerVelocity());
+  bool didFire = fireGunAndVisualize(weapons.state.weaponValues.gunCore, weapons.state.isHoldingFire, weapons.state.fireOnce, weapons.state.weaponValues.gunId, weapons.state.weaponValues.muzzleId, playerId, inventory);
+  weapons.state.fireOnce = false;
+  swayGun(weapons.state.weaponValues, weapons.state.isGunZoomed, playerId, lookVelocity, getPlayerVelocity());
   handlePickedUpItem(weapons, playerId);
   auto showActivateUi = raycastActivateableItem(weapons, playerId).has_value();
 
@@ -132,19 +129,17 @@ WeaponsMouseUpdate onWeaponsMouseCallback(Weapons& weapons, int button, int acti
   std::optional<objid> selectItem;
   if (isFireButton(button)){
     if (action == 0){
-      weapons.controls.isHoldingLeftMouse = false;
+      weapons.state.isHoldingFire = false;
     }else if (action == 1){
-      weapons.controls.isHoldingLeftMouse = true;
-      weapons.controls.fireOnce = true;
+      weapons.state.isHoldingFire = true;
+      weapons.state.fireOnce = true;
     }
   }else if (isAimButton(button)){
     if (action == 0){
-      weapons.controls.isHoldingRightMouse = false;
       weapons.state.isGunZoomed = false;
       zoomUpdateAmount = 1.f;
     }else if (action == 1){
       // select item
-      weapons.controls.isHoldingRightMouse = true;
       weapons.state.isGunZoomed = true;
       zoomUpdateAmount = 1.f / zoomAmount;
       auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), playerId);

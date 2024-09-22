@@ -639,10 +639,6 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
-void handleSelectItem(objid id){
-  gameapi -> sendNotifyMessage("selected", id);
-}
-
 void doAnimationTrigger(objid entityId, const char* transition){
   if (!hasControllerState(tags.animationController, entityId)){
     return;
@@ -1068,7 +1064,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           setTotalZoom(uiUpdate.zoomAmount.value());
         }
         if (uiUpdate.selectItem.has_value()){
-          handleSelectItem(uiUpdate.selectItem.value());
+          gameapi -> sendNotifyMessage("selected", uiUpdate.selectItem.value());
         }
       }
     }
