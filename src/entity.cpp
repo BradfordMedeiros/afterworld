@@ -5,9 +5,9 @@ MovementEntityData& getMovementData();
 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::optional<objid> playerId;
-glm::vec2 lookVelocity(0.f, 0.f);
 
 ControlledPlayer controlledPlayer {
+	.lookVelocity = glm::vec2(0.f, 0.f),
 	.activeEntity = std::nullopt,
 	.activePlayerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt,

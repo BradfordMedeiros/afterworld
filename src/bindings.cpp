@@ -6,7 +6,6 @@ CustomApiBindings* gameapi = NULL;
 Weapons weapons{};
 Movement movement = createMovement();
 extern std::optional<objid> playerId;
-extern glm::vec2 lookVelocity;
 extern ControlledPlayer controlledPlayer;
 
 Water water;
@@ -811,7 +810,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     if (playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), playerId.value(), lookVelocity);
+      auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), playerId.value(), controlledPlayer.lookVelocity);
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
@@ -1016,7 +1015,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     if (playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
-      lookVelocity = glm::vec2(xPos, yPos);
+      controlledPlayer.lookVelocity = glm::vec2(xPos, yPos);
     }
     if (controlledPlayer.activeEntity.has_value()){
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), xPos, yPos);
