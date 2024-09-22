@@ -5,9 +5,9 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons{};
 Movement movement = createMovement();
-extern std::optional<int> activeEntity;
 extern std::optional<objid> playerId;
 extern glm::vec2 lookVelocity;
+extern ControlledPlayer controlledPlayer;
 
 Water water;
 SoundData soundData;
@@ -838,8 +838,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     setUiHealth(uiHealth);
     
-    if (activeEntity.has_value()){
-      onMovementFrame(gameState -> movementEntities, movement, activeEntity.value(), isGunZoomed);
+    if (controlledPlayer.activeEntity.has_value()){
+      onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), isGunZoomed);
     }
     onFrameWater(water);
     onFrameAi(aiData);
@@ -890,8 +890,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         onWeaponsKeyCallback(weapons, key, action, playerId.value());
       }
     }
-    if (activeEntity.has_value()){
-      onMovementKeyCallback(gameState -> movementEntities, movement, activeEntity.value(), key, action);
+    if (controlledPlayer.activeEntity.has_value()){
+      onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), key, action);
     }
 
     if (key == 'R' && action == 1) {
@@ -1018,8 +1018,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
       lookVelocity = glm::vec2(xPos, yPos);
     }
-    if (activeEntity.has_value()){
-      onMovementMouseMoveCallback(gameState -> movementEntities, movement, activeEntity.value(), xPos, yPos);
+    if (controlledPlayer.activeEntity.has_value()){
+      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), xPos, yPos);
     }
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
   };
@@ -1086,8 +1086,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    if (activeEntity.has_value() && activeEntity.value() == idRemoved){
-      activeEntity = std::nullopt;
+    if (controlledPlayer.activeEntity.has_value() && controlledPlayer.activeEntity.value() == idRemoved){
+      controlledPlayer.activeEntity = std::nullopt;
     }
     maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 

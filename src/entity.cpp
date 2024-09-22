@@ -3,12 +3,12 @@
 extern CustomApiBindings* gameapi;
 MovementEntityData& getMovementData();
 
-std::optional<int> activeEntity;
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::optional<objid> playerId;
 glm::vec2 lookVelocity(0.f, 0.f);
 
 ControlledPlayer controlledPlayer {
+	.activeEntity = std::nullopt,
 	.activePlayerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt,
 	.tempViewpoint = std::nullopt,
@@ -110,7 +110,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	controlledPlayer.activePlayerId = id.value();
 	auto newCameraId = setCameraOrMakeTemp(id.value());
 
-  activeEntity = id;
+  controlledPlayer.activeEntity = id;
 	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
 
 	playerId = id.value();
@@ -118,7 +118,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	maybeDisableAi(aiData, id.value());
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
-  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), activeEntity));
+  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.activeEntity));
 }
 
 std::optional<objid> getActivePlayerId(){

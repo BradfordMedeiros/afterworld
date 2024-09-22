@@ -7,6 +7,7 @@
 #include "./health.h"
 
 struct ControlledPlayer {
+	std::optional<int> activeEntity;
 	std::optional<objid> activePlayerId;
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempViewpoint;
