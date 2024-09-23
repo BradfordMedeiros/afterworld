@@ -9,8 +9,6 @@ ControlledPlayer controlledPlayer {
   .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
 	.lookVelocity = glm::vec2(0.f, 0.f),
 	.playerId = std::nullopt,
-	.activeEntity = std::nullopt,
-	.activePlayerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt,
 	.tempViewpoint = std::nullopt,
 	.editorMode = false,
@@ -46,11 +44,11 @@ void updateCamera(){
 		gameapi -> setActiveCamera(controlledPlayer.tempViewpoint.value(), -1);
 	}else if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), -1);
-	}else if (controlledPlayer.activePlayerId.has_value()){
-		auto name = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerId.value()).value();
+	}else if (controlledPlayer.playerId.has_value()){
+		auto name = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
 		auto isCamera = name.at(0) == '>';
 		modassert(isCamera, "not a camera, but not managed cameras");
-		gameapi -> setActiveCamera(controlledPlayer.activePlayerId.value(), -1);
+		gameapi -> setActiveCamera(controlledPlayer.playerId.value(), -1);
 	}
 }
 
@@ -84,7 +82,7 @@ void setTempViewpoint(glm::vec3 position, glm::quat rotation){
 	if (controlledPlayer.tempViewpoint.has_value()){
 		popTempViewpoint();
 	}
-	auto id = controlledPlayer.activePlayerId.value();
+	auto id = controlledPlayer.playerId.value();
   std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
   GameobjAttributes attr {
     .attr = { { "position", position } },
@@ -108,33 +106,28 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	if (!id.has_value()){
 		return;
 	}
-	if (controlledPlayer.activePlayerId.has_value()){
-    maybeReEnableAi(aiData, controlledPlayer.activePlayerId.value());
+	if (controlledPlayer.playerId.has_value()){
+    maybeReEnableAi(aiData, controlledPlayer.playerId.value());
 	}
-	controlledPlayer.activePlayerId = id.value();
-	auto newCameraId = setCameraOrMakeTemp(id.value());
-
-  controlledPlayer.activeEntity = id;
-	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
-
 	controlledPlayer.playerId = id.value();
-
+	auto newCameraId = setCameraOrMakeTemp(id.value());
+	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
 	maybeDisableAi(aiData, id.value());
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
-  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.activeEntity));
+  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
 }
 
 std::optional<objid> getActivePlayerId(){
 	if (controlledPlayer.tempViewpoint.has_value()){
 		return std::nullopt;
 	}
-	return controlledPlayer.activePlayerId;
+	return controlledPlayer.playerId;
 }
 
 bool onActivePlayerRemoved(objid id){
-	if (controlledPlayer.activePlayerId.has_value() && controlledPlayer.activePlayerId.value() == id){
-		controlledPlayer.activePlayerId = std::nullopt;
+	if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id){
+		controlledPlayer.playerId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
 		return true;
 	}
@@ -148,9 +141,9 @@ void setActivePlayerEditorMode(bool editorMode){
 }
 
 void killActivePlayer(){
-	auto activePlayerId = getActivePlayerId();
-  if (activePlayerId.has_value()){
-    doDamageMessage(activePlayerId.value(), 10000.f);   
+	auto playerId = getActivePlayerId();
+  if (playerId.has_value()){
+    doDamageMessage(playerId.value(), 10000.f);   
   }
 }
 
@@ -169,8 +162,8 @@ std::string& activePlayerInventory(){
 
 DebugConfig debugPrintActivePlayer(){
   DebugConfig debugConfig { .data = {} };
-  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.activePlayerId) });
-  debugConfig.data.push_back({"tempCameraId id", print(controlledPlayer.activePlayerId) });
+  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) });
+  debugConfig.data.push_back({"tempCameraId id", print(controlledPlayer.playerId) });
   debugConfig.data.push_back({"tempViewpoint", print(controlledPlayer.tempViewpoint) });
   return debugConfig;
 }

@@ -821,8 +821,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUIAmmoCount(0, 0);
     }
 
-    if (controlledPlayer.activeEntity.has_value()){
-      onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), isGunZoomed);
+    if (controlledPlayer.playerId.has_value()){
+      onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed);
     }
     
     std::optional<UiHealth> uiHealth;
@@ -887,8 +887,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         onWeaponsKeyCallback(weapons, key, action, controlledPlayer.playerId.value());
       }
     }
-    if (controlledPlayer.activeEntity.has_value()){
-      onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), key, action);
+    if (controlledPlayer.playerId.has_value()){
+      onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action);
     }
 
     if (key == 'R' && action == 1) {
@@ -1015,8 +1015,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
       controlledPlayer.lookVelocity = glm::vec2(xPos, yPos);
     }
-    if (controlledPlayer.activeEntity.has_value()){
-      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), xPos, yPos);
+    if (controlledPlayer.playerId.has_value()){
+      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), xPos, yPos);
     }
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
   };
@@ -1083,8 +1083,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    if (controlledPlayer.activeEntity.has_value() && controlledPlayer.activeEntity.value() == idRemoved){
-      controlledPlayer.activeEntity = std::nullopt;
+    if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
+      controlledPlayer.playerId = std::nullopt;
     }
     maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 

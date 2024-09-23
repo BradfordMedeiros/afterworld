@@ -10,8 +10,6 @@ struct ControlledPlayer {
   glm::vec3 playerVelocity;
 	glm::vec2 lookVelocity;
 	std::optional<objid> playerId;
-	std::optional<int> activeEntity;
-	std::optional<objid> activePlayerId;
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempViewpoint;
 	bool editorMode;
