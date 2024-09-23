@@ -5,7 +5,6 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons{};
 Movement movement = createMovement();
-extern std::optional<objid> playerId;
 extern ControlledPlayer controlledPlayer;
 
 Water water;
@@ -809,8 +808,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
-    if (playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), playerId.value(), controlledPlayer.lookVelocity);
+    if (controlledPlayer.playerId.has_value() && !isPaused()){  
+      auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), controlledPlayer.playerId.value(), controlledPlayer.lookVelocity);
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
@@ -822,8 +821,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUIAmmoCount(0, 0);
     }
 
-
-
+    if (controlledPlayer.activeEntity.has_value()){
+      onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), isGunZoomed);
+    }
+    
     std::optional<UiHealth> uiHealth;
     auto activePlayer = getActivePlayerId();
     if (activePlayer.has_value()){
@@ -837,9 +838,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     setUiHealth(uiHealth);
     
-    if (controlledPlayer.activeEntity.has_value()){
-      onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.activeEntity.value(), isGunZoomed);
-    }
     onFrameWater(water);
     onFrameAi(aiData);
     onFrameDaynight();
@@ -864,9 +862,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
         // maybe raycast down, and then set the position so it fits 
         auto teleportPosition = getTeleportPosition(tags);
-        if (playerId.has_value() && teleportPosition.has_value()){
+        if (controlledPlayer.playerId.has_value() && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
-          gameapi -> setGameObjectPosition(playerId.value(), teleportPosition.value().position, true);
+          gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true);
           gameapi -> removeByGroupId(teleportPosition.value().id);
         }
       }
@@ -884,9 +882,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setActivePlayerNext(movement, weapons, aiData);
     }
 
-    if (playerId.has_value()){
+    if (controlledPlayer.playerId.has_value()){
       if (!(isPaused() || getGlobalState().disableGameInput)){
-        onWeaponsKeyCallback(weapons, key, action, playerId.value());
+        onWeaponsKeyCallback(weapons, key, action, controlledPlayer.playerId.value());
       }
     }
     if (controlledPlayer.activeEntity.has_value()){
@@ -965,7 +963,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      if (playerId.has_value() && (playerId.value() == itemAcquiredMessage -> targetId)){
+      if (controlledPlayer.playerId.has_value() && (controlledPlayer.playerId.value() == itemAcquiredMessage -> targetId)){
         deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> amount, activePlayerInventory());
       }
     }
@@ -1014,7 +1012,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
-    if (playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
+    if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
       controlledPlayer.lookVelocity = glm::vec2(xPos, yPos);
     }
     if (controlledPlayer.activeEntity.has_value()){
@@ -1055,10 +1053,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getGlobalState().middleMouseDown = true;
       }
     }
-    if (playerId.has_value()){
+    if (controlledPlayer.playerId.has_value()){
       static float selectDistance = querySelectDistance();
       if (!isPaused() && !getGlobalState().disableGameInput){
-        auto uiUpdate = onWeaponsMouseCallback(weapons, button, action, playerId.value(), selectDistance);
+        auto uiUpdate = onWeaponsMouseCallback(weapons, button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());
         }
@@ -1095,10 +1093,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       displayGameOverMenu();
     }
     onMainUiObjectsChanged();
-    if (playerId.has_value()){
-      if (playerId.value() == idRemoved){
+    if (controlledPlayer.playerId.has_value()){
+      if (controlledPlayer.playerId.value() == idRemoved){
         modlog("weapons", "remove player");
-        playerId = std::nullopt;
+        controlledPlayer.playerId = std::nullopt;
         removeActiveGun(weapons);
       }
     }

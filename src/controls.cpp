@@ -2,7 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
-extern std::optional<objid> playerId;
+
+std::optional<objid> getPlayerId();
 
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
 std::string& activePlayerInventory();
@@ -116,8 +117,8 @@ struct HotkeyToMessage {
 };
 
 void maybeChangeGunUpdateUi(const char* gun){
-	if (playerId.has_value()){
-		maybeChangeGun(weapons, gun, activePlayerInventory(), playerId.value());
+	if (getPlayerId().has_value()){
+		maybeChangeGun(weapons, gun, activePlayerInventory(), getPlayerId().value());
 	}
 }
 

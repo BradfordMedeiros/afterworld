@@ -4,11 +4,11 @@ extern CustomApiBindings* gameapi;
 MovementEntityData& getMovementData();
 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
-std::optional<objid> playerId;
 
 ControlledPlayer controlledPlayer {
   .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
 	.lookVelocity = glm::vec2(0.f, 0.f),
+	.playerId = std::nullopt,
 	.activeEntity = std::nullopt,
 	.activePlayerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt,
@@ -16,6 +16,9 @@ ControlledPlayer controlledPlayer {
 	.editorMode = false,
 };
 
+std::optional<objid> getPlayerId(){
+	return controlledPlayer.playerId;
+}
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
   maybeAddMovementEntity(movementEntities, idAdded);
 
@@ -114,7 +117,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
   controlledPlayer.activeEntity = id;
 	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
 
-	playerId = id.value();
+	controlledPlayer.playerId = id.value();
 
 	maybeDisableAi(aiData, id.value());
 }
