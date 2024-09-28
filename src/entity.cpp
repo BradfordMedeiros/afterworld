@@ -1,6 +1,8 @@
 #include "./entity.h"
 
 extern CustomApiBindings* gameapi;
+extern Weapons weapons;
+
 MovementEntityData& getMovementData();
 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
@@ -18,20 +20,26 @@ std::optional<objid> getPlayerId(){
 	return controlledPlayer.playerId;
 }
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
-  maybeAddMovementEntity(movementEntities, idAdded);
-
+  bool shouldAddWeapon = false;
+  shouldAddWeapon = shouldAddWeapon || maybeAddMovementEntity(movementEntities, idAdded);
   auto agent = getSingleAttr(idAdded, "agent");
   if (agent.has_value()){
+  	shouldAddWeapon = true;
     addAiAgent(aiData, idAdded, agent.value());
     controllableEntities[idAdded] = ControllableEntity {
       .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(idAdded)),
     };
+  }
+
+  if (shouldAddWeapon){
+	  addWeaponId(weapons, idAdded);
   }
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
   maybeRemoveMovementEntity(movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
+  removeWeaponId(weapons, idRemoved);
   controllableEntities.erase(idRemoved);
 }
 

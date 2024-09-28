@@ -104,15 +104,17 @@ MovementEntity createMovementEntity(objid id, std::string&& name){
   return movementEntity;
 }
 
-void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id){
+bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id){
   if (movementEntityData.movementEntities.find(id) != movementEntityData.movementEntities.end()){
-    return;
+    return false;
   }
   auto player = getSingleAttr(id, "player");
   if (player.has_value()){
     auto playerProfile = getSingleAttr(id, "player-profile");
     movementEntityData.movementEntities[id] = createMovementEntity(id, playerProfile.has_value() ? playerProfile.value() : "default");
+    return true;
   }
+  return false;
 }
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id){
   movementEntityData.movementEntities.erase(id);

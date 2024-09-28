@@ -274,7 +274,7 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 
 
 bool isGunZoomed(objid id){
-  return weapons.state.isGunZoomed;
+  return getWeaponState(weapons, getActivePlayerId().value()).isGunZoomed;
 }
 
 
@@ -809,7 +809,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     if (controlledPlayer.playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(weapons, activePlayerInventory(), controlledPlayer.playerId.value(), controlledPlayer.lookVelocity);
+      auto uiUpdate = onWeaponsFrame(getWeaponState(weapons, getActivePlayerId().value()), activePlayerInventory(), controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity());
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
@@ -884,7 +884,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (controlledPlayer.playerId.has_value()){
       if (!(isPaused() || getGlobalState().disableGameInput)){
-        onWeaponsKeyCallback(weapons, key, action, controlledPlayer.playerId.value());
+        onWeaponsKeyCallback(getWeaponState(weapons, getActivePlayerId().value()), key, action, controlledPlayer.playerId.value());
       }
     }
     if (controlledPlayer.playerId.has_value()){
@@ -904,7 +904,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
 
     if (key == "save-gun"){
-      saveGunTransform(weapons.state.weaponValues);
+      saveGunTransform(getWeaponState(weapons, getActivePlayerId().value()).weaponValues);
     }
 
     if (key == "reset"){
@@ -964,7 +964,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
       if (controlledPlayer.playerId.has_value() && (controlledPlayer.playerId.value() == itemAcquiredMessage -> targetId)){
-        deliverAmmoToCurrentGun(weapons, itemAcquiredMessage -> amount, activePlayerInventory());
+        deliverAmmoToCurrentGun(getWeaponState(weapons, getActivePlayerId().value()), itemAcquiredMessage -> amount, activePlayerInventory());
       }
     }
 
@@ -1056,7 +1056,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (controlledPlayer.playerId.has_value()){
       static float selectDistance = querySelectDistance();
       if (!isPaused() && !getGlobalState().disableGameInput){
-        auto uiUpdate = onWeaponsMouseCallback(weapons, button, action, controlledPlayer.playerId.value(), selectDistance);
+        auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, getActivePlayerId().value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());
         }
@@ -1083,6 +1083,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
+    modlog("onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
+
     if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
       controlledPlayer.playerId = std::nullopt;
     }
@@ -1097,7 +1099,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (controlledPlayer.playerId.value() == idRemoved){
         modlog("weapons", "remove player");
         controlledPlayer.playerId = std::nullopt;
-        removeActiveGun(weapons);
       }
     }
 

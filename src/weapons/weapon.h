@@ -18,27 +18,30 @@ struct WeaponEntityState {
 };
 
 struct Weapons {
-  WeaponEntityState state;
+  std::unordered_map<objid, WeaponEntityState> idToWeapon;
 };
 
 Weapons createWeapons();
+void addWeaponId(Weapons& weapons, objid id);
+void removeWeaponId(Weapons& weapons, objid id);
 
-void maybeChangeGun(Weapons& weapons, std::string gun, std::string& inventory, objid playerId);
-void deliverAmmoToCurrentGun(Weapons& weapons, int amount, std::string& inventory);
+WeaponEntityState& getWeaponState(Weapons& weapons, objid id);
+
+void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, std::string& inventory, objid playerId);
+void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, std::string& inventory);
 
 struct WeaponsUiUpdate {
   std::optional<AmmoInfo> ammoInfo;
   bool showActivateUi;
 };
 
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, std::string& inventory, objid playerId, glm::vec2 lookVelocity);
-void removeActiveGun(Weapons& weapons);
+WeaponsUiUpdate onWeaponsFrame(WeaponEntityState& weaponState, std::string& inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity);
 
 struct WeaponsMouseUpdate {
   std::optional<float> zoomAmount;
   std::optional<objid> selectItem;
 };
-WeaponsMouseUpdate onWeaponsMouseCallback(Weapons& weapons, int button, int action, objid playerId, float selectDistance);
-void onWeaponsKeyCallback(Weapons& weapons, int key, int action, objid playerId);
+WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance);
+void onWeaponsKeyCallback(WeaponEntityState& weaponsState, int key, int action, objid playerId);
 
 #endif

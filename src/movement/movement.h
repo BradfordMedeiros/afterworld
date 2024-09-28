@@ -43,7 +43,7 @@ std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);
 
-void maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
+bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
 
 void setZoomSensitivity(float multiplier);
