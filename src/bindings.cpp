@@ -1060,9 +1060,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());
         }
-        if (uiUpdate.selectItem.has_value()){
-          gameapi -> sendNotifyMessage("selected", uiUpdate.selectItem.value());
-        }
       }
     }
   };

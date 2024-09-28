@@ -9,10 +9,13 @@
 #include "../resources.h"
 #include "../controls.h"
 
+enum HoldToggle { HOLD_TOGGLE_NONE, HOLD_TOGGLE_PICKUP, HOLD_TOGGLE_RELEASE };
 struct WeaponEntityState {
   bool isHoldingFire;
   bool fireOnce;
+  bool activate;
   std::optional<objid> heldItem;
+  HoldToggle holdToggle;
   bool isGunZoomed;
   GunInstance weaponValues;
 };
@@ -39,7 +42,6 @@ WeaponsUiUpdate onWeaponsFrame(WeaponEntityState& weaponState, std::string& inve
 
 struct WeaponsMouseUpdate {
   std::optional<float> zoomAmount;
-  std::optional<objid> selectItem;
 };
 WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance);
 void onWeaponsKeyCallback(WeaponEntityState& weaponsState, int key, int action, objid playerId);
