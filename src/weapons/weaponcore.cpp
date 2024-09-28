@@ -436,6 +436,7 @@ float calculateBloomAmount(GunCore& gunCore){
 
 bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory){
   if (!gunCore.weaponCore){
+    modlog("fire gun", "no weaponCore");
     return false;
   }
   auto bloomAmount = calculateBloomAmount(gunCore);

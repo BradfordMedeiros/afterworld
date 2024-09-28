@@ -168,6 +168,15 @@ std::string& activePlayerInventory(){
 	return defaultInventory;
 }
 
+WeaponEntityData getWeaponEntityData(objid playerId){
+  // this needs to get the inventory for the relevant controlled entity
+  return WeaponEntityData {
+    .inventory = &activePlayerInventory(),
+    .lookVelocity = controlledPlayer.lookVelocity,
+    .velocity = getPlayerVelocity(),
+  };
+}
+
 DebugConfig debugPrintActivePlayer(){
   DebugConfig debugConfig { .data = {} };
   debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) });

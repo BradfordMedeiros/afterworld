@@ -38,7 +38,12 @@ struct WeaponsUiUpdate {
   bool showActivateUi;
 };
 
-WeaponsUiUpdate onWeaponsFrame(WeaponEntityState& weaponState, std::string& inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity);
+struct WeaponEntityData {
+  std::string* inventory;
+  glm::vec2 lookVelocity;
+  glm::vec3 velocity;
+};
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, std::string& inventory, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData);
 
 struct WeaponsMouseUpdate {
   std::optional<float> zoomAmount;

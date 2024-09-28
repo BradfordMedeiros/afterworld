@@ -118,7 +118,7 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
   return weapons.idToWeapon.at(id);
 }
 
-WeaponsUiUpdate onWeaponsFrame(WeaponEntityState& weaponState, std::string& inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity){
+WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, std::string& inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity){
   if (weaponState.activate){
     auto activateableItem = raycastActivateableItem(playerId);
     if (activateableItem.has_value()){
@@ -194,6 +194,21 @@ WeaponsUiUpdate onWeaponsFrame(WeaponEntityState& weaponState, std::string& inve
   };
 }
 
+
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, std::string& inventory, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData){
+  WeaponsUiUpdate weaponsUiUpdate{
+    .ammoInfo = std::nullopt,
+    .showActivateUi = false,
+  };
+  for (auto &[id, weaponEntityState] : weapons.idToWeapon){
+    auto weaponEntityData = getWeaponEntityData(id);
+    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, *weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity);
+    if (id == playerId){
+      weaponsUiUpdate = uiUpdate;
+    }
+  }
+  return weaponsUiUpdate;
+}
 
 const float zoomAmount = 4.f;
 WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance){

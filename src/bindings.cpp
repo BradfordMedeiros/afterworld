@@ -274,7 +274,7 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 
 
 bool isGunZoomed(objid id){
-  return getWeaponState(weapons, getActivePlayerId().value()).isGunZoomed;
+  return getWeaponState(weapons, id).isGunZoomed;
 }
 
 
@@ -670,7 +670,15 @@ AIInterface aiInterface {
     });
   },
   .fireGun = [](objid agentId) -> void {
-    fireGunAndVisualize(controllableEntities.at(agentId).gunCore.value(), false, true, std::nullopt, std::nullopt, agentId, "default");
+    bool bypassWeaponInterface = false;
+    if (bypassWeaponInterface){
+      // get rid of this code path but need to handle the loading of the gun core for ai properly. 
+      fireGunAndVisualize(controllableEntities.at(agentId).gunCore.value(), false, true, std::nullopt, std::nullopt, agentId, "default");
+    }else{
+      // this isn't really the interface we want either. really shouold just be like
+      // eg requestFireGun(agent) = true;
+      fireGunAndVisualize(getWeaponState(weapons, agentId).weaponValues.gunCore, false, true, std::nullopt, std::nullopt, agentId, "default");
+    }
   },
   .deliverAmmo = [](objid agentId, int amount) -> void {
     deliverAmmo("default", controllableEntities.at(agentId).gunCore.value().weaponCore -> weaponParams.name, amount);
@@ -685,8 +693,6 @@ float querySelectDistance(){
   float selectDistance = floatFromFirstSqlResult(result, 0);
   return selectDistance;
 }
-
-
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -809,7 +815,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     if (controlledPlayer.playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(getWeaponState(weapons, getActivePlayerId().value()), activePlayerInventory(), controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity());
+      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), activePlayerInventory(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData);
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
