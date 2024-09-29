@@ -19,10 +19,14 @@ void setUIAmmoCount(int currentAmmo, int totalAmmo){
 }
 
 std::optional<UiHealth> uiHealth;
-
 void setUiHealth(std::optional<UiHealth> health){
   uiHealth = health;
   //modlog("ui health", std::to_string(health) + ", " + std::to_string(totalHealth));
+}
+
+std::optional<glm::vec3> uiSpeed;
+void setUiSpeed(std::optional<glm::vec3> speed){
+  uiSpeed = speed;
 }
 
 bool showActivate = false;
@@ -30,15 +34,22 @@ void setShowActivate(bool show){
   showActivate = show;
 }
 
-void drawbar(DrawingTools& drawTools, float percentage){
-  float width = 0.4f;
-  float aspectRatio = 0.2f;
+enum DrawBarAlign { DRAWBAR_ALIGN_NONE, DRAWBAR_ALIGN_POSITIVE, DRAWBAR_ALIGN_NEGATIVE };
+void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::vec2 offset, DrawBarAlign align, glm::vec4 tint){
+  float width = sizeNdi.x;
   float widthPercentage = glm::min(1.f, glm::max(0.f, percentage));
-  float yNdc = 1.f;
 
-  float barHeight = width * aspectRatio;
-  drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), width, barHeight, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.5f),true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawRect(0.f, yNdc - (barHeight * 0.5f), widthPercentage * width, barHeight, false, glm::vec4(0.f, 0.f, 0.8f, 0.6f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  float barHeight = sizeNdi.y;
+
+  float alignOffset = 0.f;
+  if (align == DRAWBAR_ALIGN_NEGATIVE){
+    alignOffset = barHeight * -0.5f;
+  }else if (align == DRAWBAR_ALIGN_POSITIVE){
+    alignOffset = barHeight * 0.5f;
+  }
+
+  drawTools.drawRect(offset.x, offset.y + alignOffset, width, barHeight, false, glm::vec4(0.2f, 0.2f, 0.2f, 0.5f),true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  drawTools.drawRect(offset.x, offset.y + alignOffset, widthPercentage * width, barHeight, false, tint, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   //modlog("ui health percentage", std::to_string(widthPercentage));
 }
 
@@ -126,10 +137,18 @@ Component hudComponent {
     }
 
     if (uiHealth.has_value()){
-      drawbar(drawTools, uiHealth.value().health / uiHealth.value().totalHealth);
+      drawbar(drawTools, uiHealth.value().health / uiHealth.value().totalHealth, glm::vec2(1.f, 0.1f), glm::vec2(0.f, 1.f), DRAWBAR_ALIGN_NEGATIVE, glm::vec4(0.f, 0.f, 1.f, 0.5f));
       drawTools.drawText("health: " + std::to_string(static_cast<int>(uiHealth.value().health)), 0.85f, 0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
     drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+    if (uiSpeed.has_value()){
+      glm::ivec3 speedRounded(uiSpeed.value().x, uiSpeed.value().y, uiSpeed.value().z);
+      drawTools.drawText(std::string("speed: ") + print(speedRounded), 0.65, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+     
+      auto speed = glm::length(uiSpeed.value());
+      drawbar(drawTools, speed / 250.f, glm::vec2(2.f, 0.025f), glm::vec2(0.f, -1.f), DRAWBAR_ALIGN_POSITIVE, glm::vec4(1.f, 1.f, 1.f, 0.2f));
+    }
 
     if (showActivate){
       drawTools.drawText("press e to activate", 0.75f, 0.7f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);

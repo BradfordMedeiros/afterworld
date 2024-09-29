@@ -828,7 +828,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (controlledPlayer.playerId.has_value()){
-      onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed);
+      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed);
+      setUiSpeed(uiUpdate.speed);
     }
     
     std::optional<UiHealth> uiHealth;

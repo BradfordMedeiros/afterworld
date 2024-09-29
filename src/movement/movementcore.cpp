@@ -137,6 +137,8 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
   movementState.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
   setPlayerVelocity(displacement);
+  movementState.velocity = displacement;
+  modlog("update velocity", print(movementState.velocity));
 
   *_movingDown = displacement.y < 0.f;
 }
@@ -664,6 +666,7 @@ MovementState getInitialMovementState(objid playerId){
   movementState.isCrouching = false;
   movementState.shouldBeCrouching = false;
   movementState.lastCrouchTime = -10000.f;  // so can immediately crouch
+  movementState.velocity = glm::vec3(0.f, 0.f, 0.f);
 
   auto scale = gameapi -> getGameObjectScale(playerId, false);
   movementState.initialScale = scale;

@@ -225,16 +225,21 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
-void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed){
+
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed){
+  UiMovementUpdate uiUpdate {
+    .speed = std::nullopt,
+  };
   if (isPaused()){
-    return;
+    return uiUpdate;
   }
 
   MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
   onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, isGunZoomed(activeId));
-    
+  //uiUpdate.speed = entity.movementState.velocity;
+
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
       continue;
@@ -255,6 +260,7 @@ void onMovementFrame(MovementEntityData& movementEntityData, Movement& movement,
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
+  return uiUpdate;
 }
 
 void setZoomSensitivity(float multiplier){

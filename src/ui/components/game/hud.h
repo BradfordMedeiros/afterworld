@@ -12,6 +12,7 @@ struct UiHealth {
 };
 
 void setUiHealth(std::optional<UiHealth> health);
+void setUiSpeed(std::optional<glm::vec3> speed);
 void setShowActivate(bool showActivate);
 
 struct LetterboxFade {
