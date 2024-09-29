@@ -142,7 +142,6 @@ bool onActivePlayerRemoved(objid id){
 	return false;
 }
 
-
 void setActivePlayerEditorMode(bool editorMode){
 	controlledPlayer.editorMode = editorMode;
 	updateCamera();
@@ -163,17 +162,18 @@ glm::vec3 getPlayerVelocity(){
   return controlledPlayer.playerVelocity;
 }
 
-std::string defaultInventory = "default";
 std::string& activePlayerInventory(){
-	return defaultInventory;
+	modassert(controlledPlayer.playerId.has_value(), "activePlayerInventory no active player");
+	return inventoryById(controlledPlayer.playerId.has_value());
 }
 
-WeaponEntityData getWeaponEntityData(objid playerId){
-  // this needs to get the inventory for the relevant controlled entity
+WeaponEntityData getWeaponEntityData(objid id){
+	auto velocity = getMovementData().movementEntities.at(id).movementState.velocity;
+	auto lookVelocity = controlledPlayer.lookVelocity;
   return WeaponEntityData {
-    .inventory = &activePlayerInventory(),
-    .lookVelocity = controlledPlayer.lookVelocity,
-    .velocity = getPlayerVelocity(),
+    .inventory = &inventoryById(id),
+    .lookVelocity = lookVelocity,
+    .velocity = velocity,
   };
 }
 

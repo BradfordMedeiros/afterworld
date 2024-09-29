@@ -1,6 +1,15 @@
 #include "./inventory.h"
 
-extern CustomApiBindings* gameapi;
+std::string unlimitedInventory = "unlimited-inventory";
+int unlimitedItemCount = 9999;
+std::string& getUnlimitedInventory(){
+  return unlimitedInventory;
+}
+
+std::string defaultInventory = "default";
+std::string& inventoryById(objid id){
+  return unlimitedInventory;
+}
 
 std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenameToInventory {
     { "default", {
@@ -25,13 +34,18 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
 
 
 int currentItemCount(std::string inventory, std::string name){
-  if (scopenameToInventory.at(inventory).find(name) == scopenameToInventory.at(inventory).end()){
-    return 0;
+  if (inventory == unlimitedInventory){
+    return unlimitedItemCount;
   }
+  modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "currentItemCount inventory does not exist");
   return scopenameToInventory.at(inventory).at(name);
 }
 
 void updateItemCount(std::string inventory, std::string name, int count){
+  if (inventory == unlimitedInventory){
+    return;
+  }
+  modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "updateItemCount inventory does not exist");
   scopenameToInventory.at(inventory)[name] = count;
 }
 
@@ -40,6 +54,10 @@ void updateItemCount(std::string inventory, std::string name, int count){
 // Gun logic
 
 bool hasGun(std::string inventory, std::string& gun){
+  if (inventory == unlimitedInventory){
+    return true;
+  }
+  modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "hasGun inventory does not exist");
   return scopenameToInventory.at(inventory).find(gun) != scopenameToInventory.at(inventory).end();
 }
 
@@ -47,11 +65,12 @@ std::string ammoNameForGun(std::string& gun){
   return gun + "-ammo";
 }
 int ammoForGun(std::string inventory, std::string& gun){
+  if (inventory == unlimitedInventory){
+    return unlimitedItemCount;
+  }
   std::cout << "gun is: " << gun << std::endl;
   std::string ammoName = ammoNameForGun(gun);
-  if (scopenameToInventory.at(inventory).find(ammoName) == scopenameToInventory.at(inventory).end()){
-    return 0;
-  }
+  modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "ammoForGun inventory does not exist");
   return static_cast<int>(scopenameToInventory.at(inventory).at(ammoName));
 }
 

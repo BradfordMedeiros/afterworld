@@ -228,7 +228,8 @@ void onMovementScrollCallback(Movement& movement, double amount){
 
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed){
   UiMovementUpdate uiUpdate {
-    .speed = std::nullopt,
+    .velocity = std::nullopt,
+    .lookVelocity = std::nullopt,
   };
   if (isPaused()){
     return uiUpdate;
@@ -238,7 +239,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
   onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, isGunZoomed(activeId));
-  uiUpdate.speed = entity.movementState.velocity;
+  uiUpdate.velocity = entity.movementState.velocity;
+  uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){

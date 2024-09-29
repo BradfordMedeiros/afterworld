@@ -24,9 +24,11 @@ void setUiHealth(std::optional<UiHealth> health){
   //modlog("ui health", std::to_string(health) + ", " + std::to_string(totalHealth));
 }
 
-std::optional<glm::vec3> uiSpeed;
-void setUiSpeed(std::optional<glm::vec3> speed){
-  uiSpeed = speed;
+std::optional<glm::vec3> uiVelocity;
+std::optional<glm::vec2> uiLookVelocity;
+void setUiSpeed(std::optional<glm::vec3> velocity, std::optional<glm::vec2> lookVelocity){
+  uiVelocity = velocity;
+  uiLookVelocity = lookVelocity;
 }
 
 bool showActivate = false;
@@ -52,7 +54,6 @@ void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::
   drawTools.drawRect(offset.x, offset.y + alignOffset, widthPercentage * width, barHeight, false, tint, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   //modlog("ui health percentage", std::to_string(widthPercentage));
 }
-
 
 //std::optional<std::string> imageForHud = "./res/textures/badhud.png";
 std::optional<std::string> imageForHud = std::nullopt;
@@ -142,12 +143,16 @@ Component hudComponent {
     }
     drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-    if (uiSpeed.has_value()){
-      glm::ivec3 speedRounded(uiSpeed.value().x, uiSpeed.value().y, uiSpeed.value().z);
+    if (uiVelocity.has_value()){
+      glm::ivec3 speedRounded(uiVelocity.value().x, uiVelocity.value().y, uiVelocity.value().z);
       drawTools.drawText(std::string("speed: ") + print(speedRounded), 0.65, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
      
-      auto speed = glm::length(uiSpeed.value());
+      auto speed = glm::length(uiVelocity.value());
       drawbar(drawTools, speed / 250.f, glm::vec2(2.f, 0.025f), glm::vec2(0.f, -1.f), DRAWBAR_ALIGN_POSITIVE, glm::vec4(1.f, 1.f, 1.f, 0.2f));
+    }
+
+    if (uiLookVelocity.has_value()){
+      drawTools.drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(uiLookVelocity.value().x, uiLookVelocity.value().y, 0.f), false, glm::vec4(0.f, 0.f, 1.f, 0.8f), true, std::nullopt, std::nullopt, std::nullopt);
     }
 
     if (showActivate){

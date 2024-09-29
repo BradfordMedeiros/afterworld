@@ -65,7 +65,7 @@ struct MovementParams {
   std::string moveSound;
 };
 struct MovementState {
-  float lastMoveSoundPlayTime;      // state
+  float lastMoveSoundPlayTime;
   glm::vec3 lastMoveSoundPlayLocation;
   float xRot;               
   float yRot;

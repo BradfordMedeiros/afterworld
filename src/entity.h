@@ -37,7 +37,7 @@ void killActivePlayer();
 glm::vec3 getPlayerVelocity();
 std::string& activePlayerInventory();
 
-WeaponEntityData getWeaponEntityData(objid playerId);
+WeaponEntityData getWeaponEntityData(objid id);
 
 DebugConfig debugPrintActivePlayer();
 

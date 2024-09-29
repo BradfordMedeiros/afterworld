@@ -6,7 +6,10 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 
-// Inventory should be scoped toward different entities
+std::string& getUnlimitedInventory();
+
+std::string& inventoryById(objid id);
+
 int currentItemCount(std::string inventory, std::string name);
 void updateItemCount(std::string inventory, std::string name, int count);
 

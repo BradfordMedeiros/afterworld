@@ -37,7 +37,8 @@ void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movemen
 void onMovementScrollCallback(Movement& movement, double amount);
 
 struct UiMovementUpdate {
-  std::optional<glm::vec3> speed;
+  std::optional<glm::vec3> velocity;
+  std::optional<glm::vec2> lookVelocity;
 };
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed);
 
@@ -49,8 +50,6 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
 
 bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
-
-
 
 void setZoomSensitivity(float multiplier);
 

@@ -806,7 +806,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
 
-    std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+    //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+    std::optional<glm::vec2> mainUiCursorCoord;
+
     gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
     modassert(tags.uiData, "tags.uiData NULL");
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
@@ -830,8 +832,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (controlledPlayer.playerId.has_value()){
+      const bool showLookVelocity = false;
       auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed);
-      setUiSpeed(uiUpdate.speed);
+      setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
     }
     
     std::optional<UiHealth> uiHealth;

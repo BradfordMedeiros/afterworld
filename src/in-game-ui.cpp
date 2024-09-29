@@ -66,7 +66,7 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 
 void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
 	// should make sure the texture id is the same
-	bool drawCursor = false;
+	bool drawCursor = true;
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
 		textDisplay.mouseCoordNdc = ndiCoord;
 
