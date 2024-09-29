@@ -1,5 +1,6 @@
 #include "./utilview.h"
 
+
 Component utilViewComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     UtilViewOptions* utilViewOptions = typeFromProps<UtilViewOptions>(props, valueSymbol);
@@ -35,8 +36,10 @@ Component utilViewComponent {
       alertComponent.draw(drawTools, defaultProps);
     }
 
+
     if (utilViewOptions -> ndiCursor.has_value()){
-      drawTools.drawRect(utilViewOptions -> ndiCursor.value().x, utilViewOptions -> ndiCursor.value().y, 0.01f, 0.01f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, std::nullopt, ShapeOptions { .zIndex = 6 }, std::nullopt);
+      const glm::vec2 cursorSizeNdi(0.02f, 0.02f);
+      drawTools.drawRect(utilViewOptions -> ndiCursor.value().x, utilViewOptions -> ndiCursor.value().y, cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "./res/textures/crosshairs/crosshair029.png", ShapeOptions { .zIndex = 6 }, std::nullopt);
     }
 
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };

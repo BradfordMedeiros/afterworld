@@ -804,9 +804,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getGlobalState().texCoordUvView = texCoordUv;
     });
 
-    gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, std::nullopt);
-    modassert(tags.uiData, "tags.uiData NULL");
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
+
+    std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+    gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
+    modassert(tags.uiData, "tags.uiData NULL");
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){

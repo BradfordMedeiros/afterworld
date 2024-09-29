@@ -238,7 +238,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
   auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
   onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, isGunZoomed(activeId));
-  //uiUpdate.speed = entity.movementState.velocity;
+  uiUpdate.speed = entity.movementState.velocity;
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
