@@ -181,12 +181,6 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
 }
 
 
-void fireProjectile(objid agentId, AgentAttackState& agentAttackState){
-  modlog("basic agent", "firing projectile");
-  aiInterface.fireGun(agentId);
-}
-
-
 const bool useMovementSystem = true;
 const bool useAiPathing = true;
 void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 1.f){
@@ -209,9 +203,9 @@ void attackTarget(Agent& agent){
 
   float currentTime = gameapi -> timeSeconds(false);
   if (currentTime - attackState -> lastAttackTime > 1.f){
-    std::cout << "attack placeholder" << std::endl;
+    modlog("ai basic", "attack");
     attackState -> lastAttackTime = currentTime;
-    fireProjectile(agent.id, *attackState);
+    aiInterface.fireGun(agent.id);
   }
 }
 

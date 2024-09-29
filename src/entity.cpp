@@ -168,12 +168,11 @@ std::string& activePlayerInventory(){
 }
 
 WeaponEntityData getWeaponEntityData(objid id){
-	auto velocity = getMovementData().movementEntities.at(id).movementState.velocity;
-	auto lookVelocity = controlledPlayer.lookVelocity;
+	MovementState& movementState = getMovementData().movementEntities.at(id).movementState;
   return WeaponEntityData {
     .inventory = &inventoryById(id),
-    .lookVelocity = lookVelocity,
-    .velocity = velocity,
+    .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
+    .velocity = movementState.velocity,
   };
 }
 

@@ -826,6 +826,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else{
         setUIAmmoCount(0, 0);
       }
+      if (uiUpdate.bloomAmount.has_value()){
+        drawBloom(controlledPlayer.playerId.value(), controlledPlayer.playerId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
+      }
     }else{
       setShowActivate(false);
       setUIAmmoCount(0, 0);

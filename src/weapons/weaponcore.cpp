@@ -5,8 +5,6 @@ extern CustomApiBindings* gameapi;
 void doDamageMessage(objid targetId, float damage);
 int ammoForGun(std::string inventory, std::string& gun);
 void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
-void drawBloom(objid playerId, objid id, float distance, float bloomAmount);
-
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -434,21 +432,21 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-bool fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory){
+GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory){
   if (!gunCore.weaponCore){
     modlog("fire gun", "no weaponCore");
-    return false;
+    return GunFireInfo { .didFire = false, .bloomAmount = std::nullopt };
   }
   auto bloomAmount = calculateBloomAmount(gunCore);
-  drawBloom(id, id, -1.f, bloomAmount); // 0.002f is just a min amount for visualization, not actual bloom
   if ((gunCore.weaponCore -> weaponParams.canHold && holding) || fireOnce){
     //// should come from outside this since gun core can't know this 
     auto playerRotation = gameapi -> getGameObjectRotation(id, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
     auto playerPos = gameapi -> getGameObjectPos(id, true);
     //////////////////////
-    return tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
+    bool didFire = tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
+    return GunFireInfo { .didFire = didFire, .bloomAmount = bloomAmount };
   }
-  return false;
+  return GunFireInfo { .didFire = false, .bloomAmount = bloomAmount };
 }
 
 bool swayFromMouse = true;

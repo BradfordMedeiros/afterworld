@@ -176,7 +176,8 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, std::string
   }
   weaponState.holdToggle = HOLD_TOGGLE_NONE;
 
-  bool didFire = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory);
+  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory);
+
   weaponState.fireOnce = false;
   swayGun(weaponState.weaponValues, weaponState.isGunZoomed, playerId, lookVelocity, playerVelocity);
   handlePickedUpItem(weaponState, playerId);
@@ -186,11 +187,13 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, std::string
     return WeaponsUiUpdate { 
       .ammoInfo = std::nullopt, 
       .showActivateUi = showActivateUi,
+      .bloomAmount = gunFireInfo.bloomAmount,
     };
   }
   return WeaponsUiUpdate {
     .ammoInfo = currentAmmoInfo(weaponState, inventory),
     .showActivateUi = showActivateUi,
+    .bloomAmount = gunFireInfo.bloomAmount,
   };
 }
 

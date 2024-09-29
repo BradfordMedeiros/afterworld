@@ -36,6 +36,7 @@ void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, std::st
 struct WeaponsUiUpdate {
   std::optional<AmmoInfo> ammoInfo;
   bool showActivateUi;
+  std::optional<float> bloomAmount;
 };
 
 struct WeaponEntityData {
