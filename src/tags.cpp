@@ -118,13 +118,26 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 }
 
 
-std::optional<objid> glassTextureId;
-std::optional<objid> glassObjId;
+struct GlassTexture {
+	objid id;
+	std::string name;
+};
+std::unordered_map<objid, GlassTexture> objIdToGlassTexture;
+
 void createGlassTexture(objid id){
-	glassObjId = id;
-	glassTextureId = gameapi -> createTexture("test-glass-texture", 1000, 10000, id);
-  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.75f), glassTextureId.value(), true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
- 	updateBackground(id, "test-glass-texture");
+	std::string textureName = std::string("glass-texture") + uniqueNameSuffix();
+	auto glassTextureId = gameapi -> createTexture(textureName, 1000, 10000, id);
+	objIdToGlassTexture[id] = GlassTexture {
+		.id = glassTextureId,
+		.name = textureName,
+	};
+  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.75f), glassTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+ 	updateBackground(id, objIdToGlassTexture.at(id).name);
+}
+void removeGlassTexture(objid id){
+	auto textureName = objIdToGlassTexture.at(id).name;
+	gameapi -> freeTexture(textureName, id);
+	objIdToGlassTexture.erase(id);
 }
 
 // This should add normals, and drawRect should be able to subtractively add or something like that, so that
@@ -133,15 +146,15 @@ void createGlassTexture(objid id){
 // This also only worked for glass the player is looking at...which is okay enough, but lame
 // probably could do a quick render on  the object or something to map pos/normal of hit to uv space of object
 bool maybeAddGlassBulletHole(objid id, objid playerId){
-  auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-	if (glassObjId.has_value() && glassObjId.value() == id){
-
-		float bulletHoleSize = randomNumber(0.f, 0.1f) + 0.1;
-
-	  gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTextureId.value(), true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
-		return true;
+	if (objIdToGlassTexture.find(id) == objIdToGlassTexture.end()){
+		return false;
 	}
-	return false;
+	GlassTexture& glassTexture = objIdToGlassTexture.at(id);
+  auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
+	float bulletHoleSize = randomNumber(0.f, 0.1f) + 0.1;
+
+	 gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTexture.id, true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
+	return true;
 }
 
 std::vector<TagUpdater> tagupdates = { 
@@ -481,7 +494,9 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
 	  	createGlassTexture(id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		removeGlassTexture(id);
+  	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	}
