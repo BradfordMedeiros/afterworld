@@ -5,6 +5,7 @@ extern CustomApiBindings* gameapi;
 void doDamageMessage(objid targetId, float damage);
 int ammoForGun(std::string inventory, std::string& gun);
 void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
+bool maybeAddGlassBulletWhole(objid id, objid playerId);
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -350,17 +351,20 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       emitterId = gunCore.weaponCore -> hitParticles.value();
     }
 
+    auto addedGlassDecal = maybeAddGlassBulletWhole(hitpoint.id, playerId);
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
-    if (emitterId.has_value()){
-      std::cout << "hit particle, hitpoint.id = " << hitpoint.id << std::endl;
-      gameapi -> emit(emitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
+    if (!addedGlassDecal){
+      if (emitterId.has_value()){
+        std::cout << "hit particle, hitpoint.id = " << hitpoint.id << std::endl;
+        gameapi -> emit(emitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
+      }      
     }
+
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
 
     doDamageMessage(hitpoint.id, gunCore.weaponCore -> weaponParams.damage);
-
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
 }

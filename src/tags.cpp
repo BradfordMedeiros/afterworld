@@ -62,9 +62,6 @@ void updateQueryBackground(std::string image){
   modassert(validSql, "error executing sql query");
 }
 void updateBackground(objid id, std::string image){
-	if (!getSingleAttr(id, "background").has_value()){
-		return;
-	}
   setGameObjectTexture(id, image);
 }
 
@@ -118,6 +115,30 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	simpleOnFrame([position, outerRadius]() -> void {
 		drawSphereVecGfx(position, outerRadius, glm::vec4(0.f, 0.f, 1.f, 1.f));
 	}, 0.2f);
+}
+
+
+std::optional<objid> glassTextureId;
+std::optional<objid> glassObjId;
+void createGlassTexture(objid id){
+	glassObjId = id;
+	glassTextureId = gameapi -> createTexture("test-glass-texture", 1000, 10000, id);
+  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.75f), glassTextureId.value(), true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+ 	updateBackground(id, "test-glass-texture");
+}
+
+// This should add normals, and drawRect should be able to subtractively add or something like that, so that
+// can make the drawRect call subtract alpha
+//
+// This also only worked for glass the player is looking at...which is okay enough, but lame
+// probably could do a quick render on  the object or something to map pos/normal of hit to uv space of object
+bool maybeAddGlassBulletWhole(objid id, objid playerId){
+  auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
+	if (glassObjId.has_value() && glassObjId.value() == id){
+	  gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glassTextureId.value(), true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
+		return true;
+	}
+	return false;
 }
 
 std::vector<TagUpdater> tagupdates = { 
@@ -452,6 +473,15 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
+	TagUpdater {
+		.attribute = "glasstexture",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+	  	createGlassTexture(id);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	}
 };
 
 void setMenuBackground(std::string background){
