@@ -18,6 +18,8 @@ platform_lowert:texture:../gameresources/textures/wood.jpg
 platform_lowert:physics:enabled
 platform_lowert:material:metal
 
+platform_lowert:recording:test
+
 
 &ambient_space:clip:../gameresources/sound/busy_cyberworld.wav
 &ambient_space:loop:true
@@ -260,35 +262,41 @@ item3:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
 
 
 console:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-console:position:10 -25 -1
+console:position:10 -15 -1
 console:scale:3 3 3
 console:rotation:0 0 1 180
-console:tint:0 0.6 1 1
 console:in-game-ui:test
 console:in-game-ui-offset:0 0 -5
 
+glass:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+glass:position:17 -25 -1
+glass:scale:3 3 3
+glass:rotation:0 0 1 180
+glass:glasstexture:true
+glass:layer:transparency
+glass:physics:enabled
 
 #!light:position:0 -5 5
 
-enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
-enemy:rotation:0 0 -1 0
-enemy:position:0 -10 70
-enemy:physics_angle:0 0 0
-enemy:physics:enabled
-enemy:physics_type:dynamic
-enemy:tint:1 0 0 1
-#enemy:goal:idle-enemy
-enemy:goal-type:idle
-enemy:goal-value:2
-enemy:agent:basic
-enemy:agent-target:blue
-enemy:goal-info:target
-enemy:team:red
-enemy:health:130
-enemy:physics_damping_linear:0.9
-enemy:dragselect:ai
-enemy:animation:character
-enemy:player:true
+#enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+#enemy:rotation:0 0 -1 0
+#enemy:position:0 -10 70
+#enemy:physics_angle:0 0 0
+#enemy:physics:enabled
+#enemy:physics_type:dynamic
+#enemy:tint:1 0 0 1
+##enemy:goal:idle-enemy
+#enemy:goal-type:idle
+#enemy:goal-value:2
+#enemy:agent:basic
+#enemy:agent-target:blue
+#enemy:goal-info:target
+#enemy:team:red
+#enemy:health:130
+#enemy:physics_damping_linear:0.9
+#enemy:dragselect:ai
+#enemy:animation:character
+#enemy:player:true
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 goal:scale:0.25 0.05 1.25
@@ -330,7 +338,7 @@ spawnpoint:spawnlimit:3
 
 
 playerspawn:playerspawn:true
-playerspawn:position:250 50 -175
+playerspawn:position:0 20 0
 playerspawn:teleport:true
 
 wires:mesh:../gameresources/build/uncategorized/darkwires.gltf
@@ -338,7 +346,7 @@ wires:position:250 50 -400
 wires:scale:10 10 10
 
 [terminal:scene:../afterworld/scenes/prefabs/objects/terminal.rawscene
-[terminal:position:250 50 -177
+[terminal:position:12 -25 -1
 
 [bouncepad:scene:../afterworld/scenes/prefabs/objects/bouncepad.rawscene
 [bouncepad:position:230 50 -175
