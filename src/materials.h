@@ -13,8 +13,9 @@ struct ParticleAndEmitter {
 
 struct MaterialToParticle {
   std::string material;
+  std::optional<objid> hitParticleClipId;
   std::optional<ParticleAndEmitter> hitParticle;  // wherever gun hits, gets parented to the surface
-  std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented. 
+  std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented.
 };
 
 std::optional<std::string> materialTypeForObj(objid id);

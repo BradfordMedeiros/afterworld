@@ -275,6 +275,7 @@ glass:rotation:0 0 1 180
 glass:glasstexture:true
 glass:layer:transparency
 glass:physics:enabled
+glass:material:glass
 
 #!light:position:0 -5 5
 

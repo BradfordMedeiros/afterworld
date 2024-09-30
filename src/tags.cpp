@@ -132,10 +132,13 @@ void createGlassTexture(objid id){
 //
 // This also only worked for glass the player is looking at...which is okay enough, but lame
 // probably could do a quick render on  the object or something to map pos/normal of hit to uv space of object
-bool maybeAddGlassBulletWhole(objid id, objid playerId){
+bool maybeAddGlassBulletHole(objid id, objid playerId){
   auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
 	if (glassObjId.has_value() && glassObjId.value() == id){
-	  gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glassTextureId.value(), true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
+
+		float bulletHoleSize = randomNumber(0.f, 0.1f) + 0.1;
+
+	  gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTextureId.value(), true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
 		return true;
 	}
 	return false;

@@ -5,7 +5,7 @@ extern CustomApiBindings* gameapi;
 void doDamageMessage(objid targetId, float damage);
 int ammoForGun(std::string inventory, std::string& gun);
 void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
-bool maybeAddGlassBulletWhole(objid id, objid playerId);
+bool maybeAddGlassBulletHole(objid id, objid playerId);
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -333,6 +333,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       objMaterial = "default";
     }
 
+    std::optional<objid> soundEmitterId = std::nullopt;
     std::optional<objid> emitterId = std::nullopt;
     std::optional<objid> splashEmitterId = std::nullopt;
 
@@ -341,6 +342,9 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       std::cout << "hit particle material: (" << (material.has_value() && material.value() -> hitParticle.has_value() ? "has hit particle" : "no hit particle" ) << ") " << std::endl;
       if (material.has_value() && material.value() -> hitParticle.has_value()){
         emitterId = material.value() -> hitParticle.value().particleId;
+      }
+      if (material.has_value()){
+        soundEmitterId = material.value() -> hitParticleClipId;
       }
       if (material.has_value() && material.value() -> splashParticle.has_value()){
         splashEmitterId = material.value() -> splashParticle.value().particleId;
@@ -351,7 +355,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       emitterId = gunCore.weaponCore -> hitParticles.value();
     }
 
-    auto addedGlassDecal = maybeAddGlassBulletWhole(hitpoint.id, playerId);
+    auto addedGlassDecal = maybeAddGlassBulletHole(hitpoint.id, playerId);
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
     if (!addedGlassDecal){
       if (emitterId.has_value()){
@@ -359,6 +363,11 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
         gameapi -> emit(emitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
       }      
     }
+
+    if (soundEmitterId.has_value()){
+      playGameplayClipById(soundEmitterId.value(), std::nullopt, hitpoint.point);
+    }
+
 
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);

@@ -38,7 +38,7 @@ GameobjAttributes particleAttributes(std::string& particle){
 
 std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   std::vector<MaterialToParticle> materialToParticles;
-  auto query = gameapi -> compileSqlQuery("select material, hit-particle, particle from materials", {});
+  auto query = gameapi -> compileSqlQuery("select material, hit-particle, particle, hit-sound from materials", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -51,8 +51,20 @@ std::vector<MaterialToParticle> loadMaterials(objid sceneId){
     auto splashParticleAttr = particleAttributes(row.at(2));
     auto splashEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-splashparticle-" + row.at(0), splashParticleAttr, submodelAttributes);
 
+    GameobjAttributes attr {
+      .attr = {},
+    };
+
+    auto materialHitSound = row.at(3);
+    std::optional<objid> hitParticleClipId;
+    if (materialHitSound != ""){
+      attr.attr["clip"] = row.at(3);
+      hitParticleClipId = gameapi -> makeObjectAttr(sceneId, std::string("&material-hitsound") + row.at(0), attr, submodelAttributes);
+    }
+
     materialToParticles.push_back(MaterialToParticle {
       .material = row.at(0),
+      .hitParticleClipId = hitParticleClipId,
       .hitParticle = ParticleAndEmitter {
         .particle = row.at(1),
         .particleId = materialEmitterId.value(),
