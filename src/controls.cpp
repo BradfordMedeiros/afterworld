@@ -6,7 +6,7 @@ extern Weapons weapons;
 std::optional<objid> getPlayerId();
 
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
-std::string& activePlayerInventory();
+objid activePlayerInventory();
 
 int jumpKey = 32;
 int moveFowardKey = 'W';

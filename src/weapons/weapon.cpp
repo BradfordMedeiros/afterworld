@@ -57,7 +57,7 @@ std::optional<objid> raycastActivateableItem(objid playerId){
   return std::nullopt;
 }
 
-void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, std::string& inventory, objid playerId){
+void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, objid inventory, objid playerId){
   if (hasGun(inventory, gun)){
     modlog("weapons change gun confirm", gun);
     changeGunAnimate(weaponState.weaponValues, gun, gameapi -> listSceneId(playerId), playerId, showWeaponViewModel);
@@ -69,13 +69,13 @@ void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, std::string
 std::optional<std::string*> getCurrentGunName(WeaponEntityState& weaponState){
   return getCurrentGunName(weaponState.weaponValues);
 }
-void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, std::string& inventory){
+void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, objid inventory){
   auto weaponName = getCurrentGunName(weaponState);
   if (weaponName.has_value()){
     deliverAmmo(inventory, *weaponName.value(), amount);
   }
 }
-AmmoInfo currentAmmoInfo(WeaponEntityState& weaponState, std::string& inventory){
+AmmoInfo currentAmmoInfo(WeaponEntityState& weaponState, objid inventory){
   auto gunName = weaponState.weaponValues.gunCore.weaponCore -> weaponParams.name;
   auto currentAmmo = ammoForGun(inventory, gunName);
   auto totalAmmo = weaponState.weaponValues.gunCore.weaponCore  -> weaponParams.totalAmmo;
@@ -104,7 +104,7 @@ void addWeaponId(Weapons& weapons, objid id){
   };
   weapons.idToWeapon.at(id).weaponValues.gunCore.weaponState = WeaponState {};
 
-  std::string inventory = "default";
+  objid inventory = getDefaultInventory();
   maybeChangeGun(weapons.idToWeapon.at(id), "pistol", inventory, id);
 }
 
@@ -120,7 +120,7 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
   return weapons.idToWeapon.at(id);
 }
 
-WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, std::string& inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun){
+WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun){
   ensureGunInstance(weaponState.weaponValues, gameapi -> listSceneId(playerId), playerId, showFpsGun);
 
   if (weaponState.activate){
@@ -204,7 +204,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, std::string
 }
 
 
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, std::string& inventory, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData){
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, objid inventory, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData){
   WeaponsUiUpdate weaponsUiUpdate{
     .ammoInfo = std::nullopt,
     .showActivateUi = false,
@@ -212,7 +212,7 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, std::string& in
   for (auto &[id, weaponEntityState] : weapons.idToWeapon){
     auto weaponEntityData = getWeaponEntityData(id);
     bool activePlayer = id == playerId;
-    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, *weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer);
+    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer);
     if (activePlayer){
       weaponsUiUpdate = uiUpdate;
     }

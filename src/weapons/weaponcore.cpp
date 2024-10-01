@@ -3,8 +3,8 @@
 extern CustomApiBindings* gameapi;
 
 void doDamageMessage(objid targetId, float damage);
-int ammoForGun(std::string inventory, std::string& gun);
-void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
+int ammoForGun(objid inventory, std::string& gun);
+void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 bool maybeAddGlassBulletHole(objid id, objid playerId);
 
 std::vector<WeaponCore> weaponCores = {};
@@ -300,7 +300,7 @@ void removeGun(GunInstance& weaponValues){
   }
 }
 
-void deliverAmmo(std::string inventory, std::string gunName, int ammo){
+void deliverAmmo(objid inventory, std::string gunName, int ammo){
   auto oldAmmo = ammoForGun(inventory, gunName);
   setGunAmmo(inventory, gunName, oldAmmo + ammo);
 }
@@ -396,7 +396,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
   }
 }
 
-bool tryFireGun(std::string inventory, std::optional<objid> gunId, std::optional<objid> muzzleId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
+bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid> muzzleId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(gunCore, now);
   modlog("weapons", std::string("try fire gun, can fire = ") + (canFireGun ? "true" : "false") + ", now = " + std::to_string(now) + ", firing rate = " + std::to_string(gunCore.weaponCore -> weaponParams.firingRate));
@@ -463,7 +463,7 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory){
+GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory){
   if (!gunCore.weaponCore){
     modlog("fire gun", "no weaponCore");
     return GunFireInfo { .didFire = false, .bloomAmount = std::nullopt };

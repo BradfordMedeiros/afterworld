@@ -160,7 +160,7 @@ glm::vec3 getPlayerVelocity(){
   return controlledPlayer.playerVelocity;
 }
 
-std::string& activePlayerInventory(){
+objid activePlayerInventory(){
 	modassert(controlledPlayer.playerId.has_value(), "activePlayerInventory no active player");
 	return inventoryById(controlledPlayer.playerId.has_value());
 }
@@ -168,7 +168,7 @@ std::string& activePlayerInventory(){
 WeaponEntityData getWeaponEntityData(objid id){
 	MovementState& movementState = getMovementData().movementEntities.at(id).movementState;
   return WeaponEntityData {
-    .inventory = &inventoryById(id),
+    .inventory = inventoryById(id),
     .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
     .velocity = movementState.velocity,
   };

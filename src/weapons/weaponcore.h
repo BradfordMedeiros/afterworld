@@ -101,7 +101,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId,
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);
 void removeGun(GunInstance& weaponValues);
 
-void deliverAmmo(std::string inventory, std::string gunName, int ammo);
+void deliverAmmo(objid inventory, std::string gunName, int ammo);
 
 struct AmmoInfo { 
   int currentAmmo;
@@ -117,7 +117,7 @@ struct GunFireInfo {
   bool didFire;
   std::optional<float> bloomAmount;
 };
-GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, std::string inventory);
+GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory);
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);

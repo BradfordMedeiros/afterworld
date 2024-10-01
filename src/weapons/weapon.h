@@ -30,8 +30,8 @@ void removeWeaponId(Weapons& weapons, objid id);
 
 WeaponEntityState& getWeaponState(Weapons& weapons, objid id);
 
-void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, std::string& inventory, objid playerId);
-void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, std::string& inventory);
+void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, objid inventory, objid playerId);
+void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, objid inventory);
 
 struct WeaponsUiUpdate {
   std::optional<AmmoInfo> ammoInfo;
@@ -41,11 +41,11 @@ struct WeaponsUiUpdate {
 };
 
 struct WeaponEntityData {
-  std::string* inventory;
+  objid inventory;
   glm::vec2 lookVelocity;
   glm::vec3 velocity;
 };
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, std::string& inventory, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData);
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, objid inventory, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData);
 
 struct WeaponsMouseUpdate {
   std::optional<float> zoomAmount;

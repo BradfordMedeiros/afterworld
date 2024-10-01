@@ -1,18 +1,22 @@
 #include "./inventory.h"
 
-std::string unlimitedInventory = "unlimited-inventory";
+objid unlimitedInventory = 2;
 int unlimitedItemCount = 9999;
-std::string& getUnlimitedInventory(){
+objid getUnlimitedInventory(){
   return unlimitedInventory;
 }
 
-std::string defaultInventory = "default";
-std::string& inventoryById(objid id){
+objid defaultInventory = 0;
+objid getDefaultInventory(){
   return defaultInventory;
 }
 
-std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenameToInventory {
-    { "default", {
+objid inventoryById(objid id){
+  return defaultInventory;
+}
+
+std::unordered_map<objid, std::unordered_map<std::string, float>> scopenameToInventory {
+    { 0, {
         { "gold",  100 },
         { "pistol",  10 },
         { "fork",  100 },
@@ -21,7 +25,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
         { "electrogun",  100 },
         { "electrogun-ammo", 10000 },
     }},
-    { "another", {
+    { 1, {
         { "gold",  100 },
         { "pistol",  10 },
         { "fork",  100 },
@@ -32,8 +36,15 @@ std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenam
     }}
 };
 
+void addInventory(objid id){
 
-int currentItemCount(std::string inventory, std::string name){
+}
+void removeInventory(objid id){
+
+}
+
+
+int currentItemCount(objid inventory, std::string name){
   if (inventory == unlimitedInventory){
     return unlimitedItemCount;
   }
@@ -41,7 +52,7 @@ int currentItemCount(std::string inventory, std::string name){
   return scopenameToInventory.at(inventory).at(name);
 }
 
-void updateItemCount(std::string inventory, std::string name, int count){
+void updateItemCount(objid inventory, std::string name, int count){
   if (inventory == unlimitedInventory){
     return;
   }
@@ -53,7 +64,7 @@ void updateItemCount(std::string inventory, std::string name, int count){
 ///////////////////
 // Gun logic
 
-bool hasGun(std::string inventory, std::string& gun){
+bool hasGun(objid inventory, std::string& gun){
   if (inventory == unlimitedInventory){
     return true;
   }
@@ -64,7 +75,7 @@ bool hasGun(std::string inventory, std::string& gun){
 std::string ammoNameForGun(std::string& gun){
   return gun + "-ammo";
 }
-int ammoForGun(std::string inventory, std::string& gun){
+int ammoForGun(objid inventory, std::string& gun){
   if (inventory == unlimitedInventory){
     return unlimitedItemCount;
   }
@@ -75,7 +86,7 @@ int ammoForGun(std::string inventory, std::string& gun){
 }
 
 
-void setGunAmmo(std::string inventory, std::string gun, int currentAmmo){
+void setGunAmmo(objid inventory, std::string gun, int currentAmmo){
   updateItemCount(inventory, ammoNameForGun(gun), currentAmmo);
 }
 
@@ -84,14 +95,14 @@ void debugPrintInventory(){
     const float fontSize = 0.02f;
     drawRightText("inventory\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt);
 
-    std::vector<std::string> inventoryNames;
+    std::vector<objid> inventoryNames;
     for (auto &[name, inventory] : scopenameToInventory){
       inventoryNames.push_back(name);
     }
     int offset = 0;
     for (int i = 0; i < inventoryNames.size(); i++){
 
-      drawRightText(inventoryNames.at(i), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt);
+      drawRightText(std::to_string(inventoryNames.at(i)), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt);
       offset++;
 
       for (auto &[name, amount] : scopenameToInventory.at(inventoryNames.at(i))){

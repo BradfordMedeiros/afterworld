@@ -6,16 +6,20 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 
-std::string& getUnlimitedInventory();
+objid getUnlimitedInventory();
+objid getDefaultInventory();
 
-std::string& inventoryById(objid id);
+objid inventoryById(objid id);
 
-int currentItemCount(std::string inventory, std::string name);
-void updateItemCount(std::string inventory, std::string name, int count);
+void addInventory(objid id);
+void removeInventory(objid id);
 
-bool hasGun(std::string inventory, std::string& gun);
-int ammoForGun(std::string inventory, std::string& gun);
-void setGunAmmo(std::string inventory, std::string gun, int currentAmmo);
+int currentItemCount(objid inventory, std::string name);
+void updateItemCount(objid inventory, std::string name, int count);
+
+bool hasGun(objid inventory, std::string& gun);
+int ammoForGun(objid inventory, std::string& gun);
+void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 
 void debugPrintInventory();
 
