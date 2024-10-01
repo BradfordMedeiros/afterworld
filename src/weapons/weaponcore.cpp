@@ -18,7 +18,6 @@ WeaponCore* findWeaponCore(std::string& name){
   return NULL;
 }
 
-
 void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponParams){
   modlog("weapons", std::string("load weapon core: ") + coreName);
   if (findWeaponCore(coreName)){
@@ -178,7 +177,6 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid play
   return gunId.value();
 }
 
-
 void saveGunTransform(GunInstance& weaponValues){
   debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
 
@@ -210,9 +208,9 @@ void saveGunTransform(GunInstance& weaponValues){
   }
 }
 
-GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId){
-  auto weaponParams = queryWeaponParams(gun);
+GunCore createGunCoreInstance(std::string gun, objid sceneId){
   modlog("weapons", std::string("spawn gun: ") + gun);
+  auto weaponParams = queryWeaponParams(gun);
 
   loadWeaponCore(gun, sceneId, weaponParams);
 
@@ -231,42 +229,64 @@ GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId){
   return gunCore;
 }
 
-GunInstance changeGunInstance(std::optional<objid> oldGunId, std::string gun, int ammo, objid sceneId, objid playerId){
-  auto gunCore = createGunCoreInstance(gun, ammo, 0); // would be better to preload all gun cores
-  auto weaponCore = gunCore.weaponCore;
-
-  if (oldGunId.has_value()){
-    gameapi -> removeByGroupId(oldGunId.value());
+std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
+  if (!weaponValues.gunCore.weaponCore){
+    return std::nullopt;
   }
-  auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
-  auto gunId = createWeaponInstance(weaponCore -> weaponParams, sceneId, playerId, weaponName);
-  if (weaponCore -> weaponParams.idleAnimation.has_value() && weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
-    gameapi -> playAnimation(gunId, weaponCore -> weaponParams.idleAnimation.value(), LOOP);
-  }
-
-  auto muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
-  if (!muzzlePointId.has_value()){
-    modlog("weapon core", std::string("no muzzle defined for: ") + gun);
-  }
-
-  GunInstance gunInstance {
-    .gunCore = gunCore,
-    .gunId = gunId,
-    .muzzleId = muzzlePointId,
-  };
-  return gunInstance;
+  return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
-void changeGunAnimate(GunInstance& weaponValues, std::string gun, int ammo, objid sceneId, objid playerId){
+
+void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId, bool createGunModel){
+  auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
+  if (elapsedTimeSinceChange  < 0.5f){
+    //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
+    return;
+  }
+
+  auto currentGun = getCurrentGunName(_gunInstance);
+  if (!currentGun.has_value() && _gunInstance.desiredGun == ""){
+    return;
+  }
+
+  bool sameGun = currentGun.has_value() && (*currentGun.value() == _gunInstance.desiredGun);
+  if (sameGun && _gunInstance.gunId.has_value() && createGunModel){
+    return;
+  }
+  modlog("weapons ensureGunInstance", std::string("change gun instance: ") + _gunInstance.desiredGun);
+
+  if (_gunInstance.gunId.has_value()){
+    gameapi -> removeByGroupId(_gunInstance.gunId.value());
+  }
+
+  auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores
+  std::optional<objid> gunId;
+  std::optional<objid> muzzlePointId;
+
+  if (createGunModel){
+    auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
+    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, playerId, weaponName);
+    if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
+      gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
+    }
+    muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
+    if (!muzzlePointId.has_value()){
+      modlog("weapon core", std::string("no muzzle defined for: ") + _gunInstance.desiredGun);
+    }    
+  }
+
+  _gunInstance.gunCore = gunCore;
+  _gunInstance.gunId = gunId;
+  _gunInstance.muzzleId = muzzlePointId;
+}
+
+void changeGunAnimate(GunInstance& weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel){
   if (weaponValues.gunCore.weaponCore != NULL && weaponValues.gunCore.weaponCore -> weaponParams.name == gun){
     modlog("weapons change gun animation - weapon already equipped", gun);
     return;
   }
-
   weaponValues.gunCore.weaponState.gunState = GUN_LOWERING;
-  gameapi -> schedule(playerId, 500, NULL, [&weaponValues, gun, ammo, sceneId, playerId](void* weaponData) -> void {
-    auto newWeaponValues = changeGunInstance(weaponValues.gunId, gun, ammo, sceneId, playerId);
-    weaponValues = newWeaponValues;
-  });
+  weaponValues.desiredGun = gun;
+  weaponValues.changeGunTime = gameapi -> timeSeconds(false);
 }
 
 // probably this shouldn't reset the state, just remove objects 
@@ -284,8 +304,6 @@ void deliverAmmo(std::string inventory, std::string gunName, int ammo){
   auto oldAmmo = ammoForGun(inventory, gunName);
   setGunAmmo(inventory, gunName, oldAmmo + ammo);
 }
-
-
 
 bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
   auto timeSinceLastShot = elapsedMilliseconds - gunCore.weaponState.lastShootingTime;

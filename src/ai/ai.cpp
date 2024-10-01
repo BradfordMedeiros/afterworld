@@ -188,11 +188,7 @@ void onAiHealthChange(objid targetId, float remainingHealth){
 }
 
 void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
-  if(key == "ammo"){
-    auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
-    modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-    onAiAmmo(agent, itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
-  }else if (key == "health-change"){
+  if (key == "health-change"){
     auto healthChangeMessage = anycast<HealthChangeMessage>(value);
     modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");
     onAiBasicAgentHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);

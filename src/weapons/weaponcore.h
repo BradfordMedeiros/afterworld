@@ -86,13 +86,19 @@ struct GunCore {
 };
 
 struct GunInstance {
+  std::string desiredGun;
+  float changeGunTime = 0.f;
+
   GunCore gunCore;
   std::optional<objid> gunId;
   std::optional<objid> muzzleId;
 };
 
-GunCore createGunCoreInstance(std::string gun, int ammo, objid sceneId);
-void changeGunAnimate(GunInstance& _weaponValues, std::string gun, int ammo, objid sceneId, objid playerId);
+GunCore createGunCoreInstance(std::string gun, objid sceneId);
+std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues);
+
+void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId, bool createGunModel);
+void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);
 void removeGun(GunInstance& weaponValues);
 
 void deliverAmmo(std::string inventory, std::string gunName, int ammo);

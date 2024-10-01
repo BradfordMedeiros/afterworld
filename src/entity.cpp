@@ -26,9 +26,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
   if (agent.has_value()){
   	shouldAddWeapon = true;
     addAiAgent(aiData, idAdded, agent.value());
-    controllableEntities[idAdded] = ControllableEntity {
-      .gunCore = createGunCoreInstance("pistol", 5, gameapi -> listSceneId(idAdded)),
-    };
+    controllableEntities[idAdded] = ControllableEntity {};
   }
 
   if (shouldAddWeapon){

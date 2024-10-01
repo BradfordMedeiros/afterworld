@@ -16,7 +16,6 @@ struct ControlledPlayer {
 };
 
 struct ControllableEntity {
-  std::optional<GunCore> gunCore;
 };
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);

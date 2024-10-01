@@ -8,7 +8,7 @@ std::string& getUnlimitedInventory(){
 
 std::string defaultInventory = "default";
 std::string& inventoryById(objid id){
-  return unlimitedInventory;
+  return defaultInventory;
 }
 
 std::unordered_map<std::string, std::unordered_map<std::string, float>> scopenameToInventory {

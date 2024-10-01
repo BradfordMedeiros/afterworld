@@ -621,6 +621,10 @@ UiContext getUiContext(GameState& gameState){
       .setShowDebugUi = [&gameState](DebugPrintType printType) -> void {
         gameState.printType = printType;
       },
+      .showWeapon = [&gameState](bool showWeapon) -> void {
+        modlog("console weapons", std::string("show weapon: ") + print(showWeapon));
+        setShowWeaponModel(showWeapon);
+      },
     },
   };
   return uiContext;
@@ -670,18 +674,7 @@ AIInterface aiInterface {
     });
   },
   .fireGun = [](objid agentId) -> void {
-    bool bypassWeaponInterface = false;
-    if (bypassWeaponInterface){
-      // get rid of this code path but need to handle the loading of the gun core for ai properly. 
-      fireGunAndVisualize(controllableEntities.at(agentId).gunCore.value(), false, true, std::nullopt, std::nullopt, agentId, "default");
-    }else{
-      // this isn't really the interface we want either. really shouold just be like
-      // eg requestFireGun(agent) = true;
-      fireGunAndVisualize(getWeaponState(weapons, agentId).weaponValues.gunCore, false, true, std::nullopt, std::nullopt, agentId, "default");
-    }
-  },
-  .deliverAmmo = [](objid agentId, int amount) -> void {
-    deliverAmmo("default", controllableEntities.at(agentId).gunCore.value().weaponCore -> weaponParams.name, amount);
+    fireGun(weapons, agentId);
   },
 };
 
@@ -829,9 +822,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (uiUpdate.bloomAmount.has_value()){
         drawBloom(controlledPlayer.playerId.value(), controlledPlayer.playerId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
       }
+      modlog("current weapon", uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : "");
+      setUiWeapon(uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : std::optional<std::string>(std::nullopt));
     }else{
       setShowActivate(false);
       setUIAmmoCount(0, 0);
+      setUiWeapon(std::nullopt);
     }
 
     if (controlledPlayer.playerId.has_value()){

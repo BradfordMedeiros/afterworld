@@ -234,7 +234,21 @@ std::vector<CommandDispatch> commands {
       }
       return "invalid type";      
     },
-  }
+  },
+  CommandDispatch {
+    .command = "hideweapon",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      consoleInterface.showWeapon(false);
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
+    .command = "showweapon",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      consoleInterface.showWeapon(true);
+      return std::nullopt;
+    },
+  },
 };
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){

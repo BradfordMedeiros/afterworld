@@ -260,11 +260,6 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }
 }
 
-void onAiAmmo(Agent& agent, objid targetId, int amount){
-  if (targetId == agent.id){
-    aiInterface.deliverAmmo(agent.id, amount);
-  }
-}
 
 void onAiBasicAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
   if (targetId == agent.id){

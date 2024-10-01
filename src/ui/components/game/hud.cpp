@@ -36,6 +36,11 @@ void setShowActivate(bool show){
   showActivate = show;
 }
 
+std::optional<std::string> uiWeapon;
+void setUiWeapon(std::optional<std::string> weapon){
+  uiWeapon = weapon;
+}
+
 enum DrawBarAlign { DRAWBAR_ALIGN_NONE, DRAWBAR_ALIGN_POSITIVE, DRAWBAR_ALIGN_NEGATIVE };
 void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::vec2 offset, DrawBarAlign align, glm::vec4 tint){
   float width = sizeNdi.x;
@@ -137,11 +142,14 @@ Component hudComponent {
       drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, imageForHud.value(), std::nullopt, std::nullopt);
     }
 
+    drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
     if (uiHealth.has_value()){
       drawbar(drawTools, uiHealth.value().health / uiHealth.value().totalHealth, glm::vec2(1.f, 0.1f), glm::vec2(0.f, 1.f), DRAWBAR_ALIGN_NEGATIVE, glm::vec4(0.f, 0.f, 1.f, 0.5f));
       drawTools.drawText("health: " + std::to_string(static_cast<int>(uiHealth.value().health)), 0.85f, 0.9f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
-    drawTools.drawText(std::string("ammo: ") + std::to_string(ammoInfo.currentAmmo) + " / " + std::to_string(ammoInfo.totalAmmo), 0.85, 0.95, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+    drawTools.drawText(std::string("weapon: ") + (uiWeapon.has_value() ? uiWeapon.value() : std::string("unequipped")), 0.65, 0.75, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
     if (uiVelocity.has_value()){
       glm::ivec3 speedRounded(uiVelocity.value().x, uiVelocity.value().y, uiVelocity.value().z);
@@ -158,6 +166,7 @@ Component hudComponent {
     if (showActivate){
       drawTools.drawText("press e to activate", 0.75f, 0.7f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
+
 
     auto fade = calculateFade(letterbox, letterBoxStartTime);
     if (fade.has_value()){

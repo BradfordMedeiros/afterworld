@@ -37,6 +37,7 @@ struct WeaponsUiUpdate {
   std::optional<AmmoInfo> ammoInfo;
   bool showActivateUi;
   std::optional<float> bloomAmount;
+  std::optional<std::string*> currentGunName;
 };
 
 struct WeaponEntityData {
@@ -51,5 +52,9 @@ struct WeaponsMouseUpdate {
 };
 WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance);
 void onWeaponsKeyCallback(WeaponEntityState& weaponsState, int key, int action, objid playerId);
+
+void fireGun(Weapons& weapons, objid playerId);
+
+void setShowWeaponModel(bool showModel);
 
 #endif
