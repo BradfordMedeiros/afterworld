@@ -249,6 +249,13 @@ std::vector<CommandDispatch> commands {
       return std::nullopt;
     },
   },
+  CommandDispatch {
+    .command = "ammo",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      consoleInterface.deliverAmmo(100);
+      return std::nullopt;
+    },
+  },
 };
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){

@@ -476,6 +476,10 @@ DebugConfig debugPrintAnimations(){
   return debugConfig;
 }
 
+void deliverCurrentGunAmmo(objid id, int ammoAmount){
+  deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, activePlayerInventory());
+}
+
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -625,6 +629,11 @@ UiContext getUiContext(GameState& gameState){
         modlog("console weapons", std::string("show weapon: ") + print(showWeapon));
         setShowWeaponModel(showWeapon);
       },
+      .deliverAmmo = [](int amount) -> void {
+        if(getActivePlayerId().has_value()){
+          deliverCurrentGunAmmo(getActivePlayerId().value(), amount);
+        }
+      }
     },
   };
   return uiContext;
@@ -686,6 +695,7 @@ float querySelectDistance(){
   float selectDistance = floatFromFirstSqlResult(result, 0);
   return selectDistance;
 }
+
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -975,7 +985,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
       if (controlledPlayer.playerId.has_value() && (controlledPlayer.playerId.value() == itemAcquiredMessage -> targetId)){
-        deliverAmmoToCurrentGun(getWeaponState(weapons, getActivePlayerId().value()), itemAcquiredMessage -> amount, activePlayerInventory());
+        deliverCurrentGunAmmo(getActivePlayerId().value(), itemAcquiredMessage -> amount);
       }
     }
 

@@ -31,6 +31,7 @@ struct ConsoleInterface {
   std::function<void()> toggleKeyboard;
   std::function<void(DebugPrintType printType)> setShowDebugUi;
   std::function<void(bool)> showWeapon;
+  std::function<void(int)> deliverAmmo;
 };
 
 extern Component consoleComponent;
