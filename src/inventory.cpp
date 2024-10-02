@@ -3,6 +3,7 @@
 std::unordered_map<objid, std::unordered_map<std::string, float>> scopenameToInventory {};
 
 void addInventory(objid id){
+  modlog("add inventory added id:", std::to_string(id));
   modassert(scopenameToInventory.find(id) == scopenameToInventory.end(), "inventory already exists");
   scopenameToInventory[id] = {
     { "gold",  100 },
@@ -15,7 +16,10 @@ void addInventory(objid id){
   };
 }
 void removeInventory(objid id){
-  scopenameToInventory.erase(id);
+  if (scopenameToInventory.find(id) != scopenameToInventory.end()){
+    modlog("remove inventory added id:", std::to_string(id));
+    scopenameToInventory.erase(id);
+  }
 }
 
 
@@ -44,7 +48,7 @@ std::string ammoNameForGun(std::string& gun){
 int ammoForGun(objid inventory, std::string& gun){
   std::cout << "gun is: " << gun << std::endl;
   std::string ammoName = ammoNameForGun(gun);
-  modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "ammoForGun inventory does not exist");
+  modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), std::string("ammoForGun inventory does not exist: ") + std::to_string(inventory));
   return static_cast<int>(scopenameToInventory.at(inventory).at(ammoName));
 }
 

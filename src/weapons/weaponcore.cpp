@@ -258,6 +258,10 @@ void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId,
     gameapi -> removeByGroupId(_gunInstance.gunId.value());
   }
 
+  if (sameGun && !createGunModel){
+    return;
+  }
+
   auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores
   std::optional<objid> gunId;
   std::optional<objid> muzzlePointId;

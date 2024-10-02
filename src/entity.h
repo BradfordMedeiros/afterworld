@@ -34,7 +34,6 @@ void setActivePlayerEditorMode(bool editorMode);
 void killActivePlayer();
 
 glm::vec3 getPlayerVelocity();
-objid activePlayerInventory();
 
 WeaponEntityData getWeaponEntityData(objid id);
 

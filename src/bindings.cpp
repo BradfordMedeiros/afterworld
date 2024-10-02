@@ -477,7 +477,7 @@ DebugConfig debugPrintAnimations(){
 }
 
 void deliverCurrentGunAmmo(objid id, int ammoAmount){
-  deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, activePlayerInventory());
+  deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }
 
 UiContext getUiContext(GameState& gameState){
@@ -822,7 +822,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     if (controlledPlayer.playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), activePlayerInventory(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData);
+      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData);
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);

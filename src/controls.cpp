@@ -5,8 +5,6 @@ extern Weapons weapons;
 
 std::optional<objid> getPlayerId();
 
-void setUIAmmoCount(int currentAmmo, int totalAmmo);
-objid activePlayerInventory();
 
 int jumpKey = 32;
 int moveFowardKey = 'W';
@@ -118,7 +116,7 @@ struct HotkeyToMessage {
 
 void maybeChangeGunUpdateUi(const char* gun){
 	if (getPlayerId().has_value()){
-		maybeChangeGun(getWeaponState(weapons, getPlayerId().value()), gun, activePlayerInventory(), getPlayerId().value());
+		maybeChangeGun(getWeaponState(weapons, getPlayerId().value()), gun,  getPlayerId().value(), getPlayerId().value());
 	}
 }
 

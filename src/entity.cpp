@@ -20,6 +20,7 @@ std::optional<objid> getPlayerId(){
 	return controlledPlayer.playerId;
 }
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
+	modlog("onAddControllableEntity added id:", std::to_string(idAdded));
   bool shouldAddWeapon = false;
   shouldAddWeapon = shouldAddWeapon || maybeAddMovementEntity(movementEntities, idAdded);
   auto agent = getSingleAttr(idAdded, "agent");
@@ -160,11 +161,6 @@ void setPlayerVelocity(glm::vec3 velocity){
 
 glm::vec3 getPlayerVelocity(){
   return controlledPlayer.playerVelocity;
-}
-
-objid activePlayerInventory(){
-	modassert(controlledPlayer.playerId.has_value(), "activePlayerInventory no active player");
-	return controlledPlayer.playerId.has_value();
 }
 
 WeaponEntityData getWeaponEntityData(objid id){
