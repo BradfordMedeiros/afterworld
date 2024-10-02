@@ -30,6 +30,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
   }
 
   if (shouldAddWeapon){
+	  addInventory(idAdded);
 	  addWeaponId(weapons, idAdded);
   }
 }
@@ -38,6 +39,7 @@ void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementE
   maybeRemoveMovementEntity(movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
   removeWeaponId(weapons, idRemoved);
+  removeInventory(idRemoved);
   controllableEntities.erase(idRemoved);
 }
 
@@ -162,13 +164,13 @@ glm::vec3 getPlayerVelocity(){
 
 objid activePlayerInventory(){
 	modassert(controlledPlayer.playerId.has_value(), "activePlayerInventory no active player");
-	return inventoryById(controlledPlayer.playerId.has_value());
+	return controlledPlayer.playerId.has_value();
 }
 
 WeaponEntityData getWeaponEntityData(objid id){
 	MovementState& movementState = getMovementData().movementEntities.at(id).movementState;
   return WeaponEntityData {
-    .inventory = inventoryById(id),
+    .inventory = id,
     .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
     .velocity = movementState.velocity,
   };

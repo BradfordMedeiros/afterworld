@@ -177,7 +177,7 @@ bool isPickup(objid id){
   return playerAttr.has_value();
 }
 void tryPickupItem(objid gameObjId, objid playerId){
-  objid inventory = getDefaultInventory();
+  objid inventory = playerId;
 
   auto objAttr = getAttrHandle(gameObjId);
   auto pickup = getStrAttr(objAttr, "pickup");

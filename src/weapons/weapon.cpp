@@ -104,7 +104,7 @@ void addWeaponId(Weapons& weapons, objid id){
   };
   weapons.idToWeapon.at(id).weaponValues.gunCore.weaponState = WeaponState {};
 
-  objid inventory = getDefaultInventory();
+  objid inventory = id;
   maybeChangeGun(weapons.idToWeapon.at(id), "pistol", inventory, id);
 }
 

@@ -1,61 +1,30 @@
 #include "./inventory.h"
 
-objid unlimitedInventory = 2;
-int unlimitedItemCount = 9999;
-objid getUnlimitedInventory(){
-  return unlimitedInventory;
-}
-
-objid defaultInventory = 0;
-objid getDefaultInventory(){
-  return defaultInventory;
-}
-
-objid inventoryById(objid id){
-  return defaultInventory;
-}
-
-std::unordered_map<objid, std::unordered_map<std::string, float>> scopenameToInventory {
-    { 0, {
-        { "gold",  100 },
-        { "pistol",  10 },
-        { "fork",  100 },
-        { "pistol-ammo", 50 },
-        { "fork-ammo", 50 },
-        { "electrogun",  100 },
-        { "electrogun-ammo", 10000 },
-    }},
-    { 1, {
-        { "gold",  100 },
-        { "pistol",  10 },
-        { "fork",  100 },
-        { "pistol-ammo", 30 },
-        { "fork-ammo", 50 },
-        { "electrogun",  100 },
-        { "electrogun-ammo", 10000 },
-    }}
-};
+std::unordered_map<objid, std::unordered_map<std::string, float>> scopenameToInventory {};
 
 void addInventory(objid id){
-
+  modassert(scopenameToInventory.find(id) == scopenameToInventory.end(), "inventory already exists");
+  scopenameToInventory[id] = {
+    { "gold",  100 },
+    { "pistol",  10 },
+    { "fork",  100 },
+    { "pistol-ammo", 10 },
+    { "fork-ammo", 50 },
+    { "electrogun",  100 },
+    { "electrogun-ammo", 10000 },
+  };
 }
 void removeInventory(objid id){
-
+  scopenameToInventory.erase(id);
 }
 
 
 int currentItemCount(objid inventory, std::string name){
-  if (inventory == unlimitedInventory){
-    return unlimitedItemCount;
-  }
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "currentItemCount inventory does not exist");
   return scopenameToInventory.at(inventory).at(name);
 }
 
 void updateItemCount(objid inventory, std::string name, int count){
-  if (inventory == unlimitedInventory){
-    return;
-  }
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "updateItemCount inventory does not exist");
   scopenameToInventory.at(inventory)[name] = count;
 }
@@ -65,9 +34,6 @@ void updateItemCount(objid inventory, std::string name, int count){
 // Gun logic
 
 bool hasGun(objid inventory, std::string& gun){
-  if (inventory == unlimitedInventory){
-    return true;
-  }
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "hasGun inventory does not exist");
   return scopenameToInventory.at(inventory).find(gun) != scopenameToInventory.at(inventory).end();
 }
@@ -76,9 +42,6 @@ std::string ammoNameForGun(std::string& gun){
   return gun + "-ammo";
 }
 int ammoForGun(objid inventory, std::string& gun){
-  if (inventory == unlimitedInventory){
-    return unlimitedItemCount;
-  }
   std::cout << "gun is: " << gun << std::endl;
   std::string ammoName = ammoNameForGun(gun);
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "ammoForGun inventory does not exist");
