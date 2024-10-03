@@ -608,7 +608,10 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   }
 }
 
-void onMovementFrame(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera, bool isGunZoomed){
+void onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera, bool isGunZoomed){
+  if (managedCamera.has_value()){
+    modassert(gameapi -> gameobjExists(managedCamera.value().id), std::string("lookThirdPerson camera does not exist: ") + std::to_string(managedCamera.value().id));
+  }
   onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera, isGunZoomed);
   if (controlData.doJump){
     jump(moveParams, movementState, playerId);      

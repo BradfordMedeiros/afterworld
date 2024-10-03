@@ -255,6 +255,8 @@ void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId,
   modlog("weapons ensureGunInstance", std::string("change gun instance: ") + _gunInstance.desiredGun);
 
   if (_gunInstance.gunId.has_value()){
+    _gunInstance.gunId = std::nullopt;
+    _gunInstance.muzzleId = std::nullopt;
     gameapi -> removeByGroupId(_gunInstance.gunId.value());
   }
 

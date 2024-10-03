@@ -235,12 +235,15 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     return uiUpdate;
   }
 
-  MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+  {
+    //MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+    //auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
+    //onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
 
-  auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-  onMovementFrame(*entity.moveParams, entity.movementState, entity.playerId, controlData, movementEntityData.movementEntities.at(activeId).managedCamera, isGunZoomed(activeId));
-  uiUpdate.velocity = entity.movementState.velocity;
-  uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
+    //uiUpdate.velocity = entity.movementState.velocity;
+    //uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
+  }
+
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
@@ -252,7 +255,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
       }
-      onMovementFrame(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, isGunZoomed(id));  
+      onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, isGunZoomed(id));  
     }
   }
 

@@ -103,9 +103,6 @@ void addWeaponId(Weapons& weapons, objid id){
     .isGunZoomed = false,
   };
   weapons.idToWeapon.at(id).weaponValues.gunCore.weaponState = WeaponState {};
-
-  objid inventory = id;
-  maybeChangeGun(weapons.idToWeapon.at(id), "pistol", inventory, id);
 }
 
 void removeWeaponId(Weapons& weapons, objid id){
