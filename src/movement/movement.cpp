@@ -261,8 +261,10 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (movementEntity.targetLocation.has_value()){
       bool atTarget = false;
       auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, movementEntity.movementState, movementEntity.playerId, &atTarget);
+      movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
+        movementEntity.movementState.speed = 1.f;
       }
       onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, isGunZoomed(id));  
     }

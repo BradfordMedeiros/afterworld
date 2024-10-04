@@ -75,9 +75,12 @@ struct MovementControlData {
   float raw_deltax;
   float raw_deltay;
   float zoom_delta;
-  float speed;
 };
 struct MovementState {
+  // control data 
+  float speed;
+
+  ////
   float lastMoveSoundPlayTime;
   glm::vec3 lastMoveSoundPlayLocation;
   float xRot;               

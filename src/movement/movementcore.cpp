@@ -435,7 +435,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
     .raw_deltax = 0.f,
     .raw_deltay = 0.f,
     .zoom_delta = 0.f,
-    .speed = speed,
   };
   if (atTargetPos){
     *atTargetPos = false;
@@ -476,7 +475,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
     .zoom_delta = controlParams.zoom_delta,
-    .speed = 1.f,
   };
 
   static float horzRelVelocity = 0.8f;
@@ -552,7 +550,7 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 
   
 
-  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * controlData.speed;
+  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
   auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, controlData.moveVec.y, controlData.moveVec.z), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;
@@ -652,6 +650,7 @@ glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
 MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
+  movementState.speed = 1.f;
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);

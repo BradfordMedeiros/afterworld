@@ -679,7 +679,7 @@ AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
     setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
       .position = targetPosition,
-      .speed = speed,
+      .speed = speed * 0.6f,
     });
   },
   .fireGun = [](objid agentId) -> void {
