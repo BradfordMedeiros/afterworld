@@ -424,14 +424,10 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 }
 
 // This is obviously wrong, but a starting point
-MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos){
+MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos){
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
-    .isWalking = false,
   };
-  if (atTargetPos){
-    *atTargetPos = false;
-  }
 
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
@@ -440,6 +436,9 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   controlData.moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
   auto moveLength = glm::length(controlData.moveVec);
 
+  if (atTargetPos){
+    *atTargetPos = false;
+  }
   if (moveLength < 0.5){  // already arrived
     if (atTargetPos){
       *atTargetPos = true;
@@ -451,58 +450,9 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
     controlData.moveVec = glm::normalize(controlData.moveVec);
   }
 
-  controlData.isWalking = true;
-
   modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(controlData.moveVec));
   return controlData;
 }
-
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams){
-  MovementControlData controlData {
-    .moveVec = glm::vec3(0.f, 0.f, 0.f),
-    .isWalking = false,
-  };
-
-  static float horzRelVelocity = 0.8f;
-
-  if (controlParams.goForward){
-    std::cout << "should move forward" << std::endl;
-    if (controlParams.shiftModifier && moveParams.moveVertical){
-      controlData.moveVec += glm::vec3(0.f, 1.f, 0.f);
-    }else{
-      controlData.moveVec += glm::vec3(0.f, 0.f, -1.f);
-    }
-    if (!(movementState.facingLadder || movementState.attachedToLadder)){
-      controlData.isWalking = true;
-    }
-  }
-  if (controlParams.goBackward){
-    if (controlParams.shiftModifier && moveParams.moveVertical){
-      controlData.moveVec += glm::vec3(0.f, -1.f, 0.f);
-    }else{
-      controlData.moveVec += glm::vec3(0.f, 0.f, 1.f);
-    }
-    if (!(movementState.facingLadder || movementState.attachedToLadder)){
-      controlData.isWalking = true;
-    }
-  }
-  if (controlParams.goLeft){
-    controlData.moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
-    if (!movementState.attachedToLadder){
-      controlData.isWalking = true;
-    }
-    
-  }
-  if (controlParams.goRight){
-    controlData.moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
-    if (!movementState.attachedToLadder){
-      controlData.isWalking = true;
-    }
-  }
-
-  return controlData;
-}
-
 
 std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::vector<glm::quat> hitDirections;
@@ -545,7 +495,7 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
   }
   auto direction = glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z);
 
-  if (controlData.isWalking){
+  if (movementState.isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
     bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.z);
@@ -644,6 +594,7 @@ MovementState getInitialMovementState(objid playerId){
   movementState.raw_deltax = 0.f;
   movementState.raw_deltay = 0.f;
   movementState.crouchType = CROUCH_NONE;
+  movementState.isWalking = false;
 
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 

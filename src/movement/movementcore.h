@@ -67,7 +67,6 @@ struct MovementParams {
 
 struct MovementControlData {
   glm::vec3 moveVec;
-  bool isWalking;
 };
 struct MovementState {
   // control data 
@@ -79,6 +78,7 @@ struct MovementState {
   float raw_deltax;
   float raw_deltay;
   CrouchType crouchType;
+  bool isWalking;
 
   ////
   float lastMoveSoundPlayTime;
@@ -105,9 +105,7 @@ void loadMovementCore(std::string& coreName);
 void removeAllMovementCores();
 
 
-
-MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams);
+MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos);
 
 struct CameraUpdate {
   glm::vec3 position;

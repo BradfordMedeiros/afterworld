@@ -232,6 +232,53 @@ void onMovementScrollCallback(Movement& movement, double amount){
 }
 
 
+MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams){
+  MovementControlData controlData {
+    .moveVec = glm::vec3(0.f, 0.f, 0.f),
+  };
+
+  static float horzRelVelocity = 0.8f;
+
+  movementState.isWalking = false;
+  if (controlParams.goForward){
+    std::cout << "should move forward" << std::endl;
+    if (controlParams.shiftModifier && moveParams.moveVertical){
+      controlData.moveVec += glm::vec3(0.f, 1.f, 0.f);
+    }else{
+      controlData.moveVec += glm::vec3(0.f, 0.f, -1.f);
+    }
+    if (!(movementState.facingLadder || movementState.attachedToLadder)){
+      movementState.isWalking = true;
+    }
+  }
+  if (controlParams.goBackward){
+    if (controlParams.shiftModifier && moveParams.moveVertical){
+      controlData.moveVec += glm::vec3(0.f, -1.f, 0.f);
+    }else{
+      controlData.moveVec += glm::vec3(0.f, 0.f, 1.f);
+    }
+    if (!(movementState.facingLadder || movementState.attachedToLadder)){
+      movementState.isWalking = true;
+    }
+  }
+  if (controlParams.goLeft){
+    controlData.moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
+    if (!movementState.attachedToLadder){
+      movementState.isWalking = true;
+    }
+    
+  }
+  if (controlParams.goRight){
+    controlData.moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
+    if (!movementState.attachedToLadder){
+      movementState.isWalking = true;
+    }
+  }
+
+  return controlData;
+}
+
+
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, std::optional<objid> thirdPersonCamera){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
@@ -268,9 +315,10 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
     if (movementEntity.targetLocation.has_value()){
       bool atTarget = false;
-      auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, movementEntity.movementState, movementEntity.playerId, &atTarget);
+      auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget);
       movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
       movementEntity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+      movementEntity.movementState.isWalking = !atTarget;
 
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
