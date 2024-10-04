@@ -246,7 +246,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
     entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
     entity.movementState.doJump = movement.controlParams.doJump;
-
+    entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
+    
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.has_value()){
       gameapi -> setGameObjectPosition(thirdPersonCamera.value(), cameraUpdate.value().position, true);

@@ -428,7 +428,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .doAttachToLadder = false,
     .doReleaseFromLadder = false,
     .crouchType = CROUCH_NONE,
     .raw_deltax = 0.f,
@@ -466,7 +465,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .doAttachToLadder = controlParams.doAttachToLadder,
     .doReleaseFromLadder = controlParams.doReleaseFromLadder,
     .crouchType = controlParams.crouchType,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
@@ -611,7 +609,7 @@ std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, Move
   if (movementState.doJump){
     jump(moveParams, movementState, playerId);      
   }
-  if (controlData.doAttachToLadder){
+  if (movementState.doAttachToLadder){
     attachToLadder(movementState);
   }
   if (controlData.doReleaseFromLadder){
