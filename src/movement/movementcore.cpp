@@ -428,7 +428,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .crouchType = CROUCH_NONE,
   };
   if (atTargetPos){
     *atTargetPos = false;
@@ -462,7 +461,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .crouchType = controlParams.crouchType,
   };
 
   static float horzRelVelocity = 0.8f;
@@ -609,10 +607,10 @@ std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, Move
   if (movementState.doReleaseFromLadder){
     releaseFromLadder(movementState);       
   }
-  if (controlData.crouchType != CROUCH_NONE){
-    if (controlData.crouchType == CROUCH_DOWN){
+  if (movementState.crouchType != CROUCH_NONE){
+    if (movementState.crouchType == CROUCH_DOWN){
       maybeToggleCrouch(moveParams, movementState, true);
-    }else if (controlData.crouchType == CROUCH_UP){
+    }else if (movementState.crouchType == CROUCH_UP){
       maybeToggleCrouch(moveParams, movementState, false);
     }
   }
@@ -645,6 +643,7 @@ MovementState getInitialMovementState(objid playerId){
   movementState.doReleaseFromLadder = false;
   movementState.raw_deltax = 0.f;
   movementState.raw_deltay = 0.f;
+  movementState.crouchType = CROUCH_NONE;
 
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
