@@ -428,7 +428,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .doReleaseFromLadder = false,
     .crouchType = CROUCH_NONE,
     .raw_deltax = 0.f,
     .raw_deltay = 0.f,
@@ -465,7 +464,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .doReleaseFromLadder = controlParams.doReleaseFromLadder,
     .crouchType = controlParams.crouchType,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
@@ -612,7 +610,7 @@ std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, Move
   if (movementState.doAttachToLadder){
     attachToLadder(movementState);
   }
-  if (controlData.doReleaseFromLadder){
+  if (movementState.doReleaseFromLadder){
     releaseFromLadder(movementState);       
   }
   if (controlData.crouchType != CROUCH_NONE){
@@ -644,8 +642,12 @@ glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
 MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
+  
   movementState.speed = 1.f;
   movementState.zoom_delta = 0.f;
+  movementState.doAttachToLadder = false;
+  movementState.doReleaseFromLadder = false;
+
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
