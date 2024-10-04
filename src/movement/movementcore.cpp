@@ -434,7 +434,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
     .crouchType = CROUCH_NONE,
     .raw_deltax = 0.f,
     .raw_deltay = 0.f,
-    .zoom_delta = 0.f,
   };
   if (atTargetPos){
     *atTargetPos = false;
@@ -474,7 +473,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .crouchType = controlParams.crouchType,
     .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
     .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
-    .zoom_delta = controlParams.zoom_delta,
   };
 
   static float horzRelVelocity = 0.8f;
@@ -587,7 +585,7 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 
   std::optional<CameraUpdate> cameraUpdate;
   if (managedCamera.thirdPersonMode){
-    cameraUpdate = lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+    cameraUpdate = lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
   }else{
     look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
   }
@@ -651,6 +649,7 @@ MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
   movementState.speed = 1.f;
+  movementState.zoom_delta = 0.f;
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);

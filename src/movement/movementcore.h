@@ -74,11 +74,11 @@ struct MovementControlData {
   CrouchType crouchType;
   float raw_deltax;
   float raw_deltay;
-  float zoom_delta;
 };
 struct MovementState {
   // control data 
   float speed;
+  float zoom_delta;
 
   ////
   float lastMoveSoundPlayTime;

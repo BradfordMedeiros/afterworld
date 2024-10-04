@@ -244,6 +244,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   {
     MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
     auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
+    entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.has_value()){
       gameapi -> setGameObjectPosition(thirdPersonCamera.value(), cameraUpdate.value().position, true);
@@ -262,6 +264,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       bool atTarget = false;
       auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, movementEntity.movementState, movementEntity.playerId, &atTarget);
       movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
+      movementEntity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
         movementEntity.movementState.speed = 1.f;
