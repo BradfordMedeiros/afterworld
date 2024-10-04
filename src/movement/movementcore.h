@@ -69,8 +69,6 @@ struct MovementControlData {
   glm::vec3 moveVec;
   bool isWalking;
   CrouchType crouchType;
-  float raw_deltax;
-  float raw_deltay;
 };
 struct MovementState {
   // control data 
@@ -79,6 +77,8 @@ struct MovementState {
   bool doJump;
   bool doAttachToLadder;
   bool doReleaseFromLadder;
+  float raw_deltax;
+  float raw_deltay;
 
   ////
   float lastMoveSoundPlayTime;

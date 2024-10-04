@@ -429,8 +429,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
     .crouchType = CROUCH_NONE,
-    .raw_deltax = 0.f,
-    .raw_deltay = 0.f,
   };
   if (atTargetPos){
     *atTargetPos = false;
@@ -465,8 +463,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
     .crouchType = controlParams.crouchType,
-    .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
-    .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
   };
 
   static float horzRelVelocity = 0.8f;
@@ -579,9 +575,9 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 
   std::optional<CameraUpdate> cameraUpdate;
   if (managedCamera.thirdPersonMode){
-    cameraUpdate = lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+    cameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
   }else{
-    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
+    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
   }
 
 
@@ -642,11 +638,13 @@ glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
 MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
-  
+
   movementState.speed = 1.f;
   movementState.zoom_delta = 0.f;
   movementState.doAttachToLadder = false;
   movementState.doReleaseFromLadder = false;
+  movementState.raw_deltax = 0.f;
+  movementState.raw_deltay = 0.f;
 
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 

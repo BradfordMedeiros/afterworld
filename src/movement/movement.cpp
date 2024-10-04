@@ -248,6 +248,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     entity.movementState.doJump = movement.controlParams.doJump;
     entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
     entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
+    entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
+    entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
 
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.has_value()){
