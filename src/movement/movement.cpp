@@ -291,6 +291,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   {
     MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
     auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
+
+    entity.movementState.speed = 1.f;
     entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
     entity.movementState.doJump = movement.controlParams.doJump;
     entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
@@ -328,6 +330,16 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
   }
 
+  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    movementEntity.movementState.speed = 1.f;
+    movementEntity.movementState.zoom_delta = 0.f;
+    movementEntity.movementState.doJump = false;
+    movementEntity.movementState.doAttachToLadder = false;
+    movementEntity.movementState.doReleaseFromLadder = false;
+    movementEntity.movementState.raw_deltax = 0.f;
+    movementEntity.movementState.raw_deltay = 0.f;
+    movementEntity.movementState.crouchType = CROUCH_NONE;
+  }
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
   movement.controlParams.zoom_delta = 0.f;
   movement.controlParams.doJump = false;

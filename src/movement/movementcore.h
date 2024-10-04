@@ -69,7 +69,7 @@ struct MovementControlData {
   glm::vec3 moveVec;
 };
 struct MovementState {
-  // control data 
+  // control data  this should be reset each frame
   float speed;
   float zoom_delta;
   bool doJump;
@@ -79,6 +79,7 @@ struct MovementState {
   float raw_deltay;
   CrouchType crouchType;
   bool isWalking;
+  //////
 
   ////
   float lastMoveSoundPlayTime;
