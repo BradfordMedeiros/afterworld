@@ -20,7 +20,7 @@ struct MovementEntity {
   objid playerId;
   MovementParams* moveParams;
   MovementState movementState;
-  std::optional<ThirdPersonCameraInfo> managedCamera;
+  ThirdPersonCameraInfo managedCamera;
 
   // when set the entity navigates to this location
   std::optional<MovementRequest> targetLocation;
@@ -40,7 +40,7 @@ struct UiMovementUpdate {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec2> lookVelocity;
 };
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed);
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, std::optional<objid> thirdPersonCamera);
 
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);

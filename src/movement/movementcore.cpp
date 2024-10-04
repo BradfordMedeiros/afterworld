@@ -189,8 +189,7 @@ void look(MovementParams& moveParams, MovementState& movementState, objid id, fl
 
 
 // this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
-void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, std::optional<ThirdPersonCameraInfo>& managedCamera, float elapsedTime, bool isGunZoomed){
-  ThirdPersonCameraInfo& thirdPersonInfo = managedCamera.value();
+CameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, ThirdPersonCameraInfo& thirdPersonInfo, float elapsedTime, bool isGunZoomed){
   thirdPersonInfo.angleX += turnX * 0.05 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.distanceFromTarget += zoom_delta;
@@ -216,13 +215,14 @@ void lookThirdPerson(MovementParams& moveParams, MovementState& movementState, f
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
   auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
-    
-  gameapi -> setGameObjectRot(managedCamera.value().id, newOrientation, true);
-  gameapi -> setGameObjectPosition(managedCamera.value().id, finalCameraLocation, true);
-
   // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
   gameapi -> setGameObjectRot(id, newOrientation, true);  
-
+    
+  CameraUpdate cameraUpdate {
+    .position = finalCameraLocation,
+    .rotation = newOrientation,
+  };
+  return cameraUpdate;
 }
 
 
@@ -520,7 +520,7 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
 }
 
 
-void onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera, bool isGunZoomed){
+std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -587,8 +587,9 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
     
   float elapsedTime = gameapi -> timeElapsed();
 
-  if (managedCamera.has_value()){
-    lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+  std::optional<CameraUpdate> cameraUpdate;
+  if (managedCamera.thirdPersonMode){
+    cameraUpdate = lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
   }else{
     look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
   }
@@ -606,13 +607,13 @@ void onMovementFrameControl(MovementParams& moveParams, MovementState& movementS
   if (shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
+
+  return cameraUpdate;
 }
 
-void onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, std::optional<ThirdPersonCameraInfo>& managedCamera, bool isGunZoomed){
-  if (managedCamera.has_value()){
-    modassert(gameapi -> gameobjExists(managedCamera.value().id), std::string("lookThirdPerson camera does not exist: ") + std::to_string(managedCamera.value().id));
-  }
-  onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera, isGunZoomed);
+std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+  std::optional<CameraUpdate> cameraUpdate;
+  cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera, isGunZoomed);
   if (controlData.doJump){
     jump(moveParams, movementState, playerId);      
   }
@@ -629,6 +630,7 @@ void onMovementFrameCore(MovementParams& moveParams, MovementState& movementStat
       maybeToggleCrouch(moveParams, movementState, false);
     }
   }
+  return cameraUpdate;
 }
 
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){

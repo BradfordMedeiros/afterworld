@@ -111,6 +111,11 @@ void popTempViewpoint(){
 	updateCamera();
 }
 
+std::optional<objid> thirdPersonCameraId;
+std::optional<objid> getCameraForThirdPerson(){
+	return thirdPersonCameraId;
+}
+
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
 	if (!id.has_value()){
 		return;
@@ -120,6 +125,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	}
 	controlledPlayer.playerId = id.value();
 	auto newCameraId = setCameraOrMakeTemp(id.value());
+	thirdPersonCameraId = newCameraId;
 	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
 	maybeDisableAi(aiData, id.value());
 }

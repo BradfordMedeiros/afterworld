@@ -842,7 +842,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (controlledPlayer.playerId.has_value()){
       const bool showLookVelocity = false;
-      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed);
+      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, getCameraForThirdPerson());
       setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
     }
     

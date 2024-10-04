@@ -15,20 +15,6 @@ void reloadSettingsConfig(Movement& movement, std::string name){
 }
 
 void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
-  movementEntityData.movementEntities.at(id).managedCamera = !managedCamera.has_value() ? std::optional<ThirdPersonCameraInfo>(std::nullopt) : ThirdPersonCameraInfo {
-    .id = managedCamera.value(),
-    .distanceFromTarget = -5.f,
-    .angleX = 0.f,
-    .angleY = 0.f,
-    .actualDistanceFromTarget = -5.f,
-    .actualAngleX = 0.f,
-    .actualAngleY = 0.f,
-    .additionalCameraOffset = glm::vec3(-0.2f, 0.5f, 0.f),
-    .zoomOffset = glm::vec3(-0.6f, -0.2f, -1.f),
-    .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
-    .reverseCamera = false,
-  };
-
   movement.controlParams.goForward = false;
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
@@ -100,6 +86,21 @@ MovementEntity createMovementEntity(objid id, std::string&& name){
   modassert(movementEntity.moveParams, "could not find movement core");
   movementEntity.movementState.lastMoveSoundPlayTime = 0.f;
   movementEntity.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+
+  movementEntity.managedCamera = ThirdPersonCameraInfo {
+    .thirdPersonMode = false,
+    .distanceFromTarget = -5.f,
+    .angleX = 0.f,
+    .angleY = 0.f,
+    .actualDistanceFromTarget = -5.f,
+    .actualAngleX = 0.f,
+    .actualAngleY = 0.f,
+    .additionalCameraOffset = glm::vec3(-0.2f, 0.5f, 0.f),
+    .zoomOffset = glm::vec3(-0.6f, -0.2f, -1.f),
+    .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
+    .reverseCamera = false,
+  };
+
   setGameObjectPhysics(id, movementEntity.moveParams -> physicsMass, movementEntity.moveParams -> physicsRestitution, movementEntity.moveParams -> friction, movementEntity.moveParams -> gravity);
   return movementEntity;
 }
@@ -203,10 +204,15 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
     }else if (action == 1){
       movement.controlParams.shiftModifier = true;
       MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
-      if (entity.managedCamera.has_value()){
-        entity.managedCamera.value().reverseCamera = !entity.managedCamera.value().reverseCamera;
+      if (entity.managedCamera.thirdPersonMode){
+        entity.managedCamera.reverseCamera = !entity.managedCamera.reverseCamera;
       }
     }
+  }
+
+  if (isToggleThirdPersonKey(key) && action == 1){
+    MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+    entity.managedCamera.thirdPersonMode = !entity.managedCamera.thirdPersonMode;
   }
 }
 
@@ -226,7 +232,7 @@ void onMovementScrollCallback(Movement& movement, double amount){
 }
 
 
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed){
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, std::optional<objid> thirdPersonCamera){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -236,12 +242,15 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
   {
-    //MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
-    //auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-    //onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
-
-    //uiUpdate.velocity = entity.movementState.velocity;
-    //uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
+    MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+    auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
+    auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
+    if (cameraUpdate.has_value()){
+      gameapi -> setGameObjectPosition(thirdPersonCamera.value(), cameraUpdate.value().position, true);
+      gameapi -> setGameObjectRot(thirdPersonCamera.value(), cameraUpdate.value().rotation, true);
+    }
+    uiUpdate.velocity = entity.movementState.velocity;
+    uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
   }
 
 
