@@ -64,6 +64,19 @@ struct MovementParams {
   std::string landSound;
   std::string moveSound;
 };
+
+struct MovementControlData {
+  glm::vec3 moveVec;
+  bool isWalking;
+  bool doJump;
+  bool doAttachToLadder;
+  bool doReleaseFromLadder;
+  CrouchType crouchType;
+  float raw_deltax;
+  float raw_deltay;
+  float zoom_delta;
+  float speed;
+};
 struct MovementState {
   float lastMoveSoundPlayTime;
   glm::vec3 lastMoveSoundPlayLocation;
@@ -88,18 +101,7 @@ MovementParams* findMovementCore(std::string& name);
 void loadMovementCore(std::string& coreName);
 void removeAllMovementCores();
 
-struct MovementControlData {
-  glm::vec3 moveVec;
-  bool isWalking;
-  bool doJump;
-  bool doAttachToLadder;
-  bool doReleaseFromLadder;
-  CrouchType crouchType;
-  float raw_deltax;
-  float raw_deltay;
-  float zoom_delta;
-  float speed;
-};
+
 
 MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
 MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams);

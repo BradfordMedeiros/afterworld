@@ -126,7 +126,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	controlledPlayer.playerId = id.value();
 	auto newCameraId = setCameraOrMakeTemp(id.value());
 	thirdPersonCameraId = newCameraId;
-	setActiveMovementEntity(movement, getMovementData(), id.value(), newCameraId);
+	setActiveMovementEntity(movement);
 	maybeDisableAi(aiData, id.value());
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){

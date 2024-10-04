@@ -14,7 +14,7 @@ void reloadSettingsConfig(Movement& movement, std::string name){
   movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
-void setActiveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id, std::optional<objid> managedCamera){
+void setActiveMovementEntity(Movement& movement){
   movement.controlParams.goForward = false;
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
