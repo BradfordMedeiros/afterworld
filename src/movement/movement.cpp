@@ -245,6 +245,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
     auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
     entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+    entity.movementState.doJump = movement.controlParams.doJump;
 
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.has_value()){

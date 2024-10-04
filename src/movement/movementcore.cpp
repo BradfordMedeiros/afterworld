@@ -428,7 +428,6 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .doJump = false,
     .doAttachToLadder = false,
     .doReleaseFromLadder = false,
     .crouchType = CROUCH_NONE,
@@ -467,7 +466,6 @@ MovementControlData getMovementControlData(ControlParams& controlParams, Movemen
   MovementControlData controlData {
     .moveVec = glm::vec3(0.f, 0.f, 0.f),
     .isWalking = false,
-    .doJump = controlParams.doJump,
     .doAttachToLadder = controlParams.doAttachToLadder,
     .doReleaseFromLadder = controlParams.doReleaseFromLadder,
     .crouchType = controlParams.crouchType,
@@ -610,7 +608,7 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::optional<CameraUpdate> cameraUpdate;
   cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera, isGunZoomed);
-  if (controlData.doJump){
+  if (movementState.doJump){
     jump(moveParams, movementState, playerId);      
   }
   if (controlData.doAttachToLadder){
