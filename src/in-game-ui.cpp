@@ -163,24 +163,61 @@ auto _ = addWaypoint();
 glm::vec2 positionToNdi(glm::vec3 position); // put this on gameapi 
 
 
-glm::vec2 pointAtSlope(glm::vec2 screenspacePosition){  // this is wrong
+glm::vec2 pointAtSlope(glm::vec2 screenspacePosition, glm::vec4* color, float sizeNdi){
 	float slopeY = screenspacePosition.y;
 	float slopeX = screenspacePosition.x;
 	float slope = slopeY / slopeX;
-	if (slope > 1){
+	float inverseSlope = slopeX / slopeY;
 
-	}else if (slope > 0){
-		// intersects bottom y
-		float yValue = slope * 1; 
-		return glm::vec2(1.f, yValue);
-	}else if (slope < -1){
+	float halfWidth = sizeNdi * 0.5f;
+	float halfHeight = sizeNdi * 0.5f;
 
-	}else if (slope < 0){
-		// intersects top y
-		float yValue = slope * 1; 
-		return glm::vec2(-1.f, yValue);
+	// left and right side
+	if (slope > 0 && slope < 1 && screenspacePosition.x > 0){  // top right on x side
+		auto yValue = slope * 1.f;
+		*color = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+		return glm::vec2(1.f, yValue) - halfWidth;
+	}
+	if (slope < 0 && slope > -1 && screenspacePosition.x < 0){  // top left on -x side
+		auto yValue = slope * -1.f;
+		*color = glm::vec4(0.f, 0.f, 1.f, 0.5f);
+		return glm::vec2(-1.f, yValue) + halfWidth;
+	}
+	if (slope > 0 && slope < 1 && screenspacePosition.x < 0){  // bottom left on -x side
+		auto yValue = slope * -1.f;
+		*color = glm::vec4(0.f, 1.f, 0.f, 0.5f);
+		return glm::vec2(-1.f, yValue) + halfWidth;
+	}
+	if (slope < 0 && slope > -1 && screenspacePosition.x > 0){  // bottom right on x side
+		auto yValue = slope * 1.f;
+		*color = glm::vec4(0.f, 0.f, 1.f, 0.5f);
+		return glm::vec2(1.f, yValue) - halfWidth;
 	}
 
+	// top and bottom side
+	if (slope > 1 && screenspacePosition.x > 0){  // upper right side
+		auto xValue = inverseSlope * 1.f;
+		*color = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+		return glm::vec2(xValue, 1.f) - halfHeight;
+	}
+	if (slope > 1 && screenspacePosition.x < 0){  // bottom left side
+		auto xValue = inverseSlope * -1.f;
+		*color = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+		return glm::vec2(xValue, -1.f) + halfHeight;
+	}
+
+	if (slope < 1 && screenspacePosition.x > 0){  // bottom right side
+		auto xValue = inverseSlope * -1.f;
+		*color = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+		return glm::vec2(xValue, -1.f) + halfHeight;
+	}
+	if (slope < 1 && screenspacePosition.x < 0){  // top left side
+		auto xValue = inverseSlope * 1.f;
+		*color = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+		return glm::vec2(xValue, 1.f) - halfHeight;
+	}
+
+	*color = glm::vec4(0.f, 0.f, 0.f, 0.f);
 	return glm::vec2(0.f, 0.f);
 }
 
@@ -192,11 +229,11 @@ void drawWaypoints(){
 			modlog("waypoint", print(screenspacePosition));
 
 	   	if (screenspacePosition.x > 1.f || screenspacePosition.x < -1.f || screenspacePosition.y > 1.f || screenspacePosition.y < -1.f){
-		    gameapi -> drawText("waypoint out of range", 0.f, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-        gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(screenspacePosition.x, screenspacePosition.y, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-	   	
-	   		auto point = pointAtSlope(screenspacePosition);
-   	    gameapi -> drawRect(point.x, point.y, 0.02f, 0.02f, false, glm::vec4(1.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+		    //gameapi -> drawText("waypoint out of range", 0.f, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        //gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(screenspacePosition.x, screenspacePosition.y, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+	   		glm::vec4 color(1.f, 1.f, 1.f, 1.f);
+	   		auto point = pointAtSlope(screenspacePosition, &color, 0.02f);
+   	    gameapi -> drawRect(point.x, point.y, 0.02f, 0.02f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 
 	   	}else{
   	    gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
