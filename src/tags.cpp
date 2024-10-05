@@ -499,7 +499,18 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
-	}
+	},
+	TagUpdater {
+		.attribute = "waypoint",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+	  	addWaypoint(id);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		removeWaypoint(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
 };
 
 void setMenuBackground(std::string background){

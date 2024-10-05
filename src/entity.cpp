@@ -168,6 +168,13 @@ glm::vec3 getPlayerVelocity(){
   return controlledPlayer.playerVelocity;
 }
 
+std::optional<glm::vec3> getActivePlayerPosition(){
+	if (!controlledPlayer.playerId.has_value()){
+		return std::nullopt;
+	}
+	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true);
+}
+
 WeaponEntityData getWeaponEntityData(objid id){
 	MovementState& movementState = getMovementData().movementEntities.at(id).movementState;
   return WeaponEntityData {

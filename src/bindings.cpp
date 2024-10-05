@@ -851,7 +851,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
     }
 
-    drawWaypoints();
+    auto playerPosition = getActivePlayerPosition();
+    if (playerPosition.has_value()){
+      drawWaypoints(playerPosition.value());
+    }
     //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
     std::optional<glm::vec2> mainUiCursorCoord;
     gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
@@ -869,7 +872,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         };
       }
     }
-    setUiHealth(uiHealth);
+    //setUiHealth(uiHealth);
     
     onFrameWater(water);
     onFrameAi(aiData);

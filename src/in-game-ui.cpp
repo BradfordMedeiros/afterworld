@@ -137,31 +137,24 @@ void onInGameUiKeyCallback(int key, int scancode, int action, int mods){
 
 }
 
-struct WaypointPosition {
-	glm::vec3 position;
-};
 struct WaypointObject {
-	objid id;
+	std::optional<objid> id;
+	bool drawDistance;
 };
-typedef std::variant<WaypointPosition, WaypointObject> WaypointType;
-std::unordered_map<objid, WaypointType> waypoints = {};
+std::unordered_map<objid, WaypointObject> waypoints = {};
 
-objid addWaypoint(){
+objid addWaypoint(std::optional<objid> waypointId){
 	auto id = getUniqueObjId();
-	waypoints[id] = WaypointPosition {
-		.position = glm::vec3(0.f, 0.f, 0.f),
-	} ;
+	waypoints[id] = WaypointObject {
+		.id = waypointId,
+		.drawDistance = true,
+	};
 	return id;
 }
+
 void removeWaypoint(objid id){
 	waypoints.erase(id);
 }
-
-auto _ = addWaypoint();
-
-
-glm::vec2 positionToNdi(glm::vec3 position); // put this on gameapi 
-
 
 glm::vec2 pointAtSlope(glm::vec2 screenspacePosition, glm::vec4* color, float sizeNdi){
 	float slopeY = screenspacePosition.y;
@@ -221,35 +214,42 @@ glm::vec2 pointAtSlope(glm::vec2 screenspacePosition, glm::vec4* color, float si
 	return glm::vec2(0.f, 0.f);
 }
 
-void drawWaypoints(){
+void drawWaypoint(glm::vec3 position, glm::vec3 playerPos, bool drawDistance){
+	auto ndiPosition = gameapi -> positionToNdi(position);
+	// ndi position is basically ndi intersects with screenspace
+	// when it's behind us, we could just draw it, and would be accurate. 
+	// but instead -1  makes it so you reflect which is path to the object
+	// the max length means its guaranteed to fall outside the screen (which would otherwise show on the opposite side)
+	if (ndiPosition.z < 0){ 
+		auto maxLength = glm::max(1 / glm::abs(ndiPosition.x), 1 / glm::abs(ndiPosition.y));  
+		ndiPosition.x *= -1 * maxLength;
+		ndiPosition.y *= -1 * maxLength;
+	}
+	auto screenspacePosition = glm::vec2(ndiPosition.x, ndiPosition.y);
+	modlog("waypoint", print(screenspacePosition));
+	if (screenspacePosition.x > 1.f || screenspacePosition.x < -1.f || screenspacePosition.y > 1.f || screenspacePosition.y < -1.f){
+	  //gameapi -> drawText("waypoint out of range", 0.f, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    //gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(screenspacePosition.x, screenspacePosition.y, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+		glm::vec4 color(1.f, 1.f, 1.f, 1.f);
+		auto point = pointAtSlope(screenspacePosition, &color, 0.02f);
+    gameapi -> drawRect(point.x, point.y, 0.02f, 0.02f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+	}else{
+  	gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+		if (drawDistance){
+			int distance = glm::distance(position, playerPos);
+			gameapi -> drawText(std::to_string(distance), screenspacePosition.x, screenspacePosition.y, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);	   	
+		}
+	}
+}
+void drawWaypoints(glm::vec3 playerPos){
 	for (auto &[id, waypoint] : waypoints){
-		auto waypointPosition = std::get_if<WaypointPosition>(&waypoint);
-		if (waypointPosition){
-			auto screenspacePosition = positionToNdi(waypointPosition -> position);
-			modlog("waypoint", print(screenspacePosition));
-
-	   	if (screenspacePosition.x > 1.f || screenspacePosition.x < -1.f || screenspacePosition.y > 1.f || screenspacePosition.y < -1.f){
-		    //gameapi -> drawText("waypoint out of range", 0.f, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-        //gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(screenspacePosition.x, screenspacePosition.y, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-	   		glm::vec4 color(1.f, 1.f, 1.f, 1.f);
-	   		auto point = pointAtSlope(screenspacePosition, &color, 0.02f);
-   	    gameapi -> drawRect(point.x, point.y, 0.02f, 0.02f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-
-	   	}else{
-  	    gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-			  int distance = 204;
-			  gameapi -> drawText(std::to_string(distance), screenspacePosition.x, screenspacePosition.y, 10.f, false, glm::vec4(0.f, 0.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);	   	
-   	    gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-	   	}
+		if (waypoint.id.has_value()){
+			auto objectExists = gameapi -> gameobjExists(waypoint.id.value());
+			if (objectExists){
+				auto position = gameapi -> getGameObjectPos(waypoint.id.value(), true);
+				drawWaypoint(position, playerPos, waypoint.drawDistance);
+			}
 			return;
 		}
-		
-		auto waypointObject = std::get_if<WaypointObject>(&waypoint);
-		if (waypointObject){
-			auto position = gameapi -> getGameObjectPos(waypointObject -> id, true);
-		 	drawSphereVecGfx(position, 1.f, glm::vec4(0.f, 0.f, 1.f, 0.8f));
-			return;
-		}
-
 	}
 }
