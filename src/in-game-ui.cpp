@@ -160,7 +160,29 @@ void removeWaypoint(objid id){
 auto _ = addWaypoint();
 
 
-glm::vec2 positionToNdi(glm::vec3 position);
+glm::vec2 positionToNdi(glm::vec3 position); // put this on gameapi 
+
+
+glm::vec2 pointAtSlope(glm::vec2 screenspacePosition){  // this is wrong
+	float slopeY = screenspacePosition.y;
+	float slopeX = screenspacePosition.x;
+	float slope = slopeY / slopeX;
+	if (slope > 1){
+
+	}else if (slope > 0){
+		// intersects bottom y
+		float yValue = slope * 1; 
+		return glm::vec2(1.f, yValue);
+	}else if (slope < -1){
+
+	}else if (slope < 0){
+		// intersects top y
+		float yValue = slope * 1; 
+		return glm::vec2(-1.f, yValue);
+	}
+
+	return glm::vec2(0.f, 0.f);
+}
 
 void drawWaypoints(){
 	for (auto &[id, waypoint] : waypoints){
@@ -172,10 +194,15 @@ void drawWaypoints(){
 	   	if (screenspacePosition.x > 1.f || screenspacePosition.x < -1.f || screenspacePosition.y > 1.f || screenspacePosition.y < -1.f){
 		    gameapi -> drawText("waypoint out of range", 0.f, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
         gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(screenspacePosition.x, screenspacePosition.y, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+	   	
+	   		auto point = pointAtSlope(screenspacePosition);
+   	    gameapi -> drawRect(point.x, point.y, 0.02f, 0.02f, false, glm::vec4(1.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+
 	   	}else{
   	    gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 			  int distance = 204;
-			  gameapi -> drawText(std::to_string(distance), screenspacePosition.x, screenspacePosition.y, 10.f, false, glm::vec4(0.f, 0.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+			  gameapi -> drawText(std::to_string(distance), screenspacePosition.x, screenspacePosition.y, 10.f, false, glm::vec4(0.f, 0.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);	   	
+   	    gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 	   	}
 			return;
 		}
