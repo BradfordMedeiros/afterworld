@@ -718,6 +718,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     };
     initGlobal();
+    reloadSettingsConfig(movement, "default");
     gameState -> dragSelect = std::nullopt;
     gameState -> uiData.uiContext = getUiContext(*gameState);
 
@@ -815,6 +816,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
     modassert(tags.uiData, "tags.uiData NULL");
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
+    drawWaypoints();
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
@@ -842,7 +844,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (controlledPlayer.playerId.has_value()){
       const bool showLookVelocity = false;
-      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, getCameraForThirdPerson());
+      auto thirdPersonCamera = getCameraForThirdPerson();
+      if (!thirdPersonCamera.has_value()){
+        if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
+          thirdPersonCamera = 0;
+        }else{
+          modassert(false, "cannot use third person mode, no camera provided");
+        }
+      }
+ 
+      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value());
       setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
     }
     

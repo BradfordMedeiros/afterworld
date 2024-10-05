@@ -91,7 +91,6 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id){
     gameapi -> applyImpulse(id, impulse);
   }
   doAnimationTrigger(id, "jump");
-
 }
 
 void land(objid id){
@@ -223,16 +222,6 @@ CameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movement
     .rotation = newOrientation,
   };
   return cameraUpdate;
-}
-
-
-void attachToLadder(MovementState& movementState){
-  if (movementState.facingLadder){
-     movementState.attachedToLadder = true;
-  }
-}
-void releaseFromLadder(MovementState& movementState){
-  movementState.attachedToLadder = false;
 }
 
 void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch){
@@ -424,17 +413,15 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 }
 
 // This is obviously wrong, but a starting point
-MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos){
-  MovementControlData controlData {
-    .moveVec = glm::vec3(0.f, 0.f, 0.f),
-  };
+glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos){
+  glm::vec3 moveVec(0.f, 0.f, 0.f);
 
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
   positionDiff = glm::inverse(playerDirection) * positionDiff;
 
-  controlData.moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
-  auto moveLength = glm::length(controlData.moveVec);
+  moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
+  auto moveLength = glm::length(moveVec);
 
   if (atTargetPos){
     *atTargetPos = false;
@@ -443,18 +430,28 @@ MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition
     if (atTargetPos){
       *atTargetPos = true;
     }
-    return controlData;
   }
 
   if (moveLength){
-    controlData.moveVec = glm::normalize(controlData.moveVec);
+    moveVec = glm::normalize(moveVec);
   }
 
-  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(controlData.moveVec));
-  return controlData;
+  if (*atTargetPos){
+    moveVec = glm::vec3(0.f, 0.f, 0.f);
+  }
+
+  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(moveVec));
+  return moveVec;
 }
 
-std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+bool calcIfWalking(MovementState& movementState){
+  if (movementState.facingLadder || movementState.attachedToLadder){
+    return false;
+  }
+  return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
+}
+
+std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -488,20 +485,21 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 
   float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, controlData.moveVec.y, controlData.moveVec.z), hitDirections, rotationWithoutY);
+  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(movementState.moveVec.x, movementState.moveVec.y, movementState.moveVec.z), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;
   if (!moveParams.moveVertical){
     limitedMoveVec.y = 0.f;
   }
   auto direction = glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z);
+  auto isWalking = calcIfWalking(movementState);
 
-  if (movementState.isWalking){
+  if (isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
-    bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.z);
+    bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
     doAnimationTrigger(playerId, isSideStepping ? "sidestep" : "walking");
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
-    moveUp(playerId, controlData.moveVec);
+    moveUp(playerId, movementState.moveVec);
     doAnimationTrigger(playerId, "not-walking");
   }else{
     doAnimationTrigger(playerId, "not-walking");
@@ -545,17 +543,19 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
   return cameraUpdate;
 }
 
-std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::optional<CameraUpdate> cameraUpdate;
-  cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera, isGunZoomed);
+  cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, managedCamera, isGunZoomed);
   if (movementState.doJump){
     jump(moveParams, movementState, playerId);      
   }
   if (movementState.doAttachToLadder){
-    attachToLadder(movementState);
+    if (movementState.facingLadder){
+      movementState.attachedToLadder = true;
+    }
   }
   if (movementState.doReleaseFromLadder){
-    releaseFromLadder(movementState);       
+    movementState.attachedToLadder = false;
   }
   if (movementState.crouchType != CROUCH_NONE){
     if (movementState.crouchType == CROUCH_DOWN){
@@ -587,6 +587,7 @@ MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
 
+  movementState.moveVec = glm::vec3(0.f, 0.f, 0.f);
   movementState.speed = 1.f;
   movementState.zoom_delta = 0.f;
   movementState.doAttachToLadder = false;
@@ -594,7 +595,6 @@ MovementState getInitialMovementState(objid playerId){
   movementState.raw_deltax = 0.f;
   movementState.raw_deltay = 0.f;
   movementState.crouchType = CROUCH_NONE;
-  movementState.isWalking = false;
 
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 

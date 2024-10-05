@@ -26,8 +26,6 @@ void setActiveMovementEntity(Movement& movement){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
-  reloadSettingsConfig(movement, "default");
-
 }
 
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
@@ -231,55 +229,37 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
-
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams){
-  MovementControlData controlData {
-    .moveVec = glm::vec3(0.f, 0.f, 0.f),
-  };
-
+glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& moveParams){
   static float horzRelVelocity = 0.8f;
 
-  movementState.isWalking = false;
+  glm::vec3 moveVec(0.f, 0.f, 0.f);
   if (controlParams.goForward){
     std::cout << "should move forward" << std::endl;
     if (controlParams.shiftModifier && moveParams.moveVertical){
-      controlData.moveVec += glm::vec3(0.f, 1.f, 0.f);
+      moveVec += glm::vec3(0.f, 1.f, 0.f);
     }else{
-      controlData.moveVec += glm::vec3(0.f, 0.f, -1.f);
-    }
-    if (!(movementState.facingLadder || movementState.attachedToLadder)){
-      movementState.isWalking = true;
+      moveVec += glm::vec3(0.f, 0.f, -1.f);
     }
   }
   if (controlParams.goBackward){
     if (controlParams.shiftModifier && moveParams.moveVertical){
-      controlData.moveVec += glm::vec3(0.f, -1.f, 0.f);
+      moveVec += glm::vec3(0.f, -1.f, 0.f);
     }else{
-      controlData.moveVec += glm::vec3(0.f, 0.f, 1.f);
-    }
-    if (!(movementState.facingLadder || movementState.attachedToLadder)){
-      movementState.isWalking = true;
+      moveVec += glm::vec3(0.f, 0.f, 1.f);
     }
   }
   if (controlParams.goLeft){
-    controlData.moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
-    if (!movementState.attachedToLadder){
-      movementState.isWalking = true;
-    }
-    
+    moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
   }
   if (controlParams.goRight){
-    controlData.moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
-    if (!movementState.attachedToLadder){
-      movementState.isWalking = true;
-    }
+    moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
   }
 
-  return controlData;
+  return moveVec;
 }
 
 
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, std::optional<objid> thirdPersonCamera){
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -290,8 +270,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
   {
     MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
-    auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-
+    entity.movementState.moveVec = getMovementControlData(movement.controlParams, *entity.moveParams);;
     entity.movementState.speed = 1.f;
     entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
     entity.movementState.doJump = movement.controlParams.doJump;
@@ -301,15 +280,14 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
     entity.movementState.crouchType = movement.controlParams.crouchType;
 
-    auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
+    auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.has_value()){
-      gameapi -> setGameObjectPosition(thirdPersonCamera.value(), cameraUpdate.value().position, true);
-      gameapi -> setGameObjectRot(thirdPersonCamera.value(), cameraUpdate.value().rotation, true);
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.value().position, true);
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.value().rotation, true);
     }
     uiUpdate.velocity = entity.movementState.velocity;
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
   }
-
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
@@ -317,20 +295,20 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
     if (movementEntity.targetLocation.has_value()){
       bool atTarget = false;
-      auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget);
+      movementEntity.movementState.moveVec = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget);;
       movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
       movementEntity.movementState.zoom_delta = movement.controlParams.zoom_delta;
-      movementEntity.movementState.isWalking = !atTarget;
 
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
         movementEntity.movementState.speed = 1.f;
       }
-      onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, isGunZoomed(id));  
+      onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id));  
     }
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    movementEntity.movementState.moveVec = glm::vec3(0.f, 0.f, 0.f);
     movementEntity.movementState.speed = 1.f;
     movementEntity.movementState.zoom_delta = 0.f;
     movementEntity.movementState.doJump = false;

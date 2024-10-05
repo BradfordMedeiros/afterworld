@@ -32,6 +32,8 @@ struct MovementEntityData {
 };
 
 Movement createMovement();
+void reloadSettingsConfig(Movement& movement, std::string name);
+
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action);
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos);
 void onMovementScrollCallback(Movement& movement, double amount);
@@ -40,7 +42,7 @@ struct UiMovementUpdate {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec2> lookVelocity;
 };
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, std::optional<objid> thirdPersonCamera);
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera);
 
 void setActiveMovementEntity(Movement& movement);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
