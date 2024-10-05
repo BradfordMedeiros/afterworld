@@ -137,6 +137,55 @@ void onInGameUiKeyCallback(int key, int scancode, int action, int mods){
 
 }
 
-void testInGameUiSetText(std::string value){
-	gameapi -> sendNotifyMessage("ui-debug-text", std::string("textvalue"));
+struct WaypointPosition {
+	glm::vec3 position;
+};
+struct WaypointObject {
+	objid id;
+};
+typedef std::variant<WaypointPosition, WaypointObject> WaypointType;
+std::unordered_map<objid, WaypointType> waypoints = {};
+
+objid addWaypoint(){
+	auto id = getUniqueObjId();
+	waypoints[id] = WaypointPosition {
+		.position = glm::vec3(0.f, 0.f, 0.f),
+	} ;
+	return id;
+}
+void removeWaypoint(objid id){
+	waypoints.erase(id);
+}
+
+auto _ = addWaypoint();
+
+
+glm::vec2 positionToNdi(glm::vec3 position);
+
+void drawWaypoints(){
+	for (auto &[id, waypoint] : waypoints){
+		auto waypointPosition = std::get_if<WaypointPosition>(&waypoint);
+		if (waypointPosition){
+			auto screenspacePosition = positionToNdi(waypointPosition -> position);
+			modlog("waypoint", print(screenspacePosition));
+
+	   	if (screenspacePosition.x > 1.f || screenspacePosition.x < -1.f || screenspacePosition.y > 1.f || screenspacePosition.y < -1.f){
+		    gameapi -> drawText("waypoint out of range", 0.f, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        gameapi -> drawLine2D(glm::vec3(0.f, 0.f, 0.f), glm::vec3(screenspacePosition.x, screenspacePosition.y, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+	   	}else{
+  	    gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.02f, 0.02f, false, glm::vec4(0.f, 0.f, 1.f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+			  int distance = 204;
+			  gameapi -> drawText(std::to_string(distance), screenspacePosition.x, screenspacePosition.y, 10.f, false, glm::vec4(0.f, 0.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	   	}
+			return;
+		}
+		
+		auto waypointObject = std::get_if<WaypointObject>(&waypoint);
+		if (waypointObject){
+			auto position = gameapi -> getGameObjectPos(waypointObject -> id, true);
+		 	drawSphereVecGfx(position, 1.f, glm::vec4(0.f, 0.f, 1.f, 0.8f));
+			return;
+		}
+
+	}
 }

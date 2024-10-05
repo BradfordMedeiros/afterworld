@@ -26,8 +26,6 @@ void setActiveMovementEntity(Movement& movement){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
-  reloadSettingsConfig(movement, "default");
-
 }
 
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
@@ -231,8 +229,37 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
+glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& moveParams){
+  static float horzRelVelocity = 0.8f;
 
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, std::optional<objid> thirdPersonCamera){
+  glm::vec3 moveVec(0.f, 0.f, 0.f);
+  if (controlParams.goForward){
+    std::cout << "should move forward" << std::endl;
+    if (controlParams.shiftModifier && moveParams.moveVertical){
+      moveVec += glm::vec3(0.f, 1.f, 0.f);
+    }else{
+      moveVec += glm::vec3(0.f, 0.f, -1.f);
+    }
+  }
+  if (controlParams.goBackward){
+    if (controlParams.shiftModifier && moveParams.moveVertical){
+      moveVec += glm::vec3(0.f, -1.f, 0.f);
+    }else{
+      moveVec += glm::vec3(0.f, 0.f, 1.f);
+    }
+  }
+  if (controlParams.goLeft){
+    moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
+  }
+  if (controlParams.goRight){
+    moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
+  }
+
+  return moveVec;
+}
+
+
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -243,16 +270,24 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
   {
     MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
-    auto controlData = getMovementControlData(movement.controlParams, entity.movementState, *entity.moveParams);
-    auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, controlData, entity.managedCamera, isGunZoomed(activeId));
+    entity.movementState.moveVec = getMovementControlData(movement.controlParams, *entity.moveParams);;
+    entity.movementState.speed = 1.f;
+    entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+    entity.movementState.doJump = movement.controlParams.doJump;
+    entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
+    entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
+    entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
+    entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
+    entity.movementState.crouchType = movement.controlParams.crouchType;
+
+    auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.has_value()){
-      gameapi -> setGameObjectPosition(thirdPersonCamera.value(), cameraUpdate.value().position, true);
-      gameapi -> setGameObjectRot(thirdPersonCamera.value(), cameraUpdate.value().rotation, true);
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.value().position, true);
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.value().rotation, true);
     }
     uiUpdate.velocity = entity.movementState.velocity;
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
   }
-
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
@@ -260,14 +295,29 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
     if (movementEntity.targetLocation.has_value()){
       bool atTarget = false;
-      auto controlData = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.targetLocation.value().speed, movementEntity.movementState, movementEntity.playerId, &atTarget);
+      movementEntity.movementState.moveVec = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget);;
+      movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
+      movementEntity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
+        movementEntity.movementState.speed = 1.f;
       }
-      onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, controlData, movementEntity.managedCamera, isGunZoomed(id));  
+      onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id));  
     }
   }
 
+  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    movementEntity.movementState.moveVec = glm::vec3(0.f, 0.f, 0.f);
+    movementEntity.movementState.speed = 1.f;
+    movementEntity.movementState.zoom_delta = 0.f;
+    movementEntity.movementState.doJump = false;
+    movementEntity.movementState.doAttachToLadder = false;
+    movementEntity.movementState.doReleaseFromLadder = false;
+    movementEntity.movementState.raw_deltax = 0.f;
+    movementEntity.movementState.raw_deltay = 0.f;
+    movementEntity.movementState.crouchType = CROUCH_NONE;
+  }
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
   movement.controlParams.zoom_delta = 0.f;
   movement.controlParams.doJump = false;

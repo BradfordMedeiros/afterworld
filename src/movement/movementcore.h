@@ -65,19 +65,20 @@ struct MovementParams {
   std::string moveSound;
 };
 
-struct MovementControlData {
+struct MovementState {
+  // control data  this should be reset each frame
   glm::vec3 moveVec;
-  bool isWalking;
+  float speed;
+  float zoom_delta;
   bool doJump;
   bool doAttachToLadder;
   bool doReleaseFromLadder;
-  CrouchType crouchType;
   float raw_deltax;
   float raw_deltay;
-  float zoom_delta;
-  float speed;
-};
-struct MovementState {
+  CrouchType crouchType;
+  ///////////////////////////////////
+
+  ////
   float lastMoveSoundPlayTime;
   glm::vec3 lastMoveSoundPlayLocation;
   float xRot;               
@@ -102,15 +103,13 @@ void loadMovementCore(std::string& coreName);
 void removeAllMovementCores();
 
 
-
-MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos);
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams);
+glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos);
 
 struct CameraUpdate {
   glm::vec3 position;
   glm::quat rotation;
 };
-std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
+std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
 
 MovementState getInitialMovementState(objid playerId);
 

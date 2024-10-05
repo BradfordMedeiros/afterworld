@@ -5,6 +5,7 @@
 #include <vector>
 #include "./util.h"
 #include "./ui/views/mainui.h"
+#include "./vector_gfx.h"
 
 struct TextDisplay {
 	objid textureId;
@@ -31,6 +32,6 @@ void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, f
 void onInGameUiScrollCallback(InGameUi& inGameUi, double amount);
 void onInGameUiKeyCallback(int key, int scancode, int action, int mods);
 
-void testInGameUiSetText(std::string value);
+void drawWaypoints();
 
 #endif 

@@ -91,7 +91,6 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id){
     gameapi -> applyImpulse(id, impulse);
   }
   doAnimationTrigger(id, "jump");
-
 }
 
 void land(objid id){
@@ -223,16 +222,6 @@ CameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movement
     .rotation = newOrientation,
   };
   return cameraUpdate;
-}
-
-
-void attachToLadder(MovementState& movementState){
-  if (movementState.facingLadder){
-     movementState.attachedToLadder = true;
-  }
-}
-void releaseFromLadder(MovementState& movementState){
-  movementState.attachedToLadder = false;
 }
 
 void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch){
@@ -424,103 +413,45 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 }
 
 // This is obviously wrong, but a starting point
-MovementControlData getMovementControlDataFromTargetPos(glm::vec3 targetPosition, float speed, MovementState& movementState, objid playerId, bool* atTargetPos){
-  MovementControlData controlData {
-    .moveVec = glm::vec3(0.f, 0.f, 0.f),
-    .isWalking = false,
-    .doJump = false,
-    .doAttachToLadder = false,
-    .doReleaseFromLadder = false,
-    .crouchType = CROUCH_NONE,
-    .raw_deltax = 0.f,
-    .raw_deltay = 0.f,
-    .zoom_delta = 0.f,
-    .speed = speed,
-  };
-  if (atTargetPos){
-    *atTargetPos = false;
-  }
+glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos){
+  glm::vec3 moveVec(0.f, 0.f, 0.f);
 
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
   positionDiff = glm::inverse(playerDirection) * positionDiff;
 
-  controlData.moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
-  auto moveLength = glm::length(controlData.moveVec);
+  moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
+  auto moveLength = glm::length(moveVec);
 
+  if (atTargetPos){
+    *atTargetPos = false;
+  }
   if (moveLength < 0.5){  // already arrived
     if (atTargetPos){
       *atTargetPos = true;
     }
-    return controlData;
   }
 
   if (moveLength){
-    controlData.moveVec = glm::normalize(controlData.moveVec);
+    moveVec = glm::normalize(moveVec);
   }
 
-  controlData.isWalking = true;
+  if (*atTargetPos){
+    moveVec = glm::vec3(0.f, 0.f, 0.f);
+  }
 
-  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(controlData.moveVec));
-  return controlData;
+  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(moveVec));
+  return moveVec;
 }
 
-MovementControlData getMovementControlData(ControlParams& controlParams, MovementState& movementState, MovementParams& moveParams){
-  MovementControlData controlData {
-    .moveVec = glm::vec3(0.f, 0.f, 0.f),
-    .isWalking = false,
-    .doJump = controlParams.doJump,
-    .doAttachToLadder = controlParams.doAttachToLadder,
-    .doReleaseFromLadder = controlParams.doReleaseFromLadder,
-    .crouchType = controlParams.crouchType,
-    .raw_deltax = controlParams.lookVelocity.x * controlParams.xsensitivity,
-    .raw_deltay = -1.f * controlParams.lookVelocity.y * controlParams.ysensitivity,
-    .zoom_delta = controlParams.zoom_delta,
-    .speed = 1.f,
-  };
-
-  static float horzRelVelocity = 0.8f;
-
-  if (controlParams.goForward){
-    std::cout << "should move forward" << std::endl;
-    if (controlParams.shiftModifier && moveParams.moveVertical){
-      controlData.moveVec += glm::vec3(0.f, 1.f, 0.f);
-    }else{
-      controlData.moveVec += glm::vec3(0.f, 0.f, -1.f);
-    }
-    if (!(movementState.facingLadder || movementState.attachedToLadder)){
-      controlData.isWalking = true;
-    }
+bool calcIfWalking(MovementState& movementState){
+  if (movementState.facingLadder || movementState.attachedToLadder){
+    return false;
   }
-  if (controlParams.goBackward){
-    if (controlParams.shiftModifier && moveParams.moveVertical){
-      controlData.moveVec += glm::vec3(0.f, -1.f, 0.f);
-    }else{
-      controlData.moveVec += glm::vec3(0.f, 0.f, 1.f);
-    }
-    if (!(movementState.facingLadder || movementState.attachedToLadder)){
-      controlData.isWalking = true;
-    }
-  }
-  if (controlParams.goLeft){
-    controlData.moveVec += glm::vec3(horzRelVelocity * -1.f, 0.f, 0.f);
-    if (!movementState.attachedToLadder){
-      controlData.isWalking = true;
-    }
-    
-  }
-  if (controlParams.goRight){
-    controlData.moveVec += glm::vec3(horzRelVelocity * 1.f, 0.f, 0.f);
-    if (!movementState.attachedToLadder){
-      controlData.isWalking = true;
-    }
-  }
-
-  return controlData;
+  return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
 }
 
-
-std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -552,22 +483,23 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 
   
 
-  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * controlData.speed;
+  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
-  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(controlData.moveVec.x, controlData.moveVec.y, controlData.moveVec.z), hitDirections, rotationWithoutY);
+  auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(movementState.moveVec.x, movementState.moveVec.y, movementState.moveVec.z), hitDirections, rotationWithoutY);
   //auto limitedMoveVec = moveVec;
   if (!moveParams.moveVertical){
     limitedMoveVec.y = 0.f;
   }
   auto direction = glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z);
+  auto isWalking = calcIfWalking(movementState);
 
-  if (controlData.isWalking){
+  if (isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
-    bool isSideStepping = glm::abs(controlData.moveVec.x) > glm::abs(controlData.moveVec.z);
+    bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
     doAnimationTrigger(playerId, isSideStepping ? "sidestep" : "walking");
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
-    moveUp(playerId, controlData.moveVec);
+    moveUp(playerId, movementState.moveVec);
     doAnimationTrigger(playerId, "not-walking");
   }else{
     doAnimationTrigger(playerId, "not-walking");
@@ -589,9 +521,9 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
 
   std::optional<CameraUpdate> cameraUpdate;
   if (managedCamera.thirdPersonMode){
-    cameraUpdate = lookThirdPerson(moveParams, movementState, controlData.raw_deltax, controlData.raw_deltay, controlData.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+    cameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
   }else{
-    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, controlData.raw_deltax, controlData.raw_deltay);
+    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
   }
 
 
@@ -611,22 +543,24 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
   return cameraUpdate;
 }
 
-std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, MovementControlData& controlData, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::optional<CameraUpdate> cameraUpdate;
-  cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, controlData, managedCamera, isGunZoomed);
-  if (controlData.doJump){
+  cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, managedCamera, isGunZoomed);
+  if (movementState.doJump){
     jump(moveParams, movementState, playerId);      
   }
-  if (controlData.doAttachToLadder){
-    attachToLadder(movementState);
+  if (movementState.doAttachToLadder){
+    if (movementState.facingLadder){
+      movementState.attachedToLadder = true;
+    }
   }
-  if (controlData.doReleaseFromLadder){
-    releaseFromLadder(movementState);       
+  if (movementState.doReleaseFromLadder){
+    movementState.attachedToLadder = false;
   }
-  if (controlData.crouchType != CROUCH_NONE){
-    if (controlData.crouchType == CROUCH_DOWN){
+  if (movementState.crouchType != CROUCH_NONE){
+    if (movementState.crouchType == CROUCH_DOWN){
       maybeToggleCrouch(moveParams, movementState, true);
-    }else if (controlData.crouchType == CROUCH_UP){
+    }else if (movementState.crouchType == CROUCH_UP){
       maybeToggleCrouch(moveParams, movementState, false);
     }
   }
@@ -652,6 +586,16 @@ glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
 MovementState getInitialMovementState(objid playerId){
   MovementState movementState {};
   movementState.lastMoveSoundPlayTime = 0.f;
+
+  movementState.moveVec = glm::vec3(0.f, 0.f, 0.f);
+  movementState.speed = 1.f;
+  movementState.zoom_delta = 0.f;
+  movementState.doAttachToLadder = false;
+  movementState.doReleaseFromLadder = false;
+  movementState.raw_deltax = 0.f;
+  movementState.raw_deltay = 0.f;
+  movementState.crouchType = CROUCH_NONE;
+
   movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
