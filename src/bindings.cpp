@@ -12,6 +12,9 @@ SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
+Waypoints waypoints {
+  .waypoints = {},
+};
 Tags tags{};
 
 struct ManagedScene {
@@ -853,7 +856,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     auto playerPosition = getActivePlayerPosition();
     if (playerPosition.has_value()){
-      drawWaypoints(playerPosition.value());
+      drawWaypoints(waypoints, playerPosition.value());
     }
     //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
     std::optional<glm::vec2> mainUiCursorCoord;

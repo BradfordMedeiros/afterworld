@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 extern Tags tags;
+extern Waypoints waypoints;
 
 struct TagUpdater {
 	std::string attribute;
@@ -503,10 +504,10 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "waypoint",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	addWaypoint(id);
+	  	addWaypoint(waypoints, id);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeWaypoint(id);
+  		removeWaypoint(waypoints, id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,

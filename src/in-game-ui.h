@@ -32,9 +32,4 @@ void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, f
 void onInGameUiScrollCallback(InGameUi& inGameUi, double amount);
 void onInGameUiKeyCallback(int key, int scancode, int action, int mods);
 
-objid addWaypoint(std::optional<objid> id);
-void removeWaypoint(objid id);
-
-void drawWaypoints(glm::vec3 playerPos);
-
 #endif 
