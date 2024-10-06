@@ -504,7 +504,11 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "waypoint",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	addWaypoint(waypoints, id);
+	  	addWaypoint(waypoints, id, id);
+	  	auto hitpoints = getHealth(id);
+	  	if (hitpoints.has_value()){
+	  		updateHealth(waypoints, id, hitpoints.value().current / hitpoints.value().total);
+	  	}
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		removeWaypoint(waypoints, id);

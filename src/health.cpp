@@ -74,6 +74,7 @@ void onNoHealth(objid targetId){
   }
 }
 
+extern Waypoints waypoints;
 void doDamageMessage(objid targetId, float damageAmount){
   bool enemyDead = false;
   float remainingHealth = 0.f;
@@ -90,6 +91,11 @@ void doDamageMessage(objid targetId, float damageAmount){
    	onNoHealth(targetId);
   }
   onAiHealthChange(targetId, remainingHealth); // this shouldn't know about ai system
+
+  auto hitpoints = getHealth(targetId);
+  if (hitpoints.has_value()){
+	  updateHealth(waypoints, targetId, hitpoints.value().current / hitpoints.value().total);
+  }
 }
 
 std::optional<HitPoints> getHealth(objid id){

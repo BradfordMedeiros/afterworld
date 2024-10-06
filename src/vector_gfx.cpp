@@ -85,18 +85,24 @@ void drawDebugHitmark(HitObject& hitpoint, objid playerId){
 }
 
 
-objid addWaypoint(Waypoints& waypoints, std::optional<objid> waypointId){
-  auto id = getUniqueObjId();
+void addWaypoint(Waypoints& waypoints, objid id, std::optional<objid> waypointId){
+  modassert(waypoints.waypoints.find(id) == waypoints.waypoints.end(), "waypoint id already defined");
   waypoints.waypoints[id] = WaypointObject {
     .id = waypointId,
     .drawDistance = true,
     .color = glm::vec4(0.f, 1.f, 0.f, 0.3f),
+    .percentage = 0.3f,
   };
-  return id;
 }
 
 void removeWaypoint(Waypoints& waypoints, objid id){
   waypoints.waypoints.erase(id);
+}
+
+void updateHealth(Waypoints& waypoints, objid id, std::optional<float> health){
+  if (waypoints.waypoints.find(id) != waypoints.waypoints.end()){
+    waypoints.waypoints.at(id).percentage = health;
+  }
 }
 
 glm::vec2 pointAtSlope(glm::vec2 screenspacePosition, float sizeNdi){
@@ -147,7 +153,7 @@ glm::vec2 pointAtSlope(glm::vec2 screenspacePosition, float sizeNdi){
   return glm::vec2(0.f, 0.f);
 }
 
-void drawWaypoint(glm::vec3 position, glm::vec3 playerPos, bool drawDistance, glm::vec4 color){
+void drawWaypoint(glm::vec3 position, glm::vec3 playerPos, bool drawDistance, glm::vec4 color, std::optional<float> percentage){
   auto ndiPosition = gameapi -> positionToNdi(position);
   // ndi position is basically ndi intersects with screenspace
   // when it's behind us, we could just draw it, and would be accurate. 
@@ -168,6 +174,10 @@ void drawWaypoint(glm::vec3 position, glm::vec3 playerPos, bool drawDistance, gl
       int distance = glm::distance(position, playerPos);
       gameapi -> drawText(std::to_string(distance), screenspacePosition.x, screenspacePosition.y, 10.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);      
     }
+    if (percentage.has_value()){
+      gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.2f, 0.04f, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      gameapi -> drawRect(screenspacePosition.x, screenspacePosition.y, 0.2f * percentage.value(), 0.04f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    }
   }
 }
 void drawWaypoints(Waypoints& waypoints, glm::vec3 playerPos){
@@ -176,7 +186,7 @@ void drawWaypoints(Waypoints& waypoints, glm::vec3 playerPos){
       auto objectExists = gameapi -> gameobjExists(waypoint.id.value());
       if (objectExists){
         auto position = gameapi -> getGameObjectPos(waypoint.id.value(), true);
-        drawWaypoint(position, playerPos, waypoint.drawDistance, waypoint.color);
+        drawWaypoint(position, playerPos, waypoint.drawDistance, waypoint.color, waypoint.percentage);
       }
     }
   }

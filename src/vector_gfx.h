@@ -11,12 +11,15 @@ struct WaypointObject {
 	std::optional<objid> id;
 	bool drawDistance;
 	glm::vec4 color;
+	std::optional<float> percentage;
 };
 struct Waypoints {
   std::unordered_map<objid, WaypointObject> waypoints;
 };
-objid addWaypoint(Waypoints& waypoints, std::optional<objid> id);
+void addWaypoint(Waypoints& waypoints, objid id, std::optional<objid> waypointId);
 void removeWaypoint(Waypoints& waypoints, objid id);
+void updateHealth(Waypoints& waypoints, objid id, std::optional<float> health);
+
 void drawWaypoints(Waypoints& waypoints, glm::vec3 playerPos);
 
 #endif
