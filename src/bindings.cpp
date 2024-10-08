@@ -643,10 +643,17 @@ UiContext getUiContext(GameState& gameState){
 }
 
 
+  std::function<void(glm::vec3 position, glm::quat rotation)> setCameraPosition;
+  std::function<void()> popTempViewpoint;
+
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
-  .setCameraPosition = setTempViewpoint,
-  .popTempViewpoint = popTempViewpoint,
+  .setCameraPosition = [](glm::vec3 position, glm::quat rotation) -> void {
+    modassert(false, "setCameraPosition not yet implemented");
+  },
+  .popTempViewpoint = []()-> void {
+    modassert(false, "popTempViewpoint not yet implemented");
+  },
 };
 
 void goBackMainMenu(){

@@ -423,18 +423,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = [](Tags& tags) -> void {},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-			if (key == "interact-ingame-ui"){
-				//objid* objidPtr = std::get_if<objid>(&value);
-				//modassert(objidPtr, "invalid value for interact-ingame-ui");
-				if (hasTempViewpoint()){
-					popTempViewpoint();
-				}else{
-					auto uiInstance = getAnyUiInstance(tags.inGameUi);
-					if (uiInstance.has_value()){
-						zoomIntoGameUi(uiInstance.value());
-					}
-				}
-			}
   	},
 	},
 	TagUpdater {

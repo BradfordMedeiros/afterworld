@@ -8,11 +8,10 @@ MovementEntityData& getMovementData();
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 
 ControlledPlayer controlledPlayer {
-  .playerVelocity = glm::vec3(0.f, 0.f, 0.f),
-	.lookVelocity = glm::vec2(0.f, 0.f),
+	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
 	.playerId = std::nullopt,
-	.activePlayerManagedCameraId = std::nullopt,
-	.tempViewpoint = std::nullopt,
+	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
+	.thirdPersonCameraId = std::nullopt,
 	.editorMode = false,
 };
 
@@ -49,9 +48,7 @@ void updateCamera(){
 		gameapi -> setActiveCamera(std::nullopt, -1);
 		return;
 	}
-	if (controlledPlayer.tempViewpoint.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.tempViewpoint.value(), -1);
-	}else if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), -1);
 	}else if (controlledPlayer.playerId.has_value()){
 		auto name = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
@@ -66,11 +63,10 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
-	auto name = gameapi -> getGameObjNameForId(id).value();
-	auto isCamera = name.at(0) == '>';
-	if (isCamera){
-		updateCamera();
-	}else{
+	auto isCamera = gameapi -> getGameObjNameForId(id).value().at(0) == '>';
+
+	std::optional<objid> finalCameraId;
+	if (!isCamera){
     GameobjAttributes attr {
       .attr = { 
 				{ "position", glm::vec3(0.f, 0.f, 20.f) },
@@ -79,41 +75,18 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
     std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
     std::map<std::string, GameobjAttributes> submodelAttributes;
     auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), cameraName, attr, submodelAttributes).value();
-    controlledPlayer.activePlayerManagedCameraId = cameraId;
     gameapi -> makeParent(cameraId, id);
-    updateCamera();
-    return cameraId;
-	}
-	return std::nullopt;
-}
 
-void setTempViewpoint(glm::vec3 position, glm::quat rotation){
-	if (controlledPlayer.tempViewpoint.has_value()){
-		popTempViewpoint();
+    controlledPlayer.activePlayerManagedCameraId = cameraId;
+    finalCameraId = cameraId;
 	}
-	auto id = controlledPlayer.playerId.value();
-  std::string cameraName = std::string(">tempviewpoint-camera-") + uniqueNameSuffix();
-  GameobjAttributes attr {
-    .attr = { { "position", position } },
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), cameraName, attr, submodelAttributes).value();
-  gameapi -> setGameObjectRot(cameraId, rotation, true);
-  controlledPlayer.tempViewpoint = cameraId;
+
   updateCamera();
-}
-bool hasTempViewpoint(){
-	return controlledPlayer.tempViewpoint.has_value();
-}
-void popTempViewpoint(){
-	gameapi -> removeByGroupId(controlledPlayer.tempViewpoint.value());
-	controlledPlayer.tempViewpoint = std::nullopt;
-	updateCamera();
+	return finalCameraId;
 }
 
-std::optional<objid> thirdPersonCameraId;
 std::optional<objid> getCameraForThirdPerson(){
-	return thirdPersonCameraId;
+	return controlledPlayer.thirdPersonCameraId;
 }
 
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
@@ -123,19 +96,17 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	if (controlledPlayer.playerId.has_value()){
     maybeReEnableAi(aiData, controlledPlayer.playerId.value());
 	}
-	controlledPlayer.playerId = id.value();
-	thirdPersonCameraId = setCameraOrMakeTemp(id.value());;
 	setActiveMovementEntity(movement);
 	maybeDisableAi(aiData, id.value());
+
+	controlledPlayer.playerId = id.value();
+	controlledPlayer.thirdPersonCameraId = setCameraOrMakeTemp(id.value());
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
   setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
 }
 
 std::optional<objid> getActivePlayerId(){
-	if (controlledPlayer.tempViewpoint.has_value()){
-		return std::nullopt;
-	}
 	return controlledPlayer.playerId;
 }
 
@@ -160,12 +131,8 @@ void killActivePlayer(){
   }
 }
 
-void setPlayerVelocity(glm::vec3 velocity){
-  controlledPlayer.playerVelocity = velocity;
-}
-
 glm::vec3 getPlayerVelocity(){
-  return controlledPlayer.playerVelocity;
+  return getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.velocity;
 }
 
 std::optional<glm::vec3> getActivePlayerPosition(){
@@ -188,6 +155,5 @@ DebugConfig debugPrintActivePlayer(){
   DebugConfig debugConfig { .data = {} };
   debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) });
   debugConfig.data.push_back({"tempCameraId id", print(controlledPlayer.playerId) });
-  debugConfig.data.push_back({"tempViewpoint", print(controlledPlayer.tempViewpoint) });
   return debugConfig;
 }

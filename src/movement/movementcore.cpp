@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
-void setPlayerVelocity(glm::vec3 velocity);
 
 struct MovementCore {
   std::string name;
@@ -135,7 +134,6 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
   //auto speed = glm::length(displacement);
   movementState.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
-  setPlayerVelocity(displacement);
   movementState.velocity = displacement;
   modlog("update velocity", print(movementState.velocity));
 

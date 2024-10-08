@@ -24,7 +24,6 @@ struct InGameUi {
 void setShowSelectionTexture(bool shouldShow);
 void createInGamesUiInstance(InGameUi& inGameUi, objid id);
 void freeInGameUiInstance(InGameUi& inGameUi, objid id);
-void zoomIntoGameUi(objid id);
 std::optional<objid>  getAnyUiInstance(InGameUi& inGameUi);
 void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord);
 void onInGameUiMouseCallback(UiStateContext& uiState, UiContext& uiContext, InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId);
