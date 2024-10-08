@@ -169,7 +169,7 @@ void restrictLadderMovement(MovementState& movementState, objid id, bool movingD
   }
 }
 
-void look(MovementParams& moveParams, MovementState& movementState, objid id, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
+glm::quat look(MovementParams& moveParams, MovementState& movementState, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
   float raw_deltax = turnX * elapsedTime;
@@ -181,7 +181,7 @@ void look(MovementParams& moveParams, MovementState& movementState, objid id, fl
   movementState.xRot = limitAngle(movementState.xRot + deltax, std::nullopt, std::nullopt);
   movementState.yRot = limitAngle(movementState.yRot + deltay, moveParams.maxAngleUp, moveParams.maxAngleDown); 
   auto rotation = gameapi -> setFrontDelta(forwardVec, movementState.xRot, movementState.yRot, 0, 1.f);
-  gameapi -> setGameObjectRot(id, rotation, false);
+  return rotation;
 }
 
 
@@ -213,7 +213,6 @@ CameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movement
 
   auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
   // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
-  gameapi -> setGameObjectRot(id, newOrientation, true);  
     
   CameraUpdate cameraUpdate {
     .position = finalCameraLocation,
@@ -520,8 +519,10 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
   std::optional<CameraUpdate> cameraUpdate;
   if (managedCamera.thirdPersonMode){
     cameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+    gameapi -> setGameObjectRot(playerId, cameraUpdate.value().rotation, true);  
   }else{
-    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
+    auto rotation = look(moveParams, movementState, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
+    gameapi -> setGameObjectRot(playerId, rotation, false);
   }
 
 

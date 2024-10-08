@@ -11,7 +11,6 @@ ControlledPlayer controlledPlayer {
 	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
 	.playerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
-	.thirdPersonCameraId = std::nullopt,
 	.editorMode = false,
 };
 
@@ -63,30 +62,19 @@ std::optional<objid> setCameraOrMakeTemp(objid id){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
-	auto isCamera = gameapi -> getGameObjNameForId(id).value().at(0) == '>';
 
-	std::optional<objid> finalCameraId;
-	if (!isCamera){
-    GameobjAttributes attr {
-      .attr = { 
-				{ "position", glm::vec3(0.f, 0.f, 20.f) },
-      },
-    };
-    std::string cameraName = std::string(">player-camera-") + uniqueNameSuffix();
-    std::map<std::string, GameobjAttributes> submodelAttributes;
-    auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), cameraName, attr, submodelAttributes).value();
-    gameapi -> makeParent(cameraId, id);
+  GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id), std::string(">gen-player-camera-") + uniqueNameSuffix(), attr, submodelAttributes).value();
+  gameapi -> makeParent(cameraId, id);
 
-    controlledPlayer.activePlayerManagedCameraId = cameraId;
-    finalCameraId = cameraId;
-	}
+  controlledPlayer.activePlayerManagedCameraId = cameraId;
 
-  updateCamera();
-	return finalCameraId;
+	return cameraId;
 }
 
 std::optional<objid> getCameraForThirdPerson(){
-	return controlledPlayer.thirdPersonCameraId;
+	return controlledPlayer.activePlayerManagedCameraId;
 }
 
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
@@ -100,7 +88,8 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	maybeDisableAi(aiData, id.value());
 
 	controlledPlayer.playerId = id.value();
-	controlledPlayer.thirdPersonCameraId = setCameraOrMakeTemp(id.value());
+	setCameraOrMakeTemp(id.value());
+  updateCamera();
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
   setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
