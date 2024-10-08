@@ -49,11 +49,6 @@ void updateCamera(){
 	}
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), -1);
-	}else if (controlledPlayer.playerId.has_value()){
-		auto name = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
-		auto isCamera = name.at(0) == '>';
-		modassert(isCamera, "not a camera, but not managed cameras");
-		gameapi -> setActiveCamera(controlledPlayer.playerId.value(), -1);
 	}
 }
 
