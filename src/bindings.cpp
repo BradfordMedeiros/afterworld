@@ -153,19 +153,19 @@ std::vector<SceneRouterPath> routerPaths = {
       return sceneFile.value();
     },
     .makePlayer = true,
-    .camera = ">maincamera",
+    .camera = "maincamera",
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
     .makePlayer = false,
-    .camera = ">maincamera",
+    .camera = "maincamera",
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
     .makePlayer = false,
-    .camera = ">maincamera",
+    .camera = "maincamera",
   },
 };
 

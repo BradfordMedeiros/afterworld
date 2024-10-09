@@ -1,16 +1,25 @@
->maincamera:physics_angle:0.000000 0.000000 0.000000
->maincamera:physics:enabled
->maincamera:physics_velocity:0 0 -10
->maincamera:physics_type:dynamic
->maincamera:physics_gravity:0 -9.81 0
->maincamera:physics_shape:shape_sphere
->maincamera:goal-info:target
->maincamera:goal-type:move
->maincamera:goal-value:5
->maincamera:goal-conditions:in-range
->maincamera:goal-conditions-val:20
->maincamera:team:blue
->maincamera:health:90
->maincamera:player:true
+maincamera:physics_angle:0.000000 0.000000 0.000000
+maincamera:physics:enabled
+maincamera:physics_velocity:0 0 -10
+maincamera:physics_type:dynamic
+maincamera:physics_gravity:0 -9.81 0
+#maincamera:physics_shape:shape_rect
+maincamera:goal-info:target
+maincamera:goal-type:move
+maincamera:goal-value:5
+maincamera:goal-conditions:in-range
+maincamera:goal-conditions-val:20
+maincamera:team:blue
+maincamera:health:90
+maincamera:player:true
+maincamera:collide_damage:50
+maincamera:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+maincamera:tint:1 0 0 0.1
+maincamera:layer:transparency
 
->maincamera:collide_damage:50
+#
+#box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#box:position:0 0 -5
+#box:layer:transparency
+#box:tint:0 0 1 0.5
+#maincamera:child:box
