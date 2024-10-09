@@ -633,8 +633,8 @@ UiContext getUiContext(GameState& gameState){
         setShowWeaponModel(showWeapon);
       },
       .deliverAmmo = [](int amount) -> void {
-        if(getActivePlayerId().has_value()){
-          deliverCurrentGunAmmo(getActivePlayerId().value(), amount);
+        if(controlledPlayer.playerId.has_value()){
+          deliverCurrentGunAmmo(controlledPlayer.playerId.value(), amount);
         }
       }
     },
@@ -872,7 +872,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
     
     std::optional<UiHealth> uiHealth;
-    auto activePlayer = getActivePlayerId();
+    auto activePlayer = controlledPlayer.playerId;
     if (activePlayer.has_value()){
       auto health = getHealth(activePlayer.value());
       if (health.has_value()){
@@ -900,7 +900,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
     if (action == 1){
-      auto playerId = getActivePlayerId();
+      auto playerId = controlledPlayer.playerId;
       if (isPauseKey(key)){
         togglePauseIfInGame();
       }
@@ -930,7 +930,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (controlledPlayer.playerId.has_value()){
       if (!(isPaused() || getGlobalState().disableGameInput)){
-        onWeaponsKeyCallback(getWeaponState(weapons, getActivePlayerId().value()), key, action, controlledPlayer.playerId.value());
+        onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), key, action, controlledPlayer.playerId.value());
       }
     }
     if (controlledPlayer.playerId.has_value()){
@@ -950,7 +950,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
 
     if (key == "save-gun"){
-      saveGunTransform(getWeaponState(weapons, getActivePlayerId().value()).weaponValues);
+      saveGunTransform(getWeaponState(weapons, controlledPlayer.playerId.value()).weaponValues);
     }
 
     if (key == "reset"){
@@ -1010,7 +1010,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
       if (controlledPlayer.playerId.has_value() && (controlledPlayer.playerId.value() == itemAcquiredMessage -> targetId)){
-        deliverCurrentGunAmmo(getActivePlayerId().value(), itemAcquiredMessage -> amount);
+        deliverCurrentGunAmmo(controlledPlayer.playerId.value(), itemAcquiredMessage -> amount);
       }
     }
 
@@ -1081,7 +1081,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
         if (false){
-          raycastFromCameraAndMoveTo(gameState -> movementEntities, getActivePlayerId().value());
+          raycastFromCameraAndMoveTo(gameState -> movementEntities, controlledPlayer.playerId.value());
         }
         nextTerminalPage();
       }
@@ -1102,7 +1102,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (controlledPlayer.playerId.has_value()){
       static float selectDistance = querySelectDistance();
       if (!isPaused() && !getGlobalState().disableGameInput){
-        auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, getActivePlayerId().value()), button, action, controlledPlayer.playerId.value(), selectDistance);
+        auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());
         }

@@ -69,7 +69,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
-	
+
 	controlledPlayer.playerId = id.value();
 
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
@@ -103,9 +103,8 @@ void setActivePlayerEditorMode(bool editorMode){
 }
 
 void killActivePlayer(){
-	auto playerId = getActivePlayerId();
-  if (playerId.has_value()){
-    doDamageMessage(playerId.value(), 10000.f);   
+  if (controlledPlayer.playerId.has_value()){
+    doDamageMessage(controlledPlayer.playerId.value(), 10000.f);   
   }
 }
 
@@ -131,7 +130,17 @@ WeaponEntityData getWeaponEntityData(objid id){
 
 DebugConfig debugPrintActivePlayer(){
   DebugConfig debugConfig { .data = {} };
-  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) });
-  debugConfig.data.push_back({"tempCameraId id", print(controlledPlayer.playerId) });
+
+  std::string playerName = "";
+  if (controlledPlayer.playerId.has_value()){
+  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
+  }
+
+  std::string cameraName = "";
+  if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+  	cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
+  }
+  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) + playerName });
+  debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + cameraName });
   return debugConfig;
 }
