@@ -65,13 +65,13 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	}
 	setActiveMovementEntity(movement);
 	maybeDisableAi(aiData, id.value());
-
-	controlledPlayer.playerId = id.value();
-
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
+	
+	controlledPlayer.playerId = id.value();
+
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id.value()), std::string(">gen-player-camera-") + uniqueNameSuffix(), attr, submodelAttributes).value();
