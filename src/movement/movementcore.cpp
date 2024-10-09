@@ -448,7 +448,7 @@ bool calcIfWalking(MovementState& movementState){
   return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
 }
 
-CameraUpdate onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -541,11 +541,6 @@ CameraUpdate onMovementFrameControl(MovementParams& moveParams, MovementState& m
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
 
-  return cameraUpdate;
-}
-
-CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
-  auto cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, managedCamera, isGunZoomed);
   if (movementState.doJump){
     jump(moveParams, movementState, playerId);      
   }
@@ -566,6 +561,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
   return cameraUpdate;
 }
+
 
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
   glm::vec3 euler_angles = glm::eulerAngles(currRotation);
