@@ -1,8 +1,6 @@
 #include "./in-game-ui.h"
 
 extern CustomApiBindings* gameapi;
-void setTempViewpoint(glm::vec3 position, glm::quat rotation);
-
 
 bool showSelectionTexture = false;
 
@@ -43,16 +41,6 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 void freeInGameUiInstance(InGameUi& inGameUi, objid id){
 	gameapi -> freeTexture(ingameUiTextureName(id), id);
 	inGameUi.textDisplays.erase(id);
-}
-
-void zoomIntoGameUi(objid id){
-	auto rotation = gameapi -> getGameObjectRotation(id, true);
-	auto objectPosition = gameapi -> getGameObjectPos(id, true);
-  auto uiOffset = getSingleVec3Attr(id, "in-game-ui-offset");
-  auto offset = uiOffset.has_value() ? uiOffset.value() : glm::vec3(0.f, 0.f, 0.f);
-	auto position = objectPosition + rotation * offset;
-	auto viewOrientation = gameapi -> orientationFromPos(position, objectPosition);
-	setTempViewpoint(position, viewOrientation);
 }
 
 std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){

@@ -42,6 +42,17 @@ Component utilViewComponent {
       drawTools.drawRect(utilViewOptions -> ndiCursor.value().x, utilViewOptions -> ndiCursor.value().y, cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "./res/textures/crosshairs/crosshair029.png", ShapeOptions { .zIndex = 6 }, std::nullopt);
     }
 
+
+    if (utilViewOptions -> debugConfig.has_value()){
+      Props props {
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = utilViewOptions -> debugConfig.value() },
+          PropPair { .symbol = xoffsetSymbol, .value = -1.f },
+        },
+      };
+      debugComponent.draw(drawTools, props);
+    }
+
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },
 };

@@ -132,6 +132,14 @@ void debugOnFrame(){
   //}
   handleSimpleOnFrame();
 
+
+  auto activeCamera = gameapi -> getActiveCamera();
+  if (!activeCamera.has_value()){
+  	modlog("active camera", "none");
+  }else{
+  	modlog("active camera", gameapi -> getGameObjNameForId(activeCamera.value()).value());
+  }
+
 	auto args = gameapi -> getArgs();
 	static std::optional<PrintObjDebug> printObjDebug = getPrintObjDebug(args);
 	if (!printObjDebug.has_value()){

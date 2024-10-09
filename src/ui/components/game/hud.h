@@ -16,6 +16,7 @@ void setUiSpeed(std::optional<glm::vec3> velocity, std::optional<glm::vec2> look
 void setShowActivate(bool showActivate);
 void setUiWeapon(std::optional<std::string> weapon);
 
+
 struct LetterboxFade {
   std::string title;
   std::optional<float> animationDuration;

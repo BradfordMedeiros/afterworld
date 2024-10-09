@@ -7,11 +7,10 @@
 #include "./health.h"
 
 struct ControlledPlayer {
-  glm::vec3 playerVelocity;
 	glm::vec2 lookVelocity;
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
-	std::optional<objid> tempViewpoint;
+	std::optional<objid> activeMeshManagedId;
 	bool editorMode;
 };
 
@@ -27,9 +26,6 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
 bool onActivePlayerRemoved(objid id);
 
-void setTempViewpoint(glm::vec3 position, glm::quat rotation);
-bool hasTempViewpoint();
-void popTempViewpoint();
 void setActivePlayerEditorMode(bool editorMode);
 
 void killActivePlayer();

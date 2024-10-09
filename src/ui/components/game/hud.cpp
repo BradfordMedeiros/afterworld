@@ -41,6 +41,7 @@ void setUiWeapon(std::optional<std::string> weapon){
   uiWeapon = weapon;
 }
 
+
 enum DrawBarAlign { DRAWBAR_ALIGN_NONE, DRAWBAR_ALIGN_POSITIVE, DRAWBAR_ALIGN_NEGATIVE };
 void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::vec2 offset, DrawBarAlign align, glm::vec4 tint){
   float width = sizeNdi.x;

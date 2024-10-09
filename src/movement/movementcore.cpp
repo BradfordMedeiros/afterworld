@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
-void setPlayerVelocity(glm::vec3 velocity);
 
 struct MovementCore {
   std::string name;
@@ -135,7 +134,6 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
   //auto speed = glm::length(displacement);
   movementState.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
-  setPlayerVelocity(displacement);
   movementState.velocity = displacement;
   modlog("update velocity", print(movementState.velocity));
 
@@ -171,7 +169,7 @@ void restrictLadderMovement(MovementState& movementState, objid id, bool movingD
   }
 }
 
-void look(MovementParams& moveParams, MovementState& movementState, objid id, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
+glm::quat look(MovementParams& moveParams, MovementState& movementState, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
   float raw_deltax = turnX * elapsedTime;
@@ -183,12 +181,12 @@ void look(MovementParams& moveParams, MovementState& movementState, objid id, fl
   movementState.xRot = limitAngle(movementState.xRot + deltax, std::nullopt, std::nullopt);
   movementState.yRot = limitAngle(movementState.yRot + deltay, moveParams.maxAngleUp, moveParams.maxAngleDown); 
   auto rotation = gameapi -> setFrontDelta(forwardVec, movementState.xRot, movementState.yRot, 0, 1.f);
-  gameapi -> setGameObjectRot(id, rotation, false);
+  return rotation;
 }
 
 
 // this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
-CameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, ThirdPersonCameraInfo& thirdPersonInfo, float elapsedTime, bool isGunZoomed){
+ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, float turnX, float turnY, float zoom_delta, objid id, ThirdPersonCameraInfo& thirdPersonInfo, float elapsedTime, bool isGunZoomed){
   thirdPersonInfo.angleX += turnX * 0.05 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.angleY += turnY * 0.05 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.distanceFromTarget += zoom_delta;
@@ -215,9 +213,8 @@ CameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movement
 
   auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
   // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
-  gameapi -> setGameObjectRot(id, newOrientation, true);  
     
-  CameraUpdate cameraUpdate {
+  ThirdPersonCameraUpdate cameraUpdate {
     .position = finalCameraLocation,
     .rotation = newOrientation,
   };
@@ -451,7 +448,7 @@ bool calcIfWalking(MovementState& movementState){
   return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
 }
 
-std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
   std::vector<glm::quat> hitDirections;
 
     //std::vector<glm::quat> hitDirections;
@@ -519,11 +516,15 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
     
   float elapsedTime = gameapi -> timeElapsed();
 
-  std::optional<CameraUpdate> cameraUpdate;
+  CameraUpdate cameraUpdate { 
+    .thirdPerson = std::nullopt,
+  };
   if (managedCamera.thirdPersonMode){
-    cameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+    auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
+    cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
   }else{
-    look(moveParams, movementState, playerId, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
+    auto rotation = look(moveParams, movementState, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
+    gameapi -> setGameObjectRot(playerId, rotation, false);
   }
 
 
@@ -540,12 +541,6 @@ std::optional<CameraUpdate> onMovementFrameControl(MovementParams& moveParams, M
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
 
-  return cameraUpdate;
-}
-
-std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
-  std::optional<CameraUpdate> cameraUpdate;
-  cameraUpdate = onMovementFrameControl(moveParams, movementState, playerId, managedCamera, isGunZoomed);
   if (movementState.doJump){
     jump(moveParams, movementState, playerId);      
   }
@@ -566,6 +561,7 @@ std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, Move
   }
   return cameraUpdate;
 }
+
 
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation){
   glm::vec3 euler_angles = glm::eulerAngles(currRotation);

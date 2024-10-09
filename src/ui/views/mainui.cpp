@@ -379,6 +379,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
             .consoleKeyName = (std::string("console-") + uniqueNameSuffix()),
             .consoleInterface = &uiContext.consoleInterface,
             .ndiCursor = ndiCursor,
+            .debugConfig = uiContext.debugConfig(),
           } 
         },
       },
@@ -426,14 +427,12 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
               .scenes = uiContext.listScenes(),
               .currentScene = uiState.currentScene,
             },
-            .debugConfig = uiContext.debugConfig(),
           } 
         },
       }
     };
     editorViewComponent.draw(drawTools, editorViewProps);
   }
-
 
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
 

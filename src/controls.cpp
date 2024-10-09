@@ -163,15 +163,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 			maybeChangeGunUpdateUi("fork");
 		},
 	},
-
-	HotkeyToMessage {
-		.key = '5',  // 3
-		.action = 0,
-		.fn = []() -> void {
-			gameapi -> sendNotifyMessage("interact-ingame-ui", std::string(""));
-		},
-	},
-
 };
 
 void handleHotkey(int key, int action){

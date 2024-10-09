@@ -11,7 +11,6 @@
 #include "./navlist.h"
 #include "./navbar.h"
 #include "./dock/dock.h"
-#include "./debug.h"
 
 struct EditorViewOptions {
   WorldPlayInterface* worldPlayInterface;
@@ -33,9 +32,6 @@ struct EditorViewOptions {
   std::set<std::string>* dockedDocks;
 
   SceneManagerInterface sceneManagerInterface;
-
-  std::optional<DebugConfig> debugConfig;
-
 };
 extern Component editorViewComponent;
 
