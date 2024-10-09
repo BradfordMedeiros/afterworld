@@ -11,6 +11,7 @@ ControlledPlayer controlledPlayer {
 	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
 	.playerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
+	.activeMeshManagedId = std::nullopt,
 	.editorMode = false,
 };
 

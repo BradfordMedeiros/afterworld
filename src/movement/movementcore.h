@@ -105,11 +105,14 @@ void removeAllMovementCores();
 
 glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos);
 
-struct CameraUpdate {
+struct ThirdPersonCameraUpdate {
   glm::vec3 position;
   glm::quat rotation;
 };
-std::optional<CameraUpdate> onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
+struct CameraUpdate {
+  std::optional<ThirdPersonCameraUpdate> thirdPerson;
+};
+CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
 
 MovementState getInitialMovementState(objid playerId);
 

@@ -16,6 +16,8 @@ maincamera:collide_damage:50
 maincamera:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 maincamera:tint:1 0 0 0.1
 maincamera:layer:transparency
+maincamera:disabled:true
+maincamera:physics_mass:100000
 
 #
 #box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf

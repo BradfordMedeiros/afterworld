@@ -281,9 +281,9 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     entity.movementState.crouchType = movement.controlParams.crouchType;
 
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId));
-    if (cameraUpdate.has_value()){
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.value().position, true);
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.value().rotation, true);
+    if (cameraUpdate.thirdPerson.has_value()){
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
     }
     uiUpdate.velocity = entity.movementState.velocity;
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
