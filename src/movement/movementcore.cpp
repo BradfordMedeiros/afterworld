@@ -522,7 +522,6 @@ CameraUpdate onMovementFrameControl(MovementParams& moveParams, MovementState& m
   if (managedCamera.thirdPersonMode){
     auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
-    gameapi -> setGameObjectRot(playerId, cameraUpdate.thirdPerson.value().rotation, true);  
   }else{
     auto rotation = look(moveParams, movementState, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
     gameapi -> setGameObjectRot(playerId, rotation, false);

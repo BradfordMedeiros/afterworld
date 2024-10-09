@@ -259,6 +259,7 @@ glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& m
 }
 
 
+// TODO third person mode should only be a thing if active id
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
@@ -284,6 +285,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().rotation, true);  
     }
     uiUpdate.velocity = entity.movementState.velocity;
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
@@ -303,7 +305,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         movementEntity.targetLocation = std::nullopt;
         movementEntity.movementState.speed = 1.f;
       }
-      onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id));  
+      auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id));  
+      modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
     }
   }
 
