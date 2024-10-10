@@ -118,7 +118,7 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
 }
 
 WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun){
-  ensureGunInstance(weaponState.weaponValues, gameapi -> listSceneId(playerId), playerId, showFpsGun);
+  ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun);
 
   if (weaponState.activate){
     auto activateableItem = raycastActivateableItem(playerId);

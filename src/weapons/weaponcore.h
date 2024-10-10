@@ -57,8 +57,6 @@ fireGun(gunInstance)*/
 WeaponParams queryWeaponParams(std::string gunName);
 
 
-objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
-
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponState {
   float lastShootingTime;
@@ -97,7 +95,7 @@ struct GunInstance {
 GunCore createGunCoreInstance(std::string gun, objid sceneId);
 std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues);
 
-void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId, bool createGunModel);
+void ensureGunInstance(GunInstance& _gunInstance, objid playerId, bool createGunModel);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);
 void removeGun(GunInstance& weaponValues);
 

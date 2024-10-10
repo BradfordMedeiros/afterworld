@@ -109,8 +109,13 @@ struct ThirdPersonCameraUpdate {
   glm::vec3 position;
   glm::quat rotation;
 };
+struct FirstPersonCameraUpdate {
+  glm::quat rotation;
+};
+
 struct CameraUpdate {
   std::optional<ThirdPersonCameraUpdate> thirdPerson;
+  std::optional<FirstPersonCameraUpdate> firstPerson;
 };
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
 

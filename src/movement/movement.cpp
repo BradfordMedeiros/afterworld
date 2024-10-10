@@ -285,7 +285,10 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().rotation, true);  
+      //gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().rotation, true);  
+    }
+    if (cameraUpdate.firstPerson.has_value()){
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.value().rotation, false);
     }
     uiUpdate.velocity = entity.movementState.velocity;
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;

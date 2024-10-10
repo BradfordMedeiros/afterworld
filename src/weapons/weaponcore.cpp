@@ -155,7 +155,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   return weaponParams;
 }
 
-objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId, std::string& weaponName){
+objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName){
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
     { "layer", "no_depth" },
@@ -173,7 +173,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid play
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
-  gameapi -> makeParent(gunId.value(), playerId);
+  gameapi -> makeParent(gunId.value(), parentId);
   return gunId.value();
 }
 
@@ -236,7 +236,7 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
   return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
 
-void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId, bool createGunModel){
+void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
   if (elapsedTimeSinceChange  < 0.5f){
     //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
@@ -269,8 +269,9 @@ void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId,
   std::optional<objid> muzzlePointId;
 
   if (createGunModel){
+    auto sceneId = gameapi -> listSceneId(parentId);
     auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
-    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, playerId, weaponName);
+    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName);
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
       gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
     }

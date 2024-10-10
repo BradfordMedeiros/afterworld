@@ -449,16 +449,19 @@ bool calcIfWalking(MovementState& movementState){
 }
 
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
-  std::vector<glm::quat> hitDirections;
+  auto currTime = gameapi -> timeSeconds(false);
+  float elapsedTime = gameapi -> timeElapsed();
 
-    //std::vector<glm::quat> hitDirections;
+  auto currPos = gameapi -> getGameObjectPos(playerId, true);
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
+
   auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
   directionVec.y = 0.f;
   auto rotationWithoutY = quatFromDirection(directionVec);
 
   movementState.lastFrameIsGrounded = movementState.isGrounded;
 
+  std::vector<glm::quat> hitDirections;
   auto collisions = checkMovementCollisions(playerId, hitDirections, rotationWithoutY);
   bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
    
@@ -503,9 +506,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
 
-  auto currPos = gameapi -> getGameObjectPos(playerId, true);
-  auto currTime = gameapi -> timeSeconds(false);
-
   if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
     std::cout << "should play move clip" << std::endl;
@@ -514,17 +514,18 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     movementState.lastMoveSoundPlayLocation = currPos;
   }
     
-  float elapsedTime = gameapi -> timeElapsed();
-
   CameraUpdate cameraUpdate { 
     .thirdPerson = std::nullopt,
+    .firstPerson = std::nullopt,
   };
   if (managedCamera.thirdPersonMode){
     auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
   }else{
     auto rotation = look(moveParams, movementState, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
-    gameapi -> setGameObjectRot(playerId, rotation, false);
+    cameraUpdate.firstPerson = FirstPersonCameraUpdate {
+      .rotation = rotation,
+    };
   }
 
 
