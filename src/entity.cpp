@@ -132,16 +132,30 @@ WeaponEntityData getWeaponEntityData(objid id){
 DebugConfig debugPrintActivePlayer(){
   DebugConfig debugConfig { .data = {} };
 
-  std::string playerName = "";
-  if (controlledPlayer.playerId.has_value()){
-  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
-  }
+  {
+  	std::string activeCameraName = "";
+  	auto activeCameraId = gameapi -> getActiveCamera();
+  	if (activeCameraId.has_value()){
+  		activeCameraName = gameapi -> getGameObjNameForId(activeCameraId.value()).value();
+  	}
+	  debugConfig.data.push_back({"activeCameraName", print(activeCameraId) + " [" + activeCameraName + "]" });
+	}
 
-  std::string cameraName = "";
-  if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-  	cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
-  }
-  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) + playerName });
-  debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + cameraName });
+	{
+	  std::string playerName = "";
+	  if (controlledPlayer.playerId.has_value()){
+	  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
+	  }
+	  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) + + " [" + playerName + "]" });
+	}
+
+	{
+  	std::string cameraName = "";
+  	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+  		cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
+  	}
+  	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
+	}
+
   return debugConfig;
 }
