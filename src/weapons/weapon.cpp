@@ -117,8 +117,8 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
   return weapons.idToWeapon.at(id);
 }
 
-WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun){
-  ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun);
+WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, std::function<objid(objid)> getWeaponParentId){
+  ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun, getWeaponParentId);
 
   if (weaponState.activate){
     auto activateableItem = raycastActivateableItem(playerId);
@@ -201,7 +201,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
 }
 
 
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData){
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData, std::function<objid(objid)> getWeaponParentId) {
   WeaponsUiUpdate weaponsUiUpdate{
     .ammoInfo = std::nullopt,
     .showActivateUi = false,
@@ -209,7 +209,7 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookV
   for (auto &[id, weaponEntityState] : weapons.idToWeapon){
     auto weaponEntityData = getWeaponEntityData(id);
     bool activePlayer = id == playerId;
-    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer);
+    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode, getWeaponParentId);
     if (activePlayer){
       weaponsUiUpdate = uiUpdate;
     }

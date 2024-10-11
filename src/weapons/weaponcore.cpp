@@ -155,7 +155,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   return weaponParams;
 }
 
-objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName){
+objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName, std::function<objid(objid)> getWeaponParentId){
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
     { "layer", "no_depth" },
@@ -173,7 +173,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
-  gameapi -> makeParent(gunId.value(), parentId);
+  gameapi -> makeParent(gunId.value(), getWeaponParentId(parentId));
   return gunId.value();
 }
 
@@ -236,7 +236,7 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
   return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
 
-void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel){
+void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
   if (elapsedTimeSinceChange  < 0.5f){
     //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
@@ -255,10 +255,10 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
   modlog("weapons ensureGunInstance", std::string("change gun instance: ") + _gunInstance.desiredGun);
 
   if (_gunInstance.gunId.has_value()){
-    _gunInstance.gunId = std::nullopt;
-    _gunInstance.muzzleId = std::nullopt;
     gameapi -> removeByGroupId(_gunInstance.gunId.value());
   }
+  _gunInstance.gunId = std::nullopt;
+  _gunInstance.muzzleId = std::nullopt;
 
   if (sameGun && !createGunModel){
     return;
@@ -271,7 +271,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
   if (createGunModel){
     auto sceneId = gameapi -> listSceneId(parentId);
     auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
-    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName);
+    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
       gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
     }

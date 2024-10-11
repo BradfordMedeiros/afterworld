@@ -121,11 +121,12 @@ std::optional<glm::vec3> getActivePlayerPosition(){
 }
 
 WeaponEntityData getWeaponEntityData(objid id){
-	MovementState& movementState = getMovementData().movementEntities.at(id).movementState;
+	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
   return WeaponEntityData {
     .inventory = id,
     .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
-    .velocity = movementState.velocity,
+    .velocity = movementEntity.movementState.velocity,
+    .thirdPersonMode = movementEntity.managedCamera.thirdPersonMode,
   };
 }
 

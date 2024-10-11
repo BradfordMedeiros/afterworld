@@ -44,8 +44,9 @@ struct WeaponEntityData {
   objid inventory;
   glm::vec2 lookVelocity;
   glm::vec3 velocity;
+  bool thirdPersonMode;
 };
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData);
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData, std::function<objid(objid)> getWeaponParentId);
 
 struct WeaponsMouseUpdate {
   std::optional<float> zoomAmount;

@@ -281,14 +281,16 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
     entity.movementState.crouchType = movement.controlParams.crouchType;
 
+    // should take the rotation and direct and stuff from where the player is looking
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.thirdPerson.has_value()){
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);  
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
       //gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().rotation, true);  
     }
     if (cameraUpdate.firstPerson.has_value()){
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.value().rotation, false);
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.value().rotation, true); // i think this should only rotate around y 
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.value().rotation, true);
     }
     uiUpdate.velocity = entity.movementState.velocity;
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
