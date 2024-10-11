@@ -110,7 +110,8 @@ struct ThirdPersonCameraUpdate {
   glm::quat rotation;
 };
 struct FirstPersonCameraUpdate {
-  glm::quat rotation;
+  glm::quat rotation;   // rotation here means orientation
+  glm::quat yAxisRotation;
 };
 
 struct CameraUpdate {

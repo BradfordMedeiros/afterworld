@@ -168,8 +168,7 @@ void restrictLadderMovement(MovementState& movementState, objid id, bool movingD
     setGameObjectVelocity(id, velocity);
   }
 }
-
-glm::quat look(MovementParams& moveParams, MovementState& movementState, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
+FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movementState, float elapsedTime, bool ironsight, float ironsight_turn, float turnX, float turnY){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
   float raw_deltax = turnX * elapsedTime;
@@ -181,7 +180,13 @@ glm::quat look(MovementParams& moveParams, MovementState& movementState, float e
   movementState.xRot = limitAngle(movementState.xRot + deltax, std::nullopt, std::nullopt);
   movementState.yRot = limitAngle(movementState.yRot + deltay, moveParams.maxAngleUp, moveParams.maxAngleDown); 
   auto rotation = gameapi -> setFrontDelta(forwardVec, movementState.xRot, movementState.yRot, 0, 1.f);
-  return rotation;
+
+  auto rotation1 = gameapi -> setFrontDelta(forwardVec, movementState.xRot, 0, 0, 1.f);
+
+  return FirstPersonCameraUpdate {
+      .rotation = rotation,
+      .yAxisRotation = rotation1,
+  };
 }
 
 
@@ -522,10 +527,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, movementState.raw_deltax, movementState.raw_deltay, movementState.zoom_delta, playerId, managedCamera, elapsedTime, isGunZoomed);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
   }else{
-    auto rotation = look(moveParams, movementState, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
-    cameraUpdate.firstPerson = FirstPersonCameraUpdate {
-      .rotation = rotation,
-    };
+    cameraUpdate.firstPerson = look(moveParams, movementState, elapsedTime, false, 0.5f, movementState.raw_deltax, movementState.raw_deltay);
   }
 
 
