@@ -11,8 +11,6 @@ struct ThirdPersonCameraInfo {
   float angleX;
   float angleY;
   float actualDistanceFromTarget;
-  float actualAngleX;
-  float actualAngleY;
   glm::vec3 additionalCameraOffset;
   glm::vec3 zoomOffset;
   glm::vec3 actualZoomOffset;
