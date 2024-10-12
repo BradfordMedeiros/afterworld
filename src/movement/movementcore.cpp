@@ -223,12 +223,16 @@ ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementStat
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
+  auto fromLocationYOnly = targetLocation + glm::vec3(x, 0.f, z);
+  auto newOrientationNoX = orientationFromPos(fromLocationYOnly, targetLocation);  // maybe should clear the y
+
   auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
   // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
     
   ThirdPersonCameraUpdate cameraUpdate {
     .position = finalCameraLocation,
     .rotation = newOrientation,
+    .yAxisRotation = newOrientationNoX,
   };
   return cameraUpdate;
 }

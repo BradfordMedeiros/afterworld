@@ -106,6 +106,7 @@ glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, Movement
 struct ThirdPersonCameraUpdate {
   glm::vec3 position;
   glm::quat rotation;
+  glm::quat yAxisRotation;
 };
 struct FirstPersonCameraUpdate {
   glm::quat rotation;   // rotation here means orientation

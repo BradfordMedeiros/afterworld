@@ -285,7 +285,9 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       //gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
 
       //--------------------------------------------------
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
+      //gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true);
+
 
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);  
