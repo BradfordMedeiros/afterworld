@@ -201,8 +201,8 @@ FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movement
 
 // this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
 ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo){
-  thirdPersonInfo.angleX += lookParams.turnX * 0.05 /* 0.05f arbitary turn speed */;
-  thirdPersonInfo.angleY += lookParams.turnY * 0.05 /* 0.05f arbitary turn speed */;
+  thirdPersonInfo.angleX += lookParams.turnX * 0.1 /* 0.05f arbitary turn speed */;
+  thirdPersonInfo.angleY += lookParams.turnY * 0.1 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.distanceFromTarget += zoom_delta;
 
   float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
@@ -526,11 +526,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     movementState.lastMoveSoundPlayLocation = currPos;
   }
     
-  CameraUpdate cameraUpdate { 
-    .thirdPerson = std::nullopt,
-    .firstPerson = std::nullopt,
-  };
-
   LookParams lookParams {
     .elapsedTime = elapsedTime,
     .ironsight = isGunZoomed,
@@ -538,12 +533,14 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     .turnX = movementState.raw_deltax,
     .turnY = movementState.raw_deltay,
   };
+  
+  CameraUpdate cameraUpdate { .thirdPerson = std::nullopt };
+  cameraUpdate.firstPerson = look(moveParams, movementState, lookParams);
   if (managedCamera.thirdPersonMode){
     auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, lookParams, movementState.zoom_delta, managedCamera);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
-  }else{
-    cameraUpdate.firstPerson = look(moveParams, movementState, lookParams);
   }
+  
 
 
   bool movingDown = false;

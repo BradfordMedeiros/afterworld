@@ -57,6 +57,14 @@ std::optional<objid> getCameraForThirdPerson(){
 	return controlledPlayer.activePlayerManagedCameraId;
 }
 
+std::optional<bool> activePlayerInThirdPerson(){
+	if (!controlledPlayer.playerId.has_value()){
+		return std::nullopt;
+	}
+	bool thirdPerson = getWeaponEntityData(controlledPlayer.playerId.value()).thirdPersonMode;
+	return thirdPerson;
+}
+
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
 	if (!id.has_value()){
 		return;
@@ -157,6 +165,9 @@ DebugConfig debugPrintActivePlayer(){
   	}
   	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
 	}
+
+	auto inThirdPerson = activePlayerInThirdPerson();
+	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
 
   return debugConfig;
 }

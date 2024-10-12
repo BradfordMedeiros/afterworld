@@ -114,7 +114,7 @@ struct FirstPersonCameraUpdate {
 
 struct CameraUpdate {
   std::optional<ThirdPersonCameraUpdate> thirdPerson;
-  std::optional<FirstPersonCameraUpdate> firstPerson;
+  FirstPersonCameraUpdate firstPerson;
 };
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
 
