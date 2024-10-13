@@ -227,6 +227,10 @@ void onMovementScrollCallback(Movement& movement, double amount){
   movement.controlParams.zoom_delta = amount;
 }
 
+glm::quat getLookDirection(MovementEntity& movementEntity){
+  return weaponLookDirection(movementEntity.movementState);
+}
+
 glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& moveParams){
   static float horzRelVelocity = 0.8f;
 

@@ -117,7 +117,7 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
   return weapons.idToWeapon.at(id);
 }
 
-WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, std::function<objid(objid)> getWeaponParentId){
+WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, std::function<objid(objid)> getWeaponParentId, FiringTransform& fireTransform){
   ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun, getWeaponParentId);
 
   if (weaponState.activate){
@@ -149,7 +149,10 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       }
       weaponState.heldItem = std::nullopt;
     }else{
-      auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), playerId);
+      auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
+      auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);
+
+      auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), mainobjPos, mainobjRotation);
       if (hitpoints.size() > 0){
         auto cameraPos = gameapi -> getGameObjectPos(playerId, true);
         auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
@@ -177,7 +180,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
   }
   weaponState.holdToggle = HOLD_TOGGLE_NONE;
 
-  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory);
+  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory, fireTransform);
 
   weaponState.fireOnce = false;
   swayGun(weaponState.weaponValues, weaponState.isGunZoomed, playerId, lookVelocity, playerVelocity);
@@ -209,7 +212,8 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookV
   for (auto &[id, weaponEntityState] : weapons.idToWeapon){
     auto weaponEntityData = getWeaponEntityData(id);
     bool activePlayer = id == playerId;
-    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode, getWeaponParentId);
+
+    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode, getWeaponParentId, weaponEntityData.fireTransform);
     if (activePlayer){
       weaponsUiUpdate = uiUpdate;
     }

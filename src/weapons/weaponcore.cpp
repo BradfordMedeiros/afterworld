@@ -320,16 +320,18 @@ bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
 
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId){
+std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjPos, glm::quat mainobjRotation){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
-  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
-  auto rot = gameapi -> getGameObjectRotation(playerId, true) *  orientationOffsetQuat;
+  auto rot = mainobjRotation *  orientationOffsetQuat;
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
   return hitpoints;
 }
 
 std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::vec3 orientationOffset, objid playerId){
-  auto hitpoints = doRaycast(orientationOffset, playerId);
+  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
+  auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);
+
+  auto hitpoints = doRaycast(orientationOffset, mainobjPos, mainobjRotation);
   if (hitpoints.size() > 0){
     auto closestIndex = closestHitpoint(hitpoints, cameraPos);
     return { hitpoints.at(closestIndex) };
@@ -346,8 +348,7 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
 
-void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials){
-  auto cameraPos = gameapi -> getGameObjectPos(playerId, true);
+void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos){
   auto hitpoints = doRaycastClosest(cameraPos, orientationOffset, playerId);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
@@ -441,7 +442,7 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (gunCore.weaponCore -> weaponParams.isRaycast){
-    fireRaycast(gunCore, shootingVecAngle, playerId, materials);
+    fireRaycast(gunCore, shootingVecAngle, playerId, materials, gameapi -> getGameObjectPos(playerId, true));
   }
   if (gunCore.weaponCore -> projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
@@ -470,18 +471,14 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory){
+GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory, FiringTransform& transform){
   if (!gunCore.weaponCore){
     modlog("fire gun", "no weaponCore");
     return GunFireInfo { .didFire = false, .bloomAmount = std::nullopt };
   }
   auto bloomAmount = calculateBloomAmount(gunCore);
   if ((gunCore.weaponCore -> weaponParams.canHold && holding) || fireOnce){
-    //// should come from outside this since gun core can't know this 
-    auto playerRotation = gameapi -> getGameObjectRotation(id, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
-    auto playerPos = gameapi -> getGameObjectPos(id, true);
-    //////////////////////
-    bool didFire = tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
+    bool didFire = tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, transform.position, transform.rotation, getMaterials());
     return GunFireInfo { .didFire = didFire, .bloomAmount = bloomAmount };
   }
   return GunFireInfo { .didFire = false, .bloomAmount = bloomAmount };

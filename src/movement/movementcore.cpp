@@ -177,6 +177,12 @@ struct LookParams {
   float turnY;
 };
 
+
+glm::quat weaponLookDirection(MovementState& movementState){
+  auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
+  auto rotation = gameapi -> setFrontDelta(forwardVec, movementState.xRot, movementState.yRot, 0, 1.f);
+  return rotation;
+}
 FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams){
   auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
@@ -188,8 +194,7 @@ FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movement
 
   movementState.xRot = limitAngle(movementState.xRot + deltax, std::nullopt, std::nullopt);
   movementState.yRot = limitAngle(movementState.yRot + deltay, moveParams.maxAngleUp, moveParams.maxAngleDown); 
-  auto rotation = gameapi -> setFrontDelta(forwardVec, movementState.xRot, movementState.yRot, 0, 1.f);
-
+  auto rotation = weaponLookDirection(movementState);
   auto rotation1 = gameapi -> setFrontDelta(forwardVec, movementState.xRot, 0, 0, 1.f);
 
   return FirstPersonCameraUpdate {
