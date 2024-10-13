@@ -109,7 +109,7 @@ struct AmmoInfo {
 void saveGunTransform(GunInstance& weaponValues);
 
 std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 pos, glm::quat rotation);
-std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId);
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset);
 
 struct GunFireInfo {
   bool didFire;

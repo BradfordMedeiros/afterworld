@@ -40,7 +40,7 @@ void handlePickedUpItem(WeaponEntityState& weaponState, objid playerId){
 }
 
 std::optional<objid> raycastActivateableItem(objid playerId){
-  auto hitpoints = doRaycastClosest(glm::vec3(0.f, 0.f, -1.f), playerId);
+  auto hitpoints = doRaycastClosest(playerId, glm::vec3(0.f, 0.f, -1.f));
   if (hitpoints.size() > 0){
     auto hitpoint = hitpoints.at(0);
     auto playerPos = gameapi -> getGameObjectPos(playerId, true);

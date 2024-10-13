@@ -327,8 +327,8 @@ std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjP
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::vec3 orientationOffset, glm::quat mainobjRotation){
-  auto hitpoints = doRaycast(orientationOffset, cameraPos, mainobjRotation);
+std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset){
+  auto hitpoints = doRaycast(orientationOffset, cameraPos, cameraRotation);
   if (hitpoints.size() > 0){
     auto closestIndex = closestHitpoint(hitpoints, cameraPos);
     return { hitpoints.at(closestIndex) };
@@ -336,19 +336,18 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::vec3 orientati
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId){
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset){
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
   auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);
-
-  return doRaycastClosest(mainobjPos, orientationOffset, mainobjRotation); 
+  return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset); 
 }
 
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
 
-void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos){
-  auto hitpoints = doRaycastClosest(orientationOffset, playerId);
+void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos, glm::quat cameraRotation){
+  auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
@@ -441,7 +440,7 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (gunCore.weaponCore -> weaponParams.isRaycast){
-    fireRaycast(gunCore, shootingVecAngle, playerId, materials, gameapi -> getGameObjectPos(playerId, true));
+    fireRaycast(gunCore, shootingVecAngle, playerId, materials, playerPos, playerRotation);
   }
   if (gunCore.weaponCore -> projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
