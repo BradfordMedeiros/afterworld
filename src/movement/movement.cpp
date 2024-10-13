@@ -282,21 +282,11 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     // should take the rotation and direct and stuff from where the player is looking
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId));
     if (cameraUpdate.thirdPerson.has_value()){
-      //gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
-
-      //--------------------------------------------------
-      //gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true);
-
-
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);  
-
-      //gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true);  
-      //gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true);
     }else{
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
-
       gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true);  
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true);
     }
@@ -320,8 +310,11 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
         movementEntity.movementState.speed = 1.f;
+        continue;
       }
       auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id));  
+      auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
+      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true);   // meh this should really come from the movement system
       modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
     }
   }
