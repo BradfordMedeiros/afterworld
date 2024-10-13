@@ -38,6 +38,8 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos);
 void onMovementScrollCallback(Movement& movement, double amount);
 
+glm::quat getLookDirection(MovementEntity& movementEntity);
+
 struct UiMovementUpdate {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec2> lookVelocity;

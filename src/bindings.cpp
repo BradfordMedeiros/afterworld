@@ -828,7 +828,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     if (controlledPlayer.playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData);
+      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, [](objid id) -> objid {
+        return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
+      });
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);

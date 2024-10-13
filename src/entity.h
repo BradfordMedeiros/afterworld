@@ -10,7 +10,6 @@ struct ControlledPlayer {
 	glm::vec2 lookVelocity;
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
-	std::optional<objid> activeMeshManagedId;
 	bool editorMode;
 };
 
@@ -22,6 +21,7 @@ void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementE
 
 std::optional<objid> getActivePlayerId();
 std::optional<objid> getCameraForThirdPerson();
+std::optional<bool> activePlayerInThirdPerson();
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id);
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
 bool onActivePlayerRemoved(objid id);

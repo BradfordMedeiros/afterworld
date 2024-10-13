@@ -11,8 +11,6 @@ struct ThirdPersonCameraInfo {
   float angleX;
   float angleY;
   float actualDistanceFromTarget;
-  float actualAngleX;
-  float actualAngleY;
   glm::vec3 additionalCameraOffset;
   glm::vec3 zoomOffset;
   glm::vec3 actualZoomOffset;
@@ -102,15 +100,24 @@ MovementParams* findMovementCore(std::string& name);
 void loadMovementCore(std::string& coreName);
 void removeAllMovementCores();
 
+glm::quat weaponLookDirection(MovementState& movementState);
+
 
 glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos);
 
 struct ThirdPersonCameraUpdate {
   glm::vec3 position;
   glm::quat rotation;
+  glm::quat yAxisRotation;
 };
+struct FirstPersonCameraUpdate {
+  glm::quat rotation;   // rotation here means orientation
+  glm::quat yAxisRotation;
+};
+
 struct CameraUpdate {
   std::optional<ThirdPersonCameraUpdate> thirdPerson;
+  FirstPersonCameraUpdate firstPerson;
 };
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed);
 

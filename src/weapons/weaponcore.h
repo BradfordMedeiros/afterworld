@@ -57,8 +57,6 @@ fireGun(gunInstance)*/
 WeaponParams queryWeaponParams(std::string gunName);
 
 
-objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId);
-
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponState {
   float lastShootingTime;
@@ -97,7 +95,7 @@ struct GunInstance {
 GunCore createGunCoreInstance(std::string gun, objid sceneId);
 std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues);
 
-void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId, bool createGunModel);
+void ensureGunInstance(GunInstance& _gunInstance, objid playerId, bool createGunModel, std::function<objid(objid)> getWeaponParentId);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);
 void removeGun(GunInstance& weaponValues);
 
@@ -110,14 +108,19 @@ struct AmmoInfo {
 
 void saveGunTransform(GunInstance& weaponValues);
 
-std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId);
-std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId);
+std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 pos, glm::quat rotation);
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset);
 
 struct GunFireInfo {
   bool didFire;
   std::optional<float> bloomAmount;
 };
-GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory);
+
+struct FiringTransform {
+  glm::vec3 position;
+  glm::quat rotation;
+};
+GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory, FiringTransform& transform);
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);

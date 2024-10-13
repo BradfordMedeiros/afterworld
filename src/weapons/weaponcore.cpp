@@ -155,7 +155,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   return weaponParams;
 }
 
-objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid playerId, std::string& weaponName){
+objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName, std::function<objid(objid)> getWeaponParentId){
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
     { "layer", "no_depth" },
@@ -173,7 +173,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid play
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
-  gameapi -> makeParent(gunId.value(), playerId);
+  gameapi -> makeParent(gunId.value(), getWeaponParentId(parentId));
   return gunId.value();
 }
 
@@ -236,7 +236,7 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
   return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
 
-void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId, bool createGunModel){
+void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
   if (elapsedTimeSinceChange  < 0.5f){
     //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
@@ -255,10 +255,10 @@ void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId,
   modlog("weapons ensureGunInstance", std::string("change gun instance: ") + _gunInstance.desiredGun);
 
   if (_gunInstance.gunId.has_value()){
-    _gunInstance.gunId = std::nullopt;
-    _gunInstance.muzzleId = std::nullopt;
     gameapi -> removeByGroupId(_gunInstance.gunId.value());
   }
+  _gunInstance.gunId = std::nullopt;
+  _gunInstance.muzzleId = std::nullopt;
 
   if (sameGun && !createGunModel){
     return;
@@ -269,8 +269,9 @@ void ensureGunInstance(GunInstance& _gunInstance, objid sceneId, objid playerId,
   std::optional<objid> muzzlePointId;
 
   if (createGunModel){
+    auto sceneId = gameapi -> listSceneId(parentId);
     auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
-    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, playerId, weaponName);
+    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
       gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
     }
@@ -319,16 +320,15 @@ bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
 
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, objid playerId){
+std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjPos, glm::quat mainobjRotation){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
-  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
-  auto rot = gameapi -> getGameObjectRotation(playerId, true) *  orientationOffsetQuat;
+  auto rot = mainobjRotation *  orientationOffsetQuat;
   auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::vec3 orientationOffset, objid playerId){
-  auto hitpoints = doRaycast(orientationOffset, playerId);
+std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset){
+  auto hitpoints = doRaycast(orientationOffset, cameraPos, cameraRotation);
   if (hitpoints.size() > 0){
     auto closestIndex = closestHitpoint(hitpoints, cameraPos);
     return { hitpoints.at(closestIndex) };
@@ -336,18 +336,18 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::vec3 orientati
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(glm::vec3 orientationOffset, objid playerId){
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset){
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
-  return doRaycastClosest(mainobjPos, orientationOffset, playerId); 
+  auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);
+  return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset); 
 }
 
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
   return gameapi -> moveRelative(pos, normal, 0.01);  // 0.01?
 }
 
-void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials){
-  auto cameraPos = gameapi -> getGameObjectPos(playerId, true);
-  auto hitpoints = doRaycastClosest(cameraPos, orientationOffset, playerId);
+void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos, glm::quat cameraRotation){
+  auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
@@ -440,7 +440,7 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   glm::vec3 shootingVecAngle(randomNumber(-bloomAmount, bloomAmount), randomNumber(-bloomAmount, bloomAmount), -1.f);
   if (gunCore.weaponCore -> weaponParams.isRaycast){
-    fireRaycast(gunCore, shootingVecAngle, playerId, materials);
+    fireRaycast(gunCore, shootingVecAngle, playerId, materials, playerPos, playerRotation);
   }
   if (gunCore.weaponCore -> projectileParticles.has_value()){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
@@ -469,18 +469,14 @@ float calculateBloomAmount(GunCore& gunCore){
   return glm::max(gunCore.weaponCore -> weaponParams.minBloom, (gunCore.weaponCore -> weaponParams.totalBloom - gunCore.weaponCore -> weaponParams.minBloom) * slerpAmount + gunCore.weaponCore -> weaponParams.minBloom);
 }
 
-GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory){
+GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, std::optional<objid> gunId, std::optional<objid> muzzleId, objid id, objid inventory, FiringTransform& transform){
   if (!gunCore.weaponCore){
     modlog("fire gun", "no weaponCore");
     return GunFireInfo { .didFire = false, .bloomAmount = std::nullopt };
   }
   auto bloomAmount = calculateBloomAmount(gunCore);
   if ((gunCore.weaponCore -> weaponParams.canHold && holding) || fireOnce){
-    //// should come from outside this since gun core can't know this 
-    auto playerRotation = gameapi -> getGameObjectRotation(id, true);  // maybe this should be the gun rotation instead, problem is the offsets on the gun
-    auto playerPos = gameapi -> getGameObjectPos(id, true);
-    //////////////////////
-    bool didFire = tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, playerPos, playerRotation, getMaterials());
+    bool didFire = tryFireGun(inventory, gunId, muzzleId, gunCore, bloomAmount, id, transform.position, transform.rotation, getMaterials());
     return GunFireInfo { .didFire = didFire, .bloomAmount = bloomAmount };
   }
   return GunFireInfo { .didFire = false, .bloomAmount = bloomAmount };
