@@ -198,27 +198,13 @@ FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movement
   auto rotation1 = gameapi -> setFrontDelta(forwardVec, movementState.xRot, 0, 0, 1.f);
 
   return FirstPersonCameraUpdate {
-      .rotation = rotation,
-      .yAxisRotation = rotation1,
+    .rotation = rotation,
+    .yAxisRotation = rotation1,
   };
 }
 
-
-// this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
-ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo){
-  thirdPersonInfo.angleX += lookParams.turnX * 0.1 /* 0.05f arbitary turn speed */;
-  thirdPersonInfo.angleY += lookParams.turnY * 0.1 /* 0.05f arbitary turn speed */;
-  thirdPersonInfo.distanceFromTarget += zoom_delta;
-
+ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdPersonCameraInfo& thirdPersonInfo){
   float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
-
-  auto finalAdjustedDistance = lookParams.ironsight ? thirdPersonInfo.zoomOffset.z :  thirdPersonInfo.distanceFromTarget;
-  float zoomSpeed = lookParams.ironsight ? 10.f : 2.f;
-
-  thirdPersonInfo.actualDistanceFromTarget = glm::lerp(thirdPersonInfo.actualDistanceFromTarget, finalAdjustedDistance, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
-  thirdPersonInfo.actualZoomOffset.x = glm::lerp(thirdPersonInfo.actualZoomOffset.x, lookParams.ironsight ? (thirdPersonInfo.zoomOffset.x * reverseMultiplier) : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
-  thirdPersonInfo.actualZoomOffset.y = glm::lerp(thirdPersonInfo.actualZoomOffset.y, lookParams.ironsight ? thirdPersonInfo.zoomOffset.y : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
-
 
   float x = glm::cos(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
   float z = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
@@ -240,6 +226,24 @@ ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementStat
     .yAxisRotation = newOrientationNoX,
   };
   return cameraUpdate;
+}
+
+// this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
+ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo){
+  thirdPersonInfo.angleX += lookParams.turnX * 0.1 /* 0.05f arbitary turn speed */;
+  thirdPersonInfo.angleY += lookParams.turnY * 0.1 /* 0.05f arbitary turn speed */;
+  thirdPersonInfo.distanceFromTarget += zoom_delta;
+
+  float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
+
+  auto finalAdjustedDistance = lookParams.ironsight ? thirdPersonInfo.zoomOffset.z :  thirdPersonInfo.distanceFromTarget;
+  float zoomSpeed = lookParams.ironsight ? 10.f : 2.f;
+
+  thirdPersonInfo.actualDistanceFromTarget = glm::lerp(thirdPersonInfo.actualDistanceFromTarget, finalAdjustedDistance, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
+  thirdPersonInfo.actualZoomOffset.x = glm::lerp(thirdPersonInfo.actualZoomOffset.x, lookParams.ironsight ? (thirdPersonInfo.zoomOffset.x * reverseMultiplier) : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
+  thirdPersonInfo.actualZoomOffset.y = glm::lerp(thirdPersonInfo.actualZoomOffset.y, lookParams.ironsight ? thirdPersonInfo.zoomOffset.y : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
+
+  return lookThirdPersonCalc(movementState, thirdPersonInfo);;
 }
 
 void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch){
@@ -550,8 +554,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
   }
   
-
-
   bool movingDown = false;
   updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
 

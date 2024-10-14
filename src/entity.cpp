@@ -127,20 +127,35 @@ std::optional<glm::vec3> getActivePlayerPosition(){
 	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true);
 }
 
-WeaponEntityData getWeaponEntityData(objid id){
+FiringTransform getFireTransform(objid id){
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 
-	auto lookDirection = getLookDirection(movementEntity);
+	if (movementEntity.managedCamera.thirdPersonMode){
+		// this is wrong obviously
 
+		auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.movementState, movementEntity.managedCamera);
+		return FiringTransform {
+			.position = thirdPersonInfo.position,
+			.rotation = thirdPersonInfo.rotation,
+		};
+	}
+
+	auto position = gameapi -> getGameObjectPos(id, true);
+	auto rotation = getLookDirection(movementEntity);
+	return FiringTransform {
+		.position = position,
+		.rotation = rotation,
+	};
+}
+
+WeaponEntityData getWeaponEntityData(objid id){
+	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
   return WeaponEntityData {
     .inventory = id,
     .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
     .velocity = movementEntity.movementState.velocity,
     .thirdPersonMode = movementEntity.managedCamera.thirdPersonMode,
-    .fireTransform = FiringTransform {
-      .position = gameapi -> getGameObjectPos(id, true),
-      .rotation = lookDirection,
-    },
+    .fireTransform = getFireTransform(id),
   };
 }
 
