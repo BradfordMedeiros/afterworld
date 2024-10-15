@@ -131,8 +131,6 @@ FiringTransform getFireTransform(objid id){
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 
 	if (movementEntity.managedCamera.thirdPersonMode){
-		// this is wrong obviously
-
 		auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.movementState, movementEntity.managedCamera);
 		return FiringTransform {
 			.position = thirdPersonInfo.position,

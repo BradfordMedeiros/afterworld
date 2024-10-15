@@ -84,6 +84,13 @@ void drawDebugHitmark(HitObject& hitpoint, objid playerId){
   );
 }
 
+void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId){
+  //gameapi -> drawLine(
+  //  fromPosition,
+  //  toPos,
+  //  true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  //);
+}
 
 void addWaypoint(Waypoints& waypoints, objid id, std::optional<objid> waypointId){
   modassert(waypoints.waypoints.find(id) == waypoints.waypoints.end(), "waypoint id already defined");

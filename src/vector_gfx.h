@@ -6,6 +6,7 @@
 void drawBloom(objid playerId, objid id, float distance, float bloomAmount);
 void drawSphereVecGfx(glm::vec3 position, float radius, glm::vec4 tint);
 void drawDebugHitmark(HitObject& hitpoint, objid playerId);
+void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
 
 struct WaypointObject {
 	std::optional<objid> id;

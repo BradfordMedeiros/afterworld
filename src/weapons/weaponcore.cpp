@@ -6,6 +6,7 @@ void doDamageMessage(objid targetId, float damage);
 int ammoForGun(objid inventory, std::string& gun);
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 bool maybeAddGlassBulletHole(objid id, objid playerId);
+void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -351,6 +352,8 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
+    drawDebugRaycast(cameraPos, hitpoint.point, playerId);
+
     modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
     auto objMaterial = materialTypeForObj(hitpoint.id);
     if (!objMaterial.has_value()){
