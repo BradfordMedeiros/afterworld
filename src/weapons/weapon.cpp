@@ -40,7 +40,7 @@ void handlePickedUpItem(WeaponEntityState& weaponState, objid playerId){
 }
 
 std::optional<objid> raycastActivateableItem(objid playerId){
-  auto hitpoints = doRaycastClosest(playerId, glm::vec3(0.f, 0.f, -1.f));
+  auto hitpoints = doRaycastClosest(playerId, glm::vec3(0.f, 0.f, -1.f), std::nullopt);
   if (hitpoints.size() > 0){
     auto hitpoint = hitpoints.at(0);
     auto playerPos = gameapi -> getGameObjectPos(playerId, true);
@@ -155,7 +155,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), mainobjPos, mainobjRotation);
       if (hitpoints.size() > 0){
         auto cameraPos = gameapi -> getGameObjectPos(playerId, true);
-        auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos);
+        auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos, std::nullopt).value();
         auto hitpoint = hitpoints.at(closestHitpointIndex);
         float distance = glm::length(cameraPos - hitpoint.point);
         auto attrHandle = getAttrHandle(hitpoint.id);

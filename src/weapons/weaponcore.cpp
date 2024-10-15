@@ -328,19 +328,19 @@ std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjP
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset){
+std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
   auto hitpoints = doRaycast(orientationOffset, cameraPos, cameraRotation);
   if (hitpoints.size() > 0){
-    auto closestIndex = closestHitpoint(hitpoints, cameraPos);
+    auto closestIndex = closestHitpoint(hitpoints, cameraPos, excludeHitpoint).value();
     return { hitpoints.at(closestIndex) };
   }
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset){
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
   auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);
-  return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset); 
+  return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset, excludeHitpoint); 
 }
 
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
@@ -348,13 +348,13 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
 }
 
 void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos, glm::quat cameraRotation){
-  auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset);
+  auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset, playerId);
   modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
 
   for (auto &hitpoint : hitpoints){
     drawDebugRaycast(cameraPos, hitpoint.point, playerId);
     drawDebugHitmark(hitpoint, playerId);
-    
+
     modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
     auto objMaterial = materialTypeForObj(hitpoint.id);
     if (!objMaterial.has_value()){

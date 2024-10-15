@@ -112,13 +112,13 @@ int randomNumber(int min, int max){
   return distribution(gen);
 }
 
-int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos){
+std::optional<int> closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos, std::optional<objid> excludeHitpoint){
   modassert(hitpoints.size() > 0, "hitpoints object is size 0");
-  int closestIndex = 0;
-  auto minDistance = glm::distance(playerPos, hitpoints.at(0).point);
-  for (int i = 1; i < hitpoints.size(); i++){
+  std::optional<int> closestIndex;
+  std::optional<float> minDistance;
+  for (int i = 0; i < hitpoints.size(); i++){
     auto distance = glm::distance(playerPos, hitpoints.at(i).point); 
-    if (distance < minDistance){
+    if ((!minDistance.has_value() || distance < minDistance.value()) && (!excludeHitpoint.has_value() || excludeHitpoint.value() != hitpoints.at(i).id)){
       closestIndex = i;
       minDistance = distance;
     }

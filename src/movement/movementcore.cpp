@@ -148,7 +148,7 @@ void updateFacingWall(MovementState& movementState, objid id){
 
   if (hitpoints.size() > 0){
     movementState.facingWall = true;
-    auto hitpoint = hitpoints.at(closestHitpoint(hitpoints, mainobjPos));
+    auto hitpoint = hitpoints.at(closestHitpoint(hitpoints, mainobjPos, std::nullopt).value());
     auto attr = getAttrHandle(hitpoint.id);
     movementState.facingLadder = getStrAttr(attr, "ladder").has_value();
   }else{

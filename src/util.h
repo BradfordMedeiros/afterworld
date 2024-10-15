@@ -28,7 +28,7 @@ void clickMouse(objid id);
 float randomNumber(float min, float max);
 int randomNumber(int min, int max);
 
-int closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos);
+std::optional<int> closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos, std::optional<objid> excludeHitpoint);
 void drawDebugHitmark(HitObject& hitpoint, objid playerId);
 
 void debugAssertForNow(bool valid, const char* message);
