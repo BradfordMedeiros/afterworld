@@ -353,7 +353,8 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
 
   for (auto &hitpoint : hitpoints){
     drawDebugRaycast(cameraPos, hitpoint.point, playerId);
-
+    drawDebugHitmark(hitpoint, playerId);
+    
     modlog("weapons", "raycast hit: " + std::to_string(hitpoint.id) + "- point: " + print(hitpoint.point) + ", normal: " + print(hitpoint.normal));
     auto objMaterial = materialTypeForObj(hitpoint.id);
     if (!objMaterial.has_value()){

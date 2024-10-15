@@ -33,7 +33,6 @@ void drawMarkers(objid id, glm::vec3 pos, float radius, glm::quat orientation){
   gameapi -> drawLine2D(glm::vec3(-1 * marketInner, 0.f, 0.f), glm::vec3(-1 * markerOuter, 0.f, 0.f), false, reticleColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
 
-
 // draw a circle at a distance from the player with a certain radius
 // this is independent of fov, and should be
 void drawBloom(objid playerId, objid id, float distance, float bloomAmount){
@@ -53,14 +52,27 @@ void drawBloom(objid playerId, objid id, float distance, float bloomAmount){
   }
 }
 
+
 void drawSphereVecGfx(glm::vec3 position, float radius, glm::vec4 tint){
   drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), tint);
   drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f)), tint);
   drawCircle(gameapi -> rootSceneId(), position, radius, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f)), tint);
 }
 
+///////// debug //////////////////
+
+bool drawDebugVector = false;
+
+
+void setDrawDebugVector(bool shouldDrawDebugVector){
+  drawDebugVector = shouldDrawDebugVector;
+}
+
 float debugMarkerHitlength = 2;
 void drawDebugHitmark(HitObject& hitpoint, objid playerId){
+  if (!drawDebugVector){
+    return;
+  }
   gameapi -> drawLine(
     hitpoint.point + glm::vec3(0.f, -1.f * debugMarkerHitlength,  0.f),
     hitpoint.point + glm::vec3(0.f, 1.f * debugMarkerHitlength,  0.f),
@@ -85,12 +97,17 @@ void drawDebugHitmark(HitObject& hitpoint, objid playerId){
 }
 
 void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId){
-  //gameapi -> drawLine(
-  //  fromPosition,
-  //  toPos,
-  //  true, playerId, std::nullopt,  std::nullopt, std::nullopt
-  //);
+  if (!drawDebugVector){
+    return;
+  }
+  gameapi -> drawLine(
+    fromPosition,
+    toPos,
+    true, playerId, std::nullopt,  std::nullopt, std::nullopt
+  );
 }
+
+//////////////// waypoint code ///////////////////////
 
 void addWaypoint(Waypoints& waypoints, objid id, std::optional<objid> waypointId){
   modassert(waypoints.waypoints.find(id) == waypoints.waypoints.end(), "waypoint id already defined");

@@ -740,6 +740,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
     }
 
+    if (args.find("debug-shoot") != args.end()){
+      setDrawDebugVector(true);
+    }
+
     gameState -> printType = DEBUG_NONE;
     if (args.find("print-type") != args.end()){
       auto printType = args.at("print-type");
