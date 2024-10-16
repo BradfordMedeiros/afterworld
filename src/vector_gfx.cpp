@@ -63,7 +63,6 @@ void drawSphereVecGfx(glm::vec3 position, float radius, glm::vec4 tint){
 
 bool drawDebugVector = false;
 
-
 void setDrawDebugVector(bool shouldDrawDebugVector){
   drawDebugVector = shouldDrawDebugVector;
 }

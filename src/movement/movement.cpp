@@ -91,7 +91,7 @@ MovementEntity createMovementEntity(objid id, std::string&& name){
     .angleX = 0.f,
     .angleY = 0.f,
     .actualDistanceFromTarget = -5.f,
-    .additionalCameraOffset = glm::vec3(-0.2f, 0.5f, 0.f),
+    .additionalCameraOffset = glm::vec3(-1.f, 0.5f, 0.f),
     .zoomOffset = glm::vec3(-0.6f, -0.2f, -1.f),
     .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
     .reverseCamera = false,
