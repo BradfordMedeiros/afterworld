@@ -64,6 +64,21 @@ std::optional<bool> activePlayerInThirdPerson(){
 	return thirdPerson;
 }
 
+std::set<objid> allChildIds(objid id){
+	return gameapi -> getChildrenIdsAndParent(id);
+}
+void maybeReEnableMesh(objid id){
+	for (auto childId : allChildIds(id)){
+		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "false");
+	}
+}
+void maybeDisableMesh(objid id){
+	for (auto childId : allChildIds(id)){
+		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "true");
+	}
+}
+
+
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
 	if (!id.has_value()){
 		return;
