@@ -113,7 +113,8 @@ bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id){
   }
   return false;
 }
-void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id){
+void maybeRemoveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id){
+  movement.disabledMeshes.erase(id);
   movementEntityData.movementEntities.erase(id);
 }
 
@@ -131,8 +132,14 @@ Movement createMovement(){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.crouchType = CROUCH_NONE;
+
+  movement.disabledMeshes = {};
+
   return movement;
 }
+
+void maybeReEnableMesh(objid id);
+void maybeDisableMesh(objid id);
 
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, int key, int action){
   if (isPaused() || getGlobalState().disableGameInput){
@@ -261,6 +268,10 @@ glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& m
 }
 
 
+void maybeReEnableMesh(objid id);
+void maybeDisableMesh(objid id);
+
+
 // TODO third person mode should only be a thing if active id
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera){
   UiMovementUpdate uiUpdate {
@@ -334,6 +345,20 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     movementEntity.movementState.raw_deltay = 0.f;
     movementEntity.movementState.crouchType = CROUCH_NONE;
   }
+
+  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    if (movementEntity.managedCamera.thirdPersonMode && movement.disabledMeshes.count(id) > 0){
+       movement.disabledMeshes.erase(id);
+       maybeReEnableMesh(id);
+    }
+    if ((id == activeId) && !movementEntity.managedCamera.thirdPersonMode){
+      if (movement.disabledMeshes.count(id) == 0){
+        movement.disabledMeshes.insert(id);
+        maybeDisableMesh(id);        
+      }
+    }
+  }
+
   movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
   movement.controlParams.zoom_delta = 0.f;
   movement.controlParams.doJump = false;

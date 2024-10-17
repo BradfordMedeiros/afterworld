@@ -8,6 +8,7 @@
 
 struct Movement {
   ControlParams controlParams;
+  std::set<objid> disabledMeshes;
 };
 
 
@@ -53,7 +54,7 @@ void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, s
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);
 
 bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
-void maybeRemoveMovementEntity(MovementEntityData& movementEntityData, objid id);
+void maybeRemoveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id);
 
 void setZoomSensitivity(float multiplier);
 

@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
+extern Movement movement;
 
 MovementEntityData& getMovementData();
 
@@ -35,7 +36,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
-  maybeRemoveMovementEntity(movementEntities, idRemoved);
+  maybeRemoveMovementEntity(movement, movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
   removeWeaponId(weapons, idRemoved);
   removeInventory(idRemoved);
