@@ -473,7 +473,7 @@ bool calcIfWalking(MovementState& movementState){
   return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
 }
 
-CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed){
+CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed, bool enableThirdPerson){
   auto currTime = gameapi -> timeSeconds(false);
   float elapsedTime = gameapi -> timeElapsed();
 
@@ -549,7 +549,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   
   CameraUpdate cameraUpdate { .thirdPerson = std::nullopt };
   cameraUpdate.firstPerson = look(moveParams, movementState, lookParams);
-  if (managedCamera.thirdPersonMode){
+  if (enableThirdPerson && managedCamera.thirdPersonMode){
     auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, lookParams, movementState.zoom_delta, managedCamera);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
   }

@@ -65,16 +65,17 @@ std::optional<bool> activePlayerInThirdPerson(){
 	return thirdPerson;
 }
 
-std::set<objid> allChildIds(objid id){
-	return gameapi -> getChildrenIdsAndParent(id);
-}
 void maybeReEnableMesh(objid id){
-	for (auto childId : allChildIds(id)){
+	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
+	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
+		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
 		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "false");
 	}
 }
 void maybeDisableMesh(objid id){
-	for (auto childId : allChildIds(id)){
+	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
+	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
+		 modlog("disable mesh", gameapi -> getGameObjNameForId(childId).value());
 		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "true");
 	}
 }
