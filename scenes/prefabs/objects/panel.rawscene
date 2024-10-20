@@ -8,8 +8,8 @@ panel:tint:0 0 1 0.5
 panel:layer:transparency
 
 panel:activate:open-door-trigger
-panel:activate-index:open-door-trigger
-panel:activate-time:0
+#panel:activate-index:open-door-trigger
+#panel:activate-time:0
 
 
 panel:activate-cooldown:1

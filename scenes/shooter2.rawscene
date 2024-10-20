@@ -277,27 +277,20 @@ glass:layer:transparency
 glass:physics:enabled
 glass:material:glass
 
+glass2:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
+glass2:position:25 -25 -1
+glass2:scale:3 3 3
+glass2:rotation:0 0 1 180
+glass2:glasstexture:true
+glass2:layer:transparency
+glass2:physics:enabled
+glass2:material:glass
+
 #!light:position:0 -5 5
 
-#enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
-#enemy:rotation:0 0 -1 0
-#enemy:position:0 -10 70
-#enemy:physics_angle:0 0 0
-#enemy:physics:enabled
-#enemy:physics_type:dynamic
-#enemy:tint:1 0 0 1
-##enemy:goal:idle-enemy
-#enemy:goal-type:idle
-#enemy:goal-value:2
-#enemy:agent:basic
-#enemy:agent-target:blue
-#enemy:goal-info:target
-#enemy:team:red
-#enemy:health:130
-#enemy:physics_damping_linear:0.9
-#enemy:dragselect:ai
-#enemy:animation:character
-#enemy:player:true
+[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
+[enemy:position:0 -10 40
+
 
 goal:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 goal:scale:0.25 0.05 1.25

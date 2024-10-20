@@ -1,12 +1,20 @@
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+enemy:rotation:0 0 -1 0
+enemy:physics_angle:0 0 0
 enemy:physics:enabled
 enemy:physics_type:dynamic
+enemy:physics_mass:5
+enemy/doctor::tint:1 0 0 1
+
+enemy:team:red
+enemy:health:130
+enemy:physics_damping_linear:0.9
+enemy:dragselect:ai
+enemy:animation:character
+enemy:player:true
+enemy:goal:idle-enemy
+enemy:goal-type:idle
+enemy:goal-value:2
 enemy:agent:basic
 enemy:agent-target:blue
-enemy:spawn-managed:
-enemy:team:red
-enemy:physics_angle:0 0 0
-enemy:health:130
 enemy:goal-info:target
-enemy/doctor:tint:0.8 0.8 0.8 0.6
-enemy:player:true
