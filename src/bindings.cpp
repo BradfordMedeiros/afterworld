@@ -764,6 +764,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> printType = DEBUG_HEALTH;
       }else if (printType == "active"){
         gameState -> printType = DEBUG_ACTIVEPLAYER;
+      }else if (printType == "animation"){
+        gameState -> printType = DEBUG_ANIMATION;
       }else{
         modassert(false, "invalid print type");
       }
