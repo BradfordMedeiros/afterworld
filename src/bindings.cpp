@@ -43,6 +43,9 @@ void setTotalZoom(float multiplier){
   playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 }
 
+bool disableAnimation = false;
+
+
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
   bool validSql = false;
@@ -670,7 +673,9 @@ void doAnimationTrigger(objid entityId, const char* transition){
     if (stateAnimation){
       modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
       if (stateAnimation -> animation.has_value()){
-        gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
+        if (!disableAnimation){
+          gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
+        }
       }else{
         gameapi -> stopAnimation(entityId);
       }
@@ -765,6 +770,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     if (args.find("uiselection-texture") != args.end()){
       setShowSelectionTexture(true);
+    }
+    if (args.find("no-animation") != args.end()){
+      disableAnimation = true;
     }
 
     initSettings();
