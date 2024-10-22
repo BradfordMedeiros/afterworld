@@ -179,7 +179,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.action = 0,
 		.fn = []() -> void {
 			modlog("controls", "set pose");
-			const char* pose = "tposed";
+			const char* pose = "pose-t";
 			if (animationExists(getPlayerId().value(), pose)){
 				modlog("animation", std::string("set pose: ") + std::string(pose));
 				gameapi -> setAnimationPose(getPlayerId().value(), pose, 0.f);
