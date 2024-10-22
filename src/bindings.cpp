@@ -457,21 +457,37 @@ bool keyIsDown(int key){
   return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
+bool isPose(std::string& name){
+  return name.find("pose-") == 0;
+}
 DebugConfig debugPrintAnimations(){
   DebugConfig debugConfig { .data = {} };
-  auto ids = gameapi -> selected();
+  std::vector<objid> ids;
+  if (controlledPlayer.playerId.has_value()){
+    ids.push_back(controlledPlayer.playerId.value());
+  }
   if (ids.size() > 0){
     auto id = ids.at(0);
     auto name = gameapi -> getGameObjNameForId(id).value();
     debugConfig.data.push_back({"object", name });
     auto animationNames = gameapi -> listAnimations(id);
     for (auto &animation : animationNames){
-      debugConfig.data.push_back({ animation, DebugItem {
-        .text = "[PLAY]",
-        .onClick = [id, animation]() -> void {
-          gameapi -> playAnimation(id, animation, ONESHOT);
-        },
-      }});
+      bool isNamePose = isPose(animation);
+      if (isNamePose){
+        debugConfig.data.push_back({ animation, DebugItem {
+          .text = "[POSE]",
+          .onClick = [id, animation]() -> void {
+            gameapi -> setAnimationPose(id, animation, 0.f);
+          },
+        }});   
+      }else{
+        debugConfig.data.push_back({ animation, DebugItem {
+          .text = "[PLAY]",
+          .onClick = [id, animation]() -> void {
+            gameapi -> playAnimation(id, animation, ONESHOT);
+          },
+        }});        
+      }
     }
     if (animationNames.size() == 0){
       debugConfig.data.push_back({ "[no-animations]" });
