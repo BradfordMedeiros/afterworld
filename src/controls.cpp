@@ -127,6 +127,16 @@ void maybeChangeGunUpdateUi(const char* gun){
 	}
 }
 
+bool animationExists(objid entityId, const char* animationName){
+  auto animationNames = gameapi -> listAnimations(entityId);
+  for (auto &animation : animationNames){
+    if (animation == animationName){
+      return true;
+    }
+  }
+  return false;
+}
+
 std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
@@ -163,6 +173,27 @@ std::vector<HotkeyToMessage> hotkeys = {
 			maybeChangeGunUpdateUi("fork");
 		},
 	},
+
+	HotkeyToMessage {
+		.key = '9',  
+		.action = 0,
+		.fn = []() -> void {
+			modlog("controls", "set pose");
+			const char* pose = "tposed";
+			if (animationExists(getPlayerId().value(), pose)){
+				modlog("animation", std::string("set pose: ") + std::string(pose));
+				gameapi -> setAnimationPose(getPlayerId().value(), pose, 0.f);
+			}else{
+				modlog("animation", std::string("set pose does not exist: ") + std::string(pose));
+				modassert(false, "animation does not exist");
+			}
+		},
+	},
+
+
+  
+	
+
 };
 
 void handleHotkey(int key, int action){
