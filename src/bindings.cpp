@@ -172,6 +172,18 @@ std::vector<SceneRouterPath> routerPaths = {
   },
 };
 
+SceneRouterOptions defaultRouterOptions(std::string path){
+  SceneRouterOptions options {
+    .paths = { 
+      PathAndParams { .path = path, .params = {} }, 
+    },
+    .paused = false,
+    .inGameMode = false,
+    .showMouse = true,
+  };
+  return options;
+}
+
 std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = { 
@@ -227,6 +239,9 @@ std::vector<SceneRouterOptions> routerPathOptions = {
       .inGameMode = false,
       .showMouse = true,
     },
+
+    defaultRouterOptions("debug/"),
+    defaultRouterOptions("gamemenu/elevatorcontrol/"),
 };
 
 std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, std::vector<std::string>* _params){
@@ -274,7 +289,6 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
       }
     }
   }
-  modassert(false, std::string("no router options for: ") + path);
   return std::nullopt;
 }
 
@@ -307,10 +321,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   std::vector<std::string> params;
   auto router = getSceneRouter(currentPath, &currentIndex, &params);
   modlog("scene route, router, has router = ", print(router.has_value()));
-  modassert(router.has_value(), std::string("no router for path: ") + currentPath);
+  //modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
   int matchedRouterOption = 0;
   auto routerOptions = getRouterOptions(currentPath, queryParams, &matchedRouterOption);
+  modassert(routerOptions.has_value(), std::string("no router options for: ") + currentPath);
   modlog("router", std::string("matched router option: ") + std::to_string(matchedRouterOption));
   setRouterGameState(RouteState{
     .paused = routerOptions.value() -> paused,
@@ -334,7 +349,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }
   }
 
-  modassert(router.has_value(), "router not found");
   if (router.has_value()){
     std::optional<objid> sceneId;
     if (router.value() -> scene.has_value()){
@@ -804,7 +818,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     );
 
-    pushHistory({ "mainmenu" }, true);
+    if (args.find("route") == args.end()){
+      pushHistory({ "mainmenu" }, true);
+    }else{
+      pushHistory(split(args.at("route"), '/'), true);
+    }
 
     if (args.find("level") != args.end()){
       auto scene = levelByShortcutName(args.at("level"));
