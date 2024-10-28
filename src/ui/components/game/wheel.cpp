@@ -49,8 +49,8 @@ WheelConfig wheelConfig {
 	 	auto timeOffset = gameapi -> timeSeconds(false) * 0.2f;
 	 	return timeOffset;
 	},
-	.onClick = [](int) -> void {
-		wheelConfig.selectedIndex++;
+	.onClick = [](int index) -> void {
+		wheelConfig.selectedIndex = index;
 	},
 };
 
@@ -66,8 +66,38 @@ Component wheelComponent {
 
   		auto index = i + wheelConfig.offset;
 	    auto textContent = wheelConfig.wheelContents.at(index % wheelConfig.wheelContents.size());
-		  drawCenteredTextReal(drawTools, textContent, midpointX, midpointY, 0.02f, (index == wheelConfig.selectedIndex) ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt);
+  	
+  		std::function<void()> onClick = [index]() -> void {
+  			wheelConfig.onClick(index);
+  		};
+
+			Props listItemProps {
+				.props = {
+					PropPair { .symbol = valueSymbol, .value = textContent },
+					PropPair { .symbol = paddingSymbol, .value = 0.1f },
+					PropPair { .symbol = onclickSymbol, .value = onClick },
+					PropPair { .symbol = tintSymbol, .value =  glm::vec4(0.f, 0.f, 0.f, 0.2f) },
+				},
+			};
+			if (index == wheelConfig.selectedIndex){
+				listItemProps.props.push_back(PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 1.f) });
+				listItemProps.props.push_back(PropPair { .symbol = focusTintSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 1.f) });
+			}else{
+				listItemProps.props.push_back(PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 0.f, 1.f, 1.f) });
+			}
+      std::vector<Component> wheelButton = { withPropsCopy(listItem, listItemProps) };
+
+		 	auto layout = simpleHorizontalLayout(wheelButton, 0.f, glm::vec4(0.f, 0.f, 0.f, 0.f));
+      Props layoutProps { 
+        .props = { 
+          PropPair { .symbol = xoffsetSymbol, .value = midpointX },
+          PropPair { .symbol = yoffsetSymbol, .value = midpointY },
+        }
+      };
+		 	layout.draw(drawTools, layoutProps);
   	}
+
+  	// put this whole thing in a layout so can have a background and dimensions on this
 
   	return BoundingBox2D {
   		.x = 0.f,

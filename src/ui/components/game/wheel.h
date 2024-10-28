@@ -4,6 +4,8 @@
 #include "../common.h"
 #include "../../../global.h"
 
+#include "../basic/button.h"
+
 extern Component wheelComponent;
 
 #endif
