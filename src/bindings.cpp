@@ -143,7 +143,7 @@ struct SceneRouterOptions {
 
 std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
-    .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/" },
+    .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/", "debug/wheel/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
     .makePlayer = false,
     .camera = std::nullopt,
@@ -240,7 +240,9 @@ std::vector<SceneRouterOptions> routerPathOptions = {
       .showMouse = true,
     },
 
+
     defaultRouterOptions("debug/"),
+    defaultRouterOptions("debug/wheel/"),
     defaultRouterOptions("gamemenu/elevatorcontrol/"),
 };
 

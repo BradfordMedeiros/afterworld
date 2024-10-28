@@ -14,6 +14,7 @@
 #include "./uicontext.h"
 #include "../components/uiwindow.h"
 #include "../components/game/elevator.h"
+#include "../components/game/wheel.h"
 #include "./navigation.h"
 #include "../../modelviewer.h"
 

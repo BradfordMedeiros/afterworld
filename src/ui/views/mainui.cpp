@@ -88,6 +88,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "gamemenu/elevatorcontrol/", elevatorView },
+    { "debug/wheel/", wheelComponent },
     { "",  emptyComponent  },
   };
 
