@@ -9,7 +9,7 @@ Component wheelComponent {
     WheelConfig& wheelConfig = *wheelConfigPtr;
 
   	for (int i = 0; i < wheelConfig.numElementsInWheel; i++){
-  		if ((i + 1) > wheelConfig.numElementsToShow){
+  		if ((i + 1) > wheelConfig.numElementsInWheel){
   			break;
 			}
   		float value = wheelConfig.getRotationOffset() + i * (2 * M_PI) / wheelConfig.numElementsInWheel;
@@ -19,8 +19,9 @@ Component wheelComponent {
   		auto index = i + wheelConfig.offset;
 	    auto textContent = wheelConfig.wheelContents.at(index % wheelConfig.wheelContents.size());
   	
-  		std::function<void()> onClick = [index, &wheelConfig]() -> void {
-  			wheelConfig.onClick(index);
+  		auto onClickValue = wheelConfigPtr -> onClick;
+  		std::function<void()> onClick = [index, onClickValue]() -> void {
+  			onClickValue(index);
   		};
 
 			Props listItemProps {

@@ -8,7 +8,6 @@
 
 struct WheelConfig {
 	int numElementsInWheel;
-	int numElementsToShow;
 	float wheelRadius;
 	int selectedIndex;
 	int offset;

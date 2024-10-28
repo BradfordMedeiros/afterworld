@@ -7,12 +7,14 @@ void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 bool isSignalLocked(std::string signal);
 
 float wheelRotationOffset = 0.f;
+float actualWheelRotationOffset = wheelRotationOffset;
+int wheelRotate = 0;
+void rotateWheel(bool up);
 WheelConfig wheelConfig {
   .numElementsInWheel = 10,
-  .numElementsToShow = 9,
   .wheelRadius = 0.5f,
-  .selectedIndex = 3,
-  .offset = 2,
+  .selectedIndex = 0,
+  .offset = 0,
   .wheelContents = {
     "a1 Target Hunt",
     "a2 Maze",
@@ -40,12 +42,25 @@ WheelConfig wheelConfig {
     "d6 Vortex Vault",
   },
   .getRotationOffset = []() -> float {
-    return wheelRotationOffset;
+    actualWheelRotationOffset = glm::lerp(actualWheelRotationOffset, wheelRotationOffset, static_cast<float>(gameapi -> timeElapsed()));
+    return actualWheelRotationOffset;
   },
   .onClick = [](int index) -> void {
-    wheelConfig.selectedIndex = index;
+    wheelRotate = index - 1;
+    rotateWheel(true);
   },
 };
+
+void rotateWheel(bool up){
+  wheelRotate += (up ? 1 : -1);
+  if (wheelRotate < 0){
+    wheelRotate = 0;
+  }
+  auto wheelDegreesPerRotate = (2 * M_PI) / wheelConfig.numElementsInWheel;
+  wheelRotationOffset = -1 * wheelRotate * wheelDegreesPerRotate;
+  wheelConfig.selectedIndex = wheelRotate;
+}
+
 
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
@@ -528,13 +543,9 @@ void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, doubl
   }
   scenegraphScroll(scrollValue);
 
-  if (amount > 0){
-    wheelRotationOffset += 0.1f;
-    uiContext.playSound();
-  }else{
-    wheelRotationOffset -= 0.1f;
-    uiContext.playSound();
-  }
+
+  rotateWheel(amount > 0);
+  uiContext.playSound();
 }
 
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
