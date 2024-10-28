@@ -347,7 +347,7 @@ void notYetImplementedAlert(){
 }
 
 
-float musicVolume = 0.f;
+float musicVolume = 1.f;
 float gameplayVolume = 1.f;
 void setMusicVolume(float volume){
   musicVolume = volume;

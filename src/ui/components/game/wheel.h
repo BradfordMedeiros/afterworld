@@ -6,6 +6,17 @@
 
 #include "../basic/button.h"
 
+struct WheelConfig {
+	int numElementsInWheel;
+	int numElementsToShow;
+	float wheelRadius;
+	int selectedIndex;
+	int offset;
+	std::vector<std::string> wheelContents;
+	std::function<float()> getRotationOffset;
+	std::function<void(int)> onClick;
+};
+
 extern Component wheelComponent;
 
 #endif

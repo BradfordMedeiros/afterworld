@@ -29,28 +29,7 @@ objid createSound(objid sceneId, std::string soundObjName, std::string clip){
   return soundObjId.value();
 }
 
-
-void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
-  if (jumpClip != ""){
-    if (sounds.jumpSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.jumpSoundObjId.value());
-    }
-    sounds.jumpSoundObjId = createSound(sceneId, std::string("&code-movement-jump") + uniqueNameSuffix(), jumpClip);    
-  }
-  if (landClip != ""){
-    if (sounds.landSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.landSoundObjId.value());
-    }
-    sounds.landSoundObjId = createSound(sceneId, ("&code-movement-land") + uniqueNameSuffix(), landClip);
-  }
-
-  if (moveClip != ""){
-    if (sounds.moveSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.moveSoundObjId.value());
-    }
-    sounds.moveSoundObjId = createSound(sceneId, ("&code-move") + uniqueNameSuffix(), moveClip);
-  }
-
+void ensureDefaultSoundsLoadced(objid sceneId){
   std::string activateClip = "../gameresources/sound/click.wav";
   if (activateClip != ""){
     if (sounds.activateSoundObjId.has_value()){
@@ -73,6 +52,28 @@ void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landCli
       gameapi -> removeByGroupId(sounds.explosionSoundObjId.value());
     }
     sounds.explosionSoundObjId = createSound(sceneId, ("&code-explosion") + uniqueNameSuffix(), explosionClip);
+  }
+}
+
+void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
+  if (jumpClip != ""){
+    if (sounds.jumpSoundObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.jumpSoundObjId.value());
+    }
+    sounds.jumpSoundObjId = createSound(sceneId, std::string("&code-movement-jump") + uniqueNameSuffix(), jumpClip);    
+  }
+  if (landClip != ""){
+    if (sounds.landSoundObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.landSoundObjId.value());
+    }
+    sounds.landSoundObjId = createSound(sceneId, ("&code-movement-land") + uniqueNameSuffix(), landClip);
+  }
+
+  if (moveClip != ""){
+    if (sounds.moveSoundObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.moveSoundObjId.value());
+    }
+    sounds.moveSoundObjId = createSound(sceneId, ("&code-move") + uniqueNameSuffix(), moveClip);
   }
 }
 

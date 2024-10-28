@@ -58,6 +58,8 @@ struct UiState {
 
   NavbarType navbarType;
   std::set<std::string> dockedDocks;
+
+  
 };
 UiState createUiState();
 
@@ -66,7 +68,7 @@ struct UiStateContext {
   UiState uiState;
 };
 HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
-void onMainUiScroll(UiStateContext& uiStateContext, double amount);
+void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, double amount);
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);
 void onMainUiObjectsChanged();

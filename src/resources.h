@@ -15,6 +15,7 @@ struct ManagedSounds {
 };
 
 ManagedSounds& getManagedSounds();
+void ensureDefaultSoundsLoadced(objid sceneId);
 void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip);
 void ensureSoundsUnloaded(objid sceneId);
 

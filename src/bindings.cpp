@@ -636,9 +636,7 @@ UiContext getUiContext(GameState& gameState){
     .showPreviousModel = modelViewerPrevModel,
     .showNextModel = modelViewerNextModel,
     .playSound = []() -> void {
-      if (getManagedSounds().activateSoundObjId.has_value()){
-        playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
-      }
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
     },
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool showEditor) -> void {
@@ -836,14 +834,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     loadDialogTree();
+
     soundData = createSoundData(gameapi -> rootSceneId());
+    ensureDefaultSoundsLoadced(gameapi -> rootSceneId());
+
     gametypeSystem = createGametypes();
     aiData = createAiData();
     maybeSpawnLightFromArgs();
 
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
-  
+
     tags = createTags(&gameState -> uiData);
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
@@ -869,8 +870,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     });
 
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-
-
 
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
@@ -1163,7 +1162,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    onMainUiScroll(uiStateContext, amount);
+    onMainUiScroll(uiStateContext, tags.uiData->uiContext, amount);
     onInGameUiScrollCallback(tags.inGameUi, amount);
     onMovementScrollCallback(movement, amount);
   };

@@ -6,6 +6,47 @@ void setMenuBackground(std::string background);
 void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 bool isSignalLocked(std::string signal);
 
+float wheelRotationOffset = 0.f;
+WheelConfig wheelConfig {
+  .numElementsInWheel = 10,
+  .numElementsToShow = 9,
+  .wheelRadius = 0.5f,
+  .selectedIndex = 3,
+  .offset = 2,
+  .wheelContents = {
+    "a1 Target Hunt",
+    "a2 Maze",
+    "a3 Race Stalker",
+    "a4 Placeholder Game",
+    "a5 Target Hunt 2",
+    "a6 Vortex Vault",
+    "b1 Target Hunt",
+    "b2 Maze",
+    "b3 Race Stalker",
+    "b4 Placeholder Game",
+    "b5 Target Hunt 2",
+    "b6 Vortex Vault",
+    "c1 Target Hunt",
+    "c2 Maze",
+    "c3 Race Stalker",
+    "c4 Placeholder Game",
+    "c5 Target Hunt 2",
+    "c6 Vortex Vault",
+    "d1 Target Hunt",
+    "d2 Maze",
+    "d3 Race Stalker",
+    "d4 Placeholder Game",
+    "d5 Target Hunt 2",
+    "d6 Vortex Vault",
+  },
+  .getRotationOffset = []() -> float {
+    return wheelRotationOffset;
+  },
+  .onClick = [](int index) -> void {
+    wheelConfig.selectedIndex = index;
+  },
+};
+
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
   auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(selectedId, uiContext));
@@ -78,6 +119,18 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     }   
   );
 
+  auto wheelView = withPropsCopy(
+    wheelComponent,
+    Props {
+      .props = {
+        PropPair {
+          .symbol = valueSymbol, 
+          .value = wheelConfig,
+        },
+      },
+    }
+  );
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
@@ -88,7 +141,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "gamemenu/elevatorcontrol/", elevatorView },
-    { "debug/wheel/", wheelComponent },
+    { "debug/wheel/", wheelView },
     { "",  emptyComponent  },
   };
 
@@ -453,7 +506,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
   return handlerFuncs;
 }
 
-void onMainUiScroll(UiStateContext& uiStateContext, double amount){
+void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, double amount){
   UiState& uiState = uiStateContext.uiState;
   commonState = &uiState;
 
@@ -474,6 +527,14 @@ void onMainUiScroll(UiStateContext& uiStateContext, double amount){
     uiState.offset = 0;
   }
   scenegraphScroll(scrollValue);
+
+  if (amount > 0){
+    wheelRotationOffset += 0.1f;
+    uiContext.playSound();
+  }else{
+    wheelRotationOffset -= 0.1f;
+    uiContext.playSound();
+  }
 }
 
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
