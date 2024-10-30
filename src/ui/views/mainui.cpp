@@ -14,32 +14,11 @@ WheelConfig wheelConfig {
   .numElementsInWheel = 10,
   .wheelRadius = 0.5f,
   .selectedIndex = 0,
-  .offset = 0,
-  .wheelContents = {
-    "a1 Target Hunt",
-    "a2 Maze",
-    "a3 Race Stalker",
-    "a4 Placeholder Game",
-    "a5 Target Hunt 2",
-    "a6 Vortex Vault",
-    "b1 Target Hunt",
-    "b2 Maze",
-    "b3 Race Stalker",
-    "b4 Placeholder Game",
-    "b5 Target Hunt 2",
-    "b6 Vortex Vault",
-    "c1 Target Hunt",
-    "c2 Maze",
-    "c3 Race Stalker",
-    "c4 Placeholder Game",
-    "c5 Target Hunt 2",
-    "c6 Vortex Vault",
-    "d1 Target Hunt",
-    "d2 Maze",
-    "d3 Race Stalker",
-    "d4 Placeholder Game",
-    "d5 Target Hunt 2",
-    "d6 Vortex Vault",
+  .getWheelContent = [](int index) -> std::optional<std::string> {
+    if ((index - wheelRotate) == 0){
+      return std::nullopt;
+    }
+    return std::string("placeholder content: " + std::to_string(index));
   },
   .getRotationOffset = []() -> float {
     actualWheelRotationOffset = glm::lerp(actualWheelRotationOffset, wheelRotationOffset, static_cast<float>(gameapi -> timeElapsed()));
@@ -156,7 +135,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "gamemenu/elevatorcontrol/", elevatorView },
-    { "debug/wheel/", wheelView },
+    { "debug/wheel/",  simpleLayout(wheelView, glm::vec2(1.5f, 1.5f), defaultAlignment, glm::vec4(1.f, 0.f, 0.f, 1.f)) },
     { "",  emptyComponent  },
   };
 
@@ -545,7 +524,6 @@ void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, doubl
 
 
   rotateWheel(amount > 0);
-  uiContext.playSound();
 }
 
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){

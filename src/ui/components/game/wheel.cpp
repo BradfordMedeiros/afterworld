@@ -7,6 +7,8 @@ Component wheelComponent {
     auto wheelConfigPtr = typeFromProps<WheelConfig>(props, valueSymbol);
     modassert(wheelConfigPtr, "wheelComponent wheelConfigPtr is null");
     WheelConfig& wheelConfig = *wheelConfigPtr;
+	
+	  auto boundingBoxMeasurer = createMeasurer();
 
   	for (int i = 0; i < wheelConfig.numElementsInWheel; i++){
   		if ((i + 1) > wheelConfig.numElementsInWheel){
@@ -15,10 +17,12 @@ Component wheelComponent {
   		float value = wheelConfig.getRotationOffset() + i * (2 * M_PI) / wheelConfig.numElementsInWheel;
   		float midpointX = glm::cos(value) * wheelConfig.wheelRadius;
   		float midpointY = glm::sin(value) * wheelConfig.wheelRadius;
-
-  		auto index = i + wheelConfig.offset;
-	    auto textContent = wheelConfig.wheelContents.at(index % wheelConfig.wheelContents.size());
-  	
+  		
+  		auto index = i;
+  		auto textContent = wheelConfig.getWheelContent(index);
+  		if (!textContent.has_value()){
+  			continue;
+  		}
   		auto onClickValue = wheelConfigPtr -> onClick;
   		std::function<void()> onClick = [index, onClickValue]() -> void {
   			onClickValue(index);
@@ -26,7 +30,7 @@ Component wheelComponent {
 
 			Props listItemProps {
 				.props = {
-					PropPair { .symbol = valueSymbol, .value = textContent },
+					PropPair { .symbol = valueSymbol, .value = textContent.value() },
 					PropPair { .symbol = paddingSymbol, .value = 0.1f },
 					PropPair { .symbol = onclickSymbol, .value = onClick },
 					PropPair { .symbol = tintSymbol, .value =  glm::vec4(0.f, 0.f, 0.f, 0.2f) },
@@ -47,16 +51,10 @@ Component wheelComponent {
           PropPair { .symbol = yoffsetSymbol, .value = midpointY },
         }
       };
-		 	layout.draw(drawTools, layoutProps);
+
+      auto boundingBox = layout.draw(drawTools, layoutProps);
+      measureBoundingBox(boundingBoxMeasurer, boundingBox);
   	}
-
-  	// put this whole thing in a layout so can have a background and dimensions on this
-
-  	return BoundingBox2D {
-  		.x = 0.f,
-  		.y = 0.f,
-  		.width = 1.f,
-  		.height = 1.f,
-  	};
+  	return measurerToBox(boundingBoxMeasurer);;
   },
 };

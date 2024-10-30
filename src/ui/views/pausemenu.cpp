@@ -13,6 +13,11 @@ Component pauseMenuComponent {
     auto yoffset = floatFromProp(props, yoffsetSymbol, 0.f);
 	  double elapsedTime  = static_cast<double>(floatFromProp(props, elapsedTimeSymbol, 0.f));
 
+    ShapeOptions shapeOptions {
+      .shaderId = std::nullopt,
+      .zIndex = -5,
+    };
+
 	  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tint.x, tint.y, tint.z, tint.w * interpolateDuration(0.f, 1.f, elapsedTime, 0.2f)), true, std::nullopt /* selection id */, std::nullopt, std::nullopt, std::nullopt);
 
 //	  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png", std::nullopt);

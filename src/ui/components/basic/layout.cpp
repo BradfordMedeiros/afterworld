@@ -231,7 +231,15 @@ BoundingBox2D drawLayoutElements(BufferedDrawingTools& bufferedDrawingTools, Lay
     }
   }
 
- 	modassert(layout.children.size() > 0, "layout must have at least 1 element");
+  if (layout.children.size() == 0){
+  	return BoundingBox2D {
+  		.x = 0.f,
+  		.y = 0.f,
+  		.width = 0.f,
+  		.height = 0.f,
+  	};
+  }
+
 	return measurerToBox(boundingBoxMeasurer);
 
 }

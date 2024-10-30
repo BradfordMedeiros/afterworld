@@ -303,8 +303,6 @@ Component withPropsCopy(Component& wrappedComponent, Props outerProps){
   return component;
 }
 
-
-
 Props getDefaultProps(){
   return Props { 
     .props = {}

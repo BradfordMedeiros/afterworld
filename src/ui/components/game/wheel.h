@@ -10,8 +10,7 @@ struct WheelConfig {
 	int numElementsInWheel;
 	float wheelRadius;
 	int selectedIndex;
-	int offset;
-	std::vector<std::string> wheelContents;
+	std::function<std::optional<std::string>(int)> getWheelContent;
 	std::function<float()> getRotationOffset;
 	std::function<void(int)> onClick;
 };
