@@ -71,6 +71,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, 
 void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, double amount);
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);
+void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, double xPos, double yPos, float xNdc, float yNdc);
 void onMainUiObjectsChanged();
 void pushHistory(std::vector<std::string> route, bool replace = false);
 void pushHistoryParam(std::string param);

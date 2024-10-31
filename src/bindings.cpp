@@ -1115,6 +1115,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (controlledPlayer.playerId.has_value()){
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), xPos, yPos);
     }
+
+    onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
   };
 

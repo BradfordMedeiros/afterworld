@@ -131,6 +131,8 @@ void drawRightText(DrawingTools& drawTools, std::string text, float ndiOffsetX, 
 void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::function<void()>& onClickX);
 
+void drawCircle(DrawingTools& drawTools, glm::vec2 center, float radius);
+
 enum DataStoreHint { NOHINT, VEC4, STRING };
 void registerUiSource(int symbol, void* data, DataStoreHint typeHint = NOHINT);
 void unregisterUiSource(int symbol);

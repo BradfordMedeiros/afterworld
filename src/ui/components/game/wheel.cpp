@@ -10,6 +10,7 @@ Component wheelComponent {
 	
 	  auto boundingBoxMeasurer = createMeasurer();
 
+	  drawCircle(drawTools, glm::vec2(0.f, 0.f), wheelConfig.wheelRadius);
   	for (int i = 0; i < wheelConfig.numElementsInWheel; i++){
   		if ((i + 1) > wheelConfig.numElementsInWheel){
   			break;

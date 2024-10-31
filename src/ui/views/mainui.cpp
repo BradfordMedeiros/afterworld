@@ -570,6 +570,7 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
       }
     }  
   }
+
 }
 
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods){
@@ -584,6 +585,10 @@ void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, in
   if (handlerFns.inputFns.find(uiState.focusedId.value()) != handlerFns.inputFns.end()){
     handlerFns.inputFns.at(uiState.focusedId.value())(key, mods);
   }
+}
+
+void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, double xPos, double yPos, float xNdc, float yNdc){
+  
 }
 
 void onMainUiObjectsChanged(){

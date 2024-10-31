@@ -371,6 +371,20 @@ void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::funct
   drawTools.registerCallbackFns(xMappingId, onClickX);
 }
 
+void drawCircle(DrawingTools& drawTools, glm::vec2 center, float radius){
+  int resolution = 12;
+  auto radiansPerIncrement = (2 * M_PI) / resolution;
+  for (int i = 0; i < resolution; i++){
+    float radiansFrom = radiansPerIncrement * i;
+    float radiansTo = radiansPerIncrement * (i + 1);
+    float xFrom = (radius * glm::cos(radiansFrom)) + center.x;
+    float yFrom = (radius * glm::sin(radiansFrom)) + center.y;
+    float xTo = (radius* glm::cos(radiansTo)) + center.x;
+    float yTo = (radius* glm::sin(radiansTo)) + center.y;
+    drawTools.drawLine2D(glm::vec3(xFrom, yFrom, 0.f), glm::vec3(xTo, yTo, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 1.f), true, std::nullopt, std::nullopt, std::nullopt);
+  }
+}
+
 struct UiDataStore {
   std::map<int, void*> data;
   std::map<int, DataStoreHint> typeHints;
