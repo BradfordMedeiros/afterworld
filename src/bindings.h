@@ -31,6 +31,7 @@
 #include "./modelviewer.h"
 #include "./collision.h"
 #include "./cutscene.h"
+#include "./curves.h"
 #include "./vector_gfx.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
