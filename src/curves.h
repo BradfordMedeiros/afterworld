@@ -7,10 +7,19 @@ struct LinePoints {
   std::vector<glm::vec3> points;
 };
 
-void drawCurve(LinePoints& line, glm::vec3 point, objid owner);
-void drawAllCurves(objid owner);
+struct RaceData {
+  int currentPosition;
+  int maxPosition;
+  float percentageToNext;
+  bool complete;
+};
 
-void attachToCurve(objid entityId, objid railId);
+struct EntityOnRail {
+  objid railId;
+  bool direction;
+};
+
+void attachToCurve(objid entityId, objid railId, glm::vec3 position);
 void unattachToCurve(objid entityId);
 void handleEntitiesOnRails(objid owner, objid playerId);
 
