@@ -95,7 +95,11 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
 
+	if (controlledPlayer.playerId.has_value()){
+		removeFromRace(controlledPlayer.playerId.value());
+	}
 	controlledPlayer.playerId = id.value();
+  addToRace(id.value());
 
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
   std::map<std::string, GameobjAttributes> submodelAttributes;

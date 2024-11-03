@@ -911,7 +911,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value());
       setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
 
-      handleEntitiesOnRails(id, controlledPlayer.playerId.value());
+      handleEntitiesOnRails(id);
     }
 
     auto playerPosition = getActivePlayerPosition();
@@ -1004,8 +1004,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else{
         unattachToCurve(controlledPlayer.playerId.value());
       }
+    }else if (key == 'T' && action == 0){
+      auto direction = getDirectionCurve(controlledPlayer.playerId.value());
+      if (direction.has_value()){
+        setDirectionCurve(controlledPlayer.playerId.value(), !direction.value());
+      }
     }
-
 
     debugOnKey(key, scancode, action, mods);
   };

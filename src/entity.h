@@ -5,6 +5,7 @@
 #include "./movement/movement.h"
 #include "./ai/ai.h"
 #include "./health.h"
+#include "./curves.h"
 
 struct ControlledPlayer {
 	glm::vec2 lookVelocity;

@@ -189,7 +189,7 @@ void toggleKeyboard(){
 void initGlobal(){
   auto args = gameapi -> getArgs();
   if (args.find("godmode") != args.end()){
-    global.godMode = args.at("godmode") == "true";
+    global.godMode = true;
   }
   global.showEditor = queryShowEditor();
   setShowEditor(global.showEditor);
