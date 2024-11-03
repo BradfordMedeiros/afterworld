@@ -19,8 +19,10 @@ struct EntityOnRail {
   bool direction;
 };
 
-void attachToCurve(objid entityId, objid railId, glm::vec3 position);
+void attachToCurve(objid entityId, objid railId);
 void unattachToCurve(objid entityId);
+bool isAttachedToCurve(objid entityId);
+
 void handleEntitiesOnRails(objid owner, objid playerId);
 
 #endif

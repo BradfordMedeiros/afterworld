@@ -100,6 +100,15 @@ CurvePoint calculateCurvePoint(LinePoints& linePoints, glm::vec3 point){
   };
 }
 
+const float RAIL_DISTANCE_TOLERANCE = 0.1f;
+
+bool pointOnRail(LinePoints& linePoints, glm::vec3 point){
+	auto curvePoint = calculateCurvePoint(linePoints, point);
+	auto actualDistance = glm::distance(curvePoint.point, point);
+	std::cout << "rail: actual distance: " << actualDistance << std::endl;
+	return actualDistance < RAIL_DISTANCE_TOLERANCE;
+}
+
 float getTotalDistanceForCurve(LinePoints& line){
 	float totalDistance = 0.f;
 	for (int i = 0; i < (line.points.size() - 1); i++){
@@ -125,6 +134,7 @@ float distanceRemaining(LinePoints& line, int index, float percentageToNext){
 	}
 	return remainingDistanceAlongCurve;
 }
+
 void handleRace(RaceData& raceData, glm::vec3 position, LinePoints& line){
  	auto curvePoint = calculateCurvePoint(line, position);
  	raceData.currentPosition = curvePoint.lowIndex;
@@ -132,13 +142,12 @@ void handleRace(RaceData& raceData, glm::vec3 position, LinePoints& line){
  	if (raceData.currentPosition > raceData.maxPosition){
  		raceData.maxPosition = raceData.currentPosition;
  	}
-
  	if (distanceRemaining(line, raceData.currentPosition, raceData.percentageToNext) <= 0.f){
  		raceData.complete = true;
  	}
 }
 
-void attachToCurve(objid entityId, objid railId, glm::vec3 position){
+void attachToCurve(objid entityId, objid railId){
   entityToRail[entityId] = EntityOnRail {
   	.railId = railId,
   	.direction = true,
@@ -146,6 +155,9 @@ void attachToCurve(objid entityId, objid railId, glm::vec3 position){
 }
 void unattachToCurve(objid entityId){
   entityToRail.erase(entityId);
+}
+bool isAttachedToCurve(objid entityId){
+	return entityToRail.find(entityId) != entityToRail.end();
 }
 
 void addToRace(objid entityId){
@@ -171,10 +183,9 @@ void handleEntitiesOnRails(objid ownerId, objid playerId){
   		.points = {
     		glm::vec3(0.f, -20.f, 0.f),
     		glm::vec3(50.f, -20.f, 0.f),
-    		glm::vec3(50.f, -20.f, -50.f),
+    		glm::vec3(50.f, -20.f, -100.f),
   		},
 		};
-	  attachToCurve(playerId, 0, position);
 	  addToRace(playerId);
 	}
 
@@ -185,9 +196,10 @@ void handleEntitiesOnRails(objid ownerId, objid playerId){
 
  	auto position = gameapi -> getGameObjectPos(playerId, true);
 
+	static objid activeRaceRailId = 0;
  	for (auto &[id, raceData] : entityToRaceData){
-	  handleRace(raceData, position, rails.at(0));
-  	auto distance = distanceRemaining(rails.at(0), raceData.currentPosition, raceData.percentageToNext);
+	  handleRace(raceData, position, rails.at(activeRaceRailId));
+  	auto distance = distanceRemaining(rails.at(activeRaceRailId), raceData.currentPosition, raceData.percentageToNext);
 	  auto totalDistance = getTotalDistanceForCurve(rails.at(0));
   	gameapi -> drawText(std::string("race: ") + std::to_string(distance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   	gameapi -> drawText(std::string("percentage: ") + std::to_string(distance / totalDistance), 0.f, -0.1f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
@@ -197,18 +209,23 @@ void handleEntitiesOnRails(objid ownerId, objid playerId){
  	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
- 		break;
- 		float speed = 1.f;
+ 		float speed = 0.5f;
  		auto position = gameapi -> getGameObjectPos(id, true);
+
+
+  	auto entityAlreadyOnRail = pointOnRail(rails.at(entityOnRail.railId), position);
+  	std::cout << "rail: onrail = " << (entityAlreadyOnRail ? "true" : "false") << std::endl;
+
   	auto curvePoint = calculateCurvePoint(rails.at(entityOnRail.railId), position);
   	std::cout << "rail: low = " << curvePoint.lowIndex << ", high = " << curvePoint.highIndex << ", percentage = " << curvePoint.percentage << std::endl;
-  	auto nextPoint = calulateNextPointOnRail(rails.at(entityOnRail.railId), curvePoint, 0.1f * gameapi -> timeElapsed());
+  	auto nextPoint = calulateNextPointOnRail(rails.at(entityOnRail.railId), curvePoint, speed * gameapi -> timeElapsed());
   	gameapi -> setGameObjectPosition(id, nextPoint, true);
+
  	}
 
-  //for (auto &[id, rail] : entityToRail){
-  //	auto curvePoint = calculateCurvePoint(rails.at(rail.railId), position);
-  //	std::cout << "curve point: " << curvePoint.lowIndex << ", " << curvePoint.highIndex << ", " << curvePoint.percentage << ", " << print(curvePoint.point) << std::endl;
-  //  gameapi -> drawLine(position, curvePoint.point, true, ownerId, std::nullopt, std::nullopt, std::nullopt);
-  //}
+  for (auto &[id, rail] : entityToRail){
+  	auto curvePoint = calculateCurvePoint(rails.at(rail.railId), position);
+  	std::cout << "curve point: " << curvePoint.lowIndex << ", " << curvePoint.highIndex << ", " << curvePoint.percentage << ", " << print(curvePoint.point) << std::endl;
+    gameapi -> drawLine(position, curvePoint.point, true, ownerId, std::nullopt, std::nullopt, std::nullopt);
+  }
 }

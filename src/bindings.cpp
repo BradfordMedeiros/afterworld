@@ -997,6 +997,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData.worldInfo);
     }
+
+    if (key == 'E' && action == 0){
+      if (!isAttachedToCurve(controlledPlayer.playerId.value())){
+        attachToCurve(controlledPlayer.playerId.value(), 0 /* 0 is just the default debug rail right now*/);
+      }else{
+        unattachToCurve(controlledPlayer.playerId.value());
+      }
+    }
+
+
     debugOnKey(key, scancode, action, mods);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
