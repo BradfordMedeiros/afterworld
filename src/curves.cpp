@@ -54,11 +54,13 @@ glm::vec3 calulateNextPointOnRail(LinePoints& linePoints, CurvePoint& curvePoint
 // Find the closest points, then project the point onto the line defined by those two points
 CurvePoint calculateCurvePoint(LinePoints& linePoints, glm::vec3 point){
 	auto closestIndex = closestPointInCurve(linePoints, point).value();
-	if (glm::distance(point, linePoints.points.at(closestIndex)) < 5.f){
-		closestIndex++;
-		std::cout << "rail should advance" << std::endl;
-	}else{
 
+	// should also check if you overshot
+	if (glm::distance(point, linePoints.points.at(closestIndex)) < 1.f){
+		std::cout << "rail should advance: " << print(point) << ", vs = " << print(linePoints.points.at(closestIndex)) << std::endl;
+		closestIndex++;
+	}else{
+		std::cout << "rail should not advance: " << print(point) << ", vs = " << print(linePoints.points.at(closestIndex)) << std::endl;
 	}
 	if (closestIndex >= linePoints.points.size()){  // means it's finished
 		return CurvePoint {
@@ -112,12 +114,26 @@ CurvePoint calculateCurvePoint(LinePoints& linePoints, glm::vec3 point){
 	auto projectedOnToRailDistance 	= glm::dot(d1, d2);
 
 	float percentage = projectedOnToRailDistance / (glm::length(d1) * glm::length(d2));
+	if (percentage != percentage /* check for NaN */ ){
+		percentage = 1.f; 
+	}
+	
+
+	std::cout << "rail = d1 = " << print(d1) << ", d2 = " << print(d2) << ", percentage = " << percentage << ", projectedOnToRailDistance = " << projectedOnToRailDistance <<  std::endl;
 	auto newPoint = point1 + (glm::normalize(d1) * (percentage * glm::length(d2)));
 
-	auto percentageToNext = glm::distance(newPoint, point1) / glm::distance(point1, point2);
-	if (percentageToNext > 1.f){  // means you went beyond the point, kind of weird
-		percentageToNext = 1.f;
+	float percentageToNext = 1.f;
+	auto distanceBetween = glm::distance(point1, point2);
+	if (distanceBetween != 0.f){
+		auto newDistance = glm::distance(newPoint, point1);
+		percentageToNext = newDistance / distanceBetween;
+		std::cout << "rail = distanceBetween " <<  distanceBetween <<  ", new distance = " <<  newDistance << ", percentageToNext " << percentageToNext << ", p1 = " << print(newPoint) << ", p2 = " << print(point1) << std::endl;
+		if (percentageToNext > 1.f){  // means you went beyond the point, kind of weird
+			std::cout << "rail went beyond" << std::endl;
+			percentageToNext = 1.f;
+		}		
 	}
+
   return CurvePoint {
     .lowIndex = lowIndex,
     .highIndex = highIndex,
@@ -227,6 +243,7 @@ void handleEntitiesOnRails(objid ownerId){
   	drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);
   }
 
+  std::cout << "rail---------------------------------" << std::endl;
  	for (auto &[id, raceData] : entityToRaceData){
  		break;
 		static objid activeRaceRailId = 0;
