@@ -215,7 +215,33 @@ void removeFromRace(objid entityId){
 }
 
 
-void handleEntitiesOnRails(objid ownerId){
+void generateMeshForRail(objid sceneId, LinePoints& linePoints){
+// 	void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh){
+//   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);
+	std::vector<glm::vec3> face {
+		glm::vec3(-0.1f, 0.f, 0.f),
+		glm::vec3(0.f, 0.1f, 0.f),
+		glm::vec3(0.1f, 0.f, 0.f),
+	};
+	std::vector<glm::vec3> points {
+		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(30.f, 0.f, 0.f),
+	};
+
+	std::string meshName = "rail-mesh0";
+	gameapi -> generateMesh(face, linePoints.points, meshName);
+
+  GameobjAttributes attr {
+    .attr = {
+			{ "mesh", meshName },
+			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
+    },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto id = gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
+}
+
+void handleEntitiesOnRails(objid ownerId, objid sceneId){
 	static bool doOnce = true;
 	if (doOnce){
 		doOnce = false;
@@ -224,10 +250,14 @@ void handleEntitiesOnRails(objid ownerId){
   		.points = {
     		glm::vec3(0.f, -20.f, 0.f),
     		glm::vec3(50.f, -20.f, 0.f),
-    		glm::vec3(50.f, -20.f, -60.f),
+    		glm::vec3(55.f, -20.f, -10.f),
+    		glm::vec3(55.f, -10.f, -60.f),
   		},
 		};
+
+		generateMeshForRail(sceneId, rails.at(0));
 	}
+
 
   for (auto &[id, line] : rails){
   	drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);

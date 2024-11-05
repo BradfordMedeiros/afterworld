@@ -28,6 +28,6 @@ bool isAttachedToCurve(objid entityId);
 void addToRace(objid entityId);
 void removeFromRace(objid entityId);
 
-void handleEntitiesOnRails(objid owner);
+void handleEntitiesOnRails(objid owner, objid sceneId);
 
 #endif
