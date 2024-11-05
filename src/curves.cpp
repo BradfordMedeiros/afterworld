@@ -252,6 +252,8 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
     		glm::vec3(50.f, -20.f, 0.f),
     		glm::vec3(55.f, -20.f, -10.f),
     		glm::vec3(55.f, -10.f, -60.f),
+    		glm::vec3(30.f, -10.f, -60.f),
+    		glm::vec3(0.f, -20.f, 0.f),
   		},
 		};
 
