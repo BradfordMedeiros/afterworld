@@ -2,6 +2,9 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
+void attachToCurve(objid entityId, objid railId);
+void unattachToCurve(objid entityId);
+bool isAttachedToCurve(objid entityId);
 
 struct MovementCore {
   std::string name;
@@ -568,7 +571,14 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
   if (movementState.doJump){
-    jump(moveParams, movementState, playerId);      
+    jump(moveParams, movementState, playerId);
+  }
+  if (movementState.doGrind){
+    if (!isAttachedToCurve(playerId)){
+      attachToCurve(playerId, 0);
+    }else{
+      unattachToCurve(playerId);
+    }
   }
   if (movementState.doAttachToLadder){
     if (movementState.facingLadder){
@@ -578,6 +588,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   if (movementState.doReleaseFromLadder){
     movementState.attachedToLadder = false;
   }
+
   if (movementState.crouchType != CROUCH_NONE){
     if (movementState.crouchType == CROUCH_DOWN){
       maybeToggleCrouch(moveParams, movementState, true);
@@ -614,6 +625,7 @@ MovementState getInitialMovementState(objid playerId){
   movementState.zoom_delta = 0.f;
   movementState.doAttachToLadder = false;
   movementState.doReleaseFromLadder = false;
+  movementState.doGrind = false;
   movementState.raw_deltax = 0.f;
   movementState.raw_deltay = 0.f;
   movementState.crouchType = CROUCH_NONE;

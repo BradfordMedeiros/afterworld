@@ -998,13 +998,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       printWorldInfo(aiData.worldInfo);
     }
 
-    if (key == 'E' && action == 0){
-      if (!isAttachedToCurve(controlledPlayer.playerId.value())){
-        attachToCurve(controlledPlayer.playerId.value(), 0 /* 0 is just the default debug rail right now*/);
-      }else{
-        unattachToCurve(controlledPlayer.playerId.value());
-      }
-    }else if (key == 'T' && action == 0){
+    if (key == 'T' && action == 0){
       auto direction = getDirectionCurve(controlledPlayer.playerId.value());
       if (direction.has_value()){
         setDirectionCurve(controlledPlayer.playerId.value(), !direction.value());

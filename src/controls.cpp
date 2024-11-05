@@ -7,6 +7,7 @@ std::optional<objid> getPlayerId();
 
 
 int jumpKey = 32;
+int grindKey = 'Q';
 int moveFowardKey = 'W';
 int moveBackwardKey = 'S';
 int moveLeftKey = 'A';
@@ -23,6 +24,7 @@ int toggleThirdPersonButton = 'O';
 
 void setControl(int controlSymbol, int key){
 	static int jumpSymbol = getSymbol("control-jump");
+	static int grindSymbol = getSymbol("control-grind");
 	static int moveForwardSymbol = getSymbol("control-move-forward");
 	static int moveBackwardSymbol = getSymbol("control-move-backward");
 	static int moveLeftSymbol = getSymbol("control-move-left");
@@ -39,6 +41,8 @@ void setControl(int controlSymbol, int key){
 
 	if (controlSymbol == jumpSymbol){
 		jumpKey = key;
+	}else if (controlSymbol == grindSymbol){
+		grindKey = key;
 	}else if (controlSymbol == moveForwardSymbol){
 		moveFowardKey = key;
 	}else if (controlSymbol == moveBackwardSymbol){
@@ -70,6 +74,9 @@ void setControl(int controlSymbol, int key){
 
 bool isJumpKey(int key){
 	return key == jumpKey; // space
+}
+bool isGrindKey(int key){
+	return key == grindKey;
 }
 bool isMoveForwardKey(int key){
 	return key == moveFowardKey;
