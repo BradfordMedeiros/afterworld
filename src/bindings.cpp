@@ -998,13 +998,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       printWorldInfo(aiData.worldInfo);
     }
 
-    if (key == 'T' && action == 0){
-      auto direction = getDirectionCurve(controlledPlayer.playerId.value());
-      if (direction.has_value()){
-        setDirectionCurve(controlledPlayer.playerId.value(), !direction.value());
-      }
-    }
-
     debugOnKey(key, scancode, action, mods);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){

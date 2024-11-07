@@ -35,6 +35,7 @@ struct ControlParams {
   bool doAttachToLadder;
   bool doReleaseFromLadder;
   bool doGrind;
+  bool doReverseGrind;
   CrouchType crouchType;
 };
 
@@ -73,6 +74,7 @@ struct MovementState {
   bool doAttachToLadder;
   bool doReleaseFromLadder;
   bool doGrind;
+  bool doReverseGrind;
   float raw_deltax;
   float raw_deltay;
   CrouchType crouchType;

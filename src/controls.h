@@ -9,6 +9,7 @@
 
 bool isJumpKey(int key);
 bool isGrindKey(int key);
+bool isReverseGrindKey(int key);
 bool isMoveForwardKey(int key);
 bool isMoveBackwardKey(int key);
 bool isMoveLeftKey(int key);

@@ -26,6 +26,7 @@ void setActiveMovementEntity(Movement& movement){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.doGrind = false;
+  movement.controlParams.doReverseGrind = false;
   movement.controlParams.crouchType = CROUCH_NONE;
 }
 
@@ -133,6 +134,7 @@ Movement createMovement(){
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.doGrind = false;
+  movement.controlParams.doReverseGrind = false;
   movement.controlParams.crouchType = CROUCH_NONE;
 
   movement.disabledMeshes = {};
@@ -204,6 +206,10 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
   }
   if (isGrindKey(key) && action == 1){
     movement.controlParams.doGrind = true;
+    return;
+  }
+  if (isReverseGrindKey(key) && action == 1){
+    movement.controlParams.doReverseGrind = true;
     return;
   }
 
@@ -297,6 +303,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
     entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
     entity.movementState.doGrind = movement.controlParams.doGrind;
+    entity.movementState.doReverseGrind = movement.controlParams.doReverseGrind;
     entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
     entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
     entity.movementState.crouchType = movement.controlParams.crouchType;
@@ -349,6 +356,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     movementEntity.movementState.doAttachToLadder = false;
     movementEntity.movementState.doReleaseFromLadder = false;
     movementEntity.movementState.doGrind = false;
+    movementEntity.movementState.doReverseGrind = false;
     movementEntity.movementState.raw_deltax = 0.f;
     movementEntity.movementState.raw_deltay = 0.f;
     movementEntity.movementState.crouchType = CROUCH_NONE;
@@ -373,6 +381,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   movement.controlParams.doAttachToLadder = false;
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.doGrind = false;
+  movement.controlParams.doReverseGrind = false;
   movement.controlParams.crouchType = CROUCH_NONE;
   return uiUpdate;
 }

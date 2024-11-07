@@ -97,39 +97,96 @@ struct LineSegment {
 	int lowIndex;
 	int highIndex;
 };
-LineSegment calcSegmentForPoint(LinePoints& linePoints, glm::vec3 point, bool biasUp){
-	std::optional<int> lowIndex;
-	std::optional<float> lineSegmentDistance;
-	if (biasUp){
-		for (int i = 0; i < (linePoints.points.size() - 1); i++){
-			auto projectedPoint = calculateProjectPoint(linePoints, i, i+1, point);
-			auto distanceToPoint = glm::distance(point, projectedPoint.point);
-			if (!lineSegmentDistance.has_value() || distanceToPoint <= lineSegmentDistance.value()){
-				lineSegmentDistance = distanceToPoint;
-				lowIndex = i;
-			}
+struct LineSegmentToDistance {
+	LineSegment lineSegment;
+	float distance;
+};
+
+std::vector<LineSegmentToDistance> calcSegmentForPoint(LinePoints& linePoints, glm::vec3 point){
+	std::vector<LineSegmentToDistance> distances;
+	for (int i = 0; i < (linePoints.points.size() - 1); i++){
+		auto projectedPoint = calculateProjectPoint(linePoints, i, i+1, point);
+		auto distanceToPoint = glm::distance(point, projectedPoint.point);
+		distances.push_back(LineSegmentToDistance{
+			.lineSegment = LineSegment {
+				.lowIndex = i,
+				.highIndex = (i + 1),
+			},
+			.distance = distanceToPoint,
+		});
+	}
+	return distances;
+}
+
+float getMinDistance(std::vector<LineSegmentToDistance>& segments){
+	float minDistance = segments.at(0).distance;
+	for (int i = 1; i < segments.size(); i++){
+		auto distance = segments.at(i).distance; 
+		if (distance < minDistance){
+			minDistance = distance;
 		}
-	}else{
-		for (int i = (linePoints.points.size() - 2); i >= 0; i--){
-			auto projectedPoint = calculateProjectPoint(linePoints, i, i+1, point);
-			auto distanceToPoint = glm::distance(point, projectedPoint.point);
-			if (!lineSegmentDistance.has_value() || distanceToPoint <= lineSegmentDistance.value()){
-				lineSegmentDistance = distanceToPoint;
-				lowIndex = i;
-			}
+	}
+	return minDistance;
+}
+
+bool isCornerPiece(std::vector<int>& minValues, std::vector<LineSegmentToDistance>& segments){
+	bool foundFirst = false;
+	bool foundEnd = false;
+
+	for (auto minValue : minValues){
+		if (segments.at(minValue).lineSegment.highIndex == (segments.size())){
+			foundEnd = true;
+		}
+		if (segments.at(minValue).lineSegment.lowIndex == 0){
+			foundFirst = true;
+		}
+	}
+	return foundFirst && foundEnd;
+}
+LineSegment& pickSegment(std::vector<LineSegmentToDistance>& segments, bool direction){	
+	modassert(segments.size() > 0, "no segment to pick");
+	std::vector<int> minValues;
+	float minDistance = getMinDistance(segments);
+	for (int i = 0; i < segments.size(); i++){
+		LineSegmentToDistance& segment = segments.at(i);
+		if (segment.distance <= (minDistance + 0.001f)){
+			minValues.push_back(i);
 		}
 	}
 
-	return LineSegment {
-		.lowIndex = lowIndex.value(),
-		.highIndex = lowIndex.value() + 1,
-	};
+	std::cout << "seg direction: " << (direction ? "true" : "false") << std::endl;
+	std::cout << "seg min values: ";
+	for (auto minValue : minValues){
+		LineSegmentToDistance& segment = segments.at(minValue);
+		std::cout << segment.distance << "( low = " << segment.lineSegment.lowIndex << ", high = " << segment.lineSegment.highIndex << " ) ";
+	}
+	std::cout << std::endl;
+
+	auto corner = isCornerPiece(minValues, segments);
+	if (corner){
+		std::cout << "seg this is a corner" << std::endl;
+		if (direction){
+			return segments.at(0).lineSegment;
+		}else{
+			return segments.at(segments.size() - 1).lineSegment;
+		}
+	}
+
+	if (!direction){
+		// pick decreasing index
+		std::cout << "seg picked low: " << minValues.at(0) << std::endl;
+		return segments.at(minValues.at(0)).lineSegment;
+	}
+	// pick increasing index
+	std::cout << "seg picked high: " << minValues.at(minValues.size() - 1) << std::endl << std::endl;
+	return segments.at(minValues.at(minValues.size() - 1)).lineSegment;
 }
 
-// Find the closest points, then project the point onto the line defined by those two points
-CurvePoint calculateCurvePoint(LinePoints& linePoints, glm::vec3 point, bool biasUp){
-	auto closestSegment = calcSegmentForPoint(linePoints, point, biasUp);
-	return calculateProjectPoint(linePoints, closestSegment.lowIndex, closestSegment.highIndex, point);
+CurvePoint calculateCurvePoint(LinePoints& linePoints, glm::vec3 point, bool direction){
+	auto closestSegment = calcSegmentForPoint(linePoints, point);
+	LineSegment& lineSegment = pickSegment(closestSegment, direction);
+	std::cout << "seg minIndex: low = " << lineSegment.lowIndex << ", high = " << lineSegment.highIndex << std::endl;
+	return calculateProjectPoint(linePoints, lineSegment.lowIndex, lineSegment.highIndex, point);
 }
 
 const float RAIL_DISTANCE_TOLERANCE = 0.1f;
@@ -192,14 +249,20 @@ void unattachToCurve(objid entityId){
 void setDirectionCurve(objid entityId, bool direction){
 	entityToRail.at(entityId).direction = direction;
 }
+bool isAttachedToCurve(objid entityId){
+	return entityToRail.find(entityId) != entityToRail.end();
+}
 std::optional<bool> getDirectionCurve(objid entityId){
 	if (!isAttachedToCurve(entityId)){
 		return std::nullopt;
 	}
 	return entityToRail.at(entityId).direction;
 }
-bool isAttachedToCurve(objid entityId){
-	return entityToRail.find(entityId) != entityToRail.end();
+void maybeReverseDirection(objid entityId){
+  auto direction = getDirectionCurve(entityId);
+  if (direction.has_value()){
+    setDirectionCurve(entityId, !direction.value());
+  }
 }
 
 void addToRace(objid entityId){
@@ -259,7 +322,6 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 
 		generateMeshForRail(sceneId, rails.at(0));
 	}
-
 
   for (auto &[id, line] : rails){
   	drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);

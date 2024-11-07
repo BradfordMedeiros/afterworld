@@ -21,9 +21,7 @@ struct EntityOnRail {
 
 void attachToCurve(objid entityId, objid railId);
 void unattachToCurve(objid entityId);
-void setDirectionCurve(objid entityId, bool direction);
-std::optional<bool> getDirectionCurve(objid entityId);
-bool isAttachedToCurve(objid entityId);
+void maybeReverseDirection(objid entityId);
 
 void addToRace(objid entityId);
 void removeFromRace(objid entityId);

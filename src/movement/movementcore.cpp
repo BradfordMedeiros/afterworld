@@ -5,6 +5,7 @@ void doAnimationTrigger(objid id, const char* transition);
 void attachToCurve(objid entityId, objid railId);
 void unattachToCurve(objid entityId);
 bool isAttachedToCurve(objid entityId);
+void maybeReverseDirection(objid entityId);
 
 struct MovementCore {
   std::string name;
@@ -580,6 +581,9 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
       unattachToCurve(playerId);
     }
   }
+  if (movementState.doReverseGrind){
+    maybeReverseDirection(playerId);
+  }
   if (movementState.doAttachToLadder){
     if (movementState.facingLadder){
       movementState.attachedToLadder = true;
@@ -626,6 +630,7 @@ MovementState getInitialMovementState(objid playerId){
   movementState.doAttachToLadder = false;
   movementState.doReleaseFromLadder = false;
   movementState.doGrind = false;
+  movementState.doReverseGrind = false;
   movementState.raw_deltax = 0.f;
   movementState.raw_deltay = 0.f;
   movementState.crouchType = CROUCH_NONE;
