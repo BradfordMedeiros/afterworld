@@ -149,7 +149,7 @@ LineSegment& pickSegment(std::vector<LineSegmentToDistance>& segments, bool dire
 	float minDistance = getMinDistance(segments);
 	for (int i = 0; i < segments.size(); i++){
 		LineSegmentToDistance& segment = segments.at(i);
-		if (segment.distance <= (minDistance + 0.001f)){
+		if (segment.distance <= (minDistance + 0.1f)){
 			minValues.push_back(i);
 		}
 	}
@@ -282,9 +282,9 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
 // 	void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh){
 //   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);
 	std::vector<glm::vec3> face {
-		glm::vec3(-0.1f, 0.f, 0.f),
-		glm::vec3(0.f, 0.1f, 0.f),
-		glm::vec3(0.1f, 0.f, 0.f),
+		glm::vec3(-0.05f, 0.f, 0.f),
+		glm::vec3(0.f, 0.05f, 0.f),
+		glm::vec3(0.05f, 0.f, 0.f),
 	};
 	std::vector<glm::vec3> points {
 		glm::vec3(0.f, 0.f, 0.f),
