@@ -19,13 +19,21 @@ struct EntityOnRail {
   bool direction;
 };
 
-void attachToCurve(objid entityId, objid railId);
+void attachToCurve(objid entityId, objid railId, bool direction);
 void unattachToCurve(objid entityId);
+bool isAttachedToCurve(objid entityId);
 void maybeReverseDirection(objid entityId);
 
 void addToRace(objid entityId);
 void removeFromRace(objid entityId);
 
 void handleEntitiesOnRails(objid owner, objid sceneId);
+
+struct NearbyRail {
+  objid id;
+  bool direction;
+};
+
+std::optional<NearbyRail> nearbyRail(glm::vec3 position, glm::vec3 forwardDir);
 
 #endif

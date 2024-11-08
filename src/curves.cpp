@@ -57,7 +57,7 @@ CurvePoint calculateProjectPoint(LinePoints& linePoints, int lowIndex, int highI
 	modassert(highIndex < linePoints.points.size(), "calculateProjectPoint highIndex too high");
 	auto point1 = linePoints.points.at(lowIndex);
 	auto point2 = linePoints.points.at(highIndex);
-	std::cout << "rail lowIndex = " << lowIndex << ", highIndex = " << highIndex << std::endl;
+	//std::cout << "rail lowIndex = " << lowIndex << ", highIndex = " << highIndex << std::endl;
 
 	auto d1 = point2 - point1;
 	auto d2 = point - point1;
@@ -68,8 +68,7 @@ CurvePoint calculateProjectPoint(LinePoints& linePoints, int lowIndex, int highI
 		percentage = 1.f; 
 	}
 	
-
-	std::cout << "rail = d1 = " << print(d1) << ", d2 = " << print(d2) << ", percentage = " << percentage << ", projectedOnToRailDistance = " << projectedOnToRailDistance <<  std::endl;
+	//std::cout << "rail = d1 = " << print(d1) << ", d2 = " << print(d2) << ", percentage = " << percentage << ", projectedOnToRailDistance = " << projectedOnToRailDistance <<  std::endl;
 	auto newPoint = point1 + (glm::normalize(d1) * (percentage * glm::length(d2)));
 
 	float percentageToNext = 1.f;
@@ -77,9 +76,9 @@ CurvePoint calculateProjectPoint(LinePoints& linePoints, int lowIndex, int highI
 	if (distanceBetween != 0.f){
 		auto newDistance = glm::distance(newPoint, point1);
 		percentageToNext = newDistance / distanceBetween;
-		std::cout << "rail = distanceBetween " <<  distanceBetween <<  ", new distance = " <<  newDistance << ", percentageToNext " << percentageToNext << ", p1 = " << print(newPoint) << ", p2 = " << print(point1) << std::endl;
+		//std::cout << "rail = distanceBetween " <<  distanceBetween <<  ", new distance = " <<  newDistance << ", percentageToNext " << percentageToNext << ", p1 = " << print(newPoint) << ", p2 = " << print(point1) << std::endl;
 		if (percentageToNext > 1.f){  // means you went beyond the point, kind of weird
-			std::cout << "rail went beyond" << std::endl;
+			//std::cout << "rail went beyond" << std::endl;
 			percentageToNext = 1.f;
 		}		
 	}
@@ -100,6 +99,7 @@ struct LineSegment {
 struct LineSegmentToDistance {
 	LineSegment lineSegment;
 	float distance;
+	glm::vec3 point;
 };
 
 std::vector<LineSegmentToDistance> calcSegmentForPoint(LinePoints& linePoints, glm::vec3 point){
@@ -113,6 +113,7 @@ std::vector<LineSegmentToDistance> calcSegmentForPoint(LinePoints& linePoints, g
 				.highIndex = (i + 1),
 			},
 			.distance = distanceToPoint,
+			.point = projectedPoint.point,
 		});
 	}
 	return distances;
@@ -154,13 +155,13 @@ LineSegment& pickSegment(std::vector<LineSegmentToDistance>& segments, bool dire
 		}
 	}
 
-	std::cout << "seg direction: " << (direction ? "true" : "false") << std::endl;
-	std::cout << "seg min values: ";
-	for (auto minValue : minValues){
-		LineSegmentToDistance& segment = segments.at(minValue);
-		std::cout << segment.distance << "( low = " << segment.lineSegment.lowIndex << ", high = " << segment.lineSegment.highIndex << " ) ";
-	}
-	std::cout << std::endl;
+	//std::cout << "seg direction: " << (direction ? "true" : "false") << std::endl;
+	//std::cout << "seg min values: ";
+	//for (auto minValue : minValues){
+	//	LineSegmentToDistance& segment = segments.at(minValue);
+	//	std::cout << segment.distance << "( low = " << segment.lineSegment.lowIndex << ", high = " << segment.lineSegment.highIndex << " ) ";
+	//}
+	//std::cout << std::endl;
 
 	auto corner = isCornerPiece(minValues, segments);
 	if (corner){
@@ -174,18 +175,18 @@ LineSegment& pickSegment(std::vector<LineSegmentToDistance>& segments, bool dire
 
 	if (!direction){
 		// pick decreasing index
-		std::cout << "seg picked low: " << minValues.at(0) << std::endl;
+		//std::cout << "seg picked low: " << minValues.at(0) << std::endl;
 		return segments.at(minValues.at(0)).lineSegment;
 	}
 	// pick increasing index
-	std::cout << "seg picked high: " << minValues.at(minValues.size() - 1) << std::endl << std::endl;
+	//std::cout << "seg picked high: " << minValues.at(minValues.size() - 1) << std::endl << std::endl;
 	return segments.at(minValues.at(minValues.size() - 1)).lineSegment;
 }
 
 CurvePoint calculateCurvePoint(LinePoints& linePoints, glm::vec3 point, bool direction){
 	auto closestSegment = calcSegmentForPoint(linePoints, point);
 	LineSegment& lineSegment = pickSegment(closestSegment, direction);
-	std::cout << "seg minIndex: low = " << lineSegment.lowIndex << ", high = " << lineSegment.highIndex << std::endl;
+	//std::cout << "seg minIndex: low = " << lineSegment.lowIndex << ", high = " << lineSegment.highIndex << std::endl;
 	return calculateProjectPoint(linePoints, lineSegment.lowIndex, lineSegment.highIndex, point);
 }
 
@@ -236,10 +237,10 @@ void handleRace(RaceData& raceData, glm::vec3 position, LinePoints& line){
  	}
 }
 
-void attachToCurve(objid entityId, objid railId){
+void attachToCurve(objid entityId, objid railId, bool direction){
   entityToRail[entityId] = EntityOnRail {
   	.railId = railId,
-  	.direction = true,
+  	.direction = direction,
   };
 }
 void unattachToCurve(objid entityId){
@@ -277,10 +278,7 @@ void removeFromRace(objid entityId){
 	entityToRaceData.erase(entityId);
 }
 
-
 void generateMeshForRail(objid sceneId, LinePoints& linePoints){
-// 	void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh){
-//   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);
 	std::vector<glm::vec3> face {
 		glm::vec3(-0.05f, 0.f, 0.f),
 		glm::vec3(0.f, 0.05f, 0.f),
@@ -298,9 +296,8 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
     .attr = {
 			{ "mesh", meshName },
 			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
-			//{ "tint", glm::vec4(0.f, 0.f, 1.f, 1.f) },
 			{ "texture", "./res/textures/testgradient2.png" },
-    },
+		}
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto id = gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
@@ -314,12 +311,12 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 
 	  rails[0] = LinePoints {
   		.points = {
-    		glm::vec3(0.f, -20.f, 0.f),
-    		glm::vec3(50.f, -20.f, 0.f),
-    		glm::vec3(55.f, -20.f, -10.f),
-    		glm::vec3(55.f, -10.f, -60.f),
-    		glm::vec3(30.f, -10.f, -60.f),
-    		glm::vec3(0.f, -20.f, 0.f),
+    		glm::vec3(0.f, -27.f, 0.f),
+    		glm::vec3(50.f, -27.f, 0.f),
+    		glm::vec3(55.f, -27.f, -10.f),
+    		glm::vec3(55.f, -17.f, -60.f),
+    		glm::vec3(30.f, -17.f, -60.f),
+    		//glm::vec3(0.f, -27.f, 0.f),
   		},
 		};
 
@@ -332,18 +329,17 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
   	}		
 	}
 
-  std::cout << "rail---------------------------------" << std::endl;
  	for (auto &[id, raceData] : entityToRaceData){
 		static objid activeRaceRailId = 0;
   	auto position = gameapi -> getGameObjectPos(id, true);
 	  handleRace(raceData, position, rails.at(activeRaceRailId));
   	auto distance = distanceRemaining(rails.at(activeRaceRailId), raceData.currentPosition, raceData.percentageToNext);
 	  auto totalDistance = getTotalDistanceForCurve(rails.at(0));
-  	gameapi -> drawText(std::string("race: ") + std::to_string(distance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  	gameapi -> drawText(std::string("percentage: ") + std::to_string(distance / totalDistance), 0.f, -0.1f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  	if (raceData.complete){
-  	  gameapi -> drawText("race finished!", 0.f, -0.2f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  	}
+  	//gameapi -> drawText(std::string("race: ") + std::to_string(distance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	//gameapi -> drawText(std::string("percentage: ") + std::to_string(distance / totalDistance), 0.f, -0.1f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	//if (raceData.complete){
+  	//  gameapi -> drawText("race finished!", 0.f, -0.2f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	//}
  	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
@@ -351,14 +347,34 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
  		auto position = gameapi -> getGameObjectPos(id, true);
 
   	auto entityAlreadyOnRail = pointOnRail(rails.at(entityOnRail.railId), position);
-  	std::cout << "rail: onrail = " << (entityAlreadyOnRail ? "true" : "false") << std::endl;
-
   	auto curvePoint = calculateCurvePoint(rails.at(entityOnRail.railId), position, entityOnRail.direction);
-  	std::cout << "rail: low = " << curvePoint.lowIndex << ", high = " << curvePoint.highIndex << ", percentage = " << curvePoint.percentage << std::endl;
   	
   	auto direction = entityOnRail.direction ? 1  : -1;
   	auto nextPoint = calulateNextPointOnRail(rails.at(entityOnRail.railId), curvePoint, direction * speed * gameapi -> timeElapsed());
   	gameapi -> setGameObjectPosition(id, nextPoint, true);
  	}
 
+}
+
+const float RAIL_GRACE_DISTANCE = 0.5f;
+std::optional<NearbyRail> nearbyRail(glm::vec3 position, glm::vec3 forwardDir){
+ 	for (auto &[id, line] : rails){
+		auto points = calcSegmentForPoint(rails.at(0), position);
+		for (int i = 0; i < points.size(); i++){
+			auto& point = points.at(i);
+			if (point.distance < RAIL_GRACE_DISTANCE){
+				auto lowPoint = line.points.at(point.lineSegment.lowIndex);
+				auto highPoint = line.points.at(point.lineSegment.highIndex);
+				auto railDir = highPoint - lowPoint;
+
+				auto dir = glm::dot(forwardDir, railDir);
+				std::cout << "seg: " << dir << std::endl;
+				return NearbyRail {
+					.id = id,
+					.direction = dir >= 0.f,
+				};
+			}
+		}
+ 	}
+	return std::nullopt;
 }

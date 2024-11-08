@@ -2,10 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
-void attachToCurve(objid entityId, objid railId);
-void unattachToCurve(objid entityId);
-bool isAttachedToCurve(objid entityId);
-void maybeReverseDirection(objid entityId);
 
 struct MovementCore {
   std::string name;
@@ -583,8 +579,11 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
   if (movementState.doGrind){
     if (!isAttachedToCurve(playerId)){
-      attachToCurve(playerId, 0);
-      setGameObjectPhysicsEnable(playerId, false);
+      auto rail = nearbyRail(currPos, glm::vec3(directionVec.x, directionVec.y, directionVec.z));
+      if (rail.has_value()){
+        attachToCurve(playerId, rail.value().id, rail.value().direction);
+        setGameObjectPhysicsEnable(playerId, false);        
+      }
     }else{
       unattachToCurve(playerId);
       setGameObjectPhysicsEnable(playerId, true);
