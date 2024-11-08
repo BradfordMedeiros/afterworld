@@ -228,6 +228,10 @@ void setGameObjectPhysicsDynamic(objid id){
   gameapi -> setSingleGameObjectAttr(id, "physics_type", "dynamic");
 }
 
+void setGameObjectPhysicsEnable(objid id, bool enable){
+  gameapi -> setSingleGameObjectAttr(id, "physics", enable ? "enabled" : "disabled");
+}
+
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity){
   gameapi -> setGameObjectAttr(
     id, 

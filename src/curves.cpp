@@ -298,12 +298,15 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
     .attr = {
 			{ "mesh", meshName },
 			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
+			//{ "tint", glm::vec4(0.f, 0.f, 1.f, 1.f) },
+			{ "texture", "./res/textures/testgradient2.png" },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto id = gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
 }
 
+const bool DRAW_CURVES = false;
 void handleEntitiesOnRails(objid ownerId, objid sceneId){
 	static bool doOnce = true;
 	if (doOnce){
@@ -323,9 +326,11 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 		generateMeshForRail(sceneId, rails.at(0));
 	}
 
-  for (auto &[id, line] : rails){
-  	drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);
-  }
+	if (DRAW_CURVES){
+  	for (auto &[id, line] : rails){
+  		drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);
+  	}		
+	}
 
   std::cout << "rail---------------------------------" << std::endl;
  	for (auto &[id, raceData] : entityToRaceData){

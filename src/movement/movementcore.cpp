@@ -81,10 +81,10 @@ void removeAllMovementCores(){
   ensureSoundsUnloaded(gameapi -> rootSceneId());
 }
 
-void jump(MovementParams& moveParams, MovementState& movementState, objid id){
+void jump(MovementParams& moveParams, MovementState& movementState, objid id, bool force = false){
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
   modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
-  if (movementState.isGrounded){
+  if (movementState.isGrounded || force){
     gameapi -> applyImpulse(id, impulse);
     if (getManagedSounds().jumpSoundObjId.has_value()){
       playGameplayClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
@@ -572,13 +572,22 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
   if (movementState.doJump){
-    jump(moveParams, movementState, playerId);
+    if (isAttachedToCurve(playerId)){
+      unattachToCurve(playerId);
+      setGameObjectPhysicsEnable(playerId, true);
+      setGameObjectVelocity(playerId, glm::vec3(0.f, 0.f, 0.f));
+      jump(moveParams, movementState, playerId, true);
+    }else{
+      jump(moveParams, movementState, playerId);
+    }
   }
   if (movementState.doGrind){
     if (!isAttachedToCurve(playerId)){
       attachToCurve(playerId, 0);
+      setGameObjectPhysicsEnable(playerId, false);
     }else{
       unattachToCurve(playerId);
+      setGameObjectPhysicsEnable(playerId, true);
     }
   }
   if (movementState.doReverseGrind){
