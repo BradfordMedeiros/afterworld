@@ -911,7 +911,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value());
       setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
 
+      drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
+      handleEntitiesRace();
     }
 
     auto playerPosition = getActivePlayerPosition();

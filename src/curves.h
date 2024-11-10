@@ -19,6 +19,8 @@ struct EntityOnRail {
   bool direction;
 };
 
+void drawAllCurves(objid ownerId);
+
 void attachToCurve(objid entityId, objid railId, bool direction);
 void unattachToCurve(objid entityId);
 bool isAttachedToCurve(objid entityId);
@@ -28,6 +30,7 @@ void addToRace(objid entityId);
 void removeFromRace(objid entityId);
 
 void handleEntitiesOnRails(objid owner, objid sceneId);
+void handleEntitiesRace();
 
 struct NearbyRail {
   objid id;
