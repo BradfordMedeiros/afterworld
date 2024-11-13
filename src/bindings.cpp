@@ -44,7 +44,7 @@ void setTotalZoom(float multiplier){
 }
 
 bool disableAnimation = false;
-
+bool disableTpsMesh = false;
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -671,11 +671,7 @@ UiContext getUiContext(GameState& gameState){
         }
       },
       .disableActiveEntity = [](bool enable) -> void {
-        if (!enable){
-          maybeReEnableMesh(getActivePlayerId().value());
-        }else{
-          maybeDisableMesh(getActivePlayerId().value());
-        }
+        disableTpsMesh = enable;
       },
     },
   };
@@ -814,6 +810,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       disableAnimation = true;
     }
 
+    if (args.find("no-mesh-tp") != args.end()){
+      disableTpsMesh = true;
+    }
+
+
     initSettings();
     registerOnRouteChanged(
       getMainRouterHistory(),
@@ -915,7 +916,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
       }
  
-      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value());
+      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
       setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
 
       drawAllCurves(id);

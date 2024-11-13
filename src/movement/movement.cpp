@@ -285,7 +285,7 @@ void maybeDisableMesh(objid id);
 
 
 // TODO third person mode should only be a thing if active id
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera){
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -367,7 +367,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
        movement.disabledMeshes.erase(id);
        maybeReEnableMesh(id);
     }
-    if ((id == activeId) && !movementEntity.managedCamera.thirdPersonMode){
+    if ((id == activeId) && (!movementEntity.managedCamera.thirdPersonMode || disableThirdPersonMesh)){
       if (movement.disabledMeshes.count(id) == 0){
         movement.disabledMeshes.insert(id);
         maybeDisableMesh(id);        
