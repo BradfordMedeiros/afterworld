@@ -23,6 +23,10 @@ void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementE
 std::optional<objid> getActivePlayerId();
 std::optional<objid> getCameraForThirdPerson();
 std::optional<bool> activePlayerInThirdPerson();
+
+void maybeReEnableMesh(objid id);
+void maybeDisableMesh(objid id);
+
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id);
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
 bool onActivePlayerRemoved(objid id);

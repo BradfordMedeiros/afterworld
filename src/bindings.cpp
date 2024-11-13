@@ -669,7 +669,14 @@ UiContext getUiContext(GameState& gameState){
         if(controlledPlayer.playerId.has_value()){
           deliverCurrentGunAmmo(controlledPlayer.playerId.value(), amount);
         }
-      }
+      },
+      .disableActiveEntity = [](bool enable) -> void {
+        if (!enable){
+          maybeReEnableMesh(getActivePlayerId().value());
+        }else{
+          maybeDisableMesh(getActivePlayerId().value());
+        }
+      },
     },
   };
   return uiContext;
@@ -913,7 +920,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
-      handleEntitiesRace();
+      //handleEntitiesRace();
     }
 
     auto playerPosition = getActivePlayerPosition();

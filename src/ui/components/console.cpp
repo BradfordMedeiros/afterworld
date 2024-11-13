@@ -256,7 +256,25 @@ std::vector<CommandDispatch> commands {
       return std::nullopt;
     },
   },
+  CommandDispatch {
+    .command = "disable-active",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      consoleInterface.disableActiveEntity(true);
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
+    .command = "enable-active",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      consoleInterface.disableActiveEntity(false);
+      return std::nullopt;
+    },
+  },
 };
+
+
+
+
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){
   for (auto &command : commands){
