@@ -4,6 +4,7 @@ bool keyIsDown(int key);
 bool leftMouseDown();
 bool middleMouseDown();
 bool rightMouseDown();
+glm::vec2 getMouseVelocity();
 
 struct KeyLocation {
   int key;
@@ -448,6 +449,11 @@ Component mouseComponentInner {
     drawMouseButtonValue(drawTools, size, size.x * 0 + (size.x * 0.5f) - (totalWidth * 0.5f), leftMouseDown());
     drawMouseButtonValue(drawTools, size, size.x * 1 + (size.x * 0.5f) - (totalWidth * 0.5f), middleMouseDown());
     drawMouseButtonValue(drawTools, size, size.x * 2 + (size.x * 0.5f) - (totalWidth * 0.5f), rightMouseDown());
+
+    auto mouseVel = getMouseVelocity();
+
+    drawCenteredTextReal(drawTools, std::to_string(static_cast<int>(mouseVel.x)), -size.x, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
+    drawCenteredTextReal(drawTools, std::to_string(static_cast<int>(mouseVel.y)), size.x, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
 
     return BoundingBox2D {
       .x = 0.f,

@@ -16,6 +16,7 @@ GlobalState global {
   .lastToggleTerminalTime = 0.f,
   .xNdc = 0.f,
   .yNdc = 0.f,
+  .mouseVelocity = glm::vec2(0.f, 0.f),
   .texCoordUv = glm::vec2(0.f, 0.f),
   .texCoordUvView = glm::vec2(0.f, 0.f),
   .selectedId = std::nullopt,

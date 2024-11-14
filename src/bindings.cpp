@@ -472,6 +472,9 @@ bool keyIsDown(int key){
   extern GLFWwindow* window;
   return glfwGetKey(window, key) == GLFW_PRESS;
 }
+glm::vec2 getMouseVelocity(){
+  return getGlobalState().mouseVelocity;
+}
 
 bool isPose(std::string& name){
   return name.find("pose-") == 0;
@@ -1122,6 +1125,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
+    getGlobalState().mouseVelocity = glm::vec2(xPos, yPos);
     if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
       controlledPlayer.lookVelocity = glm::vec2(xPos, yPos);
     }
