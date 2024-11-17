@@ -46,6 +46,8 @@ uniform vec3 lightsatten[MAX_LIGHTS];
 uniform float lightsmaxangle[MAX_LIGHTS];
 uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
+uniform vec3 voxellights[8];
+uniform int voxelcellwidth;
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
 
@@ -56,6 +58,7 @@ uniform float time;
 uniform float bloomThreshold;
 //uniform vec3 mouseCoordVal;
 uniform bool enableAttenutation;
+uniform bool enableVoxelLighting;
 
 
 int getNumLights(){
@@ -69,12 +72,41 @@ float calcAttenutation(int lightNumber){
   float constant = attenuationTerms.x;
   float linear = attenuationTerms.y;
   float quadratic = attenuationTerms.z;
-  float attenuation = enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;
+  float attenuation = enableVoxelLighting && enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;
   return attenuation;
 }
 
+
+int numCellsDim = 2;
+
+float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
+  return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
+}
+
+
+int xyzToIndex(int x, int y, int z){
+  return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
+}
+vec3 lookupAmbientLight(){
+  int numCellsPerRow = 2;
+  int totalCells = numCellsPerRow * numCellsPerRow * numCellsPerRow;
+
+  int cellXInt = int(round(FragPos.x)) / voxelcellwidth;                 // cellYInt is 24
+  int remainingCellX = cellXInt % numCellsDim;  // 0 
+
+  int cellYInt = int(round(FragPos.y)) / voxelcellwidth;                 // cellYInt is 24
+  int remainingCellY = cellYInt % numCellsDim;  // 0 
+
+  int cellZInt = int(round(FragPos.z)) / voxelcellwidth;                 // cellYInt is 24
+  int remainingCellZ = cellZInt % numCellsDim;  // 0 
+
+  int finalIndex = xyzToIndex(remainingCellX, remainingCellY, remainingCellZ);
+
+  return voxellights[0];
+}
+
 vec3 calculatePhongLight(vec3 normal){
-  vec3 ambient = ambientAmount;   
+  vec3 ambient =  lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
 
@@ -198,6 +230,10 @@ void main(){
       return;
     }
 
+    if (voxelcellwidth < -1){
+      discard;
+    }
+
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
     vec2 offsetTexCoord = vec2(TexCoord.x, TexCoord.y); 
   
@@ -256,6 +292,7 @@ void main(){
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
+
 
     if (enableLighting){
       FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);
