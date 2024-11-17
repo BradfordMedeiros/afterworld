@@ -46,7 +46,7 @@ uniform vec3 lightsatten[MAX_LIGHTS];
 uniform float lightsmaxangle[MAX_LIGHTS];
 uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
-uniform vec3 voxellights[8];
+uniform vec3 voxellights[512];
 uniform int voxelcellwidth;
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
