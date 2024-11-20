@@ -46,7 +46,7 @@ uniform vec3 lightsatten[MAX_LIGHTS];
 uniform float lightsmaxangle[MAX_LIGHTS];
 uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
-uniform vec3 voxellights[512];
+uniform int voxelindexs[512];
 uniform int voxelcellwidth;
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
@@ -102,7 +102,7 @@ vec3 lookupAmbientLight(){
 
   int finalIndex = xyzToIndex(remainingCellX, remainingCellY, remainingCellZ);
 
-  return voxellights[0];
+  return voxelindexs[0] == 5 ? vec3(1, 1, 1) : vec3(0, 0, 0);
 }
 
 vec3 calculatePhongLight(vec3 normal){
