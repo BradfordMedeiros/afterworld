@@ -124,6 +124,67 @@ std::string print(NdiPrintInfo& ndiPrintInfo){
 	return selectModeStr + " " + print(ndiPrintInfo.ndiPoint.point1) + " " + print(ndiPrintInfo.ndiPoint.point2) + " " + print(ndiPrintInfo.ndiPoint.mappedKey);
 }
 
+
+bool voxelCellIsLit(VoxelLightingData& voxelLightingData, int x, int y, int z){
+	int index = (x + (voxelLightingData.numCellsDim * y) + (voxelLightingData.numCellsDim * voxelLightingData.numCellsDim * z));
+	if (index < 0){
+		return false;
+	}
+	if (index >= voxelLightingData.cells.size()){
+		return false;
+	}
+	return voxelLightingData.cells.at(index).lightIndex != 0;
+}
+void drawVoxelCellFilled(int x, int z, int voxelWidth, int numCellWide, float yOffset){
+	glm::vec3 topLeft(x * voxelWidth, 0.f, z * voxelWidth);
+	glm::vec3 bottomRight((x + 1) * voxelWidth, 0.f, (z + 1) * voxelWidth);
+
+	glm::vec3 offset((numCellWide * voxelWidth * -0.5f), yOffset, (numCellWide * voxelWidth * -0.5f));
+	gameapi -> drawLine(topLeft + offset, bottomRight + offset, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+}
+void drawVoxelLightGrid(int yIndexToRender){
+  VoxelLightingData& voxelLighting = gameapi -> getVoxelLightingData();
+
+	int voxelWidth = voxelLighting.voxelCellWidth;
+	int numCellWide = voxelLighting.numCellsDim;
+
+	float gridFullSize = numCellWide * voxelWidth;
+	float gridHalfSize = gridFullSize * 0.5f;
+
+	float yValue = (yIndexToRender * voxelWidth) - gridHalfSize;
+
+	glm::vec3 topLeft(-gridHalfSize, yValue, -gridHalfSize);
+	glm::vec3 topRight(gridHalfSize, yValue, -gridHalfSize);
+	glm::vec3 bottomLeft(-gridHalfSize, yValue, gridHalfSize);
+	glm::vec3 bottomRight(gridHalfSize, yValue, gridHalfSize);
+
+	gameapi -> drawLine(topLeft, topRight, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	gameapi -> drawLine(topLeft, bottomLeft, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	gameapi -> drawLine(topRight, bottomRight, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	gameapi -> drawLine(bottomLeft, bottomRight, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+	for (int x = 0; x < numCellWide; x++){
+		glm::vec3 nearPoint(-gridHalfSize  + (x * voxelWidth), yValue, gridHalfSize);
+		glm::vec3 farPoint(-gridHalfSize + (x * voxelWidth), yValue, -gridHalfSize);
+		gameapi -> drawLine(nearPoint, farPoint, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	}
+	for (int z = 0; z < numCellWide; z++){
+		glm::vec3 leftPoint(-gridHalfSize, yValue, -gridHalfSize + (z * voxelWidth));
+		glm::vec3 rightPoint(gridHalfSize, yValue, -gridHalfSize + (z * voxelWidth));
+		gameapi -> drawLine(leftPoint, rightPoint, false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	}
+	for (int x = 0; x < numCellWide; x++){
+		for (int z = 0; z < numCellWide; z++){
+			if (voxelCellIsLit(voxelLighting, x, yIndexToRender, z)){
+				drawVoxelCellFilled(x, z, voxelWidth, numCellWide, yValue);
+			}
+		}
+	}
+
+	//gameapi -> drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f, 10.f, 10.f), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+}
+
+int voxelYIndex = 1;
 void debugOnFrame(){
   //if (ndiPrintInfo.debugNdiPrintMode){
   //	modlog("ndi print info", print(ndiPrintInfo.ndiPoint.point1) + " " + print(ndiPrintInfo.ndiPoint.point2) + " " + print(ndiPrintInfo.ndiPoint.mappedKey));
@@ -131,7 +192,6 @@ void debugOnFrame(){
   //	modlog("ndi print info", "not enabled");
   //}
   handleSimpleOnFrame();
-
 
   auto activeCamera = gameapi -> getActiveCamera();
   if (!activeCamera.has_value()){
@@ -141,6 +201,11 @@ void debugOnFrame(){
   }
 
 	auto args = gameapi -> getArgs();
+
+	if (args.find("showvoxel") != args.end()){
+	  drawVoxelLightGrid(voxelYIndex);
+	}
+
 	static std::optional<PrintObjDebug> printObjDebug = getPrintObjDebug(args);
 	if (!printObjDebug.has_value()){
 		return;
@@ -318,6 +383,22 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	   	std::cout << "customStrValue: " << "none" << std::endl;
    	}
   }
+
+
+  std::cout << "testkey: " << key << std::endl;
+  if (key == 264 /* up */ && action == 1){
+	  VoxelLightingData& voxelLighting = gameapi -> getVoxelLightingData();
+  	voxelYIndex++;
+  	if (voxelYIndex >= voxelLighting.numCellsDim){
+  		voxelYIndex = voxelLighting.numCellsDim - 1;
+  	}
+	}
+	if (key == 265 /* down*/ && action == 1){
+		voxelYIndex--;
+		if (voxelYIndex < 0){
+			voxelYIndex = 0;
+		}
+	}
 }
 
 
