@@ -1,15 +1,25 @@
+playerspawn:playerspawn:true
+playerspawn:position:-20 -25 0
+playerspawn:teleport:true
 
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform_lowert:position:-20 -30 0
 platform_lowert:scale:100 100 10
 platform_lowert:rotation:0 -1 0 0
-platform_lowert:texture:../gameresources/textures/wood.jpg
+platform_lowert:texture:./res/textures/brickwall.jpg
+platform_lowert:texturesize:40 40
 platform_lowert:physics:enabled
 platform_lowert:material:metal
 
-playerspawn:playerspawn:true
-playerspawn:position:0 10 0
-playerspawn:teleport:true
 
-[bouncepad:scene:../afterworld/scenes/prefabs/objects/bouncepad.rawscene
-[bouncepad:position:0 15 0
+boxfront:mesh:./res/models/electricbox/electricbox.obj
+#boxfront/Cube:emission:5 0 0
+boxfront:position:-20 -20 0
+
+#enemy:agent:basic
+#enemy:health:130
+
+
+[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
+[enemy:position:0 -10 40
+

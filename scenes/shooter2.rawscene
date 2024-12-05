@@ -286,7 +286,8 @@ glass2:layer:transparency
 glass2:physics:enabled
 glass2:material:glass
 
-#!light:position:0 -5 5
+!light:position:0 -25 0
+!light:color:1 0 0
 
 [enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
 [enemy:position:0 -10 40

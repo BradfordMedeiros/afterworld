@@ -1,0 +1,9 @@
+
+menu:mesh:../gameresources/build/ui/titlescreen.gltf
+menu:layer:basicui
+menu:rotation:0 0 1 0
+menu:tint:1 1 1 1
+#menu:shader:../afterworld/shaders/menu/fragment.glsl
+
+
+

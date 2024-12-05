@@ -3,7 +3,7 @@ menu:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 menu:layer:basicui
 menu:position:0 0 -1
 menu:rotation:0 0 1 180
-menu:tint:0.2 0.2 0.2 1
+menu:tint:0.6 0.6 0.6 1
 menu:shader:../afterworld/shaders/menu/fragment.glsl
 #menu:scrollspeed:0 0.02 0
 menu:background:true
@@ -20,6 +20,6 @@ menu:background:true
 
 
 &music:clip:/home/brad/Desktop/bones.wav
-&music:autoplay:true
+#&music:autoplay:true
 &music:volume:5
 
