@@ -60,6 +60,7 @@ uniform bool enableAttenutation;
 uniform bool enableVoxelLighting;
 
 
+
 int getNumLights(){
   return min(numlights, MAX_LIGHTS);
 }
@@ -294,9 +295,9 @@ void main(){
 
 
     if (enableLighting){
-      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);
+      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w) * 2;
     }else{
-      FragColor = tint * texColor;
+      FragColor = tint * texColor * vec4(1, 0.7, 0.4, 1);
     }
 
     // TODO -> what would be a better thesholding function? 

@@ -773,8 +773,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> dragSelect = std::nullopt;
     gameState -> uiData.uiContext = getUiContext(*gameState);
 
-    //gameapi -> loadShader("ui2", "./res/shaders/ui2");
-
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");
@@ -859,6 +857,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     tags = createTags(&gameState -> uiData);
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
+
+    generateWater();
 
     return gameState;
   };

@@ -158,3 +158,72 @@ void onFrameWater(Water& water){
  	}
  	applyWaterForces(water);
 }
+
+
+void generateWater(){
+
+	std::vector<glm::vec3> points;
+	std::vector<unsigned int> indexs;
+
+	int currIndex = 0;
+	int dim = 5;
+	for (int x = 0; x < dim; x++){
+		for (int y = 0; y < dim; y++){
+			float offsetX = 5.f * x;
+			float offsetY = 5.f * y;
+			points.push_back(glm::vec3(0.f + offsetX, 0.f + offsetY, 0.f));
+			indexs.push_back(currIndex);
+			currIndex++;
+
+
+			points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
+			indexs.push_back(currIndex);
+			currIndex++;
+
+			points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
+			indexs.push_back(currIndex);
+			currIndex++;
+
+			//////////////
+
+			points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
+			indexs.push_back(currIndex);
+			currIndex++;
+
+			points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
+			indexs.push_back(currIndex);
+			currIndex++;
+
+
+			points.push_back(glm::vec3(5.f + offsetX, 5.f + offsetY, 0.f));
+			indexs.push_back(currIndex);
+			currIndex++;
+
+
+
+
+
+		}
+	}
+
+
+	
+
+	std::string meshName = "water";
+	gameapi -> generateMeshRaw(points, indexs, meshName);
+
+  GameobjAttributes attr {
+    .attr = {
+			{ "mesh", meshName },
+			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
+			{ "rotation", glm::vec4(0.f, 1.f, 0.f, 0.f) },
+			{ "scale", glm::vec3(10.f, 10.f, 10.f) },
+			{ "texture", "./res/textures/blacktop.jpg" },
+			{ "tint", glm::vec4(0.4f, 0.4f, 1.f, 1.f) },
+			{ "shader", "../afterworld/shaders/water/fragment.glsl,../afterworld/shaders/water/vertex.glsl" },
+		}
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto id = gameapi -> makeObjectAttr(rootSceneId(), "generatedMesh", attr, submodelAttributes);
+
+}
