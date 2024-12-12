@@ -163,10 +163,12 @@ void onFrameWater(Water& water){
 void generateWater(){
 
 	std::vector<glm::vec3> points;
+	std::vector<glm::vec2> uvCoords;
+
 	std::vector<unsigned int> indexs;
 
 	int currIndex = 0;
-	int dim = 5;
+	int dim = 15;
 	for (int x = 0; x < dim; x++){
 		for (int y = 0; y < dim; y++){
 			float offsetX = 5.f * x;
@@ -200,7 +202,13 @@ void generateWater(){
 			currIndex++;
 
 
+			uvCoords.push_back(glm::vec2(0.f, 0.f));
+			uvCoords.push_back(glm::vec2(0.f, 1.f));
+			uvCoords.push_back(glm::vec2(1.f, 0.f));
 
+			uvCoords.push_back(glm::vec2(1.f, 0.f));
+			uvCoords.push_back(glm::vec2(0.f, 1.f));
+			uvCoords.push_back(glm::vec2(1.f, 1.f));
 
 
 		}
@@ -210,7 +218,7 @@ void generateWater(){
 	
 
 	std::string meshName = "water";
-	gameapi -> generateMeshRaw(points, indexs, meshName);
+	gameapi -> generateMeshRaw(points, uvCoords, indexs, meshName);
 
   GameobjAttributes attr {
     .attr = {
@@ -219,6 +227,8 @@ void generateWater(){
 			{ "rotation", glm::vec4(0.f, 1.f, 0.f, 0.f) },
 			{ "scale", glm::vec3(10.f, 10.f, 10.f) },
 			{ "texture", "./res/textures/blacktop.jpg" },
+//			{ "texture", "../gameresources/build/textures/lava.png" },
+
 			{ "tint", glm::vec4(0.4f, 0.4f, 1.f, 1.f) },
 			{ "shader", "../afterworld/shaders/water/fragment.glsl,../afterworld/shaders/water/vertex.glsl" },
 		}
