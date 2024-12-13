@@ -224,6 +224,11 @@ vec2 calcRipple(vec2 rippleCoord, float rippleMagnitude){
   return vec2(xWeight, yWeight);
 }
 
+float noiseIntensity = 0;
+float noise(in vec2 st){
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
 void main(){
     if (hasCubemapTexture){
       FragColor = tint * texture(cubemapTexture, FragPos);
@@ -293,11 +298,11 @@ void main(){
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
 
-
+    float noiseValue = noise(TexCoord + time * 0.00001) * noiseIntensity;
     if (enableLighting){
-      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w) * 2;
+      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w) * 2 + vec4(noiseValue, noiseValue, noiseValue, 0);
     }else{
-      FragColor = tint * texColor * vec4(1, 0.7, 0.4, 1);
+      FragColor = tint * texColor * vec4(1, 0.7, 0.4, 1) + vec4(noiseValue, noiseValue, noiseValue, 0);
     }
 
     // TODO -> what would be a better thesholding function? 
