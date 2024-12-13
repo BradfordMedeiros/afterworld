@@ -128,7 +128,11 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       if (activateKey.has_value()){
         auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true);
         playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
-        gameapi -> sendNotifyMessage(activateKey.value(), "default");
+
+        MessageWithId activateMessage {
+          .id = activateableItem.value(),
+        };
+        gameapi -> sendNotifyMessage(activateKey.value(), activateMessage);
       }
     }    
   }

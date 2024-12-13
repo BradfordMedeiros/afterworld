@@ -61,6 +61,8 @@ wall:gem:0
 
 [link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
 [link:position:15 -27.5 5
+[link:+link:link:testlink
+
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 ladder:position:-40 -10 0

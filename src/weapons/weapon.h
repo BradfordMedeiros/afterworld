@@ -9,6 +9,10 @@
 #include "../resources.h"
 #include "../controls.h"
 
+struct MessageWithId {
+  objid id;
+};
+
 enum HoldToggle { HOLD_TOGGLE_NONE, HOLD_TOGGLE_PICKUP, HOLD_TOGGLE_RELEASE };
 struct WeaponEntityState {
   bool isHoldingFire;

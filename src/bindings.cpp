@@ -158,6 +158,12 @@ std::vector<SceneRouterPath> routerPaths = {
     .camera = "maincamera",
   },
   SceneRouterPath {
+    .paths = { "loading/" },
+    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/loading.rawscene"; },
+    .makePlayer = false,
+    .camera = std::nullopt,
+  },
+  SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
     .makePlayer = false,
@@ -238,8 +244,14 @@ std::vector<SceneRouterOptions> routerPathOptions = {
       .inGameMode = false,
       .showMouse = true,
     },
-
-
+    SceneRouterOptions {
+      .paths = { 
+        PathAndParams { .path = "loading/", .params = {} },  
+      },
+      .paused = true,
+      .inGameMode = false,
+      .showMouse = true,
+    },
     defaultRouterOptions("debug/"),
     defaultRouterOptions("debug/wheel/"),
     defaultRouterOptions("gamemenu/elevatorcontrol/"),
@@ -535,7 +547,10 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount){
 }
 
 void goToLink(std::string link){
-  pushHistory({ "playing", link }, true);
+  pushHistory({ "loading" }, true);
+  gameapi -> schedule(0, 5000, NULL, [link](void*) -> void {
+    pushHistory({ "playing", link }, true);
+  });
 }
 
 UiContext getUiContext(GameState& gameState){
@@ -666,7 +681,7 @@ UiContext getUiContext(GameState& gameState){
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
-        goToLink(level.value());
+        goToLevel(gameState.sceneManagement, level.value());
       },
       .routerPush = [](std::string route, bool replace) -> void {
         pushHistory({ route }, replace);
@@ -1088,7 +1103,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == "link"){
-      goToLevel(gameState -> sceneManagement, "testlink");
+      auto attrValue = anycast<MessageWithId>(value); 
+      modassert(attrValue, "link message invalid");
+      auto linkToValue = getSingleAttr(attrValue -> id, "link");
+      modassert(linkToValue.has_value(), "link id does not have a link tag");
+      goToLink(linkToValue.value());
     }
 
     if (key == "ammo"){
