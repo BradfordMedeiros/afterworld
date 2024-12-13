@@ -21,10 +21,10 @@ struct ManagedScene {
   std::optional<objid> id; 
   int index;
   std::string path;
+  std::optional<std::string> sceneFile;
 };
 struct SceneManagement {
   std::vector<Level> levels;
-  std::optional<std::string> loadedLevel;
   std::optional<ManagedScene> managedScene;
 };
 
@@ -64,7 +64,6 @@ std::vector<Level> loadLevels(){
 SceneManagement createSceneManagement(){
   return SceneManagement {
     .levels = loadLevels(),
-    .loadedLevel = std::nullopt,
     .managedScene = std::nullopt,
   };
 }
@@ -317,13 +316,16 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
 }
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, std::vector<std::string>& queryParams){
-  modlog("scene route", std::string("path is: ") + currentPath);
+  modlog("router scene route", std::string("path is: ") + currentPath);
 
   int currentIndex = 0;
   std::vector<std::string> params;
   auto router = getSceneRouter(currentPath, &currentIndex, &params);
-  modlog("scene route, router, has router = ", print(router.has_value()));
+  modlog("router scene route, router, has router = ", print(router.has_value()));
   //modassert(router.has_value(), std::string("no router for path: ") + currentPath);
+
+  std::optional<std::string> sceneToLoad;
+
 
   int matchedRouterOption = 0;
   auto routerOptions = getRouterOptions(currentPath, queryParams, &matchedRouterOption);
@@ -336,35 +338,43 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   });
   setPaused(routerOptions.value() -> paused);
 
+  if (router.has_value() && router.value() -> scene.has_value()){
+    sceneToLoad = router.value() -> scene.value()(params);
+    modlog("router scene route load", sceneToLoad.value());
+  }
+  
+
+  bool currentSceneFileLoaded = sceneToLoad.has_value() && sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().sceneFile.has_value() && sceneManagement.managedScene.value().sceneFile.value() == sceneToLoad.value();
+
   if (sceneManagement.managedScene.has_value()){
-    if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex){
+    if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex && currentSceneFileLoaded){
+      modlog("router scene route", "already loaded, returning");
       return;
     }else{
-      modlog("scene route unload", sceneManagement.managedScene.value().path);
+      modlog("router scene route unload", sceneManagement.managedScene.value().path);
       if (sceneManagement.managedScene.value().id.has_value()){
         auto sceneFileName = gameapi -> listSceneFiles(sceneManagement.managedScene.value().id.value()).at(0);
         auto sceneName = gameapi -> sceneNameById(sceneManagement.managedScene.value().id.value());
-        modlog("scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
+        modlog("router scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
         gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
       }
       sceneManagement.managedScene = std::nullopt;
     }
   }
 
+
   if (router.has_value()){
     std::optional<objid> sceneId;
-    if (router.value() -> scene.has_value()){
-      auto sceneToLoad = router.value() -> scene.value()(params);
-      std::cout << sceneToLoad << std::endl;
-      modlog("scene route load", sceneToLoad);
-      sceneId = gameapi -> loadScene(sceneToLoad, {}, std::nullopt, {});
+    if (sceneToLoad.has_value()){
+      sceneId = gameapi -> loadScene(sceneToLoad.value(), {}, std::nullopt, {});
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
       .index = currentIndex,
       .path = currentPath,
+      .sceneFile = sceneToLoad,
     };
-    modlog("scene route load", sceneManagement.managedScene.value().path);
+    modlog("router scene route load", sceneManagement.managedScene.value().path);
     if (sceneId.has_value()){
       if (router.value() -> makePlayer){
         auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId.value());
@@ -373,8 +383,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
       }
       if (router.value() -> camera.has_value()){
-        auto cameraId = findObjByShortName(router.value() -> camera.value());
-        modassert(cameraId.has_value(), "lonSceneRouteChange, no camera in scene to load");
+        modlog("router", "setting active player");
+
+        // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
+        auto cameraId = findObjByShortName(router.value() -> camera.value(), sceneId);
+        modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
         setActivePlayer(movement, weapons, aiData, cameraId.value());      
       }
     }
@@ -521,6 +534,10 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount){
   deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }
 
+void goToLink(std::string link){
+  pushHistory({ "playing", link }, true);
+}
+
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
     setPausedMode(true); 
@@ -649,7 +666,7 @@ UiContext getUiContext(GameState& gameState){
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
-        pushHistory({ "playing", level.value() }, true);
+        goToLink(level.value());
       },
       .routerPush = [](std::string route, bool replace) -> void {
         pushHistory({ route }, replace);
@@ -681,9 +698,6 @@ UiContext getUiContext(GameState& gameState){
   return uiContext;
 }
 
-
-  std::function<void(glm::vec3 position, glm::quat rotation)> setCameraPosition;
-  std::function<void()> popTempViewpoint;
 
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
@@ -1071,6 +1085,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "terminal" && !getGlobalState().showTerminal){
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
       showTerminal("test");
+    }
+
+    if (key == "link"){
+      goToLevel(gameState -> sceneManagement, "testlink");
     }
 
     if (key == "ammo"){

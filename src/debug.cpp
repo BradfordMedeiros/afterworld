@@ -216,7 +216,7 @@ void debugOnFrame(){
   	return;
   }
  	lastPrintTime = currTime;
-  auto objid = findObjByShortName(printObjDebug.value().objname);
+  auto objid = findObjByShortName(printObjDebug.value().objname, std::nullopt);
   if (objid.has_value()){
 	  auto objAttr = getAttrHandle(objid.value());
 	  auto attr = getAttr(objAttr, printObjDebug.value().attribute.c_str());
@@ -255,7 +255,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	auto shader = gameapi -> shaderByName("ui2");
   	modlog("shader is: ", shader.has_value() ? std::to_string(shader.value()) : "no shader");
   }else if (key == 'L' && action == 0){
-  	 auto id = findObjByShortName("boxfront/Cube");
+  	 auto id = findObjByShortName("boxfront/Cube", std::nullopt);
 
   	 float duration = 5.f;
   	 if (id.has_value()){
@@ -336,7 +336,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
 
-  auto testObject = findObjByShortName("testobject-no-exist");
+  auto testObject = findObjByShortName("testobject-no-exist", std::nullopt);
   if (testObject.has_value()){
 	  if (key == 340 /* shift */ && action == 1){
 	  	gameapi -> setSingleGameObjectAttr(testObject.value(), "position", glm::vec3(0.f, 2.f, 0.f));

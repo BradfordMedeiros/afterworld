@@ -95,7 +95,7 @@ void playMusicClipById(objid id, std::optional<float> volume, std::optional<glm:
 void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 
-std::optional<objid> findObjByShortName(std::string name);
+std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId);
 std::optional<objid> activeSceneForSelected();
 
 void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint);

@@ -388,7 +388,19 @@ void playGameplayClipById(objid id, std::optional<float> volume, std::optional<g
   gameapi -> playClipById(id, volume, position);
 }
 
-std::optional<objid> findObjByShortName(std::string name){
+std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId){
+  if (sceneId.has_value()){
+    auto allChildrenIds = gameapi -> listObjAndDescInScene(sceneId.value());
+    for (auto id : allChildrenIds){
+      auto objName = gameapi -> getGameObjNameForId(id);
+      if (objName.has_value() && objName.value() == name){
+        return id;
+      }
+    }
+    return std::nullopt;
+  }
+
+
   auto allSceneIds = gameapi -> listScenes(std::nullopt);
   for (auto id : allSceneIds){
     auto objId = gameapi -> getGameObjectByName(name, id, true);

@@ -325,7 +325,7 @@ CScriptBinding particleviewerBinding(CustomApiBindings& api, const char* name){
 
 
 std::optional<objid> getEmitter(){
-  auto emitterPrefab = findObjByShortName("[particle-viewer");
+  auto emitterPrefab = findObjByShortName("[particle-viewer", std::nullopt);
   if (!emitterPrefab.has_value()){
     return std::nullopt;
   }

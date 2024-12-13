@@ -33,6 +33,7 @@
 #include "./cutscene.h"
 #include "./curves.h"
 #include "./vector_gfx.h"
+#include "./progress.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 

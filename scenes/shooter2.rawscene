@@ -19,7 +19,7 @@ platform_lowert:physics:enabled
 platform_lowert:material:metal
 
 platform_lowert:recording:test
-
+#platform_lowert:shader:../afterworld/shaders/kaleidoscope/fragment.glsl
 
 &ambient_space:clip:../gameresources/sound/busy_cyberworld.wav
 &ambient_space:loop:true
@@ -59,6 +59,8 @@ wall:gem:0
 [panel:scene:../afterworld/scenes/prefabs/objects/panel.rawscene
 [panel:position:9 -27.5 5
 
+[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
+[link:position:15 -27.5 5
 
 ladder:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 ladder:position:-40 -10 0

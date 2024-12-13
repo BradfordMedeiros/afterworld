@@ -1,0 +1,13 @@
+link:mesh:../gameresources/build/misc/barrel.gltf
+link:physics:enabled
+link:physics_mass:20
+link:physics_shape:shape_cylinder
+link:scale:1 1 1
+link:tint:0 1 1 0.5
+link:health:10
+link:health-delay:1000
+link:explode:40
+link:explode-radius:5
+link:health-tint-to:1 0.2 1 1
+link:activate:link
+
