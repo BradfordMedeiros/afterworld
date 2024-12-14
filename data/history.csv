@@ -1,33 +1,46 @@
 history.text:STRING,history.valid:STRING
 editor on,true
-editor on,true
-editor on,true
-editor on,true
-editor on,true
 editor off,true
+
+keyboard off,false
+keyboard off,false
+level fps,true
 editor on,true
-editor on,true
-editor on,true
-editor on,true
-editor on,true
-editor on,true
-editor off,true
-editor on,true
+level fps,true
+level fps,true
+level fps,true
 editor off,true
 editor on,true
 editor off,true
 editor on,true
-background /home/brad/desktop/art/arcade3.png,true
+editro on,false
 editor off,true
 editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
+keyboard off,false
+keyboard off,false
+keyboard on ,false
+keyboard off,false
+fdsf,false
+fdasf,false
+fdasf,false
+fdasf,false
+fdasfx,false
+dsfasdf,false
+asdf,false
+s,false
 f,false
 f,false
-editor on,true
+f,false
+f,false
+f,false
+dsafsdf,false
+sadfasdfasdfasdf,false
+f,false
+dfsdf,false
+xasdfasdf,false
+fasdfdffasdfasd,false
+asdfsdsadfasd,false
+fadsfasdf,false
 editor off,true
 editor on,true
 editor off,true
@@ -38,157 +51,19 @@ editor off,true
 editor on,true
 editor off,true
 editor on,true
+editr off,false
 editor off,true
 editor on,true
 editor off,true
 editor on,true
 editor off,true
-editor on,true
-editor off,true
-play,false
-help,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-vcridesvvc,false
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor offx,false
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-saeditor of,false
-editor off,true
-editor on,true
-editor off,true
-editor off,true
-editor on,true
-editor off,true
- editor on,false
-editor on,true
-editor off,true
- fdasfd,false
-editor on,true
-editor off,true
-editor on,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-help,true
 level fps,true
-level fsdfsdf,true
-level fsafsdadf,true
-level fps,true
-editor on,true
-level test,true
-editor off,true
-editor on,true
-level fps,true
-level fps1,true
-help,true
-history,true
-help history,true
-history pop,true
-history pop,true
-history ,true
-history df,true
-history pushdfasdf,true
-history push asdf,true
-router,false
-help router,true
-help,true
-router,false
-router push paused,false
-editor off,true
+fasdf,false
+xasf,false
 editor on,true
 editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-help,true
-mute,false
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor oln,false
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-edtior off,false
-editor off,true
+fasdfasdf,false
+asdfa,false
 editor on,true
 editor off,true
 editor on,true
@@ -201,39 +76,7 @@ editor on,true
 editor off,true
 editor on,true
 editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-help,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-ediotor on,false
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-editor on,true
-editor off,true
-die,false
+die,true
 die,true
 editor on,true
 editor off,true
@@ -249,6 +92,72 @@ editor on,true
 editor off,true
 editor on,true
 editor off,true
+help,true
+hideweapon,false
+showweapon,false
+showweapon,false
+hideweapon,false
+hideweapon,false
+showweapon,false
+hideweapon,false
+showweapon,false
+help,true
+hideweapon,false
+showweapon,false
+hideweapon,false
+showweapon,false
+hideweapon,false
+showweapon,false
+hideweapon,false
+hideweapon,false
+ammo,false
+ammo,false
+help,true
+hideweapon,false
+ammo,false
+ammo,false
+hideweapon,false
+hideweapon,false
+ammo,false
+ammo,false
+ammo,false
+ammo,false
+hideweapon,false
+ammo,false
+ammo,false
+showweapon,false
+ammo,false
+hideweapon,false
+ammo,false
+ammo,false
+hideweapon,false
+hideweapon,false
+hideweapon,false
+ammo,false
+showweapon,false
+ammo,false
+ammo,false
+ammo,false
+edito on,false
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editro off,false
+editro off,false
+editro off,false
+editv,false
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+help,true
+editor off,true
+edito on,false
 editor on,true
 editor off,true
 editor on,true
@@ -257,3 +166,189 @@ editor on,true
 editor off,true
 editor on,true
 editor off,true
+editor on,true
+editor off,true
+hideweapon,false
+editor on,true
+editor off,true
+help,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+help,true
+v,false
+debugui,false
+history,true
+history ,true
+history mainmenu,true
+router,false
+router mainmenu,false
+router,false
+router help,false
+editro off,false
+editro off,false
+editro off,false
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+keyboard,false
+keyboard,false
+fasdfasdffasdf,false
+pop,false
+help,true
+router pop,false
+editor on,true
+editor off,true
+sfaasdf,false
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+edtor off,false
+erouter pop,false
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+dfasdf,false
+editor on,true
+editor off,true
+disable-active,false
+editor on,true
+editor off,true
+disable-active,false
+help,true
+disable-active,false
+disable-active,false
+enable-active,false
+disable-active,false
+enable-active,false
+disable-active,false
+enable-active,false
+enable-active,false
+no-mesh-tp,false
+enable-active,false
+enable-activex,false
+enable-active,false
+help,true
+enable-active,false
+disable-active,false
+enable-active,false
+keybord,false
+keyboard,false
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+keyboard off,false
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+peditor ,false
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+level fps,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
+editor off,true
+editor on,true
