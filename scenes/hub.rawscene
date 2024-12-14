@@ -1,0 +1,8 @@
+*octree:position:0 0 0
+*octree:scale:500 500 500
+*octree:physics:enabled
+*octree:map:../afterworld/scenes/hub.map
+
+playerspawn:playerspawn:true
+playerspawn:position:200 200 0
+playerspawn:teleport:true

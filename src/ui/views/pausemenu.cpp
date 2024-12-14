@@ -4,7 +4,7 @@ Component pauseMenuComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     auto pauseMenuPtr = typeFromProps<std::vector<ImListItem>>(props, valueSymbol);
     auto tintPtr = typeFromProps<glm::vec4>(props, tintSymbol);
-    auto tint = tintPtr ? *tintPtr : glm::vec4(0.f, 0.f, 0.f, 1.f);
+    auto tint = tintPtr ? *tintPtr : glm::vec4(0.f, 0.f, 0.f, 0.8f);
 
     modassert(pauseMenuPtr, "no valueSymbol for pause menu");
     auto pauseMenu = *pauseMenuPtr;

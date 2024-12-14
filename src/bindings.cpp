@@ -550,7 +550,9 @@ void goToLink(std::string link){
   pushHistory({ "loading" }, true);
   gameapi -> schedule(0, 5000, NULL, [link](void*) -> void {
     pushHistory({ "playing", link }, true);
+    playCutscene("test", gameapi -> timeSeconds(true));
   });
+
 }
 
 UiContext getUiContext(GameState& gameState){
