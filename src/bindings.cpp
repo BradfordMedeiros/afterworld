@@ -566,7 +566,7 @@ UiContext getUiContext(GameState& gameState){
   UiContext uiContext {
    .isDebugMode = []() -> bool { 
     auto args = gameapi -> getArgs();
-    bool debugUi = args.find("debug-ui") != args.end();
+    bool debugUi = getArgEnabled("debug-ui");
     if (debugUi){
       return true;
     }
@@ -779,10 +779,14 @@ float querySelectDistance(){
   return selectDistance;
 }
 
-
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
+  if (getArgEnabled("help")){
+    printGameOptionsHelp();
+    exit(0);
+  }
+
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
     gameStatePtr = gameState;
@@ -811,31 +815,28 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
     }
 
-    if (args.find("debug-shoot") != args.end()){
+    if (getArgEnabled("debug-shoot")){
       setDrawDebugVector(true);
     }
 
     gameState -> printType = DEBUG_NONE;
-    if (args.find("print-type") != args.end()){
-      auto printType = args.at("print-type");
-      if (printType == "inventory"){
-        gameState -> printType = DEBUG_INVENTORY;
-      }else if (printType == "global"){
-        gameState -> printType = DEBUG_GLOBAL;
-      }else if (printType == "gametype"){
-        gameState -> printType = DEBUG_GAMETYPE;
-      }else if (printType == "ai"){
-        gameState -> printType = DEBUG_AI;
-      }else if (printType == "health"){
-        gameState -> printType = DEBUG_HEALTH;
-      }else if (printType == "active"){
-        gameState -> printType = DEBUG_ACTIVEPLAYER;
-      }else if (printType == "animation"){
-        gameState -> printType = DEBUG_ANIMATION;
-      }else{
-        modassert(false, "invalid print type");
-      }
+
+    if (getArgChoice("print-type", "inventory")){
+      gameState -> printType = DEBUG_INVENTORY;
+    }else if (getArgChoice("print-type", "global")){
+      gameState -> printType = DEBUG_GLOBAL;
+    }else if (getArgChoice("print-type", "gametype")){
+      gameState -> printType = DEBUG_GAMETYPE;
+    }else if (getArgChoice("print-type", "ai")){
+      gameState -> printType = DEBUG_AI;
+    }else if (getArgChoice("print-type", "health")){
+      gameState -> printType = DEBUG_HEALTH;
+    }else if (getArgChoice("print-type", "active")){
+      gameState -> printType = DEBUG_ACTIVEPLAYER;
+    }else if (getArgChoice("print-type", "animation")){
+      gameState -> printType = DEBUG_ANIMATION;
     }
+    
     if (args.find("uiselection-texture") != args.end()){
       setShowSelectionTexture(true);
     }
@@ -860,8 +861,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     );
 
 
-    if (args.find("level") != args.end()){
-      levelShortcutToLoad = args.at("level");
+    if (hasOption("level")){
+      levelShortcutToLoad = getArgOption("level");;
     }else if (args.find("route") == args.end()){
       pushHistory({ "mainmenu" }, true);
     }else{

@@ -34,6 +34,7 @@
 #include "./curves.h"
 #include "./vector_gfx.h"
 #include "./progress.h"
+#include "./options.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
