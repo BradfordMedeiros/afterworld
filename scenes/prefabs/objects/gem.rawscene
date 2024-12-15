@@ -1,0 +1,6 @@
+gem:mesh:./res/models/box/crate.gltf
+#gem:physics:enabled
+#gem:physics_type:dynamic
+gem:physics_mass:100
+gem:texture:./res/textures/hexglow.png
+gem:spin:true

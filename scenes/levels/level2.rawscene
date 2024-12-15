@@ -16,3 +16,6 @@ platform_lowert:tint:0.4 0.4 0.8 1
 [link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
 [link:position:15 -27.5 5
 [link:+link:link:hub
+
+[gem:scene:../afterworld/scenes/prefabs/objects/gem.rawscene
+[gem:position:20 -27.5 5
