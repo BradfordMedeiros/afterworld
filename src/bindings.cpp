@@ -16,6 +16,7 @@ Waypoints waypoints {
   .waypoints = {},
 };
 Tags tags{};
+std::optional<std::string> levelShortcutToLoad;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -858,19 +859,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     );
 
-    if (args.find("route") == args.end()){
+
+    if (args.find("level") != args.end()){
+      levelShortcutToLoad = args.at("level");
+    }else if (args.find("route") == args.end()){
       pushHistory({ "mainmenu" }, true);
     }else{
       pushHistory(split(args.at("route"), '/'), true);
-    }
-
-    if (args.find("level") != args.end()){
-      auto scene = levelByShortcutName(args.at("level"));
-      if (scene.has_value()){
-        goToLevel(gameState -> sceneManagement, scene.value());
-      }else{
-        modlog("routing", std::string("AFTERWORLD: no level found for shortcut: ") + args.at("level"));
-      }
     }
 
     loadDialogTree();
@@ -985,6 +980,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onFrameAi(aiData);
     onFrameDaynight();
     onTagsFrame(tags);
+
+    if (levelShortcutToLoad.has_value()){
+      goToLevel(gameState -> sceneManagement, levelShortcutToLoad.value());
+      levelShortcutToLoad = std::nullopt;
+    }
 
     // debug
     debugOnFrame();
