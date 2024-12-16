@@ -104,7 +104,7 @@ vec3 lookupAmbientLight(){
 
   int finalIndex = xyzToIndex(remainingCellX, remainingCellY, remainingCellZ);
 
-  return vec3(0, 0, 0);
+  return vec3(1, 1, 1);
 }
 
 vec3 calculatePhongLight(vec3 normal){
