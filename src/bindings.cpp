@@ -1120,6 +1120,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         deliverCurrentGunAmmo(controlledPlayer.playerId.value(), itemAcquiredMessage -> amount);
       }
     }
+    if (key == "gem-pickup"){
+      auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
+      modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
+      auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position);
+    }
 
     if (key == "play-material-sound"){
       auto soundPosition = anycast<MessagePlaySound>(value);

@@ -21,6 +21,7 @@ bool hasGun(objid inventory, std::string& gun);
 int ammoForGun(objid inventory, std::string& gun);
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 
+
 void debugPrintInventory();
 
 #endif
