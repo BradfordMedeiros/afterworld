@@ -43,14 +43,20 @@ struct UiData {
   HandlerFns uiCallbacks;
 };
 
+struct EmissionObject {
+	glm::vec3 lowColor;
+	glm::vec3 highColor;
+	float period;
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
 	InGameUi inGameUi;
 	std::unordered_map<objid, OpenableType> openable;
 	std::unordered_map<objid, float> idToRotateTimeAdded;
+	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::set<objid> teleportObjs;
-
 	std::unordered_map<objid, ManagedRecording> recordings;
 
 	UiData* uiData;

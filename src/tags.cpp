@@ -504,6 +504,44 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
+
+	TagUpdater {
+		.attribute = "autoemission",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			auto period = maybeUnwrapAttrOpt<float>(value).value();
+	  	auto attrHandle = getAttrHandle(id);
+			auto emissionLow = getVec3Attr(attrHandle, "autoemission-low");
+			auto emissionHigh = getVec3Attr(attrHandle, "autoemission-high");
+
+	  	tags.emissionObjects[id] = EmissionObject {
+	  		.lowColor = emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
+	  		.highColor = emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+	  		.period = period,
+	  	};
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.emissionObjects.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		for (auto &[id, emissionObject] : tags.emissionObjects){
+				float integer = 0.f;
+				float remaining = std::modf(gameapi -> timeSeconds(false) / emissionObject.period, &integer);
+				float interp = remaining < 0.5f ? (remaining * 2.f) : (1.f - ((remaining - 0.5f) * 2.f));
+ 				modlog("emission object interp", std::to_string(interp));
+
+	  		glm::vec3 newColor(
+	  			emissionObject.lowColor.r + ((emissionObject.highColor.r - emissionObject.lowColor.r) * interp), 
+	  			emissionObject.lowColor.g + ((emissionObject.highColor.g - emissionObject.lowColor.g) * interp), 
+	  			emissionObject.lowColor.b + ((emissionObject.highColor.b - emissionObject.lowColor.b) * interp)
+	  		);
+	  		setGameObjectEmission(id, newColor);
+  		}
+  	},
+  	.onMessage = std::nullopt,
+	},
+
+
+	
 };
 
 void setMenuBackground(std::string background){
@@ -564,6 +602,7 @@ Tags createTags(UiData* uiData){
   };
   tags.openable = {};
   tags.idToRotateTimeAdded = {};
+  tags.emissionObjects = {};
   tags.teleportObjs = {};
   tags.recordings = {};
   ///// animations ////

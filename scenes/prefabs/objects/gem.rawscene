@@ -1,6 +1,7 @@
-gem:mesh:./res/models/box/crate.gltf
-#gem:physics:enabled
-#gem:physics_type:dynamic
-gem:physics_mass:100
-gem:texture:./res/textures/hexglow.png
+gem:mesh:../gameresources/build/misc/gem.gltf
+
 gem:spin:true
+
+gem:autoemission-low:1 0 0
+gem:autoemission-high:0 0 1
+gem:autoemission:2

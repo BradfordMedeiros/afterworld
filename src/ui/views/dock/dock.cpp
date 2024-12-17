@@ -349,6 +349,7 @@ std::vector<DockConfiguration> configurations {
       DockImageConfig {
         .label =  "someimage-here",
         .onImageSelect = [](std::string texture) -> void {
+          modlog("dock set texture", texture);
           dockConfigApi.setTexture(texture);
         }
       },
