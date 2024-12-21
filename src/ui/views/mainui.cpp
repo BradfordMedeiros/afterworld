@@ -40,6 +40,50 @@ void rotateWheel(bool up){
   wheelConfig.selectedIndex = wheelRotate;
 }
 
+Component withSimpleAnimatedLayout(Component& component){
+  Component simpleAnimatedLayout {
+    .draw = [component](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      float* interpolationAmount = typeFromProps<float>(props, interpolationSymbol);
+      modassert(interpolationAmount, "interpolationAmount undefined");  
+
+      float xoffset = -2.f;
+      if (interpolationAmount){
+        xoffset += (*interpolationAmount * 2.f);
+      }
+
+      float opacity = *interpolationAmount - 0.1f;
+      if (opacity < 0){
+        opacity = 0.f;
+      }
+      drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
+
+      Layout layout {
+        .tint = glm::vec4(0.f, 0.f, 0.f, 1.f - *interpolationAmount),
+        .showBackpanel = true,
+        .borderColor = glm::vec4(1.f, 0.f, 0.f, 0.f),
+        .minwidth = 0.f,
+        .minheight = 0.f,
+        .layoutType = LAYOUT_HORIZONTAL2,
+        .layoutFlowHorizontal = UILayoutFlowNone2,
+        .layoutFlowVertical = UILayoutFlowNone2,
+        .alignHorizontal = UILayoutFlowNone2,
+        .alignVertical = UILayoutFlowNone2,
+        .spacing = 0.f,
+        .minspacing = 0.f,
+        .padding = 0.f,
+        .children = { component },
+      };
+      Props listLayoutProps {
+        .props = {
+          { .symbol = layoutSymbol, .value = layout },
+          { .symbol = xoffsetSymbol, xoffset },
+        },
+      };
+      return layoutComponent.draw(drawTools, listLayoutProps);
+    }
+  };
+  return simpleAnimatedLayout;
+}
 
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
   auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
@@ -125,10 +169,12 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     }
   );
 
+
+
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
-    { "mainmenu/levelselect/", withNavigation(uiContext, levelSelect) },
-    { "mainmenu/settings/", withNavigation(uiContext, settingsComponent) },
+    { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.25f)) },
+    { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
     { "playing/*/",  playingView },
     { "playing/*/paused/", pauseComponent },
     { "playing/*/dead/", deadComponent },

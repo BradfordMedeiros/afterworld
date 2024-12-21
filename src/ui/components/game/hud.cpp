@@ -41,6 +41,10 @@ void setUiWeapon(std::optional<std::string> weapon){
   uiWeapon = weapon;
 }
 
+std::optional<int> uiGemCount;
+void setUiGemCount(std::optional<int> count){
+  uiGemCount = count;
+}
 
 enum DrawBarAlign { DRAWBAR_ALIGN_NONE, DRAWBAR_ALIGN_POSITIVE, DRAWBAR_ALIGN_NEGATIVE };
 void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::vec2 offset, DrawBarAlign align, glm::vec4 tint){
@@ -151,6 +155,10 @@ Component hudComponent {
     }
 
     drawTools.drawText(std::string("weapon: ") + (uiWeapon.has_value() ? uiWeapon.value() : std::string("unequipped")), 0.65, 0.75, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+    if (uiGemCount.has_value()){
+      drawTools.drawText(std::string("gem count: ") + (uiGemCount.has_value() ? std::to_string(uiGemCount.value()) : ""), 0.65, 0.65, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    }
 
     if (uiVelocity.has_value()){
       glm::ivec3 speedRounded(uiVelocity.value().x, uiVelocity.value().y, uiVelocity.value().z);

@@ -424,3 +424,4 @@ Component simpleLayout(Component& component, glm::vec2 minDim, AlignmentParams d
 	std::vector<Component> components = { component };
   return simpleVerticalLayout(components, minDim, defaultAlignment, borderColor, padding);
 }
+

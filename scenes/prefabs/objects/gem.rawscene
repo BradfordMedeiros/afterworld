@@ -12,3 +12,4 @@ gem:physics:enabled
 gem:physics_collision:nocollide
 
 gem:pickup-trigger:gem-pickup
+gem:gem-name:one

@@ -182,17 +182,27 @@ Component router {
   },
 };
 
-Component withAnimator(RouterHistory& history, Component& component, float duration){
+
+Component withAnimator(RouterHistory& history, Component wrappedComponent, float duration){
   float elapsedTime = gameapi -> timeSeconds(true) - history.currentRouteTime;
   float interpAmount = glm::min(1.f, elapsedTime / duration);
 
-  Props props {
-    .props = {
-      PropPair  { .symbol = interpolationSymbol, .value = interpAmount },
-    },
+  Component component {
+    .draw = [interpAmount, wrappedComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+      Props interpProps {
+        .props = {
+          PropPair  { .symbol = interpolationSymbol, .value = interpAmount },
+        },
+      };
+
+      props.props.push_back(PropPair  { .symbol = interpolationSymbol, .value = interpAmount });
+      auto boundingBox = wrappedComponent.draw(drawTools, props);
+      return boundingBox;
+    }
   };
-  return withPropsCopy(component, props);
+  return component;
 }
+
 
 void registerOnRouteChanged(RouterHistory& history, std::function<void()> onRouteChanged){
   modassert(!history.registerOnRouteChangedFn.has_value(), "can only register a single route");

@@ -244,9 +244,8 @@ Component levelSelectComponent {
     };
     elements.push_back(withProps(levelDetail, levelDetailProps));
 
-
     Layout outerLayout {
-      .tint = glm::vec4(1.f, 1.f, 1.f, 0.f),
+      .tint = glm::vec4(0.f, 0.f, 0.f, 0.f),
       .showBackpanel = true,
       .borderColor = styles.highlightColor,
       .minwidth = 2.f,
@@ -261,6 +260,7 @@ Component levelSelectComponent {
       .padding = 0.f,
       .children = elements,
     };
+
 
     Props listLayoutProps {
       .props = {

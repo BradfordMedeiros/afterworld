@@ -81,11 +81,22 @@ int ammoForGun(objid inventory, std::string& gun){
   return static_cast<int>(inven.items.at(ammoName));
 }
 
+std::set<std::string> gems {};
+std::set<std::string>& listGems(){
+  return gems;
+}
+
 
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo){
   updateItemCount(inventory, ammoNameForGun(gun), currentAmmo);
 }
 
+bool hasGem(std::string& name){
+  return true;
+}
+void pickupGem(std::string name){
+  gems.insert(name);
+}
 
 void debugPrintInventory(){
     const float fontSize = 0.02f;

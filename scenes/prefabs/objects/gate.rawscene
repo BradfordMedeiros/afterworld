@@ -1,0 +1,30 @@
+leftside:mesh:./res/models/box/crate.gltf
+leftside:position:-2 0 0
+leftside:scale:0.2 1 1
+leftside:physics:enabled
+
+rightside:mesh:./res/models/box/crate.gltf
+rightside:position:2 0 0
+rightside:scale:0.2 1 1
+rightside:physics:enabled
+
+
+middle:mesh:./res/models/box/crate.gltf
+middle:position:0 0 0
+middle:scale:1.75 1 0.25
+middle:physics:enabled
+middle:switch-recording:raise-gate  # not yet implemented 
+
+#middle:open:open-door-trigger
+#middle:open-behavior:toggle
+
+middle:switch:someswitch
+middle:switch-recording:../afterworld/data/recordings/move-gate.rec
+
+switch:mesh:./res/models/box/crate.gltf
+switch:scale:0.2 0.2 0.2
+switch:position:2 0 -2
+switch:physics:enabled
+switch:activate:activate-switch
+switch:activate-switch-type:someswitch
+

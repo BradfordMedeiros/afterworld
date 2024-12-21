@@ -5,7 +5,7 @@
 #include "./style.h"
 #include "./uicontext.h"
 
-Component withNavigation(UiContext& uiContext, Component& wrappedComponent);
+Component withNavigation(UiContext& uiContext, Component wrappedComponent);
 
 #endif
 

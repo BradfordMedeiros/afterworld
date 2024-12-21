@@ -17,18 +17,6 @@ Props createLevelListProps(){
     }
   });
   levels.push_back(ListComponentData {
-    .name = "Model Viewer",
-    .onClick = []() -> void {
-      pushHistory({ "modelviewer" }, false);
-    }
-  });
-  levels.push_back(ListComponentData {
-    .name = "Particle Viewer",
-    .onClick = []() -> void {
-      pushHistory({ "particleviewer" }, false);
-    }
-  });
-  levels.push_back(ListComponentData {
     .name = "Quit",
     .onClick = []() -> void {
       modlog("exit", "exit normally through main menu");

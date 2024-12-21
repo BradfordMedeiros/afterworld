@@ -21,10 +21,9 @@ Component navigationComponent {
   }
 };
 
-Component withNavigation(UiContext& uiContext, Component& wrappedComponent){
+Component withNavigation(UiContext& uiContext, Component wrappedComponent){
   Component component {
     .draw = [&uiContext, wrappedComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-  
       Props emptyProps {
         .props = {
           PropPair { .symbol = xoffsetSymbol, .value = -0.95f },

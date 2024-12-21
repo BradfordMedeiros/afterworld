@@ -18,6 +18,6 @@ viewer:position:0 0 -25
 !light:position:5 0 10
 !light:color:0.3 0.3 0.3
 
->maincamera:position:0 5 -10
->maincamera:player:true
->maincamera:rotation:0 -0.4 -1 0
+maincamera:position:0 5 -10
+maincamera:player:true
+maincamera:rotation:0 -0.4 -1 0

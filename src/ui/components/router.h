@@ -22,7 +22,7 @@ std::string getCurrentPath(RouterHistory& history);
 std::vector<std::string> historyParams(RouterHistory& history);
 
 std::optional<std::string> getPathParts(RouterHistory& history, int index);
-Component withAnimator(RouterHistory& history, Component& component, float duration);
+Component withAnimator(RouterHistory& history, Component component, float duration);
 void registerOnRouteChanged(RouterHistory& history, std::function<void()> onRouteChanged);
 
 

@@ -935,6 +935,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUiWeapon(std::nullopt);
     }
 
+    setUiGemCount(listGems().size());
+
     if (controlledPlayer.playerId.has_value()){
       const bool showLookVelocity = false;
       auto thirdPersonCamera = getCameraForThirdPerson();
@@ -960,8 +962,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
     std::optional<glm::vec2> mainUiCursorCoord;
+
+    auto start = std::chrono::steady_clock::now();
+   
     gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
     modassert(tags.uiData, "tags.uiData NULL");
+    
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::microseconds timeUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    modlog("main ui time us: ", std::to_string(timeUs.count())); 
+
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
     
     std::optional<UiHealth> uiHealth;
@@ -975,7 +985,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         };
       }
     }
-    //setUiHealth(uiHealth);
+    setUiHealth(uiHealth);
     
     onFrameWater(water);
     onFrameAi(aiData);
@@ -1125,6 +1135,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
       auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true);
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position);
+      pickupGem("testgem");
+    }
+    if (key == "activate-switch"){
+      auto attrValue = anycast<MessageWithId>(value); 
+      modassert(attrValue, "activate-switch message invalid");
+      auto switchValue = getSingleAttr(attrValue -> id, "activate-switch-type");
+      modassert(switchValue.has_value(), "activate-switch does not have a activate-switch-type");
+      handleSwitch(switchValue.value());
     }
 
     if (key == "play-material-sound"){
