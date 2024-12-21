@@ -10,7 +10,7 @@ Layout createLayout(std::vector<ListComponentData> listItems, bool horizontal, U
       .props = {
         PropPair { .symbol = valueSymbol, .value = listItemData.name },
         PropPair { .symbol = onclickSymbol, .value = onClick },
-        PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f) },
+        PropPair { .symbol = colorSymbol, .value = selectedIndex == i ? glm::vec4(0.f, 0.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 0.6f) },
         PropPair { .symbol = paddingSymbol, .value = itemPadding },
 
       },

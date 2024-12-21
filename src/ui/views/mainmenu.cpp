@@ -30,9 +30,10 @@ Props createLevelListProps(){
       PropPair { .symbol = listItemsSymbol, .value = levels },
       //PropPair { .symbol = xoffsetSymbol,   .value = 0.f },
       PropPair { .symbol = yoffsetSymbol,   .value = 0.2f },
-      //PropPair { .symbol = tintSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.3f) },
+      PropPair { .symbol = colorSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.3f) },
       PropPair { .symbol = flowVertical,    .value = UILayoutFlowNegative2 },
       PropPair { .symbol = itemPaddingSymbol, .value = 0.04f },
+      PropPair { .symbol = fontsizeSymbol, .value = 0.02f },
     },
   };
   return levelProps;

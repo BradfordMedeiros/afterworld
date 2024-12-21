@@ -12,6 +12,8 @@ COMMAND_ARGS="\
   --font ./res/fonts/Walby-Regular.ttf \
   $@"
 
+#   --font ./res/fonts/ocr.ttf \
+
 if [ "$1" == "gdb" ]; then
   (
     cd ../ModEngine && gdb "$BINARY" -ex "run  $COMMAND_ARGS"
