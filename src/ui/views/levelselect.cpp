@@ -192,7 +192,7 @@ Component levelDetail {
     detailElements.push_back(createDetailText("High Score:  N/A"));
 
     Layout levelDisplayLayout {
-      .tint = glm::vec4(0.f, 0.f, 1.f, 0.1f),
+      .tint = glm::vec4(0.f, 0.f, 0.f, 0.4f),
       .showBackpanel = true,
       .borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f), //styles.highlightColor,
       .minwidth = (1.f - selectorRatio) * 2.f,

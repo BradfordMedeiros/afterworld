@@ -18,13 +18,22 @@ middle:switch-recording:raise-gate  # not yet implemented
 #middle:open:open-door-trigger
 #middle:open-behavior:toggle
 
-middle:switch:someswitch
+middle:switch:testswitch
+middle:switch-reverse:testswitch-reverse
 middle:switch-recording:../afterworld/data/recordings/move-gate.rec
 
-switch:mesh:./res/models/box/crate.gltf
-switch:scale:0.2 0.2 0.2
-switch:position:2 0 -2
-switch:physics:enabled
-switch:activate:activate-switch
-switch:activate-switch-type:someswitch
+switch-up:mesh:./res/models/box/crate.gltf
+switch-up:scale:0.2 0.2 0.2
+switch-up:position:2 0 -2
+switch-up:physics:enabled
+switch-up:activate:activate-switch
+switch-up:activate-switch-type:testswitch
+
+switch-down:mesh:./res/models/box/crate.gltf
+switch-down:scale:0.2 0.2 0.2
+switch-down:position:-2 0 -2
+switch-down:physics:enabled
+switch-down:activate:activate-switch
+switch-down:activate-switch-type:testswitch-reverse
+
 

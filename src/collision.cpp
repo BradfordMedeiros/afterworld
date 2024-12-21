@@ -9,20 +9,27 @@ void doDialogMessage(std::string& value);
 void handleSwitch(std::string switchValue){ 
   //wall:switch:someswitch
   //wall:switch-recording:somerecording
+
+  modlog("handle switch", std::string("switch value = ") + switchValue );
   auto objectsWithSwitch = gameapi -> getObjectsByAttr("switch", switchValue, std::nullopt);
+  auto objectsWithSwitchReverse = gameapi -> getObjectsByAttr("switch-reverse", switchValue, std::nullopt);  // probably shouldn't have both?
 
   //std::vector<objid> objectsWithSwitch = {};
   std::cout << "num objects with switch = " << switchValue << ", " << objectsWithSwitch.size() << std::endl;
   for (auto id : objectsWithSwitch){
-    std::cout << "handle switch: " << id << std::endl;
-    //wall:switch-recording:somerecording
-    // supposed to play recording here, setting tint for now to test
     auto objAttr = getAttrHandle(id);
     auto switchRecording = getStrAttr(objAttr, "switch-recording");
     if (switchRecording.has_value()){
-      gameapi -> playRecording(id, switchRecording.value(), std::nullopt);
+      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE);
     }
-    setGameObjectTint(id, glm::vec4(randomNum(), randomNum(), randomNum(), 1.f));
+  }
+
+  for (auto id : objectsWithSwitchReverse){
+    auto objAttr = getAttrHandle(id);
+    auto switchRecording = getStrAttr(objAttr, "switch-recording");
+    if (switchRecording.has_value()){
+      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE_REVERSE);  // play in reverse
+    }
   }
 }
 
