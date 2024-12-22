@@ -83,7 +83,7 @@ void playRecordingBySignal(std::string signal, std::string rec, bool reverse){
 	for (auto &[id, recording] : tags.recordings){
 		if (recording.signal == signal){
 			auto length = gameapi -> recordingLength(rec);
-			gameapi -> playRecording(id, rec, reverse ? RECORDING_PLAY_ONCE_REVERSE : RECORDING_PLAY_ONCE, true);
+			gameapi -> playRecording(id, rec, reverse ? RECORDING_PLAY_ONCE_REVERSE : RECORDING_PLAY_ONCE, std::nullopt);
 			modlog("play recording playback length", std::to_string(length));
 			lockedSignals[signal] = Signal {
 				.locked = true,

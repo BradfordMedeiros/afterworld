@@ -20,7 +20,7 @@ void handleSwitch(std::string switchValue){
     auto objAttr = getAttrHandle(id);
     auto switchRecording = getStrAttr(objAttr, "switch-recording");
     if (switchRecording.has_value()){
-      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE, true);
+      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE, RecordingOptionResume{});
     }
   }
 
@@ -28,7 +28,7 @@ void handleSwitch(std::string switchValue){
     auto objAttr = getAttrHandle(id);
     auto switchRecording = getStrAttr(objAttr, "switch-recording");
     if (switchRecording.has_value()){
-      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE_REVERSE, true);  // play in reverse
+      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE_REVERSE, RecordingOptionResume{});  // play in reverse
     }
   }
 }
