@@ -186,6 +186,34 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
+
+	TagUpdater {
+		.attribute = "switch",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+			auto onSignal = getSingleAttr(id, "switch");
+			auto offSignal = getSingleAttr(id, "switch-reverse");
+			addSwitch(tags.switches, id, onSignal, offSignal);
+  	},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		removeSwitch(tags.switches, id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
+	TagUpdater {
+		.attribute = "switch-reverse",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+			auto onSignal = getSingleAttr(id, "switch");
+			auto offSignal = getSingleAttr(id, "switch-reverse");
+			addSwitch(tags.switches, id, onSignal, offSignal);
+  	},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		removeSwitch(tags.switches, id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
+
 	TagUpdater {
 		.attribute = "scrollspeed",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
@@ -540,6 +568,9 @@ Tags createTags(UiData* uiData){
   tags.emissionObjects = {};
   tags.teleportObjs = {};
   tags.recordings = {};
+  tags.switches = Switches{
+  	.switches = {},
+  };
   ///// animations ////
   tags.animationController = createStateController();
 

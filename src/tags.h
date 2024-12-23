@@ -13,6 +13,7 @@
 #include "./health.h"
 #include "./debug.h"
 #include "./vector_gfx.h"
+#include "./switch.h"
 
 struct CurrentPlayingData {
 	objid id;
@@ -39,6 +40,7 @@ struct EmissionObject {
 	float period;
 };
 
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -47,6 +49,7 @@ struct Tags {
 	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::set<objid> teleportObjs;
 	std::unordered_map<objid, ManagedRecording> recordings;
+	Switches switches;
 
 	UiData* uiData;
 

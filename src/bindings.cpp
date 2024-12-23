@@ -1083,7 +1083,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "switch"){
       auto strValue = anycast<std::string>(value); 
       modassert(strValue != NULL, "switch value invalid");
-      handleSwitch(*strValue);
+      handleSwitch(tags.switches, *strValue);
       return;
     }
 
@@ -1142,7 +1142,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(attrValue, "activate-switch message invalid");
       auto switchValue = getSingleAttr(attrValue -> id, "activate-switch-type");
       modassert(switchValue.has_value(), "activate-switch does not have a activate-switch-type");
-      handleSwitch(switchValue.value());
+      handleSwitch(tags.switches, switchValue.value());
     }
 
     if (key == "play-material-sound"){

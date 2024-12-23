@@ -22,6 +22,7 @@ middle:switch:testswitch
 middle:switch-reverse:testswitch-reverse
 middle:switch-recording:../afterworld/data/recordings/move-gate.rec
 
+
 switch-up:mesh:./res/models/box/crate.gltf
 switch-up:scale:0.2 0.2 0.2
 switch-up:position:2 0 -2

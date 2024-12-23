@@ -5,38 +5,6 @@ void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
 
 
-// should work globally but needs lsobj-attr modifications, and probably should create a way to index these
-void handleSwitch(std::string switchValue){ 
-  //wall:switch:someswitch
-  //wall:switch-recording:somerecording
-
-  modlog("handle switch", std::string("switch value = ") + switchValue );
-  auto objectsWithSwitch = gameapi -> getObjectsByAttr("switch", switchValue, std::nullopt);
-  auto objectsWithSwitchReverse = gameapi -> getObjectsByAttr("switch-reverse", switchValue, std::nullopt);  // probably shouldn't have both?
-
-  //std::vector<objid> objectsWithSwitch = {};
-  std::cout << "num objects with switch = " << switchValue << ", " << objectsWithSwitch.size() << std::endl;
-  for (auto id : objectsWithSwitch){
-    auto objAttr = getAttrHandle(id);
-    auto switchRecording = getStrAttr(objAttr, "switch-recording");
-    if (switchRecording.has_value()){
-      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE, RecordingOptionResume{});
-    }
-  }
-
-  for (auto id : objectsWithSwitchReverse){
-    auto recordingState = gameapi -> recordingState(id);
-    if (recordingState.has_value()){
-      modlog("recording", std::to_string(recordingState.value().timeElapsed / recordingState.value().length));
-    }
-    auto objAttr = getAttrHandle(id);
-    auto switchRecording = getStrAttr(objAttr, "switch-recording");
-    if (switchRecording.has_value()){
-      gameapi -> playRecording(id, switchRecording.value(), RECORDING_PLAY_ONCE_REVERSE, RecordingOptionResume{});  // play in reverse
-    }
-  }
-}
-
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
   auto chatNode = getStrAttr(objAttr, "chatnode");
