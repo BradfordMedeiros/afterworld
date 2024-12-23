@@ -187,67 +187,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
-		.attribute = "open",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
- 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
-  		tags.openable[id] = OpenableType {
-  			.signal = value,
-  			.closeSignal = "close-door-trigger",
-  			.behavior = OPEN_BEHAVIOR_TOGGLE,
-  			.stateUp = false,
-  		};
-  	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
- 			tags.openable.erase(id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-	  	for (auto &[id, openable] : tags.openable){
-	  		if (!gameapi -> gameobjExists(id)){
-	  			continue;
-	  		}
-	  		if (key == openable.signal){
-	  			if (openable.behavior == OPEN_BEHAVIOR_DELETE){
-	  				auto groupId = gameapi -> groupId(id);
-      			gameapi -> removeByGroupId(groupId);
-	  			}else if (openable.behavior == OPEN_BEHAVIOR_UP){
-	  				if (!openable.stateUp){
-			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
-	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, 5.f, 0.f), true);
-		  				openable.stateUp = true;
-	  				}
-	  			}else if (openable.behavior == OPEN_BEHAVIOR_TOGGLE){
-	  				if (!openable.stateUp){
-			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
-	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, 5.f, 0.f), true);
-		  				openable.stateUp = true;
-	  				}else{
-			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
-	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, -5.f, 0.f), true);
-		  				openable.stateUp = false; 					
-	  				}
-	  			}else{
-	  				modassert(false, "open behavior not yet implemented");
-	  			}
-	  		}else if (key == openable.closeSignal){
-	  			if (openable.behavior == OPEN_BEHAVIOR_DELETE){
-	  				// do nothing
-	  			}else if (openable.behavior == OPEN_BEHAVIOR_UP){
-	  				if (openable.stateUp){
-			  			glm::vec3 position = gameapi -> getGameObjectPos(id, true);
-	  					gameapi -> setGameObjectPosition(id, position + glm::vec3(0.f, -5.f, 0.f), true);
-		  				openable.stateUp = false;
-	  				}
-	  			}else if (openable.behavior == OPEN_BEHAVIOR_TOGGLE){
-	  				//modassert(false, "close signal for a toggle door");
-	  			}else{
-	  				modassert(false, "open behavior not yet implemented");
-	  			}	
-	  		}
-	  	}
-  	},
-	},
-	TagUpdater {
 		.attribute = "scrollspeed",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
 			auto value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
@@ -504,7 +443,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "autoemission",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -598,7 +536,6 @@ Tags createTags(UiData* uiData){
   tags.inGameUi = InGameUi {
   	.textDisplays = {},
   };
-  tags.openable = {};
   tags.idToRotateTimeAdded = {};
   tags.emissionObjects = {};
   tags.teleportObjs = {};

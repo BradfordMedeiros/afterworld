@@ -24,16 +24,6 @@ struct AudioZones {
 	std::optional<CurrentPlayingData> currentPlaying;
 };
 
-enum OpenBehavior {
-		OPEN_BEHAVIOR_DELETE, OPEN_BEHAVIOR_UP, OPEN_BEHAVIOR_TOGGLE
-};
-struct OpenableType {
-	std::string signal;
-	std::string closeSignal;
-	OpenBehavior behavior;
-	bool stateUp;
-};
-
 struct ManagedRecording{
 	std::string signal;
 };
@@ -53,7 +43,6 @@ struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
 	InGameUi inGameUi;
-	std::unordered_map<objid, OpenableType> openable;
 	std::unordered_map<objid, float> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::set<objid> teleportObjs;

@@ -25,6 +25,10 @@ void handleSwitch(std::string switchValue){
   }
 
   for (auto id : objectsWithSwitchReverse){
+    auto recordingState = gameapi -> recordingState(id);
+    if (recordingState.has_value()){
+      modlog("recording", std::to_string(recordingState.value().timeElapsed / recordingState.value().length));
+    }
     auto objAttr = getAttrHandle(id);
     auto switchRecording = getStrAttr(objAttr, "switch-recording");
     if (switchRecording.has_value()){
