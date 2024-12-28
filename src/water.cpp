@@ -159,9 +159,9 @@ void onFrameWater(Water& water){
  	applyWaterForces(water);
 }
 
+static std::string waterMeshName = "water";
 
-void generateWater(){
-
+void generateWaterMesh(){
 	std::vector<glm::vec3> points;
 	std::vector<glm::vec2> uvCoords;
 
@@ -209,31 +209,26 @@ void generateWater(){
 			uvCoords.push_back(glm::vec2(1.f, 0.f));
 			uvCoords.push_back(glm::vec2(0.f, 1.f));
 			uvCoords.push_back(glm::vec2(1.f, 1.f));
-
-
 		}
 	}
-
-
 	
+	gameapi -> generateMeshRaw(points, uvCoords, indexs, waterMeshName);
+}
 
-	std::string meshName = "water";
-	gameapi -> generateMeshRaw(points, uvCoords, indexs, meshName);
-
+objid addWaterObj(objid sceneId){
   GameobjAttributes attr {
     .attr = {
-			{ "mesh", meshName },
+			{ "mesh", waterMeshName },
 			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
 			{ "rotation", glm::vec4(0.f, 1.f, 0.f, 0.f) },
 			{ "scale", glm::vec3(10.f, 10.f, 10.f) },
 			{ "texture", "./res/heightmaps/dunes_low.jpg" },
 //			{ "texture", "../gameresources/build/textures/lava.png" },
-
 			{ "tint", glm::vec4(0.4f, 0.4f, 1.f, 1.f) },
 			{ "shader", "../afterworld/shaders/water/fragment.glsl,../afterworld/shaders/water/vertex.glsl" },
 		}
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto id = gameapi -> makeObjectAttr(rootSceneId(), "generatedMesh", attr, submodelAttributes);
-
+  auto id = gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
+  return id.value();
 }

@@ -14,7 +14,7 @@ void onCollisionExitWater(Water& water, int32_t obj1, int32_t obj2);
 void onObjectRemovedWater(Water& water, objid idRemoved);
 void onFrameWater(Water& water);
 
-
-void generateWater();
+void generateWaterMesh();
+objid addWaterObj(objid sceneId);
 
 #endif
