@@ -884,9 +884,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     tags = createTags(&gameState -> uiData);
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
-
     generateWaterMesh();
-    addWaterObj(rootSceneId());
 
     return gameState;
   };
