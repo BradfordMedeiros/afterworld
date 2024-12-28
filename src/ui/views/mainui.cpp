@@ -173,7 +173,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
 
   std::map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
-    { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.25f)) },
+    { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.125f)) },
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
     { "playing/*/",  playingView },
     { "playing/*/paused/", pauseComponent },

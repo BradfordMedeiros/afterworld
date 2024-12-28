@@ -19,4 +19,6 @@ void addSwitch(Switches& switches, objid id, std::optional<std::string> onSignal
 void removeSwitch(Switches& switches, objid id);
 void handleSwitch(Switches& switches, std::string switchValue);
 
+void onAddConditionId(objid id, std::string& value);
+
 #endif 
