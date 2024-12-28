@@ -46,6 +46,7 @@ void setTotalZoom(float multiplier){
 
 bool disableAnimation = false;
 bool disableTpsMesh = false;
+bool validateAnimationControllerAnimations = false;
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -502,7 +503,7 @@ glm::vec2 getMouseVelocity(){
   return getGlobalState().mouseVelocity;
 }
 
-bool isPose(std::string& name){
+bool isPose(std::string name){
   return name.find("pose-") == 0;
 }
 DebugConfig debugPrintAnimations(){
@@ -731,6 +732,10 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
+bool hasAnimation(objid entityId, std::string& animationName){
+  return gameapi -> listAnimations(entityId).count(animationName) > 0;
+}
+
 void doAnimationTrigger(objid entityId, const char* transition){
   if (!hasControllerState(tags.animationController, entityId)){
     return;
@@ -738,15 +743,16 @@ void doAnimationTrigger(objid entityId, const char* transition){
   bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
   if (changedState){
     auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
-    if (stateAnimation){
+    bool stateAnimationHasAnimation = stateAnimation && stateAnimation -> animation.has_value();
+    bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
+    if (!disableAnimation && matchingAnimation){
       modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
-      if (stateAnimation -> animation.has_value()){
-        if (!disableAnimation){
-          gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);
-        }
-      }else{
-        gameapi -> stopAnimation(entityId);
+      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);        
+    }else{
+      if (validateAnimationControllerAnimations && stateAnimationHasAnimation && !matchingAnimation){
+        modassert(false, std::string("no matching animation: ") + stateAnimation -> animation.value());
       }
+      gameapi -> stopAnimation(entityId);
     }
   }
 }
@@ -844,10 +850,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       disableAnimation = true;
     }
 
-    if (args.find("no-mesh-tp") != args.end()){
-      disableTpsMesh = true;
-    }
-
+    disableTpsMesh = getArgEnabled("no-mesh-tp");
+    validateAnimationControllerAnimations = getArgEnabled("validate-animation");
 
     initSettings();
     registerOnRouteChanged(

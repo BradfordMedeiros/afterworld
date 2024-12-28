@@ -35,7 +35,21 @@ std::vector<GameOption> gameOptions {
     .description = "debug information for the ui",
     .option = BoolOption{},
   },
+  GameOption {
+    .arg = "no-mesh-tp",
+    .description = "disable third person mesh for controlled entities",
+    .option = BoolOption{},
+  },
+  GameOption {
+    .arg = "validate-animation",
+    .description = "validate state controller animations to verify they exist",
+    .option = BoolOption{},
+  },
+
 };
+
+
+
 
 bool getArgEnabled(const char* name){
   auto args = gameapi -> getArgs();
