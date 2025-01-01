@@ -501,7 +501,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   movementState.isGrounded = isGrounded && !movementState.inWater; 
 
   if (movementState.isGrounded && !movementState.lastFrameIsGrounded){
-    modlog("animation controller", "land");
     doAnimationTrigger(playerId, "land");
     land(playerId);
   }
@@ -522,7 +521,8 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
     bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
-    doAnimationTrigger(playerId, isSideStepping ? "sidestep" : "walking");
+    bool isMovingRight = movementState.moveVec.x >= 0.f;
+    doAnimationTrigger(playerId, isSideStepping ? (isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     moveUp(playerId, movementState.moveVec);
     doAnimationTrigger(playerId, "not-walking");

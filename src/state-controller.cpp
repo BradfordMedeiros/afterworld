@@ -37,6 +37,7 @@ bool hasControllerState(StateController& controller, objid entityId){
 }
 
 bool triggerControllerState(StateController& controller, objid entityId, int transition){
+	modlog("animation controller triggerControllerState", nameForSymbol(transition));
 	ControllerEntityState& controllerEntityState = controller.entityToState.at(entityId);
 	auto controllerStates = controller.controllers.at(controllerEntityState.controller);
 
@@ -46,6 +47,7 @@ bool triggerControllerState(StateController& controller, objid entityId, int tra
 		if (controllerState.fromState == entityState && controllerState.transition == transition){
 			entityState = controllerState.toState;
 			transitionedState = true;
+			modlog("animation controller transitionedState", nameForSymbol(transition) + ", new state = " + nameForSymbol(controllerState.toState));
 			break;
 		}
 	}

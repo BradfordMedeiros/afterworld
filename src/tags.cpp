@@ -585,8 +585,13 @@ Tags createTags(UiData* uiData){
 			},
    		ControllerState{
 				.fromState = getSymbol("idle"),
-				.toState = getSymbol("sidestep"),
-				.transition = getSymbol("sidestep"),
+				.toState = getSymbol("sidestep-right"),
+				.transition = getSymbol("sidestep-right"),
+			},
+   		ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("sidestep-left"),
+				.transition = getSymbol("sidestep-left"),
 			},
 			ControllerState{
 				.fromState = getSymbol("walking"),
@@ -599,24 +604,44 @@ Tags createTags(UiData* uiData){
 				.transition = getSymbol("jump"),
 			},
 			ControllerState{
-				.fromState = getSymbol("sidestep"),
+				.fromState = getSymbol("sidestep-right"),
 				.toState = getSymbol("jump"),
 				.transition = getSymbol("jump"),
 			},
 			ControllerState{
-				.fromState = getSymbol("sidestep"),
+				.fromState = getSymbol("sidestep-left"),
+				.toState = getSymbol("jump"),
+				.transition = getSymbol("jump"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep-right"),
 				.toState = getSymbol("idle"),
 				.transition = getSymbol("not-walking"),
 			},
 			ControllerState{
-				.fromState = getSymbol("sidestep"),
+				.fromState = getSymbol("sidestep-left"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("not-walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep-right"),
+				.toState = getSymbol("walking"),
+				.transition = getSymbol("walking"),
+			},
+			ControllerState{
+				.fromState = getSymbol("sidestep-left"),
 				.toState = getSymbol("walking"),
 				.transition = getSymbol("walking"),
 			},
 			ControllerState{
 				.fromState = getSymbol("walking"),
-				.toState = getSymbol("sidestep"),
-				.transition = getSymbol("sidestep"),
+				.toState = getSymbol("sidestep-right"),
+				.transition = getSymbol("sidestep-right"),
+			},
+			ControllerState{
+				.fromState = getSymbol("walking"),
+				.toState = getSymbol("sidestep-left"),
+				.transition = getSymbol("sidestep-left"),
 			},
    		 ControllerState{
 				.fromState = getSymbol("idle"),
@@ -632,7 +657,7 @@ Tags createTags(UiData* uiData){
    	{
    		ControllerStateAnimation {
    			.state = getSymbol("idle"),
-   			.animation = std::nullopt,
+   			.animation = "idle", // make this idle
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
@@ -641,8 +666,13 @@ Tags createTags(UiData* uiData){
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
-   			.state = getSymbol("sidestep"),
-   			.animation = "sidestep",
+   			.state = getSymbol("sidestep-right"),
+   			.animation = "strafe-right",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("sidestep-left"),
+   			.animation = "strafe-left",
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {

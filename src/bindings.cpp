@@ -46,7 +46,7 @@ void setTotalZoom(float multiplier){
 
 bool disableAnimation = false;
 bool disableTpsMesh = false;
-bool validateAnimationControllerAnimations = false;
+bool validateAnimationControllerAnimations = true;
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -736,25 +736,37 @@ bool hasAnimation(objid entityId, std::string& animationName){
   return gameapi -> listAnimations(entityId).count(animationName) > 0;
 }
 
+
+std::set<objid> pendingAnimations;
+
 void doAnimationTrigger(objid entityId, const char* transition){
   if (!hasControllerState(tags.animationController, entityId)){
     return;
   }
   bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
   if (changedState){
+    pendingAnimations.insert(entityId);
+  }
+}
+void doStateControllerAnimations(){
+  for (auto entityId : pendingAnimations){
     auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
     bool stateAnimationHasAnimation = stateAnimation && stateAnimation -> animation.has_value();
     bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
     if (!disableAnimation && matchingAnimation){
-      modlog("animation controller", std::string("changed state to: ") + nameForSymbol(stateAnimation -> state));
+      modlog("animation controller play animation for state", nameForSymbol(stateAnimation -> state));
       gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);        
     }else{
-      if (validateAnimationControllerAnimations && stateAnimationHasAnimation && !matchingAnimation){
-        modassert(false, std::string("no matching animation: ") + stateAnimation -> animation.value());
+      if (stateAnimationHasAnimation && !matchingAnimation){
+        if (validateAnimationControllerAnimations){
+          modassert(false, std::string("no matching animation: ") + stateAnimation -> animation.value());
+        }
+        modlog("animation controller play animation no matching animation for state", nameForSymbol(stateAnimation -> state) + ", for animation: " + stateAnimation -> animation.value());
       }
       gameapi -> stopAnimation(entityId);
     }
   }
+  pendingAnimations = {};
 }
 
 UiStateContext uiStateContext {
@@ -994,6 +1006,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onFrameAi(aiData);
     onFrameDaynight();
     onTagsFrame(tags);
+    doStateControllerAnimations();
 
     if (levelShortcutToLoad.has_value()){
       goToLevel(gameState -> sceneManagement, levelShortcutToLoad.value());
