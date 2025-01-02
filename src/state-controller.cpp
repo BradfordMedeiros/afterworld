@@ -4,6 +4,7 @@ StateController createStateController(){
 	return StateController{
 		.controllers = {},
 		.entityToState = {},
+		.pendingAnimations = {},
 	};
 }
 
@@ -26,6 +27,7 @@ void addEntityController(StateController& controller, objid entityId, int contro
 		.controller = controllerId,
 		.currentState = initialEntityState,
 	};
+	controller.pendingAnimations.insert(entityId);
 }
 
 void removeEntityController(StateController& controller, objid entityId){

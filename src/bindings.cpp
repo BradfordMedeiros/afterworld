@@ -737,19 +737,17 @@ bool hasAnimation(objid entityId, std::string& animationName){
 }
 
 
-std::set<objid> pendingAnimations;
-
 void doAnimationTrigger(objid entityId, const char* transition){
   if (!hasControllerState(tags.animationController, entityId)){
     return;
   }
   bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
   if (changedState){
-    pendingAnimations.insert(entityId);
+    tags.animationController.pendingAnimations.insert(entityId);
   }
 }
 void doStateControllerAnimations(){
-  for (auto entityId : pendingAnimations){
+  for (auto entityId : tags.animationController.pendingAnimations){
     auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
     bool stateAnimationHasAnimation = stateAnimation && stateAnimation -> animation.has_value();
     bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
@@ -766,7 +764,7 @@ void doStateControllerAnimations(){
       gameapi -> stopAnimation(entityId);
     }
   }
-  pendingAnimations = {};
+  tags.animationController.pendingAnimations = {};
 }
 
 UiStateContext uiStateContext {

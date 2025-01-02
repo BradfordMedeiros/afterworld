@@ -30,6 +30,8 @@ struct ControllerEntityState {
 struct StateController {
 	std::unordered_map<int, SingleStateController> controllers;
 	std::unordered_map<objid, ControllerEntityState> entityToState;
+
+	std::set<objid> pendingAnimations;
 };
 
 StateController createStateController();
