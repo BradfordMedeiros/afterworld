@@ -652,7 +652,20 @@ Tags createTags(UiData* uiData){
 				.fromState = getSymbol("jump"),
 				.toState = getSymbol("idle"),
 				.transition = getSymbol("land"),
-			}
+			},
+
+			// aiming
+   		 ControllerState{
+				.fromState = getSymbol("idle"),
+				.toState = getSymbol("aiming"),
+				.transition = getSymbol("start-aiming"),
+			},
+   		 ControllerState{
+				.fromState = getSymbol("aiming"),
+				.toState = getSymbol("idle"),
+				.transition = getSymbol("stop-aiming"),
+			},
+
 		},
    	{
    		ControllerStateAnimation {
@@ -677,6 +690,11 @@ Tags createTags(UiData* uiData){
    		},
    		ControllerStateAnimation {
    			.state = getSymbol("jump"),
+   			.animation = "jump",
+   			.animationBehavior = FORWARDS,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("aiming"),
    			.animation = "jump",
    			.animationBehavior = FORWARDS,
    		},

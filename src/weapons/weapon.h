@@ -55,6 +55,7 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookV
 
 struct WeaponsMouseUpdate {
   std::optional<float> zoomAmount;
+  std::optional<bool> zoomUpdate;
 };
 WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance);
 void onWeaponsKeyCallback(WeaponEntityState& weaponsState, int key, int action, objid playerId);

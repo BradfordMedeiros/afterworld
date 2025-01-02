@@ -228,6 +228,7 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookV
 const float zoomAmount = 4.f;
 WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance){
   std::optional<float> zoomUpdateAmount;
+  std::optional<bool> zoomUpdate;
   if (isFireButton(button)){
     if (action == 0){
       weaponsState.isHoldingFire = false;
@@ -238,15 +239,18 @@ WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int b
   }else if (isAimButton(button)){
     if (action == 0){
       weaponsState.isGunZoomed = false;
+      zoomUpdate = false;
       zoomUpdateAmount = 1.f;
     }else if (action == 1){
       // select item
       weaponsState.isGunZoomed = true;
+      zoomUpdate = true;
       zoomUpdateAmount = 1.f / zoomAmount;
     }
   }
   return WeaponsMouseUpdate {
     .zoomAmount = zoomUpdateAmount,
+    .zoomUpdate = zoomUpdate,
   };
 }
 

@@ -1256,6 +1256,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());
         }
+        if (uiUpdate.zoomUpdate.has_value()){
+          doAnimationTrigger(controlledPlayer.playerId.value(), uiUpdate.zoomUpdate.value() ? "start-aiming" : "stop-aiming");
+        }
       }
     }
   };
