@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../util.h"
 
 struct ControllerState {
 	int fromState;
@@ -42,5 +42,7 @@ void removeEntityController(StateController& controller, objid entityId);
 bool hasControllerState(StateController& controller, objid entityId);
 bool triggerControllerState(StateController& controller, objid entityId, int transition);
 ControllerStateAnimation* stateAnimationForController(StateController& controller, objid entityId);
+
+std::optional<std::string> dumpAsString(StateController& controller, std::string name);
 
 #endif 

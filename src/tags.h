@@ -5,7 +5,7 @@
 #include <vector>
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
-#include "./state-controller.h"
+#include "./animation/animation.h"
 #include "./spawn.h"
 #include "./global.h"
 #include "./in-game-ui.h"

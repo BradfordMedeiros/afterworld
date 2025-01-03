@@ -8,6 +8,7 @@
 #include "./controls.h"
 #include "./spawn.h"
 #include "./cutscene.h"
+#include "./tags.h"
 
 void debugOnFrame();
 void debugOnKey(int key, int scancode, int action, int mods);

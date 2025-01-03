@@ -67,3 +67,36 @@ ControllerStateAnimation* stateAnimationForController(StateController& controlle
 	}
 	return NULL;
 }
+
+
+//relations = relations + getDotInfoForNode(dotInfo.parent.value()) + " -- " + getDotInfoForNode(dotInfo.child) + "\n";
+
+
+std::optional<std::string> dumpAsString(StateController& controller, std::string name){
+
+  std::string graph = "";
+  std::string prefix = "strict digraph {\n";
+  std::string suffix = "}"; 
+
+  std::string relations = "";
+
+	for (auto &[id, stateController] : controller.controllers){
+		auto controllerName = nameForSymbol(id);
+		if (controllerName == name){
+			for (auto &controllerTransition : stateController.transitions){
+				auto fromState = nameForSymbol(controllerTransition.fromState);
+				auto toState = nameForSymbol(controllerTransition.toState);
+				auto transition = nameForSymbol(controllerTransition.transition);
+				relations += std::string("\"") + fromState + "\"";
+				relations += " -> ";
+				relations += std::string("\"") + toState + "\"";
+				relations += "[label=\"" + transition + "\"]";
+				relations += "\n";
+			}
+		}
+	}
+
+  graph = graph + prefix + relations + suffix;
+
+	return graph;
+}

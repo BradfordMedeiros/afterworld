@@ -773,7 +773,6 @@ UiStateContext uiStateContext {
 };
 
 
-extern std::unordered_map<objid, ControllableEntity> controllableEntities;
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
     setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {

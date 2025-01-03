@@ -1,6 +1,7 @@
 #include "./debug.h"
 
 extern CustomApiBindings* gameapi;
+extern Tags tags;
 
 void spawnProcMesh(objid sceneId){
 	std::vector<glm::vec3> faces = {
@@ -335,6 +336,10 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	}
   }
 
+  if (key == 'L' && action == 0){
+  	std::cout << dumpAsString(tags.animationController, "character").value() << std::endl;
+  	exit(0);
+  }
 
   auto testObject = findObjByShortName("testobject-no-exist", std::nullopt);
   if (testObject.has_value()){
