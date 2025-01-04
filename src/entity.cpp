@@ -19,14 +19,16 @@ std::optional<objid> getPlayerId(){
 	return controlledPlayer.playerId;
 }
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
-	modlog("onAddControllableEntity added id:", std::to_string(idAdded));
+	modlog("controllable entity added id:", std::to_string(idAdded));
   bool shouldAddWeapon = false;
   shouldAddWeapon = shouldAddWeapon || maybeAddMovementEntity(movementEntities, idAdded);
   auto agent = getSingleAttr(idAdded, "agent");
   if (agent.has_value()){
   	shouldAddWeapon = true;
     addAiAgent(aiData, idAdded, agent.value());
-    controllableEntities[idAdded] = ControllableEntity {};
+    controllableEntities[idAdded] = ControllableEntity {
+    	.isInShootingMode = true,
+    };
   }
 
   if (shouldAddWeapon){
@@ -36,11 +38,18 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
+	if (controllableEntities.find(idRemoved) != controllableEntities.end()){
+		modlog("controllable entity removed id:", std::to_string(idRemoved));
+	}
   maybeRemoveMovementEntity(movement, movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
   removeWeaponId(weapons, idRemoved);
   removeInventory(idRemoved);
   controllableEntities.erase(idRemoved);
+}
+
+bool controllableEntityExists(objid id){
+	return controllableEntities.find(id) != controllableEntities.end();
 }
 
 void updateCamera(){
@@ -63,6 +72,18 @@ std::optional<bool> activePlayerInThirdPerson(){
 	}
 	bool thirdPerson = getWeaponEntityData(controlledPlayer.playerId.value()).thirdPersonMode;
 	return thirdPerson;
+}
+
+std::optional<bool> isInShootingMode(objid id){
+	if (controllableEntities.find(id) == controllableEntities.end()){
+		return false;
+	}
+	return controllableEntities.at(id).isInShootingMode;
+}
+
+void setInShootingMode(objid id, bool shootingMode){
+	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setInShootingMode for unregistered controllableEntity: ") + std::to_string(id));
+	controllableEntities.at(id).isInShootingMode = shootingMode;
 }
 
 void maybeReEnableMesh(objid id){

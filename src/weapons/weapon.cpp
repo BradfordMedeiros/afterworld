@@ -1,6 +1,8 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
+void doAnimationTrigger(objid id, const char* transition);
+bool entityInShootingMode(objid id);
 
 bool showWeaponViewModel = true;
 
@@ -184,7 +186,8 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
   }
   weaponState.holdToggle = HOLD_TOGGLE_NONE;
 
-  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory, fireTransform);
+  auto isInShootingMode = entityInShootingMode(playerId);
+  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory, fireTransform, isInShootingMode);
 
   weaponState.fireOnce = false;
   swayGun(weaponState.weaponValues, weaponState.isGunZoomed, playerId, lookVelocity, playerVelocity);

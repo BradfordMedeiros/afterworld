@@ -15,14 +15,19 @@ struct ControlledPlayer {
 };
 
 struct ControllableEntity {
+	bool isInShootingMode;  // not sure if this should be in here but w/e
 };
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
+bool controllableEntityExists(objid id);
 
 std::optional<objid> getActivePlayerId();
 std::optional<objid> getCameraForThirdPerson();
 std::optional<bool> activePlayerInThirdPerson();
+
+std::optional<bool> isInShootingMode(objid id);
+void setInShootingMode(objid id, bool shootingMode);
 
 void maybeReEnableMesh(objid id);
 void maybeDisableMesh(objid id);

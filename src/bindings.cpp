@@ -794,6 +794,10 @@ float querySelectDistance(){
   return selectDistance;
 }
 
+bool entityInShootingMode(objid id){
+  return isInShootingMode(id).value();
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1064,6 +1068,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData.worldInfo);
+      if (controlledPlayer.playerId.has_value()){
+        setInShootingMode(controlledPlayer.playerId.value(), !isInShootingMode(controlledPlayer.playerId.value()).value());
+      }
     }
 
     debugOnKey(key, scancode, action, mods);
@@ -1252,9 +1259,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());
-        }
-        if (uiUpdate.zoomUpdate.has_value()){
-          doAnimationTrigger(controlledPlayer.playerId.value(), uiUpdate.zoomUpdate.value() ? "start-aiming" : "stop-aiming");
         }
       }
     }

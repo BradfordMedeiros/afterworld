@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
+bool entityInShootingMode(objid id);
 
 struct MovementCore {
   std::string name;
@@ -473,6 +474,7 @@ bool calcIfWalking(MovementState& movementState){
   return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
 }
 
+
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed, bool enableThirdPerson){
   auto currTime = gameapi -> timeSeconds(false);
   float elapsedTime = gameapi -> timeElapsed();
@@ -517,17 +519,23 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   auto direction = glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z);
   auto isWalking = calcIfWalking(movementState);
 
+  auto isHoldingGun = entityInShootingMode(playerId);
+
   if (isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
     bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
     bool isMovingRight = movementState.moveVec.x >= 0.f;
-    doAnimationTrigger(playerId, isSideStepping ? (isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+    if (!isHoldingGun){
+      doAnimationTrigger(playerId, isSideStepping ? (isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+    }else{
+      doAnimationTrigger(playerId, isSideStepping ? (isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
+    }
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     moveUp(playerId, movementState.moveVec);
-    doAnimationTrigger(playerId, "not-walking");
+    doAnimationTrigger(playerId, isHoldingGun ? "not-walking-rifle" : "not-walking");
   }else{
-    doAnimationTrigger(playerId, "not-walking");
+    doAnimationTrigger(playerId, isHoldingGun ? "not-walking-rifle" : "not-walking");
   }
 
 
