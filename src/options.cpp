@@ -41,6 +41,11 @@ std::vector<GameOption> gameOptions {
     .option = BoolOption{},
   },
   GameOption {
+    .arg = "no-animation",
+    .description = "disable animation controller animations",
+    .option = BoolOption{},
+  },
+  GameOption {
     .arg = "validate-animation",
     .description = "validate state controller animations to verify they exist",
     .option = BoolOption{},

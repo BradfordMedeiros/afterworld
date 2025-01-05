@@ -859,7 +859,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (args.find("uiselection-texture") != args.end()){
       setShowSelectionTexture(true);
     }
-    if (args.find("no-animation") != args.end()){
+    if (getArgEnabled("no-animation")){
       disableAnimation = true;
     }
 

@@ -18,6 +18,7 @@ maincamera:tint:1 0 0 0.1
 maincamera:layer:transparency
 #maincamera:disabled:true
 maincamera:physics_mass:100000
+maincamera:agent:basic
 
 #
 #box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
