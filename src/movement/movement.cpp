@@ -363,7 +363,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (movementEntity.managedCamera.thirdPersonMode && movement.disabledMeshes.count(id) > 0){
+    if ((movementEntity.managedCamera.thirdPersonMode || activeId != id) && movement.disabledMeshes.count(id) > 0){
        movement.disabledMeshes.erase(id);
        maybeReEnableMesh(id);
     }
