@@ -251,19 +251,18 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
 
   bool sameGun = currentGun.has_value() && (*currentGun.value() == _gunInstance.desiredGun);
   if (sameGun && _gunInstance.gunId.has_value() && createGunModel){
+    modlog("weapons ensureGunInstance", "nothing to do, gun already created");
     return;
   }
   modlog("weapons ensureGunInstance", std::string("change gun instance: ") + _gunInstance.desiredGun);
 
   if (_gunInstance.gunId.has_value()){
+    modlog("weapons ensureGunInstance", std::string("removing gun instance: ") + _gunInstance.desiredGun);
     gameapi -> removeByGroupId(_gunInstance.gunId.value());
   }
   _gunInstance.gunId = std::nullopt;
   _gunInstance.muzzleId = std::nullopt;
 
-  if (sameGun && !createGunModel){
-    return;
-  }
 
   auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores
   std::optional<objid> gunId;
@@ -272,6 +271,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
   if (createGunModel){
     auto sceneId = gameapi -> listSceneId(parentId);
     auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
+    modlog("weapons ensureGunInstance", "creating weapon instance");
     gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
       gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
