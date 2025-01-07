@@ -1,5 +1,4 @@
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
-enemy:rotation:0 0 -1 0
 enemy:physics_angle:0 0 0
 enemy:physics:enabled
 enemy:physics_type:dynamic
@@ -7,10 +6,6 @@ enemy:physics_mass:5
 enemy/doctor::tint:1 0 0 1
 enemy/doctor:disabled:true
 enemy/doctor:tint:0 0 1 1
-
-enemy:scale:0.01 0.01 0.01
-
-enemy:rotation:0 0 -1 0
 
 enemy:team:red
 enemy:health:130
