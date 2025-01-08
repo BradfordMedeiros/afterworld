@@ -931,9 +931,22 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
     if (controlledPlayer.playerId.has_value() && !isPaused()){  
-      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, [](objid id) -> objid {
-        return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
-      });
+      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
+        [](objid id) -> objid {
+          return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
+        }, 
+        [](objid id) -> objid {
+          auto children = gameapi -> getChildrenIdsAndParent(id);
+          for (auto childId : children){
+            auto name = gameapi -> getGameObjNameForId(childId).value();
+            if (stringEndsWith(name, "mixamorig:RightHand")){
+              return childId;
+            }
+          }
+          modassert(false, "could not find the bone for the weapon");
+          return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
+        }
+      );
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);

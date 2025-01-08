@@ -178,6 +178,25 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   return gunId.value();
 }
 
+objid createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::function<objid(objid)> getWeaponParentId){
+  std::map<std::string, AttributeValue> attrAttributes = { 
+    { "mesh", weaponParams.modelpath }, 
+    //{ "rotation", weaponParams.initialGunRotVec4 },
+   // { "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) },
+   // { "scale", weaponParams.scale },
+    //{ "scale", glm::vec3(5.f, 5.f, 5.f) },
+
+   // { "tint", glm::vec4(1.f, 1.f, 1.f, 0.4f) },
+  };
+  GameobjAttributes attr { .attr = attrAttributes };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  auto gunId = gameapi -> makeObjectAttr(sceneId, /*weaponName*/ "thisisaweaponname", attr, submodelAttributes);
+  modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
+  gameapi -> makeParent(gunId.value(), getWeaponParentId(parentId));
+  return gunId.value();
+
+}
+
 void saveGunTransform(GunInstance& weaponValues){
   debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
 
@@ -237,7 +256,8 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
   return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
 
-void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId){
+
+void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, std::function<objid(objid)> getWeaponParentIdThirdPerson){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
   if (elapsedTimeSinceChange  < 0.5f){
     //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
@@ -279,12 +299,18 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
     muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
     if (!muzzlePointId.has_value()){
       modlog("weapon core", std::string("no muzzle defined for: ") + _gunInstance.desiredGun);
-    }    
+    }
+
+
+    if (!_gunInstance.thirdPersonGunId.has_value()){
+      _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, getWeaponParentIdThirdPerson);
+    } 
   }
 
   _gunInstance.gunCore = gunCore;
   _gunInstance.gunId = gunId;
   _gunInstance.muzzleId = muzzlePointId;
+
 }
 
 void changeGunAnimate(GunInstance& weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel){
@@ -306,7 +332,12 @@ void removeGun(GunInstance& weaponValues){
     weaponValues.muzzleId = std::nullopt; 
     weaponValues.gunCore.weaponCore = NULL;
   }
+
+  if (weaponValues.thirdPersonGunId.has_value()){
+    gameapi -> removeByGroupId(weaponValues.thirdPersonGunId.value());
+  }
 }
+
 
 void deliverAmmo(objid inventory, std::string gunName, int ammo){
   auto oldAmmo = ammoForGun(inventory, gunName);

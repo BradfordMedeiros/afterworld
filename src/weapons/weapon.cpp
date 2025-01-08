@@ -119,8 +119,9 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
   return weapons.idToWeapon.at(id);
 }
 
-WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, std::function<objid(objid)> getWeaponParentId, FiringTransform& fireTransform){
-  ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun, getWeaponParentId);
+
+WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, std::function<objid(objid)> getWeaponParentId, std::function<objid(objid)> getWeaponParentIdThirdPerson, FiringTransform& fireTransform){
+  ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun, getWeaponParentId, getWeaponParentIdThirdPerson);
 
   if (weaponState.activate){
     auto activateableItem = raycastActivateableItem(playerId);
@@ -211,7 +212,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
 }
 
 
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData, std::function<objid(objid)> getWeaponParentId) {
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData, std::function<objid(objid)> getWeaponParentId, std::function<objid(objid)> getWeaponParentIdThirdPerson) {
   WeaponsUiUpdate weaponsUiUpdate{
     .ammoInfo = std::nullopt,
     .showActivateUi = false,
@@ -220,7 +221,7 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookV
     auto weaponEntityData = getWeaponEntityData(id);
     bool activePlayer = id == playerId;
 
-    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode, getWeaponParentId, weaponEntityData.fireTransform);
+    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode, getWeaponParentId, getWeaponParentIdThirdPerson, weaponEntityData.fireTransform);
     if (activePlayer){
       weaponsUiUpdate = uiUpdate;
     }
