@@ -98,7 +98,7 @@ GunCore createGunCoreInstance(std::string gun, objid sceneId);
 std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues);
 
 struct ThirdPersonWeapon {
-  std::function<objid(objid)> getWeaponParentId;
+  std::function<std::optional<objid>(objid)> getWeaponParentId;
 };
 void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);

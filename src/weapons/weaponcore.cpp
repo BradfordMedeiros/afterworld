@@ -178,7 +178,12 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   return gunId.value();
 }
 
-objid createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, ThirdPersonWeapon thirdPersonWeapon){
+std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, ThirdPersonWeapon thirdPersonWeapon){
+  auto entityHandId = thirdPersonWeapon.getWeaponParentId(parentId);
+  if (!entityHandId.has_value()){
+    return std::nullopt;
+  }
+
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
     { "rotation", glm::vec4(0.f, 0.f, -1.f, 270.f) },
@@ -188,7 +193,8 @@ objid createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId,
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, /*weaponName*/ "thisisaweaponname", attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
-  gameapi -> makeParent(gunId.value(), thirdPersonWeapon.getWeaponParentId(parentId));
+
+  gameapi -> makeParent(gunId.value(), entityHandId.value());
   return gunId.value();
 
 }
@@ -252,6 +258,9 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
   return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
 
+void ensureGunInstanceThirdPerson(GunInstance& _gunInstance, objid parentId, ThirdPersonWeapon thirdPersonWeapon){
+
+}
 
 void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
@@ -264,6 +273,10 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
   if (!currentGun.has_value() && _gunInstance.desiredGun == ""){
     return;
   }
+
+  auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores
+
+  ensureGunInstanceThirdPerson(_gunInstance, parentId, thirdPersonWeapon);
 
   bool sameGun = currentGun.has_value() && (*currentGun.value() == _gunInstance.desiredGun);
   if (sameGun && _gunInstance.gunId.has_value() && createGunModel){
@@ -280,7 +293,6 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
   _gunInstance.muzzleId = std::nullopt;
 
 
-  auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores
   std::optional<objid> gunId;
   std::optional<objid> muzzlePointId;
 

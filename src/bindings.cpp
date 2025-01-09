@@ -935,16 +935,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         [](objid id) -> objid {
           return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
         }, 
-        [](objid id) -> objid {
-          auto children = gameapi -> getChildrenIdsAndParent(id);
-          for (auto childId : children){
-            auto name = gameapi -> getGameObjNameForId(childId).value();
-            if (stringEndsWith(name, "mixamorig:RightHand")){
-              return childId;
+        ThirdPersonWeapon {
+          .getWeaponParentId = [](objid id) -> std::optional<objid> {
+            auto children = gameapi -> getChildrenIdsAndParent(id);
+            for (auto childId : children){
+              auto name = gameapi -> getGameObjNameForId(childId).value();
+              if (stringEndsWith(name, "mixamorig:RightHand")){
+                return childId;
+              }
             }
+            return std::nullopt;
           }
-          modassert(false, "could not find the bone for the weapon");
-          return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
         }
       );
       setShowActivate(uiUpdate.showActivateUi);
