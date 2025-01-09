@@ -97,7 +97,10 @@ struct GunInstance {
 GunCore createGunCoreInstance(std::string gun, objid sceneId);
 std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues);
 
-void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, std::function<objid(objid)> getWeaponParentIdThirdPerson);
+struct ThirdPersonWeapon {
+  std::function<objid(objid)> getWeaponParentId;
+};
+void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);
 void removeGun(GunInstance& weaponValues);
 

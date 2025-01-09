@@ -178,21 +178,17 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   return gunId.value();
 }
 
-objid createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::function<objid(objid)> getWeaponParentId){
+objid createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, ThirdPersonWeapon thirdPersonWeapon){
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
-    //{ "rotation", weaponParams.initialGunRotVec4 },
-   // { "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) },
-   // { "scale", weaponParams.scale },
-    //{ "scale", glm::vec3(5.f, 5.f, 5.f) },
-
-   // { "tint", glm::vec4(1.f, 1.f, 1.f, 0.4f) },
+    { "rotation", glm::vec4(0.f, 0.f, -1.f, 270.f) },
+    { "position", glm::vec3(0.f, 0.4f, -0.f) },
   };
   GameobjAttributes attr { .attr = attrAttributes };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, /*weaponName*/ "thisisaweaponname", attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
-  gameapi -> makeParent(gunId.value(), getWeaponParentId(parentId));
+  gameapi -> makeParent(gunId.value(), thirdPersonWeapon.getWeaponParentId(parentId));
   return gunId.value();
 
 }
@@ -257,7 +253,7 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
 }
 
 
-void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, std::function<objid(objid)> getWeaponParentIdThirdPerson){
+void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
   if (elapsedTimeSinceChange  < 0.5f){
     //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
@@ -303,7 +299,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
 
 
     if (!_gunInstance.thirdPersonGunId.has_value()){
-      _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, getWeaponParentIdThirdPerson);
+      _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, thirdPersonWeapon);
     } 
   }
 
