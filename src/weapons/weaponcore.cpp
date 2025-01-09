@@ -178,7 +178,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   return gunId.value();
 }
 
-std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, ThirdPersonWeapon thirdPersonWeapon){
+std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, ThirdPersonWeapon thirdPersonWeapon, std::string& weaponName){
   auto entityHandId = thirdPersonWeapon.getWeaponParentId(parentId);
   if (!entityHandId.has_value()){
     return std::nullopt;
@@ -191,7 +191,7 @@ std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams,
   };
   GameobjAttributes attr { .attr = attrAttributes };
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  auto gunId = gameapi -> makeObjectAttr(sceneId, /*weaponName*/ "thisisaweaponname", attr, submodelAttributes);
+  auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
 
   gameapi -> makeParent(gunId.value(), entityHandId.value());
@@ -258,66 +258,68 @@ std::optional<std::string*> getCurrentGunName(GunInstance& weaponValues){
   return &weaponValues.gunCore.weaponCore -> weaponParams.name;
 }
 
-void ensureGunInstanceThirdPerson(GunInstance& _gunInstance, objid parentId, ThirdPersonWeapon thirdPersonWeapon){
-
-}
-
+bool showThirdPersonGunModel = true;
 void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon){
   auto elapsedTimeSinceChange = gameapi -> timeSeconds(false) - _gunInstance.changeGunTime; 
   if (elapsedTimeSinceChange  < 0.5f){
     //modlog("ensure gun instance weapons not enough time", std::to_string(elapsedTimeSinceChange));
     return;
   }
-
   auto currentGun = getCurrentGunName(_gunInstance);
   if (!currentGun.has_value() && _gunInstance.desiredGun == ""){
     return;
   }
 
-  auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores
-
-  ensureGunInstanceThirdPerson(_gunInstance, parentId, thirdPersonWeapon);
 
   bool sameGun = currentGun.has_value() && (*currentGun.value() == _gunInstance.desiredGun);
-  if (sameGun && _gunInstance.gunId.has_value() && createGunModel){
-    modlog("weapons ensureGunInstance", "nothing to do, gun already created");
-    return;
-  }
-  modlog("weapons ensureGunInstance", std::string("change gun instance: ") + _gunInstance.desiredGun);
 
-  if (_gunInstance.gunId.has_value()){
-    modlog("weapons ensureGunInstance", std::string("removing gun instance: ") + _gunInstance.desiredGun);
+  bool needToDeleteFpsGun = (_gunInstance.gunId.has_value() && !sameGun) || (_gunInstance.gunId.has_value() && !createGunModel);
+  bool needToCreateFpsGun = (!sameGun && createGunModel) || (sameGun && createGunModel && !_gunInstance.gunId.has_value());
+
+  bool needToDeleteTpsGun =  (_gunInstance.thirdPersonGunId.has_value() && !sameGun) || (_gunInstance.thirdPersonGunId.has_value() && !showThirdPersonGunModel);
+  bool needToCreateTpsGun = (!sameGun && showThirdPersonGunModel) || (sameGun && showThirdPersonGunModel && !_gunInstance.thirdPersonGunId.has_value());
+
+  if (needToDeleteFpsGun){
+    modlog("weapons ensureGunInstance", "deleting weapon instance");
     gameapi -> removeByGroupId(_gunInstance.gunId.value());
+    _gunInstance.gunId = std::nullopt;
   }
-  _gunInstance.gunId = std::nullopt;
-  _gunInstance.muzzleId = std::nullopt;
 
 
-  std::optional<objid> gunId;
   std::optional<objid> muzzlePointId;
+  auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores, also this should just be optional
+  auto sceneId = gameapi -> listSceneId(parentId);
 
-  if (createGunModel){
-    auto sceneId = gameapi -> listSceneId(parentId);
+  if (needToCreateFpsGun){
     auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
     modlog("weapons ensureGunInstance", "creating weapon instance");
-    gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
-    if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && gunId){
-      gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
+    _gunInstance.gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
+
+    if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && _gunInstance.gunId.has_value()){
+      gameapi -> playAnimation(_gunInstance.gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
     }
     muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
     if (!muzzlePointId.has_value()){
       modlog("weapon core", std::string("no muzzle defined for: ") + _gunInstance.desiredGun);
     }
-
-
-    if (!_gunInstance.thirdPersonGunId.has_value()){
-      _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, thirdPersonWeapon);
-    } 
   }
 
-  _gunInstance.gunCore = gunCore;
-  _gunInstance.gunId = gunId;
-  _gunInstance.muzzleId = muzzlePointId;
+  if (needToDeleteTpsGun){
+    modlog("weapons ensureGunInstance third person", "deleting weapon instance");
+    gameapi -> removeByGroupId(_gunInstance.thirdPersonGunId.value());
+    _gunInstance.thirdPersonGunId = std::nullopt;
+  }
+  if (needToCreateTpsGun){
+    modlog("weapons ensureGunInstance third person", "create weapon instance");
+    auto weaponName = std::string("code-weapon-third") + uniqueNameSuffix();
+    _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, thirdPersonWeapon, weaponName);
+  }
+
+  if (!sameGun){
+    _gunInstance.gunCore = gunCore;
+    _gunInstance.muzzleId = muzzlePointId;
+  }
+
 
 }
 
