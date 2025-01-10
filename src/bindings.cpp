@@ -945,7 +945,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
               }
             }
             return std::nullopt;
-          }
+          },
         }
       );
       setShowActivate(uiUpdate.showActivateUi);
