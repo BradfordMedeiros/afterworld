@@ -2,6 +2,40 @@
 
 extern CustomApiBindings* gameapi;
 
+std::optional<bool> isInShootingMode(objid id);
+
+std::optional<objid> findBodyPart(objid entityId, const char* part){
+  auto children = gameapi -> getChildrenIdsAndParent(entityId);
+  for (auto childId : children){
+    auto name = gameapi -> getGameObjNameForId(childId).value();
+    if (stringEndsWith(name, part)){
+      return childId;
+    }
+  } 
+  return std::nullopt;
+}
+
+void updateEntityGunPosition(objid entityId, glm::quat orientation){
+  if (!isInShootingMode(entityId).value()){
+    return;
+  }
+  auto rightHand = findBodyPart(entityId, "mixamorig:RightHand");
+  modassert(rightHand.has_value(), "right hand missing");
+  if (rightHand.has_value()){
+    gameapi -> setGameObjectRot(rightHand.value(), orientation, true);
+
+    auto leftHand = findBodyPart(entityId, "mixamorig:LeftHand");
+    auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true);
+
+    auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
+
+
+    auto newLeftHandPosition = rightHandPosition + leftHandDir;
+
+    gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true);
+  }
+}
+
 void reloadSettingsConfig(Movement& movement, std::string name){
   auto settingQuery = gameapi -> compileSqlQuery(
     "select xsensitivity, ysensitivity from settings where profile = " + name,
@@ -313,13 +347,14 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true);
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);  
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);
+
+      updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
     }else{
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
       gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true);  
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true);
     }
-
 
     
     uiUpdate.velocity = entity.movementState.velocity;

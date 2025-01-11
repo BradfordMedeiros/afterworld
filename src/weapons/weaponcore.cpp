@@ -186,8 +186,12 @@ std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams,
 
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
-    { "rotation", glm::vec4(0.f, 0.f, -1.f, 270.f) },
-    { "position", glm::vec3(0.f, 0.4f, -0.f) },
+    //{ "rotation", glm::vec4(-1.f, 0.f, 0.f, 180.f) }, // the default rotation here should probably be set to be relative to the parent but forward...doesnt matter since update hand pos abs elsewhere
+    { "position", glm::vec3(0.f, 0.0f, -0.5f) },
+
+    //{ "rotation", glm::vec4(0.f, 0.f, -1.f, 270.f) },
+    //{ "position", glm::vec3(0.f, 0.4f, -0.f) },
+
   };
   GameobjAttributes attr { .attr = attrAttributes };
   std::map<std::string, GameobjAttributes> submodelAttributes;
