@@ -19,21 +19,17 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   if (!isInShootingMode(entityId).value()){
     return;
   }
+  auto leftHand = findBodyPart(entityId, "mixamorig:LeftHand");
   auto rightHand = findBodyPart(entityId, "mixamorig:RightHand");
-  modassert(rightHand.has_value(), "right hand missing");
-  if (rightHand.has_value()){
-    gameapi -> setGameObjectRot(rightHand.value(), orientation, true);
+  modassert(leftHand.has_value() && rightHand.has_value(), "hands missing");
 
-    auto leftHand = findBodyPart(entityId, "mixamorig:LeftHand");
-    auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true);
+  auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true);
+  auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
+  auto newLeftHandPosition = rightHandPosition + leftHandDir;
 
-    auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
-
-
-    auto newLeftHandPosition = rightHandPosition + leftHandDir;
-
-    gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true);
-  }
+  gameapi -> disableAnimationIds(entityId, { leftHand.value(), rightHand.value() });
+  gameapi -> setGameObjectRot(rightHand.value(), orientation, true);
+  gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true);
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){

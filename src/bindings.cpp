@@ -753,7 +753,7 @@ void doStateControllerAnimations(){
     bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
     if (!disableAnimation && matchingAnimation){
       modlog("animation controller play animation for state", nameForSymbol(stateAnimation -> state));
-      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);        
+      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);  
     }else{
       if (stateAnimationHasAnimation && !matchingAnimation){
         if (validateAnimationControllerAnimations){
