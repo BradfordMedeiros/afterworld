@@ -12,6 +12,7 @@ struct ControlledPlayer {
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
 	bool editorMode;
+	std::set<objid> disableAnimationIds;
 };
 
 struct ControllableEntity {

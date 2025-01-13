@@ -13,10 +13,45 @@ ControlledPlayer controlledPlayer {
 	.playerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
 	.editorMode = false,
+	.disableAnimationIds = {},
 };
 
 std::optional<objid> getPlayerId(){
 	return controlledPlayer.playerId;
+}
+
+std::optional<objid> findBodyPart(objid entityId, const char* part){
+  auto children = gameapi -> getChildrenIdsAndParent(entityId);
+  for (auto childId : children){
+    auto name = gameapi -> getGameObjNameForId(childId).value();
+    if (stringEndsWith(name, part)){
+      return childId;
+    }
+  } 
+  return std::nullopt;
+}
+void disableEntityAnimations(objid entityId){
+  auto leftHand = findBodyPart(entityId, "mixamorig:LeftHand");
+  auto rightHand = findBodyPart(entityId, "mixamorig:RightHand");
+  auto neck = findBodyPart(entityId, "mixamorig:Neck");
+  auto head = findBodyPart(entityId, "mixamorig:Head");
+  if (leftHand.has_value()){
+	  controlledPlayer.disableAnimationIds.insert(leftHand.value());
+  }
+  if (rightHand.has_value()){
+	  controlledPlayer.disableAnimationIds.insert(rightHand.value());
+  }
+  if (neck.has_value()){
+	  controlledPlayer.disableAnimationIds.insert(neck.value());
+  }
+  if (head.has_value()){
+	  controlledPlayer.disableAnimationIds.insert(head.value());
+  }
+  gameapi -> disableAnimationIds(controlledPlayer.disableAnimationIds); // maybe should just do add / remove 
+}
+void reenableEntityAnimations(objid entityId){
+	controlledPlayer.disableAnimationIds.erase(entityId);
+  gameapi -> disableAnimationIds(controlledPlayer.disableAnimationIds); // maybe should just do add / remove 
 }
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));
@@ -35,9 +70,12 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 	  addInventory(idAdded);
 	  addWeaponId(weapons, idAdded);
   }
+
+  disableEntityAnimations(idAdded);
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
+	reenableEntityAnimations(idRemoved);
 	if (controllableEntities.find(idRemoved) != controllableEntities.end()){
 		modlog("controllable entity removed id:", std::to_string(idRemoved));
 	}
