@@ -195,11 +195,11 @@ void debugOnFrame(){
   handleSimpleOnFrame();
 
   auto activeCamera = gameapi -> getActiveCamera();
-  if (!activeCamera.has_value()){
-  	modlog("active camera", "none");
-  }else{
-  	modlog("active camera", gameapi -> getGameObjNameForId(activeCamera.value()).value());
-  }
+  //if (!activeCamera.has_value()){
+  //	modlog("active camera", "none");
+  //}else{
+  //	modlog("active camera", gameapi -> getGameObjNameForId(activeCamera.value()).value());
+  //}
 
 	auto args = gameapi -> getArgs();
 
@@ -271,7 +271,15 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	 }
 
   }
-    
+   
+  if (key == 'C' && action == 0){
+  	auto testViewObj = findObjByShortName(">testview", std::nullopt);
+  	if (getTempCamera().has_value()){
+	  	setTempCamera(std::nullopt);
+  	}else{
+	  	setTempCamera(testViewObj.value());
+  	}
+  }
   if (key == 'Y' && action == 0){
   	playCutscene("test", gameapi -> timeSeconds(true));
   }

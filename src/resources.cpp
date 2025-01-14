@@ -10,6 +10,10 @@ ManagedSounds sounds {
   .soundObjId = std::nullopt,
   .explosionSoundObjId = std::nullopt,
 };
+PrecachedResources precachedResources {
+  .models = {},
+  .ids = {},
+};
 
 ManagedSounds& getManagedSounds(){
   return sounds;
@@ -96,4 +100,31 @@ void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading
   ensureSoundUnloaded(sceneId, &sounds.soundObjId);
   ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
 }
+
+
+void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly
+  auto oldIds = precachedResources.ids;
+  precachedResources.models = models;
+
+  std::vector<objid> newIds;
+  for (auto &model : models){
+    GameobjAttributes attr {
+      .attr = {
+        { "mesh", model },
+        //{ "disabled", "false" },  why doesn't this work?
+        { "position", glm::vec3(10000.f, -10000.f, 10000.f) },
+      }
+    };
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    auto id = gameapi -> makeObjectAttr(sceneId, std::string("cached-model") + uniqueNameSuffix(), attr, submodelAttributes);
+    newIds.push_back(id.value());
+
+    gameapi -> setSingleGameObjectAttr(id.value(), "disabled", "true");  // this doesn't work right now?  just putting position at big
+  }
+  for (auto id : oldIds){
+    gameapi -> removeObjectById(id);
+  }
+  precachedResources.ids = newIds;
+}
+
 

@@ -898,6 +898,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
 
+    ensurePrecachedModels(
+      gameapi -> rootSceneId(),
+    { 
+      "/home/brad/Desktop/testmodel/scene.gltf" /* br*/, 
+      "../gameresources/build/weapons/scrapgun.gltf",
+      "../gameresources/build/weapons/electrogun.gltf",
+      "../gameresources/build/weapons/fork.gltf",
+    });
+  
     tags = createTags(&gameState -> uiData);
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
@@ -1000,7 +1009,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
     auto end = std::chrono::steady_clock::now();
     std::chrono::microseconds timeUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    modlog("main ui time us: ", std::to_string(timeUs.count())); 
+    //modlog("main ui time us: ", std::to_string(timeUs.count())); 
 
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
     

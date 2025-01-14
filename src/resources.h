@@ -19,4 +19,11 @@ void ensureDefaultSoundsLoadced(objid sceneId);
 void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip);
 void ensureSoundsUnloaded(objid sceneId);
 
+
+struct PrecachedResources {
+  std::vector<std::string> models;
+  std::vector<objid> ids;
+};
+void ensurePrecachedModels(objid sceneId, std::vector<std::string> models);
+
 #endif

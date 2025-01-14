@@ -12,6 +12,7 @@ ControlledPlayer controlledPlayer {
 	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
 	.playerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
+	.tempCamera = std::nullopt,
 	.editorMode = false,
 	.disableAnimationIds = {},
 };
@@ -93,6 +94,10 @@ bool controllableEntityExists(objid id){
 void updateCamera(){
 	if (controlledPlayer.editorMode){
 		gameapi -> setActiveCamera(std::nullopt, -1);
+		return;
+	}
+	if (controlledPlayer.tempCamera.has_value()){
+		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), -1);
 		return;
 	}
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
@@ -207,6 +212,14 @@ bool onActivePlayerRemoved(objid id){
 void setActivePlayerEditorMode(bool editorMode){
 	controlledPlayer.editorMode = editorMode;
 	updateCamera();
+}
+
+void setTempCamera(std::optional<objid> camera){
+	controlledPlayer.tempCamera = camera;
+	updateCamera();
+}
+std::optional<objid> getTempCamera(){
+	return controlledPlayer.tempCamera;
 }
 
 void killActivePlayer(){

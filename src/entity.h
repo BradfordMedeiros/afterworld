@@ -11,6 +11,7 @@ struct ControlledPlayer {
 	glm::vec2 lookVelocity;
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
+	std::optional<objid> tempCamera;
 	bool editorMode;
 	std::set<objid> disableAnimationIds;
 };
@@ -39,6 +40,9 @@ bool onActivePlayerRemoved(objid id);
 
 void setActivePlayerEditorMode(bool editorMode);
 
+void setTempCamera(std::optional<objid> camera);
+std::optional<objid> getTempCamera();
+
 void killActivePlayer();
 
 glm::vec3 getPlayerVelocity();
@@ -47,6 +51,5 @@ std::optional<glm::vec3> getActivePlayerPosition();
 WeaponEntityData getWeaponEntityData(objid id);
 
 DebugConfig debugPrintActivePlayer();
-
 
 #endif 
