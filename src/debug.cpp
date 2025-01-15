@@ -412,6 +412,27 @@ void debugOnKey(int key, int scancode, int action, int mods){
 			voxelYIndex = 0;
 		}
 	}
+
+	if (key == 'K' && action == 1){
+		simpleOnFrame([]() -> void {
+
+			bool moveLeft = static_cast<int>(gameapi -> timeSeconds(false) / 5.f) % 2;
+
+			auto objid = findObjByShortName("testobj", std::nullopt);
+			if (!objid.has_value()){
+				return;
+			}
+
+			auto oldPosition = gameapi -> getGameObjectPos(objid.value(), true);
+			modlog("on frame move", std::to_string(gameapi -> timeSeconds(false)));
+		  
+		  float speed = 10.f;
+		  auto elapsedTime = gameapi -> timeElapsed();
+			auto newPosition = oldPosition + glm::vec3(speed * (moveLeft ? (-1 * elapsedTime) : elapsedTime), 0.f, 0.f);
+			gameapi -> setGameObjectPosition(objid.value(), newPosition, true);
+
+		}, 10.f);
+	}
 }
 
 

@@ -31,7 +31,6 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto headOrientation = gameapi -> orientationFromPos(lookAtPosition, headPosition);
   gameapi -> setGameObjectRot(neck.value(), headOrientation, true);
   gameapi -> setGameObjectRot(head.value(), headOrientation, true);
-
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){
