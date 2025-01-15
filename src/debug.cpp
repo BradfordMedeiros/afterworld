@@ -280,6 +280,16 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  	setTempCamera(testViewObj.value());
   	}
   }
+  if (key == 'V' && action == 0){
+  	auto testViewObj = findObjByShortName(">testview2", std::nullopt);
+  	if (getTempCamera().has_value()){
+	  	setTempCamera(std::nullopt);
+  	}else{
+	  	setTempCamera(testViewObj.value());
+  	}
+  }
+
+
   if (key == 'Y' && action == 0){
   	playCutscene("test", gameapi -> timeSeconds(true));
   }
@@ -426,7 +436,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 			auto oldPosition = gameapi -> getGameObjectPos(objid.value(), true);
 			modlog("on frame move", std::to_string(gameapi -> timeSeconds(false)));
 		  
-		  float speed = 10.f;
+		  float speed = 20.f;
 		  auto elapsedTime = gameapi -> timeElapsed();
 			auto newPosition = oldPosition + glm::vec3(speed * (moveLeft ? (-1 * elapsedTime) : elapsedTime), 0.f, 0.f);
 			gameapi -> setGameObjectPosition(objid.value(), newPosition, true);

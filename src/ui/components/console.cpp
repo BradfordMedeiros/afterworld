@@ -189,9 +189,19 @@ std::vector<CommandDispatch> commands {
   CommandDispatch {
     .command = "dump",
     .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
-      gameapi -> debugInfo(std::nullopt);
-      exit(1);
-      return std::nullopt;    
+      auto values = split(command, ' ');
+      if (values.size() == 1){
+        gameapi -> debugInfo(std::nullopt);
+        exit(1);    
+      }
+
+      auto delayMs = std::atoi(values.at(1).c_str());
+      gameapi -> schedule(-1, delayMs, NULL, [](void*) -> void {
+        gameapi -> debugInfo(std::nullopt);
+        exit(1);    
+      });
+
+      return "dump scheduled";    
     },
   },
   CommandDispatch {
