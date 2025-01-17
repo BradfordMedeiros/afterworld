@@ -1,7 +1,7 @@
 filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING
 ../afterworld/scenes/levels/level1.rawscene,Dreams and Reconciliation,level1,Fall asleep and enter the realm of the dreamweavers.,./res/textures/trippyflash.png
 ../afterworld/scenes/levels/level2.rawscene,Arrival,level2,You arrive to a port city and find demons.,./res/textures/water.jpg
-../afterworld/scenes/sandbox.rawscene,Ocean Diving and Submarine Voyages,fps,Take voyage in a submarine and explore the dreamweavers domain.,./res/textures/maxresdefault.jpg
+../afterworld/scenes/levels/e1m1.rawscene,e1m1,e1m1,Vertical slice - classic slice. ,./res/textures/maxresdefault.jpg
 ../afterworld/scenes/sandbox.rawscene,Hybrid Nightmare,fps,The dreamweaver has betrayed you.  Kill him.,./res/textures/wood.jpg
 ../afterworld/scenes/sandbox.rawscene,Nightmare,fps,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg
 ../afterworld/scenes/sandbox.rawscene,Dreams and Reconciliation II,fps,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg
@@ -9,5 +9,5 @@ filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING
 ../afterworld/scenes/levels/level1.rawscene,level1,level1,level1 test,./res/textures/wood.jpg
 ../afterworld/scenes/levels/level2.rawscene,level2,level2,level2 test,./res/textures/wood.jpg
 ../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg
-../afterworld/scenes/empty.rawscene,TestLink,testlink,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg
+../afterworld/scenes/empty.rawscene,Empty,empty,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg
 ../afterworld/scenes/sandbox.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg
