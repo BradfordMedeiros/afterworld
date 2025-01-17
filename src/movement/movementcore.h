@@ -114,8 +114,7 @@ struct ThirdPersonCameraUpdate {
   glm::quat rotation;
   glm::quat yAxisRotation;
 };
-ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdPersonCameraInfo& thirdPersonInfo);
-
+ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdPersonCameraInfo& thirdPersonInfo, objid id);
 
 struct FirstPersonCameraUpdate {
   glm::quat rotation;   // rotation here means orientation

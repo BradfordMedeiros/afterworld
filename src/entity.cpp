@@ -246,7 +246,7 @@ FiringTransform getFireTransform(objid id){
 		// this 0 out only works if these vectors are parallel, otherwise would have to solve the parametric eqtns 
 		// z is set to the player entity so it doesnt shoot from behind the character.
 		// for example, if you dont do this, if you zoom the cam out you can hit a target in the crosshair behind the character
-		auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.movementState, movementEntity.managedCamera);
+		auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.movementState, movementEntity.managedCamera, id);
 		auto posFromThirdPerson = glm::inverse(thirdPersonInfo.rotation) * (thirdPersonInfo.position - gameapi -> getGameObjectPos(id, true));
 		auto zOffset = glm::vec3(0.f, 0.f, posFromThirdPerson.z);
 		auto zSpaceOffset = thirdPersonInfo.rotation * zOffset;

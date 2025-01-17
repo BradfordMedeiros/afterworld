@@ -204,14 +204,14 @@ FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movement
   };
 }
 
-ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdPersonCameraInfo& thirdPersonInfo){
+ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdPersonCameraInfo& thirdPersonInfo, objid id){
   float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
 
   float x = glm::cos(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
   float z = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
   float y = glm::cos(thirdPersonInfo.angleY) * thirdPersonInfo.actualDistanceFromTarget;
 
-  auto targetLocation = movementState.lastPosition;
+  auto targetLocation = gameapi -> getGameObjectPos(id, true);
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
@@ -230,7 +230,7 @@ ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdP
 }
 
 // this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
-ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo){
+ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo, objid id){
   thirdPersonInfo.angleX += lookParams.turnX * 0.1 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.angleY += lookParams.turnY * 0.1 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.distanceFromTarget += zoom_delta;
@@ -244,7 +244,7 @@ ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementStat
   thirdPersonInfo.actualZoomOffset.x = glm::lerp(thirdPersonInfo.actualZoomOffset.x, lookParams.ironsight ? (thirdPersonInfo.zoomOffset.x * reverseMultiplier) : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
   thirdPersonInfo.actualZoomOffset.y = glm::lerp(thirdPersonInfo.actualZoomOffset.y, lookParams.ironsight ? thirdPersonInfo.zoomOffset.y : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
 
-  return lookThirdPersonCalc(movementState, thirdPersonInfo);;
+  return lookThirdPersonCalc(movementState, thirdPersonInfo, id);
 }
 
 void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch){
@@ -558,7 +558,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   CameraUpdate cameraUpdate { .thirdPerson = std::nullopt };
   cameraUpdate.firstPerson = look(moveParams, movementState, lookParams);
   if (enableThirdPerson && managedCamera.thirdPersonMode){
-    auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, lookParams, movementState.zoom_delta, managedCamera);
+    auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, lookParams, movementState.zoom_delta, managedCamera, playerId);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
   }
   
