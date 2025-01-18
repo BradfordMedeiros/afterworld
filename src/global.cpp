@@ -8,6 +8,7 @@ void setActivePlayerEditorMode(bool);
 
 GlobalState global {
   .showEditor = false,
+  .isFreeCam = false,
   .showScreenspaceGrid = false,
   .showConsole = false,
   .showKeyboard = false,
@@ -62,7 +63,7 @@ DebugConfig debugPrintGlobal(){
 
 
 void updateState(){
-  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal;
+  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
   global.showGameHud = !global.disableGameInput;
 
   if (global.routeState.showMouse){
@@ -83,7 +84,7 @@ void updateState(){
     });    
   }
 
-  if (global.showEditor){
+  if (global.showEditor || global.isFreeCam){
     gameapi -> setWorldState({ 
       ObjectValue {
         .object = "editor",
@@ -163,6 +164,10 @@ void setShowEditor(bool shouldShowEditor){
   }else{
     rmHistoryParam("editor");
   }
+}
+
+void setShowFreecam(bool isFreeCam){
+  global.isFreeCam = isFreeCam;
 }
 
 bool queryShowKeyboard(){

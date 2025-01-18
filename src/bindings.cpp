@@ -682,6 +682,10 @@ UiContext getUiContext(GameState& gameState){
         setActivePlayerEditorMode(showEditor);
         setShowEditor(showEditor);
       },
+      .setFreeCam = [](bool isFreeCamMode) -> void {
+        setActivePlayerEditorMode(isFreeCamMode);
+        setShowFreecam(isFreeCamMode);;
+      },
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
@@ -911,7 +915,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
     generateWaterMesh();
-
+    addWaterObj(gameapi -> rootSceneId());
+    
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

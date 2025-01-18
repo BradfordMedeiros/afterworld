@@ -114,6 +114,23 @@ std::vector<CommandDispatch> commands {
     }, 
   },
   CommandDispatch {
+    .command = "free",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
+      auto values = split(commandStr, ' ');
+      *valid = false;
+      if (values.at(1) == "on"){
+        consoleInterface.setFreeCam(true);
+        *valid = true;
+        return std::nullopt;
+      }else if (values.at(1) == "off"){ 
+        consoleInterface.setFreeCam(false);
+        *valid = true;
+        return std::nullopt;
+      }
+      return std::nullopt;
+    }, 
+  },
+  CommandDispatch {
     .command = "background",
     .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
       auto values = split(command, ' ');
