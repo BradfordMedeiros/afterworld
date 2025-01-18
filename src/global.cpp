@@ -84,12 +84,20 @@ void updateState(){
     });    
   }
 
-  if (global.showEditor || global.isFreeCam){
+  if (global.showEditor){
     gameapi -> setWorldState({ 
       ObjectValue {
         .object = "editor",
         .attribute = "disableinput",
         .value = "false",
+      },
+    });    
+  }else if (global.isFreeCam){
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "camera",
       },
     });    
   }else{

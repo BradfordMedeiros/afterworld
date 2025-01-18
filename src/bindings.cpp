@@ -680,11 +680,13 @@ UiContext getUiContext(GameState& gameState){
     .consoleInterface = ConsoleInterface {
       .setShowEditor = [](bool showEditor) -> void {
         setActivePlayerEditorMode(showEditor);
+        setShowFreecam(false);
         setShowEditor(showEditor);
       },
       .setFreeCam = [](bool isFreeCamMode) -> void {
         setActivePlayerEditorMode(isFreeCamMode);
-        setShowFreecam(isFreeCamMode);;
+        setShowFreecam(isFreeCamMode);
+        setShowEditor(false);
       },
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
