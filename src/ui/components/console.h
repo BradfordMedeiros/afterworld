@@ -20,8 +20,9 @@ enum DebugPrintType {
 };
 
 struct ConsoleInterface {
-  std::function<void(bool)> setShowEditor;
-  std::function<void(bool)> setFreeCam;
+  std::function<void()> setNormalMode;
+  std::function<void()> setShowEditor;
+  std::function<void()> setFreeCam;
   std::function<void(std::string)> setBackground;
   std::function<void(std::optional<std::string>)> goToLevel;
 

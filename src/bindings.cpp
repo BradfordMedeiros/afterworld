@@ -678,14 +678,19 @@ UiContext getUiContext(GameState& gameState){
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
     },
     .consoleInterface = ConsoleInterface {
-      .setShowEditor = [](bool showEditor) -> void {
-        setActivePlayerEditorMode(showEditor);
+      .setNormalMode = []() -> void {
+        setActivePlayerEditorMode(false);
         setShowFreecam(false);
-        setShowEditor(showEditor);
+        setShowEditor(false);
       },
-      .setFreeCam = [](bool isFreeCamMode) -> void {
-        setActivePlayerEditorMode(isFreeCamMode);
-        setShowFreecam(isFreeCamMode);
+      .setShowEditor = []() -> void {
+        setActivePlayerEditorMode(true);
+        setShowFreecam(false);
+        setShowEditor(true);
+      },
+      .setFreeCam = []() -> void {
+        setActivePlayerEditorMode(true);
+        setShowFreecam(true);
         setShowEditor(false);
       },
       .setBackground = setMenuBackground,
