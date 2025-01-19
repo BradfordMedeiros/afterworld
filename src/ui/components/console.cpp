@@ -216,6 +216,22 @@ std::vector<CommandDispatch> commands {
     },
   },
   CommandDispatch {
+    .command = "screenshot",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      auto values = split(command, ' ');
+      if (values.size() == 1){
+        consoleInterface.takeScreenshot("../afterworld/screenshots/test.png");
+        return std::nullopt;
+      }
+      auto delayMs = std::atoi(values.at(1).c_str());
+      auto takeScreenshot = consoleInterface.takeScreenshot;
+      gameapi -> schedule(-1, delayMs, NULL, [takeScreenshot](void*) -> void {
+        takeScreenshot("../afterworld/screenshots/test.png");
+      });
+      return std::nullopt;    
+    },
+  },
+  CommandDispatch {
     .command = "debugui",
     .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
       auto values = split(command, ' ');

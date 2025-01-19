@@ -51,6 +51,11 @@ std::vector<GameOption> gameOptions {
     .option = BoolOption{},
   },
 
+  GameOption {
+    .arg = "dev",
+    .description = "misc options and controls for development mode",
+  },
+
 };
 
 

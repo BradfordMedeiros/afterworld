@@ -698,6 +698,9 @@ UiContext getUiContext(GameState& gameState){
         modlog("gotolevel", std::string("level loading: ") + level.value());
         goToLevel(gameState.sceneManagement, level.value());
       },
+      .takeScreenshot = [](std::string path) -> void {
+        gameapi -> saveScreenshot(path);
+      },
       .routerPush = [](std::string route, bool replace) -> void {
         pushHistory({ route }, replace);
       },

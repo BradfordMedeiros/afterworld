@@ -237,6 +237,15 @@ std::string printCode(glm::vec2 vec){
 }
 
 void debugOnKey(int key, int scancode, int action, int mods){
+  if (key == 96 /* ~ */  && action == 1){
+  	setShowConsole(!showConsole());
+  	modlog("console visibility", print(getGlobalState().showConsole));
+  }
+
+  if (!getArgEnabled("dev")){
+  	return;
+  }
+
 	auto args = gameapi -> getArgs();
 	auto printKey = args.find("printkey") != args.end();
   if (printKey){
@@ -244,6 +253,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
   std::cout << "key is: " << key << std::endl;
  
+
   if (key == 'M' && action == 0){
     spawnFromRandomSpawnpoint("red");
   }else if (key == ',' && action == 0){
@@ -295,10 +305,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
   if (key == 75){
   	//spawnProcMesh(gameapi -> listSceneId(id));
-  }
-  if (key == 96 /* ~ */  && action == 1){
-  	setShowConsole(!showConsole());
-  	modlog("console visibility", print(getGlobalState().showConsole));
   }
 
   if (key == 'T'){
@@ -425,7 +431,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
 	if (key == 'K' && action == 1){
 		simpleOnFrame([]() -> void {
-
 			bool moveLeft = static_cast<int>(gameapi -> timeSeconds(false) / 5.f) % 2;
 
 			auto objid = findObjByShortName("testobj", std::nullopt);
