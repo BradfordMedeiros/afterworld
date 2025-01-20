@@ -1,4 +1,4 @@
-obj:mesh:../gameresources/build/nocheck/e1m1.gltf
+obj:mesh:../gameresources/build/nocheck/e1m2.gltf
 obj:physics:enabled
 obj:physics_shape:shape_exact
 #obj:scale:0.1 0.1 0.1
