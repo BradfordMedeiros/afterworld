@@ -185,6 +185,21 @@ void drawVoxelLightGrid(int yIndexToRender){
 	//gameapi -> drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f, 10.f, 10.f), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
 }
 
+
+static float visualizationDistance = 1.f;
+void visualizeScale(glm::vec3 positionFrom, glm::quat orientation, float distance){
+	auto rotationOffset = orientation * glm::vec3(0.f, 0.f, -1);
+	rotationOffset.y = 0.f;
+	rotationOffset = distance * glm::normalize(rotationOffset);
+
+	auto position = positionFrom + rotationOffset;
+//
+	gameapi -> drawLine(position, position + glm::vec3(0.f, 1.f, 0.f), true, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	gameapi -> drawLine(positionFrom, position, true, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+}
+
+
 int voxelYIndex = 1;
 void debugOnFrame(){
   //if (ndiPrintInfo.debugNdiPrintMode){
@@ -193,6 +208,13 @@ void debugOnFrame(){
   //	modlog("ndi print info", "not enabled");
   //}
   handleSimpleOnFrame();
+
+  if (!getArgEnabled("dev")){
+  	return;
+  }
+  
+ 	gameapi -> drawText(std::string("last visualizeScale: ") + std::to_string(visualizationDistance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
 
   auto activeCamera = gameapi -> getActiveCamera();
   //if (!activeCamera.has_value()){
@@ -229,6 +251,8 @@ void debugOnFrame(){
   }else{
 		  modlog("debug attribute", "no gameobj");
   }
+
+
 }
 
 
@@ -246,6 +270,17 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	return;
   }
 
+  if (key == '[' && action == 0){
+  	auto activeCamera = gameapi -> getCameraTransform();
+  	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
+  }
+  if (key == 'N' && action == 0){
+  	visualizationDistance -= 1.f;
+  }
+  if (key == 'M' && action == 0){
+  	visualizationDistance += 1.f;
+  }
+  
 	auto args = gameapi -> getArgs();
 	auto printKey = args.find("printkey") != args.end();
   if (printKey){
