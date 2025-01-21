@@ -1100,10 +1100,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action);
     }
 
-    if (key == 'R' && action == 1) {
-      changeGameType(gametypeSystem, "targetkill");
-    }
-
     if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData.worldInfo);
       if (controlledPlayer.playerId.has_value()){

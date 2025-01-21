@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 extern Tags tags;
+extern GameTypes gametypeSystem;
 
 void spawnProcMesh(objid sceneId){
 	std::vector<glm::vec3> faces = {
@@ -268,6 +269,10 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
   if (!getArgEnabled("dev")){
   	return;
+  }
+
+  if (key == 'R' && action == 1) {
+    changeGameType(gametypeSystem, "targetkill");
   }
 
   if (key == '[' && action == 0){

@@ -10,6 +10,7 @@
 #include "./cutscene.h"
 #include "./tags.h"
 #include "./options.h"
+#include "./gametypes/gametypes.h"
 
 void debugOnFrame();
 void debugOnKey(int key, int scancode, int action, int mods);
