@@ -23,8 +23,10 @@ struct ConsoleInterface {
   std::function<void()> setNormalMode;
   std::function<void()> setShowEditor;
   std::function<void()> setFreeCam;
+  std::function<void(bool)> setNoClip;
   std::function<void(std::string)> setBackground;
   std::function<void(std::optional<std::string>)> goToLevel;
+  std::function<void()> nextLevel;
   std::function<void(std::string)> takeScreenshot;
 
   std::function<void(std::string, bool)> routerPush;

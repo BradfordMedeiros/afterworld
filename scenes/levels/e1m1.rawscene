@@ -1,22 +1,20 @@
 obj:mesh:../gameresources/build/nocheck/e1m1.gltf
 obj:physics:enabled
 obj:physics_shape:shape_exact
-#obj:scale:0.1 0.1 0.1
 
 playerspawn:playerspawn:true
-playerspawn:position:-20 10 0
+playerspawn:position:48 -3 -9
 playerspawn:teleport:true
 
 [enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
 [enemy:position:-22 10 0
 
-platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert:position:-20 -8 0
-platform_lowert:scale:1000 1000 10
-platform_lowert:rotation:0 -1 0 0
-platform_lowert:texture:./res/textures/brickwall.jpg
-platform_lowert:texturesize:40 40
-platform_lowert:physics:enabled
-platform_lowert:material:metal
-platform_lowert:tint:0.4 0.4 0.8 0
-platform_lowert:layer:transparency
+
+[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
+[link:position:-147 -5 -132
+[link:+link:link:next
+
+
+&music:clip:../gameresources/sound/rain.wav
+&music:autoplay:true
+&music:volume:5

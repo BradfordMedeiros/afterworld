@@ -215,6 +215,9 @@ void setGameObjectTextureOffset(objid id, glm::vec2 offset){
 void setGameObjectFriction(objid id, float friction){
   gameapi -> setSingleGameObjectAttr(id, "physics_friction", friction);
 }
+void setGameObjectGravity(objid id, glm::vec3 gravity){
+  gameapi -> setSingleGameObjectAttr(id, "physics_gravity", gravity);
+}
 void setGameObjectVelocity(objid id, glm::vec3 velocity){
   gameapi -> setSingleGameObjectAttr(id, "physics_velocity", velocity);
 }

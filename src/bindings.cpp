@@ -70,8 +70,21 @@ SceneManagement createSceneManagement(){
   };
 }
 
-void goToLevel(SceneManagement& sceneManagement, std::string levelShortName){
+void goToLevel(std::string levelShortName){
   pushHistory({ "playing", levelShortName }, true);
+}
+void goToLink(std::string link){
+  pushHistory({ "loading" }, true);
+  gameapi -> schedule(0, 5000, NULL, [link](void*) -> void {
+    goToLevel(link);
+    playCutscene("test", gameapi -> timeSeconds(true));
+  });
+}
+void goToNextLevel(){
+  advanceProgress();
+  auto nextLink = getCurrentLink();
+  modassert(nextLink.has_value(), "no next link");
+  goToLink(nextLink.value());
 }
 
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -548,14 +561,24 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount){
   deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }
 
-void goToLink(std::string link){
-  pushHistory({ "loading" }, true);
-  gameapi -> schedule(0, 5000, NULL, [link](void*) -> void {
-    pushHistory({ "playing", link }, true);
-    playCutscene("test", gameapi -> timeSeconds(true));
-  });
+std::optional<glm::vec3> oldGravity;
+void setNoClipMode(bool enable){
+  if (controlledPlayer.playerId.has_value()){
+    if (enable){
+      oldGravity = getSingleVec3Attr(controlledPlayer.playerId.value(), "physics_gravity");
+      setGameObjectGravity(controlledPlayer.playerId.value(), glm::vec3(0.f, 0.f, 0.f));
+      gameapi -> setSingleGameObjectAttr(controlledPlayer.playerId.value(), "physics_collision", "nocollide");
 
+    }else{
+      if(oldGravity.has_value()){
+        setGameObjectGravity(controlledPlayer.playerId.value(), oldGravity.value());
+        gameapi -> setSingleGameObjectAttr(controlledPlayer.playerId.value(), "physics_collision", "collide");
+        oldGravity = std::nullopt;
+      }
+    }
+  }
 }
+
 
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
@@ -633,7 +656,7 @@ UiContext getUiContext(GameState& gameState){
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);
-        goToLevel(gameState.sceneManagement, level.name);
+        goToLevel(level.name);
       },
       .goToMenu = [&gameState]() -> void {
         pushHistory({ "mainmenu" }, true);
@@ -660,7 +683,7 @@ UiContext getUiContext(GameState& gameState){
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [&gameState](std::string scene) -> void {
       modassert(false, "load scene not yet implemented");
-      goToLevel(gameState.sceneManagement, scene);
+      goToLevel(scene);
     },
     .newScene = [](std::string sceneName) -> void {
       const std::string sceneFolder = "./res/scenes/";
@@ -693,10 +716,15 @@ UiContext getUiContext(GameState& gameState){
         setShowFreecam(true);
         setShowEditor(false);
       },
+      .setNoClip = setNoClipMode,
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
-        goToLevel(gameState.sceneManagement, level.value());
+        setProgressByShortname(level.value());
+        goToLevel(level.value());
+      },
+      .nextLevel = []() -> void {
+        goToNextLevel();
       },
       .takeScreenshot = [](std::string path) -> void {
         gameapi -> saveScreenshot(path);
@@ -812,6 +840,7 @@ bool entityInShootingMode(objid id){
   return isInShootingMode(id).value();
 }
 
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -925,7 +954,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
     generateWaterMesh();
-    addWaterObj(gameapi -> rootSceneId());
+    
+    //addWaterObj(gameapi -> rootSceneId());
     
     return gameState;
   };
@@ -1048,7 +1078,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     doStateControllerAnimations();
 
     if (levelShortcutToLoad.has_value()){
-      goToLevel(gameState -> sceneManagement, levelShortcutToLoad.value());
+      setProgressByShortname(levelShortcutToLoad.value());
+      goToLevel(levelShortcutToLoad.value());
       levelShortcutToLoad = std::nullopt;
     }
 
@@ -1174,7 +1205,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(attrValue, "link message invalid");
       auto linkToValue = getSingleAttr(attrValue -> id, "link");
       modassert(linkToValue.has_value(), "link id does not have a link tag");
-      goToLink(linkToValue.value());
+      if (linkToValue.value() == "next"){ // hackey but that's ok!
+        goToNextLevel();
+      }else{
+        goToLink(linkToValue.value());
+      }
     }
 
     if (key == "ammo"){

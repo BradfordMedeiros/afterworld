@@ -3,9 +3,9 @@ filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING
 ../afterworld/scenes/levels/level2.rawscene,Arrival,level2,You arrive to a port city and find demons.,./res/textures/water.jpg
 ../afterworld/scenes/levels/e1m1.rawscene,e1m1,e1m1,Vertical slice - classic slice. ,../afterworld/screenshots/test.png
 ../afterworld/scenes/levels/e1m2.rawscene,e1m2,e1m2,Vertical slice 2  classic slice.,../afterworld/screenshots/test.png
-../afterworld/scenes/sandbox.rawscene,Nightmare,fps,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg
-../afterworld/scenes/sandbox.rawscene,Dreams and Reconciliation II,fps,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg
-../afterworld/scenes/sandbox.rawscene,Odyssey,fps,Return home.,./res/textures/wood.jpg
+../afterworld/scenes/levels/story.rawscene,story1,story-1,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg
+../afterworld/scenes/levels/story.rawscene,story2,story-2,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg
+../afterworld/scenes/levels/story.rawscene,story end,story-end,Return home.,./res/textures/wood.jpg
 ../afterworld/scenes/levels/level1.rawscene,level1,level1,level1 test,./res/textures/wood.jpg
 ../afterworld/scenes/levels/level2.rawscene,level2,level2,level2 test,./res/textures/wood.jpg
 ../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg

@@ -97,9 +97,10 @@ std::vector<CommandDispatch> commands {
     }, 
   },
   CommandDispatch {
-    .command = "reg",
+    .command = "play",
     .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       consoleInterface.setNormalMode();
+      consoleInterface.setNoClip(false);
       return std::nullopt;
     }, 
   },
@@ -114,6 +115,13 @@ std::vector<CommandDispatch> commands {
     .command = "free",
     .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       consoleInterface.setFreeCam();
+      return std::nullopt;
+    }, 
+  },
+  CommandDispatch {
+    .command = "noclip",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
+      consoleInterface.setNoClip(true);
       return std::nullopt;
     }, 
   },
@@ -147,6 +155,14 @@ std::vector<CommandDispatch> commands {
         *valid = true;
         return std::nullopt;
       }
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
+    .command = "next",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      *valid = true;
+      consoleInterface.nextLevel();
       return std::nullopt;
     },
   },
