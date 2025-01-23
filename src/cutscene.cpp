@@ -4,7 +4,6 @@ extern CustomApiBindings* gameapi;
 
 
 struct BackgroundFill {
-	float duration;
 	glm::vec4 color;
 };
 struct DebugTextDisplay {
@@ -114,6 +113,75 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 
 std::unordered_map<std::string, Cutscene> cutscenes {
 	{
+		"opening", Cutscene {
+			.events = {
+				CutsceneEvent {
+					.name = "background",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = false,
+						.waitForMessage = std::nullopt,
+					},
+					.type = BackgroundFill {
+						.color = glm::vec4(0.f, 0.f, 1.f, 0.4f),
+					},
+				},
+				CutsceneEvent {
+					.name = "initial title text",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = false,
+						.waitForMessage = std::nullopt,
+					},
+					.type = DebugTextDisplay {
+						.text = "Opening Text Here",
+						.rate = 0.f,
+					},
+				},
+				CutsceneEvent {
+					.name = "letterbox",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = false,
+						.waitForMessage = std::nullopt,
+					},
+					.type = Letterbox {
+						.text = "",
+					},
+				},
+				CutsceneEvent {
+					.name = "camera-view-1",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = false,
+						.waitForMessage = std::nullopt,
+					},
+					.type = CameraView {
+						.position = glm::vec3(0.f, 5.f, 15.f),
+						.rotation = parseQuat(glm::vec4(0.f, 0, -1.f, 0.f)),
+					},
+				},
+				CutsceneEvent {
+					.name = "camera-view-2",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = CameraView {
+						.position = glm::vec3(0.f, 5.f, 20.f),
+						.rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
+					},
+				},
+			},
+		} 
+	},
+	{
 		"test", Cutscene {
 			.events = {
 				CutsceneEvent {
@@ -197,7 +265,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 
 std::unordered_map<objid, CutsceneInstance> playingCutscenes;
 
-void playCutscene(std::string&& cutsceneName, float startTime){
+void playCutscene(std::string cutsceneName, float startTime){
 	modassert(cutscenes.find(cutsceneName) != cutscenes.end(), std::string("play custscene, cutscene does not exist: ") + cutsceneName)
 
 	CutsceneInstance cutsceneInstance { 

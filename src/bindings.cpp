@@ -415,7 +415,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
         auto cameraId = findObjByShortName(router.value() -> camera.value(), sceneId);
         modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
-        setActivePlayer(movement, weapons, aiData, cameraId.value());      
+        setActivePlayer(movement, weapons, aiData, cameraId.value());
       }
     }
   }
@@ -763,11 +763,23 @@ UiContext getUiContext(GameState& gameState){
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
   .setCameraPosition = [](glm::vec3 position, glm::quat rotation) -> void {
-    modassert(false, "setCameraPosition not yet implemented");
+    modlog("cutscene api", "setCameraPosition");
+    // depending on this camera existing is lame
+    auto testViewObj = findObjByShortName(">testview", std::nullopt);
+    setTempCamera(testViewObj.value());
+    
+    gameapi -> setGameObjectPosition(testViewObj.value(), position, true);
+    gameapi -> setGameObjectRot(testViewObj.value(), rotation, true);
   },
   .popTempViewpoint = []()-> void {
+    modlog("cutscene api", "popTempViewpoint");
+
     modassert(false, "popTempViewpoint not yet implemented");
   },
+  .setPlayerControllable = [](bool) -> void {
+    modlog("cutscene api", "setPlayerControllable");
+    modassert(false, "setPlayerControllable not yet implemented");
+  }
 };
 
 void goBackMainMenu(){

@@ -315,7 +315,7 @@ void initializeRails(objid sceneId){
 }
 
 void handleEntitiesOnRails(objid ownerId, objid sceneId){
-	static bool doOnce = true;
+	static bool doOnce = false;
 	if (doOnce){
 		doOnce = false;
 		initializeRails(sceneId);

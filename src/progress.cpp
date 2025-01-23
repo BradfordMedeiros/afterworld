@@ -4,6 +4,7 @@ GameProgress progress {
 	.levels = LevelPlaylist {
 		.currentProgress = 0,
 		.shortNames = {
+			"intro",
 			"e1m1",
 			"story-1",
 			"e1m2",

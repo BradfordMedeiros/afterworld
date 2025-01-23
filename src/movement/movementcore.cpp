@@ -571,7 +571,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 
   auto shouldStep = shouldStepUp(playerId) && (direction.z < 0 /* going forward */ );
   //std::cout << "should step up: " << shouldStep << std::endl;
-  if (shouldStep){
+  if (false && shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
 

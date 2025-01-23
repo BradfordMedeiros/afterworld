@@ -1,0 +1,37 @@
+floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+floor:position:0 0 0
+floor:scale:100 100 10
+floor:rotation:0 -1 0 0
+floor:texturesize:40 40
+floor:physics:enabled
+floor:material:metal
+floor:texture:../gameresources/build/misc/keyboard.png
+
+
+wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+wall:position:0 0 -5
+wall:scale:100 100 10
+wall:rotation:0 0 1 0
+wall:texturesize:40 40
+wall:physics:enabled
+wall:material:metal
+wall:texture:../gameresources/build/misc/keyboard.png
+
+
+
+playerspawn:playerspawn:true
+playerspawn:position:0 20 0
+playerspawn:teleport:true
+
+>testview:position:0 0 40
+>testview:rotation:0 0 -10 0
+
+trigger_cutscene:cutscene:opening
+
+[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
+[link:position:0 5 0
+
+&music:clip:/home/brad/Desktop/bones.wav
+&music:autoplay:true
+&music:volume:5
+
