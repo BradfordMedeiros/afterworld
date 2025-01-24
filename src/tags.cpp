@@ -510,9 +510,11 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "cutscene",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			auto cutscene = getSingleAttr(id, "cutscene");
-			playCutscene(cutscene.value(), gameapi -> timeSeconds(false));
+			playCutscene(id, cutscene.value(), gameapi -> timeSeconds(false));
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+	    onCutsceneObjRemoved(id);
+  	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},

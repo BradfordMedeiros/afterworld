@@ -37,6 +37,10 @@ void advanceProgress(){
 	progress.levels.currentProgress = progress.levels.currentProgress.value() + 1;
 }
 
+bool canAdvanceProgress(){
+	return progress.levels.currentProgress < (progress.levels.shortNames.size() - 1);
+}
+
 GameProgress& getGameProgress(){
 	return progress;
 }

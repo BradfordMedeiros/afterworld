@@ -19,6 +19,7 @@ GameProgress& getGameProgress();
 void setProgressByShortname(std::string name);
 std::optional<std::string> getCurrentLink();
 void advanceProgress();
+bool canAdvanceProgress();
 GameProgress& getGameProgress();
 
 #endif

@@ -77,14 +77,20 @@ void goToLink(std::string link){
   pushHistory({ "loading" }, true);
   gameapi -> schedule(0, 5000, NULL, [link](void*) -> void {
     goToLevel(link);
-    playCutscene("test", gameapi -> timeSeconds(true));
   });
 }
+void goBackMainMenu(){
+  pushHistory({ "mainmenu" }, true);
+}
 void goToNextLevel(){
-  advanceProgress();
-  auto nextLink = getCurrentLink();
-  modassert(nextLink.has_value(), "no next link");
-  goToLink(nextLink.value());
+  if (canAdvanceProgress()){
+    advanceProgress();
+    auto nextLink = getCurrentLink();
+    modassert(nextLink.has_value(), "no next link");
+    goToLink(nextLink.value());    
+  }else{
+    goBackMainMenu();
+  }
 }
 
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -759,12 +765,12 @@ UiContext getUiContext(GameState& gameState){
   return uiContext;
 }
 
-
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
-  .setCameraPosition = [](glm::vec3 position, glm::quat rotation) -> void {
+  .setCameraPosition = [](glm::vec3 position, glm::quat rotation, std::optional<float> duration) -> void {
     modlog("cutscene api", "setCameraPosition");
     // depending on this camera existing is lame
+
     auto testViewObj = findObjByShortName(">testview", std::nullopt);
     setTempCamera(testViewObj.value());
     
@@ -778,13 +784,11 @@ CutsceneApi cutsceneApi {
   },
   .setPlayerControllable = [](bool) -> void {
     modlog("cutscene api", "setPlayerControllable");
-    modassert(false, "setPlayerControllable not yet implemented");
-  }
+    setTempCamera(std::nullopt);
+  },
+  .goToNextLevel = goToNextLevel,
 };
 
-void goBackMainMenu(){
-  pushHistory({ "mainmenu" }, true);
-}
 
 bool hasAnimation(objid entityId, std::string& animationName){
   return gameapi -> listAnimations(entityId).count(animationName) > 0;
@@ -995,7 +999,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
 
-    tickCutscenes(cutsceneApi, gameapi -> timeSeconds(true));
+    tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
     if (controlledPlayer.playerId.has_value() && !isPaused()){  
       auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
         [](objid id) -> objid {

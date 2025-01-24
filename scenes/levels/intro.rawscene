@@ -17,6 +17,8 @@ wall:physics:enabled
 wall:material:metal
 wall:texture:../gameresources/build/misc/keyboard.png
 
+wall:health:5
+wall:cutscene:opening
 
 
 playerspawn:playerspawn:true
@@ -26,7 +28,6 @@ playerspawn:teleport:true
 >testview:position:0 0 40
 >testview:rotation:0 0 -10 0
 
-trigger_cutscene:cutscene:opening
 
 [link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
 [link:position:0 5 0

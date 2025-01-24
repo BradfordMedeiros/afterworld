@@ -340,9 +340,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
 
-  if (key == 'Y' && action == 0){
-  	playCutscene("test", gameapi -> timeSeconds(true));
-  }
   if (key == 75){
   	//spawnProcMesh(gameapi -> listSceneId(id));
   }

@@ -7,9 +7,10 @@ struct BackgroundFill {
 	glm::vec4 color;
 };
 struct DebugTextDisplay {
-	float duration;
 	std::string text;
 	float rate;
+	glm::vec2 ndi;
+	glm::vec2 pos;
 };
 struct Letterbox {
 	std::string text;
@@ -18,12 +19,17 @@ struct Letterbox {
 struct CameraView {
 	glm::vec3 position;
 	glm::quat rotation;
+	std::optional<float> duration = std::nullopt;
 };
 struct PopCameraView {};
-
 struct TerminalDisplay {};
 
-typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, CameraView, PopCameraView, TerminalDisplay> CutsceneEventType;
+struct ChangePlayable {
+	bool isPlayable;
+};
+struct NextLevel {};
+
+typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, CameraView, PopCameraView, TerminalDisplay, ChangePlayable, NextLevel> CutsceneEventType;
 
 
 
@@ -50,6 +56,8 @@ struct CutsceneTiming {
 };
 struct CutsceneInstance {
 	float startTime;
+	bool shouldRemove;
+	objid ownerObjId;
 	std::set<std::string> messages;
 	std::unordered_map<int, CutsceneTiming> playedEvents;
 	Cutscene* cutscene;
@@ -65,15 +73,18 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 	auto cameraViewPtr = std::get_if<CameraView>(&event.type);
 	auto popcameraPtr = std::get_if<PopCameraView>(&event.type);
 	auto terminalPtr = std::get_if<TerminalDisplay>(&event.type);
+	auto playablePtr = std::get_if<ChangePlayable>(&event.type);
+	auto nextLevelPtr = std::get_if<NextLevel>(&event.type);
 
 	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
 		std::string text = debugTextDisplayPtr -> text;
+		auto pos = debugTextDisplayPtr -> pos;
 
-		perFrameEvents[id] = [text, time]() -> void {
-			auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - time) * 100.f);
+		perFrameEvents[id] = [text, time, pos]() -> void {
+			auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - time) * 100.f);
 			auto textSubtr = text.substr(0, currIndex);
-			drawRightText(textSubtr, 0.f, 0.f, 0.05f, std::nullopt /* tint */, std::nullopt);
+			drawRightText(textSubtr, pos.x, pos.y, 0.05f, std::nullopt /* tint */, std::nullopt);
 		};
   	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
@@ -90,14 +101,14 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 	}else if (letterboxPtr){
 		api.showLetterBox(letterboxPtr -> text, duration);
 	}else if (cameraViewPtr){
-		api.setCameraPosition(cameraViewPtr -> position, cameraViewPtr -> rotation);
+		api.setCameraPosition(cameraViewPtr -> position, cameraViewPtr -> rotation, cameraViewPtr -> duration);
 	}else if (popcameraPtr){
 		api.popTempViewpoint();
 	}else if (terminalPtr){
 		auto id = getUniqueObjId();
 		std::string text = "hello world";
 		perFrameEvents[id] = [text, time]() -> void {
-			auto currIndex = static_cast<int>((gameapi -> timeSeconds(true) - time) * 100.f);
+			auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - time) * 100.f);
 			auto textSubtr = text.substr(0, currIndex);
 			gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.98f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 			drawRightText(textSubtr, -1.f, 0.f, 0.02f, std::nullopt /* tint */, std::nullopt);
@@ -105,7 +116,10 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
   	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
-
+	}else if (playablePtr){
+		api.setPlayerControllable(playablePtr -> isPlayable);
+	}else if (nextLevelPtr){
+		api.goToNextLevel();
 	}
 
 	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
@@ -138,6 +152,8 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = DebugTextDisplay {
 						.text = "Opening Text Here",
 						.rate = 0.f,
+						.ndi = glm::vec2(0.f, 0.f),
+						.pos = glm::vec2(-1.f, 1.f),
 					},
 				},
 				CutsceneEvent {
@@ -154,7 +170,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 				},
 				CutsceneEvent {
 					.name = "camera-view-1",
-					.duration = 5.f,
+					.duration = 2.f,
 					.time = TriggerType {
 						.time = 0.f,
 						.waitForLastEvent = false,
@@ -163,6 +179,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = CameraView {
 						.position = glm::vec3(0.f, 5.f, 15.f),
 						.rotation = parseQuat(glm::vec4(0.f, 0, -1.f, 0.f)),
+						.duration = 0.f,
 					},
 				},
 				CutsceneEvent {
@@ -176,8 +193,32 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = CameraView {
 						.position = glm::vec3(0.f, 5.f, 20.f),
 						.rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
+						.duration = 5.f,
 					},
 				},
+				CutsceneEvent {
+					.name = "start-playing",
+					.duration = 5.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = ChangePlayable { .isPlayable = true },
+				},
+
+				CutsceneEvent {
+					.name = "next-level",
+					.duration = 0.f,
+					.time = TriggerType {
+						.time = 0.f,
+						.waitForLastEvent = true,
+						.waitForMessage = std::nullopt,
+					},
+					.type = NextLevel{},
+				},
+
+
 			},
 		} 
 	},
@@ -195,6 +236,8 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = DebugTextDisplay {
 						.text = "Welcome to the Afterworld",
 						.rate = 100.f,
+						.ndi = glm::vec2(0.f, 0.f),
+						.pos = glm::vec2(0.f, 0.f),
 					},
 				},
 				/*CutsceneEvent {
@@ -265,11 +308,13 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 
 std::unordered_map<objid, CutsceneInstance> playingCutscenes;
 
-void playCutscene(std::string cutsceneName, float startTime){
+void playCutscene(objid ownerObjId, std::string cutsceneName, float startTime){
 	modassert(cutscenes.find(cutsceneName) != cutscenes.end(), std::string("play custscene, cutscene does not exist: ") + cutsceneName)
 
 	CutsceneInstance cutsceneInstance { 
 		.startTime = startTime,
+		.shouldRemove = false,
+		.ownerObjId = ownerObjId,
 		.messages = {},
 		.playedEvents = {},
 		.cutscene = &cutscenes.at(cutsceneName),
@@ -364,7 +409,7 @@ void tickCutscenes(CutsceneApi& api, float time){
 	for (auto &[id, instance] : playingCutscenes){
 		bool finished = false;
 		auto nextEventIndex = getNextEventIndex(instance, time, &finished);
-		if (finished){
+		if (finished || instance.shouldRemove){
 			idsToRemove.push_back(id);
 			continue;
 		}
@@ -397,5 +442,13 @@ void onCutsceneMessages(std::string& key){
 				instance.messages.insert(key);
 			}
 		}
+	}
+}
+
+void onCutsceneObjRemoved(objid id){
+	for (auto &[_, instance] : playingCutscenes){
+		if (instance.ownerObjId == id){
+			instance.shouldRemove = true;
+		}		
 	}
 }
