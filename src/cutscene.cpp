@@ -179,7 +179,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = CameraView {
 						.position = glm::vec3(0.f, 5.f, 15.f),
 						.rotation = parseQuat(glm::vec4(0.f, 0, -1.f, 0.f)),
-						.duration = 0.f,
+						.duration = std::nullopt,
 					},
 				},
 				CutsceneEvent {

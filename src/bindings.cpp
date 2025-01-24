@@ -774,7 +774,9 @@ CutsceneApi cutsceneApi {
     auto testViewObj = findObjByShortName(">testview", std::nullopt);
     setTempCamera(testViewObj.value());
     
-    gameapi -> setGameObjectPosition(testViewObj.value(), position, true);
+    gameapi -> moveCameraTo(testViewObj.value(), position, duration);
+
+    //gameapi -> setGameObjectPosition(testViewObj.value(), position, true);
     gameapi -> setGameObjectRot(testViewObj.value(), rotation, true);
   },
   .popTempViewpoint = []()-> void {
