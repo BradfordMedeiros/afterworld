@@ -32,7 +32,16 @@ playerspawn:teleport:true
 [link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
 [link:position:0 5 0
 
-&music:clip:/home/brad/Desktop/bones.wav
-&music:autoplay:true
-&music:volume:5
+#&music:clip:/home/brad/Desktop/bones.wav
+#&music:autoplay:true
+#music:volume:5
+
+pyramid:mesh:../gameresources/build/misc/pyramid.gltf
+darkwires:mesh:../gameresources/build/uncategorized/darkwires.gltf
+bed:mesh:../gameresources/build/uncategorized/bedframe.gltf
+clock:mesh:../gameresources/build/uncategorized/grandfatherclock.gltf
+limbo:mesh:../gameresources/build/uncategorized/limboapple.gltf
+
+storyboardtexture1:texture:../afterworld/design/storyboard/announcer.png
+storyboardtexture2:texture:../afterworld/design/storyboard/hell.jpg
 

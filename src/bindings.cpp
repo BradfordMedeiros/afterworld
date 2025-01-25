@@ -779,11 +779,6 @@ CutsceneApi cutsceneApi {
     //gameapi -> setGameObjectPosition(testViewObj.value(), position, true);
     gameapi -> setGameObjectRot(testViewObj.value(), rotation, true);
   },
-  .popTempViewpoint = []()-> void {
-    modlog("cutscene api", "popTempViewpoint");
-
-    modassert(false, "popTempViewpoint not yet implemented");
-  },
   .setPlayerControllable = [](bool) -> void {
     modlog("cutscene api", "setPlayerControllable");
     setTempCamera(std::nullopt);

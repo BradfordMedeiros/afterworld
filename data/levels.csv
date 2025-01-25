@@ -1,5 +1,5 @@
 filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING
-../afterworld/scenes/levels/intro.rawscene,Intro Dreams and Reconciliation,intro,Fall asleep and enter the realm of the dreamweavers.,./res/textures/trippyflash.png
+../afterworld/scenes/levels/intro.rawscene,Intro Dreams and Reconciliation,intro,Fall asleep and enter the realm of the dreamweavers.,../afterworld/design/storyboard/hell.jpg
 ../afterworld/scenes/levels/level2.rawscene,Arrival,level2,You arrive to a port city and find demons.,./res/textures/water.jpg
 ../afterworld/scenes/levels/e1m1.rawscene,e1m1,e1m1,Vertical slice - classic slice. ,../afterworld/screenshots/test.png
 ../afterworld/scenes/levels/e1m2.rawscene,e1m2,e1m2,Vertical slice 2  classic slice.,../afterworld/screenshots/test.png

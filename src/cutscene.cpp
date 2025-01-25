@@ -9,9 +9,16 @@ struct BackgroundFill {
 struct DebugTextDisplay {
 	std::string text;
 	float rate;
-	glm::vec2 ndi;
+	float size;
 	glm::vec2 pos;
 };
+struct ImageDisplay {
+	glm::vec2 pos;
+	glm::vec2 size;
+	int zIndex = -1;
+	const char* image = NULL;
+};
+
 struct Letterbox {
 	std::string text;
 };
@@ -21,7 +28,6 @@ struct CameraView {
 	glm::quat rotation;
 	std::optional<float> duration = std::nullopt;
 };
-struct PopCameraView {};
 struct TerminalDisplay {};
 
 struct ChangePlayable {
@@ -29,7 +35,16 @@ struct ChangePlayable {
 };
 struct NextLevel {};
 
-typedef std::variant<DebugTextDisplay, BackgroundFill, Letterbox, CameraView, PopCameraView, TerminalDisplay, ChangePlayable, NextLevel> CutsceneEventType;
+typedef std::variant<
+	ImageDisplay,
+	DebugTextDisplay, 
+	BackgroundFill, 
+	Letterbox, 
+	CameraView, 
+	TerminalDisplay, 
+	ChangePlayable, 
+	NextLevel
+> CutsceneEventType;
 
 
 
@@ -68,10 +83,10 @@ std::unordered_map<objid, std::function<void()>> perFrameEvents;
 
 void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float duration){
 	auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
+	auto imageDisplayPtr = std::get_if<ImageDisplay>(&event.type);
 	auto backgroundFillPtr = std::get_if<BackgroundFill>(&event.type);
 	auto letterboxPtr = std::get_if<Letterbox>(&event.type);
 	auto cameraViewPtr = std::get_if<CameraView>(&event.type);
-	auto popcameraPtr = std::get_if<PopCameraView>(&event.type);
 	auto terminalPtr = std::get_if<TerminalDisplay>(&event.type);
 	auto playablePtr = std::get_if<ChangePlayable>(&event.type);
 	auto nextLevelPtr = std::get_if<NextLevel>(&event.type);
@@ -80,15 +95,40 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		auto id = getUniqueObjId();
 		std::string text = debugTextDisplayPtr -> text;
 		auto pos = debugTextDisplayPtr -> pos;
+		auto size = debugTextDisplayPtr -> size;
 
-		perFrameEvents[id] = [text, time, pos]() -> void {
+		perFrameEvents[id] = [text, time, pos, size]() -> void {
 			auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - time) * 100.f);
 			auto textSubtr = text.substr(0, currIndex);
-			drawRightText(textSubtr, pos.x, pos.y, 0.05f, std::nullopt /* tint */, std::nullopt);
+			drawRightText(textSubtr, pos.x, pos.y, size, std::nullopt /* tint */, std::nullopt);
 		};
   	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
+	}else if (imageDisplayPtr){
+		auto id = getUniqueObjId();
+		auto pos = imageDisplayPtr -> pos;
+		auto size = imageDisplayPtr -> size;
+		auto image = imageDisplayPtr -> image;
+		auto zIndex = imageDisplayPtr -> zIndex;
+		modassert(image, "image is null");
+
+		static bool didLoadShader = false;
+		static unsigned int* shaderId = 0;
+		if (!didLoadShader){
+			shaderId = gameapi -> loadShader("storyboard", "../afterworld/shaders/storyboard");
+			didLoadShader = true;
+		}
+		perFrameEvents[id] = [time, pos, size, image, zIndex]() -> void {
+		  gameapi -> drawRect(pos.x, pos.y, size.x, size.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, image, ShapeOptions {
+		  	.shaderId = *shaderId,
+		  	.zIndex = zIndex,
+		  });
+		};
+  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
+  		perFrameEvents.erase(id);
+  	});
+
 	}else if (backgroundFillPtr){
 		auto id = getUniqueObjId();
 		auto color = backgroundFillPtr -> color;
@@ -102,8 +142,6 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		api.showLetterBox(letterboxPtr -> text, duration);
 	}else if (cameraViewPtr){
 		api.setCameraPosition(cameraViewPtr -> position, cameraViewPtr -> rotation, cameraViewPtr -> duration);
-	}else if (popcameraPtr){
-		api.popTempViewpoint();
 	}else if (terminalPtr){
 		auto id = getUniqueObjId();
 		std::string text = "hello world";
@@ -125,102 +163,171 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
 }
 
-std::unordered_map<std::string, Cutscene> cutscenes {
-	{
-		"opening", Cutscene {
-			.events = {
-				CutsceneEvent {
-					.name = "background",
-					.duration = 5.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = false,
-						.waitForMessage = std::nullopt,
-					},
-					.type = BackgroundFill {
-						.color = glm::vec4(0.f, 0.f, 1.f, 0.4f),
-					},
-				},
-				CutsceneEvent {
-					.name = "initial title text",
-					.duration = 5.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = false,
-						.waitForMessage = std::nullopt,
-					},
-					.type = DebugTextDisplay {
-						.text = "Opening Text Here",
-						.rate = 0.f,
-						.ndi = glm::vec2(0.f, 0.f),
-						.pos = glm::vec2(-1.f, 1.f),
-					},
-				},
-				CutsceneEvent {
-					.name = "letterbox",
-					.duration = 5.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = false,
-						.waitForMessage = std::nullopt,
-					},
-					.type = Letterbox {
-						.text = "",
-					},
-				},
-				CutsceneEvent {
-					.name = "camera-view-1",
-					.duration = 2.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = false,
-						.waitForMessage = std::nullopt,
-					},
-					.type = CameraView {
-						.position = glm::vec3(0.f, 5.f, 15.f),
-						.rotation = parseQuat(glm::vec4(0.f, 0, -1.f, 0.f)),
-						.duration = std::nullopt,
-					},
-				},
-				CutsceneEvent {
-					.name = "camera-view-2",
-					.duration = 5.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = true,
-						.waitForMessage = std::nullopt,
-					},
-					.type = CameraView {
-						.position = glm::vec3(0.f, 5.f, 20.f),
-						.rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
-						.duration = 5.f,
-					},
-				},
-				CutsceneEvent {
-					.name = "start-playing",
-					.duration = 5.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = true,
-						.waitForMessage = std::nullopt,
-					},
-					.type = ChangePlayable { .isPlayable = true },
-				},
-
-				CutsceneEvent {
-					.name = "next-level",
-					.duration = 0.f,
-					.time = TriggerType {
-						.time = 0.f,
-						.waitForLastEvent = true,
-						.waitForMessage = std::nullopt,
-					},
-					.type = NextLevel{},
-				},
-
-
+std::vector<CutsceneEvent> joinCutscenes(std::vector<CutsceneEvent> eventsOne, std::vector<CutsceneEvent> eventsTwo){
+	std::vector<CutsceneEvent> combinedEvents;
+	for (auto &event : eventsOne){
+		combinedEvents.push_back(event);
+	}
+	for (auto &event : eventsTwo){
+		combinedEvents.push_back(event);
+	}
+	return combinedEvents;
+}
+std::vector<CutsceneEvent> createTextCutscene(const char* background, std::vector<std::string> dialog){
+  std::vector<CutsceneEvent> events {
+		CutsceneEvent {
+			.name = "stop-playing",
+			.duration = 0.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = false,
+				.waitForMessage = std::nullopt,
 			},
-		} 
+			.type = ChangePlayable { .isPlayable = false },
+		},
+		CutsceneEvent {
+			.name = "background",
+			.duration = 10.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = false,
+				.waitForMessage = std::nullopt,
+			},
+			.type = BackgroundFill {
+				.color = glm::vec4(0.f, 0.f, 1.f, 0.f),
+			},
+		},
+		CutsceneEvent {
+			.name = "initial display",
+			.duration = 25.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = false,
+				.waitForMessage = std::nullopt,
+			},
+			.type = ImageDisplay {
+				.pos = glm::vec2(0.f, 0.f),
+				.size = glm::vec2(2.f, 2.f),
+				.image = background,
+			},
+		},
+		CutsceneEvent {
+			.name = "letterbox",
+			.duration = 25.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = false,
+				.waitForMessage = std::nullopt,
+			},
+			.type = Letterbox {
+				.text = "",
+			},
+		},
+		CutsceneEvent {
+			.name = "initial title text",
+			.duration = 10.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = false,
+				.waitForMessage = std::nullopt,
+			},
+			.type = DebugTextDisplay {
+				.text = "You Have Fallen Asleep.",
+				.rate = 0.5f,
+				.size = 0.04f,
+				.pos = glm::vec2(-0.4f, 0.f),
+			},
+		},
+		CutsceneEvent {
+			.name = "initial title text 2",
+			.duration = 5.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = true,
+				.waitForMessage = std::nullopt,
+			},
+			.type = DebugTextDisplay {
+				.text = "It is Not Yet Time To Wake Up",
+				.rate = 0.5f,
+				.size = 0.04f,
+				.pos = glm::vec2(-0.4f, 0.f),
+			},
+		},
+		CutsceneEvent {
+			.name = "initial title text 2",
+			.duration = 10.f,
+			.time = TriggerType {
+				.time = 0.f,
+				.waitForLastEvent = true,
+				.waitForMessage = std::nullopt,
+			},
+			.type = DebugTextDisplay {
+				.text = "It is Time to [?????]",
+				.rate = 0.5f,
+				.size = 0.04f,
+				.pos = glm::vec2(-0.4f, 0.f),
+			},
+		},
+	};
+  return events;
+}
+
+std::unordered_map<std::string, Cutscene> cutscenes {
+	{ "opening", Cutscene {
+			.events = joinCutscenes(
+				createTextCutscene("../afterworld/design/storyboard/hell.jpg", {}), 
+				{
+					CutsceneEvent {
+						.name = "camera-view-1",
+						.duration = 2.f,
+						.time = TriggerType {
+							.time = 0.f,
+							.waitForLastEvent = true,
+							.waitForMessage = std::nullopt,
+						},
+						.type = CameraView {
+							.position = glm::vec3(0.f, 5.f, 15.f),
+							.rotation = parseQuat(glm::vec4(0.f, 0, -1.f, 0.f)),
+							.duration = std::nullopt,
+						},
+					},
+					CutsceneEvent {
+						.name = "camera-view-2",
+						.duration = 30.f,
+						.time = TriggerType {
+							.time = 0.f,
+							.waitForLastEvent = true,
+							.waitForMessage = std::nullopt,
+						},
+						.type = CameraView {
+							.position = glm::vec3(0.f, 5.f, 50.f),
+							.rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
+							.duration = 30.f,
+						},
+					},
+					CutsceneEvent {
+						.name = "start-playing",
+						.duration = 5.f,
+						.time = TriggerType {
+							.time = 0.f,
+							.waitForLastEvent = true,
+							.waitForMessage = std::nullopt,
+						},
+						.type = ChangePlayable { .isPlayable = true },
+					},
+					CutsceneEvent {
+						.name = "next-level",
+						.duration = 0.f,
+						.time = TriggerType {
+							.time = 0.f,
+							.waitForLastEvent = true,
+							.waitForMessage = std::nullopt,
+						},
+						.type = NextLevel{},
+					},
+				}
+			),
+		}
 	},
 	{
 		"test", Cutscene {
@@ -236,7 +343,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 					.type = DebugTextDisplay {
 						.text = "Welcome to the Afterworld",
 						.rate = 100.f,
-						.ndi = glm::vec2(0.f, 0.f),
+						.size = 0.05f,
 						.pos = glm::vec2(0.f, 0.f),
 					},
 				},

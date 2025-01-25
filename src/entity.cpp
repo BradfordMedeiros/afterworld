@@ -93,15 +93,15 @@ bool controllableEntityExists(objid id){
 
 void updateCamera(){
 	if (controlledPlayer.editorMode){
-		gameapi -> setActiveCamera(std::nullopt, -1);
+		gameapi -> setActiveCamera(std::nullopt);
 		return;
 	}
 	if (controlledPlayer.tempCamera.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), -1);
+		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value());
 		return;
 	}
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), -1);
+		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value());
 	}
 }
 
