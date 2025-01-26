@@ -15,6 +15,7 @@
 #include "../components/uiwindow.h"
 #include "../components/game/elevator.h"
 #include "../components/game/wheel.h"
+#include "../components/game/fade.h"
 #include "./navigation.h"
 #include "../../modelviewer.h"
 #include "./loading.h"

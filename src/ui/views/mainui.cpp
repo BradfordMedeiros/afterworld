@@ -529,6 +529,13 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
     editorViewComponent.draw(drawTools, editorViewProps);
   }
 
+  {
+    Props props {
+      .props = {},
+    };
+    fadeComponent.draw(drawTools, props);
+  }
+
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
 
   if (handlerFuncs.autofocus.has_value()){

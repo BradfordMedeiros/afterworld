@@ -17,19 +17,8 @@ void setShowActivate(bool showActivate);
 void setUiWeapon(std::optional<std::string> weapon);
 void setUiGemCount(std::optional<int> count);
 
-
-struct LetterboxFade {
-  std::string title;
-  std::optional<float> animationDuration;
-  std::optional<float> animationHold;
-  std::optional<float> fadeOutDuration;
-  glm::vec4 boxColor;
-  glm::vec4 fadeColor;
-  float fontSize;
-};
-void showLetterBox(std::string title, float duration);
-
 extern Component hudComponent;
+
 
 #endif
 
