@@ -204,11 +204,13 @@ std::optional<objid> getActivePlayerId(){
 bool onActivePlayerRemoved(objid id){
 	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
 		controlledPlayer.tempCamera = std::nullopt;
+		updateCamera();
 	}
 	if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id){
 		controlledPlayer.playerId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
 		controlledPlayer.disablePlayerControl = false;
+		updateCamera();
 		return true;
 	}
 	return false;
@@ -216,6 +218,7 @@ bool onActivePlayerRemoved(objid id){
 
 void setDisablePlayerControl(bool isDisabled){
 	controlledPlayer.disablePlayerControl = isDisabled;
+	updateCamera();
 }
 bool isPlayerControlDisabled(){
 	return controlledPlayer.disablePlayerControl;

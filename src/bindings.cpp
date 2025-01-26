@@ -608,7 +608,7 @@ UiContext getUiContext(GameState& gameState){
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
-   .showGameHud = []() -> bool { return getGlobalState().showGameHud; },
+   .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(); },
    .showTerminal = []() -> std::optional<TerminalConfig> {
       if (!terminalInterface.has_value()){
         return std::optional<TerminalConfig>(std::nullopt); 
@@ -784,6 +784,15 @@ CutsceneApi cutsceneApi {
     setDisablePlayerControl(!isPlayable);
   },
   .goToNextLevel = goToNextLevel,
+  .setWorldState = [](std::string field, std::string name, AttributeValue value) -> void {
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = field,
+        .attribute = name,
+        .value = value,
+      },
+    });  
+  }
 };
 
 

@@ -37,6 +37,13 @@ struct ChangePlayable {
 };
 struct NextLevel {};
 
+struct WorldState {
+	const char* field;
+	const char* name;
+	AttributeValue value;
+};
+
+
 typedef std::variant<
 	ImageDisplay,
 	DebugTextDisplay, 
@@ -45,7 +52,8 @@ typedef std::variant<
 	CameraView, 
 	TerminalDisplay, 
 	ChangePlayable, 
-	NextLevel
+	NextLevel,
+	WorldState
 > CutsceneEventType;
 
 
@@ -92,6 +100,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 	auto terminalPtr = std::get_if<TerminalDisplay>(&event.type);
 	auto playablePtr = std::get_if<ChangePlayable>(&event.type);
 	auto nextLevelPtr = std::get_if<NextLevel>(&event.type);
+	auto worldStatePtr = std::get_if<WorldState>(&event.type);
 
 	if (debugTextDisplayPtr){
 		auto id = getUniqueObjId();
@@ -161,6 +170,8 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		api.setPlayerControllable(playablePtr -> isPlayable);
 	}else if (nextLevelPtr){
 		api.goToNextLevel();
+	}else if (worldStatePtr){
+		api.setWorldState(worldStatePtr -> field, worldStatePtr -> name, worldStatePtr -> value);
 	}
 
 	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
@@ -201,7 +212,6 @@ std::vector<CutsceneEvent> createTextCutscene(const char* background, std::vecto
 			.type = ImageDisplay {
 				.pos = glm::vec2(0.f, 0.f),
 				.size = glm::vec2(2.f, 2.f),
-				.tint = glm::vec4(1.f, 1.f, 1.f, 0.5f),
 				.image = background,
 			},
 		},
@@ -318,6 +328,20 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						.duration = 5.f,
 						.time = TriggerType {
 							.time = 0.f,
+							.waitForLastEvent = false,
+							.waitForMessage = std::nullopt,
+						},
+						.type = WorldState {
+							.field = "skybox",
+							.name = "color",
+							.value = glm::vec3(1.f, 0.f, 0.f),
+						},
+					},
+					CutsceneEvent {
+						.name = "camera-view-2",
+						.duration = 5.f,
+						.time = TriggerType {
+							.time = 0.f,
 							.waitForLastEvent = true,
 							.waitForMessage = std::nullopt,
 						},
@@ -338,16 +362,16 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						},
 						.type = ChangePlayable { .isPlayable = true },
 					},
-					CutsceneEvent {
-						.name = "next-level",
-						.duration = 0.f,
-						.time = TriggerType {
-							.time = 0.f,
-							.waitForLastEvent = true,
-							.waitForMessage = std::nullopt,
-						},
-						.type = NextLevel{},
-					},
+					//CutsceneEvent {
+					//	.name = "next-level",
+					//	.duration = 0.f,
+					//	.time = TriggerType {
+					//		.time = 0.f,
+					//		.waitForLastEvent = true,
+					//		.waitForMessage = std::nullopt,
+					//	},
+					//	.type = NextLevel{},
+					//},
 				}}
 			),
 		}

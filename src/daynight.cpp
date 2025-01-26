@@ -45,6 +45,7 @@ void maybeSpawnLightFromArgs(){
   }
 }
 void onFrameDaynight(){
+  return;
   float currMinute;
   if (useRealTime){
     std::time_t t = std::time(0);   // get time now

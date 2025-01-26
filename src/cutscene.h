@@ -8,6 +8,7 @@ struct CutsceneApi {
 	std::function<void(std::optional<std::string> camera, glm::vec3 position, glm::quat rotation, std::optional<float> duration)> setCameraPosition;
 	std::function<void(bool)> setPlayerControllable;
 	std::function<void()> goToNextLevel;
+	std::function<void(std::string field, std::string name, AttributeValue)> setWorldState;
 };
 
 void playCutscene(objid ownerObjId, std::string cutsceneName, float startTime);

@@ -13,7 +13,7 @@ struct ControlledPlayer {
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempCamera;
 	bool editorMode;
-	bool disablePlayerControl;
+	bool disablePlayerControl;  // this maybe should be in global? 
 	std::set<objid> disableAnimationIds;
 };
 
