@@ -146,7 +146,7 @@ struct SceneRouterPath {
   std::vector<std::string> paths;
   std::optional<std::function<std::string(std::vector<std::string> params)>> scene;
   bool makePlayer;
-  std::optional<std::string> camera;
+  std::optional<std::string> player;
 };
 
 struct PathAndParams {
@@ -166,7 +166,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/", "debug/wheel/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
     .makePlayer = false,
-    .camera = std::nullopt,
+    .player = std::nullopt,
   },
   SceneRouterPath {
     .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
@@ -176,25 +176,25 @@ std::vector<SceneRouterPath> routerPaths = {
       return sceneFile.value();
     },
     .makePlayer = true,
-    .camera = "maincamera",
+    .player = "maincamera",
   },
   SceneRouterPath {
     .paths = { "loading/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/loading.rawscene"; },
     .makePlayer = false,
-    .camera = std::nullopt,
+    .player = std::nullopt,
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
     .makePlayer = false,
-    .camera = "maincamera",
+    .player = "maincamera",
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
     .makePlayer = false,
-    .camera = "maincamera",
+    .player = "maincamera",
   },
 };
 
@@ -415,13 +415,14 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
       }
-      if (router.value() -> camera.has_value()){
-        modlog("router", "setting active player");
+      if (router.value() -> player.has_value()){
 
         // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
-        auto cameraId = findObjByShortName(router.value() -> camera.value(), sceneId);
-        modassert(cameraId.has_value(), "onSceneRouteChange, no camera in scene to load");
-        setActivePlayer(movement, weapons, aiData, cameraId.value());
+        auto playerId = findObjByShortName(router.value() -> player.value(), sceneId);
+        modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
+        modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
+
+        setActivePlayer(movement, weapons, aiData, playerId.value());
       }
     }
   }
@@ -767,21 +768,20 @@ UiContext getUiContext(GameState& gameState){
 
 CutsceneApi cutsceneApi {
   .showLetterBox = showLetterBox,
-  .setCameraPosition = [](glm::vec3 position, glm::quat rotation, std::optional<float> duration) -> void {
+  .setCameraPosition = [](std::optional<std::string> camera, glm::vec3 position, glm::quat rotation, std::optional<float> duration) -> void {
     modlog("cutscene api", "setCameraPosition");
-    // depending on this camera existing is lame
-
-    auto testViewObj = findObjByShortName(">testview", std::nullopt);
-    setTempCamera(testViewObj.value());
-    
-    gameapi -> moveCameraTo(testViewObj.value(), position, duration);
-
-    //gameapi -> setGameObjectPosition(testViewObj.value(), position, true);
-    gameapi -> setGameObjectRot(testViewObj.value(), rotation, true);
+    if (!camera.has_value()){
+      setTempCamera(std::nullopt);
+    }else{
+      auto testViewObj = findObjByShortName(camera.value(), std::nullopt);
+      setTempCamera(testViewObj.value());      
+      gameapi -> moveCameraTo(testViewObj.value(), position, duration);
+      gameapi -> setGameObjectRot(testViewObj.value(), rotation, true);
+    }
   },
-  .setPlayerControllable = [](bool) -> void {
+  .setPlayerControllable = [](bool isPlayable) -> void {
     modlog("cutscene api", "setPlayerControllable");
-    setTempCamera(std::nullopt);
+    setDisablePlayerControl(!isPlayable);
   },
   .goToNextLevel = goToNextLevel,
 };
@@ -997,7 +997,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
-    if (controlledPlayer.playerId.has_value() && !isPaused()){  
+    if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){  
       auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
         [](objid id) -> objid {
           return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
@@ -1034,7 +1034,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     setUiGemCount(listGems().size());
 
-    if (controlledPlayer.playerId.has_value()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
       const bool showLookVelocity = false;
       auto thirdPersonCamera = getCameraForThirdPerson();
       if (!thirdPersonCamera.has_value()){
@@ -1115,7 +1115,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
         // maybe raycast down, and then set the position so it fits 
         auto teleportPosition = getTeleportPosition(tags);
-        if (controlledPlayer.playerId.has_value() && teleportPosition.has_value()){
+        if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled() && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
           gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true);
           gameapi -> removeByGroupId(teleportPosition.value().id);
@@ -1135,18 +1135,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setActivePlayerNext(movement, weapons, aiData);
     }
 
-    if (controlledPlayer.playerId.has_value()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
       if (!(isPaused() || getGlobalState().disableGameInput)){
         onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), key, action, controlledPlayer.playerId.value());
       }
     }
-    if (controlledPlayer.playerId.has_value()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
       onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action);
     }
 
     if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData.worldInfo);
-      if (controlledPlayer.playerId.has_value()){
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
         setInShootingMode(controlledPlayer.playerId.value(), !isInShootingMode(controlledPlayer.playerId.value()).value());
       }
     }
@@ -1292,10 +1292,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     getGlobalState().mouseVelocity = glm::vec2(xPos, yPos);
-    if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput){
+    if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
       controlledPlayer.lookVelocity = glm::vec2(xPos, yPos);
     }
-    if (controlledPlayer.playerId.has_value()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), xPos, yPos);
     }
 
@@ -1337,7 +1337,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     if (controlledPlayer.playerId.has_value()){
       static float selectDistance = querySelectDistance();
-      if (!isPaused() && !getGlobalState().disableGameInput){
+      if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
         auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
           setTotalZoom(uiUpdate.zoomAmount.value());

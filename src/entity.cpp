@@ -14,6 +14,7 @@ ControlledPlayer controlledPlayer {
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
 	.tempCamera = std::nullopt,
 	.editorMode = false,
+	.disablePlayerControl = false,
 	.disableAnimationIds = {},
 };
 
@@ -201,12 +202,23 @@ std::optional<objid> getActivePlayerId(){
 }
 
 bool onActivePlayerRemoved(objid id){
+	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
+		controlledPlayer.tempCamera = std::nullopt;
+	}
 	if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id){
 		controlledPlayer.playerId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
+		controlledPlayer.disablePlayerControl = false;
 		return true;
 	}
 	return false;
+}
+
+void setDisablePlayerControl(bool isDisabled){
+	controlledPlayer.disablePlayerControl = isDisabled;
+}
+bool isPlayerControlDisabled(){
+	return controlledPlayer.disablePlayerControl;
 }
 
 void setActivePlayerEditorMode(bool editorMode){

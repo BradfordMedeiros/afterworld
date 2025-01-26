@@ -5,7 +5,7 @@
 
 struct CutsceneApi {
 	std::function<void(std::string title, float duration)> showLetterBox;
-	std::function<void(glm::vec3 position, glm::quat rotation, std::optional<float> duration)> setCameraPosition;
+	std::function<void(std::optional<std::string> camera, glm::vec3 position, glm::quat rotation, std::optional<float> duration)> setCameraPosition;
 	std::function<void(bool)> setPlayerControllable;
 	std::function<void()> goToNextLevel;
 };

@@ -13,6 +13,7 @@ struct ControlledPlayer {
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempCamera;
 	bool editorMode;
+	bool disablePlayerControl;
 	std::set<objid> disableAnimationIds;
 };
 
@@ -37,6 +38,8 @@ void maybeDisableMesh(objid id);
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id);
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
 bool onActivePlayerRemoved(objid id);
+void setDisablePlayerControl(bool isDisabled);
+bool isPlayerControlDisabled();
 
 void setActivePlayerEditorMode(bool editorMode);
 
