@@ -298,7 +298,7 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   .pickGameObj = [](std::function<void(objid, std::string)> selectGameObj) -> void {
     std::cout << "dock pick gameobj" << std::endl;
     // kind of hack, otherwise it would select the object just clicked due to ordering of binding callbacks
-    gameapi -> schedule(-1, 100, NULL, [selectGameObj](void*) -> void { 
+    gameapi -> schedule(-1, true, 100, NULL, [selectGameObj](void*) -> void { 
       commonState -> onGameObjSelected = selectGameObj;
     });
   },

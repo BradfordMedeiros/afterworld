@@ -95,7 +95,7 @@ float interpolateDuration(float min, float max, float elapsedTime, float duratio
 
 void clickMouse(objid id){
   gameapi ->  click(0, 1); // mouse down
-  gameapi -> schedule(id, 5000, NULL, [](void*) -> void {
+  gameapi -> schedule(id, true, 5000, NULL, [](void*) -> void {
     gameapi -> click(0, 0);
   });
 }

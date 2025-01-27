@@ -216,7 +216,7 @@ std::vector<CommandDispatch> commands {
       }
 
       auto delayMs = std::atoi(values.at(1).c_str());
-      gameapi -> schedule(-1, delayMs, NULL, [](void*) -> void {
+      gameapi -> schedule(-1, true, delayMs, NULL, [](void*) -> void {
         gameapi -> debugInfo(std::nullopt);
         exit(1);    
       });
@@ -241,7 +241,7 @@ std::vector<CommandDispatch> commands {
       }
       auto delayMs = std::atoi(values.at(1).c_str());
       auto takeScreenshot = consoleInterface.takeScreenshot;
-      gameapi -> schedule(-1, delayMs, NULL, [takeScreenshot](void*) -> void {
+      gameapi -> schedule(-1, true, delayMs, NULL, [takeScreenshot](void*) -> void {
         takeScreenshot("../afterworld/screenshots/test.png");
       });
       return std::nullopt;    

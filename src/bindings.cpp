@@ -75,7 +75,7 @@ void goToLevel(std::string levelShortName){
 }
 void goToLink(std::string link){
   pushHistory({ "loading" }, true);
-  gameapi -> schedule(0, 5000, NULL, [link](void*) -> void {
+  gameapi -> schedule(0, true, 5000, NULL, [link](void*) -> void {
     goToLevel(link);
   });
 }

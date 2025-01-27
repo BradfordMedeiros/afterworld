@@ -101,7 +101,7 @@ std::vector<MaterialToParticle>& getMaterials(){
 }
 
 void emitBloodTest(objid sceneId){
-  gameapi -> schedule(sceneId, 1000, NULL, [sceneId](void*) -> void {
+  gameapi -> schedule(sceneId, false, 1000, NULL, [sceneId](void*) -> void {
     emitBlood(sceneId, glm::vec3(0.f, 0.f, 0.f));
     emitBloodTest(sceneId);
   });

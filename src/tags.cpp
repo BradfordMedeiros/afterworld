@@ -88,7 +88,7 @@ void playRecordingBySignal(std::string signal, std::string rec, bool reverse){
 			lockedSignals[signal] = Signal {
 				.locked = true,
 			};
-  		gameapi -> schedule(-1, length * 1000, NULL, [id, signal](void*) -> void {
+  		gameapi -> schedule(-1, true, length * 1000, NULL, [id, signal](void*) -> void {
 				modlog("play recording playback stopped", "done");
 				lockedSignals.erase(signal);
   		});

@@ -113,7 +113,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 			auto textSubtr = text.substr(0, currIndex);
 			drawRightText(textSubtr, pos.x, pos.y, size, std::nullopt /* tint */, std::nullopt);
 		};
-  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
+  	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
 	}else if (imageDisplayPtr){
@@ -137,7 +137,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		  	.zIndex = zIndex,
 		  });
 		};
-  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
+  	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
 
@@ -147,7 +147,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		perFrameEvents[id] = [color]() -> void {
 			gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 		};
-  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
+  	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
 	}else if (letterboxPtr){
@@ -163,7 +163,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 			gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.98f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 			drawRightText(textSubtr, -1.f, 0.f, 0.02f, std::nullopt /* tint */, std::nullopt);
 		};
-  	gameapi -> schedule(-1, duration * 1000, NULL, [id](void*) -> void {
+  	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
 	}else if (playablePtr){
