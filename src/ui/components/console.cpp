@@ -316,6 +316,32 @@ std::vector<CommandDispatch> commands {
       return std::nullopt;
     },
   },
+  CommandDispatch {
+    .command = "speed",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      auto values = split(command, ' ');
+      if (values.size() == 1){
+        gameapi -> setWorldState({
+          ObjectValue {
+            .object = "game",
+            .attribute = "speed",
+            .value = 1.f,
+          },
+        });  
+      }else {
+        modassert(values.size() == 2, "speed must be 0 or 1");
+        float speed = std::atof(values.at(1).c_str());
+        gameapi -> setWorldState({
+          ObjectValue {
+            .object = "game",
+            .attribute = "speed",
+            .value = speed,
+          },
+        });  
+      }
+      return std::nullopt;
+    },
+  },
 };
 
 
