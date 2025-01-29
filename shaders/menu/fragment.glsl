@@ -53,7 +53,7 @@ uniform int voxelcellwidth;
 uniform vec3 ambientAmount;
 uniform float emissionAmount;
 uniform float discardTexAmount;
-uniform float time;
+uniform float realtime;
 uniform float bloomThreshold;
 //uniform vec3 mouseCoordVal;
 uniform bool enableAttenutation;
@@ -244,8 +244,8 @@ void main(){
   
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
 
-    float movementX = -0.8 + sin(time * 0.1) * wiggleAmount.x;
-    float movementY = -0.8 + sin(time * 0.1) * wiggleAmount.y;
+    float movementX = -0.8 + sin(realtime * 0.1) * wiggleAmount.x;
+    float movementY = -0.8 + sin(realtime * 0.1) * wiggleAmount.y;
 
     vec2 totalRipple = vec2(0.0, 0.0);
     for (int i = 0; i < 4; i++){
@@ -298,11 +298,11 @@ void main(){
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
 
-    float noiseValue = noise(TexCoord + time * 0.00001) * noiseIntensity;
+    float noiseValue = noise(TexCoord + realtime * 0.00001) * noiseIntensity;
     if (enableLighting){
       FragColor = tint *  vec4(color.xyz * shadowDelta, color.w) * 2 + vec4(noiseValue, noiseValue, noiseValue, 0);
     }else{
-      FragColor = tint * texColor * vec4(1, 0.7, 0.4, 1) + vec4(noiseValue, noiseValue, noiseValue, 0);
+      FragColor = tint * texColor * vec4(0.2, 0.2, 0.2, 1) + vec4(noiseValue, noiseValue, noiseValue, 0);
     }
 
     // TODO -> what would be a better thesholding function? 
