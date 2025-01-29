@@ -1298,11 +1298,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
     GameState* gameState = static_cast<GameState*>(data);
 
+    float movementX = xNdc - getGlobalState().xNdc;
+    float movementY = yNdc - getGlobalState().yNdc;
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     getGlobalState().mouseVelocity = glm::vec2(xPos, yPos);
     if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
-      controlledPlayer.lookVelocity = glm::vec2(xPos, yPos);
+      controlledPlayer.lookVelocity = glm::vec2(movementX, movementY);
     }
     if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), xPos, yPos);
