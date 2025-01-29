@@ -516,7 +516,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   if (!moveParams.moveVertical){
     limitedMoveVec.y = 0.f;
   }
-  auto direction = glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z);
+  auto direction = glm::normalize(glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z));
   auto isWalking = calcIfWalking(movementState);
 
   auto isHoldingGun = entityInShootingMode(playerId);
