@@ -36,6 +36,8 @@
 #include "./progress.h"
 #include "./options.h"
 
+#include "./arcade/tennis.h"
+
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 
 #endif

@@ -1107,6 +1107,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     // debug
     debugOnFrame();
+
+
+    //////
+    updateTennis();
+    drawTennis();
+
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -1161,6 +1167,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     debugOnKey(key, scancode, action, mods);
+
+    onKeyTennis(key, scancode, action, mods);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
