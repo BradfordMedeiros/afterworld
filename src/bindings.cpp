@@ -979,6 +979,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
     //addWaterObj(gameapi -> rootSceneId());
     
+    if (hasOption("arcade")){
+      addArcadeType(-1, getArgOption("arcade"), std::nullopt);
+    }
+    
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -1110,8 +1114,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
 
     //////
-    updateTennis();
-    drawTennis();
+    updateArcade();
+    drawArcade();
 
   };
 
@@ -1168,7 +1172,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     debugOnKey(key, scancode, action, mods);
 
-    onKeyTennis(key, scancode, action, mods);
+    onKeyArcade(key, scancode, action, mods);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);

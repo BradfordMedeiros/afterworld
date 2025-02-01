@@ -518,8 +518,26 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-	
+
+	TagUpdater {
+		.attribute = "arcade",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			std::string textureName = std::string("aracde-texture") + uniqueNameSuffix();
+			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 10000, id);
+	 	  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+		 	updateBackground(id, textureName);
+
+			addArcadeType(id, "tennis", arcadeTextureId);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+			maybeRemoveArcadeType(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	}
 };
+
+
 
 void setMenuBackground(std::string background){
   auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);

@@ -50,12 +50,15 @@ std::vector<GameOption> gameOptions {
     .description = "validate state controller animations to verify they exist",
     .option = BoolOption{},
   },
-
   GameOption {
     .arg = "dev",
     .description = "misc options and controls for development mode",
   },
-
+  GameOption {
+    .arg = "arcade",
+    .description = "play arcade game instead, full screen",
+    .option = StrOption{}, 
+  },
 };
 
 

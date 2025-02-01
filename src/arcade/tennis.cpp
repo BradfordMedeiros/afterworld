@@ -2,6 +2,21 @@
 
 extern CustomApiBindings* gameapi;
 
+struct Tennis {
+	glm::vec2 ballPosition;
+	glm::vec2 ballVelocity;
+	float leftPaddlePosition;
+	float rightPaddlePosition;
+	int scorePlayerOne;
+	int scorePlayerTwo;
+	float gameTime;
+	bool isPlaying;
+
+	bool pressingUp;
+	bool pressingDown;
+	bool controllingRightPaddle;
+};
+
 float offsetPaddle = 0.1f;
 float paddleWidth = 0.015f;
 float paddleHeight = 0.3f;
@@ -9,7 +24,8 @@ float ballSize = 0.05f;
 float paddleXLeft = -1.f + offsetPaddle;
 float paddleXRight = 1.f - offsetPaddle;
 glm::vec2 initialBallVelocity(0.5f, 0.25f);
-Tennis createTennis(){
+
+std::any createTennis(){
 	return Tennis {
 		.ballPosition = glm::vec2(0.f, 0.f),
 		.ballVelocity = initialBallVelocity,
@@ -25,20 +41,21 @@ Tennis createTennis(){
 	};
 }
 
-Tennis tennis = createTennis();
-
-
-void onMouseTennis(){
+void rmInstance(std::any& any){
 
 }
 
-
-void resetTennisBall(){
+void resetTennisBall(Tennis& tennis){
 	tennis.ballPosition = glm::vec2(0.f, 0.f);
 	tennis.ballVelocity = initialBallVelocity;
 }
-void onKeyTennis(int key, int scancode, int action, int mod){
+
+void onKeyTennis(std::any& any, int key, int scancode, int action, int mod){
 	modlog("tennis", std::to_string(key) + " " + std::to_string(action));
+
+  Tennis* tennisPtr = anycast<Tennis>(any);
+  Tennis& tennis = *tennisPtr;
+
 	if (key == 265){ // up arrow
 		if (action == 1){
 			tennis.pressingUp = true;
@@ -60,14 +77,15 @@ void onKeyTennis(int key, int scancode, int action, int mod){
 	}
 
 	if (key == 82 && action == 1){
-		resetTennisBall();
+		resetTennisBall(tennis);
 	}
 }
 
-bool tennisPaddleCanMoveUp(){
+bool tennisPaddleCanMoveUp(Tennis& tennis){
 	return tennis.leftPaddlePosition < (1.f - (paddleHeight * 0.5f));
 }
-bool tennisPaddleCanMoveDown(){
+
+bool tennisPaddleCanMoveDown(Tennis& tennis){
 	return tennis.leftPaddlePosition > (-1.f + (paddleHeight * 0.5f));
 }
 
@@ -86,11 +104,13 @@ bool tennisHitsPaddle(glm::vec2 paddlePos, glm::vec2 paddleSize, glm::vec2 ballP
 	}
 	return true;
 }
-bool tennisPaddleHitLeft(){
+
+
+bool tennisPaddleHitLeft(Tennis& tennis){
 	return tennisHitsPaddle(glm::vec2(paddleXLeft, tennis.leftPaddlePosition), glm::vec2(paddleWidth, paddleHeight), tennis.ballPosition);
 }
 
-bool tennisPaddleHitRight(){
+bool tennisPaddleHitRight(Tennis& tennis){
 	return tennisHitsPaddle(glm::vec2(paddleXRight, tennis.rightPaddlePosition), glm::vec2(paddleWidth, paddleHeight), tennis.ballPosition);
 }
 
@@ -100,11 +120,14 @@ glm::vec2 tennisReflect(glm::vec2 ballVelocity){
  	return ballVelocity;
 }
 
-void updateTennis(){
+void updateTennis(std::any& any){
+  Tennis* tennisPtr = anycast<Tennis>(any);
+  Tennis& tennis = *tennisPtr;
+
 	float paddleMovementSpeed = 2.f;
 
-	auto paddleHitRight = tennisPaddleHitRight();
-	auto paddleHitLeft = tennisPaddleHitLeft();
+	auto paddleHitRight = tennisPaddleHitRight(tennis);
+	auto paddleHitLeft = tennisPaddleHitLeft(tennis);
 	if (paddleHitRight){
 		if (tennis.ballVelocity.x > 0){
 			tennis.ballVelocity = tennisReflect(tennis.ballVelocity);
@@ -131,17 +154,17 @@ void updateTennis(){
 	tennis.ballPosition.y += tennis.ballVelocity.y * gameapi -> timeElapsed();
 
 	if (tennis.controllingRightPaddle){
-		if (tennis.pressingUp && tennisPaddleCanMoveUp()){
+		if (tennis.pressingUp && tennisPaddleCanMoveUp(tennis)){
 			tennis.rightPaddlePosition += paddleMovementSpeed * gameapi -> timeElapsed();
 		}
-		if (tennis.pressingDown && tennisPaddleCanMoveDown()){
+		if (tennis.pressingDown && tennisPaddleCanMoveDown(tennis)){
 			tennis.rightPaddlePosition -= paddleMovementSpeed * gameapi -> timeElapsed();
 		}		
 	}else{
-		if (tennis.pressingUp && tennisPaddleCanMoveUp()){
+		if (tennis.pressingUp && tennisPaddleCanMoveUp(tennis)){
 			tennis.leftPaddlePosition += paddleMovementSpeed * gameapi -> timeElapsed();
 		}
-		if (tennis.pressingDown && tennisPaddleCanMoveDown()){
+		if (tennis.pressingDown && tennisPaddleCanMoveDown(tennis)){
 			tennis.leftPaddlePosition -= paddleMovementSpeed * gameapi -> timeElapsed();
 		}		
 	}
@@ -149,7 +172,7 @@ void updateTennis(){
 	bool playerLeftScores = tennis.ballPosition.x > 1.f;
 	bool playerRightScores = tennis.ballPosition.x < -1.f;
 	if (playerLeftScores || playerRightScores){
-		resetTennisBall();
+		resetTennisBall(tennis);
 		if(playerLeftScores){
 			tennis.scorePlayerOne++;
 		}else if(playerRightScores){
@@ -158,15 +181,27 @@ void updateTennis(){
 	}
 }
 
-void drawTennis(){
-	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt /*textureId*/, true, std::nullopt, "./res/textures/testgradient.png", std::nullopt);
+void drawTennis(std::any& any, std::optional<objid> textureId){
+  Tennis* tennisPtr = anycast<Tennis>(any);
+  Tennis& tennis = *tennisPtr;
+
+	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "./res/textures/testgradient.png", std::nullopt);
 
   drawRightText(std::to_string(tennis.scorePlayerOne) + " - " + std::to_string(tennis.scorePlayerTwo), 0.f, 0.8f, 0.04f, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt);
 
-	gameapi -> drawRect(tennis.ballPosition.x, tennis.ballPosition.y, ballSize, ballSize, false, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt /*textureId*/, true, std::nullopt, std::nullopt, std::nullopt);
+	gameapi -> drawRect(tennis.ballPosition.x, tennis.ballPosition.y, ballSize, ballSize, false, glm::vec4(1.f, 0.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 
-	gameapi -> drawRect(paddleXLeft, tennis.leftPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt /*textureId*/, true, std::nullopt, std::nullopt, std::nullopt);
-	gameapi -> drawRect(paddleXRight, tennis.rightPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt /*textureId*/, true, std::nullopt, std::nullopt, std::nullopt);
+	gameapi -> drawRect(paddleXLeft, tennis.leftPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(1.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
+	gameapi -> drawRect(paddleXRight, tennis.rightPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(1.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 
 }
+
+
+ArcadeInterface tennisGame {
+	.createInstance = createTennis,
+	.rmInstance = rmInstance,
+	.update = updateTennis,
+	.draw = drawTennis,
+	.onKey = onKeyTennis,
+};
 

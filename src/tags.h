@@ -13,6 +13,7 @@
 #include "./debug.h"
 #include "./vector_gfx.h"
 #include "./switch.h"
+#include "./arcade/arcade.h"
 
 struct CurrentPlayingData {
 	objid id;
