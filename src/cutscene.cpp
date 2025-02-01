@@ -324,11 +324,11 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						},
 					},
 					CutsceneEvent {
-						.name = "camera-view-2",
+						.name = "set sky color",
 						.duration = 5.f,
 						.time = TriggerType {
 							.time = 0.f,
-							.waitForLastEvent = false,
+							.waitForLastEvent = true,
 							.waitForMessage = std::nullopt,
 						},
 						.type = WorldState {

@@ -176,6 +176,7 @@ void setShowEditor(bool shouldShowEditor){
 
 void setShowFreecam(bool isFreeCam){
   global.isFreeCam = isFreeCam;
+  updateState();
 }
 
 bool queryShowKeyboard(){
