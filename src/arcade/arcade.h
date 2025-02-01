@@ -4,8 +4,9 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "./tennis.h"
+#include "./invaders.h"
 
-enum ArcadeType { ARCADE_TENNIS };
+enum ArcadeType { ARCADE_TENNIS, ARCADE_INVADERS };
 struct ArcadeInstance { 
   ArcadeType type;
   ArcadeInterface* interface;
@@ -17,6 +18,8 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId);
 void maybeRemoveArcadeType(objid id);
 
 void onKeyArcade(int key, int scancode, int action, int mod);
+void onMouseMoveArcade(double xPos, double yPos, float xNdc, float yNdc);
+
 void updateArcade();
 void drawArcade();
 

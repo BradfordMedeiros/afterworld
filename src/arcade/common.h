@@ -7,7 +7,7 @@ struct ArcadeInterface {
   std::function<void(std::any&)> update;
   std::function<void(std::any&, std::optional<objid> textureId)> draw;
   std::function<void(std::any&, int key, int scancode, int action, int mod)> onKey;
-
+  std::function<void(std::any&, double xPos, double yPos, float xNdc, float yNdc)> onMouseMove;
 };
 
 

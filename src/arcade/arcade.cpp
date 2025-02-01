@@ -12,6 +12,13 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 			.data = tennisGame.createInstance(),
 			.textureId = textureId,
 		};
+	}else if (type == "invaders"){
+		arcadeInstances[id] = ArcadeInstance {
+			.type = ARCADE_INVADERS,
+			.interface = &invadersGame,
+			.data = invadersGame.createInstance(),
+			.textureId = textureId,
+		};
 	}else{
 		modassert(false, "invalid type");
 	}
@@ -30,6 +37,12 @@ void onKeyArcade(int key, int scancode, int action, int mod){
 	for (auto &[id, arcade] : arcadeInstances){
 		arcade.interface -> onKey(arcade.data, key, scancode, action, mod);
 	}
+}
+
+void onMouseMoveArcade(double xPos, double yPos, float xNdc, float yNdc){
+	for (auto &[id, arcade] : arcadeInstances){
+		arcade.interface -> onMouseMove(arcade.data, xPos, yPos, xNdc, yNdc);
+	}	
 }
 
 void updateArcade(){

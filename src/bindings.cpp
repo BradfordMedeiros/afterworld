@@ -1324,6 +1324,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
+
+    onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
   };
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {

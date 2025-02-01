@@ -41,7 +41,7 @@ std::any createTennis(){
 	};
 }
 
-void rmInstance(std::any& any){
+void rmTennisInstance(std::any& any){
 
 }
 
@@ -197,11 +197,18 @@ void drawTennis(std::any& any, std::optional<objid> textureId){
 }
 
 
+void onTennisMouseMove(std::any&, double xPos, double yPos, float xNdc, float yNdc){
+
+}
+
+
+
 ArcadeInterface tennisGame {
 	.createInstance = createTennis,
-	.rmInstance = rmInstance,
+	.rmInstance = rmTennisInstance,
 	.update = updateTennis,
 	.draw = drawTennis,
 	.onKey = onKeyTennis,
+	.onMouseMove = onTennisMouseMove,
 };
 
