@@ -333,6 +333,11 @@ std::vector<TagUpdater> tagupdates = {
 			onSpawnTick();
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		if (key == "spawn"){
+ 			  SpawnRequest* spawnPtr = anycast<SpawnRequest>(value);
+	 		  spawnFromAllSpawnpoints(spawnPtr -> tag);  			
+  		}
+
   	},
 	},
 	TagUpdater {
@@ -390,7 +395,7 @@ std::vector<TagUpdater> tagupdates = {
   		freeInGameUiInstance(tags.inGameUi, id);
   	},
   	.onFrame = [](Tags& tags) -> void {},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void { 		  
   	},
 	},
 	TagUpdater {

@@ -38,6 +38,7 @@ struct ConsoleInterface {
   std::function<void(bool)> showWeapon;
   std::function<void(int)> deliverAmmo;
   std::function<void(bool)> disableActiveEntity;
+  std::function<void(std::string)> spawnByTag;
 };
 
 extern Component consoleComponent;

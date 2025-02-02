@@ -317,6 +317,17 @@ std::vector<CommandDispatch> commands {
     },
   },
   CommandDispatch {
+    .command = "spawn",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      auto values = split(command, ' ');
+      if (values.size() == 2){
+        consoleInterface.spawnByTag(values.at(1));
+        return std::nullopt;
+      }
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
     .command = "speed",
     .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
       auto values = split(command, ' ');

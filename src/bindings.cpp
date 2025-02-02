@@ -762,6 +762,9 @@ UiContext getUiContext(GameState& gameState){
       .disableActiveEntity = [](bool enable) -> void {
         disableTpsMesh = enable;
       },
+      .spawnByTag = [](std::string tag) -> void {
+        spawnFromAllSpawnpoints(tag.c_str());       
+      },
     },
   };
   return uiContext;

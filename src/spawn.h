@@ -23,5 +23,8 @@ std::vector<RespawnInfo> getRespawnInfos(float currentTime);
 
 void drawDebugRespawnInfo(RespawnInfo& respawnInfo);
 
+struct SpawnRequest {
+  const char* tag;
+};
 
 #endif
