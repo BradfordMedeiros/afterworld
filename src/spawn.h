@@ -19,7 +19,7 @@ struct RespawnInfo {
 };
 
 std::vector<RespawnInfo> getRespawnInfos(float currentTime);
-
+void showSpawnpoints(bool showSpawnpoints);
 
 void drawDebugRespawnInfo(RespawnInfo& respawnInfo);
 

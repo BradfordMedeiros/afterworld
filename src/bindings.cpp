@@ -415,6 +415,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
         spawnFromAllSpawnpoints("onload");
+        showSpawnpoints(false);
       }
       if (router.value() -> player.has_value()){
 

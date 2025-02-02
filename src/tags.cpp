@@ -337,7 +337,6 @@ std::vector<TagUpdater> tagupdates = {
  			  SpawnRequest* spawnPtr = anycast<SpawnRequest>(value);
 	 		  spawnFromAllSpawnpoints(spawnPtr -> tag);  			
   		}
-
   	},
 	},
 	TagUpdater {

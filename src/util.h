@@ -68,6 +68,7 @@ void setGameObjectGravity(objid id, glm::vec3 gravity);
 void setGameObjectVelocity(objid id, glm::vec3 velocity);
 void setGameObjectTint(objid id, glm::vec4 tint);
 void setGameObjectStateEnabled(objid id, bool enable);
+void setGameObjectMeshEnabled(objid id, bool enable);
 void setGameObjectPhysicsDynamic(objid id);
 void setGameObjectPhysicsEnable(objid id, bool enable);
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity);

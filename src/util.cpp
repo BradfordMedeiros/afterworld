@@ -227,6 +227,9 @@ void setGameObjectTint(objid id, glm::vec4 tint){
 void setGameObjectStateEnabled(objid id, bool enable){
   gameapi -> setSingleGameObjectAttr(id, "state", enable ? std::string("enabled") : std::string("disabled"));
 }
+void setGameObjectMeshEnabled(objid id, bool enable){
+ gameapi -> setSingleGameObjectAttr(id, "disabled", enable ? "false" : "true");
+}
 void setGameObjectPhysicsDynamic(objid id){
   gameapi -> setSingleGameObjectAttr(id, "physics_type", "dynamic");
 }

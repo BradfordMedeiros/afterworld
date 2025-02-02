@@ -204,6 +204,12 @@ std::vector<RespawnInfo> getRespawnInfos(float currentTime){
   return respawnInfos;
 }
 
+void showSpawnpoints(bool showSpawnpoints){
+  for (auto &[id, _] : managedSpawnpoints){
+    setGameObjectMeshEnabled(id, showSpawnpoints ? true : false);
+  }
+}
+
 void drawDebugRespawnInfo(RespawnInfo& respawnInfo){
   float percentage = respawnInfo.blocked ? 1.f : (respawnInfo.elapsedTime / respawnInfo.totalTime);
   std::cout << "spawn percentage :  " << percentage << std::endl;
