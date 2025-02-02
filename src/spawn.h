@@ -11,7 +11,6 @@ void spawnAddId(objid id);
 void spawnRemoveId(objid id);
 void onSpawnTick();
 
-
 struct RespawnInfo {
 	objid id;
   bool blocked;

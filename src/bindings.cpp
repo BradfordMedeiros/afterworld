@@ -783,8 +783,12 @@ CutsceneApi cutsceneApi {
     modlog("cutscene api", "setPlayerControllable");
     setDisablePlayerControl(!isPlayable);
   },
-  .goToNextLevel = goToNextLevel,
+  .goToNextLevel = []() -> void {
+    modlog("cutscene api", "goToNextLevel");
+    goToNextLevel();
+  }, 
   .setWorldState = [](std::string field, std::string name, AttributeValue value) -> void {
+    modlog("cutscene api", "setWorldState");
     gameapi -> setWorldState({
       ObjectValue {
         .object = field,

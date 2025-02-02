@@ -50,6 +50,7 @@ void killActivePlayer();
 
 glm::vec3 getPlayerVelocity();
 std::optional<glm::vec3> getActivePlayerPosition();
+std::optional<glm::quat> getActivePlayerRotation();
 
 WeaponEntityData getWeaponEntityData(objid id);
 

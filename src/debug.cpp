@@ -214,7 +214,7 @@ void debugOnFrame(){
   	return;
   }
   
- 	gameapi -> drawText(std::string("last visualizeScale: ") + std::to_string(visualizationDistance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+ 	//gameapi -> drawText(std::string("last visualizeScale: ") + std::to_string(visualizationDistance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
 
   auto activeCamera = gameapi -> getActiveCamera();
@@ -261,6 +261,25 @@ std::string printCode(glm::vec2 vec){
 	return std::string("glm::vec2(") + std::to_string(vec.x) + ", " + std::to_string(vec.y) + ")";
 }
 
+void printDebugSpawnpoint(){
+	auto id = getUniqueObjId();
+	std::string name = std::string("spawnpoint-") + std::to_string(id);
+
+	if (getActivePlayerId().has_value()){
+		auto position = getActivePlayerPosition().value();
+		auto rotation = getActivePlayerRotation().value();
+
+		std::string positionString = name + ":position:" + print(position);
+		std::string spawnString = name + ":spawn:enemy";
+		std::string meshString = name + ":mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf";
+
+		std::cout << positionString << " #spawn debug" << "\n";
+		std::cout << spawnString    << " #spawn debug" << "\n";
+		std::cout << meshString    << " #spawn debug" << "\n\n";
+
+	}
+}
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -293,6 +312,10 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
   std::cout << "key is: " << key << std::endl;
  
+
+  if (key == 'Q' && action == 1){
+  	printDebugSpawnpoint();
+  }
 
   if (key == 'M' && action == 0){
     spawnFromRandomSpawnpoint("red");

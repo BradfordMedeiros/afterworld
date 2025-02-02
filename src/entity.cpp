@@ -254,6 +254,13 @@ std::optional<glm::vec3> getActivePlayerPosition(){
 	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true);
 }
 
+std::optional<glm::quat> getActivePlayerRotation(){
+	if (!controlledPlayer.playerId.has_value()){
+		return std::nullopt;
+	}
+	return gameapi -> getGameObjectRotation(controlledPlayer.playerId.value(), true);
+}
+
 FiringTransform getFireTransform(objid id){
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 

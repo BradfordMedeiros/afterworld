@@ -10,6 +10,7 @@
 #include "./cutscene.h"
 #include "./tags.h"
 #include "./options.h"
+#include "./entity.h"
 #include "./gametypes/gametypes.h"
 
 void debugOnFrame();
