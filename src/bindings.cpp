@@ -415,7 +415,10 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
         spawnFromAllSpawnpoints("onload");
+
+        // hide debug stuff
         showSpawnpoints(false);
+        showTriggerVolumes(false);
       }
       if (router.value() -> player.has_value()){
 
@@ -1303,6 +1306,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleMomentumCollision(obj1, obj2, pos, normal, force);
     handleBouncepadCollision(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);
+    handleSpawnCollision(obj1, obj2, getActivePlayerId());
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);
   };
