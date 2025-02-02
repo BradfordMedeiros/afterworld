@@ -11,5 +11,3 @@ playerspawn:playerspawn:true
 playerspawn:position:-20 -25 0
 playerspawn:teleport:true
 
-
-

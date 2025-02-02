@@ -414,6 +414,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
+        spawnFromAllSpawnpoints("onload");
       }
       if (router.value() -> player.has_value()){
 
@@ -1230,7 +1231,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(attrValue, "spawn value invalid");
       auto strValue = std::get_if<std::string>(attrValue);
       modassert(strValue, "spawn not string value");
-      spawnFromAllSpawnpoints("red", strValue -> c_str());
+      spawnFromAllSpawnpoints(strValue -> c_str());
     }
 
     if (key == "terminal" && !getGlobalState().showTerminal){

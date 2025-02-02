@@ -3,7 +3,7 @@
 
 #include "./util.h"
 
-void spawnFromAllSpawnpoints(const char* team, const char* tag = NULL);
+void spawnFromAllSpawnpoints(const char* tag);
 void spawnFromRandomSpawnpoint(const char* team, const char* tag = NULL);
 void removeAllSpawnedEntities();
 

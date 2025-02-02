@@ -332,7 +332,8 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = [](Tags& tags) -> void {  
 			onSpawnTick();
   	},
-  	.onMessage = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
 	},
 	TagUpdater {
 		.attribute = "spawn-managed",

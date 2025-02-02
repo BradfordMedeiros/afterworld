@@ -133,7 +133,7 @@ void onSpawnTick(){
   //drawDebugRespawnInfo(getRespawnInfos(gameapi -> timeSeconds(false)).at(0));
 }
 
-void spawnFromAllSpawnpoints(const char* team, const char* tag){
+void spawnFromAllSpawnpoints(const char* tag){
   if (managedSpawnpoints.size() == 0){
     return;
   }
