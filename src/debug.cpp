@@ -280,6 +280,28 @@ void printDebugSpawnpoint(){
 	}
 }
 
+void addNObjects(objid sceneId, int width, int height, int depth){
+	for (int x = 0; x < width; x++){
+		for (int z = 0; z < depth; z++){
+			for (int y = 0; y < height; y++){
+				float xoffset = 2.5f * x;
+				float yoffset = 2.5f * y;
+				float zoffset = 2.5f * z;
+  			GameobjAttributes attr {
+  			  .attr = {
+						{ "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
+						{ "position", glm::vec3(xoffset, yoffset, zoffset) },
+				  	{ "scale", glm::vec3(1.f, 1.f, 1.f) },
+  			  },
+  			};
+  			std::map<std::string, GameobjAttributes> submodelAttributes;
+  			auto name = std::string("debug-obj-") + std::to_string(getUniqueObjId());
+  			gameapi -> makeObjectAttr(sceneId, name, attr, submodelAttributes);		
+			}
+		}
+	}
+}
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -303,6 +325,15 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
   if (key == 'M' && action == 0){
   	visualizationDistance += 1.f;
+  }
+
+  if (key == 'I' && action == 0){
+  	static std::optional<objid> sceneId;
+  	if (sceneId.has_value()){
+  		gameapi -> unloadScene(sceneId.value());
+  	}
+    sceneId = gameapi -> loadScene("../afterworld/scenes/empty.rawscene", {}, std::nullopt, {});
+  	addNObjects(sceneId.value(), 4, 4, 4);
   }
   
 	auto args = gameapi -> getArgs();
@@ -328,7 +359,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }else if (key == 'P' && action == 0){
   	auto shader = gameapi -> shaderByName("ui2");
   	modlog("shader is: ", shader.has_value() ? std::to_string(shader.value()) : "no shader");
-  }else if (key == 'L' && action == 0){
+  }/*else if (key == 'L' && action == 0){
   	 auto id = findObjByShortName("boxfront/Cube", std::nullopt);
 
   	 float duration = 5.f;
@@ -343,7 +374,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  	 	}, duration);
   	 }
 
-  }
+  }*/
    
   if (key == 'C' && action == 0){
   	auto testViewObj = findObjByShortName(">testview", std::nullopt);
@@ -420,10 +451,10 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	}
   }
 
-  if (key == 'L' && action == 0){
-  	std::cout << dumpAsString(tags.animationController, "character").value() << std::endl;
-  	exit(0);
-  }
+  //if (key == 'L' && action == 0){
+  //	std::cout << dumpAsString(tags.animationController, "character").value() << std::endl;
+  //	exit(0);
+  //}
 
   auto testObject = findObjByShortName("testobject-no-exist", std::nullopt);
   if (testObject.has_value()){
