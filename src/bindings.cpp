@@ -1110,7 +1110,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     setUiHealth(uiHealth);
     
     onFrameWater(water);
-    onFrameAi(aiData);
+
+    if (!hasOption("no-ai")){
+      onFrameAi(aiData);
+    }
     onFrameDaynight();
     onTagsFrame(tags);
     doStateControllerAnimations();

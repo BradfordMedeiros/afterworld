@@ -46,6 +46,11 @@ std::vector<GameOption> gameOptions {
     .option = BoolOption{},
   },
   GameOption {
+    .arg = "no-ai",
+    .description = "disable ai",
+    .option = BoolOption{},
+  },
+  GameOption {
     .arg = "validate-animation",
     .description = "validate state controller animations to verify they exist",
     .option = BoolOption{},
