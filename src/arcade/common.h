@@ -10,5 +10,9 @@ struct ArcadeInterface {
   std::function<void(std::any&, double xPos, double yPos, float xNdc, float yNdc)> onMouseMove;
 };
 
+struct ArcadeApi {
+  std::function<std::vector<objid>(objid, std::vector<std::string>)> ensureSoundsLoaded;
+  std::function<void(objid)> releaseSounds;
+};
 
 #endif

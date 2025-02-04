@@ -9,6 +9,7 @@ ManagedSounds sounds {
   .activateSoundObjId = std::nullopt,
   .soundObjId = std::nullopt,
   .explosionSoundObjId = std::nullopt,
+  .sceneIdToSounds = {},
 };
 PrecachedResources precachedResources {
   .models = {},
@@ -32,6 +33,32 @@ objid createSound(objid sceneId, std::string soundObjName, std::string clip){
   modassert(soundObjId.has_value(), "sound already exists in scene: " + std::to_string(sceneId));
   return soundObjId.value();
 }
+
+std::vector<objid> ensureSoundLoadedBySceneId(objid id, objid sceneId, std::vector<std::string>& soundsToLoad){
+  modassert(sounds.sceneIdToSounds.find(id) == sounds.sceneIdToSounds.end(), "ensureSoundLoadedBySceneId scene id already loaded");
+  std::vector<objid> soundIds;
+  for (std::string& sound: soundsToLoad){
+    modlog("ensureSoundLoadedBySceneId loaded: ", sound);
+    auto soundObjName = std::string("&code-sound") + uniqueNameSuffix();
+    auto soundId = createSound(sceneId, soundObjName, sound);
+    soundIds.push_back(soundId);
+  }
+  sounds.sceneIdToSounds[id] = soundIds;
+  return soundIds;
+}
+void unloadManagedSounds(objid id){
+  if (sounds.sceneIdToSounds.find(id) != sounds.sceneIdToSounds.end()){
+    auto objIds = sounds.sceneIdToSounds.at(id);
+    for (auto soundId : objIds){
+      gameapi -> removeByGroupId(soundId);
+    }
+    sounds.sceneIdToSounds.erase(id);
+  }
+}
+void playManagedSound(std::string& clip){
+
+}
+
 
 void ensureDefaultSoundsLoadced(objid sceneId){
   std::string activateClip = "../gameresources/sound/click.wav";
@@ -100,7 +127,6 @@ void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading
   ensureSoundUnloaded(sceneId, &sounds.soundObjId);
   ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
 }
-
 
 void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly
   auto oldIds = precachedResources.ids;

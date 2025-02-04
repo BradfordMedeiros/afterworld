@@ -808,6 +808,15 @@ CutsceneApi cutsceneApi {
 };
 
 
+ArcadeApi arcadeApi {
+  .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
+      return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
+  },
+  .releaseSounds = [](objid id) -> void {
+    unloadManagedSounds(id);
+  },
+};
+
 bool hasAnimation(objid entityId, std::string& animationName){
   return gameapi -> listAnimations(entityId).count(animationName) > 0;
 }

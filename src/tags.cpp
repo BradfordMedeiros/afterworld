@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 
 extern Tags tags;
 extern Waypoints waypoints;
+extern ArcadeApi arcadeApi;
 
 struct TagUpdater {
 	std::string attribute;

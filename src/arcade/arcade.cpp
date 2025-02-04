@@ -1,5 +1,7 @@
 #include "./arcade.h"
 
+extern ArcadeApi arcadeApi;
+
 std::unordered_map<objid, ArcadeInstance> arcadeInstances;
 
 void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
