@@ -21,6 +21,13 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 			.data = invadersGame.createInstance(),
 			.textureId = textureId,
 		};
+	}else if (type == "helicopter"){
+		arcadeInstances[id] = ArcadeInstance {
+			.type = ARCADE_INVADERS,
+			.interface = &helicopterGame,
+			.data = helicopterGame.createInstance(),
+			.textureId = textureId,
+		};
 	}else{
 		modassert(false, "invalid type");
 	}

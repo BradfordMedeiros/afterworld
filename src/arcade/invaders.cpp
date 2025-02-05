@@ -1,7 +1,5 @@
 #include "./invaders.h"
 
-#include "./tennis.h"
-
 extern CustomApiBindings* gameapi;
 
 struct InvaderCollisionObj {

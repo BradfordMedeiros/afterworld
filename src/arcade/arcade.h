@@ -5,6 +5,7 @@
 #include "../util.h"
 #include "./tennis.h"
 #include "./invaders.h"
+#include "./helicopter.h"
 
 enum ArcadeType { ARCADE_TENNIS, ARCADE_INVADERS };
 struct ArcadeInstance { 

@@ -528,15 +528,17 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "arcade",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			std::string textureName = std::string("aracde-texture") + uniqueNameSuffix();
+			std::string textureName = std::string("arcade-texture") + uniqueNameSuffix();
 			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 10000, id);
 	 	  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
 		 	updateBackground(id, textureName);
 
-			addArcadeType(id, "tennis", arcadeTextureId);
+  		auto arcadeType = getSingleAttr(id, "arcade");
+			addArcadeType(id, arcadeType.value(), arcadeTextureId);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
 			maybeRemoveArcadeType(id);
+			unloadManagedSounds(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,

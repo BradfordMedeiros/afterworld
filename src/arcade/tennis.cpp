@@ -49,7 +49,7 @@ std::any createTennis(){
 }
 
 void rmTennisInstance(std::any& any){
-
+	arcadeApi.releaseSounds(101);
 }
 
 void resetTennisBall(Tennis& tennis){
@@ -127,6 +127,7 @@ glm::vec2 tennisReflect(glm::vec2 ballVelocity){
  	return ballVelocity;
 }
 
+
 void updateTennis(std::any& any){
   Tennis* tennisPtr = anycast<Tennis>(any);
   Tennis& tennis = *tennisPtr;
@@ -165,20 +166,32 @@ void updateTennis(std::any& any){
 	tennis.ballPosition.x += tennis.ballVelocity.x * gameapi -> timeElapsed();
 	tennis.ballPosition.y += tennis.ballVelocity.y * gameapi -> timeElapsed();
 
-	if (tennis.controllingRightPaddle){
-		if (tennis.pressingUp && tennisPaddleCanMoveUp(tennis.rightPaddlePosition)){
-			tennis.rightPaddlePosition += paddleMovementSpeed * gameapi -> timeElapsed();
-		}
-		if (tennis.pressingDown && tennisPaddleCanMoveDown(tennis.rightPaddlePosition)){
-			tennis.rightPaddlePosition -= paddleMovementSpeed * gameapi -> timeElapsed();
-		}		
-	}else{
-		if (tennis.pressingUp && tennisPaddleCanMoveUp(tennis.leftPaddlePosition)){
-			tennis.leftPaddlePosition += paddleMovementSpeed * gameapi -> timeElapsed();
-		}
-		if (tennis.pressingDown && tennisPaddleCanMoveDown(tennis.leftPaddlePosition)){
-			tennis.leftPaddlePosition -= paddleMovementSpeed * gameapi -> timeElapsed();
-		}		
+	auto moveRightPaddleUp = tennis.controllingRightPaddle && tennis.pressingUp;
+	auto moveRightPaddleDown = tennis.controllingRightPaddle && tennis.pressingDown;
+	auto moveLeftPaddleUp = !tennis.controllingRightPaddle && tennis.pressingUp;
+	auto moveLeftPaddleDown = !tennis.controllingRightPaddle && tennis.pressingDown;
+
+
+	// ai code
+	if (tennis.ballPosition.y > tennis.rightPaddlePosition){
+		moveRightPaddleUp = true;
+	}else if (tennis.ballPosition.y < tennis.rightPaddlePosition){
+		moveRightPaddleDown = true;
+	}
+	//
+
+
+	if(moveRightPaddleUp && tennisPaddleCanMoveUp(tennis.rightPaddlePosition)){
+		tennis.rightPaddlePosition += paddleMovementSpeed * gameapi -> timeElapsed();
+	}
+	if (moveRightPaddleDown && tennisPaddleCanMoveDown(tennis.rightPaddlePosition)){
+		tennis.rightPaddlePosition -= paddleMovementSpeed * gameapi -> timeElapsed();
+	}
+	if (moveLeftPaddleUp && tennisPaddleCanMoveUp(tennis.leftPaddlePosition)){
+		tennis.leftPaddlePosition += paddleMovementSpeed * gameapi -> timeElapsed();
+	}
+	if (moveLeftPaddleDown && tennisPaddleCanMoveDown(tennis.leftPaddlePosition)){
+		tennis.leftPaddlePosition -= paddleMovementSpeed * gameapi -> timeElapsed();
 	}
 
 	bool playerLeftScores = tennis.ballPosition.x > 1.f;
@@ -197,13 +210,13 @@ void drawTennis(std::any& any, std::optional<objid> textureId){
   Tennis* tennisPtr = anycast<Tennis>(any);
   Tennis& tennis = *tennisPtr;
 
-	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "./res/textures/testgradient.png", std::nullopt);
+	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(.1f, .1f, .1f, 1.f), textureId, true, std::nullopt, "./res/textures/hexglow.png", std::nullopt);
 
   drawRightText(std::to_string(tennis.scorePlayerOne) + " - " + std::to_string(tennis.scorePlayerTwo), 0.f, 0.8f, 0.04f, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt);
 
-	gameapi -> drawRect(tennis.ballPosition.x, tennis.ballPosition.y, ballSize, ballSize, false, glm::vec4(1.f, 0.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
+	gameapi -> drawRect(tennis.ballPosition.x, tennis.ballPosition.y, ballSize, ballSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "./res/textures/tennisball.png", std::nullopt);
 
-	gameapi -> drawRect(paddleXLeft, tennis.leftPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
+	gameapi -> drawRect(paddleXLeft, tennis.leftPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(0.f, 0.f, 1.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 	gameapi -> drawRect(paddleXRight, tennis.rightPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(0.f, 0.f, 1.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 
 }
