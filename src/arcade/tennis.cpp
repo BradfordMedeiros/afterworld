@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 extern ArcadeApi arcadeApi;
-void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 
 struct Tennis {
 	glm::vec2 ballPosition;
@@ -29,8 +28,8 @@ float paddleXLeft = -1.f + offsetPaddle;
 float paddleXRight = 1.f - offsetPaddle;
 glm::vec2 initialBallVelocity(0.5f, 0.25f);
 
-std::any createTennis(){
-	auto sounds = arcadeApi.ensureSoundsLoaded(101 /* this should be the arcade id*/, { "./res/sounds/thud.wav" });
+std::any createTennis(objid id){
+	auto sounds = arcadeApi.ensureSoundsLoaded(id, { "./res/sounds/thud.wav" });
 
 	return Tennis {
 		.ballPosition = glm::vec2(0.f, 0.f),
@@ -139,27 +138,26 @@ void updateTennis(std::any& any){
 	if (paddleHitRight){
 		if (tennis.ballVelocity.x > 0){
 			tennis.ballVelocity = tennisReflect(tennis.ballVelocity);
-			playGameplayClipById(tennis.sounds.at(0), std::nullopt, std::nullopt);
-
+			arcadeApi.playSound(tennis.sounds.at(0));
 		}
 	}
 	if (paddleHitLeft){
 		if (tennis.ballVelocity.x < 0){
 			tennis.ballVelocity = tennisReflect(tennis.ballVelocity);
-			playGameplayClipById(tennis.sounds.at(0), std::nullopt, std::nullopt);
+			arcadeApi.playSound(tennis.sounds.at(0));
 		}
 	}
 
 	if ((tennis.ballPosition.y + (0.5f * ballSize)) > 1.f){
 		if (tennis.ballVelocity.y > 0.f){
 			tennis.ballVelocity.y *= -1;
-			playGameplayClipById(tennis.sounds.at(0), std::nullopt, std::nullopt);
+			arcadeApi.playSound(tennis.sounds.at(0));
 		}
 	}
 	if ((tennis.ballPosition.y - (0.5f * ballSize)) < -1.f){
 		if (tennis.ballVelocity.y < 0.f){
 			tennis.ballVelocity.y *= -1;
-			playGameplayClipById(tennis.sounds.at(0), std::nullopt, std::nullopt);
+			arcadeApi.playSound(tennis.sounds.at(0));
 		}
 	}
 
@@ -227,6 +225,9 @@ void onTennisMouseMove(std::any&, double xPos, double yPos, float xNdc, float yN
 }
 
 
+void onTennisMouseClick(std::any&, int button, int action, int mods){
+
+}
 
 ArcadeInterface tennisGame {
 	.createInstance = createTennis,
@@ -235,5 +236,6 @@ ArcadeInterface tennisGame {
 	.draw = drawTennis,
 	.onKey = onKeyTennis,
 	.onMouseMove = onTennisMouseMove,
+	.onMouseClick = onTennisMouseClick,
 };
 

@@ -807,13 +807,19 @@ CutsceneApi cutsceneApi {
   }
 };
 
-
 ArcadeApi arcadeApi {
   .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
       return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
   },
   .releaseSounds = [](objid id) -> void {
     unloadManagedSounds(id);
+  },
+  .ensureTexturesLoaded = [](objid id, std::vector<std::string> textures) -> void {
+    ensureManagedTexturesLoaded(id, rootSceneId(), textures);
+  },
+  .releaseTextures = unloadManagedTexturesLoaded,
+  .playSound = [](objid clipId) -> void {
+    playGameplayClipById(clipId, std::nullopt, std::nullopt);
   },
 };
 
@@ -1357,6 +1363,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     GameState* gameState = static_cast<GameState*>(data);
     onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
     onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
+    onMouseClickArcade(button, action, mods);
 
     modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
     if (button == 1){

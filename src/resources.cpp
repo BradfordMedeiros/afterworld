@@ -10,6 +10,7 @@ ManagedSounds sounds {
   .soundObjId = std::nullopt,
   .explosionSoundObjId = std::nullopt,
   .sceneIdToSounds = {},
+  .sceneIdToTextures = {},
 };
 PrecachedResources precachedResources {
   .models = {},
@@ -55,9 +56,41 @@ void unloadManagedSounds(objid id){
     sounds.sceneIdToSounds.erase(id);
   }
 }
-void playManagedSound(std::string& clip){
 
+// no reason for this to have to create a gameobj to load a texture
+void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::string> textures){
+  modlog("ensureManagedTexturesLoaded loaded: ", std::to_string(id));
+  modassert(sounds.sceneIdToTextures.find(id) == sounds.sceneIdToTextures.end(), "ensureManagedTexturesLoaded scene id already loaded");
+  std::vector<objid> soundIds;
+  for (auto &texture : textures){
+    GameobjAttributes attr {
+      .attr = {
+        { "texture", texture },
+      },
+    };
+    attr.attr["texture"] = texture;
+
+    auto soundObjName = std::string("code-texture") + uniqueNameSuffix();
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    auto textureObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
+    modassert(textureObjId.has_value(), "obj already exists in scene: " + std::to_string(sceneId));   
+    soundIds.push_back(textureObjId.value()); 
+  }
+  sounds.sceneIdToTextures[id] = soundIds;
 }
+void unloadManagedTexturesLoaded(objid id){
+  modlog("ensureManagedTexturesLoaded try unloaded: ", std::to_string(id));
+
+  if (sounds.sceneIdToTextures.find(id) != sounds.sceneIdToTextures.end()){
+    modlog("ensureManagedTexturesLoaded unloaded: ", std::to_string(id));
+    auto objIds = sounds.sceneIdToTextures.at(id);
+    for (auto soundId : objIds){
+      gameapi -> removeByGroupId(soundId);
+    }
+    sounds.sceneIdToTextures.erase(id);
+  }
+}
+
 
 
 void ensureDefaultSoundsLoadced(objid sceneId){

@@ -539,6 +539,7 @@ std::vector<TagUpdater> tagupdates = {
   	.onRemove = [](Tags& tags, int32_t id) -> void {
 			maybeRemoveArcadeType(id);
 			unloadManagedSounds(id);
+			unloadManagedTexturesLoaded(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,

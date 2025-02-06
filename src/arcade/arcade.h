@@ -20,6 +20,7 @@ void maybeRemoveArcadeType(objid id);
 
 void onKeyArcade(int key, int scancode, int action, int mod);
 void onMouseMoveArcade(double xPos, double yPos, float xNdc, float yNdc);
+void onMouseClickArcade(int button, int action, int mods);
 
 void updateArcade();
 void drawArcade();

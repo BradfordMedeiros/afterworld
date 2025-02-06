@@ -14,6 +14,7 @@ struct ManagedSounds {
   std::optional<objid> explosionSoundObjId;
 
   std::unordered_map<objid, std::vector<objid>> sceneIdToSounds;
+  std::unordered_map<objid, std::vector<objid>> sceneIdToTextures;
 };
 
 ManagedSounds& getManagedSounds();
@@ -24,6 +25,9 @@ void ensureSoundsUnloaded(objid sceneId);
 // these dont actually assume it's a scene id
 std::vector<objid> ensureSoundLoadedBySceneId(objid id, objid sceneId, std::vector<std::string>& soundsToLoad);
 void unloadManagedSounds(objid id);
+
+void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::string> textures);
+void unloadManagedTexturesLoaded(objid id);
 
 struct PrecachedResources {
   std::vector<std::string> models;
