@@ -1008,6 +1008,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
     if (hasOption("arcade")){
       addArcadeType(-1, getArgOption("arcade"), std::nullopt);
+      getGlobalState().disableUiInput = true;
     }
     
     return gameState;
@@ -1174,7 +1175,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         showTerminal(std::nullopt);
       }
 
-      onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
+      if (!getGlobalState().disableUiInput){
+        onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
+      }
       onInGameUiKeyCallback(key, scancode, action, mods);
     }
     handleHotkey(key, action);
@@ -1353,7 +1356,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), xPos, yPos);
     }
 
-    onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
+    if (!getGlobalState().disableUiInput){
+      onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
+    }
     onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
 
     onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
@@ -1361,7 +1366,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+    if (!getGlobalState().disableUiInput){
+      onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+    }
     onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
     onMouseClickArcade(button, action, mods);
 
@@ -1404,7 +1411,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onScrollCallback = [](objid id, void* data, double amount) -> void {
-    onMainUiScroll(uiStateContext, tags.uiData->uiContext, amount);
+    if (!getGlobalState().disableUiInput){
+      onMainUiScroll(uiStateContext, tags.uiData->uiContext, amount);
+    }
     onInGameUiScrollCallback(tags.inGameUi, amount);
     onMovementScrollCallback(movement, amount);
   };

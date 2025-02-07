@@ -19,6 +19,8 @@ struct GlobalState {
 
   bool showGameHud;
 
+  bool disableUiInput;
+
   bool showTerminal;
   float lastToggleTerminalTime;
 

@@ -476,8 +476,10 @@ float randomNum(){
 
 void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  float approximateWidth = text.size() * ndiSize;
-  gameapi -> drawText(text, ndiOffsetX - (approximateWidth * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
+  float width = 0.f;
+  float height = 0.f;
+  gameapi -> getTextDimensionsNdi(text, ndiSize, true, std::nullopt, &width, &height);
+  gameapi -> drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 
 

@@ -13,6 +13,7 @@ GlobalState global {
   .showConsole = false,
   .showKeyboard = false,
   .showGameHud = false,
+  .disableUiInput = false,
   .showTerminal = false,
   .lastToggleTerminalTime = 0.f,
   .xNdc = 0.f,
