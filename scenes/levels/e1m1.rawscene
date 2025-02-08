@@ -25,21 +25,29 @@ playerspawn:teleport:true
 spawnpoint-63147309:position:113.313 -6.2 11.3059 #spawn debug
 spawnpoint-63147309:spawn:enemy #spawn debug
 spawnpoint-63147309:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-63147309:spawntags:onload
+spawnpoint-63147309:spawntags:collider
 
 
-spawnpoint-602475919:position:116.097 -6.2 30.0432 #spawn debug
-spawnpoint-602475919:spawn:enemy #spawn debug
-spawnpoint-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-602475919:spawntags:onload
+#spawnpoint-602475919:position:116.097 -6.2 30.0432 #spawn debug
+#spawnpoint-602475919:spawn:enemy #spawn debug
+#spawnpoint-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#spawnpoint-602475919:spawntags:onload
+
+spawntrigger-602475919:position:116.097 -6.2 30.0432 #spawn debug
+spawntrigger-602475919:spawn:enemy #spawn debug
+spawntrigger-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+spawntrigger-602475919:spawn-trigger:collider
+spawntrigger-602475919:physics:enabled
+spawntrigger-602475919:scale:5 5 5
+
 
 spawnpoint-355426010:position:154.033 5 23.5665 #spawn debug
 spawnpoint-355426010:spawn:enemy #spawn debug
 spawnpoint-355426010:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-355426010:spawntags:onload
+spawnpoint-355426010:spawntags:collider
 
 spawnpoint-1748154242:position:19.0161 -5.39999 84.2045 #spawn debug
 spawnpoint-1748154242:spawn:enemy #spawn debug
 spawnpoint-1748154242:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-1748154242:spawntags:onload
+spawnpoint-1748154242:spawntags:collider
 

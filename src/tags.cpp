@@ -524,7 +524,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "arcade",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -543,7 +542,7 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
-	}
+	},
 };
 
 

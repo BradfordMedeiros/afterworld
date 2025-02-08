@@ -9,7 +9,7 @@ menu:shader:../afterworld/shaders/menu/fragment.glsl
 menu:background:true
 
 
-&music:clip:/home/brad/Desktop/bones.wav
+&music:clip:/home/brad/Desktop/bones2.wav
 &music:autoplay:true
 &music:volume:5
 

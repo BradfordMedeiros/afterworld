@@ -1,4 +1,5 @@
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
-arcade:position:-20 -27 0
-arcade:child:arcade-screen
 arcade/screen:arcade:tennis
+
+arcade:activate:arcade
+arcade:physics:enabled

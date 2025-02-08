@@ -11,3 +11,5 @@ playerspawn:playerspawn:true
 playerspawn:position:-20 -25 0
 playerspawn:teleport:true
 
+[arcade:scene:../afterworld/scenes/prefabs/objects/arcade.rawscene
+[arcade:position:-20 -27 0
