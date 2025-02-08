@@ -25,6 +25,7 @@ struct InvaderEnemy {
 enum InvadersState { TITLE, PLAYING };
 struct Invaders {
 	InvadersState state;
+	bool drawCursor;
 	int score;
 	float minSpawnTime;
 
@@ -66,6 +67,7 @@ void updateShipPosition(Invaders& invaders, glm::vec2 position){
 
 Invaders initialInvadersState {
 	.state = TITLE,
+	.drawCursor = true,
 	.score = 0,
 	.minSpawnTime = 2.f,
 	.bulletColorAlt = false,
@@ -383,8 +385,11 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
   }
 
  	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", ShapeOptions { .shaderId = *invaders.shaderId  });
-	gameapi -> drawRect(invaders.cursorPosition.x, invaders.cursorPosition.y, 0.01f, 0.01f, false, glm::vec4(1.f, 0.f, 0.f, 0.5f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
-
+	
+ 	if (invaders.drawCursor){
+ 		std::cout << "draw cursor: " << print(invaders.cursorPosition) << std::endl;
+		gameapi -> drawRect(invaders.cursorPosition.x, invaders.cursorPosition.y, 0.1f, 0.1f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = *invaders.shaderId  });
+ 	}
 
 	for (int i = 0; i < invaders.shipTrail.size(); i++){
 		auto trailPos = invaders.shipTrail.at(i);
@@ -402,7 +407,6 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
   drawRightText(std::string("SCORE: ")  + std::to_string(invaders.score), -0.975f, 0.95, 0.05, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt);
   gameapi -> drawRect(0.f, 0.9f, 0.9f, 0.1f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
   gameapi -> drawRect(0.f, 0.9f, (invaders.score / 10000.f) * 0.9f, 0.1f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
-
 
   //gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 1.f, 0.f, 0. * glm::cos(gameapi -> timeSeconds(false) * 0.1f)), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 

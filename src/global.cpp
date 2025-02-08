@@ -14,6 +14,7 @@ GlobalState global {
   .showKeyboard = false,
   .showGameHud = false,
   .disableUiInput = false,
+  .zoomIntoArcade = false,
   .showTerminal = false,
   .lastToggleTerminalTime = 0.f,
   .xNdc = 0.f,
@@ -273,4 +274,9 @@ void setShowTerminal(bool showTerminal){
     getGlobalState().showTerminal = showTerminal;
     updateState();
   }
+}
+
+void setShowZoomArcade(bool zoomIn){
+  getGlobalState().zoomIntoArcade = zoomIn;
+  updateState();
 }

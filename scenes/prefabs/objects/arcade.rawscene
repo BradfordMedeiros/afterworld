@@ -1,5 +1,10 @@
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
-arcade/screen:arcade:tennis
+arcade/screen:arcade:invaders
 
 arcade:activate:arcade
 arcade:physics:enabled
+
+arcade:child:>camera
+>camera:position:0 0.75 0.5
+
+arcade/screen:child:!light

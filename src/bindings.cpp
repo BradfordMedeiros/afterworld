@@ -890,6 +890,32 @@ bool entityInShootingMode(objid id){
 }
 
 
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName){
+  auto children = gameapi -> getChildrenIdsAndParent(id);
+  for (auto childId : children){
+    auto name = gameapi -> getGameObjNameForId(childId).value();
+    if (stringEndsWith(name, objName)){
+      return childId;
+    }
+  }
+  return std::nullopt;
+}
+
+void zoomIntoArcade(std::optional<objid> id){
+  bool zoomIn = id.has_value();
+  setShowZoomArcade(zoomIn);
+  setDisablePlayerControl(zoomIn);
+  if (!zoomIn){
+    setTempCamera(std::nullopt);          
+  }else{
+    auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
+    modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
+    auto position = gameapi -> getGameObjectPos(id.value(), true);
+    auto rotation = gameapi -> getGameObjectRotation(id.value(), true);
+    setTempCamera(arcadeCameraId.value());          
+  }
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1205,6 +1231,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     debugOnKey(key, scancode, action, mods);
 
+    if (isInteractKey(key) && (action == 1) && getGlobalState().zoomIntoArcade){
+      zoomIntoArcade(std::nullopt);
+    }
     onKeyArcade(key, scancode, action, mods);
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
@@ -1305,6 +1334,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto soundPosition = anycast<MessagePlaySound>(value);
       modassert(soundPosition != NULL, "sound position not given");
       playMaterialSound(soundData, gameapi -> rootSceneId(), soundPosition -> position, soundPosition -> material);
+    }
+
+    if (key == "arcade"){
+      auto attrValue = anycast<MessageWithId>(value); 
+      modassert(attrValue, "activate-switch message invalid arcade");
+      zoomIntoArcade(attrValue -> id);
     }
 
     onCutsceneMessages(key);
