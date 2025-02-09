@@ -139,7 +139,7 @@ void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position){
   static bool callOnce = true;
   if (callOnce){
     callOnce = false;
-    std::string particleStr("+scale:0.3 0.3 0.3;+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+physics:enabled;+physics_type:dynamic;+tint:1 0 0 1;+physics_gravity:0 -9.10 0;+physics_collision:nocollide;+texture:../gameresources/textures/particles/blood.png;+normal-texture:../gameresources/textures/particles/blood.normal.png");
+    std::string particleStr("limit:100;+scale:0.3 0.3 0.3;+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+physics:enabled;+physics_type:dynamic;+tint:1 0 0 1;+physics_gravity:0 -9.10 0;+physics_collision:nocollide;+texture:../gameresources/textures/particles/blood.png;+normal-texture:../gameresources/textures/particles/blood.normal.png");
     particleStr += std::to_string(lookAtId);
     modlog("blood", particleStr);
 

@@ -7,6 +7,8 @@ int ammoForGun(objid inventory, std::string& gun);
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 bool maybeAddGlassBulletHole(objid id, objid playerId);
 void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
+void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
+std::optional<objid> getActivePlayerId();
 
 std::vector<WeaponCore> weaponCores = {};
 
@@ -445,6 +447,10 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
 
+    auto activePlayerId = getActivePlayerId();
+    auto inFront = hitpoint.point + (hitpoint.normal * glm::vec3(0.f, 0.f, -0.1f));
+    emitBlood(rootSceneId(), activePlayerId.value(), inFront);
+  
     doDamageMessage(hitpoint.id, gunCore.weaponCore -> weaponParams.damage);
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));
   }
