@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 void onAiHealthChange(objid targetId, float remainingHealth);
+void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 
 std::unordered_map<objid, HitPoints> hitpoints = {};
 
@@ -26,6 +27,7 @@ void removeEntityIdHitpoints(objid id){
 	hitpoints.erase(id);
 }
 
+
 bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float amount, bool* _enemyDead, float* _remainingHealth){
 	if (hitpoints.find(id) == hitpoints.end()){
 		modlog("health", "not an enemy with tracked health: " + std::to_string(id) + ", " + gameapi -> getGameObjNameForId(id).value());
@@ -34,6 +36,12 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
 
 	auto activePlayerId = getActivePlayerId();
+
+	auto enemyPos = gameapi -> getGameObjectPos(id, true);
+	auto enemyRot = gameapi -> getGameObjectRotation(id, true);
+	auto inFront = enemyPos + (enemyRot * glm::vec3(0.f, 0.f, -1.f));
+
+	emitBlood(rootSceneId(), activePlayerId.value(), inFront);
 	float adjustedDamageAmount = (getGlobalState().godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
 
 	auto newHealthAmount = hitpoints.at(id).current - adjustedDamageAmount;

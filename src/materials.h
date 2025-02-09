@@ -28,7 +28,7 @@ std::vector<MaterialToParticle>& getMaterials();
 void loadParticleEmitters(objid rootSceneId);
 std::optional<objid> getParticleEmitter(std::string& emitterName);
 
-void emitBlood(objid sceneId, glm::vec3 position);
-
+void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
+void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 size);
 
 #endif

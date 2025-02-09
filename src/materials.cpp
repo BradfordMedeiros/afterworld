@@ -100,23 +100,8 @@ std::vector<MaterialToParticle>& getMaterials(){
   return materials;
 }
 
-void emitBloodTest(objid sceneId){
-  gameapi -> schedule(sceneId, false, 1000, NULL, [sceneId](void*) -> void {
-    emitBlood(sceneId, glm::vec3(0.f, 0.f, 0.f));
-    emitBloodTest(sceneId);
-  });
-}
-
-
-
 std::vector<ParticleAndEmitter> particleEmitters;
 void loadParticleEmitters(objid rootSceneId){
-  /// temp code hackey hook here
-
-  //emitBloodTest(rootSceneId);
-  ///////////////////////
-
-
   auto query = gameapi -> compileSqlQuery("select name, projectile from particles", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
@@ -148,16 +133,40 @@ std::optional<objid> getParticleEmitter(std::string& emitterName){
 
 
 std::optional<objid> bloodEmitter = std::nullopt;
-void emitBlood(objid sceneId, glm::vec3 position){
+void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position){
   modlog("blood", "blood emitter");
   //modassert(false, "emit blood not yet implemented");
   static bool callOnce = true;
   if (callOnce){
     callOnce = false;
-    std::string particleStr("+scale:0.1 0.1 0.1;+mesh:./res/models/box/box.obj;+physics:enabled;+physics_type:dynamic;+Cube/tint:1 0 0 1;+physics_gravity:0 -10 0;+physics_collision:nocollide");
+    std::string particleStr("+scale:0.3 0.3 0.3;+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+physics:enabled;+physics_type:dynamic;+tint:1 0 0 1;+physics_gravity:0 -9.10 0;+physics_collision:nocollide;+texture:../gameresources/textures/particles/blood.png;+normal-texture:../gameresources/textures/particles/blood.normal.png");
+    particleStr += std::to_string(lookAtId);
+    modlog("blood", particleStr);
+
+    auto playerName = gameapi -> getGameObjNameForId(lookAtId);
+    modassert(playerName.has_value(), "player name does not have a value...");
     bloodEmitter = createParticleEmitter(sceneId, particleStr, "+blood-emitter");
   }
-  if (bloodEmitter.has_value()){
-    gameapi -> emit(bloodEmitter.value(), position, std::nullopt /* normal */, std::nullopt, std::nullopt, std::nullopt);
-  }
+
+  auto mainObjPos = gameapi -> getGameObjectPos(lookAtId, true);
+
+  auto orientation1 = gameapi -> orientationFromPos(position, mainObjPos);
+  gameapi -> emit(bloodEmitter.value(), position, orientation1, std::nullopt, std::nullopt, std::nullopt);
+
+  auto position2 = position + glm::vec3(0.2f, 0.f, 0.f);
+  auto orientation2 = gameapi -> orientationFromPos(position2, mainObjPos);
+  gameapi -> emit(bloodEmitter.value(), position2, orientation2, std::nullopt, std::nullopt, std::nullopt);
+  
+  auto position3 =  position + glm::vec3(-0.2f, 0.f, 0.f);
+  auto orientation3 = gameapi -> orientationFromPos(position3, mainObjPos);
+
+  auto velocity = position3 - position;
+  velocity.x *= 100;
+  velocity.y *= 100;
+  velocity.z *= 100;
+  gameapi -> emit(bloodEmitter.value(), position3, orientation3, glm::vec3(0.f, 2.f, 0.f), std::nullopt, std::nullopt);
+}
+
+void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 size){
+  emitBlood(sceneId, lookAtId, position);
 }

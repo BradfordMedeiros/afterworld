@@ -312,9 +312,17 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	return;
   }
 
-  if (key == 'R' && action == 1) {
-    changeGameType(gametypeSystem, "targetkill");
+  if (key == 'H' && action == 1){
+  	auto activePlayerId = getActivePlayerId();
+		auto playerPos = getActivePlayerPosition();
+		auto playerRot = getActivePlayerRotation();
+		auto inFront = playerPos.value() + (playerRot.value() * glm::vec3(0.f, 0.f, -1.f));
+  	emitBlood(rootSceneId(), activePlayerId.value(), inFront);
   }
+
+  //if (key == 'R' && action == 1) {
+  //  changeGameType(gametypeSystem, "targetkill");
+  //}
 
   if (key == '[' && action == 0){
   	auto activeCamera = gameapi -> getCameraTransform();
@@ -327,14 +335,14 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	visualizationDistance += 1.f;
   }
 
-  if (key == 'I' && action == 0){
+  /*if (key == 'I' && action == 0){
   	static std::optional<objid> sceneId;
   	if (sceneId.has_value()){
   		gameapi -> unloadScene(sceneId.value());
   	}
     sceneId = gameapi -> loadScene("../afterworld/scenes/empty.rawscene", {}, std::nullopt, {});
   	addNObjects(sceneId.value(), 4, 4, 4);
-  }
+  }*/
   
 	auto args = gameapi -> getArgs();
 	auto printKey = args.find("printkey") != args.end();
@@ -434,7 +442,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 		ndiPrintInfo.selectMode = NDI_SELECT_TOP_LEFT;
   }
 
-  if (key == 'I' && action == 0){
+  /*if (key == 'I' && action == 0){
 		glm::vec2 ndiCoord(getGlobalState().xNdc, getGlobalState().yNdc);
   	if (ndiPrintInfo.selectMode == NDI_SELECT_TOP_LEFT){
  			ndiPrintInfo.ndiPoint.point1 = ndiCoord;
@@ -449,7 +457,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   		ndiPrintInfo.ndiPoint.mappedKey = std::nullopt;
  			ndiPrintInfo.selectMode = NDI_SELECT_KEY;
   	}
-  }
+  }*/
 
   //if (key == 'L' && action == 0){
   //	std::cout << dumpAsString(tags.animationController, "character").value() << std::endl;
