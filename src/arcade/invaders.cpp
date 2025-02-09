@@ -362,7 +362,7 @@ void updateInvaders(std::any& any){
 	}
 }
 
-void drawCenteredTextFade(const char* text, float x, float y, float size, glm::vec3 color, float period){
+void drawCenteredTextFade(const char* text, float x, float y, float size, glm::vec3 color, float period, std::optional<objid> textureId){
 	float alphaValue = gameapi -> timeSeconds(false) / period;
   float percentage = fmod(alphaValue, 1);
   if (percentage < 0.5f){
@@ -370,7 +370,7 @@ void drawCenteredTextFade(const char* text, float x, float y, float size, glm::v
   }else{
   	percentage = 2.f - (2.f * percentage);
   }
-  drawCenteredText(text, x, y, size, glm::vec4(color.x, color.y, color.z, percentage), std::nullopt);
+  drawCenteredText(text, x, y, size, glm::vec4(color.x, color.y, color.z, percentage), std::nullopt, textureId);
 }
 
 void drawInvaders(std::any& any, std::optional<objid> textureId){
@@ -380,7 +380,7 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
   if (invaders.state == TITLE){
    	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", ShapeOptions { .shaderId = *invaders.shaderId  });
    	gameapi -> drawRect(0.f, 0.f + 0.02f * glm::cos(gameapi -> timeSeconds(false) * 2.f), 0.4f, 0.4f, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/pete.png", std::nullopt);
-	  drawCenteredTextFade("Press Left Mouse to Play!", 0, -0.4f, 0.04f, glm::vec3(1.f, 1.f, 1.f), 2.f);
+	  drawCenteredTextFade("Press Left Mouse to Play!", 0, -0.4f, 0.04f, glm::vec3(1.f, 1.f, 1.f), 2.f, textureId);
   	return;
   }
 
@@ -404,7 +404,7 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
 	 	gameapi -> drawRect(particle.position.x, particle.position.y, particle.size.x, particle.size.y, false, particle.color, textureId, true, std::nullopt, std::nullopt, ShapeOptions { .shaderId = *invaders.shaderId  });
 	}
 	//drawCollisionDebug(invaders.collisions, textureId);
-  drawRightText(std::string("SCORE: ")  + std::to_string(invaders.score), -0.975f, 0.95, 0.05, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt);
+  drawRightText(std::string("SCORE: ")  + std::to_string(invaders.score), -0.975f, 0.95, 0.05, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt, textureId);
   gameapi -> drawRect(0.f, 0.9f, 0.9f, 0.1f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
   gameapi -> drawRect(0.f, 0.9f, (invaders.score / 10000.f) * 0.9f, 0.1f, false, glm::vec4(0.f, 0.f, 1.f, 0.8f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 

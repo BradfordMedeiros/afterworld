@@ -474,16 +474,15 @@ float randomNum(){
   return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX));
 }
 
-void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
+void drawCenteredText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<objid> textureId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   float width = 0.f;
   float height = 0.f;
   gameapi -> getTextDimensionsNdi(text, ndiSize, true, std::nullopt, &width, &height);
-  gameapi -> drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
+  gameapi -> drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, textureId, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 
-
-void drawRightText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
+void drawRightText(std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<objid> textureId){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  gameapi -> drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, textureId, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 }

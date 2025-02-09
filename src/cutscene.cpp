@@ -111,7 +111,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		perFrameEvents[id] = [text, time, pos, size]() -> void {
 			auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - time) * 100.f);
 			auto textSubtr = text.substr(0, currIndex);
-			drawRightText(textSubtr, pos.x, pos.y, size, std::nullopt /* tint */, std::nullopt);
+			drawRightText(textSubtr, pos.x, pos.y, size, std::nullopt /* tint */, std::nullopt, std::nullopt);
 		};
   	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
@@ -161,7 +161,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 			auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - time) * 100.f);
 			auto textSubtr = text.substr(0, currIndex);
 			gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.98f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-			drawRightText(textSubtr, -1.f, 0.f, 0.02f, std::nullopt /* tint */, std::nullopt);
+			drawRightText(textSubtr, -1.f, 0.f, 0.02f, std::nullopt /* tint */, std::nullopt, std::nullopt);
 		};
   	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);

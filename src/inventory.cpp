@@ -100,7 +100,7 @@ void pickupGem(std::string name){
 
 void debugPrintInventory(){
     const float fontSize = 0.02f;
-    drawRightText("inventory\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt);
+    drawRightText("inventory\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt, std::nullopt);
 
     std::vector<objid> inventoryNames;
     for (auto &[name, inventory] : scopenameToInventory){
@@ -109,12 +109,12 @@ void debugPrintInventory(){
     int offset = 0;
     for (int i = 0; i < inventoryNames.size(); i++){
 
-      drawRightText(std::to_string(inventoryNames.at(i)), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt);
+      drawRightText(std::to_string(inventoryNames.at(i)), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt, std::nullopt);
       offset++;
 
       for (auto &[name, amount] : scopenameToInventory.at(inventoryNames.at(i)).items){
-        drawRightText(name, -0.8, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
-        drawRightText(std::to_string(amount), -0.5, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
+        drawRightText(name, -0.8, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+        drawRightText(std::to_string(amount), -0.5, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
         offset++;       
       }
     }
