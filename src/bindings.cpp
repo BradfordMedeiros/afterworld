@@ -821,6 +821,16 @@ ArcadeApi arcadeApi {
   .playSound = [](objid clipId) -> void {
     playGameplayClipById(clipId, std::nullopt, std::nullopt);
   },
+  .getResolution = [](objid id) -> glm::vec2 {
+    auto texture = arcadeTextureId(id);
+    if (texture.has_value()){
+      return glm::vec2(1000, 1000); // this is overly coupled to the create texture call in tags
+    }
+    auto resolutionAttr = getWorldStateAttr("rendering", "resolution").value();
+    glm::vec2* resolution = std::get_if<glm::vec2>(&resolutionAttr);
+    modassert(resolution, "resolution value invalid");
+    return *resolution;
+  }
 };
 
 bool hasAnimation(objid entityId, std::string& animationName){

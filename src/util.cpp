@@ -297,6 +297,16 @@ std::optional<std::string> getStrWorldState(const char* object, const char* attr
   return std::nullopt;
 }
 
+std::optional<AttributeValue> getWorldStateAttr(const char* object, const char* attribute){
+  auto worldStates = gameapi -> getWorldState();
+  for (auto &worldState : worldStates){
+    if (worldState.object == object && worldState.attribute == attribute){
+      return worldState.value;
+    }
+  }
+  return std::nullopt; 
+}
+
 std::string defaultEnable = "true";
 std::string defaultDisable = "false";
 bool toggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled, const char *disabled){

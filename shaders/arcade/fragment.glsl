@@ -7,7 +7,9 @@ uniform bool forceTint;
 uniform vec4 tint;
 uniform vec4 encodedid;
 uniform float time;
+
 uniform vec2 resolution;
+uniform vec2 shipPosition;
 
 
 layout (location = 0) out vec4 FragColor;
@@ -23,11 +25,14 @@ void main(){
   vec4 texColor = texture(textureData, vec2(TexCoord.x, TexCoord.y));
 
 
+  vec2 lightLocation = vec2(0.5 * (shipPosition.x + 1), 0.5 * (shipPosition.y + 1));
 
-  vec2 lightLocation = vec2(500 + 100 * (1 + cos(time * 0.1)), 1000 * 0.5);
-  float distanceToLight = 200 * (1 / distance(gl_FragCoord.xy, lightLocation));
-  vec4 lightColor = vec4(0, 0, distanceToLight, 1);
+  //vec2 lightLocation = vec2(0.5 * (1 + cos(time)), 0.5);
 
-  FragColor = texColor * tint * (vec4(lightColor.xyz, 1) + vec4(0.8, 0.8, 0.8, 0));
+  vec2 locNdi = vec2(gl_FragCoord.x / resolution.x, gl_FragCoord.y / resolution.y);
+  float distanceToLight = (1 / (3 * distance(locNdi, lightLocation)));
+  vec4 lightColor = vec4(distanceToLight, distanceToLight, distanceToLight, 1);
+
+  FragColor = texColor * tint * lightColor;
   FragColor2 = encodedid;
 }

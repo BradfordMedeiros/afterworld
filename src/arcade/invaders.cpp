@@ -4,7 +4,6 @@ extern CustomApiBindings* gameapi;
 extern ArcadeApi arcadeApi;
 
 // power ups - automatic, multishot
-// shader with lighting? 
 
 struct InvaderParticle {
 	glm::vec4 color;
@@ -24,6 +23,8 @@ struct InvaderEnemy {
 
 enum InvadersState { TITLE, PLAYING };
 struct Invaders {
+	objid id;
+	glm::vec2 lastResolution;
 	InvadersState state;
 	bool drawCursor;
 	int score;
@@ -66,6 +67,8 @@ void updateShipPosition(Invaders& invaders, glm::vec2 position){
 }
 
 Invaders initialInvadersState {
+	.id = -1,
+	.lastResolution = glm::vec2(0.f, 0.f),
 	.state = TITLE,
 	.drawCursor = true,
 	.score = 0,
@@ -85,11 +88,29 @@ Invaders initialInvadersState {
 	.lastEnemySpawnTime = 0.f,
 	.enemies = {},
 };
+
+
+void shaderUpdateResolution(unsigned int* shaderId, glm::vec2* lastResolution, objid id){
+	auto resolution = arcadeApi.getResolution(id);
+
+  if (!aboutEqual(resolution, *lastResolution)){
+  	*lastResolution = resolution;
+	  std::cout << "shaderSetResolution: " << print(resolution) << std::endl;
+		UniformData uniformData {
+		 	.name = "resolution",
+		 	.value = resolution,
+		};
+  	gameapi -> setShaderUniform(*shaderId, uniformData);
+  }
+}
+
+
 std::any createInvaders(objid id){
 	Invaders invaders = initialInvadersState;
 
+	invaders.id = id;
 	invaders.shaderId = gameapi -> loadShader("arcade", "../afterworld/shaders/arcade");
-
+  std::cout << "setting resolution color" << std::endl;
 
 	arcadeApi.ensureTexturesLoaded(id, 
 	{ 
@@ -106,6 +127,7 @@ std::any createInvaders(objid id){
 	invaders.shootingSound = soundObjs.at(0);
 	invaders.collisions = create2DCollisions();
 	createInvadersEnemy(invaders, invaders.shipId, glm::vec2(0.f, 0.f), glm::vec4(1.f, 1.f, 1.f, 1.f));
+
 
 	return invaders;
 }
@@ -141,12 +163,31 @@ void createInvadersBullet(Invaders& invaders, glm::vec2 position, glm::vec2 dire
 		.color = invaders.bulletColorAlt ? glm::vec4(1.f, 0.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f),
 		.position = position,
 		.size = glm::vec2(0.02f, 0.02f),
-		.direction = direction,
+		.direction = glm::normalize(direction),
 		.time = gameapi -> timeSeconds(false),
 		.duration = 5.f,
 	};
 	addColliderRect(invaders.collisions, id, position, glm::vec2(0.02f, 0.02f));
 }
+
+enum INVADERS_SHOT_TYPE { INVADER_SHOT_SINGLE, INVADER_SHOT_MULTI };
+void invadersShoot(Invaders& invaders, glm::vec2 position, glm::vec2 direction, INVADERS_SHOT_TYPE type){
+	if (type == INVADER_SHOT_SINGLE){
+		createInvadersBullet(invaders, position, direction);
+	}else if (type == INVADER_SHOT_MULTI){
+
+		auto shotUpLeft = rotatePoint(glm::vec2(-0.5f, 1.f), direction);
+		auto shotUpRight = rotatePoint(glm::vec2(0.5f, 1.f), direction);
+
+		createInvadersBullet(invaders, position, direction);
+		createInvadersBullet(invaders, position, glm::vec2(shotUpLeft.x, shotUpLeft.y));
+		createInvadersBullet(invaders, position, glm::vec2(shotUpRight.x, shotUpRight.y));
+	}else{
+		modassert(false, "invadersShoot invalid shot type");
+	}
+
+}
+
 void removeInvadersBullet(Invaders& invaders, objid id){
 	invaders.particles.erase(id);
 	rmCollider(invaders.collisions, id);
@@ -303,7 +344,7 @@ void updateInvaders(std::any& any){
   spawnInvadersEnemies(invaders);
 
 	if (invaders.shoot){
-		createInvadersBullet(invaders, getShipPosition(invaders), invaders.shipDirection);
+		invadersShoot(invaders, getShipPosition(invaders), invaders.shipDirection, INVADER_SHOT_MULTI);
 		arcadeApi.playSound(invaders.shootingSound);
 	}
 	invaders.shoot = false;
@@ -373,9 +414,29 @@ void drawCenteredTextFade(const char* text, float x, float y, float size, glm::v
   drawCenteredText(text, x, y, size, glm::vec4(color.x, color.y, color.z, percentage), std::nullopt, textureId);
 }
 
+
 void drawInvaders(std::any& any, std::optional<objid> textureId){
   Invaders* invadersPtr = anycast<Invaders>(any);
   Invaders& invaders = *invadersPtr;
+
+	shaderUpdateResolution(invaders.shaderId, &invaders.lastResolution, invaders.id);
+	UniformData uniformData {
+	 	.name = "shipPosition",
+	 	.value = getShipPosition(invaders),
+	};
+  gameapi -> setShaderUniform(*invaders.shaderId, uniformData);
+
+  std::string textureName("./res/textures/wood.jpg");
+  auto textureSampleId = gameapi -> getTextureSamplerId(textureName);
+  modassert(textureSampleId.has_value(), "invaders texture sampler no value");
+
+	UniformData uniformTextureData {
+	 	.name = "overlayTexture",
+	 	.value = Sampler2D { 
+  		.textureUnitId = textureSampleId.value(),
+		},
+	};
+  gameapi -> setShaderUniform(*invaders.shaderId, uniformTextureData);
 
   if (invaders.state == TITLE){
    	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", ShapeOptions { .shaderId = *invaders.shaderId  });

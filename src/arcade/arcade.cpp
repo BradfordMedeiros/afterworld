@@ -42,6 +42,13 @@ void maybeRemoveArcadeType(objid id){
 	arcadeInstances.erase(id);
 }
 
+std::optional<objid> arcadeTextureId(objid id){
+	if (arcadeInstances.find(id) == arcadeInstances.end()){
+		return std::nullopt;
+	}
+	return arcadeInstances.at(id).textureId;
+}
+
 void onKeyArcade(int key, int scancode, int action, int mod){
 	for (auto &[id, arcade] : arcadeInstances){
 		arcade.interface -> onKey(arcade.data, key, scancode, action, mod);

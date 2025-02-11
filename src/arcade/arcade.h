@@ -17,6 +17,7 @@ struct ArcadeInstance {
 
 void addArcadeType(objid id, std::string type, std::optional<objid> textureId);
 void maybeRemoveArcadeType(objid id);
+std::optional<objid> arcadeTextureId(objid id);
 
 void onKeyArcade(int key, int scancode, int action, int mod);
 void onMouseMoveArcade(double xPos, double yPos, float xNdc, float yNdc);

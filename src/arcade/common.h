@@ -22,6 +22,7 @@ struct ArcadeApi {
   std::function<void(objid)> releaseTextures;
 
   std::function<void(objid)> playSound;
+  std::function<glm::vec2(objid)> getResolution;
 };
 
 struct Collider2DRect {
@@ -44,6 +45,6 @@ void updatePosition(Collision2DArcade& collision, objid id, glm::vec2 pos);
 std::vector<Collision2D> getCollisionsArcade(Collision2DArcade& collision);
 void drawCollisionDebug(Collision2DArcade& collision, std::optional<objid> textureId);
 
-
+glm::vec2 rotatePoint(glm::vec2 point, glm::vec2 dir);
 
 #endif

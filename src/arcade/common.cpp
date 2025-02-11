@@ -91,3 +91,10 @@ void drawCollisionDebug(Collision2DArcade& collision, std::optional<objid> textu
 		gameapi -> drawLine2D(topRight, bottomRight, false, glm::vec4(1.f, 0.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 	}
 }
+
+glm::vec2 rotatePoint(glm::vec2 point, glm::vec2 dir){
+	auto angleRadians = atanRadians360(dir.y, dir.x);
+	glm::mat2 rotationMatrix = glm::mat2(glm::cos(angleRadians), -glm::sin(angleRadians), glm::sin(angleRadians), glm::cos(angleRadians));
+	glm::vec2 rotatedPoint = rotationMatrix * point;
+	return rotatedPoint;
+}
