@@ -6,8 +6,9 @@
 #include "./tennis.h"
 #include "./invaders.h"
 #include "./helicopter.h"
+#include "./interact.h"
 
-enum ArcadeType { ARCADE_TENNIS, ARCADE_INVADERS };
+enum ArcadeType { ARCADE_TENNIS, ARCADE_INVADERS, ARCADE_INTERACT, ARCADE_HELICOPTER };
 struct ArcadeInstance { 
   ArcadeType type;
   ArcadeInterface* interface;
@@ -22,6 +23,8 @@ std::optional<objid> arcadeTextureId(objid id);
 void onKeyArcade(int key, int scancode, int action, int mod);
 void onMouseMoveArcade(double xPos, double yPos, float xNdc, float yNdc);
 void onMouseClickArcade(int button, int action, int mods);
+
+void onMessageArcade(std::any& message);
 
 void updateArcade();
 void drawArcade();

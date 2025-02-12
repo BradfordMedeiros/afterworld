@@ -229,6 +229,10 @@ void onTennisMouseClick(std::any&, int button, int action, int mods){
 
 }
 
+void OnTennisMessage(std::any&){
+
+}
+
 ArcadeInterface tennisGame {
 	.createInstance = createTennis,
 	.rmInstance = rmTennisInstance,
@@ -237,5 +241,6 @@ ArcadeInterface tennisGame {
 	.onKey = onKeyTennis,
 	.onMouseMove = onTennisMouseMove,
 	.onMouseClick = onTennisMouseClick,
+	.onMessage = OnTennisMessage,
 };
 

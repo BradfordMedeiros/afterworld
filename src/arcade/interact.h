@@ -6,6 +6,10 @@
 #include "./common.h"
 #include <cmath>
 
-extern ArcadeInterface invadersGame;
+struct DeliverAmmoMessage {
+	int ammo;
+};
+
+extern ArcadeInterface interactGame;
 
 #endif

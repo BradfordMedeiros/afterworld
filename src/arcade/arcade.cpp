@@ -23,9 +23,16 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 		};
 	}else if (type == "helicopter"){
 		arcadeInstances[id] = ArcadeInstance {
-			.type = ARCADE_INVADERS,
+			.type = ARCADE_HELICOPTER,
 			.interface = &helicopterGame,
 			.data = helicopterGame.createInstance(id),
+			.textureId = textureId,
+		};
+	}else if (type == "interact"){
+		arcadeInstances[id] = ArcadeInstance {
+			.type = ARCADE_INTERACT,
+			.interface = &interactGame,
+			.data = interactGame.createInstance(id),
 			.textureId = textureId,
 		};
 	}else{
@@ -65,6 +72,12 @@ void onMouseClickArcade(int button, int action, int mods){
 	for (auto &[id, arcade] : arcadeInstances){
 		arcade.interface -> onMouseClick(arcade.data, button, action, mods);
 	}	
+}
+
+void onMessageArcade(std::any& message){
+	for (auto &[id, arcade] : arcadeInstances){
+		arcade.interface -> onMessage(message);
+	}
 }
 
 void updateArcade(){

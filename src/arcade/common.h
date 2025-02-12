@@ -12,6 +12,7 @@ struct ArcadeInterface {
   std::function<void(std::any&, int key, int scancode, int action, int mod)> onKey;
   std::function<void(std::any&, double xPos, double yPos, float xNdc, float yNdc)> onMouseMove;
   std::function<void(std::any&, int button, int action, int mods)> onMouseClick;
+  std::function<void(std::any&)> onMessage;
 };
 
 struct ArcadeApi {
@@ -46,5 +47,6 @@ std::vector<Collision2D> getCollisionsArcade(Collision2DArcade& collision);
 void drawCollisionDebug(Collision2DArcade& collision, std::optional<objid> textureId);
 
 glm::vec2 rotatePoint(glm::vec2 point, glm::vec2 dir);
+void drawCenteredTextFade(const char* text, float x, float y, float size, glm::vec3 color, float period, std::optional<objid> textureId);
 
 #endif

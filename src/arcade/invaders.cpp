@@ -175,10 +175,8 @@ void invadersShoot(Invaders& invaders, glm::vec2 position, glm::vec2 direction, 
 	if (type == INVADER_SHOT_SINGLE){
 		createInvadersBullet(invaders, position, direction);
 	}else if (type == INVADER_SHOT_MULTI){
-
 		auto shotUpLeft = rotatePoint(glm::vec2(-0.5f, 1.f), direction);
 		auto shotUpRight = rotatePoint(glm::vec2(0.5f, 1.f), direction);
-
 		createInvadersBullet(invaders, position, direction);
 		createInvadersBullet(invaders, position, glm::vec2(shotUpLeft.x, shotUpLeft.y));
 		createInvadersBullet(invaders, position, glm::vec2(shotUpRight.x, shotUpRight.y));
@@ -403,18 +401,6 @@ void updateInvaders(std::any& any){
 	}
 }
 
-void drawCenteredTextFade(const char* text, float x, float y, float size, glm::vec3 color, float period, std::optional<objid> textureId){
-	float alphaValue = gameapi -> timeSeconds(false) / period;
-  float percentage = fmod(alphaValue, 1);
-  if (percentage < 0.5f){
-  	percentage *= 2;
-  }else{
-  	percentage = 2.f - (2.f * percentage);
-  }
-  drawCenteredText(text, x, y, size, glm::vec4(color.x, color.y, color.z, percentage), std::nullopt, textureId);
-}
-
-
 void drawInvaders(std::any& any, std::optional<objid> textureId){
   Invaders* invadersPtr = anycast<Invaders>(any);
   Invaders& invaders = *invadersPtr;
@@ -557,6 +543,10 @@ void onKeyInvaders(std::any& any, int key, int scancode, int action, int mod){
 	}
 }
 
+void OnInvadersMessage(std::any&){
+
+}
+
 
 ArcadeInterface invadersGame {
 	.createInstance = createInvaders,
@@ -566,5 +556,6 @@ ArcadeInterface invadersGame {
 	.onKey = onKeyInvaders,
 	.onMouseMove = onInvadersMouseMove,
 	.onMouseClick = onInvadersMouseClick,
+	.onMessage = OnInvadersMessage,
 };
 

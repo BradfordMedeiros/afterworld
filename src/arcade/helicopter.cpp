@@ -141,6 +141,10 @@ void onHelicopterMouseClick(std::any&, int button, int action, int mods){
 
 }
 
+void onHelicopterMessage(std::any&){
+
+}
+
 ArcadeInterface helicopterGame {
 	.createInstance = createHelicopter,
 	.rmInstance = rmHelicopterInstance,
@@ -149,5 +153,6 @@ ArcadeInterface helicopterGame {
 	.onKey = onKeyHelicopter,
 	.onMouseMove = onHelicopterMouseMove,
 	.onMouseClick = onHelicopterMouseClick,
+	.onMessage = onHelicopterMessage,
 };
 

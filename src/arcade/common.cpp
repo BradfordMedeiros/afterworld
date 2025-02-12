@@ -98,3 +98,14 @@ glm::vec2 rotatePoint(glm::vec2 point, glm::vec2 dir){
 	glm::vec2 rotatedPoint = rotationMatrix * point;
 	return rotatedPoint;
 }
+
+void drawCenteredTextFade(const char* text, float x, float y, float size, glm::vec3 color, float period, std::optional<objid> textureId){
+	float alphaValue = gameapi -> timeSeconds(false) / period;
+  float percentage = fmod(alphaValue, 1);
+  if (percentage < 0.5f){
+  	percentage *= 2;
+  }else{
+  	percentage = 2.f - (2.f * percentage);
+  }
+  drawCenteredText(text, x, y, size, glm::vec4(color.x, color.y, color.z, percentage), std::nullopt, textureId);
+}

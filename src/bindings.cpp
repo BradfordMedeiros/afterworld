@@ -1095,6 +1095,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setShowActivate(uiUpdate.showActivateUi);
       if (uiUpdate.ammoInfo.has_value()){
         setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
+        DeliverAmmoMessage ammoArcadeMessage {
+          .ammo = uiUpdate.ammoInfo.value().currentAmmo,
+        };
+        std::any value = ammoArcadeMessage;
+        onMessageArcade(value);
       }else{
         setUIAmmoCount(0, 0);
       }
