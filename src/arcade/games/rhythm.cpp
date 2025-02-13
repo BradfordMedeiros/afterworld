@@ -8,8 +8,14 @@ struct Rhythm {
 };
 
 std::any createRhythm(objid id){
-	return Rhythm {
-	};
+	arcadeApi.ensureTexturesLoaded(id, 
+	{ 
+			"../gameresources/textures/arcade/rhythm/arrow-right.png", 
+			"../gameresources/textures/arcade/rhythm/arrow-left.png", 
+			"../gameresources/textures/arcade/rhythm/arrow-up.png", 
+			"../gameresources/textures/arcade/rhythm/arrow-down.png", 
+	});
+	return Rhythm {};
 }
 
 void rmRhythmInstance(std::any& any){
@@ -18,32 +24,107 @@ void rmRhythmInstance(std::any& any){
 void updateRhythm(std::any& any){
 }
 
+
+enum RhythmType { RHYTHM_LEFT, RHYTHM_RIGHT, RHYTHM_UP, RHYTHM_DOWN };
 struct RhythmControl {
-	glm::vec2 position;
+	RhythmType type;
+	float time;
 };
-
-
-
 std::vector<RhythmControl> elementsToRender(float time){
-	std::vector<RhythmControl> elements {
-		RhythmControl {
-			.position = glm::vec2(0.2f, 0.2f + (time * 0.1f)),
-		},
-		RhythmControl {
-			.position = glm::vec2(0.2f, 0.6f  + (time * 0.1f)),
-		},
-	};
+	std::vector<RhythmControl> elements {};
+	for (int i = 0; i < 50; i++){
+		RhythmType type = RHYTHM_LEFT;
+		if (i % 4 == 0){
+			type = RHYTHM_LEFT;
+		}else if (i % 4 == 1){
+			type = RHYTHM_RIGHT;
+		}else if (i % 4 == 2){
+			type = RHYTHM_UP;
+		}else if (i % 4 == 3){
+			type = RHYTHM_DOWN;
+		}
+		elements.push_back(RhythmControl {
+			.type = type,
+			.time = 0.f,
+		});
+	}
 	return elements;
 }
+
+float getArrowCenter(int column, float columnWidth){
+	float offset = ((column - 1) * columnWidth) - (columnWidth * 0.5f);
+	return offset;
+}
+
+struct ArrowRender {
+	glm::vec2 position;
+	const char* texture;
+};
+std::vector<ArrowRender> getArrowRendering(float time, float columnWidth){
+	std::vector<ArrowRender> arrows;
+
+	for (auto &element : elementsToRender(time)){
+		int columnNumber = 0;
+		if (element.type == RHYTHM_LEFT){
+			columnNumber = 0;
+		}else if (element.type == RHYTHM_RIGHT){
+			columnNumber = 1;
+		}else if (element.type == RHYTHM_UP){
+			columnNumber = 2;
+		}else if (element.type == RHYTHM_DOWN){
+			columnNumber = 3;
+		}else{
+			modassert(false, "invalid type rhythm column");
+		}
+		auto positionX = getArrowCenter(columnNumber, columnWidth);
+		auto positionY = element.time;
+
+		const char* texture = NULL;
+		if (element.type == RHYTHM_LEFT){
+			texture = "../gameresources/textures/arcade/rhythm/arrow-left.png";
+		}else if (element.type == RHYTHM_RIGHT){
+			texture = "../gameresources/textures/arcade/rhythm/arrow-right.png";
+		}else if (element.type == RHYTHM_UP){
+			texture = "../gameresources/textures/arcade/rhythm/arrow-up.png";
+		}else if (element.type == RHYTHM_DOWN){
+			texture = "../gameresources/textures/arcade/rhythm/arrow-down.png";
+		}else{
+			modassert(false, "invalid type rhythm");
+		}
+
+		arrows.push_back(ArrowRender {
+			.position = glm::vec2(positionX, positionY),
+			.texture = texture,
+		});
+
+
+	}
+
+	return arrows;
+}
+
 
 void drawRhythm(std::any& any, std::optional<objid> textureId){
 	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(.1f, .1f, .1f, 1.f), textureId, true, std::nullopt, "./res/textures/hexglow.png", std::nullopt);
 	gameapi -> drawRect(0.f, 0.8f, 2.f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.2f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 
+	float columnWidth = 2.f / 4.f;
+
+	std::vector<glm::vec4> colors {
+		glm::vec4(1.f, 0.f, 0.f, 0.2f),
+		glm::vec4(1.f, 1.f, 0.f, 0.2f),
+		glm::vec4(1.f, 0.f, 1.f, 0.2f),
+		glm::vec4(0.f, 1.f, 0.f, 0.2f),
+	};
+	for (int i = 0; i < 4; i++){
+		auto offset = getArrowCenter(i, columnWidth);
+		gameapi -> drawRect(offset, 0.f, columnWidth, 0.2f, false, colors.at(i), textureId, true, std::nullopt, std::nullopt, std::nullopt);
+	}
 
 	auto time = gameapi -> timeSeconds(false);
-	for (auto &element : elementsToRender(time)){
-		gameapi -> drawRect(element.position.x, element.position.y, 0.05f, 0.05f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
+	float arrowSize = 0.1f;
+	for (auto &element : getArrowRendering(time, columnWidth)){
+		gameapi -> drawRect(element.position.x, element.position.y, arrowSize, arrowSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, element.texture, std::nullopt);
 	}
 
 }
