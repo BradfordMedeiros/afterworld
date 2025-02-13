@@ -334,12 +334,7 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = [](Tags& tags) -> void {  
 			onSpawnTick();
   	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		if (key == "spawn"){
- 			  SpawnRequest* spawnPtr = anycast<SpawnRequest>(value);
-	 		  spawnFromAllSpawnpoints(spawnPtr -> tag);  			
-  		}
-  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "spawn-managed",
@@ -528,6 +523,7 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "arcade",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			modlog("arcade", "on add");
 			std::string textureName = std::string("arcade-texture") + std::to_string(id);
 			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
 	 	  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);

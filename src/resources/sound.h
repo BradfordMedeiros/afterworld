@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../util.h"
 
 struct MaterialToSound {
 	std::string material;

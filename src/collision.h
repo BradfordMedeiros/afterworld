@@ -2,7 +2,7 @@
 #define MOD_AFTERWORLD_COLLISION
 
 #include "./util.h"
-#include "./resources.h"
+#include "./resources/resources.h"
 #include "./inventory.h"
 
 void handleInteract(objid gameObjId);

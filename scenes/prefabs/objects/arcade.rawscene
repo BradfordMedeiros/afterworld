@@ -1,5 +1,5 @@
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
-arcade/screen:arcade:invaders
+arcade/screen:arcade:interact
 
 arcade:activate:arcade
 arcade:physics:enabled
@@ -8,3 +8,5 @@ arcade:child:>camera
 >camera:position:0 0.75 0.5
 
 arcade/screen:child:!light
+
+arcade:health:200000

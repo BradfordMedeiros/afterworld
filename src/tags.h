@@ -6,7 +6,7 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./animation/animation.h"
-#include "./spawn.h"
+#include "./director/spawn.h"
 #include "./global.h"
 #include "./in-game-ui.h"
 #include "./health.h"

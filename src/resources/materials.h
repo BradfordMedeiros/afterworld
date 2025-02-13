@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <string>
-#include "./util.h"
-#include "../../ModEngine/src/scene/serialization.h"
+#include "../util.h"
+#include "../../../ModEngine/src/scene/serialization.h"
 
 struct ParticleAndEmitter {
   std::string particle;
@@ -30,5 +30,6 @@ std::optional<objid> getParticleEmitter(std::string& emitterName);
 
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 size);
+void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
 
 #endif

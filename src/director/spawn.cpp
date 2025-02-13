@@ -2,14 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
-struct Spawnpoint {
-  int type;
-  std::set<std::string> tags;
-  std::optional<float> respawnRate;
-  std::optional<int> itemLimit;
-  std::optional<float> lastSlotFreeTime;
-  std::set<objid> managedIds;
-};
+std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 
 objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
@@ -44,7 +37,6 @@ objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::v
   return -1;
 }
 
-std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 int spawnTypeFromAttr(std::optional<std::string>&& value){
   modlog("do spawn spawner create", value.value());

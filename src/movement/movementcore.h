@@ -3,7 +3,7 @@
 
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
-#include "../resources.h"
+#include "../resources/resources.h"
 #include "../curves.h"
 
 struct ThirdPersonCameraInfo {

@@ -5,6 +5,7 @@ CustomApiBindings* gameapi = NULL;
 
 Weapons weapons{};
 Movement movement = createMovement();
+Director director = createDirector();
 extern ControlledPlayer controlledPlayer;
 
 Water water;
@@ -1132,6 +1133,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
+      handleDirector(director);
       //handleEntitiesRace();
     }
 
@@ -1454,7 +1456,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
         auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
-          setTotalZoom(uiUpdate.zoomAmount.value());
+          //setTotalZoom(uiUpdate.zoomAmount.value());
         }
       }
     }

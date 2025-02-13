@@ -8,6 +8,7 @@ void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 bool maybeAddGlassBulletHole(objid id, objid playerId);
 void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
+void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
 std::optional<objid> getActivePlayerId();
 
 std::vector<WeaponCore> weaponCores = {};
@@ -158,6 +159,7 @@ WeaponParams queryWeaponParams(std::string gunName){
   return weaponParams;
 }
 
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName, std::function<objid(objid)> getWeaponParentId){
   std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
@@ -165,7 +167,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
     { "rotation", weaponParams.initialGunRotVec4 },
     { "position", weaponParams.initialGunPos - glm::vec3(0.f, 0.f, 0.f) },
     { "scale", weaponParams.scale },
-    { "tint", glm::vec4(1.f, 1.f, 1.f, 0.4f) },
+    //{ "tint", glm::vec4(1.f, 1.f, 1.f, 0.4f) },
   };
   if (weaponParams.script != ""){
     attrAttributes["script"] = weaponParams.script;
@@ -174,9 +176,20 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
     .attr = attrAttributes,
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
+  submodelAttributes["sight"] = GameobjAttributes{};
+  submodelAttributes.at("sight").attr["tint"] = glm::vec4(1.f, 0.f, 0.f, 1.f);
+
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
   gameapi -> makeParent(gunId.value(), getWeaponParentId(parentId));
+
+
+  auto screen = findChildObjBySuffix(gunId.value(), "sight");
+  if (screen.has_value()){
+    gameapi -> setSingleGameObjectAttr(screen.value(), "tint", glm::vec4(0.f, 0.f, 1.f, 0.4f));
+    gameapi -> setSingleGameObjectAttr(screen.value(), "layer", "transparency");
+  }
+
   return gunId.value();
 }
 
@@ -443,13 +456,14 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
     }
 
 
+    emitWaterSplash(rootSceneId(), getActivePlayerId().value(), emitParticlePosition);
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
 
     auto activePlayerId = getActivePlayerId();
     auto inFront = hitpoint.point + (hitpoint.normal * glm::vec3(0.f, 0.f, -0.1f));
-    emitBlood(rootSceneId(), activePlayerId.value(), inFront);
+    //emitBlood(rootSceneId(), activePlayerId.value(), inFront);
   
     doDamageMessage(hitpoint.id, gunCore.weaponCore -> weaponParams.damage);
     modlog("weapons", "raycast normal: " + serializeQuat(hitpoint.normal));

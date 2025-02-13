@@ -4,9 +4,9 @@
 #include <iostream>
 #include <vector>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "../materials.h"
+#include "../resources/materials.h"
 #include "./weaponcore.h"
-#include "../resources.h"
+#include "../resources/resources.h"
 #include "../controls.h"
 
 struct MessageWithId {

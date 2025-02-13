@@ -2,10 +2,11 @@
 #define MOD_AFTERWORLD_AI
 
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../global.h"
+
 #include "./worldinfo.h"
 #include "./agents/basic_agent.h"
 #include "./agents/turret.h"
-#include "../global.h"
 
 struct AiData {
   WorldInfo worldInfo;

@@ -3,12 +3,13 @@
 
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
-#include "./tennis.h"
-#include "./invaders.h"
-#include "./helicopter.h"
-#include "./interact.h"
+#include "./games/tennis.h"
+#include "./games/invaders.h"
+#include "./games/helicopter.h"
+#include "./games/rhythm.h"
+#include "./games/interact.h"
 
-enum ArcadeType { ARCADE_TENNIS, ARCADE_INVADERS, ARCADE_INTERACT, ARCADE_HELICOPTER };
+enum ArcadeType { ARCADE_TENNIS, ARCADE_INVADERS, ARCADE_RHYTHM, ARCADE_INTERACT, ARCADE_HELICOPTER };
 struct ArcadeInstance { 
   ArcadeType type;
   ArcadeInterface* interface;

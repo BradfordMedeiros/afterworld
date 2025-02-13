@@ -11,19 +11,3 @@ playerspawn:playerspawn:true
 playerspawn:position:-20 -25 0
 playerspawn:teleport:true
 
-[arcade:scene:../afterworld/scenes/prefabs/objects/arcade.rawscene
-[arcade:position:-20 -27.7 0
-
-
-bottle:mesh:../gameresources/build/uncategorized/bottle.gltf
-bottle:position:-25 -27.7 0
-bottle:physics:enabled
-bottle:health:1
-bottle:health-delay:5000
-
-[explosive3:position:-26 -27.7 0
-[explosive3:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
-
-
-
-!light:position:-22 -27.0 -0.2

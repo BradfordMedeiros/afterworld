@@ -5,7 +5,7 @@
 #include <vector>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
-#include "../materials.h"
+#include "../resources/materials.h"
 
 struct WeaponParams {
   // gun intrinsic stuff
