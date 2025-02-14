@@ -2,9 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
-
-
 objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* prefab, glm::vec3 pos, glm::quat rotation){
   GameobjAttributes attr = {
     .attr = {
@@ -63,7 +60,7 @@ std::set<std::string> spawnTags(std::optional<std::string>&& value){
   return tags;
 }
 
-void spawnAddId(objid id){
+void spawnAddId(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, objid id){
   auto attr = getAttrHandle(id);
   modlog("spawn spawner add id", std::to_string(id));
   std::optional<float> spawnLimitFloat = getFloatAttr(attr, "spawnlimit");
@@ -80,7 +77,8 @@ void spawnAddId(objid id){
     .managedIds = {},
   };
 }
-void spawnRemoveId(objid id){
+
+void spawnRemoveId(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, objid id){
   modlog("spawn remove id", std::to_string(id));
   managedSpawnpoints.erase(id);
   for (auto &[_, spawnpoint] : managedSpawnpoints){
@@ -98,7 +96,7 @@ void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
   spawnpoint.managedIds.insert(spawnedEntityId);
 }
 
-void onSpawnTick(){
+void onSpawnTick(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints){
   float currentTime = gameapi -> timeSeconds(false);
   for (auto &[id, spawnpoint] : managedSpawnpoints){
     if (spawnpoint.respawnRate.has_value()){
@@ -125,7 +123,7 @@ void onSpawnTick(){
   //drawDebugRespawnInfo(getRespawnInfos(gameapi -> timeSeconds(false)).at(0));
 }
 
-void spawnFromAllSpawnpoints(const char* tag){
+void spawnFromAllSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag){
   if (managedSpawnpoints.size() == 0){
     return;
   }
@@ -136,7 +134,8 @@ void spawnFromAllSpawnpoints(const char* tag){
     }
   }
 }
-void spawnFromRandomSpawnpoint(const char* team, const char* tag){
+
+void spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints,  const char* tag){
   if (managedSpawnpoints.size() == 0){
     return;
   }
@@ -188,7 +187,8 @@ RespawnInfo respawnInfo(Spawnpoint& spawnpoint, objid id, float currentTime){
    };
 }
 
-std::vector<RespawnInfo> getRespawnInfos(float currentTime){
+
+std::vector<RespawnInfo> getRespawnInfos(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, float currentTime){
   std::vector<RespawnInfo> respawnInfos;
   for (auto &[id, spawnpoint] : managedSpawnpoints){
     respawnInfos.push_back(respawnInfo(spawnpoint, id, currentTime));
@@ -196,7 +196,7 @@ std::vector<RespawnInfo> getRespawnInfos(float currentTime){
   return respawnInfos;
 }
 
-void showSpawnpoints(bool showSpawnpoints){
+void showSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, bool showSpawnpoints){
   for (auto &[id, _] : managedSpawnpoints){
     setGameObjectMeshEnabled(id, showSpawnpoints ? true : false);
   }
@@ -208,3 +208,5 @@ void drawDebugRespawnInfo(RespawnInfo& respawnInfo){
   gameapi -> drawRect(0.f, 0.f, 0.2f, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
   gameapi -> drawRect(0.f, 0.f, 0.2f * percentage, 0.2f, false, glm::vec4(0.2f, 0.2f, 0.8f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
+
+

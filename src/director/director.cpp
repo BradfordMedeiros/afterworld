@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 Director createDirector(){
 	return Director{

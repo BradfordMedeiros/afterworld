@@ -1,9 +1,9 @@
 #include "./collision.h"
 
 extern CustomApiBindings* gameapi;
+extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
-void spawnFromAllSpawnpoints(const char* tag);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -210,14 +210,14 @@ void handleSpawnCollision(int32_t obj1, int32_t obj2, std::optional<objid> activ
     auto objAttr = getAttrHandle(obj1);
     auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger");
     if (spawnPointTag.has_value()){
-      spawnFromAllSpawnpoints(spawnPointTag.value().c_str());
+      spawnFromAllSpawnpoints(managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj1);
     }
   }else if (obj1 == playerId){
     auto objAttr = getAttrHandle(obj2);
     auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger"); 
     if (spawnPointTag.has_value()){
-      spawnFromAllSpawnpoints(spawnPointTag.value().c_str());
+      spawnFromAllSpawnpoints(managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj2);
     }
   }

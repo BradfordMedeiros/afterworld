@@ -12,13 +12,13 @@ struct Spawnpoint {
   std::set<objid> managedIds;
 };
 
-void spawnFromAllSpawnpoints(const char* tag);
-void spawnFromRandomSpawnpoint(const char* team, const char* tag = NULL);
+void spawnFromAllSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag);
+void spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag);
 void removeAllSpawnedEntities();
 
-void spawnAddId(objid id);
-void spawnRemoveId(objid id);
-void onSpawnTick();
+void spawnAddId(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, objid id);
+void spawnRemoveId(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, objid id);
+void onSpawnTick(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints);
 
 struct RespawnInfo {
 	objid id;
@@ -27,7 +27,7 @@ struct RespawnInfo {
   float elapsedTime;
 };
 
-std::vector<RespawnInfo> getRespawnInfos(float currentTime);
-void showSpawnpoints(bool showSpawnpoints);
+std::vector<RespawnInfo> getRespawnInfos(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, float currentTime);
+void showSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, bool showSpawnpoints);
 
 #endif

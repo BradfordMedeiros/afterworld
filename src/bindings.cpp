@@ -7,6 +7,7 @@ Weapons weapons{};
 Movement movement = createMovement();
 Director director = createDirector();
 extern ControlledPlayer controlledPlayer;
+extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 Water water;
 SoundData soundData;
@@ -415,10 +416,10 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
-        spawnFromAllSpawnpoints("onload");
+        spawnFromAllSpawnpoints(managedSpawnpoints, "onload");
 
         // hide debug stuff
-        showSpawnpoints(false);
+        showSpawnpoints(managedSpawnpoints, false);
         showTriggerVolumes(false);
       }
       if (router.value() -> player.has_value()){
@@ -768,7 +769,7 @@ UiContext getUiContext(GameState& gameState){
         disableTpsMesh = enable;
       },
       .spawnByTag = [](std::string tag) -> void {
-        spawnFromAllSpawnpoints(tag.c_str());       
+        spawnFromAllSpawnpoints(managedSpawnpoints, tag.c_str());       
       },
     },
   };
@@ -1305,7 +1306,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(attrValue, "spawn value invalid");
       auto strValue = std::get_if<std::string>(attrValue);
       modassert(strValue, "spawn not string value");
-      spawnFromAllSpawnpoints(strValue -> c_str());
+      spawnFromAllSpawnpoints(managedSpawnpoints, strValue -> c_str());
     }
 
     if (key == "terminal" && !getGlobalState().showTerminal){

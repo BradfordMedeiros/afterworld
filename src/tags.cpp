@@ -5,6 +5,7 @@ extern CustomApiBindings* gameapi;
 extern Tags tags;
 extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
+extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 struct TagUpdater {
 	std::string attribute;
@@ -326,13 +327,13 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "spawn",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-			spawnAddId(id);
+			spawnAddId(managedSpawnpoints, id);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		spawnRemoveId(id);
+  		spawnRemoveId(managedSpawnpoints, id);
   	},
   	.onFrame = [](Tags& tags) -> void {  
-			onSpawnTick();
+			onSpawnTick(managedSpawnpoints);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
@@ -340,7 +341,7 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "spawn-managed",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		spawnRemoveId(id);
+  		spawnRemoveId(managedSpawnpoints, id);
   	},
   	.onFrame = [](Tags& tags) -> void {},
   	.onMessage = std::nullopt,
