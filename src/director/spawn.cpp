@@ -123,21 +123,25 @@ void onSpawnTick(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints){
   //drawDebugRespawnInfo(getRespawnInfos(gameapi -> timeSeconds(false)).at(0));
 }
 
-void spawnFromAllSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag){
+int spawnFromAllSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag){
   if (managedSpawnpoints.size() == 0){
-    return;
+    return 0;
   }
+
+  int numSpawned = 0;
   float currentTime = gameapi -> timeSeconds(false);
   for (auto &[id, spawnpoint] : managedSpawnpoints){
     if (tag == NULL || spawnpoint.tags.count(tag) > 0){
       spawnEntity(id, spawnpoint, currentTime);
+      numSpawned++;
     }
   }
+  return numSpawned;
 }
 
-void spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints,  const char* tag){
+bool spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints,  const char* tag){
   if (managedSpawnpoints.size() == 0){
-    return;
+    return false;
   }
   float currentTime = gameapi -> timeSeconds(false);
 
@@ -155,11 +159,12 @@ void spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpa
       if (spawnpointIndex == currentIndex){
         modassert(gameapi -> gameobjExists(id), std::string("spawn element does not exist: ") + std::to_string(id));
         spawnEntity(id, spawnpoint, currentTime);
-        break;
+        return true;
       }
       currentIndex++;
     }
   }
+  return false;
 }
 
 void removeAllSpawnedEntities(){
@@ -169,6 +174,13 @@ void removeAllSpawnedEntities(){
   }  
 }
 
+int numberOfSpawnManaged(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints){
+  int count = 0;
+  for (auto &[_, spawnpoint] : managedSpawnpoints){
+    count = count + spawnpoint.managedIds.size();
+  }
+  return count;
+}
 
 RespawnInfo respawnInfo(Spawnpoint& spawnpoint, objid id, float currentTime){
    if (!spawnpoint.lastSlotFreeTime.has_value()){

@@ -342,6 +342,7 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		spawnRemoveId(managedSpawnpoints, id);
+  		modassert(false, "spawn-manage removed");
   	},
   	.onFrame = [](Tags& tags) -> void {},
   	.onMessage = std::nullopt,
