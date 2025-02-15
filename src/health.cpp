@@ -48,13 +48,14 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 
 void onNoHealth(objid targetId){
   auto removeType = getSingleAttr(targetId, "health-remove");
-  if (false && removeType.has_value() && removeType.value() == "self"){
+  if (removeType.has_value() && removeType.value() == "self"){
 	  modlog("health", "removing self object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
   	// check if the parent of the group of id has no children, if so delete it 
   	auto allChildren = gameapi -> idsInGroupById(targetId);
   	auto groupId = gameapi -> groupId(targetId);
   	gameapi -> removeObjectById(targetId);
-  	if (false && allChildren.size() == 2){  // wtf ? 
+  	if (allChildren.size() == 2){  // wtf ? 
+  		modassert(false, "idk wtf this code is triggered");
   		if (allChildren.at(0) == targetId){
   			auto healthCleanup = getSingleAttr(allChildren.at(1), "health-cleanup");
   			if (healthCleanup.has_value() && healthCleanup.value() == "no-children"){
@@ -69,9 +70,22 @@ void onNoHealth(objid targetId){
   	}
   }else{
 	  modlog("health", "removing group object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
-  	gameapi -> schedule(-1, true, 1, NULL, [targetId](void*) -> void {
-  		if (gameapi -> gameobjExists(targetId)){
-	  		gameapi -> removeByGroupId(gameapi -> groupId(targetId));
+ 		auto prefabId = gameapi -> prefabId(targetId);
+ 		auto idExists = gameapi -> gameobjExists(targetId);
+		auto objName = gameapi -> getGameObjNameForId(targetId).value();
+ 		// todo why schedule?
+  	gameapi -> schedule(-1, true, 1, NULL, [targetId, prefabId, idExists, objName](void*) -> void {
+  		if (prefabId.has_value()){
+  			//modassert(false, "should remove the whole prefab here");
+  			gameapi -> removeByGroupId(prefabId.value());
+
+  		}else{
+  			modlog("health id exists", print(idExists));
+  			modlog("health id name", objName);
+  			//modassert(false, "object was not a prefab");
+  			if (gameapi -> gameobjExists(targetId)){
+	  			gameapi -> removeByGroupId(gameapi -> groupId(targetId));
+  			}  			
   		}
   	});
   }
