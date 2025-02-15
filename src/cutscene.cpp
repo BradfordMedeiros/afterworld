@@ -2,93 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
-
-struct BackgroundFill {
-	glm::vec4 color;
-};
-struct DebugTextDisplay {
-	std::string text;
-	float rate;
-	float size;
-	glm::vec2 pos;
-};
-struct ImageDisplay {
-	glm::vec2 pos;
-	glm::vec2 size;
-	int zIndex = -1;
-	glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
-	const char* image = NULL;
-};
-
-struct Letterbox {
-	std::string text;
-};
-
-struct CameraView {
-	std::optional<std::string> name;
-	glm::vec3 position;
-	glm::quat rotation;
-	std::optional<float> duration = std::nullopt;
-};
-struct TerminalDisplay {};
-
-struct ChangePlayable {
-	bool isPlayable;
-};
-struct NextLevel {};
-
-struct WorldState {
-	const char* field;
-	const char* name;
-	AttributeValue value;
-};
-
-
-typedef std::variant<
-	ImageDisplay,
-	DebugTextDisplay, 
-	BackgroundFill, 
-	Letterbox, 
-	CameraView, 
-	TerminalDisplay, 
-	ChangePlayable, 
-	NextLevel,
-	WorldState
-> CutsceneEventType;
-
-
-
-struct TriggerType {
-	std::optional<float> time;
-	bool waitForLastEvent;
-	std::optional<std::string> waitForMessage;
-};
-
-struct CutsceneEvent {
-	std::string name;
-	float duration;
-	TriggerType time;
-	CutsceneEventType type;
-};
-
-struct Cutscene {
-	std::vector<CutsceneEvent> events;
-};
-
-struct CutsceneTiming {
-	float startTime;
-	std::optional<float> endTime;
-};
-struct CutsceneInstance {
-	float startTime;
-	bool shouldRemove;
-	objid ownerObjId;
-	std::set<std::string> messages;
-	std::unordered_map<int, CutsceneTiming> playedEvents;
-	Cutscene* cutscene;
-};
-
-std::unordered_map<objid, std::function<void()>> perFrameEvents;
+std::unordered_map<objid, CutsceneInstance> playingCutscenes;     // static-state
+std::unordered_map<objid, std::function<void()>> perFrameEvents;  // static-state
 
 
 void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float duration){
@@ -273,6 +188,12 @@ std::vector<CutsceneEvent> createTextCutscene(const char* background, std::vecto
 			},
 		},
 	};
+	/* another clip
+		Something happened, I dont know what happened
+		but I know somethign happened
+		it changed
+		but i dont know what the difference is
+	*/
   return events;
 }
 
@@ -378,9 +299,6 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 	},
 };
 
-
-
-std::unordered_map<objid, CutsceneInstance> playingCutscenes;
 
 void playCutscene(objid ownerObjId, std::string cutsceneName, float startTime){
 	modassert(cutscenes.find(cutsceneName) != cutscenes.end(), std::string("play custscene, cutscene does not exist: ") + cutsceneName)

@@ -2,7 +2,7 @@
 
 extern ArcadeApi arcadeApi;
 
-std::unordered_map<objid, ArcadeInstance> arcadeInstances;
+extern std::unordered_map<objid, ArcadeInstance> arcadeInstances; // static-state extern
 
 void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 	modassert(arcadeInstances.find(id) == arcadeInstances.end(), "arcade instance already exists");

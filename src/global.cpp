@@ -6,7 +6,7 @@ void rmHistoryParam(std::string);
 void setActivePlayerEditorMode(bool);
 
 
-GlobalState global {
+GlobalState global {  // static-state
   .showEditor = false,
   .isFreeCam = false,
   .showScreenspaceGrid = false,

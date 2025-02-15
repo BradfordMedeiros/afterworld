@@ -1,14 +1,10 @@
 #include "./inventory.h"
 
-struct Inventory {
-  bool infinite;
-  std::unordered_map<std::string, float> items;
-};
-
-std::unordered_map<objid, Inventory> scopenameToInventory {};
+extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
+extern std::set<std::string> gems;   // static-state extern
 
 const int INFINITE_ITEM_COUNT = 9999;
-void addInventory(objid id){
+void addInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, objid id){
   modlog("add inventory added id:", std::to_string(id));
   modassert(scopenameToInventory.find(id) == scopenameToInventory.end(), "inventory already exists");
   scopenameToInventory[id] = {
@@ -26,20 +22,20 @@ void addInventory(objid id){
     }
   };
 }
-void removeInventory(objid id){
+void removeInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, objid id){
   if (scopenameToInventory.find(id) != scopenameToInventory.end()){
     modlog("remove inventory added id:", std::to_string(id));
     scopenameToInventory.erase(id);
   }
 }
 
-void setInventoryInfinite(objid inventory, bool infinite){
+void setInventoryInfinite(std::unordered_map<objid, Inventory>& scopenameToInventory, objid inventory, bool infinite){
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), std::string("setInventoryInfinite inventory does not exist: ") + std::to_string(inventory));
   scopenameToInventory.at(inventory).infinite = infinite;
 }
 
 
-int currentItemCount(objid inventory, std::string name){
+int currentItemCount(std::unordered_map<objid, Inventory>& scopenameToInventory, objid inventory, std::string name){
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "currentItemCount inventory does not exist");
   Inventory& inven = scopenameToInventory.at(inventory);
   if (inven.infinite){
@@ -48,7 +44,7 @@ int currentItemCount(objid inventory, std::string name){
   return inven.items.at(name);
 }
 
-void updateItemCount(objid inventory, std::string name, int count){
+void updateItemCount(std::unordered_map<objid, Inventory>& scopenameToInventory, objid inventory, std::string name, int count){
   modassert(scopenameToInventory.find(inventory) != scopenameToInventory.end(), "updateItemCount inventory does not exist");
   scopenameToInventory.at(inventory).items[name] = count;
 }
@@ -81,14 +77,12 @@ int ammoForGun(objid inventory, std::string& gun){
   return static_cast<int>(inven.items.at(ammoName));
 }
 
-std::set<std::string> gems {};
 std::set<std::string>& listGems(){
   return gems;
 }
 
-
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo){
-  updateItemCount(inventory, ammoNameForGun(gun), currentAmmo);
+  updateItemCount(scopenameToInventory, inventory, ammoNameForGun(gun), currentAmmo);
 }
 
 bool hasGem(std::string& name){
@@ -98,7 +92,7 @@ void pickupGem(std::string name){
   gems.insert(name);
 }
 
-void debugPrintInventory(){
+void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInventory){
     const float fontSize = 0.02f;
     drawRightText("inventory\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt, std::nullopt);
 

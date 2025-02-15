@@ -5,6 +5,7 @@
 
 struct Director {
 	float lastEnemySpawnTime;
+	std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 };
 
 Director createDirector();

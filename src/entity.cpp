@@ -6,9 +6,10 @@ extern Movement movement;
 
 MovementEntityData& getMovementData();
 
-std::unordered_map<objid, ControllableEntity> controllableEntities;
+extern std::unordered_map<objid, ControllableEntity> controllableEntities;  // static-state extern
+extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 
-ControlledPlayer controlledPlayer {
+ControlledPlayer controlledPlayer {      // static-state
 	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
 	.playerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
@@ -69,7 +70,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
   }
 
   if (shouldAddWeapon){
-	  addInventory(idAdded);
+	  addInventory(scopenameToInventory, idAdded);
 	  addWeaponId(weapons, idAdded);
   }
 
@@ -84,7 +85,7 @@ void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementE
   maybeRemoveMovementEntity(movement, movementEntities, idRemoved);
   maybeRemoveAiAgent(aiData, idRemoved);
   removeWeaponId(weapons, idRemoved);
-  removeInventory(idRemoved);
+  removeInventory(scopenameToInventory, idRemoved);
   controllableEntities.erase(idRemoved);
 }
 

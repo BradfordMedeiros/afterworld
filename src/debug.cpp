@@ -3,7 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern Tags tags;
 extern GameTypes gametypeSystem;
-extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
+extern Director director;
 
 void spawnProcMesh(objid sceneId){
 	std::vector<glm::vec3> faces = {
@@ -358,11 +358,11 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'M' && action == 0){
-    spawnFromRandomSpawnpoint(managedSpawnpoints, "red");
+    spawnFromRandomSpawnpoint(director.managedSpawnpoints, "red");
   }else if (key == ',' && action == 0){
-    spawnFromAllSpawnpoints(managedSpawnpoints, "red");
+    spawnFromAllSpawnpoints(director.managedSpawnpoints, "red");
   }else if (key == '.' && action == 0){
-    spawnFromAllSpawnpoints(managedSpawnpoints, "blue");
+    spawnFromAllSpawnpoints(director.managedSpawnpoints, "blue");
   }else if (key == '/' && action == 0){
     removeAllSpawnedEntities();
   }else if (key == 'P' && action == 0){

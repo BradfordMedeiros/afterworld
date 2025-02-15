@@ -5,7 +5,7 @@ extern CustomApiBindings* gameapi;
 extern Tags tags;
 extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
-extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
+extern Director director;
 
 struct TagUpdater {
 	std::string attribute;
@@ -189,7 +189,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "switch",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
@@ -216,7 +215,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "scrollspeed",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
@@ -327,21 +325,23 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "spawn",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-			spawnAddId(managedSpawnpoints, id);
+			spawnAddId(director.managedSpawnpoints, id);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		spawnRemoveId(managedSpawnpoints, id);
+  		spawnRemoveId(director.managedSpawnpoints, id);
   	},
   	.onFrame = [](Tags& tags) -> void {  
-			onSpawnTick(managedSpawnpoints);
+			onSpawnTick(director.managedSpawnpoints);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "spawn-managed",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+			modlog("spawn-manage added: ", gameapi -> getGameObjNameForId(id).value());
+		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		spawnRemoveId(managedSpawnpoints, id);
+  		spawnRemoveId(director.managedSpawnpoints, id);
   		modassert(false, "spawn-manage removed");
   	},
   	.onFrame = [](Tags& tags) -> void {},
@@ -509,7 +509,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "cutscene",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {

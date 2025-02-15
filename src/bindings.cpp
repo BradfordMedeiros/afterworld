@@ -6,8 +6,14 @@ CustomApiBindings* gameapi = NULL;
 Weapons weapons{};
 Movement movement = createMovement();
 Director director = createDirector();
+std::unordered_map<objid, ArcadeInstance> arcadeInstances; 
+std::unordered_map<objid, HitPoints> hitpoints = {}; 
+std::unordered_map<objid, ControllableEntity> controllableEntities;
+std::unordered_map<objid, Inventory> scopenameToInventory;
+GameProgress progress = createProgress();
+std::set<std::string> gems;   // static-state
+
 extern ControlledPlayer controlledPlayer;
-extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
 
 Water water;
 SoundData soundData;
@@ -344,7 +350,7 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   return gameapi -> makeObjectAttr(
     sceneId, 
-    std::string("[spawned-instance-") + uniqueNameSuffix(), 
+    std::string("[prefab-instance-") + uniqueNameSuffix(), 
     attr, 
     submodelAttributes
   ).value();
@@ -416,10 +422,10 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
-        spawnFromAllSpawnpoints(managedSpawnpoints, "onload");
+        spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
 
         // hide debug stuff
-        showSpawnpoints(managedSpawnpoints, false);
+        showSpawnpoints(director.managedSpawnpoints, false);
         showTriggerVolumes(false);
       }
       if (router.value() -> player.has_value()){
@@ -633,7 +639,7 @@ UiContext getUiContext(GameState& gameState){
         return debugPrintGlobal();
       }
       if (gameState.printType == DEBUG_INVENTORY){
-        debugPrintInventory();
+        debugPrintInventory(scopenameToInventory);
         return std::nullopt;
       }
       if (gameState.printType == DEBUG_GAMETYPE){
@@ -769,7 +775,7 @@ UiContext getUiContext(GameState& gameState){
         disableTpsMesh = enable;
       },
       .spawnByTag = [](std::string tag) -> void {
-        spawnFromAllSpawnpoints(managedSpawnpoints, tag.c_str());       
+        spawnFromAllSpawnpoints(director.managedSpawnpoints, tag.c_str());       
       },
     },
   };
@@ -1306,7 +1312,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(attrValue, "spawn value invalid");
       auto strValue = std::get_if<std::string>(attrValue);
       modassert(strValue, "spawn not string value");
-      spawnFromAllSpawnpoints(managedSpawnpoints, strValue -> c_str());
+      spawnFromAllSpawnpoints(director.managedSpawnpoints, strValue -> c_str());
     }
 
     if (key == "terminal" && !getGlobalState().showTerminal){
@@ -1473,6 +1479,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
+    modlog("objchange onObjectAdded", gameapi -> getGameObjNameForId(idAdded).value());
+
     onAddControllableEntity(aiData, gameStatePtr -> movementEntities, idAdded);
     handleOnAddedTags(tags, idAdded);
 
@@ -1481,7 +1489,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);
 
-    modlog("onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
+    modlog("objchange onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
 
     if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
       controlledPlayer.playerId = std::nullopt;

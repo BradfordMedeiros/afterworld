@@ -11,7 +11,7 @@ void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
 std::optional<objid> getActivePlayerId();
 
-std::vector<WeaponCore> weaponCores = {};
+std::vector<WeaponCore> weaponCores = {};  // static-state
 
 WeaponCore* findWeaponCore(std::string& name){
   for (auto &weaponCore : weaponCores){

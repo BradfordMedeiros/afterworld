@@ -117,6 +117,9 @@ std::optional<int> closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 
   std::optional<int> closestIndex;
   std::optional<float> minDistance;
   for (int i = 0; i < hitpoints.size(); i++){
+    if (hitpoints.at(i).mask == 1){
+      continue;
+    }
     auto distance = glm::distance(playerPos, hitpoints.at(i).point); 
     if ((!minDistance.has_value() || distance < minDistance.value()) && (!excludeHitpoint.has_value() || excludeHitpoint.value() != hitpoints.at(i).id)){
       closestIndex = i;

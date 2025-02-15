@@ -14,6 +14,7 @@ struct GameProgress {
 	LevelPlaylist levels;
 };
 
+GameProgress createProgress();
 GameProgress& getGameProgress();
 
 void setProgressByShortname(std::string name);

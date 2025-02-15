@@ -2,9 +2,9 @@
 
 extern CustomApiBindings* gameapi;
 
-std::unordered_map<objid, LinePoints> rails; 
-std::unordered_map<objid, EntityOnRail> entityToRail;
-std::unordered_map<objid, RaceData> entityToRaceData;
+std::unordered_map<objid, LinePoints> rails;  // static-state
+std::unordered_map<objid, EntityOnRail> entityToRail; // static-state
+std::unordered_map<objid, RaceData> entityToRaceData; // static-state
 
 void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
   for (int i = 0; i < (line.points.size() - 1); i++){

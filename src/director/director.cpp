@@ -2,11 +2,12 @@
 
 extern CustomApiBindings* gameapi;
 
-std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
+
 
 Director createDirector(){
 	return Director{
 		.lastEnemySpawnTime = 0.f,
+		.managedSpawnpoints = {},
 	};
 }
 
@@ -17,10 +18,10 @@ void handleDirector(Director& director){
 	auto sinceLastSpawn = currTime - director.lastEnemySpawnTime;
 
 	bool enoughTime = sinceLastSpawn > 5.f;
-	bool tooManyEnemies = numberOfSpawnManaged(managedSpawnpoints) >= 3;
+	bool tooManyEnemies = numberOfSpawnManaged(director.managedSpawnpoints) >= 1;
 	if (enoughTime && !tooManyEnemies){
 		director.lastEnemySpawnTime = currTime;
-		spawnFromRandomSpawnpoint(managedSpawnpoints, NULL);
+		spawnFromRandomSpawnpoint(director.managedSpawnpoints, NULL);
 	}
-	std::cout << "number of enenmies: " << numberOfSpawnManaged(managedSpawnpoints) << std::endl;
+	std::cout << "number of enenmies: " << numberOfSpawnManaged(director.managedSpawnpoints) << std::endl;
 }

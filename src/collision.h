@@ -4,7 +4,7 @@
 #include "./util.h"
 #include "./resources/resources.h"
 #include "./inventory.h"
-#include "./director/spawn.h"
+#include "./director/director.h"
 
 void handleInteract(objid gameObjId);
 void handleSwitch(std::string switchValue);

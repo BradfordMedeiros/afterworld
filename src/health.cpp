@@ -1,9 +1,11 @@
 #include "./health.h"
 
 extern CustomApiBindings* gameapi;
+extern Waypoints waypoints;
+extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
+
 void onAiHealthChange(objid targetId, float remainingHealth);
 
-std::unordered_map<objid, HitPoints> hitpoints = {};
 
 void addEntityIdHitpoints(objid id){
 	if (hitpoints.find(id) != hitpoints.end()){
@@ -46,13 +48,13 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 
 void onNoHealth(objid targetId){
   auto removeType = getSingleAttr(targetId, "health-remove");
-  if (removeType.has_value() && removeType.value() == "self"){
+  if (false && removeType.has_value() && removeType.value() == "self"){
 	  modlog("health", "removing self object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
   	// check if the parent of the group of id has no children, if so delete it 
   	auto allChildren = gameapi -> idsInGroupById(targetId);
   	auto groupId = gameapi -> groupId(targetId);
   	gameapi -> removeObjectById(targetId);
-  	if (allChildren.size() == 2){
+  	if (false && allChildren.size() == 2){  // wtf ? 
   		if (allChildren.at(0) == targetId){
   			auto healthCleanup = getSingleAttr(allChildren.at(1), "health-cleanup");
   			if (healthCleanup.has_value() && healthCleanup.value() == "no-children"){
@@ -75,7 +77,6 @@ void onNoHealth(objid targetId){
   }
 }
 
-extern Waypoints waypoints;
 void doDamageMessage(objid targetId, float damageAmount){
   bool enemyDead = false;
   float remainingHealth = 0.f;

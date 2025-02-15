@@ -1,7 +1,9 @@
 #include "./collision.h"
 
 extern CustomApiBindings* gameapi;
-extern std::unordered_map<objid, Spawnpoint> managedSpawnpoints;
+extern Director director;
+extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
+
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
 
@@ -167,9 +169,9 @@ void tryPickupItem(objid gameObjId, objid playerId){
     auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
     auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
 
-    auto oldItemCount = currentItemCount(inventory, pickup.value());
+    auto oldItemCount = currentItemCount(scopenameToInventory, inventory, pickup.value());
     auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
-    updateItemCount(inventory, pickup.value(), newItemCount);
+    updateItemCount(scopenameToInventory, inventory, pickup.value(), newItemCount);
 
     if (!pickupRemove.has_value()){
       gameapi -> removeByGroupId(gameObjId);
@@ -210,14 +212,14 @@ void handleSpawnCollision(int32_t obj1, int32_t obj2, std::optional<objid> activ
     auto objAttr = getAttrHandle(obj1);
     auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger");
     if (spawnPointTag.has_value()){
-      spawnFromAllSpawnpoints(managedSpawnpoints, spawnPointTag.value().c_str());
+      spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj1);
     }
   }else if (obj1 == playerId){
     auto objAttr = getAttrHandle(obj2);
     auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger"); 
     if (spawnPointTag.has_value()){
-      spawnFromAllSpawnpoints(managedSpawnpoints, spawnPointTag.value().c_str());
+      spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj2);
     }
   }

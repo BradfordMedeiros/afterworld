@@ -1,17 +1,22 @@
 #include "./progress.h"
 
-GameProgress progress {
-	.levels = LevelPlaylist {
-		.currentProgress = 0,
-		.shortNames = {
-			"intro",
-			"e1m1",
-			"story-1",
-			"e1m2",
-			"story-end",
+extern GameProgress progress;  // static-state extern 
+
+GameProgress createProgress(){
+	GameProgress progress {
+		.levels = LevelPlaylist {
+			.currentProgress = 0,
+			.shortNames = {
+				"intro",
+				"e1m1",
+				"story-1",
+				"e1m2",
+				"story-end",
+			},
 		},
-	},
-};
+	};
+	return progress;
+}
 
 void setProgressByShortname(std::string name){
 	for (int i = 0; i < progress.levels.shortNames.size(); i++){
