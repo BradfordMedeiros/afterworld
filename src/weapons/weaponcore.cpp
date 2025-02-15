@@ -390,8 +390,11 @@ std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjP
 std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
   auto hitpoints = doRaycast(orientationOffset, cameraPos, cameraRotation);
   if (hitpoints.size() > 0){
-    auto closestIndex = closestHitpoint(hitpoints, cameraPos, excludeHitpoint).value();
-    return { hitpoints.at(closestIndex) };
+    auto closestIndex = closestHitpoint(hitpoints, cameraPos, excludeHitpoint);
+    if (!closestIndex.has_value()){
+      return hitpoints;
+    }
+    return { hitpoints.at(closestIndex.value()) };
   }
   return hitpoints;
 }

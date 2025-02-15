@@ -113,7 +113,6 @@ int randomNumber(int min, int max){
 }
 
 std::optional<int> closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos, std::optional<objid> excludeHitpoint){
-  modassert(hitpoints.size() > 0, "hitpoints object is size 0");
   std::optional<int> closestIndex;
   std::optional<float> minDistance;
   for (int i = 0; i < hitpoints.size(); i++){

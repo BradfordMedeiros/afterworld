@@ -145,12 +145,13 @@ void updateFacingWall(MovementState& movementState, objid id){
   auto mainobjPos = gameapi -> getGameObjectPos(id, true);
   auto rot = gameapi -> getGameObjectRotation(id, true);
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
-  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, 2.f);
 
-  if (hitpoints.size() > 0){
+  auto hitpoints = gameapi -> raycast(mainobjPos, rot, 2.f);
+  auto hitpointIndex =  closestHitpoint(hitpoints, mainobjPos, std::nullopt);
+
+  if (hitpointIndex.has_value()){
     movementState.facingWall = true;
-    auto hitpoint = hitpoints.at(closestHitpoint(hitpoints, mainobjPos, std::nullopt).value());
-    auto attr = getAttrHandle(hitpoint.id);
+    auto attr = getAttrHandle(hitpoints.at(hitpointIndex.value()).id);
     movementState.facingLadder = getStrAttr(attr, "ladder").has_value();
   }else{
     movementState.facingWall = false;

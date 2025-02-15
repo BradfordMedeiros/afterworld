@@ -123,7 +123,6 @@ void removeWaypoint(Waypoints& waypoints, objid id){
 }
 
 void updateHealth(Waypoints& waypoints, objid id, std::optional<float> health){
-  return;
   if (waypoints.waypoints.find(id) != waypoints.waypoints.end()){
     waypoints.waypoints.at(id).percentage = health;
   }
