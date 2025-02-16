@@ -341,7 +341,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
 
 }
 
-void changeGunAnimate(GunInstance& weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel){
+void changeGunAnimate(GunInstance& weaponValues, std::string gun){
   if (weaponValues.gunCore.weaponCore != NULL && weaponValues.gunCore.weaponCore -> weaponParams.name == gun){
     modlog("weapons change gun animation - weapon already equipped", gun);
     return;

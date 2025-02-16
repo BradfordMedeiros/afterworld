@@ -903,7 +903,7 @@ AIInterface aiInterface {
     fireGun(weapons, agentId);
   },
   .changeGun = [](objid agentId, const char* gun) -> void {
-    modassert(false, "not yet implemented");
+    maybeChangeGun(getWeaponState(weapons, agentId), gun,  agentId /*inventory */);
   }, 
 };
 

@@ -101,7 +101,7 @@ struct ThirdPersonWeapon {
   std::function<std::optional<objid>(objid)> getWeaponParentId;
 };
 void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, bool showThirdPersonGun, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon);
-void changeGunAnimate(GunInstance& _weaponValues, std::string gun, objid sceneId, objid playerId, bool createGunModel);
+void changeGunAnimate(GunInstance& _weaponValues, std::string gun);
 void removeGun(GunInstance& weaponValues);
 
 void deliverAmmo(objid inventory, std::string gunName, int ammo);

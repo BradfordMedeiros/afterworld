@@ -137,7 +137,7 @@ struct HotkeyToMessage {
 
 void maybeChangeGunUpdateUi(const char* gun){
 	if (getPlayerId().has_value()){
-		maybeChangeGun(getWeaponState(weapons, getPlayerId().value()), gun,  getPlayerId().value(), getPlayerId().value());
+		maybeChangeGun(getWeaponState(weapons, getPlayerId().value()), gun,  getPlayerId().value());
 	}
 }
 

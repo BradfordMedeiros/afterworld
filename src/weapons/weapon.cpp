@@ -58,10 +58,10 @@ std::optional<objid> raycastActivateableItem(objid playerId){
   return std::nullopt;
 }
 
-void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, objid inventory, objid playerId){
+void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, objid inventory){
   if (hasGun(inventory, gun)){
     modlog("weapons change gun confirm", gun);
-    changeGunAnimate(weaponState.weaponValues, gun, gameapi -> listSceneId(playerId), playerId, showWeaponViewModel);
+    changeGunAnimate(weaponState.weaponValues, gun);
   }else{
     modlog("weapons change gun - not in inventory", gun);
   }

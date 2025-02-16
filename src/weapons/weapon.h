@@ -34,7 +34,7 @@ void removeWeaponId(Weapons& weapons, objid id);
 
 WeaponEntityState& getWeaponState(Weapons& weapons, objid id);
 
-void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, objid inventory, objid playerId);
+void maybeChangeGun(WeaponEntityState& weaponState, std::string gun, objid inventory);
 void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, objid inventory);
 
 struct WeaponsUiUpdate {

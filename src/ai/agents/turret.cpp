@@ -6,6 +6,7 @@ extern AIInterface aiInterface;
 
 struct TurretAiState {
 	float lastAttackTime;
+  bool changedGun;
 };
 
 Agent createTurretAgent(objid id){
@@ -15,6 +16,7 @@ Agent createTurretAgent(objid id){
     .type = AGENT_TURRET,
     .agentData = TurretAiState {
     	.lastAttackTime = 0.f,
+      .changedGun = false,
     },
   };
 }
@@ -68,6 +70,12 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
   TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
   modassert(turretState, "attackState invalid");
+
+  if (!turretState -> changedGun){
+    aiInterface.changeGun(agent.id, "scrapgun");
+    turretState -> changedGun = true;
+    return;
+  }
 
   if (goal.goaltype == idleGoal){
     // do nothing
