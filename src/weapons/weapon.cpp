@@ -1,7 +1,6 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
-void doAnimationTrigger(objid id, const char* transition);
 bool entityInShootingMode(objid id);
 
 bool showWeaponViewModel = true;

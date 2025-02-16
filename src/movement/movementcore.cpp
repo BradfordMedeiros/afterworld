@@ -78,7 +78,7 @@ void removeAllMovementCores(){
   ensureSoundsUnloaded(gameapi -> rootSceneId());
 }
 
-void jump(MovementParams& moveParams, MovementState& movementState, objid id, bool force = false){
+bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bool force = false){
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
   modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
   if (movementState.isGrounded || force){
@@ -86,11 +86,12 @@ void jump(MovementParams& moveParams, MovementState& movementState, objid id, bo
     if (getManagedSounds().jumpSoundObjId.has_value()){
       playGameplayClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
     }
+    return true;
   }
   if (movementState.inWater){
     gameapi -> applyImpulse(id, impulse);
   }
-  doAnimationTrigger(id, "jump");
+  return false;
 }
 
 void land(objid id){
@@ -476,6 +477,16 @@ bool calcIfWalking(MovementState& movementState){
 }
 
 
+struct MovementAnimationConfig {
+  bool isSideStepping;
+  bool isMovingRight;
+  bool isWalking;
+  bool isHoldingGun;
+  bool didLand;
+  bool didJump;
+  bool attachedToLadder;
+};
+
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed, bool enableThirdPerson){
   auto currTime = gameapi -> timeSeconds(false);
   float elapsedTime = gameapi -> timeElapsed();
@@ -503,12 +514,18 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
   movementState.isGrounded = isGrounded && !movementState.inWater; 
 
+  MovementAnimationConfig animationConfig {
+    .isSideStepping = false,
+    .isWalking = false,
+    .isHoldingGun = false,
+    .didLand = false,
+    .didJump = false,
+  };
   if (movementState.isGrounded && !movementState.lastFrameIsGrounded){
-    doAnimationTrigger(playerId, "land");
     land(playerId);
+    animationConfig.didLand = true;
   }
 
-  
 
   float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
   //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
@@ -519,26 +536,21 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
   auto direction = glm::normalize(glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z));
   auto isWalking = calcIfWalking(movementState);
-
   auto isHoldingGun = entityInShootingMode(playerId);
+  animationConfig.isWalking = isWalking;
+  animationConfig.isHoldingGun = isHoldingGun;
+  animationConfig.attachedToLadder = movementState.attachedToLadder;
 
   if (isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
     moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
     bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
+    animationConfig.isSideStepping = isSideStepping;
     bool isMovingRight = movementState.moveVec.x >= 0.f;
-    if (!isHoldingGun){
-      doAnimationTrigger(playerId, isSideStepping ? (isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
-    }else{
-      doAnimationTrigger(playerId, isSideStepping ? (isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
-    }
+    animationConfig.isMovingRight = isMovingRight;
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     moveUp(playerId, movementState.moveVec);
-    doAnimationTrigger(playerId, isHoldingGun ? "not-walking-rifle" : "not-walking");
-  }else{
-    doAnimationTrigger(playerId, isHoldingGun ? "not-walking-rifle" : "not-walking");
   }
-
 
   if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
@@ -581,9 +593,11 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
       unattachToCurve(playerId);
       setGameObjectPhysicsEnable(playerId, true);
       setGameObjectVelocity(playerId, glm::vec3(0.f, 0.f, 0.f));
-      jump(moveParams, movementState, playerId, true);
+      bool didJump = jump(moveParams, movementState, playerId, true);
+      animationConfig.didJump = didJump;
     }else{
-      jump(moveParams, movementState, playerId);
+      bool didJump = jump(moveParams, movementState, playerId);
+      animationConfig.didJump = didJump;
     }
   }
   if (movementState.doGrind){
@@ -617,6 +631,32 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
       maybeToggleCrouch(moveParams, movementState, false);
     }
   }
+
+
+  /// i would like the jumping animations, but haven't solved this with the other animations, since the others will preempt this
+  // i could make it just not preempt this, but then it adds delay?   
+  //if (animationConfig.didLand){
+  //  doAnimationTrigger(playerId, "land");
+  //}
+  //if (animationConfig.attachedToLadder){
+  //  doAnimationTrigger(playerId, animationConfig.isHoldingGun ? "not-walking-rifle" : "not-walking");
+  //}
+  //if (animationConfig.didJump){
+  //  doAnimationTrigger(playerId, "jump");
+  //}
+
+  if (animationConfig.isWalking){
+    if (!animationConfig.isHoldingGun){
+      doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+    }else{
+      doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
+    }
+  }else{
+    doAnimationTrigger(playerId, animationConfig.isHoldingGun ? "not-walking-rifle" : "not-walking");
+  }
+
+
+
   return cameraUpdate;
 }
 

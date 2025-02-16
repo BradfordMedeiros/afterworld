@@ -21,6 +21,7 @@ int initialStateForController(StateController& controller, int controllerId){
 }
 
 void addEntityController(StateController& controller, objid entityId, int controllerId){
+	modlog("statecontroller addEntityController", std::to_string(entityId));
 	modassert(controller.entityToState.find(entityId) == controller.entityToState.end(), std::string("state controller - entity already has controller: ") + std::to_string(entityId));
 	auto initialEntityState = initialStateForController(controller, controllerId);
 	controller.entityToState[entityId] = ControllerEntityState {
@@ -31,6 +32,7 @@ void addEntityController(StateController& controller, objid entityId, int contro
 }
 
 void removeEntityController(StateController& controller, objid entityId){
+	modlog("statecontroller removeEntityController", std::to_string(entityId));
 	controller.entityToState.erase(entityId);
 }
 
@@ -39,27 +41,28 @@ bool hasControllerState(StateController& controller, objid entityId){
 }
 
 bool triggerControllerState(StateController& controller, objid entityId, int transition){
-	modlog("animation controller triggerControllerState", nameForSymbol(transition));
+	modlog("statecontroller animation controller triggerControllerState", nameForSymbol(transition));
 	ControllerEntityState& controllerEntityState = controller.entityToState.at(entityId);
 	auto controllerStates = controller.controllers.at(controllerEntityState.controller);
 
-	bool transitionedState = false;
 	auto entityState = controllerEntityState.currentState;
 	for (auto &controllerState : controllerStates.transitions){
 		if (controllerState.fromState == entityState && controllerState.transition == transition){
 			entityState = controllerState.toState;
-			transitionedState = true;
-			modlog("animation controller transitionedState", nameForSymbol(transition) + ", new state = " + nameForSymbol(controllerState.toState));
+			modlog("statecontroller animation controller transitionedState", nameForSymbol(transition) + ", old state = " + nameForSymbol(controllerEntityState.currentState) + ", new state = " + nameForSymbol(controllerState.toState));
 			break;
 		}
 	}
+
+	auto oldState = controllerEntityState.currentState;
 	controllerEntityState.currentState = entityState;
-	return transitionedState;
+	return oldState != controllerEntityState.currentState;
 }
 
 ControllerStateAnimation* stateAnimationForController(StateController& controller, objid entityId){
 	ControllerEntityState& controllerEntityState = controller.entityToState.at(entityId);
 	SingleStateController& controllerStates = controller.controllers.at(controllerEntityState.controller);
+	modlog("statecontroller finding for state", nameForSymbol(controllerEntityState.currentState));
 	for (auto &stateToAnimation  : controllerStates.stateToAnimation){
 		if (stateToAnimation.state == controllerEntityState.currentState){
 			return &stateToAnimation;

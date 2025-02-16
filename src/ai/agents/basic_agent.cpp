@@ -3,8 +3,6 @@
 extern CustomApiBindings* gameapi;
 extern AIInterface aiInterface;
 
-void doAnimationTrigger(objid id, const char* transition);
-
 struct AgentAttackState {
   float lastAttackTime;
   float initialHealth;
@@ -191,7 +189,6 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, fl
     auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
     gameapi -> setGameObjectRot(agentId, towardTarget, true);
     gameapi -> setGameObjectPosition(agentId, newPos, true);
-    doAnimationTrigger(agentId, "walking");
     return;
   }
 
@@ -222,7 +219,6 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
   if (goal.goaltype == idleGoal){
     // do nothing
-    doAnimationTrigger(agent.id, "not-walking");
   }else if (goal.goaltype == wanderGoal){
     auto targetPosition = anycast<EntityPosition>(goal.goalData);
     modassert(targetPosition, "target pos was null");
@@ -245,7 +241,6 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }else if (goal.goaltype == attackTargetGoal){
     // not yet implemented
     attackTarget(agent);
-    doAnimationTrigger(agent.id, "not-walking");
   }else if (goal.goaltype == getAmmoGoal){
     static int ammoSymbol = getSymbol("ammo");
     auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });

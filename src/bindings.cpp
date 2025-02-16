@@ -852,6 +852,7 @@ void doAnimationTrigger(objid entityId, const char* transition){
   }
   bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
   if (changedState){
+    modlog("statecontroller state changed", std::to_string(entityId));
     tags.animationController.pendingAnimations.insert(entityId);
   }
 }
@@ -860,16 +861,21 @@ void doStateControllerAnimations(){
     auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
     bool stateAnimationHasAnimation = stateAnimation && stateAnimation -> animation.has_value();
     bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
+
+    if (stateAnimationHasAnimation){
+      modlog("statecontroller want animation", stateAnimation -> animation.value());
+    }
     if (!disableAnimation && matchingAnimation){
-      modlog("animation controller play animation for state", nameForSymbol(stateAnimation -> state));
+      modlog("statecontroller animation controller play animation for state", nameForSymbol(stateAnimation -> state) + ", " + std::to_string(entityId) + ", " + print(stateAnimation -> animationBehavior));
       gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);  
     }else{
       if (stateAnimationHasAnimation && !matchingAnimation){
         if (validateAnimationControllerAnimations){
           modassert(false, std::string("no matching animation: ") + stateAnimation -> animation.value());
         }
-        modlog("animation controller play animation no matching animation for state", nameForSymbol(stateAnimation -> state) + ", for animation: " + stateAnimation -> animation.value());
+        modlog("statecontroller animation controller play animation no matching animation for state", nameForSymbol(stateAnimation -> state) + ", for animation: " + stateAnimation -> animation.value() + ", " + std::to_string(entityId));
       }
+      modlog("statecontroller stop animation", std::to_string(entityId));
       gameapi -> stopAnimation(entityId);
     }
   }

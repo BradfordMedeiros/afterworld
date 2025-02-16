@@ -522,7 +522,8 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
   }
 
   if (gunId.has_value() && gunCore.weaponCore -> weaponParams.fireAnimation.has_value()){
-     gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT);
+    modlog("animation fire gun", gunCore.weaponCore -> weaponParams.fireAnimation.value());
+    gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT);
   }
   ////
 

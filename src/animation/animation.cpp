@@ -94,8 +94,6 @@ void addAnimationController(StateController& controller){
 		controller, 
 		"character", 
 		{ 
-			StateAndTransition { .state = "jump", .transition = "jump" },
-
 			StateAndTransition { .state = "idle", .transition = "not-walking" },
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
@@ -105,6 +103,8 @@ void addAnimationController(StateController& controller){
 			StateAndTransition { .state = "strafe-right-rifle", .transition = "sidestep-right-rifle" },
 			StateAndTransition { .state = "strafe-left-rifle", .transition = "sidestep-left-rifle" },
 			StateAndTransition { .state = "walking-rifle", .transition = "walking-rifle" },
+
+			StateAndTransition { .state = "jump", .transition = "jump" },
 
 			//StateAndTransition { .state = "fire-rifle", .transition = "fire-rifle" }, // this requires animations layers
 

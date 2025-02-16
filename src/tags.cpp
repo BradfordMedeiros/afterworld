@@ -163,7 +163,7 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
-		.attribute = "animation",
+		.attribute = "animation",  // TODO this should probably move to entity
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
   		auto animationController = getSingleAttr(id, "animation");
