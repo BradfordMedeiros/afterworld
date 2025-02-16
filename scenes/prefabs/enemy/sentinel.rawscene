@@ -14,5 +14,4 @@ enemy:tint:1 0 0 0.5
 enemy:physics_damping_linear:0.9
 enemy:move-vertical:true
 enemy:player:true
-enemy:player-profile:sentinel
 enemy:waypoint:true

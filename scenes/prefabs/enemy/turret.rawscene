@@ -1,4 +1,5 @@
-enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+
+enemy:mesh:../gameresources/build/weapons/turret2.gltf
 enemy:physics_angle:0 0 0
 enemy:physics:enabled
 enemy:physics_type:dynamic
@@ -14,12 +15,14 @@ enemy:health:130
 enemy:physics_damping_linear:0.9
 enemy:dragselect:ai
 enemy:animation:character
-enemy:player:default
 enemy:goal:idle-enemy
 enemy:goal-type:idle
 enemy:goal-value:2
-enemy:agent:basic
+
+enemy:player:turret
+enemy:agent:turret
 enemy:agent-target:blue
 enemy:goal-info:target
+
 
 

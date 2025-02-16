@@ -895,9 +895,16 @@ AIInterface aiInterface {
       .speed = speed * 0.6f,
     });
   },
+  .look = [](objid agentId, glm::quat direction) -> void {
+    // integrate this with the movement system
+    gameapi -> setGameObjectRot(agentId, direction, true); 
+  },
   .fireGun = [](objid agentId) -> void {
     fireGun(weapons, agentId);
   },
+  .changeGun = [](objid agentId, const char* gun) -> void {
+    modassert(false, "not yet implemented");
+  }, 
 };
 
 float querySelectDistance(){

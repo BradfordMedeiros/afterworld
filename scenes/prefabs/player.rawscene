@@ -4,6 +4,9 @@ maincamera:physics_velocity:0 0 -10
 maincamera:physics_type:dynamic
 maincamera:physics_gravity:0 -9.81 0
 maincamera:physics_shape:shape_sphere
+maincamera:physics_mass:100000
+
+
 maincamera:goal-info:target
 maincamera:goal-type:move
 maincamera:goal-value:5
@@ -11,7 +14,7 @@ maincamera:goal-conditions:in-range
 maincamera:goal-conditions-val:20
 maincamera:team:blue
 maincamera:health:90
-maincamera:player:true
+maincamera:player:default
 maincamera:collide_damage:50
 maincamera:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 maincamera:tint:1 0 0 0.1
