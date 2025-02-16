@@ -1098,7 +1098,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
             auto children = gameapi -> getChildrenIdsAndParent(id);
             for (auto childId : children){
               auto name = gameapi -> getGameObjNameForId(childId).value();
-              if (stringEndsWith(name, "mixamorig:RightHand")){
+              if (stringEndsWith(name, "RightHand")){
                 return childId;
               }
             }

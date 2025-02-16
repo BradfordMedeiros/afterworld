@@ -10,18 +10,24 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
     return;
   }
 
-  auto leftHand = findBodyPart(entityId, "mixamorig:LeftHand");
-  auto rightHand = findBodyPart(entityId, "mixamorig:RightHand");
+  auto leftHand = findBodyPart(entityId, "LeftHand");
+  auto rightHand = findBodyPart(entityId, "RightHand");
+  auto neck = findBodyPart(entityId, "Neck");
+  auto head = findBodyPart(entityId, "Head");
 
-  auto neck = findBodyPart(entityId, "mixamorig:Neck");
-  modassert(leftHand.has_value() && rightHand.has_value(), "hands missing");
-  auto head = findBodyPart(entityId, "mixamorig:Head");
+  if (rightHand.has_value()){
+    gameapi -> setGameObjectRot(rightHand.value(), orientation, true);
+  }
+
+
+  if (!leftHand.has_value() || !rightHand.has_value() || !neck.has_value() || !head.has_value()){
+    return;
+  }
 
   auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true);
   auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
   auto newLeftHandPosition = rightHandPosition + leftHandDir;
 
-  gameapi -> setGameObjectRot(rightHand.value(), orientation, true);
   gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true);
 
 
@@ -106,7 +112,7 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
   }
 }
 
-MovementEntity createMovementEntity(objid id, std::string&& name){
+MovementEntity createMovementEntity(objid id, std::string& name){
   MovementEntity movementEntity {
     .playerId = id,
   };
@@ -140,8 +146,7 @@ bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id){
   }
   auto player = getSingleAttr(id, "player");
   if (player.has_value()){
-    auto playerProfile = getSingleAttr(id, "player-profile");
-    movementEntityData.movementEntities[id] = createMovementEntity(id, playerProfile.has_value() ? playerProfile.value() : "default");
+    movementEntityData.movementEntities[id] = createMovementEntity(id, player.value());
     return true;
   }
   return false;

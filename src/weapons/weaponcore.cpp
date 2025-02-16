@@ -329,7 +329,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
   }
   if (needToCreateTpsGun){
     modlog("weapons ensureGunInstance third person", "create weapon instance");
-    auto weaponName = std::string("code-weapon-third") + uniqueNameSuffix();
+    auto weaponName = std::string("code-weapon-third-") + uniqueNameSuffix();
     _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, thirdPersonWeapon, weaponName);
   }
 

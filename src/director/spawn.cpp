@@ -21,13 +21,16 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
 }
 
 const int basicEnemyInstance = getSymbol("enemy");
+const int turretInstance = getSymbol("turret");
 const int ammoInstance = getSymbol("ammo");
 
 objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::vec3 pos, glm::quat rotation){
   std::cout << "do spawn entity: " << nameForSymbol(spawnTypeSymbol) << std::endl;
   if (spawnTypeSymbol == basicEnemyInstance){
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy/enemy.rawscene", pos, rotation);
-  }else if (spawnTypeSymbol == ammoInstance){
+  }else if (spawnTypeSymbol == turretInstance){
+    return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/enemy/turret.rawscene", pos, rotation);
+  } else if (spawnTypeSymbol == ammoInstance){
     return createSpawnManagedPrefab(sceneId, spawnOwnerId, "../afterworld/scenes/prefabs/ammo.rawscene", pos, rotation);
   }
   modassert(false, "invalid type: " + nameForSymbol(spawnTypeSymbol));
@@ -42,6 +45,9 @@ int spawnTypeFromAttr(std::optional<std::string>&& value){
   }
   if (value.value() == "ammo"){
     return ammoInstance;
+  }
+  if (value.value() == "turret"){
+    return turretInstance;
   }
   modassert(false, "invalid spawn type");
   return -1;
