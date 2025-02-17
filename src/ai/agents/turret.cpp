@@ -7,6 +7,7 @@ extern AIInterface aiInterface;
 struct TurretAiState {
 	float lastAttackTime;
   bool changedGun;
+  bool isGunRaised;
 };
 
 Agent createTurretAgent(objid id){
@@ -17,6 +18,7 @@ Agent createTurretAgent(objid id){
     .agentData = TurretAiState {
     	.lastAttackTime = 0.f,
       .changedGun = false,
+      .isGunRaised = true,
     },
   };
 }
@@ -36,11 +38,14 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
 
   std::vector<Goal> goals = {};
 
+  TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
+  modassert(turretState, "attackState invalid");
+
 	auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
   auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
 
-  if (targetPosition.has_value() && distanceToTarget < 5 ){
+  if (targetPosition.has_value() && distanceToTarget < 5  && turretState -> isGunRaised){
     goals.push_back(
       Goal {
         .goaltype = attackTargetGoal,
@@ -97,3 +102,20 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }
 }
 
+
+void setGunTurret(Agent& agent, bool isGunRaised){
+  TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
+  modassert(turretState, "attackState invalid");
+  turretState -> isGunRaised = isGunRaised;
+}
+
+bool isGunRaisedTurret(Agent& agent){
+  TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
+  modassert(turretState, "attackState invalid");
+  return turretState -> isGunRaised;  
+}
+
+bool isAgentTurret(Agent& agent){
+  TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
+  return turretState != NULL;
+}

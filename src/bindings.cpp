@@ -340,6 +340,15 @@ bool isGunZoomed(objid id){
 }
 
 
+void raiseTurret(objid id, bool raiseUp){
+  Agent& agent = getAgent(aiData, id);
+  if (isAgentTurret(agent)){
+    auto isGunRaised = isGunRaisedTurret(agent);
+    setGunTurret(agent, !isGunRaised);
+    gameapi -> playAnimation(id, !isGunRaised ? "raise" : "lower" , FORWARDS);
+  }
+}
+
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
   GameobjAttributes attr = {
     .attr = {

@@ -249,3 +249,12 @@ DebugConfig debugPrintAi(AiData& aiData){
   debugConfig.data.push_back({{ "agents", std::to_string(aiData.agents.size()) }});
   return debugConfig;
 }
+
+Agent& getAgent(AiData& aiData, objid id){
+  for (auto &agent : aiData.agents){
+    if (agent.id == id){
+      return agent;
+    }
+  }
+  modassert(false, "agent does not exist");
+}

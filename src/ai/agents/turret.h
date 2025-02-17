@@ -8,4 +8,8 @@ void detectWorldInfoTurretAgent(WorldInfo& worldInfo, Agent& agent);
 std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent);
 void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent);
 
+void setGunTurret(Agent& agent, bool isGunRaised);
+bool isGunRaisedTurret(Agent& agent);
+bool isAgentTurret(Agent& agent);
+
 #endif

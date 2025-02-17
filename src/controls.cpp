@@ -151,6 +151,7 @@ bool animationExists(objid entityId, const char* animationName){
   return false;
 }
 
+
 std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0

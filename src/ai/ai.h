@@ -24,4 +24,6 @@ DebugConfig debugPrintAi(AiData& aiData);
 void maybeReEnableAi(AiData& aiData, objid id);
 void maybeDisableAi(AiData& aiData, objid id);
 
+Agent& getAgent(AiData& aiData, objid id);
+
 #endif

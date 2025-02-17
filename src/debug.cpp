@@ -303,10 +303,18 @@ void addNObjects(objid sceneId, int width, int height, int depth){
 	}
 }
 
+void raiseTurret(objid id, bool raiseUp);
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
   	modlog("console visibility", print(getGlobalState().showConsole));
+  }
+
+  if (key == 'T' && action == 1){
+  	static bool raiseUp = false;
+  	raiseUp = !raiseUp;
+  	raiseTurret(getActivePlayerId().value(), raiseUp);
   }
 
   if (!getArgEnabled("dev")){
