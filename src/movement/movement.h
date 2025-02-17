@@ -25,6 +25,7 @@ struct MovementEntity {
 
   // when set the entity navigates to this location
   std::optional<MovementRequest> targetLocation;
+  std::optional<glm::quat> targetRotation;
 
 };
 
@@ -51,6 +52,7 @@ void setActiveMovementEntity(Movement& movement);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
+void setEntityTargetRotation(MovementEntityData& movementEntityData, objid id, std::optional<glm::quat> rotation);
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);
 
 bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);

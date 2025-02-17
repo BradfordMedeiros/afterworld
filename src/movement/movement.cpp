@@ -97,6 +97,9 @@ std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest){
   movementEntityData.movementEntities.at(id).targetLocation = movementRequest;
 }
+void setEntityTargetRotation(MovementEntityData& movementEntityData, objid id, std::optional<glm::quat> rotation){
+  movementEntityData.movementEntities.at(id).targetRotation = rotation;
+}
 
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId){
   auto currentTransform = gameapi -> getCameraTransform();
@@ -363,6 +366,23 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
   }
 
+
+  // TODO
+  // ideally this rotation could just be a control request to the movement
+  // that being said, this kind of just bypasses it an sets to the rotation directly
+  // that's ... ok, but can run into bypassing constraints later on, hence it's really forcing it
+  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    if (id == activeId){
+      continue;
+    }
+    if (movementEntity.targetRotation.has_value()){
+        gameapi -> setGameObjectRot(movementEntity.playerId, movementEntity.targetRotation.value(), true); 
+        auto oldXYRot = pitchXAndYawYRadians(movementEntity.targetRotation.value());  // TODO - at least set this movement core area code.  at least call this "force". 
+        movementEntity.movementState.xRot = oldXYRot.x;
+        movementEntity.movementState.yRot = oldXYRot.y;    
+    }
+  }
+
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
       continue;
@@ -380,7 +400,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       }
       auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id), activeId == movementEntity.playerId);  
       auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
-      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true);   // meh this should really come from the movement system
+      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true);   // meh this should really come from the movement system (huh?)
       modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
     }
   }
@@ -397,6 +417,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     movementEntity.movementState.raw_deltax = 0.f;
     movementEntity.movementState.raw_deltay = 0.f;
     movementEntity.movementState.crouchType = CROUCH_NONE;
+
+    movementEntity.targetRotation = std::nullopt;
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){

@@ -896,8 +896,7 @@ AIInterface aiInterface {
     });
   },
   .look = [](objid agentId, glm::quat direction) -> void {
-    // integrate this with the movement system
-    gameapi -> setGameObjectRot(agentId, direction, true); 
+    setEntityTargetRotation(gameStatePtr -> movementEntities, agentId, direction);
   },
   .fireGun = [](objid agentId) -> void {
     fireGun(weapons, agentId);
@@ -1095,6 +1094,23 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
+ 
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+      const bool showLookVelocity = false;
+      auto thirdPersonCamera = getCameraForThirdPerson();
+      if (!thirdPersonCamera.has_value()){
+        if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
+          thirdPersonCamera = 0;
+        }else{
+          modassert(false, "cannot use third person mode, no camera provided");
+        }
+      }
+ 
+      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
+      setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
+
+    }
+
     if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){  
       auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
         [](objid id) -> objid {
@@ -1135,27 +1151,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setUiWeapon(std::nullopt);
     }
 
+
+    drawAllCurves(id);
+    handleEntitiesOnRails(id, gameapi -> rootSceneId());
+    //handleEntitiesRace();
+    handleDirector(director);
     setUiGemCount(listGems().size());
 
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
-      const bool showLookVelocity = false;
-      auto thirdPersonCamera = getCameraForThirdPerson();
-      if (!thirdPersonCamera.has_value()){
-        if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
-          thirdPersonCamera = 0;
-        }else{
-          modassert(false, "cannot use third person mode, no camera provided");
-        }
-      }
- 
-      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
-      setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
-
-      drawAllCurves(id);
-      handleEntitiesOnRails(id, gameapi -> rootSceneId());
-      handleDirector(director);
-      //handleEntitiesRace();
-    }
 
     auto playerPosition = getActivePlayerPosition();
     if (playerPosition.has_value()){

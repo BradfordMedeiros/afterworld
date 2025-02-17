@@ -128,6 +128,7 @@ struct CameraUpdate {
 CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& movementState, objid playerId, ThirdPersonCameraInfo& managedCamera, bool isGunZoomed, bool enableThirdPerson);
 
 MovementState getInitialMovementState(objid playerId);
+glm::vec2 pitchXAndYawYRadians(glm::quat currRotation);
 
 
 #endif

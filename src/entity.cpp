@@ -265,7 +265,7 @@ std::optional<glm::quat> getActivePlayerRotation(){
 FiringTransform getFireTransform(objid id){
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 
-	if (movementEntity.managedCamera.thirdPersonMode){
+	if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id)){ // only use the third person code for the active player
 		// this 0 out only works if these vectors are parallel, otherwise would have to solve the parametric eqtns 
 		// z is set to the player entity so it doesnt shoot from behind the character.
 		// for example, if you dont do this, if you zoom the cam out you can hit a target in the crosshair behind the character
