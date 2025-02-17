@@ -345,7 +345,6 @@ void raiseTurret(objid id, bool raiseUp){
   if (isAgentTurret(agent)){
     auto isGunRaised = isGunRaisedTurret(agent);
     setGunTurret(agent, !isGunRaised);
-    gameapi -> playAnimation(id, !isGunRaised ? "raise" : "lower" , FORWARDS);
   }
 }
 
@@ -912,7 +911,10 @@ AIInterface aiInterface {
   },
   .changeGun = [](objid agentId, const char* gun) -> void {
     maybeChangeGun(getWeaponState(weapons, agentId), gun,  agentId /*inventory */);
-  }, 
+  },
+  .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
+    gameapi -> playAnimation(agentId, animation, animationType);
+  }
 };
 
 float querySelectDistance(){

@@ -106,7 +106,11 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 void setGunTurret(Agent& agent, bool isGunRaised){
   TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
   modassert(turretState, "attackState invalid");
+  bool oldIsGunRaised = turretState -> isGunRaised;
   turretState -> isGunRaised = isGunRaised;
+  if (oldIsGunRaised != turretState -> isGunRaised){
+    aiInterface.playAnimation(agent.id, isGunRaised ? "raise" : "lower", FORWARDS);
+  }
 }
 
 bool isGunRaisedTurret(Agent& agent){
