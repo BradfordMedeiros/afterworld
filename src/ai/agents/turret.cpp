@@ -5,17 +5,22 @@ extern AIInterface aiInterface;
 
 
 struct TurretAiState {
+  float health;
+  float initialHealth;
 	float lastAttackTime;
   bool changedGun;
   bool isGunRaised;
 };
 
 Agent createTurretAgent(objid id){
+  auto initialHealth = getSingleFloatAttr(id, "health").value();
 	return Agent{
     .id = id,
     .enabled = true,
     .type = AGENT_TURRET,
     .agentData = TurretAiState {
+      .health = initialHealth,
+      .initialHealth = initialHealth,
     	.lastAttackTime = 0.f,
       .changedGun = false,
       .isGunRaised = true,
@@ -45,7 +50,7 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
   auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
 
-  if (targetPosition.has_value() && distanceToTarget < 5  && turretState -> isGunRaised){
+  if (targetPosition.has_value() && distanceToTarget < 20  && turretState -> isGunRaised){
     goals.push_back(
       Goal {
         .goaltype = attackTargetGoal,
@@ -95,13 +100,27 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   		auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
   		glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y, targetPosition.z);
     	auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);
-    
+      
+      if ((turretState -> health / turretState -> initialHealth) < 0.6f){
+        setGunTurret(agent, false);
+        return;
+      }
+
     	aiInterface.look(agent.id, towardTarget);
    	  aiInterface.fireGun(agent.id);
   	}
   }
 }
 
+
+void onAiTurretAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
+  if (targetId == agent.id){
+    TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
+    modassert(turretState, "attackState invalid");
+    turretState -> health = remainingHealth;
+    modlog("turret health", std::to_string(remainingHealth));
+  }
+}
 
 void setGunTurret(Agent& agent, bool isGunRaised){
   TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);

@@ -1,0 +1,9 @@
+arcade:mesh:../gameresources/build/uncategorized/tv2.gltf
+arcade/screen:arcade:rhythm
+
+arcade:activate:arcade
+arcade:physics:enabled
+
+arcade:child:>camera
+>camera:position:0 0.75 0.5
+

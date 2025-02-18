@@ -22,7 +22,14 @@ bottle:health:1
 bottle:health-delay:5000
 
 [explosive3:position:-26 -27.7 0
-[explosive3:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
+[explosive3:scene:../afterworld/scenes/prefabs/objects/tv.rawscene
+
+
+amp:mesh:../gameresources/build/uncategorized/amp.gltf
+amp:position:-22 -27.7 0
+amp:physics:enabled
+amp:health:1
+amp:health-delay:5000
 
 
 

@@ -11,3 +11,18 @@ playerspawn:playerspawn:true
 playerspawn:position:-20 -25 0
 playerspawn:teleport:true
 
+
+spawnpoint-0:position:-20 -25 0
+spawnpoint-0:spawn:turret 
+spawnpoint-0:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#
+spawnpoint-1:position:-15 -25 0
+spawnpoint-1:spawn:turret 
+spawnpoint-1:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#
+spawnpoint-2:position:-25 -25 0
+spawnpoint-2:spawn:turret 
+spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+
+
+

@@ -196,6 +196,15 @@ void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
   }
 }
 
+void onMessageTurretAgent(Agent& agent, std::string& key, std::any& value){
+  if (key == "health-change"){
+    auto healthChangeMessage = anycast<HealthChangeMessage>(value);
+    modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");
+    onAiTurretAgentHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);
+    modlog("health change", "health changed called");
+  }
+}
+
 
 AiData createAiData(){
   AiData aiData;
@@ -239,6 +248,7 @@ void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
       onMessageBasicAgent(agent, key, value);
       continue;
     }else if (agent.type == AGENT_TURRET){
+      onMessageTurretAgent(agent, key, value);
       continue;
     }
   }
