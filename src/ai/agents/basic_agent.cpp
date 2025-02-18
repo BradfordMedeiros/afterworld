@@ -267,3 +267,12 @@ void onAiBasicAgentHealthChange(Agent& agent, objid targetId, float remainingHea
     }
   }
 }
+
+
+AiAgent basicAgent{
+  .createAgent = createBasicAgent,
+  .detect = detectWorldInfoBasicAgent,
+  .getGoals = getGoalsForBasicAgent,
+  .doGoal = doGoalBasicAgent,
+  .onHealthChange = onAiBasicAgentHealthChange,
+};

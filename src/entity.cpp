@@ -34,10 +34,10 @@ std::optional<objid> findBodyPart(objid entityId, const char* part){
   return std::nullopt;
 }
 void disableEntityAnimations(objid entityId){
-  auto leftHand = findBodyPart(entityId, "mixamorig:LeftHand");
-  auto rightHand = findBodyPart(entityId, "mixamorig:RightHand");
-  auto neck = findBodyPart(entityId, "mixamorig:Neck");
-  auto head = findBodyPart(entityId, "mixamorig:Head");
+  auto leftHand = findBodyPart(entityId, "LeftHand");
+  auto rightHand = findBodyPart(entityId, "RightHand");
+  auto neck = findBodyPart(entityId, "Neck");
+  auto head = findBodyPart(entityId, "Head");
   if (leftHand.has_value()){
 	  controlledPlayer.disableAnimationIds.insert(leftHand.value());
   }

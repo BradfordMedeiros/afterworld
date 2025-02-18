@@ -142,3 +142,11 @@ bool isAgentTurret(Agent& agent){
   TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
   return turretState != NULL;
 }
+
+AiAgent turretAgent{
+  .createAgent = createTurretAgent,
+  .detect = detectWorldInfoTurretAgent,
+  .getGoals = getGoalsForTurretAgent,
+  .doGoal = doGoalTurretAgent,
+  .onHealthChange = onAiTurretAgentHealthChange,
+};

@@ -12,7 +12,7 @@ struct AIInterface {
   std::function<void(objid agentId, const char* animation, AnimationType animationType)> playAnimation;
 };
 
-enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET };
+enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET, AGENT_TV };
 struct Agent { 
   objid id;
   bool enabled;
@@ -20,10 +20,20 @@ struct Agent {
   std::any agentData;
 };
 
+
 struct Goal {
   int goaltype;
   std::any goalData;
   std::function<int(std::any&)> score;
+};
+
+struct AiAgent {
+  std::function<Agent(objid)> createAgent;
+  std::function<void(WorldInfo&, Agent&)> detect;
+  std::function<std::vector<Goal>(WorldInfo&, Agent&)> getGoals;
+  std::function<void(WorldInfo&, Goal&, Agent&)> doGoal;
+
+  std::function<void(Agent& agent, objid targetId, float remainingHealth)> onHealthChange;
 };
 
 struct TargetData {

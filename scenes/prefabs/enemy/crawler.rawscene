@@ -21,7 +21,6 @@ enemy/doctor:tint:1 0 1 1
 enemy:team:red
 enemy:health:130
 enemy:physics_damping_linear:0.9
-enemy:dragselect:ai
 enemy:animation:character
 enemy:player:default
 enemy:goal:idle-enemy

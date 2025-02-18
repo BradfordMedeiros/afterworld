@@ -18,7 +18,7 @@ void handleDirector(Director& director){
 	auto sinceLastSpawn = currTime - director.lastEnemySpawnTime;
 
 	bool enoughTime = sinceLastSpawn > 5.f;
-	bool tooManyEnemies = numberOfSpawnManaged(director.managedSpawnpoints) >= 2;
+	bool tooManyEnemies = numberOfSpawnManaged(director.managedSpawnpoints) >= 1;
 	if (enoughTime && !tooManyEnemies){
 		director.lastEnemySpawnTime = currTime;
 		spawnFromRandomSpawnpoint(director.managedSpawnpoints, NULL);

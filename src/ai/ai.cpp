@@ -26,7 +26,42 @@ extern CustomApiBindings* gameapi;
 */
 
 
+bool agentExists(AiData& aiData, objid id){
+  for (auto &agent : aiData.agents){
+    if (agent.id == id){
+      return true;
+    }
+  }
+  return false;
+}
 
+std::optional<AgentType> agentTypeStr(std::string agentType){
+  if (agentType == "basic"){
+    return AGENT_BASIC_AGENT;
+  }
+  if (agentType == "turret"){
+    return AGENT_TURRET;
+  }
+  if (agentType == "tv"){
+    return AGENT_TV;
+  }
+  modassert(false, "invalid aiAgentType");
+  return std::nullopt;
+}
+
+std::optional<AiAgent*> getAiAgent(AgentType agentType){
+  if (agentType == AGENT_BASIC_AGENT){
+    return &basicAgent;
+  }
+  if (agentType == AGENT_TURRET){
+    return &turretAgent;
+  }
+  //if (agentType == AGENT_TV){
+  //  return &tvAgent;
+  //}
+  modassert(false, "invalid aiAgentType");
+  return std::nullopt;
+}
 
 
 // based on goal-info:targets update vec3 position for each - target-pos-<objid> with team symbol from attr
@@ -77,34 +112,13 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
     }
-    if (agent.type == AGENT_BASIC_AGENT){
-      detectWorldInfoBasicAgent(worldInfo, agent);
-      continue;
-    }else if(agent.type == AGENT_TURRET){
-      detectWorldInfoTurretAgent(worldInfo, agent);
-      continue;
-    }
-    modassert(false, "detect world info invalid agent type");
+    getAiAgent(agent.type).value() -> detect(worldInfo, agent);
   }
 }
 
-bool agentExists(AiData& aiData, objid id){
-  for (auto &agent : aiData.agents){
-    if (agent.id == id){
-      return true;
-    }
-  }
-  return false;
-}
 void addAiAgent(AiData& aiData, objid id, std::string agentType){
   modassert(!agentExists(aiData, id), std::string("agent already exists: ") + std::to_string(id));
-  if (agentType == "basic"){
-    aiData.agents.push_back(createBasicAgent(id));
-  }else if (agentType == "turret"){
-    aiData.agents.push_back(createTurretAgent(id));
-  }else{
-    modassert(false, std::string("invalid agent type: ") + agentType);
-  }
+  aiData.agents.push_back(getAiAgent(agentTypeStr(agentType).value()).value() -> createAgent(id));
 }
 
 void maybeRemoveAiAgent(AiData& aiData, objid id){
@@ -140,15 +154,6 @@ void maybeReEnableAi(AiData& aiData, objid id){
   }
 }
 
-std::vector<Goal> getGoalsForAgent(WorldInfo& worldInfo, Agent& agent){
-  if (agent.type == AGENT_BASIC_AGENT){
-    return getGoalsForBasicAgent(worldInfo, agent);
-  }else if (agent.type == AGENT_TURRET){
-    return getGoalsForTurretAgent(worldInfo, agent);
-  }
-  modassert(false, "get goals for agent invalid agent type");
-  return {};
-}
 
 Goal* getOptimalGoal(std::vector<Goal>& goals){
   if (goals.size() == 0){
@@ -168,17 +173,6 @@ Goal* getOptimalGoal(std::vector<Goal>& goals){
   return &goals.at(maxScoreIndex);
 }
 
-void doGoal(WorldInfo& worldInfo, Goal& goal, Agent& agent){
-  if (agent.type == AGENT_BASIC_AGENT){
-    doGoalBasicAgent(worldInfo, goal, agent);
-    return;
-  }else if (agent.type == AGENT_TURRET){
-    doGoalTurretAgent(worldInfo, goal, agent);
-    return;
-  }
-  modassert(false, "do goal invalid agent");
-}
-
 void onAiHealthChange(objid targetId, float remainingHealth){
   HealthChangeMessage healthMessage {
     .targetId = targetId,
@@ -186,25 +180,6 @@ void onAiHealthChange(objid targetId, float remainingHealth){
   };
   gameapi -> sendNotifyMessage("health-change", healthMessage);
 }
-
-void onMessageBasicAgent(Agent& agent, std::string& key, std::any& value){
-  if (key == "health-change"){
-    auto healthChangeMessage = anycast<HealthChangeMessage>(value);
-    modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");
-    onAiBasicAgentHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);
-    modlog("health change", "health changed called");
-  }
-}
-
-void onMessageTurretAgent(Agent& agent, std::string& key, std::any& value){
-  if (key == "health-change"){
-    auto healthChangeMessage = anycast<HealthChangeMessage>(value);
-    modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");
-    onAiTurretAgentHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);
-    modlog("health change", "health changed called");
-  }
-}
-
 
 AiData createAiData(){
   AiData aiData;
@@ -232,25 +207,24 @@ void onFrameAi(AiData& aiData){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
     }
-    auto goals = getGoalsForAgent(aiData.worldInfo, agent);
+    auto goals =  getAiAgent(agent.type).value() -> getGoals(aiData.worldInfo, agent);
     auto optimalGoal = getOptimalGoal(goals);
     //modassert(optimalGoal, "no goal for agent");
     if (optimalGoal){
       //modlog("ai goals", nameForSymbol(optimalGoal -> goaltype));
-      doGoal(aiData.worldInfo, *optimalGoal, agent);  
+      getAiAgent(agent.type).value() -> doGoal(aiData.worldInfo, *optimalGoal, agent);
     }
   }
 }
 
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
-  for (auto &agent : aiData.agents){
-    if (agent.type == AGENT_BASIC_AGENT){
-      onMessageBasicAgent(agent, key, value);
-      continue;
-    }else if (agent.type == AGENT_TURRET){
-      onMessageTurretAgent(agent, key, value);
-      continue;
-    }
+  if (key == "health-change"){
+    auto healthChangeMessage = anycast<HealthChangeMessage>(value);
+    modassert(healthChangeMessage != NULL, "healthChangeMessage not an healthChangeMessage");
+
+    for (auto &agent : aiData.agents){
+      getAiAgent(agent.type).value() -> onHealthChange(agent, healthChangeMessage -> targetId, healthChangeMessage -> remainingHealth);
+    }    
   }
 }
 
