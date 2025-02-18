@@ -118,7 +118,13 @@ void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
 
 void addAiAgent(AiData& aiData, objid id, std::string agentType){
   modassert(!agentExists(aiData, id), std::string("agent already exists: ") + std::to_string(id));
-  aiData.agents.push_back(getAiAgent(agentTypeStr(agentType).value()).value() -> createAgent(id));
+  auto type = agentTypeStr(agentType).value();
+  aiData.agents.push_back(Agent {
+    .id = id,
+    .enabled = true,
+    .type = type,
+    .agentData = getAiAgent(type).value() -> createAgent(id),
+  });
 }
 
 void maybeRemoveAiAgent(AiData& aiData, objid id){

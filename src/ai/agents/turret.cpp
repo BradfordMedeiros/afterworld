@@ -12,19 +12,14 @@ struct TurretAiState {
   bool isGunRaised;
 };
 
-Agent createTurretAgent(objid id){
+std::any createTurretAgent(objid id){
   auto initialHealth = getSingleFloatAttr(id, "health").value();
-	return Agent{
-    .id = id,
-    .enabled = true,
-    .type = AGENT_TURRET,
-    .agentData = TurretAiState {
-      .health = initialHealth,
-      .initialHealth = initialHealth,
-    	.lastAttackTime = 0.f,
-      .changedGun = false,
-      .isGunRaised = true,
-    },
+	return TurretAiState {
+    .health = initialHealth,
+    .initialHealth = initialHealth,
+    .lastAttackTime = 0.f,
+    .changedGun = false,
+    .isGunRaised = true,
   };
 }
 

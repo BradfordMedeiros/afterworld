@@ -6,13 +6,8 @@ extern AIInterface aiInterface;
 struct TvAiState {
 };
 
-Agent createTvAgent(objid id){
-	return Agent{
-    .id = id,
-    .enabled = true,
-    .type = AGENT_TV,
-    .agentData = TvAiState {},
-  };
+std::any createTvAgent(objid id){
+	return TvAiState {};
 }
 
 void detectWorldInfoTvAgent(WorldInfo& worldInfo, Agent& agent){

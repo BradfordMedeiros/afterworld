@@ -12,21 +12,16 @@ struct AgentAttackState {
   std::set<objid> visited;
 };
 
-Agent createBasicAgent(objid id){
+std::any createBasicAgent(objid id){
   auto initialHealth = getSingleFloatAttr(id, "health").value();
   auto moveVerticalAttr = getSingleAttr(id, "move-vertical");  // probably shouldn't be in ai system, i think
-	return Agent{
-    .id = id,
-    .enabled = true,
-    .type = AGENT_BASIC_AGENT,
-    .agentData = AgentAttackState {
+	return AgentAttackState {
       .lastAttackTime = 0.f,
       .initialHealth = initialHealth,
       .moveVertical = moveVerticalAttr.has_value() && moveVerticalAttr.value() == "true",
       .aggravated = false,
       .scared = false,
       .visited = {},
-    },
   };
 }
 

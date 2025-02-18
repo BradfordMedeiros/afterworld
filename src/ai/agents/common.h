@@ -28,7 +28,7 @@ struct Goal {
 };
 
 struct AiAgent {
-  std::function<Agent(objid)> createAgent;
+  std::function<std::any(objid)> createAgent;
   std::function<void(WorldInfo&, Agent&)> detect;
   std::function<std::vector<Goal>(WorldInfo&, Agent&)> getGoals;
   std::function<void(WorldInfo&, Goal&, Agent&)> doGoal;
