@@ -111,7 +111,7 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.soundObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), teleportClip);
   }
 
-  std::string explosionClip = "../ModEngine/res/sounds/silenced-gunshot.wav";
+  std::string explosionClip = "../gameresources/sound/q009/explosion.wav";
   if (explosionClip != ""){
     if (sounds.explosionSoundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.explosionSoundObjId.value());
