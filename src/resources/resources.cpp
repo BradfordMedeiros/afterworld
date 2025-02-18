@@ -9,6 +9,7 @@ ManagedSounds sounds {
   .activateSoundObjId = std::nullopt,
   .soundObjId = std::nullopt,
   .explosionSoundObjId = std::nullopt,
+  .hitmarkerSoundObjId = std::nullopt,
   .sceneIdToSounds = {},
   .sceneIdToTextures = {},
 };
@@ -117,6 +118,15 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     }
     sounds.explosionSoundObjId = createSound(sceneId, ("&code-explosion") + uniqueNameSuffix(), explosionClip);
   }
+
+
+  std::string hitmarkerClip = "../ModEngine/res/sounds/sample.wav";
+  if (hitmarkerClip != ""){
+    if (sounds.hitmarkerSoundObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.hitmarkerSoundObjId.value());
+    }
+    sounds.hitmarkerSoundObjId = createSound(sceneId, ("&code-hitmarker") + uniqueNameSuffix(), hitmarkerClip);
+  }
 }
 
 void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
@@ -159,6 +169,7 @@ void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading
   ensureSoundUnloaded(sceneId, &sounds.activateSoundObjId);
   ensureSoundUnloaded(sceneId, &sounds.soundObjId);
   ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
+  ensureSoundUnloaded(sceneId, &sounds.hitmarkerSoundObjId);
 }
 
 void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly
