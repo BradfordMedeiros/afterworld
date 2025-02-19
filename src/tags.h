@@ -40,6 +40,9 @@ struct EmissionObject {
 	float period;
 };
 
+struct ExplosionObj {
+	float time;
+};
 
 struct Tags {
 	std::set<objid> textureScrollObjIds;
@@ -48,6 +51,7 @@ struct Tags {
 	std::unordered_map<objid, float> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::set<objid> teleportObjs;
+	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, ManagedRecording> recordings;
 	Switches switches;
 

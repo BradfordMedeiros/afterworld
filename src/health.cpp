@@ -45,7 +45,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	*_enemyDead = newHealthAmount <= 0;
 	*_remainingHealth = newHealthAmount;
 
-	playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, std::nullopt); // TODO - this shoiuldn't be here, only if it is damaged by the player
+	playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, getActivePlayerPosition().value()); // TODO - this shoiuldn't be here, only if it is damaged by the player
 
 	return true;
 }

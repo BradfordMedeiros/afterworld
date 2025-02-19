@@ -188,6 +188,13 @@ std::vector<HotkeyToMessage> hotkeys = {
 			maybeChangeGunUpdateUi("fork");
 		},
 	},
+	HotkeyToMessage {
+		.key = '5',  
+		.action = 0,
+		.fn = []() -> void {
+			maybeChangeGunUpdateUi("launcher");
+		},
+	},
 
 	HotkeyToMessage {
 		.key = '9',  

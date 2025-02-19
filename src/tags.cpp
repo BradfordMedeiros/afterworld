@@ -374,6 +374,35 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
+		.attribute = "damageafter",  // make this remove-after and then can just use the explode
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+			// do not do it this way...
+  		auto attrHandle = getAttrHandle(id);
+			auto explodeAfterSeconds = getFloatAttr(attrHandle, "damageafter").value();
+			tags.explosionObjects[id] = ExplosionObj {
+				.time = gameapi -> timeSeconds(false) + explodeAfterSeconds,
+			};
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.explosionObjects.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+   		auto currTime = gameapi -> timeSeconds(false);
+
+   		std::vector<objid> explodedObjs;
+   		for (auto &[id, explosionObj] : tags.explosionObjects){
+  			if (currTime >= explosionObj.time){
+  				explodedObjs.push_back(id);
+					doDamageMessage(id, 100.f);
+  			}
+  		}
+  		for (auto id : explodedObjs){
+  			tags.explosionObjects.erase(id);
+  		}
+  	},
+  	.onMessage = std::nullopt,
+	},
+	TagUpdater {
 		.attribute = "condition",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
  			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
@@ -605,6 +634,7 @@ Tags createTags(UiData* uiData){
   tags.idToRotateTimeAdded = {};
   tags.emissionObjects = {};
   tags.teleportObjs = {};
+  tags.explosionObjects = {};
   tags.recordings = {};
   tags.switches = Switches{
   	.switches = {},
