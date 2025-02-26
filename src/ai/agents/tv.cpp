@@ -22,3 +22,11 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 void onAiTvAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
 
 }
+
+AiAgent tvAgent{
+  .createAgent = createTvAgent,
+  .detect = detectWorldInfoTvAgent,
+  .getGoals = getGoalsForTvAgent,
+  .doGoal = doGoalTvAgent,
+  .onHealthChange = onAiTvAgentHealthChange,
+};

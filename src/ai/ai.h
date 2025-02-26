@@ -7,6 +7,8 @@
 #include "./worldinfo.h"
 #include "./agents/basic_agent.h"
 #include "./agents/turret.h"
+#include "./agents/tv.h"
+#include "./agents/crawler.h"
 
 struct AiData {
   WorldInfo worldInfo;

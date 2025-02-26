@@ -45,6 +45,9 @@ std::optional<AgentType> agentTypeStr(std::string agentType){
   if (agentType == "tv"){
     return AGENT_TV;
   }
+  if (agentType == "crawler"){
+    return AGENT_CRAWLER;
+  }
   modassert(false, "invalid aiAgentType");
   return std::nullopt;
 }
@@ -56,9 +59,12 @@ std::optional<AiAgent*> getAiAgent(AgentType agentType){
   if (agentType == AGENT_TURRET){
     return &turretAgent;
   }
-  //if (agentType == AGENT_TV){
-  //  return &tvAgent;
-  //}
+  if (agentType == AGENT_TV){
+    return &tvAgent;
+  }
+  if (agentType == AGENT_CRAWLER){
+    return &crawlerAgent;
+  }
   modassert(false, "invalid aiAgentType");
   return std::nullopt;
 }

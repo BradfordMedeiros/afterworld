@@ -12,7 +12,7 @@ struct AIInterface {
   std::function<void(objid agentId, const char* animation, AnimationType animationType)> playAnimation;
 };
 
-enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET, AGENT_TV };
+enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET, AGENT_TV, AGENT_CRAWLER };
 struct Agent { 
   objid id;
   bool enabled;

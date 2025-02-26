@@ -3,4 +3,6 @@
 
 #include "./common.h"
 
+extern AiAgent tvAgent;
+
 #endif
