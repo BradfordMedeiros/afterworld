@@ -39,6 +39,10 @@ struct EmissionObject {
 	glm::vec3 highColor;
 	float period;
 };
+struct HealthColorObject {
+	glm::vec3 lowColor;
+	glm::vec3 highColor;
+};
 
 struct ExplosionObj {
 	float time;
@@ -50,6 +54,7 @@ struct Tags {
 	InGameUi inGameUi;
 	std::unordered_map<objid, float> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
+	std::unordered_map<objid, HealthColorObject> healthColorObjects;
 	std::set<objid> teleportObjs;
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, ManagedRecording> recordings;

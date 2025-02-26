@@ -263,7 +263,9 @@ std::vector<TagUpdater> tagupdates = {
   		}
   		std::cout << "audio zones: " << print(tags.audiozones.audiozoneIds) << std::endl;
   	},
-  	.onFrame = [](Tags& tags) -> void {  
+  	.onFrame = [](Tags& tags) -> void {
+  		// TODO perframe
+  		// This doesn't need to be per frame, can easily make this on the collision callbacks
   		auto transform = gameapi -> getView();
   		auto hitObjects = gameapi -> contactTestShape(transform.position, transform.rotation, glm::vec3(1.f, 1.f, 1.f));
   		std::set<objid> audioZones;
@@ -538,6 +540,37 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
+		.attribute = "healthcolor",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+	  	auto attrHandle = getAttrHandle(id);
+			auto colorLow = getVec3Attr(attrHandle, "healthcolor-low");
+			auto colorHigh = getVec3Attr(attrHandle, "healthcolor");
+	  	tags.healthColorObjects[id] = HealthColorObject {
+	  		.lowColor = colorLow.has_value() ? colorLow.value(): glm::vec3(0.f, 0.f, 0.f),
+	  		.highColor = colorHigh.has_value() ? colorHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+	  	};
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.healthColorObjects.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		for (auto &[id, healthColorObject] : tags.healthColorObjects){
+				auto health = getHealth(id);
+				float percentageHealth = health.value().current / health.value().total;
+	  		glm::vec4 newColor(
+	  			healthColorObject.lowColor.r + ((healthColorObject.highColor.r - healthColorObject.lowColor.r) * percentageHealth), 
+	  			healthColorObject.lowColor.g + ((healthColorObject.highColor.g - healthColorObject.lowColor.g) * percentageHealth), 
+	  			healthColorObject.lowColor.b + ((healthColorObject.highColor.b - healthColorObject.lowColor.b) * percentageHealth),
+	  			1.f
+	  		);
+	  		setGameObjectTint(id, newColor);
+  		}
+  	},
+  	.onMessage = std::nullopt,
+	},
+
+
+	TagUpdater {
 		.attribute = "cutscene",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			auto cutscene = getSingleAttr(id, "cutscene");
@@ -633,6 +666,7 @@ Tags createTags(UiData* uiData){
   };
   tags.idToRotateTimeAdded = {};
   tags.emissionObjects = {};
+  tags.healthColorObjects = {};
   tags.teleportObjs = {};
   tags.explosionObjects = {};
   tags.recordings = {};
