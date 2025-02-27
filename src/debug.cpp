@@ -304,6 +304,7 @@ void addNObjects(objid sceneId, int width, int height, int depth){
 }
 
 void raiseTurret(objid id, bool raiseUp);
+void wakeUpTv(objid id);
 
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
@@ -315,6 +316,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	static bool raiseUp = false;
   	raiseUp = !raiseUp;
   	raiseTurret(getActivePlayerId().value(), raiseUp);
+  	wakeUpTv(getActivePlayerId().value());
   }
 
   if (!getArgEnabled("dev")){

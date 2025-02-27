@@ -348,6 +348,14 @@ void raiseTurret(objid id, bool raiseUp){
   }
 }
 
+void wakeUpTv(objid id){
+  Agent& agent = getAgent(aiData, id);
+  if (isAgentTv(agent)){
+    setTvActive(agent, true);
+  }
+}
+
+
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
   GameobjAttributes attr = {
     .attr = {
