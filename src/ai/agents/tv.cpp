@@ -81,11 +81,13 @@ void onAiTvAgentHealthChange(Agent& agent, objid targetId, float remainingHealth
 }
 
 void setTvActive(Agent& agent, bool active){
+	modlog("ai tv", "setTvActive");
 	TvAiState* tvState = anycast<TvAiState>(agent.agentData);
   bool oldIsActive = tvState -> isActive;
   tvState -> isActive = active;
   if (oldIsActive != tvState -> isActive){
   	modlog("ai tv active", active ? "active" : "not-active");
+    aiInterface.playAnimation(agent.id, active ? "activate" : "deactivate", FORWARDS);
   }
 
 }

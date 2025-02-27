@@ -348,10 +348,10 @@ void raiseTurret(objid id, bool raiseUp){
   }
 }
 
-void wakeUpTv(objid id){
+void wakeUpTv(objid id, bool active){
   Agent& agent = getAgent(aiData, id);
   if (isAgentTv(agent)){
-    setTvActive(agent, true);
+    setTvActive(agent, active);
   }
 }
 
