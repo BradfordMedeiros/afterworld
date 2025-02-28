@@ -6,10 +6,12 @@
 
 struct AIInterface {
   std::function<void(objid agentId, glm::vec3 targetPosition, float speed)> move;
+  std::function<void(objid agentId)> stopMoving;
   std::function<void(objid agentId, glm::quat dir)> look;
   std::function<void(objid agentId)> fireGun;
   std::function<void(objid agentId, const char* gun)> changeGun;
   std::function<void(objid agentId, const char* animation, AnimationType animationType)> playAnimation;
+
 };
 
 enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET, AGENT_TV, AGENT_CRAWLER };

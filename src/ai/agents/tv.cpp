@@ -3,13 +3,18 @@
 extern CustomApiBindings* gameapi;
 extern AIInterface aiInterface;
 
+std::optional<objid> findBodyPart(objid entityId, const char* part);
+void setGameObjectTint(objid id, glm::vec4 tint);
+void setGameObjectTexture(objid id, std::string texture);
+
+
 struct TvAiState {
-	bool isActive;
+  std::optional<float> activateTime;
 };
 
 std::any createTvAgent(objid id){
 	return TvAiState {
-		.isActive = false,
+		.activateTime = std::nullopt,
 	};
 }
 
@@ -33,7 +38,7 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
   auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
 
-  if (targetPosition.has_value() && distanceToTarget < 20 && tvState -> isActive){
+  if (targetPosition.has_value() && distanceToTarget < 20 && (tvState -> activateTime.has_value() && (gameapi -> timeSeconds(false) - tvState -> activateTime.value()) > 0.5f)){ // allow the animation to play
     goals.push_back(
       Goal {
         .goaltype = attackTargetGoal,
@@ -73,21 +78,47 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);
       
     aiInterface.look(agent.id, towardTarget);
+
+    aiInterface.move(agent.id, targetPosition,  1.f);
+
   	
   }
 }
 void onAiTvAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
-
+  if (agent.id == targetId){
+    setTvActive(agent, true);
+  }
 }
 
 void setTvActive(Agent& agent, bool active){
 	modlog("ai tv", "setTvActive");
 	TvAiState* tvState = anycast<TvAiState>(agent.agentData);
-  bool oldIsActive = tvState -> isActive;
-  tvState -> isActive = active;
-  if (oldIsActive != tvState -> isActive){
-  	modlog("ai tv active", active ? "active" : "not-active");
+  bool oldIsActive = tvState -> activateTime.has_value();
+
+  if (active && oldIsActive){
+    return;
+  }
+
+  tvState -> activateTime = active ? gameapi -> timeSeconds(false) : std::optional<float>(std::nullopt);
+
+  auto screen = findBodyPart(agent.id, "screen");;
+  if (active){
+    setGameObjectTint(screen.value(), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    setGameObjectTexture(screen.value(), "../gameresources/textures/enemies/happy.png");
+  }else{
+    setGameObjectTint(screen.value(), glm::vec4(1.f, 1.f, 1.f, 1.f));
+  }
+
+  if (oldIsActive != tvState -> activateTime.has_value()){
+    if (active){
+      modlog("ai tv active active", std::to_string(agent.id));
+    }else{
+      modlog("ai tv active inactive", std::to_string(agent.id));
+    }
     aiInterface.playAnimation(agent.id, active ? "activate" : "deactivate", FORWARDS);
+  }
+  if (!tvState -> activateTime.has_value()){
+    aiInterface.stopMoving(agent.id);
   }
 
 }

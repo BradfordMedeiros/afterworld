@@ -911,6 +911,9 @@ AIInterface aiInterface {
       .speed = speed * 0.6f,
     });
   },
+  .stopMoving = [](objid agentId) -> void {
+    setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, std::nullopt);
+  },
   .look = [](objid agentId, glm::quat direction) -> void {
     setEntityTargetRotation(gameStatePtr -> movementEntities, agentId, direction);
   },

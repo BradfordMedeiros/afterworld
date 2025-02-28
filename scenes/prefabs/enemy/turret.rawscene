@@ -14,9 +14,6 @@ enemy:physics_type:dynamic
 enemy:physics_shape:shape_sphere
 
 enemy:physics_mass:5
-enemy/doctor::tint:1 0 0 1
-enemy/doctor:disabled:true
-enemy/doctor:tint:0 0 1 1
 
 enemy:team:red
 enemy:health:130
@@ -30,6 +27,5 @@ enemy:player:turret
 enemy:agent:turret
 enemy:agent-target:blue
 enemy:goal-info:target
-
 
 enemy:explode:40

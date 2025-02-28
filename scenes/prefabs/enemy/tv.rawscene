@@ -16,12 +16,13 @@ enemy:goal-type:idle
 enemy:goal-value:2
 
 enemy:player:default
-#enemy:agent:tv
+enemy:agent:tv
 enemy:agent-target:blue
 enemy:goal-info:target
 
-
 enemy:explode:40
 
-enemy/screen:texture:../gameresources/textures/enemies/happy.png
 enemy/screen:shader:../afterworld/shaders/water/fragment.glsl
+alt-texture:texture:../gameresources/textures/enemies/happy.png # probably move this out
+
+
