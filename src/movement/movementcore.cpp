@@ -438,20 +438,24 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 }
 
 // This is obviously wrong, but a starting point
-glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos){
+glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos, bool moveVertical){
   glm::vec3 moveVec(0.f, 0.f, 0.f);
 
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
   positionDiff = glm::inverse(playerDirection) * positionDiff;
 
-  moveVec = glm::vec3(positionDiff.x, 0.f, positionDiff.z);
+  moveVec = glm::vec3(positionDiff.x, positionDiff.y, positionDiff.z);
+  if (!moveVertical){
+    moveVec.y = 0.f;
+  }
+
   auto moveLength = glm::length(moveVec);
 
   if (atTargetPos){
     *atTargetPos = false;
   }
-  if (moveLength < 0.5){  // already arrived
+  if (moveLength < 0.01f){  // already arrived
     if (atTargetPos){
       *atTargetPos = true;
     }
@@ -465,7 +469,7 @@ glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, Movement
     moveVec = glm::vec3(0.f, 0.f, 0.f);
   }
 
-  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(moveVec));
+  modlog("movement movevec", std::string("last pos: ") + print(movementState.lastPosition) + ", target = " + print(targetPosition) + ", movVec = " +  print(moveVec) + ", posdiff = " + print(positionDiff) + ", last = " + print(movementState.lastPosition) + ", rot = " + print(playerDirection) + ", forward:" + print(playerDirection * glm::vec3(0.f, 0.f, -1.f)));
   return moveVec;
 }
 

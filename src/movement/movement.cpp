@@ -389,7 +389,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
     if (movementEntity.targetLocation.has_value()){
       bool atTarget = false;
-      movementEntity.movementState.moveVec = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget);;
+      movementEntity.movementState.moveVec = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget, movementEntity.moveParams -> moveVertical);;
       movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
       movementEntity.movementState.zoom_delta = movement.controlParams.zoom_delta;
 
@@ -400,7 +400,12 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       }
       auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id), activeId == movementEntity.playerId);  
       auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
+
       gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true);   // meh this should really come from the movement system (huh?)
+      auto oldXYRot = pitchXAndYawYRadians(orientation);  // TODO - at least set this movement core area code.  at least call this "force". 
+      movementEntity.movementState.xRot = oldXYRot.x;
+      movementEntity.movementState.yRot = oldXYRot.y;    
+
       modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
     }
   }

@@ -10,11 +10,13 @@ void setGameObjectTexture(objid id, std::string texture);
 
 struct TvAiState {
   std::optional<float> activateTime;
+  float lastAttackTime;
 };
 
 std::any createTvAgent(objid id){
 	return TvAiState {
 		.activateTime = std::nullopt,
+    .lastAttackTime = 0.f,
 	};
 }
 
@@ -62,26 +64,87 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
 	return goals;
 
 }
+
+
+std::optional<float> heightAboveGround(Agent& agent){
+  auto position = gameapi -> getGameObjectPos(agent.id, true);
+  auto rotation = gameapi -> orientationFromPos(position, position + glm::vec3(0.f, -10.f, 0.f));
+  auto hitpoints = gameapi -> raycast(position, rotation, 100.f);
+
+  std::optional<float> minDistance;
+  for (auto &hitpoint : hitpoints){
+    if (agent.id == hitpoint.id){
+      continue;
+    }
+    auto distance = glm::distance(hitpoint.point, position);
+    if (!minDistance.has_value()){
+      minDistance = distance;
+    }else if (distance < minDistance.value()){
+      minDistance = distance;
+    }
+  }
+  return minDistance;
+}
+
 void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
+  TvAiState* tvState = anycast<TvAiState>(agent.agentData);
+
   static int idleGoal = getSymbol("idle");
   static int attackTargetGoal = getSymbol("attack-target");
 
   if (goal.goaltype == idleGoal){
-    // do nothing
+    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+    auto groundHeight = heightAboveGround(agent);
+    auto amountToMoveY = !groundHeight.has_value() ? 0.f : (1.f - groundHeight.value());
+    if (amountToMoveY < -10.f){
+      amountToMoveY = -10.f;
+    }
+    if (amountToMoveY > 10.f){
+      amountToMoveY = 10.f;
+    }
+
+    auto newPosition = glm::vec3(agentPos.x + 0.02f /* if this is not added it causes NaN somewhere.... wtf*/, agentPos.y + amountToMoveY, agentPos.z);
+
+    if (glm::distance(newPosition, agentPos) > 0.01f){
+       aiInterface.move(agent.id, newPosition, 1.f);
+    }
+
+
+    modlog("tv pos groundHeight", std::to_string(!groundHeight.has_value() ? 0.f : groundHeight.value()));
+    modlog("tv pos amountToMoveY", std::to_string(amountToMoveY));
+    modlog("tv pos agentPos", print(agentPos));
+    modlog("tv pos newPos", print(newPosition));
+
+
   }else if (goal.goaltype == attackTargetGoal){
   	float currentTime = gameapi -> timeSeconds(false);
 
 		auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   	auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
   	auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
-  	glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y, targetPosition.z);
+
+    auto groundHeight = heightAboveGround(agent);
+    auto amountToMoveY = !groundHeight.has_value() ? 0.f : (1.f - groundHeight.value());
+
+  	glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y , targetPosition.z);
     auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);
-      
-    aiInterface.look(agent.id, towardTarget);
+    auto newPosition = glm::vec3(targetPosition.x, targetPosition.y + amountToMoveY, targetPosition.z);
+    
+    //aiInterface.look(agent.id, towardTarget);
+    aiInterface.move(agent.id, newPosition,  1.f);
 
-    aiInterface.move(agent.id, targetPosition,  1.f);
+    auto currTime = gameapi -> timeSeconds(false);
+    if (true || (currTime - tvState -> lastAttackTime) > 0.5f){
+      aiInterface.fireGun(agent.id);
+      tvState -> lastAttackTime = currTime;
+      modlog("tv", "attack");
+    }
 
-  	
+
+    modlog("tv groundHeight", std::to_string(groundHeight.value()));
+    modlog("tv agentPos", print(agentPos));
+    modlog("tv newPosition", print(newPosition));
+
   }
 }
 void onAiTvAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
@@ -96,6 +159,9 @@ void setTvActive(Agent& agent, bool active){
   bool oldIsActive = tvState -> activateTime.has_value();
 
   if (active && oldIsActive){
+    return;
+  }
+  if (!active && !oldIsActive){
     return;
   }
 

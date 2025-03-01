@@ -107,7 +107,7 @@ void removeAllMovementCores();
 
 glm::quat weaponLookDirection(MovementState& movementState);
 
-glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos);
+glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos, bool moveVertical);
 
 struct ThirdPersonCameraUpdate {
   glm::vec3 position;
