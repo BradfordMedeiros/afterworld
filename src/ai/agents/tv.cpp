@@ -11,12 +11,14 @@ void setGameObjectTexture(objid id, std::string texture);
 struct TvAiState {
   std::optional<float> activateTime;
   float lastAttackTime;
+  bool changedGun = false;
 };
 
 std::any createTvAgent(objid id){
 	return TvAiState {
 		.activateTime = std::nullopt,
     .lastAttackTime = 0.f,
+    .changedGun = false,
 	};
 }
 
@@ -117,6 +119,12 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
 
   }else if (goal.goaltype == attackTargetGoal){
+
+    if (!tvState -> changedGun){
+      tvState -> changedGun = true;
+      aiInterface.changeGun(agent.id, "scrapgun");
+    }
+
   	float currentTime = gameapi -> timeSeconds(false);
 
 		auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
@@ -135,6 +143,7 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
     auto currTime = gameapi -> timeSeconds(false);
     if (true || (currTime - tvState -> lastAttackTime) > 0.5f){
+      aiInterface.look(agent.id, towardTarget);
       aiInterface.fireGun(agent.id);
       tvState -> lastAttackTime = currTime;
       modlog("tv", "attack");

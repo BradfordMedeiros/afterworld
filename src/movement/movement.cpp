@@ -367,22 +367,6 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
 
-  // TODO
-  // ideally this rotation could just be a control request to the movement
-  // that being said, this kind of just bypasses it an sets to the rotation directly
-  // that's ... ok, but can run into bypassing constraints later on, hence it's really forcing it
-  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (id == activeId){
-      continue;
-    }
-    if (movementEntity.targetRotation.has_value()){
-        gameapi -> setGameObjectRot(movementEntity.playerId, movementEntity.targetRotation.value(), true); 
-        auto oldXYRot = pitchXAndYawYRadians(movementEntity.targetRotation.value());  // TODO - at least set this movement core area code.  at least call this "force". 
-        movementEntity.movementState.xRot = oldXYRot.x;
-        movementEntity.movementState.yRot = oldXYRot.y;    
-    }
-  }
-
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
       continue;
@@ -401,6 +385,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id), activeId == movementEntity.playerId);  
       auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
 
+      // not sure i should set the always here? 
       gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true);   // meh this should really come from the movement system (huh?)
       auto oldXYRot = pitchXAndYawYRadians(orientation);  // TODO - at least set this movement core area code.  at least call this "force". 
       movementEntity.movementState.xRot = oldXYRot.x;
@@ -409,6 +394,24 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
     }
   }
+
+  // TODO
+  // ideally this rotation could just be a control request to the movement
+  // that being said, this kind of just bypasses it an sets to the rotation directly
+  // that's ... ok, but can run into bypassing constraints later on, hence it's really forcing it
+  for (auto &[id, movementEntity] : movementEntityData.movementEntities){
+    if (id == activeId){
+      continue;
+    }
+    if (movementEntity.targetRotation.has_value()){
+        gameapi -> setGameObjectRot(movementEntity.playerId, movementEntity.targetRotation.value(), true); 
+        auto oldXYRot = pitchXAndYawYRadians(movementEntity.targetRotation.value());  // TODO - at least set this movement core area code.  at least call this "force". 
+        movementEntity.movementState.xRot = oldXYRot.x;
+        movementEntity.movementState.yRot = oldXYRot.y;    
+    }
+  }
+
+
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     movementEntity.movementState.moveVec = glm::vec3(0.f, 0.f, 0.f);
