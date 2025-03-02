@@ -7,6 +7,7 @@ extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
 
+
 struct TagUpdater {
 	std::string attribute;
 	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
@@ -545,9 +546,13 @@ std::vector<TagUpdater> tagupdates = {
 	  	auto attrHandle = getAttrHandle(id);
 			auto colorLow = getVec3Attr(attrHandle, "healthcolor-low");
 			auto colorHigh = getVec3Attr(attrHandle, "healthcolor");
+			auto colorTarget = getStrAttr(attrHandle, "healthcolor-target");
+			auto target = colorTarget.has_value() ? findBodyPart(id, colorTarget.value().c_str()) : std::nullopt;
+
 	  	tags.healthColorObjects[id] = HealthColorObject {
 	  		.lowColor = colorLow.has_value() ? colorLow.value(): glm::vec3(0.f, 0.f, 0.f),
 	  		.highColor = colorHigh.has_value() ? colorHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+	  		.target = target,
 	  	};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
@@ -563,7 +568,11 @@ std::vector<TagUpdater> tagupdates = {
 	  			healthColorObject.lowColor.b + ((healthColorObject.highColor.b - healthColorObject.lowColor.b) * percentageHealth),
 	  			1.f
 	  		);
-	  		setGameObjectTint(id, newColor);
+	  		if (healthColorObject.target.has_value()){
+		  		setGameObjectTint(healthColorObject.target.value(), newColor);
+	  		}else{
+		  		setGameObjectTint(id, newColor);
+	  		}
   		}
   	},
   	.onMessage = std::nullopt,

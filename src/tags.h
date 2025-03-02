@@ -14,6 +14,7 @@
 #include "./vector_gfx.h"
 #include "./switch.h"
 #include "./arcade/arcade.h"
+#include "./entity.h"
 
 struct CurrentPlayingData {
 	objid id;
@@ -42,6 +43,7 @@ struct EmissionObject {
 struct HealthColorObject {
 	glm::vec3 lowColor;
 	glm::vec3 highColor;
+	std::optional<objid> target;
 };
 
 struct ExplosionObj {

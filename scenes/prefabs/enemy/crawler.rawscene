@@ -14,12 +14,10 @@ enemy:physics_type:dynamic
 enemy:physics_shape:shape_sphere
 
 enemy:physics_mass:5
-enemy/doctor::tint:1 0 0 1
-enemy/doctor:disabled:true
-enemy/doctor:tint:1 0 1 1
+
+enemy/model:tint:0 0 1 1
 
 enemy:team:red
-enemy:health:130
 enemy:physics_damping_linear:0.9
 enemy:animation:crawler
 enemy:player:default
@@ -35,3 +33,7 @@ enemy:explode-radius:5
 
 
 enemy:scale:0.5 0.5 0.5
+enemy:health:130
+enemy:healthcolor:1 1 1
+enemy:healthcolor-low:1 0 0
+enemy:healthcolor-target:model

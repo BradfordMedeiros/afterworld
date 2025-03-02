@@ -25,6 +25,8 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
 bool controllableEntityExists(objid id);
 
+std::optional<objid> findBodyPart(objid entityId, const char* part);  // should move into a util
+
 std::optional<objid> getActivePlayerId();
 std::optional<objid> getCameraForThirdPerson();
 std::optional<bool> activePlayerInThirdPerson();

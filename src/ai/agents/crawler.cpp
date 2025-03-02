@@ -66,8 +66,6 @@ void doGoalCrawlerAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     if (glm::distance(agentPos, targetPosition) < 1.5f){
       aiInterface.doDamage(agent.id, 10000.f); 
     }
-
-
   }
 }
 void onAiCrawlerAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
