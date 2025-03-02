@@ -86,8 +86,6 @@ void addAnimationController(StateController& controller){
    			.animationBehavior = LOOP,
    		},
    	}
-
-
   );
 
 	addN2Transitions(
@@ -107,6 +105,91 @@ void addAnimationController(StateController& controller){
 			StateAndTransition { .state = "jump", .transition = "jump" },
 
 			//StateAndTransition { .state = "fire-rifle", .transition = "fire-rifle" }, // this requires animations layers
-
 	});
+
+
+////////////
+  addStateController(
+   	controller, 
+   	"crawler",
+   	{},
+   	{
+   		// basic movement animations
+   		ControllerStateAnimation {
+   			.state = getSymbol("idle"),
+   			.animation = "crawl", // make this idle
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("sidestep-right"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("sidestep-left"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+
+   		/////// misc 
+   		ControllerStateAnimation {
+   			.state = getSymbol("jump"),
+   			.animation = "jump",
+   			.animationBehavior = FORWARDS,
+   		},
+   		
+   		// gun animations 
+   		ControllerStateAnimation {
+   			.state = getSymbol("fire-rifle"),
+   			.animation = "rifle-fire",
+   			.animationBehavior = LOOP,
+   		},
+   		
+   		ControllerStateAnimation {
+   			.state = getSymbol("idle-rifle"),
+   			.animation = "crawl", // make this idle
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking-rifle"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("strafe-right-rifle"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("strafe-left-rifle"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+   	}
+  );
+
+	addN2Transitions(
+		controller, 
+		"crawler", 
+		{ 
+			StateAndTransition { .state = "idle", .transition = "not-walking" },
+			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
+			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
+			StateAndTransition { .state = "walking", .transition = "walking" },
+
+			StateAndTransition { .state = "idle-rifle", .transition = "not-walking-rifle" },
+			StateAndTransition { .state = "strafe-right-rifle", .transition = "sidestep-right-rifle" },
+			StateAndTransition { .state = "strafe-left-rifle", .transition = "sidestep-left-rifle" },
+			StateAndTransition { .state = "walking-rifle", .transition = "walking-rifle" },
+
+			StateAndTransition { .state = "jump", .transition = "jump" },
+
+			//StateAndTransition { .state = "fire-rifle", .transition = "fire-rifle" }, // this requires animations layers
+	});
+
 }

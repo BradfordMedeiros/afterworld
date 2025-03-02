@@ -12,7 +12,7 @@ struct AIInterface {
   std::function<void(objid agentId, const char* gun)> changeGun;
   std::function<void(objid agentId, const char* profile)> changeTraits;
   std::function<void(objid agentId, const char* animation, AnimationType animationType)> playAnimation;
-
+  std::function<void(objid agentId, float amount)> doDamage;
 };
 
 enum AgentType { AGENT_BASIC_AGENT, AGENT_TURRET, AGENT_TV, AGENT_CRAWLER };

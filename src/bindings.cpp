@@ -928,7 +928,8 @@ AIInterface aiInterface {
   },
   .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
     gameapi -> playAnimation(agentId, animation, animationType);
-  }
+  },
+  .doDamage = doDamageMessage,
 };
 
 float querySelectDistance(){

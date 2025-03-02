@@ -15,7 +15,7 @@ enemy:goal:idle-enemy
 enemy:goal-type:idle
 enemy:goal-value:2
 
-enemy:player:default
+enemy:player:tv
 enemy:agent:tv
 enemy:agent-target:blue
 enemy:goal-info:target
