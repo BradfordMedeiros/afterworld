@@ -11,7 +11,8 @@ void setGameObjectTexture(objid id, std::string texture);
 struct TvAiState {
   std::optional<float> activateTime;
   float lastAttackTime;
-  bool changedGun = false;
+  bool changedGun;
+  bool usingDefaultTraits;
 };
 
 std::any createTvAgent(objid id){
@@ -19,6 +20,7 @@ std::any createTvAgent(objid id){
 		.activateTime = std::nullopt,
     .lastAttackTime = 0.f,
     .changedGun = false,
+    .usingDefaultTraits = false,
 	};
 }
 
@@ -95,16 +97,21 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   static int attackTargetGoal = getSymbol("attack-target");
 
   if (goal.goaltype == idleGoal){
-
-    aiInterface.changeTraits(agent.id, "default");
+    if (!tvState -> usingDefaultTraits){
+      tvState -> usingDefaultTraits = true;
+      aiInterface.changeTraits(agent.id, "default");
+    }
+    aiInterface.stopMoving(agent.id);
 
   }else if (goal.goaltype == attackTargetGoal){
-
-    aiInterface.changeTraits(agent.id, "tv");
+    if (tvState -> usingDefaultTraits){
+      tvState -> usingDefaultTraits = false;
+      aiInterface.changeTraits(agent.id, "tv");
+    }
 
     if (!tvState -> changedGun){
       tvState -> changedGun = true;
-      aiInterface.changeGun(agent.id, "scrapgun");
+      aiInterface.changeGun(agent.id, "pistol");
     }
 
   	float currentTime = gameapi -> timeSeconds(false);

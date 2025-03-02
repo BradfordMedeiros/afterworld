@@ -13,7 +13,7 @@ struct Spawnpoint {
 };
 
 int spawnFromAllSpawnpoints(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag);
-bool spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag);
+bool spawnFromRandomSpawnpoint(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, const char* tag, std::set<objid> excludeSpawnpoints);
 void removeAllSpawnedEntities();
 int numberOfSpawnManaged(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints);
 

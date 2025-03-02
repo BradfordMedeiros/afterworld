@@ -368,7 +368,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'M' && action == 0){
-    spawnFromRandomSpawnpoint(director.managedSpawnpoints, "red");
+    spawnFromRandomSpawnpoint(director.managedSpawnpoints, "red", {});
   }else if (key == ',' && action == 0){
     spawnFromAllSpawnpoints(director.managedSpawnpoints, "red");
   }else if (key == '.' && action == 0){
