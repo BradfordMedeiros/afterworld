@@ -50,6 +50,10 @@ struct ExplosionObj {
 	float time;
 };
 
+struct LinkGunObj {
+
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -59,6 +63,7 @@ struct Tags {
 	std::unordered_map<objid, HealthColorObject> healthColorObjects;
 	std::set<objid> teleportObjs;
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
+	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, ManagedRecording> recordings;
 	Switches switches;
 
