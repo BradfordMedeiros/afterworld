@@ -55,6 +55,7 @@ void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, s
 void setEntityTargetRotation(MovementEntityData& movementEntityData, objid id, std::optional<glm::quat> rotation);
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId);
 
+void changeMovementEntityType(MovementEntityData& movementEntityData, objid id, std::string name);
 bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id);
 

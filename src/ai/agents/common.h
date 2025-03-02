@@ -10,6 +10,7 @@ struct AIInterface {
   std::function<void(objid agentId, glm::quat dir)> look;
   std::function<void(objid agentId)> fireGun;
   std::function<void(objid agentId, const char* gun)> changeGun;
+  std::function<void(objid agentId, const char* profile)> changeTraits;
   std::function<void(objid agentId, const char* animation, AnimationType animationType)> playAnimation;
 
 };

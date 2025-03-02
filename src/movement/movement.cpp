@@ -115,18 +115,18 @@ void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid en
   }
 }
 
+
+void setMovementEntityParams(MovementEntity& movementEntity, objid id, std::string& name){
+  loadMovementCore(name);
+  movementEntity.moveParams = findMovementCore(name);
+  modassert(movementEntity.moveParams, "could not find movement core");
+  setGameObjectPhysics(id, movementEntity.moveParams -> physicsMass, movementEntity.moveParams -> physicsRestitution, movementEntity.moveParams -> friction, movementEntity.moveParams -> gravity);
+}
 MovementEntity createMovementEntity(objid id, std::string& name){
   MovementEntity movementEntity {
     .playerId = id,
   };
   movementEntity.movementState = getInitialMovementState(movementEntity.playerId);
-
-  loadMovementCore(name);
-  movementEntity.moveParams = findMovementCore(name);
-  modassert(movementEntity.moveParams, "could not find movement core");
-  movementEntity.movementState.lastMoveSoundPlayTime = 0.f;
-  movementEntity.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
-
   movementEntity.managedCamera = ThirdPersonCameraInfo {
     .thirdPersonMode = false,
     .distanceFromTarget = -5.f,
@@ -138,9 +138,15 @@ MovementEntity createMovementEntity(objid id, std::string& name){
     .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
     .reverseCamera = false,
   };
-
-  setGameObjectPhysics(id, movementEntity.moveParams -> physicsMass, movementEntity.moveParams -> physicsRestitution, movementEntity.moveParams -> friction, movementEntity.moveParams -> gravity);
+  movementEntity.movementState.lastMoveSoundPlayTime = 0.f;
+  movementEntity.movementState.lastMoveSoundPlayLocation = glm::vec3(0.f, 0.f, 0.f);
+  setMovementEntityParams(movementEntity, id, name);
   return movementEntity;
+}
+
+void changeMovementEntityType(MovementEntityData& movementEntityData, objid id, std::string name){
+  MovementEntity& movementEntity = movementEntityData.movementEntities.at(id);
+  setMovementEntityParams(movementEntity, id, name);
 }
 
 bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id){

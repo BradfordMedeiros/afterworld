@@ -95,30 +95,12 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   static int attackTargetGoal = getSymbol("attack-target");
 
   if (goal.goaltype == idleGoal){
-    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
-    auto groundHeight = heightAboveGround(agent);
-    auto amountToMoveY = !groundHeight.has_value() ? 0.f : (1.f - groundHeight.value());
-    if (amountToMoveY < -10.f){
-      amountToMoveY = -10.f;
-    }
-    if (amountToMoveY > 10.f){
-      amountToMoveY = 10.f;
-    }
 
-    auto newPosition = glm::vec3(agentPos.x + 0.02f /* if this is not added it causes NaN somewhere.... wtf*/, agentPos.y + amountToMoveY, agentPos.z);
-
-    if (glm::distance(newPosition, agentPos) > 0.01f){
-       aiInterface.move(agent.id, newPosition, 1.f);
-    }
-
-
-    modlog("tv pos groundHeight", std::to_string(!groundHeight.has_value() ? 0.f : groundHeight.value()));
-    modlog("tv pos amountToMoveY", std::to_string(amountToMoveY));
-    modlog("tv pos agentPos", print(agentPos));
-    modlog("tv pos newPos", print(newPosition));
-
+    aiInterface.changeTraits(agent.id, "default");
 
   }else if (goal.goaltype == attackTargetGoal){
+
+    aiInterface.changeTraits(agent.id, "tv");
 
     if (!tvState -> changedGun){
       tvState -> changedGun = true;

@@ -923,6 +923,9 @@ AIInterface aiInterface {
   .changeGun = [](objid agentId, const char* gun) -> void {
     maybeChangeGun(getWeaponState(weapons, agentId), gun,  agentId /*inventory */);
   },
+  .changeTraits = [](objid agentId, const char* profile) -> void {
+    changeMovementEntityType(getMovementData(), agentId, profile);
+  },
   .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
     gameapi -> playAnimation(agentId, animation, animationType);
   }
