@@ -281,28 +281,6 @@ void printDebugSpawnpoint(){
 	}
 }
 
-void addNObjects(objid sceneId, int width, int height, int depth){
-	for (int x = 0; x < width; x++){
-		for (int z = 0; z < depth; z++){
-			for (int y = 0; y < height; y++){
-				float xoffset = 2.5f * x;
-				float yoffset = 2.5f * y;
-				float zoffset = 2.5f * z;
-  			GameobjAttributes attr {
-  			  .attr = {
-						{ "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
-						{ "position", glm::vec3(xoffset, yoffset, zoffset) },
-				  	{ "scale", glm::vec3(1.f, 1.f, 1.f) },
-  			  },
-  			};
-  			std::map<std::string, GameobjAttributes> submodelAttributes;
-  			auto name = std::string("debug-obj-") + std::to_string(getUniqueObjId());
-  			gameapi -> makeObjectAttr(sceneId, name, attr, submodelAttributes);		
-			}
-		}
-	}
-}
-
 void raiseTurret(objid id, bool raiseUp);
 void wakeUpTv(objid id, bool active);
 
@@ -346,15 +324,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	visualizationDistance += 1.f;
   }
 
-  /*if (key == 'I' && action == 0){
-  	static std::optional<objid> sceneId;
-  	if (sceneId.has_value()){
-  		gameapi -> unloadScene(sceneId.value());
-  	}
-    sceneId = gameapi -> loadScene("../afterworld/scenes/empty.rawscene", {}, std::nullopt, {});
-  	addNObjects(sceneId.value(), 4, 4, 4);
-  }*/
-  
 	auto args = gameapi -> getArgs();
 	auto printKey = args.find("printkey") != args.end();
   if (printKey){
