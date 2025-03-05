@@ -1243,10 +1243,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-    auto hasInputKey = gameapi -> unlock("input", id);
-    if (!hasInputKey){
-      return;
-    }
     if (action == 1){
       auto playerId = controlledPlayer.playerId;
       if (isPauseKey(key)){
