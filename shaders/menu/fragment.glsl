@@ -8,6 +8,8 @@ in vec4 sshadowCoord;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
+layout(location = 2) out vec4 EncodeId;
+layout(location = 3) out vec4 UVCoords;
 
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
@@ -57,7 +59,9 @@ uniform float realtime;
 uniform float bloomThreshold;
 //uniform vec3 mouseCoordVal;
 uniform bool enableAttenutation;
-uniform bool enableVoxelLighting;
+
+//uniform int textureid;
+//uniform vec4 encodedid;
 
 
 
@@ -72,7 +76,7 @@ float calcAttenutation(int lightNumber){
   float constant = attenuationTerms.x;
   float linear = attenuationTerms.y;
   float quadratic = attenuationTerms.z;
-  float attenuation = enableVoxelLighting && enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;
+  float attenuation = enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;
   return attenuation;
 }
 
@@ -230,6 +234,9 @@ float noise(in vec2 st){
 }
 
 void main(){
+    //EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
+    //UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
+    
     if (hasCubemapTexture){
       FragColor = tint * texture(cubemapTexture, FragPos);
       return;

@@ -9,6 +9,9 @@ in vec3 ambientVoxelColor;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
+layout(location = 2) out vec4 EncodeId;
+layout(location = 3) out vec4 UVCoords;
+
 
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
@@ -53,6 +56,8 @@ uniform vec3 emissionAmount;
 uniform float discardTexAmount;
 uniform float bloomThreshold;
 
+//uniform int textureid;
+//uniform vec4 encodedid;
 
 // numCellsDim ^ 3 = voxelLightSize
 // https://stackoverflow.com/questions/20647207/glsl-replace-large-uniform-int-array-with-buffer-or-texture
@@ -144,6 +149,10 @@ vec2 scrollWater(vec2 coords){
 }
 
 void main(){
+    //EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
+    //UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
+    
+
     if (hasCubemapTexture){
       FragColor = tint * texture(cubemapTexture, FragPos);
       return;
