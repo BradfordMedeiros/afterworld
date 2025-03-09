@@ -291,10 +291,12 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'T' && action == 1){
-  	static bool raiseUp = false;
-  	raiseUp = !raiseUp;
-  	raiseTurret(getActivePlayerId().value(), raiseUp);
-  	wakeUpTv(getActivePlayerId().value(), raiseUp);
+  	if (getActivePlayerId().has_value()){
+  		static bool raiseUp = false;
+  		raiseUp = !raiseUp;
+  		raiseTurret(getActivePlayerId().value(), raiseUp);
+  		wakeUpTv(getActivePlayerId().value(), raiseUp);  		
+  	}
   }
 
   if (!getArgEnabled("dev")){
