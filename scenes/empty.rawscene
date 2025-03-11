@@ -36,3 +36,8 @@ amp:healthcolor-low:1 0 0
 
 
 !light:position:-22 -27.0 -0.2
+
+skeeball:position:18 -27.7 0
+skeeball:mesh:../gameresources/build/uncategorized/skeeball.gltf
+skeeball:physics:enabled
+skeeball:physics_shape:shape_exact

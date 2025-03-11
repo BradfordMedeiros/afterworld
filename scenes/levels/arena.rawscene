@@ -31,18 +31,19 @@ playerspawn:position:-20 0 0
 playerspawn:teleport:true
 
 
-spawnpoint-0:position:10 0 0
-spawnpoint-0:spawn:crawler
-spawnpoint-0:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#spawnpoint-0:position:10 0 0
+#spawnpoint-0:spawn:crawler
+#spawnpoint-0:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+
 #
 #spawnpoint-1:position:0 0 0
 #spawnpoint-1:spawn:enemy 
 #spawnpoint-1:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
 
 ##
-#spawnpoint-2:position:-10 0 0
-#spawnpoint-2:spawn:turret 
-#spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+spawnpoint-2:position:-10 0 0
+spawnpoint-2:spawn:tv 
+spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
 
 
 

@@ -629,7 +629,7 @@ Props navListProps {
     },
     PropPair {
       .symbol = yoffsetSymbol,
-      .value = 0.98f,  
+      .value = 0.f,  
     }
   }
 };

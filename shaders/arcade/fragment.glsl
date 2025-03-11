@@ -8,8 +8,8 @@ uniform vec4 tint;
 uniform vec4 encodedid;
 uniform float time;
 
-uniform vec2 resolution;
-uniform vec2 shipPosition;
+uniform vec2 _resolution;
+uniform vec2 _shipPosition;
 
 
 layout (location = 0) out vec4 FragColor;
@@ -25,11 +25,11 @@ void main(){
   vec4 texColor = texture(textureData, vec2(TexCoord.x, TexCoord.y));
 
 
-  vec2 lightLocation = vec2(0.5 * (shipPosition.x + 1), 0.5 * (shipPosition.y + 1));
+  vec2 lightLocation = vec2(0.5 * (_shipPosition.x + 1), 0.5 * (_shipPosition.y + 1));
 
   //vec2 lightLocation = vec2(0.5 * (1 + cos(time)), 0.5);
 
-  vec2 locNdi = vec2(gl_FragCoord.x / resolution.x, gl_FragCoord.y / resolution.y);
+  vec2 locNdi = vec2(gl_FragCoord.x / _resolution.x, gl_FragCoord.y / _resolution.y);
   float distanceToLight = (1 / (3 * distance(locNdi, lightLocation)));
   vec4 lightColor = vec4(distanceToLight, distanceToLight, distanceToLight, 1);
 

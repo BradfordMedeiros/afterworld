@@ -97,7 +97,7 @@ void shaderUpdateResolution(unsigned int* shaderId, glm::vec2* lastResolution, o
   	*lastResolution = resolution;
 	  std::cout << "shaderSetResolution: " << print(resolution) << std::endl;
 		UniformData uniformData {
-		 	.name = "resolution",
+		 	.name = "_resolution",
 		 	.value = resolution,
 		};
   	gameapi -> setShaderUniform(*shaderId, uniformData);
@@ -407,7 +407,7 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
 
 	shaderUpdateResolution(invaders.shaderId, &invaders.lastResolution, invaders.id);
 	UniformData uniformData {
-	 	.name = "shipPosition",
+	 	.name = "_shipPosition",
 	 	.value = getShipPosition(invaders),
 	};
   gameapi -> setShaderUniform(*invaders.shaderId, uniformData);
