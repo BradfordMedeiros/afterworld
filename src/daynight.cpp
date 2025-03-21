@@ -30,7 +30,7 @@ void spawnLight(objid sceneId, glm::vec3 color){
     },
   };
 
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   gameapi -> makeObjectAttr(sceneId, "!code-debuglight", attr, submodelAttributes);
 }
 

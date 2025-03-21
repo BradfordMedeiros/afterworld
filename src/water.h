@@ -6,7 +6,7 @@
 #include "./global.h"
 
 struct Water {
-	std::unordered_map<objid, std::set<objid>> objectsInWater;
+	std::map<objid, std::set<objid>> objectsInWater;
 };
 
 void onCollisionEnterWater(Water& water, int32_t obj1, int32_t obj2);

@@ -30,7 +30,7 @@ objid createSound(objid sceneId, std::string soundObjName, std::string clip){
       { "center", "true" },
     },
   };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   auto soundObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
   modassert(soundObjId.has_value(), "sound already exists in scene: " + std::to_string(sceneId));
   return soundObjId.value();
@@ -72,7 +72,7 @@ void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::strin
     attr.attr["texture"] = texture;
 
     auto soundObjName = std::string("code-texture") + uniqueNameSuffix();
-    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    std::map<std::string, GameobjAttributes> submodelAttributes;
     auto textureObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
     modassert(textureObjId.has_value(), "obj already exists in scene: " + std::to_string(sceneId));   
     soundIds.push_back(textureObjId.value()); 
@@ -185,7 +185,7 @@ void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // 
         { "position", glm::vec3(10000.f, -10000.f, 10000.f) },
       }
     };
-    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    std::map<std::string, GameobjAttributes> submodelAttributes;
     auto id = gameapi -> makeObjectAttr(sceneId, std::string("cached-model") + uniqueNameSuffix(), attr, submodelAttributes);
     newIds.push_back(id.value());
 

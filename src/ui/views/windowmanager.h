@@ -17,7 +17,7 @@ struct WindowData {
   bool vertical;
 };
 
-extern std::unordered_map<int, WindowData> windowData;
+extern std::map<int, WindowData> windowData;
 
 bool windowEnabled(int symbol);
 void windowSetEnabled(int symbol, bool enable, glm::vec2 initialPos = glm::vec2(0.f, 0.f));

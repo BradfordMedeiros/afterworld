@@ -35,7 +35,7 @@ void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponPa
       .attr = { { "clip", weaponParams.soundpath }, { "physics", "disabled" }},
     };
     std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
-    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    std::map<std::string, GameobjAttributes> submodelAttributes;
     auto clipObjectId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
     modassert(clipObjectId.has_value(), "load weapon core sound, could not create clip obj");
     SoundResource soundResource {
@@ -161,7 +161,7 @@ WeaponParams queryWeaponParams(std::string gunName){
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName, std::function<objid(objid)> getWeaponParentId){
-  std::unordered_map<std::string, AttributeValue> attrAttributes = { 
+  std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
     { "layer", "no_depth" },
     { "rotation", weaponParams.initialGunRotVec4 },
@@ -175,7 +175,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   GameobjAttributes attr {
     .attr = attrAttributes,
   };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   submodelAttributes["sight"] = GameobjAttributes{};
   submodelAttributes.at("sight").attr["tint"] = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
@@ -199,7 +199,7 @@ std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams,
     return std::nullopt;
   }
 
-  std::unordered_map<std::string, AttributeValue> attrAttributes = { 
+  std::map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
     //{ "rotation", glm::vec4(-1.f, 0.f, 0.f, 180.f) }, // the default rotation here should probably be set to be relative to the parent but forward...doesnt matter since update hand pos abs elsewhere
     { "position", glm::vec3(0.f, 0.0f, -0.5f) },
@@ -209,7 +209,7 @@ std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams,
 
   };
   GameobjAttributes attr { .attr = attrAttributes };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
   modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
 

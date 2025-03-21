@@ -270,7 +270,7 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
 			{ "texture", "./res/textures/testgradient2.png" },
 		}
   };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   auto id = gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
 }
 

@@ -18,7 +18,7 @@ struct TextDisplay {
 
 
 struct InGameUi {
-	std::unordered_map<objid, TextDisplay> textDisplays;
+	std::map<objid, TextDisplay> textDisplays;
 };
 
 void setShowSelectionTexture(bool shouldShow);

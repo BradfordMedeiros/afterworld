@@ -155,8 +155,6 @@ void clearInvadersState(Invaders& invaders){
 }
 
 void rmInvadersInstance(std::any& any){
-  Invaders* invadersPtr = anycast<Invaders>(any);
-	gameapi -> unloadShader(*invadersPtr -> shaderId);
 }
 
 void createInvadersBullet(Invaders& invaders, glm::vec2 position, glm::vec2 direction){
@@ -414,23 +412,17 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
 	};
   gameapi -> setShaderUniform(*invaders.shaderId, uniformData);
 
-  // gameapi -> bindTexture(*invaders.shaderId, "_secondTexture", gameapi -> getTextureSamplerId(textureName));
-  
-  //std::string textureName("./res/textures/wood.jpg");
-  //modassert(textureSampleId.has_value(), "invaders texture sampler no value");
+  std::string textureName("./res/textures/wood.jpg");
+  auto textureSampleId = gameapi -> getTextureSamplerId(textureName);
+  modassert(textureSampleId.has_value(), "invaders texture sampler no value");
 
 	UniformData uniformTextureData {
-	 	.name = "_overlayTexture",
+	 	.name = "overlayTexture",
 	 	.value = Sampler2D { 
-  		.textureUnitId = 7,
+  		.textureUnitId = textureSampleId.value(),
 		},
 	};
   gameapi -> setShaderUniform(*invaders.shaderId, uniformTextureData);
-
-  std::string texName("./res/textures/wood.jpg");
-  auto textureSampleId = gameapi -> getTextureSamplerId(texName);
-  gameapi -> bindTexture(*invaders.shaderId, 7, textureSampleId.value());
-
 
   if (invaders.state == TITLE){
    	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", ShapeOptions { .shaderId = *invaders.shaderId  });

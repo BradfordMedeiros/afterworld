@@ -23,7 +23,7 @@ void spawnProcMesh(objid sceneId){
 	  	{ "scale", glm::vec3(1.f, 1.f, 1.f) },
     },
   };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
 }
 
@@ -78,7 +78,7 @@ void handleSimpleOnFrame(){
 	}
 }
 
-std::optional<PrintObjDebug> getPrintObjDebug(std::unordered_map<std::string, std::string>& args){
+std::optional<PrintObjDebug> getPrintObjDebug(std::map<std::string, std::string>& args){
 	if (args.find("printdebug") == args.end()){
 		return std::nullopt;
 	}

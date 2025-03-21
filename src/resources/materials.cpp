@@ -43,7 +43,7 @@ std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
 
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   for (auto &row : result){
     auto particleAttr = particleAttributes(row.at(1));
     auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + row.at(0), particleAttr, submodelAttributes);
@@ -84,7 +84,7 @@ std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleS
 	}
 
   modlog("particle", particleStr);
-	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+	std::map<std::string, GameobjAttributes> submodelAttributes;
   auto particleAttr = particleAttributes(particleStr);
   auto particleId = gameapi -> makeObjectAttr(sceneId, emitterName, particleAttr, submodelAttributes);
   modassert(particleId.has_value(), "create particle emitter - could not create emitter (probably duplicate name)");
@@ -109,7 +109,7 @@ void loadParticleEmitters(objid rootSceneId){
 
   modlog("load particle emitters", "start");
 
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   for (auto &row : result){
     auto particleAttr = particleAttributes(row.at(1));
     auto materialEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + row.at(0), particleAttr, submodelAttributes);

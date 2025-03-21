@@ -18,7 +18,7 @@ void changeWeather(Weather& weather, std::string name, objid sceneId){
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
 
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   GameobjAttributes particleAttr {
     .attr = { 
       { "state", "enabled" },    

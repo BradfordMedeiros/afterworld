@@ -3,8 +3,8 @@
 extern CustomApiBindings* gameapi;
 
 struct Node {
-  std::unordered_map<std::string, std::string> transitionNameToNode;
-  std::unordered_map<std::string, std::string> properties;  
+  std::map<std::string, std::string> transitionNameToNode;
+  std::map<std::string, std::string> properties;  
 };  
 
 struct NodeTransition {
@@ -36,8 +36,8 @@ std::set<std::string> allNodeNames(DialogData& data){
   return nodes;
 }
 
-std::unordered_map<std::string, std::string> allTransitions(DialogData& data, std::string nodename){
-  std::unordered_map<std::string, std::string> transitions;
+std::map<std::string, std::string> allTransitions(DialogData& data, std::string nodename){
+  std::map<std::string, std::string> transitions;
   for (auto transition : data.transitions){
     if (transition.nodeFrom == nodename){
       transitions[transition.transition] = transition.nodeTo;
@@ -46,8 +46,8 @@ std::unordered_map<std::string, std::string> allTransitions(DialogData& data, st
   return transitions;
 }
 
-std::unordered_map<std::string, std::string> allProperties(DialogData& data, std::string nodename){
-  std::unordered_map<std::string, std::string> properties;
+std::map<std::string, std::string> allProperties(DialogData& data, std::string nodename){
+  std::map<std::string, std::string> properties;
   for (auto property : data.properties){
     if (property.node == nodename){
       properties[property.key] = property.value;
@@ -108,8 +108,8 @@ DialogData deserializeDialogData(){
   return data;
 }
 
-std::unordered_map<std::string, Node> createDialogTree(DialogData data){
-  std::unordered_map<std::string, Node> dialogTree;
+std::map<std::string, Node> createDialogTree(DialogData data){
+  std::map<std::string, Node> dialogTree;
   for (auto nodename : allNodeNames(data)){
     assert(dialogTree.find(nodename) == dialogTree.end());
     dialogTree[nodename] = Node {
@@ -120,7 +120,7 @@ std::unordered_map<std::string, Node> createDialogTree(DialogData data){
   return dialogTree;
 }
 
-std::string getNodeInfo(std::string name, Node& node, std::unordered_map<std::string, std::string>& properties){
+std::string getNodeInfo(std::string name, Node& node, std::map<std::string, std::string>& properties){
   std::string valueStr = name + "\n";
   for (auto &[key, value] : properties){
     valueStr = valueStr + " " + key + " - " +  value + "\n" ;
@@ -128,7 +128,7 @@ std::string getNodeInfo(std::string name, Node& node, std::unordered_map<std::st
   return valueStr;
 }
 
-void dumpDotFormat(std::unordered_map<std::string, Node>& dialogTree){
+void dumpDotFormat(std::map<std::string, Node>& dialogTree){
   std::string text = "strict graph {\n";
 
   std::set<std::string> nodesInGraph;
@@ -155,7 +155,7 @@ void dumpDotFormat(std::unordered_map<std::string, Node>& dialogTree){
 }
 
 
-std::optional<std::unordered_map<std::string, Node>> dialogTree = std::nullopt;
+std::optional<std::map<std::string, Node>> dialogTree = std::nullopt;
 
 std::optional<Node*> nodeForTransition(std::string fromNode, std::string transition){
 	Node& node = dialogTree.value().at(fromNode);
