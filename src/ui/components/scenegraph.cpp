@@ -72,8 +72,8 @@ Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds){
 	auto depGraph = filterScenegraph(gameapi -> scenegraph());
 
 	std::vector<ScenegraphItem> scenegraphItems = {};
-	std::map<objid, objid> childToParent = {};
-	std::map<objid, std::string> idToName = {};
+	std::unordered_map<objid, objid> childToParent = {};
+	std::unordered_map<objid, std::string> idToName = {};
 	std::set<objid> idToExpanded = {};
 
 	std::cout << "dep graph: " << std::endl;
@@ -85,7 +85,7 @@ Scenegraph createScenegraph(std::set<objid> initiallyExpandedIds){
 	std::cout << std::endl;
 
 
-	std::map<objid, std::vector<int>> idToScenegraphItemPath = {};
+	std::unordered_map<objid, std::vector<int>> idToScenegraphItemPath = {};
 	const int LOOPMAX = 10000;
 	int i = 0;
 

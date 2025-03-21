@@ -363,7 +363,7 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
       { "position", pos },
     },
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
   return gameapi -> makeObjectAttr(
     sceneId, 
     std::string("[prefab-instance-") + uniqueNameSuffix(), 

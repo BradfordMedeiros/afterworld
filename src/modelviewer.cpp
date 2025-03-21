@@ -87,7 +87,7 @@ void changeObject(ModelViewerData& modelViewer, objid id){
   GameobjAttributes attr = {
     .attr = {{ "mesh", model }},
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
   modelViewer.viewer.managedObject = gameapi -> makeObjectAttr(
    	gameapi -> listSceneId(id), 
    	std::string("model-viewer-") + uniqueNameSuffix(), 
@@ -112,7 +112,7 @@ void changeObject(ParticleViewerData& particleViewer, objid id){
   GameobjAttributes attr = {
     .attr = {{ "scene", scene }},
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
   particleViewer.viewer.managedObject = gameapi -> makeObjectAttr(
     gameapi -> listSceneId(id), 
     std::string("[particle-viewer"), 

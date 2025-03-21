@@ -171,7 +171,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
 
 
 
-  std::map<std::string, Component> routeToComponent = {
+  std::unordered_map<std::string, Component> routeToComponent = {
     { "mainmenu/",  mainMenu },
     { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.125f)) },
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
@@ -251,17 +251,17 @@ UiManagerContext uiManagerContext {
 
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createCamera = []() -> void {
-    std::map<std::string, GameobjAttributes> submodelAttributes;
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createLight = []() -> void {
-    std::map<std::string, GameobjAttributes> submodelAttributes;
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createNavmesh = []() -> void {
-    std::map<std::string, GameobjAttributes> submodelAttributes;
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
   },

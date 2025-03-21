@@ -187,7 +187,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
   addToRace(id.value());
 
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id.value()), std::string(">gen-player-camera-") + uniqueNameSuffix(), attr, submodelAttributes).value();
   gameapi -> makeParent(cameraId, id.value());
   controlledPlayer.activePlayerManagedCameraId = cameraId;

@@ -139,7 +139,7 @@ std::function<bool()> createShouldBeCollapse(const char* value){
   return [value]() -> bool { return collapseValues.at(value); };
 }
 
-std::map<std::string, std::string> textStore;
+std::unordered_map<std::string, std::string> textStore;
 enum TextEditType { 
   TEXT_TYPE_STRING, 
   TEXT_TYPE_NUMBER, TEXT_TYPE_POSITIVE_NUMBER, TEXT_TYPE_INTEGER, TEXT_TYPE_POSITIVE_INTEGER,

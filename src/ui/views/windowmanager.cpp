@@ -7,7 +7,7 @@ const int windowFileExplorerSymbol = getSymbol("window-fileexplorer");
 const int windowImageExplorerSymbol = getSymbol("window-imageexplorer");
 const int windowDialogSymbol = getSymbol("window-dialogsymbol");
 
-std::map<int, WindowData> windowData = {};
+std::unordered_map<int, WindowData> windowData = {};
 
 bool windowEnabled(int symbol){
   return windowData.find(symbol) != windowData.end();

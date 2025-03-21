@@ -228,7 +228,7 @@ objid addWaterObj(objid sceneId){
 			{ "shader", "../afterworld/shaders/water/fragment.glsl,../afterworld/shaders/water/vertex.glsl" },
 		}
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   auto id = gameapi -> makeObjectAttr(sceneId, "generatedMesh", attr, submodelAttributes);
   return id.value();
 }
