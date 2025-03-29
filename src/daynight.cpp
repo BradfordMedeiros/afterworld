@@ -25,7 +25,7 @@ void spawnLight(objid sceneId, glm::vec3 color){
     .attr = {
       { "position", glm::vec3(0.f, 50.f, 0.f) },
       { "color", color },
-      { "voxelsize", 3 },
+      { "voxelsize", 3.f },
       { "attenuation", glm::vec3(0.8f, 0.f, 0.f) }
     },
   };

@@ -375,8 +375,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig { // Snap Translates
         .options = { "0.01", "0.1", "0.5", "1", "5" },
-        .onClick = optionsOnClick("editor", "snaptranslate-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
+        .onClick = optionsOnClick("editor", "snaptranslate-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
       },
       DockCheckboxConfig {
         .label = "Preserve Scale",
@@ -385,8 +385,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig {  // "Snap Scales",
         .options = { "0.01", "0.1", "0.5", "1", "5" },
-        .onClick = optionsOnClick("editor", "snapscale-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale-index", { 0.0, 1.0, 2.0, 3.0, 4.0 }),
+        .onClick = optionsOnClick("editor", "snapscale-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
       },
       DockCheckboxConfig {
         .label = "Absolute Rotation",
@@ -395,8 +395,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig { // Snap Rotation
         .options = { "1", "5", "15", "30", "45", "90", "180" },
-        .onClick = optionsOnClick("editor", "snapangle-index", { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle-index", { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }),
+        .onClick = optionsOnClick("editor", "snapangle-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
       },
     },
   },
