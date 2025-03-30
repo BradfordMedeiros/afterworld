@@ -1075,7 +1075,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     ensurePrecachedModels(
       gameapi -> rootSceneId(),
     { 
-      "/home/brad/Desktop/testmodel/scene.gltf" /* br*/, 
       "../gameresources/build/weapons/scrapgun.gltf",
       "../gameresources/build/weapons/electrogun.gltf",
       "../gameresources/build/weapons/fork.gltf",

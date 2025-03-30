@@ -9,7 +9,7 @@ menu:scrollspeed:0 0.02 0
 menu:background:true
 
 
-&music:clip:/home/brad/Desktop/bones2.wav
+&music:clip:../gameresources/sound/theme.wav
 &music:autoplay:true
 &music:volume:5
 

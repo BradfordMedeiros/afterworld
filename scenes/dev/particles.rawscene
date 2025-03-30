@@ -1,8 +1,5 @@
 
 
-&music:clip:/home/brad/Desktop/music.wav
-&music:volume:0
-
 viewer:script:native/particleviewer
 
 viewer:position:0 0 -25

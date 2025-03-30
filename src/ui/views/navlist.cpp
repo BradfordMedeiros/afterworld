@@ -481,7 +481,7 @@ std::vector<NestedListItem> nestedListTest = {
             .item = ImListItem {
               .value = "dark-trippy",
               .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/test3.png");
+                setMenuBackground("../gameresources/textures/backgrounds/test3.png");
               },
               .mappingId = mappingId++,
             },
@@ -491,7 +491,7 @@ std::vector<NestedListItem> nestedListTest = {
             .item = ImListItem {
               .value = "dark-trippy-invert",
               .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/test5.png");
+                setMenuBackground("../gameresources/textures/backgrounds/test5.png");
               },
               .mappingId = mappingId++,
             },
@@ -499,29 +499,9 @@ std::vector<NestedListItem> nestedListTest = {
           },
           NestedListItem {
             .item = ImListItem {
-              .value = "dark-trippy2",
+              .value = "tvs",
               .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/test4.png");
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "cybertek",
-              .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/tvs.png");
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "scifi",
-              .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/testhelmet.jpg");
+                setMenuBackground("../gameresources/textures/backgrounds/tvs.png");
               },
               .mappingId = mappingId++,
             },
@@ -531,7 +511,7 @@ std::vector<NestedListItem> nestedListTest = {
             .item = ImListItem {
               .value = "arcade",
               .onClick = []() -> void {
-                setMenuBackground("/home/brad/Desktop/art/arcade3.png");
+                setMenuBackground("../gameresources/textures/backgrounds/arcade2.png");
               },
               .mappingId = mappingId++,
             },
