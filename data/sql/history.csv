@@ -1,0 +1,10 @@
+history.text:STRING,history.valid:STRING
+editor on,true
+editor off,true
+
+keyboard off,false
+keyboard off,false
+level fps,true
+editor on,true
+fasdf,false
+asdf,false
