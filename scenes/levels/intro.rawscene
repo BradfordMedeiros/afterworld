@@ -36,7 +36,7 @@ playerspawn:teleport:true
 [link:position:0 5 0
 
 pyramid:mesh:../gameresources/build/misc/pyramid.gltf
-darkwires:mesh:../gameresources/build/uncategorized/darkwires.gltf
+darkwires:mesh:../gameresources/build/uncategorized/darkwires4.gltf
 bed:mesh:../gameresources/build/uncategorized/bedframe.gltf
 clock:mesh:../gameresources/build/uncategorized/grandfatherclock.gltf
 limbo:mesh:../gameresources/build/uncategorized/limboapple.gltf
