@@ -13,6 +13,10 @@ afterworld: modengine
 
 afterworld_release: modengine_release 
 
+validate: 
+	@(cd ../ModEngine && ./build/modengine --validate ../)
+
+
 clean:
 	@echo "clean placeholder"
 
