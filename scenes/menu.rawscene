@@ -13,6 +13,6 @@ menu:background:true
 &music:autoplay:true
 &music:volume:5
 
-loadtexture-menu:texture:../afterworld/screenshots/test.png
+#loadtexture-menu:texture:../afterworld/screenshots/test.png
 
 storyboardtexture2:texture:../afterworld/design/storyboard/hell.jpg

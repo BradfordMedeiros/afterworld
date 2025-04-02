@@ -14,7 +14,7 @@ afterworld: modengine
 afterworld_release: modengine_release 
 
 validate: 
-	@(cd ../ModEngine && ./build/modengine --validate ../)
+	@(cd ../ModEngine && ./build/modengine --validate ../afterworld/scenes --validate ../ModEngine/res/)
 
 
 clean:

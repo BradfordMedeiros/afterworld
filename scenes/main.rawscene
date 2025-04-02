@@ -2,7 +2,7 @@
 
 # Texture resources
 loadtexture:texture:../gameresources/textures/controls/up-down.png
-loadtexture-terminal:texture:../gameresources/build/terminals/terminal.png
+loadtexture-terminal:texture:../gameresources/build/textures/terminals/terminal.png
 loadtexture-terminal2:texture:../gameresources/build/textures/moonman.jpg
 loadtexture-terminal3:texture:../gameresources/ui/zoom.png
 loadtexture-terminal4:texture:../gameresources/build/misc/keyboard.png

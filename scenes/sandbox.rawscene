@@ -340,7 +340,7 @@ playerspawn:playerspawn:true
 playerspawn:position:0 20 0
 playerspawn:teleport:true
 
-wires:mesh:../gameresources/build/uncategorized/darkwires.gltf
+wires:mesh:../gameresources/build/uncategorized/darkwires4.gltf
 wires:position:250 50 -400
 wires:scale:10 10 10
 
