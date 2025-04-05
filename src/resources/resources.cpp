@@ -120,7 +120,7 @@ void ensureDefaultSoundsLoadced(objid sceneId){
   }
 
 
-  std::string hitmarkerClip = "../ModEngine/res/sounds/sample.wav";
+  std::string hitmarkerClip = "./res/sounds/sample.wav";
   if (hitmarkerClip != ""){
     if (sounds.hitmarkerSoundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.hitmarkerSoundObjId.value());
