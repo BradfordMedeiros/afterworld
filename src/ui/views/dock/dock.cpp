@@ -483,11 +483,6 @@ std::vector<DockConfiguration> configurations {
         .text = connectGetText("test-text"),
         .onEdit = connectEditText("test-text"),
       },
-
-      DockFileConfig {
-        .label = "somefile-here",
-        .displayLimit = 30,
-      },
     },
   },
   DockConfiguration {
@@ -930,6 +925,39 @@ std::vector<DockConfiguration> configurations {
           auto pathAsStr = relativePath.string();
           std::string meshName = "../gameresources/build/primitives/loop.gltf";
           dockConfigApi.createMesh(pathAsStr);
+        },
+        .filterFilter = [](bool isDirectory, std::string& file) -> bool {
+          if (isDirectory){
+            return true;
+          }
+          auto extension = getExtension(file);
+          if (extension.has_value()){
+            if (extension.value() == "gltf"){
+              return true;
+            }else if (extension.value() == "obj"){
+              return true;
+            }else if (extension.value() == "fbx"){
+              return true;
+            }
+          }
+          return false;
+        },
+      },
+    }
+  },
+  DockConfiguration {
+    .title = "Scene",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Save Scene",
+        .onClick = []() -> void {
+          dockConfigApi.saveScene();
+        },
+      },
+      DockButtonConfig {
+        .buttonText = "Reset Scene",
+        .onClick = []() -> void {
+          dockConfigApi.resetScene();
         },
       },
     }

@@ -353,6 +353,14 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
   .getParticlesViewerShouldEmit = getParticlesViewerShouldEmit,
   .setParticleAttribute = setParticleAttribute,
   .getParticleAttribute = getParticleAttribute,
+  .saveScene = []() -> void {
+    auto sceneId = uiManagerContext.uiContext -> activeSceneId().value();
+    gameapi -> saveScene(false, sceneId, std::nullopt);
+  },
+  .resetScene = []() -> void {
+    auto sceneId = uiManagerContext.uiContext -> activeSceneId().value();
+    gameapi -> resetScene(sceneId);
+  },
 };
 
 

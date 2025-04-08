@@ -28,6 +28,9 @@ struct DockConfigApi {
   std::function<bool()> getParticlesViewerShouldEmit;
   std::function<void(std::string, AttributeValue)> setParticleAttribute;
   std::function<std::optional<AttributeValue>(std::string)> getParticleAttribute;
+
+  std::function<void()> saveScene;
+  std::function<void()> resetScene;
 };
 
 std::optional<glm::vec2> toVec2(std::string& text);

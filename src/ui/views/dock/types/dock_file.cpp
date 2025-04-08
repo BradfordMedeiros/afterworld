@@ -24,9 +24,7 @@ std::function<void()> onClick =  [&fileconfigOptions]() -> void {
           fileconfigOptions.onFileSelected(file);
         }
       }, 
-      [](bool isDirectory, std::string&) -> bool { 
-        return true; 
-      });
+      fileconfigOptions.filterFilter);
   };
 
   auto fileDisplay = limitDisplayFilePath(fileconfigOptions.label, fileconfigOptions.displayLimit);
