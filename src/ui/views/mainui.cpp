@@ -250,6 +250,13 @@ UiManagerContext uiManagerContext {
 
 
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
+  .createMesh = [](std::string& mesh) -> void {
+    std::map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr { .attr = {
+      { "mesh", mesh },
+    }};
+    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("gameobj-") + uniqueNameSuffix(), attr, submodelAttributes);
+  },
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };

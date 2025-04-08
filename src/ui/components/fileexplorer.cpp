@@ -1,5 +1,7 @@
 #include "./fileexplorer.h"
 
+// TODO - this depends upon the real files on the system
+
 const float UI_STYLE_EXPLORER_BUTTON_PADDING = 0.02f;
 
 const int fileExplorerSymbol = getSymbol("file-explorer");
@@ -84,10 +86,8 @@ Component fileexplorerComponent {
         auto isDirectory = value.isDirectory;
         auto clickedPathVec = fileExplorer -> currentPath;
         clickedPathVec.push_back(value.content);
-        auto clickedPath = std::string("/") + join(clickedPathVec, '/');
-        if (value.isDirectory){
-          clickedPath += "/";
-        }
+        auto clickedPath = join(clickedPathVec, '/');
+   
         std::function<void()> onClick = [clickedPath, onChange, isDirectory, customFileCallback]() -> void {
           std::cout << "on click: " <<  clickedPath << std::endl;
           onChange(isDirectory, clickedPath);

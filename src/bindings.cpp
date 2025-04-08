@@ -1499,7 +1499,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
         auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
-          setTotalZoom(uiUpdate.zoomAmount.value());
+          //setTotalZoom(uiUpdate.zoomAmount.value());
         }
       }
     }

@@ -911,6 +911,30 @@ std::vector<DockConfiguration> configurations {
       }
     }
   },
+
+  DockConfiguration {
+    .title = "Models",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Model",
+        .onClick = []() -> void {},
+      },
+      DockFileConfig {
+        .label = "Select Model",
+        .displayLimit = 30,
+        .onFileSelected = [](std::string& file) -> void {
+          // TODO REALFILES
+          std::filesystem::path workingDir = std::filesystem::current_path(); 
+          std::filesystem::path absolutePath = file;
+          std::filesystem::path relativePath = std::filesystem::relative(absolutePath, workingDir);
+          auto pathAsStr = relativePath.string();
+          std::string meshName = "../gameresources/build/primitives/loop.gltf";
+          dockConfigApi.createMesh(pathAsStr);
+        },
+      },
+    }
+  },
+
 };
 
 DockConfiguration* dockConfigByName(std::string name){

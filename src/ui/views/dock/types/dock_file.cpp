@@ -21,6 +21,7 @@ std::function<void()> onClick =  [&fileconfigOptions]() -> void {
         std::cout << "open file picker dialog mock: " << justClosed << ", file = " << file << std::endl;
         if (!justClosed){
           fileconfigOptions.label = file;
+          fileconfigOptions.onFileSelected(file);
         }
       }, 
       [](bool isDirectory, std::string&) -> bool { 

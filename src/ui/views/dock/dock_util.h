@@ -6,6 +6,7 @@
 #include "../style.h"
 
 struct DockConfigApi {
+  std::function<void(std::string&)> createMesh;
   std::function<void()> createCamera;
   std::function<void()> createLight;
   std::function<void()> createNavmesh;
