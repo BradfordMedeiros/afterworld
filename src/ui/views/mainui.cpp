@@ -361,6 +361,9 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     auto sceneId = uiManagerContext.uiContext -> activeSceneId().value();
     gameapi -> resetScene(sceneId);
   },
+  .activeScene = []() -> std::optional<objid> {
+    return uiManagerContext.uiContext -> activeSceneId();
+  },
 };
 
 

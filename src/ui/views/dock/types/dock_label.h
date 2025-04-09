@@ -5,7 +5,7 @@
 #include "../../../components/basic/textbox.h"
 
 struct DockLabelConfig {
-  std::string label;
+  std::function<std::string()> label;
 };
 
 Component createDockLabel(DockLabelConfig& dockLabel);

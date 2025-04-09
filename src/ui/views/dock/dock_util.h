@@ -31,6 +31,7 @@ struct DockConfigApi {
 
   std::function<void()> saveScene;
   std::function<void()> resetScene;
+  std::function<std::optional<objid>()> activeScene;
 };
 
 std::optional<glm::vec2> toVec2(std::string& text);

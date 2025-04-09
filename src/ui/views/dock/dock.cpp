@@ -960,6 +960,16 @@ std::vector<DockConfiguration> configurations {
           dockConfigApi.resetScene();
         },
       },
+      DockLabelConfig {
+        .label = []() -> std::string {
+           auto id = dockConfigApi.activeScene();
+           if (!id.has_value()){
+            return "no scene";
+           }else{
+            return std::to_string(id.value());
+           }
+        },
+      }, 
     }
   },
 
