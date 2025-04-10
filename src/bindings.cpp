@@ -37,6 +37,37 @@ struct SceneManagement {
   std::optional<ManagedScene> managedScene;
 };
 
+
+struct ScenarioOptions {
+  glm::vec3 ambientLight;
+  glm::vec3 skyboxColor;
+  std::string skybox;
+};
+ScenarioOptions defaultScenario {
+  .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
+  .skyboxColor = glm::vec3(0.f, 0.f, 1.f),
+  .skybox = "./res/textures/skyboxs/desert/",
+};
+void setScenarioOptions(ScenarioOptions& options){
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "light",
+      .attribute = "amount",
+      .value = options.ambientLight,
+    },
+    ObjectValue {
+      .object = "skybox",
+      .attribute = "color",
+      .value = options.skyboxColor,
+    },
+    ObjectValue {
+      .object = "skybox",
+      .attribute = "texture",
+      .value = options.skybox,
+    },
+  });
+}
+
 std::optional<ZoomOptions> zoomOptions;
 void setTotalZoom(float multiplier){
   bool isZoomedIn = multiplier < 1.f;
@@ -424,6 +455,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     std::optional<objid> sceneId;
     if (sceneToLoad.has_value()){
       sceneId = gameapi -> loadScene(sceneToLoad.value(), {}, std::nullopt, {});
+      setScenarioOptions(defaultScenario);
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
