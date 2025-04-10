@@ -43,11 +43,7 @@ struct ScenarioOptions {
   glm::vec3 skyboxColor;
   std::string skybox;
 };
-ScenarioOptions defaultScenario {
-  .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
-  .skyboxColor = glm::vec3(0.f, 0.f, 1.f),
-  .skybox = "./res/textures/skyboxs/desert/",
-};
+
 void setScenarioOptions(ScenarioOptions& options){
   gameapi -> setWorldState({ 
     ObjectValue {
@@ -147,6 +143,29 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
   return std::nullopt;
 }
 
+ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
+  auto query = gameapi -> compileSqlQuery("select shortcut, ambient, skyboxcolor, skybox from levels", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  for (auto row : result){
+    auto shortcutResult = row.at(0);
+    if (shortcutResult == shortcut){
+      return ScenarioOptions {
+        .ambientLight = parseVec3(row.at(1)),
+        .skyboxColor = parseVec3(row.at(2)),
+        .skybox = row.at(3),
+      };
+    }
+  }
+  ScenarioOptions defaultScenario {
+    .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
+    .skyboxColor = glm::vec3(0.f, 0.f, 1.f),
+    .skybox = "./res/textures/skyboxs/desert/",
+  };
+  return defaultScenario;
+}
+
 
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
@@ -184,6 +203,7 @@ void displayGameOverMenu(){
 struct SceneRouterPath {
   std::vector<std::string> paths;
   std::optional<std::function<std::string(std::vector<std::string> params)>> scene;
+  std::optional<std::function<ScenarioOptions(std::vector<std::string> params)>> scenarioOptions;
   bool makePlayer;
   std::optional<std::string> player;
 };
@@ -204,6 +224,7 @@ std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
     .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/", "debug/wheel/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
+    .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = std::nullopt,
   },
@@ -214,24 +235,30 @@ std::vector<SceneRouterPath> routerPaths = {
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
       return sceneFile.value();
     },
+    .scenarioOptions = [](std::vector<std::string> params) -> ScenarioOptions {
+      return scenarioOptionsByShortcutName(params.at(0));
+    },
     .makePlayer = true,
     .player = "maincamera",
   },
   SceneRouterPath {
     .paths = { "loading/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/loading.rawscene"; },
+    .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = std::nullopt,
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
+    .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = "maincamera",
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
     .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
+    .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = "maincamera",
   },
@@ -413,6 +440,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   //modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
   std::optional<std::string> sceneToLoad;
+  std::optional<ScenarioOptions> scenarioOptions;
 
 
   int matchedRouterOption = 0;
@@ -429,6 +457,9 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   if (router.has_value() && router.value() -> scene.has_value()){
     sceneToLoad = router.value() -> scene.value()(params);
     modlog("router scene route load", sceneToLoad.value());
+  }
+  if (router.has_value() && router.value() -> scenarioOptions.has_value()){
+    scenarioOptions = router.value() -> scenarioOptions.value()(params);
   }
   
 
@@ -455,7 +486,16 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     std::optional<objid> sceneId;
     if (sceneToLoad.has_value()){
       sceneId = gameapi -> loadScene(sceneToLoad.value(), {}, std::nullopt, {});
-      setScenarioOptions(defaultScenario);
+    }
+    if (scenarioOptions.has_value()){
+      setScenarioOptions(scenarioOptions.value());
+    }else{
+      ScenarioOptions defaultSettings {
+        .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
+        .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
+        .skybox = "./res/textures/skyboxs/desert/",
+      };
+      setScenarioOptions(defaultSettings);
     }
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
