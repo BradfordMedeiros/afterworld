@@ -31,6 +31,8 @@ struct ManagedScene {
   int index;
   std::string path;
   std::optional<std::string> sceneFile;
+  std::optional<std::string> player;
+  bool makePlayer;
 };
 struct SceneManagement {
   std::vector<Level> levels;
@@ -79,16 +81,24 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
     submodelAttributes
   ).value();
 }
-void startLevel(std::optional<objid> sceneId, std::optional<std::string> player){
-  auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId.value());
-  modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
-  glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
-  createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
+void startLevel(ManagedScene& managedScene){
+  if (!managedScene.id.has_value()){
+    return;
+  }
+
+  std::optional<objid> sceneId = managedScene.id;
+  if (managedScene.makePlayer){
+    auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId.value());
+    modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
+    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
+    createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);    
+  }
+
   spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
 
-  if (player.has_value()){
+  if (managedScene.player.has_value()){
     // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
-    auto playerId = findObjByShortName(player.value(), sceneId);
+    auto playerId = findObjByShortName(managedScene.player.value(), sceneId);
     modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
     modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
     setActivePlayer(movement, weapons, aiData, playerId.value());
@@ -522,13 +532,12 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .index = currentIndex,
       .path = currentPath,
       .sceneFile = sceneToLoad,
+      .player = router.value() -> player,
+      .makePlayer = router.value() -> makePlayer,
     };
     modlog("router scene route load", sceneManagement.managedScene.value().path);
-    if (sceneId.has_value()){
-      if (router.value() -> makePlayer){
-        startLevel(sceneId, router.value() -> player);
-      }
-    }
+    startLevel(sceneManagement.managedScene.value());
+   
   }
 }
 
@@ -824,10 +833,15 @@ UiContext getUiContext(GameState& gameState){
         setShowEditor(true);
         setGlobalModeValues(true);
 
-        bool liveEdit = false;
+        bool liveEdit = true;
         if (!liveEdit){
           if (gameState.sceneManagement.managedScene.value().id.has_value()){
             gameapi -> resetScene(gameState.sceneManagement.managedScene.value().id.value());
+
+            // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
+            gameapi -> schedule(0, true, 2000, NULL, [&gameState](void*) -> void {
+              startLevel(gameState.sceneManagement.managedScene.value());
+            });
           }
         }
 
