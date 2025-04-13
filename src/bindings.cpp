@@ -833,7 +833,7 @@ UiContext getUiContext(GameState& gameState){
         setShowEditor(true);
         setGlobalModeValues(true);
 
-        bool liveEdit = true;
+        bool liveEdit = false;
         if (!liveEdit){
           if (gameState.sceneManagement.managedScene.value().id.has_value()){
             gameapi -> resetScene(gameState.sceneManagement.managedScene.value().id.value());
@@ -1220,107 +1220,104 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
  
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
-      const bool showLookVelocity = false;
-      auto thirdPersonCamera = getCameraForThirdPerson();
-      if (!thirdPersonCamera.has_value()){
-        if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
-          thirdPersonCamera = 0;
-        }else{
-          modassert(false, "cannot use third person mode, no camera provided");
+    if (isInGameMode()){
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+        const bool showLookVelocity = false;
+        auto thirdPersonCamera = getCameraForThirdPerson();
+        if (!thirdPersonCamera.has_value()){
+          if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
+            thirdPersonCamera = 0;
+          }else{
+            modassert(false, "cannot use third person mode, no camera provided");
+          }
         }
+        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
+        setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
       }
- 
-      auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
-      setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
 
-    }
-
-    if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){  
-      auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
-        [](objid id) -> objid {
-          return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
-        }, 
-        ThirdPersonWeapon {
-          .getWeaponParentId = [](objid id) -> std::optional<objid> {
-            auto children = gameapi -> getChildrenIdsAndParent(id);
-            for (auto childId : children){
-              auto name = gameapi -> getGameObjNameForId(childId).value();
-              if (stringEndsWith(name, "RightHand")){
-                return childId;
+      if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){  
+        auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
+          [](objid id) -> objid {
+            return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
+          }, 
+          ThirdPersonWeapon {
+            .getWeaponParentId = [](objid id) -> std::optional<objid> {
+              auto children = gameapi -> getChildrenIdsAndParent(id);
+              for (auto childId : children){
+                auto name = gameapi -> getGameObjNameForId(childId).value();
+                if (stringEndsWith(name, "RightHand")){
+                  return childId;
+                }
               }
-            }
-            return std::nullopt;
-          },
+              return std::nullopt;
+            },
+          }
+        );
+        setShowActivate(uiUpdate.showActivateUi);
+        if (uiUpdate.ammoInfo.has_value()){
+          setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
+          DeliverAmmoMessage ammoArcadeMessage {
+            .ammo = uiUpdate.ammoInfo.value().currentAmmo,
+          };
+          std::any value = ammoArcadeMessage;
+          onMessageArcade(value);
+        }else{
+          setUIAmmoCount(0, 0);
         }
-      );
-      setShowActivate(uiUpdate.showActivateUi);
-      if (uiUpdate.ammoInfo.has_value()){
-        setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
-        DeliverAmmoMessage ammoArcadeMessage {
-          .ammo = uiUpdate.ammoInfo.value().currentAmmo,
-        };
-        std::any value = ammoArcadeMessage;
-        onMessageArcade(value);
+        if (uiUpdate.bloomAmount.has_value()){
+          drawBloom(controlledPlayer.playerId.value(), controlledPlayer.playerId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
+        }
+        modlog("current weapon", uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : "");
+        setUiWeapon(uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : std::optional<std::string>(std::nullopt));
       }else{
+        setShowActivate(false);
         setUIAmmoCount(0, 0);
+        setUiWeapon(std::nullopt);
       }
-      if (uiUpdate.bloomAmount.has_value()){
-        drawBloom(controlledPlayer.playerId.value(), controlledPlayer.playerId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
+
+      drawAllCurves(id);
+      handleEntitiesOnRails(id, gameapi -> rootSceneId());
+      //handleEntitiesRace();
+
+      handleDirector(director);
+      setUiGemCount(listGems().size());
+      auto playerPosition = getActivePlayerPosition();
+      if (playerPosition.has_value()){
+        drawWaypoints(waypoints, playerPosition.value());
       }
-      modlog("current weapon", uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : "");
-      setUiWeapon(uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : std::optional<std::string>(std::nullopt));
-    }else{
-      setShowActivate(false);
-      setUIAmmoCount(0, 0);
-      setUiWeapon(std::nullopt);
     }
 
-
-    drawAllCurves(id);
-    handleEntitiesOnRails(id, gameapi -> rootSceneId());
-    //handleEntitiesRace();
-    handleDirector(director);
-    setUiGemCount(listGems().size());
-
-
-    auto playerPosition = getActivePlayerPosition();
-    if (playerPosition.has_value()){
-      drawWaypoints(waypoints, playerPosition.value());
-    }
     //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
     std::optional<glm::vec2> mainUiCursorCoord;
-
-    auto start = std::chrono::steady_clock::now();
-   
     gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
     modassert(tags.uiData, "tags.uiData NULL");
     
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::microseconds timeUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    //modlog("main ui time us: ", std::to_string(timeUs.count())); 
-
     onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
     
-    std::optional<UiHealth> uiHealth;
-    auto activePlayer = controlledPlayer.playerId;
-    if (activePlayer.has_value()){
-      auto health = getHealth(activePlayer.value());
-      if (health.has_value()){
-        uiHealth = UiHealth {
-          .health = health.value().current,
-          .totalHealth = health.value().total,
-        };
+    if (isInGameMode()){
+      std::optional<UiHealth> uiHealth;
+      auto activePlayer = controlledPlayer.playerId;
+      if (activePlayer.has_value()){
+        auto health = getHealth(activePlayer.value());
+        if (health.has_value()){
+          uiHealth = UiHealth {
+            .health = health.value().current,
+            .totalHealth = health.value().total,
+          };
+        }
       }
-    }
-    setUiHealth(uiHealth);
-    
-    onFrameWater(water);
+      setUiHealth(uiHealth);
+      onFrameWater(water);
 
-    if (!hasOption("no-ai")){
-      onFrameAi(aiData);
+      if (!hasOption("no-ai")){
+        onFrameAi(aiData);
+      }
+      onFrameDaynight();
+
+      updateArcade();
+      drawArcade();
     }
-    onFrameDaynight();
+
     onTagsFrame(tags);
     doStateControllerAnimations();
 
@@ -1332,12 +1329,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     // debug
     debugOnFrame();
-
-
-    //////
-    updateArcade();
-    drawArcade();
-
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
@@ -1512,7 +1503,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onTagsMessage(tags, key, value);
   };
-
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1); // this check shouldn't be necessary, is bug
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
@@ -1614,7 +1604,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
-
     modlog("objchange onObjectAdded", gameapi -> getGameObjNameForId(idAdded).value());
 
     onAddControllableEntity(aiData, gameStatePtr -> movementEntities, idAdded);
@@ -1637,11 +1626,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       controlledPlayer.tempCamera = std::nullopt;
     }
 
-
-
-
     maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
-
     auto playerKilled = onActivePlayerRemoved(idRemoved);
     if (playerKilled){
       displayGameOverMenu();
