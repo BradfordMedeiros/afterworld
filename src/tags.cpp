@@ -6,7 +6,7 @@ extern Tags tags;
 extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
-
+bool isInGameMode();
 
 struct TagUpdater {
 	std::string attribute;
@@ -333,7 +333,10 @@ std::vector<TagUpdater> tagupdates = {
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		spawnRemoveId(director.managedSpawnpoints, id);
   	},
-  	.onFrame = [](Tags& tags) -> void {  
+  	.onFrame = [](Tags& tags) -> void {
+  		if (!isInGameMode()){
+  			return;
+  		}
 			onSpawnTick(director.managedSpawnpoints);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
@@ -354,9 +357,13 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
+  		if (!isInGameMode()){
+				return;
+  		}
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
   		auto sceneId = gameapi -> listSceneId(id);
-  		createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);
+  		createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);  		
+
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
@@ -365,7 +372,10 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "explode",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		 // when this object it removed, get the position, and spawn a prefab there 
+  		if (!isInGameMode()){
+  			return;
+  		}
+ 		  // when this object it removed, get the position, and spawn a prefab there 
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
 
   		auto attrHandle = getAttrHandle(id);
@@ -472,6 +482,9 @@ std::vector<TagUpdater> tagupdates = {
   		tags.idToRotateTimeAdded.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
+  		if (!isInGameMode()){
+  			return;
+  		}
   		for (auto &[id, time] : tags.idToRotateTimeAdded){
   			auto timeElapsed = gameapi -> timeSeconds(false) - time;
   			float degrees = (360.f * timeElapsed) * 0.2f; // 0.2f is the turns per seconds 
@@ -595,6 +608,9 @@ std::vector<TagUpdater> tagupdates = {
   		tags.healthColorObjects.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
+  		if (!isInGameMode()){
+  			return;
+  		}
   		for (auto &[id, healthColorObject] : tags.healthColorObjects){
 				auto health = getHealth(id);
 				float percentageHealth = health.value().current / health.value().total;
@@ -613,8 +629,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
-
-
 	TagUpdater {
 		.attribute = "cutscene",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {

@@ -219,7 +219,7 @@ void onFrameAi(AiData& aiData){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
     }
-    auto goals =  getAiAgent(agent.type).value() -> getGoals(aiData.worldInfo, agent);
+    auto goals = getAiAgent(agent.type).value() -> getGoals(aiData.worldInfo, agent);
     auto optimalGoal = getOptimalGoal(goals);
     //modassert(optimalGoal, "no goal for agent");
     if (optimalGoal){

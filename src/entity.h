@@ -44,6 +44,7 @@ void setDisablePlayerControl(bool isDisabled);
 bool isPlayerControlDisabled();
 
 void setActivePlayerEditorMode(bool editorMode);
+bool isInGameMode();
 
 void setTempCamera(std::optional<objid> camera);
 std::optional<objid> getTempCamera();
