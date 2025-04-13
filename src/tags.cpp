@@ -229,6 +229,9 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = [](Tags& tags) -> void {
   		//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
+  		if (!isInGameMode()){
+  			return;
+  		}
 			handleScroll(tags.textureScrollObjIds);
   	},
   	.onMessage = std::nullopt,
