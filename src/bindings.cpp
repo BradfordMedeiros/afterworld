@@ -430,6 +430,11 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
   ).value();
 }
 
+void setGlobalModeValues(bool isEditorMode){
+  showSpawnpoints(director.managedSpawnpoints, isEditorMode);
+  showTriggerVolumes(isEditorMode);
+}
+
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, std::vector<std::string>& queryParams){
   modlog("router scene route", std::string("path is: ") + currentPath);
 
@@ -511,10 +516,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
         createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);
         spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
-
-        // hide debug stuff
-        showSpawnpoints(director.managedSpawnpoints, false);
-        showTriggerVolumes(false);
       }
       if (router.value() -> player.has_value()){
 
@@ -813,11 +814,21 @@ UiContext getUiContext(GameState& gameState){
         setActivePlayerEditorMode(false);
         setShowFreecam(false);
         setShowEditor(false);
+        setGlobalModeValues(false);
       },
-      .setShowEditor = []() -> void {
+      .setShowEditor = [&gameState]() -> void {
         setActivePlayerEditorMode(true);
         setShowFreecam(false);
         setShowEditor(true);
+        setGlobalModeValues(true);
+
+        bool liveEdit = false;
+        if (!liveEdit){
+          if (gameState.sceneManagement.managedScene.value().id.has_value()){
+            gameapi -> resetScene(gameState.sceneManagement.managedScene.value().id.value());
+          }
+        }
+
       },
       .setFreeCam = []() -> void {
         setActivePlayerEditorMode(true);
@@ -1070,6 +1081,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     };
     initGlobal();
+    setGlobalModeValues(getGlobalState().showEditor);
     reloadSettingsConfig(movement, "default");
     gameState -> dragSelect = std::nullopt;
     gameState -> uiData.uiContext = getUiContext(*gameState);
@@ -1602,6 +1614,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
       controlledPlayer.playerId = std::nullopt;
     }
+    if (controlledPlayer.activePlayerManagedCameraId.has_value() && controlledPlayer.activePlayerManagedCameraId.value() == idRemoved){
+      controlledPlayer.activePlayerManagedCameraId = std::nullopt;
+    }
+    if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == idRemoved){
+      controlledPlayer.tempCamera = std::nullopt;
+    }
+
+
+
+
     maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 
     auto playerKilled = onActivePlayerRemoved(idRemoved);

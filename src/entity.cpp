@@ -94,6 +94,11 @@ bool controllableEntityExists(objid id){
 }
 
 void updateCamera(){
+	bool tempCameraDoesNotExistButShould = controlledPlayer.tempCamera.has_value() && !gameapi -> gameobjExists(controlledPlayer.tempCamera.value());
+	bool activeCameraDoesNotExistButShould = controlledPlayer.activePlayerManagedCameraId.has_value() && !gameapi -> gameobjExists(controlledPlayer.activePlayerManagedCameraId.value());
+	modassert(!tempCameraDoesNotExistButShould, "temp camera has value but obj does not exist");
+	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");
+
 	if (controlledPlayer.editorMode){
 		gameapi -> setActiveCamera(std::nullopt);
 		return;
