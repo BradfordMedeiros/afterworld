@@ -821,11 +821,20 @@ UiContext getUiContext(GameState& gameState){
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
     },
     .consoleInterface = ConsoleInterface {
-      .setNormalMode = []() -> void {
+      .setNormalMode = [&gameState]() -> void {
+        auto wasInEditorMode = !isInGameMode();
         setActivePlayerEditorMode(false);
         setShowFreecam(false);
         setShowEditor(false);
         setGlobalModeValues(false);
+
+        if (wasInEditorMode){
+          // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
+          gameapi -> schedule(0, true, 0, NULL, [&gameState](void*) -> void {
+            startLevel(gameState.sceneManagement.managedScene.value());
+          });          
+        }
+
       },
       .setShowEditor = [&gameState]() -> void {
         setActivePlayerEditorMode(true);
@@ -837,11 +846,6 @@ UiContext getUiContext(GameState& gameState){
         if (!liveEdit){
           if (gameState.sceneManagement.managedScene.value().id.has_value()){
             gameapi -> resetScene(gameState.sceneManagement.managedScene.value().id.value());
-
-            // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
-            gameapi -> schedule(0, true, 2000, NULL, [&gameState](void*) -> void {
-              startLevel(gameState.sceneManagement.managedScene.value());
-            });
           }
         }
 
