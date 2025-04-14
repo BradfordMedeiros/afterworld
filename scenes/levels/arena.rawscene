@@ -16,9 +16,7 @@ poster-copy-1394279730-copy-2049210480:position:54.5 17 -4.4
 poster-copy-1394279730-copy-2049210480:rotation:-0.5 -1.08033e-07 -0.866025 170
 poster-copy-1394279730-copy-2049210480:scale:18 8 1
 poster-copy-1394279730-copy-2049210480:texture:../gameresources/build/characters/garbage.png
-[prefab-instance-713420726:child:maincamera
-[prefab-instance-713420726:position:-20 0 0
-[prefab-instance-713420726:scene:../afterworld/scenes/prefabs/player.rawscene
+
 platform_lowert:material:metal
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform_lowert:physics:enabled
@@ -46,9 +44,7 @@ background:rotation:0 0 -1 90
 background:scale:100 100 10
 background:texture:../gameresources/textures/metal_grating.jpg
 background:texturesize:40 40
-[prefab-instance-1796876217:child:maincamera
-[prefab-instance-1796876217:position:-20 0 0
-[prefab-instance-1796876217:scene:../afterworld/scenes/prefabs/player.rawscene
+
 poster-copy-1394279730:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 poster-copy-1394279730:position:-5 17 -4.4
 poster-copy-1394279730:rotation:0 0 1 170

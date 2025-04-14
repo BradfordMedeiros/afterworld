@@ -91,7 +91,7 @@ void startLevel(ManagedScene& managedScene){
     auto playerLocationObj = findObjByShortName("playerspawn", std::nullopt);
     modassert(playerLocationObj.has_value(), "no initial spawnpoint");
     glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true);
-    createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);    
+    createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position);    
   }
 
   spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
