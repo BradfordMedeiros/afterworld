@@ -1,7 +1,4 @@
-
-
 target:mesh:../gameresources/build/misc/shootingtarget.gltf
 target:physics:enabled
 target:physics_shape:shape_exact
-
 target:health:10
