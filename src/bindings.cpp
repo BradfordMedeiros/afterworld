@@ -88,9 +88,9 @@ void startLevel(ManagedScene& managedScene){
 
   std::optional<objid> sceneId = managedScene.id;
   if (managedScene.makePlayer){
-    auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId.value());
-    modassert(playerLocationObj.size() > 0, "no initial spawnpoint");
-    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.at(0), true);
+    auto playerLocationObj = findObjByShortName("playerspawn", std::nullopt);
+    modassert(playerLocationObj.has_value(), "no initial spawnpoint");
+    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true);
     createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/player.rawscene",  position);    
   }
 
@@ -164,6 +164,7 @@ void goToNextLevel(){
     advanceProgress();
     auto nextLink = getCurrentLink();
     modassert(nextLink.has_value(), "no next link");
+    modlog("go to link", nextLink.value());
     goToLink(nextLink.value());    
   }else{
     goBackMainMenu();

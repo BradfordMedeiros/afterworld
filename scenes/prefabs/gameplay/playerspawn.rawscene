@@ -1,0 +1,3 @@
+playerspawn:playerspawn:true
+playerspawn:mesh:../gameresources/build/uncategorized/bottle.gltf
+playerspawn:texture:./res/textures/wood.jpg

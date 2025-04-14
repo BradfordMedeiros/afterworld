@@ -1,5 +1,5 @@
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
-arcade/screen:arcade:rhythm
+arcade/screen:arcade:invaders
 
 arcade:activate:arcade
 arcade:physics:enabled

@@ -1,36 +1,30 @@
+# Generated scene 
+platform_lowert:material:metal
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert:physics:enabled
 platform_lowert:position:-20 -30 0
+platform_lowert:rotation:0 -1 1.19209e-07 180.04
 platform_lowert:scale:100 100 10
-platform_lowert:rotation:0 -1 0 0
 platform_lowert:texture:./res/textures/brickwall.jpg
 platform_lowert:texturesize:40 40
-platform_lowert:physics:enabled
-platform_lowert:material:metal
-
+amp:health:100
+amp:health-delay:5000
+amp:healthcolor:1 1 1
+amp:healthcolor-low:1 0 0
+amp:mesh:../gameresources/build/uncategorized/amp.gltf
+amp:physics:enabled
+amp:position:-22 -27.7 0
+[explosive3-copy-1864654694:position:-26 -27.7 10.2
+[explosive3-copy-1864654694:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
+[explosive3-copy-1690341349:position:-26 -27.7 11.9
+[explosive3-copy-1690341349:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
+[arcade:position:-20 -27.7 0
+[arcade:scene:../afterworld/scenes/prefabs/objects/arcade.rawscene
+[explosive3:position:-26 -27.7 6.8
+[explosive3:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
+[explosive3-copy-500981568:position:-26 -27.7 8.5
+[explosive3-copy-500981568:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
+playerspawn:mesh:../gameresources/build/uncategorized/bottle.gltf
 playerspawn:playerspawn:true
 playerspawn:position:-20 -25 0
 playerspawn:teleport:true
-
-[arcade:scene:../afterworld/scenes/prefabs/objects/arcade.rawscene
-[arcade:position:-20 -27.7 0
-
-
-bottle:mesh:../gameresources/build/uncategorized/bottle.gltf
-bottle:position:-25 -27.7 0
-bottle:physics:enabled
-bottle:health:1
-bottle:health-delay:5000
-
-[explosive3:position:-26 -27.7 0
-[explosive3:scene:../afterworld/scenes/prefabs/objects/explosive.rawscene
-
-
-amp:mesh:../gameresources/build/uncategorized/amp.gltf
-amp:position:-22 -27.7 0
-amp:physics:enabled
-amp:health:100
-amp:health-delay:5000
-amp:healthcolor:true
-amp:healthcolor:1 1 1
-amp:healthcolor-low:1 0 0
-
