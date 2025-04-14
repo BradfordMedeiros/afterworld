@@ -910,10 +910,6 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "Models",
     .configFields = {
-      DockButtonConfig {
-        .buttonText = "Create Model",
-        .onClick = []() -> void {},
-      },
       DockFileConfig {
         .label = "Select Model",
         .displayLimit = 30,
@@ -923,7 +919,6 @@ std::vector<DockConfiguration> configurations {
           std::filesystem::path absolutePath = file;
           std::filesystem::path relativePath = std::filesystem::relative(absolutePath, workingDir);
           auto pathAsStr = relativePath.string();
-          std::string meshName = "../gameresources/build/primitives/loop.gltf";
           dockConfigApi.createMesh(pathAsStr);
         },
         .filterFilter = [](bool isDirectory, std::string& file) -> bool {
@@ -937,6 +932,35 @@ std::vector<DockConfiguration> configurations {
             }else if (extension.value() == "obj"){
               return true;
             }else if (extension.value() == "fbx"){
+              return true;
+            }
+          }
+          return false;
+        },
+      },
+    }
+  },
+  DockConfiguration {
+    .title = "Prefabs",
+    .configFields = {
+      DockFileConfig {
+        .label = "Select Prefab",
+        .displayLimit = 30,
+        .onFileSelected = [](std::string& file) -> void {
+          // TODO REALFILES
+          std::filesystem::path workingDir = std::filesystem::current_path(); 
+          std::filesystem::path absolutePath = file;
+          std::filesystem::path relativePath = std::filesystem::relative(absolutePath, workingDir);
+          auto pathAsStr = relativePath.string();
+          dockConfigApi.createPrefab(pathAsStr);
+        },
+        .filterFilter = [](bool isDirectory, std::string& file) -> bool {
+          if (isDirectory){
+            return true;
+          }
+          auto extension = getExtension(file);
+          if (extension.has_value()){
+            if (extension.value() == "rawscene"){
               return true;
             }
           }

@@ -123,9 +123,16 @@ std::vector<NavbarOption> navbarOptionsEditor = {
 		.dock = "Models",
 	},
 	NavbarOption {
+		.name = "Prefabs",
+		.dock = "Prefabs",
+	},
+	NavbarOption {
 		.name = "Scene",
 		.dock = "Scene",
 	},
+
+	
+
 };
 
 NavbarType strToNavbarType(std::string& layout){

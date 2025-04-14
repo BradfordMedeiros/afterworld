@@ -7,6 +7,7 @@
 
 struct DockConfigApi {
   std::function<void(std::string&)> createMesh;
+  std::function<void(std::string&)> createPrefab;
   std::function<void()> createCamera;
   std::function<void()> createLight;
   std::function<void()> createNavmesh;
