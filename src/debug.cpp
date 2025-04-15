@@ -365,7 +365,8 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	 }
 
   }*/
-   
+
+
   if (key == 'C' && action == 0){
   	auto testViewObj = findObjByShortName(">testview", std::nullopt);
   	if (getTempCamera().has_value()){

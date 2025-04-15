@@ -54,6 +54,8 @@ struct LinkGunObj {
 
 };
 
+struct Autodoor {};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -65,6 +67,7 @@ struct Tags {
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, ManagedRecording> recordings;
+	std::unordered_map<objid, Autodoor> autodoors;
 	Switches switches;
 
 	UiData* uiData;

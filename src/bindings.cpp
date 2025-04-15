@@ -1391,6 +1391,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       zoomIntoArcade(std::nullopt);
     }
     onKeyArcade(key, scancode, action, mods);
+
+
+    if (key == 'I' && action == 0){
+      for (auto &[id, autodoor] : tags.autodoors){
+        auto targetId = findChildObjBySuffix(id, "gate");
+        modassert(targetId.has_value(), "target not found for autodoor");
+        gameapi -> playRecording(targetId.value(), "../afterworld/data/recordings/move-gate.rec", RECORDING_PLAY_ONCE, RecordingOptionResume{});
+      }
+    }
+   
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);

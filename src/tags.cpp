@@ -666,6 +666,17 @@ std::vector<TagUpdater> tagupdates = {
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
+	TagUpdater {
+		.attribute = "autodoor",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			tags.autodoors[id] = Autodoor{};			
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.autodoors.erase(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
+	},
 };
 
 
