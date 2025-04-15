@@ -9,7 +9,7 @@ water:water-gravity:0.0125
 water:water-viscosity:0.1
 water:physics:enabled
 water:physics_collision:nocollide
-water:layer:transparency
+#water:layer:transparency
 water:scrollspeed:0.10 0 0
 water:material:water
 water:shader:../afterworld/shaders/water/fragment.glsl

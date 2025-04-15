@@ -7,6 +7,7 @@ extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
 bool isInGameMode();
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 
 struct TagUpdater {
 	std::string attribute;
@@ -98,6 +99,15 @@ void playRecordingBySignal(std::string signal, std::string rec, bool reverse){
 		}
 	}
 }
+
+void toggleAutodoor(objid id, Autodoor& autodoor){
+  auto targetId = findChildObjBySuffix(id, "gate");
+  modassert(targetId.has_value(), "target not found for autodoor");
+  auto reverse = autodoor.open ?  RECORDING_PLAY_ONCE_REVERSE : RECORDING_PLAY_ONCE;
+  autodoor.open = !autodoor.open;
+  gameapi -> playRecording(targetId.value(), "../afterworld/data/recordings/move-gate.rec", reverse, RecordingOptionResume{});
+}
+
 
 void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
@@ -669,16 +679,31 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "autodoor",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			tags.autodoors[id] = Autodoor{};			
+			auto toggleSignal = std::get_if<std::string>(&value);
+			tags.autodoors[id] = Autodoor{
+				.open = false,
+				.toggleSignal = toggleSignal ? *toggleSignal : std::string(""),
+			};			
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		tags.autodoors.erase(id);
   	},
   	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		if (key == "open-autodoor"){
+	  		auto valueStr = anycast<MessageWithId>(value);
+	  		modassert(valueStr, "open-autodoor should be MessageWithId type");
+  			for (auto &[id, autodoor] : tags.autodoors){
+  				if (valueStr -> value.has_value() && autodoor.toggleSignal == valueStr -> value.value()){
+	  				toggleAutodoor(id, autodoor);
+  				}
+  			}
+  		}
+  	},
 	},
 };
 
+ 
 
 
 void setMenuBackground(std::string background){

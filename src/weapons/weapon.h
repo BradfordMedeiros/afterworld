@@ -11,6 +11,7 @@
 
 struct MessageWithId {
   objid id;
+  std::optional<std::string> value;
 };
 
 enum HoldToggle { HOLD_TOGGLE_NONE, HOLD_TOGGLE_PICKUP, HOLD_TOGGLE_RELEASE };

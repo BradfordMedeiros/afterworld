@@ -54,7 +54,10 @@ struct LinkGunObj {
 
 };
 
-struct Autodoor {};
+struct Autodoor {
+	bool open;
+	std::string toggleSignal;
+};
 
 struct Tags {
 	std::set<objid> textureScrollObjIds;
@@ -92,5 +95,6 @@ struct TeleportInfo {
 std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 
 void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
+void toggleAutodoor(objid id, Autodoor& autodoor);
 
 #endif 
