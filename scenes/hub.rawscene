@@ -1,6 +1,6 @@
 # Generated scene 
 
-[opendoorswitch:+panel:activate:open-autodoor
+[opendoorswitch:+panel:activate:open-autodoor,activate-value:openautodoor,tint:1 0 0 1
 [opendoorswitch:position:165.99 48.45 -53.74
 [opendoorswitch:rotation:-1 -7.10543e-15 1.19209e-07 360
 [opendoorswitch:scene:../afterworld/scenes/prefabs/objects/panel.rawscene
@@ -39,23 +39,23 @@ gameobj-1729547751-copy-1530817585:position:-18.7 8.5 -73.1
 gameobj-1729547751-copy-1530817585:rotation:0 0 1 360
 gameobj-1729547751-copy-1530817585:scale:8.50555 8.50555 8.50555
 gameobj-1729547751-copy-1530817585:texture:../gameresources/build/misc/keyboard.png
-[prefab-instance-1139299773:position:168.22 52.55 -54.31
-[prefab-instance-1139299773:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+
 *octree:map:../afterworld/scenes/hub.map
 *octree:physics:enabled
 *octree:position:-154.42 -140 50
 *octree:scale:500 500 500
-[prefab-instance-1614655583:position:168.22 52.55 -54.31
-[prefab-instance-1614655583:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+
 gameobj-382765913-copy-1786577332:mesh:../gameresources/build/primitives/sphere.gltf
 gameobj-382765913-copy-1786577332:normal-texture:../gameresources/build/textures/evilpattern.normal.png
 gameobj-382765913-copy-1786577332:position:-6.8 -10.2 2.63
 gameobj-382765913-copy-1786577332:scale:23.5167 23.5167 23.5167
 gameobj-382765913-copy-1786577332:scrollspeed:0 0.005 0
 gameobj-382765913-copy-1786577332:texture:../gameresources/build/textures/evilpattern.png
+
 [autodoor:position:165.77 48.51 -55.43
 [autodoor:rotation:0.0345505 5.51941e-08 0.999403 360
 [autodoor:scene:../afterworld/scenes/prefabs/toys/gate.rawscene
+
 spawnpoint:mesh:../gameresources/build/objtypes/spawnpoint.gltf
 spawnpoint:position:164.79 48.23 -55.41
 spawnpoint:rotation:1 1.4847e-08 3.57628e-07 0

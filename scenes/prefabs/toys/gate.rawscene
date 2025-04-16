@@ -1,6 +1,6 @@
 gate:mesh:../gameresources/build/building/autodoor.gltf
 gate:physics:enabled
-gate:autodoor:true
+gate:autodoor:openautodoor
 
 gate:recordings:../afterworld/data/recordings/move.rec
 gate:targets:model
