@@ -283,6 +283,9 @@ std::function<void(bool)> floatParticleSetValueBool(const char* field, const cha
   };
 }
 
+static int selectedPrefabIndex = 0;
+std::vector<const char*> enemyTypes { "crawler", "tv", "enemy", "turret" };
+
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "",
@@ -952,7 +955,8 @@ std::vector<DockConfiguration> configurations {
           std::filesystem::path absolutePath = file;
           std::filesystem::path relativePath = std::filesystem::relative(absolutePath, workingDir);
           auto pathAsStr = relativePath.string();
-          dockConfigApi.createPrefab(pathAsStr);
+          std::unordered_map<std::string, AttributeValue> attrs;
+          dockConfigApi.createPrefab(pathAsStr, attrs);
         },
         .filterFilter = [](bool isDirectory, std::string& file) -> bool {
           if (isDirectory){
@@ -997,6 +1001,33 @@ std::vector<DockConfiguration> configurations {
     }
   },
 
+  DockConfiguration {
+    .title = "Spawn",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Spawnpoint",
+        .onClick = []() -> void {
+          std::string spawnpointFile("../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene");
+          std::unordered_map<std::string, AttributeValue> attrs;
+
+          std::string enemyType = "spawn:";
+          enemyType += enemyTypes.at(selectedPrefabIndex);
+
+          attrs["+spawnpoint"] = enemyType;
+          dockConfigApi.createPrefab(spawnpointFile, attrs);
+        },
+      },
+      DockOptionConfig { // Snap Translates
+        .options = enemyTypes,
+        .onClick = [](std::string&, int index) -> void {
+          selectedPrefabIndex = index;
+        },
+        .getSelectedIndex = [](void) -> int { 
+          return selectedPrefabIndex;
+        }
+      },
+    }
+  },
 };
 
 DockConfiguration* dockConfigByName(std::string name){

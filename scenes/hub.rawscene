@@ -1,66 +1,107 @@
 # Generated scene 
-
-[opendoorswitch:+panel:activate:open-autodoor,activate-value:openautodoor,tint:1 0 0 1
-[opendoorswitch:position:165.99 48.45 -53.74
-[opendoorswitch:rotation:-1 -7.10543e-15 1.19209e-07 360
-[opendoorswitch:scene:../afterworld/scenes/prefabs/objects/panel.rawscene
-
+[link-copy-444035037:+link:link:arena
+[link-copy-444035037:position:61.55 -11.08 -13.14
+[link-copy-444035037:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
 gameobj-1729547751:mesh:../gameresources/build/uncategorized/darkwires4.gltf
 gameobj-1729547751:normal-texture:../gameresources/build/misc/keyboard.normal.png
 gameobj-1729547751:position:-17 28.9 -73.1
 gameobj-1729547751:rotation:0 0 1 360
 gameobj-1729547751:scale:8.50555 8.50555 8.50555
 gameobj-1729547751:texture:../gameresources/build/misc/keyboard.png
+[opendoorswitch:+panel:activate:open-autodoor,activate-value:openautodoor,tint:1 0 0 1
+[opendoorswitch:position:165.99 48.45 -53.74
+[opendoorswitch:rotation:-1 -7.10543e-15 1.19209e-07 360
+[opendoorswitch:scene:../afterworld/scenes/prefabs/objects/panel.rawscene
+[prefab-instance-1023668041:position:168.22 52.55 -54.31
+[prefab-instance-1023668041:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+gameobj-815915005-copy-929176780-copy-1823473745:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005-copy-929176780-copy-1823473745:position:32.3 6.8 -18.7
+gameobj-815915005-copy-929176780-copy-1823473745:scale:62.1991 62.1991 62.1991
+gameobj-382765913-copy-1786577332-copy-1285964204:mesh:../gameresources/build/primitives/sphere.gltf
+gameobj-382765913-copy-1786577332-copy-1285964204:position:-30 20 540
+gameobj-382765913-copy-1786577332-copy-1285964204:scale:50.6714 50.6714 50.6714
+gameobj-382765913-copy-1786577332-copy-1285964204:scrollspeed:0 0.005 0
+gameobj-382765913-copy-1786577332-copy-1285964204:texture:./res/models/electricbox/electromech.jpg
 gameobj-1729547751-copy-1089421038:mesh:../gameresources/build/uncategorized/darkwires4.gltf
 gameobj-1729547751-copy-1089421038:normal-texture:../gameresources/build/misc/keyboard.normal.png
 gameobj-1729547751-copy-1089421038:position:-18.7 -10.2 -73.1
 gameobj-1729547751-copy-1089421038:rotation:0 0 1 0
 gameobj-1729547751-copy-1089421038:scale:8.50555 8.50555 8.50555
 gameobj-1729547751-copy-1089421038:texture:../gameresources/build/misc/keyboard.png
-[start:position:168.22 52.55 -54.31
-[start:rotation:-0.173648 -7.22357e-08 0.984808 359.875
-[start:scene:../afterworld/scenes/prefabs/gameplay/playerspawn.rawscene
-gameobj-815915005-copy-929176780:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005-copy-929176780:position:103.7 6.8 -18.7
-gameobj-815915005-copy-929176780:scale:62.1991 62.1991 62.1991
-gameobj-815915005-copy-929176780-copy-1823473745:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005-copy-929176780-copy-1823473745:position:32.3 6.8 -18.7
-gameobj-815915005-copy-929176780-copy-1823473745:scale:62.1991 62.1991 62.1991
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:position:319.6 -83.72 154.7
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:rotation:0.173648 -6.53241e-08 -0.984808 0
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:scale:45.582 45.582 45.582
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:texture:../gameresources/build/building/garbage.png
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:position:229.5 -56.1 154.7
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:rotation:0.173648 -6.53241e-08 -0.984808 0
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:scale:45.582 45.582 45.582
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:texture:../gameresources/build/building/garbage.png
 gameobj-815915005:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
 gameobj-815915005:position:0 -10.2 -153
 gameobj-815915005:scale:62.1991 62.1991 62.1991
-[link:+link:link:arena
-[link:position:7.08 -11.55 3.12
-[link:rotation:-1 0 3.57628e-07 359.944
-[link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[autodoor:position:165.77 48.51 -55.43
+[autodoor:rotation:0.0345505 5.51941e-08 0.999403 360
+[autodoor:scene:../afterworld/scenes/prefabs/toys/gate.rawscene
+[prefab-instance-1886701099:position:168.22 52.55 -54.31
+[prefab-instance-1886701099:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[link-copy-1358701467:+link:link:arena
+[link-copy-1358701467:position:7.08 -11.55 3.12
+[link-copy-1358701467:rotation:-1 0 3.57628e-07 359.944
+[link-copy-1358701467:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+gameobj-815915005-copy-929176780-copy-1600573849:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005-copy-929176780-copy-1600573849:position:69.7 6.8 -18.7
+gameobj-815915005-copy-929176780-copy-1600573849:scale:62.1991 62.1991 62.1991
+[start:position:168.22 52.55 -54.31
+[start:rotation:-0.173648 -7.22066e-08 0.984808 359.847
+[start:scene:../afterworld/scenes/prefabs/gameplay/playerspawn.rawscene
+*octree:map:../afterworld/scenes/hub.map
+*octree:physics:enabled
+*octree:position:-154.42 -140 50
+*octree:scale:500 500 500
+[prefab-instance-1819133388:position:168.22 52.55 -54.31
+[prefab-instance-1819133388:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
 gameobj-1729547751-copy-1530817585:mesh:../gameresources/build/uncategorized/darkwires4.gltf
 gameobj-1729547751-copy-1530817585:normal-texture:../gameresources/build/misc/keyboard.normal.png
 gameobj-1729547751-copy-1530817585:position:-18.7 8.5 -73.1
 gameobj-1729547751-copy-1530817585:rotation:0 0 1 360
 gameobj-1729547751-copy-1530817585:scale:8.50555 8.50555 8.50555
 gameobj-1729547751-copy-1530817585:texture:../gameresources/build/misc/keyboard.png
-
-*octree:map:../afterworld/scenes/hub.map
-*octree:physics:enabled
-*octree:position:-154.42 -140 50
-*octree:scale:500 500 500
-
 gameobj-382765913-copy-1786577332:mesh:../gameresources/build/primitives/sphere.gltf
-gameobj-382765913-copy-1786577332:normal-texture:../gameresources/build/textures/evilpattern.normal.png
-gameobj-382765913-copy-1786577332:position:-6.8 -10.2 2.63
-gameobj-382765913-copy-1786577332:scale:23.5167 23.5167 23.5167
+gameobj-382765913-copy-1786577332:position:-200 10 520
+gameobj-382765913-copy-1786577332:scale:50.6714 50.6714 50.6714
 gameobj-382765913-copy-1786577332:scrollspeed:0 0.005 0
-gameobj-382765913-copy-1786577332:texture:../gameresources/build/textures/evilpattern.png
-
-[autodoor:position:165.77 48.51 -55.43
-[autodoor:rotation:0.0345505 5.51941e-08 0.999403 360
-[autodoor:scene:../afterworld/scenes/prefabs/toys/gate.rawscene
-
+gameobj-382765913-copy-1786577332:texture:./res/models/electricbox/electromech.jpg
+gameobj-815915005-copy-929176780:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005-copy-929176780:position:103.7 6.8 -18.7
+gameobj-815915005-copy-929176780:scale:62.1991 62.1991 62.1991
+[link:+link:link:arena
+[link:position:85.06 -11.08 -13.14
+[link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-957247245:+link:link:arena
+[link-copy-957247245:position:73.38 -11.08 -13.14
+[link-copy-957247245:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[prefab-instance-1169564999:position:168.22 52.55 -54.31
+[prefab-instance-1169564999:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
 spawnpoint:mesh:../gameresources/build/objtypes/spawnpoint.gltf
 spawnpoint:position:164.79 48.23 -55.41
 spawnpoint:rotation:1 1.4847e-08 3.57628e-07 0
 spawnpoint:spawn:tv
 spawnpoint:texture:../gameresources/build/building/clean_metal.jpg
-gameobj-815915005-copy-929176780-copy-1600573849:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005-copy-929176780-copy-1600573849:position:69.7 6.8 -18.7
-gameobj-815915005-copy-929176780-copy-1600573849:scale:62.1991 62.1991 62.1991
+gameobj-382765913-copy-1786577332-copy-1859466191:mesh:../gameresources/build/primitives/sphere.gltf
+gameobj-382765913-copy-1786577332-copy-1859466191:position:45 90 350
+gameobj-382765913-copy-1786577332-copy-1859466191:scale:50.6714 50.6714 50.6714
+gameobj-382765913-copy-1786577332-copy-1859466191:scrollspeed:0 0.005 0
+gameobj-382765913-copy-1786577332-copy-1859466191:texture:./res/models/electricbox/electromech.jpg
+gameobj-382765913-copy-1786577332-copy-2046440386:mesh:../gameresources/build/primitives/sphere.gltf
+gameobj-382765913-copy-1786577332-copy-2046440386:normal-texture:../gameresources/build/textures/evilpattern.normal.png
+gameobj-382765913-copy-1786577332-copy-2046440386:position:-5.8 -10.2 2.63
+gameobj-382765913-copy-1786577332-copy-2046440386:scale:23.5167 23.5167 23.5167
+gameobj-382765913-copy-1786577332-copy-2046440386:scrollspeed:0 0.005 0
+gameobj-382765913-copy-1786577332-copy-2046440386:texture:../gameresources/build/textures/evilpattern.png
+gameobj-1751558280-copy-523702016-copy-887595726:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726:position:397.08 -108.72 154.7
+gameobj-1751558280-copy-523702016-copy-887595726:rotation:0.173648 -6.53241e-08 -0.984808 0
+gameobj-1751558280-copy-523702016-copy-887595726:scale:45.582 45.582 45.582
+gameobj-1751558280-copy-523702016-copy-887595726:texture:../gameresources/build/building/garbage.png

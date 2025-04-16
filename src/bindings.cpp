@@ -66,13 +66,18 @@ void setScenarioOptions(ScenarioOptions& options){
   });
 }
 
-objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos){
+objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
   GameobjAttributes attr = {
     .attr = {
       { "scene", prefab },
       { "position", pos },
     },
   };
+
+  for (auto &[key, payload] : additionalFields){
+    attr.attr[key] = payload;
+  }
+
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   return gameapi -> makeObjectAttr(
     sceneId, 
@@ -91,7 +96,7 @@ void startLevel(ManagedScene& managedScene){
     auto playerLocationObj = findObjByShortName("playerspawn", std::nullopt);
     modassert(playerLocationObj.has_value(), "no initial spawnpoint");
     glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true);
-    createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position);    
+    createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position, {});    
   }
 
   spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");

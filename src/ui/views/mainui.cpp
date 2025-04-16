@@ -5,7 +5,7 @@ extern CustomApiBindings* gameapi;
 void setMenuBackground(std::string background);
 void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 bool isSignalLocked(std::string signal);
-objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos);
+objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields);
 
 float wheelRotationOffset = 0.f;
 float actualWheelRotationOffset = wheelRotationOffset;
@@ -258,8 +258,8 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     }};
     gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("gameobj-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
-  .createPrefab = [](std::string& prefab) -> void {
-    createPrefab(uiManagerContext.uiContext -> activeSceneId().value(), prefab.c_str(), glm::vec3(0.f, 0.f, 0.f));
+  .createPrefab = [](std::string& prefab, std::unordered_map<std::string, AttributeValue>& additionalFields) -> void {
+    createPrefab(uiManagerContext.uiContext -> activeSceneId().value(), prefab.c_str(), glm::vec3(0.f, 0.f, 0.f), additionalFields);
   },
   .createCamera = []() -> void {
     std::map<std::string, GameobjAttributes> submodelAttributes;

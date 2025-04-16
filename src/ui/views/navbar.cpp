@@ -130,9 +130,10 @@ std::vector<NavbarOption> navbarOptionsEditor = {
 		.name = "Scene",
 		.dock = "Scene",
 	},
-
-	
-
+	NavbarOption {
+		.name = "Spawn",
+		.dock = "Spawn",
+	},
 };
 
 NavbarType strToNavbarType(std::string& layout){
