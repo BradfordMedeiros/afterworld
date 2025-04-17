@@ -1,9 +1,0 @@
-spawn_trigger:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-spawn_trigger:scale:5 15 25
-spawn_trigger:texture:../gameresources/textures/wood.jpg
-spawn_trigger:physics:enabled
-spawn_trigger:physics_collision:nocollide
-spawn_trigger:tint:0 1 0 0.5
-spawn_trigger:switch-enter-key:spawn
-spawn_trigger:switch-enter:type1
-spawn_trigger:switch-remove:enter

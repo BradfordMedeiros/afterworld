@@ -32,7 +32,7 @@ bool passesSwitchFilter(ObjectAttrHandle& handle, objid otherObjId){
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey){
   modlog("main collision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
   auto objAttr1 =  getAttrHandle(obj1);
-  auto switchEnter1 = getAttr(objAttr1, attrForValue.c_str());
+  std::optional<AttributeValue> switchEnter1 = getAttr(objAttr1, attrForValue.c_str());
   auto switchEnter1Key = getStrAttr(objAttr1, attrForKey.c_str());
   auto switchRemove1 = getStrAttr(objAttr1, "switch-remove");
   auto passedFilter1 = passesSwitchFilter(objAttr1, obj2);
@@ -48,7 +48,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   }
 
   auto objAttr2 = getAttrHandle(obj2);
-  auto switchEnter2 = getAttr(objAttr2, attrForValue.c_str());
+  std::optional<AttributeValue> switchEnter2 = getAttr(objAttr2, attrForValue.c_str());
   auto switchEnter2Key = getStrAttr(objAttr2, attrForKey.c_str());
   auto switchRemove2 = getStrAttr(objAttr2, "switch-remove");
   auto passedFilter2 = passesSwitchFilter(objAttr2, obj1);

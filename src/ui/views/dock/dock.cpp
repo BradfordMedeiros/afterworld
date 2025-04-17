@@ -628,7 +628,11 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockButtonConfig {
         .buttonText = "Create Trigger",
-        .onClick = []() -> void {},
+        .onClick = []() -> void {
+          std::unordered_map<std::string, AttributeValue> attrs;
+          std::string triggerFile("../afterworld/scenes/prefabs/gameplay/trigger.rawscene");
+          dockConfigApi.createPrefab(triggerFile, attrs);
+        },
       },
       DockTextboxConfig {
         .label = "Trigger",
@@ -1013,7 +1017,7 @@ std::vector<DockConfiguration> configurations {
           std::string enemyType = "spawn:";
           enemyType += enemyTypes.at(selectedPrefabIndex);
 
-          attrs["+spawnpoint"] = enemyType;
+          attrs["+spawnpoint"] = enemyType + std::string(",spawntags:testtag");
           dockConfigApi.createPrefab(spawnpointFile, attrs);
         },
       },

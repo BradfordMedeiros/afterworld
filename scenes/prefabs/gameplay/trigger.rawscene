@@ -1,0 +1,8 @@
+trigger:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+trigger:scale:5 15 25
+trigger:physics:enabled
+trigger:physics_collision:nocollide
+trigger:tint:1 1 1 1
+trigger:switch-enter-key:spawn
+trigger:switch-enter:testtag
+#trigger:switch-remove:enter

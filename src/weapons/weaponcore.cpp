@@ -180,7 +180,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
   submodelAttributes.at("sight").attr["tint"] = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
-  modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
+  modassert(gunId.has_value(), std::string("weapons could not create gun: ") + weaponParams.name);
   gameapi -> makeParent(gunId.value(), getWeaponParentId(parentId));
 
 
@@ -211,7 +211,7 @@ std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams,
   GameobjAttributes attr { .attr = attrAttributes };
   std::map<std::string, GameobjAttributes> submodelAttributes;
   auto gunId = gameapi -> makeObjectAttr(sceneId, weaponName, attr, submodelAttributes);
-  modassert(gunId.has_value(), std::string("weapons could not spawn gun: ") + weaponParams.name);
+  modassert(gunId.has_value(), std::string("weapons could not create gun: ") + weaponParams.name);
 
   gameapi -> makeParent(gunId.value(), entityHandId.value());
   return gunId.value();
@@ -250,7 +250,7 @@ void saveGunTransform(GunInstance& weaponValues){
 }
 
 GunCore createGunCoreInstance(std::string gun, objid sceneId){
-  modlog("weapons", std::string("spawn gun: ") + gun);
+  modlog("weapons", std::string("create gun: ") + gun);
   auto weaponParams = queryWeaponParams(gun);
 
   loadWeaponCore(gun, sceneId, weaponParams);
