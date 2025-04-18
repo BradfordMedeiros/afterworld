@@ -83,17 +83,6 @@ std::vector<NestedListItem> nestedListTest = {
   },
   NestedListItem {
     .item = ImListItem {
-      .value = "play/pause",
-      .onClick = []() -> void { 
-        auto isPaused = toggleWorldStateBoolStr("world", "paused");
-        nestedListTest.at(1).item.value = (isPaused ? "play" : "pause");
-      },
-      .mappingId = mappingId++,
-    },
-    .items = {},
-  },
-  NestedListItem {
-    .item = ImListItem {
       .value = "render",
       .onClick = []() -> void { },
       .mappingId = mappingId++,
@@ -435,43 +424,6 @@ std::vector<NestedListItem> nestedListTest = {
     .items = {
       NestedListItem {
         .item = ImListItem {
-          .value = "worldstate",
-          .onClick = []() -> void { 
-          },
-          .mappingId = mappingId++,
-        },
-        .items = {
-          NestedListItem {
-            .item = ImListItem {
-              .value = "save",
-              .onClick = []() -> void { 
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "load 1",
-              .onClick = []() -> void { 
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "load 2",
-              .onClick = []() -> void { 
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-        },
-      },
-      NestedListItem {
-        .item = ImListItem {
           .value = "background",
           .onClick = std::nullopt,
           .mappingId = mappingId++,
@@ -512,58 +464,6 @@ std::vector<NestedListItem> nestedListTest = {
               .value = "arcade",
               .onClick = []() -> void {
                 setMenuBackground("../gameresources/textures/backgrounds/arcade2.png");
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-        },
-      },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "hotkeys",
-          .onClick = std::nullopt, 
-          .mappingId = mappingId++,
-        },
-        .items = {
-          NestedListItem {
-            .item = ImListItem {
-              .value = "engine-dev",
-              .onClick = notYetImplementedAlert,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "editor-keys",
-              .onClick = notYetImplementedAlert,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-        },
-      },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "font",
-          .onClick = std::nullopt,
-          .mappingId = mappingId++,
-        },
-        .items = {
-          NestedListItem {
-            .item = ImListItem {
-              .value = "Walby-Regular.ttf",
-              .onClick = []() -> void { 
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "dpquak e.ttf",
-              .onClick = []() -> void { 
               },
               .mappingId = mappingId++,
             },

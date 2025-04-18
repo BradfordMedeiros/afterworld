@@ -285,6 +285,7 @@ std::function<void(bool)> floatParticleSetValueBool(const char* field, const cha
 
 static int selectedPrefabIndex = 0;
 std::vector<const char*> enemyTypes { "crawler", "tv", "enemy", "turret" };
+std::optional<std::string> spawnTag;
 
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
@@ -634,13 +635,63 @@ std::vector<DockConfiguration> configurations {
           dockConfigApi.createPrefab(triggerFile, attrs);
         },
       },
+      DockCheckboxConfig {
+        .label = "Oneshot",
+        .isChecked = []() -> bool {
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
+
+        },
+      },
+      DockCheckboxConfig {
+        .label = "On Enter",
+        .isChecked = []() -> bool {
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
+
+        },
+      },
       DockTextboxConfig {
-        .label = "Trigger",
-        .text = []() -> std::string {  // gameobj:trigger-switch
-          return "trigger-name-plaeholder"; 
+        .label = "On Enter Key",
+        .text = []() -> std::string {
+          return "placeholder enter key";
         },
         .onEdit = [](std::string value) -> void {
+        }
+      },
+      DockTextboxConfig {
+        .label = "On Enter Key",
+        .text = []() -> std::string {
+          return "placeholder enter value";
+        },
+        .onEdit = [](std::string value) -> void {
+        }
+      },
+      DockCheckboxConfig {
+        .label = "On Exit",
+        .isChecked = []() -> bool {
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
 
+        },
+      },
+      DockTextboxConfig {
+        .label = "On Exit Key",
+        .text = []() -> std::string {
+          return "placeholder exit key";
+        },
+        .onEdit = [](std::string value) -> void {
+        }
+      },
+      DockTextboxConfig {
+        .label = "On Exit Key",
+        .text = []() -> std::string {
+          return "placeholder exit value";
+        },
+        .onEdit = [](std::string value) -> void {
         }
       },
     }
@@ -1013,21 +1064,58 @@ std::vector<DockConfiguration> configurations {
         .onClick = []() -> void {
           std::string spawnpointFile("../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene");
           std::unordered_map<std::string, AttributeValue> attrs;
-
           std::string enemyType = "spawn:";
           enemyType += enemyTypes.at(selectedPrefabIndex);
 
-          attrs["+spawnpoint"] = enemyType + std::string(",spawntags:testtag");
+          std::string spawnString = enemyType;
+          if (spawnTag.has_value()){
+            spawnString = spawnString + std::string(",spawntags:") + spawnTag.value();
+          }
+          attrs["+spawnpoint"] = spawnString;
           dockConfigApi.createPrefab(spawnpointFile, attrs);
         },
       },
-      DockOptionConfig { // Snap Translates
+      DockOptionConfig {
         .options = enemyTypes,
         .onClick = [](std::string&, int index) -> void {
           selectedPrefabIndex = index;
         },
         .getSelectedIndex = [](void) -> int { 
           return selectedPrefabIndex;
+        }
+      },
+      DockCheckboxConfig {
+        .label = "Spawn On Load",
+        .isChecked = []() -> bool {
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
+          
+        },
+      },
+      DockCheckboxConfig {
+        .label = "Enable Spawn Tag",
+        .isChecked = []() -> bool {
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
+
+        },
+      },
+      DockTextboxConfig {
+        .label = "Spawn Tag",
+        .text = []() -> std::string {
+          if (!spawnTag.has_value()){
+            return "";
+          }
+          return spawnTag.value(); 
+        },
+        .onEdit = [](std::string value) -> void {
+          if (value == ""){
+            spawnTag = std::nullopt;
+            return;
+          }
+          spawnTag = value;
         }
       },
     }

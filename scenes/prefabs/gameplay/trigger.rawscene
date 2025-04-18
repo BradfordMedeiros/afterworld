@@ -6,3 +6,6 @@ trigger:tint:1 1 1 1
 trigger:switch-enter-key:spawn
 trigger:switch-enter:testtag
 #trigger:switch-remove:enter
+
+trigger:layer:transparency
+trigger:tint:1 1 1 0.5
