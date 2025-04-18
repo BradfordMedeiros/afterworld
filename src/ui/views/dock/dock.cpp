@@ -745,7 +745,6 @@ std::vector<DockConfiguration> configurations {
           resetColors();
         },
       },
-      // then a background picker 
     }
   },
   DockConfiguration {
@@ -862,15 +861,6 @@ std::vector<DockConfiguration> configurations {
             .value = floatParticleGetValueVec3("+scale", 2),
             .onEdit = floatParticleSetValueVec3("+scale", 2),
           },
-          /*DockCheckboxConfig {
-            .label = "Billboard",
-            .isChecked = getIsCheckedWorld("tools", "position-mirror", "true", "false"),
-            .onChecked = getOnCheckedWorld("tools", "position-mirror", "true", "false"),
-          },
-          DockFileConfig {
-            .label = "model-here",
-            .displayLimit = 30,
-          },*/
         },
       },
       DockGroup {

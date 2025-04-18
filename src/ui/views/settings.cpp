@@ -51,7 +51,6 @@ float getWorldStateFloat(std::string object, std::string attribute){
   return *floatPtr;
 }
 
-
 struct SettingConfiguration {
   DockConfig config;
   std::optional<std::function<void()>> initSetting;
@@ -83,7 +82,6 @@ void setZoom(float percentage, bool hideGun){
   });  
 }
 
-//float currentFov = 45;
 std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsItems {
   { "Game", std::vector<SettingConfiguration> {
     SettingConfiguration {
