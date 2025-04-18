@@ -613,60 +613,90 @@ std::vector<DockConfiguration> configurations {
       DockCheckboxConfig {
         .label = "Oneshot",
         .isChecked = []() -> bool {
-          return false;
+          auto value = dockConfigApi.getObjAttr("switch-remove");
+          if (!value.has_value()){
+            return false;
+          }
+          auto strValue = std::get_if<std::string>(&value.value());
+          if (strValue == NULL){
+            return false;
+          }
+          return *strValue == "enter";
         },
         .onChecked = [](bool checked) -> void {
-
+          if (checked){
+            dockConfigApi.setObjAttr("switch-remove", "enter");
+          }else{
+            dockConfigApi.setObjAttr("switch-remove", DeleteAttribute{});
+          }
         },
       },
       DockCheckboxConfig {
         .label = "On Enter",
         .isChecked = []() -> bool {
-          return false;
+          auto value = dockConfigApi.getObjAttr("switch-enter");
+          return value.has_value();
         },
         .onChecked = [](bool checked) -> void {
-
+          if (checked){
+            dockConfigApi.setObjAttr("switch-enter", "enter");
+          }else{
+            dockConfigApi.setObjAttr("switch-enter", DeleteAttribute{});
+          }   
         },
       },
       DockTextboxConfig {
         .label = "On Enter Key",
         .text = []() -> std::string {
-          return "placeholder enter key";
+          auto value = dockConfigApi.getObjAttr("switch-enter");
+          if (!value.has_value()){
+            return "[disabled]";
+          }
+          auto attrValue = value.value();
+          auto strValue = std::get_if<std::string>(&attrValue);
+          modassert(strValue, "invalid type onEnterKey");
+          return *strValue;
         },
         .onEdit = [](std::string value) -> void {
-        }
-      },
-      DockTextboxConfig {
-        .label = "On Enter Key",
-        .text = []() -> std::string {
-          return "placeholder enter value";
-        },
-        .onEdit = [](std::string value) -> void {
+          auto enterValue = dockConfigApi.getObjAttr("switch-enter");
+          if (!enterValue.has_value()){
+            return;
+          }
+          dockConfigApi.setObjAttr("switch-enter", value);
         }
       },
       DockCheckboxConfig {
         .label = "On Exit",
         .isChecked = []() -> bool {
-          return false;
+          auto value = dockConfigApi.getObjAttr("switch-exit");
+          return value.has_value();
         },
         .onChecked = [](bool checked) -> void {
-
+          if (checked){
+            dockConfigApi.setObjAttr("switch-exit", "exit");
+          }else{
+            dockConfigApi.setObjAttr("switch-exit", DeleteAttribute{});
+          }   
         },
       },
       DockTextboxConfig {
         .label = "On Exit Key",
         .text = []() -> std::string {
-          return "placeholder exit key";
+          auto value = dockConfigApi.getObjAttr("switch-exit");
+          if (!value.has_value()){
+            return "[disabled]";
+          }
+          auto attrValue = value.value();
+          auto strValue = std::get_if<std::string>(&attrValue);
+          modassert(strValue, "invalid type onEnterKey");
+          return *strValue;
         },
         .onEdit = [](std::string value) -> void {
-        }
-      },
-      DockTextboxConfig {
-        .label = "On Exit Key",
-        .text = []() -> std::string {
-          return "placeholder exit value";
-        },
-        .onEdit = [](std::string value) -> void {
+          auto enterValue = dockConfigApi.getObjAttr("switch-exit");
+          if (!enterValue.has_value()){
+            return;
+          }
+          dockConfigApi.setObjAttr("switch-exit", value);
         }
       },
     }
