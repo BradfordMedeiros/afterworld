@@ -416,12 +416,6 @@ std::vector<DockConfiguration> configurations {
         .onClick = optionsOnClickObj("dof", { "enabled", "disabled" }),
         .getSelectedIndex = optionsSelectedIndexObj("dof",  { "enabled", "disabled" }),
       },
-      DockCheckboxConfig {
-        .label = "enable physics",
-        .isChecked = getIsCheckedGameobj("physics", "enabled", "disabled"),
-        .onChecked = getOnCheckedGameobj("physics", "enabled", "disabled"),
-      },    
-
       DockGroup {
         .groupName = "Depth of Field Blur",
         .onClick = createCollapsableOnClick("blur"),
@@ -476,16 +470,6 @@ std::vector<DockConfiguration> configurations {
         .options = { "point", "spotlight", "directional" },
         .onClick = optionsOnClickObj("type", { "point", "spotlight", "directional" }),
         .getSelectedIndex = optionsSelectedIndexObj("type", { "point", "spotlight", "directional" }),
-      },
-      DockTextboxConfig {
-        .label = "Test Vec2",
-        .text = connectGetText("test-text"),
-        .onEdit = connectEditText("test-text", TEXT_TYPE_VEC2 ),
-      },
-      DockTextboxConfig {
-        .label = "Test Vec",
-        .text = connectGetText("test-text"),
-        .onEdit = connectEditText("test-text"),
       },
     },
   },
@@ -559,15 +543,6 @@ std::vector<DockConfiguration> configurations {
         .getSelectedIndex = []() -> int {
           return -1;
         },
-      },
-    }
-  },
-  DockConfiguration {
-    .title = "Navmesh",
-    .configFields = {
-      DockButtonConfig {
-        .buttonText = "Create Navmesh",
-        .onClick = []() -> void { dockConfigApi.createNavmesh(); } ,
       },
     }
   },
@@ -697,15 +672,6 @@ std::vector<DockConfiguration> configurations {
     }
   },
   DockConfiguration {
-    .title = "HUD",
-    .configFields = {
-      DockButtonConfig {
-        .buttonText = "HUD",
-        .onClick = []() -> void {},
-      },
-    }
-  },
-  DockConfiguration {
     .title = "WATER",
     .configFields = {
       DockButtonConfig {
@@ -782,7 +748,6 @@ std::vector<DockConfiguration> configurations {
       // then a background picker 
     }
   },
-
   DockConfiguration {
     .title = "Particle Viewer",
     .configFields = {
@@ -964,7 +929,6 @@ std::vector<DockConfiguration> configurations {
       }
     }
   },
-
   DockConfiguration {
     .title = "Models",
     .configFields = {
@@ -1055,7 +1019,6 @@ std::vector<DockConfiguration> configurations {
       }, 
     }
   },
-
   DockConfiguration {
     .title = "Spawn",
     .configFields = {
