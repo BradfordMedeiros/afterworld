@@ -116,7 +116,7 @@ void updateState(){
    ObjectValue {
      .object = "world",
      .attribute = "paused",
-     .value = global.routeState.paused ? "true" : "false",
+     .value = (global.routeState.paused || global.showEditor) ? "true" : "false",
    }
   });
 }
