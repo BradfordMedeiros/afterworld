@@ -20,6 +20,7 @@ std::set<objid> occupiedSpawners(Director& director){
 }
 
 void handleDirector(Director& director){
+	return;
 	// check the spawnpoints, and then spawn from a random one 
 	auto currTime = gameapi -> timeSeconds(false);
 	auto sinceLastSpawn = currTime - director.lastEnemySpawnTime;

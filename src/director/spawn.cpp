@@ -6,7 +6,7 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
   GameobjAttributes attr = {
     .attr = {
       { "scene", prefab },
-      { "+item", "pickup-remove:prefab" },
+      { "+item|pickup-remove", "|prefab" },
       { "spawn-managed", static_cast<float>(spawnOwnerId)},
       { "position", pos },
     },

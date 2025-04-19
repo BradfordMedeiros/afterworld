@@ -283,9 +283,7 @@ std::function<void(bool)> floatParticleSetValueBool(const char* field, const cha
   };
 }
 
-static int selectedPrefabIndex = 0;
 std::vector<const char*> enemyTypes { "crawler", "tv", "enemy", "turret" };
-std::optional<std::string> spawnTag;
 
 std::vector<DockConfiguration> configurations {
   DockConfiguration {
@@ -613,7 +611,7 @@ std::vector<DockConfiguration> configurations {
       DockCheckboxConfig {
         .label = "Oneshot",
         .isChecked = []() -> bool {
-          auto value = dockConfigApi.getObjAttr("switch-remove");
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-remove");
           if (!value.has_value()){
             return false;
           }
@@ -621,82 +619,82 @@ std::vector<DockConfiguration> configurations {
           if (strValue == NULL){
             return false;
           }
-          return *strValue == "enter";
+          return *strValue == "|enter";
         },
         .onChecked = [](bool checked) -> void {
           if (checked){
-            dockConfigApi.setObjAttr("switch-remove", "enter");
+            dockConfigApi.setObjAttr("+trigger|switch-remove", "|enter");
           }else{
-            dockConfigApi.setObjAttr("switch-remove", DeleteAttribute{});
+            dockConfigApi.setObjAttr("+trigger|switch-remove", DeleteAttribute{});
           }
         },
       },
       DockCheckboxConfig {
         .label = "On Enter",
         .isChecked = []() -> bool {
-          auto value = dockConfigApi.getObjAttr("switch-enter");
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-enter");
           return value.has_value();
         },
         .onChecked = [](bool checked) -> void {
           if (checked){
-            dockConfigApi.setObjAttr("switch-enter", "enter");
+            dockConfigApi.setObjAttr("+trigger|switch-enter", "|enter");
           }else{
-            dockConfigApi.setObjAttr("switch-enter", DeleteAttribute{});
+            dockConfigApi.setObjAttr("+trigger|switch-enter", DeleteAttribute{});
           }   
         },
       },
       DockTextboxConfig {
         .label = "On Enter Key",
         .text = []() -> std::string {
-          auto value = dockConfigApi.getObjAttr("switch-enter");
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-enter");
           if (!value.has_value()){
             return "[disabled]";
           }
           auto attrValue = value.value();
           auto strValue = std::get_if<std::string>(&attrValue);
           modassert(strValue, "invalid type onEnterKey");
-          return *strValue;
+          return strValue -> substr(1, strValue -> size());
         },
         .onEdit = [](std::string value) -> void {
-          auto enterValue = dockConfigApi.getObjAttr("switch-enter");
+          auto enterValue = dockConfigApi.getObjAttr("+trigger|switch-enter");
           if (!enterValue.has_value()){
             return;
           }
-          dockConfigApi.setObjAttr("switch-enter", value);
+          dockConfigApi.setObjAttr("+trigger|switch-enter", std::string("|") + value);
         }
       },
       DockCheckboxConfig {
         .label = "On Exit",
         .isChecked = []() -> bool {
-          auto value = dockConfigApi.getObjAttr("switch-exit");
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-exit");
           return value.has_value();
         },
         .onChecked = [](bool checked) -> void {
           if (checked){
-            dockConfigApi.setObjAttr("switch-exit", "exit");
+            dockConfigApi.setObjAttr("+trigger|switch-exit", "|exit");
           }else{
-            dockConfigApi.setObjAttr("switch-exit", DeleteAttribute{});
+            dockConfigApi.setObjAttr("+trigger|switch-exit", DeleteAttribute{});
           }   
         },
       },
       DockTextboxConfig {
         .label = "On Exit Key",
         .text = []() -> std::string {
-          auto value = dockConfigApi.getObjAttr("switch-exit");
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-exit");
           if (!value.has_value()){
             return "[disabled]";
           }
           auto attrValue = value.value();
           auto strValue = std::get_if<std::string>(&attrValue);
           modassert(strValue, "invalid type onEnterKey");
-          return *strValue;
+          return strValue -> substr(1, strValue -> size());
         },
         .onEdit = [](std::string value) -> void {
-          auto enterValue = dockConfigApi.getObjAttr("switch-exit");
+          auto enterValue = dockConfigApi.getObjAttr("+trigger|switch-exit");
           if (!enterValue.has_value()){
             return;
           }
-          dockConfigApi.setObjAttr("switch-exit", value);
+          dockConfigApi.setObjAttr("+trigger|switch-exit", std::string("|") + value);
         }
       },
     }
@@ -1047,58 +1045,104 @@ std::vector<DockConfiguration> configurations {
         .onClick = []() -> void {
           std::string spawnpointFile("../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene");
           std::unordered_map<std::string, AttributeValue> attrs;
-          std::string enemyType = "spawn:";
-          enemyType += enemyTypes.at(selectedPrefabIndex);
-
-          std::string spawnString = enemyType;
-          if (spawnTag.has_value()){
-            spawnString = spawnString + std::string(",spawntags:") + spawnTag.value();
-          }
-          attrs["+spawnpoint"] = spawnString;
+          attrs["+spawnpoint|spawn"] = std::string("|") + enemyTypes.at(0);
           dockConfigApi.createPrefab(spawnpointFile, attrs);
         },
       },
       DockOptionConfig {
         .options = enemyTypes,
         .onClick = [](std::string&, int index) -> void {
-          selectedPrefabIndex = index;
+          dockConfigApi.setObjAttr("+spawnpoint|spawn", std::string("|") + enemyTypes.at(index));
         },
-        .getSelectedIndex = [](void) -> int { 
-          return selectedPrefabIndex;
+        .getSelectedIndex = [](void) -> int {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawn");
+          if (!attr.has_value()){
+            return -1;
+          }
+          auto spawnStr = std::get_if<std::string>(&attr.value());
+          modassert(spawnStr, "invalid type for spawnStr");
+
+          for (int i = 0; i < enemyTypes.size(); i++){
+            if (enemyTypes.at(i) == spawnStr -> substr(1, spawnStr -> size())){
+              return i;
+            }
+          }
+          return -1;
         }
       },
       DockCheckboxConfig {
         .label = "Spawn On Load",
         .isChecked = []() -> bool {
-          return false;
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return false;
+          }
+          auto value = std::get_if<std::string>(&attr.value());
+          if (value == NULL){
+            return false;
+          }
+          return *value == "|onload";
         },
         .onChecked = [](bool checked) -> void {
-          
+          if (checked){
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", "|onload");
+          }else{
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", DeleteAttribute{});
+          }
         },
       },
       DockCheckboxConfig {
         .label = "Enable Spawn Tag",
         .isChecked = []() -> bool {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return false;
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "enable spawn tag wrong type");
+          auto values = split(strValue -> substr(1, strValue -> size()), ',');
+          for (auto &value : values){
+            if (value != "onload"){
+              return true;
+            }
+          }
           return false;
         },
         .onChecked = [](bool checked) -> void {
-
+          if (checked){
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", "|default");
+          }else{
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", DeleteAttribute{});
+          }
         },
       },
       DockTextboxConfig {
         .label = "Spawn Tag",
         .text = []() -> std::string {
-          if (!spawnTag.has_value()){
-            return "";
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return "[disabled]";
           }
-          return spawnTag.value(); 
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "invalid type for spawn tag");
+          auto body = strValue -> substr(1, strValue -> size());
+          if (body == "onload"){
+            return "[disabled]";
+          }
+          return body; 
         },
         .onEdit = [](std::string value) -> void {
-          if (value == ""){
-            spawnTag = std::nullopt;
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
             return;
           }
-          spawnTag = value;
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "invalid type for spawn tag");
+          auto body = strValue -> substr(1, strValue -> size());
+          if (body == "onload"){
+            return;
+          }
+          dockConfigApi.setObjAttr("+spawnpoint|spawntags", std::string("|") + value);
         }
       },
     }

@@ -39,7 +39,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   if (switchEnter1.has_value() && passedFilter1){
     //std::cout << "race publishing 1: " << switchEnter1.value() << std::endl;
     auto key = switchEnter1Key.has_value() ? switchEnter1Key.value() : "switch";
-    std::cout << "handle collision: " << key << ", " << print(switchEnter1.value()) << std::endl;
+    std::cout << "handle collision: " << key << ", " << print(switchEnter1.value()) << ", remove = " << print(switchRemove1) << std::endl;
 
     gameapi -> sendNotifyMessage(key, switchEnter1.value());
     if (switchRemove1.has_value() && switchRemove1.value() == removeKey){
@@ -55,7 +55,7 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   if (switchEnter2.has_value() && passedFilter2){
     //std::cout << "race publishing 2: " << switchEnter2.value() << std::endl;
     auto key = switchEnter2Key.has_value() ? switchEnter2Key.value() : "switch";
-    std::cout << "handle collision:2 " << key << ", " << print(switchEnter2.value()) << std::endl;
+    std::cout << "handle collision:2 " << key << ", " << print(switchEnter2.value()) << ", remove = " << print(switchRemove2) << std::endl;
     
     gameapi -> sendNotifyMessage(key, switchEnter2.value());
     if (switchRemove2.has_value() && switchRemove2.value() == removeKey){
