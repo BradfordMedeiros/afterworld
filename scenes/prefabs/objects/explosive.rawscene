@@ -1,7 +1,7 @@
 red_barrel:mesh:../gameresources/build/misc/barrel.gltf
 red_barrel:physics:enabled
-red_barrel:physics_mass:20
-#red_barrel:physics_type:dynamic
+red_barrel:physics_mass:400
+red_barrel:physics_type:dynamic
 red_barrel:physics_shape:shape_cylinder
 red_barrel:scale:0.3 0.3 0.3
 red_barrel:tint:1 0.2 0.2 1
