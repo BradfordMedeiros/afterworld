@@ -112,11 +112,12 @@ int randomNumber(int min, int max){
   return distribution(gen);
 }
 
+extern int PARTICLE_MASK;
 std::optional<int> closestHitpoint(std::vector<HitObject>& hitpoints, glm::vec3 playerPos, std::optional<objid> excludeHitpoint){
   std::optional<int> closestIndex;
   std::optional<float> minDistance;
   for (int i = 0; i < hitpoints.size(); i++){
-    if (hitpoints.at(i).mask == 1){
+    if (hitpoints.at(i).mask == PARTICLE_MASK){ // we don't want to shoot consider particles. 
       continue;
     }
     auto distance = glm::distance(playerPos, hitpoints.at(i).point); 

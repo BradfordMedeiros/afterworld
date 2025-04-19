@@ -1,0 +1,19 @@
+default
+- enemies use default
+2
+0010
+
+triggers
+6
+0110
+
+player
+1
+0001
+
+particles
+4
+0100
+
+Things collide with their own layer
+Or if x & y = 0
