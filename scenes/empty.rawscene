@@ -47,3 +47,4 @@ platform_lowert:rotation:5.82077e-11 1 4.76837e-07 179.967
 platform_lowert:scale:100 100 10
 platform_lowert:texture:./res/textures/brickwall.jpg
 platform_lowert:texturesize:40 40
+

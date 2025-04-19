@@ -8,3 +8,5 @@ trigger:switch-exit-key:spawn
 
 trigger:layer:transparency
 trigger:tint:1 1 1 0.5
+
+trigger:physics_layer:6

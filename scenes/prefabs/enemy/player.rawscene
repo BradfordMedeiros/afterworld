@@ -29,3 +29,8 @@ maincamera:agent:basic
 #box:layer:transparencys
 #box:tint:0 0 1 0.5
 #maincamera:child:box
+
+maincamera:physics_layer:1
+
+
+
