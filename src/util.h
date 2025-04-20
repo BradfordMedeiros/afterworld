@@ -66,6 +66,7 @@ void setGameObjectTextureOffset(objid id, glm::vec2 offset);
 void setGameObjectFriction(objid id, float friction);
 void setGameObjectGravity(objid id, glm::vec3 gravity);
 void setGameObjectVelocity(objid id, glm::vec3 velocity);
+glm::vec3 getGameObjectVelocity(objid id);
 void setGameObjectTint(objid id, glm::vec4 tint);
 void setGameObjectStateEnabled(objid id, bool enable);
 void setGameObjectMeshEnabled(objid id, bool enable);

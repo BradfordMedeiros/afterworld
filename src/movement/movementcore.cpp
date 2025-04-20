@@ -82,14 +82,18 @@ bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bo
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
   modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
   if (movementState.isGrounded || force){
-    gameapi -> applyImpulse(id, impulse);
+    auto currentVelocity = getGameObjectVelocity(id);
+    movementState.newVelocity += glm::vec3(currentVelocity.x, impulse.y, currentVelocity.z);
+    movementState.changedYVelocity = true;
+
     if (getManagedSounds().jumpSoundObjId.has_value()){
       playGameplayClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt);
     }
     return true;
   }
   if (movementState.inWater){
-    gameapi -> applyImpulse(id, impulse);
+    movementState.newVelocity += impulse;
+    movementState.changedYVelocity = true;
   }
   return false;
 }
@@ -103,20 +107,6 @@ void land(objid id){
 void moveUp(objid id, glm::vec2 direction){
   float time = gameapi -> timeElapsed();
   gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
-}
-
-void moveAbsolute(objid id, glm::vec3 direction){ // i wonder if i should make this actually parellel to the surface the player is moving along
-  //modlog("editor: move xz: ", print(direction));
-  float time = gameapi -> timeElapsed();
-  auto directionVec = direction;
-
-  auto magnitude = glm::length(directionVec);
-  if (aboutEqual(magnitude, 0.f)){
-    //modassert(false, "magnitude was about zero");
-    modlog("movement", "warning magnitude was about zero");
-    return;
-  }
-  gameapi -> applyImpulse(id, time * glm::normalize(directionVec) * magnitude); // change to apply force since every frame
 }
 
 
@@ -545,16 +535,76 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   animationConfig.isHoldingGun = isHoldingGun;
   animationConfig.attachedToLadder = movementState.attachedToLadder;
 
+  auto oldVelocity = getGameObjectVelocity(playerId);
+
+  auto oppositeVelocity = -1.f * oldVelocity;
+
+  float time = gameapi -> timeElapsed() * 1000;
+
   if (isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
-    moveAbsolute(playerId, rotationWithoutY * (moveSpeed * direction));
+
+    // I want counter acceleration here to be a separate variable 
+    // you should be able to slow down faster than 
+    // getting up to speed 
+    {
+      // move absolute
+      auto directionVec = rotationWithoutY * (moveSpeed * direction);
+      if (aboutEqual(glm::length(directionVec), 0.f)){
+        //modassert(false, "magnitude was about zero");
+        modlog("movement", "warning magnitude was about zero");
+      }else{
+        auto towardDirection = directionVec - oldVelocity;
+        auto diffMag = glm::length(towardDirection);
+        
+        // actual magnitude 6
+        // limit  magnitude 2
+        // so limit / actual = divisor
+        // toward * divosor
+        // if limit > actual, divisor = 1
+        float speedLimit = 0.06f;
+        auto ratio = speedLimit / diffMag;
+        if (ratio > 1){
+          ratio = 1.f;
+        }else{
+          std::cout << "Movement ratio limiting: " << diffMag << std::endl;
+        }
+        movementState.newVelocity = oldVelocity + (time * ratio * towardDirection);
+      }
+    }
+
     bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
     animationConfig.isSideStepping = isSideStepping;
     bool isMovingRight = movementState.moveVec.x >= 0.f;
     animationConfig.isMovingRight = isMovingRight;
+
   }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     moveUp(playerId, movementState.moveVec);
   }
+
+  bool enableFriction = true;
+  if (enableFriction){
+    float frictionAmount = isWalking ? 0.0f : 0.01f;
+    if (movementState.newVelocity.x > 0.f && (movementState.newVelocity.x + (time * frictionAmount * oppositeVelocity.x)) < 0.f){
+      movementState.newVelocity.x = 0.f;
+    }else if (movementState.newVelocity.x < 0.f && (movementState.newVelocity.x + (time * frictionAmount * oppositeVelocity.x)) > 0.f){
+      movementState.newVelocity.x = 0.f;
+    }else{
+      movementState.newVelocity.x += (time * frictionAmount * oppositeVelocity.x);
+    }
+  
+    if (movementState.newVelocity.z > 0.f && (movementState.newVelocity.z + (time * frictionAmount * oppositeVelocity.z)) < 0.f){
+      movementState.newVelocity.z = 0.f;
+    }else if (movementState.newVelocity.z < 0.f && (movementState.newVelocity.z + (time * frictionAmount * oppositeVelocity.z)) > 0.f){
+      movementState.newVelocity.z = 0.f;
+    }else{
+      movementState.newVelocity.z += (time * frictionAmount * oppositeVelocity.z);
+    }
+  }
+
+
+
+
 
   if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
@@ -591,6 +641,14 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   if (false && shouldStep){
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
+
+  oldVelocity.x = movementState.newVelocity.x;
+  oldVelocity.z = movementState.newVelocity.z;
+  if (movementState.changedYVelocity){
+    oldVelocity.y = movementState.newVelocity.y;
+  }
+  setGameObjectVelocity(playerId, oldVelocity);
+  movementState.changedYVelocity = false;
 
   if (movementState.doJump){
     if (isAttachedToCurve(playerId)){
@@ -719,6 +777,9 @@ MovementState getInitialMovementState(objid playerId){
 
   auto scale = gameapi -> getGameObjectScale(playerId, false);
   movementState.initialScale = scale;
+
+  movementState.newVelocity = glm::vec3(0.f, 0.f, 0.f);
+  movementState.changedYVelocity = false;
 
   return movementState;
 }
