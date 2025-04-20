@@ -80,10 +80,10 @@ void removeAllMovementCores(){
 
 bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bool force = false){
   glm::vec3 impulse(0, moveParams.jumpHeight, 0);
-  modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
   if (movementState.isGrounded || force){
-    auto currentVelocity = getGameObjectVelocity(id);
-    movementState.newVelocity += glm::vec3(currentVelocity.x, impulse.y, currentVelocity.z);
+    modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
+
+    movementState.newVelocity += impulse;
     movementState.changedYVelocity = true;
 
     if (getManagedSounds().jumpSoundObjId.has_value()){
@@ -536,6 +536,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   animationConfig.attachedToLadder = movementState.attachedToLadder;
 
   auto oldVelocity = getGameObjectVelocity(playerId);
+  movementState.newVelocity = oldVelocity;
 
   auto oppositeVelocity = -1.f * oldVelocity;
 
@@ -569,7 +570,10 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
         }else{
           std::cout << "Movement ratio limiting: " << diffMag << std::endl;
         }
-        movementState.newVelocity = oldVelocity + (time * ratio * towardDirection);
+
+        auto finalDir = (time * ratio * towardDirection);
+        finalDir.y = 0.f; // the y is not time adjusted since basically an impulse
+        movementState.newVelocity += finalDir;
       }
     }
 
@@ -642,13 +646,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     gameapi -> applyImpulse(playerId, glm::vec3(0.f, 0.4f, 0.f));
   }
 
-  oldVelocity.x = movementState.newVelocity.x;
-  oldVelocity.z = movementState.newVelocity.z;
-  if (movementState.changedYVelocity){
-    oldVelocity.y = movementState.newVelocity.y;
-  }
-  setGameObjectVelocity(playerId, oldVelocity);
-  movementState.changedYVelocity = false;
 
   if (movementState.doJump){
     if (isAttachedToCurve(playerId)){
@@ -662,6 +659,16 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
       animationConfig.didJump = didJump;
     }
   }
+
+  oldVelocity.x = movementState.newVelocity.x;
+  oldVelocity.z = movementState.newVelocity.z;
+  if (movementState.changedYVelocity){
+    oldVelocity.y = movementState.newVelocity.y;
+  }
+  setGameObjectVelocity(playerId, oldVelocity);
+  movementState.changedYVelocity = false;
+
+
   if (movementState.doGrind){
     if (!isAttachedToCurve(playerId)){
       auto rail = nearbyRail(currPos, glm::vec3(directionVec.x, directionVec.y, directionVec.z));
