@@ -105,12 +105,6 @@ void land(objid id){
   }
 }
 
-void moveUp(objid id, glm::vec2 direction){
-  float time = gameapi -> timeElapsed();
-  gameapi -> applyImpulse(id, time * glm::vec3(0.f, -direction.y, 0.f));
-}
-
-
 float ironsightSpeedMultiplier = 0.4f;
 float getMoveSpeed(MovementParams& moveParams, MovementState& movementState, bool ironsight, bool isGrounded){
   auto baseMoveSpeed = movementState.isCrouching ? moveParams.crouchSpeed : moveParams.moveSpeed;
@@ -543,7 +537,16 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 
   float time = gameapi -> timeElapsed() * 1000;
 
-  if (isWalking){
+  if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
+    if (movementState.moveVec.x > 0.1f){
+      movementState.newVelocity.y = 1.f;
+      movementState.changedYVelocity = true;
+    }else if (movementState.moveVec.x < 0.1f){
+      movementState.newVelocity.y = -1.f;
+      movementState.changedYVelocity = true;     
+    }
+
+  }else if (isWalking){
     std::cout << "movement, direction = : " << print(direction) << std::endl;
 
     // I want counter acceleration here to be a separate variable 
@@ -583,8 +586,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     bool isMovingRight = movementState.moveVec.x >= 0.f;
     animationConfig.isMovingRight = isMovingRight;
 
-  }else if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
-    moveUp(playerId, movementState.moveVec);
   }
 
   bool enableFriction = true;
