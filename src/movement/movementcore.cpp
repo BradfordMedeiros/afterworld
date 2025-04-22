@@ -561,7 +561,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
         // actual magnitude 6
         // limit  magnitude 2
         // so limit / actual = divisor
-        // toward * divosor
+        // toward * divisor
         // if limit > actual, divisor = 1
         float speedLimit = 0.06f;
         auto ratio = speedLimit / diffMag;
@@ -587,8 +587,14 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
   bool enableFriction = true;
+  float groundFriction  = 0.008f;
+  float airFriction = 0.f;
   if (enableFriction){
-    float frictionAmount = isWalking ? 0.0f : 0.01f;
+    float frictionAmount = isWalking ? 0.0f : groundFriction; //0.01f;
+    if (!movementState.isGrounded){
+      frictionAmount = airFriction;
+    }
+
     if (movementState.newVelocity.x > 0.f && (movementState.newVelocity.x + (time * frictionAmount * oppositeVelocity.x)) < 0.f){
       movementState.newVelocity.x = 0.f;
     }else if (movementState.newVelocity.x < 0.f && (movementState.newVelocity.x + (time * frictionAmount * oppositeVelocity.x)) > 0.f){
