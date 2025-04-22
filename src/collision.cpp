@@ -6,6 +6,7 @@ extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-
 
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
+void applyImpulseAffectMovement(objid id, glm::vec3 force);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -136,7 +137,7 @@ void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
     auto bounceAmount = getVec3Attr(attr, "bounce");
     if (bounceAmount.has_value()){
       auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), oppositeNormal) * bounceAmount.value();
-      gameapi -> applyImpulse(obj2, impulse);
+      applyImpulseAffectMovement(obj2, impulse);
     }    
   }
 
@@ -145,7 +146,7 @@ void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
     auto bounceAmount = getVec3Attr(attr, "bounce");
     if (bounceAmount.has_value()){
       auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * bounceAmount.value();
-      gameapi -> applyImpulse(obj1, impulse);
+      applyImpulseAffectMovement(obj1, impulse);
     }    
   }
 }
