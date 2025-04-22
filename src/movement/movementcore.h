@@ -99,6 +99,10 @@ struct MovementState {
   glm::vec3 velocity;
 
   glm::vec3 initialScale;
+
+  glm::vec3 newVelocity;
+  bool changedYVelocity;
+
 };
 
 MovementParams* findMovementCore(std::string& name);
