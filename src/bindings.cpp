@@ -12,6 +12,7 @@ std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::unordered_map<objid, Inventory> scopenameToInventory;
 GameProgress progress = createProgress();
 std::set<std::string> gems;   // static-state
+std::unordered_map<objid, glm::vec3> impulses;
 
 extern ControlledPlayer controlledPlayer;
 
@@ -124,6 +125,17 @@ void setTotalZoom(float multiplier){
   setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(multiplier);
   playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+}
+
+void applyImpulseAffectMovement(objid id, glm::vec3 force){
+  gameapi -> applyImpulse(id, force);
+  impulses[id] = force;
+}
+std::optional<glm::vec3> getImpulseThisFrame(objid id){
+  if (impulses.find(id) == impulses.end()){
+    return std::nullopt;
+  }
+  return impulses.at(id);
 }
 
 bool disableAnimation = false;
@@ -1242,6 +1254,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           }
         }
         auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
+        impulses = {};
         setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
       }
 

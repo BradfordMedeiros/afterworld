@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
 bool entityInShootingMode(objid id);
+std::optional<glm::vec3> getImpulseThisFrame(objid id);
 
 struct MovementCore {
   std::string name;
@@ -613,9 +614,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
 
-
-
-
   if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
     std::cout << "should play move clip" << std::endl;
@@ -671,6 +669,15 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   if (movementState.changedYVelocity){
     oldVelocity.y = movementState.newVelocity.y;
   }
+
+
+  // get impulse stuff here: 
+
+  auto impulse = getImpulseThisFrame(playerId);
+  if (impulse.has_value()){
+    oldVelocity += impulse.value() / moveParams.physicsMass;
+  }
+
   setGameObjectVelocity(playerId, oldVelocity);
   movementState.changedYVelocity = false;
 

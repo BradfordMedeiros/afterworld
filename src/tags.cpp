@@ -7,6 +7,7 @@ extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
 bool isInGameMode();
+void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 
 struct TagUpdater {
@@ -109,14 +110,15 @@ void toggleAutodoor(objid id, Autodoor& autodoor){
 }
 
 
+
 void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
 	for (auto &hitobject : hitObjects){
 		doDamageMessage(hitobject.id, damage);
 
-		float force = 10.f;
+		float force = 30.f;
 		auto dirVec = glm::normalize(hitobject.point - position);
-		gameapi -> applyImpulse(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
+		applyImpulseAffectMovement(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
 	}
 
 	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position);
