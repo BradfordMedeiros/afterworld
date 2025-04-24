@@ -43,7 +43,7 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
 			{ "position", position },
     },
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
   return gameapi -> makeObjectAttr(
     sceneId, 
     std::string("[instance-") + uniqueNameSuffix(), 
@@ -74,7 +74,7 @@ void updateBackground(objid id, std::string image){
 struct Signal {
 	bool locked;   // should remove on unloading 
 };
-std::map<std::string, Signal> lockedSignals {};
+std::unordered_map<std::string, Signal> lockedSignals {};
 
 bool isSignalLocked(std::string signal){
 	if(lockedSignals.find(signal) == lockedSignals.end()){

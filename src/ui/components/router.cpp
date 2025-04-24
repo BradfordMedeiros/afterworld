@@ -111,12 +111,12 @@ RouterHistory* routerHistory(Props& props){
  	return router;
 }
 
-std::map<std::string, Component>* routerMapping(Props& props){
+std::unordered_map<std::string, Component>* routerMapping(Props& props){
   auto propPair = propPairAtIndex(props.props, routerMappingSymbol);
   if (!propPair){
     return NULL;
   }
-  std::map<std::string, Component>* routerMapping = anycast<std::map<std::string, Component>>(propPair -> value);
+  std::unordered_map<std::string, Component>* routerMapping = anycast<std::unordered_map<std::string, Component>>(propPair -> value);
   modassert(routerMapping, "invalid router mapping");
   return routerMapping;
 }
@@ -153,7 +153,7 @@ PathMatch matchPath(std::string path, std::string expression){
   };
 }
 
-const Component* componentAtRoute(const std::map<std::string, Component>& routeToComponent, std::string& path){
+const Component* componentAtRoute(const std::unordered_map<std::string, Component>& routeToComponent, std::string& path){
   for (auto &[routePath, component] : routeToComponent){
     if (matchPath(path, routePath).matches){
       return &component;

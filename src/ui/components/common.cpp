@@ -386,8 +386,8 @@ void drawCircle(DrawingTools& drawTools, glm::vec2 center, float radius){
 }
 
 struct UiDataStore {
-  std::map<int, void*> data;
-  std::map<int, DataStoreHint> typeHints;
+  std::unordered_map<int, void*> data;
+  std::unordered_map<int, DataStoreHint> typeHints;
 };
 
 UiDataStore dataStore { .data = { }, .typeHints = {} };

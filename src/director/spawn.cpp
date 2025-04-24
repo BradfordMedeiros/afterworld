@@ -11,7 +11,7 @@ objid createSpawnManagedPrefab(objid sceneId, objid spawnOwnerId, const char* pr
       { "position", pos },
     },
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
   return gameapi -> makeObjectAttr(
     sceneId, 
     std::string("[spawned-instance-") + uniqueNameSuffix(), 

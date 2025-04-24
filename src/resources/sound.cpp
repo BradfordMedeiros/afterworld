@@ -16,7 +16,7 @@ void loadAllSounds(std::vector<MaterialToSound>& sounds, objid sceneId){
   GameobjAttributes attr {
     .attr = {},
   };
-	std::map<std::string, GameobjAttributes> submodelAttributes;
+	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
 
 	for (auto &sound : sounds){
 		attr.attr["clip"] = sound.clip;
