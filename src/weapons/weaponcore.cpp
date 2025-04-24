@@ -22,12 +22,13 @@ WeaponCore* findWeaponCore(std::string& name){
   return NULL;
 }
 
-void loadWeaponCore(std::string& coreName, objid sceneId, WeaponParams& weaponParams){
+void loadWeaponCore(std::string& coreName, objid sceneId){
   modlog("weapons", std::string("load weapon core: ") + coreName);
   if (findWeaponCore(coreName)){
     return;
   }
 
+  auto weaponParams = queryWeaponParams(coreName);
   WeaponCore weaponCore { };
   weaponCore.weaponParams = weaponParams;
   if (weaponParams.soundpath != ""){
@@ -251,9 +252,8 @@ void saveGunTransform(GunInstance& weaponValues){
 
 GunCore createGunCoreInstance(std::string gun, objid sceneId){
   modlog("weapons", std::string("create gun: ") + gun);
-  auto weaponParams = queryWeaponParams(gun);
 
-  loadWeaponCore(gun, sceneId, weaponParams);
+  loadWeaponCore(gun, sceneId);
 
   auto weaponCore = findWeaponCore(gun);
   modassert(weaponCore, std::string("could not find gun core for: ") + gun);
@@ -305,10 +305,10 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
 
 
   std::optional<objid> muzzlePointId;
-  auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores, also this should just be optional
   auto sceneId = gameapi -> listSceneId(parentId);
 
   if (needToCreateFpsGun){
+    auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores, also this should just be optional
     auto weaponName = std::string("code-weapon-") + uniqueNameSuffix();
     modlog("weapons ensureGunInstance", "creating weapon instance");
     _gunInstance.gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
@@ -328,12 +328,14 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
     _gunInstance.thirdPersonGunId = std::nullopt;
   }
   if (needToCreateTpsGun){
+    auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores, also this should just be optional
     modlog("weapons ensureGunInstance third person", "create weapon instance");
     auto weaponName = std::string("code-weapon-third-") + uniqueNameSuffix();
     _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, thirdPersonWeapon, weaponName);
   }
 
   if (!sameGun){
+    auto gunCore = createGunCoreInstance(_gunInstance.desiredGun, 0); // would be better to preload all gun cores, also this should just be optional
     _gunInstance.gunCore = gunCore;
     _gunInstance.muzzleId = muzzlePointId;
   }
