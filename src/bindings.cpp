@@ -1366,7 +1366,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         // maybe raycast down, and then set the position so it fits 
         auto teleportPosition = getTeleportPosition(tags);
         if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled() && teleportPosition.has_value()){
-          playGameplayClipById(getManagedSounds().soundObjId.value(), std::nullopt, std::nullopt);
+          playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
           gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true);
           gameapi -> removeByGroupId(teleportPosition.value().id);
         }

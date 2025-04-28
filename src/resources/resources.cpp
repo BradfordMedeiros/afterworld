@@ -10,6 +10,7 @@ ManagedSounds sounds {
   .soundObjId = std::nullopt,
   .explosionSoundObjId = std::nullopt,
   .hitmarkerSoundObjId = std::nullopt,
+  .teleportObjId = std::nullopt,
   .sceneIdToSounds = {},
   .sceneIdToTextures = {},
 };
@@ -103,12 +104,12 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.activateSoundObjId = createSound(sceneId, ("&code-activate") + uniqueNameSuffix(), activateClip);
   }
 
-  std::string teleportClip = "../gameresources/sound/teleport.wav";
-  if (teleportClip != ""){
+  std::string soundClip = "../gameresources/sound/q009/weapswitch.ogg";
+  if (soundClip != ""){
     if (sounds.soundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.soundObjId.value());
     }
-    sounds.soundObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), teleportClip);
+    sounds.soundObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), soundClip);
   }
 
   std::string explosionClip = "../gameresources/sound/q009/explosion.wav";
@@ -127,6 +128,16 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     }
     sounds.hitmarkerSoundObjId = createSound(sceneId, ("&code-hitmarker") + uniqueNameSuffix(), hitmarkerClip);
   }
+
+  std::string teleportClip = "../gameresources/sound/q009/teleport.ogg";
+  if (teleportClip != ""){
+    if (sounds.teleportObjId.has_value()){
+      gameapi -> removeByGroupId(sounds.teleportObjId.value());
+    }
+    sounds.teleportObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), teleportClip);
+  }
+
+
 }
 
 void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
@@ -170,6 +181,7 @@ void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading
   ensureSoundUnloaded(sceneId, &sounds.soundObjId);
   ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
   ensureSoundUnloaded(sceneId, &sounds.hitmarkerSoundObjId);
+  ensureSoundUnloaded(sceneId, &sounds.teleportObjId);
 }
 
 void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly

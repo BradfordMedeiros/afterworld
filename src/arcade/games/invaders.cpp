@@ -121,7 +121,7 @@ std::any createInvaders(objid id){
 
 	auto soundObjs = arcadeApi.ensureSoundsLoaded(id,
 	{
-		"./res/sounds/silenced-gunshot2.wav",
+		"./res/sounds/silenced-gunshot.wav",
 		"./res/sounds/glassbreak.wav",
 	});
 	invaders.shootingSound = soundObjs.at(0);

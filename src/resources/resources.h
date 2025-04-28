@@ -13,6 +13,7 @@ struct ManagedSounds {
   std::optional<objid> soundObjId;
   std::optional<objid> explosionSoundObjId;
   std::optional<objid> hitmarkerSoundObjId;
+  std::optional<objid> teleportObjId;
 
   std::unordered_map<objid, std::vector<objid>> sceneIdToSounds;
   std::unordered_map<objid, std::vector<objid>> sceneIdToTextures;

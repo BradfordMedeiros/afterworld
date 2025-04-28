@@ -32,7 +32,7 @@ playerspawn:teleport:true
 [enemy:position:0 4 0
 
 
-[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
+[link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
 [link:position:0 5 0
 
 pyramid:mesh:../gameresources/build/misc/pyramid.gltf
