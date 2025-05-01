@@ -3,15 +3,11 @@
 all: afterworld
 release: afterworld_release
 
-modengine:
+afterworld:
 	@(cd ../ModEngine && make modengine additional_src=../../afterworld/src)
 
-modengine_release: 
+afterworld_release: 
 	@(cd ../ModEngine && make modengine_release additional_src=../../afterworld/src)
-
-afterworld: modengine
-
-afterworld_release: modengine_release 
 
 validate: 
 	@(cd ../ModEngine && ./build/modengine --validate ../afterworld/scenes --validate ../ModEngine/res/)
