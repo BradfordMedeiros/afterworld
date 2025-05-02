@@ -12,9 +12,9 @@ afterworld_release:
 validate: 
 	@(cd ../ModEngine && ./build/modengine --validate ../afterworld/scenes --validate ../ModEngine/res/)
 
-package: afterworld_release
+package: afterworld_release 
 	@(./package.sh)
-	
+
 clean:
 	@echo "clean placeholder"
 
