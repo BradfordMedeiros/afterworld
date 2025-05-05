@@ -1,0 +1,9 @@
+
+
+playerspawn:playerspawn:true
+playerspawn:teleport:true
+
+]video:position:0 0 -5
+]video:show:enabled
+]video:shader:./res/shaders/video/fragment.glsl,./res/shaders/video/vertex.glsl
+]video:layer:basicui2
