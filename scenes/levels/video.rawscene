@@ -1,9 +1,50 @@
 
-
-playerspawn:playerspawn:true
-playerspawn:teleport:true
-
 ]video:position:0 0 -5
 ]video:show:enabled
 ]video:shader:./res/shaders/video/fragment.glsl,./res/shaders/video/vertex.glsl
 ]video:layer:basicui2
+]video:video:../gameresources/video/bigbuck.webm
+
+
+floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+floor:position:0 0 0
+floor:scale:100 100 10
+floor:rotation:0 -1 0 0
+floor:texturesize:40 40
+floor:physics:enabled
+floor:material:metal
+floor:texture:../gameresources/build/misc/keyboard.png
+
+
+wall:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+wall:position:0 0 -5
+wall:scale:100 100 10
+wall:rotation:0 0 1 0
+wall:texturesize:40 40
+wall:physics:enabled
+wall:material:metal
+wall:texture:../gameresources/build/misc/keyboard.png
+
+wall:health:5
+
+
+playerspawn:playerspawn:true
+playerspawn:position:0 20 0
+playerspawn:teleport:true
+
+>testview:position:0 0 40
+>testview:rotation:0 0 -10 0
+
+[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
+[enemy:position:0 4 0
+
+
+[link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link:position:0 5 0
+
+pyramid:mesh:../gameresources/build/misc/pyramid.gltf
+darkwires:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+bed:mesh:../gameresources/build/uncategorized/bedframe.gltf
+clock:mesh:../gameresources/build/uncategorized/grandfatherclock.gltf
+limbo:mesh:../gameresources/build/uncategorized/limboapple.gltf
+
