@@ -427,7 +427,7 @@ std::optional<objid> findObjByShortName(std::string name, std::optional<objid> s
 
   auto allSceneIds = gameapi -> listScenes(std::nullopt);
   for (auto id : allSceneIds){
-    auto objId = gameapi -> getGameObjectByName(name, id, true);
+    auto objId = gameapi -> getGameObjectByName(name, id);
     if (objId.has_value()){
       return objId.value();
     }

@@ -316,7 +316,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && _gunInstance.gunId.has_value()){
       gameapi -> playAnimation(_gunInstance.gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP);
     }
-    muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId, true);
+    muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId);
     if (!muzzlePointId.has_value()){
       modlog("weapon core", std::string("no muzzle defined for: ") + _gunInstance.desiredGun);
     }

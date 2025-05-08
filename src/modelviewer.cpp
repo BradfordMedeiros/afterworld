@@ -60,7 +60,7 @@ void enforceObjectTransform(ViewerData& viewer, objid id){
   auto position = gameapi -> getGameObjectPos(id, true);
   gameapi -> setGameObjectPosition(viewer.managedObject.value(), position, true);
 
-  auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
+  auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id)).value();
 
   auto newCameraPosition = viewer.cameraData.initialCameraPos ;
 
@@ -142,7 +142,7 @@ ViewerData createViewerData(objid id){
     },
   };
 
-  auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id), false).value();
+  auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id)).value();
   viewer.cameraData.initialCameraPos = gameapi -> getGameObjectPos(cameraId, true);
   return viewer;
 }
