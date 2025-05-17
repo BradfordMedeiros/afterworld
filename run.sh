@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export LD_LIBRARY_PATH="$(pwd)/build/runtime_libs:$LD_LIBRARY_PATH"
+
+
 BASE_DIRECTORY=$(pwd)
 SCRIPT_FOLDER=$BASE_DIRECTORY/scripts
 

@@ -11,6 +11,7 @@ mkdir -p ./build/afterworld
 mkdir -p ./build/ModEngine/build
 
 cp ../ModEngine/build/modengine ./build/ModEngine/build
+cp -r ../ModEngine/build/runtime_libs/ ./build
 cp -r ./data ./build/afterworld
 cp ./run.sh ./build/afterworld
 
