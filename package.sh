@@ -3,7 +3,7 @@
 set -e 
 
 (
-	cd ../gameresources/ && make -j12 all
+	cd ../gameresources/ && make -j8 all
 )
 
 mkdir -p ./build
