@@ -183,7 +183,7 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, fl
     auto towardTarget = gameapi -> orientationFromPos(agentPos, finalTargetPosition);
     auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
     gameapi -> setGameObjectRot(agentId, towardTarget, true);
-    gameapi -> setGameObjectPosition(agentId, newPos, true);
+    gameapi -> setGameObjectPosition(agentId, newPos, true, Hint { .hint = "ai - moveToTarget" });
     return;
   }
 

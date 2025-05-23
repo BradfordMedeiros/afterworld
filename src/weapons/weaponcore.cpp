@@ -602,7 +602,7 @@ void swayGunTranslation(GunInstance& weaponValues, glm::vec3 relVelocity, bool i
   auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
   //std::cout << "gun: targetpos: " << print(targetPosWithRecoil) << std::endl;
   //std::cout << "gun: newpos: " << print(newPos) << std::endl;
-  gameapi -> setGameObjectPosition(gunId, newPos, false);
+  gameapi -> setGameObjectPosition(gunId, newPos, false, Hint { .hint = "swayGunTranslation" });
 }
 
 void swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2 lookVelocity, glm::vec3 movementVec){

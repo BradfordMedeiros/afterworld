@@ -28,7 +28,7 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
   auto newLeftHandPosition = rightHandPosition + leftHandDir;
 
-  gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true);
+  gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true, Hint { .hint = "updateEntityGunPosition" });
 
 
   auto headPosition = gameapi -> getGameObjectPos(neck.value(), true);
@@ -358,12 +358,12 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true);
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true);
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "onMovementFrame1" });
 
       updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
     }else{
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
-      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true);  
+      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true, Hint { .hint = "onMovementFrame2" });  
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true);
     }
 

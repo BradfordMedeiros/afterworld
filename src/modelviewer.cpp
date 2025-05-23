@@ -58,7 +58,7 @@ void enforceObjectTransform(ViewerData& viewer, objid id){
   gameapi -> setGameObjectScale(viewer.managedObject.value(), glm::vec3(viewer.cameraData.scale, viewer.cameraData.scale, viewer.cameraData.scale), true);
 
   auto position = gameapi -> getGameObjectPos(id, true);
-  gameapi -> setGameObjectPosition(viewer.managedObject.value(), position, true);
+  gameapi -> setGameObjectPosition(viewer.managedObject.value(), position, true, Hint { .hint = "enforceObjectTransform1" });
 
   auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id)).value();
 
@@ -72,7 +72,7 @@ void enforceObjectTransform(ViewerData& viewer, objid id){
 
   auto finalCameraPosition = newCameraPosition + glm::vec3(cameraAngleOffsetX, 0.f, cameraAngleOffsetY) + viewer.cameraData.objectOffset + glm::vec3(0.f, 0.f, -0.5f * distance);
   auto orientation = gameapi -> orientationFromPos(finalCameraPosition, position);
-  gameapi -> setGameObjectPosition(cameraId, finalCameraPosition, true); 
+  gameapi -> setGameObjectPosition(cameraId, finalCameraPosition, true, Hint { .hint = "enforceObjectTransform2" }); 
   gameapi -> setGameObjectRot(cameraId, orientation, true);
 
 }

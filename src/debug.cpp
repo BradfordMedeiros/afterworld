@@ -526,7 +526,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 		  float speed = 20.f;
 		  auto elapsedTime = gameapi -> timeElapsed();
 			auto newPosition = oldPosition + glm::vec3(speed * (moveLeft ? (-1 * elapsedTime) : elapsedTime), 0.f, 0.f);
-			gameapi -> setGameObjectPosition(objid.value(), newPosition, true);
+			gameapi -> setGameObjectPosition(objid.value(), newPosition, true, Hint { .hint = "simpleOnFrameMove" });
 
 		}, 10.f);
 	}

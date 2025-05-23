@@ -328,7 +328,7 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 
   	float railDistancePerSecond = 10.f;
   	auto nextPoint = calculateNextPointOnRail(rails.at(entityOnRail.railId), curvePoint, direction * railDistancePerSecond * gameapi -> timeElapsed());
-  	gameapi -> setGameObjectPosition(id, nextPoint, true);
+  	gameapi -> setGameObjectPosition(id, nextPoint, true, Hint { .hint = "handleEntitiesOnRails" });
  	}
 }
 
