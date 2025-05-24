@@ -629,7 +629,8 @@ void swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2 look
   gameapi -> setGameObjectRot(
     weaponValues.gunId.value(), 
     glm::slerp(oldRotation, targetRotation, 0.1f),
-    false
+    false,
+    Hint { .hint = "swayGunRotation" }
   );
 }
 

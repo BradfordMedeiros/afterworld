@@ -16,7 +16,7 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto head = findBodyPart(entityId, "Head");
 
   if (rightHand.has_value()){
-    gameapi -> setGameObjectRot(rightHand.value(), orientation, true);
+    gameapi -> setGameObjectRot(rightHand.value(), orientation, true, Hint { .hint = "updateEntityGunPosition right hand" });
   }
 
 
@@ -35,8 +35,8 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto lookAtPosition = headPosition + (orientation * glm::vec3(0.f, 0.f, -10.f));
 
   auto headOrientation = gameapi -> orientationFromPos(lookAtPosition, headPosition);
-  gameapi -> setGameObjectRot(neck.value(), headOrientation, true);
-  gameapi -> setGameObjectRot(head.value(), headOrientation, true);
+  gameapi -> setGameObjectRot(neck.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition neck" });
+  gameapi -> setGameObjectRot(head.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition head" });
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -356,15 +356,15 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     // should take the rotation and direct and stuff from where the player is looking
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId), activeId == entity.playerId);
     if (cameraUpdate.thirdPerson.has_value()){
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true);
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true);
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "onMovementFrame1 rot" });
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "onMovementFrame2 rot" });
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "onMovementFrame1" });
 
       updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
     }else{
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true); // i think this should only rotate around y 
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "onMovementFrame3 rot" }); // i think this should only rotate around y 
       gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true, Hint { .hint = "onMovementFrame2" });  
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true);
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "onMovementFrame4 rot" });
     }
 
     
@@ -392,7 +392,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
 
       // not sure i should set the always here? 
-      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true);   // meh this should really come from the movement system (huh?)
+      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true, Hint { .hint = "movementEntity rot - targetLocation" });   // meh this should really come from the movement system (huh?)
       auto oldXYRot = pitchXAndYawYRadians(orientation);  // TODO - at least set this movement core area code.  at least call this "force". 
       movementEntity.movementState.xRot = oldXYRot.x;
       movementEntity.movementState.yRot = oldXYRot.y;    
@@ -410,7 +410,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       continue;
     }
     if (movementEntity.targetRotation.has_value()){
-        gameapi -> setGameObjectRot(movementEntity.playerId, movementEntity.targetRotation.value(), true); 
+        gameapi -> setGameObjectRot(movementEntity.playerId, movementEntity.targetRotation.value(), true, Hint { .hint = "movementEntity rot - targetRotation" }); 
         auto oldXYRot = pitchXAndYawYRadians(movementEntity.targetRotation.value());  // TODO - at least set this movement core area code.  at least call this "force". 
         movementEntity.movementState.xRot = oldXYRot.x;
         movementEntity.movementState.yRot = oldXYRot.y;    

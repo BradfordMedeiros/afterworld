@@ -929,7 +929,7 @@ CutsceneApi cutsceneApi {
       auto testViewObj = findObjByShortName(camera.value(), std::nullopt);
       setTempCamera(testViewObj.value());      
       gameapi -> moveCameraTo(testViewObj.value(), position, duration);
-      gameapi -> setGameObjectRot(testViewObj.value(), rotation, true);
+      gameapi -> setGameObjectRot(testViewObj.value(), rotation, true, Hint { .hint = "cutscene - setCameraPosition" });
     }
   },
   .setPlayerControllable = [](bool isPlayable) -> void {
