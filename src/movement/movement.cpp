@@ -16,7 +16,7 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto head = findBodyPart(entityId, "Head");
 
   if (rightHand.has_value()){
-    gameapi -> setGameObjectRot(rightHand.value(), orientation, true, Hint { .hint = "updateEntityGunPosition right hand" });
+    gameapi -> setGameObjectRot(rightHand.value(), orientation, true, Hint { .hint = "updateEntityGunPosition right hand" }); // tempchecked
   }
 
 
@@ -28,15 +28,15 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
   auto newLeftHandPosition = rightHandPosition + leftHandDir;
 
-  gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true, Hint { .hint = "updateEntityGunPosition" });
+  gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true, Hint { .hint = "updateEntityGunPosition" }); // tempchecked
 
 
   auto headPosition = gameapi -> getGameObjectPos(neck.value(), true);
   auto lookAtPosition = headPosition + (orientation * glm::vec3(0.f, 0.f, -10.f));
 
   auto headOrientation = gameapi -> orientationFromPos(lookAtPosition, headPosition);
-  gameapi -> setGameObjectRot(neck.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition neck" });
-  gameapi -> setGameObjectRot(head.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition head" });
+  gameapi -> setGameObjectRot(neck.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition neck" });  // tempchecked
+  gameapi -> setGameObjectRot(head.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition head" });  // tempchecked
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -362,9 +362,12 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
       updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
     }else{
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "onMovementFrame3 rot" }); // i think this should only rotate around y 
+      // This one is where the actual character is facing, so affects wasd
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "onMovementFrame movePlayerModelLeftAndRight" }); // i think this should only rotate around y 
+
+      // These effect the camera
       gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true, Hint { .hint = "onMovementFrame2" });  
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "onMovementFrame4 rot" });
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "onMovementFrame4 setFirstPersonView" });
     }
 
     

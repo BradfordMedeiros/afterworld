@@ -129,7 +129,7 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
 
 void updateFacingWall(MovementState& movementState, objid id){
   auto mainobjPos = gameapi -> getGameObjectPos(id, true);
-  auto rot = gameapi -> getGameObjectRotation(id, true);
+  auto rot = gameapi -> getGameObjectRotation(id, true);  // tempchecked
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
 
   auto hitpoints = gameapi -> raycast(mainobjPos, rot, 2.f);
@@ -282,7 +282,7 @@ bool isCollideable(objid id){
 
 bool shouldStepUp(objid id){ // check this logic 
   auto playerPos = gameapi -> getGameObjectPos(id, true);
-  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true) * glm::vec3(0.f, 0.f, -1.f);
+  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true) * glm::vec3(0.f, 0.f, -1.f); // tempchecked
   auto inFrontOfPlayerSameHeight = playerPos + glm::vec3(inFrontOfPlayer.x, 0.f, inFrontOfPlayer.z);
   
   auto belowPos = playerPos - glm::vec3(0.f, 0.95f, 0.f);
@@ -779,7 +779,7 @@ MovementState getInitialMovementState(objid playerId){
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
 
-  auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId, true));
+  auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId, true));  // tempchecked
   movementState.xRot = oldXYRot.x;
   movementState.yRot = oldXYRot.y;    
   

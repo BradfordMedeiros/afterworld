@@ -510,7 +510,7 @@ std::vector<TagUpdater> tagupdates = {
   			auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
   			auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
   			auto newOrientation = orientationFromPos(fromLocation, targetLocation);
-  			gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" });
+  			gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" }); // tempchecked
   		}
   	},
   	.onMessage =  std::nullopt,

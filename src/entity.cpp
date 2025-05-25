@@ -267,7 +267,7 @@ std::optional<glm::quat> getActivePlayerRotation(){
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
-	return gameapi -> getGameObjectRotation(controlledPlayer.playerId.value(), true);
+	return gameapi -> getGameObjectRotation(controlledPlayer.playerId.value(), true); // tempchecked
 }
 
 FiringTransform getFireTransform(objid id){

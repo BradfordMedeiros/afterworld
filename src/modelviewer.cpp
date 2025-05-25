@@ -54,7 +54,7 @@ void enforceObjectTransform(ViewerData& viewer, objid id){
   //glm::vec3 rotationVec(xPos, yPos, 0.f);
   //auto rotation = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), rotationVec);
   //auto newOrientation = rotation * orientation;
-  gameapi -> setGameObjectRot(viewer.managedObject.value(), rotationAroundX * rotationAroundY, true, Hint { .hint = "enforceObjectTransform1 rot" });
+  gameapi -> setGameObjectRot(viewer.managedObject.value(), rotationAroundX * rotationAroundY, true, Hint { .hint = "enforceObjectTransform1 rot" }); // tempchecked
   gameapi -> setGameObjectScale(viewer.managedObject.value(), glm::vec3(viewer.cameraData.scale, viewer.cameraData.scale, viewer.cameraData.scale), true);
 
   auto position = gameapi -> getGameObjectPos(id, true);
@@ -73,7 +73,7 @@ void enforceObjectTransform(ViewerData& viewer, objid id){
   auto finalCameraPosition = newCameraPosition + glm::vec3(cameraAngleOffsetX, 0.f, cameraAngleOffsetY) + viewer.cameraData.objectOffset + glm::vec3(0.f, 0.f, -0.5f * distance);
   auto orientation = gameapi -> orientationFromPos(finalCameraPosition, position);
   gameapi -> setGameObjectPosition(cameraId, finalCameraPosition, true, Hint { .hint = "enforceObjectTransform2" }); 
-  gameapi -> setGameObjectRot(cameraId, orientation, true, Hint { .hint = "enforceObjectTransform2 rot" });
+  gameapi -> setGameObjectRot(cameraId, orientation, true, Hint { .hint = "enforceObjectTransform2 rot" });  // tempchecked
 
 }
 

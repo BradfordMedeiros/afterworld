@@ -182,8 +182,8 @@ void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, fl
     auto agentPos = gameapi -> getGameObjectPos(agentId, true);
     auto towardTarget = gameapi -> orientationFromPos(agentPos, finalTargetPosition);
     auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
-    gameapi -> setGameObjectRot(agentId, towardTarget, true, Hint { .hint = "ai - moveToTarget rot" });
-    gameapi -> setGameObjectPosition(agentId, newPos, true, Hint { .hint = "ai - moveToTarget pos" });
+    gameapi -> setGameObjectRot(agentId, towardTarget, true, Hint { .hint = "ai - moveToTarget rot" }); // tempchecked
+    gameapi -> setGameObjectPosition(agentId, newPos, true, Hint { .hint = "ai - moveToTarget pos" });  // tempchecked
     return;
   }
 

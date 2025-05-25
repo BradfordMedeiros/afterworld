@@ -929,7 +929,7 @@ CutsceneApi cutsceneApi {
       auto testViewObj = findObjByShortName(camera.value(), std::nullopt);
       setTempCamera(testViewObj.value());      
       gameapi -> moveCameraTo(testViewObj.value(), position, duration);
-      gameapi -> setGameObjectRot(testViewObj.value(), rotation, true, Hint { .hint = "cutscene - setCameraPosition" });
+      gameapi -> setGameObjectRot(testViewObj.value(), rotation, true, Hint { .hint = "cutscene - setCameraPosition" });  // tempchecked
     }
   },
   .setPlayerControllable = [](bool isPlayable) -> void {
@@ -1088,7 +1088,7 @@ void zoomIntoArcade(std::optional<objid> id){
     auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
     modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
     auto position = gameapi -> getGameObjectPos(id.value(), true);
-    auto rotation = gameapi -> getGameObjectRotation(id.value(), true);
+    auto rotation = gameapi -> getGameObjectRotation(id.value(), true);  // tempchecked
     setTempCamera(arcadeCameraId.value());          
   }
 }
