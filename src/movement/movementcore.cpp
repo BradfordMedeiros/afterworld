@@ -129,7 +129,7 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
 
 void updateFacingWall(MovementState& movementState, objid id){
   auto mainobjPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] updateFacingWall");
-  auto rot = gameapi -> getGameObjectRotation(id, true);  // tempchecked
+  auto rot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] updateFacingWall");  // tempchecked
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
 
   auto hitpoints = gameapi -> raycast(mainobjPos, rot, 2.f);
@@ -282,7 +282,7 @@ bool isCollideable(objid id){
 
 bool shouldStepUp(objid id){ // check this logic 
   auto playerPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] shouldStepUp");
-  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true) * glm::vec3(0.f, 0.f, -1.f); // tempchecked
+  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true, "[gamelogic] shouldStepUp") * glm::vec3(0.f, 0.f, -1.f); // tempchecked
   auto inFrontOfPlayerSameHeight = playerPos + glm::vec3(inFrontOfPlayer.x, 0.f, inFrontOfPlayer.z);
   
   auto belowPos = playerPos - glm::vec3(0.f, 0.95f, 0.f);
@@ -426,7 +426,7 @@ void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState,
 glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos, bool moveVertical){
   glm::vec3 moveVec(0.f, 0.f, 0.f);
 
-  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
+  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] getMovementControlDataFromTargetPos");
   glm::vec3 positionDiff = glm::vec3(targetPosition.x, targetPosition.y, targetPosition.z) - glm::vec3(movementState.lastPosition.x, movementState.lastPosition.y, movementState.lastPosition.z);
   positionDiff = glm::inverse(playerDirection) * positionDiff;
 
@@ -481,7 +481,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   float elapsedTime = gameapi -> timeElapsed();
 
   auto currPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onMovementFrameCore");
-  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
+  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] onMovementFrameCore");
 
   auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
   directionVec.y = 0.f;
@@ -779,7 +779,7 @@ MovementState getInitialMovementState(objid playerId){
 
   movementState.lastPosition = glm::vec3(0.f, 0.f, 0.f);
 
-  auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId, true));  // tempchecked
+  auto oldXYRot = pitchXAndYawYRadians(gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] getInitialMovementState"));  // tempchecked
   movementState.xRot = oldXYRot.x;
   movementState.yRot = oldXYRot.y;    
   

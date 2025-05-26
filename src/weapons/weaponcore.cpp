@@ -403,7 +403,7 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRot
 
 std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] doRaycastClosest");
-  auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true); // tempchecked
+  auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] doRaycastClosest"); // tempchecked
   return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset, excludeHitpoint); 
 }
 
@@ -562,7 +562,7 @@ glm::vec3 getSwayVelocity(objid playerId, glm::vec2 lookVelocity, glm::vec3 move
     debugAssertForNow(false, "sway from mouse should take into account sensitivity");
     return glm::vec3(lookVelocity.x, lookVelocity.y, 0.f);
   }
-  auto parentRot = gameapi -> getGameObjectRotation(playerId, false); // tempchecked
+  auto parentRot = gameapi -> getGameObjectRotation(playerId, false, "[gamelogic] getSwayVelocity"); // tempchecked
   auto newPos = glm::inverse(parentRot) * movementVec;
   return newPos;
 }
@@ -617,7 +617,7 @@ void swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2 look
   //std::cout << "limited sway x: " << limitedSwayX << std::endl;
   //std::cout << "limited recoil: " << recoilAmount << std::endl;
 
-  auto oldRotation = gameapi -> getGameObjectRotation(weaponValues.gunId.value(), false); // tempchecked
+  auto oldRotation = gameapi -> getGameObjectRotation(weaponValues.gunId.value(), false, "[gamelogic] swayGunRotation"); // tempchecked
   auto rotation = gameapi -> setFrontDelta(
     parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), 
     limitedSwayX /* delta yaw */, 

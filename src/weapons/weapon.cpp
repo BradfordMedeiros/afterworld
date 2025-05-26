@@ -20,7 +20,7 @@ void handlePickedUpItem(WeaponEntityState& weaponState, objid playerId){
   }
 
   auto playerPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] handlePickedUpItem player position");
-  auto playerRotation = gameapi -> getGameObjectRotation(playerId, true);  // tempchecked  // maybe this should be the gun rotation instead, problem is the offsets on the gun
+  auto playerRotation = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] handlePickedUpItem player rotation");  // tempchecked  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
   auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
 
@@ -158,7 +158,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       weaponState.heldItem = std::nullopt;
     }else{
       auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onWeaponsFrameEntity - entity location");
-      auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);  // tempchecked
+      auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] onWeaponsFrameEntity - entity rotation");  // tempchecked
 
       auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), mainobjPos, mainobjRotation);
       if (hitpoints.size() > 0){

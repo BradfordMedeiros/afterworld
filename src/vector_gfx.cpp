@@ -40,7 +40,7 @@ void drawBloom(objid playerId, objid id, float distance, float bloomAmount){
   // i'd rather do this on a screen only texture
   modassert(distance < 0, "distance must be negative (forward -z)");
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] drawBloom from playerId");
-  auto mainobjRot = gameapi -> getGameObjectRotation(playerId, true); // tempchecked
+  auto mainobjRot = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] drawBloom from playerId"); // tempchecked
   auto toPos = mainobjPos + mainobjRot * glm::vec3(0.f, 0.f, distance);
   gameapi -> drawLine(mainobjPos, toPos, false, id, reticleColor, std::nullopt, std::nullopt);
   

@@ -1088,7 +1088,7 @@ void zoomIntoArcade(std::optional<objid> id){
     auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
     modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
     auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
-    auto rotation = gameapi -> getGameObjectRotation(id.value(), true);  // tempchecked
+    auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
     setTempCamera(arcadeCameraId.value());          
   }
 }
