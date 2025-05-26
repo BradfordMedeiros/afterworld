@@ -5,9 +5,26 @@ extern CustomApiBindings* gameapi;
 std::optional<bool> isInShootingMode(objid id);
 std::optional<objid> findBodyPart(objid entityId, const char* part);
 
-void updateEntityGunPosition(objid entityId, glm::quat orientation){
+struct AnimGunPosUpdate {
+  objid id;
+  glm::vec3 pos;
+};
+struct AnimGunRotUpdate {
+  objid id;
+  glm::quat rot;
+};
+
+struct AnimationGunUpdate {
+  std::optional<AnimGunPosUpdate> leftHand;
+  std::optional<AnimGunRotUpdate> rightHand;
+  std::optional<AnimGunRotUpdate> neck;
+  std::optional<AnimGunRotUpdate> head;
+};
+
+AnimationGunUpdate updateEntityGunPosition(objid entityId, glm::quat orientation){
+  AnimationGunUpdate update {};
   if (!isInShootingMode(entityId).value()){
-    return;
+    return update;
   }
 
   auto leftHand = findBodyPart(entityId, "LeftHand");
@@ -16,27 +33,38 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
   auto head = findBodyPart(entityId, "Head");
 
   if (rightHand.has_value()){
-    gameapi -> setGameObjectRot(rightHand.value(), orientation, true, Hint { .hint = "updateEntityGunPosition right hand" }); // tempchecked
+    update.rightHand = AnimGunRotUpdate {
+      .id = rightHand.value(),
+      .rot = orientation,
+    };
   }
 
-
   if (!leftHand.has_value() || !rightHand.has_value() || !neck.has_value() || !head.has_value()){
-    return;
+    return update;
   }
 
   auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true, "[gamelogic] updateEntityGunPosition - rightHandPosition");
   auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
   auto newLeftHandPosition = rightHandPosition + leftHandDir;
 
-  gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true, Hint { .hint = "updateEntityGunPosition" }); // tempchecked
-
+  update.leftHand = AnimGunPosUpdate {
+    .id = leftHand.value(),
+    .pos = newLeftHandPosition,
+  };
 
   auto headPosition = gameapi -> getGameObjectPos(neck.value(), true, "[gamelogic] updateEntityGunPosition - neckPosition");
   auto lookAtPosition = headPosition + (orientation * glm::vec3(0.f, 0.f, -10.f));
 
   auto headOrientation = gameapi -> orientationFromPos(lookAtPosition, headPosition);
-  gameapi -> setGameObjectRot(neck.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition neck" });  // tempchecked
-  gameapi -> setGameObjectRot(head.value(), headOrientation, true, Hint { .hint = "updateEntityGunPosition head" });  // tempchecked
+  update.neck = AnimGunRotUpdate {
+    .id = neck.value(),
+    .rot = headOrientation,
+  };
+  update.head = AnimGunRotUpdate {
+    .id = head.value(),
+    .rot = headOrientation,
+  };
+  return update;
 }
 
 void reloadSettingsConfig(Movement& movement, std::string name){
@@ -360,7 +388,20 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
 
-      updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
+      auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
+      if (gunAimingUpdates.rightHand.has_value()){
+        gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
+      }        
+      if (gunAimingUpdates.leftHand.has_value()){
+        gameapi -> setGameObjectPosition(gunAimingUpdates.leftHand.value().id, gunAimingUpdates.leftHand.value().pos, true, Hint { .hint = "updateEntityGunPosition" });
+      }
+      if (gunAimingUpdates.neck.has_value()){
+        gameapi -> setGameObjectRot(gunAimingUpdates.neck.value().id, gunAimingUpdates.neck.value().rot, true, Hint { .hint = "updateEntityGunPosition neck" });
+      }
+      if (gunAimingUpdates.head.has_value()){
+        gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
+      }
+
     }else{
       // This one is where the actual character is facing, so affects wasd
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot" }); // i think this should only rotate around y 
