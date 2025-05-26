@@ -260,7 +260,7 @@ std::optional<glm::vec3> getActivePlayerPosition(){
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
-	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true);
+	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true, "[gamelogic] getActivePlayerPosition");
 }
 
 std::optional<glm::quat> getActivePlayerRotation(){
@@ -278,7 +278,7 @@ FiringTransform getFireTransform(objid id){
 		// z is set to the player entity so it doesnt shoot from behind the character.
 		// for example, if you dont do this, if you zoom the cam out you can hit a target in the crosshair behind the character
 		auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.movementState, movementEntity.managedCamera, id);
-		auto posFromThirdPerson = glm::inverse(thirdPersonInfo.rotation) * (thirdPersonInfo.position - gameapi -> getGameObjectPos(id, true));
+		auto posFromThirdPerson = glm::inverse(thirdPersonInfo.rotation) * (thirdPersonInfo.position - gameapi -> getGameObjectPos(id, true, "[gamelogic] getFireTransform 1"));
 		auto zOffset = glm::vec3(0.f, 0.f, posFromThirdPerson.z);
 		auto zSpaceOffset = thirdPersonInfo.rotation * zOffset;
 		return FiringTransform {
@@ -287,7 +287,7 @@ FiringTransform getFireTransform(objid id){
 		};
 	}
 
-	auto position = gameapi -> getGameObjectPos(id, true);
+	auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] getFireTransform 2");
 	auto rotation = getLookDirection(movementEntity);
 	return FiringTransform {
 		.position = position,

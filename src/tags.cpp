@@ -375,7 +375,7 @@ std::vector<TagUpdater> tagupdates = {
   		if (!isInGameMode()){
 				return;
   		}
-  		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+  		glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - destroy");
   		auto sceneId = gameapi -> listSceneId(id);
   		createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);  		
 
@@ -391,7 +391,7 @@ std::vector<TagUpdater> tagupdates = {
   			return;
   		}
  		  // when this object it removed, get the position, and spawn a prefab there 
-  		glm::vec3 position = gameapi -> getGameObjectPos(id, true);
+  		glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - explode");
 
   		auto attrHandle = getAttrHandle(id);
 			auto explodeDamage = getFloatAttr(attrHandle, "explode").value();
@@ -449,8 +449,8 @@ std::vector<TagUpdater> tagupdates = {
   				if (id1 == id2){
   					continue;
   				}
-					auto pos1 = gameapi -> getGameObjectPos(id1, true);
- 					auto pos2 = gameapi -> getGameObjectPos(id2, true);
+					auto pos1 = gameapi -> getGameObjectPos(id1, true, "[gamelogic] tags - linkorb positions");
+ 					auto pos2 = gameapi -> getGameObjectPos(id2, true, "[gamelogic] tags - linkorb positions");
  					if (pos1.x < pos2.x){  // just so we only draw one connection between each, arbitrary function
   		  		gameapi -> drawLine(pos1, pos2, false, id1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
   		  	}
@@ -458,7 +458,7 @@ std::vector<TagUpdater> tagupdates = {
 	  	}
 
 	  	for (auto &[id, _] : tags.linkGunObj){
-				auto pos1 = gameapi -> getGameObjectPos(id, true);
+				auto pos1 = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - link orb - vert lines");
 	  		gameapi -> drawLine(pos1, pos1 + glm::vec3(0.f, 0.4f, 0.f), false, id, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
 
 	  	}
@@ -799,7 +799,7 @@ std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
 	int currIndex = 0;
 	for(auto id : tags.teleportObjs){
 		if (currIndex == index){
-			auto position = gameapi -> getGameObjectPos(id, true);
+			auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - getTeleportPosition");
 			return TeleportInfo {
 				.id = id,
 				.position = position

@@ -42,7 +42,7 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
 
 	auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-  auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
+  auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTvAgent"));
 
   if (targetPosition.has_value() && distanceToTarget < 20 && (tvState -> activateTime.has_value() && (gameapi -> timeSeconds(false) - tvState -> activateTime.value()) > 0.5f)){ // allow the animation to play
     goals.push_back(
@@ -71,7 +71,7 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
 
 
 std::optional<float> heightAboveGround(Agent& agent){
-  auto position = gameapi -> getGameObjectPos(agent.id, true);
+  auto position = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] agents - tv - heightAboveGround");
   auto rotation = gameapi -> orientationFromPos(position, position + glm::vec3(0.f, -10.f, 0.f));
   auto hitpoints = gameapi -> raycast(position, rotation, 100.f);
 
@@ -118,7 +118,7 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
 		auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   	auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
-  	auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+  	auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalTvAgent");
 
     auto groundHeight = heightAboveGround(agent);
     auto amountToMoveY = !groundHeight.has_value() ? 0.f : (1.f - groundHeight.value());

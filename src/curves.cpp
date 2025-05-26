@@ -322,7 +322,7 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
- 		auto position = gameapi -> getGameObjectPos(id, true);
+ 		auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] curves - entity agent on rail");
   	auto curvePoint = calculateCurvePoint(rails.at(entityOnRail.railId), position, entityOnRail.direction);
   	auto direction = entityOnRail.direction ? 1  : -1;
 
@@ -335,7 +335,7 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 void handleEntitiesRace(){
  	for (auto &[id, raceData] : entityToRaceData){
 		static objid activeRaceRailId = 0;
-  	auto position = gameapi -> getGameObjectPos(id, true);
+  	auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] curves - entities race data");
 	  handleRace(raceData, position, rails.at(activeRaceRailId));
   	auto distance = distanceRemaining(rails.at(activeRaceRailId), raceData.currentPosition, raceData.percentageToNext);
 	  auto totalDistance = getTotalDistanceForCurve(rails.at(0));

@@ -149,7 +149,7 @@ void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position){
     bloodEmitter = createParticleEmitter(sceneId, particleStr, "+blood-emitter");
   }
 
-  auto mainObjPos = gameapi -> getGameObjectPos(lookAtId, true);
+  auto mainObjPos = gameapi -> getGameObjectPos(lookAtId, true, "[gamelogic] emitBlood - get lookat pos");
 
   auto orientation1 = gameapi -> orientationFromPos(position, mainObjPos);
   gameapi -> emit(bloodEmitter.value(), position, orientation1, std::nullopt, std::nullopt, std::nullopt);

@@ -24,14 +24,14 @@ void updateEntityGunPosition(objid entityId, glm::quat orientation){
     return;
   }
 
-  auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true);
+  auto rightHandPosition = gameapi -> getGameObjectPos(rightHand.value(), true, "[gamelogic] updateEntityGunPosition - rightHandPosition");
   auto leftHandDir = orientation * glm::vec3(0.f, 0.f, -0.1f);
   auto newLeftHandPosition = rightHandPosition + leftHandDir;
 
   gameapi -> setGameObjectPosition(leftHand.value(), newLeftHandPosition, true, Hint { .hint = "updateEntityGunPosition" }); // tempchecked
 
 
-  auto headPosition = gameapi -> getGameObjectPos(neck.value(), true);
+  auto headPosition = gameapi -> getGameObjectPos(neck.value(), true, "[gamelogic] updateEntityGunPosition - neckPosition");
   auto lookAtPosition = headPosition + (orientation * glm::vec3(0.f, 0.f, -10.f));
 
   auto headOrientation = gameapi -> orientationFromPos(lookAtPosition, headPosition);
@@ -366,7 +366,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "onMovementFrame movePlayerModelLeftAndRight" }); // i think this should only rotate around y 
 
       // These effect the camera
-      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true), true, Hint { .hint = "onMovementFrame2" });  
+      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true, "[gamelogic] onMovementFrame - get entity pos for set first person camera"), true, Hint { .hint = "onMovementFrame2" });  
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "onMovementFrame4 setFirstPersonView" });
     }
 

@@ -81,7 +81,7 @@ void updateWorldStateTargets(WorldInfo& worldInfo){
     if (team.has_value()){
       symbols.insert(getSymbol(team.value()));
     }
-    auto position = gameapi -> getGameObjectPos(targetId, true);
+    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] updateWorldStateTargets");
     updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION, 0);
   }
   // agoal-info
@@ -92,7 +92,7 @@ void updateAmmoLocations(WorldInfo& worldInfo){
   auto targetIds = gameapi -> getObjectsByAttr("pickup-trigger", "ammo", std::nullopt);
   for (auto targetId : targetIds){
     std::string stateName = std::string("ammo-pos-") + std::to_string(targetId); // leak
-    auto position = gameapi -> getGameObjectPos(targetId, true);
+    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] updateAmmoLocations");
     updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { ammoSymbol }, STATE_ENTITY_POSITION, targetId);
   }
 }
@@ -104,7 +104,7 @@ void updatePointsOfInterest(WorldInfo& worldInfo){
     std::string stateName = std::string("interest-") + std::to_string(targetId); // leak
     auto attrValue = getSingleAttr(targetId, "interest").value();
     auto tags = getSymbol(std::string("interest-") + attrValue);
-    auto position = gameapi -> getGameObjectPos(targetId, true);
+    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] updatePointsOfInterest");
     updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { tags }, STATE_ENTITY_POSITION, targetId);
   }
 }

@@ -58,7 +58,7 @@ void doGoalCrawlerAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     // do nothing
   }else if (goal.goaltype == moveToTargetGoal){
     auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+    auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalCrawlerAgent get agentPos");
     auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
 
     aiInterface.move(agent.id, targetPosition,  1.f);

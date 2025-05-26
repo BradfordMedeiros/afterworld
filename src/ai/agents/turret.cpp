@@ -43,7 +43,7 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
 
 	auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-  auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
+  auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTurretAgent"));
 
   if (targetPosition.has_value() && distanceToTarget < 20  && turretState -> isGunRaised){
     goals.push_back(
@@ -92,7 +92,7 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
 			auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
   		auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
-  		auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+  		auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalTurretAgent");
   		glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y, targetPosition.z);
     	auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);
       

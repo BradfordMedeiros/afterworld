@@ -107,7 +107,7 @@ void spawnRemoveId(std::unordered_map<objid, Spawnpoint>& managedSpawnpoints, ob
 
 void spawnEntity(objid id, Spawnpoint& spawnpoint, float currentTime){
   modlog("spawn entity", std::to_string(id));
-  auto spawnPosition = gameapi -> getGameObjectPos(id, true);
+  auto spawnPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] spawnEntity - get spawn position");
   auto spawnRotation = gameapi -> getGameObjectRotation(id, true);  // maybe don't want the actual rotn but rather only on xz plane?  maybe?  // tempchecked
   auto spawnedEntityId = spawnEntity(spawnpoint.type, id, gameapi -> listSceneId(id), spawnPosition, spawnRotation);
 

@@ -402,7 +402,7 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRot
 }
 
 std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
-  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
+  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] doRaycastClosest");
   auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true); // tempchecked
   return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset, excludeHitpoint); 
 }
@@ -498,11 +498,11 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   if (gunCore.weaponCore -> muzzleParticle.has_value() && gunId.has_value()){
     if (muzzleId.has_value()){
-      auto muzzlePosition = gameapi -> getGameObjectPos(muzzleId.value(), true);
+      auto muzzlePosition = gameapi -> getGameObjectPos(muzzleId.value(), true, "[gamelogic] tryFireGun - find muzzle position");
       std::cout << "muzzle emit: " << print(muzzlePosition) << std::endl;
       gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), muzzlePosition, playerRotation /* should this be the muzzle rotation? */, std::nullopt, std::nullopt, playerId);
     }else{
-      auto gunPosition = gameapi -> getGameObjectPos(gunId.value(), true);
+      auto gunPosition = gameapi -> getGameObjectPos(gunId.value(), true, "[gamelogic] tryFireGun - get gun position");
       glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
       auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
       gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation /* should this be the gun rotation? */, std::nullopt, std::nullopt, playerId);
@@ -599,7 +599,7 @@ void swayGunTranslation(GunInstance& weaponValues, glm::vec3 relVelocity, bool i
   auto gunId = weaponValues.gunId.value();
   auto animationRate = weaponValues.gunCore.weaponState.gunState == GUN_LOWERING ? 5.f : 3.f;
   float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
-  auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
+  auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false, "[gamelogic] swayGunTranslation - find gun position"), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
   //std::cout << "gun: targetpos: " << print(targetPosWithRecoil) << std::endl;
   //std::cout << "gun: newpos: " << print(newPos) << std::endl;
   gameapi -> setGameObjectPosition(gunId, newPos, false, Hint { .hint = "swayGunTranslation" });

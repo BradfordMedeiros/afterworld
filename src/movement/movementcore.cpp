@@ -128,7 +128,7 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
 }
 
 void updateFacingWall(MovementState& movementState, objid id){
-  auto mainobjPos = gameapi -> getGameObjectPos(id, true);
+  auto mainobjPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] updateFacingWall");
   auto rot = gameapi -> getGameObjectRotation(id, true);  // tempchecked
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
 
@@ -198,7 +198,7 @@ ThirdPersonCameraUpdate lookThirdPersonCalc(MovementState& movementState, ThirdP
   float z = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
   float y = glm::cos(thirdPersonInfo.angleY) * thirdPersonInfo.actualDistanceFromTarget;
 
-  auto targetLocation = gameapi -> getGameObjectPos(id, true);
+  auto targetLocation = gameapi -> getGameObjectPos(id, true, "[gamelogic] lookThirdPersonCalc");
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
@@ -266,7 +266,7 @@ void updateCrouch(MovementParams& moveParams, MovementState& movementState, obji
     movementState.lastCrouchTime = gameapi -> timeSeconds(false);
     toggleCrouch(moveParams, movementState, id, true);
   }else if (!movementState.shouldBeCrouching && movementState.isCrouching){
-    auto playerPos = gameapi -> getGameObjectPos(id, true);
+    auto playerPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] updateCrouch");
     auto canUncrouch = !somethingAbovePlayer(playerPos);
     if (canUncrouch){
       movementState.isCrouching = false;
@@ -281,7 +281,7 @@ bool isCollideable(objid id){
 }
 
 bool shouldStepUp(objid id){ // check this logic 
-  auto playerPos = gameapi -> getGameObjectPos(id, true);
+  auto playerPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] shouldStepUp");
   auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true) * glm::vec3(0.f, 0.f, -1.f); // tempchecked
   auto inFrontOfPlayerSameHeight = playerPos + glm::vec3(inFrontOfPlayer.x, 0.f, inFrontOfPlayer.z);
   
@@ -480,7 +480,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   auto currTime = gameapi -> timeSeconds(false);
   float elapsedTime = gameapi -> timeElapsed();
 
-  auto currPos = gameapi -> getGameObjectPos(playerId, true);
+  auto currPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onMovementFrameCore");
   auto playerDirection = gameapi -> getGameObjectRotation(playerId, true);
 
   auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 

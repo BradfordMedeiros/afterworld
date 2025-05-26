@@ -19,13 +19,13 @@ void handlePickedUpItem(WeaponEntityState& weaponState, objid playerId){
     return;
   }
 
-  auto playerPos = gameapi -> getGameObjectPos(playerId, true);
+  auto playerPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] handlePickedUpItem player position");
   auto playerRotation = gameapi -> getGameObjectRotation(playerId, true);  // tempchecked  // maybe this should be the gun rotation instead, problem is the offsets on the gun
   glm::vec3 distanceFromPlayer = glm::vec3(0.f, 0.f, -5.f); 
   auto slightlyInFrontOfPlayer = gameapi -> moveRelativeVec(playerPos, playerRotation, distanceFromPlayer);
 
   // old object position
-  auto oldItemPos = gameapi -> getGameObjectPos(weaponState.heldItem.value(), true);
+  auto oldItemPos = gameapi -> getGameObjectPos(weaponState.heldItem.value(), true, "[gamelogic] handlePickedUpItem held item location");
   auto towardPlayerView = slightlyInFrontOfPlayer - oldItemPos;
   auto distance = glm::length(towardPlayerView);
   auto direction = glm::normalize(towardPlayerView);
@@ -44,7 +44,7 @@ std::optional<objid> raycastActivateableItem(objid playerId){
   auto hitpoints = doRaycastClosest(playerId, glm::vec3(0.f, 0.f, -1.f), std::nullopt);
   if (hitpoints.size() > 0){
     auto hitpoint = hitpoints.at(0);
-    auto playerPos = gameapi -> getGameObjectPos(playerId, true);
+    auto playerPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] raycastActivateableItem get player position");
     auto distance = glm::distance(hitpoint.point, playerPos);
     if (distance < 2){
       modlog("active", "found item close");
@@ -129,7 +129,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       auto activateKey = getStrAttr(attrHandle, "activate");
       auto activateValue = getStrAttr(attrHandle, "activate-value");
       if (activateKey.has_value()){
-        auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true);
+        auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true, "[gamelogic] onWeaponsFrameEntity - activatable item sound location");
         playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
 
         MessageWithId activateMessage {
@@ -157,12 +157,12 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       }
       weaponState.heldItem = std::nullopt;
     }else{
-      auto mainobjPos = gameapi -> getGameObjectPos(playerId, true);
+      auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onWeaponsFrameEntity - entity location");
       auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true);  // tempchecked
 
       auto hitpoints = doRaycast(glm::vec3(0.f, 0.f, -1.f), mainobjPos, mainobjRotation);
       if (hitpoints.size() > 0){
-        auto cameraPos = gameapi -> getGameObjectPos(playerId, true);
+        auto cameraPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onWeaponsFrameEntity - entity location 2");
         auto closestHitpointIndex = closestHitpoint(hitpoints, cameraPos, std::nullopt).value();
         auto hitpoint = hitpoints.at(closestHitpointIndex);
         float distance = glm::length(cameraPos - hitpoint.point);

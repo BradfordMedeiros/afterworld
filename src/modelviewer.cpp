@@ -57,7 +57,7 @@ void enforceObjectTransform(ViewerData& viewer, objid id){
   gameapi -> setGameObjectRot(viewer.managedObject.value(), rotationAroundX * rotationAroundY, true, Hint { .hint = "enforceObjectTransform1 rot" }); // tempchecked
   gameapi -> setGameObjectScale(viewer.managedObject.value(), glm::vec3(viewer.cameraData.scale, viewer.cameraData.scale, viewer.cameraData.scale), true);
 
-  auto position = gameapi -> getGameObjectPos(id, true);
+  auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] modelviewer - enforceObjectTransform");
   gameapi -> setGameObjectPosition(viewer.managedObject.value(), position, true, Hint { .hint = "enforceObjectTransform1" });
 
   auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id)).value();
@@ -143,7 +143,7 @@ ViewerData createViewerData(objid id){
   };
 
   auto cameraId = gameapi -> getGameObjectByName(">maincamera", gameapi -> listSceneId(id)).value();
-  viewer.cameraData.initialCameraPos = gameapi -> getGameObjectPos(cameraId, true);
+  viewer.cameraData.initialCameraPos = gameapi -> getGameObjectPos(cameraId, true, "[gamelogic] modelviewer createViewerData");
   return viewer;
 }
 

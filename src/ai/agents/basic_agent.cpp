@@ -70,7 +70,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   AgentAttackState* attackState = anycast<AgentAttackState>(agent.agentData);
   modassert(attackState, "attackState invalid");
 
-  auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+  auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForBasicAgent");
 
   goals.push_back(
     Goal {
@@ -124,7 +124,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
         .score = [&agent, &worldInfo, symbol](std::any&) -> int {
             auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
             if (targetPosition.has_value()){
-              auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true));
+              auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForBasicAgent attackGoal"));
               if (distance < 5){
                 return 100;
               }
@@ -179,7 +179,7 @@ const bool useAiPathing = true;
 void moveToTarget(objid agentId, glm::vec3 targetPosition, bool moveVertical, float speed = 1.f){
   auto finalTargetPosition = useAiPathing ? gameapi -> navPosition(agentId, targetPosition) : targetPosition;
   if (!useMovementSystem){  // simple behavior for debug
-    auto agentPos = gameapi -> getGameObjectPos(agentId, true);
+    auto agentPos = gameapi -> getGameObjectPos(agentId, true, "[gamelogic] moveToTarget basic agent");
     auto towardTarget = gameapi -> orientationFromPos(agentPos, finalTargetPosition);
     auto newPos = gameapi -> moveRelative(agentPos, towardTarget, speed * gameapi -> timeElapsed());
     gameapi -> setGameObjectRot(agentId, towardTarget, true, Hint { .hint = "ai - moveToTarget rot" }); // tempchecked
@@ -218,7 +218,7 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     auto targetPosition = anycast<EntityPosition>(goal.goalData);
     modassert(targetPosition, "target pos was null");
     moveToTarget(agent.id, targetPosition -> position, agentData -> moveVertical, 0.7f); 
-    auto agentPos = gameapi -> getGameObjectPos(agent.id, true);
+    auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalBasicAgent wander");
 
 
     auto distanceToGoal = glm::distance(targetPosition -> position, agentPos);

@@ -520,7 +520,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 				return;
 			}
 
-			auto oldPosition = gameapi -> getGameObjectPos(objid.value(), true);
+			auto oldPosition = gameapi -> getGameObjectPos(objid.value(), true, "[gamelogic] simpleOnFrame debug");
 			modlog("on frame move", std::to_string(gameapi -> timeSeconds(false)));
 		  
 		  float speed = 20.f;

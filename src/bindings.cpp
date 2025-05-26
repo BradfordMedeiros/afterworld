@@ -96,7 +96,7 @@ void startLevel(ManagedScene& managedScene){
   if (managedScene.makePlayer){
     auto playerLocationObj = findObjByShortName("playerspawn", std::nullopt);
     modassert(playerLocationObj.has_value(), "no initial spawnpoint");
-    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true);
+    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true, "[gamelogic] startLevel get player spawnpoint");
     createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position, {});    
   }
 
@@ -1087,7 +1087,7 @@ void zoomIntoArcade(std::optional<objid> id){
   }else{
     auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
     modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
-    auto position = gameapi -> getGameObjectPos(id.value(), true);
+    auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
     auto rotation = gameapi -> getGameObjectRotation(id.value(), true);  // tempchecked
     setTempCamera(arcadeCameraId.value());          
   }
@@ -1500,7 +1500,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "gem-pickup"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
-      auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true);
+      auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true, "[gamelogic] get position for gem pickup to play sound");
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position);
       pickupGem("testgem");
     }
