@@ -383,6 +383,9 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
     // should take the rotation and direct and stuff from where the player is looking
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId), activeId == entity.playerId);
+    uiUpdate.velocity = entity.movementState.velocity;
+    uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
+
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
       gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
@@ -412,8 +415,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
 
     
-    uiUpdate.velocity = entity.movementState.velocity;
-    uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
+
   }
 
 
