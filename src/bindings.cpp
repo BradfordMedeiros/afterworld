@@ -1353,6 +1353,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     // debug
     debugOnFrame();
   };
+  binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
+    modlog("onFrameAfterUpdate", "late frame update");
+    GameState* gameState = static_cast<GameState*>(data);
+    if (isInGameMode()){
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+        onMovementFrameLateUpdate(gameState -> movementEntities, movement, controlledPlayer.playerId.value());
+      }
+    }
+  };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);

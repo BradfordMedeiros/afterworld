@@ -480,8 +480,8 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   auto currTime = gameapi -> timeSeconds(false);
   float elapsedTime = gameapi -> timeElapsed();
 
-  auto currPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onMovementFrameCore");
-  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] onMovementFrameCore");
+  auto currPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] onMovementFrameCore - main entity position");
+  auto playerDirection = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] onMovementFrameCore - main entity rotn");
 
   auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
   directionVec.y = 0.f;

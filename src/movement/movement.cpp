@@ -356,18 +356,18 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     // should take the rotation and direct and stuff from where the player is looking
     auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId), activeId == entity.playerId);
     if (cameraUpdate.thirdPerson.has_value()){
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "onMovementFrame1 rot" });
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "onMovementFrame2 rot" });
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "onMovementFrame1" });
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
+      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
 
       updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
     }else{
       // This one is where the actual character is facing, so affects wasd
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "onMovementFrame movePlayerModelLeftAndRight" }); // i think this should only rotate around y 
+      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot" }); // i think this should only rotate around y 
 
       // These effect the camera
-      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true, "[gamelogic] onMovementFrame - get entity pos for set first person camera"), true, Hint { .hint = "onMovementFrame2" });  
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "onMovementFrame4 setFirstPersonView" });
+      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera"), true, Hint { .hint = "[gamelogic] onMovementFrame - entity pos for set first person camera" });  
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame setFirstPersonView - rot" });
     }
 
     
@@ -395,7 +395,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
 
       // not sure i should set the always here? 
-      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true, Hint { .hint = "movementEntity rot - targetLocation" });   // meh this should really come from the movement system (huh?)
+      gameapi -> setGameObjectRot(movementEntity.playerId, orientation, true, Hint { .hint = "[gamelogic] movementEntity rot - targetLocation" });   // meh this should really come from the movement system (huh?)
       auto oldXYRot = pitchXAndYawYRadians(orientation);  // TODO - at least set this movement core area code.  at least call this "force". 
       movementEntity.movementState.xRot = oldXYRot.x;
       movementEntity.movementState.yRot = oldXYRot.y;    
@@ -460,6 +460,10 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   movement.controlParams.doReverseGrind = false;
   movement.controlParams.crouchType = CROUCH_NONE;
   return uiUpdate;
+}
+
+void onMovementFrameLateUpdate(MovementEntityData& movementEntityData, Movement& movement, objid activeId){
+  modlog("movement", "onMovementFrameLateUpdate");
 }
 
 void setZoomSensitivity(float multiplier){
