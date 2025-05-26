@@ -128,8 +128,8 @@ void updateVelocity(MovementState& movementState, objid id, float elapsedTime, g
 }
 
 void updateFacingWall(MovementState& movementState, objid id){
-  auto mainobjPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] updateFacingWall");
-  auto rot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] updateFacingWall");  // tempchecked
+  auto mainobjPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] updateFacingWall getPos");
+  auto rot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] updateFacingWall getRot");  // tempchecked
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
 
   auto hitpoints = gameapi -> raycast(mainobjPos, rot, 2.f);
@@ -281,8 +281,8 @@ bool isCollideable(objid id){
 }
 
 bool shouldStepUp(objid id){ // check this logic 
-  auto playerPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] shouldStepUp");
-  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true, "[gamelogic] shouldStepUp") * glm::vec3(0.f, 0.f, -1.f); // tempchecked
+  auto playerPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] shouldStepUp position");
+  auto inFrontOfPlayer = gameapi -> getGameObjectRotation(id, true, "[gamelogic] shouldStepUp rot") * glm::vec3(0.f, 0.f, -1.f); // tempchecked
   auto inFrontOfPlayerSameHeight = playerPos + glm::vec3(inFrontOfPlayer.x, 0.f, inFrontOfPlayer.z);
   
   auto belowPos = playerPos - glm::vec3(0.f, 0.95f, 0.f);

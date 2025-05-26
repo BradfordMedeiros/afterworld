@@ -402,8 +402,8 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRot
 }
 
 std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
-  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] doRaycastClosest");
-  auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] doRaycastClosest"); // tempchecked
+  auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] doRaycastClosest pos");
+  auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] doRaycastClosest rot"); // tempchecked
   return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset, excludeHitpoint); 
 }
 
