@@ -1223,6 +1223,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+ 
+    std::vector<EntityUpdate> entityUpdates;
+
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
@@ -1253,7 +1256,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
             modassert(false, "cannot use third person mode, no camera provided");
           }
         }
-        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh);
+        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh, entityUpdates);
         impulses = {};
         setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
       }
@@ -1352,6 +1355,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     // debug
     debugOnFrame();
+
+    for (auto &update : entityUpdates){
+      if (update.pos.has_value()){
+        gameapi -> setGameObjectPosition(update.id, update.pos.value(), true, Hint { .hint = update.posHint });  
+      }
+      if (update.rot.has_value()){
+        gameapi -> setGameObjectRot(update.id, update.rot.value(), true, Hint { .hint = update.rotHint });
+      }
+    }
   };
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");

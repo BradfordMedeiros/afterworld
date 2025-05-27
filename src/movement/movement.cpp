@@ -357,8 +357,9 @@ void maybeReEnableMesh(objid id);
 void maybeDisableMesh(objid id);
 
 
+
 // TODO third person mode should only be a thing if active id
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh){
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& entityUpdates){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -388,8 +389,9 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
+
       gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
 
       auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
       if (gunAimingUpdates.rightHand.has_value()){
@@ -406,18 +408,26 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       }
 
     }else{
-      // This one is where the actual character is facing, so affects wasd
-      gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.firstPerson.yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot" }); // i think this should only rotate around y 
+      entityUpdates.push_back(EntityUpdate {
+        .id = entity.playerId,
+        .rot = cameraUpdate.firstPerson.yAxisRotation,
+        .rotHint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot",
+      });
 
       // These effect the camera
-      gameapi -> setGameObjectPosition(thirdPersonCamera, gameapi -> getGameObjectPos(entity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera"), true, Hint { .hint = "[gamelogic] onMovementFrame - entity pos for set first person camera" });  
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.firstPerson.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame setFirstPersonView - rot" });
+      auto playerPos = gameapi -> getGameObjectPos(entity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
+
+      // This should be done in a late update step
+      entityUpdates.push_back(EntityUpdate {
+        .id = thirdPersonCamera,
+        .pos = playerPos, 
+        .rot = cameraUpdate.firstPerson.rotation,
+        .posHint = "[gamelogic] onMovementFrame - entity pos for set first person camera",
+        .rotHint = "[gamelogic] onMovementFrame setFirstPersonView - rot",
+      });
     }
 
-    
-
   }
-
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if (id == activeId){
@@ -502,6 +512,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   movement.controlParams.doGrind = false;
   movement.controlParams.doReverseGrind = false;
   movement.controlParams.crouchType = CROUCH_NONE;
+
   return uiUpdate;
 }
 

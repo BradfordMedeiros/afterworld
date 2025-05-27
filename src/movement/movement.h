@@ -46,7 +46,16 @@ struct UiMovementUpdate {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec2> lookVelocity;
 };
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh);
+
+struct EntityUpdate {
+  objid id;
+  std::optional<glm::vec3> pos;
+  std::optional<glm::quat> rot;
+  const char* posHint = NULL;
+  const char* rotHint = NULL;
+};
+
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& entityUpdates);
 void onMovementFrameLateUpdate(MovementEntityData& movementEntityData, Movement& movement, objid activeId);
 
 void setActiveMovementEntity(Movement& movement);
