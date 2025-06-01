@@ -303,14 +303,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	return;
   }
 
-  if (key == 'H' && action == 1){
-  	auto activePlayerId = getActivePlayerId();
-		auto playerPos = getActivePlayerPosition();
-		auto playerRot = getActivePlayerRotation();
-		auto inFront = playerPos.value() + (playerRot.value() * glm::vec3(0.f, 0.f, -1.f));
-  	emitBlood(rootSceneId(), activePlayerId.value(), inFront);
-  }
-
   //if (key == 'R' && action == 1) {
   //  changeGameType(gametypeSystem, "targetkill");
   //}
