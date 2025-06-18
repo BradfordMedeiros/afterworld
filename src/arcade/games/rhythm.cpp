@@ -81,13 +81,13 @@ std::vector<ArrowRender> getArrowRendering(float time, float columnWidth){
 
 		const char* texture = NULL;
 		if (element.type == RHYTHM_LEFT){
-			texture = "../gameresources/textures/arcade/rhythm/arrow-left.png";
+			texture = paths::RHYTHM_LEFT;
 		}else if (element.type == RHYTHM_RIGHT){
-			texture = "../gameresources/textures/arcade/rhythm/arrow-right.png";
+			texture = paths::RHYTHM_RIGHT;
 		}else if (element.type == RHYTHM_UP){
-			texture = "../gameresources/textures/arcade/rhythm/arrow-up.png";
+			texture = paths::RHYTHM_UP;
 		}else if (element.type == RHYTHM_DOWN){
-			texture = "../gameresources/textures/arcade/rhythm/arrow-down.png";
+			texture = paths::RHYTHM_DOWN;
 		}else{
 			modassert(false, "invalid type rhythm");
 		}

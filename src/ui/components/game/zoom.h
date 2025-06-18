@@ -3,6 +3,7 @@
 
 #include "../common.h"
 #include "../../../global.h"
+#include "../../../resources/paths.h"
 
 struct ZoomOptions {
   int zoomAmount;

@@ -5,17 +5,6 @@ extern CustomApiBindings* gameapi;
 // Cantarell ?
 
 
-//TerminalDisplayType terminalDisplay = TerminalImage {
-//  .image = "../gameresources/build/textures/moonman.jpg",
-//};
-
-//TerminalConfig terminalConfig {
-//  .terminalDisplay = TerminalImageLeftTextRight {
-//    .image = "../gameresources/build/textures/moonman.jpg",
-//    .text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Blandit cursus risus at ultrices mi tempus. Quam viverra orci sagittis eu volutpat odio. Non consectetur a erat nam at lectus. Sed tempus urna et pharetra pharetra massa. Eu volutpat odio facilisis mauris sit amet massa vitae tortor. Purus non enim praesent elementum facilisis leo vel. Tellus rutrum tellus pellentesque eu tincidunt tortor aliquam. Eu lobortis elementum nibh tellus molestie nunc non. Arcu dui vivamus arcu felis. Aliquam vestibulum morbi blandit cursus risus at ultrices mi. Urna et pharetra pharetra massa massa ultricies mi. Feugiat sed lectus vestibulum mattis ullamcorper. Senectus et netus et malesuada. Feugiat vivamus at augue eget arcu. Suspendisse sed nisi lacus sed viverra tellus. In nulla posuere sollicitudin aliquam ultrices sagittis orci. Vulputate eu scelerisque felis imperdiet proin fermentum leo vel. Tellus id interdum velit laoreet id donec ultrices tincidunt arcu.",
-//  }
-//};
-
 glm::vec4 terminalFontColor(0.2745f, 0.5098f, 0.7059f, 1.f);
 
 //TerminalDisplayType terminalDisplay = TerminalText {
@@ -33,7 +22,7 @@ Component terminalComponent {
     modassert(terminalImagePtr || terminalImageLeftTextRightPtr || terminalTextPtr, "invalid terminal type");
 
     std::cout << "terminal time: " << terminalConfig -> time << std::endl;
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "../gameresources/build/terminals/terminal.png", std::nullopt, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, paths::TERMINAL_BACKGROUND, std::nullopt, std::nullopt);
     if (terminalImagePtr){
       drawTools.drawRect(0.f, 0.f, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, terminalImagePtr -> image, std::nullopt, std::nullopt);
     }else if (terminalImageLeftTextRightPtr){

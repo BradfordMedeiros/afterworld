@@ -168,7 +168,7 @@ void setTvActive(Agent& agent, bool active){
   auto screen = findBodyPart(agent.id, "screen");;
   if (active){
     setGameObjectTint(screen.value(), glm::vec4(1.f, 0.f, 0.f, 1.f));
-    setGameObjectTexture(screen.value(), "../gameresources/textures/enemies/happy.png");
+    setGameObjectTexture(screen.value(), paths::AI_TV_HAPPY_FACE);
   }else{
     setGameObjectTint(screen.value(), glm::vec4(1.f, 1.f, 1.f, 1.f));
   }

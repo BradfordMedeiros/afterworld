@@ -222,8 +222,7 @@ objid addWaterObj(objid sceneId){
 			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
 			{ "rotation", glm::vec4(0.f, 1.f, 0.f, 0.f) },
 			{ "scale", glm::vec3(10.f, 10.f, 10.f) },
-			{ "texture", "./res/heightmaps/dunes_low.jpg" },
-//			{ "texture", "../gameresources/build/textures/lava.png" },
+			{ "texture",  paths::WATER_TEXTURE },
 			{ "tint", glm::vec4(0.4f, 0.4f, 1.f, 1.f) },
 			{ "shader", "../afterworld/shaders/water/fragment.glsl,../afterworld/shaders/water/vertex.glsl" },
 		}

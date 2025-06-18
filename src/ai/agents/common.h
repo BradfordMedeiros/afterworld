@@ -3,6 +3,7 @@
 
 #include "../../util.h"
 #include "../worldinfo.h"
+#include "../../resources/paths.h"
 
 struct AIInterface {
   std::function<void(objid agentId, glm::vec3 targetPosition, float speed)> move;

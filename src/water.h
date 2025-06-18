@@ -4,6 +4,7 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./global.h"
+#include "./resources/paths.h"
 
 struct Water {
 	std::unordered_map<objid, std::set<objid>> objectsInWater;

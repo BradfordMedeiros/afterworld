@@ -5,6 +5,7 @@
 #include "../../../global.h"
 #include "../basic/layout.h"
 #include "../basic/listitem.h"
+#include "../../../resources/paths.h"
 
 extern Component keyboardComponent;
 

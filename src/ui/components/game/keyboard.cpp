@@ -421,7 +421,7 @@ void drawKeyHighlighted(DrawingTools& drawTools, KeyLocation& key, glm::vec2 siz
 Component keyboardComponentInner {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     glm::vec2 size(0.5f, 0.5f);
-    drawTools.drawRect(0.f, 0.f, size.x, size.y, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), true, std::nullopt, "../gameresources/build/misc/keyboard.png", std::nullopt, std::nullopt);
+    drawTools.drawRect(0.f, 0.f, size.x, size.y, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), true, std::nullopt, paths::UI_KEYBOARD_IMAGE, std::nullopt, std::nullopt);
     for (auto &key : keys){
       if (keyIsDown(key.key)){
         drawKeyHighlighted(drawTools, key, size * 0.5f); // 0.5f since this is using ndi

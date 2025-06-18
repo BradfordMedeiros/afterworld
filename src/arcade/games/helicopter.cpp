@@ -13,9 +13,9 @@ struct Helicopter {
 float helicopterDisplayOffset = -0.6f;
 
 std::any createHelicopter(objid id){
-	auto sounds = arcadeApi.ensureSoundsLoaded(id, { "../gameresources/sound/rain.wav" });
+	auto sounds = arcadeApi.ensureSoundsLoaded(id, { paths::HELICOPTER_MAIN_SOUND });
 
-	arcadeApi.ensureTexturesLoaded(id, { "../gameresources/textures/lava.png" });
+	arcadeApi.ensureTexturesLoaded(id, { paths::HELICOPTER_BACKGROUND });
 	Helicopter helicopter {
 		.gameStarted = false,
 		.flyUp = false,
@@ -128,7 +128,7 @@ void drawObstacles(Helicopter& heli, std::optional<objid> textureId){
 void drawHelicopter(std::any& any, std::optional<objid> textureId){
   Helicopter* helicopterPtr = anycast<Helicopter>(any);
 
-	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/lava.png", std::nullopt);
+	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, paths::HELICOPTER_BACKGROUND, std::nullopt);
 	gameapi -> drawRect(helicopterDisplayOffset, helicopterPtr -> helicopterLocation.y, helicopterPtr -> helicopterSize.x, helicopterPtr -> helicopterSize.x, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 
 	drawObstacles(*helicopterPtr, textureId);

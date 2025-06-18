@@ -432,13 +432,13 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
 
 
   if (invaders.state == TITLE){
-   	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", ShapeOptions { .shaderId = *invaders.shaderId  });
-   	gameapi -> drawRect(0.f, 0.f + 0.02f * glm::cos(gameapi -> timeSeconds(false) * 2.f), 0.4f, 0.4f, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/pete.png", std::nullopt);
+   	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, paths::INVADERS_BACKGROUND, ShapeOptions { .shaderId = *invaders.shaderId  });
+   	gameapi -> drawRect(0.f, 0.f + 0.02f * glm::cos(gameapi -> timeSeconds(false) * 2.f), 0.4f, 0.4f, false, glm::vec4(0.f, 1.f, 0.f, 1.f), textureId, true, std::nullopt, paths::INVADERS_PETE, std::nullopt);
 	  drawCenteredTextFade("Press Left Mouse to Play!", 0, -0.4f, 0.04f, glm::vec3(1.f, 1.f, 1.f), 2.f, textureId);
   	return;
   }
 
- 	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", ShapeOptions { .shaderId = *invaders.shaderId  });
+ 	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, paths::INVADERS_BACKGROUND, ShapeOptions { .shaderId = *invaders.shaderId  });
 	
  	if (invaders.drawCursor){
  		std::cout << "draw cursor: " << print(invaders.cursorPosition) << std::endl;
@@ -448,10 +448,10 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
 	for (int i = 0; i < invaders.shipTrail.size(); i++){
 		auto trailPos = invaders.shipTrail.at(i);
 		float opacity = static_cast<float>(i) / static_cast<float>(invaders.shipTrail.size());
-	 	gameapi -> drawRect(trailPos.x, trailPos.y, 0.1f, 0.1f, false, glm::vec4(0.f, 0.f, 1.f, 0.2f * opacity), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/ship.png", ShapeOptions { .shaderId = *invaders.shaderId  });
+	 	gameapi -> drawRect(trailPos.x, trailPos.y, 0.1f, 0.1f, false, glm::vec4(0.f, 0.f, 1.f, 0.2f * opacity), textureId, true, std::nullopt, paths::INVADERS_SHIP, ShapeOptions { .shaderId = *invaders.shaderId  });
 	}
 	for (auto &[_, enemy] : invaders.enemies){
-	 	gameapi -> drawRect(enemy.position.x, enemy.position.y, enemy.size.x, enemy.size.y, false, enemy.color, textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/ship.png", ShapeOptions { .shaderId = *invaders.shaderId  });
+	 	gameapi -> drawRect(enemy.position.x, enemy.position.y, enemy.size.x, enemy.size.y, false, enemy.color, textureId, true, std::nullopt, paths::INVADERS_SHIP, ShapeOptions { .shaderId = *invaders.shaderId  });
 	}
 
 	for (auto &[_, particle] : invaders.particles){

@@ -10,7 +10,7 @@ struct Interact {
 std::any createInteract(objid id){
 	arcadeApi.ensureTexturesLoaded(id, 
 	{ 
-			"../gameresources/textures/arcade/invaders/background.png",
+		 paths::ARCADE_INTERACT_IMAGE,
 	});
 	return Interact{};
 }
@@ -23,7 +23,7 @@ void updateInteract(std::any& any){
 
 int currentAmmo = 0;
 void drawInteract(std::any& any, std::optional<objid> textureId){
- 	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), textureId, true, std::nullopt, "../gameresources/textures/arcade/invaders/background.png", std::nullopt);
+ 	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), textureId, true, std::nullopt, paths::ARCADE_INTERACT_IMAGE, std::nullopt);
   drawCenteredText(std::to_string(currentAmmo), 0.f, 0.f, 0.2f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, textureId);
 }
 
