@@ -96,7 +96,7 @@ void unloadManagedTexturesLoaded(objid id){
 
 
 void ensureDefaultSoundsLoadced(objid sceneId){
-  std::string activateClip = "../gameresources/sound/click.wav";
+  std::string activateClip = paths::ACTIVATE_SOUND;
   if (activateClip != ""){
     if (sounds.activateSoundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.activateSoundObjId.value());
@@ -104,7 +104,7 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.activateSoundObjId = createSound(sceneId, ("&code-activate") + uniqueNameSuffix(), activateClip);
   }
 
-  std::string soundClip = "../gameresources/sound/q009/weapswitch.ogg";
+  std::string soundClip = paths::WEAPON_SWITCH;
   if (soundClip != ""){
     if (sounds.soundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.soundObjId.value());
@@ -112,7 +112,7 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.soundObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), soundClip);
   }
 
-  std::string explosionClip = "../gameresources/sound/q009/explosion.wav";
+  std::string explosionClip = paths::EXPLOSION;
   if (explosionClip != ""){
     if (sounds.explosionSoundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.explosionSoundObjId.value());
@@ -121,7 +121,7 @@ void ensureDefaultSoundsLoadced(objid sceneId){
   }
 
 
-  std::string hitmarkerClip = "./res/sounds/sample.wav";
+  std::string hitmarkerClip = paths::HITMARKER;
   if (hitmarkerClip != ""){
     if (sounds.hitmarkerSoundObjId.has_value()){
       gameapi -> removeByGroupId(sounds.hitmarkerSoundObjId.value());
@@ -129,7 +129,7 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.hitmarkerSoundObjId = createSound(sceneId, ("&code-hitmarker") + uniqueNameSuffix(), hitmarkerClip);
   }
 
-  std::string teleportClip = "../gameresources/sound/q009/teleport.ogg";
+  std::string teleportClip = paths::TELEPORT_SOUND;
   if (teleportClip != ""){
     if (sounds.teleportObjId.has_value()){
       gameapi -> removeByGroupId(sounds.teleportObjId.value());

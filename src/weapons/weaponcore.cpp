@@ -452,6 +452,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
     if (!addedGlassDecal){
       if (emitterId.has_value()){
         std::cout << "hit particle, hitpoint.id = " << hitpoint.id << std::endl;
+        // these are the decals that get added on the wall eg a bullet hole
         gameapi -> emit(emitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
       }      
     }

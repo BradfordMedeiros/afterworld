@@ -2,6 +2,7 @@
 #define MOD_AFTERWORLD_CUTSCENE
 
 #include "./util.h"
+#include "./resources/paths.h"
 
 struct CutsceneApi {
 	std::function<void(std::string title, float duration)> showLetterBox;

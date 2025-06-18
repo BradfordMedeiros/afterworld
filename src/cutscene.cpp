@@ -43,7 +43,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		static bool didLoadShader = false;
 		static unsigned int* shaderId = 0;
 		if (!didLoadShader){
-			shaderId = gameapi -> loadShader("storyboard", "../afterworld/shaders/storyboard");
+			shaderId = gameapi -> loadShader("storyboard", paths::SHADER_STORYBOARD);
 			didLoadShader = true;
 		}
 		perFrameEvents[id] = [time, pos, size, image, zIndex, tint]() -> void {
@@ -212,7 +212,7 @@ std::unordered_map<std::string, Cutscene> cutscenes {
 						.type = ChangePlayable { .isPlayable = false },
 					},
 				},
-				createTextCutscene("../afterworld/design/storyboard/hell.jpg", {}), 
+				createTextCutscene(paths::IMAGE_CUTSCENE_HELL, {}), 
 				{
 					CutsceneEvent {
 						.name = "camera-view-1",

@@ -29,7 +29,11 @@ float paddleXRight = 1.f - offsetPaddle;
 glm::vec2 initialBallVelocity(0.5f, 0.25f);
 
 std::any createTennis(objid id){
-	auto sounds = arcadeApi.ensureSoundsLoaded(id, { "./res/sounds/thud.wav" });
+	auto sounds = arcadeApi.ensureSoundsLoaded(id, { paths::TENNIS_HIT_SOUND });
+	arcadeApi.ensureTexturesLoaded(id, 
+	{ 
+		paths::TENNIS_BALL_IMAGE,
+	});
 
 	return Tennis {
 		.ballPosition = glm::vec2(0.f, 0.f),
@@ -212,7 +216,7 @@ void drawTennis(std::any& any, std::optional<objid> textureId){
 
   drawRightText(std::to_string(tennis.scorePlayerOne) + " - " + std::to_string(tennis.scorePlayerTwo), 0.f, 0.8f, 0.04f, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, std::nullopt);
 
-	gameapi -> drawRect(tennis.ballPosition.x, tennis.ballPosition.y, ballSize, ballSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, "./res/textures/tennisball.png", std::nullopt);
+	gameapi -> drawRect(tennis.ballPosition.x, tennis.ballPosition.y, ballSize, ballSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), textureId, true, std::nullopt, paths::TENNIS_BALL_IMAGE, std::nullopt);
 
 	gameapi -> drawRect(paddleXLeft, tennis.leftPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(0.f, 0.f, 1.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 	gameapi -> drawRect(paddleXRight, tennis.rightPaddlePosition, paddleWidth, paddleHeight, false, glm::vec4(0.f, 0.f, 1.f, 1.f), textureId, true, std::nullopt, std::nullopt, std::nullopt);

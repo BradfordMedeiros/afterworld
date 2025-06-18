@@ -3,6 +3,7 @@
 
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
+#include "../resources/paths.h"
 
 struct ArcadeInterface {
   std::function<std::any(objid)> createInstance;

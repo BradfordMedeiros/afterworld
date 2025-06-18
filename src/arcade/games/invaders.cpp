@@ -114,15 +114,14 @@ std::any createInvaders(objid id){
 
 	arcadeApi.ensureTexturesLoaded(id, 
 	{ 
-			"../gameresources/textures/arcade/invaders/ship.png", 
-			"../gameresources/textures/arcade/invaders/background.png",
-			"../gameresources/textures/arcade/invaders/pete.png", 
+			paths::INVADERS_SHIP, 
+			paths::INVADERS_BACKGROUND,
+			paths::INVADERS_PETE, 
 	});
 
 	auto soundObjs = arcadeApi.ensureSoundsLoaded(id,
 	{
-		"./res/sounds/silenced-gunshot.wav",
-		"./res/sounds/glassbreak.wav",
+	  paths::GUNSHOT,
 	});
 	invaders.shootingSound = soundObjs.at(0);
 	invaders.collisions = create2DCollisions();

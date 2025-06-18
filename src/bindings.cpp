@@ -1707,3 +1707,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   return bindings;
 } 
 
+std::vector<const char*> getAdditionalPathsToValidate(){
+  return paths::allResources;
+}

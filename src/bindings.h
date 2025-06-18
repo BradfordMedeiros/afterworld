@@ -40,5 +40,7 @@
 #include "./arcade/arcade.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
+std::vector<const char*> getAdditionalPathsToValidate();
+
 
 #endif

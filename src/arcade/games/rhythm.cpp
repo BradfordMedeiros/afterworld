@@ -10,10 +10,10 @@ struct Rhythm {
 std::any createRhythm(objid id){
 	arcadeApi.ensureTexturesLoaded(id, 
 	{ 
-			"../gameresources/textures/arcade/rhythm/arrow-right.png", 
-			"../gameresources/textures/arcade/rhythm/arrow-left.png", 
-			"../gameresources/textures/arcade/rhythm/arrow-up.png", 
-			"../gameresources/textures/arcade/rhythm/arrow-down.png", 
+		paths::RHYTHM_LEFT,
+		paths::RHYTHM_RIGHT,
+		paths::RHYTHM_UP,
+		paths::RHYTHM_DOWN,
 	});
 	return Rhythm {};
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include <optional>
 #include "../util.h"
+#include "./paths.h"
 
 struct ManagedSounds {
   std::optional<objid> jumpSoundObjId;
