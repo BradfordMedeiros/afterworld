@@ -14,12 +14,15 @@ struct CutsceneApi {
 
 struct BackgroundFill {
 	glm::vec4 color;
+	int scheduleId = 0;
 };
 struct DebugTextDisplay {
 	std::string text;
 	float rate;
 	float size;
 	glm::vec2 pos;
+
+	int scheduleId = 0;
 };
 struct ImageDisplay {
 	glm::vec2 pos;
@@ -27,6 +30,8 @@ struct ImageDisplay {
 	int zIndex = -1;
 	glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
 	const char* image = NULL;
+
+	int scheduleId = 0;
 };
 
 struct Letterbox {

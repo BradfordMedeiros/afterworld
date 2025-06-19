@@ -31,6 +31,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
   	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
+  	debugTextDisplayPtr -> scheduleId = id;
 	}else if (imageDisplayPtr){
 		auto id = getUniqueObjId();
 		auto pos = imageDisplayPtr -> pos;
@@ -46,6 +47,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 			shaderId = gameapi -> loadShader("storyboard", paths::SHADER_STORYBOARD);
 			didLoadShader = true;
 		}
+		imageDisplayPtr -> scheduleId = id;
 		perFrameEvents[id] = [time, pos, size, image, zIndex, tint]() -> void {
 		  gameapi -> drawRect(pos.x, pos.y, size.x, size.y, false, tint, std::nullopt, true, std::nullopt, image, ShapeOptions {
 		  	.shaderId = *shaderId,
@@ -65,6 +67,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
   	gameapi -> schedule(-1, false, duration * 1000, NULL, [id](void*) -> void {
   		perFrameEvents.erase(id);
   	});
+  	backgroundFillPtr -> scheduleId = id;
 	}else if (letterboxPtr){
 		api.showLetterBox(letterboxPtr -> text, duration);
 	}else if (cameraViewPtr){
@@ -89,7 +92,7 @@ void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float d
 		api.setWorldState(worldStatePtr -> field, worldStatePtr -> name, worldStatePtr -> value);
 	}
 
-	modlog("cutscene", std::string("event - name") + event.name + ", time = " + std::to_string(time));
+	modlog("cutscene", std::string("event - ") + event.name + ", time = " + std::to_string(time));
 }
 
 std::vector<CutsceneEvent> joinCutscenes(std::vector<std::vector<CutsceneEvent>> cutscenes){
@@ -337,7 +340,6 @@ bool cutscenesFinished(CutsceneInstance& instance, float time){
 	return true;
 }
 
-
 bool passesWaitFor(CutsceneInstance& instance, TriggerType& triggerType, int index, float time){
 	if (!triggerType.waitForLastEvent){
 		return true;
@@ -396,6 +398,52 @@ std::optional<NextEvent> getNextEventIndex(CutsceneInstance& instance, float tim
 	return std::nullopt;
 }
 
+void finalizeCutscene(CutsceneApi& api, CutsceneInstance& cutsceneInstance, float time){
+	std::cout << "finalize cutscene called" << std::endl;
+	for (auto &[id, timing] : cutsceneInstance.playedEvents){
+		CutsceneEvent& event = cutsceneInstance.cutscene -> events.at(id);
+		auto name = event.name;
+
+		if (!timing.endTime.has_value() || timing.endTime.value() < time){
+			std::cout << "finalize cutscene - event not finished: " << name << std::endl;
+		}
+
+		auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
+		auto imageDisplayPtr = std::get_if<ImageDisplay>(&event.type);
+		auto backgroundFillPtr = std::get_if<BackgroundFill>(&event.type);
+		auto letterboxPtr = std::get_if<Letterbox>(&event.type);
+		auto cameraViewPtr = std::get_if<CameraView>(&event.type);
+		auto terminalPtr = std::get_if<TerminalDisplay>(&event.type);
+		auto playablePtr = std::get_if<ChangePlayable>(&event.type);
+		auto nextLevelPtr = std::get_if<NextLevel>(&event.type);
+		auto worldStatePtr = std::get_if<WorldState>(&event.type);
+
+		if (debugTextDisplayPtr){
+			perFrameEvents.erase(debugTextDisplayPtr -> scheduleId);
+		}else if (imageDisplayPtr){
+			perFrameEvents.erase(imageDisplayPtr -> scheduleId);
+		}else if (backgroundFillPtr){
+			perFrameEvents.erase(backgroundFillPtr -> scheduleId);
+		}else if (letterboxPtr){
+			api.showLetterBox("", 0.f);
+		}else if (cameraViewPtr){
+
+		}else if (terminalPtr){
+
+		}else if (playablePtr){
+
+		}else if (nextLevelPtr){
+
+		}else if (worldStatePtr){
+
+		}else{
+			modassert(false, "invalid type cannot finalize");
+		}
+
+
+	}
+}
+
 void tickCutscenes(CutsceneApi& api, float time){
 	std::vector<objid> idsToRemove;
 	for (auto &[id, instance] : playingCutscenes){
@@ -417,6 +465,7 @@ void tickCutscenes(CutsceneApi& api, float time){
 	}
 
 	for (auto id : idsToRemove){
+		finalizeCutscene(api, playingCutscenes.at(id), time);
 		playingCutscenes.erase(id);
 		modlog("cutscene", std::string("removed cutscene: ") + std::to_string(id));
 	}
