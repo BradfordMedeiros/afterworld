@@ -1128,23 +1128,32 @@ void ensureAllAudioZonesLoaded(){
 
 }
 
-bool playingClip = false;
-void ensureAmbientSound(bool inAudioZone){
+std::optional<std::string> playingClip;
+void ensureAmbientSound(std::vector<TagInfo>& tags){
+  std::optional<std::string> clipToPlay;
+  bool inAudioZone = false;
+  if (tags.size() > 0){
+    inAudioZone = true;
+    clipToPlay = tags.at(tags.size() - 1).value;
+  }
+ 
+
   ensureAllAudioZonesLoaded();
-  if (inAudioZone && !playingClip){
-    playingClip = true;
-    modlog("octree tags ensureAmbientSound", "play clip");
+  if (inAudioZone && !playingClip.has_value()){
+    modlog("octree tags ensureAmbientSound play clip", clipToPlay.value());
 
-    AudioClip& audioClip = audioClips.at("../gameresources/sound/rain.wav");
+    modassert(audioClips.find(clipToPlay.value()) != audioClips.end(), "octree tags could not find clip");
+    AudioClip& audioClip = audioClips.at(clipToPlay.value());
+    playingClip = clipToPlay.value();
+
     playGameplayClipById(audioClip.id, std::nullopt, std::nullopt); 
-  }else if(!inAudioZone && playingClip){
-    playingClip = false;
+  }else if(!inAudioZone && playingClip.has_value()){
     modlog("octree tags ensureAmbientSound", "stop clip");
-
-    AudioClip& audioClip = audioClips.at("../gameresources/sound/rain.wav");
-
+    AudioClip& audioClip = audioClips.at(playingClip.value());
     auto sceneId = gameapi -> listSceneId(octreeId.value());
     gameapi -> stopClip(audioClip.name, sceneId);
+    playingClip = std::nullopt;
+
   }
   std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
 }
@@ -1433,7 +1442,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         inAudioZone = true;     
       }
     }
-    ensureAmbientSound(inAudioZone);
+    ensureAmbientSound(tags);
     std::cout << "]" << std::endl;
 
 
