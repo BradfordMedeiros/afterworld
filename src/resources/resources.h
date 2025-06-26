@@ -38,4 +38,6 @@ struct PrecachedResources {
 };
 void ensurePrecachedModels(objid sceneId, std::vector<std::string> models);
 
+objid createSound(objid sceneId, std::string soundObjName, std::string clip, bool loop);
+
 #endif

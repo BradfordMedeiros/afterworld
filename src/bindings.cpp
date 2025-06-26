@@ -1093,6 +1093,62 @@ void zoomIntoArcade(std::optional<objid> id){
   }
 }
 
+
+struct AudioClip {
+  objid id;
+  std::string name;
+};
+std::unordered_map<std::string, AudioClip> audioClips;
+std::optional<objid> octreeId;
+void ensureAllAudioZonesLoaded(){
+  auto mainOctreeId = gameapi -> getMainOctreeId();
+
+  if (!mainOctreeId.has_value() || (octreeId.has_value() && mainOctreeId.value() != octreeId.value())){
+    modlog("octree tags", "unloading");
+    for (auto &[_, audioClip] : audioClips){
+      gameapi -> removeByGroupId(audioClip.id);
+    }
+    audioClips = {};    
+  }
+
+  if (mainOctreeId.has_value() && ((octreeId.has_value() && mainOctreeId .value() != octreeId.value()) || !octreeId.has_value())){
+    octreeId = mainOctreeId;
+
+    modlog("octree tags", "loading");
+    auto allTags = gameapi -> getAllTags(getSymbol("audio"));
+    for (auto &tag : allTags){
+      auto soundObjName = std::string("&code-sound") + uniqueNameSuffix();
+      audioClips[tag.value] = AudioClip {
+        .id = createSound(gameapi -> listSceneId(octreeId.value()), soundObjName, tag.value, true),
+        .name = soundObjName,
+      }; 
+      modlog("octree tags load sound", tag.value);
+    }
+  }
+
+}
+
+bool playingClip = false;
+void ensureAmbientSound(bool inAudioZone){
+  ensureAllAudioZonesLoaded();
+  if (inAudioZone && !playingClip){
+    playingClip = true;
+    modlog("octree tags ensureAmbientSound", "play clip");
+
+    AudioClip& audioClip = audioClips.at("../gameresources/sound/rain.wav");
+    playGameplayClipById(audioClip.id, std::nullopt, std::nullopt); 
+  }else if(!inAudioZone && playingClip){
+    playingClip = false;
+    modlog("octree tags ensureAmbientSound", "stop clip");
+
+    AudioClip& audioClip = audioClips.at("../gameresources/sound/rain.wav");
+
+    auto sceneId = gameapi -> listSceneId(octreeId.value());
+    gameapi -> stopClip(audioClip.name, sceneId);
+  }
+  std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1364,6 +1420,23 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameapi -> setGameObjectRot(update.id, update.rot.value(), true, Hint { .hint = update.rotHint });
       }
     }
+
+    /// temp code 
+    auto cameraPos = gameapi -> getCameraTransform();
+    auto audioSymbol = getSymbol("audio");
+    auto tags = gameapi -> getTag(audioSymbol, cameraPos.position);
+    std::cout << "tags game camera pos is: " << print(cameraPos.position) << ", tags: [";
+    bool inAudioZone = false;
+    for (auto tag : tags){
+      std::cout << std::endl << "tags   " << nameForSymbol(tag.key) << " " << tag.value << std::endl;
+      if (tag.key == audioSymbol){
+        inAudioZone = true;     
+      }
+    }
+    ensureAmbientSound(inAudioZone);
+    std::cout << "]" << std::endl;
+
+
   };
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");
