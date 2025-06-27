@@ -1139,6 +1139,15 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
  
 
   ensureAllAudioZonesLoaded();
+
+  if((!inAudioZone && playingClip.has_value()) || (inAudioZone && playingClip.has_value() && clipToPlay.has_value() && playingClip.value() != clipToPlay.value())){
+    modlog("octree tags ensureAmbientSound", "stop clip");
+    AudioClip& audioClip = audioClips.at(playingClip.value());
+    auto sceneId = gameapi -> listSceneId(octreeId.value());
+    gameapi -> stopClip(audioClip.name, sceneId);
+    playingClip = std::nullopt;
+
+  }
   if (inAudioZone && !playingClip.has_value()){
     modlog("octree tags ensureAmbientSound play clip", clipToPlay.value());
 
@@ -1147,14 +1156,8 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
     playingClip = clipToPlay.value();
 
     playGameplayClipById(audioClip.id, std::nullopt, std::nullopt); 
-  }else if(!inAudioZone && playingClip.has_value()){
-    modlog("octree tags ensureAmbientSound", "stop clip");
-    AudioClip& audioClip = audioClips.at(playingClip.value());
-    auto sceneId = gameapi -> listSceneId(octreeId.value());
-    gameapi -> stopClip(audioClip.name, sceneId);
-    playingClip = std::nullopt;
-
   }
+
   std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
 }
 
