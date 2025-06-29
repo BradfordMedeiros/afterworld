@@ -1448,7 +1448,35 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     ensureAmbientSound(tags);
     std::cout << "]" << std::endl;
 
+    static std::optional<OctreeMaterial> material;
+    static std::optional<OctreeMaterial> lastMaterial;
+    static float changeTime = 0.f;
 
+    material = gameapi -> getMaterial(cameraPos.position);
+
+    bool changed = material != lastMaterial;
+    if (changed){
+      changeTime = gameapi -> timeSeconds(false);
+    }
+    
+
+    std::cout << "material is: " << ((material == OCTREE_MATERIAL_WATER) ? "water" : "not water") << std::endl;
+    
+    bool isWater = material.has_value() && material.value() == OCTREE_MATERIAL_WATER;
+    float timeElapsed = gameapi -> timeSeconds(false) - changeTime;
+    float fadeDuration = 0.1f;
+    glm::vec3 tintColor(0.f, 0.1f, 0.3f);
+    float alpha = timeElapsed / fadeDuration;
+    if (alpha > 1){
+      alpha = 1;
+    }
+    if (isWater){
+      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    }else{
+      // this is wrong since starts from 0.3
+      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, 0.3 - (alpha * 0.3)), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    }
+    lastMaterial = material;
   };
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");
