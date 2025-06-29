@@ -196,8 +196,10 @@ void main(){
     }*/
 //    texColor = texture(normalTexture, adjustedTexCoord).rgba;
     
- 
-    vec4 color  = vec4(calculatePhongLight(normal), 1.0) * texColor;
+    vec3 lightPosition = vec3(0, 0, 0);
+    bool hasLight = false;
+
+    vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight), 1.0) * texColor;
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
