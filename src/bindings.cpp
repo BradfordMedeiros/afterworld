@@ -1470,11 +1470,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (alpha > 1){
       alpha = 1;
     }
-    if (isWater){
-      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-    }else{
-      // this is wrong since starts from 0.3
-      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, 0.3 - (alpha * 0.3)), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+
+    if (isInGameMode()){
+      if (isWater){
+        gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      }else{
+        // this is wrong since starts from 0.3
+        gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, 0.3 - (alpha * 0.3)), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      }
     }
     lastMaterial = material;
   };
