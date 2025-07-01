@@ -1471,7 +1471,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       alpha = 1;
     }
 
-    if (isInGameMode()){
+    if (isInGameMode() || getGlobalState().isFreeCam){
       if (isWater){
         gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
       }else{
