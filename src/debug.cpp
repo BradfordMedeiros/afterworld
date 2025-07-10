@@ -284,6 +284,57 @@ void printDebugSpawnpoint(){
 void raiseTurret(objid id, bool raiseUp);
 void wakeUpTv(objid id, bool active);
 
+objid createPrefab2(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
+  GameobjAttributes attr = {
+    .attr = {
+      { "scene", prefab },
+      { "position", pos },
+    },
+  };
+
+  for (auto &[key, payload] : additionalFields){
+    attr.attr[key] = payload;
+  }
+
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+
+  auto name = std::string("[debug-obj-") + std::to_string(getUniqueObjId());
+
+  return gameapi -> makeObjectAttr(
+    sceneId, 
+    name, 
+    attr, 
+    submodelAttributes
+  ).value();
+}
+
+std::set<objid> addNPrefabs(objid sceneId, int width, int height, int depth, std::string prefab){
+  auto start = std::chrono::system_clock::now();
+  std::set<objid> ids;
+
+  for (int x = 0; x < width; x++){
+    for (int z = 0; z < depth; z++){
+      for (int y = 0; y < height; y++){
+        float xoffset = 2.5f * x;
+        float yoffset = 2.5f * y;
+        float zoffset = 2.5f * z;
+
+        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+        auto id = createPrefab2(sceneId, prefab.c_str(), glm::vec3(xoffset, yoffset, zoffset),  {});
+        //auto id = gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);
+        //std::cout << "addNObjects: " << addNCounter << std::endl;
+        //gameapi.setGameObjectPosition(gameapi.groupId(id.value()), glm::vec3(xoffset, yoffset, zoffset), true, Hint{});
+      }
+    }
+  }
+
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+  std::cout << "addNObjects seconds: " << duration.count() << std::endl;
+
+  return ids;
+}
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -438,6 +489,10 @@ void debugOnKey(int key, int scancode, int action, int mods){
   //	std::cout << dumpAsString(tags.animationController, "character").value() << std::endl;
   //	exit(0);
   //}
+
+  if (key == 'M' && action == 1){
+  	addNPrefabs(gameapi -> rootSceneId(), 1, 1, 1, "../afterworld/scenes/prefabs/enemy/tv.rawscene");
+  }
 
   auto testObject = findObjByShortName("testobject-no-exist", std::nullopt);
   if (testObject.has_value()){
