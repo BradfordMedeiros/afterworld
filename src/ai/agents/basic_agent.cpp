@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern AIInterface aiInterface;
 
+
 struct AgentAttackState {
   float lastAttackTime;
   float initialHealth;
@@ -28,8 +29,7 @@ std::any createBasicAgent(objid id){
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ); 
-    updateState(worldInfo, symbol, visibleTargets.at(0).position, {}, STATE_VEC3, agent.id);
+    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
   }
 }
 
@@ -82,14 +82,14 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-  auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-  auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
+  auto targetId = getAgentTargetId(worldInfo, agent.id);
 
-  if (attackState -> aggravated && targetPosition.has_value()){
+  if (attackState -> aggravated && targetId.has_value()){
+    auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForBasicAgent targetPosition");
     goals.push_back(
       Goal {
         .goaltype = moveToTargetGoal,
-        .goalData = targetPosition.value(),
+        .goalData = targetPosition,
         .score = [&agent](std::any& targetPosition) -> int { 
           return 10;
         }
@@ -98,7 +98,8 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   }
 
   if (attackState -> scared){
-    glm::vec3 moveToPosition = targetPosition.value();
+    auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForBasicAgent targetPosition");
+    glm::vec3 moveToPosition = targetPosition;
     if (attackState -> scared){
       auto diff = moveToPosition - agentPos;
       moveToPosition = agentPos - diff;
@@ -121,10 +122,10 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
       Goal {
         .goaltype = attackTargetGoal,
         .goalData = NULL,
-        .score = [&agent, &worldInfo, symbol](std::any&) -> int {
-            auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-            if (targetPosition.has_value()){
-              auto distance = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForBasicAgent attackGoal"));
+        .score = [&agent, &worldInfo, targetId](std::any&) -> int {
+            if (targetId.has_value()){
+              auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForBasicAgent aggr targetPosition");
+              auto distance = glm::distance(targetPosition, gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForBasicAgent attackGoal"));
               if (distance < 5){
                 return 100;
               }
@@ -136,8 +137,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
   }
 
   if (!attackState -> aggravated && !attackState -> scared){
-    static int pointOfInterest = getSymbol("interest-generic");
-    auto pointOfInterestPositions = getStateByTag<EntityPosition>(worldInfo, { pointOfInterest });
+    auto pointOfInterestPositions = getPointsOfInterest(worldInfo);
     auto closestPointOfInterestIndex = closestPositionIndex(agentPos, pointOfInterestPositions, attackState -> visited);
     if (closestPointOfInterestIndex.has_value()){
       auto closestPointOfInterest = pointOfInterestPositions.at(closestPointOfInterestIndex.value());
@@ -146,7 +146,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
         Goal {
           .goaltype = wanderGoal,
           .goalData = closestPointOfInterest,
-          .score = [&agent, &worldInfo, symbol](std::any&) -> int {
+          .score = [&agent, &worldInfo](std::any&) -> int {
               return 100;
           }
         }
@@ -154,13 +154,13 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }     
   }
 
-  auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
+  auto ammoPositions = getAmmoPositions(worldInfo);
   if (ammoPositions.size() > 0){
     goals.push_back(
       Goal {
         .goaltype = getAmmoGoal,
         .goalData = NULL,
-        .score = [&agent, &worldInfo, symbol, attackState](std::any&) -> int {
+        .score = [&agent, &worldInfo, attackState](std::any&) -> int {
             auto currentAmmo = 100;
             if (currentAmmo <= 0){
               return 150;
@@ -168,6 +168,8 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
             return 0;
         }
       }
+
+
     );    
   }
   return goals;
@@ -237,8 +239,7 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     // not yet implemented
     attackTarget(agent);
   }else if (goal.goaltype == getAmmoGoal){
-    static int ammoSymbol = getSymbol("ammo");
-    auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
+    auto ammoPositions = getAmmoPositions(worldInfo);
     if (ammoPositions.size() > 0){
       auto ammoPosition = ammoPositions.at(0);
       moveToTarget(agent.id, ammoPosition.position, agentData -> moveVertical);
@@ -249,7 +250,6 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     moveToTarget(agent.id, *targetPosition, agentData -> moveVertical); 
   }
 }
-
 
 void onAiBasicAgentHealthChange(Agent& agent, objid targetId, float remainingHealth){
   if (targetId == agent.id){

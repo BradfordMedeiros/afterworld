@@ -26,8 +26,7 @@ std::any createTurretAgent(objid id){
 void detectWorldInfoTurretAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ); 
-    updateState(worldInfo, symbol, visibleTargets.at(0).position, {}, STATE_VEC3, agent.id);
+    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
   }
 
 }
@@ -41,16 +40,21 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
   TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
   modassert(turretState, "attackState invalid");
 
-	auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-  auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-  auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTurretAgent"));
+  auto targetPosition = getAgentTargetPos(worldInfo, agent.id);
+  bool hasTarget = false;
+  if (targetPosition.has_value()){
+    auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTurretAgent"));
+    if (distanceToTarget < 20  && turretState -> isGunRaised){
+      hasTarget = true;
+    }
+  }
 
-  if (targetPosition.has_value() && distanceToTarget < 20  && turretState -> isGunRaised){
+  if (hasTarget){
     goals.push_back(
       Goal {
         .goaltype = attackTargetGoal,
         .goalData = NULL,
-        .score = [&agent](std::any& targetPosition) -> int { 
+        .score = [&agent](std::any&) -> int { 
           return 10;
         }
       }
@@ -60,7 +64,7 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
   	  Goal {
   	    .goaltype = idleGoal,
   	    .goalData = NULL,
-  	    .score = [&agent](std::any& targetPosition) -> int { 
+  	    .score = [&agent](std::any&) -> int { 
   	      return 5;
   	    }
   	  }
@@ -90,8 +94,7 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   	  modlog("ai basic", "attack");
   	  turretState -> lastAttackTime = currentTime;
 
-			auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-  		auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
+      auto targetPosition = getAgentTargetPos(worldInfo, agent.id).value();
   		auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalTurretAgent");
   		glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y, targetPosition.z);
     	auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);

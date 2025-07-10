@@ -27,8 +27,7 @@ std::any createTvAgent(objid id){
 void detectWorldInfoTvAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ); 
-    updateState(worldInfo, symbol, visibleTargets.at(0).position, {}, STATE_VEC3, agent.id);
+    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
   }
 }
 std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
@@ -40,35 +39,39 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
   TvAiState* tvState = anycast<TvAiState>(agent.agentData);
   modassert(tvState, "attackState invalid");
 
-	auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-  auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-  auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTvAgent"));
+  auto targetPosition = getAgentTargetPos(worldInfo, agent.id);
 
-  if (targetPosition.has_value() && distanceToTarget < 20 && (tvState -> activateTime.has_value() && (gameapi -> timeSeconds(false) - tvState -> activateTime.value()) > 0.5f)){ // allow the animation to play
+  if (targetPosition.has_value()){
+    auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTvAgent"));
+    if (distanceToTarget < 20 && (tvState -> activateTime.has_value() && (gameapi -> timeSeconds(false) - tvState -> activateTime.value()) > 0.5f)){ // allow the animation to play
+      goals.push_back(
+        Goal {
+          .goaltype = attackTargetGoal,
+          .goalData = NULL,
+          .score = [&agent](std::any&) -> int { 
+            return 10;
+          }
+        }
+      );
+    }
+  }
+
+  if (!targetPosition.has_value()){
     goals.push_back(
       Goal {
-        .goaltype = attackTargetGoal,
+        .goaltype = idleGoal,
         .goalData = NULL,
-        .score = [&agent](std::any& targetPosition) -> int { 
-          return 10;
+        .score = [&agent](std::any&) -> int { 
+          return 5;
         }
       }
-    );
-  }else{
-  	goals.push_back(
-  	  Goal {
-  	    .goaltype = idleGoal,
-  	    .goalData = NULL,
-  	    .score = [&agent](std::any& targetPosition) -> int { 
-  	      return 5;
-  	    }
-  	  }
-  	);	
+    );   
   }
+
+
 	return goals;
 
 }
-
 
 std::optional<float> heightAboveGround(Agent& agent){
   auto position = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] agents - tv - heightAboveGround");
@@ -116,16 +119,17 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
   	float currentTime = gameapi -> timeSeconds(false);
 
-		auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-  	auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
-  	auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalTvAgent");
+    auto targetPosition = getAgentTargetPos(worldInfo, agent.id);
+    modassert(targetPosition.has_value(), "doGoalTvAgent does not have a target");
+
+  	auto agentPos = getAgentPos(worldInfo, agent);;
 
     auto groundHeight = heightAboveGround(agent);
     auto amountToMoveY = !groundHeight.has_value() ? 0.f : (1.f - groundHeight.value());
 
-  	glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y , targetPosition.z);
+  	glm::vec3 targetPosSameY = glm::vec3(targetPosition.value().x, agentPos.y , targetPosition.value().z);
     auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);
-    auto newPosition = glm::vec3(targetPosition.x, targetPosition.y + amountToMoveY, targetPosition.z);
+    auto newPosition = glm::vec3(targetPosition.value().x, targetPosition.value().y + amountToMoveY, targetPosition.value().z);
     
     //aiInterface.look(agent.id, towardTarget);
     aiInterface.move(agent.id, newPosition,  1.f);

@@ -51,4 +51,20 @@ struct IdAndPosition {
 
 std::vector<IdAndPosition> checkVisibleTargets(WorldInfo& worldInfo, objid agentId);
 
+glm::vec3 getAgentPos(WorldInfo& worldInfo, Agent& agent);
+
+std::optional<objid> getAgentTargetId(WorldInfo& worldInfo, objid agentId);
+std::optional<glm::vec3> getAgentTargetPos(WorldInfo& worldInfo, objid agentId);
+void setAgentTargetId(WorldInfo& worldInfo, objid agentId, objid targetId);
+
+std::vector<EntityPosition> getAmmoPositions(WorldInfo& worldInfo);
+void updateAmmoLocations(WorldInfo& worldInfo);
+
+// based on goal-info:targets update vec3 position for each - target-pos-<objid> with team symbol from attr
+void updateWorldStateTargets(WorldInfo& worldInfo);
+std::vector<EntityPosition> getWorldStateTargets(WorldInfo& worldInfo);
+
+void updatePointsOfInterest(WorldInfo& worldInfo);
+std::vector<EntityPosition> getPointsOfInterest(WorldInfo& worldInfo);
+
 #endif

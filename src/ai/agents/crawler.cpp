@@ -13,8 +13,7 @@ std::any createCrawlerAgent(objid id){
 void detectWorldInfoCrawlerAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id) /* bad basically a small leak */ ); 
-    updateState(worldInfo, symbol, visibleTargets.at(0).position, {}, STATE_VEC3, agent.id);
+    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
   }
 }
 std::vector<Goal> getGoalsForCrawlerAgent(WorldInfo& worldInfo, Agent& agent){
@@ -33,14 +32,13 @@ std::vector<Goal> getGoalsForCrawlerAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-  auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
-  auto targetPosition = getState<glm::vec3>(worldInfo, symbol);
-
-  if (targetPosition.has_value()){
+  auto targetId = getAgentTargetId(worldInfo, agent.id);
+  if (targetId.has_value()){
+    auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForCrawlerAgent targetPosition");
     goals.push_back(
       Goal {
         .goaltype = moveToTargetGoal,
-        .goalData = targetPosition.value(),
+        .goalData = targetPosition,
         .score = [&agent](std::any& targetPosition) -> int { 
           return 10;
         }
@@ -57,9 +55,10 @@ void doGoalCrawlerAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   if (goal.goaltype == idleGoal){
     // do nothing
   }else if (goal.goaltype == moveToTargetGoal){
-    auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agent.id));
     auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalCrawlerAgent get agentPos");
-    auto targetPosition = getState<glm::vec3>(worldInfo, symbol).value();
+
+    auto targetId = getAgentTargetId(worldInfo, agent.id);
+    auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] doGoalCrawlerAgent targetPosition");
 
     aiInterface.move(agent.id, targetPosition,  1.f);
 

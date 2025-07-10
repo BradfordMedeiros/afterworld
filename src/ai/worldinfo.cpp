@@ -75,6 +75,8 @@ void printWorldInfo(WorldInfo& worldInfo){
     }else if (anyValue.hint == STATE_ENTITY_POSITION){
       EntityPosition entityPosition = getAnyValue<EntityPosition>(anyValue.value);
       anyValueAsStr = std::string("id = ") + std::to_string(entityPosition.id) + ", pos = " + print(entityPosition.position);
+    }else if (anyValue.hint == STATE_ID){
+      anyValueAsStr = std::to_string(getAnyValue<objid>(anyValue.value));
     }
 
     std::string tagsAsStr = "";

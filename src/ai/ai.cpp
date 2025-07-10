@@ -70,45 +70,8 @@ std::optional<AiAgent*> getAiAgent(AgentType agentType){
 }
 
 
-// based on goal-info:targets update vec3 position for each - target-pos-<objid> with team symbol from attr
-void updateWorldStateTargets(WorldInfo& worldInfo){
-  static int targetSymbol = getSymbol("target");
-  auto targetIds = gameapi -> getObjectsByAttr("goal-info", "target", std::nullopt);
-  for (auto targetId : targetIds){
-    std::string stateName = std::string("target-pos-") + std::to_string(targetId);
-    auto team = getSingleAttr(targetId, "team");
-    std::set<int> symbols = { targetSymbol };
-    if (team.has_value()){
-      symbols.insert(getSymbol(team.value()));
-    }
-    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updateWorldStateTargets");
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION, 0);
-  }
-  // agoal-info
-}
-
-void updateAmmoLocations(WorldInfo& worldInfo){
-  static int ammoSymbol = getSymbol("ammo");
-  auto targetIds = gameapi -> getObjectsByAttr("pickup-trigger", "ammo", std::nullopt);
-  for (auto targetId : targetIds){
-    std::string stateName = std::string("ammo-pos-") + std::to_string(targetId); // leak
-    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updateAmmoLocations");
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { ammoSymbol }, STATE_ENTITY_POSITION, targetId);
-  }
-}
-
-void updatePointsOfInterest(WorldInfo& worldInfo){
-  //static int ammoSymbol = getSymbol("ammo");
-  auto targetIds = gameapi -> getObjectsByAttr("interest", std::nullopt, std::nullopt);
-  for (auto targetId : targetIds){
-    std::string stateName = std::string("interest-") + std::to_string(targetId); // leak
-    auto attrValue = getSingleAttr(targetId, "interest").value();
-    auto tags = getSymbol(std::string("interest-") + attrValue);
-    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updatePointsOfInterest");
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { tags }, STATE_ENTITY_POSITION, targetId);
-  }
-}
-
+// TODO PERF - This is a cute abstraction but stupid
+// I can just write these things to these when these objects get loaded, no reason to query
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
   updateWorldStateTargets(worldInfo);
   updateAmmoLocations(worldInfo);
@@ -205,12 +168,45 @@ AiData createAiData(){
 // probably most of this doesn't need to run on every frame except probably doGoal
 // (which could probably not run every frame too if everything in it is only a state transition
 //   as opposed to eg actually doing the movement)
+
+int AI_TICK_RATE_MS = 1000;  // once every 1s
+float lastTickTime = -1 * AI_TICK_RATE_MS;
+
+bool shouldTickAi(float currTime){
+  auto timeElapsed = currTime - lastTickTime;
+  return (timeElapsed * 1000) > AI_TICK_RATE_MS ;
+}
+
+void visualizeAiData(AiData& aiData){
+  auto ammoPositions = getAmmoPositions(aiData.worldInfo);
+  for (auto &point : ammoPositions){
+    gameapi -> drawLine(point.position, point.position + glm::vec3(0.f, 1.f, 0.f), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+
+  auto pointsOfInterest = getPointsOfInterest(aiData.worldInfo);
+  for (auto &point : pointsOfInterest){
+    gameapi -> drawLine(point.position, point.position + glm::vec3(0.f, 1.f, 0.f), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+
+  auto targetPositions = getWorldStateTargets(aiData.worldInfo);
+  for (auto &point : targetPositions){
+    gameapi -> drawLine(point.position, point.position + glm::vec3(0.f, 1.f, 0.f), false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+  }
+}
+
 void onFrameAi(AiData& aiData){
+  visualizeAiData(aiData);
+
   if (isPaused()){
     return;
   }
   
-  detectWorldInfo(aiData.worldInfo, aiData.agents);
+  float currTime = gameapi -> timeSeconds(false);
+  if (shouldTickAi(currTime)){
+    modlog("onFrameAi", "detectWorldInfo");
+    lastTickTime = currTime;
+    detectWorldInfo(aiData.worldInfo, aiData.agents);
+  }
 
   for (auto &agent : aiData.agents){
     if (!agent.enabled){
@@ -246,6 +242,7 @@ DebugConfig debugPrintAi(AiData& aiData){
   return debugConfig;
 }
 
+Agent nullAgent{};
 Agent& getAgent(AiData& aiData, objid id){
   for (auto &agent : aiData.agents){
     if (agent.id == id){
@@ -253,4 +250,5 @@ Agent& getAgent(AiData& aiData, objid id){
     }
   }
   modassert(false, "agent does not exist");
+  return nullAgent;
 }

@@ -5,7 +5,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 
-enum STATE_TYPE_HINT { STATE_NOHINT, STATE_VEC3, STATE_ENTITY_POSITION };
+enum STATE_TYPE_HINT { STATE_NOHINT, STATE_VEC3, STATE_ENTITY_POSITION, STATE_ID };
 struct EntityPosition {
   objid id;
   glm::vec3 position;
@@ -42,6 +42,8 @@ std::optional<T> getState(WorldInfo& worldInfo, int symbol){
     return std::nullopt;
   }
   auto anyValue = anyStateValue.value();
+  std::cout << "type: " << anyValue.type().name() << std::endl;
+
   return getAnyValue<T>(anyValue);
 }
 
@@ -55,5 +57,7 @@ std::vector<T> getStateByTag(WorldInfo& worldInfo, std::set<int> tags){
   return values;
 }
 void printWorldInfo(WorldInfo& worldInfo);
+
+
 
 #endif
