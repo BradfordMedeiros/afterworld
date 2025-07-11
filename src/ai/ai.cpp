@@ -194,8 +194,10 @@ void visualizeAiData(AiData& aiData){
   }
 }
 
-void onFrameAi(AiData& aiData){
-  visualizeAiData(aiData);
+void onFrameAi(AiData& aiData, bool showDebug){
+  if (showDebug){
+    visualizeAiData(aiData);
+  }
 
   if (isPaused()){
     return;

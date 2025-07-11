@@ -1404,7 +1404,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onFrameWater(water);
 
       if (!hasOption("no-ai")){
-        onFrameAi(aiData);
+        static bool showAi = getArgEnabled("ai-debug");
+        onFrameAi(aiData, showAi);
       }
       onFrameDaynight();
 

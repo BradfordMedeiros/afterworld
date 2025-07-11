@@ -16,7 +16,7 @@ struct AiData {
 };
 
 AiData createAiData();
-void onFrameAi(AiData& aiData);
+void onFrameAi(AiData& aiData, bool showDebug);
 void addAiAgent(AiData& aiData, objid id, std::string agentType);
 void maybeRemoveAiAgent(AiData& aiData, objid id);
 
