@@ -20,6 +20,9 @@ void onFrameAi(AiData& aiData, bool showDebug);
 void addAiAgent(AiData& aiData, objid id, std::string agentType);
 void maybeRemoveAiAgent(AiData& aiData, objid id);
 
+void onObjAdded(AiData& aiData, objid id);
+void onObjRemoved(AiData& aiData, objid id);
+
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value);
 DebugConfig debugPrintAi(AiData& aiData);
 

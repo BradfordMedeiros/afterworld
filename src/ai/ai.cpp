@@ -69,20 +69,70 @@ std::optional<AiAgent*> getAiAgent(AgentType agentType){
   return std::nullopt;
 }
 
-
 // TODO PERF - This is a cute abstraction but stupid
 // I can just write these things to these when these objects get loaded, no reason to query
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
-  updateWorldStateTargets(worldInfo);
-  updateAmmoLocations(worldInfo);
-  updatePointsOfInterest(worldInfo);
-
   for (auto agent : agents){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
     }
     getAiAgent(agent.type).value() -> detect(worldInfo, agent);
   }
+}
+
+void onObjAdded(AiData& aiData, objid id){
+  {
+    static int targetSymbol = getSymbol("target");
+    auto goalInfo = getSingleAttr(id, "goal-info");
+    if(goalInfo.has_value()){
+      if (goalInfo.has_value() && goalInfo.value() == "target"){
+        auto targetId = id;
+        std::string stateName = std::string("target-pos-") + std::to_string(targetId);
+        auto team = getSingleAttr(targetId, "team");
+        std::set<int> symbols = { targetSymbol };
+        if (team.has_value()){
+          symbols.insert(getSymbol(team.value()));
+        }
+        auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updateWorldStateTargets");
+        modlog("ai obj target added", std::to_string(targetId));
+        modlog("ai obj target worldInfo size: ", std::to_string(aiData.worldInfo.anyValues.size()));
+        updateState(aiData.worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION, id);  
+      }
+    }
+  }
+
+  {
+    static int ammoSymbol = getSymbol("ammo");
+    auto pickupTrigger = getSingleAttr(id, "pickup-trigger");
+    if (pickupTrigger.has_value() && pickupTrigger.value() == "ammo"){
+      auto targetId = id;
+      std::string stateName = std::string("ammo-pos-") + std::to_string(targetId); // leak
+      auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updateAmmoLocations");
+      modlog("ai obj target added", std::to_string(targetId));
+      modlog("ai obj target worldInfo size: ", std::to_string(aiData.worldInfo.anyValues.size()));
+      updateState(aiData.worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { ammoSymbol }, STATE_ENTITY_POSITION, targetId);
+    }
+  }
+
+  {
+    auto interest = getSingleAttr(id, "interest");
+    if (interest.has_value()){
+      auto targetId = id;
+      std::string stateName = std::string("interest-") + std::to_string(targetId); // leak
+      auto attrValue = getSingleAttr(targetId, "interest").value();
+      auto tags = getSymbol(std::string("interest-") + attrValue);
+      auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updatePointsOfInterest");
+      updateState(aiData.worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { tags }, STATE_ENTITY_POSITION, targetId);
+    }
+  }
+}
+
+
+
+void onObjRemoved(AiData& aiData, objid id){
+  modlog("ai target removed", std::to_string(id));
+  modlog("ai target worldInfo size: ", std::to_string(aiData.worldInfo.anyValues.size()));
+  freeState(aiData.worldInfo, id);
 }
 
 void addAiAgent(AiData& aiData, objid id, std::string agentType){
@@ -107,6 +157,8 @@ void maybeRemoveAiAgent(AiData& aiData, objid id){
 
   freeState(aiData.worldInfo, id);
 }
+
+
 
 void maybeDisableAi(AiData& aiData, objid id){
   //modassert(false, std::string("disable ai placeholder: ") + gameapi -> getGameObjNameForId(id).value());
@@ -173,11 +225,14 @@ int AI_TICK_RATE_MS = 1000;  // once every 1s
 float lastTickTime = -1 * AI_TICK_RATE_MS;
 
 bool shouldTickAi(float currTime){
+  return true;
   auto timeElapsed = currTime - lastTickTime;
   return (timeElapsed * 1000) > AI_TICK_RATE_MS ;
 }
 
 void visualizeAiData(AiData& aiData){
+  gameapi -> drawText(std::string("number of agents: ") + std::to_string(aiData.agents.size()), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
   auto ammoPositions = getAmmoPositions(aiData.worldInfo);
   for (auto &point : ammoPositions){
     gameapi -> drawLine(point.position, point.position + glm::vec3(0.f, 1.f, 0.f), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);

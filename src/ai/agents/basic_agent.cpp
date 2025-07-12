@@ -27,6 +27,10 @@ std::any createBasicAgent(objid id){
 }
 
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
+  auto targetId = getAgentTargetId(worldInfo, agent.id);
+  if (targetId.has_value()){
+    return;
+  }
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
     setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);

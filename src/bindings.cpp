@@ -1779,6 +1779,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleOnAddedTags(tags, idAdded);
 
     onMainUiObjectsChanged();
+    onObjAdded(aiData, idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     GameState* gameState = static_cast<GameState*>(data);
@@ -1810,6 +1811,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onObjectRemovedWater(water, idRemoved);
     handleTagsOnObjectRemoved(tags, idRemoved);
+    onObjRemoved(aiData, idRemoved);
   };
 
   return binding;

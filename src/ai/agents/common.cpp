@@ -64,32 +64,7 @@ std::vector<EntityPosition> getAmmoPositions(WorldInfo& worldInfo){
   auto ammoPositions = getStateByTag<EntityPosition>(worldInfo, { ammoSymbol });
   return ammoPositions;
 }
-void updateAmmoLocations(WorldInfo& worldInfo){
-  static int ammoSymbol = getSymbol("ammo");
-  auto targetIds = gameapi -> getObjectsByAttr("pickup-trigger", "ammo", std::nullopt);
-  for (auto targetId : targetIds){
-    std::string stateName = std::string("ammo-pos-") + std::to_string(targetId); // leak
-    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updateAmmoLocations");
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { ammoSymbol }, STATE_ENTITY_POSITION, targetId);
-  }
-}
 
-// based on goal-info:targets update vec3 position for each - target-pos-<objid> with team symbol from attr
-void updateWorldStateTargets(WorldInfo& worldInfo){
-  static int targetSymbol = getSymbol("target");
-  auto targetIds = gameapi -> getObjectsByAttr("goal-info", "target", std::nullopt);
-  for (auto targetId : targetIds){
-    std::string stateName = std::string("target-pos-") + std::to_string(targetId);
-    auto team = getSingleAttr(targetId, "team");
-    std::set<int> symbols = { targetSymbol };
-    if (team.has_value()){
-      symbols.insert(getSymbol(team.value()));
-    }
-    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updateWorldStateTargets");
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, symbols, STATE_ENTITY_POSITION, 0);
-  }
-  // agoal-info
-}
 
 std::vector<EntityPosition> getWorldStateTargets(WorldInfo& worldInfo){
   std::vector<EntityPosition> targets;
@@ -98,17 +73,6 @@ std::vector<EntityPosition> getWorldStateTargets(WorldInfo& worldInfo){
   return allTargets;
 }
 
-void updatePointsOfInterest(WorldInfo& worldInfo){
-  //static int ammoSymbol = getSymbol("ammo");
-  auto targetIds = gameapi -> getObjectsByAttr("interest", std::nullopt, std::nullopt);
-  for (auto targetId : targetIds){
-    std::string stateName = std::string("interest-") + std::to_string(targetId); // leak
-    auto attrValue = getSingleAttr(targetId, "interest").value();
-    auto tags = getSymbol(std::string("interest-") + attrValue);
-    auto position = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] ai updatePointsOfInterest");
-    updateState(worldInfo, getSymbol(stateName), EntityPosition { .id = targetId, .position = position }, { tags }, STATE_ENTITY_POSITION, targetId);
-  }
-}
 std::vector<EntityPosition> getPointsOfInterest(WorldInfo& worldInfo){
   static int pointOfInterest = getSymbol("interest-generic");
   auto pointOfInterestPositions = getStateByTag<EntityPosition>(worldInfo, { pointOfInterest });
