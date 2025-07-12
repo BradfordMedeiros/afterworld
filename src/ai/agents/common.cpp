@@ -42,21 +42,18 @@ glm::vec3 getAgentPos(WorldInfo& worldInfo, Agent& agent){
   return gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getAgentPos");
 }
 
-
-std::optional<objid> getAgentTargetId(WorldInfo& worldInfo, objid agentId){
-  auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agentId));
-  return getState<int32_t>(worldInfo, symbol);
+std::optional<objid> getAgentTargetId(WorldInfo& worldInfo, Agent& agent){
+  return agent.targetId;
 }
-std::optional<glm::vec3> getAgentTargetPos(WorldInfo& worldInfo, objid agentId){
-  auto targetId = getAgentTargetId(worldInfo, agentId);
+std::optional<glm::vec3> getAgentTargetPos(WorldInfo& worldInfo, Agent& agent){
+  auto targetId = getAgentTargetId(worldInfo, agent);
   if (!targetId.has_value()){
     return std::nullopt;
   }
   return gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] - getAgentTargetPos");
 }
-void setAgentTargetId(WorldInfo& worldInfo, objid agentId, objid targetId){
-  auto symbol = getSymbol(std::string("agent-can-see-pos-agent") + std::to_string(agentId) /* bad basically a small leak */ ); 
-  updateState(worldInfo, symbol, targetId, {}, STATE_ID, agentId);
+void setAgentTargetId(WorldInfo& worldInfo, Agent& agent, objid targetId){
+  agent.targetId = targetId;
 }
 
 std::vector<EntityPosition> getAmmoPositions(WorldInfo& worldInfo){

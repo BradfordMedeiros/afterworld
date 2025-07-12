@@ -26,7 +26,7 @@ std::any createTurretAgent(objid id){
 void detectWorldInfoTurretAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
+    setAgentTargetId(worldInfo, agent, visibleTargets.at(0).id);
   }
 
 }
@@ -40,7 +40,7 @@ std::vector<Goal> getGoalsForTurretAgent(WorldInfo& worldInfo, Agent& agent){
   TurretAiState* turretState = anycast<TurretAiState>(agent.agentData);
   modassert(turretState, "attackState invalid");
 
-  auto targetPosition = getAgentTargetPos(worldInfo, agent.id);
+  auto targetPosition = getAgentTargetPos(worldInfo, agent);
   bool hasTarget = false;
   if (targetPosition.has_value()){
     auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTurretAgent"));
@@ -94,7 +94,7 @@ void doGoalTurretAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   	  modlog("ai basic", "attack");
   	  turretState -> lastAttackTime = currentTime;
 
-      auto targetPosition = getAgentTargetPos(worldInfo, agent.id).value();
+      auto targetPosition = getAgentTargetPos(worldInfo, agent).value();
   		auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalTurretAgent");
   		glm::vec3 targetPosSameY = glm::vec3(targetPosition.x, agentPos.y, targetPosition.z);
     	auto towardTarget = gameapi -> orientationFromPos(agentPos, targetPosSameY);

@@ -22,6 +22,8 @@ struct Agent {
   bool enabled;
   AgentType type;
   std::any agentData;
+
+  std::optional<objid> targetId;
 };
 
 
@@ -53,9 +55,9 @@ std::vector<IdAndPosition> checkVisibleTargets(WorldInfo& worldInfo, objid agent
 
 glm::vec3 getAgentPos(WorldInfo& worldInfo, Agent& agent);
 
-std::optional<objid> getAgentTargetId(WorldInfo& worldInfo, objid agentId);
-std::optional<glm::vec3> getAgentTargetPos(WorldInfo& worldInfo, objid agentId);
-void setAgentTargetId(WorldInfo& worldInfo, objid agentId, objid targetId);
+std::optional<objid> getAgentTargetId(WorldInfo& worldInfo, Agent& agent);
+std::optional<glm::vec3> getAgentTargetPos(WorldInfo& worldInfo, Agent& agent);
+void setAgentTargetId(WorldInfo& worldInfo, Agent& agent, objid targetId);
 
 std::vector<EntityPosition> getAmmoPositions(WorldInfo& worldInfo);
 std::vector<EntityPosition> getWorldStateTargets(WorldInfo& worldInfo);

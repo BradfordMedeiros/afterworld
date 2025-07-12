@@ -13,7 +13,7 @@ std::any createCrawlerAgent(objid id){
 void detectWorldInfoCrawlerAgent(WorldInfo& worldInfo, Agent& agent){
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
+    setAgentTargetId(worldInfo, agent, visibleTargets.at(0).id);
   }
 }
 std::vector<Goal> getGoalsForCrawlerAgent(WorldInfo& worldInfo, Agent& agent){
@@ -32,7 +32,7 @@ std::vector<Goal> getGoalsForCrawlerAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-  auto targetId = getAgentTargetId(worldInfo, agent.id);
+  auto targetId = getAgentTargetId(worldInfo, agent);
   if (targetId.has_value()){
     auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForCrawlerAgent targetPosition");
     goals.push_back(
@@ -57,7 +57,7 @@ void doGoalCrawlerAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
   }else if (goal.goaltype == moveToTargetGoal){
     auto agentPos = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] doGoalCrawlerAgent get agentPos");
 
-    auto targetId = getAgentTargetId(worldInfo, agent.id);
+    auto targetId = getAgentTargetId(worldInfo, agent);
     auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] doGoalCrawlerAgent targetPosition");
 
     aiInterface.move(agent.id, targetPosition,  1.f);

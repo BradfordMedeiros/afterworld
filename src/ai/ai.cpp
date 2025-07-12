@@ -72,7 +72,7 @@ std::optional<AiAgent*> getAiAgent(AgentType agentType){
 // TODO PERF - This is a cute abstraction but stupid
 // I can just write these things to these when these objects get loaded, no reason to query
 void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
-  for (auto agent : agents){
+  for (Agent& agent : agents){
     if (!gameapi -> gameobjExists(agent.id)){ 
       continue;
     }
@@ -133,6 +133,11 @@ void onObjRemoved(AiData& aiData, objid id){
   modlog("ai target removed", std::to_string(id));
   modlog("ai target worldInfo size: ", std::to_string(aiData.worldInfo.anyValues.size()));
   freeState(aiData.worldInfo, id);
+  for (auto &agent : aiData.agents){
+    if (agent.targetId.has_value() && agent.targetId.value() == id){
+      agent.targetId = std::nullopt;
+    }
+  }
 }
 
 void addAiAgent(AiData& aiData, objid id, std::string agentType){
@@ -143,6 +148,7 @@ void addAiAgent(AiData& aiData, objid id, std::string agentType){
     .enabled = true,
     .type = type,
     .agentData = getAiAgent(type).value() -> createAgent(id),
+    .targetId = std::nullopt,
   });
 }
 

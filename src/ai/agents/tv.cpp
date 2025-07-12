@@ -25,13 +25,13 @@ std::any createTvAgent(objid id){
 }
 
 void detectWorldInfoTvAgent(WorldInfo& worldInfo, Agent& agent){
-  auto targetId = getAgentTargetId(worldInfo, agent.id);
+  auto targetId = getAgentTargetId(worldInfo, agent);
   if (targetId.has_value()){
     return;
   }
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
+    setAgentTargetId(worldInfo, agent, visibleTargets.at(0).id);
   }
 }
 std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
@@ -43,7 +43,7 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
   TvAiState* tvState = anycast<TvAiState>(agent.agentData);
   modassert(tvState, "attackState invalid");
 
-  auto targetPosition = getAgentTargetPos(worldInfo, agent.id);
+  auto targetPosition = getAgentTargetPos(worldInfo, agent);
 
   if (targetPosition.has_value()){
     auto distanceToTarget = glm::distance(targetPosition.value(), gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] getGoalsForTvAgent"));
@@ -123,7 +123,7 @@ void doGoalTvAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
 
   	float currentTime = gameapi -> timeSeconds(false);
 
-    auto targetPosition = getAgentTargetPos(worldInfo, agent.id);
+    auto targetPosition = getAgentTargetPos(worldInfo, agent);
     modassert(targetPosition.has_value(), "doGoalTvAgent does not have a target");
 
   	auto agentPos = getAgentPos(worldInfo, agent);;

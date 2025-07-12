@@ -27,13 +27,14 @@ std::any createBasicAgent(objid id){
 }
 
 void detectWorldInfoBasicAgent(WorldInfo& worldInfo, Agent& agent){
-  auto targetId = getAgentTargetId(worldInfo, agent.id);
+  auto targetId = getAgentTargetId(worldInfo, agent);
   if (targetId.has_value()){
     return;
   }
   auto visibleTargets = checkVisibleTargets(worldInfo, agent.id);
   if (visibleTargets.size() > 0){
-    setAgentTargetId(worldInfo, agent.id, visibleTargets.at(0).id);
+    std::cout << "basic agent set target: agent = " << std::to_string(agent.id) << ", target = " << std::to_string(visibleTargets.at(0).id) << std::endl;
+    setAgentTargetId(worldInfo, agent, visibleTargets.at(0).id);
   }
 }
 
@@ -86,7 +87,9 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     }
   );
 
-  auto targetId = getAgentTargetId(worldInfo, agent.id);
+  auto targetId = getAgentTargetId(worldInfo, agent);
+
+  std::cout << "basic agent target: " << print(targetId) << std::endl;
 
   if (attackState -> aggravated && targetId.has_value()){
     auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForBasicAgent targetPosition");
@@ -101,7 +104,7 @@ std::vector<Goal> getGoalsForBasicAgent(WorldInfo& worldInfo, Agent& agent){
     );
   }
 
-  if (attackState -> scared){
+  if (attackState -> scared && targetId.has_value()){
     auto targetPosition = gameapi -> getGameObjectPos(targetId.value(), true, "[gamelogic] getGoalsForBasicAgent targetPosition");
     glm::vec3 moveToPosition = targetPosition;
     if (attackState -> scared){
@@ -237,6 +240,7 @@ void doGoalBasicAgent(WorldInfo& worldInfo, Goal& goal, Agent& agent){
     }
   }else if (goal.goaltype == moveToTargetGoal){
     auto targetPosition = anycast<glm::vec3>(goal.goalData);
+    std::cout << "doing move to target goal: " << print(targetPosition) << std::endl;
     modassert(targetPosition, "target pos was null");
     moveToTarget(agent.id, *targetPosition, agentData -> moveVertical);
   }else if (goal.goaltype == attackTargetGoal){
