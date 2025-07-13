@@ -24,6 +24,8 @@ struct Agent {
   std::any agentData;
 
   std::optional<objid> targetId;
+  int agentIndex;
+  int lastAiDetect;
 };
 
 

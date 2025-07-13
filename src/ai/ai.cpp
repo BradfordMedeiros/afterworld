@@ -69,16 +69,6 @@ std::optional<AiAgent*> getAiAgent(AgentType agentType){
   return std::nullopt;
 }
 
-// TODO PERF - This is a cute abstraction but stupid
-// I can just write these things to these when these objects get loaded, no reason to query
-void detectWorldInfo(WorldInfo& worldInfo, std::vector<Agent>& agents){
-  for (Agent& agent : agents){
-    if (!gameapi -> gameobjExists(agent.id)){ 
-      continue;
-    }
-    getAiAgent(agent.type).value() -> detect(worldInfo, agent);
-  }
-}
 
 void onObjAdded(AiData& aiData, objid id){
   {
@@ -143,13 +133,17 @@ void onObjRemoved(AiData& aiData, objid id){
 void addAiAgent(AiData& aiData, objid id, std::string agentType){
   modassert(!agentExists(aiData, id), std::string("agent already exists: ") + std::to_string(id));
   auto type = agentTypeStr(agentType).value();
+  static int agentIndex = 0;
   aiData.agents.push_back(Agent {
     .id = id,
     .enabled = true,
     .type = type,
     .agentData = getAiAgent(type).value() -> createAgent(id),
     .targetId = std::nullopt,
+    .agentIndex = agentIndex,
+    .lastAiDetect = 0,
   });
+  agentIndex++;
 }
 
 void maybeRemoveAiAgent(AiData& aiData, objid id){
@@ -265,11 +259,35 @@ void onFrameAi(AiData& aiData, bool showDebug){
   }
   
   float currTime = gameapi -> timeSeconds(false);
+  int timeMs = static_cast<int>(currTime * 1000);
+  int updateIntervalMs = 5000;
+  int remaining = timeMs % updateIntervalMs;
+
+  int numAiUpdatesPerFrame = 0;
   if (shouldTickAi(currTime)){
     modlog("onFrameAi", "detectWorldInfo");
     lastTickTime = currTime;
-    detectWorldInfo(aiData.worldInfo, aiData.agents);
+
+    for (Agent& agent : aiData.agents){
+      auto targetUpdate = (agent.agentIndex % updateIntervalMs);
+
+      auto timeSinceLastDetect = timeMs - agent.lastAiDetect;
+      auto shouldUpdate = timeSinceLastDetect > (targetUpdate + updateIntervalMs);
+
+      //std::cout << "onFrameAi: " << timeMs << ", remaining = " << remaining << ", timeSinceLastDetect = " << timeSinceLastDetect <<  ", targetupdate = " << targetUpdate << ", shouldUpdate = " << (shouldUpdate ? "true" : "false") << std::endl;
+
+      if (shouldUpdate){
+        numAiUpdatesPerFrame++;
+        //std::cout << "onFrameAi: updating: " << agent.id << std::endl;
+        if (!gameapi -> gameobjExists(agent.id)){ 
+          continue;
+        }
+        agent.lastAiDetect = timeMs;
+        getAiAgent(agent.type).value() -> detect(aiData.worldInfo, agent);        
+      }
+    }
   }
+  std::cout << "onFrameAi numUpdates: " << numAiUpdatesPerFrame << std::endl;
 
   for (auto &agent : aiData.agents){
     if (!agent.enabled){
