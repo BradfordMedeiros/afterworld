@@ -6,7 +6,7 @@ extern Tags tags;
 extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
-bool isInGameMode();
+
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 
@@ -17,6 +17,10 @@ struct TagUpdater {
 	std::optional<std::function<void(Tags&)>> onFrame;
 	std::optional<std::function<void(Tags&, std::string& key, std::any& value)>> onMessage;
 };
+
+bool isInGameMode2(){
+	return getGlobalState().routeState.inGameMode;	
+}
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
@@ -122,7 +126,10 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	}
 
 	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position);
-	emitExplosion(rootSceneId(), getActivePlayerId().value(), position, glm::vec3(1.f, 1.f, 1.f));
+	auto activePlayer = getActivePlayerId();
+	if (activePlayer.has_value()){
+		emitExplosion(rootSceneId(), activePlayer.value(), position, glm::vec3(1.f, 1.f, 1.f));
+	}
 
 	std::cout << "hitobjects: [";
 	for (auto &hitobject : hitObjects){
@@ -241,7 +248,7 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = [](Tags& tags) -> void {
   		//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
-  		if (!isInGameMode()){
+  		if (!isInGameMode2()){
   			return;
   		}
 			handleScroll(tags.textureScrollObjIds);
@@ -349,7 +356,7 @@ std::vector<TagUpdater> tagupdates = {
   		spawnRemoveId(director.managedSpawnpoints, id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		if (!isInGameMode()){
+  		if (!isInGameMode2()){
   			return;
   		}
 			onSpawnTick(director.managedSpawnpoints);
@@ -372,7 +379,7 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		 // when this object it removed, get the position, and spawn a prefab there 
-  		if (!isInGameMode()){
+  		if (!isInGameMode2()){
 				return;
   		}
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - destroy");
@@ -387,7 +394,7 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "explode",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		if (!isInGameMode()){
+  		if (!isInGameMode2()){
   			return;
   		}
  		  // when this object it removed, get the position, and spawn a prefab there 
@@ -497,7 +504,7 @@ std::vector<TagUpdater> tagupdates = {
   		tags.idToRotateTimeAdded.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		if (!isInGameMode()){
+  		if (!isInGameMode2()){
   			return;
   		}
   		for (auto &[id, time] : tags.idToRotateTimeAdded){
@@ -623,7 +630,7 @@ std::vector<TagUpdater> tagupdates = {
   		tags.healthColorObjects.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		if (!isInGameMode()){
+  		if (!isInGameMode2()){
   			return;
   		}
   		for (auto &[id, healthColorObject] : tags.healthColorObjects){

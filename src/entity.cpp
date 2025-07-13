@@ -238,6 +238,7 @@ bool isInGameMode(){
 	return !controlledPlayer.editorMode;
 }
 
+
 void setTempCamera(std::optional<objid> camera){
 	controlledPlayer.tempCamera = camera;
 	updateCamera();
