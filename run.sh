@@ -11,7 +11,6 @@ COMMAND_ARGS="\
   -x native/main \
   -a sqldir=../afterworld/data/sql/ \
   --data ../afterworld/data/temp/ \
-  -a 'light=1 1 1' \
   -r ../afterworld/scenes/main.rawscene \
   --font ./res/fonts/Walby-Regular.ttf \
   $@"
