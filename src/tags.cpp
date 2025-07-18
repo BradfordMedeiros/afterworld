@@ -710,6 +710,19 @@ std::vector<TagUpdater> tagupdates = {
   		}
   	},
 	},
+
+	TagUpdater {
+		.attribute = "globallight",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			gameapi -> setGlobalLight(id);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+
 };
 
  

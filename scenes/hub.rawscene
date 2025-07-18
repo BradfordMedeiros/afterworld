@@ -1,128 +1,307 @@
 # Generated scene 
-[link-copy-444035037:+link|link:|arena
-[link-copy-444035037:position:54.75 -11.08 10.66
-[link-copy-444035037:rotation:0 0 1 0
-[link-copy-444035037:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-[link-copy-444035037-copy-1006760270:+link|link:|arena
-[link-copy-444035037-copy-1006760270:position:53.05 -11.08 -13.14
-[link-copy-444035037-copy-1006760270:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-gameobj-382765913-copy-1786577332:mesh:../gameresources/build/primitives/sphere.gltf
-gameobj-382765913-copy-1786577332:position:-200 10 520
-gameobj-382765913-copy-1786577332:scale:50.6714 50.6714 50.6714
-gameobj-382765913-copy-1786577332:scrollspeed:0 0.005 0
-gameobj-382765913-copy-1786577332:texture:./res/models/electricbox/electromech.jpg
-gameobj-1751558280-copy-523702016-copy-887595726:mesh:../gameresources/build/uncategorized/limboapple.gltf
-gameobj-1751558280-copy-523702016-copy-887595726:position:397.08 -108.72 154.7
-gameobj-1751558280-copy-523702016-copy-887595726:rotation:0.173648 -6.53241e-08 -0.984808 0
-gameobj-1751558280-copy-523702016-copy-887595726:scale:45.582 45.582 45.582
-gameobj-1751558280-copy-523702016-copy-887595726:texture:../gameresources/build/building/garbage.png
-gameobj-382765913-copy-1786577332-copy-1285964204:mesh:../gameresources/build/primitives/sphere.gltf
-gameobj-382765913-copy-1786577332-copy-1285964204:position:-30 20 540
-gameobj-382765913-copy-1786577332-copy-1285964204:scale:50.6714 50.6714 50.6714
-gameobj-382765913-copy-1786577332-copy-1285964204:scrollspeed:0 0.005 0
-gameobj-382765913-copy-1786577332-copy-1285964204:texture:./res/models/electricbox/electromech.jpg
-*octree:map:../afterworld/scenes/hub.map
-*octree:physics:enabled
-*octree:position:-154.42 -140 50
-*octree:scale:500 500 500
-gameobj-815915005-copy-929176780-copy-1600573849:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005-copy-929176780-copy-1600573849:position:69.7 6.8 -18.7
-gameobj-815915005-copy-929176780-copy-1600573849:scale:62.1991 62.1991 62.1991
-gameobj-1729547751-copy-1089421038:mesh:../gameresources/build/uncategorized/darkwires4.gltf
-gameobj-1729547751-copy-1089421038:normal-texture:../gameresources/build/misc/keyboard.normal.png
-gameobj-1729547751-copy-1089421038:position:-18.7 -10.2 -73.1
-gameobj-1729547751-copy-1089421038:rotation:0 0 1 0
-gameobj-1729547751-copy-1089421038:scale:8.50555 8.50555 8.50555
-gameobj-1729547751-copy-1089421038:texture:../gameresources/build/misc/keyboard.png
-gameobj-815915005-copy-929176780-copy-1823473745:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005-copy-929176780-copy-1823473745:position:32.3 6.8 -18.7
-gameobj-815915005-copy-929176780-copy-1823473745:scale:62.1991 62.1991 62.1991
-gameobj-815915005:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005:position:0 -10.2 -153
-gameobj-815915005:scale:62.1991 62.1991 62.1991
-gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:mesh:../gameresources/build/uncategorized/limboapple.gltf
-gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:position:319.6 -83.72 154.7
-gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:rotation:0.173648 -6.53241e-08 -0.984808 0
-gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:scale:45.582 45.582 45.582
-gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:texture:../gameresources/build/building/garbage.png
-gameobj-1729547751-copy-1530817585:mesh:../gameresources/build/uncategorized/darkwires4.gltf
-gameobj-1729547751-copy-1530817585:normal-texture:../gameresources/build/misc/keyboard.normal.png
-gameobj-1729547751-copy-1530817585:position:-18.7 8.5 -73.1
-gameobj-1729547751-copy-1530817585:rotation:0 0 1 360
-gameobj-1729547751-copy-1530817585:scale:8.50555 8.50555 8.50555
-gameobj-1729547751-copy-1530817585:texture:../gameresources/build/misc/keyboard.png
-[autodoor:position:165.77 48.51 -55.43
-[autodoor:rotation:0.0345505 5.51941e-08 0.999403 360
-[autodoor:scene:../afterworld/scenes/prefabs/toys/gate.rawscene
-[link-copy-957247245:+link|link:|arena
-[link-copy-957247245:position:63.18 -11.08 10.66
-[link-copy-957247245:rotation:0 0 1 0
-[link-copy-957247245:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-[prefab-instance-1169564999:position:168.22 52.55 -54.31
-[prefab-instance-1169564999:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-646862085:position:168.22 52.55 -54.31
-[prefab-instance-646862085:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-1819133388:position:168.22 52.55 -54.31
-[prefab-instance-1819133388:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[link-copy-957247245-copy-432417492:+link|link:|arena
-[link-copy-957247245-copy-432417492:position:64.88 -11.08 -13.14
-[link-copy-957247245-copy-432417492:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:mesh:../gameresources/build/uncategorized/limboapple.gltf
-gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:position:229.5 -56.1 154.7
-gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:rotation:0.173648 -6.53241e-08 -0.984808 0
-gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:scale:45.582 45.582 45.582
-gameobj-1751558280-copy-523702016-copy-887595726-copy-641128:texture:../gameresources/build/building/garbage.png
-[prefab-instance-1886701099:position:168.22 52.55 -54.31
-[prefab-instance-1886701099:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-1023668041:position:168.22 52.55 -54.31
-[prefab-instance-1023668041:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[link-copy-1584531168:+link|link:|arena
-[link-copy-1584531168:position:76.56 -11.08 -13.14
-[link-copy-1584531168:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-[start:position:168.22 52.55 -54.31
-[start:rotation:-0.173648 -7.22648e-08 0.984808 359.832
-[start:scene:../afterworld/scenes/prefabs/gameplay/playerspawn.rawscene
-gameobj-815915005-copy-929176780:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
-gameobj-815915005-copy-929176780:position:103.7 6.8 -18.7
-gameobj-815915005-copy-929176780:scale:62.1991 62.1991 62.1991
-[prefab-instance-464607102:position:168.22 52.55 -54.31
-[prefab-instance-464607102:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-gameobj-382765913-copy-1786577332-copy-2046440386:mesh:../gameresources/build/primitives/sphere.gltf
-gameobj-382765913-copy-1786577332-copy-2046440386:normal-texture:../gameresources/build/textures/evilpattern.normal.png
-gameobj-382765913-copy-1786577332-copy-2046440386:position:-11.07 -10.2 -0.9
-gameobj-382765913-copy-1786577332-copy-2046440386:scale:37.0941 37.0941 37.0941
+&code-sound1674779542:clip:../gameresources/sound/rain.wav
+&code-sound1674779542:center:true
+&code-sound1674779542:loop:true
+&code-sound69797890:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound69797890:center:true
+&code-sound69797890:loop:true
 gameobj-382765913-copy-1786577332-copy-2046440386:scrollspeed:0 0.005 0
 gameobj-382765913-copy-1786577332-copy-2046440386:texture:../gameresources/build/textures/evilpattern.png
+gameobj-382765913-copy-1786577332-copy-2046440386:scale:37.0941 37.0941 37.0941
+gameobj-382765913-copy-1786577332-copy-2046440386:normal-texture:../gameresources/build/textures/evilpattern.normal.png
+gameobj-382765913-copy-1786577332-copy-2046440386:position:-11.07 -10.2 -0.9
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:texture:../gameresources/build/building/garbage.png
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:shader:../afterworld/shaders/water/fragment.glsl
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:scale:17 12 14
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:rotation:0.34202 -6.53241e-08 -0.939693 0
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:position:-8.42 -10 50.2
+[prefab-instance-609216363:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-609216363:position:168.22 52.55 -54.31
+[prefab-instance-824605928:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-824605928:position:168.22 52.55 -54.31
+gameobj-1729547751-copy-1530817585:texture:../gameresources/build/misc/keyboard.png
+gameobj-1729547751-copy-1530817585:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+gameobj-1729547751-copy-1530817585:scale:8.50555 8.50555 8.50555
+gameobj-1729547751-copy-1530817585:normal-texture:../gameresources/build/misc/keyboard.normal.png
+gameobj-1729547751-copy-1530817585:rotation:0 0 1 360
+gameobj-1729547751-copy-1530817585:position:-18.7 8.5 -73.1
+!light:position:0 0 0
+!light:globallight:true
+[prefab-instance-1586927560:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1586927560:position:168.22 52.55 -54.31
+[prefab-instance-2135902593:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-2135902593:position:168.22 52.55 -54.31
+&code-sound670496624:clip:../gameresources/sound/rain.wav
+&code-sound670496624:center:true
+&code-sound670496624:loop:true
+&code-sound2017141726:clip:../gameresources/sound/rain.wav
+&code-sound2017141726:center:true
+&code-sound2017141726:loop:true
+[prefab-instance-1767059112:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1767059112:position:168.22 52.55 -54.31
+&code-sound363521622:clip:../gameresources/sound/rain.wav
+&code-sound363521622:center:true
+&code-sound363521622:loop:true
+[prefab-instance-464607102:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-464607102:position:168.22 52.55 -54.31
+&code-sound1091062432:clip:../gameresources/sound/rain.wav
+&code-sound1091062432:center:true
+&code-sound1091062432:loop:true
+&code-sound2076984724:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound2076984724:center:true
+&code-sound2076984724:loop:true
+gameobj-815915005-copy-929176780-copy-1600573849:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005-copy-929176780-copy-1600573849:scale:62.1991 62.1991 62.1991
+gameobj-815915005-copy-929176780-copy-1600573849:position:69.7 6.8 -18.7
+[prefab-instance-2143098452:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-2143098452:position:168.22 52.55 -54.31
+gameobj-1729547751:texture:../gameresources/build/misc/keyboard.png
+gameobj-1729547751:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+gameobj-1729547751:scale:8.50555 8.50555 8.50555
+gameobj-1729547751:normal-texture:../gameresources/build/misc/keyboard.normal.png
+gameobj-1729547751:rotation:0 0 1 360
+gameobj-1729547751:position:-17 28.9 -73.1
+&code-sound144982900:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound144982900:center:true
+&code-sound144982900:loop:true
+&code-sound1280277190:clip:../gameresources/sound/rain.wav
+&code-sound1280277190:center:true
+&code-sound1280277190:loop:true
+gameobj-815915005-copy-929176780:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005-copy-929176780:scale:62.1991 62.1991 62.1991
+gameobj-815915005-copy-929176780:position:103.7 6.8 -18.7
+&code-sound785167140:clip:../gameresources/sound/rain.wav
+&code-sound785167140:center:true
+&code-sound785167140:loop:true
+[prefab-instance-646862085:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-646862085:position:168.22 52.55 -54.31
+[prefab-instance-1819133388:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1819133388:position:168.22 52.55 -54.31
+[prefab-instance-1302205749:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1302205749:position:168.22 52.55 -54.31
+[prefab-instance-1169564999:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1169564999:position:168.22 52.55 -54.31
+&code-sound1116181632:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1116181632:center:true
+&code-sound1116181632:loop:true
+&code-sound1551610246:clip:../gameresources/sound/rain.wav
+&code-sound1551610246:center:true
+&code-sound1551610246:loop:true
+[prefab-instance-1079293786:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1079293786:position:168.22 52.55 -54.31
+[prefab-instance-1067372898:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1067372898:position:168.22 52.55 -54.31
+&code-sound1980558606:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1980558606:center:true
+&code-sound1980558606:loop:true
 [link:+link|link:|arena
-[link:position:74.86 -11.08 10.66
-[link:rotation:0 0 1 0
 [link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-[link-copy-1358701467:+link|link:|arena
-[link-copy-1358701467:position:7.08 -11.55 -1.1
-[link-copy-1358701467:rotation:-1 -5.82077e-11 2.38419e-07 359.931
-[link-copy-1358701467:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link:rotation:0 0 1 0
+[link:position:74.86 -11.08 10.66
+[prefab-instance-872151235:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-872151235:position:168.22 52.55 -54.31
+[autodoor:scene:../afterworld/scenes/prefabs/toys/gate.rawscene
+[autodoor:rotation:0.0345505 5.51941e-08 0.999403 360
+[autodoor:position:165.77 48.51 -55.43
+&code-sound922137954:clip:../gameresources/sound/rain.wav
+&code-sound922137954:center:true
+&code-sound922137954:loop:true
+[link-copy-444035037:+link|link:|arena
+[link-copy-444035037:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-444035037:rotation:0 0 1 0
+[link-copy-444035037:position:54.75 -11.08 10.66
+&code-sound1225575336:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1225575336:center:true
+&code-sound1225575336:loop:true
+gameobj-1729547751-copy-1089421038:texture:../gameresources/build/misc/keyboard.png
+gameobj-1729547751-copy-1089421038:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+gameobj-1729547751-copy-1089421038:scale:8.50555 8.50555 8.50555
+gameobj-1729547751-copy-1089421038:normal-texture:../gameresources/build/misc/keyboard.normal.png
+gameobj-1729547751-copy-1089421038:rotation:0 0 1 0
+gameobj-1729547751-copy-1089421038:position:-18.7 -10.2 -73.1
+[prefab-instance-1922309561:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1922309561:position:168.22 52.55 -54.31
+gameobj-815915005:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005:scale:62.1991 62.1991 62.1991
+gameobj-815915005:position:0 -10.2 -153
+gameobj-1751558280-copy-523702016-copy-887595726:texture:../gameresources/build/building/garbage.png
+gameobj-1751558280-copy-523702016-copy-887595726:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726:scale:45.582 45.582 45.582
+gameobj-1751558280-copy-523702016-copy-887595726:rotation:0.173648 -6.53241e-08 -0.984808 0
+gameobj-1751558280-copy-523702016-copy-887595726:position:397.08 -108.72 154.7
+[prefab-instance-851984092:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-851984092:position:168.22 52.55 -54.31
+&code-sound274616481:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound274616481:center:true
+&code-sound274616481:loop:true
+&code-sound1414366606:clip:../gameresources/sound/rain.wav
+&code-sound1414366606:center:true
+&code-sound1414366606:loop:true
+[prefab-instance-1794532739:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1794532739:position:168.22 52.55 -54.31
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1943925870:texture:../gameresources/build/building/garbage.png
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1943925870:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1943925870:scale:17 12 14
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1943925870:position:10 -10 10
+&code-sound1353087007:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1353087007:center:true
+&code-sound1353087007:loop:true
+[link-copy-1358701467-copy-967980842:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-1358701467-copy-967980842:+link|link:|arena
+[link-copy-1358701467-copy-967980842:rotation:0 1 3.57628e-07 179.944
+[link-copy-1358701467-copy-967980842:position:10.48 -16.65 12.5
+[prefab-instance-800211391:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-800211391:position:168.22 52.55 -54.31
+gameobj-382765913-copy-1786577332-copy-1285964204:scrollspeed:0 0.005 0
+gameobj-382765913-copy-1786577332-copy-1285964204:texture:./res/models/electricbox/electromech.jpg
+gameobj-382765913-copy-1786577332-copy-1285964204:mesh:../gameresources/build/primitives/sphere.gltf
+gameobj-382765913-copy-1786577332-copy-1285964204:scale:50.6714 50.6714 50.6714
+gameobj-382765913-copy-1786577332-copy-1285964204:position:-30 20 540
+spawnpoint:texture:../gameresources/build/building/clean_metal.jpg
+spawnpoint:mesh:../gameresources/build/objtypes/spawnpoint.gltf
+spawnpoint:spawn:tv
+spawnpoint:rotation:0.104869 -7.71318e-06 -0.994486 180
+spawnpoint:position:164.79 48.23 -55.41
+[prefab-instance-731951668:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-731951668:position:168.22 52.55 -54.31
+[prefab-instance-71125795:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-71125795:position:168.22 52.55 -54.31
+[prefab-instance-197715779:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-197715779:position:168.22 52.55 -54.31
+gameobj-815915005-copy-929176780-copy-1823473745:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-815915005-copy-929176780-copy-1823473745:scale:62.1991 62.1991 62.1991
+gameobj-815915005-copy-929176780-copy-1823473745:position:32.3 6.8 -18.7
+[prefab-instance-40701507:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-40701507:position:168.22 52.55 -54.31
+[prefab-instance-1611590288:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1611590288:position:168.22 52.55 -54.31
+[prefab-instance-1124735779:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1124735779:position:168.22 52.55 -54.31
+[link-copy-957247245:+link|link:|arena
+[link-copy-957247245:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-957247245:rotation:0 0 1 0
+[link-copy-957247245:position:63.18 -11.08 10.66
+[prefab-instance-1697468189:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1697468189:position:168.22 52.55 -54.31
+&code-sound1891574582:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1891574582:center:true
+&code-sound1891574582:loop:true
+[link-copy-957247245-copy-432417492:+link|link:|arena
+[link-copy-957247245-copy-432417492:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-957247245-copy-432417492:position:64.88 -11.08 -13.14
+[prefab-instance-1289254245:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1289254245:position:168.22 52.55 -54.31
+[prefab-instance-251580516:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-251580516:position:168.22 52.55 -54.31
+[prefab-instance-1404427254:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1404427254:position:168.22 52.55 -54.31
+[prefab-instance-1020421792:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1020421792:position:168.22 52.55 -54.31
+[prefab-instance-339111827:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-339111827:position:168.22 52.55 -54.31
+&code-sound63801824:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound63801824:center:true
+&code-sound63801824:loop:true
+[prefab-instance-909396433:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-909396433:position:168.22 52.55 -54.31
+*octree:map:../afterworld/scenes/hub.map
+*octree:physics:enabled
+*octree:scale:500 500 500
+*octree:position:-368.5 -75 100
+&code-sound1919518396:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1919518396:center:true
+&code-sound1919518396:loop:true
+gameobj-382765913-copy-1786577332:scrollspeed:0 0.005 0
+gameobj-382765913-copy-1786577332:texture:./res/models/electricbox/electromech.jpg
+gameobj-382765913-copy-1786577332:scale:50.6714 50.6714 50.6714
+gameobj-382765913-copy-1786577332:position:-200 10 520
 [opendoorswitch:+panel|activate:|open-autodoor
 [opendoorswitch:+panel|activate-value:|openautodoor
 [opendoorswitch:+panel|tint:|1 0 0 1
-[opendoorswitch:position:165.99 48.45 -53.74
-[opendoorswitch:rotation:-1 -7.10543e-15 1.19209e-07 360
 [opendoorswitch:scene:../afterworld/scenes/prefabs/objects/panel.rawscene
-
-spawnpoint:mesh:../gameresources/build/objtypes/spawnpoint.gltf
-spawnpoint:position:164.79 48.23 -55.41
-spawnpoint:rotation:0.104869 -7.71318e-06 -0.994486 180
-spawnpoint:spawn:tv
-spawnpoint:texture:../gameresources/build/building/clean_metal.jpg
-gameobj-382765913-copy-1786577332-copy-1859466191:mesh:../gameresources/build/primitives/sphere.gltf
-gameobj-382765913-copy-1786577332-copy-1859466191:position:45 90 350
-gameobj-382765913-copy-1786577332-copy-1859466191:scale:50.6714 50.6714 50.6714
+[opendoorswitch:rotation:-1 -7.10543e-15 1.19209e-07 360
+[opendoorswitch:position:165.99 48.45 -53.74
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:texture:../gameresources/build/building/garbage.png
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:scale:45.582 45.582 45.582
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:rotation:0.173648 -6.53241e-08 -0.984808 0
+gameobj-1751558280-copy-523702016-copy-887595726-copy-1828956392:position:319.6 -83.72 154.7
+&code-sound1814492944:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1814492944:center:true
+&code-sound1814492944:loop:true
+&code-sound1478040490:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1478040490:center:true
+&code-sound1478040490:loop:true
+&code-sound2022150677:clip:../gameresources/sound/rain.wav
+&code-sound2022150677:center:true
+&code-sound2022150677:loop:true
+[prefab-instance-1032610382:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1032610382:position:168.22 52.55 -54.31
+&code-sound416888617:clip:../gameresources/sound/rain.wav
+&code-sound416888617:center:true
+&code-sound416888617:loop:true
+[prefab-instance-1466047242:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1466047242:position:168.22 52.55 -54.31
+#!light-2061658927:angle:-10
+[link-copy-1584531168:+link|link:|arena
+[link-copy-1584531168:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-1584531168:position:76.56 -11.08 -13.14
+[prefab-instance-364543878:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-364543878:position:168.22 52.55 -54.31
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1335993289:texture:../gameresources/build/building/garbage.png
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1335993289:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1335993289:scale:45.582 45.582 45.582
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1335993289:rotation:0.173648 -6.53241e-08 -0.984808 0
+gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500-copy-1335993289:position:229.5 -56.1 154.7
+[link-copy-444035037-copy-1006760270:+link|link:|arena
+[link-copy-444035037-copy-1006760270:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-444035037-copy-1006760270:position:53.05 -11.08 -13.14
+[prefab-instance-1849406135:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1849406135:position:168.22 52.55 -54.31
+&code-sound563340207:clip:../gameresources/sound/rain.wav
+&code-sound563340207:center:true
+&code-sound563340207:loop:true
+[start:scene:../afterworld/scenes/prefabs/gameplay/playerspawn.rawscene
+[start:rotation:-0.173648 -7.27305e-08 0.984808 359.688
+[start:position:168.22 52.55 -54.31
+&code-sound426863531:clip:../gameresources/sound/rain.wav
+&code-sound426863531:center:true
+&code-sound426863531:loop:true
+&code-sound745340282:clip:../gameresources/sound/rain.wav
+&code-sound745340282:center:true
+&code-sound745340282:loop:true
+[prefab-instance-1023668041:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1023668041:position:168.22 52.55 -54.31
+[prefab-instance-502724842:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-502724842:position:168.22 52.55 -54.31
+[prefab-instance-415007155:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-415007155:position:168.22 52.55 -54.31
+&code-sound997386039:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound997386039:center:true
+&code-sound997386039:loop:true
+[prefab-instance-904840974:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-904840974:position:168.22 52.55 -54.31
+[prefab-instance-1289890603:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1289890603:position:168.22 52.55 -54.31
+[link-copy-1358701467:+link|link:|arena
+[link-copy-1358701467:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
+[link-copy-1358701467:rotation:0 1 3.57628e-07 179.944
+[link-copy-1358701467:position:35.98 -16.65 12.5
+&code-sound1321975786:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound1321975786:center:true
+&code-sound1321975786:loop:true
+[prefab-instance-1886701099:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1886701099:position:168.22 52.55 -54.31
+&code-sound4597270:clip:../gameresources/sound/busy_cyberworld.wav
+&code-sound4597270:center:true
+&code-sound4597270:loop:true
+[prefab-instance-1292953252:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1292953252:position:168.22 52.55 -54.31
+&code-sound1470466030:clip:../gameresources/sound/rain.wav
+&code-sound1470466030:center:true
+&code-sound1470466030:loop:true
 gameobj-382765913-copy-1786577332-copy-1859466191:scrollspeed:0 0.005 0
 gameobj-382765913-copy-1786577332-copy-1859466191:texture:./res/models/electricbox/electromech.jpg
-[prefab-instance-364543878:position:168.22 52.55 -54.31
-[prefab-instance-364543878:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-gameobj-1729547751:mesh:../gameresources/build/uncategorized/darkwires4.gltf
-gameobj-1729547751:normal-texture:../gameresources/build/misc/keyboard.normal.png
-gameobj-1729547751:position:-17 28.9 -73.1
-gameobj-1729547751:rotation:0 0 1 360
-gameobj-1729547751:scale:8.50555 8.50555 8.50555
-gameobj-1729547751:texture:../gameresources/build/misc/keyboard.png
+gameobj-382765913-copy-1786577332-copy-1859466191:scale:50.6714 50.6714 50.6714
+gameobj-382765913-copy-1786577332-copy-1859466191:position:45 90 350
