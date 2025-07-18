@@ -12,7 +12,6 @@ gameobj-382765913-copy-1786577332-copy-2046440386:normal-texture:../gameresource
 gameobj-382765913-copy-1786577332-copy-2046440386:position:-11.07 -10.2 -0.9
 gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:texture:../gameresources/build/building/garbage.png
 gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:mesh:../gameresources/build/uncategorized/limboapple.gltf
-gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:shader:../afterworld/shaders/water/fragment.glsl
 gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:scale:17 12 14
 gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:rotation:0.34202 -6.53241e-08 -0.939693 0
 gameobj-1751558280-copy-523702016-copy-887595726-copy-641128-copy-1254810500:position:-8.42 -10 50.2

@@ -22,7 +22,7 @@ enemy:goal-info:target
 
 enemy:explode:40
 
-enemy/screen:shader:../afterworld/shaders/water/fragment.glsl
+#enemy/screen:shader:../afterworld/shaders/water/fragment.glsl
 alt-texture:texture:../gameresources/textures/enemies/happy.png # probably move this out
 
 
