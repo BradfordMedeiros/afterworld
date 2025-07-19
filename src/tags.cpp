@@ -509,7 +509,7 @@ std::vector<TagUpdater> tagupdates = {
   		}
   		for (auto &[id, time] : tags.idToRotateTimeAdded){
   			auto timeElapsed = gameapi -> timeSeconds(false) - time;
-  			float degrees = (360.f * timeElapsed) * 0.2f; // 0.2f is the turns per seconds 
+  			float degrees = (360.f * timeElapsed) * 0.02f; // 0.2f is the turns per seconds 
   			std::cout << "gun id, rotate degrees: " << degrees << std::endl;
   			float angle = glm::radians(degrees);
 	  		float x = glm::cos(angle);

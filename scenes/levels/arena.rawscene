@@ -1,61 +1,34 @@
 # Generated scene 
-
-!light:position:0 0 0
+platform_lowert-copy-2004538622:material:metal
+platform_lowert-copy-2004538622:texture:./res/models/box/grid.png
+platform_lowert-copy-2004538622:texturesize:40 40
+platform_lowert-copy-2004538622:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-2004538622:physics_restitution:0.2
+platform_lowert-copy-2004538622:physics:enabled
+platform_lowert-copy-2004538622:scale:100 100 10
+platform_lowert-copy-2004538622:rotation:-5.66244e-07 -1 -5.96046e-07 176.508
+platform_lowert-copy-2004538622:position:-18.3 -5 0
+spawnpoint-2:disabled:true
+spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf
+spawnpoint-2:spawn:tv
+spawnpoint-2:position:-10 0 0
 !light:globallight:true
-
-poster-copy-1394279730-copy-1012209316:texture:../gameresources/build/characters/garbage.png
-poster-copy-1394279730-copy-1012209316:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-poster-copy-1394279730-copy-1012209316:scale:18 8 1
-poster-copy-1394279730-copy-1012209316:rotation:0 0 1 190
-poster-copy-1394279730-copy-1012209316:position:52.8 17 -4.4
-background:texture:../gameresources/build/textures/clean/spacecarpet.png
-background:texturesize:40 40
-background:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-background:physics:enabled
-background:scale:100 100 10
-background:normal-texture:../gameresources/build/textures/clean/spacecarpet.normal.png
-background:rotation:0 0 -1 90
-background:position:-20 -5 -15
+!light:angle:-10
+!light:rotation:0.224951 -6.52464e-09 -0.97437 0.0559529
+!light:position:-12.93 -0.51 11.98
+!light:spin:true
+[prefab-instance-1619745498:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1619745498:position:-20 0 0
+[prefab-instance-1073002533:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1073002533:position:-20 0 0
+playerspawn:teleport:true
+playerspawn:playerspawn:true
+playerspawn:position:-20 0 0
 platform_lowert:material:metal
-platform_lowert:texture:../gameresources/build/weapons/rusted_drain.jpg
+platform_lowert:texture:./res/models/box/grid.png
 platform_lowert:texturesize:40 40
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform_lowert:physics_restitution:0.2
 platform_lowert:physics:enabled
 platform_lowert:scale:100 100 10
-platform_lowert:rotation:2.03727e-10 -1 5.96046e-07 180.02
-platform_lowert:position:-18.3 -5 0
-poster-copy-1394279730:texture:../gameresources/build/characters/garbage.png
-poster-copy-1394279730:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-poster-copy-1394279730:scale:18 8 1
-poster-copy-1394279730:rotation:0 0 1 170
-poster-copy-1394279730:position:-5 17 -4.4
-[prefab-instance-1619745498:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-1619745498:position:-20 0 0
-spawnpoint-2:disabled:true
-spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf
-spawnpoint-2:spawn:tv
-spawnpoint-2:position:-10 0 0
-playerspawn:teleport:true
-playerspawn:playerspawn:true
-playerspawn:position:-20 0 0
-poster-copy-1394279730-copy-2049210480-copy-1446375166:texture:../gameresources/build/characters/garbage.png
-poster-copy-1394279730-copy-2049210480-copy-1446375166:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-poster-copy-1394279730-copy-2049210480-copy-1446375166:scale:18 8 1
-poster-copy-1394279730-copy-2049210480-copy-1446375166:rotation:-0.5 -1.08033e-07 -0.866025 170
-poster-copy-1394279730-copy-2049210480-copy-1446375166:position:76.6 17 -4.4
-poster-copy-1394279730-copy-2049210480:texture:../gameresources/build/characters/garbage.png
-poster-copy-1394279730-copy-2049210480:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-poster-copy-1394279730-copy-2049210480:scale:18 8 1
-poster-copy-1394279730-copy-2049210480:rotation:-0.5 -1.08033e-07 -0.866025 170
-poster-copy-1394279730-copy-2049210480:position:54.5 17 -4.4
-poster-copy-1394279730-copy-1012209316-copy-1676288738-copy-1487003227:texture:../gameresources/build/characters/garbage.png
-poster-copy-1394279730-copy-1012209316-copy-1676288738-copy-1487003227:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-poster-copy-1394279730-copy-1012209316-copy-1676288738-copy-1487003227:scale:18 8 1
-poster-copy-1394279730-copy-1012209316-copy-1676288738-copy-1487003227:rotation:0 0 1 190
-poster-copy-1394279730-copy-1012209316-copy-1676288738-copy-1487003227:position:-44.1 17 -4.4
-poster-copy-1394279730-copy-2049210480-copy-302168965:texture:../gameresources/build/characters/garbage.png
-poster-copy-1394279730-copy-2049210480-copy-302168965:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
-poster-copy-1394279730-copy-2049210480-copy-302168965:scale:18 8 1
-poster-copy-1394279730-copy-2049210480-copy-302168965:rotation:0.642788 -1.2666e-07 -0.766044 170
-poster-copy-1394279730-copy-2049210480-copy-302168965:position:22.2 17 -4.4
+platform_lowert:position:-23.3 -15 -4
