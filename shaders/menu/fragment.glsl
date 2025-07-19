@@ -43,6 +43,7 @@ uniform vec2 textureSize;
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
+uniform vec4 lightscoord[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
 uniform vec3 lightsatten[MAX_LIGHTS];
 uniform float lightsmaxangle[MAX_LIGHTS];
@@ -110,6 +111,9 @@ vec3 lookupAmbientLight(){
 }
 
 vec3 calculatePhongLight(vec3 normal){
+  if (lightscoord[0].x > 23434){
+    discard;
+  }
   vec3 ambient =  lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
