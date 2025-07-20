@@ -47,6 +47,7 @@ uniform float lightsmaxangle[MAX_LIGHTS];
 uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
 uniform int voxelcellwidth;
+uniform vec4 lightstexindex[ $LIGHT_BUFFER_SIZE ];
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
 

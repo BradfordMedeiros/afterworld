@@ -51,6 +51,7 @@ uniform float lightsmaxangle[MAX_LIGHTS];
 uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
 uniform int voxelcellwidth;
+uniform vec4 lightstexindex[ $LIGHT_BUFFER_SIZE ];
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
 
@@ -113,9 +114,9 @@ vec3 lookupAmbientLight(){
 
 vec3 calculatePhongLight(vec3 normal){
   if (lightscoord[0].x > 23434){
-    vec4 newNormal = vec4(normal.xyz, 1);;
+    vec4 newNormal = vec4(normal.xyz, 1);
     newNormal =  lightsdirmat[0] * newNormal;
-    if (newNormal.x > 234234){
+    if (newNormal.x > 234234 || lightstexindex[0].x == 112302){
       discard;
     }
   }
