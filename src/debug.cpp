@@ -361,9 +361,16 @@ void debugOnKey(int key, int scancode, int action, int mods){
   if (key == '[' && action == 0){
   	auto activeCamera = gameapi -> getCameraTransform();
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
+
   }
   if (key == 'N' && action == 0){
   	visualizationDistance -= 1.f;
+  	auto oldVoxelCellWidth = gameapi -> getVoxelLightingData().voxelCellWidth;
+  	auto newVoxelCellWidth = oldVoxelCellWidth * 2;
+  	auto oldOffset = gameapi -> getVoxelLightingData().offset;
+  	auto newOffset = oldOffset + glm::vec3(2.5f, 0.f, 0.f);
+		gameapi -> setVoxelLighting(newVoxelCellWidth * 2,  oldOffset);
+		modlog("voxel lighting set", std::to_string(newVoxelCellWidth) + " | " + print(newOffset));
   }
   if (key == 'M' && action == 0){
   	visualizationDistance += 1.f;
