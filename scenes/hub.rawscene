@@ -27,6 +27,8 @@ gameobj-1729547751-copy-1530817585:rotation:0 0 1 360
 gameobj-1729547751-copy-1530817585:position:-18.7 8.5 -73.1
 !light:position:0 0 0
 !light:globallight:true
+!light:spin:true
+
 [prefab-instance-1586927560:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
 [prefab-instance-1586927560:position:168.22 52.55 -54.31
 [prefab-instance-2135902593:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
