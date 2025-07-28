@@ -390,8 +390,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
 
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
+      //gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+      //gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
 
       auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
       if (gunAimingUpdates.rightHand.has_value()){
