@@ -1494,28 +1494,25 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto activePlayer = getActivePlayerId();
     auto thirdPersonCamera = getCameraForThirdPerson();
 
-    if (activePlayer.has_value() && thirdPersonCamera.has_value()){
+    if (activePlayer.has_value()){
       auto id = activePlayer.value();
       MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
-      if (movementEntity.managedCamera.thirdPersonMode){
-        auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
-        gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
-        gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        
+      if (thirdPersonCamera.has_value()){
+
+        if (movementEntity.managedCamera.thirdPersonMode){
+          auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+          gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        
+        }else{
+          auto rotation = weaponLookDirection(movementEntity.movementState);
+          auto playerPos = gameapi -> getGameObjectPos(movementEntity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+          gameapi -> setGameObjectRot(thirdPersonCamera.value(), rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });     
+        } 
+      }else{
+        modassert(false, "no third person camaera uhhhh");
       }
 
-
-      //gameapi -> setGameObjectPosition(movementEntity.managedCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
-      //gameapi -> setGameObjectRot(movementEntity.managedCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
-//
-
-/*  if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id)){ // only use the third person code for the active player
-    // this 0 out only works if these vectors are parallel, otherwise would have to solve the parametric eqtns 
-    // z is set to the player entity so it doesnt shoot from behind the character.
-    // for example, if you dont do this, if you zoom the cam out you can hit a target in the crosshair behind the character
-   
-    auto posFromThirdPerson = glm::inverse(thirdPersonInfo.rotation) * (thirdPersonInfo.position - gameapi -> getGameObjectPos(id, true, "[gamelogic] getFireTransform 1"));
-    auto zOffset = glm::vec3(0.f, 0.f, posFromThirdPerson.z);
-    auto zSpaceOffset = thirdPersonInfo.rotation * zOffset;*/
     }
 
 
