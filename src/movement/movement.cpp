@@ -390,9 +390,6 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     if (cameraUpdate.thirdPerson.has_value()){
       gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
 
-      gameapi -> setGameObjectPosition(thirdPersonCamera, cameraUpdate.thirdPerson.value().position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
-      gameapi -> setGameObjectRot(thirdPersonCamera, cameraUpdate.thirdPerson.value().rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });
-
       auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
       if (gunAimingUpdates.rightHand.has_value()){
         gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
@@ -418,13 +415,13 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       auto playerPos = gameapi -> getGameObjectPos(entity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
 
       // This should be done in a late update step
-      entityUpdates.push_back(EntityUpdate {
-        .id = thirdPersonCamera,
-        .pos = playerPos, 
-        .rot = cameraUpdate.firstPerson.rotation,
-        .posHint = "[gamelogic] onMovementFrame - entity pos for set first person camera",
-        .rotHint = "[gamelogic] onMovementFrame setFirstPersonView - rot",
-      });
+      //entityUpdates.push_back(EntityUpdate {
+      //  .id = thirdPersonCamera,
+      //  .pos = playerPos, 
+      //  .rot = cameraUpdate.firstPerson.rotation,
+      //  .posHint = "[gamelogic] onMovementFrame - entity pos for set first person camera",
+      //  .rotHint = "[gamelogic] onMovementFrame setFirstPersonView - rot",
+      //});
     }
 
   }

@@ -1490,6 +1490,34 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         onMovementFrameLateUpdate(gameState -> movementEntities, movement, controlledPlayer.playerId.value());
       }
     }
+
+    auto activePlayer = getActivePlayerId();
+    auto thirdPersonCamera = getCameraForThirdPerson();
+
+    if (activePlayer.has_value()){
+      auto id = activePlayer.value();
+      MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+      if (thirdPersonCamera.has_value()){
+
+        if (movementEntity.managedCamera.thirdPersonMode){
+          auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+          gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        
+        }else{
+          auto rotation = weaponLookDirection(movementEntity.movementState);
+          auto playerPos = gameapi -> getGameObjectPos(movementEntity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+          gameapi -> setGameObjectRot(thirdPersonCamera.value(), rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });     
+        } 
+      }else{
+        modassert(false, "no third person camaera uhhhh");
+      }
+
+    }
+
+
+
+
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
