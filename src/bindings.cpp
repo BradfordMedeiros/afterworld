@@ -27,6 +27,8 @@ Waypoints waypoints {
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 
+std::optional<float> lastGunFireTime;
+
 struct ManagedScene {
   std::optional<objid> id; 
   int index;
@@ -1363,6 +1365,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
         modlog("current weapon", uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : "");
         setUiWeapon(uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : std::optional<std::string>(std::nullopt));
+
+        if (uiUpdate.didFire){
+          modlog("ui update", "fire gun");
+          lastGunFireTime = gameapi -> timeSeconds(false);
+        }
       }else{
         setShowActivate(false);
         setUIAmmoCount(0, 0);
@@ -1497,6 +1504,21 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (activePlayer.has_value()){
       auto id = activePlayer.value();
       MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+
+      glm::vec3 screenShake(0.f, 0.f, 0.f);
+      glm::vec3 screenShakeMagnitude(0.f, 0.f, 1.f);
+      if (lastGunFireTime.has_value()){
+        float period = 2.f;
+        float timeElapsed = gameapi -> timeSeconds(false) - lastGunFireTime.value();
+        if (timeElapsed > period){
+          lastGunFireTime = std::nullopt;
+        }
+        float angle = (timeElapsed / period) * (2 * MODPI);
+        auto value = 1.f - (0.5f * (1 + glm::cos(angle)));
+        screenShake = screenShakeMagnitude * value;
+        modlog("ui update sreenshake", std::to_string(value));
+      }
+
       if (thirdPersonCamera.has_value()){
 
         if (movementEntity.managedCamera.thirdPersonMode){
@@ -1506,7 +1528,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }else{
           auto rotation = weaponLookDirection(movementEntity.movementState);
           auto playerPos = gameapi -> getGameObjectPos(movementEntity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
-          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
           gameapi -> setGameObjectRot(thirdPersonCamera.value(), rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });     
         } 
       }else{

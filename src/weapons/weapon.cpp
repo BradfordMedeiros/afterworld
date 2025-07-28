@@ -202,6 +202,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       .showActivateUi = showActivateUi,
       .bloomAmount = gunFireInfo.bloomAmount,
       .currentGunName = getCurrentGunName(weaponState),
+      .didFire = false,
     };
   }
   return WeaponsUiUpdate {
@@ -209,6 +210,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
     .showActivateUi = showActivateUi,
     .bloomAmount = gunFireInfo.bloomAmount,
     .currentGunName = getCurrentGunName(weaponState),
+    .didFire = gunFireInfo.didFire,
   };
 }
 
