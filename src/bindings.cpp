@@ -1008,6 +1008,7 @@ void doStateControllerAnimations(){
     }
     if (!disableAnimation && matchingAnimation){
       modlog("statecontroller animation controller play animation for state", nameForSymbol(stateAnimation -> state) + ", " + std::to_string(entityId) + ", " + print(stateAnimation -> animationBehavior));
+      pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value());
       gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior);  
     }else{
       if (stateAnimationHasAnimation && !matchingAnimation){
@@ -1015,6 +1016,8 @@ void doStateControllerAnimations(){
           modassert(false, std::string("no matching animation: ") + stateAnimation -> animation.value());
         }
         modlog("statecontroller animation controller play animation no matching animation for state", nameForSymbol(stateAnimation -> state) + ", for animation: " + stateAnimation -> animation.value() + ", " + std::to_string(entityId));
+        pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value() + " -- missing animation");
+
       }
       modlog("statecontroller stop animation", std::to_string(entityId));
       gameapi -> stopAnimation(entityId);

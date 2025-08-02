@@ -470,6 +470,7 @@ struct MovementAnimationConfig {
   bool isSideStepping;
   bool isMovingRight;
   bool isWalking;
+  bool isWalkingForward;
   bool isHoldingGun;
   bool didLand;
   bool didJump;
@@ -506,6 +507,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   MovementAnimationConfig animationConfig {
     .isSideStepping = false,
     .isWalking = false,
+    .isWalkingForward = false,
     .isHoldingGun = false,
     .didLand = false,
     .didJump = false,
@@ -527,6 +529,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   auto isWalking = calcIfWalking(movementState);
   auto isHoldingGun = entityInShootingMode(playerId);
   animationConfig.isWalking = isWalking;
+  animationConfig.isWalkingForward = animationConfig.isWalking && (movementState.moveVec.z < 0);
   animationConfig.isHoldingGun = isHoldingGun;
   animationConfig.attachedToLadder = movementState.attachedToLadder;
 
@@ -730,9 +733,17 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 
   if (animationConfig.isWalking){
     if (!animationConfig.isHoldingGun){
-      doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+      if (animationConfig.isWalkingForward){
+        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+      }else{
+        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking-backward");
+      }
     }else{
-      doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
+      if (animationConfig.isWalkingForward){
+        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
+      }else{
+        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle-backward");
+      }
     }
   }else{
     doAnimationTrigger(playerId, animationConfig.isHoldingGun ? "not-walking-rifle" : "not-walking");

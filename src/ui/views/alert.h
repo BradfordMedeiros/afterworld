@@ -5,7 +5,6 @@
 
 extern Component alertComponent;
 
-enum AlertMessageType { ALERT_DETAIL };
-void pushAlertMessage(std::string message, AlertMessageType type);
+void pushAlertMessage(std::string message);
 
 #endif

@@ -6,6 +6,7 @@ extern CustomApiBindings* gameapi;
 const float bufferExpirationTimeMs = 5000;
 const int maxBufferSize = 1;
 
+enum AlertMessageType { ALERT_DETAIL };
 struct AlertMessage {
 	std::string message;
 	std::optional<double> time;
@@ -79,11 +80,11 @@ Alerts alerts {
 	.messageBuffer = {},
 };
 
-void pushAlertMessage(std::string message, AlertMessageType type){
+void pushAlertMessage(std::string message){
    alerts.messageBuffer.push_back(AlertMessage {
    	.message = message,
    	.time = std::nullopt,
-   	.type = type,
+   	.type = ALERT_DETAIL,
    });
    if (alerts.messageBuffer.size() > maxBufferSize){
    	alerts.messageBuffer.pop_front();

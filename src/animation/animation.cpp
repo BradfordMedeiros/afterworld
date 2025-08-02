@@ -37,7 +37,12 @@ void addAnimationController(StateController& controller){
    		},
    		ControllerStateAnimation {
    			.state = getSymbol("walking"),
-   			.animation = "walk",
+   			.animation = "running",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking-backward"),
+   			.animation = "running-backward",
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
@@ -76,6 +81,11 @@ void addAnimationController(StateController& controller){
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
+   			.state = getSymbol("walking-rifle-backward"),
+   			.animation = "rifle-run-backward",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
    			.state = getSymbol("strafe-right-rifle"),
    			.animation = "rifle-strafe",
    			.animationBehavior = LOOP,
@@ -96,11 +106,13 @@ void addAnimationController(StateController& controller){
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
 			StateAndTransition { .state = "walking", .transition = "walking" },
-
+			StateAndTransition { .state = "walking-backward", .transition = "walking-backward" },
 			StateAndTransition { .state = "idle-rifle", .transition = "not-walking-rifle" },
 			StateAndTransition { .state = "strafe-right-rifle", .transition = "sidestep-right-rifle" },
 			StateAndTransition { .state = "strafe-left-rifle", .transition = "sidestep-left-rifle" },
 			StateAndTransition { .state = "walking-rifle", .transition = "walking-rifle" },
+			StateAndTransition { .state = "walking-rifle-backward", .transition = "walking-rifle-backward" },
+
 
 			StateAndTransition { .state = "jump", .transition = "jump" },
 
@@ -123,6 +135,11 @@ void addAnimationController(StateController& controller){
    		ControllerStateAnimation {
    			.state = getSymbol("walking"),
    			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking-backward"),
+   			.animation = "walking-backward",
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
@@ -160,6 +177,12 @@ void addAnimationController(StateController& controller){
    			.animation = "crawl",
    			.animationBehavior = LOOP,
    		},
+   		
+   		ControllerStateAnimation {
+   			.state = getSymbol("walking-rifle-backward"),
+   			.animation = "crawl",
+   			.animationBehavior = LOOP,
+   		},
    		ControllerStateAnimation {
    			.state = getSymbol("strafe-right-rifle"),
    			.animation = "crawl",
@@ -181,11 +204,13 @@ void addAnimationController(StateController& controller){
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
 			StateAndTransition { .state = "walking", .transition = "walking" },
+			StateAndTransition { .state = "walking-backward", .transition = "walking-backward" },
 
 			StateAndTransition { .state = "idle-rifle", .transition = "not-walking-rifle" },
 			StateAndTransition { .state = "strafe-right-rifle", .transition = "sidestep-right-rifle" },
 			StateAndTransition { .state = "strafe-left-rifle", .transition = "sidestep-left-rifle" },
 			StateAndTransition { .state = "walking-rifle", .transition = "walking-rifle" },
+			StateAndTransition { .state = "walking-rifle-backward", .transition = "walking-rifle-backward" },
 
 			StateAndTransition { .state = "jump", .transition = "jump" },
 

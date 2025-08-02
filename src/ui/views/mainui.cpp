@@ -708,5 +708,5 @@ std::optional<std::string> getPathParts(int index){
 
 void sendUiAlert(std::string message){
   modlog("dock alert", message);
-  pushAlertMessage(message, ALERT_DETAIL);
+  pushAlertMessage(message);
 }
