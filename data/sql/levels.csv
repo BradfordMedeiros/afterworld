@@ -7,8 +7,9 @@ filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING,ambi
 ../afterworld/scenes/levels/story.rawscene,story1,story-1,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
 ../afterworld/scenes/levels/story.rawscene,story2,story-2,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
 ../afterworld/scenes/levels/story.rawscene,story end,story-end,Return home.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/arena.rawscene,arena,arena,arena style arcade survival,../afterworld/design/storyboard/hell.jpg,1 1 1, 1 1 1,./res/textures/skyboxs/sky/
+../afterworld/scenes/levels/arena.rawscene,arena,arena,arena style arcade survival,../afterworld/design/storyboard/hell.jpg,0.6 0.6 0.6,0.2 0.2 0.4,./res/textures/skyboxs/desert/
 ../afterworld/scenes/levels/level2.rawscene,level2,level2,level2 test,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg,0.4 0.4 0.4,1 0 1,./res/textures/skyboxs/sky/
+../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg,0.2 0.2 0.2,0.8 0.8 0.8,./res/textures/skyboxs/sky/
 ../afterworld/scenes/empty.rawscene,Empty,empty,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
 ../afterworld/scenes/sandbox.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
+./res/scenes/features/scenegraph/child.p.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
