@@ -102,6 +102,7 @@ struct MovementState {
 
   glm::vec3 newVelocity;
   bool changedYVelocity;
+  bool alive;
 
 };
 

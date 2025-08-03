@@ -19,6 +19,7 @@ struct ControlledPlayer {
 
 struct ControllableEntity {
 	bool isInShootingMode;  // not sure if this should be in here but w/e
+	bool isAlive;
 };
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
@@ -33,6 +34,7 @@ std::optional<bool> activePlayerInThirdPerson();
 
 std::optional<bool> isInShootingMode(objid id);
 void setInShootingMode(objid id, bool shootingMode);
+void setIsAlive(objid id, bool alive);
 
 void maybeReEnableMesh(objid id);
 void maybeDisableMesh(objid id);

@@ -66,6 +66,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
     addAiAgent(aiData, idAdded, agent.value());
     controllableEntities[idAdded] = ControllableEntity {
     	.isInShootingMode = true,
+    	.isAlive = true,
     };
   }
 
@@ -134,6 +135,14 @@ std::optional<bool> isInShootingMode(objid id){
 void setInShootingMode(objid id, bool shootingMode){
 	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setInShootingMode for unregistered controllableEntity: ") + std::to_string(id));
 	controllableEntities.at(id).isInShootingMode = shootingMode;
+}
+
+void setIsAlive(objid id, bool alive){
+	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setIsAlive for unregistered controllableEntity: ") + std::to_string(id));
+	controllableEntities.at(id).isAlive = alive;
+	//maybeDisableAi(aiData, id.value());
+	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	movementEntity.movementState.alive = alive;
 }
 
 void maybeReEnableMesh(objid id){

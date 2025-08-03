@@ -6,7 +6,7 @@ extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
 
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void onAiHealthChange(objid targetId, float remainingHealth);
-
+void setIsAlive(objid id, bool alive);
 
 void addEntityIdHitpoints(objid id){
 	if (hitpoints.find(id) != hitpoints.end()){
@@ -87,6 +87,8 @@ void onNoHealth(objid targetId){
   			}
   		}
   	}
+  }else if (removeType.has_value() && removeType.value() == "kill"){
+  	setIsAlive(targetId, false);
   }else{
 	  modlog("health", "removing group object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
  		auto prefabId = gameapi -> prefabId(targetId);

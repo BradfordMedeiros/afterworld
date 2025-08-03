@@ -36,6 +36,11 @@ void addAnimationController(StateController& controller){
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
+   			.state = getSymbol("die"),
+   			.animation = "dying",
+   			.animationBehavior = FORWARDS,
+   		},
+   		ControllerStateAnimation {
    			.state = getSymbol("walking"),
    			.animation = "running",
    			.animationBehavior = LOOP,
@@ -102,7 +107,10 @@ void addAnimationController(StateController& controller){
 		controller, 
 		"character", 
 		{ 
+
 			StateAndTransition { .state = "idle", .transition = "not-walking" },
+			StateAndTransition { .state = "die", .transition = "die" },
+
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
 			StateAndTransition { .state = "walking", .transition = "walking" },
@@ -129,6 +137,11 @@ void addAnimationController(StateController& controller){
    		// basic movement animations
    		ControllerStateAnimation {
    			.state = getSymbol("idle"),
+   			.animation = "crawl", // make this idle
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
+   			.state = getSymbol("die"),
    			.animation = "crawl", // make this idle
    			.animationBehavior = LOOP,
    		},
@@ -201,6 +214,8 @@ void addAnimationController(StateController& controller){
 		"crawler", 
 		{ 
 			StateAndTransition { .state = "idle", .transition = "not-walking" },
+			StateAndTransition { .state = "die", .transition = "die" },
+
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
 			StateAndTransition { .state = "walking", .transition = "walking" },

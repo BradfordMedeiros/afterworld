@@ -682,7 +682,11 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     oldVelocity += impulse.value() / moveParams.physicsMass;
   }
 
-  setGameObjectVelocity(playerId, oldVelocity);
+  if (movementState.alive){
+    setGameObjectVelocity(playerId, oldVelocity);
+  }else{
+    setGameObjectVelocity(playerId, glm::vec3(0.f, 0.f, 0.f));
+  }
   movementState.changedYVelocity = false;
 
 
@@ -731,25 +735,27 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   //  doAnimationTrigger(playerId, "jump");
   //}
 
-  if (animationConfig.isWalking){
-    if (!animationConfig.isHoldingGun){
-      if (animationConfig.isWalkingForward){
-        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+  if (!movementState.alive){
+    doAnimationTrigger(playerId, "die");
+  }else{
+    if (animationConfig.isWalking){
+      if (!animationConfig.isHoldingGun){
+        if (animationConfig.isWalkingForward){
+          doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking");
+        }else{
+          doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking-backward");
+        }
       }else{
-        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right" : "sidestep-left") : "walking-backward");
+        if (animationConfig.isWalkingForward){
+          doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
+        }else{
+          doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle-backward");
+        }
       }
     }else{
-      if (animationConfig.isWalkingForward){
-        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle");
-      }else{
-        doAnimationTrigger(playerId, animationConfig.isSideStepping ? (animationConfig.isMovingRight ? "sidestep-right-rifle" : "sidestep-left-rifle") : "walking-rifle-backward");
-      }
-    }
-  }else{
-    doAnimationTrigger(playerId, animationConfig.isHoldingGun ? "not-walking-rifle" : "not-walking");
+      doAnimationTrigger(playerId, animationConfig.isHoldingGun ? "not-walking-rifle" : "not-walking");
+    }    
   }
-
-
 
   return cameraUpdate;
 }
@@ -812,6 +818,7 @@ MovementState getInitialMovementState(objid playerId){
 
   movementState.newVelocity = glm::vec3(0.f, 0.f, 0.f);
   movementState.changedYVelocity = false;
+  movementState.alive = true;
 
   return movementState;
 }
