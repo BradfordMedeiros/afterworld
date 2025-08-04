@@ -442,6 +442,10 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         continue;
       }
       auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id), activeId == movementEntity.playerId);  
+     
+      if (!movementEntity.movementState.alive){  // hackey, this needs to be after core so the animations trigger still
+        continue;
+      }
       auto orientation = gameapi -> orientationFromPos(glm::vec3(movementEntity.movementState.lastPosition.x, 0.f, movementEntity.movementState.lastPosition.z), glm::vec3(movementEntity.targetLocation.value().position.x, 0.f, movementEntity.targetLocation.value().position.z));
 
       // not sure i should set the always here? 

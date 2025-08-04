@@ -7,6 +7,9 @@ extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void onAiHealthChange(objid targetId, float remainingHealth);
 void setIsAlive(objid id, bool alive);
+void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
+
+
 
 void addEntityIdHitpoints(objid id){
 	if (hitpoints.find(id) != hitpoints.end()){
@@ -65,8 +68,27 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	return true;
 }
 
-void onNoHealth(objid targetId){
+void onNoHealth(objid targetId, float remainingHealth){
   auto removeType = getSingleAttr(targetId, "health-remove");
+
+  bool shouldKillOnly = false;
+  bool hasKillTag = removeType.has_value() && removeType.value() == "kill";
+  if (hasKillTag){
+  	modlog("health kill", std::to_string(remainingHealth));
+  }
+  if (hasKillTag && remainingHealth > -100.f){
+  	setIsAlive(targetId, false);
+  	return;
+  }
+
+  if(hasKillTag){
+  	auto activePlayerId = getActivePlayerId();
+ 		if (activePlayerId.has_value()){
+ 			auto bloodPos = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] health - onNoHealth");
+	  	emitGibs(rootSceneId(), activePlayerId.value(), bloodPos);
+ 		}
+  }
+
   if (removeType.has_value() && removeType.value() == "self"){
 	  modlog("health", "removing self object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
   	// check if the parent of the group of id has no children, if so delete it 
@@ -87,8 +109,6 @@ void onNoHealth(objid targetId){
   			}
   		}
   	}
-  }else if (removeType.has_value() && removeType.value() == "kill"){
-  	setIsAlive(targetId, false);
   }else{
 	  modlog("health", "removing group object: " + std::to_string(targetId) + " " + gameapi -> getGameObjNameForId(targetId).value());
  		auto prefabId = gameapi -> prefabId(targetId);
@@ -125,7 +145,7 @@ void doDamageMessage(objid targetId, float damageAmount){
   	return;
   }
   if (valid && enemyDead){
-   	onNoHealth(targetId);
+   	onNoHealth(targetId, remainingHealth);
   }
   onAiHealthChange(targetId, remainingHealth); // this shouldn't know about ai system
 

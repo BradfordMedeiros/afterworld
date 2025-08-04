@@ -168,6 +168,10 @@ void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position){
   gameapi -> emit(bloodEmitter.value(), position3, orientation3, glm::vec3(0.f, 2.f, 0.f), std::nullopt, std::nullopt);
 }
 
+void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position){
+  emitBlood(sceneId, lookAtId, position);  // just emit blood for now
+}
+
 void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 size){
   emitBlood(sceneId, lookAtId, position);
 }
