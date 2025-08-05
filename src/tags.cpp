@@ -57,6 +57,9 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
 }
 
 std::string queryInitialBackground(){
+	if (hasOption("background")){
+		return getArgOption("background");
+	}
   auto query = gameapi -> compileSqlQuery("select background from session", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);

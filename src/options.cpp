@@ -58,23 +58,90 @@ std::vector<GameOption> gameOptions {
   GameOption {
     .arg = "dev",
     .description = "misc options and controls for development mode",
+    .network = NetworkOption {
+      .target = "mode",
+      .attribute = "dev",
+    },
   },
   GameOption {
     .arg = "arcade",
     .description = "play arcade game instead, full screen",
     .option = StrOption{}, 
   },
+  GameOption {
+    .arg = "background",
+    .description = "texture to use for the background",
+    .option = StrOption{}, 
+    .network = NetworkOption {
+      .target = "background", 
+      .attribute = "image",
+    },
+  },
+  GameOption {
+    .arg = "config-server",
+    .description = "server to connect to for configuration",
+    .option = StrOption{}, 
+  },
+  GameOption {
+    .arg = "title",
+    .description = "title to put on the main menu instead of Afterworld",
+    .option = StrOption{},
+    .network = NetworkOption {
+      .target = "title", 
+      .attribute = "name",
+    }, 
+  },
 };
 
 
+std::unordered_map<std::string, std::string>& getArgData(){
+  static bool loadedOnce = false;
+  static std::unordered_map<std::string, std::string> argData;
+  if (!loadedOnce){
+    loadedOnce = true;
+    argData = gameapi -> getArgs();
 
+    std::optional<std::string> configServer;
+    if (argData.find("config-server") != argData.end()){
+      auto serverAddr = argData.at("config-server");
+      auto isOnline = gameapi -> isServerOnline(serverAddr);
+      if (isOnline){
+        modlog("server config", "server online");
+        bool success = false;
+        auto config = gameapi -> getServerConfig(serverAddr + "/game/game.txt", &success); // TODO make path more robust
+        modlog("server config", "config get success");
+        if (success && config.has_value()){
+          for (auto &option : gameOptions){
+            if (argData.find(option.arg) != argData.end()){
+              continue;
+            }
+            if (option.network.has_value()){
+              auto propertyValue = gameapi -> getProperty(config.value(), option.network.value().target, option.network.value().attribute);
+              if (propertyValue.has_value()){
+                modlog("server config add option", option.arg);
+                argData[option.arg] = propertyValue.value();
+              }
+            }
+          }
+        }
+        //auto backgroundImage = gameapi -> getProperty(config.value(), "background", "image");
+        //if (backgroundImage.has_value()){
+        //  modlog("server config background image", backgroundImage.value());
+        //}else{
+        //  modlog("server config background image", "missing property");
+        //}
+      }
+    }
+  }
+  return argData;
+} 
 
 bool getArgEnabled(const char* name){
-  auto args = gameapi -> getArgs();
+  auto args = getArgData();
   return args.find(name) != args.end();
 }
 bool getArgEqual(const char* name, const char* value){
-  auto args = gameapi -> getArgs();
+  auto args = getArgData();
   if (args.find(name) == args.end()){
     return false;
   }
@@ -82,7 +149,7 @@ bool getArgEqual(const char* name, const char* value){
 }
 
 bool getArgChoice(const char* name, const char* choice){
-  auto args = gameapi -> getArgs();
+  auto args = getArgData();
   if (args.find(name) == args.end()){
     return false;
   }
@@ -90,12 +157,12 @@ bool getArgChoice(const char* name, const char* choice){
 }
 
 std::string getArgOption(const char* name){
-  auto args = gameapi -> getArgs();
+  auto args = getArgData();
 	return args.at(name);
 }
 
 bool hasOption(const char* name){
-  auto args = gameapi -> getArgs();
+  auto args = getArgData();
   return args.find(name) != args.end();
 }
 

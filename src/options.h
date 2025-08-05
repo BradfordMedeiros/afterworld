@@ -13,10 +13,16 @@ struct ChoiceOption {
 struct StrOption {};
 typedef std::variant<BoolOption, ChoiceOption, StrOption> GameOptionType;
 
+
+struct NetworkOption {
+  std::string target;
+  std::string attribute;
+};
 struct GameOption {
   std::string arg;
   std::string description;
   GameOptionType option;
+  std::optional<NetworkOption> network;
 };
 
 bool getArgEnabled(const char* name);

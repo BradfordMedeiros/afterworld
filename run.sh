@@ -24,6 +24,10 @@ if [ "$1" == "gdb" ]; then
 elif [ "$1" == "dry" ]; then
   echo "command: $COMMAND_ARGS"
   exit 1
+elif [ "$1" == "connect" ]; then
+  (
+     cd ../ModEngine && bash -c "$BINARY -a config-server=127.0.0.1:8085 $COMMAND_ARGS"
+  )
 else 
   (
     cd ../ModEngine && bash -c "$BINARY $COMMAND_ARGS"

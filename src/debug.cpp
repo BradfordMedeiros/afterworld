@@ -211,12 +211,13 @@ void debugOnFrame(){
   //}
   handleSimpleOnFrame();
 
+  if (hasOption("config-server")){
+	 	gameapi -> drawText("[Config Server] - " + getArgOption("config-server"), -0.95f, -0.95f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  }
+
   if (!getArgEnabled("dev")){
   	return;
   }
-  
- 	//gameapi -> drawText(std::string("last visualizeScale: ") + std::to_string(visualizationDistance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-
 
   auto activeCamera = gameapi -> getActiveCamera();
   //if (!activeCamera.has_value()){

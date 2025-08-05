@@ -1,6 +1,8 @@
 #include "./mainmenu.h"
 
 void pushHistory(std::vector<std::string> route, bool replace);
+std::string getArgOption(const char* name);
+bool hasOption(const char* name);
 
 Props createLevelListProps(){
   std::vector<ListComponentData> levels;
@@ -41,9 +43,17 @@ Props createLevelListProps(){
 
 Component mainMenu {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    static std::string title("AFTERWORLD");
+    static bool getTitleOnce = false;
+    if (!getTitleOnce){
+      getTitleOnce = true;
+      if (hasOption("title")){
+        title = getArgOption("title");
+      }
+    }
     Props listItemProps {
       .props = {
-        PropPair { .symbol = valueSymbol, .value = std::string("AFTERWORLD") },
+        PropPair { .symbol = valueSymbol, .value = title },
         PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
         PropPair { .symbol = fontsizeSymbol, .value = 0.1f }
       },
