@@ -502,7 +502,23 @@ void debugOnKey(int key, int scancode, int action, int mods){
   //}
 
   if (key == 'M' && action == 1){
-  	addNPrefabs(gameapi -> rootSceneId(), 1, 1, 1, "../afterworld/scenes/prefabs/enemy/tv.rawscene");
+  	//addNPrefabs(gameapi -> rootSceneId(), 1, 1, 1, "../afterworld/scenes/prefabs/enemy/tv.rawscene");
+  
+    auto isOnline = gameapi -> isServerOnline("http://127.0.0.1:8085/");
+  	if (isOnline){
+  		modlog("server config", "server online");
+  		bool success = false;
+  		auto config = gameapi -> getServerConfig("http://127.0.0.1:8085/game/game.txt", &success);
+  		modlog("server config", "config get success");
+  		auto backgroundImage = gameapi -> getProperty(config.value(), "background", "image");
+  		if (backgroundImage.has_value()){
+	  		modlog("server config background image", backgroundImage.value());
+  		}else{
+	  		modlog("server config background image", "missing property");
+  		}
+  	}else{
+  		modlog("server config", "server not online");
+  	}
   }
 
   auto testObject = findObjByShortName("testobject-no-exist", std::nullopt);
