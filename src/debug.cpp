@@ -212,7 +212,20 @@ void debugOnFrame(){
   handleSimpleOnFrame();
 
   if (hasOption("config-server")){
-	 	gameapi -> drawText("[Config Server] - " + getArgOption("config-server"), -0.95f, -0.95f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	if (hasOption("config-connected")){
+	 		gameapi -> drawText("[Config Server] - " + getArgOption("config-server"), -0.95f, -0.95f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	}else{
+	 		gameapi -> drawText("[Config Server] - " + getArgOption("config-server"), -0.95f, -0.95f, 8, false, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	}
+  }
+
+  if (hasOption("motd")){
+  	std::optional<std::string> backgroundImage;
+  	if (hasOption("motd-image")){
+  		backgroundImage = getArgOption("motd-image");
+  	}
+	 	gameapi -> drawRect(0.f, 0.f, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, backgroundImage, std::nullopt);
+	 	gameapi -> drawText("[MOTD] - " + getArgOption("motd"), 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   }
 
   if (!getArgEnabled("dev")){

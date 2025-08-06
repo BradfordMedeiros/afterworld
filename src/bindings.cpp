@@ -1248,7 +1248,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     );
 
+    if (hasOption("config-server") && hasOption("config-connected") && hasOption("remote-mod")){
+      auto configUrl = getArgOption("config-server");
+      auto modpath = configUrl + getArgOption("remote-mod");
+      modlog("remote mod load start", modpath);
+      bool success = gameapi -> downloadFile(modpath, "../afterworld/mods/modfile");
+      modlog("remote mod load success", modpath);
 
+      gameapi -> mountPackage("../afterworld/mods/modfile");
+    }
+    
     if (hasOption("level")){
       levelShortcutToLoad = getArgOption("level");;
     }else if (args.find("route") == args.end()){
@@ -1288,7 +1297,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       addArcadeType(-1, getArgOption("arcade"), std::nullopt);
       getGlobalState().disableUiInput = true;
     }
-    
+
+
     return gameState;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

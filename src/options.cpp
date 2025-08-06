@@ -91,8 +91,34 @@ std::vector<GameOption> gameOptions {
       .attribute = "name",
     }, 
   },
+  GameOption {
+    .arg = "motd",
+    .description = "message of the day text to display on the menu",
+    .option = StrOption{},
+    .network = NetworkOption {
+      .target = "motd", 
+      .attribute = "text",
+    }, 
+  },
+  GameOption {
+    .arg = "motd-image",
+    .description = "message of the day background texture",
+    .option = StrOption{},
+    .network = NetworkOption {
+      .target = "motd", 
+      .attribute = "image",
+    }, 
+  },
+  GameOption {
+    .arg = "remote-mod",
+    .description = "path of a remote mod package to install. This gets appended to the server url",
+    .option = StrOption{},
+    .network = NetworkOption {
+      .target = "mod", 
+      .attribute = "path",
+    }, 
+  },
 };
-
 
 std::unordered_map<std::string, std::string>& getArgData(){
   static bool loadedOnce = false;
@@ -105,6 +131,9 @@ std::unordered_map<std::string, std::string>& getArgData(){
     if (argData.find("config-server") != argData.end()){
       auto serverAddr = argData.at("config-server");
       auto isOnline = gameapi -> isServerOnline(serverAddr);
+      if (isOnline){
+        argData["config-connected"] = "true";
+      }
       if (isOnline){
         modlog("server config", "server online");
         bool success = false;
@@ -124,7 +153,8 @@ std::unordered_map<std::string, std::string>& getArgData(){
             }
           }
         }
-        //auto backgroundImage = gameapi -> getProperty(config.value(), "background", "image");
+
+        //
         //if (backgroundImage.has_value()){
         //  modlog("server config background image", backgroundImage.value());
         //}else{
