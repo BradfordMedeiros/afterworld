@@ -44,6 +44,7 @@ void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
 bool onActivePlayerRemoved(objid id);
 void setDisablePlayerControl(bool isDisabled);
 bool isPlayerControlDisabled();
+std::optional<bool> activePlayerAlive();
 
 void setActivePlayerEditorMode(bool editorMode);
 bool isInGameMode();

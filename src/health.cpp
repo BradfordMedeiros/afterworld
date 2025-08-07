@@ -86,6 +86,9 @@ void onNoHealth(objid targetId, float remainingHealth){
  		if (activePlayerId.has_value()){
  			auto bloodPos = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] health - onNoHealth");
 	  	emitGibs(rootSceneId(), activePlayerId.value(), bloodPos);
+ 			if (activePlayerId.value() == targetId){
+ 				return;
+ 			}
  		}
   }
 

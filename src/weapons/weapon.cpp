@@ -119,7 +119,7 @@ WeaponEntityState& getWeaponState(Weapons& weapons, objid id){
 }
 
 
-WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, bool showThirdPersonGun, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon, FiringTransform& fireTransform, bool isActivePlayer){
+WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inventory, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, bool showFpsGun, bool showThirdPersonGun, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon, FiringTransform& fireTransform, bool isActivePlayer, bool isPlayerAlive){
   ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun, showThirdPersonGun, getWeaponParentId, thirdPersonWeapon);
 
   if (weaponState.activate){
@@ -189,7 +189,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
   weaponState.holdToggle = HOLD_TOGGLE_NONE;
 
   auto isInShootingMode = entityInShootingMode(playerId);
-  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire, weaponState.fireOnce, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory, fireTransform, isInShootingMode);
+  auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire && isPlayerAlive, weaponState.fireOnce && isPlayerAlive, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory, fireTransform, isInShootingMode);
 
   weaponState.fireOnce = false;
   swayGun(weaponState.weaponValues, weaponState.isGunZoomed, playerId, lookVelocity, playerVelocity);
@@ -215,7 +215,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
 }
 
 
-WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon) {
+WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookVelocity, glm::vec3 playerVelocity, std::function<WeaponEntityData(objid)> getWeaponEntityData, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon, bool disableShowGun, bool isPlayerAlive) {
   WeaponsUiUpdate weaponsUiUpdate{
     .ammoInfo = std::nullopt,
     .showActivateUi = false,
@@ -224,7 +224,7 @@ WeaponsUiUpdate onWeaponsFrame(Weapons& weapons, objid playerId, glm::vec2 lookV
     auto weaponEntityData = getWeaponEntityData(id);
     bool activePlayer = id == playerId;
 
-    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode, weaponEntityData.thirdPersonMode, getWeaponParentId, thirdPersonWeapon, weaponEntityData.fireTransform, activePlayer);
+    auto uiUpdate = onWeaponsFrameEntity(weaponEntityState, weaponEntityData.inventory, id, weaponEntityData.lookVelocity, weaponEntityData.velocity, showWeaponViewModel && activePlayer && !weaponEntityData.thirdPersonMode && !disableShowGun, weaponEntityData.thirdPersonMode, getWeaponParentId, thirdPersonWeapon, weaponEntityData.fireTransform, activePlayer, isPlayerAlive);
     if (activePlayer){
       weaponsUiUpdate = uiUpdate;
     }

@@ -1346,7 +1346,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
       }
 
-      if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){  
+      if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){
+        auto alive = activePlayerAlive().value();
         auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
           [](objid id) -> objid {
             return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
@@ -1362,7 +1363,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
               }
               return std::nullopt;
             },
-          }
+          },
+          !alive,
+          alive
         );
         setShowActivate(uiUpdate.showActivateUi);
         if (uiUpdate.ammoInfo.has_value()){
@@ -1438,6 +1441,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onTagsFrame(tags);
     doStateControllerAnimations();
+
+    auto playerAlive = activePlayerAlive();
+    if (playerAlive.has_value()){
+      if (!playerAlive.value()){
+        gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+        gameapi -> drawText("Press Fire to Respawn", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      }
+    }
 
     if (levelShortcutToLoad.has_value()){
       setProgressByShortname(levelShortcutToLoad.value());
@@ -1826,6 +1837,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }else if (action == 1){
         getGlobalState().leftMouseDown = true;
         prevTerminalPage();
+
+        auto playerAlive = activePlayerAlive();
+        if (playerAlive.has_value() && !playerAlive.value()){
+          pushHistory({ "mainmenu" }, true);
+        }
       }
     }else if (button == 2){
       if (action == 0){

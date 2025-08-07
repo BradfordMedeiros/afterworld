@@ -238,6 +238,13 @@ void setDisablePlayerControl(bool isDisabled){
 bool isPlayerControlDisabled(){
 	return controlledPlayer.disablePlayerControl;
 }
+std::optional<bool> activePlayerAlive(){
+	if (!controlledPlayer.playerId.has_value()){
+		return std::nullopt;
+	}
+  auto alive = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.alive;
+  return alive;
+}
 
 void setActivePlayerEditorMode(bool editorMode){
 	controlledPlayer.editorMode = editorMode;
