@@ -2,7 +2,7 @@
 enemy:mesh:../gameresources/build/characters/tvenemy.gltf
 enemy:physics_angle:0 0 0
 enemy:physics:enabled
-enemy:physics_type:dynamic
+enemy:physics_type:static
 enemy:physics_shape:shape_sphere
 
 enemy:physics_mass:5

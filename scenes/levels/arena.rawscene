@@ -1,76 +1,50 @@
 # Generated scene 
-!light:spin:true
-!light:angle:-10
-!light:rotation:1 0 1.19209e-07 0
-!light:position:-12.93 -58.31 11.98
-#!light:texture:../gameresources/textures/backgrounds/test3.png
-#!light:globallight:true
-
-*octree:map:../afterworld/scenes/hub.map
-*octree:physics:enabled
-*octree:scale:1024 1024 1024  # 8 * 128  => 128 cells, 8 width each for each cell
-*octree:position:-512 -512 512  # 8 * 128  => 128 cells, 8 width each for each cell
-
-[prefab-instance-1073002533:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-1073002533:position:-20 0 0
-[prefab-instance-1619745498:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-1619745498:position:-20 0 0
 playerspawn:playerspawn:true
 playerspawn:teleport:true
 playerspawn:position:-20 0 0
-platform_lowert-copy-608709856:material:metal
-
-platform_lowert-copy-608709856:scrollspeed:0 0.05 0
-platform_lowert-copy-608709856:texture:./res/textures/default.jpg
-platform_lowert-copy-608709856:texturesize:40 40
-platform_lowert-copy-608709856:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert-copy-608709856:physics_restitution:0.2
-platform_lowert-copy-608709856:physics:enabled
-platform_lowert-copy-608709856:scale:97 100 90
-platform_lowert-copy-608709856:rotation:-1 -7.10543e-15 1.19209e-07 360
-platform_lowert-copy-608709856:position:80 -15.5 -20
-platform_lowert-copy-2004538622:material:metal
-platform_lowert-copy-2004538622:texture:./res/textures/default.jpg
-platform_lowert-copy-2004538622:texturesize:40 40
-platform_lowert-copy-2004538622:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert-copy-2004538622:physics_restitution:0.2
-platform_lowert-copy-2004538622:physics:enabled
-platform_lowert-copy-2004538622:scale:100 100 10
-platform_lowert-copy-2004538622:rotation:0 1 -1.19209e-07 359.921
-platform_lowert-copy-2004538622:position:-20 60 -23
-platform_lowert-copy-2004538622-copy-1980783383:material:metal
-platform_lowert-copy-2004538622-copy-1980783383:texture:./res/textures/default.jpg
-platform_lowert-copy-2004538622-copy-1980783383:texturesize:40 40
-platform_lowert-copy-2004538622-copy-1980783383:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert-copy-2004538622-copy-1980783383:physics_restitution:0.2
-platform_lowert-copy-2004538622-copy-1980783383:physics:enabled
-platform_lowert-copy-2004538622-copy-1980783383:scale:100 100 10
-platform_lowert-copy-2004538622-copy-1980783383:rotation:5.82077e-11 1 -2.38419e-07 359.895
-platform_lowert-copy-2004538622-copy-1980783383:position:-18 -65 -23
 platform_lowert:material:metal
-platform_lowert:texture:./res/textures/default.jpg
+platform_lowert:texture:./res/textures/fonts/gamefont/image.png
 platform_lowert:texturesize:40 40
 platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform_lowert:physics_restitution:0.2
 platform_lowert:physics:enabled
 platform_lowert:scale:100 90 10
 platform_lowert:position:-20 -5 60
-[prefab-instance-857476521:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-857476521:position:-20 0 0
-platform_lowert-copy-608709856-copy-536684138:material:metal
-platform_lowert-copy-608709856-copy-536684138:texture:./res/textures/default.jpg
-platform_lowert-copy-608709856-copy-536684138:texturesize:40 40
-platform_lowert-copy-608709856-copy-536684138:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert-copy-608709856-copy-536684138:physics_restitution:0.2
-platform_lowert-copy-608709856-copy-536684138:physics:enabled
-platform_lowert-copy-608709856-copy-536684138:scale:100 100 10
-platform_lowert-copy-608709856-copy-536684138:position:-31 -15 -60
-spawnpoint-2:disabled:true
+platform_lowert-copy-608709856:material:metal
+platform_lowert-copy-608709856:texture:./res/textures/hexglow.png
+platform_lowert-copy-608709856:scrollspeed:0 0.05 0
+platform_lowert-copy-608709856:texturesize:40 40
+platform_lowert-copy-608709856:textureoffset:0 2.71818
+platform_lowert-copy-608709856:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-608709856:physics_restitution:0.2
+platform_lowert-copy-608709856:physics:enabled
+platform_lowert-copy-608709856:scale:97 100 90
+platform_lowert-copy-608709856:rotation:-1 -7.10543e-15 1.19209e-07 360
+platform_lowert-copy-608709856:position:80 100.5 -20
 spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf
-spawnpoint-2:spawn:tv
-spawnpoint-2:position:-10 0 0
-[prefab-instance-224938210:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-224938210:position:-20 0 0
-
-
-platform_lowert-copy-608709856-copy-536684138:texture:../gameresources/textures/backgrounds/test3.png
+spawnpoint-2:spawn:enemy
+spawnpoint-2:position:-20 -62 0
+platform_lowert-copy-2004538622:material:metal
+platform_lowert-copy-2004538622:texture:./res/textures/hexglow.png
+platform_lowert-copy-2004538622:texturesize:40 40
+platform_lowert-copy-2004538622:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-2004538622:physics_restitution:0.2
+platform_lowert-copy-2004538622:physics:enabled
+platform_lowert-copy-2004538622:scale:100 100 10
+platform_lowert-copy-2004538622:rotation:-5.82077e-11 1 -5.36442e-07 359.888
+platform_lowert-copy-2004538622:position:-20 60 -23
+platform_lowert-copy-2004538622-copy-1980783383:material:metal
+platform_lowert-copy-2004538622-copy-1980783383:texture:./res/textures/hexglow.png
+platform_lowert-copy-2004538622-copy-1980783383:texturesize:40 40
+platform_lowert-copy-2004538622-copy-1980783383:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-2004538622-copy-1980783383:physics_restitution:0.2
+platform_lowert-copy-2004538622-copy-1980783383:physics:enabled
+platform_lowert-copy-2004538622-copy-1980783383:scale:100 100 10
+platform_lowert-copy-2004538622-copy-1980783383:rotation:-4.24916e-09 1 -4.76837e-07 0.422435
+platform_lowert-copy-2004538622-copy-1980783383:position:-18 -65 -23
+!light:spin:true
+!light:globallight:true
+!light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
+!light:angle:-10
+!light:rotation:1 0 1.19209e-07 0
+!light:position:-12.93 -58.31 11.98

@@ -1,16 +1,17 @@
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+#enemy/model:texture:/home/brad/Desktop/art/deadinternet.png
+
 enemy:physics_angle:0 0 0
 enemy:physics:enabled
 enemy:physics_type:dynamic
 enemy:physics_shape:shape_sphere
 
 enemy:physics_mass:5
-enemy/doctor::tint:1 0 0 1
-enemy/doctor:disabled:true
-enemy/doctor:tint:0 0 1 1
+
 
 enemy:team:red
 enemy:health:130
+enemy:health-remove:kill
 enemy:physics_damping_linear:0.9
 enemy:animation:character
 enemy:player:default
@@ -20,5 +21,4 @@ enemy:goal-value:2
 enemy:agent:basic
 enemy:agent-target:blue
 enemy:goal-info:target
-
 
