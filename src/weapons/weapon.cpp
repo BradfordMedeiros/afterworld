@@ -40,7 +40,7 @@ void handlePickedUpItem(WeaponEntityState& weaponState, objid playerId){
   gameapi -> applyForce(weaponState.heldItem.value(), amountToMove);
 }
 
-std::optional<objid> raycastActivateableItem(objid playerId){
+std::optional<objid> raycastActivateableItem(objid playerId, bool anyAttr){
   auto hitpoints = doRaycastClosest(playerId, glm::vec3(0.f, 0.f, -1.f), std::nullopt);
   if (hitpoints.size() > 0){
     auto hitpoint = hitpoints.at(0);
@@ -48,6 +48,9 @@ std::optional<objid> raycastActivateableItem(objid playerId){
     auto distance = glm::distance(hitpoint.point, playerPos);
     if (distance < 2){
       modlog("active", "found item close");
+      if (anyAttr){
+        return hitpoint.id;
+      }
       auto attrHandle = getAttrHandle(hitpoint.id);
       auto activateKey = getStrAttr(attrHandle, "activate");
       if (activateKey.has_value()){
@@ -123,7 +126,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
   ensureGunInstance(weaponState.weaponValues, playerId, showFpsGun, showThirdPersonGun, getWeaponParentId, thirdPersonWeapon);
 
   if (weaponState.activate){
-    auto activateableItem = raycastActivateableItem(playerId);
+    auto activateableItem = raycastActivateableItem(playerId, false);
     if (activateableItem.has_value()){
       auto attrHandle = getAttrHandle(activateableItem.value());
       auto activateKey = getStrAttr(attrHandle, "activate");
@@ -194,7 +197,17 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
   weaponState.fireOnce = false;
   swayGun(weaponState.weaponValues, weaponState.isGunZoomed, playerId, lookVelocity, playerVelocity);
   handlePickedUpItem(weaponState, playerId);
-  auto showActivateUi = isActivePlayer ? raycastActivateableItem(playerId).has_value() : false;
+
+  auto raycastId = raycastActivateableItem(playerId, true);
+
+  bool showActivateUi = false;
+  if (raycastId.has_value() && isActivePlayer){
+    auto attrHandle = getAttrHandle(raycastId.value());
+    auto activateKey = getStrAttr(attrHandle, "activate");
+    if (activateKey.has_value()){
+      showActivateUi = true;
+    }
+  }
 
   if (!getCurrentGunName(weaponState).has_value()){
     return WeaponsUiUpdate { 
@@ -203,6 +216,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       .bloomAmount = gunFireInfo.bloomAmount,
       .currentGunName = getCurrentGunName(weaponState),
       .didFire = false,
+      .raycastId = raycastId,
     };
   }
   return WeaponsUiUpdate {
@@ -211,6 +225,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
     .bloomAmount = gunFireInfo.bloomAmount,
     .currentGunName = getCurrentGunName(weaponState),
     .didFire = gunFireInfo.didFire,
+    .raycastId = raycastId,
   };
 }
 

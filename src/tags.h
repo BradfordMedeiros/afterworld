@@ -15,6 +15,7 @@
 #include "./switch.h"
 #include "./arcade/arcade.h"
 #include "./entity.h"
+#include "./vehicles.h"
 
 struct CurrentPlayingData {
 	objid id;

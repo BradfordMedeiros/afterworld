@@ -6,6 +6,8 @@ CustomApiBindings* gameapi = NULL;
 Weapons weapons{};
 Movement movement = createMovement();
 Director director = createDirector();
+Vehicles vehicles = createVehicles();
+
 std::unordered_map<objid, ArcadeInstance> arcadeInstances; 
 std::unordered_map<objid, HitPoints> hitpoints = {}; 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
@@ -1331,6 +1333,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
  
     if (isInGameMode()){
+
+      // Control params are reset by movement so put before that
+      onVehicleFrame(vehicles, movement.controlParams);
+
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
         const bool showLookVelocity = false;
         auto thirdPersonCamera = getCameraForThirdPerson();
@@ -1367,6 +1373,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           !alive,
           alive
         );
+
+        std::optional<objid> lookingAtVehicle;
+        if (uiUpdate.raycastId.has_value()){
+          if (isVehicle(vehicles, uiUpdate.raycastId.value()) &&  !getActiveControllable().value() -> vehicle.has_value()){
+            lookingAtVehicle = uiUpdate.raycastId.value();
+            gameapi -> drawText("Press E to enter", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+          }
+        }
+        getActiveControllable().value() -> lookingAtVehicle = lookingAtVehicle;
+
         setShowActivate(uiUpdate.showActivateUi);
         if (uiUpdate.ammoInfo.has_value()){
           setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
@@ -1394,6 +1410,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         setUIAmmoCount(0, 0);
         setUiWeapon(std::nullopt);
       }
+
 
       drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
@@ -1559,7 +1576,27 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         //screenShake = screenShakeMagnitude * value;
         //modlog("ui update sreenshake", std::to_string(value));
 
+
+    
       if (thirdPersonCamera.has_value()){
+        auto controllable = getActiveControllable();
+        if (controllable.value() -> vehicle.has_value()){
+          auto vehiclePos = gameapi -> getGameObjectPos(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera pos");
+          
+          auto vehicleRot = gameapi -> getGameObjectRotation(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera rot");
+          auto offsetRot = quatFromDirection(glm::vec3(0.f, -1.f, -2.f));
+          auto finalRot = vehicleRot * offsetRot;
+
+          auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
+
+          auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).managedCamera, controllable.value() -> vehicle.value());
+
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
+          gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
+
+
+          return;
+        }
 
         if (movementEntity.managedCamera.thirdPersonMode){
           auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
@@ -1617,6 +1654,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setActivePlayerNext(movement, weapons, aiData);
     }
 
+    onVehicleKey(vehicles, key, action);
+
     if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
       if (!(isPaused() || getGlobalState().disableGameInput)){
         onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), key, action, controlledPlayer.playerId.value());
@@ -1640,6 +1679,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     onKeyArcade(key, scancode, action, mods);
 
+    if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
+      if (getActiveControllable().value() -> vehicle.has_value()){
+        exitVehicle(vehicles, getActiveControllable().value() -> vehicle.value(), controlledPlayer.playerId.has_value());
+        getActiveControllable().value() -> vehicle = std::nullopt;
+      }else if (getActiveControllable().value() -> lookingAtVehicle.has_value()){
+        enterVehicle(vehicles, getActiveControllable().value() -> lookingAtVehicle.value(), controlledPlayer.playerId.has_value());
+        getActiveControllable().value() -> vehicle = getActiveControllable().value() -> lookingAtVehicle.value();
+      }
+    }
 
     if (key == 'I' && action == 0){
       for (auto &[id, autodoor] : tags.autodoors){

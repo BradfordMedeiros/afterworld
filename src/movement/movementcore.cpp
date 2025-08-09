@@ -191,31 +191,6 @@ FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movement
   };
 }
 
-ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id){
-  float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
-
-  float x = glm::cos(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
-  float z = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
-  float y = glm::cos(thirdPersonInfo.angleY) * thirdPersonInfo.actualDistanceFromTarget;
-
-  auto targetLocation = gameapi -> getGameObjectPos(id, true, "[gamelogic] lookThirdPersonCalc");
-  auto fromLocation = targetLocation + glm::vec3(x, -y, z);
-  auto newOrientation = orientationFromPos(fromLocation, targetLocation);
-
-  auto fromLocationYOnly = targetLocation + glm::vec3(x, 0.f, z);
-  auto newOrientationNoX = orientationFromPos(fromLocationYOnly, targetLocation);  // maybe should clear the y
-
-  auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
-  // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
-    
-  ThirdPersonCameraUpdate cameraUpdate {
-    .position = finalCameraLocation,
-    .rotation = newOrientation,
-    .yAxisRotation = newOrientationNoX,
-  };
-  return cameraUpdate;
-}
-
 // this code should use the main look logic, and then manage the camera for now separate codepaths but shouldn't be, probably 
 ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo, objid id){
   thirdPersonInfo.angleX += lookParams.turnX * 0.1 /* 0.05f arbitary turn speed */;
@@ -737,6 +712,8 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 
   if (!movementState.alive){
     doAnimationTrigger(playerId, "die");
+  }else if(movementState.falling){
+    doAnimationTrigger(playerId, "falling");
   }else{
     if (animationConfig.isWalking){
       if (!animationConfig.isHoldingGun){
@@ -819,6 +796,7 @@ MovementState getInitialMovementState(objid playerId){
   movementState.newVelocity = glm::vec3(0.f, 0.f, 0.f);
   movementState.changedYVelocity = false;
   movementState.alive = true;
+  movementState.falling = false;
 
   return movementState;
 }

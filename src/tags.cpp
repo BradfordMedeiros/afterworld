@@ -6,6 +6,7 @@ extern Tags tags;
 extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
+extern Vehicles vehicles;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
@@ -720,6 +721,19 @@ std::vector<TagUpdater> tagupdates = {
 			gameapi -> setGlobalLight(id);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+
+	TagUpdater {
+		.attribute = "vehicle",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			addVehicle(vehicles, id);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		removeVehicle(vehicles, id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {

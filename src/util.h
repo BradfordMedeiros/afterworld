@@ -119,4 +119,46 @@ struct DebugConfig {
 };
 
 
+// below should probably go to a controls file
+
+enum CrouchType { CROUCH_NONE, CROUCH_UP, CROUCH_DOWN };
+struct ControlParams {
+  float xsensitivity;
+  float ysensitivity;
+
+  bool goForward;                
+  bool goBackward;
+  bool goLeft;
+  bool goRight;
+  bool shiftModifier;
+
+  glm::vec2 lookVelocity;
+  float zoom_delta;
+
+  bool doJump;
+  bool doAttachToLadder;
+  bool doReleaseFromLadder;
+  bool doGrind;
+  bool doReverseGrind;
+  CrouchType crouchType;
+};
+
+struct ThirdPersonCameraInfo {
+  bool thirdPersonMode;
+  float distanceFromTarget;
+  float angleX;
+  float angleY;
+  float actualDistanceFromTarget;
+  glm::vec3 additionalCameraOffset;
+  glm::vec3 zoomOffset;
+  glm::vec3 actualZoomOffset;
+  bool reverseCamera;
+};
+struct ThirdPersonCameraUpdate {
+  glm::vec3 position;
+  glm::quat rotation;
+  glm::quat yAxisRotation;
+};
+ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id);
+
 #endif

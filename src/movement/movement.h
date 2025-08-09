@@ -11,7 +11,6 @@ struct Movement {
   std::set<objid> disabledMeshes;
 };
 
-
 struct MovementRequest {
   glm::vec3 position;
   float speed;

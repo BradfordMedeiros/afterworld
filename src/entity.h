@@ -20,6 +20,8 @@ struct ControlledPlayer {
 struct ControllableEntity {
 	bool isInShootingMode;  // not sure if this should be in here but w/e
 	bool isAlive;
+	std::optional<objid> lookingAtVehicle;
+	std::optional<objid> vehicle;
 };
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
@@ -35,6 +37,7 @@ std::optional<bool> activePlayerInThirdPerson();
 std::optional<bool> isInShootingMode(objid id);
 void setInShootingMode(objid id, bool shootingMode);
 void setIsAlive(objid id, bool alive);
+void setIsFalling(objid id, bool falling);
 
 void maybeReEnableMesh(objid id);
 void maybeDisableMesh(objid id);
@@ -45,6 +48,7 @@ bool onActivePlayerRemoved(objid id);
 void setDisablePlayerControl(bool isDisabled);
 bool isPlayerControlDisabled();
 std::optional<bool> activePlayerAlive();
+std::optional<bool> activePlayerFalling();
 
 void setActivePlayerEditorMode(bool editorMode);
 bool isInGameMode();
@@ -61,5 +65,7 @@ std::optional<glm::quat> getActivePlayerRotation();
 WeaponEntityData getWeaponEntityData(objid id);
 
 DebugConfig debugPrintActivePlayer();
+
+std::optional<ControllableEntity*> getActiveControllable();
 
 #endif 

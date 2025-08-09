@@ -36,6 +36,7 @@
 #include "./vector_gfx.h"
 #include "./progress.h"
 #include "./options.h"
+#include "./vehicles.h"
 
 #include "./arcade/arcade.h"
 

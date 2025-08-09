@@ -67,6 +67,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
     controllableEntities[idAdded] = ControllableEntity {
     	.isInShootingMode = true,
     	.isAlive = true,
+    	.lookingAtVehicle = std::nullopt,
     };
   }
 
@@ -143,6 +144,11 @@ void setIsAlive(objid id, bool alive){
 	//maybeDisableAi(aiData, id.value());
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 	movementEntity.movementState.alive = alive;
+}
+
+void setIsFalling(objid id, bool falling){
+	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	movementEntity.movementState.falling = falling;
 }
 
 void maybeReEnableMesh(objid id){
@@ -244,6 +250,13 @@ std::optional<bool> activePlayerAlive(){
 	}
   auto alive = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.alive;
   return alive;
+}
+std::optional<bool> activePlayerFalling(){
+	if (!controlledPlayer.playerId.has_value()){
+		return std::nullopt;
+	}
+  auto falling = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.falling;
+  return falling;
 }
 
 void setActivePlayerEditorMode(bool editorMode){
@@ -355,4 +368,12 @@ DebugConfig debugPrintActivePlayer(){
 	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
 
   return debugConfig;
+}
+
+std::optional<ControllableEntity*> getActiveControllable(){
+	auto activePlayer = getActivePlayerId();
+	if (!activePlayer.has_value()){
+		return std::nullopt;
+	}
+	return &controllableEntities.at(activePlayer.value());
 }

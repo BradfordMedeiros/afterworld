@@ -355,12 +355,16 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	modlog("console visibility", print(getGlobalState().showConsole));
   }
 
-  if (key == 'T' && action == 1){
+  if (key == 'K' && action == 1){
   	if (getActivePlayerId().has_value()){
   		static bool raiseUp = false;
   		raiseUp = !raiseUp;
   		raiseTurret(getActivePlayerId().value(), raiseUp);
   		wakeUpTv(getActivePlayerId().value(), raiseUp);  		
+
+  		auto isFalling = activePlayerFalling();
+  		setIsFalling(getActivePlayerId().value(), !isFalling.value());
+
   	}
   }
 
@@ -368,9 +372,12 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	return;
   }
 
-  //if (key == 'R' && action == 1) {
+  if (key == 'R' && action == 1) {
+  	if (getActivePlayerId().has_value()){
+	  	setIsAlive(getActivePlayerId().value(), false);
+  	}
   //  changeGameType(gametypeSystem, "targetkill");
-  //}
+  }
 
   if (key == '[' && action == 0){
   	auto activeCamera = gameapi -> getCameraTransform();

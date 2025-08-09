@@ -44,6 +44,7 @@ struct WeaponsUiUpdate {
   std::optional<float> bloomAmount;
   std::optional<std::string*> currentGunName;
   bool didFire;
+  std::optional<objid> raycastId;
 };
 
 struct WeaponEntityData {
