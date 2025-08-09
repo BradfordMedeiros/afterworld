@@ -20,8 +20,8 @@ void addVehicle(Vehicles& vehicles, objid vehicleId){
       .angleX = 0.f,
       .angleY = 0.f,
       .actualDistanceFromTarget = -5.f,
-      .additionalCameraOffset = glm::vec3(-1.f, 0.5f, 0.f),
-      .zoomOffset = glm::vec3(-0.6f, -0.2f, -1.f),
+      .additionalCameraOffset = glm::vec3(0.f, 2.5f, 0.f),
+      .zoomOffset = glm::vec3(0.f, 0.f, 0.f),
       .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
       .reverseCamera = false,
     },
@@ -91,9 +91,7 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
       auto newVelocity = (diffRot * vehicle.controls) + (thirdPerson.rotation * newVelocityDiff);
       vehicle.controls = newVelocity;
 
-      if (controlParams.shiftModifier){
-        vehicle.controls = glm::vec3(0.f, 0.f, 0.f);
-      }
+
     }
   }
 
@@ -103,6 +101,47 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
       setGameObjectVelocity(id, vehicle.controls);
     }
     
+    bool slowDown = controlParams.shiftModifier;
+    float ratePerSecond = 100.f;
+    float amountThisFrame = ratePerSecond * gameapi -> timeElapsed();
+    if (slowDown){
+      if (vehicle.controls.x > 0){
+        vehicle.controls.x -= amountThisFrame;
+        if (vehicle.controls.x < 0){
+          vehicle.controls.x = 0;
+        }
+      }
+      if (vehicle.controls.x < 0){
+        vehicle.controls.x += amountThisFrame;
+        if (vehicle.controls.x > 0){
+          vehicle.controls.x = 0;
+        }
+      }
+      if (vehicle.controls.y > 0){
+        vehicle.controls.y -= amountThisFrame;
+        if (vehicle.controls.y < 0){
+          vehicle.controls.y = 0;
+        }
+      }
+      if (vehicle.controls.y < 0){
+        vehicle.controls.y += amountThisFrame;
+        if (vehicle.controls.y > 0){
+          vehicle.controls.y = 0;
+        }
+      }
+      if (vehicle.controls.z > 0){
+        vehicle.controls.z -= amountThisFrame;
+        if (vehicle.controls.z < 0){
+          vehicle.controls.z = 0;
+        }
+      }
+      if (vehicle.controls.z < 0){
+        vehicle.controls.z += amountThisFrame;
+        if (vehicle.controls.z > 0){
+          vehicle.controls.z = 0;
+        }
+      }
+    }
     /*vehicle.controls.y += gameapi -> timeElapsed() * -1.f;
     if (vehicle.controls.y < -9.81){
       vehicle.controls.y = -9.81;
