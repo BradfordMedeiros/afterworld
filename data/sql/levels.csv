@@ -1,15 +1,15 @@
-filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING,ambient:STRING,skyboxcolor:STRING,skybox:STRING
-../afterworld/scenes/levels/video.rawscene,Video,video,Test video,../afterworld/design/storyboard/hell.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/intro.rawscene,Intro Dreams and Reconciliation,intro,Fall asleep and enter the realm of the dreamweavers.,../afterworld/design/storyboard/hell.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/level2.rawscene,Arrival,level2,You arrive to a port city and find demons.,./res/textures/water.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/e1m1.rawscene,e1m1,e1m1,Vertical slice - classic slice. ,../afterworld/screenshots/test.png,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/e1m2.rawscene,e1m2,e1m2,Vertical slice 2  classic slice.,0,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/story.rawscene,story1,story-1,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/story.rawscene,story2,story-2,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/story.rawscene,story end,story-end,Return home.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/arena.rawscene,arena,arena,arena style arcade survival,../afterworld/design/storyboard/hell.jpg,0.6 0.6 0.6,0.2 0.2 0.4,./res/textures/skyboxs/desert/
-../afterworld/scenes/levels/level2.rawscene,level2,level2,level2 test,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg,0.2 0.2 0.2,0.8 0.8 0.8,./res/textures/skyboxs/sky/
-../afterworld/scenes/empty.rawscene,Empty,empty,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-../afterworld/scenes/sandbox.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
-./res/scenes/features/scenegraph/child.p.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/
+filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING,ambient:STRING,skyboxcolor:STRING,skybox:STRING,audio:STRING
+../afterworld/scenes/levels/video.rawscene,Video,video,Test video,../afterworld/design/storyboard/hell.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/intro.rawscene,Intro Dreams and Reconciliation,intro,Fall asleep and enter the realm of the dreamweavers.,../afterworld/design/storyboard/hell.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/level2.rawscene,Arrival,level2,You arrive to a port city and find demons.,./res/textures/water.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/e1m1.rawscene,e1m1,e1m1,Vertical slice - classic slice. ,../afterworld/screenshots/test.png,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/e1m2.rawscene,e1m2,e1m2,Vertical slice 2  classic slice.,0,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/story.rawscene,story1,story-1,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/story.rawscene,story2,story-2,Go back in time and resurrect the dreamweaver to be able to escape. ,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/story.rawscene,story end,story-end,Return home.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/arena.rawscene,arena,arena,arena style arcade survival,../afterworld/design/storyboard/hell.jpg,0.6 0.6 0.6,1 1 1,../gameresources/skybox/space1,../gameresources/sound/space.ogg
+../afterworld/scenes/levels/level2.rawscene,level2,level2,level2 test,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg,0.2 0.2 0.2,0.8 0.8 0.8,./res/textures/skyboxs/sky/,../gameresources/sound/rain.wav
+../afterworld/scenes/empty.rawscene,Empty,empty,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,../gameresources/skybox/storm,../gameresources/sound/rain.wav
+../afterworld/scenes/sandbox.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+./res/scenes/features/scenegraph/child.p.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav

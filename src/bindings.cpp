@@ -28,7 +28,7 @@ Waypoints waypoints {
 };
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
-
+std::string defaultAudioClipPath;
 std::optional<glm::vec3> shakeImpulse;
 struct ManagedScene {
   std::optional<objid> id; 
@@ -41,6 +41,7 @@ struct ManagedScene {
 struct SceneManagement {
   std::vector<Level> levels;
   std::optional<ManagedScene> managedScene;
+  int changedLevelFrame;
 };
 
 
@@ -48,11 +49,13 @@ struct ScenarioOptions {
   glm::vec3 ambientLight;
   glm::vec3 skyboxColor;
   std::string skybox;
+  std::string audioClipPath;
 };
 
 void applyScreenshake(glm::vec3 impulse){
   shakeImpulse = impulse;
 }
+
 void setScenarioOptions(ScenarioOptions& options){
   gameapi -> setWorldState({ 
     ObjectValue {
@@ -71,6 +74,7 @@ void setScenarioOptions(ScenarioOptions& options){
       .value = options.skybox,
     },
   });
+  defaultAudioClipPath = options.audioClipPath;
 }
 
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
@@ -167,6 +171,7 @@ SceneManagement createSceneManagement(){
   return SceneManagement {
     .levels = loadLevels(),
     .managedScene = std::nullopt,
+    .changedLevelFrame = 0,
   };
 }
 
@@ -210,7 +215,7 @@ std::optional<std::string> levelByShortcutName(std::string shortcut){
 }
 
 ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
-  auto query = gameapi -> compileSqlQuery("select shortcut, ambient, skyboxcolor, skybox from levels", {});
+  auto query = gameapi -> compileSqlQuery("select shortcut, ambient, skyboxcolor, skybox, audio from levels", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -221,6 +226,7 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
         .ambientLight = parseVec3(row.at(1)),
         .skyboxColor = parseVec3(row.at(2)),
         .skybox = row.at(3),
+        .audioClipPath = row.at(4),
       };
     }
   }
@@ -228,6 +234,7 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
     .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
     .skyboxColor = glm::vec3(0.f, 0.f, 1.f),
     .skybox = "./res/textures/skyboxs/desert/",
+    .audioClipPath = "",
   };
   return defaultScenario;
 }
@@ -532,6 +539,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
       }
       sceneManagement.managedScene = std::nullopt;
+      sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     }
   }
 
@@ -559,6 +567,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .player = router.value() -> player,
       .makePlayer = router.value() -> makePlayer,
     };
+    sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     modlog("router scene route load", sceneManagement.managedScene.value().path);
     startLevel(sceneManagement.managedScene.value());
    
@@ -1103,12 +1112,22 @@ void zoomIntoArcade(std::optional<objid> id){
 }
 
 
+// The default audio clip mechanism is kind of lame, since if you go between and audio zone
+// and a default audio zone, it will replay the clip.  Some clips this is fine, but i don't 
+// dig restarting it just because it uses a different system than the octree method. 
+// I'd prefer this to be just using the tags system and be able to set a default tag value
+// if you fall outside of the octree cell. 
 struct AudioClip {
   objid id;
   std::string name;
 };
 std::unordered_map<std::string, AudioClip> audioClips;
 std::optional<objid> octreeId;
+
+std::optional<objid> defaultAudioClip;
+int loadedDefaultAudioClipFrame = -1;
+bool playingDefaultClip = false;
+
 void ensureAllAudioZonesLoaded(){
   auto mainOctreeId = gameapi -> getMainOctreeId();
 
@@ -1123,7 +1142,7 @@ void ensureAllAudioZonesLoaded(){
     changedOctreeState = true;
   }
 
-  if (changedOctreeState && octreeId.has_value()){
+  if (changedOctreeState){
     modlog("octree tags", "loading");
     auto allTags = gameapi -> getAllTags(getSymbol("audio"));
     for (auto &tag : allTags){
@@ -1133,6 +1152,23 @@ void ensureAllAudioZonesLoaded(){
         .name = soundObjName,
       }; 
       modlog("octree tags load sound", tag.value);
+    }
+  }
+
+  auto loadLevelFrame = gameStatePtr -> sceneManagement.changedLevelFrame;
+  if (loadedDefaultAudioClipFrame < loadLevelFrame){
+    playingDefaultClip = false;
+    loadedDefaultAudioClipFrame = loadLevelFrame;
+    modlog("octree tags - default audio", "reload");
+    if (defaultAudioClip.has_value()){
+      gameapi -> removeByGroupId(defaultAudioClip.value());
+    }
+    auto soundObjName = std::string("&code-sound") + uniqueNameSuffix();
+
+    if (gameStatePtr -> sceneManagement.managedScene.has_value()){
+      if (defaultAudioClipPath != ""){
+        defaultAudioClip = createSound(gameapi -> rootSceneId(), soundObjName, defaultAudioClipPath, true);      
+      }
     }
   }
 
@@ -1156,9 +1192,13 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
     auto sceneId = gameapi -> listSceneId(octreeId.value());
     gameapi -> stopClip(audioClip.name, sceneId);
     playingClip = std::nullopt;
-
   }
   if (inAudioZone && !playingClip.has_value()){
+    if (playingDefaultClip){
+      gameapi -> stopClipById(defaultAudioClip.value());
+      playingDefaultClip = false;
+    }
+
     modlog("octree tags ensureAmbientSound play clip", clipToPlay.value());
 
     modassert(audioClips.find(clipToPlay.value()) != audioClips.end(), "octree tags could not find clip");
@@ -1166,6 +1206,11 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
     playingClip = clipToPlay.value();
 
     playGameplayClipById(audioClip.id, std::nullopt, std::nullopt); 
+  }
+
+  if (!inAudioZone && !playingDefaultClip && defaultAudioClip.has_value()){
+    playingDefaultClip = true;
+    playGameplayClipById(defaultAudioClip.value(), std::nullopt, std::nullopt); 
   }
 
   std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
