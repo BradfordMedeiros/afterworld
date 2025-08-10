@@ -1112,17 +1112,18 @@ std::optional<objid> octreeId;
 void ensureAllAudioZonesLoaded(){
   auto mainOctreeId = gameapi -> getMainOctreeId();
 
-  if (!mainOctreeId.has_value() || (octreeId.has_value() && mainOctreeId.value() != octreeId.value())){
+  bool changedOctreeState = false;
+  if (octreeId != mainOctreeId){
     modlog("octree tags", "unloading");
     for (auto &[_, audioClip] : audioClips){
       gameapi -> removeByGroupId(audioClip.id);
     }
     audioClips = {};    
+    octreeId = mainOctreeId;
+    changedOctreeState = true;
   }
 
-  if (mainOctreeId.has_value() && ((octreeId.has_value() && mainOctreeId .value() != octreeId.value()) || !octreeId.has_value())){
-    octreeId = mainOctreeId;
-
+  if (changedOctreeState && octreeId.has_value()){
     modlog("octree tags", "loading");
     auto allTags = gameapi -> getAllTags(getSymbol("audio"));
     for (auto &tag : allTags){
