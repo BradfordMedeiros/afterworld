@@ -1449,7 +1449,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (uiUpdate.didFire){
           modlog("ui update", "fire gun");
           float magnitude = static_cast<int>(std::rand()) % 5;
-          //applyScreenshake(glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
+          applyScreenshake(glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
         }
       }else{
         setShowActivate(false);
@@ -1636,8 +1636,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
 
           auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).managedCamera, controllable.value() -> vehicle.value());
+          glm::vec3 screenShake = thirdPerson.rotation * shakeOffset;
 
-          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
+          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
           gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
 
 

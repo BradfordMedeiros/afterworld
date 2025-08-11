@@ -52,9 +52,6 @@ void onVehicleKey(Vehicles& vehicles, int key, int action){
 }
 
 void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
-    
-
-
   for (auto &[id, vehicle] :  vehicles.vehicles){
     if (vehicle.occupied){
 
