@@ -1728,10 +1728,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
       if (getActiveControllable().value() -> vehicle.has_value()){
-        exitVehicle(vehicles, getActiveControllable().value() -> vehicle.value(), controlledPlayer.playerId.has_value());
+        exitVehicle(vehicles, getActiveControllable().value() -> vehicle.value(), controlledPlayer.playerId.value());
         getActiveControllable().value() -> vehicle = std::nullopt;
       }else if (getActiveControllable().value() -> lookingAtVehicle.has_value()){
-        enterVehicle(vehicles, getActiveControllable().value() -> lookingAtVehicle.value(), controlledPlayer.playerId.has_value());
+        enterVehicle(vehicles, getActiveControllable().value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
         getActiveControllable().value() -> vehicle = getActiveControllable().value() -> lookingAtVehicle.value();
       }
     }

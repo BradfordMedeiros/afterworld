@@ -6,7 +6,7 @@
 #include "./controls.h"
 
 struct Vehicle {
-  bool occupied;
+  std::optional<objid> occupied;
 
   glm::vec3 controls;
   glm::vec2 angleControls;

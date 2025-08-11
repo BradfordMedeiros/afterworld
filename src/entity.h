@@ -68,4 +68,11 @@ DebugConfig debugPrintActivePlayer();
 
 std::optional<ControllableEntity*> getActiveControllable();
 
+void setEntityThirdPerson(objid id);
+void setEntityFirstPerson(objid id);
+
+void disableEntity(objid id);
+void reenableEntity(objid id);
+
+
 #endif 

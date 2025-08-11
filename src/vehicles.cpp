@@ -3,13 +3,15 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+void disableEntity(objid id);
+void reenableEntity(objid id);
 
 Vehicles createVehicles(){
   return Vehicles{};
 }
 
 bool vehicleOccupied(Vehicles& vehicles, objid vehicleId){
-  return vehicles.vehicles.at(vehicleId).occupied;
+  return vehicles.vehicles.at(vehicleId).occupied.has_value();
 }
 
 void addVehicle(Vehicles& vehicles, objid vehicleId){
@@ -45,22 +47,26 @@ void enterVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   modassert(vehicles.vehicles.find(vehicleId) != vehicles.vehicles.end(), "vehicle does not exist");
 
   Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
-  bool occupied = vehicle.occupied;
+  bool occupied = vehicle.occupied.has_value();
   modassert(!occupied, "vehicle already occupied");
-  vehicles.vehicles.at(vehicleId).occupied = true;
+  vehicles.vehicles.at(vehicleId).occupied = id;
   modlog("vehicle enter vehicle", std::to_string(vehicleId));
 
   if (vehicle.sound.has_value()){
     playGameplayClipById(vehicle.sound.value(), std::nullopt, std::nullopt); 
   }
- 
+  disableEntity(vehicle.occupied.value());
 }
 
 void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   //vehicles.vehicles.at(vehicleId).occupied = false;
   modlog("vehicle exit vehicle", std::to_string(vehicleId));
   Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
-  vehicle.occupied = false;
+
+  auto position = gameapi -> getGameObjectPos(vehicleId, true, "[gamelogic] exit vehicle get pos");
+  reenableEntity(vehicle.occupied.value());
+  gameapi -> setGameObjectPosition(vehicle.occupied.value(), position + glm::vec3(0.f, 10.f, 0.f), true, Hint{ .hint = "[gamelogic] - exit vehicle" }); // how to handle? 
+  vehicle.occupied = std::nullopt;
   if (vehicle.sound.has_value()){
     gameapi -> stopClipById(vehicle.sound.value());
   }
@@ -71,7 +77,7 @@ void onVehicleKey(Vehicles& vehicles, int key, int action){
 
 void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
   for (auto &[id, vehicle] :  vehicles.vehicles){
-    if (vehicle.occupied){
+    if (vehicle.occupied.has_value()){
 
       // Would be nice to make this work more similarly to movement system but this is simple so
       vehicle.managedCamera.angleX += gameapi -> timeElapsed() * controlParams.lookVelocity.x;
@@ -112,7 +118,7 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
 
   for (auto &[id, vehicle] :  vehicles.vehicles){
     auto oldPos = gameapi -> getGameObjectPos(id, true, "vehicle getPos");
-    if (vehicle.occupied){
+    if (vehicle.occupied.has_value()){
       setGameObjectVelocity(id, vehicle.controls);
     }
     

@@ -151,14 +151,6 @@ void setIsFalling(objid id, bool falling){
 	movementEntity.movementState.falling = falling;
 }
 
-void maybeReEnableMesh(objid id){
-	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
-	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
-		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
-		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "false");
-	}
-}
-
 
 bool isCamera(objid id){
 	auto name = gameapi -> getGameObjNameForId(id).value();
@@ -173,6 +165,15 @@ bool hasCameraAncestor(objid id){
 		return true;
 	}
 	return hasCameraAncestor(parent.value());
+}
+
+
+void maybeReEnableMesh(objid id){
+	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
+	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
+		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
+		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "false");
+	}
 }
 
 void maybeDisableMesh(objid id){
@@ -377,3 +378,22 @@ std::optional<ControllableEntity*> getActiveControllable(){
 	}
 	return &controllableEntities.at(activePlayer.value());
 }
+
+void setEntityThirdPerson(objid id){
+	maybeReEnableMesh(id);
+}
+void setEntityFirstPerson(objid id){
+	maybeDisableMesh(id);
+}
+
+void disableEntity(objid id){
+	maybeDisableMesh(id);
+	setGameObjectPhysicsEnable(id, false);
+}
+void reenableEntity(objid id){
+	maybeReEnableMesh(id);
+	setGameObjectPhysicsEnable(id, true);
+}
+
+
+

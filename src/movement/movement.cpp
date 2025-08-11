@@ -4,6 +4,8 @@ extern CustomApiBindings* gameapi;
 
 std::optional<bool> isInShootingMode(objid id);
 std::optional<objid> findBodyPart(objid entityId, const char* part);
+void setEntityThirdPerson(objid id);
+void setEntityFirstPerson(objid id);
 
 struct AnimGunPosUpdate {
   objid id;
@@ -215,9 +217,6 @@ Movement createMovement(){
   return movement;
 }
 
-void maybeReEnableMesh(objid id);
-void maybeDisableMesh(objid id);
-
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, int key, int action){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
@@ -353,11 +352,6 @@ glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& m
 }
 
 
-void maybeReEnableMesh(objid id);
-void maybeDisableMesh(objid id);
-
-
-
 // TODO third person mode should only be a thing if active id
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& entityUpdates){
   UiMovementUpdate uiUpdate {
@@ -485,12 +479,12 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
     if ((movementEntity.managedCamera.thirdPersonMode || activeId != id) && movement.disabledMeshes.count(id) > 0){
        movement.disabledMeshes.erase(id);
-       maybeReEnableMesh(id);
+       setEntityThirdPerson(id);
     }
     if ((id == activeId) && (!movementEntity.managedCamera.thirdPersonMode || disableThirdPersonMesh)){
       if (movement.disabledMeshes.count(id) == 0){
         movement.disabledMeshes.insert(id);
-        maybeDisableMesh(id);        
+        setEntityFirstPerson(id);       
       }
     }
   }
