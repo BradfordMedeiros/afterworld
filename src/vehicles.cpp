@@ -2,6 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+
 Vehicles createVehicles(){
   return Vehicles{};
 }
@@ -11,6 +13,8 @@ bool vehicleOccupied(Vehicles& vehicles, objid vehicleId){
 }
 
 void addVehicle(Vehicles& vehicles, objid vehicleId){
+  auto soundId = findChildObjBySuffix(vehicleId, "sound");
+
   vehicles.vehicles[vehicleId] = Vehicle{
     .controls = glm::vec3(0.f, -9.81f, 0.f),
     .angleControls = glm::vec2(0.f, 0.f),
@@ -25,8 +29,11 @@ void addVehicle(Vehicles& vehicles, objid vehicleId){
       .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
       .reverseCamera = false,
     },
+    .sound = soundId,
   };
-  modlog("vehicle add vehicle", std::to_string(vehicleId));
+
+
+  modlog("vehicle add vehicle", std::to_string(vehicleId) + ", sound = " + print(soundId));
 }
 
 void removeVehicle(Vehicles& vehicles, objid vehicleId){
@@ -36,16 +43,27 @@ void removeVehicle(Vehicles& vehicles, objid vehicleId){
 
 void enterVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   modassert(vehicles.vehicles.find(vehicleId) != vehicles.vehicles.end(), "vehicle does not exist");
-  bool occupied = vehicles.vehicles.at(vehicleId).occupied;
+
+  Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
+  bool occupied = vehicle.occupied;
   modassert(!occupied, "vehicle already occupied");
   vehicles.vehicles.at(vehicleId).occupied = true;
   modlog("vehicle enter vehicle", std::to_string(vehicleId));
+
+  if (vehicle.sound.has_value()){
+    playGameplayClipById(vehicle.sound.value(), std::nullopt, std::nullopt); 
+  }
+ 
 }
 
 void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   //vehicles.vehicles.at(vehicleId).occupied = false;
   modlog("vehicle exit vehicle", std::to_string(vehicleId));
-  vehicles.vehicles.at(vehicleId).occupied = false;
+  Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
+  vehicle.occupied = false;
+  if (vehicle.sound.has_value()){
+    gameapi -> stopClipById(vehicle.sound.value());
+  }
 }
 
 void onVehicleKey(Vehicles& vehicles, int key, int action){

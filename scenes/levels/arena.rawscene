@@ -1,7 +1,36 @@
 # Generated scene 
-playerspawn:playerspawn:true
-playerspawn:teleport:true
-playerspawn:position:-20 0 0
+ship:mesh:../gameresources/build/vehicles/spaceship.gltf
+ship:position:78.7 -62 0
+ship:vehicle:ship
+ship:physics:enabled
+ship:physics_type:dynamic
+
+&ship-sound:clip:../gameresources/sound/engine.ogg
+ship:child:&ship-sound
+
+platform_lowert-copy-2004538622-copy-1980783383:material:metal
+platform_lowert-copy-2004538622-copy-1980783383:texture:./res/textures/hexglow.png
+platform_lowert-copy-2004538622-copy-1980783383:texturesize:40 40
+platform_lowert-copy-2004538622-copy-1980783383:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-2004538622-copy-1980783383:physics_restitution:0.2
+platform_lowert-copy-2004538622-copy-1980783383:physics:enabled
+platform_lowert-copy-2004538622-copy-1980783383:scale:100 100 10
+platform_lowert-copy-2004538622-copy-1980783383:rotation:-9.95351e-09 1 -4.76837e-07 1.10782
+platform_lowert-copy-2004538622-copy-1980783383:position:-18 -65 -23
+spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf
+spawnpoint-2:spawn:enemy
+spawnpoint-2:position:-20 -62 0
+platform_lowert-copy-608709856:material:metal
+platform_lowert-copy-608709856:texture:./res/textures/hexglow.png
+platform_lowert-copy-608709856:scrollspeed:0 0.05 0
+platform_lowert-copy-608709856:texturesize:40 40
+platform_lowert-copy-608709856:textureoffset:0 3.8956
+platform_lowert-copy-608709856:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-608709856:physics_restitution:0.2
+platform_lowert-copy-608709856:physics:enabled
+platform_lowert-copy-608709856:scale:97 100 90
+platform_lowert-copy-608709856:rotation:-1 -7.10543e-15 1.19209e-07 360
+platform_lowert-copy-608709856:position:80 100.5 -20
 platform_lowert:material:metal
 platform_lowert:texture:./res/textures/fonts/gamefont/image.png
 platform_lowert:texturesize:40 40
@@ -10,20 +39,15 @@ platform_lowert:physics_restitution:0.2
 platform_lowert:physics:enabled
 platform_lowert:scale:100 90 10
 platform_lowert:position:-20 -5 60
-platform_lowert-copy-608709856:material:metal
-platform_lowert-copy-608709856:texture:./res/textures/hexglow.png
-platform_lowert-copy-608709856:scrollspeed:0 0.05 0
-platform_lowert-copy-608709856:texturesize:40 40
-platform_lowert-copy-608709856:textureoffset:0 2.71818
-platform_lowert-copy-608709856:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert-copy-608709856:physics_restitution:0.2
-platform_lowert-copy-608709856:physics:enabled
-platform_lowert-copy-608709856:scale:97 100 90
-platform_lowert-copy-608709856:rotation:-1 -7.10543e-15 1.19209e-07 360
-platform_lowert-copy-608709856:position:80 100.5 -20
-spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf
-spawnpoint-2:spawn:enemy
-spawnpoint-2:position:-20 -62 0
+playerspawn:teleport:true
+playerspawn:playerspawn:true
+playerspawn:position:-20 0 0
+!light:globallight:true
+!light:spin:true
+!light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
+!light:angle:-10
+!light:rotation:1 0 1.19209e-07 0
+!light:position:-12.93 -58.31 11.98
 platform_lowert-copy-2004538622:material:metal
 platform_lowert-copy-2004538622:texture:./res/textures/hexglow.png
 platform_lowert-copy-2004538622:texturesize:40 40
@@ -31,20 +55,5 @@ platform_lowert-copy-2004538622:mesh:../gameresources/build/primitives/walls/1-0
 platform_lowert-copy-2004538622:physics_restitution:0.2
 platform_lowert-copy-2004538622:physics:enabled
 platform_lowert-copy-2004538622:scale:100 100 10
-platform_lowert-copy-2004538622:rotation:-5.82077e-11 1 -5.36442e-07 359.888
+platform_lowert-copy-2004538622:rotation:0 1 -6.55651e-07 359.881
 platform_lowert-copy-2004538622:position:-20 60 -23
-platform_lowert-copy-2004538622-copy-1980783383:material:metal
-platform_lowert-copy-2004538622-copy-1980783383:texture:./res/textures/hexglow.png
-platform_lowert-copy-2004538622-copy-1980783383:texturesize:40 40
-platform_lowert-copy-2004538622-copy-1980783383:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert-copy-2004538622-copy-1980783383:physics_restitution:0.2
-platform_lowert-copy-2004538622-copy-1980783383:physics:enabled
-platform_lowert-copy-2004538622-copy-1980783383:scale:100 100 10
-platform_lowert-copy-2004538622-copy-1980783383:rotation:-4.24916e-09 1 -4.76837e-07 0.422435
-platform_lowert-copy-2004538622-copy-1980783383:position:-18 -65 -23
-!light:spin:true
-!light:globallight:true
-!light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
-!light:angle:-10
-!light:rotation:1 0 1.19209e-07 0
-!light:position:-12.93 -58.31 11.98

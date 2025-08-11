@@ -9,10 +9,10 @@ struct Vehicle {
   bool occupied;
 
   glm::vec3 controls;
-
   glm::vec2 angleControls;
-
   ThirdPersonCameraInfo managedCamera;
+
+  std::optional<objid> sound;
   
 };
 
