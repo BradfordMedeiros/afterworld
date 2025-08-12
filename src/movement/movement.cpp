@@ -508,3 +508,11 @@ void onMovementFrameLateUpdate(MovementEntityData& movementEntityData, Movement&
 void setZoomSensitivity(float multiplier){
   zoomSensitivity = multiplier;
 }
+
+void setMovementEntityRotation(MovementEntityData& movementEntityData, objid id, glm::quat rotation){
+  MovementEntity& movementEntity = movementEntityData.movementEntities.at(id);
+  gameapi -> setGameObjectRot(movementEntity.playerId, rotation, true, Hint { .hint = "movementEntity rot - setMovementEntityRotation" }); 
+  auto oldXYRot = pitchXAndYawYRadians(rotation);  // TODO - at least set this movement core area code.  at least call this "force". 
+  movementEntity.movementState.xRot = oldXYRot.x;
+  movementEntity.movementState.yRot = oldXYRot.y;    
+}

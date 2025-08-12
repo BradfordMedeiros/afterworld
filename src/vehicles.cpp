@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void disableEntity(objid id);
-void reenableEntity(objid id);
+void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
 Vehicles createVehicles(){
   return Vehicles{};
@@ -63,9 +63,11 @@ void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   modlog("vehicle exit vehicle", std::to_string(vehicleId));
   Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
 
-  auto position = gameapi -> getGameObjectPos(vehicleId, true, "[gamelogic] exit vehicle get pos");
-  reenableEntity(vehicle.occupied.value());
-  gameapi -> setGameObjectPosition(vehicle.occupied.value(), position + glm::vec3(0.f, 10.f, 0.f), true, Hint{ .hint = "[gamelogic] - exit vehicle" }); // how to handle? 
+  auto position = gameapi -> getGameObjectPos(vehicleId, true, "[gamelogic] exit vehicle get pos") + glm::vec3(0.f, 10.f, 0.f);
+  auto vehicleRot = gameapi -> getGameObjectRotation(vehicleId, true, "[gamelogic] vehicle exit get rot"); 
+
+  reenableEntity(vehicle.occupied.value(), position, vehicleRot);
+
   vehicle.occupied = std::nullopt;
   if (vehicle.sound.has_value()){
     gameapi -> stopClipById(vehicle.sound.value());

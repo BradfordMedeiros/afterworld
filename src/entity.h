@@ -70,9 +70,8 @@ std::optional<ControllableEntity*> getActiveControllable();
 
 void setEntityThirdPerson(objid id);
 void setEntityFirstPerson(objid id);
-
 void disableEntity(objid id);
-void reenableEntity(objid id);
+void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
 
 #endif 

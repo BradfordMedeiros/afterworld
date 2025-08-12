@@ -390,9 +390,21 @@ void disableEntity(objid id){
 	maybeDisableMesh(id);
 	setGameObjectPhysicsEnable(id, false);
 }
-void reenableEntity(objid id){
-	maybeReEnableMesh(id);
+void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot){
 	setGameObjectPhysicsEnable(id, true);
+	setGameObjectVelocity(id, glm::vec3(0.f, 0.f, 0.f));
+
+	auto isActivePlayer = getActivePlayerId().has_value() && getActivePlayerId().value() == id;
+	bool thirdPersonMode = getWeaponEntityData(id).thirdPersonMode;
+	if (!isActivePlayer || thirdPersonMode){
+		maybeReEnableMesh(id);
+	}
+	if (pos.has_value()){
+	  gameapi -> setGameObjectPosition(id, pos.value(), true, Hint{ .hint = "[gamelogic] - reenableEntity" });
+	}
+	if (rot.has_value()){
+		setMovementEntityRotation(getMovementData(), id, rot.value());
+	}
 }
 
 

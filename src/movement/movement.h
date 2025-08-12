@@ -70,4 +70,6 @@ void maybeRemoveMovementEntity(Movement& movement, MovementEntityData& movementE
 
 void setZoomSensitivity(float multiplier);
 
+void setMovementEntityRotation(MovementEntityData& movementEntityData, objid id, glm::quat rotation);
+
 #endif
