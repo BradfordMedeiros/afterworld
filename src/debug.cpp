@@ -362,9 +362,11 @@ void debugOnKey(int key, int scancode, int action, int mods){
   		raiseTurret(getActivePlayerId().value(), raiseUp);
   		wakeUpTv(getActivePlayerId().value(), raiseUp);  		
 
-  		auto isFalling = activePlayerFalling();
-  		setIsFalling(getActivePlayerId().value(), !isFalling.value());
+  		//auto isFalling = activePlayerFalling();
+  		//setIsFalling(getActivePlayerId().value(), !isFalling.value());
 
+  		auto isReloading = activePlayerReloading();
+  		setIsReloading(getActivePlayerId().value(), !isReloading.value());
   	}
   }
 

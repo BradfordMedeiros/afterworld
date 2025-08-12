@@ -72,6 +72,10 @@ struct MovementState {
 
   bool alive;
   bool falling;
+
+
+  std::optional<float> reloading;
+  std::optional<float> reloadingLength;
 };
 
 MovementParams* findMovementCore(std::string& name);
@@ -82,6 +86,7 @@ glm::quat weaponLookDirection(MovementState& movementState);
 
 glm::vec3 getMovementControlDataFromTargetPos(glm::vec3 targetPosition, MovementState& movementState, objid playerId, bool* atTargetPos, bool moveVertical);
 
+bool isReloading(MovementState& movementState);
 
 struct FirstPersonCameraUpdate {
   glm::quat rotation;   // rotation here means orientation

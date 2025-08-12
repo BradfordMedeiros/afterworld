@@ -46,6 +46,11 @@ void addAnimationController(StateController& controller){
    			.animationBehavior = LOOP,
    		},
    		ControllerStateAnimation {
+   			.state = getSymbol("reload"),
+   			.animation = "rifle-reload",
+   			.animationBehavior = LOOP,
+   		},
+   		ControllerStateAnimation {
    			.state = getSymbol("walking"),
    			.animation = "running",
    			.animationBehavior = LOOP,
@@ -117,6 +122,7 @@ void addAnimationController(StateController& controller){
 			StateAndTransition { .state = "die", .transition = "die" },
 
 			StateAndTransition { .state = "falling", .transition = "falling" },
+			StateAndTransition { .state = "reload", .transition = "reload" },
 
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },
@@ -157,9 +163,11 @@ void addAnimationController(StateController& controller){
    			.animation = "crawl", // make this idle
    			.animationBehavior = LOOP,
    		},
-   		
-
-
+   		ControllerStateAnimation {
+   			.state = getSymbol("reload"),
+   			.animation = "crawl", // make this idle
+   			.animationBehavior = LOOP,
+   		},  		
    		ControllerStateAnimation {
    			.state = getSymbol("walking"),
    			.animation = "crawl",
@@ -231,6 +239,7 @@ void addAnimationController(StateController& controller){
 			StateAndTransition { .state = "idle", .transition = "not-walking" },
 			StateAndTransition { .state = "die", .transition = "die" },
 			StateAndTransition { .state = "falling", .transition = "falling" },
+			StateAndTransition { .state = "reload", .transition = "reload" },
 
 			StateAndTransition { .state = "sidestep-right", .transition = "sidestep-right" },
 			StateAndTransition { .state = "sidestep-left", .transition = "sidestep-left" },

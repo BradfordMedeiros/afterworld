@@ -440,6 +440,17 @@ bool calcIfWalking(MovementState& movementState){
   return glm::abs(movementState.moveVec.x) > 0.0001 || glm::abs(movementState.moveVec.z) > 0.0001;
 }
 
+bool isReloading(MovementState& movementState){
+  if (!movementState.reloadingLength.has_value()){
+    return false;
+  }
+  if (!movementState.reloading.has_value()){
+    return false;
+  }
+  auto timeElapsed = gameapi -> timeSeconds(false) - movementState.reloading.value();
+  bool stillReloading = timeElapsed < movementState.reloadingLength.value();
+  return stillReloading;
+}
 
 struct MovementAnimationConfig {
   bool isSideStepping;
@@ -697,6 +708,15 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     }
   }
 
+  bool reloading = false;
+  if (movementState.reloading.has_value()){
+    reloading = isReloading(movementState);
+    if (!reloading){
+      movementState.reloading = std::nullopt;
+      modlog("movement", "finished reloading");
+    }    
+  }
+
 
   /// i would like the jumping animations, but haven't solved this with the other animations, since the others will preempt this
   // i could make it just not preempt this, but then it adds delay?   
@@ -714,6 +734,8 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     doAnimationTrigger(playerId, "die");
   }else if(movementState.falling){
     doAnimationTrigger(playerId, "falling");
+  }else if (reloading){  // this is kind of wrong, this needs to be blended but w/e 
+    doAnimationTrigger(playerId, "reload");
   }else{
     if (animationConfig.isWalking){
       if (!animationConfig.isHoldingGun){
@@ -797,6 +819,10 @@ MovementState getInitialMovementState(objid playerId){
   movementState.changedYVelocity = false;
   movementState.alive = true;
   movementState.falling = false;
+  movementState.reloading = std::nullopt;
+
+  // overly coupled to the animation trigger stuff, but who cares fuck it bro
+  movementState.reloadingLength = gameapi -> animationLength(playerId, "rifle-reload").value();
 
   return movementState;
 }

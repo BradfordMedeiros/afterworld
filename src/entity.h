@@ -38,6 +38,7 @@ std::optional<bool> isInShootingMode(objid id);
 void setInShootingMode(objid id, bool shootingMode);
 void setIsAlive(objid id, bool alive);
 void setIsFalling(objid id, bool falling);
+void setIsReloading(objid id, bool reloading);
 
 void maybeReEnableMesh(objid id);
 void maybeDisableMesh(objid id);
@@ -49,6 +50,7 @@ void setDisablePlayerControl(bool isDisabled);
 bool isPlayerControlDisabled();
 std::optional<bool> activePlayerAlive();
 std::optional<bool> activePlayerFalling();
+std::optional<bool> activePlayerReloading();
 
 void setActivePlayerEditorMode(bool editorMode);
 bool isInGameMode();

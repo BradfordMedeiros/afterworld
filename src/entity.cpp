@@ -146,10 +146,6 @@ void setIsAlive(objid id, bool alive){
 	movementEntity.movementState.alive = alive;
 }
 
-void setIsFalling(objid id, bool falling){
-	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
-	movementEntity.movementState.falling = falling;
-}
 
 
 bool isCamera(objid id){
@@ -259,6 +255,27 @@ std::optional<bool> activePlayerFalling(){
   auto falling = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.falling;
   return falling;
 }
+void setIsFalling(objid id, bool falling){
+	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	movementEntity.movementState.falling = falling;
+}
+
+std::optional<bool> activePlayerReloading(){
+	if (!controlledPlayer.playerId.has_value()){
+		return std::nullopt;
+	}
+	return isReloading(getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState);
+}
+void setIsReloading(objid id, bool reloading){
+	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	if (!reloading){
+		movementEntity.movementState.reloading = std::nullopt;
+	}else{
+		movementEntity.movementState.reloading = gameapi -> timeSeconds(false);
+	}
+}
+
+
 
 void setActivePlayerEditorMode(bool editorMode){
 	controlledPlayer.editorMode = editorMode;
