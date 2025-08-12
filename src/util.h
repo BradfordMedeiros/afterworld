@@ -140,6 +140,7 @@ struct ControlParams {
   bool doReleaseFromLadder;
   bool doGrind;
   bool doReverseGrind;
+  bool doReload;
   CrouchType crouchType;
 };
 

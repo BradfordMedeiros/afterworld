@@ -94,6 +94,7 @@ void setActiveMovementEntity(Movement& movement){
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.doGrind = false;
   movement.controlParams.doReverseGrind = false;
+  movement.controlParams.doReload = false;
   movement.controlParams.crouchType = CROUCH_NONE;
 }
 
@@ -210,6 +211,7 @@ Movement createMovement(){
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.doGrind = false;
   movement.controlParams.doReverseGrind = false;
+  movement.controlParams.doReload = false;
   movement.controlParams.crouchType = CROUCH_NONE;
 
   movement.disabledMeshes = {};
@@ -282,6 +284,10 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
   }
   if (isReverseGrindKey(key) && action == 1){
     movement.controlParams.doReverseGrind = true;
+    return;
+  }
+  if (isReloadKey(key) && action == 1){
+    movement.controlParams.doReload = true;
     return;
   }
 
@@ -372,6 +378,9 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
     entity.movementState.doGrind = movement.controlParams.doGrind;
     entity.movementState.doReverseGrind = movement.controlParams.doReverseGrind;
+    if (movement.controlParams.doReload && !entity.movementState.reloading.has_value()){
+      entity.movementState.reloading = gameapi -> timeSeconds(false);
+    }
     entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
     entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
     entity.movementState.crouchType = movement.controlParams.crouchType;
@@ -496,6 +505,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   movement.controlParams.doReleaseFromLadder = false;
   movement.controlParams.doGrind = false;
   movement.controlParams.doReverseGrind = false;
+  movement.controlParams.doReload = false;
   movement.controlParams.crouchType = CROUCH_NONE;
 
   return uiUpdate;

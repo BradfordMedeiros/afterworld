@@ -22,6 +22,7 @@ int modifierButton = 'I';  // shift
 int teleportButton = 'T';
 int exitTerminalButton = 'R';
 int toggleThirdPersonButton = 'O';
+int reloadButton = 'H';
 
 void setControl(int controlSymbol, int key){
 	static int jumpSymbol = getSymbol("control-jump");
@@ -40,6 +41,7 @@ void setControl(int controlSymbol, int key){
 	static int teleportSymbol = getSymbol("control-teleport");
 	static int exitTerminalSymbol = getSymbol("control-exit-terminal");
 	static int toggleThirdPersonSymbol = getSymbol("control-third-person");
+	static int reloadSymbol = getSymbol("control-reload");
 
 	if (controlSymbol == jumpSymbol){
 		jumpKey = key;
@@ -68,9 +70,11 @@ void setControl(int controlSymbol, int key){
 	}else if (controlSymbol == teleportSymbol){
 		teleportButton = key;
 	}else if (controlSymbol == exitTerminalSymbol){
-		exitTerminalSymbol = key;
+		exitTerminalButton = key;
 	}else if (controlSymbol == toggleThirdPersonSymbol){
-		toggleThirdPersonSymbol = key;
+		toggleThirdPersonButton = key;
+	}else if (controlSymbol == reloadSymbol){
+		reloadButton = key;
 	}else {
 		modassert(false, std::string("invalid control symbol: ") + nameForSymbol(controlSymbol));
 	}
@@ -127,6 +131,10 @@ bool isExitTerminalKey(int button){
 }
 bool isToggleThirdPersonKey(int button){
 	return button == toggleThirdPersonButton;
+}
+
+bool isReloadKey(int button){
+	return button == reloadButton;
 }
 
 struct HotkeyToMessage {

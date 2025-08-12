@@ -25,6 +25,7 @@ bool isModifierButton(int button);
 bool isTeleportButton(int button);
 bool isExitTerminalKey(int button);
 bool isToggleThirdPersonKey(int button);
+bool isReloadKey(int button);
 
 void handleHotkey(int key, int action);
 
