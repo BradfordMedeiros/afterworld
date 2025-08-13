@@ -525,4 +525,8 @@ void setMovementEntityRotation(MovementEntityData& movementEntityData, objid id,
   auto oldXYRot = pitchXAndYawYRadians(rotation);  // TODO - at least set this movement core area code.  at least call this "force". 
   movementEntity.movementState.xRot = oldXYRot.x;
   movementEntity.movementState.yRot = oldXYRot.y;    
+
+
+    movementEntity.managedCamera.angleX = movementEntity.movementState.xRot;
+    movementEntity.managedCamera.angleY = movementEntity.movementState.yRot;  
 }
