@@ -171,18 +171,24 @@ glm::quat weaponLookDirection(MovementState& movementState){
   auto rotation = gameapi -> setFrontDelta(forwardVec, movementState.xRot, movementState.yRot, 0, 1.f);
   return rotation;
 }
-FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams){
-  auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
+FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, std::optional<glm::vec2> newRot){
+  if (!newRot.has_value()){
+    float raw_deltax = lookParams.turnX * lookParams.elapsedTime;
+    float raw_deltay = lookParams.turnY * lookParams.elapsedTime; 
 
-  float raw_deltax = lookParams.turnX * lookParams.elapsedTime;
-  float raw_deltay = lookParams.turnY * lookParams.elapsedTime; 
+    float deltax = lookParams.ironsight ? (raw_deltax * lookParams.ironsightTurn) : raw_deltax;
+    float deltay = lookParams.ironsight ? (raw_deltay * lookParams.ironsightTurn) : raw_deltay;
 
-  float deltax = lookParams.ironsight ? (raw_deltax * lookParams.ironsightTurn) : raw_deltax;
-  float deltay = lookParams.ironsight ? (raw_deltay * lookParams.ironsightTurn) : raw_deltay;
+    movementState.xRot = limitAngle(movementState.xRot + deltax, std::nullopt, std::nullopt);
+    movementState.yRot = limitAngle(movementState.yRot + deltay, moveParams.maxAngleUp, moveParams.maxAngleDown); 
+  }else{
+    movementState.xRot = newRot.value().x;
+    movementState.yRot = newRot.value().y;
+  }
 
-  movementState.xRot = limitAngle(movementState.xRot + deltax, std::nullopt, std::nullopt);
-  movementState.yRot = limitAngle(movementState.yRot + deltay, moveParams.maxAngleUp, moveParams.maxAngleDown); 
   auto rotation = weaponLookDirection(movementState);
+
+  auto forwardVec = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
   auto rotation1 = gameapi -> setFrontDelta(forwardVec, movementState.xRot, 0, 0, 1.f);
 
   return FirstPersonCameraUpdate {
@@ -195,6 +201,11 @@ FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movement
 ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, float zoom_delta, ThirdPersonCameraInfo& thirdPersonInfo, objid id){
   thirdPersonInfo.angleX += lookParams.turnX * 0.1 /* 0.05f arbitary turn speed */;
   thirdPersonInfo.angleY += lookParams.turnY * 0.1 /* 0.05f arbitary turn speed */;
+
+
+  thirdPersonInfo.angleX = limitAngle(thirdPersonInfo.angleX, std::nullopt, std::nullopt);
+  thirdPersonInfo.angleY = limitAngle(thirdPersonInfo.angleY, moveParams.maxAngleUp, moveParams.maxAngleDown); 
+
   thirdPersonInfo.distanceFromTarget += zoom_delta;
 
   float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
@@ -621,12 +632,22 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   };
   
   CameraUpdate cameraUpdate { .thirdPerson = std::nullopt };
-  cameraUpdate.firstPerson = look(moveParams, movementState, lookParams);
+
+  std::optional<glm::vec2> thirdPersonRot;
   if (enableThirdPerson && managedCamera.thirdPersonMode){
     auto thirdPersonCameraUpdate = lookThirdPerson(moveParams, movementState, lookParams, movementState.zoom_delta, managedCamera, playerId);
     cameraUpdate.thirdPerson = thirdPersonCameraUpdate;
+    thirdPersonRot = glm::vec2(managedCamera.angleX, managedCamera.angleY);
   }
-  
+  cameraUpdate.firstPerson = look(moveParams, movementState, lookParams, thirdPersonRot);
+  if (!(enableThirdPerson && managedCamera.thirdPersonMode)){
+    managedCamera.angleX = movementState.xRot;
+    managedCamera.angleY = movementState.yRot;  
+  }
+
+  modlog("movement view first person", print(glm::vec2(movementState.xRot, movementState.yRot)));
+  modlog("movement view third person", print(glm::vec2(managedCamera.angleX, managedCamera.angleY)));
+
   bool movingDown = false;
   updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);
 
