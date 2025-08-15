@@ -395,19 +395,19 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
       }
 
-      auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
-      if (gunAimingUpdates.rightHand.has_value()){
-        gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
-      }        
-      if (gunAimingUpdates.leftHand.has_value()){
-        gameapi -> setGameObjectPosition(gunAimingUpdates.leftHand.value().id, gunAimingUpdates.leftHand.value().pos, true, Hint { .hint = "updateEntityGunPosition" });
-      }
-      if (gunAimingUpdates.neck.has_value()){
-        gameapi -> setGameObjectRot(gunAimingUpdates.neck.value().id, gunAimingUpdates.neck.value().rot, true, Hint { .hint = "updateEntityGunPosition neck" });
-      }
-      if (gunAimingUpdates.head.has_value()){
-        gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
-      }
+      //auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
+      //if (gunAimingUpdates.rightHand.has_value()){
+      //  gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
+      //}        
+      //if (gunAimingUpdates.leftHand.has_value()){
+      //  gameapi -> setGameObjectPosition(gunAimingUpdates.leftHand.value().id, gunAimingUpdates.leftHand.value().pos, true, Hint { .hint = "updateEntityGunPosition" });
+      //}
+      //if (gunAimingUpdates.neck.has_value()){
+      //  gameapi -> setGameObjectRot(gunAimingUpdates.neck.value().id, gunAimingUpdates.neck.value().rot, true, Hint { .hint = "updateEntityGunPosition neck" });
+      //}
+      //if (gunAimingUpdates.head.has_value()){
+      //  gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
+      //}
 
     }else{
       entityUpdates.push_back(EntityUpdate {
