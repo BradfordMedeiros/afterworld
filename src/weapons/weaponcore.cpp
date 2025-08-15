@@ -528,7 +528,6 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
     modlog("animation fire gun", gunCore.weaponCore -> weaponParams.fireAnimation.value());
     gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT);
   }
-  ////
 
   return true;
 }
@@ -557,17 +556,6 @@ GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, s
   return GunFireInfo { .didFire = false, .bloomAmount = bloomAmount };
 }
 
-bool swayFromMouse = true;
-glm::vec3 getSwayVelocity(objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec){
-  if (swayFromMouse){
-    debugAssertForNow(false, "sway from mouse should take into account sensitivity");
-    return glm::vec3(lookVelocity.x, lookVelocity.y, 0.f);
-  }
-  auto parentRot = gameapi -> getGameObjectRotation(playerId, false, "[gamelogic] getSwayVelocity"); // tempchecked
-  auto newPos = glm::inverse(parentRot) * movementVec;
-  return newPos;
-}
-
 
 glm::vec3 calcLocationWithRecoil(GunInstance& weaponValues, glm::vec3 pos, bool isGunZoomed){
   auto targetPos = isGunZoomed ? weaponValues.gunCore.weaponCore -> weaponParams.ironsightOffset : pos;
@@ -576,66 +564,84 @@ glm::vec3 calcLocationWithRecoil(GunInstance& weaponValues, glm::vec3 pos, bool 
   return glm::lerp(targetPos, targetPosWithRecoil, calcRecoilSlerpAmount(weaponValues.gunCore, weaponValues.gunCore.weaponCore -> weaponParams.recoilLength, true));
 }
 
+glm::vec3 smoothVelocity(glm::vec3 lookVelocity){
+  static glm::vec3 smoothedVel2(0.0f);
+  float velSmoothFactor = 8.0f; // higher = follows player movement faster
+  float dt = gameapi -> timeElapsed();
+  smoothedVel2 += (lookVelocity - smoothedVel2) * (dt * velSmoothFactor);
+
+  auto smoothedVel = smoothedVel2;
+  if (smoothedVel.x < 0.1 && smoothedVel.x > -0.1){
+    smoothedVel.x = 0;
+  }
+  if (smoothedVel.y < 0.1 && smoothedVel.y > -0.1){
+    smoothedVel.y = 0;
+  }
+  if (smoothedVel.z < 0.1 && smoothedVel.z > -0.1){
+    smoothedVel.z = 0;
+  }
+  return smoothedVel;
+}
+
+glm::vec3 createNoise(){
+  glm::vec3 noiseOffset(0.f, 0.f, 0.f);
+  float time = gameapi -> timeSeconds(false); // seconds
+  noiseOffset.x = 0.2 * sin(time * 1.3f) * 0.02f;
+  noiseOffset.y = 0.2 * cos(time * 0.7f) * 0.015f;
+  noiseOffset.z = 0.2 * sin(time * 0.9f + 2.0f) * 0.01f;
+  return noiseOffset;
+}
+
 glm::vec3 maxMagSway(0.1f, 0.1f, 0.05f);
 float zoomSpeedMultiplier = 5.f;
 float swayVelocity = 1.;
-void swayGunTranslation(GunInstance& weaponValues, glm::vec3 relVelocity, bool isGunZoomed){
-  float swayAmountX =  relVelocity.x;
-  float limitedSwayX = glm::min(maxMagSway.x, glm::max(swayAmountX, -1.f * maxMagSway.x));
+glm::vec3 swayGunTranslation(GunInstance& weaponValues, bool isGunZoomed, objid gunId, glm::vec3 lookVelocity, glm::vec3 movementVec){
+  auto smoothedVelocity = smoothVelocity(lookVelocity);
+  modlog("sway gun smooth", print(smoothedVelocity));
 
-  float swayAmountY =  relVelocity.y;
-  float limitedSwayY = glm::min(maxMagSway.y, glm::max(swayAmountY, -1.f * maxMagSway.y));
+  auto oldGunPos = gameapi -> getGameObjectPos(gunId, false, "[gamelogic] swayGunTranslation - find gun position");
 
-  float swayAmountZ =  relVelocity.z;
-  float limitedSwayZ = glm::min(maxMagSway.z, glm::max(swayAmountZ, -1.f * maxMagSway.z));  
-
+  float limitedSwayX = glm::min(maxMagSway.x, glm::max(lookVelocity.x, -1.f * maxMagSway.x));
+  float limitedSwayY = glm::min(maxMagSway.y, glm::max(lookVelocity.y, -1.f * maxMagSway.y));
+  float limitedSwayZ = glm::min(maxMagSway.z, glm::max(lookVelocity.z, -1.f * maxMagSway.z));  
   glm::vec3 targetPos(-1.f * limitedSwayX + weaponValues.gunCore.weaponCore -> weaponParams.initialGunPos.x, -1.f * limitedSwayY + weaponValues.gunCore.weaponCore -> weaponParams.initialGunPos.y, -1.f * limitedSwayZ + weaponValues.gunCore.weaponCore -> weaponParams.initialGunPos.z); 
-  
   auto targetPosWithRecoil = calcLocationWithRecoil(weaponValues, targetPos, isGunZoomed); // this should use ironsight-offset
+
+  targetPosWithRecoil += createNoise();
 
   if (weaponValues.gunCore.weaponState.gunState == GUN_LOWERING){
     targetPosWithRecoil += glm::vec3(0.f, -1.f, 0.f);
   }
 
-  auto gunId = weaponValues.gunId.value();
   auto animationRate = weaponValues.gunCore.weaponState.gunState == GUN_LOWERING ? 5.f : 3.f;
   float lerpAmount = gameapi -> timeElapsed() * swayVelocity * (isGunZoomed ? zoomSpeedMultiplier : 1.f) * animationRate;
-  auto newPos = glm::lerp(gameapi -> getGameObjectPos(gunId, false, "[gamelogic] swayGunTranslation - find gun position"), targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
-  //std::cout << "gun: targetpos: " << print(targetPosWithRecoil) << std::endl;
-  //std::cout << "gun: newpos: " << print(newPos) << std::endl;
-  gameapi -> setGameObjectPosition(gunId, newPos, false, Hint { .hint = "swayGunTranslation" });
+  auto newPos = glm::lerp(oldGunPos, targetPosWithRecoil, lerpAmount);  // probably pick a better function?  how does it feel tho
+  return newPos;
 }
 
-void swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2 lookVelocity, glm::vec3 movementVec){
-  float swayAmountX = lookVelocity.x;
-  float limitedSwayX = glm::min(maxMagSway.x, glm::max(swayAmountX, -1.f * maxMagSway.x));
+glm::quat swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2 lookVelocity, glm::vec3 movementVec, objid gunId){
+  auto oldRotation = gameapi -> getGameObjectRotation(gunId, false, "[gamelogic] swayGunRotation");
 
-  float swayAmountY = lookVelocity.y;
-  float limitedSwayY = glm::min(maxMagSway.y, glm::max(swayAmountY, -1.f * maxMagSway.y));
-  float recoilAmount =  glm::lerp(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, weaponValues.gunCore.weaponCore -> weaponParams.recoilPitchRadians, 0.f), calcRecoilSlerpAmount(weaponValues.gunCore, weaponValues.gunCore.weaponCore -> weaponParams.recoilLength, true)).y;
+  float limitedSwayX = glm::min(maxMagSway.x, glm::max(lookVelocity.x, -1.f * maxMagSway.x));
+
+  float limitedSwayY = glm::min(maxMagSway.y, glm::max(lookVelocity.y, -1.f * maxMagSway.y));
+  float recoilAmount = glm::lerp(
+    glm::vec3(0.f, 0.f, 0.f), 
+    glm::vec3(0.f, weaponValues.gunCore.weaponCore -> weaponParams.recoilPitchRadians, 0.f), 
+    calcRecoilSlerpAmount(weaponValues.gunCore, weaponValues.gunCore.weaponCore -> weaponParams.recoilLength, true)
+  ).y;
 
   float totalSwayY = limitedSwayY + recoilAmount * 5.f;
-  //std::cout << "limited sway x: " << limitedSwayX << std::endl;
-  //std::cout << "limited recoil: " << recoilAmount << std::endl;
 
-  auto oldRotation = gameapi -> getGameObjectRotation(weaponValues.gunId.value(), false, "[gamelogic] swayGunRotation"); // tempchecked
-  auto rotation = gameapi -> setFrontDelta(
-    parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), 
-    limitedSwayX /* delta yaw */, 
-    totalSwayY /* should add recoil here */, 
-    0.f, 
-    0.1f /* why 0.1f? */
-  );
+  auto rotation = gameapi -> setFrontDelta(parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), limitedSwayX, totalSwayY, 0.f, 0.1f);
   auto targetRotation = rotation * (isGunZoomed ? weaponValues.gunCore.weaponCore -> weaponParams.ironSightAngle : weaponValues.gunCore.weaponCore -> weaponParams.initialGunRot);
-  gameapi -> setGameObjectRot(  // temp checked
-    weaponValues.gunId.value(), 
-    glm::slerp(oldRotation, targetRotation, 0.1f),
-    false,
-    Hint { .hint = "swayGunRotation" }
-  );
+  auto newRotation = glm::slerp(oldRotation, targetRotation, 0.1f);
+  return newRotation;
 }
 
-bool swayRotation = true;
+bool swayTranslation = true;
+bool swayRotation = false;
+
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec){
   if (!weaponValues.gunId.has_value()){
     return;
@@ -644,10 +650,15 @@ void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::v
   bool shouldZoomGun = isGunZoomed && weaponValues.gunCore.weaponCore -> weaponParams.isIronsight;
   //modlog("weapon", "movement velocity: " + std::to_string(weapons.movementVelocity));
   //modlog("weapon", "sway velocity: " + print(swayVelocity));
-  auto swayVelocity = getSwayVelocity(playerId, lookVelocity, movementVec);
-  swayGunTranslation(weaponValues, swayVelocity, shouldZoomGun);
+
+  if (swayTranslation){
+    auto relativeMovement = glm::inverse(gameapi -> getGameObjectRotation(playerId, false, "[gamelogic] getSwayVelocity")) * movementVec;
+    auto newPos = swayGunTranslation(weaponValues, shouldZoomGun, weaponValues.gunId.value(), glm::vec3(lookVelocity.x, lookVelocity.y, 0.f), relativeMovement);
+    gameapi -> setGameObjectPosition(weaponValues.gunId.value(), newPos, false, Hint { .hint = "swayGunTranslation" }); 
+  }
   if (swayRotation){
-    swayGunRotation(weaponValues, shouldZoomGun, lookVelocity, movementVec);
+    auto newRotation = swayGunRotation(weaponValues, shouldZoomGun, lookVelocity, movementVec, weaponValues.gunId.value());
+    gameapi -> setGameObjectRot(weaponValues.gunId.value(), newRotation, false, Hint { .hint = "swayGunRotation" });
   }
 }
 
