@@ -593,6 +593,7 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
+glm::vec2 smoothVelocity(glm::vec2 lookVelocity);
 
 std::unordered_map<std::string, std::vector<TerminalDisplayType>> terminals {
   { "test", {
@@ -1894,7 +1895,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       controlledPlayer.lookVelocity = glm::vec2(movementX, movementY);
     }
     if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
-      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), xPos, yPos);
+      //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
+      glm::vec2 smoothedMovement = glm::vec2(xPos, yPos);
+      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y);
     }
 
     if (!getGlobalState().disableUiInput){

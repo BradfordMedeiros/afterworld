@@ -586,7 +586,7 @@ glm::vec3 smoothVelocity(glm::vec3 lookVelocity){
 
 glm::vec2 smoothVelocity(glm::vec2 lookVelocity){
   static glm::vec2 smoothedVel2(0.0f);
-  float velSmoothFactor = 258.0f; // higher = follows player movement faster
+  float velSmoothFactor = 20.2f; // higher = follows player movement faster
   float dt = gameapi -> timeElapsed();
   smoothedVel2 += (lookVelocity - smoothedVel2) * (dt * velSmoothFactor);
 
@@ -614,7 +614,7 @@ glm::vec3 createNoise(){
 }
 
 glm::vec3 maxMagSway(0.1f, 0.1f, 0.05f);
-glm::vec3 maxMagSwayRot(2.f, 2.f, 2.f);
+glm::vec3 maxMagSwayRot(0.2f, 0.2f, 0.2f);
 
 float zoomSpeedMultiplier = 5.f;
 float swayVelocity = 1.;
