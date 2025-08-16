@@ -614,7 +614,7 @@ glm::vec3 createNoise(){
 }
 
 glm::vec3 maxMagSway(0.1f, 0.1f, 0.05f);
-glm::vec3 maxMagSwayRot(5.f, 5.f, 5.f);
+glm::vec3 maxMagSwayRot(2.f, 2.f, 2.f);
 
 float zoomSpeedMultiplier = 5.f;
 float swayVelocity = 1.;
@@ -681,6 +681,10 @@ glm::quat springModel(glm::quat& oldRotation, glm::quat& targetRotation, glm::qu
   return targetRotation;
 }
 
+glm::quat debugModel(glm::quat& oldRotation, glm::quat& targetRotation, glm::quat& currentRotation){
+  return targetRotation;
+}
+
 
 
 glm::quat swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2 lookVelocity, glm::vec3 movementVec, objid gunId){
@@ -703,6 +707,7 @@ glm::quat swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2
   auto targetRotation = rotation * (isGunZoomed ? weaponValues.gunCore.weaponCore -> weaponParams.ironSightAngle : weaponValues.gunCore.weaponCore -> weaponParams.initialGunRot);
   
   return lerpModel(oldRotation, targetRotation);
+  //return debugModel(oldRotation, targetRotation, oldRotation);
 }
 
 
