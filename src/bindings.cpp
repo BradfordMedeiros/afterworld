@@ -53,6 +53,9 @@ struct ScenarioOptions {
 };
 
 void applyScreenshake(glm::vec3 impulse){
+  if (hasOption("no-shake")){
+    return;
+  }
   shakeImpulse = impulse;
 }
 
@@ -697,7 +700,7 @@ DebugConfig debugPrintAnimations(){
         debugConfig.data.push_back({ animation, DebugItem {
           .text = "[PLAY]",
           .onClick = [id, animation]() -> void {
-            gameapi -> playAnimation(id, animation, ONESHOT, std::nullopt);
+            gameapi -> playAnimation(id, animation, ONESHOT, std::nullopt, 0);
           },
         }});        
       }
@@ -1009,6 +1012,11 @@ void doAnimationTrigger(objid entityId, const char* transition){
     tags.animationController.pendingAnimations.insert(entityId);
   }
 }
+
+
+// gameapi -> playAnimation(id, "walk",  LOOP, std::nullopt);
+// gameapi -> playAnimation(id, "shoot", ONESHOT, { /* everything but walk */ });
+
 void doStateControllerAnimations(){
   for (auto entityId : tags.animationController.pendingAnimations){
     auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
@@ -1023,7 +1031,7 @@ void doStateControllerAnimations(){
       pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value());
 //      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, {});
 
-      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, controllableEntities.at(entityId).disableAnimationIds);  
+      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, controllableEntities.at(entityId).disableAnimationIds, 0);  
 
     }else{
       if (stateAnimationHasAnimation && !matchingAnimation){
@@ -1070,7 +1078,7 @@ AIInterface aiInterface {
     changeMovementEntityType(getMovementData(), agentId, profile);
   },
   .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
-    gameapi -> playAnimation(agentId, animation, animationType, std::nullopt);
+    gameapi -> playAnimation(agentId, animation, animationType, std::nullopt, 0);
   },
   .doDamage = doDamageMessage,
 };

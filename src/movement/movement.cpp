@@ -395,7 +395,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
       }
 
-      auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
+      /*auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
       if (gunAimingUpdates.rightHand.has_value()){
         gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
       }        
@@ -407,7 +407,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       }
       if (gunAimingUpdates.head.has_value()){
         gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
-      }
+      }*/
 
     }else{
       entityUpdates.push_back(EntityUpdate {
