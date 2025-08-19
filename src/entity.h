@@ -14,7 +14,6 @@ struct ControlledPlayer {
 	std::optional<objid> tempCamera;
 	bool editorMode;
 	bool disablePlayerControl;  // this maybe should be in global? 
-	std::set<objid> disableAnimationIds;
 };
 
 struct ControllableEntity {
@@ -22,6 +21,7 @@ struct ControllableEntity {
 	bool isAlive;
 	std::optional<objid> lookingAtVehicle;
 	std::optional<objid> vehicle;
+	std::set<objid> disableAnimationIds;
 };
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);

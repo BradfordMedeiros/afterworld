@@ -16,7 +16,6 @@ ControlledPlayer controlledPlayer {      // static-state
 	.tempCamera = std::nullopt,
 	.editorMode = false,
 	.disablePlayerControl = false,
-	.disableAnimationIds = {},
 };
 
 std::optional<objid> getPlayerId(){
@@ -33,29 +32,28 @@ std::optional<objid> findBodyPart(objid entityId, const char* part){
   } 
   return std::nullopt;
 }
-void disableEntityAnimations(objid entityId){
+
+std::set<objid> entityIdsToDisable(objid entityId){
+	std::set<objid> ids;
   auto leftHand = findBodyPart(entityId, "LeftHand");
   auto rightHand = findBodyPart(entityId, "RightHand");
   auto neck = findBodyPart(entityId, "Neck");
   auto head = findBodyPart(entityId, "Head");
   if (leftHand.has_value()){
-	  controlledPlayer.disableAnimationIds.insert(leftHand.value());
+	  ids.insert(leftHand.value());
   }
   if (rightHand.has_value()){
-	  controlledPlayer.disableAnimationIds.insert(rightHand.value());
+	  ids.insert(rightHand.value());
   }
   if (neck.has_value()){
-	  controlledPlayer.disableAnimationIds.insert(neck.value());
+	  ids.insert(neck.value());
   }
   if (head.has_value()){
-	  controlledPlayer.disableAnimationIds.insert(head.value());
+	  ids.insert(head.value());
   }
-  gameapi -> disableAnimationIds(controlledPlayer.disableAnimationIds); // maybe should just do add / remove 
+	return ids;
 }
-void reenableEntityAnimations(objid entityId){
-	controlledPlayer.disableAnimationIds.erase(entityId);
-  gameapi -> disableAnimationIds(controlledPlayer.disableAnimationIds); // maybe should just do add / remove 
-}
+
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));
   bool shouldAddWeapon = false;
@@ -68,6 +66,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
     	.isInShootingMode = true,
     	.isAlive = true,
     	.lookingAtVehicle = std::nullopt,
+    	.disableAnimationIds = entityIdsToDisable(idAdded),
     };
   }
 
@@ -75,12 +74,9 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 	  addInventory(scopenameToInventory, idAdded);
 	  addWeaponId(weapons, idAdded);
   }
-
-  disableEntityAnimations(idAdded);
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
-	reenableEntityAnimations(idRemoved);
 	if (controllableEntities.find(idRemoved) != controllableEntities.end()){
 		modlog("controllable entity removed id:", std::to_string(idRemoved));
 	}
