@@ -700,7 +700,7 @@ DebugConfig debugPrintAnimations(){
         debugConfig.data.push_back({ animation, DebugItem {
           .text = "[PLAY]",
           .onClick = [id, animation]() -> void {
-            gameapi -> playAnimation(id, animation, ONESHOT, std::nullopt, 0);
+            gameapi -> playAnimation(id, animation, ONESHOT, std::nullopt, 0, false);
           },
         }});        
       }
@@ -1031,7 +1031,7 @@ void doStateControllerAnimations(){
       pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value());
 //      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, {});
 
-      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, controllableEntities.at(entityId).disableAnimationIds, 0);  
+      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, controllableEntities.at(entityId).disableAnimationIds, 0, true);  
 
     }else{
       if (stateAnimationHasAnimation && !matchingAnimation){
@@ -1078,7 +1078,7 @@ AIInterface aiInterface {
     changeMovementEntityType(getMovementData(), agentId, profile);
   },
   .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
-    gameapi -> playAnimation(agentId, animation, animationType, std::nullopt, 0);
+    gameapi -> playAnimation(agentId, animation, animationType, std::nullopt, 0, false);
   },
   .doDamage = doDamageMessage,
 };

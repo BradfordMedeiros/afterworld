@@ -10,6 +10,7 @@ void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
 std::optional<objid> getActivePlayerId();
+std::set<objid> entityIdsToEnableForShooting(objid entityId);
 
 std::vector<WeaponCore> weaponCores = {};  // static-state
 
@@ -314,7 +315,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
     _gunInstance.gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
 
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && _gunInstance.gunId.has_value()){
-      gameapi -> playAnimation(_gunInstance.gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP, std::nullopt, 0);
+      gameapi -> playAnimation(_gunInstance.gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP, std::nullopt, 0, false);
     }
     muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId);
     if (!muzzlePointId.has_value()){
@@ -476,6 +477,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
   }
 }
 
+
 bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid> muzzleId, GunCore& gunCore, float bloomAmount, objid playerId, glm::vec3 playerPos, glm::quat playerRotation, std::vector<MaterialToParticle>& materials){  
   float now = gameapi -> timeSeconds(false);
   auto canFireGun = canFireGunNow(gunCore, now);
@@ -526,10 +528,10 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   if (gunId.has_value() && gunCore.weaponCore -> weaponParams.fireAnimation.has_value()){
     modlog("animation fire gun", gunCore.weaponCore -> weaponParams.fireAnimation.value());
-    gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT, std::nullopt, 0);
+    gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT, std::nullopt, 0, false);
   }
 
-  gameapi -> playAnimation(playerId, "rifle-fire", ONESHOT, std::nullopt, 1);
+  gameapi -> playAnimation(playerId, "rifle-fire", ONESHOT, entityIdsToEnableForShooting(playerId), 1, false);
 
   return true;
 }

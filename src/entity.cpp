@@ -33,6 +33,19 @@ std::optional<objid> findBodyPart(objid entityId, const char* part){
   return std::nullopt;
 }
 
+std::vector<objid> findBodyPartAndChilren(objid entityId, const char* part){
+  auto bodyPart = findBodyPart(entityId, part);
+  if (!bodyPart.has_value()){
+  	return {};
+  }
+  auto childIds = gameapi -> getChildrenIdsAndParent(bodyPart.value());
+  std::vector<objid> ids;
+  for (auto id : childIds){
+  	ids.push_back(id);
+  }
+  return ids;
+}
+
 std::set<objid> entityIdsToDisable(objid entityId){
 	std::set<objid> ids;
   auto leftHand = findBodyPart(entityId, "LeftHand");
@@ -53,6 +66,30 @@ std::set<objid> entityIdsToDisable(objid entityId){
   }
 	return ids;
 }
+
+std::set<objid> entityIdsToEnableForShooting(objid entityId){
+	std::set<objid> ids;
+	//{
+  //	auto newIds = findBodyPartAndChilren(entityId, "RightShoulder");
+  //	for (auto id : newIds){
+  //		ids.insert(id);
+  //	}
+	//}
+	//{
+  //	auto newIds = findBodyPartAndChilren(entityId, "LeftShoulder");
+  //	for (auto id : newIds){
+  //		ids.insert(id);
+  //	}
+	//}
+	{
+  	auto newIds = findBodyPartAndChilren(entityId, "Spine");
+  	for (auto id : newIds){
+  		ids.insert(id);
+  	}
+	}
+	return ids;
+}
+
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));
