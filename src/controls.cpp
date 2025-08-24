@@ -223,14 +223,20 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.key = '9',  
 		.action = 0,
 		.fn = []() -> void {
+			static bool setPose = false;
+			setPose = !setPose;
 			modlog("controls", "set pose");
-			const char* pose = "pose-t";
-			if (animationExists(getPlayerId().value(), pose)){
-				modlog("animation", std::string("set pose: ") + std::string(pose));
-				gameapi -> setAnimationPose(getPlayerId().value(), pose, 0.f);
+			if(setPose){
+				const char* pose = "sitting";
+				if (animationExists(getPlayerId().value(), pose)){
+					modlog("animation", std::string("set pose: ") + std::string(pose));
+					gameapi -> setAnimationPose(getPlayerId().value(), pose, 0.f);
+				}else{
+					modlog("animation", std::string("set pose does not exist: ") + std::string(pose));
+					modassert(false, "animation does not exist");
+				}
 			}else{
-				modlog("animation", std::string("set pose does not exist: ") + std::string(pose));
-				modassert(false, "animation does not exist");
+				gameapi -> clearAnimationPose(getPlayerId().value());
 			}
 		},
 	},
