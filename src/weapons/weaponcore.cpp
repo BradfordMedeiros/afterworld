@@ -315,7 +315,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
     _gunInstance.gunId = createWeaponInstance(gunCore.weaponCore -> weaponParams, sceneId, parentId, weaponName, getWeaponParentId);
 
     if (gunCore.weaponCore -> weaponParams.idleAnimation.has_value() && gunCore.weaponCore -> weaponParams.idleAnimation.value() != "" && _gunInstance.gunId.has_value()){
-      gameapi -> playAnimation(_gunInstance.gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP, std::nullopt, 0, false);
+      gameapi -> playAnimation(_gunInstance.gunId.value(), gunCore.weaponCore -> weaponParams.idleAnimation.value(), LOOP, std::nullopt, 0, false, std::nullopt);
     }
     muzzlePointId = gameapi -> getGameObjectByName(weaponName + "/muzzle", sceneId);
     if (!muzzlePointId.has_value()){
@@ -528,10 +528,10 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   if (gunId.has_value() && gunCore.weaponCore -> weaponParams.fireAnimation.has_value()){
     modlog("animation fire gun", gunCore.weaponCore -> weaponParams.fireAnimation.value());
-    gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT, std::nullopt, 0, false);
+    gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT, std::nullopt, 0, false, std::nullopt);
   }
 
-  gameapi -> playAnimation(playerId, "rifle-fire", ONESHOT, entityIdsToEnableForShooting(playerId), 1, false);
+  gameapi -> playAnimation(playerId, "rifle-fire", ONESHOT, entityIdsToEnableForShooting(playerId), 1, false, 0.1f);
 
   return true;
 }
