@@ -1,6 +1,8 @@
 #include "./weaponcore.h"
 
 extern CustomApiBindings* gameapi;
+extern bool disableAnimation;
+
 
 void doDamageMessage(objid targetId, float damage);
 int ammoForGun(objid inventory, std::string& gun);
@@ -531,7 +533,9 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
     gameapi -> playAnimation(gunId.value(), gunCore.weaponCore -> weaponParams.fireAnimation.value(), ONESHOT, std::nullopt, 0, false, std::nullopt);
   }
 
-  gameapi -> playAnimation(playerId, "rifle-fire", ONESHOT, entityIdsToEnableForShooting(playerId), 1, false, 0.1f);
+  if (!disableAnimation){
+    gameapi -> playAnimation(playerId, "rifle-fire", ONESHOT, entityIdsToEnableForShooting(playerId), 1, false, 0.1f);
+  }
 
   return true;
 }

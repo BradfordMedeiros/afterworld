@@ -44,7 +44,7 @@ void applyWaterForces(Water& water){
 
 
 			// Fluid Drag
-			auto submergedObjVelocity = getVec3Attr(submergedAttrHandle, "physics_velocity").value();
+			auto submergedObjVelocity = getGameObjectVelocity(submergedObjId);
 			//modlog("water", "submerged velocity: " + print(submergedObjVelocity));
 
 			auto crossSectionalAreaYZ = submergedHeight * submergedObjDepth;

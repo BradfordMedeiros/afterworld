@@ -152,8 +152,6 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
         setGameObjectPhysicsOptions(  // this should instead restore the properties when it was picked up
           weaponState.heldItem.value(), 
           glm::vec3(0.f, 0.f, 0.f), 
-          glm::vec3(0.f, 0.f, 0.f), 
-          glm::vec3(0.f, 0.f, 0.f), 
           glm::vec3(1.f, 1.f, 1.f), 
           glm::vec3(0.f, -9.81f, 0.f)
         );
@@ -179,8 +177,6 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
           weaponState.heldItem = hitpoint.id;
           setGameObjectPhysicsOptions(
             weaponState.heldItem.value(), 
-            glm::vec3(0.f, 0.f, 0.f), 
-            glm::vec3(0.f, 0.f, 0.f), 
             glm::vec3(0.f, 0.f, 0.f), 
             glm::vec3(1.f, 1.f, 1.f), 
             glm::vec3(0.f, 0.f, 0.f)

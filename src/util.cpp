@@ -221,12 +221,12 @@ void setGameObjectFriction(objid id, float friction){
 void setGameObjectGravity(objid id, glm::vec3 gravity){
   gameapi -> setSingleGameObjectAttr(id, "physics_gravity", gravity);
 }
-void setGameObjectVelocity(objid id, glm::vec3 velocity){
-  gameapi -> setSingleGameObjectAttr(id, "physics_velocity", velocity);
-}
+
 glm::vec3 getGameObjectVelocity(objid id){
-  auto velocity = getSingleVec3Attr(id, "physics_velocity");
-  return velocity.value();
+  return gameapi -> getPhysicsVelocity(id);
+}
+void setGameObjectVelocity(objid id, glm::vec3 velocity){
+  gameapi -> setPhysicsVelocity(id, velocity);
 }
 
 void setGameObjectTint(objid id, glm::vec4 tint){
@@ -257,12 +257,10 @@ void setGameObjectPhysics(objid id, float mass, float restitution, float frictio
     }
   );
 }
-void setGameObjectPhysicsOptions(objid id, glm::vec3 avelocity, glm::vec3 velocity, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity){
+void setGameObjectPhysicsOptions(objid id, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity){
   gameapi -> setGameObjectAttr(
     id, 
     {
-      GameobjAttribute { .field = "physics_avelocity", .attributeValue = avelocity },
-      GameobjAttribute { .field = "physics_velocity", .attributeValue = velocity },
       GameobjAttribute { .field = "physics_angle", .attributeValue = angle },
       GameobjAttribute { .field = "physics_linear", .attributeValue = linear },
       GameobjAttribute { .field = "physics_gravity", .attributeValue = gravity },

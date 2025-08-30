@@ -39,10 +39,8 @@ void onCollisionEnterSound(SoundData& sound, int32_t sceneId, int32_t obj1, int3
   auto clip = getClipForMaterial(sound, material);
   if (clip){
     playGameplayClip(std::string("&material-" + material), sceneId, std::nullopt, pos);
-    auto attr1 = getAttrHandle(obj1);
-    auto attr2 = getAttrHandle(obj2);
-    auto vel1 = getVec3Attr(attr1, "physics_velocity").value();
-    auto vel2 = getVec3Attr(attr2, "physics_velocity").value();
+    auto vel1 = getGameObjectVelocity(obj1);;
+    auto vel2 = getGameObjectVelocity(obj2);;
     std::cout << "vel1: " << print(vel1) << ", vel2: " << print(vel2) << std::endl;
   }
 }

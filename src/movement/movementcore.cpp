@@ -147,8 +147,7 @@ void updateFacingWall(MovementState& movementState, objid id){
 
 void restrictLadderMovement(MovementState& movementState, objid id, bool movingDown){
   if (movementState.attachedToLadder){
-    auto attr = getAttrHandle(id);
-    auto velocity = getVec3Attr(attr, "physics_velocity").value();
+    auto velocity = getGameObjectVelocity(id);
     if (velocity.y > 0.f){
       return;
     }
