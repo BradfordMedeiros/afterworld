@@ -160,6 +160,106 @@ bool animationExists(objid entityId, const char* animationName){
 }
 
 
+void testPhysicsObjects(){
+	static bool firstTime = true;
+
+	auto box1 = findObjByShortName("boxtest1", std::nullopt);
+	auto box2 = findObjByShortName("boxtest2", std::nullopt);
+
+	if (firstTime){
+
+		// create a custom rigidbody, not for a bone necessarily
+		rigidBodyOpts physicsOptions1 {
+		  .linear = glm::vec3(1.f, 1.f, 1.f),
+		  .angular = glm::vec3(0.f, 1.f, 0.f),
+		  .gravity = glm::vec3(0.f, -10.f, 0.f),
+		  .friction = 0.f,
+		  .restitution = 1.f,
+		  .mass = 1.f,
+		  .layer = 2,
+		  .linearDamping = 0.f,
+		  .isStatic = false,
+		  .hasCollisions = true,
+		};
+		rigidBodyOpts physicsOptions2 {
+		  .linear = glm::vec3(0.f, 0.f, 0.f),
+		  .angular = glm::vec3(0.f, 0.f, 0.f),
+		  .gravity = glm::vec3(0.f, -10.f, 0.f),
+		  .friction = 0.f,
+		  .restitution = 1.f,
+		  .mass = 100.f,
+		  .layer = 2,
+		  .linearDamping = 0.f,
+		  .isStatic = false,
+		  .hasCollisions = true,
+		};
+
+  	//BoundInfo boundInfo;
+  	//Transformation transformation;
+  	//std::optional<glm::vec3> offset;
+
+		PhysicsCreateSphere sphereShape {
+			.radius = 5.f,
+		};
+
+
+		auto box1Bounding = gameapi -> getPhysicsInfo(box1.value(), false);
+		auto boundInfo1 = box1Bounding.value().boundInfo;
+		PhysicsCreateRect rectShape1 {
+			.width = boundInfo1.xMax - boundInfo1.xMin,
+			.height = boundInfo1.yMax - boundInfo1.yMin,
+			.depth = boundInfo1.zMax - boundInfo1.zMin,
+		};
+
+		auto box2Bounding = gameapi -> getPhysicsInfo(box2.value(), false);
+		auto boundInfo2 = box2Bounding.value().boundInfo;
+		PhysicsCreateRect rectShape2 {
+			.width = boundInfo2.xMax - boundInfo2.xMin,
+			.height = boundInfo2.yMax - boundInfo2.yMin,
+			.depth = boundInfo2.zMax - boundInfo2.zMin,
+		};
+		{
+			gameapi -> createPhysicsBody(box1.value(), rectShape1);
+			gameapi -> setPhysicsOptions(box1.value(), physicsOptions1);
+		}
+		{
+			gameapi -> createPhysicsBody(box2.value(), rectShape2);
+			gameapi -> setPhysicsOptions(box2.value(), physicsOptions2);
+		}
+	}else{
+		//gameapi -> createFixedConstraint(box1.value(), box2.value());
+		gameapi -> createPointConstraint(box1.value(), box2.value());
+		//gameapi -> createHingeConstraint(box1.value(), box2.value());
+	}
+	firstTime = false;
+}
+
+void testCreateBones(){
+	auto playerModel = getPlayerId().value();
+	auto headValue = findChildObjBySuffix(playerModel, "Head");
+	auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
+	std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
+
+	PhysicsCreateSphere shape {
+  	.radius = 0.2f,
+	};
+
+	gameapi -> createPhysicsBody(headValue.value(), shape);
+	rigidBodyOpts physicsOptions {
+	  .linear = glm::vec3(1.f, 1.f, 1.f),
+	  .angular = glm::vec3(0.f, 0.f, 0.f),
+	  .gravity = glm::vec3(0.f, -9.81f, 0.f),
+	  .friction = 0.f,
+	  .restitution = 1.f,
+	  .mass = 10.f,
+	  .layer = 2,
+	  .linearDamping = 0.f,
+	  .isStatic = true,
+	  .hasCollisions = false,
+	};
+	gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);
+}
+
 std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
@@ -222,104 +322,9 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.key = '8',  
 		.action = 0,
 		.fn = []() -> void {
-			static bool firstTime = true;
+			//testPhysicsObjects();
 
-			auto box1 = findObjByShortName("boxtest1", std::nullopt);
-			auto box2 = findObjByShortName("boxtest2", std::nullopt);
-
-			if (firstTime){
-
-			// create a custom rigidbody, not for a bone necessarily
-			rigidBodyOpts physicsOptions1 {
-			  .linear = glm::vec3(1.f, 1.f, 1.f),
-			  .angular = glm::vec3(0.f, 1.f, 0.f),
-			  .gravity = glm::vec3(0.f, -10.f, 0.f),
-			  .friction = 0.f,
-			  .restitution = 1.f,
-			  .mass = 1.f,
-			  .layer = 2,
-			  .linearDamping = 0.f,
-			  .isStatic = false,
-			  .hasCollisions = true,
-			};
-			rigidBodyOpts physicsOptions2 {
-			  .linear = glm::vec3(0.f, 0.f, 0.f),
-			  .angular = glm::vec3(0.f, 0.f, 0.f),
-			  .gravity = glm::vec3(0.f, -10.f, 0.f),
-			  .friction = 0.f,
-			  .restitution = 1.f,
-			  .mass = 100.f,
-			  .layer = 2,
-			  .linearDamping = 0.f,
-			  .isStatic = false,
-			  .hasCollisions = true,
-			};
-
-
-  		//BoundInfo boundInfo;
-  		//Transformation transformation;
-  		//std::optional<glm::vec3> offset;
-
-			PhysicsCreateSphere sphereShape {
-				.radius = 5.f,
-			};
-
-
-			auto box1Bounding = gameapi -> getPhysicsInfo(box1.value(), false);
-			auto boundInfo1 = box1Bounding.value().boundInfo;
-			PhysicsCreateRect rectShape1 {
-				.width = boundInfo1.xMax - boundInfo1.xMin,
-				.height = boundInfo1.yMax - boundInfo1.yMin,
-				.depth = boundInfo1.zMax - boundInfo1.zMin,
-			};
-
-			auto box2Bounding = gameapi -> getPhysicsInfo(box2.value(), false);
-			auto boundInfo2 = box2Bounding.value().boundInfo;
-			PhysicsCreateRect rectShape2 {
-				.width = boundInfo2.xMax - boundInfo2.xMin,
-				.height = boundInfo2.yMax - boundInfo2.yMin,
-				.depth = boundInfo2.zMax - boundInfo2.zMin,
-			};
-
-			{
-				gameapi -> createPhysicsBody(box1.value(), rectShape1);
-				gameapi -> setPhysicsOptions(box1.value(), physicsOptions1);
-			}
-			{
-				gameapi -> createPhysicsBody(box2.value(), rectShape2);
-				gameapi -> setPhysicsOptions(box2.value(), physicsOptions2);
-			}
-
-			}else{
-				//gameapi -> createFixedConstraint(box1.value(), box2.value());
-				gameapi -> createPointConstraint(box1.value(), box2.value());
-				//gameapi -> createHingeConstraint(box1.value(), box2.value());
-			}
-
-
-			firstTime = false;
-			/* create a pladyer bone
-			auto playerModel = getPlayerId().value();
-			auto headValue = findChildObjBySuffix(playerModel, "Head");
-			auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
-			std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
-			gameapi -> createPhysicsBody(headValue.value());
-			rigidBodyOpts physicsOptions {
-			  .linear = glm::vec3(1.f, 1.f, 1.f),
-			  .angular = glm::vec3(0.f, 0.f, 0.f),
-			  .gravity = glm::vec3(0.f, -9.81f, 0.f),
-			  .friction = 0.f,
-			  .restitution = 1.f,
-			  .mass = 10.f,
-			  .layer = 2,
-			  .velocity= std::nullopt,
-			  .angularVelocity = std::nullopt,
-			  .linearDamping = 0.f,
-			  .isStatic = true,
-			  .hasCollision = false,
-			};
-			gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);
-			*/
+			testCreateBones();
 
 			// set pose
 			/*static bool setPose = false;
