@@ -176,7 +176,7 @@ void testPhysicsObjects(){
 		  .friction = 0.f,
 		  .restitution = 1.f,
 		  .mass = 1.f,
-		  .layer = 2,
+		  .layer = 0,
 		  .linearDamping = 0.f,
 		  .isStatic = false,
 		  .hasCollisions = true,
@@ -188,7 +188,7 @@ void testPhysicsObjects(){
 		  .friction = 0.f,
 		  .restitution = 1.f,
 		  .mass = 100.f,
-		  .layer = 2,
+		  .layer = 0,
 		  .linearDamping = 0.f,
 		  .isStatic = false,
 		  .hasCollisions = true,
@@ -234,30 +234,54 @@ void testPhysicsObjects(){
 	firstTime = false;
 }
 
+struct BoneShape {
+	std::string bone;
+	ShapeCreateType shape;
+};
 void testCreateBones(){
 	auto playerModel = getPlayerId().value();
-	auto headValue = findChildObjBySuffix(playerModel, "Head");
-	auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
-	std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
 
-	PhysicsCreateSphere shape {
-  	.radius = 0.2f,
+	std::vector<BoneShape> values = {
+		BoneShape {
+			.bone = "Hand",
+			//.shape = PhysicsCreateSphere {
+  		//	.radius = 0.5f,
+			//},
+			.shape = PhysicsCreateRect {
+  			.width = 0.2f,
+  			.height = 0.2f,
+  			.depth = 0.2f,
+			},
+		},
+		BoneShape {
+			.bone = "Head",
+			.shape = PhysicsCreateSphere {
+  			.radius = 0.5f,
+			},
+		},
 	};
 
-	gameapi -> createPhysicsBody(headValue.value(), shape);
-	rigidBodyOpts physicsOptions {
-	  .linear = glm::vec3(1.f, 1.f, 1.f),
-	  .angular = glm::vec3(0.f, 0.f, 0.f),
-	  .gravity = glm::vec3(0.f, -9.81f, 0.f),
-	  .friction = 0.f,
-	  .restitution = 1.f,
-	  .mass = 10.f,
-	  .layer = 2,
-	  .linearDamping = 0.f,
-	  .isStatic = true,
-	  .hasCollisions = false,
-	};
-	gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);
+	for (auto &value : values){
+		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
+		auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
+		std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
+
+		gameapi -> createPhysicsBody(headValue.value(), value.shape);
+		rigidBodyOpts physicsOptions {
+		  .linear = glm::vec3(1.f, 1.f, 1.f),
+		  .angular = glm::vec3(0.f, 0.f, 0.f),
+		  .gravity = glm::vec3(0.f, -9.81f, 0.f),
+		  .friction = 0.f,
+		  .restitution = 1.f,
+		  .mass = 0.f,
+		  .layer = 0,
+		  .linearDamping = 0.f,
+		  .isStatic = true,
+		  .hasCollisions = false,
+		};
+		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
+	}
+
 }
 
 std::vector<HotkeyToMessage> hotkeys = {
@@ -323,7 +347,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.action = 0,
 		.fn = []() -> void {
 			//testPhysicsObjects();
-
 			testCreateBones();
 
 			// set pose

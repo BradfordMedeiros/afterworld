@@ -261,8 +261,13 @@ void updateCrouch(MovementParams& moveParams, MovementState& movementState, obji
 }
 
 bool isCollideable(objid id){
+  auto layer = gameapi -> physicsLayer(id);
+  if (layer.has_value() && layer.value() == 0){
+    return false;
+  }
   auto attrHandle = getAttrHandle(id);
-  return getBoolAttr(attrHandle, "physics_collision").value();
+  auto shouldCollide = getBoolAttr(attrHandle, "physics_collision").value();
+  return shouldCollide;
 }
 
 bool shouldStepUp(objid id){ // check this logic 
