@@ -1228,6 +1228,36 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
   std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
 }
 
+void objectRemoved(objid idRemoved){
+  if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
+    controlledPlayer.playerId = std::nullopt;
+  }
+  if (controlledPlayer.activePlayerManagedCameraId.has_value() && controlledPlayer.activePlayerManagedCameraId.value() == idRemoved){
+    controlledPlayer.activePlayerManagedCameraId = std::nullopt;
+  }
+  if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == idRemoved){
+    controlledPlayer.tempCamera = std::nullopt;
+  }
+
+  maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
+
+  auto playerKilled = onActivePlayerRemoved(idRemoved);
+  if (playerKilled){
+    displayGameOverMenu();
+  }
+  onMainUiObjectsChanged();
+  if (controlledPlayer.playerId.has_value()){
+    if (controlledPlayer.playerId.value() == idRemoved){
+      modlog("weapons", "remove player");
+      controlledPlayer.playerId = std::nullopt;
+    }
+  }
+
+  onObjectRemovedWater(water, idRemoved);
+  handleTagsOnObjectRemoved(tags, idRemoved);
+  onObjRemoved(aiData, idRemoved);
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1988,36 +2018,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onObjAdded(aiData, idAdded);
   };
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
-    GameState* gameState = static_cast<GameState*>(data);
-
     modlog("objchange onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
-
-    if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
-      controlledPlayer.playerId = std::nullopt;
-    }
-    if (controlledPlayer.activePlayerManagedCameraId.has_value() && controlledPlayer.activePlayerManagedCameraId.value() == idRemoved){
-      controlledPlayer.activePlayerManagedCameraId = std::nullopt;
-    }
-    if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == idRemoved){
-      controlledPlayer.tempCamera = std::nullopt;
-    }
-
-    maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
-    auto playerKilled = onActivePlayerRemoved(idRemoved);
-    if (playerKilled){
-      displayGameOverMenu();
-    }
-    onMainUiObjectsChanged();
-    if (controlledPlayer.playerId.has_value()){
-      if (controlledPlayer.playerId.value() == idRemoved){
-        modlog("weapons", "remove player");
-        controlledPlayer.playerId = std::nullopt;
-      }
-    }
-
-    onObjectRemovedWater(water, idRemoved);
-    handleTagsOnObjectRemoved(tags, idRemoved);
-    onObjRemoved(aiData, idRemoved);
+    objectRemoved(idRemoved);
   };
 
   return binding;
