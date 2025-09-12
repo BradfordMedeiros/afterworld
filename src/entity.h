@@ -76,5 +76,7 @@ void setEntityFirstPerson(objid id);
 void disableEntity(objid id);
 void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
+void createHitbox(objid id);
+void enterRagdoll(objid id);
 
 #endif 

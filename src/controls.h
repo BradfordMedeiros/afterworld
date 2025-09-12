@@ -6,7 +6,6 @@
 #include "./weapons/weapon.h"
 #include "./in-game-ui.h"
 
-
 bool isJumpKey(int key);
 bool isGrindKey(int key);
 bool isReverseGrindKey(int key);

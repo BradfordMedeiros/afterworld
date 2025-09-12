@@ -5,6 +5,8 @@ extern Weapons weapons;
 extern Movement movement;
 
 MovementEntityData& getMovementData();
+void objectRemoved(objid idRemoved);
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 
 extern std::unordered_map<objid, ControllableEntity> controllableEntities;  // static-state extern
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
@@ -458,4 +460,109 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 }
 
 
+/////////////////////
 
+struct BoneShape {
+	std::string bone;
+	ShapeCreateType shape;
+};
+std::vector<BoneShape> boneValues = {
+	BoneShape {
+		.bone = "Hand",
+		//.shape = PhysicsCreateSphere {
+ 		//	.radius = 0.5f,
+		//},
+		.shape = PhysicsCreateRect {
+ 			.width = 0.2f,
+ 			.height = 0.2f,
+ 			.depth = 0.2f,
+		},
+	},
+	BoneShape {
+		.bone = "Hips",
+		//.shape = PhysicsCreateSphere {
+ 		//	.radius = 0.5f,
+		//},
+		.shape = PhysicsCreateRect {
+ 			.width = 0.2f,
+ 			.height = 0.2f,
+ 			.depth = 0.2f,
+		},
+	},
+	BoneShape {
+		.bone = "LeftUpLeg",
+		//.shape = PhysicsCreateSphere {
+ 		//	.radius = 0.5f,
+		//},
+		.shape = PhysicsCreateRect {
+ 			.width = 0.2f,
+ 			.height = 0.2f,
+ 			.depth = 0.2f,
+		},
+	},
+	BoneShape {
+		.bone = "RightUpLeg",
+		//.shape = PhysicsCreateSphere {
+ 		//	.radius = 0.5f,
+		//},
+		.shape = PhysicsCreateRect {
+ 			.width = 0.2f,
+ 			.height = 0.2f,
+ 			.depth = 0.2f,
+		},
+	},
+	BoneShape {
+		.bone = "Head",
+		.shape = PhysicsCreateSphere {
+ 			.radius = 0.5f,
+		},
+	},
+};
+
+void createHitbox(objid playerModel){
+	for (auto &value : boneValues){
+		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
+		auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
+		std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
+
+		gameapi -> createPhysicsBody(headValue.value(), value.shape);
+		rigidBodyOpts physicsOptions {
+	    .linear = glm::vec3(1.f, 1.f, 1.f),
+	    .angular = glm::vec3(0.f, 0.f, 0.f),
+	    .gravity = glm::vec3(0.f, -9.f, 0.f),
+	    .friction = 1.f,
+	    .restitution = 1.f,
+	    .mass = 1.f,
+	    .layer = 0,
+	    .linearDamping = 0.f,
+	    .isStatic = true,
+	    .hasCollisions = false,
+		};
+		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
+	}
+}
+
+void enterRagdoll(objid playerModel){
+	objectRemoved(playerModel);
+	setGameObjectPhysicsEnable(playerModel, false);
+
+	for (auto &value : boneValues){
+		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
+		auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
+		std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
+
+		rigidBodyOpts physicsOptions {
+		  .linear = glm::vec3(1.f, 1.f, 1.f),
+		  .angular = glm::vec3(0.f, 0.f, 0.f),
+		  .gravity = glm::vec3(0.f, -9.81f, 0.f),
+		  .friction = 5.f,
+		  .restitution = 1.f,
+		  .mass = 1.f,
+		  .layer = 0,
+		  .linearDamping = 0.f,
+		  .isStatic = false,
+		  .hasCollisions = true,
+		};
+		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
+	}
+}
