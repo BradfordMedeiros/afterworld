@@ -79,4 +79,13 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 void createHitbox(objid id);
 void enterRagdoll(objid id);
 
+struct RigHit {
+	bool isHeadShot;
+	objid mainId;
+};
+
+std::string print(RigHit& righit);
+std::optional<RigHit> handleRigHit(objid id);
+
+
 #endif 

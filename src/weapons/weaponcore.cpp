@@ -416,7 +416,12 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
 
 void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos, glm::quat cameraRotation){
   auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset, playerId);
-  modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()));
+
+  std::string raycastHits = "";
+  for (auto &hitpoint : hitpoints){
+    raycastHits += gameapi -> getGameObjNameForId(hitpoint.id).value() + " ";
+  }
+  modlog("weapons", "fire raycast, total hits = " + std::to_string(hitpoints.size()) + " " + raycastHits);
 
   for (auto &hitpoint : hitpoints){
     drawDebugRaycast(cameraPos, hitpoint.point, playerId);

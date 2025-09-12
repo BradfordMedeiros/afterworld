@@ -566,3 +566,24 @@ void enterRagdoll(objid playerModel){
 		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
 	}
 }
+
+std::string print(RigHit& righit){
+	std::string value = "";
+	value += std::string("headshot: ") + (righit.isHeadShot ? "true" : "false");
+	return value;
+}
+std::optional<RigHit> handleRigHit(objid id) {
+	auto groupId = gameapi -> groupId(id);
+	auto isControllable = controllableEntityExists(groupId);
+	if (!isControllable){
+		return std::nullopt;
+	}
+	auto objectName = gameapi -> getGameObjNameForId(id).value();
+	auto isHead = objectName.find("Head") != std::string::npos;
+	std::cout << "doDamage: is head: " << (isHead ? "true" : "false") << std::endl;
+
+	return RigHit {
+		.isHeadShot = isHead,
+		.mainId = groupId,
+	};
+}

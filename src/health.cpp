@@ -40,7 +40,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 		modlog("health", "not an enemy with tracked health: " + std::to_string(id) + ", " + gameapi -> getGameObjNameForId(id).value());
 		return false;
 	}
-	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount));
+	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount) + " " + gameapi -> getGameObjNameForId(id).value());
 
 	auto activePlayerId = getActivePlayerId();
 	float adjustedDamageAmount = (getGlobalState().godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
@@ -135,7 +135,16 @@ void onNoHealth(objid targetId, float remainingHealth){
   }
 }
 
-void doDamageMessage(objid targetId, float damageAmount){
+void doDamageMessageInner(objid id, float damageAmount){
+	auto targetId = id;
+
+	auto objectName = gameapi -> getGameObjNameForId(id).value();
+	auto isHead = objectName.find("Head") != std::string::npos;
+	std::cout << "doDamage: is head: " << (isHead ? "true" : "false") << std::endl;
+	// should check if this is part of a rig 
+	// is head
+	// 
+
   bool enemyDead = false;
   float remainingHealth = 0.f;
   bool valid = doDamage(hitpoints, targetId, damageAmount, &enemyDead, &remainingHealth);
@@ -156,6 +165,16 @@ void doDamageMessage(objid targetId, float damageAmount){
   if (hitpoints.has_value()){
 	  updateHealth(waypoints, targetId, hitpoints.value().current / hitpoints.value().total);
   }
+}
+
+void doDamageMessage(objid id, float damageAmount){
+	auto rig = handleRigHit(id);
+	if (rig.has_value()){
+		std::cout << "rig data: " << print(rig.value()) << std::endl;
+	}else{
+		std::cout << "rig data: not a rig" << std::endl;
+	}
+	doDamageMessageInner(id, damageAmount);
 }
 
 std::optional<HitPoints> getHealth(objid id){
