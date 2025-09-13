@@ -385,15 +385,15 @@ bool canFireGunNow(GunCore& gunCore, float elapsedMilliseconds){
 
 // fires from point of view of the camera
 float maxRaycastDistance = 500.f;
-std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjPos, glm::quat mainobjRotation){
+std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 mainobjPos, glm::quat mainobjRotation, std::optional<int> mask){
   auto orientationOffsetQuat = gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), orientationOffset);
   auto rot = mainobjRotation *  orientationOffsetQuat;
-  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance);
+  auto hitpoints =  gameapi -> raycast(mainobjPos, rot, maxRaycastDistance, mask);
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
-  auto hitpoints = doRaycast(orientationOffset, cameraPos, cameraRotation);
+std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRotation, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint, std::optional<int> mask){
+  auto hitpoints = doRaycast(orientationOffset, cameraPos, cameraRotation, mask);
   if (hitpoints.size() > 0){
     auto closestIndex = closestHitpoint(hitpoints, cameraPos, excludeHitpoint);
     if (!closestIndex.has_value()){
@@ -404,10 +404,10 @@ std::vector<HitObject> doRaycastClosest(glm::vec3 cameraPos, glm::quat cameraRot
   return hitpoints;
 }
 
-std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint){
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint, std::optional<int> mask){
   auto mainobjPos = gameapi -> getGameObjectPos(playerId, true, "[gamelogic] doRaycastClosest pos");
   auto mainobjRotation = gameapi -> getGameObjectRotation(playerId, true, "[gamelogic] doRaycastClosest rot"); // tempchecked
-  return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset, excludeHitpoint); 
+  return doRaycastClosest(mainobjPos, mainobjRotation, orientationOffset, excludeHitpoint, mask); 
 }
 
 glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
@@ -415,7 +415,8 @@ glm::vec3 zFightingForParticle(glm::vec3 pos, glm::quat normal){
 }
 
 void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, std::vector<MaterialToParticle>& materials, glm::vec3 cameraPos, glm::quat cameraRotation){
-  auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset, playerId);
+  int mask = bonesAndObjects();
+  auto hitpoints = doRaycastClosest(cameraPos, cameraRotation, orientationOffset, playerId, mask);
 
   std::string raycastHits = "";
   for (auto &hitpoint : hitpoints){

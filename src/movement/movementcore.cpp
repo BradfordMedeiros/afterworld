@@ -132,7 +132,7 @@ void updateFacingWall(MovementState& movementState, objid id){
   auto rot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] updateFacingWall getRot");  // tempchecked
   //  (define shotangle (if (should-zoom) rot (with-bloom rot)))
 
-  auto hitpoints = gameapi -> raycast(mainobjPos, rot, 2.f);
+  auto hitpoints = gameapi -> raycast(mainobjPos, rot, 2.f, std::nullopt);
   auto hitpointIndex =  closestHitpoint(hitpoints, mainobjPos, std::nullopt);
 
   if (hitpointIndex.has_value()){
@@ -242,7 +242,7 @@ float getPlayerTop(glm::vec3 playerPos){
 bool somethingAbovePlayer(glm::vec3 playerPos){
   auto abovePlayer = getPlayerTop(playerPos);
   playerPos.y = abovePlayer;
-  auto hitpoints =  gameapi -> raycast(playerPos, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), 0.6f);
+  auto hitpoints =  gameapi -> raycast(playerPos, gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)), 0.6f, std::nullopt);
   return hitpoints.size() > 0;
 }
 void updateCrouch(MovementParams& moveParams, MovementState& movementState, objid id){
@@ -284,8 +284,8 @@ bool shouldStepUp(objid id){ // check this logic
   auto belowDir = gameapi -> orientationFromPos(belowPos, belowPosSameHeight);
   auto aboveDir = gameapi -> orientationFromPos(abovePos, abovePosSameHeight);
 
-  auto belowHitpoints = gameapi -> raycast(belowPos, belowDir, 2.f);
-  auto aboveHitpoints = gameapi -> raycast(abovePos, aboveDir, 2.f);
+  auto belowHitpoints = gameapi -> raycast(belowPos, belowDir, 2.f, std::nullopt);
+  auto aboveHitpoints = gameapi -> raycast(abovePos, aboveDir, 2.f, std::nullopt);
 
   bool anyCollideableBelow = false;
   for (auto &hitpoint : belowHitpoints){

@@ -134,7 +134,7 @@ void setEntityTargetRotation(MovementEntityData& movementEntityData, objid id, s
 
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId){
   auto currentTransform = gameapi -> getCameraTransform();
-  auto hitpoints = gameapi -> raycast(currentTransform.position, currentTransform.rotation, 100.f);
+  auto hitpoints = gameapi -> raycast(currentTransform.position, currentTransform.rotation, 100.f, std::nullopt);
 
   if (hitpoints.size() > 0){
     glm::vec3 location = hitpoints.at(0).point;

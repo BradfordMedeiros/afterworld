@@ -171,6 +171,9 @@ void doDamageMessage(objid id, float damageAmount){
 	auto rig = handleRigHit(id);
 	if (rig.has_value()){
 		std::cout << "rig data: " << print(rig.value()) << std::endl;
+		if (rig.value().isHeadShot){
+			enterRagdoll(rig.value().mainId);
+		}
 	}else{
 		std::cout << "rig data: not a rig" << std::endl;
 	}

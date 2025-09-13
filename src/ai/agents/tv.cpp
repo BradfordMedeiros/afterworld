@@ -80,7 +80,7 @@ std::vector<Goal> getGoalsForTvAgent(WorldInfo& worldInfo, Agent& agent){
 std::optional<float> heightAboveGround(Agent& agent){
   auto position = gameapi -> getGameObjectPos(agent.id, true, "[gamelogic] agents - tv - heightAboveGround");
   auto rotation = gameapi -> orientationFromPos(position, position + glm::vec3(0.f, -10.f, 0.f));
-  auto hitpoints = gameapi -> raycast(position, rotation, 100.f);
+  auto hitpoints = gameapi -> raycast(position, rotation, 100.f, std::nullopt);
 
   std::optional<float> minDistance;
   for (auto &hitpoint : hitpoints){

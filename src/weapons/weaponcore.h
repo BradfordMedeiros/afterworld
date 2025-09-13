@@ -6,6 +6,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../resources/materials.h"
+#include "../resources/layer.h"
 
 struct WeaponParams {
   // gun intrinsic stuff
@@ -113,8 +114,8 @@ struct AmmoInfo {
 
 void saveGunTransform(GunInstance& weaponValues);
 
-std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 pos, glm::quat rotation);
-std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint);
+std::vector<HitObject> doRaycast(glm::vec3 orientationOffset, glm::vec3 pos, glm::quat rotation, std::optional<int> mask);
+std::vector<HitObject> doRaycastClosest(objid playerId, glm::vec3 orientationOffset, std::optional<objid> excludeHitpoint, std::optional<int> mask);
 
 struct GunFireInfo {
   bool didFire;
