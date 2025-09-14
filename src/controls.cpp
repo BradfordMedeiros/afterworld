@@ -303,6 +303,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 
 			static bool bonesCreated = false;
 			if (!bonesCreated){
+				printLayerInfo();
 				createHitbox(getPlayerId().value());
 				bonesCreated = true;
 			}else{

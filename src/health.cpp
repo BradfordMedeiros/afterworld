@@ -173,6 +173,9 @@ void doDamageMessage(objid id, float damageAmount){
 		std::cout << "rig data: " << print(rig.value()) << std::endl;
 		if (rig.value().isHeadShot){
 			enterRagdoll(rig.value().mainId);
+			doDamageMessageInner(rig.value().mainId, damageAmount);
+			return;
+
 		}
 	}else{
 		std::cout << "rig data: not a rig" << std::endl;

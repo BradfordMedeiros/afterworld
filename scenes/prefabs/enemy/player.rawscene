@@ -11,6 +11,7 @@ maincamera:physics_type:dynamic
 maincamera:physics_shape:shape_sphere
 
 maincamera:physics_mass:5
+maincamera:physics_layer:8
 
 
 #maincamera:team:red
