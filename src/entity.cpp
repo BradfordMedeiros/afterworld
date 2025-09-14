@@ -558,7 +558,7 @@ void enterRagdoll(objid playerModel){
 		  .friction = 5.f,
 		  .restitution = 1.f,
 		  .mass = 1.f,
-		  .layer = physicsLayers.bones,
+		  .layer = physicsLayers.bonesDynamic,
 		  .linearDamping = 0.f,
 		  .isStatic = false,
 		  .hasCollisions = true,

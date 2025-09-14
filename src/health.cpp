@@ -4,6 +4,8 @@ extern CustomApiBindings* gameapi;
 extern Waypoints waypoints;
 extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
 
+bool enableRagdollKill = true;
+
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void onAiHealthChange(objid targetId, float remainingHealth);
 void setIsAlive(objid id, bool alive);
@@ -78,6 +80,10 @@ void onNoHealth(objid targetId, float remainingHealth){
   }
   if (hasKillTag && remainingHealth > -100.f){
   	setIsAlive(targetId, false);
+  	if (enableRagdollKill){
+			enterRagdoll(targetId);
+  	}
+
   	return;
   }
 
@@ -172,10 +178,8 @@ void doDamageMessage(objid id, float damageAmount){
 	if (rig.has_value()){
 		std::cout << "rig data: " << print(rig.value()) << std::endl;
 		if (rig.value().isHeadShot){
-			enterRagdoll(rig.value().mainId);
 			doDamageMessageInner(rig.value().mainId, damageAmount);
 			return;
-
 		}
 	}else{
 		std::cout << "rig data: not a rig" << std::endl;
