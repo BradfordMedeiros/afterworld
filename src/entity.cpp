@@ -107,12 +107,25 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
     	.lookingAtVehicle = std::nullopt,
     	.disableAnimationIds = entityIdsToDisable(idAdded),
     };
+
   }
 
   if (shouldAddWeapon){
 	  addInventory(scopenameToInventory, idAdded);
 	  addWeaponId(weapons, idAdded);
+
+    createHitbox(idAdded);
+
+	  gameapi -> schedule(0.1f, true, 0, NULL, [idAdded](void*) -> void {
+	  	auto playerId = getPlayerId().value();
+
+      std::cout << "create hitbox: " << idAdded << ", player = " << playerId << std::endl;
+    });        
+    
+
   }
+
+
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
@@ -432,10 +445,10 @@ std::optional<ControllableEntity*> getActiveControllable(){
 }
 
 void setEntityThirdPerson(objid id){
-	maybeReEnableMesh(id);
+	//maybeReEnableMesh(id);
 }
 void setEntityFirstPerson(objid id){
-	maybeDisableMesh(id);
+	//maybeDisableMesh(id);
 }
 
 void disableEntity(objid id){
@@ -558,7 +571,7 @@ void enterRagdoll(objid playerModel){
 		  .friction = 5.f,
 		  .restitution = 1.f,
 		  .mass = 1.f,
-		  .layer = physicsLayers.bonesDynamic,
+		  .layer = physicsLayers.bones,
 		  .linearDamping = 0.f,
 		  .isStatic = false,
 		  .hasCollisions = true,
