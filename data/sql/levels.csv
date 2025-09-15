@@ -9,7 +9,7 @@ filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING,ambi
 ../afterworld/scenes/levels/story.rawscene,story end,story-end,Return home.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ../afterworld/scenes/levels/arena.rawscene,arena,arena,arena style arcade survival,../afterworld/design/storyboard/hell.jpg,0.6 0.6 0.6,1 1 1,../gameresources/skybox/space1,../gameresources/sound/space.ogg
 ../afterworld/scenes/levels/level2.rawscene,level2,level2,level2 test,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
-../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg,0.2 0.2 0.2,0.8 0.8 0.8,./res/textures/skyboxs/sky/,../gameresources/sound/rain.wav
+../afterworld/scenes/hub.rawscene,Hub,hub,Hub world.,./res/textures/wood.jpg,0.2 0.2 0.2,0.8 0.8 0.8,./res/textures/skyboxs/sky/,../gameresources/sound/space.ogg
 ../afterworld/scenes/empty.rawscene,Empty,empty,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,../gameresources/skybox/storm,../gameresources/sound/rain.wav
 ../afterworld/scenes/sandbox.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ./res/scenes/features/scenegraph/child.p.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
