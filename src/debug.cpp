@@ -376,7 +376,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
   if (key == 'R' && action == 1) {
   	if (getActivePlayerId().has_value()){
-	  	setIsAlive(getActivePlayerId().value(), false);
+	  	//setIsAlive(getActivePlayerId().value(), false);
   	}
   //  changeGameType(gametypeSystem, "targetkill");
   }

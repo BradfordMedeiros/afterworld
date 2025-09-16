@@ -118,7 +118,6 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 
 	  gameapi -> schedule(0.1f, true, 0, NULL, [idAdded](void*) -> void {
 	  	auto playerId = getPlayerId().value();
-
       std::cout << "create hitbox: " << idAdded << ", player = " << playerId << std::endl;
     });        
     
