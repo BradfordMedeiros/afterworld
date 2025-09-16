@@ -47,6 +47,9 @@ void maybeDisableMesh(objid id);
 
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id);
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
+void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id);
+void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData);
+
 bool onActivePlayerRemoved(objid id);
 void setDisablePlayerControl(bool isDisabled);
 bool isPlayerControlDisabled();

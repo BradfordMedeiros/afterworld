@@ -244,11 +244,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
 
-	if (controlledPlayer.playerId.has_value()){
-		removeFromRace(controlledPlayer.playerId.value());
-	}
 	controlledPlayer.playerId = id.value();
-  addToRace(id.value());
 
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
@@ -260,6 +256,34 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
   setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
+}
+
+void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
+	if (!id.has_value()){
+		return;
+	}
+	if (controlledPlayer.playerId.has_value()){
+    maybeReEnableAi(aiData, controlledPlayer.playerId.value());
+	}
+	setActiveMovementEntity(movement);
+	maybeDisableAi(aiData, id.value());
+	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
+		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
+	}
+
+	controlledPlayer.playerId = id.value();
+
+  GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id.value()), std::string(">gen-player-camera-") + uniqueNameSuffix(), attr, submodelAttributes).value();
+  gameapi -> makeParent(cameraId, id.value());
+  controlledPlayer.activePlayerManagedCameraId = cameraId;
+
+  updateCamera();
+}
+void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
+	observePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
 }
 
 std::optional<objid> getActivePlayerId(){

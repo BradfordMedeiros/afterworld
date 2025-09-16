@@ -1742,6 +1742,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == '-' && action == 0){
       setActivePlayerNext(movement, weapons, aiData);
     }
+    if (key == '=' && action == 0){
+      observePlayerNext(movement, weapons, aiData);
+    }
 
     onVehicleKey(vehicles, key, action);
 
