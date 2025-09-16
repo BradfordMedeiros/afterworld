@@ -237,7 +237,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	if (controlledPlayer.playerId.has_value()){
     maybeReEnableAi(aiData, controlledPlayer.playerId.value());
 	}
-	setActiveMovementEntity(movement);
+	setActiveMovementEntity(movement, false);
 	maybeDisableAi(aiData, id.value());
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
@@ -262,11 +262,9 @@ void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::op
 	if (!id.has_value()){
 		return;
 	}
-	if (controlledPlayer.playerId.has_value()){
-    maybeReEnableAi(aiData, controlledPlayer.playerId.value());
-	}
-	setActiveMovementEntity(movement);
-	maybeDisableAi(aiData, id.value());
+
+	setActiveMovementEntity(movement, true);
+
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;

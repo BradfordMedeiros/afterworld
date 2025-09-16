@@ -57,7 +57,7 @@ struct EntityUpdate {
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& entityUpdates);
 void onMovementFrameLateUpdate(MovementEntityData& movementEntityData, Movement& movement, objid activeId);
 
-void setActiveMovementEntity(Movement& movement);
+void setActiveMovementEntity(Movement& movement, bool observeMode);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);

@@ -142,6 +142,7 @@ struct ControlParams {
   bool doReverseGrind;
   bool doReload;
   CrouchType crouchType;
+  bool observeMode;
 };
 
 struct ThirdPersonCameraInfo {

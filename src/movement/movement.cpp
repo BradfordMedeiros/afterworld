@@ -81,7 +81,7 @@ void reloadSettingsConfig(Movement& movement, std::string name){
   movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
 }
 
-void setActiveMovementEntity(Movement& movement){
+void setActiveMovementEntity(Movement& movement, bool observeMode){
   movement.controlParams.goForward = false;
   movement.controlParams.goBackward = false;
   movement.controlParams.goLeft = false;
@@ -96,6 +96,7 @@ void setActiveMovementEntity(Movement& movement){
   movement.controlParams.doReverseGrind = false;
   movement.controlParams.doReload = false;
   movement.controlParams.crouchType = CROUCH_NONE;
+  movement.controlParams.observeMode = observeMode;
 }
 
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
@@ -213,6 +214,7 @@ Movement createMovement(){
   movement.controlParams.doReverseGrind = false;
   movement.controlParams.doReload = false;
   movement.controlParams.crouchType = CROUCH_NONE;
+  movement.controlParams.observeMode = false;
 
   movement.disabledMeshes = {};
 
@@ -369,58 +371,58 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
   {
-    MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
-    entity.movementState.moveVec = getMovementControlData(movement.controlParams, *entity.moveParams);;
-    entity.movementState.speed = 1.f;
-    entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
-    entity.movementState.doJump = movement.controlParams.doJump;
-    entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
-    entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
-    entity.movementState.doGrind = movement.controlParams.doGrind;
-    entity.movementState.doReverseGrind = movement.controlParams.doReverseGrind;
-    if (movement.controlParams.doReload && !entity.movementState.reloading.has_value()){
-      entity.movementState.reloading = gameapi -> timeSeconds(false);
-    }
-    entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
-    entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
-    entity.movementState.crouchType = movement.controlParams.crouchType;
-
-    // should take the rotation and direct and stuff from where the player is looking
-    auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId), activeId == entity.playerId);
-    uiUpdate.velocity = entity.movementState.velocity;
-    uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
-
-    if (cameraUpdate.thirdPerson.has_value()){
-      if (entity.movementState.alive){
-        gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
+    if (!movement.controlParams.observeMode){
+      MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+      entity.movementState.moveVec = getMovementControlData(movement.controlParams, *entity.moveParams);;
+      entity.movementState.speed = 1.f;
+      entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+      entity.movementState.doJump = movement.controlParams.doJump;
+      entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
+      entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
+      entity.movementState.doGrind = movement.controlParams.doGrind;
+      entity.movementState.doReverseGrind = movement.controlParams.doReverseGrind;
+      if (movement.controlParams.doReload && !entity.movementState.reloading.has_value()){
+        entity.movementState.reloading = gameapi -> timeSeconds(false);
       }
+      entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
+      entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
+      entity.movementState.crouchType = movement.controlParams.crouchType;
 
-      /*auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
-      if (gunAimingUpdates.rightHand.has_value()){
-        gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
-      }        
-      if (gunAimingUpdates.leftHand.has_value()){
-        gameapi -> setGameObjectPosition(gunAimingUpdates.leftHand.value().id, gunAimingUpdates.leftHand.value().pos, true, Hint { .hint = "updateEntityGunPosition" });
-      }
-      if (gunAimingUpdates.neck.has_value()){
-        gameapi -> setGameObjectRot(gunAimingUpdates.neck.value().id, gunAimingUpdates.neck.value().rot, true, Hint { .hint = "updateEntityGunPosition neck" });
-      }
-      if (gunAimingUpdates.head.has_value()){
-        gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
-      }*/
+      // should take the rotation and direct and stuff from where the player is looking
+      auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId), activeId == entity.playerId);
+      uiUpdate.velocity = entity.movementState.velocity;
+      uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
 
-    }else{
-      entityUpdates.push_back(EntityUpdate {
-        .id = entity.playerId,
-        .rot = cameraUpdate.firstPerson.yAxisRotation,
-        .rotHint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot",
-      });
+      if (cameraUpdate.thirdPerson.has_value()){
+        if (entity.movementState.alive){
+          gameapi -> setGameObjectRot(entity.playerId, cameraUpdate.thirdPerson.value().yAxisRotation, true, Hint { .hint = "[gamelogic] onMovementFrame1 rot" });
+        }
+        /*auto gunAimingUpdates = updateEntityGunPosition(entity.playerId, cameraUpdate.thirdPerson.value().rotation);
+        if (gunAimingUpdates.rightHand.has_value()){
+          gameapi -> setGameObjectRot(gunAimingUpdates.rightHand.value().id, gunAimingUpdates.rightHand.value().rot, true, Hint { .hint = "updateEntityGunPosition right hand" });
+        }        
+        if (gunAimingUpdates.leftHand.has_value()){
+          gameapi -> setGameObjectPosition(gunAimingUpdates.leftHand.value().id, gunAimingUpdates.leftHand.value().pos, true, Hint { .hint = "updateEntityGunPosition" });
+        }
+        if (gunAimingUpdates.neck.has_value()){
+          gameapi -> setGameObjectRot(gunAimingUpdates.neck.value().id, gunAimingUpdates.neck.value().rot, true, Hint { .hint = "updateEntityGunPosition neck" });
+        }
+        if (gunAimingUpdates.head.has_value()){
+          gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
+        }*/
+      }else{
+        entityUpdates.push_back(EntityUpdate {
+          .id = entity.playerId,
+          .rot = cameraUpdate.firstPerson.yAxisRotation,
+          .rotHint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot",
+        });
+      }
     }
 
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (id == activeId){
+    if (id == activeId && !movement.controlParams.observeMode){
       continue;
     }
     if (movementEntity.targetLocation.has_value()){
@@ -447,7 +449,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       movementEntity.movementState.xRot = oldXYRot.x;
       movementEntity.movementState.yRot = oldXYRot.y;    
 
-      modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
+      //modassert(!cameraUpdate.thirdPerson.has_value(), "tps camera update for a non-active entity");
     }
   }
 
@@ -456,7 +458,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   // that being said, this kind of just bypasses it an sets to the rotation directly
   // that's ... ok, but can run into bypassing constraints later on, hence it's really forcing it
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (id == activeId){
+    if (id == activeId && !movement.controlParams.observeMode){
       continue;
     }
     if (movementEntity.targetRotation.has_value()){
