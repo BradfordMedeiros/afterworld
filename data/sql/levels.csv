@@ -13,3 +13,4 @@ filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING,ambi
 ../afterworld/scenes/empty.rawscene,Empty,empty,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,../gameresources/skybox/storm,../gameresources/sound/rain.wav
 ../afterworld/scenes/sandbox.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ./res/scenes/features/scenegraph/child.p.rawscene,Sandbox,sandbox,Go on a mission to retrive the dream catcher.,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/mainhub.rawscene,MainHub,mainhub,Start of the game connecting levels,./res/textures/wood.jpg,0.2 0.2 0.2,1 1 1,../gameresources/skybox/space1,../gameresources/sound/rain.wav
