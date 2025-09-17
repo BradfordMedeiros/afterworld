@@ -1019,6 +1019,9 @@ void doAnimationTrigger(objid entityId, const char* transition){
 
 void doStateControllerAnimations(){
   for (auto entityId : tags.animationController.pendingAnimations){
+    if (!hasControllerState(tags.animationController, entityId)){
+      continue;
+    }
     auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
     bool stateAnimationHasAnimation = stateAnimation && stateAnimation -> animation.has_value();
     bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
