@@ -1,29 +1,22 @@
-playerspawn:playerspawn:true
-playerspawn:position:-20 -25 0
-playerspawn:teleport:true
-
-platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-platform_lowert:position:-20 -30 0
-platform_lowert:scale:100 100 10
-platform_lowert:rotation:0 -1 0 0
-platform_lowert:texture:./res/textures/brickwall.jpg
-platform_lowert:texturesize:40 40
-platform_lowert:physics:enabled
-platform_lowert:material:metal
-platform_lowert:tint:0.4 0.8 0.4 1
-
+# Generated scene 
+!light:globallight:true
+!light:angle:-10
+!light:rotation:1 0 1.19209e-07 0
+!light:position:0 0 -20
+[prefab-instance-1150152159:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1150152159:position:-20 -25 0
+[prefab-instance-1767197311:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1767197311:position:-20 -25 0
 *octree:map:../afterworld/scenes/levels/level1.map
-
-[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
-[link:position:15 -27 5
-[link:+link:link:hub
-
+*octree:physics:enabled
+*octree:scale:500 500 500
+*octree:position:-250 -250 250
+[prefab-instance-1595443718:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1595443718:position:-20 -25 0
+[prefab-instance-1931110228:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1931110228:position:-20 -25 0
 [gem:scene:../afterworld/scenes/prefabs/objects/gem.rawscene
 [gem:position:20 -27.5 5
-
-
-[target:scene:../afterworld/scenes/prefabs/objects/target.rawscene
-[target:position:25 -27.5 5
-
-[gate:scene:../afterworld/scenes/prefabs/objects/gate.rawscene
-[gate:position:32 -27 5
+playerspawn:teleport:true
+playerspawn:playerspawn:true
+playerspawn:position:-20 -25 0
