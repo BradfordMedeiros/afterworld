@@ -13,14 +13,13 @@ gameobj-383049031:position:-11.5 3 -11.5
 !light:position:0 0 -20
 
 
-gameobj-958184563:mesh:../gameresources/build/uncategorized/tv2.gltf
-gameobj-958184563:scale:3 4 3.7
-gameobj-958184563:position:-6.7 1.67 -26.4
+#gameobj-958184563:mesh:../gameresources/build/uncategorized/tv2.gltf
+#gameobj-958184563:scale:3 4 3.7
+#gameobj-958184563:position:-6.7 1.67 -26.4
 
 [link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
-[link:position:15 -27.5 5
-#[link:+link:link:testlink
-
+[link:position:-6.7 1.67 -26.4
+[link:+link|link:|e1m1
 
 
 gameobj-1361672339:mesh:../gameresources/build/uncategorized/darkwires4.gltf

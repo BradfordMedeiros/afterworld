@@ -1,11 +1,11 @@
-link:mesh:../gameresources/build/misc/bolthead.gltf
+link:mesh:../gameresources/build/uncategorized/tv2.gltf
 link:physics:enabled
 link:physics_mass:20
-link:physics_shape:shape_cylinder
 link:scale:5 5 5
 link:tint:1 1 1 1
 link:activate:link
-link:rotation:0 1 0 0
 
-link/screen:shader:../afterworld/shaders/menu/fragment.glsl,../afterworld/shaders/menu/vertex.glsl
-link/bolthead:texture:../gameresources/build/textures/clean/delete.png
+link/screen:tint:1 0 0 1
+
+#link/screen:shader:../afterworld/shaders/menu/fragment.glsl,../afterworld/shaders/menu/vertex.glsl
+#link/bolthead:texture:../gameresources/build/textures/clean/delete.png
