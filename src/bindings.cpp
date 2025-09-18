@@ -13,7 +13,7 @@ std::unordered_map<objid, HitPoints> hitpoints = {};
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::unordered_map<objid, Inventory> scopenameToInventory;
 GameProgress progress = createProgress();
-std::set<std::string> gems;   // static-state
+std::vector<CrystalPickup> crystals;   // static-state
 std::unordered_map<objid, glm::vec3> impulses;
 
 extern ControlledPlayer controlledPlayer;
@@ -1292,6 +1292,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> dragSelect = std::nullopt;
     gameState -> uiData.uiContext = getUiContext(*gameState);
 
+    crystals = loadCrystals();
+
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");
@@ -1508,7 +1510,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       //handleEntitiesRace();
 
       handleDirector(director);
-      setUiGemCount(listGems().size());
+      setUiGemCount(numberOfCrystals());
       auto playerPosition = getActivePlayerPosition();
       if (playerPosition.has_value()){
         drawWaypoints(waypoints, playerPosition.value());
@@ -1875,7 +1877,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
       auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true, "[gamelogic] get position for gem pickup to play sound");
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position);
-      pickupGem("testgem");
+      if (itemAcquiredMessage -> label.has_value()){
+        pickupCrystal(itemAcquiredMessage -> label.value());
+      }else{
+        modassert(false, "no label for gem");
+      }
     }
     if (key == "activate-switch"){
       auto attrValue = anycast<MessageWithId>(value); 

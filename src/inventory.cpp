@@ -1,7 +1,6 @@
 #include "./inventory.h"
 
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
-extern std::set<std::string> gems;   // static-state extern
 
 const int INFINITE_ITEM_COUNT = 9999;
 void addInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, objid id){
@@ -77,19 +76,8 @@ int ammoForGun(objid inventory, std::string& gun){
   return static_cast<int>(inven.items.at(ammoName));
 }
 
-std::set<std::string>& listGems(){
-  return gems;
-}
-
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo){
   updateItemCount(scopenameToInventory, inventory, ammoNameForGun(gun), currentAmmo);
-}
-
-bool hasGem(std::string& name){
-  return true;
-}
-void pickupGem(std::string name){
-  gems.insert(name);
 }
 
 void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInventory){
@@ -114,3 +102,50 @@ void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInvent
     }
 }
 
+
+/////////////////////////// gems
+
+extern std::vector<CrystalPickup> crystals;   // static-state extern
+std::vector<CrystalPickup> loadCrystals(){
+  return {
+    CrystalPickup {
+      .hasCrystal = true,
+      .crystal = Crystal {
+        .label = "e1m1",
+      },
+    },
+    CrystalPickup {
+      .hasCrystal = true,
+      .crystal = Crystal {
+        .label = "e1m2",
+      },
+    },
+  };
+}
+
+int numberOfCrystals(){
+  return crystals.size();
+}
+bool hasCrystal(std::string& name){
+  for (auto& crystal : crystals){
+    if (crystal.hasCrystal && crystal.crystal.label == name){
+      return true;
+    }
+  }
+  return false;
+}
+void pickupCrystal(std::string name){
+  bool pickedUp = false;
+  for (auto& crystal : crystals){
+    if (crystal.crystal.label == name){
+      crystal.hasCrystal = true;
+      pickedUp = true;
+    }
+  }
+  if (pickedUp){
+    modlog("pickupCrystal picked up", name);
+  }else{
+    modlog("pickupCrystal no matching crystal for", name);
+    modassert(false, "bad crystal pickup");
+  }
+}

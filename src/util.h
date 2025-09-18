@@ -41,6 +41,7 @@ struct HealthChangeMessage {
 struct ItemAcquiredMessage {
 	objid targetId;
 	int amount;
+  std::optional<std::string> label;
 };
 
 std::optional<std::string> getSingleAttr(objid id, const char* key);

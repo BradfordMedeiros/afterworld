@@ -155,7 +155,7 @@ void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
 
 bool isPlayer(objid id){
   auto playerAttr = getSingleAttr(id, "player");
-  return playerAttr.has_value() && playerAttr.value() == "true";
+  return playerAttr.has_value() && playerAttr.value() == "default";
 }
 bool isPickup(objid id){
   auto playerAttr = getSingleAttr(id, "pickup");
@@ -171,6 +171,7 @@ void tryPickupItem(objid gameObjId, objid playerId){
     auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
     auto pickupType = getStrAttr(objAttr, "pickup-type");
     auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
+    auto pickupLabel = getStrAttr(objAttr, "pickup-label");
     auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
 
     auto oldItemCount = currentItemCount(scopenameToInventory, inventory, pickup.value());
@@ -189,16 +190,23 @@ void tryPickupItem(objid gameObjId, objid playerId){
       ItemAcquiredMessage itemAcquiredMessage {
         .targetId = playerId,
         .amount = static_cast<int>(newItemCount),
+        .label = pickupLabel,
       };
       gameapi -> sendNotifyMessage(pickupTrigger.value(), itemAcquiredMessage);
     }
   }
 }
 void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
+  modlog("handleInventoryOnCollision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+
   auto obj1IsPlayer = isPlayer(obj1);
   auto obj2IsPlayer = isPlayer(obj2);
   auto obj1IsPickup = isPickup(obj1);
   auto obj2IsPickup = isPickup(obj2);
+
+  std::cout << "handleInventoryOnCollision obj1IsPlayer = " << obj1IsPlayer << ", obj2IsPlayer = " << obj2IsPlayer << std::endl;
+  std::cout << "handleInventoryOnCollision obj1IsPickup = " << obj1IsPickup << ", obj2IsPickup = " << obj2IsPickup << std::endl;
+
   if (obj1IsPlayer && obj2IsPickup){
     tryPickupItem(obj2, obj1);
   }else if (obj2IsPlayer && obj1IsPickup){
