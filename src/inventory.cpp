@@ -1,6 +1,7 @@
 #include "./inventory.h"
 
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
+extern CustomApiBindings* gameapi;
 
 const int INFINITE_ITEM_COUNT = 9999;
 void addInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, objid id){
@@ -105,48 +106,30 @@ void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInvent
 
 /////////////////////////// gems
 
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>> savedValues;
-
-
-struct SerializedValue {
-  std::string key;
-  std::string value;
-};
-std::vector<SerializedValue> getSerializedValue(std::string scope){
-  if (savedValues.find("crystal") == savedValues.end()){
-    return {};
-  }
-
-  std::vector<SerializedValue> values;
-  for (auto& [key, value] : savedValues.at("crystal")){
-    values.push_back(SerializedValue {
-      .key = key,
-      .value = value,
-    });
-  }
-  return values;
-}
-
-bool hasCrystal(std::vector<SerializedValue>& values, std::string key){
-  for (auto &value : values){
-    if (value.key == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
-      return value.value == "true";
+bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& values, std::string key){
+  for (auto &[savedKey, savedValue] : values.at("crystals")){
+    if (savedKey == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
+      return savedValue == "true";
     }
   }
   return false;
 }
+
 extern std::vector<CrystalPickup> crystals;   // static-state extern
 std::vector<CrystalPickup> loadCrystals(){
-  auto serializedValues = getSerializedValue("crystals");
+  bool success = false;
+  auto data = gameapi -> loadFromJsonFile ("./save-file-2.txt", &success);
+  modassert(success, "not success");
+
   return {
     CrystalPickup {
-      .hasCrystal = hasCrystal(serializedValues, "e1m1"),
+      .hasCrystal = hasCrystal(data, "e1m1"),
       .crystal = Crystal {
         .label = "e1m1",
       },
     },
     CrystalPickup {
-      .hasCrystal = hasCrystal(serializedValues, "e1m2"),
+      .hasCrystal = hasCrystal(data, "e1m2"),
       .crystal = Crystal {
         .label = "e1m2",
       },
@@ -159,10 +142,13 @@ void saveCrystals(){
   std::unordered_map<std::string, std::string> crystalValues;
   for (auto& crystal : crystals){
     std::string key = crystal.crystal.label + std::string("|") + std::string("has_crystal");
-    std::string value = crystal.hasCrystal ? "true" : "false";
-    crystalValues[key] = value;
+    if (crystal.hasCrystal){
+      crystalValues[key] = "true";
+    }
   }
   values["crystals"] = crystalValues;
+
+  gameapi -> saveToJsonFile("./save-file-2.txt", values);
 
  // saveValues(values);
 }

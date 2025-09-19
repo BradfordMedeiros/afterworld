@@ -396,7 +396,9 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	auto activeCamera = gameapi -> getCameraTransform();
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
 
-  	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> allValues;
+  	saveCrystals();
+
+  	/*std::unordered_map<std::string, std::unordered_map<std::string, std::string>> allValues;
 
   	allValues["crystals"] = {
   		{ "keyone", "valueone" },
@@ -422,7 +424,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	}
 
 
-  	modassert(false, "save values placeholder");
+  	modassert(false, "save values placeholder");*/
   }
   if (key == 'N' && action == 0){
   	visualizationDistance -= 1.f;
