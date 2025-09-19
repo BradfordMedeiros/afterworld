@@ -1,8 +1,4 @@
 # Generated scene 
-gameobj-383049031:mesh:../gameresources/build/uncategorized/limboapple.gltf
-gameobj-383049031:scale:3 3 3
-gameobj-383049031:rotation:0.996195 -1.74513e-07 -0.0871552 360
-gameobj-383049031:position:-11.5 3 -11.5
 *octree:map:../afterworld/scenes/levels/mainhub.map
 *octree:physics:enabled
 *octree:scale:500 500 500
@@ -11,49 +7,47 @@ gameobj-383049031:position:-11.5 3 -11.5
 !light:angle:-10
 !light:rotation:1 0 1.19209e-07 0
 !light:position:0 0 -20
-
-
-#gameobj-958184563:mesh:../gameresources/build/uncategorized/tv2.gltf
-#gameobj-958184563:scale:3 4 3.7
-#gameobj-958184563:position:-6.7 1.67 -26.4
-
+[prefab-instance-2035094105:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[link:+link|link:|e1m1
 [link:scene:../afterworld/scenes/prefabs/gameplay/link.rawscene
 [link:position:-6.7 1.67 -26.4
-[link:+link|link:|e1m1
-
-
+gameobj-1667209420:mesh:../gameresources/build/uncategorized/console.gltf
+gameobj-421722544-copy-172298284:mesh:../gameresources/build/uncategorized/grandfatherclock.gltf
+gameobj-421722544-copy-172298284:rotation:-1 -7.10543e-15 1.19209e-07 360
+gameobj-421722544-copy-172298284:position:2 3 -13.5
+[prefab-instance-1099499634:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+gameobj-1432071992:mesh:../gameresources/build/uncategorized/cashregister.gltf
+gameobj-1432071992:rotation:0 0 1 0
+gameobj-1432071992:position:6.88 1.21 -27.58
+[prefab-instance-1737836334:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-197147641:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-109904693:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
 gameobj-1361672339:mesh:../gameresources/build/uncategorized/darkwires4.gltf
 gameobj-1361672339:scale:4 4 4
 gameobj-1361672339:rotation:0.996247 1.94182e-05 0.0865601 180
 gameobj-1361672339:position:-5.6 26.68 80.21
 [prefab-instance-2018223025:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-gameobj-1361672339-copy-149333244:mesh:../gameresources/build/uncategorized/darkwires4.gltf
-gameobj-1361672339-copy-149333244:scale:4 4 4
-gameobj-1361672339-copy-149333244:rotation:0.996247 1.94182e-05 0.0865601 180
-gameobj-1361672339-copy-149333244:position:14.4 26.68 80.21
-gameobj-421722544-copy-172298284:mesh:../gameresources/build/uncategorized/grandfatherclock.gltf
-gameobj-421722544-copy-172298284:rotation:-1 -7.10543e-15 1.19209e-07 360
-gameobj-421722544-copy-172298284:position:2 3 -13.5
 gameobj-1852367601:mesh:../gameresources/build/uncategorized/mattress.gltf
 gameobj-1852367601:position:6 0 -19.7
-gameobj-1225331236:mesh:../gameresources/build/uncategorized/mattress.gltf
-gameobj-1225331236:position:6.3 0.1 -19.5
-playerspawn:teleport:true
-playerspawn:playerspawn:true
-[prefab-instance-109904693:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-1737836334:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-[prefab-instance-2035094105:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-gameobj-1432071992:mesh:../gameresources/build/uncategorized/cashregister.gltf
-gameobj-1432071992:rotation:0 0 1 0
-gameobj-1432071992:position:6.88 1.21 -27.58
-gameobj-1361672339-copy-149333244-copy-816156957:mesh:../gameresources/build/uncategorized/darkwires4.gltf
-gameobj-1361672339-copy-149333244-copy-816156957:scale:4 4 4
-gameobj-1361672339-copy-149333244-copy-816156957:rotation:0.996247 1.94182e-05 0.0865601 180
-gameobj-1361672339-copy-149333244-copy-816156957:position:4.4 26.68 80.21
-[prefab-instance-1099499634:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
-gameobj-1667209420:mesh:../gameresources/build/uncategorized/console.gltf
+gameobj-383049031:mesh:../gameresources/build/uncategorized/limboapple.gltf
+gameobj-383049031:scale:3 3 3
+gameobj-383049031:rotation:0.996195 -1.74513e-07 -0.0871552 360
+gameobj-383049031:position:-11.5 3 -11.5
 gameobj-1128858057:texture:octree-atlas:main
 gameobj-1128858057:mesh:../gameresources/build/uncategorized/altar.gltf
 gameobj-1128858057:rotation:0 0 1 0
 gameobj-1128858057:position:14 1 1.48
-gameobj-958184563/screen:rotation:0 0 -1 0.0395647
+gameobj-1225331236:mesh:../gameresources/build/uncategorized/mattress.gltf
+gameobj-1225331236:position:6.3 0.1 -19.5
+gameobj-1361672339-copy-149333244-copy-816156957:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+gameobj-1361672339-copy-149333244-copy-816156957:scale:4 4 4
+gameobj-1361672339-copy-149333244-copy-816156957:rotation:0.996247 1.94182e-05 0.0865601 180
+gameobj-1361672339-copy-149333244-copy-816156957:position:4.4 26.68 80.21
+playerspawn:playerspawn:true
+playerspawn:teleport:true
+[prefab-instance-1465742006:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+gameobj-1361672339-copy-149333244:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+gameobj-1361672339-copy-149333244:scale:4 4 4
+gameobj-1361672339-copy-149333244:rotation:0.996247 1.94182e-05 0.0865601 180
+gameobj-1361672339-copy-149333244:position:14.4 26.68 80.21
+[prefab-instance-464311029:scene:../afterworld/scenes/prefabs/enemy/player.rawscene

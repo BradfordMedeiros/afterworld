@@ -1,7 +1,7 @@
 filepath:STRING,name:STRING,shortcut:STRING,description:STRING,image:STRING,ambient:STRING,skyboxcolor:STRING,skybox:STRING,audio:STRING
 ../afterworld/scenes/levels/video.rawscene,Video,video,Test video,../afterworld/design/storyboard/hell.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ../afterworld/scenes/levels/intro.rawscene,Intro Dreams and Reconciliation,intro,Fall asleep and enter the realm of the dreamweavers.,../afterworld/design/storyboard/hell.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
-../afterworld/scenes/levels/level2.rawscene,Arrival,level2,You arrive to a port city and find demons.,./res/textures/water.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
+../afterworld/scenes/levels/level1.rawscene,level1,level1,You arrive to a port city and find demons.,./res/textures/water.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ../afterworld/scenes/levels/e1m1.rawscene,e1m1,e1m1,Vertical slice - classic slice. ,../afterworld/screenshots/test.png,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ../afterworld/scenes/levels/e1m2.rawscene,e1m2,e1m2,Vertical slice 2  classic slice.,0,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav
 ../afterworld/scenes/levels/story.rawscene,story1,story-1,You have killed the dreamweaver.  Now what?,./res/textures/wood.jpg,1 1 1,1 1 1,./res/textures/skyboxs/desert/,../gameresources/sound/rain.wav

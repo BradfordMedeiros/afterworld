@@ -1,18 +1,33 @@
+!light:globallight:true
+!light:spin:true
+!light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
+!light:angle:-10
+!light:rotation:1 0 1.19209e-07 0
+!light:position:-12.93 -58.31 11.98
+
+
+
 obj:mesh:../gameresources/build/nocheck/e1m1.gltf
 obj:physics:enabled
 obj:physics_shape:shape_exact
+obj:texture:./res/textures/wood.jpg
+
 
 playerspawn:playerspawn:true
 playerspawn:position:48 -3 -9
 playerspawn:teleport:true
 
-[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
-[enemy:position:-22 10 0
+[gem:scene:../afterworld/scenes/prefabs/objects/gem.rawscene
+[gem:position:48 -5 -12
+[gem:+gem|pickup-label:|e1m1
+
+#[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
+#[enemy:position:-22 10 0
 
 
-[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
-[link:position:-147 -5 -132
-[link:+link:link:next
+#[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
+#[link:position:-147 -5 -132
+#[link:+link:link:next
 
 
 &music:clip:../gameresources/sound/rain.wav
@@ -33,21 +48,21 @@ spawnpoint-63147309:spawntags:collider
 #spawnpoint-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
 #spawnpoint-602475919:spawntags:onload
 
-spawntrigger-602475919:position:116.097 -6.2 30.0432 #spawn debug
-spawntrigger-602475919:spawn:enemy #spawn debug
-spawntrigger-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawntrigger-602475919:spawn-trigger:collider
-spawntrigger-602475919:physics:enabled
-spawntrigger-602475919:scale:5 5 5
-
-
-spawnpoint-355426010:position:154.033 5 23.5665 #spawn debug
-spawnpoint-355426010:spawn:enemy #spawn debug
-spawnpoint-355426010:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-355426010:spawntags:collider
-
-spawnpoint-1748154242:position:19.0161 -5.39999 84.2045 #spawn debug
-spawnpoint-1748154242:spawn:enemy #spawn debug
-spawnpoint-1748154242:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-1748154242:spawntags:collider
+#spawntrigger-602475919:position:116.097 -6.2 30.0432 #spawn debug
+#spawntrigger-602475919:spawn:enemy #spawn debug
+#spawntrigger-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#spawntrigger-602475919:spawn-trigger:collider
+#spawntrigger-602475919:physics:enabled
+#spawntrigger-602475919:scale:5 5 5
+#
+#
+#spawnpoint-355426010:position:154.033 5 23.5665 #spawn debug
+#spawnpoint-355426010:spawn:enemy #spawn debug
+#spawnpoint-355426010:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#spawnpoint-355426010:spawntags:collider
+#
+#spawnpoint-1748154242:position:19.0161 -5.39999 84.2045 #spawn debug
+#spawnpoint-1748154242:spawn:enemy #spawn debug
+#spawnpoint-1748154242:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
+#spawnpoint-1748154242:spawntags:collider
 

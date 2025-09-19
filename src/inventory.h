@@ -38,7 +38,9 @@ struct CrystalPickup {
 };
 
 std::vector<CrystalPickup> loadCrystals();
+void saveCrystals();
 int numberOfCrystals();
+int totalCrystals();
 void pickupCrystal(std::string name);
 
 #endif

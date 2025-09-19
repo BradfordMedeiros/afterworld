@@ -349,6 +349,15 @@ std::set<objid> addNPrefabs(objid sceneId, int width, int height, int depth, std
   return ids;
 }
 
+std::string saveValues(std::string scope, std::unordered_map<std::string, std::string> values);
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadValuesFromStr(std::string& fileContent, bool* error);
+std::string doLoadFile(std::string filepath);
+
+namespace realfiles {
+	void saveFile(std::string filepath, std::string content);
+	std::string doLoadFile(std::string filepath);
+}
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -385,6 +394,27 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	auto activeCamera = gameapi -> getCameraTransform();
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
 
+  	auto value = saveValues("crystal", {
+  		{ "keyone", "valueone" },
+  		{ "keytwo", "valuetwo" },
+  	});
+  	std::cout << value << std::endl;
+  	//realfiles::saveFile("./save-file.txt", value);
+
+  	auto fileData = realfiles::doLoadFile("./save-file.txt");
+
+  	bool success = false;
+  	auto data = loadValuesFromStr(fileData, &success);
+  	modassert(success, "did not load file successfully");
+  	
+  	for (auto& [scope, values] : data){
+  		for (auto& [key, value] : values){
+  			std::cout << scope << ", " << key << ", " << value << std::endl;
+  		}
+  	}
+
+
+  	modassert(false, "save values placeholder");
   }
   if (key == 'N' && action == 0){
   	visualizationDistance -= 1.f;
@@ -397,6 +427,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
   if (key == 'M' && action == 0){
   	visualizationDistance += 1.f;
+
   }
 
 	auto args = gameapi -> getArgs();

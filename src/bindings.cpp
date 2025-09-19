@@ -1510,7 +1510,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       //handleEntitiesRace();
 
       handleDirector(director);
-      setUiGemCount(numberOfCrystals());
+      setUiGemCount(GemCount {
+        .currentCount = numberOfCrystals(),
+        .totalCount = totalCrystals(),
+      });
       auto playerPosition = getActivePlayerPosition();
       if (playerPosition.has_value()){
         drawWaypoints(waypoints, playerPosition.value());

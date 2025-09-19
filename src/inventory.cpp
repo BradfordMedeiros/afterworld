@@ -105,27 +105,136 @@ void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInvent
 
 /////////////////////////// gems
 
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> savedValues;
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
+
+std::string saveValues(std::string scope, std::unordered_map<std::string, std::string> values){
+  std::string str;
+
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  rapidjson::Value innerMap(rapidjson::kObjectType);
+  rapidjson::Value outerKey(scope.c_str(), allocator);
+
+  for(auto& [key, value] : values){
+    rapidjson::Value jsonKey(key.c_str(), allocator);
+    rapidjson::Value jsonValue(value.c_str(), allocator);
+    innerMap.AddMember(jsonKey, jsonValue, allocator);
+  }
+
+  doc.AddMember(
+      rapidjson::Value(outerKey, allocator),
+      innerMap,
+      allocator
+  );
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  return buffer.GetString();
+}
+
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadValuesFromStr(std::string& fileContent, bool* success){
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  modassert(!doc.HasParseError(), "invalid json document");
+
+  *success = true;
+
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mapData;
+  for (auto obj = doc.MemberBegin(); obj != doc.MemberEnd(); obj++) {
+    std::string key = obj -> name.GetString();
+    mapData[key] = {};
+    if (obj -> value.IsObject()){
+      for (auto innerObj = obj -> value.MemberBegin(); innerObj != obj -> value.MemberEnd(); innerObj++) {
+        std::string innerKey = innerObj -> name.GetString();
+        std::string innerVal = innerObj -> value.GetString();
+        mapData.at(key)[innerKey] = innerVal;
+      }
+    }else{
+      modlog("loadValuesFromStr not an object", key);
+      *success = false;
+    }
+  }
+
+  return mapData;
+}
+
+
+struct SerializedValue {
+  std::string key;
+  std::string value;
+};
+std::vector<SerializedValue> getSerializedValue(std::string scope){
+  if (savedValues.find("crystal") == savedValues.end()){
+    return {};
+  }
+
+  std::vector<SerializedValue> values;
+  for (auto& [key, value] : savedValues.at("crystal")){
+    values.push_back(SerializedValue {
+      .key = key,
+      .value = value,
+    });
+  }
+  return values;
+}
+
+bool hasCrystal(std::vector<SerializedValue>& values, std::string key){
+  for (auto &value : values){
+    if (value.key == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
+      return value.value == "true";
+    }
+  }
+  return false;
+}
 extern std::vector<CrystalPickup> crystals;   // static-state extern
 std::vector<CrystalPickup> loadCrystals(){
+  auto serializedValues = getSerializedValue("crystals");
   return {
     CrystalPickup {
-      .hasCrystal = true,
+      .hasCrystal = hasCrystal(serializedValues, "e1m1"),
       .crystal = Crystal {
         .label = "e1m1",
       },
     },
     CrystalPickup {
-      .hasCrystal = true,
+      .hasCrystal = hasCrystal(serializedValues, "e1m2"),
       .crystal = Crystal {
         .label = "e1m2",
       },
     },
   };
 }
+void saveCrystals(){
+  std::unordered_map<std::string, std::string> values;
+  for (auto& crystal : crystals){
+    std::string key = crystal.crystal.label + std::string("|") + std::string("has_crystal");
+    std::string value = crystal.hasCrystal ? "true" : "false";
+    values[key] = value;
+  }
+  saveValues("crystals", values);
+}
 
 int numberOfCrystals(){
+  int totalCount = 0;
+  for (auto& crystal : crystals){
+    if (crystal.hasCrystal){
+      totalCount++;
+    }
+  }
+  return totalCount;
+}
+int totalCrystals(){
   return crystals.size();
 }
+
 bool hasCrystal(std::string& name){
   for (auto& crystal : crystals){
     if (crystal.hasCrystal && crystal.crystal.label == name){

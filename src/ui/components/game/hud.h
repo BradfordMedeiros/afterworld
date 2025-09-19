@@ -15,7 +15,12 @@ void setUiHealth(std::optional<UiHealth> health);
 void setUiSpeed(std::optional<glm::vec3> velocity, std::optional<glm::vec2> lookVelocity);
 void setShowActivate(bool showActivate);
 void setUiWeapon(std::optional<std::string> weapon);
-void setUiGemCount(std::optional<int> count);
+
+struct GemCount {
+  int currentCount;
+  int totalCount;
+};
+void setUiGemCount(std::optional<GemCount> count);
 
 extern Component hudComponent;
 

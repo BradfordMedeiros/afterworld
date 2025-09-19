@@ -41,8 +41,8 @@ void setUiWeapon(std::optional<std::string> weapon){
   uiWeapon = weapon;
 }
 
-std::optional<int> uiGemCount;
-void setUiGemCount(std::optional<int> count){
+std::optional<GemCount> uiGemCount;
+void setUiGemCount(std::optional<GemCount> count){
   uiGemCount = count;
 }
 
@@ -84,7 +84,7 @@ Component hudComponent {
     drawTools.drawText(std::string("weapon: ") + (uiWeapon.has_value() ? uiWeapon.value() : std::string("unequipped")), 0.65, 0.75, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
     if (uiGemCount.has_value()){
-      drawTools.drawText(std::string("gem count: ") + (uiGemCount.has_value() ? std::to_string(uiGemCount.value()) : ""), 0.65, 0.65, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      drawTools.drawText(std::string("gem count: ") + (uiGemCount.has_value() ? (std::to_string(uiGemCount.value().currentCount) + " / " + std::to_string(uiGemCount.value().totalCount)) : ""), 0.65, 0.65, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
 
     if (uiVelocity.has_value()){
