@@ -106,65 +106,6 @@ void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInvent
 /////////////////////////// gems
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>> savedValues;
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-
-
-std::string saveValues(std::string scope, std::unordered_map<std::string, std::string> values){
-  std::string str;
-
-  rapidjson::Document doc;
-  doc.SetObject();
-  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-
-  rapidjson::Value innerMap(rapidjson::kObjectType);
-  rapidjson::Value outerKey(scope.c_str(), allocator);
-
-  for(auto& [key, value] : values){
-    rapidjson::Value jsonKey(key.c_str(), allocator);
-    rapidjson::Value jsonValue(value.c_str(), allocator);
-    innerMap.AddMember(jsonKey, jsonValue, allocator);
-  }
-
-  doc.AddMember(
-      rapidjson::Value(outerKey, allocator),
-      innerMap,
-      allocator
-  );
-
-  rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  doc.Accept(writer);
-
-  return buffer.GetString();
-}
-
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadValuesFromStr(std::string& fileContent, bool* success){
-  rapidjson::Document doc;
-  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
-  modassert(!doc.HasParseError(), "invalid json document");
-
-  *success = true;
-
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mapData;
-  for (auto obj = doc.MemberBegin(); obj != doc.MemberEnd(); obj++) {
-    std::string key = obj -> name.GetString();
-    mapData[key] = {};
-    if (obj -> value.IsObject()){
-      for (auto innerObj = obj -> value.MemberBegin(); innerObj != obj -> value.MemberEnd(); innerObj++) {
-        std::string innerKey = innerObj -> name.GetString();
-        std::string innerVal = innerObj -> value.GetString();
-        mapData.at(key)[innerKey] = innerVal;
-      }
-    }else{
-      modlog("loadValuesFromStr not an object", key);
-      *success = false;
-    }
-  }
-
-  return mapData;
-}
 
 
 struct SerializedValue {
@@ -213,13 +154,17 @@ std::vector<CrystalPickup> loadCrystals(){
   };
 }
 void saveCrystals(){
-  std::unordered_map<std::string, std::string> values;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> values;
+
+  std::unordered_map<std::string, std::string> crystalValues;
   for (auto& crystal : crystals){
     std::string key = crystal.crystal.label + std::string("|") + std::string("has_crystal");
     std::string value = crystal.hasCrystal ? "true" : "false";
-    values[key] = value;
+    crystalValues[key] = value;
   }
-  saveValues("crystals", values);
+  values["crystals"] = crystalValues;
+
+ // saveValues(values);
 }
 
 int numberOfCrystals(){

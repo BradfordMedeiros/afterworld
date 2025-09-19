@@ -349,8 +349,10 @@ std::set<objid> addNPrefabs(objid sceneId, int width, int height, int depth, std
   return ids;
 }
 
-std::string saveValues(std::string scope, std::unordered_map<std::string, std::string> values);
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadValuesFromStr(std::string& fileContent, bool* error);
+
+std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues);
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJson(std::string& fileContent, bool* success);
+
 std::string doLoadFile(std::string filepath);
 
 namespace realfiles {
@@ -394,19 +396,25 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	auto activeCamera = gameapi -> getCameraTransform();
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
 
-  	auto value = saveValues("crystal", {
+  	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> allValues;
+
+  	allValues["crystals"] = {
   		{ "keyone", "valueone" },
-  		{ "keytwo", "valuetwo" },
-  	});
-  	std::cout << value << std::endl;
-  	//realfiles::saveFile("./save-file.txt", value);
+  		{ "keytwo", "valueone" },
+  	};
 
-  	auto fileData = realfiles::doLoadFile("./save-file.txt");
+  	allValues["another"] = {
+  		{ "keyone_another", "valueone" },
+  		{ "keytwo_another", "valueone" },
+  	};
 
-  	bool success = false;
-  	auto data = loadValuesFromStr(fileData, &success);
-  	modassert(success, "did not load file successfully");
+  	gameapi -> saveToJsonFile("./save-file-2.txt", allValues);
+
   	
+  	bool success = false;
+  	auto data = gameapi -> loadFromJsonFile ("./save-file-2.txt", &success);
+  	modassert(success, "did not load file successfully");
+
   	for (auto& [scope, values] : data){
   		for (auto& [key, value] : values){
   			std::cout << scope << ", " << key << ", " << value << std::endl;
