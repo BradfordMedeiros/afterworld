@@ -6,7 +6,7 @@
 #include <stack>
 #include "./ai/ai.h"
 #include "./entity.h"
-#include "./daynight.h"
+#include "./gameworld/daynight.h"
 #include "./weapons/weapon.h"
 #include "./movement/movement.h"
 #include "./inventory.h"
@@ -34,7 +34,7 @@
 #include "./cutscene.h"
 #include "./curves.h"
 #include "./vector_gfx.h"
-#include "./progression/progress.h"
+#include "./gameworld/progress.h"
 #include "./options.h"
 #include "./vehicles.h"
 

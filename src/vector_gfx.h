@@ -10,19 +10,4 @@ void setDrawDebugVector(bool shouldDrawDebugVector);
 void drawDebugHitmark(HitObject& hitpoint, objid playerId);
 void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
 
-struct WaypointObject {
-	std::optional<objid> id;
-	bool drawDistance;
-	glm::vec4 color;
-	std::optional<float> percentage;
-};
-struct Waypoints {
-  std::unordered_map<objid, WaypointObject> waypoints;
-};
-void addWaypoint(Waypoints& waypoints, objid id, std::optional<objid> waypointId);
-void removeWaypoint(Waypoints& waypoints, objid id);
-void updateHealth(Waypoints& waypoints, objid id, std::optional<float> health);
-
-void drawWaypoints(Waypoints& waypoints, glm::vec3 playerPos);
-
 #endif

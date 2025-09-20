@@ -2,8 +2,8 @@
 #define MOD_AFTERWORLD_SWITCH
 
 #include <unordered_map>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../util.h"
 
 struct ManagedSwitch {
 	bool switchOn;

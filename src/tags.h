@@ -12,7 +12,7 @@
 #include "./health.h"
 #include "./debug.h"
 #include "./vector_gfx.h"
-#include "./switch.h"
+#include "./gameworld/switch.h"
 #include "./arcade/arcade.h"
 #include "./entity.h"
 #include "./vehicles.h"

@@ -7,6 +7,7 @@
 #include "./util.h"
 #include "./global.h"
 #include "./entity.h"
+#include "./gameworld/waypoint.h"
 
 struct HitPoints {
 	float current;

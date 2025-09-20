@@ -11,8 +11,6 @@ void onAiHealthChange(objid targetId, float remainingHealth);
 void setIsAlive(objid id, bool alive);
 void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
 
-
-
 void addEntityIdHitpoints(objid id){
 	if (hitpoints.find(id) != hitpoints.end()){
 		return;

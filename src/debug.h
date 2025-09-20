@@ -12,7 +12,7 @@
 #include "./options.h"
 #include "./entity.h"
 #include "./gametypes/gametypes.h"
-#include "./progression/progress.h"
+#include "./gameworld/progress.h"
 
 void debugOnFrame();
 void debugOnKey(int key, int scancode, int action, int mods);

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
 
 void maybeSpawnLightFromArgs();
 void onFrameDaynight();
