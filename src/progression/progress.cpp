@@ -6,10 +6,10 @@ extern std::vector<CrystalPickup> crystals;   // static-state extern
 
 bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
   for (auto &[savedKey, savedValueObj] : values.at("crystals")){
-    auto strValue = std::get_if<std::string>(&savedValueObj);
-    if (strValue){
+    auto boolValue = std::get_if<bool>(&savedValueObj);
+    if (boolValue){
       if (savedKey == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
-        return *strValue == "true";
+        return *boolValue;
       }      
     }
   }
@@ -43,7 +43,7 @@ void saveCrystals(){
   for (auto& crystal : crystals){
     std::string key = crystal.crystal.label + std::string("|") + std::string("has_crystal");
     if (crystal.hasCrystal){
-      crystalValues[key] = "true";
+      crystalValues[key] = true;
     }
   }
 
