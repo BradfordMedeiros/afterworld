@@ -433,16 +433,6 @@ std::optional<objid> findObjByShortName(std::string name, std::optional<objid> s
   return std::nullopt;
 }
 
-std::optional<objid> activeSceneForSelected(){
-  auto selected = gameapi -> selected();
-  if (selected.size() == 0){
-    return std::nullopt;
-  }
-  auto selectedId = gameapi -> selected().at(0);
-  auto sceneId = gameapi -> listSceneId(selectedId);
-  return sceneId;
-}
-
 void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint){
   float leftX = fromPoint.x < toPoint.x ? fromPoint.x : toPoint.x;
   float rightX = fromPoint.x > toPoint.x ? fromPoint.x : toPoint.x;

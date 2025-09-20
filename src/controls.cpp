@@ -301,14 +301,14 @@ std::vector<HotkeyToMessage> hotkeys = {
 		.fn = []() -> void {
 			//testPhysicsObjects();
 
-			static bool bonesCreated = false;
+			/*static bool bonesCreated = false;
 			if (!bonesCreated){
 				printLayerInfo();
 				createHitbox(getPlayerId().value());
 				bonesCreated = true;
 			}else{
 				enterRagdoll(getPlayerId().value());
-			}
+			}*/
 
 			// set pose
 			/*static bool setPose = false;

@@ -724,6 +724,20 @@ void setNoClipMode(bool enable){
   }
 }
 
+std::optional<objid> activeSceneForSelected(){
+  if(gameStatePtr -> sceneManagement.managedScene.has_value() && gameStatePtr -> sceneManagement.managedScene.value().id.has_value()){
+    return gameStatePtr -> sceneManagement.managedScene.value().id.value();
+  }
+
+  auto selected = gameapi -> selected();
+  if (selected.size() == 0){
+    return std::nullopt;
+  }
+  auto selectedId = gameapi -> selected().at(0);
+  auto sceneId = gameapi -> listSceneId(selectedId);
+  return sceneId;
+}
+
 
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
