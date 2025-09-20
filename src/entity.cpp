@@ -215,7 +215,7 @@ void maybeReEnableMesh(objid id){
 	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
 	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
 		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
-		 gameapi -> setSingleGameObjectAttr(childId, "disabled", "false");
+		 gameapi -> setMeshEnabled(childId, true);
 	}
 }
 
@@ -224,7 +224,7 @@ void maybeDisableMesh(objid id){
 	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
 		 modlog("disable mesh", gameapi -> getGameObjNameForId(childId).value());
 		 if (!hasCameraAncestor(childId)){ // guns are children of the camera 
- 			 gameapi -> setSingleGameObjectAttr(childId, "disabled", "true");
+ 			 gameapi -> setMeshEnabled(childId, false);
 		 }
 	}
 }
@@ -466,10 +466,10 @@ std::optional<ControllableEntity*> getActiveControllable(){
 }
 
 void setEntityThirdPerson(objid id){
-	//maybeReEnableMesh(id);
+	maybeReEnableMesh(id);
 }
 void setEntityFirstPerson(objid id){
-	//maybeDisableMesh(id);
+	maybeDisableMesh(id);
 }
 
 void disableEntity(objid id){
