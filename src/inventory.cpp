@@ -1,7 +1,6 @@
 #include "./inventory.h"
 
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
-extern CustomApiBindings* gameapi;
 
 const int INFINITE_ITEM_COUNT = 9999;
 void addInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, objid id){
@@ -103,89 +102,3 @@ void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInvent
     }
 }
 
-
-/////////////////////////// gems
-
-bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& values, std::string key){
-  for (auto &[savedKey, savedValue] : values.at("crystals")){
-    if (savedKey == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
-      return savedValue == "true";
-    }
-  }
-  return false;
-}
-
-extern std::vector<CrystalPickup> crystals;   // static-state extern
-std::vector<CrystalPickup> loadCrystals(){
-  bool success = false;
-  auto data = gameapi -> loadFromJsonFile ("./save-file-2.txt", &success);
-  modassert(success, "not success");
-
-  return {
-    CrystalPickup {
-      .hasCrystal = hasCrystal(data, "e1m1"),
-      .crystal = Crystal {
-        .label = "e1m1",
-      },
-    },
-    CrystalPickup {
-      .hasCrystal = hasCrystal(data, "e1m2"),
-      .crystal = Crystal {
-        .label = "e1m2",
-      },
-    },
-  };
-}
-void saveCrystals(){
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> values;
-
-  std::unordered_map<std::string, std::string> crystalValues;
-  for (auto& crystal : crystals){
-    std::string key = crystal.crystal.label + std::string("|") + std::string("has_crystal");
-    if (crystal.hasCrystal){
-      crystalValues[key] = "true";
-    }
-  }
-  values["crystals"] = crystalValues;
-
-  gameapi -> saveToJsonFile("./save-file-2.txt", values);
-
- // saveValues(values);
-}
-
-int numberOfCrystals(){
-  int totalCount = 0;
-  for (auto& crystal : crystals){
-    if (crystal.hasCrystal){
-      totalCount++;
-    }
-  }
-  return totalCount;
-}
-int totalCrystals(){
-  return crystals.size();
-}
-
-bool hasCrystal(std::string& name){
-  for (auto& crystal : crystals){
-    if (crystal.hasCrystal && crystal.crystal.label == name){
-      return true;
-    }
-  }
-  return false;
-}
-void pickupCrystal(std::string name){
-  bool pickedUp = false;
-  for (auto& crystal : crystals){
-    if (crystal.crystal.label == name){
-      crystal.hasCrystal = true;
-      pickedUp = true;
-    }
-  }
-  if (pickedUp){
-    modlog("pickupCrystal picked up", name);
-  }else{
-    modlog("pickupCrystal no matching crystal for", name);
-    modassert(false, "bad crystal pickup");
-  }
-}

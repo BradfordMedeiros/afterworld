@@ -350,8 +350,8 @@ std::set<objid> addNPrefabs(objid sceneId, int width, int height, int depth, std
 }
 
 
-std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues);
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJson(std::string& fileContent, bool* success);
+std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
+std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success);
 
 std::string doLoadFile(std::string filepath);
 

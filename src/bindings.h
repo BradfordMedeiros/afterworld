@@ -34,7 +34,7 @@
 #include "./cutscene.h"
 #include "./curves.h"
 #include "./vector_gfx.h"
-#include "./progress.h"
+#include "./progression/progress.h"
 #include "./options.h"
 #include "./vehicles.h"
 

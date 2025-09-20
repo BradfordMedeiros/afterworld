@@ -12,3 +12,4 @@ gem:physics_collision:nocollide
 gem:pickup:true
 gem:pickup-trigger:gem-pickup
 
+gem:condition:true

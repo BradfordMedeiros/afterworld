@@ -12,8 +12,7 @@ std::unordered_map<objid, ArcadeInstance> arcadeInstances;
 std::unordered_map<objid, HitPoints> hitpoints = {}; 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::unordered_map<objid, Inventory> scopenameToInventory;
-GameProgress progress = createProgress();
-std::vector<CrystalPickup> crystals;   // static-state
+std::vector<CrystalPickup> crystals; 
 std::unordered_map<objid, glm::vec3> impulses;
 
 extern ControlledPlayer controlledPlayer;
@@ -189,17 +188,6 @@ void goToLink(std::string link){
 }
 void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
-}
-void goToNextLevel(){
-  if (canAdvanceProgress()){
-    advanceProgress();
-    auto nextLink = getCurrentLink();
-    modassert(nextLink.has_value(), "no next link");
-    modlog("go to link", nextLink.value());
-    goToLink(nextLink.value());    
-  }else{
-    goBackMainMenu();
-  }
 }
 
 std::optional<std::string> levelByShortcutName(std::string shortcut){
@@ -896,11 +884,10 @@ UiContext getUiContext(GameState& gameState){
       .setBackground = setMenuBackground,
       .goToLevel = [&gameState](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
-        setProgressByShortname(level.value());
         goToLevel(level.value());
       },
       .nextLevel = []() -> void {
-        goToNextLevel();
+        modassert(false, "next level does not exist anymore");
       },
       .takeScreenshot = [](std::string path) -> void {
         gameapi -> saveScreenshot(path);
@@ -956,8 +943,7 @@ CutsceneApi cutsceneApi {
     setDisablePlayerControl(!isPlayable);
   },
   .goToNextLevel = []() -> void {
-    modlog("cutscene api", "goToNextLevel");
-    goToNextLevel();
+    modassert(false, "next level concept does not exist anymore");
   }, 
   .setWorldState = [](std::string field, std::string name, AttributeValue value) -> void {
     modlog("cutscene api", "setWorldState");
@@ -1564,7 +1550,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (levelShortcutToLoad.has_value()){
-      setProgressByShortname(levelShortcutToLoad.value());
       goToLevel(levelShortcutToLoad.value());
       levelShortcutToLoad = std::nullopt;
     }
@@ -1861,11 +1846,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(attrValue, "link message invalid");
       auto linkToValue = getSingleAttr(attrValue -> id, "link");
       modassert(linkToValue.has_value(), "link id does not have a link tag");
-      if (linkToValue.value() == "next"){ // hackey but that's ok!
-        goToNextLevel();
-      }else{
-        goToLink(linkToValue.value());
-      }
+      goToLink(linkToValue.value());
     }
 
     if (key == "ammo"){
@@ -1880,11 +1861,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
       auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true, "[gamelogic] get position for gem pickup to play sound");
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position);
-      if (itemAcquiredMessage -> label.has_value()){
-        pickupCrystal(itemAcquiredMessage -> label.value());
+
+      auto gem = getSingleAttr(itemAcquiredMessage -> itemId, "gem-label");
+      if (gem.has_value()){
+        pickupCrystal(gem.value());
       }else{
         modassert(false, "no label for gem");
       }
+
+      saveData();
     }
     if (key == "activate-switch"){
       auto attrValue = anycast<MessageWithId>(value); 

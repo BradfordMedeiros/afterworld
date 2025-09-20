@@ -27,20 +27,4 @@ int ammoForGun(objid inventory, std::string& gun);
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInventory);
 
-
-//////////////////////////////  crystals
-struct Crystal {
-  std::string label;
-};
-struct CrystalPickup {
-  bool hasCrystal;
-  Crystal crystal;
-};
-
-std::vector<CrystalPickup> loadCrystals();
-void saveCrystals();
-int numberOfCrystals();
-int totalCrystals();
-void pickupCrystal(std::string name);
-
 #endif

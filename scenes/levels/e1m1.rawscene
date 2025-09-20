@@ -19,7 +19,8 @@ playerspawn:teleport:true
 
 [gem:scene:../afterworld/scenes/prefabs/objects/gem.rawscene
 [gem:position:48 -5 -12
-[gem:+gem|pickup-label:|e1m1
+[gem:+gem|gem-label:|e1m1
+
 
 #[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
 #[enemy:position:-22 10 0

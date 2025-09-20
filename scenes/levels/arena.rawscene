@@ -1,12 +1,13 @@
 # Generated scene 
-ship:mesh:../gameresources/build/vehicles/spaceship.gltf
-ship:position:78.7 -62 0
-ship:vehicle:ship
-ship:physics:enabled
-ship:physics_type:dynamic
+#ship:mesh:../gameresources/build/vehicles/spaceship.gltf
+#ship:position:78.7 -62 0
+#ship:vehicle:ship
+#ship:physics:enabled
+#ship:physics_type:dynamic
+#ship:physics_mass:1000
 
-&ship-sound:clip:../gameresources/sound/engine.ogg
-ship:child:&ship-sound
+#&ship-sound:clip:../gameresources/sound/engine.ogg
+#ship:child:&ship-sound
 
 platform_lowert-copy-2004538622-copy-1980783383:material:metal
 platform_lowert-copy-2004538622-copy-1980783383:texture:./res/textures/hexglow.png
@@ -22,7 +23,7 @@ spawnpoint-2:spawn:enemy
 spawnpoint-2:position:-20 -62 0
 platform_lowert-copy-608709856:material:metal
 platform_lowert-copy-608709856:texture:./res/textures/hexglow.png
-platform_lowert-copy-608709856:scrollspeed:0 0.05 0
+#platform_lowert-copy-608709856:scrollspeed:0 0.05 0
 platform_lowert-copy-608709856:texturesize:40 40
 platform_lowert-copy-608709856:textureoffset:0 3.8956
 platform_lowert-copy-608709856:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -57,3 +58,17 @@ platform_lowert-copy-2004538622:physics:enabled
 platform_lowert-copy-2004538622:scale:100 100 10
 platform_lowert-copy-2004538622:rotation:0 1 -6.55651e-07 359.881
 platform_lowert-copy-2004538622:position:-20 60 -23
+
+
+boxtest1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+boxtest1:scale:1 19 1
+boxtest1:position:0 -50 0
+#boxtest1:physics:enabled
+#boxtest1:physics_type:dynamic
+#boxtest1:physics_gravity:0 1 0
+#boxtest1:physics_collision:collide
+
+
+boxtest2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+boxtest2:scale:10 10 10
+boxtest2:position:25 -50 0

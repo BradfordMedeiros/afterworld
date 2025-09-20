@@ -2,6 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
+bool hasCrystal(std::string& name);
+
 void addSwitch(Switches& switches, objid id, std::optional<std::string> onSignal, std::optional<std::string> offSignal){
 	switches.switches[id] = ManagedSwitch{
 		.switchOn = true,
@@ -45,30 +47,12 @@ void handleSwitch(Switches& switches, std::string switchValue){
   }
 }
 
-bool isDayTime(){
-	return false;
-}
-
-std::vector<bool> playerGems = { false, true, false };
-bool hasGem(int index){
-	return playerGems.at(index);
-}
-
 void onAddConditionId(objid id, std::string& value){
-	// if the condition is true, we spawn it, else we delete it 
-	if (value == "daytime"){
-		if (isDayTime()){
+	auto gem = getSingleAttr(id, "gem-label");
+	if (gem.has_value()){
+		if (hasCrystal(gem.value())){
+			gameapi -> removeByGroupId(id);
 			return;
-		}
-	}else if (value == "gem"){
-		auto gemIndex = static_cast<int>(getSingleFloatAttr(id, "gem").value());
-		if (hasGem(gemIndex)){
-			return;
-		}
-	}else {
-		modassert(false, std::string("invalid condition: ") + value);
+		}		
 	}
-
-	gameapi -> removeByGroupId(id);
-	
 }

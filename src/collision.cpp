@@ -171,7 +171,6 @@ void tryPickupItem(objid gameObjId, objid playerId){
     auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
     auto pickupType = getStrAttr(objAttr, "pickup-type");
     auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
-    auto pickupLabel = getStrAttr(objAttr, "pickup-label");
     auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
 
     auto oldItemCount = currentItemCount(scopenameToInventory, inventory, pickup.value());
@@ -189,8 +188,8 @@ void tryPickupItem(objid gameObjId, objid playerId){
     if (pickupTrigger.has_value()){
       ItemAcquiredMessage itemAcquiredMessage {
         .targetId = playerId,
+        .itemId = gameObjId,
         .amount = static_cast<int>(newItemCount),
-        .label = pickupLabel,
       };
       gameapi -> sendNotifyMessage(pickupTrigger.value(), itemAcquiredMessage);
     }
