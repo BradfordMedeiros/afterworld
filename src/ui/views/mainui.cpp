@@ -250,31 +250,47 @@ UiManagerContext uiManagerContext {
 };
 
 
+const float makeObjectOffset = 1.f;
+void makeObject(objid sceneId, std::string name, GameobjAttributes& attr, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
+  auto id = gameapi -> makeObjectAttr(sceneId, name, attr, submodelAttributes).value();
+  auto viewportTransform = gameapi -> getView();
+
+  auto forwardOffset = viewportTransform.rotation * glm::vec3(0.f, 0.f, -1 * makeObjectOffset);
+  gameapi -> setGameObjectPosition(id, viewportTransform.position + forwardOffset, true, Hint { .hint = "[gamelogic] editor makeObject posn" });
+  //gameapi -> setGameObjectRot(id, viewportTransform.rotation, true, Hint { .hint = "[gamelogic] editor makeObject rotn" });
+}
+
 DockConfigApi dockConfigApi { // probably should be done via a prop for better control flow
   .createMesh = [](std::string& mesh) -> void {
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {
       { "mesh", mesh },
     }};
-    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("gameobj-") + uniqueNameSuffix(), attr, submodelAttributes);
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string("gameobj-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createPrefab = [](std::string& prefab, std::unordered_map<std::string, AttributeValue>& additionalFields) -> void {
-    createPrefab(uiManagerContext.uiContext -> activeSceneId().value(), prefab.c_str(), glm::vec3(0.f, 0.f, 0.f), additionalFields);
+    auto id = createPrefab(uiManagerContext.uiContext -> activeSceneId().value(), prefab.c_str(), glm::vec3(0.f, 0.f, 0.f), additionalFields);
+  
+    auto viewportTransform = gameapi -> getView();
+    auto forwardOffset = viewportTransform.rotation * glm::vec3(0.f, 0.f, -1 * makeObjectOffset);
+
+    gameapi -> setGameObjectPosition(id, viewportTransform.position + forwardOffset, true, Hint { .hint = "[gamelogic] editor makeObject posn" });
+    //gameapi -> setGameObjectRot(id, viewportTransform.rotation, true, Hint { .hint = "[gamelogic] editor makeObject rotn" });
   },
   .createCamera = []() -> void {
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
-    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createLight = []() -> void {
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
-    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .createNavmesh = []() -> void {
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
-    gameapi -> makeObjectAttr(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
   .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
     windowSetEnabled(windowFileExplorerSymbol, true);
