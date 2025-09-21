@@ -298,6 +298,27 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "Object Details",
     .configFields = {
+      DockCheckboxConfig {
+        .label = "Enable Physics",
+        .isChecked = getIsCheckedGameobj("physics"),
+        .onChecked = getOnCheckedGameobj("physics"),
+      },
+      DockCheckboxConfig {
+        .label = "Dynamic",
+        .isChecked = getIsCheckedGameobj("physics_type"),
+        .onChecked = getOnCheckedGameobj("physics_type"),
+      },
+      DockCheckboxConfig {
+        .label = "Collide",
+        .isChecked = getIsCheckedGameobj("physics_collision"),
+        .onChecked = getOnCheckedGameobj("physics_collision"),
+      },
+      DockOptionConfig {
+        .options = { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto"  },
+        .onClick = optionsOnClickObj("physics_shape", { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto" }),
+        .getSelectedIndex = optionsSelectedIndexObj("physics_shape", { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto" }),
+      },
+
       DockTextboxNumeric {
         .label = "position x",
         .value = []() -> std::string{ return "1.0"; },
