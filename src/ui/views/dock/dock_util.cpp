@@ -158,6 +158,26 @@ std::function<bool()> getIsCheckedGameobj(std::string key, std::string enabledVa
   };
 }
 
+
+std::function<bool()> getIsCheckedGameobj(std::string key){
+  return [key]() -> bool {
+    auto attr = dockConfigApi.getObjAttr(key);
+    if (!attr.has_value()){
+      return false;
+    }
+    auto value = attr.value();
+    auto valueBool = std::get_if<bool>(&value);
+    return *valueBool;
+  };
+}
+
+std::function<void(bool)> getOnCheckedGameobj(std::string key){
+  return [key](bool checked) -> void {
+    dockConfigApi.setObjAttr(key, checked ? true : false);
+  };
+}
+
+
 std::function<void(bool)> getOnCheckedGameobj(std::string key, std::string enabledValue, std::string disabledValue){
   return [key, enabledValue, disabledValue](bool checked) -> void {
     dockConfigApi.setObjAttr(key, checked ? enabledValue : disabledValue);

@@ -46,8 +46,12 @@ std::optional<int> toPositiveInteger(std::string& text);
 
 std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue);
 std::function<void(bool)> getOnCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue);
+
 std::function<bool()> getIsCheckedGameobj(std::string key, std::string enabledValue, std::string disabledValue);
 std::function<void(bool)> getOnCheckedGameobj(std::string key, std::string enabledValue, std::string disabledValue);
+std::function<bool()> getIsCheckedGameobj(std::string key);
+std::function<void(bool)> getOnCheckedGameobj(std::string key);
+
 std::function<void(float)> getSetFloatGameobj(std::string key);
 std::function<float()> getFloatGameobj(std::string key);
 std::function<void(std::string&)> getStrGameObj(const char* attribute);

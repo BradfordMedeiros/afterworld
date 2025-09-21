@@ -409,10 +409,10 @@ std::vector<DockConfiguration> configurations {
         .buttonText = "Create Camera",
         .onClick = []() -> void { dockConfigApi.createCamera(); },
       },
-      DockOptionConfig {
-        .options = { "enable dof", "disable dof" },
-        .onClick = optionsOnClickObj("dof", { "enabled", "disabled" }),
-        .getSelectedIndex = optionsSelectedIndexObj("dof",  { "enabled", "disabled" }),
+      DockCheckboxConfig {
+        .label = "toggle dof",
+        .isChecked = getIsCheckedGameobj("dof"),
+        .onChecked = getOnCheckedGameobj("dof"),
       },
       DockGroup {
         .groupName = "Depth of Field Blur",
@@ -423,11 +423,6 @@ std::vector<DockConfiguration> configurations {
             .label = std::nullopt,
             .onSelect =  getStrGameObj("target"),
           },
-          DockCheckboxConfig {
-            .label = "toggle dof",
-            .isChecked = getIsCheckedGameobj("dof", "enabled", "disabled"),
-            .onChecked = getOnCheckedGameobj("dof", "enabled", "disabled"),
-          },
           DockSliderConfig {
             .label = "blur min",
             .min = 0.f,
@@ -436,7 +431,6 @@ std::vector<DockConfiguration> configurations {
             .onSlide = [](float amount) -> void {
               auto setMinBlur = getSetFloatGameobj("minblur");
               setMinBlur(amount);
-              modassert(false, std::string("set min blur, value = " ) + std::to_string(amount));
             },
           },
           DockSliderConfig {
