@@ -131,10 +131,10 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
     SettingConfiguration {
       .config = DockCheckboxConfig {
         .label = "Fullscreen",
-        .isChecked = getIsCheckedWorld("rendering", "fullscreen", "true", "false"),
+        .isChecked = getIsCheckedWorld("rendering", "fullscreen"),
         .onChecked = persistSql(
           "fullscreen", "TRUE", "FALSE",
-          getOnCheckedWorld("rendering", "fullscreen", "true", "false")
+          getOnCheckedWorld("rendering", "fullscreen")
         ),
       },
       .initSetting = getExecuteSqlBool("fullscreen", "TRUE", "FALSE", "rendering", "fullscreen", "true", "false"),
@@ -238,10 +238,10 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
     SettingConfiguration {
       .config = DockCheckboxConfig {
         .label = "Sound Enabled",
-        .isChecked = getIsCheckedWorld("sound", "mute", "false", "true"),
+        .isChecked = getIsCheckedWorld("sound", "mute"),
         .onChecked = persistSql(
           "mute", "FALSE", "TRUE",
-          getOnCheckedWorld("sound", "mute", "false", "true")
+          getOnCheckedWorld("sound", "mute")
         ),
       },
       .initSetting = getExecuteSqlBool("mute", "TRUE", "FALSE", "sound", "mute", "true", "false"),
