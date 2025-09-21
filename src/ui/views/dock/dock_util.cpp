@@ -139,10 +139,25 @@ std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute, 
   };
 }
 
+std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute){
+  return [key, attribute]() -> bool {
+    auto value = dockConfigApi.getAttribute(key, attribute);
+    auto boolValue = std::get_if<bool>(&value);
+    modassert(boolValue, "getIsCheckedWorld not boolValue");
+    return *boolValue;
+  };
+}
+
 std::function<void(bool)> getOnCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
   return [key, attribute, enabledValue, disabledValue](bool checked) -> void {
     dockConfigApi.setAttribute(key, attribute, checked ? enabledValue : disabledValue);
   };
+}
+
+std::function<void(bool)> getOnCheckedWorld(std::string key, std::string attribute){
+  return [key, attribute](bool checked) -> void {
+    dockConfigApi.setAttribute(key, attribute, checked);
+  }; 
 }
 
 std::function<bool()> getIsCheckedGameobj(std::string key, std::string enabledValue, std::string disabledValue){
@@ -227,8 +242,7 @@ std::function<int()> optionsSelectedIndex(std::string key, std::string attribute
         return i;
       }
     }
-    modassert(false, "options selected index - invalid");
-    return 0;
+    return -1;
   };
 }
 

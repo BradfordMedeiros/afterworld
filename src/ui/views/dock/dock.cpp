@@ -362,13 +362,13 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockCheckboxConfig {
         .label = "Group Selection",
-        .isChecked = getIsCheckedWorld("editor", "groupselection", "true", "false"),
-        .onChecked = getOnCheckedWorld("editor", "groupselection", "true", "false"),
+        .isChecked = getIsCheckedWorld("editor", "groupselection"),
+        .onChecked = getOnCheckedWorld("editor", "groupselection"),
       },
       DockCheckboxConfig {
         .label = "Symmetric Translate",
-        .isChecked = getIsCheckedWorld("tools", "position-mirror", "true", "false"),
-        .onChecked = getOnCheckedWorld("tools", "position-mirror", "true", "false"),
+        .isChecked = getIsCheckedWorld("tools", "position-mirror"),
+        .onChecked = getOnCheckedWorld("tools", "position-mirror"),
       },
       DockCheckboxConfig {
         .label = "Absolute Translate",
@@ -377,18 +377,18 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig { // Snap Translates
         .options = { "0.01", "0.1", "0.5", "1", "5" },
-        .onClick = optionsOnClick("editor", "snaptranslate-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .onClick = optionsOnClick("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
       },
       DockCheckboxConfig {
         .label = "Preserve Scale",
-        .isChecked = getIsCheckedWorld("tools", "preserve-scale", "true", "false"),
-        .onChecked = getOnCheckedWorld("tools", "preserve-scale", "true", "false"),
+        .isChecked = getIsCheckedWorld("tools", "preserve-scale"),
+        .onChecked = getOnCheckedWorld("tools", "preserve-scale"),
       },
       DockOptionConfig {  // "Snap Scales",
         .options = { "0.01", "0.1", "0.5", "1", "5" },
-        .onClick = optionsOnClick("editor", "snapscale-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .onClick = optionsOnClick("editor", "snapscale", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
       },
       DockCheckboxConfig {
         .label = "Absolute Rotation",
@@ -397,8 +397,8 @@ std::vector<DockConfiguration> configurations {
       },
       DockOptionConfig { // Snap Rotation
         .options = { "1", "5", "15", "30", "45", "90", "180" },
-        .onClick = optionsOnClick("editor", "snapangle-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle-index", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
+        .onClick = optionsOnClick("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
       },
     },
   },
@@ -476,8 +476,8 @@ std::vector<DockConfiguration> configurations {
     .configFields = {
       DockCheckboxConfig {
         .label = "Show Debug",
-        .isChecked = getIsCheckedWorld("editor", "debug", "true", "false"),
-        .onChecked = getOnCheckedWorld("editor", "debug", "true", "false"),
+        .isChecked = getIsCheckedWorld("editor", "debug"),
+        .onChecked = getOnCheckedWorld("editor", "debug"),
       },
       DockCheckboxConfig {
         .label = "Show Cameras",

@@ -303,6 +303,18 @@ std::optional<std::string> getStrWorldState(const char* object, const char* attr
   return std::nullopt;
 }
 
+std::optional<bool> getBoolWorldState(const char* object, const char* attribute){
+  auto worldStates = gameapi -> getWorldState();
+  for (auto &worldState : worldStates){
+    if (worldState.object == object && worldState.attribute == attribute){
+      auto boolValue = std::get_if<bool>(&worldState.value);
+      return *boolValue;
+    }
+  }
+  return std::nullopt;
+}
+
+
 std::optional<AttributeValue> getWorldStateAttr(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
   for (auto &worldState : worldStates){

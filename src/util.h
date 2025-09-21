@@ -82,6 +82,7 @@ void setAmbientLight(glm::vec3 light);
 std::string uniqueNameSuffix();
 
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);
+std::optional<bool> getBoolWorldState(const char* object, const char* attribute);
 std::optional<AttributeValue> getWorldStateAttr(const char* object, const char* attribute);
 bool toggleWorldStateBoolStr(const char* object, const char* attribute, const char* enabled = NULL, const char *disabled = NULL);
 std::function<void()> getToggleWorldStateBoolStr(const char* object, const char* attribute);

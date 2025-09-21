@@ -753,7 +753,7 @@ UiContext getUiContext(GameState& gameState){
     if (debugUi){
       return true;
     }
-    return getStrWorldState("editor", "debug").value() == "true"; 
+    return getBoolWorldState("editor", "debug").value(); 
    },
    .showEditor = []() -> bool {
       return getGlobalState().showEditor;
