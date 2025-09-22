@@ -172,6 +172,12 @@ void doDamageMessageInner(objid id, float damageAmount){
 }
 
 void doDamageMessage(objid id, float damageAmount){
+ 	auto idExists = gameapi -> gameobjExists(id);
+ 	if (!idExists){
+ 		modassertwarn(false, std::to_string(id) + " - doDamagneMessage id does not exist");
+ 		return;
+ 	}
+
 	auto rig = handleRigHit(id);
 	if (rig.has_value()){
 		std::cout << "rig data: " << print(rig.value()) << std::endl;

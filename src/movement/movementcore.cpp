@@ -847,7 +847,15 @@ MovementState getInitialMovementState(objid playerId){
   movementState.reloading = std::nullopt;
 
   // overly coupled to the animation trigger stuff, but who cares fuck it bro
-  movementState.reloadingLength = gameapi -> animationLength(playerId, "rifle-reload").value();
+
+  auto rifleReloadAnimationLength = gameapi -> animationLength(playerId, "rifle-reload");
+  modassertwarn(rifleReloadAnimationLength.has_value(), "missing animation rifle-reload");
+
+  if (rifleReloadAnimationLength.has_value()){
+    movementState.reloadingLength = rifleReloadAnimationLength.value();
+  }else{
+    movementState.reloadingLength = 0.f;
+  }
 
   return movementState;
 }

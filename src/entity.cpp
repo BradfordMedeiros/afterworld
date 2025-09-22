@@ -549,23 +549,25 @@ std::vector<BoneShape> boneValues = {
 void createHitbox(objid playerModel){
 	for (auto &value : boneValues){
 		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
-		auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
-		std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
+		if (headValue.has_value()){
+			auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
+			std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
 
-		gameapi -> createPhysicsBody(headValue.value(), value.shape);
-		rigidBodyOpts physicsOptions {
-	    .linear = glm::vec3(1.f, 1.f, 1.f),
-	    .angular = glm::vec3(0.f, 0.f, 0.f),
-	    .gravity = glm::vec3(0.f, -9.f, 0.f),
-	    .friction = 1.f,
-	    .restitution = 1.f,
-	    .mass = 1.f,
-	    .layer = physicsLayers.bones,
-	    .linearDamping = 0.f,
-	    .isStatic = true,
-	    .hasCollisions = false,
-		};
-		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
+			gameapi -> createPhysicsBody(headValue.value(), value.shape);
+			rigidBodyOpts physicsOptions {
+	  	  .linear = glm::vec3(1.f, 1.f, 1.f),
+	  	  .angular = glm::vec3(0.f, 0.f, 0.f),
+	  	  .gravity = glm::vec3(0.f, -9.f, 0.f),
+	  	  .friction = 1.f,
+	  	  .restitution = 1.f,
+	  	  .mass = 1.f,
+	  	  .layer = physicsLayers.bones,
+	  	  .linearDamping = 0.f,
+	  	  .isStatic = true,
+	  	  .hasCollisions = false,
+			};
+			gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);	
+		}	
 	}
 }
 
