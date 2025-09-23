@@ -4,7 +4,12 @@ extern CustomApiBindings* gameapi;
 
 extern std::vector<CrystalPickup> crystals;   // static-state extern
 
+const char* CRYSTAL_SAVE_FILE = "../afterworld/data/save/crystal.json";
+
 bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
+  if (values.find("crystals") == values.end()){
+    return false;
+  }
   for (auto &[savedKey, savedValueObj] : values.at("crystals")){
     auto boolValue = std::get_if<bool>(&savedValueObj);
     if (boolValue){
@@ -18,8 +23,11 @@ bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, 
 
 std::vector<CrystalPickup> loadCrystals(){
   bool success = false;
-  auto data = gameapi -> loadFromJsonFile ("./save-file-2.txt", &success);
-  modassert(success, "not success");
+  auto data = gameapi -> loadFromJsonFile (CRYSTAL_SAVE_FILE, &success);
+  if (!success){
+    modassertwarn(false, "load save file failed");
+  }
+  data = {};
 
   return {
     CrystalPickup {
@@ -49,7 +57,7 @@ void saveCrystals(){
 
   std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> values;
   values["crystals"] = crystalValues;
-  gameapi -> saveToJsonFile("./save-file-2.txt", values);
+  gameapi -> saveToJsonFile(CRYSTAL_SAVE_FILE, values);
 }
 
 int numberOfCrystals(){

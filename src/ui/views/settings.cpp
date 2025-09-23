@@ -35,13 +35,60 @@ std::string getSqlValue(std::string column){
   modassert(validSql, "error executing sql query");
   return result.at(0).at(0).c_str();
 }
-float getSqlFloatValue(std::string column){
-  auto query = gameapi -> compileSqlQuery("select ? from settings", { column });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  float value = std::atof(result.at(0).at(0).c_str());
-  return value;
+
+bool success = false;
+const char* SETTINGS_SAVE_FILE = "../afterworld/data/save/settings.json";
+float getSaveFloatValue(std::string key, float defaultValue){
+  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
+  if (!success){
+    data = {};
+  }
+  if (data.find("settings") == data.end()){
+    data["settings"] = {};
+  }
+
+  if (data.at("settings").find(key) == data.at("settings").end()){
+    return defaultValue;
+  }
+
+  JsonType value = data.at("settings").at(key);
+  float* floatValue = std::get_if<float>(&value);
+  if (floatValue){
+    return *floatValue;
+  }
+  return defaultValue;
+}
+float getSaveBoolValue(std::string key, float defaultValue){
+  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
+  if (!success){
+    data = {};
+  }
+  if (data.find("settings") == data.end()){
+    data["settings"] = {};
+  }
+
+  if (data.at("settings").find(key) == data.at("settings").end()){
+    return defaultValue;
+  }
+  
+  JsonType value = data.at("settings").at(key);
+  bool* boolValue = std::get_if<bool>(&value);
+  if (boolValue){
+    return *boolValue;
+  }
+  return defaultValue;
+}
+
+void persistSave(std::string key, JsonType value){
+  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
+  if (!success){
+    data = {};
+  }
+  if (data.find("settings") == data.end()){
+    data["settings"] = {};
+  }
+  data.at("settings")[key] = value;
+  gameapi -> saveToJsonFile(SETTINGS_SAVE_FILE, data);
 }
 
 float getWorldStateFloat(std::string object, std::string attribute){
@@ -90,10 +137,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = []() -> bool { return getGlobalState().invertY; },
         .onChecked = [](bool isChecked) -> void {
           getGlobalState().invertY = isChecked;
+          persistSave("invertY", isChecked);
         },
       },
       .initSetting = []() -> void {
-
+        getGlobalState().invertY = getSaveBoolValue("invertY", false);
       },
     },
     SettingConfiguration {
@@ -104,11 +152,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .percentage = []() -> float { return getGlobalState().xsensitivity; },
         .onSlide = [](float amount) -> void {
           getGlobalState().xsensitivity = amount;
-          persistSqlFloat("xsensitivity", amount);
+          persistSave("xsensitivity", amount);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().xsensitivity = getSqlFloatValue("xsensitivity");
+        getGlobalState().xsensitivity = getSaveFloatValue("xsensitivity", 1.f);
       },
     },
     SettingConfiguration {
@@ -119,11 +167,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .percentage = []() -> float { return getGlobalState().ysensitivity; },
         .onSlide = [](float amount) -> void {
           getGlobalState().ysensitivity = amount;
-          persistSqlFloat("ysensitivity", amount);
+          persistSave("ysensitivity", amount);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().ysensitivity = getSqlFloatValue("ysensitivity");
+        getGlobalState().ysensitivity = getSaveFloatValue("ysensitivity", 1.f);
       },
     },
   }},
@@ -149,13 +197,13 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         },
         .onSlide = [](float amount) -> void {
           originalFov = amount;
-          persistSqlFloat("fov", originalFov);
+          persistSave("fov", originalFov);
           setZoom(1.f, false);
         },
       },
       .initSetting = []() -> void {
-        auto fov = getSqlValue("fov");
-        originalFov = std::atof(fov.c_str());
+        auto fov = getSaveFloatValue("fov", 45.f);
+        originalFov = fov;
         setZoom(1.f, false);
       },
     },
@@ -258,11 +306,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .onSlide = [](float amount) -> void {
           // sound:volume:0.2
           dockConfigApi.setAttribute("sound", "volume", amount);
-          persistSqlFloat("volume", amount);
+          persistSave("volume", amount);
         },
       },
       .initSetting = []() -> void {
-        auto volume = getSqlFloatValue("volume");
+        auto volume = getSaveFloatValue("volume", 1.f);
         dockConfigApi.setAttribute("sound", "volume", volume);
       },
     },
