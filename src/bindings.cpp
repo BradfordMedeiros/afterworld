@@ -77,6 +77,10 @@ void setScenarioOptions(ScenarioOptions& options){
     },
   });
   defaultAudioClipPath = options.audioClipPath;
+  modlog("set scenario options: ambient", print(options.ambientLight));
+  modlog("set scenario options: skyboxColor", print(options.skyboxColor));
+  modlog("set scenario options: skybox", print(options.skybox));
+
 }
 
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){

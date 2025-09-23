@@ -1,1 +1,4 @@
 spawnpoint:mesh:../gameresources/build/objtypes/spawnpoint.gltf
+spawnpoint:layer:nolighting
+spawnpoint:tint:50 50 50 0.6
+spawnpoint:texture:./res/textures/wood.normal.jpg

@@ -255,7 +255,7 @@ void main(){
     if (enableLighting){
       FragColor = tint *  vec4(color.xyz * shadowDelta, color.w) * 2 + vec4(noiseValue, noiseValue, noiseValue, 0);
     }else{
-      FragColor = tint * texColor + vec4(noiseValue, noiseValue, noiseValue, 0);
+      FragColor = tint * texColor;
     }
 
     // TODO -> what would be a better thesholding function? 
