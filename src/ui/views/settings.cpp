@@ -180,12 +180,16 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
       .config = DockCheckboxConfig {
         .label = "Fullscreen",
         .isChecked = getIsCheckedWorld("rendering", "fullscreen"),
-        .onChecked = persistSql(
-          "fullscreen", "TRUE", "FALSE",
-          getOnCheckedWorld("rendering", "fullscreen")
-        ),
+        .onChecked = [](bool isChecked) -> void {
+          bool isFullscreen = isChecked;
+          persistSave("fullscreen", isFullscreen);
+          dockConfigApi.setAttribute("rendering", "fullscreen", isFullscreen);
+        },
       },
-      .initSetting = getExecuteSqlBool("fullscreen", "TRUE", "FALSE", "rendering", "fullscreen", "true", "false"),
+      .initSetting = []() -> void {
+        bool isFullscreen = getSaveBoolValue("fullscreen", true);
+        dockConfigApi.setAttribute("rendering", "fullscreen", isFullscreen);
+      },
     },
     SettingConfiguration {
       .config = DockSliderConfig {
@@ -286,13 +290,17 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
     SettingConfiguration {
       .config = DockCheckboxConfig {
         .label = "Sound Enabled",
-        .isChecked = getIsCheckedWorld("sound", "mute"),
-        .onChecked = persistSql(
-          "mute", "FALSE", "TRUE",
-          getOnCheckedWorld("sound", "mute")
-        ),
+        .isChecked = getIsCheckedWorldInvert("sound", "mute"),
+        .onChecked = [](bool isChecked) -> void {
+          bool mute = !isChecked;
+          persistSave("mute", mute);
+          dockConfigApi.setAttribute("sound", "mute", mute);
+        },
       },
-      .initSetting = getExecuteSqlBool("mute", "TRUE", "FALSE", "sound", "mute", "true", "false"),
+      .initSetting = []() -> void {
+        bool mute = getSaveBoolValue("mute", false);
+        dockConfigApi.setAttribute("sound", "mute", mute);
+      },
     },
     SettingConfiguration {
       .config = DockSliderConfig {

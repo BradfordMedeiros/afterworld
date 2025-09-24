@@ -17,23 +17,6 @@ std::vector<NestedListItem> nestedListTest = {
     .items = {
       NestedListItem {
         .item = ImListItem {
-          .value = "fullscreen",
-          .onClick = []() -> void {
-            auto isFullscreen = getBoolWorldState("rendering", "fullscreen").value();
-            gameapi -> setWorldState({ 
-              ObjectValue {
-                .object = "rendering",
-                .attribute = "fullscreen",
-                .value = isFullscreen ? "false" : "true",
-              }
-            });
-          },
-          .mappingId = mappingId++,
-        },
-        .items = {},
-      },
-      NestedListItem {
-        .item = ImListItem {
           .value = "layout",
           .onClick = std::nullopt, 
           .mappingId = mappingId++,

@@ -148,6 +148,16 @@ std::function<bool()> getIsCheckedWorld(std::string key, std::string attribute){
   };
 }
 
+std::function<bool()> getIsCheckedWorldInvert(std::string key, std::string attribute){
+  return [key, attribute]() -> bool {
+    auto value = dockConfigApi.getAttribute(key, attribute);
+    auto boolValue = std::get_if<bool>(&value);
+    modassert(boolValue, "getIsCheckedWorld not boolValue");
+    return *boolValue == false;
+  };
+}
+
+
 std::function<void(bool)> getOnCheckedWorld(std::string key, std::string attribute, std::string enabledValue, std::string disabledValue){
   return [key, attribute, enabledValue, disabledValue](bool checked) -> void {
     dockConfigApi.setAttribute(key, attribute, checked ? enabledValue : disabledValue);
