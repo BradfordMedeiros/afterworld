@@ -26,8 +26,8 @@ std::vector<CrystalPickup> loadCrystals(){
   auto data = gameapi -> loadFromJsonFile (CRYSTAL_SAVE_FILE, &success);
   if (!success){
     modassertwarn(false, "load save file failed");
+    data = {};
   }
-  data = {};
 
   return {
     CrystalPickup {
