@@ -79,6 +79,27 @@ float getSaveBoolValue(std::string key, float defaultValue){
   return defaultValue;
 }
 
+std::string getSaveStringValue(std::string key, std::string defaultValue){
+  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
+  if (!success){
+    data = {};
+  }
+  if (data.find("settings") == data.end()){
+    data["settings"] = {};
+  }
+
+  if (data.at("settings").find(key) == data.at("settings").end()){
+    return defaultValue;
+  }
+  
+  JsonType value = data.at("settings").at(key);
+  std::string* strValue = std::get_if<std::string>(&value);
+  if (strValue){
+    return *strValue;
+  }
+  return defaultValue;
+}
+
 void persistSave(std::string key, JsonType value){
   auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
   if (!success){

@@ -10,6 +10,8 @@ extern Vehicles vehicles;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+std::string getSaveStringValue(std::string key, std::string defaultValue);
+void persistSave(std::string key, JsonType value);
 
 struct TagUpdater {
 	std::string attribute;
@@ -57,23 +59,15 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
   ).value();
 }
 
+
 std::string queryInitialBackground(){
 	if (hasOption("background")){
 		return getArgOption("background");
 	}
-  auto query = gameapi -> compileSqlQuery("select background from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0);
+	return getSaveStringValue("background", "../gameresources/textures/backgrounds/test3.png");
 }
 void updateQueryBackground(std::string image){
-  auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update session set ") + "background = ?", { image }
-  );
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-  modassert(validSql, "error executing sql query");
+	persistSave("background", image);
 }
 void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);

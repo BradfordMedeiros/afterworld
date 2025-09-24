@@ -1,2 +1,2 @@
-session.console:STRING,session.editor:STRING,session.keyboard:STRING,session.background:STRING,session.layout:STRING,session.style-primary:STRING,session.style-secondary:STRING,session.style-border:STRING,session.style-highlight:STRING
-true,false,false,../gameresources/textures/backgrounds/test3.png,editor,0.594668 0.936533 0.789791 0.15801,0.2 0.2 0.2 0.5,0 0 0 1,0 1 0 0.5
+session.console:STRING,session.layout:STRING,session.style-primary:STRING,session.style-secondary:STRING,session.style-border:STRING,session.style-highlight:STRING
+true,editor,0.594668 0.936533 0.789791 0.15801,0.2 0.2 0.2 0.5,0 0 0 1,0 1 0 0.5

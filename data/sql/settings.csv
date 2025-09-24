@@ -1,2 +1,2 @@
-settings.profile:STRING,settings.xsensitivity:STRING,settings.ysensitivity:STRING,settings.fullscreen:STRING,settings.mute:STRING
-default,0.160256,0.166184,FALSE,TRUE
+settings.profile:STRING,settings.xsensitivity:STRING,settings.ysensitivity:STRING
+default,0.160256,0.166184

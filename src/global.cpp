@@ -4,7 +4,8 @@ extern CustomApiBindings* gameapi;
 void pushHistoryParam(std::string);
 void rmHistoryParam(std::string);
 void setActivePlayerEditorMode(bool);
-
+float getSaveBoolValue(std::string key, float defaultValue);
+void persistSave(std::string key, JsonType value);
 
 GlobalState global {  // static-state
   .showEditor = false,
@@ -147,27 +148,11 @@ GlobalState& getGlobalState(){
   return global;
 }
 
-bool queryShowEditor(){
-  auto query = gameapi -> compileSqlQuery("select editor from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0) == "true";
-}
-
-void queryUpdateShowEditor(bool showEditor){
-  auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update session set ") + "editor = ?", { (showEditor ? "true" : "false") }
-  );
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-}
 
 void setShowEditor(bool shouldShowEditor){
   modlog("update show editor", std::to_string(shouldShowEditor));
   global.showEditor = shouldShowEditor;
-  queryUpdateShowEditor(shouldShowEditor);
+  persistSave("show-editor", shouldShowEditor);
 
   if (shouldShowEditor){
     pushHistoryParam("editor");
@@ -181,25 +166,9 @@ void setShowFreecam(bool isFreeCam){
   updateState();
 }
 
-bool queryShowKeyboard(){
-  auto query = gameapi -> compileSqlQuery("select keyboard from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0) == "true";
-}
-void queryUpdateShowKeyboard(bool showKeyboard){
-  auto updateQuery = gameapi -> compileSqlQuery(
-    std::string("update session set ") + "keyboard = ?" , { (showKeyboard ? "true" : "false") }
-  );
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-}
-
 void toggleKeyboard(){
   global.showKeyboard = !global.showKeyboard;
-  queryUpdateShowKeyboard(global.showKeyboard);
+  persistSave("show-keyboard", global.showKeyboard);
 }
 
 
@@ -208,10 +177,10 @@ void initGlobal(){
   if (args.find("godmode") != args.end()){
     global.godMode = true;
   }
-  global.showEditor = queryShowEditor();
+  global.showEditor = getSaveBoolValue("show-editor", false);
   setShowEditor(global.showEditor);
   setActivePlayerEditorMode(global.showEditor);
-  global.showKeyboard = queryShowKeyboard();
+  global.showKeyboard = getSaveBoolValue("show-keyboard", false);
   updateState();
 }
 
