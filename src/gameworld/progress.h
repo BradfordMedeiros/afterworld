@@ -4,7 +4,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../global.h"
-
+#include "./save.h"
 
 struct Crystal {
   std::string label;

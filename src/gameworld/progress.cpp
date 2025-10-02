@@ -1,10 +1,9 @@
 #include "./progress.h"
 
 extern CustomApiBindings* gameapi;
-
 extern std::vector<CrystalPickup> crystals;   // static-state extern
 
-const char* CRYSTAL_SAVE_FILE = "../afterworld/data/save/crystal.json";
+const char* CRYSTAL_SAVE_FILE = "../afterworld/data/save/save.json";
 
 bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
   if (values.find("crystals") == values.end()){
@@ -54,10 +53,7 @@ void saveCrystals(){
       crystalValues[key] = true;
     }
   }
-
-  std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> values;
-  values["crystals"] = crystalValues;
-  gameapi -> saveToJsonFile(CRYSTAL_SAVE_FILE, values);
+  persistSaveMap("crystals", crystalValues);
 }
 
 int numberOfCrystals(){

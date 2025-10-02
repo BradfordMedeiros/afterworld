@@ -103,6 +103,8 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unorde
     submodelAttributes
   ).value();
 }
+
+
 void startLevel(ManagedScene& managedScene){
   if (!managedScene.id.has_value()){
     return;

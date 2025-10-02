@@ -3,6 +3,7 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
+#include "./gameworld/save.h"
 
 struct RouteState {
   bool paused;

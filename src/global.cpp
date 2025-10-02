@@ -4,8 +4,7 @@ extern CustomApiBindings* gameapi;
 void pushHistoryParam(std::string);
 void rmHistoryParam(std::string);
 void setActivePlayerEditorMode(bool);
-float getSaveBoolValue(std::string key, float defaultValue);
-void persistSave(std::string key, JsonType value);
+void persistSave(std::string scope, std::string key, JsonType value);
 
 GlobalState global {  // static-state
   .showEditor = false,
@@ -152,7 +151,7 @@ GlobalState& getGlobalState(){
 void setShowEditor(bool shouldShowEditor){
   modlog("update show editor", std::to_string(shouldShowEditor));
   global.showEditor = shouldShowEditor;
-  persistSave("show-editor", shouldShowEditor);
+  persistSave("settings", "show-editor", shouldShowEditor);
 
   if (shouldShowEditor){
     pushHistoryParam("editor");
@@ -168,7 +167,7 @@ void setShowFreecam(bool isFreeCam){
 
 void toggleKeyboard(){
   global.showKeyboard = !global.showKeyboard;
-  persistSave("show-keyboard", global.showKeyboard);
+  persistSave("settings", "show-keyboard", global.showKeyboard);
 }
 
 
@@ -177,10 +176,10 @@ void initGlobal(){
   if (args.find("godmode") != args.end()){
     global.godMode = true;
   }
-  global.showEditor = getSaveBoolValue("show-editor", false);
+  global.showEditor = getSaveBoolValue("settings", "show-editor", false);
   setShowEditor(global.showEditor);
   setActivePlayerEditorMode(global.showEditor);
-  global.showKeyboard = getSaveBoolValue("show-keyboard", false);
+  global.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
   updateState();
 }
 

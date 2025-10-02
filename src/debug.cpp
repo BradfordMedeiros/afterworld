@@ -449,7 +449,20 @@ void debugOnKey(int key, int scancode, int action, int mods){
  
 
   if (key == 'Q' && action == 1){
-  	printDebugSpawnpoint();
+  	//gameapi -> removeViewport(0);
+  	//gameapi -> removeViewport(1);
+
+  	static float offset = 0.f;
+  	offset += 0.1f;
+
+ 		simpleOnFrame([&offset]() -> void {
+	  	float radius = 0.2f;
+	  	gameapi -> createViewport(0, radius * glm::cos(gameapi -> timeSeconds(true)), radius * glm::sin(gameapi -> timeSeconds(true)), 0.5f, 0.5f);
+		}, 10.f);
+
+
+   	//gameapi -> createViewport(1, 0.5f, -0.5f, 0.5f, 0.5f);
+
   }
 
   if (key == 'M' && action == 0){

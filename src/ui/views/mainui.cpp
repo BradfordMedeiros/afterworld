@@ -6,8 +6,6 @@ void setMenuBackground(std::string background);
 void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 bool isSignalLocked(std::string signal);
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields);
-std::string getSaveStringValue(std::string key, std::string defaultValue);
-void persistSave(std::string key, JsonType value);
 
 float wheelRotationOffset = 0.f;
 float actualWheelRotationOffset = wheelRotationOffset;
@@ -390,14 +388,14 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
 
 
 NavbarType queryLoadNavbarType(){
-  auto navbarType = getSaveStringValue("ui-layout", "main");
+  auto navbarType = getSaveStringValue("settings", "ui-layout", "main");
   return strToNavbarType(navbarType);
 }
 
 NavListApi navListApi {
   .changeLayout = [](std::string layout) -> void {
     commonState -> navbarType = strToNavbarType(layout);
-    persistSave("ui-layout", layout);
+    persistSave("settings", "ui-layout", layout);
   }
 };
 

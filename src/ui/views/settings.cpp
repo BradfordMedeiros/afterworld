@@ -36,81 +36,6 @@ std::string getSqlValue(std::string column){
   return result.at(0).at(0).c_str();
 }
 
-bool success = false;
-const char* SETTINGS_SAVE_FILE = "../afterworld/data/save/settings.json";
-float getSaveFloatValue(std::string key, float defaultValue){
-  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
-  if (!success){
-    data = {};
-  }
-  if (data.find("settings") == data.end()){
-    data["settings"] = {};
-  }
-
-  if (data.at("settings").find(key) == data.at("settings").end()){
-    return defaultValue;
-  }
-
-  JsonType value = data.at("settings").at(key);
-  float* floatValue = std::get_if<float>(&value);
-  if (floatValue){
-    return *floatValue;
-  }
-  return defaultValue;
-}
-float getSaveBoolValue(std::string key, float defaultValue){
-  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
-  if (!success){
-    data = {};
-  }
-  if (data.find("settings") == data.end()){
-    data["settings"] = {};
-  }
-
-  if (data.at("settings").find(key) == data.at("settings").end()){
-    return defaultValue;
-  }
-  
-  JsonType value = data.at("settings").at(key);
-  bool* boolValue = std::get_if<bool>(&value);
-  if (boolValue){
-    return *boolValue;
-  }
-  return defaultValue;
-}
-
-std::string getSaveStringValue(std::string key, std::string defaultValue){
-  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
-  if (!success){
-    data = {};
-  }
-  if (data.find("settings") == data.end()){
-    data["settings"] = {};
-  }
-
-  if (data.at("settings").find(key) == data.at("settings").end()){
-    return defaultValue;
-  }
-  
-  JsonType value = data.at("settings").at(key);
-  std::string* strValue = std::get_if<std::string>(&value);
-  if (strValue){
-    return *strValue;
-  }
-  return defaultValue;
-}
-
-void persistSave(std::string key, JsonType value){
-  auto data = gameapi -> loadFromJsonFile (SETTINGS_SAVE_FILE, &success);
-  if (!success){
-    data = {};
-  }
-  if (data.find("settings") == data.end()){
-    data["settings"] = {};
-  }
-  data.at("settings")[key] = value;
-  gameapi -> saveToJsonFile(SETTINGS_SAVE_FILE, data);
-}
 
 float getWorldStateFloat(std::string object, std::string attribute){
   auto valueAttr = dockConfigApi.getAttribute(object, attribute);
@@ -158,11 +83,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = []() -> bool { return getGlobalState().invertY; },
         .onChecked = [](bool isChecked) -> void {
           getGlobalState().invertY = isChecked;
-          persistSave("invertY", isChecked);
+          persistSave("settings", "invertY", isChecked);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().invertY = getSaveBoolValue("invertY", false);
+        getGlobalState().invertY = getSaveBoolValue("settings", "invertY", false);
       },
     },
     SettingConfiguration {
@@ -173,11 +98,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .percentage = []() -> float { return getGlobalState().xsensitivity; },
         .onSlide = [](float amount) -> void {
           getGlobalState().xsensitivity = amount;
-          persistSave("xsensitivity", amount);
+          persistSave("settings", "xsensitivity", amount);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().xsensitivity = getSaveFloatValue("xsensitivity", 1.f);
+        getGlobalState().xsensitivity = getSaveFloatValue("settings", "xsensitivity", 1.f);
       },
     },
     SettingConfiguration {
@@ -188,11 +113,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .percentage = []() -> float { return getGlobalState().ysensitivity; },
         .onSlide = [](float amount) -> void {
           getGlobalState().ysensitivity = amount;
-          persistSave("ysensitivity", amount);
+          persistSave("settings", "ysensitivity", amount);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().ysensitivity = getSaveFloatValue("ysensitivity", 1.f);
+        getGlobalState().ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
       },
     },
   }},
@@ -203,12 +128,12 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = getIsCheckedWorld("rendering", "fullscreen"),
         .onChecked = [](bool isChecked) -> void {
           bool isFullscreen = isChecked;
-          persistSave("fullscreen", isFullscreen);
+          persistSave("settings", "fullscreen", isFullscreen);
           dockConfigApi.setAttribute("rendering", "fullscreen", isFullscreen);
         },
       },
       .initSetting = []() -> void {
-        bool isFullscreen = getSaveBoolValue("fullscreen", true);
+        bool isFullscreen = getSaveBoolValue("settings", "fullscreen", true);
         dockConfigApi.setAttribute("rendering", "fullscreen", isFullscreen);
       },
     },
@@ -222,12 +147,12 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         },
         .onSlide = [](float amount) -> void {
           originalFov = amount;
-          persistSave("fov", originalFov);
+          persistSave("settings", "fov", originalFov);
           setZoom(1.f, false);
         },
       },
       .initSetting = []() -> void {
-        auto fov = getSaveFloatValue("fov", 45.f);
+        auto fov = getSaveFloatValue("settings", "fov", 45.f);
         originalFov = fov;
         setZoom(1.f, false);
       },
@@ -314,12 +239,12 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .isChecked = getIsCheckedWorldInvert("sound", "mute"),
         .onChecked = [](bool isChecked) -> void {
           bool mute = !isChecked;
-          persistSave("mute", mute);
+          persistSave("settings", "mute", mute);
           dockConfigApi.setAttribute("sound", "mute", mute);
         },
       },
       .initSetting = []() -> void {
-        bool mute = getSaveBoolValue("mute", false);
+        bool mute = getSaveBoolValue("settings", "mute", false);
         dockConfigApi.setAttribute("sound", "mute", mute);
       },
     },
@@ -335,11 +260,11 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .onSlide = [](float amount) -> void {
           // sound:volume:0.2
           dockConfigApi.setAttribute("sound", "volume", amount);
-          persistSave("volume", amount);
+          persistSave("settings", "volume", amount);
         },
       },
       .initSetting = []() -> void {
-        auto volume = getSaveFloatValue("volume", 1.f);
+        auto volume = getSaveFloatValue("settings", "volume", 1.f);
         dockConfigApi.setAttribute("sound", "volume", volume);
       },
     },

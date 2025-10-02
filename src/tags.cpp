@@ -10,9 +10,6 @@ extern Vehicles vehicles;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
-std::string getSaveStringValue(std::string key, std::string defaultValue);
-void persistSave(std::string key, JsonType value);
-
 struct TagUpdater {
 	std::string attribute;
 	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
@@ -64,10 +61,10 @@ std::string queryInitialBackground(){
 	if (hasOption("background")){
 		return getArgOption("background");
 	}
-	return getSaveStringValue("background", "../gameresources/textures/backgrounds/test3.png");
+	return getSaveStringValue("settings", "background", "../gameresources/textures/backgrounds/test3.png");
 }
 void updateQueryBackground(std::string image){
-	persistSave("background", image);
+	persistSave("settings", "background", image);
 }
 void updateBackground(objid id, std::string image){
   setGameObjectTexture(id, image);
