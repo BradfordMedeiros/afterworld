@@ -360,6 +360,20 @@ namespace realfiles {
 	std::string doLoadFile(std::string filepath);
 }
 
+void setupViewports(){
+  gameapi -> createViewport(0, 0.f, 0.5f, 0.5f, 0.5f, DEFAULT_BINDING_OPTION);
+	gameapi -> drawText("Default", -0.95f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+  gameapi -> createViewport(1, 0.f, 0.f, 0.5f, 0.5f, BLOOM_BINDING_OPTION);
+	gameapi -> drawText("Bloom", -0.95f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+  gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, PORTAL_BINDING_OPTION);
+ 	gameapi -> drawText("Portal", 0.05f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+  gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DEPTH_BINDING_OPTION);
+ 	gameapi -> drawText("Depth", 0.05f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+}
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -452,16 +466,18 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	//gameapi -> removeViewport(0);
   	//gameapi -> removeViewport(1);
 
-  	static float offset = 0.f;
-  	offset += 0.1f;
+  	static bool topScreen = false;
 
- 		simpleOnFrame([&offset]() -> void {
-	  	float radius = 0.2f;
-	  	gameapi -> createViewport(0, radius * glm::cos(gameapi -> timeSeconds(true)), radius * glm::sin(gameapi -> timeSeconds(true)), 0.5f, 0.5f);
-		}, 10.f);
+  	//simpleOnFrame([&topScreen]() -> void {
+	  //	topScreen = !topScreen;
+	  //	if (topScreen){
+		//  	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f);
+	  //	}else{
+		//  	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 0.5f);
+	  //	}
+		//}, 10.f);
 
-
-   	//gameapi -> createViewport(1, 0.5f, -0.5f, 0.5f, 0.5f);
+  	setupViewports();
 
   }
 
