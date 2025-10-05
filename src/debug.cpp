@@ -360,7 +360,7 @@ namespace realfiles {
 	std::string doLoadFile(std::string filepath);
 }
 
-void setupViewports(){
+void setupDebugView(){
 	auto viewports = gameapi -> listViewports();
 	for (auto viewportId : viewports){
 		if (viewportId == 0){
@@ -371,7 +371,7 @@ void setupViewports(){
   		gameapi -> createViewport(1, 0.f, 0.f, 0.5f, 0.5f, BloomBindingOption{});
 			gameapi -> drawText("Bloom", -0.95f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-  		gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, TextureBindingOption{ .texture = "bigbuck" });
+  		gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, TextureBindingOption{ .flipCoords = true, .texture = "bigbuck" });
  			gameapi -> drawText("Custom Texture", 0.05f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
 	  	gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DepthBindingOption{});
@@ -381,6 +381,25 @@ void setupViewports(){
 				gameapi -> setActiveCamera(cameraId, i);
 	 		}
 		}
+	}
+}
+
+void setupSplitView(){
+  gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{});
+
+  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{});
+ 	auto testViewObj = findObjByShortName(">fixedcamera", std::nullopt);
+ 	if (testViewObj.has_value()){
+	 	gameapi -> setActiveCamera(testViewObj.value(), 1);
+ 	}
+}
+
+void setupViewports(){
+	bool debugUiView = false;
+	if (debugUiView){
+		setupDebugView();
+	}else{
+		setupSplitView();
 	}
 }
 
