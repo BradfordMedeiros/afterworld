@@ -232,7 +232,7 @@ void debugOnFrame(){
   	return;
   }
 
-  auto activeCamera = gameapi -> getActiveCamera();
+  auto activeCamera = gameapi -> getActiveCamera(std::nullopt);
   //if (!activeCamera.has_value()){
   //	modlog("active camera", "none");
   //}else{
@@ -361,17 +361,27 @@ namespace realfiles {
 }
 
 void setupViewports(){
-  gameapi -> createViewport(0, 0.f, 0.5f, 0.5f, 0.5f, DEFAULT_BINDING_OPTION);
-	gameapi -> drawText("Default", -0.95f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	auto viewports = gameapi -> listViewports();
+	for (auto viewportId : viewports){
+		if (viewportId == 0){
+			auto cameraId = gameapi -> getActiveCamera(viewportId);
+  		gameapi -> createViewport(0, 0.f, 0.5f, 0.5f, 0.5f, DefaultBindingOption{});
+			gameapi -> drawText("Default", -0.95f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-  gameapi -> createViewport(1, 0.f, 0.f, 0.5f, 0.5f, BLOOM_BINDING_OPTION);
-	gameapi -> drawText("Bloom", -0.95f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  		gameapi -> createViewport(1, 0.f, 0.f, 0.5f, 0.5f, BloomBindingOption{});
+			gameapi -> drawText("Bloom", -0.95f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-  gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, PORTAL_BINDING_OPTION);
- 	gameapi -> drawText("Portal", 0.05f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  		gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, TextureBindingOption{ .texture = "bigbuck" });
+ 			gameapi -> drawText("Custom Texture", 0.05f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-  gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DEPTH_BINDING_OPTION);
- 	gameapi -> drawText("Depth", 0.05f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  	gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DepthBindingOption{});
+	 		gameapi -> drawText("Depth", 0.05f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+	 		for (int i = 0; i < 4; i++){
+				gameapi -> setActiveCamera(cameraId, i);
+	 		}
+		}
+	}
 }
 
 void debugOnKey(int key, int scancode, int action, int mods){

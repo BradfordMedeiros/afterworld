@@ -141,16 +141,24 @@ void updateCamera(){
 	modassert(!tempCameraDoesNotExistButShould, "temp camera has value but obj does not exist");
 	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");
 
+
+	auto viewports = gameapi -> listViewports();
 	if (controlledPlayer.editorMode){
-		gameapi -> setActiveCamera(std::nullopt);
+		for (auto viewportId : viewports){
+			gameapi -> setActiveCamera(std::nullopt, viewportId);
+		}
 		return;
 	}
 	if (controlledPlayer.tempCamera.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value());
+		for (auto viewportId : viewports){
+			gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), viewportId);
+		}
 		return;
 	}
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value());
+		for (auto viewportId : viewports){
+			gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), viewportId);
+		}
 	}
 }
 
@@ -421,7 +429,7 @@ DebugConfig debugPrintActivePlayer(){
 
   {
   	std::string activeCameraName = "";
-  	auto activeCameraId = gameapi -> getActiveCamera();
+  	auto activeCameraId = gameapi -> getActiveCamera(std::nullopt);
   	if (activeCameraId.has_value()){
   		activeCameraName = gameapi -> getGameObjNameForId(activeCameraId.value()).value();
   	}
