@@ -51,7 +51,7 @@ glm::vec2 pointAtSlope(glm::vec2 screenspacePosition, float sizeNdi){
 }
 
 void drawWaypoint(glm::vec3 position, glm::vec3 playerPos, bool drawDistance, glm::vec4 color, std::optional<float> percentage){
-  auto ndiPosition = gameapi -> positionToNdi(position);
+  auto ndiPosition = gameapi -> positionToNdi(position, 0); // TODO - viewport dependent
   // ndi position is basically ndi intersects with screenspace
   // when it's behind us, we could just draw it, and would be accurate. 
   // but instead -1  makes it so you reflect which is path to the object

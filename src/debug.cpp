@@ -436,7 +436,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == '[' && action == 0){
-  	auto activeCamera = gameapi -> getCameraTransform();
+  	auto activeCamera = gameapi -> getCameraTransform(0);
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
 
   	saveCrystals();

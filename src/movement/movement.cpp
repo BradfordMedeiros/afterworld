@@ -133,8 +133,8 @@ void setEntityTargetRotation(MovementEntityData& movementEntityData, objid id, s
   movementEntityData.movementEntities.at(id).targetRotation = rotation;
 }
 
-void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId){
-  auto currentTransform = gameapi -> getCameraTransform();
+void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId, int viewportIndex){
+  auto currentTransform = gameapi -> getCameraTransform(viewportIndex);
   auto hitpoints = gameapi -> raycast(currentTransform.position, currentTransform.rotation, 100.f, std::nullopt);
 
   if (hitpoints.size() > 0){

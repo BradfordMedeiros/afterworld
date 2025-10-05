@@ -1587,7 +1587,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     /// temp code 
-    auto cameraPos = gameapi -> getCameraTransform();
+    auto cameraPos = gameapi -> getCameraTransform(0);
     auto audioSymbol = getSymbol("audio");
     auto tags = gameapi -> getTag(audioSymbol, cameraPos.position);
     std::cout << "tags game camera pos is: " << print(cameraPos.position) << ", tags: [";
@@ -1986,7 +1986,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
         getGlobalState().rightMouseDown = true;
         if (false){
-          raycastFromCameraAndMoveTo(gameState -> movementEntities, controlledPlayer.playerId.value());
+          raycastFromCameraAndMoveTo(gameState -> movementEntities, controlledPlayer.playerId.value(), 0);
         }
         nextTerminalPage();
       }

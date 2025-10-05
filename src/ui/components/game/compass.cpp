@@ -19,7 +19,7 @@ Component compassComponent {
       .height = rectHeight,
     };
 
-    auto cameraTransform = gameapi -> getCameraTransform().rotation;
+    auto cameraTransform = gameapi -> getCameraTransform(0).rotation; // TODO viewport
     auto orientationVec  = glm::inverse(cameraTransform) *  glm::vec4(0.f, 0.f, -1.f, 0.f);
     auto angleRadians = atanRadians360(orientationVec.x, orientationVec.z);
     auto xPos = glm::cos(angleRadians);
