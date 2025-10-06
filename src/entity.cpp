@@ -92,7 +92,6 @@ std::set<objid> entityIdsToEnableForShooting(objid entityId){
 	return ids;
 }
 
-
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));
   bool shouldAddWeapon = false;
@@ -116,8 +115,6 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
 
     createHitbox(idAdded);
   }
-
-
 }
 
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
@@ -345,8 +342,6 @@ void setIsReloading(objid id, bool reloading){
 	}
 }
 
-
-
 void setActivePlayerEditorMode(bool editorMode){
 	controlledPlayer.editorMode = editorMode;
 	updateCamera();
@@ -354,7 +349,6 @@ void setActivePlayerEditorMode(bool editorMode){
 bool isInGameMode(){
 	return !controlledPlayer.editorMode;
 }
-
 
 void setTempCamera(std::optional<objid> camera){
 	controlledPlayer.tempCamera = camera;

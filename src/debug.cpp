@@ -387,10 +387,15 @@ void setupDebugView(){
 void setupSplitView(){
   gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{});
 
-  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{});
+	auto cameraId = gameapi -> getActiveCamera(0);
+
+
+  gameapi -> createViewport(1, 0.f, 0.0f, 0.25f, 0.5f, DefaultBindingOption{});
  	auto testViewObj = findObjByShortName(">fixedcamera", std::nullopt);
  	if (testViewObj.has_value()){
 	 	gameapi -> setActiveCamera(testViewObj.value(), 1);
+ 	}else{
+	 	gameapi -> setActiveCamera(cameraId.value(), 1);
  	}
 }
 
