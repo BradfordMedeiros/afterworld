@@ -11,7 +11,10 @@ std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 extern std::unordered_map<objid, ControllableEntity> controllableEntities;  // static-state extern
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 
+int numberOfPlayers = 1;
+
 ControlledPlayer controlledPlayer {      // static-state
+	.viewport = 0,
 	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
 	.playerId = std::nullopt,
 	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
@@ -19,6 +22,12 @@ ControlledPlayer controlledPlayer {      // static-state
 	.editorMode = false,
 	.disablePlayerControl = false,
 };
+
+void setNumberPlayers(int numPlayers){
+  modassert(numPlayers == 1 || numPlayers == 2, "invalid number of players");
+  numberOfPlayers = numPlayers;
+}
+
 
 std::optional<objid> getPlayerId(){
 	return controlledPlayer.playerId;
@@ -133,29 +142,35 @@ bool controllableEntityExists(objid id){
 }
 
 void updateCamera(){
+
+	// ensure viewports
+	if (numberOfPlayers == 1){
+  	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{});
+	}else if (numberOfPlayers == 2){
+  	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{});
+	  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{});
+	}else {
+		modassert(false, "invalid number of players");
+	}
+
+  ///////////////
+
+
 	bool tempCameraDoesNotExistButShould = controlledPlayer.tempCamera.has_value() && !gameapi -> gameobjExists(controlledPlayer.tempCamera.value());
 	bool activeCameraDoesNotExistButShould = controlledPlayer.activePlayerManagedCameraId.has_value() && !gameapi -> gameobjExists(controlledPlayer.activePlayerManagedCameraId.value());
 	modassert(!tempCameraDoesNotExistButShould, "temp camera has value but obj does not exist");
-	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");
+	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");	
 
-
-	auto viewports = gameapi -> listViewports();
 	if (controlledPlayer.editorMode){
-		for (auto viewportId : viewports){
-			gameapi -> setActiveCamera(std::nullopt, viewportId);
-		}
+		gameapi -> setActiveCamera(std::nullopt, controlledPlayer.viewport);
 		return;
 	}
 	if (controlledPlayer.tempCamera.has_value()){
-		for (auto viewportId : viewports){
-			gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), viewportId);
-		}
+		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), controlledPlayer.viewport);
 		return;
 	}
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-		for (auto viewportId : viewports){
-			gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), viewportId);
-		}
+		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), controlledPlayer.viewport);
 	}
 }
 

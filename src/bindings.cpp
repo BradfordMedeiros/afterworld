@@ -15,6 +15,7 @@ std::unordered_map<objid, Inventory> scopenameToInventory;
 std::vector<CrystalPickup> crystals; 
 std::unordered_map<objid, glm::vec3> impulses;
 
+
 extern ControlledPlayer controlledPlayer;
 
 Water water;
@@ -268,7 +269,6 @@ void displayGameOverMenu(){
     pushHistory({ "dead" });
   }
 }
-
 
 struct SceneRouterPath {
   std::vector<std::string> paths;
@@ -1304,6 +1304,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (args.find("dragselect") != args.end()){
       gameState -> dragSelect = args.at("dragselect");
       modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
+    }
+
+    if (args.find("coop") != args.end()){
+      setNumberPlayers(2);
     }
 
     if (getArgEnabled("debug-shoot")){

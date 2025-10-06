@@ -377,35 +377,17 @@ void setupDebugView(){
 	  	gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DepthBindingOption{});
 	 		gameapi -> drawText("Depth", 0.05f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-	 		for (int i = 0; i < 4; i++){
-				gameapi -> setActiveCamera(cameraId, i);
-	 		}
+			gameapi -> setActiveCamera(cameraId, 0);
+	 		gameapi -> setActiveCamera(cameraId, 1);
+	 		gameapi -> setActiveCamera(cameraId, 2);
+	 		gameapi -> setActiveCamera(cameraId, 3);
+	 		
 		}
 	}
 }
 
-void setupSplitView(){
-  gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{});
-
-	auto cameraId = gameapi -> getActiveCamera(0);
-
-
-  gameapi -> createViewport(1, 0.f, 0.0f, 0.25f, 0.5f, DefaultBindingOption{});
- 	auto testViewObj = findObjByShortName(">fixedcamera", std::nullopt);
- 	if (testViewObj.has_value()){
-	 	gameapi -> setActiveCamera(testViewObj.value(), 1);
- 	}else{
-	 	gameapi -> setActiveCamera(cameraId.value(), 1);
- 	}
-}
-
 void setupViewports(){
-	bool debugUiView = false;
-	if (debugUiView){
-		setupDebugView();
-	}else{
-		setupSplitView();
-	}
+	setupDebugView();
 }
 
 void debugOnKey(int key, int scancode, int action, int mods){

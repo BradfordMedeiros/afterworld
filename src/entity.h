@@ -9,6 +9,7 @@
 #include "./resources/layer.h"
 
 struct ControlledPlayer {
+	int viewport;
 	glm::vec2 lookVelocity;
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
@@ -24,6 +25,8 @@ struct ControllableEntity {
 	std::optional<objid> vehicle;
 	std::set<objid> disableAnimationIds;
 };
+
+void setNumberPlayers(int numPlayers);
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
