@@ -3,7 +3,8 @@
 extern CustomApiBindings* gameapi;
 void pushHistoryParam(std::string);
 void rmHistoryParam(std::string);
-void setActivePlayerEditorMode(bool);
+void setActivePlayerEditorMode(bool, int);
+int getDefaultPlayerIndex();
 void persistSave(std::string scope, std::string key, JsonType value);
 
 GlobalState global {  // static-state
@@ -178,7 +179,7 @@ void initGlobal(){
   }
   global.showEditor = getSaveBoolValue("settings", "show-editor", false);
   setShowEditor(global.showEditor);
-  setActivePlayerEditorMode(global.showEditor);
+  setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
   global.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
   updateState();
 }

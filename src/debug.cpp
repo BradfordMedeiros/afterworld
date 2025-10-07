@@ -280,9 +280,9 @@ void printDebugSpawnpoint(){
 	auto id = getUniqueObjId();
 	std::string name = std::string("spawnpoint-") + std::to_string(id);
 
-	if (getActivePlayerId().has_value()){
-		auto position = getActivePlayerPosition().value();
-		auto rotation = getActivePlayerRotation().value();
+	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
+		auto position = getActivePlayerPosition(getDefaultPlayerIndex()).value();
+		auto rotation = getActivePlayerRotation(getDefaultPlayerIndex()).value();
 
 		std::string positionString = name + ":position:" + print(position);
 		std::string spawnString = name + ":spawn:enemy";
@@ -397,17 +397,17 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'K' && action == 1){
-  	if (getActivePlayerId().has_value()){
+  	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
   		static bool raiseUp = false;
   		raiseUp = !raiseUp;
-  		raiseTurret(getActivePlayerId().value(), raiseUp);
-  		wakeUpTv(getActivePlayerId().value(), raiseUp);  		
+  		raiseTurret(getActivePlayerId(getDefaultPlayerIndex()).value(), raiseUp);
+  		wakeUpTv(getActivePlayerId(getDefaultPlayerIndex()).value(), raiseUp);  		
 
   		//auto isFalling = activePlayerFalling();
   		//setIsFalling(getActivePlayerId().value(), !isFalling.value());
 
-  		auto isReloading = activePlayerReloading();
-  		setIsReloading(getActivePlayerId().value(), !isReloading.value());
+  		auto isReloading = activePlayerReloading(getDefaultPlayerIndex());
+  		setIsReloading(getActivePlayerId(getDefaultPlayerIndex()).value(), !isReloading.value());
   	}
   }
 
@@ -416,14 +416,14 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'R' && action == 1) {
-  	if (getActivePlayerId().has_value()){
+  	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
 	  	//setIsAlive(getActivePlayerId().value(), false);
   	}
   //  changeGameType(gametypeSystem, "targetkill");
   }
 
   if (key == '[' && action == 0){
-  	auto activeCamera = gameapi -> getCameraTransform(0);
+  	auto activeCamera = gameapi -> getCameraTransform(getDefaultPlayerIndex());
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
 
   	saveCrystals();
@@ -528,21 +528,21 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
   if (key == 'C' && action == 0){
   	auto testViewObj = findObjByShortName(">testview", std::nullopt);
-  	if (getTempCamera().has_value()){
-	  	setTempCamera(std::nullopt);
+  	if (getTempCamera(getDefaultPlayerIndex()).has_value()){
+	  	setTempCamera(std::nullopt, getDefaultPlayerIndex());
   	}else{
   		if (testViewObj.has_value()){
-		  	setTempCamera(testViewObj.value());
+		  	setTempCamera(testViewObj.value(), getDefaultPlayerIndex());
   		}
   	}
   }
   if (key == 'V' && action == 0){
   	auto testViewObj = findObjByShortName(">testview2", std::nullopt);
-  	if (getTempCamera().has_value()){
-	  	setTempCamera(std::nullopt);
+  	if (getTempCamera(getDefaultPlayerIndex()).has_value()){
+	  	setTempCamera(std::nullopt, getDefaultPlayerIndex());
   	}else{
   		if (testViewObj.has_value()){
-		  	setTempCamera(testViewObj.value());
+		  	setTempCamera(testViewObj.value(), getDefaultPlayerIndex());
   		}
   	}
   }

@@ -11,7 +11,9 @@ bool maybeAddGlassBulletHole(objid id, objid playerId);
 void drawDebugRaycast(glm::vec3 fromPosition, glm::vec3 toPos, objid playerId);
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
-std::optional<objid> getActivePlayerId();
+std::optional<objid> getActivePlayerId(int playerIndex);
+int getDefaultPlayerIndex();
+
 std::set<objid> entityIdsToEnableForShooting(objid entityId);
 
 std::vector<WeaponCore> weaponCores = {};  // static-state
@@ -471,12 +473,12 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
     }
 
 
-    emitWaterSplash(rootSceneId(), getActivePlayerId().value(), emitParticlePosition);
+    emitWaterSplash(rootSceneId(), getActivePlayerId(getDefaultPlayerIndex()).value(), emitParticlePosition);
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
 
-    auto activePlayerId = getActivePlayerId();
+    auto activePlayerId = getActivePlayerId(getDefaultPlayerIndex());
     auto inFront = hitpoint.point + (hitpoint.normal * glm::vec3(0.f, 0.f, -0.1f));
     //emitBlood(rootSceneId(), activePlayerId.value(), inFront);
   

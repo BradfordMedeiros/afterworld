@@ -42,7 +42,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	}
 	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount) + " " + gameapi -> getGameObjNameForId(id).value());
 
-	auto activePlayerId = getActivePlayerId();
+	auto activePlayerId = getActivePlayerId(getDefaultPlayerIndex());
 	float adjustedDamageAmount = (getGlobalState().godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
 
 	auto newHealthAmount = hitpoints.at(id).current - adjustedDamageAmount;
@@ -51,7 +51,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	*_remainingHealth = newHealthAmount;
 
 	if (activePlayerId.has_value() && getManagedSounds().hitmarkerSoundObjId.has_value()){
-		auto playerPosition = getActivePlayerPosition(); // TODO - this shoiuldn't be here, only if it is damaged by the player
+		auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex()); // TODO - this shoiuldn't be here, only if it is damaged by the player
 		if(playerPosition.has_value()){
 			//modassert(false, "hitmarker sound try play!");
 			playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, playerPosition.value()); 
@@ -86,7 +86,7 @@ void onNoHealth(objid targetId, float remainingHealth){
   }
 
   if(hasKillTag){
-  	auto activePlayerId = getActivePlayerId();
+  	auto activePlayerId = getActivePlayerId(getDefaultPlayerIndex());
  		if (activePlayerId.has_value()){
  			auto bloodPos = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] health - onNoHealth");
 	  	emitGibs(rootSceneId(), activePlayerId.value(), bloodPos);

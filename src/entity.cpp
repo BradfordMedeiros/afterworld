@@ -13,24 +13,53 @@ extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-
 
 int numberOfPlayers = 1;
 
-ControlledPlayer controlledPlayer {      // static-state
-	.viewport = 0,
-	.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
-	.playerId = std::nullopt,
-	.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
-	.tempCamera = std::nullopt,
-	.editorMode = false,
-	.disablePlayerControl = false,
-};
+std::vector<ControlledPlayer> players; // TODO static state
+
+void addPlayerPort(int playerIndex){
+	ControlledPlayer player {
+		.viewport = playerIndex,
+		.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
+		.playerId = std::nullopt,
+		.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
+		.tempCamera = std::nullopt,
+		.editorMode = false,
+		.disablePlayerControl = false,	
+	};
+	players.push_back(player);
+}
+
+void removePlayerPort(int playerIndex){
+	std::vector<ControlledPlayer> newPlayers;
+	for (auto& player : players){
+		if (player.viewport == playerIndex){
+			continue;
+		}
+		newPlayers.push_back(player);
+	}
+	players = newPlayers;
+}
+
+ControlledPlayer& getControlledPlayer(int playerIndex){
+	for (auto& player : players){
+		if (player.viewport == playerIndex){
+			return player;
+		}
+	}
+	modassert(false, "getControlledPlayer playerIndex invalid");
+	return players.at(0);
+}
 
 void setNumberPlayers(int numPlayers){
   modassert(numPlayers == 1 || numPlayers == 2, "invalid number of players");
   numberOfPlayers = numPlayers;
 }
 
+int getNumberOfPlayers(){
+	return numberOfPlayers;
+}
 
-std::optional<objid> getPlayerId(){
-	return controlledPlayer.playerId;
+std::optional<objid> getPlayerId(int playerIndex){
+	return getControlledPlayer(playerIndex).playerId;
 }
 
 std::optional<objid> findBodyPart(objid entityId, const char* part){
@@ -141,7 +170,8 @@ bool controllableEntityExists(objid id){
 	return controllableEntities.find(id) != controllableEntities.end();
 }
 
-void updateCamera(){
+void updateCamera(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	// ensure viewports
 	if (numberOfPlayers == 1){
@@ -174,11 +204,13 @@ void updateCamera(){
 	}
 }
 
-std::optional<objid> getCameraForThirdPerson(){
+std::optional<objid> getCameraForThirdPerson(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	return controlledPlayer.activePlayerManagedCameraId;
 }
 
-std::optional<bool> activePlayerInThirdPerson(){
+std::optional<bool> activePlayerInThirdPerson(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
@@ -243,7 +275,10 @@ void maybeDisableMesh(objid id){
 }
 
 
-void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
+void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex){
+	modlog("set active player", std::to_string(playerIndex) + " set to: " + print(id));
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
 	if (!id.has_value()){
 		return;
 	}
@@ -265,13 +300,16 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
   gameapi -> makeParent(cameraId, id.value());
   controlledPlayer.activePlayerManagedCameraId = cameraId;
 
-  updateCamera();
+  updateCamera(playerIndex);
 }
-void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
-  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
+void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId), playerIndex);
 }
 
-void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id){
+void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
 	if (!id.has_value()){
 		return;
 	}
@@ -291,46 +329,57 @@ void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::op
   gameapi -> makeParent(cameraId, id.value());
   controlledPlayer.activePlayerManagedCameraId = cameraId;
 
-  updateCamera();
+  updateCamera(playerIndex);
 }
-void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData){
-	observePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId));
+void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	observePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId), playerIndex);
 }
 
-std::optional<objid> getActivePlayerId(){
+int getDefaultPlayerIndex(){
+	return 0;
+}
+std::optional<objid> getActivePlayerId(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	return controlledPlayer.playerId;
 }
 
 bool onActivePlayerRemoved(objid id){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
 	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
 		controlledPlayer.tempCamera = std::nullopt;
-		updateCamera();
+		updateCamera(getDefaultPlayerIndex());
 	}
 	if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id){
 		controlledPlayer.playerId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
 		controlledPlayer.disablePlayerControl = false;
-		updateCamera();
+		updateCamera(getDefaultPlayerIndex());
 		return true;
 	}
 	return false;
 }
 
-void setDisablePlayerControl(bool isDisabled){
+void setDisablePlayerControl(bool isDisabled, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	controlledPlayer.disablePlayerControl = isDisabled;
-	updateCamera();
+	updateCamera(playerIndex);
 }
-bool isPlayerControlDisabled(){
+bool isPlayerControlDisabled(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	return controlledPlayer.disablePlayerControl;
 }
-std::optional<bool> activePlayerAlive(){
+std::optional<bool> activePlayerAlive(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
   auto alive = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.alive;
   return alive;
 }
-std::optional<bool> activePlayerFalling(){
+std::optional<bool> activePlayerFalling(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
@@ -342,7 +391,9 @@ void setIsFalling(objid id, bool falling){
 	movementEntity.movementState.falling = falling;
 }
 
-std::optional<bool> activePlayerReloading(){
+std::optional<bool> activePlayerReloading(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
@@ -357,47 +408,58 @@ void setIsReloading(objid id, bool reloading){
 	}
 }
 
-void setActivePlayerEditorMode(bool editorMode){
+void setActivePlayerEditorMode(bool editorMode, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	controlledPlayer.editorMode = editorMode;
-	updateCamera();
+	updateCamera(playerIndex);
 }
 bool isInGameMode(){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 	return !controlledPlayer.editorMode;
 }
 
-void setTempCamera(std::optional<objid> camera){
+void setTempCamera(std::optional<objid> camera, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	controlledPlayer.tempCamera = camera;
-	updateCamera();
+	updateCamera(playerIndex);
 }
-std::optional<objid> getTempCamera(){
+std::optional<objid> getTempCamera(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	return controlledPlayer.tempCamera;
 }
 
-void killActivePlayer(){
+void killActivePlayer(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
   if (controlledPlayer.playerId.has_value()){
     doDamageMessage(controlledPlayer.playerId.value(), 10000.f);   
   }
 }
 
-glm::vec3 getPlayerVelocity(){
+glm::vec3 getPlayerVelocity(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
   return getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.velocity;
 }
 
-std::optional<glm::vec3> getActivePlayerPosition(){
+std::optional<glm::vec3> getActivePlayerPosition(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
 	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true, "[gamelogic] getActivePlayerPosition");
 }
 
-std::optional<glm::quat> getActivePlayerRotation(){
+std::optional<glm::quat> getActivePlayerRotation(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
 	return gameapi -> getGameObjectRotation(controlledPlayer.playerId.value(), true, "[gamelogic] getActivePlayerRotation"); // tempchecked
 }
 
-FiringTransform getFireTransform(objid id){
+FiringTransform getFireTransform(objid id, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 
 	if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id)){ // only use the third person code for the active player
@@ -423,17 +485,22 @@ FiringTransform getFireTransform(objid id){
 }
 
 WeaponEntityData getWeaponEntityData(objid id){
+	int playerIndex = getDefaultPlayerIndex();
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
 	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
   return WeaponEntityData {
     .inventory = id,
     .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
     .velocity = movementEntity.movementState.velocity,
     .thirdPersonMode = movementEntity.managedCamera.thirdPersonMode,
-    .fireTransform = getFireTransform(id),
+    .fireTransform = getFireTransform(id, playerIndex),
   };
 }
 
-DebugConfig debugPrintActivePlayer(){
+DebugConfig debugPrintActivePlayer(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
   DebugConfig debugConfig { .data = {} };
 
   {
@@ -461,14 +528,14 @@ DebugConfig debugPrintActivePlayer(){
   	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
 	}
 
-	auto inThirdPerson = activePlayerInThirdPerson();
+	auto inThirdPerson = activePlayerInThirdPerson(playerIndex);
 	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
 
   return debugConfig;
 }
 
-std::optional<ControllableEntity*> getActiveControllable(){
-	auto activePlayer = getActivePlayerId();
+std::optional<ControllableEntity*> getActiveControllable(int playerIndex){
+	auto activePlayer = getActivePlayerId(playerIndex);
 	if (!activePlayer.has_value()){
 		return std::nullopt;
 	}
@@ -487,10 +554,12 @@ void disableEntity(objid id){
 	setGameObjectPhysicsEnable(id, false);
 }
 void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot){
+	int playerIndex = getDefaultPlayerIndex();
+	
 	setGameObjectPhysicsEnable(id, true);
 	setGameObjectVelocity(id, glm::vec3(0.f, 0.f, 0.f));
 
-	auto isActivePlayer = getActivePlayerId().has_value() && getActivePlayerId().value() == id;
+	auto isActivePlayer = getActivePlayerId(playerIndex).has_value() && getActivePlayerId(playerIndex).value() == id;
 	bool thirdPersonMode = getWeaponEntityData(id).thirdPersonMode;
 	if (!isActivePlayer || thirdPersonMode){
 		maybeReEnableMesh(id);

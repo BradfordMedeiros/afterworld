@@ -3,7 +3,9 @@
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
 
-std::optional<objid> getPlayerId();
+std::optional<objid> getPlayerId(int playerIndex);
+int getDefaultPlayerIndex();
+
 void maybeRemoveControllableEntity(objid idRemoved);
 void createHitbox(objid id);
 void enterRagdoll(objid id);
@@ -146,8 +148,8 @@ struct HotkeyToMessage {
 };
 
 void maybeChangeGunUpdateUi(const char* gun){
-	if (getPlayerId().has_value()){
-		maybeChangeGun(getWeaponState(weapons, getPlayerId().value()), gun,  getPlayerId().value());
+	if (getPlayerId(getDefaultPlayerIndex()).has_value()){
+		maybeChangeGun(getWeaponState(weapons, getPlayerId(getDefaultPlayerIndex()).value()), gun,  getPlayerId(getDefaultPlayerIndex()).value());
 	}
 }
 

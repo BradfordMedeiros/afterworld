@@ -15,9 +15,6 @@ std::unordered_map<objid, Inventory> scopenameToInventory;
 std::vector<CrystalPickup> crystals; 
 std::unordered_map<objid, glm::vec3> impulses;
 
-
-extern ControlledPlayer controlledPlayer;
-
 Water water;
 SoundData soundData;
 GameTypes gametypeSystem;
@@ -112,21 +109,39 @@ void startLevel(ManagedScene& managedScene){
   }
 
   std::optional<objid> sceneId = managedScene.id;
+
+  std::vector<objid> playerIds;
   if (managedScene.makePlayer){
     auto playerLocationObj = findObjByShortName("playerspawn", std::nullopt);
     modassert(playerLocationObj.has_value(), "no initial spawnpoint");
     glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true, "[gamelogic] startLevel get player spawnpoint");
-    createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position, {});    
+
+    int numberOfPlayers = getNumberOfPlayers();
+    for (int i  = 0; i < numberOfPlayers; i++){
+      auto initialPosition = position + glm::vec3(1.f * i, 0.f, 0.f); // this is bad, this should just have a few initial spawnpoints
+      auto playerId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  initialPosition, {});    
+      playerIds.push_back(playerId);
+    }
   }
 
   spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
 
-  if (managedScene.player.has_value()){
+  if (playerIds.size() == 0 && managedScene.player.has_value()){
     // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
     auto playerId = findObjByShortName(managedScene.player.value(), sceneId);
     modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
     modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-    setActivePlayer(movement, weapons, aiData, playerId.value());
+    setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
+  }
+
+  if (playerIds.size() > 0){
+    for (int i = 0; i < playerIds.size(); i++){
+      auto prefabId = playerIds.at(i);
+      auto playerId = findBodyPart(prefabId, managedScene.player.value().c_str());
+      modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
+      modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
+      setActivePlayer(movement, weapons, aiData, playerId, i);
+    }
   }
 }
 
@@ -673,6 +688,7 @@ bool isPose(std::string name){
 DebugConfig debugPrintAnimations(){
   DebugConfig debugConfig { .data = {} };
   std::vector<objid> ids;
+  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
   if (controlledPlayer.playerId.has_value()){
     ids.push_back(controlledPlayer.playerId.value());
   }
@@ -714,6 +730,8 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount){
 
 std::optional<glm::vec3> oldGravity;
 void setNoClipMode(bool enable){
+  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
   if (controlledPlayer.playerId.has_value()){
     if (enable){
       oldGravity = getSingleVec3Attr(controlledPlayer.playerId.value(), "physics_gravity");
@@ -766,7 +784,7 @@ UiContext getUiContext(GameState& gameState){
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
-   .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(); },
+   .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
    .showTerminal = []() -> std::optional<TerminalConfig> {
       if (!terminalInterface.has_value()){
         return std::optional<TerminalConfig>(std::nullopt); 
@@ -797,7 +815,7 @@ UiContext getUiContext(GameState& gameState){
         return debugPrintHealth();
       }
       if (gameState.printType == DEBUG_ACTIVEPLAYER){
-        return debugPrintActivePlayer();
+        return debugPrintActivePlayer(getDefaultPlayerIndex());
       }
       if (gameState.printType == DEBUG_ANIMATION){
         return debugPrintAnimations();
@@ -868,7 +886,7 @@ UiContext getUiContext(GameState& gameState){
     .consoleInterface = ConsoleInterface {
       .setNormalMode = [&gameState]() -> void {
         auto wasInEditorMode = !isInGameMode();
-        setActivePlayerEditorMode(false);
+        setActivePlayerEditorMode(false, getDefaultPlayerIndex());
         setShowFreecam(false);
         setShowEditor(false);
         setGlobalModeValues(false);
@@ -882,7 +900,7 @@ UiContext getUiContext(GameState& gameState){
 
       },
       .setShowEditor = [&gameState]() -> void {
-        setActivePlayerEditorMode(true);
+        setActivePlayerEditorMode(true, getDefaultPlayerIndex());
         setShowFreecam(false);
         setShowEditor(true);
         setGlobalModeValues(true);
@@ -896,7 +914,7 @@ UiContext getUiContext(GameState& gameState){
 
       },
       .setFreeCam = []() -> void {
-        setActivePlayerEditorMode(true);
+        setActivePlayerEditorMode(true, getDefaultPlayerIndex());
         setShowFreecam(true);
         setShowEditor(false);
       },
@@ -918,7 +936,9 @@ UiContext getUiContext(GameState& gameState){
       .routerPop = []() -> void {
         popHistory();
       },
-      .die = killActivePlayer,
+      .die = []() -> void {
+        killActivePlayer(getDefaultPlayerIndex());
+      },
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
       },
@@ -930,6 +950,8 @@ UiContext getUiContext(GameState& gameState){
         setShowWeaponModel(showWeapon);
       },
       .deliverAmmo = [](int amount) -> void {
+        ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
         if(controlledPlayer.playerId.has_value()){
           deliverCurrentGunAmmo(controlledPlayer.playerId.value(), amount);
         }
@@ -950,17 +972,17 @@ CutsceneApi cutsceneApi {
   .setCameraPosition = [](std::optional<std::string> camera, glm::vec3 position, glm::quat rotation, std::optional<float> duration) -> void {
     modlog("cutscene api", "setCameraPosition");
     if (!camera.has_value()){
-      setTempCamera(std::nullopt);
+      setTempCamera(std::nullopt, getDefaultPlayerIndex());
     }else{
       auto testViewObj = findObjByShortName(camera.value(), std::nullopt);
-      setTempCamera(testViewObj.value());      
+      setTempCamera(testViewObj.value(), getDefaultPlayerIndex());      
       gameapi -> moveCameraTo(testViewObj.value(), position, duration);
       gameapi -> setGameObjectRot(testViewObj.value(), rotation, true, Hint { .hint = "cutscene - setCameraPosition" });  // tempchecked
     }
   },
   .setPlayerControllable = [](bool isPlayable) -> void {
     modlog("cutscene api", "setPlayerControllable");
-    setDisablePlayerControl(!isPlayable);
+    setDisablePlayerControl(!isPlayable, 0);
   },
   .goToNextLevel = []() -> void {
     modassert(false, "next level concept does not exist anymore");
@@ -1120,15 +1142,15 @@ std::optional<objid> findChildObjBySuffix(objid id, const char* objName){
 void zoomIntoArcade(std::optional<objid> id){
   bool zoomIn = id.has_value();
   setShowZoomArcade(zoomIn);
-  setDisablePlayerControl(zoomIn);
+  setDisablePlayerControl(zoomIn, 0);
   if (!zoomIn){
-    setTempCamera(std::nullopt);          
+    setTempCamera(std::nullopt, getDefaultPlayerIndex());          
   }else{
     auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
     modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
     auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
     auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
-    setTempCamera(arcadeCameraId.value());     
+    setTempCamera(arcadeCameraId.value(), getDefaultPlayerIndex());     
   }
 }
 
@@ -1238,6 +1260,8 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
 }
 
 void objectRemoved(objid idRemoved){
+  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
   if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
     controlledPlayer.playerId = std::nullopt;
   }
@@ -1292,6 +1316,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         .inputFns = {},
       }
     };
+
+    addPlayerPort(0);
+
     initGlobal();
     setGlobalModeValues(getGlobalState().showEditor);
     reloadSettingsConfig(movement, "default");
@@ -1308,6 +1335,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (args.find("coop") != args.end()){
       setNumberPlayers(2);
+      addPlayerPort(1);
     }
 
     if (getArgEnabled("debug-shoot")){
@@ -1414,6 +1442,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
  
+    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
     std::vector<EntityUpdate> entityUpdates;
 
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
@@ -1440,9 +1470,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       // Control params are reset by movement so put before that
       onVehicleFrame(vehicles, movement.controlParams);
 
-      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         const bool showLookVelocity = false;
-        auto thirdPersonCamera = getCameraForThirdPerson();
+        auto thirdPersonCamera = getCameraForThirdPerson(getDefaultPlayerIndex());
         if (!thirdPersonCamera.has_value()){
           if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
             thirdPersonCamera = 0;
@@ -1455,10 +1485,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
       }
 
-      if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled()){
-        auto alive = activePlayerAlive().value();
-        auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(), getWeaponEntityData, 
+      if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
+        auto alive = activePlayerAlive(getDefaultPlayerIndex()).value();
+        auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(getDefaultPlayerIndex()), getWeaponEntityData, 
           [](objid id) -> objid {
+            ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
             return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
           }, 
           ThirdPersonWeapon {
@@ -1479,12 +1510,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
         std::optional<objid> lookingAtVehicle;
         if (uiUpdate.raycastId.has_value()){
-          if (isVehicle(vehicles, uiUpdate.raycastId.value()) &&  !getActiveControllable().value() -> vehicle.has_value()){
+          if (isVehicle(vehicles, uiUpdate.raycastId.value()) &&  !getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle.has_value()){
             lookingAtVehicle = uiUpdate.raycastId.value();
             gameapi -> drawText("Press E to enter", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
           }
         }
-        getActiveControllable().value() -> lookingAtVehicle = lookingAtVehicle;
+        getActiveControllable(getDefaultPlayerIndex()).value() -> lookingAtVehicle = lookingAtVehicle;
 
         setShowActivate(uiUpdate.showActivateUi);
         if (uiUpdate.ammoInfo.has_value()){
@@ -1524,7 +1555,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         .currentCount = numberOfCrystals(),
         .totalCount = totalCrystals(),
       });
-      auto playerPosition = getActivePlayerPosition();
+      auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex());
       if (playerPosition.has_value()){
         drawWaypoints(waypoints, playerPosition.value());
       }
@@ -1565,7 +1596,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onTagsFrame(tags);
     doStateControllerAnimations();
 
-    auto playerAlive = activePlayerAlive();
+    auto playerAlive = activePlayerAlive(getDefaultPlayerIndex());
     if (playerAlive.has_value()){
       if (!playerAlive.value()){
         gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
@@ -1591,7 +1622,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     /// temp code 
-    auto cameraPos = gameapi -> getCameraTransform(0);
+    auto cameraPos = gameapi -> getCameraTransform(getDefaultPlayerIndex());
     auto audioSymbol = getSymbol("audio");
     auto tags = gameapi -> getTag(audioSymbol, cameraPos.position);
     std::cout << "tags game camera pos is: " << print(cameraPos.position) << ", tags: [";
@@ -1641,15 +1672,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");
     GameState* gameState = static_cast<GameState*>(data);
+
+    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
     if (isInGameMode()){
-      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         onMovementFrameLateUpdate(gameState -> movementEntities, movement, controlledPlayer.playerId.value());
       }
     }
 
 
-    auto activePlayer = getActivePlayerId();
-    auto thirdPersonCamera = getCameraForThirdPerson();
+    auto activePlayer = getActivePlayerId(getDefaultPlayerIndex());
+    auto thirdPersonCamera = getCameraForThirdPerson(getDefaultPlayerIndex());
 
     if (activePlayer.has_value()){
       auto id = activePlayer.value();
@@ -1684,7 +1718,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     
       if (thirdPersonCamera.has_value()){
-        auto controllable = getActiveControllable();
+        auto controllable = getActiveControllable(getDefaultPlayerIndex());
         if (controllable.value() -> vehicle.has_value()){
           auto vehiclePos = gameapi -> getGameObjectPos(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera pos");
           
@@ -1729,6 +1763,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
     if (action == 1){
       auto playerId = controlledPlayer.playerId;
       if (isPauseKey(key)){
@@ -1738,7 +1774,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         // this probably should be aware of the bounds, an not allow to clip into wall for example
         // maybe raycast down, and then set the position so it fits 
         auto teleportPosition = getTeleportPosition(tags);
-        if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled() && teleportPosition.has_value()){
+        if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex()) && teleportPosition.has_value()){
           playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
           gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true, Hint { .hint = "teleport" });
           gameapi -> removeByGroupId(teleportPosition.value().id);
@@ -1757,26 +1793,26 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
 
     if (key == '-' && action == 0){
-      setActivePlayerNext(movement, weapons, aiData);
+      setActivePlayerNext(movement, weapons, aiData, 0);
     }
     if (key == '=' && action == 0){
-      observePlayerNext(movement, weapons, aiData);
+      observePlayerNext(movement, weapons, aiData, 0);
     }
 
     onVehicleKey(vehicles, key, action);
 
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
       if (!(isPaused() || getGlobalState().disableGameInput)){
         onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), key, action, controlledPlayer.playerId.value());
       }
     }
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
       onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action);
     }
 
     if (key == 'Q' && action == 0) { 
       printWorldInfo(aiData.worldInfo);
-      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         setInShootingMode(controlledPlayer.playerId.value(), !isInShootingMode(controlledPlayer.playerId.value()).value());
       }
     }
@@ -1789,12 +1825,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onKeyArcade(key, scancode, action, mods);
 
     if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
-      if (getActiveControllable().value() -> vehicle.has_value()){
-        exitVehicle(vehicles, getActiveControllable().value() -> vehicle.value(), controlledPlayer.playerId.value());
-        getActiveControllable().value() -> vehicle = std::nullopt;
-      }else if (getActiveControllable().value() -> lookingAtVehicle.has_value()){
-        enterVehicle(vehicles, getActiveControllable().value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
-        getActiveControllable().value() -> vehicle = getActiveControllable().value() -> lookingAtVehicle.value();
+      if (getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle.has_value()){
+        exitVehicle(vehicles, getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle.value(), controlledPlayer.playerId.value());
+        getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle = std::nullopt;
+      }else if (getActiveControllable(getDefaultPlayerIndex()).value() -> lookingAtVehicle.has_value()){
+        enterVehicle(vehicles, getActiveControllable(getDefaultPlayerIndex()).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
+        getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle = getActiveControllable(getDefaultPlayerIndex()).value() -> lookingAtVehicle.value();
       }
     }
 
@@ -1807,6 +1843,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
+
+    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
     if (key == "save-gun"){
       saveGunTransform(getWeaponState(weapons, controlledPlayer.playerId.value()).weaponValues);
@@ -1934,7 +1972,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleMomentumCollision(obj1, obj2, pos, normal, force);
     handleBouncepadCollision(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);
-    handleSpawnCollision(obj1, obj2, getActivePlayerId());
+    handleSpawnCollision(obj1, obj2, getActivePlayerId(getDefaultPlayerIndex()));
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);
   };
@@ -1950,16 +1988,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     //modlog("input", std::string("mouse move: ") + print(glm::vec2(xPos, yPos)));
     //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
     GameState* gameState = static_cast<GameState*>(data);
+    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
     float movementX = xNdc - getGlobalState().xNdc;
     float movementY = yNdc - getGlobalState().yNdc;
     getGlobalState().xNdc = xNdc;
     getGlobalState().yNdc = yNdc;
     getGlobalState().mouseVelocity = glm::vec2(xPos, yPos);
-    if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
+    if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled(getDefaultPlayerIndex())){
       controlledPlayer.lookVelocity = glm::vec2(movementX, movementY);
     }
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled()){
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
       //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
       glm::vec2 smoothedMovement = glm::vec2(xPos, yPos);
       onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y);
@@ -1975,6 +2014,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
     if (!getGlobalState().disableUiInput){
       onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
     }
@@ -2001,7 +2042,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getGlobalState().leftMouseDown = true;
         prevTerminalPage();
 
-        auto playerAlive = activePlayerAlive();
+        auto playerAlive = activePlayerAlive(getDefaultPlayerIndex());
         if (playerAlive.has_value() && !playerAlive.value()){
           pushHistory({ "mainmenu" }, true);
         }
@@ -2015,7 +2056,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
     if (controlledPlayer.playerId.has_value()){
       static float selectDistance = querySelectDistance();
-      if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled()){
+      if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
         if (uiUpdate.zoomAmount.has_value()){
           //setTotalZoom(uiUpdate.zoomAmount.value());
