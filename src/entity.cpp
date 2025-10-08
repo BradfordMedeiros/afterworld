@@ -12,6 +12,7 @@ extern std::unordered_map<objid, ControllableEntity> controllableEntities;  // s
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 
 int numberOfPlayers = 1;
+int mainPlayerControl = 0;
 
 std::vector<ControlledPlayer> players; // TODO static state
 
@@ -56,6 +57,10 @@ void setNumberPlayers(int numPlayers){
 
 int getNumberOfPlayers(){
 	return numberOfPlayers;
+}
+
+void setMainPlayerControl(int playerIndex){
+	mainPlayerControl = playerIndex;
 }
 
 std::optional<objid> getPlayerId(int playerIndex){
@@ -337,7 +342,7 @@ void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int
 }
 
 int getDefaultPlayerIndex(){
-	return 0;
+	return mainPlayerControl;
 }
 std::optional<objid> getActivePlayerId(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);

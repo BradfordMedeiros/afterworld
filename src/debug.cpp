@@ -493,8 +493,11 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  //	}
 		//}, 10.f);
 
-  	setupViewports();
+  	// setupViewports();
 
+  	static bool playerOneMain = true;
+  	setMainPlayerControl(playerOneMain ? 0 : 1);
+  	playerOneMain = !playerOneMain;
   }
 
   if (key == 'M' && action == 0){

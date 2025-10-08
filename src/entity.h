@@ -29,7 +29,9 @@ struct ControllableEntity {
 ControlledPlayer& getControlledPlayer(int playerIndex);
 void setNumberPlayers(int numPlayers);
 int getNumberOfPlayers();
+void setMainPlayerControl(int playerIndex);
 void addPlayerPort(int playerIndex);
+void removePlayerPort(int playerIndex);
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
