@@ -349,6 +349,11 @@ std::optional<objid> getActivePlayerId(int playerIndex){
 	return controlledPlayer.playerId;
 }
 
+std::vector<ControlledPlayer>& getPlayers(){
+	return players;
+}
+
+
 bool onActivePlayerRemoved(objid id){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 

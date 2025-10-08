@@ -26,7 +26,7 @@ Waypoints waypoints {
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 std::string defaultAudioClipPath;
-std::optional<glm::vec3> shakeImpulse;
+
 struct ManagedScene {
   std::optional<objid> id; 
   int index;
@@ -49,11 +49,11 @@ struct ScenarioOptions {
   std::string audioClipPath;
 };
 
-void applyScreenshake(glm::vec3 impulse){
+void applyScreenshake(int playerIndex, glm::vec3 impulse){
   if (hasOption("no-shake")){
     return;
   }
-  shakeImpulse = impulse;
+  getControlledPlayer(playerIndex).shakeImpulse = impulse;
 }
 
 void setScenarioOptions(ScenarioOptions& options){
@@ -1537,7 +1537,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (uiUpdate.didFire){
           modlog("ui update", "fire gun");
           float magnitude = static_cast<int>(std::rand()) % 5;
-          applyScreenshake(glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
+          applyScreenshake(getDefaultPlayerIndex(), glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
         }
       }else{
         setShowActivate(false);
@@ -1673,88 +1673,79 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modlog("onFrameAfterUpdate", "late frame update");
     GameState* gameState = static_cast<GameState*>(data);
 
-    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+    auto& allPlayers = getPlayers();
+    for (auto& player : allPlayers){
+      auto activePlayer = player.playerId;
+      auto thirdPersonCamera = getCameraForThirdPerson(player.viewport);
 
-    if (isInGameMode()){
-      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
-        onMovementFrameLateUpdate(gameState -> movementEntities, movement, controlledPlayer.playerId.value());
-      }
-    }
+      if (activePlayer.has_value()){
+        auto id = activePlayer.value();
+        if (getMovementData().movementEntities.find(id) == getMovementData().movementEntities.end()){
+          continue;
+        }
+        MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
 
+        const float shakeStiffness = 100.f;
+        const float shakeDamping = 20.f;
 
-    auto activePlayer = getActivePlayerId(getDefaultPlayerIndex());
-    auto thirdPersonCamera = getCameraForThirdPerson(getDefaultPlayerIndex());
+        if (player.shakeImpulse.has_value()){
+          player.shakeVelocity += player.shakeImpulse.value();
+          player.shakeImpulse = std::nullopt;
+        }
+        glm::vec3 springForce(-1 * player.shakeOffset.x * shakeStiffness, -1 * player.shakeOffset.y * shakeStiffness, -1 * player.shakeOffset.z * shakeStiffness);
+        glm::vec3 dampingForce(-1 * player.shakeVelocity.x * shakeDamping, -1 * player.shakeVelocity.y * shakeDamping, -1 * player.shakeVelocity.z * shakeDamping);
+        glm::vec3 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y, springForce.z + dampingForce.z);
 
-    if (activePlayer.has_value()){
-      auto id = activePlayer.value();
-      MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+        player.shakeVelocity.x += acceleration.x * gameapi -> timeElapsed();
+        player.shakeVelocity.y += acceleration.y * gameapi -> timeElapsed();
+        player.shakeVelocity.z += acceleration.z * gameapi -> timeElapsed();
 
-
-      static float shakeStiffness = 100.f;
-      static float shakeDamping = 20.f;
-
-      static glm::vec3 shakeOffset(0.f, 0.f, 0.f);
-      static glm::vec3 shakeVelocity(0.f, 0.f, 0.f);
-
-      if (shakeImpulse.has_value()){
-        shakeVelocity += shakeImpulse.value();
-        shakeImpulse = std::nullopt;
-      }
-      glm::vec3 springForce(-1 * shakeOffset.x * shakeStiffness, -1 * shakeOffset.y * shakeStiffness, -1 * shakeOffset.z * shakeStiffness);
-      glm::vec3 dampingForce(-1 * shakeVelocity.x * shakeDamping, -1 * shakeVelocity.y * shakeDamping, -1 * shakeVelocity.z * shakeDamping);
-      glm::vec3 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y, springForce.z + dampingForce.z);
-
-      shakeVelocity.x += acceleration.x * gameapi -> timeElapsed();
-      shakeVelocity.y += acceleration.y * gameapi -> timeElapsed();
-      shakeVelocity.z += acceleration.z * gameapi -> timeElapsed();
-
-      shakeOffset.x  += shakeVelocity.x * gameapi -> timeElapsed();
-      shakeOffset.y  += shakeVelocity.y * gameapi -> timeElapsed();
-      shakeOffset.z  += shakeVelocity.z * gameapi -> timeElapsed();
+        player.shakeOffset.x  += player.shakeVelocity.x * gameapi -> timeElapsed();
+        player.shakeOffset.y  += player.shakeVelocity.y * gameapi -> timeElapsed();
+        player.shakeOffset.z  += player.shakeVelocity.z * gameapi -> timeElapsed();
 
         //screenShake = screenShakeMagnitude * value;
         //modlog("ui update sreenshake", std::to_string(value));
 
-
     
-      if (thirdPersonCamera.has_value()){
-        auto controllable = getActiveControllable(getDefaultPlayerIndex());
-        if (controllable.value() -> vehicle.has_value()){
-          auto vehiclePos = gameapi -> getGameObjectPos(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera pos");
+        if (thirdPersonCamera.has_value()){
+          auto controllable = getActiveControllable(player.viewport);
+          if (controllable.value() -> vehicle.has_value()){
+            auto vehiclePos = gameapi -> getGameObjectPos(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera pos");
           
-          auto vehicleRot = gameapi -> getGameObjectRotation(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera rot");
-          auto offsetRot = quatFromDirection(glm::vec3(0.f, -1.f, -2.f));
-          auto finalRot = vehicleRot * offsetRot;
+            auto vehicleRot = gameapi -> getGameObjectRotation(controllable.value() -> vehicle.value(), true, "[gamelogic] lateUpdate - vehicle camera rot");
+            auto offsetRot = quatFromDirection(glm::vec3(0.f, -1.f, -2.f));
+            auto finalRot = vehicleRot * offsetRot;
 
-          auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
+            auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
 
-          auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).managedCamera, controllable.value() -> vehicle.value());
-          glm::vec3 screenShake = thirdPerson.rotation * shakeOffset;
+            auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).managedCamera, controllable.value() -> vehicle.value());
+            glm::vec3 screenShake = thirdPerson.rotation * player.shakeOffset;
 
-          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
-          gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
+            gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
+            gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
 
+            return;
+          }
 
-          return;
-        }
-
-        if (movementEntity.managedCamera.thirdPersonMode){
-          auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
-          glm::vec3 screenShake = thirdPersonInfo.rotation * shakeOffset;
-          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
-          gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        
+          if (movementEntity.managedCamera.thirdPersonMode){
+            auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
+            glm::vec3 screenShake = thirdPersonInfo.rotation * player.shakeOffset;
+            gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+            gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        
+          }else{
+            auto rotation = weaponLookDirection(movementEntity.movementState);
+            auto playerPos = gameapi -> getGameObjectPos(movementEntity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
+            glm::vec3 screenShake = rotation * player.shakeOffset;
+            gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
+            gameapi -> setGameObjectRot(thirdPersonCamera.value(), rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });     
+          } 
         }else{
-          auto rotation = weaponLookDirection(movementEntity.movementState);
-          auto playerPos = gameapi -> getGameObjectPos(movementEntity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
-          glm::vec3 screenShake = rotation * shakeOffset;
-          gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
-          gameapi -> setGameObjectRot(thirdPersonCamera.value(), rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });     
-        } 
-      }else{
-        modassert(false, "no third person camaera uhhhh");
+          modassert(false, "no third person camaera uhhhh");
+        }
       }
-
     }
+
 
 
 

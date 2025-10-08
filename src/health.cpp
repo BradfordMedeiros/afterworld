@@ -33,8 +33,6 @@ void removeEntityIdHitpoints(objid id){
 }
 
 
-void applyScreenshake(glm::vec3);
-
 bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float amount, bool* _enemyDead, float* _remainingHealth){
 	if (hitpoints.find(id) == hitpoints.end()){
 		modlog("health", "not an enemy with tracked health: " + std::to_string(id) + ", " + gameapi -> getGameObjNameForId(id).value());
@@ -58,7 +56,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 
 			if (*_enemyDead){
 				float magnitude = 10;
-      	applyScreenshake(glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));				
+      	//applyScreenshake(glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));				
 			}
 
 

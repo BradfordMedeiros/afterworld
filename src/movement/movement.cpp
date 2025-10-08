@@ -513,10 +513,6 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   return uiUpdate;
 }
 
-void onMovementFrameLateUpdate(MovementEntityData& movementEntityData, Movement& movement, objid activeId){
-  modlog("movement", "onMovementFrameLateUpdate");
-}
-
 void setZoomSensitivity(float multiplier){
   zoomSensitivity = multiplier;
 }

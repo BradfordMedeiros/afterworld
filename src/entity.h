@@ -9,13 +9,17 @@
 #include "./resources/layer.h"
 
 struct ControlledPlayer {
-	int viewport;
+	int viewport; // this is used interchangably with the player index (eg player 1, 2, etc)
 	glm::vec2 lookVelocity;
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempCamera;
 	bool editorMode;
 	bool disablePlayerControl;  // this maybe should be in global? 
+
+	glm::vec3 shakeOffset = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 shakeVelocity = glm::vec3(0.f, 0.f, 0.f);
+	std::optional<glm::vec3> shakeImpulse;
 };
 
 struct ControllableEntity {
@@ -42,6 +46,7 @@ std::vector<objid> findBodyPartAndChilren(objid entityId, const char* part);
 
 int getDefaultPlayerIndex();
 std::optional<objid> getActivePlayerId(int playerIndex);
+std::vector<ControlledPlayer>& getPlayers();
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
 std::optional<bool> activePlayerInThirdPerson(int playerIndex);
 
