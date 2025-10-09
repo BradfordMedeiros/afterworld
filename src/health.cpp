@@ -10,6 +10,7 @@ void playGameplayClipById(objid id, std::optional<float> volume, std::optional<g
 void onAiHealthChange(objid targetId, float remainingHealth);
 void setIsAlive(objid id, bool alive);
 void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
+void maybeDisplayGameOver();
 
 void addEntityIdHitpoints(objid id){
 	if (hitpoints.find(id) != hitpoints.end()){
@@ -79,7 +80,7 @@ void onNoHealth(objid targetId, float remainingHealth){
   	if (enableRagdollKill){
 			enterRagdoll(targetId);
   	}
-
+ 		maybeDisplayGameOver();
   	return;
   }
 

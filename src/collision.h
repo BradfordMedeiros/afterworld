@@ -13,7 +13,7 @@ void handleDamageCollision(objid obj1, objid obj2);
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force);
 void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal);
 void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
-void handleSpawnCollision(int32_t obj1, int32_t obj2, std::optional<objid> activePlayerId);
+void handleSpawnCollision(int32_t obj1, int32_t obj2);
 
 void showTriggerVolumes(bool showTriggerVolumes);
 

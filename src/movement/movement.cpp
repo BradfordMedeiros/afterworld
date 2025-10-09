@@ -311,7 +311,6 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
   }
 }
 
-float zoomSensitivity = 1.f;
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
@@ -319,7 +318,9 @@ void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movemen
 
   float xsensitivity = getGlobalState().xsensitivity;
   float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
-  movement.controlParams.lookVelocity = glm::vec2(zoomSensitivity * xsensitivity * xPos, zoomSensitivity * ysensitivity * yPos);
+
+  MovementEntity& movementEntity = movementEntityData.movementEntities.at(activeId);
+  movement.controlParams.lookVelocity = glm::vec2(movementEntity.zoomSensitivity * xsensitivity * xPos, movementEntity.zoomSensitivity * ysensitivity * yPos);
 }
 
 void onMovementScrollCallback(Movement& movement, double amount){
@@ -361,7 +362,7 @@ glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& m
 
 
 // TODO third person mode should only be a thing if active id
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& entityUpdates){
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -411,7 +412,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
           gameapi -> setGameObjectRot(gunAimingUpdates.head.value().id, gunAimingUpdates.head.value().rot, true, Hint { .hint = "updateEntityGunPosition head" });
         }
       }else{
-        entityUpdates.push_back(EntityUpdate {
+        _entityUpdates.push_back(EntityUpdate {
           .id = entity.playerId,
           .rot = cameraUpdate.firstPerson.yAxisRotation,
           .rotHint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot",
@@ -513,8 +514,9 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   return uiUpdate;
 }
 
-void setZoomSensitivity(float multiplier){
-  zoomSensitivity = multiplier;
+void setZoomSensitivity(MovementEntityData& movementEntityData, float multiplier, objid id){
+  MovementEntity& movementEntity = movementEntityData.movementEntities.at(id);
+  movementEntity.zoomSensitivity = multiplier;
 }
 
 void setMovementEntityRotation(MovementEntityData& movementEntityData, objid id, glm::quat rotation){
@@ -524,7 +526,6 @@ void setMovementEntityRotation(MovementEntityData& movementEntityData, objid id,
   movementEntity.movementState.xRot = oldXYRot.x;
   movementEntity.movementState.yRot = oldXYRot.y;    
 
-
-    movementEntity.managedCamera.angleX = movementEntity.movementState.xRot;
-    movementEntity.managedCamera.angleY = movementEntity.movementState.yRot;  
+  movementEntity.managedCamera.angleX = movementEntity.movementState.xRot;
+  movementEntity.managedCamera.angleY = movementEntity.movementState.yRot;  
 }

@@ -31,11 +31,13 @@ struct ControllableEntity {
 };
 
 ControlledPlayer& getControlledPlayer(int playerIndex);
+ControlledPlayer& getMainControlledPlayer();
 void setNumberPlayers(int numPlayers);
 int getNumberOfPlayers();
 void setMainPlayerControl(int playerIndex);
 void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
+bool isControlledPlayer(int playerId);
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
@@ -56,6 +58,8 @@ void setIsAlive(objid id, bool alive);
 void setIsFalling(objid id, bool falling);
 void setIsReloading(objid id, bool reloading);
 
+bool allPlayersDead();
+
 void maybeReEnableMesh(objid id);
 void maybeDisableMesh(objid id);
 
@@ -64,7 +68,7 @@ void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, i
 void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex);
 void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex);
 
-bool onActivePlayerRemoved(objid id);
+void onActivePlayerRemoved(objid id);
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 bool isPlayerControlDisabled(int playerIndex);
 std::optional<bool> activePlayerAlive(int playerIndex);

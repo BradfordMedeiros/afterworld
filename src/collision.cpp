@@ -7,6 +7,7 @@ extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
+bool isControlledPlayer(int playerId);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -214,19 +215,15 @@ void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
 }
 
 
-void handleSpawnCollision(int32_t obj1, int32_t obj2, std::optional<objid> activePlayerId){
-  if(!activePlayerId.has_value()){
-    return;
-  }
-  auto playerId = activePlayerId.value();
-  if (obj2 == playerId){
+void handleSpawnCollision(int32_t obj1, int32_t obj2){
+  if (isControlledPlayer(obj2)){
     auto objAttr = getAttrHandle(obj1);
     auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger");
     if (spawnPointTag.has_value()){
       spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj1);
     }
-  }else if (obj1 == playerId){
+  }else if (isControlledPlayer(obj1)){
     auto objAttr = getAttrHandle(obj2);
     auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger"); 
     if (spawnPointTag.has_value()){

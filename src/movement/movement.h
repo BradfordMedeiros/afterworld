@@ -26,6 +26,8 @@ struct MovementEntity {
   std::optional<MovementRequest> targetLocation;
   std::optional<glm::quat> targetRotation;
 
+  float zoomSensitivity = 1.f;
+
 };
 
 struct MovementEntityData {
@@ -54,7 +56,7 @@ struct EntityUpdate {
   const char* rotHint = NULL;
 };
 
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& entityUpdates);
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates);
 
 void setActiveMovementEntity(Movement& movement, bool observeMode);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
@@ -67,7 +69,7 @@ void changeMovementEntityType(MovementEntityData& movementEntityData, objid id, 
 bool maybeAddMovementEntity(MovementEntityData& movementEntityData, objid id);
 void maybeRemoveMovementEntity(Movement& movement, MovementEntityData& movementEntityData, objid id);
 
-void setZoomSensitivity(float multiplier);
+void setZoomSensitivity(MovementEntityData& movementEntityData, float multiplier, objid id);
 
 void setMovementEntityRotation(MovementEntityData& movementEntityData, objid id, glm::quat rotation);
 

@@ -40,6 +40,15 @@ void removePlayerPort(int playerIndex){
 	players = newPlayers;
 }
 
+bool isControlledPlayer(int playerId){
+	for (auto& player : players){
+		if (player.playerId.has_value() && player.playerId.value() == playerId){
+			return true;
+		}
+	}
+	return false;
+}
+
 ControlledPlayer& getControlledPlayer(int playerIndex){
 	for (auto& player : players){
 		if (player.viewport == playerIndex){
@@ -48,6 +57,10 @@ ControlledPlayer& getControlledPlayer(int playerIndex){
 	}
 	modassert(false, "getControlledPlayer playerIndex invalid");
 	return players.at(0);
+}
+
+ControlledPlayer& getMainControlledPlayer(){
+	return players.at(getDefaultPlayerIndex());
 }
 
 void setNumberPlayers(int numPlayers){
@@ -243,8 +256,6 @@ void setIsAlive(objid id, bool alive){
 	movementEntity.movementState.alive = alive;
 }
 
-
-
 bool isCamera(objid id){
 	auto name = gameapi -> getGameObjNameForId(id).value();
 	return name.at(0) == '>';
@@ -354,7 +365,7 @@ std::vector<ControlledPlayer>& getPlayers(){
 }
 
 
-bool onActivePlayerRemoved(objid id){
+void onActivePlayerRemoved(objid id){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
 	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
@@ -366,9 +377,8 @@ bool onActivePlayerRemoved(objid id){
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
 		controlledPlayer.disablePlayerControl = false;
 		updateCamera(getDefaultPlayerIndex());
-		return true;
+		return;
 	}
-	return false;
 }
 
 void setDisablePlayerControl(bool isDisabled, int playerIndex){
@@ -416,6 +426,16 @@ void setIsReloading(objid id, bool reloading){
 	}else{
 		movementEntity.movementState.reloading = gameapi -> timeSeconds(false);
 	}
+}
+
+bool allPlayersDead(){
+	for (auto& player : players){
+		std::optional<ControllableEntity*> controllable = getActiveControllable(player.viewport);
+		if (controllable.has_value() && controllable.value() -> isAlive){
+			return false;
+		}
+	}
+	return true;	
 }
 
 void setActivePlayerEditorMode(bool editorMode, int playerIndex){
@@ -547,6 +567,9 @@ DebugConfig debugPrintActivePlayer(int playerIndex){
 std::optional<ControllableEntity*> getActiveControllable(int playerIndex){
 	auto activePlayer = getActivePlayerId(playerIndex);
 	if (!activePlayer.has_value()){
+		return std::nullopt;
+	}
+	if (controllableEntities.find(activePlayer.value()) == controllableEntities.end()){
 		return std::nullopt;
 	}
 	return &controllableEntities.at(activePlayer.value());
