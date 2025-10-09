@@ -41,7 +41,6 @@ struct SceneManagement {
   int changedLevelFrame;
 };
 
-
 struct ScenarioOptions {
   glm::vec3 ambientLight;
   glm::vec3 skyboxColor;
@@ -120,7 +119,6 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unorde
   ).value();
 }
 
-
 void startLevel(ManagedScene& managedScene){
   if (!managedScene.id.has_value()){
     return;
@@ -136,7 +134,7 @@ void startLevel(ManagedScene& managedScene){
 
     int numberOfPlayers = getNumberOfPlayers();
     for (int i  = 0; i < numberOfPlayers; i++){
-      auto initialPosition = position + glm::vec3(1.f * i, 0.f, 0.f); // this is bad, this should just have a few initial spawnpoints
+      auto initialPosition = position + glm::vec3(1.f * i, 0.f, 0.f); // TODO - this is bad, this should just have a few initial spawnpoints
       auto playerId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  initialPosition, {});    
       playerIds.push_back(playerId);
     }
@@ -1276,14 +1274,7 @@ void objectRemoved(objid idRemoved){
   maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
 
   onActivePlayerRemoved(idRemoved);
-
   onMainUiObjectsChanged();
-  if (controlledPlayer.playerId.has_value()){
-    if (controlledPlayer.playerId.value() == idRemoved){
-      modlog("weapons", "remove player");
-      controlledPlayer.playerId = std::nullopt;
-    }
-  }
 
   onObjectRemovedWater(water, idRemoved);
   handleTagsOnObjectRemoved(tags, idRemoved);
@@ -1459,13 +1450,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
 
-    ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
     std::vector<EntityUpdate> entityUpdates;
     if (isInGameMode()){
 
       // Control params are reset by movement so put before that
       onVehicleFrame(vehicles, movement.controlParams);
+
+      ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         const bool showLookVelocity = false;
@@ -1526,6 +1518,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           setUIAmmoCount(0, 0);
         }
         if (uiUpdate.bloomAmount.has_value()){
+          ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
           drawBloom(controlledPlayer.playerId.value(), controlledPlayer.playerId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
         }
         modlog("current weapon", uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : "");
@@ -1567,17 +1560,23 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
     if (isInGameMode()){
       std::optional<UiHealth> uiHealth;
-      auto activePlayer = controlledPlayer.playerId;
-      if (activePlayer.has_value()){
-        auto health = getHealth(activePlayer.value());
-        if (health.has_value()){
-          uiHealth = UiHealth {
-            .health = health.value().current,
-            .totalHealth = health.value().total,
-          };
+
+      {
+        for (auto& player : getPlayers()){
+          ControlledPlayer& controlledPlayer = getControlledPlayer(player.viewport);
+          auto activePlayer = controlledPlayer.playerId;
+          if (activePlayer.has_value()){
+            auto health = getHealth(activePlayer.value());
+            if (health.has_value()){
+              uiHealth = UiHealth {
+                .health = health.value().current,
+                .totalHealth = health.value().total,
+              };
+            }
+          }
+          setUiHealth(player.viewport, uiHealth);
         }
       }
-      setUiHealth(uiHealth);
       onFrameWater(water);
 
       if (!hasOption("no-ai")){
@@ -1658,7 +1657,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     lastMaterial = material;
   };
 
-  
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");
     GameState* gameState = static_cast<GameState*>(data);
@@ -1694,10 +1692,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         player.shakeOffset.y  += player.shakeVelocity.y * gameapi -> timeElapsed();
         player.shakeOffset.z  += player.shakeVelocity.z * gameapi -> timeElapsed();
 
-        //screenShake = screenShakeMagnitude * value;
-        //modlog("ui update sreenshake", std::to_string(value));
-
-    
         if (thirdPersonCamera.has_value()){
           auto controllable = getActiveControllable(player.viewport);
           if (controllable.value() -> vehicle.has_value()){
@@ -1735,11 +1729,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
-
-
-
-
-
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {

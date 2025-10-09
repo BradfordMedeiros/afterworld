@@ -365,16 +365,16 @@ void setupDebugView(){
 	for (auto viewportId : viewports){
 		if (viewportId == 0){
 			auto cameraId = gameapi -> getActiveCamera(viewportId);
-  		gameapi -> createViewport(0, 0.f, 0.5f, 0.5f, 0.5f, DefaultBindingOption{});
+  		gameapi -> createViewport(0, 0.f, 0.5f, 0.5f, 0.5f, DefaultBindingOption{}, {});
 			gameapi -> drawText("Default", -0.95f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-  		gameapi -> createViewport(1, 0.f, 0.f, 0.5f, 0.5f, BloomBindingOption{});
+  		gameapi -> createViewport(1, 0.f, 0.f, 0.5f, 0.5f, BloomBindingOption{}, {});
 			gameapi -> drawText("Bloom", -0.95f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-  		gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, TextureBindingOption{ .flipCoords = true, .texture = "bigbuck" });
+  		gameapi -> createViewport(2, 0.5f, 0.f, 0.5f, 0.5f, TextureBindingOption{ .flipCoords = true, .texture = "bigbuck" }, {});
  			gameapi -> drawText("Custom Texture", 0.05f, -0.1f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-	  	gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DepthBindingOption{});
+	  	gameapi -> createViewport(3, 0.5f, 0.5f, 0.5f, 0.5f, DepthBindingOption{}, {});
 	 		gameapi -> drawText("Depth", 0.05f, 0.9f, 8, true, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
 			gameapi -> setActiveCamera(cameraId, 0);

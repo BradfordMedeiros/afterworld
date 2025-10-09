@@ -19,7 +19,7 @@ void setUIAmmoCount(int currentAmmo, int totalAmmo){
 }
 
 std::optional<UiHealth> uiHealth;
-void setUiHealth(std::optional<UiHealth> health){
+void setUiHealth(int player, std::optional<UiHealth> health){
   uiHealth = health;
   //modlog("ui health", std::to_string(health) + ", " + std::to_string(totalHealth));
 }

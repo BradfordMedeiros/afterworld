@@ -8,7 +8,7 @@ void addInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, ob
   modassert(scopenameToInventory.find(id) == scopenameToInventory.end(), "inventory already exists");
   scopenameToInventory[id] = {
     Inventory {
-      .infinite = true,
+      .infinite = false,
       .items = {
         { "gold",  100 },
         { "pistol",  10 },

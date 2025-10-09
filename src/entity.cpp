@@ -193,10 +193,10 @@ void updateCamera(int playerIndex){
 
 	// ensure viewports
 	if (numberOfPlayers == 1){
-  	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{});
+  	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{}, {});
 	}else if (numberOfPlayers == 2){
-  	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{});
-	  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{});
+  	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{}, {});
+	  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{}, {});
 	}else {
 		modassert(false, "invalid number of players");
 	}
