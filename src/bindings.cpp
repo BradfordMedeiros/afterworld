@@ -1534,13 +1534,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
 
 
-      auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex());
-      if (playerPosition.has_value()){
-        drawWaypoints(waypoints, playerPosition.value());
-      }
     }
     ////////////////////////////////////////////////////
     if (isInGameMode()){
+
+      for (auto& player : getPlayers()){
+        auto playerPosition = getActivePlayerPosition(player.viewport);
+        if (playerPosition.has_value()){
+          drawWaypoints(waypoints, playerPosition.value());
+        }
+      }
 
       drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
