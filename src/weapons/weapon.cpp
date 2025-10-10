@@ -136,6 +136,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
         playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
 
         MessageWithId activateMessage {
+          .playerId = playerId,
           .id = activateableItem.value(),
           .value = activateValue,
         };

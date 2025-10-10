@@ -10,6 +10,7 @@
 #include "../controls.h"
 
 struct MessageWithId {
+  std::optional<objid> playerId;
   objid id;
   std::optional<std::string> value;
 };

@@ -360,6 +360,15 @@ std::optional<objid> getActivePlayerId(int playerIndex){
 	return controlledPlayer.playerId;
 }
 
+std::optional<int> getPlayerIndex(objid id){
+	for (auto &player : players){
+		if (player.playerId.has_value() && player.playerId.value() == id){
+			return player.viewport;
+		}
+	}
+	return std::nullopt;
+}
+
 std::vector<ControlledPlayer>& getPlayers(){
 	return players;
 }

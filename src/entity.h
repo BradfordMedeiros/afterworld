@@ -48,6 +48,7 @@ std::vector<objid> findBodyPartAndChilren(objid entityId, const char* part);
 
 int getDefaultPlayerIndex();
 std::optional<objid> getActivePlayerId(int playerIndex);
+std::optional<int> getPlayerIndex(objid id);
 std::vector<ControlledPlayer>& getPlayers();
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
 std::optional<bool> activePlayerInThirdPerson(int playerIndex);

@@ -1259,16 +1259,16 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
 }
 
 void objectRemoved(objid idRemoved){
-  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-
-  if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
-    controlledPlayer.playerId = std::nullopt;
-  }
-  if (controlledPlayer.activePlayerManagedCameraId.has_value() && controlledPlayer.activePlayerManagedCameraId.value() == idRemoved){
-    controlledPlayer.activePlayerManagedCameraId = std::nullopt;
-  }
-  if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == idRemoved){
-    controlledPlayer.tempCamera = std::nullopt;
+  for (auto& controlledPlayer : getPlayers()){
+    if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
+      controlledPlayer.playerId = std::nullopt;
+    }
+    if (controlledPlayer.activePlayerManagedCameraId.has_value() && controlledPlayer.activePlayerManagedCameraId.value() == idRemoved){
+      controlledPlayer.activePlayerManagedCameraId = std::nullopt;
+    }
+    if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == idRemoved){
+      controlledPlayer.tempCamera = std::nullopt;
+    }
   }
 
   maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
@@ -1449,7 +1449,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
-
 
     std::vector<EntityUpdate> entityUpdates;
     if (isInGameMode()){
@@ -1919,7 +1918,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "arcade"){
       auto attrValue = anycast<MessageWithId>(value); 
       modassert(attrValue, "activate-switch message invalid arcade");
-      zoomIntoArcade(attrValue -> id, getDefaultPlayerIndex());
+      zoomIntoArcade(attrValue -> id, getPlayerIndex(attrValue -> playerId.value()).value());
     }
 
     onCutsceneMessages(key);
