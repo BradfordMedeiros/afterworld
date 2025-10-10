@@ -1451,27 +1451,26 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
 
     std::vector<EntityUpdate> entityUpdates;
-    if (isInGameMode()){
+    //////// needs multiviewport work ///////////////////////////////
 
+    if (isInGameMode()){
       // Control params are reset by movement so put before that
       onVehicleFrame(vehicles, movement.controlParams);
 
-      ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+    }
 
+    if (isInGameMode()){
+
+      ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         const bool showLookVelocity = false;
         auto thirdPersonCamera = getCameraForThirdPerson(getDefaultPlayerIndex());
-        if (!thirdPersonCamera.has_value()){
-          if (!gameState -> movementEntities.movementEntities.at(controlledPlayer.playerId.value()).managedCamera.thirdPersonMode){
-            thirdPersonCamera = 0;
-          }else{
-            modassert(false, "cannot use third person mode, no camera provided");
-          }
-        }
         auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh, entityUpdates);
-        impulses = {};
         setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
       }
+
+      impulses = {};
+
 
       if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         auto alive = activePlayerAlive(getDefaultPlayerIndex()).value();
@@ -1535,19 +1534,24 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
 
 
+      auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex());
+      if (playerPosition.has_value()){
+        drawWaypoints(waypoints, playerPosition.value());
+      }
+    }
+    ////////////////////////////////////////////////////
+    if (isInGameMode()){
+
       drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
       //handleEntitiesRace();
+
 
       handleDirector(director);
       setUiGemCount(GemCount {
         .currentCount = numberOfCrystals(),
         .totalCount = totalCrystals(),
       });
-      auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex());
-      if (playerPosition.has_value()){
-        drawWaypoints(waypoints, playerPosition.value());
-      }
     }
 
     //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
@@ -1609,6 +1613,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     /// temp code 
+    // TODO multiviewport sound
     auto cameraPos = gameapi -> getCameraTransform(getDefaultPlayerIndex());
     auto audioSymbol = getSymbol("audio");
     auto tags = gameapi -> getTag(audioSymbol, cameraPos.position);
