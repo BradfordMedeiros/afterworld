@@ -278,7 +278,7 @@ void maybeReEnableMesh(objid id){
 	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
 	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
 		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
-		 gameapi -> setMeshEnabled(childId, true);
+		 gameapi -> setMeshEnabled(childId, true, {});
 	}
 }
 
@@ -287,7 +287,17 @@ void maybeDisableMesh(objid id){
 	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
 		 modlog("disable mesh", gameapi -> getGameObjNameForId(childId).value());
 		 if (!hasCameraAncestor(childId)){ // guns are children of the camera 
- 			 gameapi -> setMeshEnabled(childId, false);
+		 	 if (isControlledPlayer(id)){
+		 	 	int viewport = getPlayerIndex(id).value();
+		 	 	ViewportMeshEnablement meshEnablement {
+  					.enable = false,
+  					.viewport = viewport,
+			 	};
+ 			 	gameapi -> setMeshEnabled(childId, true, { meshEnablement });
+		 	 }else{
+ 			 	gameapi -> setMeshEnabled(childId, true, {});
+		 	 }
+
 		 }
 	}
 }
