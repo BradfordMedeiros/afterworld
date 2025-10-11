@@ -7,7 +7,7 @@
 #include "../controls.h"
 
 struct Movement {
-  ControlParams controlParams;
+  std::vector<ControlParams> controlParams;
   std::set<objid> disabledMeshes;
 };
 
@@ -35,11 +35,13 @@ struct MovementEntityData {
 };
 
 Movement createMovement();
-void reloadSettingsConfig(Movement& movement, std::string name);
+void addPlayerPortToMovement(Movement& movement, int port);
+void removePlayerPortFromMovement(Movement& movement, int port);
+ControlParams& getControlParamsByPort(Movement& movement, int playerIndex);
 
-void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action);
-void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos);
-void onMovementScrollCallback(Movement& movement, double amount);
+void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action, int playerIndex);
+void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos, int playerPort);
+void onMovementScrollCallback(Movement& movement, double amount, int playerPort);
 
 glm::quat getLookDirection(MovementEntity& movementEntity);
 
@@ -57,11 +59,12 @@ struct EntityUpdate {
 };
 
 struct MovementActivePlayer {
- objid activeId;
+  objid activeId;
+  int playerPort;
 };
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, std::function<bool(objid)> isGunZoomed, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates, std::vector<MovementActivePlayer>& player);
 
-void setActiveMovementEntity(Movement& movement, bool observeMode);
+void setActiveMovementEntity(Movement& movement, bool observeMode, int playerPort);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);

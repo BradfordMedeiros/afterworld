@@ -124,9 +124,7 @@ struct DebugConfig {
 
 enum CrouchType { CROUCH_NONE, CROUCH_UP, CROUCH_DOWN };
 struct ControlParams {
-  float xsensitivity;
-  float ysensitivity;
-
+  int playerPort;
   bool goForward;                
   bool goBackward;
   bool goLeft;

@@ -1312,7 +1312,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     initGlobal();
     setGlobalModeValues(getGlobalState().showEditor);
-    reloadSettingsConfig(movement, "default");
     gameState -> dragSelect = std::nullopt;
     gameState -> uiData.uiContext = getUiContext(*gameState);
 
@@ -1455,7 +1454,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (isInGameMode()){
       // Control params are reset by movement so put before that
-      onVehicleFrame(vehicles, movement.controlParams);
+      onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
 
     }
 
@@ -1468,6 +1467,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         for (auto& player : getPlayers()){
           activePlayers.push_back(MovementActivePlayer {
             .activeId = player.playerId.value(),
+            .playerPort = player.viewport,
           });
         }
 
@@ -1794,7 +1794,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
     if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
-      onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action);
+      onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action, controlledPlayer.viewport);
     }
 
     if (key == 'Q' && action == 0) { 
@@ -1994,7 +1994,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
         //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
         glm::vec2 smoothedMovement = glm::vec2(xPos, yPos);
-        onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y);
+        onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y, playerIndex);
       }
     }
   };
@@ -2054,7 +2054,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onMainUiScroll(uiStateContext, tags.uiData->uiContext, amount);
     }
     onInGameUiScrollCallback(tags.inGameUi, amount);
-    onMovementScrollCallback(movement, amount);
+    onMovementScrollCallback(movement, amount, getDefaultPlayerIndex());
   };
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);

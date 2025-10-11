@@ -69,34 +69,24 @@ AnimationGunUpdate updateEntityGunPosition(objid entityId, glm::quat orientation
   return update;
 }
 
-void reloadSettingsConfig(Movement& movement, std::string name){
-  auto settingQuery = gameapi -> compileSqlQuery(
-    "select xsensitivity, ysensitivity from settings where profile = " + name,
-    {}
-  );
-  bool validSettingsSql = false;
-  auto settingsResult = gameapi -> executeSqlQuery(settingQuery, &validSettingsSql);
-  modassert(validSettingsSql, "error executing sql query");
-  movement.controlParams.xsensitivity = floatFromFirstSqlResult(settingsResult, 0);
-  movement.controlParams.ysensitivity = floatFromFirstSqlResult(settingsResult, 1);
-}
+void setActiveMovementEntity(Movement& movement, bool observeMode, int playerPort){
+  ControlParams& controlParams = getControlParamsByPort(movement, playerPort);;
 
-void setActiveMovementEntity(Movement& movement, bool observeMode){
-  movement.controlParams.goForward = false;
-  movement.controlParams.goBackward = false;
-  movement.controlParams.goLeft = false;
-  movement.controlParams.goRight = false;
-  movement.controlParams.shiftModifier = false;
-  movement.controlParams.doJump = false;
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.controlParams.zoom_delta = 0.f;
-  movement.controlParams.doAttachToLadder = false;
-  movement.controlParams.doReleaseFromLadder = false;
-  movement.controlParams.doGrind = false;
-  movement.controlParams.doReverseGrind = false;
-  movement.controlParams.doReload = false;
-  movement.controlParams.crouchType = CROUCH_NONE;
-  movement.controlParams.observeMode = observeMode;
+  controlParams.goForward = false;
+  controlParams.goBackward = false;
+  controlParams.goLeft = false;
+  controlParams.goRight = false;
+  controlParams.shiftModifier = false;
+  controlParams.doJump = false;
+  controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+  controlParams.zoom_delta = 0.f;
+  controlParams.doAttachToLadder = false;
+  controlParams.doReleaseFromLadder = false;
+  controlParams.doGrind = false;
+  controlParams.doReverseGrind = false;
+  controlParams.doReload = false;
+  controlParams.crouchType = CROUCH_NONE;
+  controlParams.observeMode = observeMode;
 }
 
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
@@ -197,107 +187,135 @@ void maybeRemoveMovementEntity(Movement& movement, MovementEntityData& movementE
   movementEntityData.movementEntities.erase(id);
 }
 
+ControlParams createControlParams(int playerPort){
+  ControlParams controlParams;
+  controlParams.playerPort = playerPort;
+  controlParams.goForward = false;
+  controlParams.goBackward = false;
+  controlParams.goLeft = false;
+  controlParams.goRight = false;
+  controlParams.shiftModifier = false;
+  controlParams.doJump = false;
+  controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+  controlParams.zoom_delta = 0.f;
+
+  controlParams.doAttachToLadder = false;
+  controlParams.doReleaseFromLadder = false;
+  controlParams.doGrind = false;
+  controlParams.doReverseGrind = false;
+  controlParams.doReload = false;
+  controlParams.crouchType = CROUCH_NONE;
+  controlParams.observeMode = false;
+  return controlParams;
+}
 Movement createMovement(){
   Movement movement {};
-  movement.controlParams.goForward = false;
-  movement.controlParams.goBackward = false;
-  movement.controlParams.goLeft = false;
-  movement.controlParams.goRight = false;
-  movement.controlParams.shiftModifier = false;
-  movement.controlParams.doJump = false;
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.controlParams.zoom_delta = 0.f;
-
-  movement.controlParams.doAttachToLadder = false;
-  movement.controlParams.doReleaseFromLadder = false;
-  movement.controlParams.doGrind = false;
-  movement.controlParams.doReverseGrind = false;
-  movement.controlParams.doReload = false;
-  movement.controlParams.crouchType = CROUCH_NONE;
-  movement.controlParams.observeMode = false;
-
   movement.disabledMeshes = {};
-
+  movement.controlParams = { createControlParams(0) };
   return movement;
 }
 
-void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, int key, int action){
+ControlParams& getControlParamsByPort(Movement& movement, int playerIndex){
+  for (auto& controlParams : movement.controlParams){
+    if (controlParams.playerPort == playerIndex){
+      return controlParams;
+    }
+  }
+  modassert(false, "invalid player port");
+  return movement.controlParams.at(0);
+}
+
+
+void addPlayerPortToMovement(Movement& movement, int port){
+  for (auto& controlParams : movement.controlParams){
+    if (controlParams.playerPort == port){
+      return;
+    }
+  }
+  movement.controlParams.push_back(createControlParams(port));
+}
+void removePlayerPortFromMovement(Movement& movement, int port){
+
+}
+
+void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, int key, int action, int playerIndex){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
 
+  ControlParams& controlParams = getControlParamsByPort(movement, playerIndex);
   if (isCrouchKey(key)){  // ctrl
     if (action == 0 || action == 1){
       if (action == 0){
-        movement.controlParams.crouchType = CROUCH_UP;
+        controlParams.crouchType = CROUCH_UP;
       }else if (action == 1){
-        movement.controlParams.crouchType = CROUCH_DOWN;
+        controlParams.crouchType = CROUCH_DOWN;
       }
     }
   }
   if (isClimbKey(key)) { 
     if (action == 1){
-      movement.controlParams.doAttachToLadder = true;
+      controlParams.doAttachToLadder = true;
     }else if (action == 0){
-      movement.controlParams.doReleaseFromLadder = true;
+      controlParams.doReleaseFromLadder = true;
     }
     return;
   }
   if (isMoveForwardKey(key)){
     if (action == 0){
-      movement.controlParams.goForward = false;
+      controlParams.goForward = false;
     }else if (action == 1){
-      movement.controlParams.goForward = true;
+      controlParams.goForward = true;
     }
     return;
   }
   if (isMoveBackwardKey(key)){
     if (action == 0){
-      movement.controlParams.goBackward = false;
+      controlParams.goBackward = false;
     }else if (action == 1){
-      movement.controlParams.goBackward = true;
+      controlParams.goBackward = true;
     }
     return;
   }
   if (isMoveLeftKey(key)){
     if (action == 0){
-      movement.controlParams.goLeft = false;
+      controlParams.goLeft = false;
     }else if (action == 1){
-      movement.controlParams.goLeft = true;
+      controlParams.goLeft = true;
     }
     return;
   }
   if (isMoveRightKey(key)){
     if (action == 0){
-      movement.controlParams.goRight = false;
+      controlParams.goRight = false;
     }else if (action == 1){
-      movement.controlParams.goRight = true;
+      controlParams.goRight = true;
     }
     return;
   }
 
   if (isJumpKey(key) /* space */ && action == 1){
-    movement.controlParams.doJump = true;
+    controlParams.doJump = true;
     return;
   }
   if (isGrindKey(key) && action == 1){
-    movement.controlParams.doGrind = true;
+    controlParams.doGrind = true;
     return;
   }
   if (isReverseGrindKey(key) && action == 1){
-    movement.controlParams.doReverseGrind = true;
+    controlParams.doReverseGrind = true;
     return;
   }
   if (isReloadKey(key) && action == 1){
-    movement.controlParams.doReload = true;
+    controlParams.doReload = true;
     return;
   }
 
   if (key == 340 /* shift */){
     if (action == 0){
-      movement.controlParams.shiftModifier = false;
+      controlParams.shiftModifier = false;
     }else if (action == 1){
-      movement.controlParams.shiftModifier = true;
+      controlParams.shiftModifier = true;
       MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
       if (entity.managedCamera.thirdPersonMode){
         entity.managedCamera.reverseCamera = !entity.managedCamera.reverseCamera;
@@ -311,7 +329,7 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
   }
 }
 
-void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos){
+void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos, int playerPort){
   if (isPaused() || getGlobalState().disableGameInput){
     return;
   }
@@ -320,11 +338,14 @@ void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movemen
   float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
 
   MovementEntity& movementEntity = movementEntityData.movementEntities.at(activeId);
-  movement.controlParams.lookVelocity = glm::vec2(movementEntity.zoomSensitivity * xsensitivity * xPos, movementEntity.zoomSensitivity * ysensitivity * yPos);
+
+  ControlParams& controlParams = getControlParamsByPort(movement, playerPort);
+  controlParams.lookVelocity = glm::vec2(movementEntity.zoomSensitivity * xsensitivity * xPos, movementEntity.zoomSensitivity * ysensitivity * yPos);
 }
 
-void onMovementScrollCallback(Movement& movement, double amount){
-  movement.controlParams.zoom_delta = amount;
+void onMovementScrollCallback(Movement& movement, double amount, int playerPort){
+  ControlParams& controlParams = getControlParamsByPort(movement, playerPort);
+  controlParams.zoom_delta = amount;
 }
 
 glm::quat getLookDirection(MovementEntity& movementEntity){
@@ -362,8 +383,23 @@ glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& m
 
 
 bool isControlledPlayer(std::vector<MovementActivePlayer>& players, objid id){
-  return id == players.at(0).activeId;  
+  for (auto& player : players){
+    if (id == player.activeId){
+      return true;
+    }
+  }
+  return false;
 }
+std::optional<MovementActivePlayer*> getControlledPlayer(std::vector<MovementActivePlayer>& players, objid id){
+  for (auto& player : players){
+    if (id == player.activeId){
+      return &player;;
+    }
+  }
+  return std::nullopt;
+}
+
+
 
 // TODO third person mode should only be a thing if active id
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, std::function<bool(objid)> isGunZoomed, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates, std::vector<MovementActivePlayer>& players){
@@ -376,28 +412,29 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
   {
-    if (!movement.controlParams.observeMode){
-      for (auto& player : players){
+    for (auto& player : players){
+      ControlParams& controlParams = getControlParamsByPort(movement, player.playerPort);
+      if (!controlParams.observeMode){
         MovementEntity& entity = movementEntityData.movementEntities.at(player.activeId);
-        entity.movementState.moveVec = getMovementControlData(movement.controlParams, *entity.moveParams);;
+        entity.movementState.moveVec = getMovementControlData(controlParams, *entity.moveParams);;
         entity.movementState.speed = 1.f;
-        entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
-        entity.movementState.doJump = movement.controlParams.doJump;
-        entity.movementState.doAttachToLadder = movement.controlParams.doAttachToLadder;
-        entity.movementState.doReleaseFromLadder = movement.controlParams.doReleaseFromLadder;
-        entity.movementState.doGrind = movement.controlParams.doGrind;
-        entity.movementState.doReverseGrind = movement.controlParams.doReverseGrind;
-        if (movement.controlParams.doReload && !entity.movementState.reloading.has_value()){
+        entity.movementState.zoom_delta = controlParams.zoom_delta;
+        entity.movementState.doJump = controlParams.doJump;
+        entity.movementState.doAttachToLadder = controlParams.doAttachToLadder;
+        entity.movementState.doReleaseFromLadder = controlParams.doReleaseFromLadder;
+        entity.movementState.doGrind = controlParams.doGrind;
+        entity.movementState.doReverseGrind = controlParams.doReverseGrind;
+        if (controlParams.doReload && !entity.movementState.reloading.has_value()){
           entity.movementState.reloading = gameapi -> timeSeconds(false);
         }
-        entity.movementState.raw_deltax = movement.controlParams.lookVelocity.x * movement.controlParams.xsensitivity;
-        entity.movementState.raw_deltay = -1.f * movement.controlParams.lookVelocity.y * movement.controlParams.ysensitivity;
-        entity.movementState.crouchType = movement.controlParams.crouchType;
+        entity.movementState.raw_deltax = controlParams.lookVelocity.x;
+        entity.movementState.raw_deltay = -1.f * controlParams.lookVelocity.y;
+        entity.movementState.crouchType = controlParams.crouchType;
 
         // should take the rotation and direct and stuff from where the player is looking
         auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(player.activeId),  isControlledPlayer(players, entity.playerId));
         uiUpdate.velocity = entity.movementState.velocity;
-        uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
+        uiUpdate.lookVelocity = controlParams.lookVelocity;
 
         if (cameraUpdate.thirdPerson.has_value()){
           if (entity.movementState.alive){
@@ -423,20 +460,20 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
             .rotHint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot",
           });
         }
-  
       }
     }
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (isControlledPlayer(players, id) && !movement.controlParams.observeMode){
+    auto controlledPlayer = getControlledPlayer(players, id);
+    if (controlledPlayer.has_value() && !getControlParamsByPort(movement, controlledPlayer.value() -> playerPort).observeMode){
       continue;
     }
     if (movementEntity.targetLocation.has_value()){
       bool atTarget = false;
       movementEntity.movementState.moveVec = getMovementControlDataFromTargetPos(movementEntity.targetLocation.value().position, movementEntity.movementState, movementEntity.playerId, &atTarget, movementEntity.moveParams -> moveVertical);;
       movementEntity.movementState.speed = movementEntity.targetLocation.value().speed;
-      movementEntity.movementState.zoom_delta = movement.controlParams.zoom_delta;
+      movementEntity.movementState.zoom_delta = 0.f;
 
       if (atTarget){
         movementEntity.targetLocation = std::nullopt;
@@ -465,7 +502,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   // that being said, this kind of just bypasses it an sets to the rotation directly
   // that's ... ok, but can run into bypassing constraints later on, hence it's really forcing it
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (isControlledPlayer(players, id) && !movement.controlParams.observeMode){
+    auto controlledPlayer = getControlledPlayer(players, id);
+    if (controlledPlayer.has_value() && !getControlParamsByPort(movement, controlledPlayer.value() -> playerPort).observeMode){
       continue;
     }
     if (movementEntity.targetRotation.has_value()){
@@ -507,15 +545,19 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     }
   }
 
-  movement.controlParams.lookVelocity = glm::vec2(0.f, 0.f);
-  movement.controlParams.zoom_delta = 0.f;
-  movement.controlParams.doJump = false;
-  movement.controlParams.doAttachToLadder = false;
-  movement.controlParams.doReleaseFromLadder = false;
-  movement.controlParams.doGrind = false;
-  movement.controlParams.doReverseGrind = false;
-  movement.controlParams.doReload = false;
-  movement.controlParams.crouchType = CROUCH_NONE;
+
+  for (auto& player : players){
+    ControlParams& controlParams = getControlParamsByPort(movement, player.playerPort);
+    controlParams.lookVelocity = glm::vec2(0.f, 0.f);
+    controlParams.zoom_delta = 0.f;
+    controlParams.doJump = false;
+    controlParams.doAttachToLadder = false;
+    controlParams.doReleaseFromLadder = false;
+    controlParams.doGrind = false;
+    controlParams.doReverseGrind = false;
+    controlParams.doReload = false;
+    controlParams.crouchType = CROUCH_NONE;    
+  }
 
   return uiUpdate;
 }

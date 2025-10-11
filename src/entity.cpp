@@ -27,6 +27,7 @@ void addPlayerPort(int playerIndex){
 		.disablePlayerControl = false,	
 	};
 	players.push_back(player);
+	addPlayerPortToMovement(movement, playerIndex);
 }
 
 void removePlayerPort(int playerIndex){
@@ -38,6 +39,7 @@ void removePlayerPort(int playerIndex){
 		newPlayers.push_back(player);
 	}
 	players = newPlayers;
+	removePlayerPortFromMovement(movement, playerIndex);
 }
 
 bool isControlledPlayer(int playerId){
@@ -301,7 +303,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 	if (controlledPlayer.playerId.has_value()){
     maybeReEnableAi(aiData, controlledPlayer.playerId.value());
 	}
-	setActiveMovementEntity(movement, false);
+	setActiveMovementEntity(movement, false, playerIndex);
 	maybeDisableAi(aiData, id.value());
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
@@ -330,7 +332,7 @@ void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::op
 		return;
 	}
 
-	setActiveMovementEntity(movement, true);
+	setActiveMovementEntity(movement, true, playerIndex);
 
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
