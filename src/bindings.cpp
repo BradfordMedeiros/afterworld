@@ -1463,18 +1463,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
-        const bool showLookVelocity = false;
-        auto thirdPersonCamera = getCameraForThirdPerson(getDefaultPlayerIndex());
-        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), isGunZoomed, thirdPersonCamera.value(), disableTpsMesh, entityUpdates);
-        setUiSpeed(uiUpdate.velocity, showLookVelocity ? uiUpdate.lookVelocity : std::nullopt);
+        MovementActivePlayer activePlayer {
+          .activeId = controlledPlayer.playerId.value(),
+        };
+        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, isGunZoomed, disableTpsMesh, entityUpdates, activePlayer);
+        setUiSpeed(uiUpdate.velocity, false ? uiUpdate.lookVelocity : std::nullopt);
       }
 
       impulses = {};
 
-
+      std::vector<WeaponsUiUpdate> uiUpdates;
       if (controlledPlayer.playerId.has_value() && !isPaused() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         auto alive = activePlayerAlive(getDefaultPlayerIndex()).value();
-        auto uiUpdate = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(getDefaultPlayerIndex()), getWeaponEntityData, 
+        uiUpdates = onWeaponsFrame(weapons, controlledPlayer.playerId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(getDefaultPlayerIndex()), getWeaponEntityData, 
           [](objid id) -> objid {
             ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
             return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
@@ -1494,7 +1495,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           !alive,
           alive
         );
+      }
 
+      for (auto& uiUpdate : uiUpdates){
         std::optional<objid> lookingAtVehicle;
         if (uiUpdate.raycastId.has_value()){
           if (isVehicle(vehicles, uiUpdate.raycastId.value()) &&  !getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle.has_value()){
@@ -1505,6 +1508,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getActiveControllable(getDefaultPlayerIndex()).value() -> lookingAtVehicle = lookingAtVehicle;
 
         setShowActivate(uiUpdate.showActivateUi);
+
         if (uiUpdate.ammoInfo.has_value()){
           setUIAmmoCount(uiUpdate.ammoInfo.value().currentAmmo, uiUpdate.ammoInfo.value().totalAmmo);
           DeliverAmmoMessage ammoArcadeMessage {
@@ -1526,18 +1530,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           modlog("ui update", "fire gun");
           float magnitude = static_cast<int>(std::rand()) % 5;
           applyScreenshake(getDefaultPlayerIndex(), glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
+        }else{
+          setShowActivate(false);
+          setUIAmmoCount(0, 0);
+          setUiWeapon(std::nullopt);
         }
-      }else{
-        setShowActivate(false);
-        setUIAmmoCount(0, 0);
-        setUiWeapon(std::nullopt);
+
       }
-
-
     }
+
     ////////////////////////////////////////////////////
     if (isInGameMode()){
-
       for (auto& player : getPlayers()){
         auto playerPosition = getActivePlayerPosition(player.viewport);
         if (playerPosition.has_value()){

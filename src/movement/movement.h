@@ -56,7 +56,10 @@ struct EntityUpdate {
   const char* rotHint = NULL;
 };
 
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates);
+struct MovementActivePlayer {
+ objid activeId;
+};
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, std::function<bool(objid)> isGunZoomed, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates, MovementActivePlayer& player);
 
 void setActiveMovementEntity(Movement& movement, bool observeMode);
 std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);

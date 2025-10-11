@@ -362,7 +362,7 @@ glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& m
 
 
 // TODO third person mode should only be a thing if active id
-UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, objid activeId, std::function<bool(objid)> isGunZoomed, objid thirdPersonCamera, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates){
+UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, std::function<bool(objid)> isGunZoomed, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates, MovementActivePlayer& player){
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
@@ -373,7 +373,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
 
   {
     if (!movement.controlParams.observeMode){
-      MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
+      MovementEntity& entity = movementEntityData.movementEntities.at(player.activeId);
       entity.movementState.moveVec = getMovementControlData(movement.controlParams, *entity.moveParams);;
       entity.movementState.speed = 1.f;
       entity.movementState.zoom_delta = movement.controlParams.zoom_delta;
@@ -390,7 +390,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       entity.movementState.crouchType = movement.controlParams.crouchType;
 
       // should take the rotation and direct and stuff from where the player is looking
-      auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(activeId), activeId == entity.playerId);
+      auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(player.activeId), player.activeId == entity.playerId);
       uiUpdate.velocity = entity.movementState.velocity;
       uiUpdate.lookVelocity = movement.controlParams.lookVelocity;
 
@@ -423,7 +423,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (id == activeId && !movement.controlParams.observeMode){
+    if (id == player.activeId && !movement.controlParams.observeMode){
       continue;
     }
     if (movementEntity.targetLocation.has_value()){
@@ -437,7 +437,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         movementEntity.movementState.speed = 1.f;
         continue;
       }
-      auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id), activeId == movementEntity.playerId);  
+      auto cameraUpdate = onMovementFrameCore(*movementEntity.moveParams, movementEntity.movementState, movementEntity.playerId, movementEntity.managedCamera, isGunZoomed(id), player.activeId == movementEntity.playerId);  
      
       if (!movementEntity.movementState.alive){  // hackey, this needs to be after core so the animations trigger still
         continue;
@@ -459,7 +459,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   // that being said, this kind of just bypasses it an sets to the rotation directly
   // that's ... ok, but can run into bypassing constraints later on, hence it's really forcing it
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if (id == activeId && !movement.controlParams.observeMode){
+    if (id == player.activeId && !movement.controlParams.observeMode){
       continue;
     }
     if (movementEntity.targetRotation.has_value()){
@@ -489,11 +489,11 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   }
 
   for (auto &[id, movementEntity] : movementEntityData.movementEntities){
-    if ((movementEntity.managedCamera.thirdPersonMode || activeId != id) && movement.disabledMeshes.count(id) > 0){
+    if ((movementEntity.managedCamera.thirdPersonMode || player.activeId != id) && movement.disabledMeshes.count(id) > 0){
        movement.disabledMeshes.erase(id);
        setEntityThirdPerson(id);
     }
-    if ((id == activeId) && (!movementEntity.managedCamera.thirdPersonMode || disableThirdPersonMesh)){
+    if ((id == player.activeId) && (!movementEntity.managedCamera.thirdPersonMode || disableThirdPersonMesh)){
       if (movement.disabledMeshes.count(id) == 0){
         movement.disabledMeshes.insert(id);
         setEntityFirstPerson(id);       
