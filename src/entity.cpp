@@ -370,6 +370,7 @@ std::optional<int> getPlayerIndex(objid id){
 }
 
 std::vector<ControlledPlayer>& getPlayers(){
+	modassert(players.size() > 0, "invalid player size");
 	return players;
 }
 

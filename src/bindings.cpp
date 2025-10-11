@@ -1463,10 +1463,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
-        MovementActivePlayer activePlayer {
-          .activeId = controlledPlayer.playerId.value(),
-        };
-        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, isGunZoomed, disableTpsMesh, entityUpdates, activePlayer);
+        std::vector<MovementActivePlayer> activePlayers;
+
+        for (auto& player : getPlayers()){
+          activePlayers.push_back(MovementActivePlayer {
+            .activeId = player.playerId.value(),
+          });
+        }
+
+        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, isGunZoomed, disableTpsMesh, entityUpdates, activePlayers);
         setUiSpeed(uiUpdate.velocity, false ? uiUpdate.lookVelocity : std::nullopt);
       }
 
