@@ -383,8 +383,25 @@ void handleHotkey(int key, int action){
 ///////////////////////
 
 RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods){
+	bool forceSecondPlayer = false;
+	if (key == 265){  // up arrow
+		forceSecondPlayer = true;
+		key = 'W';
+	}
+	if (key == 264){ 
+		forceSecondPlayer = true;
+		key = 'S';
+	}
+	if (key == 263){  
+		forceSecondPlayer = true;
+		key = 'A';
+	}
+	if (key == 262){ 
+		forceSecondPlayer = true;
+		key = 'D';
+	}
   return RemappedKey {
-    .playerPort = getDefaultPlayerIndex(),
+    .playerPort = forceSecondPlayer ? 1 : getDefaultPlayerIndex(),
     .key = key,
     .scancode = scancode,
     .action = action,
