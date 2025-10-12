@@ -28,4 +28,37 @@ bool isReloadKey(int button);
 
 void handleHotkey(int key, int action);
 
+//////////////////////
+struct RemappedKey {
+  int playerPort;
+  int key;
+  int scancode;
+  int action;
+  int mods;
+};
+RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods);
+struct RemappedMouseMovement {
+  int playerPort;
+  double xPos; 
+  double yPos;
+  float xNdc;
+  float yNdc;
+};
+RemappedMouseMovement remapMouseMovement(double xPos, double yPos, float xNdc, float yNdc);
+
+struct RemappedMouseCallback {
+  int playerPort;
+  int button;
+  int action;
+  int mods;
+};
+RemappedMouseCallback remapMouseCallback(int button, int action, int mods);
+
+struct RemappedScrollCallback {
+  int playerPort;
+  double amount;
+};
+RemappedScrollCallback remapScrollCallback(double amount);
+
+
 #endif

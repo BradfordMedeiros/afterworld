@@ -378,3 +378,42 @@ void handleHotkey(int key, int action){
 		}
 	}
 }
+
+
+///////////////////////
+
+RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods){
+  return RemappedKey {
+    .playerPort = getDefaultPlayerIndex(),
+    .key = key,
+    .scancode = scancode,
+    .action = action,
+    .mods = mods,
+  };
+}
+
+RemappedMouseMovement remapMouseMovement(double xPos, double yPos, float xNdc, float yNdc){
+  return RemappedMouseMovement {
+    .playerPort = getDefaultPlayerIndex(),
+    .xPos = xPos,
+    .yPos = yPos,
+    .xNdc = xNdc,
+    .yNdc = yNdc,
+  };
+}
+
+RemappedMouseCallback remapMouseCallback(int button, int action, int mods){
+  return RemappedMouseCallback {
+    .playerPort = getDefaultPlayerIndex(),
+    .button = button,
+    .action = action,
+    .mods = mods,
+  };
+}
+
+RemappedScrollCallback remapScrollCallback(double amount){
+  return RemappedScrollCallback {
+    .playerPort = getDefaultPlayerIndex(),
+    .amount = amount,
+  };
+}
