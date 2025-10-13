@@ -1281,7 +1281,6 @@ void objectRemoved(objid idRemoved){
   onObjRemoved(aiData, idRemoved);
 }
 
-
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1834,6 +1833,18 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
    
   };
+
+  binding.onController = [](int32_t id, void* data, int joystick, bool connected){
+    modlog("controller connection event", std::to_string(joystick) + " - " + (connected ? "connected" : "disconnected"));
+  };
+  binding.onControllerKey = [](int32_t id, void* data, int joystick, BUTTON_TYPE button, bool keyDown){
+    modlog("controller key", std::to_string(joystick) + ", key = " + print(button) + ", keydown = " + (keyDown ? "true" : "false"));
+
+    if (button == BUTTON_A){
+      gameapi -> click(0, 1);
+    }
+  };
+
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
 
@@ -2009,6 +2020,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onMouseCallback = [](objid id, void* data, int rawButton, int rawAction, int rawMods) -> void {
     GameState* gameState = static_cast<GameState*>(data);
+
+    std::cout << "controller mouse rawButton: " << rawButton << ", action = " << rawAction << std::endl;
 
     auto mouseCallback = remapMouseCallback(rawButton, rawAction, rawMods);
 
