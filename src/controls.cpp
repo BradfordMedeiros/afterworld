@@ -409,6 +409,75 @@ RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods){
   };
 }
 
+std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE button, bool keyDown){
+	if (button == BUTTON_A && keyDown){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = jumpKey,
+			.scancode = jumpKey,
+			.action = 1,
+			.mods = 0,
+		};
+	}
+	if (button == BUTTON_B && keyDown){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = toggleThirdPersonButton,
+			.scancode = toggleThirdPersonButton,
+			.action = 1,
+			.mods = 0,
+		};
+	}
+	if (button == BUTTON_X && keyDown){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = interactKey,
+			.scancode = interactKey,
+			.action = 1,
+			.mods = 0,
+		};		
+	}
+	if (button == BUTTON_UP){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = moveFowardKey,
+			.scancode = moveFowardKey,
+			.action = (keyDown ? 1 :  0),
+			.mods = 0,
+		};
+	}
+	if (button == BUTTON_DOWN){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = moveBackwardKey,
+			.scancode = moveBackwardKey,
+			.action = (keyDown ? 1 :  0),
+			.mods = 0,
+		};
+	}
+	if (button == BUTTON_LEFT){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = moveLeftKey,
+			.scancode = moveLeftKey,
+			.action = (keyDown ? 1 :  0),
+			.mods = 0,
+		};
+	}
+	if (button == BUTTON_RIGHT){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = moveRightKey,
+			.scancode = moveRightKey,
+			.action = (keyDown ? 1 :  0),
+			.mods = 0,
+		};
+	}
+
+
+	return std::nullopt;
+}
+
 RemappedMouseMovement remapMouseMovement(double xPos, double yPos, float xNdc, float yNdc){
   return RemappedMouseMovement {
     .playerPort = getDefaultPlayerIndex(),

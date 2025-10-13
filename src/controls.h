@@ -44,6 +44,9 @@ struct RemappedMouseMovement {
   float xNdc;
   float yNdc;
 };
+std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE button, bool keyDown);
+
+
 RemappedMouseMovement remapMouseMovement(double xPos, double yPos, float xNdc, float yNdc);
 
 struct RemappedMouseCallback {

@@ -604,7 +604,71 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   }
 }
 
+/*
 
+struct AxisInfo {
+  float leftTrigger;
+  float rightTrigger;
+  float leftStickX;
+  float leftStickY;
+  float rightStickX;
+  float rightStickY;
+};
+
+enum BUTTON_TYPE { BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y, BUTTON_LEFT_STICK, BUTTON_RIGHT_STICK, BUTTON_START, BUTTON_LB, BUTTON_RB, BUTTON_HOME, BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT };
+std::string print(BUTTON_TYPE button);
+
+struct ButtonInfo {
+  bool a = false;
+  bool b = false;
+  bool x = false;
+  bool y = false;
+  bool leftStick = false;
+  bool rightStick = false;
+  bool start = false;
+  bool leftBumper = false;
+  bool rightBumper = false;
+  bool home = false;
+  bool up = false;
+  bool down = false;
+  bool left = false;
+  bool right = false;
+};
+struct ControlInfo {
+  AxisInfo axisInfo;
+  ButtonInfo buttonInfo;
+};*/
+std::string print(ControlInfo& controlInfo){
+  std::string content;
+  content += std::string("controller| a: ") + (controlInfo.buttonInfo.a ? "true" : "false") + "\n";
+  content += std::string("controller| b: ") + (controlInfo.buttonInfo.b ? "true" : "false") + "\n";
+  content += std::string("controller| x: ") + (controlInfo.buttonInfo.x ? "true" : "false") + "\n";
+  content += std::string("controller| y: ") + (controlInfo.buttonInfo.y ? "true" : "false") + "\n";
+
+  content += std::string("controller| leftStick: ") + (controlInfo.buttonInfo.leftStick ? "true" : "false") + "\n";
+  content += std::string("controller| rightStick: ") + (controlInfo.buttonInfo.rightStick ? "true" : "false") + "\n";
+
+  content += std::string("controller| start: ") + (controlInfo.buttonInfo.start ? "true" : "false") + "\n";
+
+  content += std::string("controller| leftBumper: ") + (controlInfo.buttonInfo.leftBumper ? "true" : "false") + "\n";
+  content += std::string("controller| rightBumper: ") + (controlInfo.buttonInfo.rightBumper ? "true" : "false") + "\n";
+
+  content += std::string("controller| home: ") + (controlInfo.buttonInfo.home ? "true" : "false") + "\n";
+
+  content += std::string("controller| up: ") + (controlInfo.buttonInfo.up ? "true" : "false") + "\n";
+  content += std::string("controller| down: ") + (controlInfo.buttonInfo.down ? "true" : "false") + "\n";
+  content += std::string("controller| left: ") + (controlInfo.buttonInfo.left ? "true" : "false") + "\n";
+  content += std::string("controller| right: ") + (controlInfo.buttonInfo.right ? "true" : "false") + "\n";
+
+  content += std::string("controller| leftTrigger: ") + std::to_string(controlInfo.axisInfo.leftTrigger) + "\n";
+  content += std::string("controller| rightTrigger: ") + std::to_string(controlInfo.axisInfo.rightTrigger) + "\n";
+  content += std::string("controller| leftStickX: ") + std::to_string(controlInfo.axisInfo.leftStickX) + "\n";
+  content += std::string("controller| leftStickY: ") + std::to_string(controlInfo.axisInfo.leftStickY) + "\n";
+  content += std::string("controller| rightStickX: ") + std::to_string(controlInfo.axisInfo.rightStickX) + "\n";
+  content += std::string("controller| rightStickY: ") + std::to_string(controlInfo.axisInfo.rightStickY) + "\n";
+
+  return content;
+}
 
 
 glm::vec2 smoothVelocity(glm::vec2 lookVelocity);
@@ -1281,6 +1345,87 @@ void objectRemoved(objid idRemoved){
   onObjRemoved(aiData, idRemoved);
 }
 
+void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
+  GameState* gameState = static_cast<GameState*>(data);
+
+  ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
+  if (action == 1){
+    auto playerId = controlledPlayer.playerId;
+    if (isPauseKey(key)){
+      togglePauseIfInGame();
+    }
+    if (isTeleportButton(key) && !isPaused()){
+      // this probably should be aware of the bounds, an not allow to clip into wall for example
+      // maybe raycast down, and then set the position so it fits 
+      auto teleportPosition = getTeleportPosition(tags);
+      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex) && teleportPosition.has_value()){
+        playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+        gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true, Hint { .hint = "teleport" });
+        gameapi -> removeByGroupId(teleportPosition.value().id);
+      }
+    }
+    if (isExitTerminalKey(key)){
+      showTerminal(std::nullopt);
+    }
+
+    if (!getGlobalState().disableUiInput){
+      onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
+    }
+    onInGameUiKeyCallback(key, scancode, action, mods);
+  }
+  handleHotkey(key, action);
+
+
+  if (key == '-' && action == 0){
+    setActivePlayerNext(movement, weapons, aiData, 0);
+  }
+  if (key == '=' && action == 0){
+    observePlayerNext(movement, weapons, aiData, 0);
+  }
+
+  onVehicleKey(vehicles, key, action);
+
+  if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
+    if (!(isPaused() || getGlobalState().disableGameInput)){
+      onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), key, action, controlledPlayer.playerId.value());
+    }
+  }
+  if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
+    onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action, controlledPlayer.viewport);
+  }
+
+  if (key == 'Q' && action == 0) { 
+    printWorldInfo(aiData.worldInfo);
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
+      setInShootingMode(controlledPlayer.playerId.value(), !isInShootingMode(controlledPlayer.playerId.value()).value());
+    }
+  }
+
+  debugOnKey(key, scancode, action, mods);
+
+  if (isInteractKey(key) && (action == 1) && getGlobalState().zoomIntoArcade){
+    zoomIntoArcade(std::nullopt, playerIndex);
+  }
+  onKeyArcade(key, scancode, action, mods);
+
+  if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
+    if (getActiveControllable(playerIndex).value() -> vehicle.has_value()){
+      exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.playerId.value());
+      getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
+    }else if (getActiveControllable(playerIndex).value() -> lookingAtVehicle.has_value()){
+      enterVehicle(vehicles, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
+      getActiveControllable(playerIndex).value() -> vehicle = getActiveControllable(playerIndex).value() -> lookingAtVehicle.value();
+    }
+  }
+
+  if (key == 'I' && action == 0){
+    for (auto &[id, autodoor] : tags.autodoors){
+      toggleAutodoor(id, autodoor);
+    }
+  }
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1746,104 +1891,33 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int rawKey, int rawScancode, int rawAction, int rawMods) -> void {
-    GameState* gameState = static_cast<GameState*>(data);
-
     auto keycallback = remapDeviceKeys(rawKey, rawScancode, rawAction, rawMods);
-    auto key = keycallback.key;
-    auto scancode = keycallback.scancode;
-    auto action = keycallback.action;
-    auto mods = keycallback.mods;
-
-    auto playerIndex = keycallback.playerPort;
-    ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-
-    if (action == 1){
-      auto playerId = controlledPlayer.playerId;
-      if (isPauseKey(key)){
-        togglePauseIfInGame();
-      }
-      if (isTeleportButton(key) && !isPaused()){
-        // this probably should be aware of the bounds, an not allow to clip into wall for example
-        // maybe raycast down, and then set the position so it fits 
-        auto teleportPosition = getTeleportPosition(tags);
-        if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex) && teleportPosition.has_value()){
-          playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
-          gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true, Hint { .hint = "teleport" });
-          gameapi -> removeByGroupId(teleportPosition.value().id);
-        }
-      }
-      if (isExitTerminalKey(key)){
-        showTerminal(std::nullopt);
-      }
-
-      if (!getGlobalState().disableUiInput){
-        onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
-      }
-      onInGameUiKeyCallback(key, scancode, action, mods);
-    }
-    handleHotkey(key, action);
-
-
-    if (key == '-' && action == 0){
-      setActivePlayerNext(movement, weapons, aiData, 0);
-    }
-    if (key == '=' && action == 0){
-      observePlayerNext(movement, weapons, aiData, 0);
-    }
-
-    onVehicleKey(vehicles, key, action);
-
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
-      if (!(isPaused() || getGlobalState().disableGameInput)){
-        onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), key, action, controlledPlayer.playerId.value());
-      }
-    }
-    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
-      onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action, controlledPlayer.viewport);
-    }
-
-    if (key == 'Q' && action == 0) { 
-      printWorldInfo(aiData.worldInfo);
-      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
-        setInShootingMode(controlledPlayer.playerId.value(), !isInShootingMode(controlledPlayer.playerId.value()).value());
-      }
-    }
-
-    debugOnKey(key, scancode, action, mods);
-
-    if (isInteractKey(key) && (action == 1) && getGlobalState().zoomIntoArcade){
-      zoomIntoArcade(std::nullopt, playerIndex);
-    }
-    onKeyArcade(key, scancode, action, mods);
-
-    if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
-      if (getActiveControllable(playerIndex).value() -> vehicle.has_value()){
-        exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.playerId.value());
-        getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
-      }else if (getActiveControllable(playerIndex).value() -> lookingAtVehicle.has_value()){
-        enterVehicle(vehicles, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
-        getActiveControllable(playerIndex).value() -> vehicle = getActiveControllable(playerIndex).value() -> lookingAtVehicle.value();
-      }
-    }
-
-    if (key == 'I' && action == 0){
-      for (auto &[id, autodoor] : tags.autodoors){
-        toggleAutodoor(id, autodoor);
-      }
-    }
-   
+    onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
   };
 
   binding.onController = [](int32_t id, void* data, int joystick, bool connected){
     modlog("controller connection event", std::to_string(joystick) + " - " + (connected ? "connected" : "disconnected"));
+    std::cout << "controller onController debug" << std::endl;
+    if (connected){
+      auto info = gameapi -> getControlInfo(joystick);     
+      std::cout << print(info.value()) << std::endl;
+    }
+
   };
   binding.onControllerKey = [](int32_t id, void* data, int joystick, BUTTON_TYPE button, bool keyDown){
     modlog("controller key", std::to_string(joystick) + ", key = " + print(button) + ", keydown = " + (keyDown ? "true" : "false"));
 
-    if (button == BUTTON_A){
-      gameapi -> click(0, 1);
+    auto keycallbackOpt = remapControllerToKeys(joystick, button, keyDown);
+    if (keycallbackOpt.has_value()){
+      auto keycallback = keycallbackOpt.value();
+      onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
     }
+
+    //auto values = gameapi -> controllerInput(joystick);
+    //values.axis.leftTrigger > 
   };
+
+  std::cout << "controller: created onControllerKey" << std::endl;
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
