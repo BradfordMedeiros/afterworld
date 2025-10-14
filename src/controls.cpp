@@ -19,6 +19,7 @@ int moveLeftKey = 'A';
 int moveRightKey = 'D';
 int crouchKey = 341;
 int interactKey = 'E';
+int pausekey = 256;   // escape 
 
 int fireButton = 0;
 int aimButton = 1;
@@ -115,7 +116,7 @@ bool isInteractKey(int key){
 	return key == interactKey;
 }
 bool isPauseKey(int key){
-	return key == 256; // escape 
+	return key == pausekey;
 }
 
 bool isFireButton(int button){
@@ -409,6 +410,77 @@ RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods){
   };
 }
 
+
+std::vector<RemappedKey> remapFrameToKeys(int joystick, ControlInfo2& controls){
+	std::vector<RemappedKey> keys;
+
+	// This is kind of lame since not actual analog but dpad like, but it's OK until further down the line
+  if (controls.thisFrame.axisInfo.leftStickY >= 0.6f && controls.lastFrame.axisInfo.leftStickY < 0.6f){
+		keys.push_back(RemappedKey {
+			.playerPort = joystick,
+			.key = moveBackwardKey,
+			.scancode = moveBackwardKey,
+			.action = 1,
+			.mods = 0,
+		});
+  }
+  if (controls.thisFrame.axisInfo.leftStickY < 0.6f && controls.lastFrame.axisInfo.leftStickY >= 0.6f){
+		keys.push_back(RemappedKey {
+			.playerPort = joystick,
+			.key = moveBackwardKey,
+			.scancode = moveBackwardKey,
+			.action = 0,
+			.mods = 0,
+		});
+  }
+
+  /*if (controls.thisFrame.axisInfo.leftStickY <= -0.6f && controls.lastFrame.axisInfo.leftStickY > -0.6f){
+		keys.push_back(RemappedKey {
+			.playerPort = joystick,
+			.key = moveBackwardKey,
+			.scancode = moveBackwardKey,
+			.action = 1,
+			.mods = 0,
+		});
+  }
+  if (controls.thisFrame.axisInfo.leftStickX >= 0.6f && controls.lastFrame.axisInfo.leftStickX < 0.6f){
+		keys.push_back(RemappedKey {
+			.playerPort = joystick,
+			.key = moveRightKey,
+			.scancode = moveRightKey,
+			.action = 1,
+			.mods = 0,
+		});
+  }
+  if (controls.thisFrame.axisInfo.leftStickX <= -0.6f && controls.lastFrame.axisInfo.leftStickX > -0.6f){
+		keys.push_back(RemappedKey {
+			.playerPort = joystick,
+			.key = moveLeftKey,
+			.scancode = moveLeftKey,
+			.action = 1,
+			.mods = 0,
+		});
+  }*/
+
+	return keys;
+}
+
+std::vector<RemappedMouseCallback> remapFrameToMouse(int joystick, ControlInfo2& controls){
+  if (controls.thisFrame.axisInfo.rightTrigger >= 0.6f && controls.lastFrame.axisInfo.rightTrigger < 0.6f){
+  	std::cout << "controller trigger: " << controls.thisFrame.axisInfo.rightTrigger << ", " << controls.lastFrame.axisInfo.rightTrigger  << std::endl;
+    std::cout << "controller: right trigger pressed" << std::endl;
+		return { 
+			RemappedMouseCallback {
+    		.playerPort = joystick,
+    		.button = fireButton,
+    		.action = 1,
+    		.mods = 0,
+    	}
+		};
+  }
+	return {};
+}
+
 std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE button, bool keyDown){
 	if (button == BUTTON_A && keyDown){
 		return RemappedKey {
@@ -433,6 +505,15 @@ std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE butto
 			.playerPort = joystick,
 			.key = interactKey,
 			.scancode = interactKey,
+			.action = 1,
+			.mods = 0,
+		};		
+	}
+	if (button == BUTTON_START && keyDown){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = pausekey,
+			.scancode = pausekey,
 			.action = 1,
 			.mods = 0,
 		};		

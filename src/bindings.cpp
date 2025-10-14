@@ -1426,6 +1426,59 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   }
 }
 
+
+void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
+  GameState* gameState = static_cast<GameState*>(data);
+
+  if (!getGlobalState().disableUiInput){
+    onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+  }
+  onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
+  onMouseClickArcade(button, action, mods);
+
+  modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
+
+  if (button == 1){
+    if (action == 0){
+      gameState -> selecting = std::nullopt;
+      getGlobalState().rightMouseDown = false;
+    }else if (action == 1){
+      gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+      getGlobalState().rightMouseDown = true;
+      if (false){
+        ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+        raycastFromCameraAndMoveTo(gameState -> movementEntities, controlledPlayer.playerId.value(), 0);
+      }
+      nextTerminalPage();
+    }
+  }else if (button == 0){
+    if (action == 0){
+      getGlobalState().leftMouseDown = false;
+    }else if (action == 1){
+      getGlobalState().leftMouseDown = true;
+      prevTerminalPage();
+    }
+  }else if (button == 2){
+    if (action == 0){
+      getGlobalState().middleMouseDown = false;
+    }else if (action == 1){
+      getGlobalState().middleMouseDown = true;
+    }
+  }
+
+  ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+  if (controlledPlayer.playerId.has_value()){
+    static float selectDistance = querySelectDistance();
+    if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled(playerIndex)){
+      auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
+      if (uiUpdate.zoomAmount.has_value()){
+        setTotalZoom(uiUpdate.zoomAmount.value(), controlledPlayer.playerId.value());
+      }
+    }
+  }
+}
+
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   
@@ -1589,6 +1642,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
     if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
+    }
+
+    auto info = gameapi -> getControlInfo(0);     
+    ControlInfo2& controls = info.value();
+    auto keycallbacks = remapFrameToKeys(0, controls);
+    for (auto& keycallback : keycallbacks){
+      onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
+    }
+    auto mouseCallbacks = remapFrameToMouse(0, controls);
+    for (auto& mouseCallback : mouseCallbacks){
+      onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
@@ -1899,8 +1963,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modlog("controller connection event", std::to_string(joystick) + " - " + (connected ? "connected" : "disconnected"));
     std::cout << "controller onController debug" << std::endl;
     if (connected){
-      auto info = gameapi -> getControlInfo(joystick);     
-      std::cout << print(info.value()) << std::endl;
+
     }
 
   };
@@ -2093,59 +2156,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMouseCallback = [](objid id, void* data, int rawButton, int rawAction, int rawMods) -> void {
-    GameState* gameState = static_cast<GameState*>(data);
 
     std::cout << "controller mouse rawButton: " << rawButton << ", action = " << rawAction << std::endl;
 
     auto mouseCallback = remapMouseCallback(rawButton, rawAction, rawMods);
+    onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
 
-    if (!getGlobalState().disableUiInput){
-      onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, mouseCallback.button, mouseCallback.action, getGlobalState().selectedId);
-    }
-    onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, mouseCallback.button, mouseCallback.action, getGlobalState().lookAtId /* this needs to come from the texture */);
-    onMouseClickArcade(mouseCallback.button, mouseCallback.action, mouseCallback.mods);
-
-    modlog("input", std::string("on mouse down: button = ") + std::to_string(mouseCallback.button) + std::string(", action = ") + std::to_string(mouseCallback.action));
-
-    int playerIndex = mouseCallback.playerPort;
-    if (mouseCallback.button == 1){
-      if (mouseCallback.action == 0){
-        gameState -> selecting = std::nullopt;
-        getGlobalState().rightMouseDown = false;
-      }else if (mouseCallback.action == 1){
-        gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
-        getGlobalState().rightMouseDown = true;
-        if (false){
-          ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-          raycastFromCameraAndMoveTo(gameState -> movementEntities, controlledPlayer.playerId.value(), 0);
-        }
-        nextTerminalPage();
-      }
-    }else if (mouseCallback.button == 0){
-      if (mouseCallback.action == 0){
-        getGlobalState().leftMouseDown = false;
-      }else if (mouseCallback.action == 1){
-        getGlobalState().leftMouseDown = true;
-        prevTerminalPage();
-      }
-    }else if (mouseCallback.button == 2){
-      if (mouseCallback.action == 0){
-        getGlobalState().middleMouseDown = false;
-      }else if (mouseCallback.action == 1){
-        getGlobalState().middleMouseDown = true;
-      }
-    }
-
-    ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-    if (controlledPlayer.playerId.has_value()){
-      static float selectDistance = querySelectDistance();
-      if (!isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled(playerIndex)){
-        auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), mouseCallback.button, mouseCallback.action, controlledPlayer.playerId.value(), selectDistance);
-        if (uiUpdate.zoomAmount.has_value()){
-          setTotalZoom(uiUpdate.zoomAmount.value(), controlledPlayer.playerId.value());
-        }
-      }
-    }
   };
 
   binding.onScrollCallback = [](objid id, void* data, double rawAmount) -> void {

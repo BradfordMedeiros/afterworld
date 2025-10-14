@@ -37,6 +37,8 @@ struct RemappedKey {
   int mods;
 };
 RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods);
+std::vector<RemappedKey> remapFrameToKeys(int joystick, ControlInfo2& controls);
+
 struct RemappedMouseMovement {
   int playerPort;
   double xPos; 
@@ -47,6 +49,7 @@ struct RemappedMouseMovement {
 std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE button, bool keyDown);
 
 
+
 RemappedMouseMovement remapMouseMovement(double xPos, double yPos, float xNdc, float yNdc);
 
 struct RemappedMouseCallback {
@@ -55,7 +58,9 @@ struct RemappedMouseCallback {
   int action;
   int mods;
 };
+
 RemappedMouseCallback remapMouseCallback(int button, int action, int mods);
+std::vector<RemappedMouseCallback> remapFrameToMouse(int joystick, ControlInfo2& controls);
 
 struct RemappedScrollCallback {
   int playerPort;
