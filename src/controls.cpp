@@ -23,7 +23,7 @@ int pausekey = 256;   // escape
 
 int fireButton = 0;
 int aimButton = 1;
-int modifierButton = 'I';  // shift
+int modifierButton = 340;  // shift
 int teleportButton = 'T';
 int exitTerminalButton = 'R';
 int toggleThirdPersonButton = 'O';
@@ -474,6 +474,7 @@ std::vector<RemappedKey> remapFrameToKeys(int joystick, ControlInfo2& controls){
 	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftStickX, controls.thisFrame.axisInfo.leftStickX, -0.6, joystick, moveLeftKey);
 	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftStickX, controls.thisFrame.axisInfo.leftStickX, 0.6, joystick, moveRightKey);
 
+
 	return keys;
 }
 
@@ -531,6 +532,8 @@ void maybeAddThreshold(std::vector<RemappedMouseCallback>& _keys, float lastFram
 std::vector<RemappedMouseCallback> remapFrameToMouse(int joystick, ControlInfo2& controls){
 	std::vector<RemappedMouseCallback> keys;
 	maybeAddThreshold(keys, controls.lastFrame.axisInfo.rightTrigger, controls.thisFrame.axisInfo.rightTrigger, 0.6f, joystick, fireButton);
+	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftTrigger, controls.thisFrame.axisInfo.leftTrigger, 0.6, joystick, aimButton);
+
 	return keys;
 }
 
@@ -553,6 +556,26 @@ std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE butto
 			.mods = 0,
 		};
 	}
+	if (button == BUTTON_Y && keyDown){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = modifierButton,
+			.scancode = modifierButton,
+			.action = 1,
+			.mods = 0,
+		};
+	}
+
+	if (button == BUTTON_LB && keyDown){
+		return RemappedKey {
+			.playerPort = joystick,
+			.key = 'Q',
+			.scancode = 'Q',
+			.action = 0,
+			.mods = 0,
+		};		
+	}	
+
 	if (button == BUTTON_X && keyDown){
 		return RemappedKey {
 			.playerPort = joystick,
