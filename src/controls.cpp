@@ -411,74 +411,127 @@ RemappedKey remapDeviceKeys(int key, int scancode, int action, int mods){
 }
 
 
+void maybeAddThreshold(std::vector<RemappedKey>& _keys, float lastFrameValue, float thisFrameValue, float threshold, int joystick, int key){
+	if (threshold < 0.f){
+		if (lastFrameValue > threshold && thisFrameValue <= threshold){
+			_keys.push_back(
+				RemappedKey {
+					.playerPort = joystick,
+					.key = key,
+					.scancode = key,
+					.action = 1,
+					.mods = 0,
+				}
+  	  );
+  	  return;
+		}
+		if (lastFrameValue <= threshold && thisFrameValue > threshold){
+			_keys.push_back(
+				RemappedKey {
+					.playerPort = joystick,
+					.key = key,
+					.scancode = key,
+					.action = 0,
+					.mods = 0,
+				}
+  	  );
+  	  return;
+		}
+	}
+
+
+	if (lastFrameValue < threshold && thisFrameValue >= threshold){
+		_keys.push_back(
+			RemappedKey {
+				.playerPort = joystick,
+				.key = key,
+				.scancode = key,
+				.action = 1,
+				.mods = 0,
+			}
+    );
+    return;
+	}
+	if (lastFrameValue >= threshold && thisFrameValue < threshold){
+		_keys.push_back(
+				RemappedKey {
+					.playerPort = joystick,
+					.key = key,
+					.scancode = key,
+					.action = 0,
+					.mods = 0,
+				}
+    );
+    return;
+	}
+}
 std::vector<RemappedKey> remapFrameToKeys(int joystick, ControlInfo2& controls){
 	std::vector<RemappedKey> keys;
 
 	// This is kind of lame since not actual analog but dpad like, but it's OK until further down the line
-  if (controls.thisFrame.axisInfo.leftStickY >= 0.6f && controls.lastFrame.axisInfo.leftStickY < 0.6f){
-		keys.push_back(RemappedKey {
-			.playerPort = joystick,
-			.key = moveBackwardKey,
-			.scancode = moveBackwardKey,
-			.action = 1,
-			.mods = 0,
-		});
-  }
-  if (controls.thisFrame.axisInfo.leftStickY < 0.6f && controls.lastFrame.axisInfo.leftStickY >= 0.6f){
-		keys.push_back(RemappedKey {
-			.playerPort = joystick,
-			.key = moveBackwardKey,
-			.scancode = moveBackwardKey,
-			.action = 0,
-			.mods = 0,
-		});
-  }
-
-  /*if (controls.thisFrame.axisInfo.leftStickY <= -0.6f && controls.lastFrame.axisInfo.leftStickY > -0.6f){
-		keys.push_back(RemappedKey {
-			.playerPort = joystick,
-			.key = moveBackwardKey,
-			.scancode = moveBackwardKey,
-			.action = 1,
-			.mods = 0,
-		});
-  }
-  if (controls.thisFrame.axisInfo.leftStickX >= 0.6f && controls.lastFrame.axisInfo.leftStickX < 0.6f){
-		keys.push_back(RemappedKey {
-			.playerPort = joystick,
-			.key = moveRightKey,
-			.scancode = moveRightKey,
-			.action = 1,
-			.mods = 0,
-		});
-  }
-  if (controls.thisFrame.axisInfo.leftStickX <= -0.6f && controls.lastFrame.axisInfo.leftStickX > -0.6f){
-		keys.push_back(RemappedKey {
-			.playerPort = joystick,
-			.key = moveLeftKey,
-			.scancode = moveLeftKey,
-			.action = 1,
-			.mods = 0,
-		});
-  }*/
+	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftStickY, controls.thisFrame.axisInfo.leftStickY, -0.6, joystick, moveFowardKey);
+	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftStickY, controls.thisFrame.axisInfo.leftStickY, 0.6, joystick, moveBackwardKey);
+	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftStickX, controls.thisFrame.axisInfo.leftStickX, -0.6, joystick, moveLeftKey);
+	maybeAddThreshold(keys, controls.lastFrame.axisInfo.leftStickX, controls.thisFrame.axisInfo.leftStickX, 0.6, joystick, moveRightKey);
 
 	return keys;
 }
 
-std::vector<RemappedMouseCallback> remapFrameToMouse(int joystick, ControlInfo2& controls){
-  if (controls.thisFrame.axisInfo.rightTrigger >= 0.6f && controls.lastFrame.axisInfo.rightTrigger < 0.6f){
-  	std::cout << "controller trigger: " << controls.thisFrame.axisInfo.rightTrigger << ", " << controls.lastFrame.axisInfo.rightTrigger  << std::endl;
-    std::cout << "controller: right trigger pressed" << std::endl;
-		return { 
+void maybeAddThreshold(std::vector<RemappedMouseCallback>& _keys, float lastFrameValue, float thisFrameValue, float threshold, int joystick, int button){
+	if (threshold < 0.f){
+		if (lastFrameValue > threshold && thisFrameValue <= threshold){
+			_keys.push_back(
+				RemappedMouseCallback {
+  	  		.playerPort = joystick,
+  	  		.button = button,
+  	  		.action = 1,
+  	  		.mods = 0,
+  	  	}
+  	  );
+  	  return;
+		}
+		if (lastFrameValue <= threshold && thisFrameValue > threshold){
+			_keys.push_back(
+				RemappedMouseCallback {
+  	  		.playerPort = joystick,
+  	  		.button = button,
+  	  		.action = 0,
+  	  		.mods = 0,
+  	  	}
+  	  );
+  	  return;
+		}
+	}
+
+
+	if (lastFrameValue < threshold && thisFrameValue >= threshold){
+		_keys.push_back(
 			RemappedMouseCallback {
     		.playerPort = joystick,
-    		.button = fireButton,
+    		.button = button,
     		.action = 1,
     		.mods = 0,
     	}
-		};
-  }
-	return {};
+    );
+    return;
+	}
+	if (lastFrameValue >= threshold && thisFrameValue < threshold){
+		_keys.push_back(
+			RemappedMouseCallback {
+    		.playerPort = joystick,
+    		.button = button,
+    		.action = 0,
+    		.mods = 0,
+    	}
+    );
+    return;
+	}
+}
+
+std::vector<RemappedMouseCallback> remapFrameToMouse(int joystick, ControlInfo2& controls){
+	std::vector<RemappedMouseCallback> keys;
+	maybeAddThreshold(keys, controls.lastFrame.axisInfo.rightTrigger, controls.thisFrame.axisInfo.rightTrigger, 0.6f, joystick, fireButton);
+	return keys;
 }
 
 std::optional<RemappedKey> remapControllerToKeys(int joystick, BUTTON_TYPE button, bool keyDown){

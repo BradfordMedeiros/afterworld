@@ -1645,14 +1645,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     auto info = gameapi -> getControlInfo(0);     
-    ControlInfo2& controls = info.value();
-    auto keycallbacks = remapFrameToKeys(0, controls);
-    for (auto& keycallback : keycallbacks){
-      onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
-    }
-    auto mouseCallbacks = remapFrameToMouse(0, controls);
-    for (auto& mouseCallback : mouseCallbacks){
-      onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
+    if (info.has_value()){
+      ControlInfo2& controls = info.value();
+      auto keycallbacks = remapFrameToKeys(0, controls);
+      for (auto& keycallback : keycallbacks){
+        onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
+      }
+      auto mouseCallbacks = remapFrameToMouse(0, controls);
+      for (auto& mouseCallback : mouseCallbacks){
+        onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
+      }
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
