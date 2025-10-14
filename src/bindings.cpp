@@ -1478,6 +1478,38 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
   }
 }
 
+void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float xNdc, float yNdc, int playerPort){ 
+  GameState* gameState = static_cast<GameState*>(data);
+
+  if (!getGlobalState().disableUiInput){
+    onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
+  }
+  onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
+  onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
+
+  float movementX = xNdc - getGlobalState().xNdc;
+  float movementY = yNdc - getGlobalState().yNdc;
+  getGlobalState().xNdc = xNdc;
+  getGlobalState().yNdc = yNdc;
+  getGlobalState().mouseVelocity = glm::vec2(xPos, yPos);
+
+  { // per player code
+    auto playerIndex = playerPort;
+    ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+    if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled(playerIndex)){
+      controlledPlayer.lookVelocity = glm::vec2(movementX, movementY);
+    }
+    if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
+      //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
+      glm::vec2 smoothedMovement = glm::vec2(xPos, yPos);
+      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y, playerIndex);
+    }
+  }
+}
+
+
+
+
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -1655,6 +1687,24 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       for (auto& mouseCallback : mouseCallbacks){
         onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
       }
+
+      float deadzone = 0.15f;
+
+      float rightStickX = controls.thisFrame.axisInfo.rightStickX;
+      float rightStickY = controls.thisFrame.axisInfo.rightStickY;
+      if (rightStickX < deadzone && rightStickX > (-1 * deadzone)){
+        rightStickX = 0.f;
+      }
+      if (rightStickY < deadzone && rightStickY > (-1 * deadzone)){
+        rightStickY = 0.f;
+      }
+
+      float sensitivity = 10.f;
+      if (controls.thisFrame.buttonInfo.rightStick){
+        sensitivity = 2.f;
+      }
+      onMouseMoveCallback(id, data, sensitivity * rightStickX, sensitivity * -1 * rightStickY, 0.f, 0.f, 0.f);
+
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
@@ -2127,34 +2177,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onMouseMoveCallback = [](objid id, void* data, double rawXPos, double rawYPos, float rawXNdc, float rawYNdc) -> void { 
     //modlog("input", std::string("mouse move: ") + print(glm::vec2(xPos, yPos)));
     //modlog("input",  std::string("(xNdc, yNdc)") + print(glm::vec2(xNdc, yNdc)));
-    GameState* gameState = static_cast<GameState*>(data);
 
     auto mouseMoveCallback = remapMouseMovement(rawXPos, rawYPos, rawXNdc, rawYNdc);
-
-    if (!getGlobalState().disableUiInput){
-      onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, mouseMoveCallback.xPos, mouseMoveCallback.yPos, mouseMoveCallback.xNdc, mouseMoveCallback.yNdc);
-    }
-    onInGameUiMouseMoveCallback(tags.inGameUi, mouseMoveCallback.xPos, mouseMoveCallback.yPos, mouseMoveCallback.xNdc, mouseMoveCallback.yNdc);
-    onMouseMoveArcade(mouseMoveCallback.xPos, mouseMoveCallback.yPos, mouseMoveCallback.xNdc, mouseMoveCallback.yNdc);
-
-    float movementX = mouseMoveCallback.xNdc - getGlobalState().xNdc;
-    float movementY = mouseMoveCallback.yNdc - getGlobalState().yNdc;
-    getGlobalState().xNdc = mouseMoveCallback.xNdc;
-    getGlobalState().yNdc = mouseMoveCallback.yNdc;
-    getGlobalState().mouseVelocity = glm::vec2(mouseMoveCallback.xPos, mouseMoveCallback.yPos);
-
-    { // per player code
-      auto playerIndex = mouseMoveCallback.playerPort;
-      ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-      if (controlledPlayer.playerId.has_value() && !isPaused() && !getGlobalState().disableGameInput && !isPlayerControlDisabled(playerIndex)){
-        controlledPlayer.lookVelocity = glm::vec2(movementX, movementY);
-      }
-      if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
-        //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
-        glm::vec2 smoothedMovement = glm::vec2(mouseMoveCallback.xPos, mouseMoveCallback.yPos);
-        onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y, playerIndex);
-      }
-    }
+    onMouseMoveCallback(id, data, mouseMoveCallback.xPos, mouseMoveCallback.yPos, mouseMoveCallback.xNdc, mouseMoveCallback.yNdc, mouseMoveCallback.playerPort);
   };
 
   binding.onMouseCallback = [](objid id, void* data, int rawButton, int rawAction, int rawMods) -> void {
