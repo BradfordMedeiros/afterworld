@@ -57,7 +57,7 @@ ControlledPlayer& getControlledPlayer(int playerIndex){
 			return player;
 		}
 	}
-	modassert(false, "getControlledPlayer playerIndex invalid");
+	modassert(false, std::string("getControlledPlayer playerIndex invalid: ") + std::to_string(playerIndex));
 	return players.at(0);
 }
 
