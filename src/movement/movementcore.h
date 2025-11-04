@@ -102,5 +102,12 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 MovementState getInitialMovementState(objid playerId);
 glm::vec2 pitchXAndYawYRadians(glm::quat currRotation);
 
+enum COLLISION_SPACE_INDEX { COLLISION_SPACE_LEFT = 0, COLLISION_SPACE_RIGHT = 1, COLLISION_SPACE_DOWN = 3 };
+struct MovementCollisions {
+  std::vector<bool> movementCollisions;
+  std::vector<objid> allCollisions;
+};
+MovementCollisions checkMovementCollisions(objid playerId, std::vector<glm::quat>& _hitDirections, glm::quat rotationWithoutY);
+
 
 #endif

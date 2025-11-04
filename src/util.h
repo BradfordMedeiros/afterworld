@@ -74,6 +74,7 @@ void setGameObjectMeshEnabled(objid id, bool enable);
 void setGameObjectPhysicsDynamic(objid id);
 void setGameObjectPhysicsEnable(objid id, bool enable);
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity);
+void setGameObjectPhysicsMass(objid id, float mass);
 void setGameObjectPhysicsOptions(objid id, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity);
 void setGameObjectEmission(objid id, std::optional<glm::vec3> emission);
 

@@ -246,6 +246,15 @@ void setGameObjectPhysicsEnable(objid id, bool enable){
   gameapi -> setSingleGameObjectAttr(id, "physics", enable ? "enabled" : "disabled");
 }
 
+void setGameObjectPhysicsMass(objid id, float mass){
+  gameapi -> setGameObjectAttr(
+    id, 
+    {
+      GameobjAttribute { .field = "physics_mass", .attributeValue = mass },
+    }
+  ); 
+}
+
 void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity){
   gameapi -> setGameObjectAttr(
     id, 

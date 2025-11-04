@@ -299,13 +299,8 @@ bool shouldStepUp(objid id){ // check this logic
   return anyCollideableBelow && aboveHitpoints.size() == 0;
 }
 
-enum COLLISION_SPACE_INDEX { COLLISION_SPACE_LEFT = 0, COLLISION_SPACE_RIGHT = 1, COLLISION_SPACE_DOWN = 3 };
 std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY);
 
-struct MovementCollisions {
-  std::vector<bool> movementCollisions;
-  std::vector<objid> allCollisions;
-};
 
 struct CollisionSpace {
   glm::vec3 direction;
@@ -326,7 +321,7 @@ std::vector<CollisionSpace> collisionSpaces = {
   },
   CollisionSpace {  // down
     .direction = glm::vec3(0.f, 1.f, 0.f),
-    .comparison = 0.9f,
+    .comparison = 0.4f,
   },
   CollisionSpace {  // backward
     .direction = glm::vec3(0.f, 0.f, 1.f),

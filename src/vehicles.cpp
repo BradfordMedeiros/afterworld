@@ -14,12 +14,11 @@ bool vehicleOccupied(Vehicles& vehicles, objid vehicleId){
   return vehicles.vehicles.at(vehicleId).occupied.has_value();
 }
 
-void addVehicle(Vehicles& vehicles, objid vehicleId){
+void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
   auto soundId = findChildObjBySuffix(vehicleId, "sound");
 
   vehicles.vehicles[vehicleId] = Vehicle{
     .controls = glm::vec3(0.f, -9.81f, 0.f),
-    .angleControls = glm::vec2(0.f, 0.f),
     .managedCamera = ThirdPersonCameraInfo {
       .thirdPersonMode = false,
       .distanceFromTarget = -5.f,
@@ -33,7 +32,25 @@ void addVehicle(Vehicles& vehicles, objid vehicleId){
     },
     .sound = soundId,
   };
-
+  if (isShip){
+    vehicles.vehicles.at(vehicleId).vehicle = VehicleShip{};
+  }else{
+    BallConfig ballConfig {
+      .magnitude = 100.f,
+      .torque = 0.f,
+      .jumpMagnitude = 100.f,
+      .mass = 10.f,
+      .friction = 1.f,
+      .restitution = 0.5f,
+      .gravity = -9.81f,
+    };
+    setGameObjectPhysics(vehicleId, ballConfig.mass, ballConfig.restitution, ballConfig.friction, glm::vec3(0.f, ballConfig.gravity, 0.f));
+    vehicles.vehicles.at(vehicleId).vehicle = VehicleBall{
+      .ballConfig = ballConfig,
+      .isGrounded = false,
+      .shouldJump = false,
+    };
+  }
 
   modlog("vehicle add vehicle", std::to_string(vehicleId) + ", sound = " + print(soundId));
 }
@@ -50,6 +67,7 @@ void enterVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   bool occupied = vehicle.occupied.has_value();
   modassert(!occupied, "vehicle already occupied");
   vehicles.vehicles.at(vehicleId).occupied = id;
+
   modlog("vehicle enter vehicle", std::to_string(vehicleId));
 
   if (vehicle.sound.has_value()){
@@ -63,7 +81,7 @@ void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   modlog("vehicle exit vehicle", std::to_string(vehicleId));
   Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
 
-  auto position = gameapi -> getGameObjectPos(vehicleId, true, "[gamelogic] exit vehicle get pos") + glm::vec3(0.f, 10.f, 0.f);
+  auto position = gameapi -> getGameObjectPos(vehicleId, true, "[gamelogic] exit vehicle get pos") + glm::vec3(0.f, 30.f, 0.f);
   auto vehicleRot = gameapi -> getGameObjectRotation(vehicleId, true, "[gamelogic] vehicle exit get rot"); 
 
   reenableEntity(vehicle.occupied.value(), position, vehicleRot);
@@ -75,50 +93,52 @@ void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
 }
 
 void onVehicleKey(Vehicles& vehicles, int key, int action){
-}
-
-void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
   for (auto &[id, vehicle] :  vehicles.vehicles){
     if (vehicle.occupied.has_value()){
-
-      // Would be nice to make this work more similarly to movement system but this is simple so
-      vehicle.managedCamera.angleX += gameapi -> timeElapsed() * controlParams.lookVelocity.x;
-      vehicle.managedCamera.angleY += gameapi -> timeElapsed() * controlParams.lookVelocity.y;
-      vehicle.managedCamera.actualDistanceFromTarget += gameapi -> timeElapsed() * controlParams.zoom_delta * 20.f /*arbitary multiplier */;
-      auto thirdPerson = lookThirdPersonCalc(vehicle.managedCamera, id);
-
-      auto oldRotation = gameapi -> getGameObjectRotation(id, true, "[gamelogic] vehicle velocity rot"); 
-
-      gameapi -> setGameObjectRot(id, thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle rotn" }); // shouldn't be instant
-
-      glm::vec3 newVelocityDiff(0.f, 0.f, 0.f);
-      if (controlParams.goForward){
-        newVelocityDiff.z -= 100.f * gameapi -> timeElapsed();
+      VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+      if (vehicleBall){
+        if(isJumpKey(key) /* space */ && action == 1){
+          vehicleBall -> shouldJump = true;
+        }
       }
-      if (controlParams.goBackward){
-        newVelocityDiff.z += 100.f * gameapi -> timeElapsed();
-      }
-      if (controlParams.goLeft){
-        newVelocityDiff.x -= 100.f * gameapi -> timeElapsed();
-      }
-      if (controlParams.goRight){
-        newVelocityDiff.x += 100.f * gameapi -> timeElapsed();
-      }
-      //if (controlParams.shiftModifier){
-      //  newVelocityDiff.y += 100.f * gameapi -> timeElapsed();
-      //}
-
-      auto diffRot = thirdPerson.rotation * glm::inverse(oldRotation); // I shouldn't apply all of it, but how much?
-      //auto diffRot = glm::inverse(thirdPerson.rotation) * oldRotationdf; // I shouldn't apply all of it, but how much?
-
-      auto newVelocity = (diffRot * vehicle.controls) + (thirdPerson.rotation * newVelocityDiff);
-      vehicle.controls = newVelocity;
-
-
     }
   }
+}
 
-  for (auto &[id, vehicle] :  vehicles.vehicles){
+void onVehicleFrameShip(objid id, Vehicle& vehicle, ControlParams& controlParams){
+  if (vehicle.occupied.has_value()){
+    // Would be nice to make this work more similarly to movement system but this is simple so
+
+    auto thirdPerson = lookThirdPersonCalc(vehicle.managedCamera, id);
+
+    auto oldRotation = gameapi -> getGameObjectRotation(id, true, "[gamelogic] vehicle velocity rot"); 
+    gameapi -> setGameObjectRot(id, thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle rotn" }); // shouldn't be instant
+
+    glm::vec3 newVelocityDiff(0.f, 0.f, 0.f);
+    if (controlParams.goForward){
+      newVelocityDiff.z -= 100.f * gameapi -> timeElapsed();
+    }
+    if (controlParams.goBackward){
+      newVelocityDiff.z += 100.f * gameapi -> timeElapsed();
+    }
+    if (controlParams.goLeft){
+      newVelocityDiff.x -= 100.f * gameapi -> timeElapsed();
+    }
+    if (controlParams.goRight){
+      newVelocityDiff.x += 100.f * gameapi -> timeElapsed();
+    }
+    //if (controlParams.shiftModifier){
+    //  newVelocityDiff.y += 100.f * gameapi -> timeElapsed();
+    //}
+
+    auto diffRot = thirdPerson.rotation * glm::inverse(oldRotation); // I shouldn't apply all of it, but how much?
+    //auto diffRot = glm::inverse(thirdPerson.rotation) * oldRotationdf; // I shouldn't apply all of it, but how much?
+
+    auto newVelocity = (diffRot * vehicle.controls) + (thirdPerson.rotation * newVelocityDiff);
+    vehicle.controls = newVelocity;
+  }
+
+  {
     auto oldPos = gameapi -> getGameObjectPos(id, true, "vehicle getPos");
     if (vehicle.occupied.has_value()){
       setGameObjectVelocity(id, vehicle.controls);
@@ -207,6 +227,94 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
         vehicle.controls.z = 0;
       }
     }*/
+  }
+}
+
+
+bool checkIfGrounded(objid id){
+  auto playerDirection = gameapi -> getGameObjectRotation(id, true, "vehicle - ball - check grounded");
+  auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
+  directionVec.y = 0.f;
+  auto rotationWithoutY = quatFromDirection(directionVec);
+
+   
+  std::vector<glm::quat> hitDirections;
+  auto collisions = checkMovementCollisions(id, hitDirections, rotationWithoutY);
+  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+  return isGrounded;
+}
+
+void onVehicleFrameBall(objid id, Vehicle& vehicle, ControlParams& controlParams){
+  if (!vehicle.occupied.has_value()){
+    return;
+  }
+
+  VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+  modassert(vehicleBall, "onVehicleFrame incorrect type");
+  if (vehicleBall){
+    auto isGrounded = checkIfGrounded(id);
+    std::cout << "is grounded: " << isGrounded << std::endl;
+    vehicleBall -> isGrounded = isGrounded;
+  }
+
+  if (vehicleBall -> shouldJump && vehicleBall -> isGrounded){
+    gameapi -> applyImpulse(id, glm::vec3(0.f, vehicleBall -> ballConfig.jumpMagnitude, 0.f));
+  }
+
+  vehicleBall -> shouldJump = false;
+
+
+  std::cout << "onVehicleFrameBall onFrame" << std::endl;
+
+  auto rotation = lookThirdPersonCalc(vehicle.managedCamera, id).yAxisRotation;
+  auto magnitude = vehicleBall -> ballConfig.magnitude * gameapi -> timeElapsed();
+  auto torqueMagnitude = vehicleBall -> ballConfig.torque;
+
+  glm::vec3 direction(0.f, 0.f, 0.f);
+
+  if (controlParams.goForward){
+    direction.z = -1.f;
+  }
+  if (controlParams.goBackward){
+    direction.z = 1.f;
+  }
+  if (controlParams.goLeft){
+    direction.x = -1.f;
+  }
+  if (controlParams.goRight){
+    direction.x = 1.f;
+  }
+
+  // should normalize the direction here
+  auto amount = rotation * glm::vec3(magnitude * direction.x, magnitude * direction.y, magnitude * direction.z);
+  gameapi -> applyImpulse(id, amount);
+
+  auto torqueAmount = rotation * glm::vec3(torqueMagnitude * direction.z, torqueMagnitude * direction.y, -1 * torqueMagnitude * direction.x);
+  gameapi -> applyTorque(id, torqueAmount);
+
+  //std::cout << "onVehicleFrameBall: " << id << " , apply force = " << print(amount) <<  ", apply torque = " << print(torqueAmount) <<  ", name = " << gameapi -> getGameObjNameForId(id).value() << ", occupied = " << gameapi -> getGameObjNameForId(vehicle.occupied.value()).value() << std::endl;
+}
+
+void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
+  for (auto &[id, vehicle] :  vehicles.vehicles){
+    if (vehicle.occupied.has_value()){
+      vehicle.managedCamera.angleX += gameapi -> timeElapsed() * controlParams.lookVelocity.x;
+      vehicle.managedCamera.angleY += gameapi -> timeElapsed() * controlParams.lookVelocity.y;
+      vehicle.managedCamera.actualDistanceFromTarget += gameapi -> timeElapsed() * controlParams.zoom_delta * 20.f /*arbitary multiplier */;
+    }
+
+    {
+      VehicleShip* vehicleShip = std::get_if<VehicleShip>(&vehicle.vehicle);
+      if (vehicleShip){
+        onVehicleFrameShip(id, vehicle, controlParams);
+      }
+    }
+    {
+      VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+      if (vehicleBall){
+        onVehicleFrameBall(id, vehicle, controlParams);
+      }
+    }
   }
 }
 

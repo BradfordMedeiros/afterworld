@@ -721,7 +721,15 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "vehicle",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			addVehicle(vehicles, id);
+			auto vehicleType = std::get_if<std::string>(&value);
+			modassert(vehicleType, "vehicle type not defined as str");
+			if (*vehicleType == "" || *vehicleType == "ship"){
+				addVehicle(vehicles, id, true);
+			}else if (*vehicleType == "ball"){
+				addVehicle(vehicles, id, false);
+			}else{
+				modassert(false, std::string("vehicle type not supported: ") + *vehicleType);
+			}
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		removeVehicle(vehicles, id);

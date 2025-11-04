@@ -274,6 +274,7 @@ WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int b
 }
 
 void onWeaponsKeyCallback(WeaponEntityState& weaponsState, int key, int action, objid playerId){
+  return;
   if (isInteractKey(key)) { 
     if (action == 1){
       weaponsState.activate = true;
