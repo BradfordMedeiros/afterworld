@@ -44,7 +44,7 @@ GameTypeInfo getDeathmatchMode(){
 	GameTypeInfo deathmatchMode = GameTypeInfo {
 	  .gametypeName = "deathmatch",
 	  .events = { "nohealth"  },
-	  .createGametype = []() -> std::any {
+	  .createGametype = [](void*) -> std::any {
 			int scoreLimit = 3;
 			std::vector<std::string> teamNames = { "red", "blue" };
 			std::vector<int> scores = { 0, 0 };

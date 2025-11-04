@@ -13,7 +13,7 @@ GameTypeInfo getTargetKill(){
 	GameTypeInfo targetKill = GameTypeInfo {
 	  .gametypeName = "targetkill",
 	  .events = { "nohealth" },
-	  .createGametype = []() -> std::any {
+	  .createGametype = [](void*) -> std::any {
 	    return TargetKillMode { 
 	      .numTargets = 3,
 	      .startTime = 1.f,

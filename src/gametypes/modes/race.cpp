@@ -33,7 +33,7 @@ GameTypeInfo getRaceMode(){
 	GameTypeInfo race = GameTypeInfo {
 	  .gametypeName = "race",
 	  .events = { "race-marker" },
-	  .createGametype = []() -> std::any {
+	  .createGametype = [](void*) -> std::any {
 	    return RaceMode {
 	    	.startTime = gameapi -> timeSeconds(false),
 	    	.durationSeconds = 30.f,

@@ -6,6 +6,7 @@ std::vector<GameTypeInfo> gametypes = {
   getTargetKill(),
   getDeathmatchMode(),
   getRaceMode(),
+  getBallMode(),
 };
 
 GameTypeInfo* gametypeByName(const char* name) {
@@ -17,15 +18,16 @@ GameTypeInfo* gametypeByName(const char* name) {
   return NULL;
 }
 
-void changeGameType(GameTypes& gametypes, const char* name){
+void changeGameType(GameTypes& gametypes, const char* name, void* data){
   gametypes.name = name;
   auto gametypeInfo = gametypeByName(name);
   if (!gametypeInfo){
     gametypes.meta = NULL;
+    modassert(false, "no matching gametype");
     return;
   }
   gametypes.meta = gametypeInfo;
-  gametypes.gametype = gametypeInfo -> createGametype();
+  gametypes.gametype = gametypeInfo -> createGametype(data);
   gametypes.startTime = gameapi -> timeSeconds(false);
 }
 
@@ -43,7 +45,7 @@ void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value)
       if (key == event){
         bool gameFinished = gametypes.meta -> onEvent(gametypes.gametype, event, value);
         if (gameFinished){
-          changeGameType(gametypes, "nogame");
+          changeGameType(gametypes, "nogame", NULL);
           return;
         }
       }

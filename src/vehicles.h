@@ -49,6 +49,8 @@ void enterVehicle(Vehicles& vehicle, objid vehicleId, objid id);
 void exitVehicle(Vehicles& vehicle, objid vehicleId, objid id);
 bool isVehicle(Vehicles& vehicle, objid id);
 
+std::vector<int> getVehicleIds();
+
 void onVehicleKey(Vehicles& vehicle, int key, int action);
 void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams);
 

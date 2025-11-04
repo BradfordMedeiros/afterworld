@@ -2,23 +2,41 @@
 obj/entity0_brush0:texture:./res/textures/wood.jpg
 obj/entity0_brush0:physics_shape:shape_exact
 obj/entity0_brush0:physics:enabled
+obj/entity0_brush0:physics_restitution:1
 
-ship1:vehicle:ship
-ship1:mesh:../gameresources/build/vehicles/spaceship.gltf
-ship1:physics_mass:1000
-ship1:physics_type:dynamic
-ship1:physics:enabled
-ship1:rotation:-1 0 -8.9407e-07 0.0395647
-ship1:position:5.68 -4.98 13.6
+#ship1:vehicle:ship
+#ship1:mesh:../gameresources/build/vehicles/spaceship.gltf
+#ship1:physics_mass:1000
+#ship1:physics_type:dynamic
+#ship1:physics:enabled
+#ship1:rotation:-1 0 -8.9407e-07 0.0395647
+#ship1:position:5.68 -4.98 13.6
 
 ball1:vehicle:ball
 ball1:mesh:../gameresources/build/primitives/sphere.gltf
-ball1:physics_mass:1000
+ball1:physics_mass:10
 ball1:physics_type:dynamic
 ball1:physics:enabled
 ball1:physics_shape:shape_sphere
-ball1:rotation:-1 0 -8.9407e-07 0.0395647
 ball1:position:5.68 -4.98 13.6
+ball1:texture:./res/textures/wood.jpg
+ball1:mode:ball
+
+
+ball2:vehicle:ball
+ball2:mesh:../gameresources/build/primitives/sphere.gltf
+ball2:physics_mass:10
+ball2:physics_type:dynamic
+ball2:physics:enabled
+ball2:physics_shape:shape_sphere
+ball2:position:6.68 -4.98 13.6
+ball2:texture:./res/textures/wood.jpg
+
+
+playerspawn:playerspawn:true
+playerspawn:teleport:true
+playerspawn:position:0 100 0
+playerspawn:position:5.68 -2.98 13.6
 
 
 
@@ -29,6 +47,3 @@ ball1:position:5.68 -4.98 13.6
 !light:position:-12.93 -58.31 11.98
 obj:mesh:../afterworld/scenes/levels/trench/testmap.obj
 obj:scale:0.2 0.2 0.2
-playerspawn:playerspawn:true
-playerspawn:teleport:true
-playerspawn:position:0 100 0

@@ -66,6 +66,34 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
+std::vector<int> getVehicleIds(){
+  std::vector<int>  vehicleIds;
+  for (auto& [id, vehicle] : vehicles.vehicles){
+    vehicleIds.push_back(id);
+  }
+  return vehicleIds;
+}
+
+void enterVehicleRaw(int playerIndex, objid vehicleId, objid id){
+  enterVehicle(vehicles, vehicleId, id);
+  std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
+  modassert(controllable.has_value() && controllable.value() != NULL, "controllable invalid");
+  controllable.value() -> vehicle = vehicleId;
+}
+
+
+bool canExitVehicle = true;
+void setCanExitVehicle(bool canExit){
+  canExitVehicle = canExit;
+}
+void exitVehicleRaw(int playerIndex, objid vehicleId, objid id){
+  if (!canExitVehicle){
+    return;
+  }
+  exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
+  getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
+}
+
 void applyScreenshake(int playerIndex, glm::vec3 impulse){
   if (hasOption("no-shake")){
     return;
@@ -1411,11 +1439,9 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
     if (getActiveControllable(playerIndex).value() -> vehicle.has_value()){
-      exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.playerId.value());
-      getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
+      exitVehicleRaw(playerIndex, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.playerId.value());
     }else if (getActiveControllable(playerIndex).value() -> lookingAtVehicle.has_value()){
-      enterVehicle(vehicles, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
-      getActiveControllable(playerIndex).value() -> vehicle = getActiveControllable(playerIndex).value() -> lookingAtVehicle.value();
+      enterVehicleRaw(playerIndex, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
     }
   }
 

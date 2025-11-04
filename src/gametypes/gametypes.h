@@ -6,6 +6,7 @@
 #include "./modes/targetkill.h"
 #include "./modes/deathmatch.h"
 #include "./modes/race.h"
+#include "./modes/ball.h"
 
 struct GameTypes  {
   std::string name;
@@ -18,7 +19,7 @@ GameTypes createGametypes();
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value);
 DebugConfig debugPrintGametypes(GameTypes& gametype);
 
-void changeGameType(GameTypes& gametypes, const char* name);
+void changeGameType(GameTypes& gametypes, const char* name, void* data);
 std::optional<GametypeData> getGametypeData(GameTypes&);
 
 #endif 

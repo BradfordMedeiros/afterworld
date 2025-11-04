@@ -321,3 +321,4 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
 bool isVehicle(Vehicles& vehicles, objid id){
   return vehicles.vehicles.find(id) != vehicles.vehicles.end();
 }
+

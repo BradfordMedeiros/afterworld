@@ -3,6 +3,12 @@
 
 #include "../common.h"
 
+struct BallModeOptions{
+   int testNumber;
+
+   std::function<void()> setPlayerControl;
+};
+
 GameTypeInfo getBallMode();
 
 #endif 

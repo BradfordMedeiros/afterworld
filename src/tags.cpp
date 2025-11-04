@@ -7,9 +7,13 @@ extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
 extern Vehicles vehicles;
+extern GameTypes gametypeSystem;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
+void setCanExitVehicle(bool canExit);
+
 struct TagUpdater {
 	std::string attribute;
 	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
@@ -733,6 +737,36 @@ std::vector<TagUpdater> tagupdates = {
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		removeVehicle(vehicles, id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+
+	TagUpdater {
+		.attribute = "mode",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			BallModeOptions modeOptions {
+			  .testNumber = 100323,
+			};
+			modeOptions.setPlayerControl = []() -> void {
+				std::cout << "set Player Control" << std::endl;
+				auto activePlayer = getActivePlayerId(0);
+				auto vehicles = getVehicleIds();
+				std::cout << "vehicles: " << print(vehicles) << ", playerid: " << print(activePlayer) << std::endl;
+				//  enterVehicle(0, vehicles.at(0), activePlayer.value());
+  			gameapi -> schedule(0, true, 1, NULL, [](void*) -> void {
+				  auto activePlayer = getActivePlayerId(0);
+				  auto vehicles = getVehicleIds();
+				  std::cout << "vehicles: " << print(vehicles) << ", playerid: " << print(activePlayer) << std::endl;
+				  enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
+				  setCanExitVehicle(false);
+  			});
+			};
+			changeGameType(gametypeSystem, "ball", &modeOptions);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		setCanExitVehicle(true);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
