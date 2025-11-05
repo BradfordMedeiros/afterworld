@@ -17,12 +17,19 @@ struct BallConfig {
   float restitution;
   float gravity;
 };
+
+enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, TELEPORT };
 struct VehicleBall {
   BallConfig ballConfig;
 
   // state
   bool isGrounded;
   bool shouldJump;
+  bool shouldUsePowerUp;
+
+  std::optional<glm::vec3> teleportPosition;
+
+  std::optional<BallPowerup> powerup;
 };
 
 typedef std::variant<VehicleShip, VehicleBall> VehicleType;
@@ -53,5 +60,8 @@ std::vector<int> getVehicleIds();
 
 void onVehicleKey(Vehicles& vehicle, int key, int action);
 void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams);
+
+/// vehicle type specific stuff
+void setPowerupBall(Vehicles& vehicle, objid vehicleId, std::optional<BallPowerup> powerup);
 
 #endif

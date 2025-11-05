@@ -750,11 +750,6 @@ std::vector<TagUpdater> tagupdates = {
 			  .testNumber = 100323,
 			};
 			modeOptions.setPlayerControl = []() -> void {
-				std::cout << "set Player Control" << std::endl;
-				auto activePlayer = getActivePlayerId(0);
-				auto vehicles = getVehicleIds();
-				std::cout << "vehicles: " << print(vehicles) << ", playerid: " << print(activePlayer) << std::endl;
-				//  enterVehicle(0, vehicles.at(0), activePlayer.value());
   			gameapi -> schedule(0, true, 1, NULL, [](void*) -> void {
 				  auto activePlayer = getActivePlayerId(0);
 				  auto vehicles = getVehicleIds();
@@ -785,6 +780,15 @@ std::vector<TagUpdater> tagupdates = {
 			modeOptions.setLevelFinished = []() -> void {
 				pushHistory({ "mainmenu" }, true);
 			};
+			
+			/*modeOptions.doActivePowerUp = []() -> void {
+			  auto vehicleIds = getVehicleIds();
+				doPowerupBall(vehicles, vehicleIds.at(0));
+			};
+			modeOptions.getActivePowerup = []() -> std::string {
+				return "super-jump";
+			};*/
+
 			changeGameType(gametypeSystem, "ball", &modeOptions);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {

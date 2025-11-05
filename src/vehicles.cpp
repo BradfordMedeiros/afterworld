@@ -49,6 +49,9 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
       .ballConfig = ballConfig,
       .isGrounded = false,
       .shouldJump = false,
+      .shouldUsePowerUp = false,
+      .teleportPosition = std::nullopt,
+      .powerup = TELEPORT,
     };
   }
 
@@ -99,6 +102,9 @@ void onVehicleKey(Vehicles& vehicles, int key, int action){
       if (vehicleBall){
         if(isJumpKey(key) /* space */ && action == 1){
           vehicleBall -> shouldJump = true;
+        }
+        if (isInteractKey(key) && action == 1){
+          vehicleBall -> shouldUsePowerUp = true;
         }
       }
     }
@@ -260,13 +266,36 @@ void onVehicleFrameBall(objid id, Vehicle& vehicle, ControlParams& controlParams
   if (vehicleBall -> shouldJump && vehicleBall -> isGrounded){
     gameapi -> applyImpulse(id, glm::vec3(0.f, vehicleBall -> ballConfig.jumpMagnitude, 0.f));
   }
-
   vehicleBall -> shouldJump = false;
+
+  auto rotation = lookThirdPersonCalc(vehicle.managedCamera, id).yAxisRotation;
+
+  if (vehicleBall -> shouldUsePowerUp){
+    if (vehicleBall -> teleportPosition.has_value()){
+      // TODO This needs to preserve the direction too
+      gameapi -> setGameObjectPosition(id, vehicleBall -> teleportPosition.value(), true, Hint { .hint = "vehicle teleport position" });
+      vehicleBall -> teleportPosition = std::nullopt;
+    }
+    
+    if (vehicleBall -> powerup.has_value()){
+      if (vehicleBall -> powerup.value() == BIG_JUMP){
+        gameapi -> applyImpulse(id, glm::vec3(0.f, 5 * vehicleBall -> ballConfig.jumpMagnitude, 0.f));
+      }else if (vehicleBall -> powerup.value() == LAUNCH_FORWARD){
+        auto direction = rotation * glm::vec3(0.f, vehicleBall -> ballConfig.jumpMagnitude, -1 * vehicleBall -> ballConfig.jumpMagnitude);
+        gameapi -> applyImpulse(id, direction);
+      }else if (vehicleBall -> powerup.value() == LOW_GRAVITY){
+        setGameObjectGravity(id, glm::vec3(0.f, 0.2f * vehicleBall -> ballConfig.gravity, 0.f));
+      }else if (vehicleBall -> powerup.value() == TELEPORT){
+        vehicleBall -> teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
+      }
+      vehicleBall -> powerup = std::nullopt;
+    }
+  }
+  vehicleBall -> shouldUsePowerUp = false;
 
 
   std::cout << "onVehicleFrameBall onFrame" << std::endl;
 
-  auto rotation = lookThirdPersonCalc(vehicle.managedCamera, id).yAxisRotation;
   auto magnitude = vehicleBall -> ballConfig.magnitude * gameapi -> timeElapsed();
   auto torqueMagnitude = vehicleBall -> ballConfig.torque;
 
@@ -320,5 +349,12 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
 
 bool isVehicle(Vehicles& vehicles, objid id){
   return vehicles.vehicles.find(id) != vehicles.vehicles.end();
+}
+
+
+
+void setPowerupBall(Vehicles& vehicles, objid vehicleId, std::optional<BallPowerup> powerup){
+  auto& vehicle = vehicles.vehicles.at(vehicleId);
+  VehicleShip* vehicleShip = std::get_if<VehicleShip>(&vehicle.vehicle);
 }
 

@@ -9,7 +9,6 @@ struct BallModeOptions{
    std::function<void()> setPlayerControl;
    std::function<void(bool)> changeUi;
    std::function<void(std::optional<float>)> showTimeElapsed;
-
    std::function<void()> setLevelFinished;
 };
 

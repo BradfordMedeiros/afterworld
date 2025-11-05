@@ -6,6 +6,7 @@
 struct BallComponentOptions {
 	std::optional<float> startTime;
 	std::optional<std::string> winMessage;
+	std::optional<std::string> powerup;
 };
 extern Component ballComponent;
 
