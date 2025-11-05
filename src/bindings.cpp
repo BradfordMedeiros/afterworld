@@ -927,6 +927,7 @@ UiContext getUiContext(GameState& gameState){
       };
       return scoreOptions;
    },
+   .getBallMode = showBallOptions,
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);

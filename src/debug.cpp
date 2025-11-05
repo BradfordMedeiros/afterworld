@@ -397,6 +397,8 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'K' && action == 1){
+  	std::cout << "send notify message" << std::endl;
+  	gameapi -> sendNotifyMessage("ball-game", std::string("complete"));
   	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
   		static bool raiseUp = false;
   		raiseUp = !raiseUp;

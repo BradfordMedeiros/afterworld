@@ -249,3 +249,10 @@ void setShowZoomArcade(bool zoomIn){
   getGlobalState().zoomIntoArcade = zoomIn;
   updateState();
 }
+
+std::optional<BallComponentOptions> showBallOptions(){
+  return getGlobalState().ballOptions;
+}
+void setShowBallOptions(std::optional<BallComponentOptions> ballOptions){
+  getGlobalState().ballOptions = ballOptions;
+}

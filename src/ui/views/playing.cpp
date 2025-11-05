@@ -5,6 +5,17 @@ Component playingComponent {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
     modassert(playingOptions, "playing options not defined");
 
+    auto ballOptions = playingOptions -> ballMode;
+    if (ballOptions.has_value()){
+  	  Props ballProps { 
+  	    .props = {
+  	      PropPair { .symbol = valueSymbol, .value = playingOptions -> ballMode.value() },
+  	    },
+  	  };
+  	  ballComponent.draw(drawTools, ballProps);    
+      return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
+    }
+
     if (playingOptions -> showHud){
   	  auto hudProps = getDefaultProps();
 	    hudComponent.draw(drawTools, hudProps);

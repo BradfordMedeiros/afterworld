@@ -4,6 +4,7 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./gameworld/save.h"
+#include "./ui/views/ball.h"
 
 struct RouteState {
   bool paused;
@@ -46,6 +47,8 @@ struct GlobalState {
   bool middleMouseDown;
 
   RouteState routeState;
+
+  std::optional<BallComponentOptions> ballOptions;
 };
 
 void setPaused(bool paused);
@@ -69,6 +72,9 @@ bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
 void setShowZoomArcade(bool showArcade);
+
+std::optional<BallComponentOptions> showBallOptions();
+void setShowBallOptions(std::optional<BallComponentOptions> ballOptions);
 
 DebugConfig debugPrintGlobal();
 

@@ -3,6 +3,7 @@
 
 #include "../components/worldplay.h"
 #include "../components/console.h"
+#include "./ball.h"
 
 struct Level {
   std::string scene;
@@ -38,6 +39,8 @@ struct UiContext {
   std::function<std::optional<DebugConfig>()> debugConfig;
 
   std::function<std::optional<ScoreOptions>()> getScoreConfig;
+  std::function<std::optional<BallComponentOptions>()> getBallMode;
+
 
   // api for the ui
   LevelUIInterface levels;

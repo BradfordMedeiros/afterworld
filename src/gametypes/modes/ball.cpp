@@ -5,7 +5,7 @@ extern CustomApiBindings* gameapi;
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
-	  .events = { },
+	  .events = { "ball-game" },
 	  .createGametype = [](void* data) -> std::any {
 		int scoreLimit = 3;
 		std::vector<std::string> teamNames = { "red", "blue" };
@@ -15,21 +15,21 @@ GameTypeInfo getBallMode(){
 		BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
 		std::cout << "ball mode: " << modeOptions -> testNumber << std::endl;
 		modeOptions -> setPlayerControl();
-	    //return DeathmatchMode { 
-	    //	.scoreLimit = scoreLimit,
-	    //	.teamNames = teamNames,
-	    //	.scores = scores,
-	    //};
+		modeOptions -> changeUi(true);
+		modeOptions -> showTimeElapsed(gameapi -> timeSeconds(true));
 
-  		//gameapi -> schedule(0, true, 10000, NULL, [](void*) -> void {
-		//  auto activePlayer = getActivePlayerId(0);
-		//  auto vehicles = getVehicleIds();
-		//  std::cout << "vehicles: " << print(vehicles) << ", playerid: " << print(activePlayer) << std::endl;
-		//  enterVehicle(0, vehicles.at(0), activePlayer.value());
-  		//});
-	    return std::nullopt; 
+	    return *modeOptions; 
 	  },
 	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
+	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
+	  	modassert(ballMode, "ballMode options");
+
+	  	std::string* message = std::any_cast<std::string>(&value);
+	  	modassert(message, "invalid type ball-mode");
+	  	std::cout << "from ball modde: " << event << ", " << *message << std::endl;
+	  	if (*message == "complete"){
+	  		ballMode -> setLevelFinished();
+	  	}
 	   	return false;
 	  },
 	  .getDebugText = [](std::any& gametype) -> std::string {

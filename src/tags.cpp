@@ -763,10 +763,33 @@ std::vector<TagUpdater> tagupdates = {
 				  setCanExitVehicle(false);
   			});
 			};
+			modeOptions.changeUi = [](bool showBallUi) -> void {
+				if (showBallUi){
+					setShowBallOptions(
+						BallComponentOptions {
+							.winMessage = "you win congrats",
+						}
+					);
+				}else{
+					setShowBallOptions(std::nullopt);
+				}
+			};
+			modeOptions.showTimeElapsed = [](std::optional<float> startTime) -> void {
+				if (!showBallOptions().has_value()){
+					return;
+				}
+				auto ballOptions = showBallOptions().value();
+				ballOptions.startTime = startTime;
+				setShowBallOptions(ballOptions);
+			};
+			modeOptions.setLevelFinished = []() -> void {
+				pushHistory({ "mainmenu" }, true);
+			};
 			changeGameType(gametypeSystem, "ball", &modeOptions);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		setCanExitVehicle(true);
+  		setShowBallOptions(std::nullopt);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
