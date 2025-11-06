@@ -51,7 +51,7 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
       .shouldJump = false,
       .shouldUsePowerUp = false,
       .teleportPosition = std::nullopt,
-      .powerup = TELEPORT,
+      .powerup = REVERSE_GRAVITY,
     };
   }
 
@@ -285,7 +285,10 @@ void onVehicleFrameBall(objid id, Vehicle& vehicle, ControlParams& controlParams
         gameapi -> applyImpulse(id, direction);
       }else if (vehicleBall -> powerup.value() == LOW_GRAVITY){
         setGameObjectGravity(id, glm::vec3(0.f, 0.2f * vehicleBall -> ballConfig.gravity, 0.f));
-      }else if (vehicleBall -> powerup.value() == TELEPORT){
+      }else if (vehicleBall -> powerup.value() == REVERSE_GRAVITY){
+        // This needs changes in the camera to feel correct
+        setGameObjectGravity(id, glm::vec3(0.f, -1.f * vehicleBall -> ballConfig.gravity, 0.f));
+      } else if (vehicleBall -> powerup.value() == TELEPORT){
         vehicleBall -> teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
       }
       vehicleBall -> powerup = std::nullopt;

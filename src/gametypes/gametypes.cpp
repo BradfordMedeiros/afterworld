@@ -18,6 +18,12 @@ GameTypeInfo* gametypeByName(const char* name) {
   return NULL;
 }
 
+void gametypesOnKey(GameTypes& gametypes, int rawKey, int rawScancode, int rawAction, int rawMods){
+  if (gametypes.meta){
+    gametypes.meta -> onKey(gametypes.gametype, rawKey, rawScancode, rawAction, rawMods);
+  }
+}
+
 void changeGameType(GameTypes& gametypes, const char* name, void* data){
   gametypes.name = name;
   auto gametypeInfo = gametypeByName(name);

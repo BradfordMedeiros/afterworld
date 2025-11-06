@@ -1437,6 +1437,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     zoomIntoArcade(std::nullopt, playerIndex);
   }
   onKeyArcade(key, scancode, action, mods);
+  gametypesOnKey(gametypeSystem, key, scancode, action, mods);
 
   if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
     if (getActiveControllable(playerIndex).value() -> vehicle.has_value()){

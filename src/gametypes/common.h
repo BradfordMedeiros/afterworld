@@ -19,6 +19,7 @@ struct GameTypeInfo {
   std::function<bool(std::any&, std::string& event, std::any& value)> onEvent;
   std::function<std::string(std::any&)> getDebugText;
   std::function<std::optional<GametypeData>(std::any& gametype, float startTime)> getScoreInfo;
+  std::function<void(std::any& gametype, int rawKey, int rawScancode, int rawAction, int rawMods)> onKey = [](std::any& gametype, int rawKey, int rawScancode, int rawAction, int rawMods) -> void {};
 }; 
 
 

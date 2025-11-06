@@ -18,7 +18,7 @@ struct BallConfig {
   float gravity;
 };
 
-enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, TELEPORT };
+enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT };
 struct VehicleBall {
   BallConfig ballConfig;
 

@@ -749,13 +749,18 @@ std::vector<TagUpdater> tagupdates = {
 			BallModeOptions modeOptions {
 			  .testNumber = 100323,
 			};
-			modeOptions.setPlayerControl = []() -> void {
-  			gameapi -> schedule(0, true, 1, NULL, [](void*) -> void {
+			modeOptions.getBallId = []() -> std::optional<objid> {
+			  auto vehicles = getVehicleIds();
+				return vehicles.at(0);
+			};
+			modeOptions.setPlayerControl = [](std::function<void()> fn) -> void {
+  			gameapi -> schedule(0, true, 1, NULL, [fn](void*) -> void {
 				  auto activePlayer = getActivePlayerId(0);
 				  auto vehicles = getVehicleIds();
 				  std::cout << "vehicles: " << print(vehicles) << ", playerid: " << print(activePlayer) << std::endl;
 				  enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
 				  setCanExitVehicle(false);
+				  fn();
   			});
 			};
 			modeOptions.changeUi = [](bool showBallUi) -> void {

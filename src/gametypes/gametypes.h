@@ -19,6 +19,8 @@ GameTypes createGametypes();
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value);
 DebugConfig debugPrintGametypes(GameTypes& gametype);
 
+void gametypesOnKey(GameTypes& gametypes, int rawKey, int rawScancode, int rawAction, int rawMods);
+
 void changeGameType(GameTypes& gametypes, const char* name, void* data);
 std::optional<GametypeData> getGametypeData(GameTypes&);
 
