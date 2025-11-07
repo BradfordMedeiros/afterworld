@@ -1,0 +1,87 @@
+newmtl __TB_empty
+map_Kd ../../../../../../../../tmp/.mount_TrenchdWu1dA/usr/share/TrenchBroom/defaults/assets/textures/__TB_empty.png
+
+newmtl arcade/invaders/ship
+map_Kd ../../../../gameresources/textures/arcade/invaders/ship.png
+
+newmtl backgrounds/test3
+map_Kd ../../../../gameresources/textures/backgrounds/test3.png
+
+newmtl backgrounds/test5
+map_Kd ../../../../gameresources/textures/backgrounds/test5.png
+
+newmtl backgrounds/tvs
+map_Kd ../../../../gameresources/textures/backgrounds/tvs.png
+
+newmtl clean/WoodenDoor
+map_Kd ../../../../gameresources/textures/clean/WoodenDoor.jpg
+
+newmtl clean/chainlink
+map_Kd ../../../../gameresources/textures/clean/chainlink.png
+
+newmtl clean/darkwood
+map_Kd ../../../../gameresources/textures/clean/darkwood.jpg
+
+newmtl clean/metalbridgetoprailbig
+map_Kd ../../../../gameresources/textures/clean/metalbridgetoprailbig.jpg
+
+newmtl clean/metalgrid
+map_Kd ../../../../gameresources/textures/clean/metalgrid.jpg
+
+newmtl clean/metalwithbar
+map_Kd ../../../../gameresources/textures/clean/metalwithbar.png
+
+newmtl clean/stonewall
+map_Kd ../../../../gameresources/textures/clean/stonewall.jpg
+
+newmtl clean/tex_Ice
+map_Kd ../../../../gameresources/textures/clean/tex_Ice.jpg
+
+newmtl clean/vehlengback
+map_Kd ../../../../gameresources/textures/clean/vehlengback.jpg
+
+newmtl clean/vehltreadsback
+map_Kd ../../../../gameresources/textures/clean/vehltreadsback.jpg
+
+newmtl clean/walkwaybiglawyerbuild
+map_Kd ../../../../gameresources/textures/clean/walkwaybiglawyerbuild.jpg
+
+newmtl clean/wood_light
+map_Kd ../../../../gameresources/textures/clean/wood_light.png
+
+newmtl creepydog
+map_Kd ../../../../gameresources/textures/creepydog.jpg
+
+newmtl enemies/happy
+map_Kd ../../../../gameresources/textures/enemies/happy.png
+
+newmtl grid
+map_Kd ../../../../gameresources/textures/grid.png
+
+newmtl metal_grating
+map_Kd ../../../../gameresources/textures/metal_grating.jpg
+
+newmtl metal_vent_worn
+map_Kd ../../../../gameresources/textures/metal_vent_worn.jpg
+
+newmtl particles/blood
+map_Kd ../../../../gameresources/textures/particles/blood.png
+
+newmtl particles/blood2
+map_Kd ../../../../gameresources/textures/particles/blood2.png
+
+newmtl posters/garbage
+map_Kd ../../../../gameresources/textures/posters/garbage.png
+
+newmtl posters/moonshotarcade
+map_Kd ../../../../gameresources/textures/posters/moonshotarcade.png
+
+newmtl spawnpoint
+map_Kd ../../../../gameresources/textures/spawnpoint.png
+
+newmtl vehl1tanktop1
+map_Kd ../../../../gameresources/textures/vehl1tanktop1.jpg
+
+newmtl worntv
+map_Kd ../../../../gameresources/textures/worntv.jpg
+

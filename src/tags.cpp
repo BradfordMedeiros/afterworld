@@ -767,7 +767,7 @@ std::vector<TagUpdater> tagupdates = {
 				if (showBallUi){
 					setShowBallOptions(
 						BallComponentOptions {
-							.winMessage = "you win congrats",
+							//.winMessage = "you win congrats",
 						}
 					);
 				}else{

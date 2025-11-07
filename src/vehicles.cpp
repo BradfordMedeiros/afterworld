@@ -355,7 +355,6 @@ bool isVehicle(Vehicles& vehicles, objid id){
 }
 
 
-
 void setPowerupBall(Vehicles& vehicles, objid vehicleId, std::optional<BallPowerup> powerup){
   auto& vehicle = vehicles.vehicles.at(vehicleId);
   VehicleShip* vehicleShip = std::get_if<VehicleShip>(&vehicle.vehicle);
