@@ -182,7 +182,9 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 
 struct OrbView {
 	objid orbId;
-	int index;
+	int actualIndex;
+	int targetIndex;
+	std::optional<float> amount;
 };
 struct Orb {
 	int index;
@@ -201,6 +203,8 @@ struct OrbUi {
 struct OrbData {
 	std::unordered_map<objid, OrbUi> orbUis;
 	std::unordered_map<objid, OrbView> orbViewsCameraToOrb;
+
+
 };
 OrbData orbData;
 
@@ -275,8 +279,8 @@ void drawOrbs(OrbUi& orbUi, int ownerId){
 void handleOrbViews(std::unordered_map<objid, OrbView>& orbViewsCameraToOrb){
 	for (auto& [cameraId, objView] : orbViewsCameraToOrb){
 		OrbUi& orbUi = orbData.orbUis.at(objView.orbId);
-		auto orbPosition = getOrbPosition(orbUi, objView.index);
-		auto orbRotation = getOrbRotation(orbUi, objView.index);
+		auto orbPosition = getOrbPosition(orbUi, objView.targetIndex);
+		auto orbRotation = getOrbRotation(orbUi, objView.targetIndex);
 		std::cout << "handleOrbViews set position: " << gameapi -> getGameObjNameForId(cameraId).value() << ", to : " << print(orbPosition) << std::endl;
 		std::cout << "handleOrbViews set rotn: " << print(orbRotation) << std::endl << std::endl;
 
@@ -300,20 +304,20 @@ int getMaxOrbIndex(OrbUi& orbUi){
 void handleOrbControls(int key, int action){
 	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
 		if (isMoveLeftKey(key) && (action == 1)){
-			orbView.index--;
-			if (orbView.index < 0){
-				orbView.index = 0;
+			orbView.targetIndex--;
+			if (orbView.targetIndex < 0){
+				orbView.targetIndex = 0;
 			}
 		}
 		if (isMoveRightKey(key) && (action == 1)){
-			orbView.index++;
+			orbView.targetIndex++;
 			for (auto &[id, orbUi] : orbData.orbUis){
 				if (orbView.orbId != id){
 					continue;
 				}
 				auto maxIndex = getMaxOrbIndex(orbUi);
-				if(orbView.index > maxIndex){
-					orbView.index = maxIndex;
+				if(orbView.targetIndex > maxIndex){
+					orbView.targetIndex = maxIndex;
 				}
 			}
 		}
@@ -899,7 +903,9 @@ std::vector<TagUpdater> tagupdates = {
 			modassert(orbId.has_value(), "orbview target does not exist");
 			orbData.orbViewsCameraToOrb[id] = OrbView {
 				.orbId = orbId.value(),
-				.index = 1,
+				.actualIndex = 1,
+				.targetIndex = 1,
+				.amount = std::nullopt,
 			};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
