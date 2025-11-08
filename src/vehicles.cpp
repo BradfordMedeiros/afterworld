@@ -37,7 +37,7 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
   }else{
     BallConfig ballConfig {
       .magnitude = 100.f,
-      .torque = 0.f,
+      .torque = 50.f,
       .jumpMagnitude = 100.f,
       .mass = 10.f,
       .friction = 1.f,

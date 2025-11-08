@@ -180,6 +180,114 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 	return true;
 }
 
+struct OrbView {
+	objid orbId;
+	int index;
+};
+struct Orb {
+	int index;
+	glm::vec3 position;
+	glm::vec4 tint;
+};
+struct OrbConnection {
+	int indexFrom;
+	int indexTo;
+};
+struct OrbUi {
+	objid id;
+	std::vector<Orb> orbs;
+	std::vector<OrbConnection> connections;
+};
+struct OrbData {
+	std::unordered_map<objid, OrbUi> orbUis;
+	std::unordered_map<objid, OrbView> orbViewsCameraToOrb;
+};
+OrbData orbData;
+
+std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
+	for (auto& orb : orbs){
+		if (orb.index == index){
+			return &orb;
+		}
+	}
+	return std::nullopt;
+}
+
+std::vector<Orb> defaultOrbs {
+	Orb {
+		.index = 0,
+		.position = glm::vec3(0.f, 0.f, 0.f),
+		.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
+	},
+	Orb {
+		.index = 1,
+		.position = glm::vec3(2.f, 0.f, 0.f),
+		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
+	},
+	Orb {
+		.index = 2,
+		.position = glm::vec3(2.f, 1.f, 0.f),
+		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
+	},
+};
+std::vector<OrbConnection> defaultConnections {
+	OrbConnection {
+		.indexFrom = 0,
+		.indexTo = 2,
+	},
+	OrbConnection {
+		.indexFrom = 0,
+		.indexTo = 1,
+	},
+	OrbConnection {
+		.indexFrom = 1,
+		.indexTo = 2,
+	},
+};
+
+glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
+	glm::vec3 offset = gameapi -> getGameObjectPos(orbUi.id, true, "getOrbPosition pos");
+	auto scale = gameapi -> getGameObjectScale(orbUi.id, "getOrbPosition scale");
+	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn");
+	auto orbFrom = getOrb(orbUi.orbs, index).value();
+	auto position = orbFrom -> position;
+	return offset +  (rotation * (scale * position));
+}
+
+glm::quat getOrbRotation(OrbUi& orbUi, int index){
+	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn");
+	return rotation;	
+}
+
+void drawOrbs(OrbUi& orbUi, int ownerId){
+	for (auto& orb : orbUi.orbs){
+		auto orbPosition = getOrbPosition(orbUi, orb.index);
+		drawSphereVecGfx(orbPosition, 0.2f, orb.tint);
+	}
+	for (auto& connection : orbUi.connections){
+		auto orbFrom = getOrbPosition(orbUi, connection.indexFrom);
+		auto orbTo = getOrbPosition(orbUi, connection.indexTo);
+		gameapi -> drawLine(orbFrom, orbTo, false, ownerId, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	}
+}
+
+void handleOrbViews(std::unordered_map<objid, OrbView>& orbViewsCameraToOrb){
+	for (auto& [cameraId, objView] : orbViewsCameraToOrb){
+		OrbUi& orbUi = orbData.orbUis.at(objView.orbId);
+		auto orbPosition = getOrbPosition(orbUi, objView.index);
+		auto orbRotation = getOrbRotation(orbUi, objView.index);
+		std::cout << "handleOrbViews set position: " << gameapi -> getGameObjNameForId(cameraId).value() << ", to : " << print(orbPosition) << std::endl;
+		std::cout << "handleOrbViews set rotn: " << print(orbRotation) << std::endl << std::endl;
+		gameapi -> setGameObjectPosition(cameraId, orbPosition, true, Hint { .hint = "handleOrbViews set orb camera" });
+		gameapi -> setGameObjectRot(cameraId, orbRotation, true, Hint { .hint = "handleOrbViews set orb camera rotn" });
+	}
+}
+
+void handleOrbControls(int key, int action){
+
+}
+
+
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "animation",  // TODO this should probably move to entity
@@ -721,6 +829,56 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
+
+	TagUpdater {
+		.attribute = "orbui",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+   		OrbUi orbUi {
+   			.id = id,
+				.orbs = defaultOrbs,
+				.connections = defaultConnections,
+			};
+			orbData.orbUis[id] = orbUi;			
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		orbData.orbUis.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+			for (auto& [id, orbUi] : orbData.orbUis){
+				auto objExists = gameapi -> gameobjExists(id);
+				if (!objExists){
+					continue;
+				}
+  			auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - orb select");
+	  		auto scale = glm::vec3(1.f, 1.f, 1.f);
+	  		drawOrbs(orbUi, id);  			
+			}
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+	TagUpdater {
+		.attribute = "orbview",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			std::string* strValue = std::get_if<std::string>(&value);
+			modassert(strValue, "orbview target not a thing");
+			auto orbId = findObjByShortName(*strValue, std::nullopt);
+			modassert(orbId.has_value(), "orbview target does not exist");
+			orbData.orbViewsCameraToOrb[id] = OrbView {
+				.orbId = orbId.value(),
+				.index = 1,
+			};
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		orbData.orbViewsCameraToOrb.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		handleOrbViews(orbData.orbViewsCameraToOrb);
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+	
 
 	TagUpdater {
 		.attribute = "vehicle",

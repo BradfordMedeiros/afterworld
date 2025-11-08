@@ -1,0 +1,26 @@
+# Generated scene 
+playerspawn:teleport:true
+playerspawn:playerspawn:true
+playerspawn:position:0 20 20
+
+levelselect:texture:./res/models/box/grid.png
+levelselect:mesh:../gameresources/build/primitives/sphere.gltf
+levelselect:scale:5 5 5
+levelselect:position:0 5.1 0
+levelselect:orbui:true
+
+>camera-view:rotation:-2.1029e-07 0.642788 0.766044 180
+>camera-view:position:0 4.7 21.7
+>camera-view:orbview:levelselect
+
+floor:texture:../gameresources/build/misc/keyboard.png
+floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+floor:physics:enabled
+floor:rotation:0 -1 -5.96046e-08 0.0395647
+floor:scale:100 100 10
+
+
+!light:globallight:true
+!light:angle:-10
+!light:rotation:1 0 1.19209e-07 0
+!light:position:-12.93 -58.31 11.98
