@@ -249,8 +249,9 @@ glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
 	glm::vec3 offset = gameapi -> getGameObjectPos(orbUi.id, true, "getOrbPosition pos");
 	auto scale = gameapi -> getGameObjectScale(orbUi.id, "getOrbPosition scale");
 	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn");
-	auto orbFrom = getOrb(orbUi.orbs, index).value();
-	auto position = orbFrom -> position;
+	auto orbFrom = getOrb(orbUi.orbs, index);
+	modassert(orbFrom.has_value(), std::string("orbFrom does not exist: ") + std::to_string(index));
+	auto position = orbFrom.value() -> position;
 	return offset +  (rotation * (scale * position));
 }
 
@@ -278,13 +279,45 @@ void handleOrbViews(std::unordered_map<objid, OrbView>& orbViewsCameraToOrb){
 		auto orbRotation = getOrbRotation(orbUi, objView.index);
 		std::cout << "handleOrbViews set position: " << gameapi -> getGameObjNameForId(cameraId).value() << ", to : " << print(orbPosition) << std::endl;
 		std::cout << "handleOrbViews set rotn: " << print(orbRotation) << std::endl << std::endl;
-		gameapi -> setGameObjectPosition(cameraId, orbPosition, true, Hint { .hint = "handleOrbViews set orb camera" });
+
 		gameapi -> setGameObjectRot(cameraId, orbRotation, true, Hint { .hint = "handleOrbViews set orb camera rotn" });
+
+		glm::vec3 cameraOffset = orbRotation * glm::vec3(0.f, 0.f, 2.f);
+		gameapi -> setGameObjectPosition(cameraId, orbPosition + cameraOffset, true, Hint { .hint = "handleOrbViews set orb camera" });
+		
 	}
 }
 
+int getMaxOrbIndex(OrbUi& orbUi){
+	int maxIndex = 0;
+	for (auto& orb : orbUi.orbs){
+		if (orb.index > maxIndex){
+			maxIndex = orb.index;
+		}
+	}
+	return maxIndex;
+}
 void handleOrbControls(int key, int action){
-
+	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
+		if (isMoveLeftKey(key) && (action == 1)){
+			orbView.index--;
+			if (orbView.index < 0){
+				orbView.index = 0;
+			}
+		}
+		if (isMoveRightKey(key) && (action == 1)){
+			orbView.index++;
+			for (auto &[id, orbUi] : orbData.orbUis){
+				if (orbView.orbId != id){
+					continue;
+				}
+				auto maxIndex = getMaxOrbIndex(orbUi);
+				if(orbView.index > maxIndex){
+					orbView.index = maxIndex;
+				}
+			}
+		}
+	}
 }
 
 

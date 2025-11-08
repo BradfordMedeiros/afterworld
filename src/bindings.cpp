@@ -1452,6 +1452,8 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
       toggleAutodoor(id, autodoor);
     }
   }
+
+  handleOrbControls(key, action);
 }
 
 

@@ -98,4 +98,6 @@ std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 void toggleAutodoor(objid id, Autodoor& autodoor);
 
+void handleOrbControls(int key, int action);
+
 #endif 
