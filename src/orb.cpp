@@ -63,7 +63,7 @@ void handleOrbViews(OrbData& orbData){
 				orbPosition = targetOrbPosition;
 				objView.actualIndex = objView.targetIndex;
 				objView.startTime = std::nullopt;
-	      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+	      		playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 			}
 		}
 

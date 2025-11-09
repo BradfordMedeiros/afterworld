@@ -82,18 +82,6 @@ void createBallObj(objid sceneId){
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);
   modassert(ball.has_value(), "ball was not created");
-/**
- * ball1:mode:ball
-ball1:texture:./res/textures/wood.jpg
-ball1:tint:1 1 1 0.7
-ball1:physics_restitution:0.5
-ball1:mesh:../gameresources/build/primitives/sphere.gltf
-ball1:physics_mass:10
-ball1:physics_type:dynamic
-ball1:physics_shape:shape_sphere
-ball1:physics:enabled
-ball1:layer:transparency
-ball1:position:5.68 -4.98 13.6*/
 }
 
 

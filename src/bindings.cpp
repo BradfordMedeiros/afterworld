@@ -606,6 +606,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   if (router.has_value()){
     std::optional<objid> sceneId;
     if (sceneToLoad.has_value()){
+      setTempCamera(std::nullopt, 0); // find a better place for this, should be reconciled better
       sceneId = gameapi -> loadScene(sceneToLoad.value(), {}, std::nullopt, {});
     }
     if (scenarioOptions.has_value()){
