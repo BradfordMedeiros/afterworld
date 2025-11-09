@@ -188,28 +188,28 @@ std::vector<Orb> defaultOrbs {
 		.index = 0,
 		.position = glm::vec3(0.f, 0.f, 0.f),
 		.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
-		.text = "level 0\nTutorial Level\nPress Action To Play",
+		.text = "level 0\nVideo\nPress Action To Play",
 		.level = "video",
 	},
 	Orb {
 		.index = 1,
 		.position = glm::vec3(2.f, 0.f, 0.f),
 		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
-		.text = "level 1\nTutorial Level\nPress Action To Play",
+		.text = "level 1\nIntro\nPress Action To Play",
 		.level = "intro",
 	},
 	Orb {
 		.index = 2,
 		.position = glm::vec3(2.f, 1.f, 0.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
-		.text = "level 2\nTutorial Level\nPress Action To Play",
+		.text = "level 2\nBall Rollingl\nPress Action To Play",
 		.level = "ball",
 	},
 	Orb {
 		.index = 3,
 		.position = glm::vec3(2.f, 1.f, -2.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
-		.text = "level 3\nTutorial Level\nPress Action To Play",
+		.text = "level 3\nArena\nPress Action To Play",
 		.level = "arena",
 	},
 };
@@ -856,6 +856,10 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "mode",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			createBallObj(gameapi -> listSceneId(id));
+			createLevelObj(gameapi -> listSceneId(id));
+
+
 			BallModeOptions modeOptions {
 			  .testNumber = 100323,
 			};
@@ -896,14 +900,6 @@ std::vector<TagUpdater> tagupdates = {
 				pushHistory({ "mainmenu" }, true);
 			};
 			
-			/*modeOptions.doActivePowerUp = []() -> void {
-			  auto vehicleIds = getVehicleIds();
-				doPowerupBall(vehicles, vehicleIds.at(0));
-			};
-			modeOptions.getActivePowerup = []() -> std::string {
-				return "super-jump";
-			};*/
-
 			changeGameType(gametypeSystem, "ball", &modeOptions);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {

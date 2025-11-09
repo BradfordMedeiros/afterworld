@@ -18,4 +18,7 @@ struct BallModeOptions{
 
 GameTypeInfo getBallMode();
 
+void createBallObj(objid sceneId);
+void createLevelObj(objid sceneId);
+
 #endif 

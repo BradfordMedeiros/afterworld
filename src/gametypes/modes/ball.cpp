@@ -62,3 +62,61 @@ GameTypeInfo getBallMode(){
 	};
 	return ballMode;
 }
+
+void createBallObj(objid sceneId){
+  GameobjAttributes attr { 
+  	.attr = {
+  		{ "vehicle", "ball" },
+		{ "texture", "./res/textures/wood.jpg" },
+		{ "tint", glm::vec4(1.f, 1.f, 1.f, 0.7f) },
+		{ "physics_restitution", 0.5f },
+		{ "mesh", "../gameresources/build/primitives/sphere.gltf" },
+		{ "physics_mass" , 10.f },
+		{ "physics_type", "dynamic" },
+		{ "physics_shape", "shape_sphere" },
+		{ "physics", "enabled" },
+		{ "layer", "transparency" },
+		{ "position", glm::vec3(5.68f, -4.98f, 13.6f) }
+  	} 
+  };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);
+  modassert(ball.has_value(), "ball was not created");
+/**
+ * ball1:mode:ball
+ball1:texture:./res/textures/wood.jpg
+ball1:tint:1 1 1 0.7
+ball1:physics_restitution:0.5
+ball1:mesh:../gameresources/build/primitives/sphere.gltf
+ball1:physics_mass:10
+ball1:physics_type:dynamic
+ball1:physics_shape:shape_sphere
+ball1:physics:enabled
+ball1:layer:transparency
+ball1:position:5.68 -4.98 13.6*/
+}
+
+
+void createLevelObj(objid sceneId){
+  GameobjAttributes attr { 
+  	.attr = {
+		{ "mesh", "../afterworld/scenes/levels/trench/balls/easy_drops.obj" },
+		{ "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
+		{ "position", glm::vec3(68.32f, -22.1f, 166.6f) },
+  	} 
+  };
+
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  GameobjAttributes submodelAttr { 
+  	.attr = {
+		{ "physics_restitution", 1.f },
+		{ "physics_shape", "shape_exact" },
+		{ "physics", "enabled" },
+  	} 
+  };
+  submodelAttributes["obj/entity0_brush9"] = submodelAttr;
+
+  auto level = gameapi -> makeObjectAttr(sceneId, std::string("obj"), attr, submodelAttributes);
+  modassert(level.has_value(), "level was not created");
+
+}
