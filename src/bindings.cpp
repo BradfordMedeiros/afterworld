@@ -14,6 +14,7 @@ std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::unordered_map<objid, Inventory> scopenameToInventory;
 std::vector<CrystalPickup> crystals; 
 std::unordered_map<objid, glm::vec3> impulses;
+OrbData orbData;
 
 Water water;
 SoundData soundData;
@@ -1453,7 +1454,11 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     }
   }
 
-  handleOrbControls(key, action);
+  auto selectedOrb = handleOrbControls(orbData, key, action);
+  if (selectedOrb.selectedOrb.has_value()){
+    std::cout << "handleOrbViews orb: " << print(*selectedOrb.selectedOrb.value()) << std::endl;
+    goToLevel(selectedOrb.selectedOrb.value() -> level);
+  }
 }
 
 

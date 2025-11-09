@@ -8,12 +8,12 @@ extern ArcadeApi arcadeApi;
 extern Director director;
 extern Vehicles vehicles;
 extern GameTypes gametypeSystem;
+extern OrbData orbData;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void setCanExitVehicle(bool canExit);
-void applyScreenshake(int playerIndex, glm::vec3 impulse);
 
 struct TagUpdater {
 	std::string attribute;
@@ -181,43 +181,7 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 	return true;
 }
 
-struct OrbView {
-	objid orbId;
-	int actualIndex;
-	int targetIndex;
-	std::optional<float> startTime;
-};
-struct Orb {
-	int index;
-	glm::vec3 position;
-	glm::vec4 tint;
-	std::string text;
-};
-struct OrbConnection {
-	int indexFrom;
-	int indexTo;
-};
-struct OrbUi {
-	objid id;
-	std::vector<Orb> orbs;
-	std::vector<OrbConnection> connections;
-};
-struct OrbData {
-	std::unordered_map<objid, OrbUi> orbUis;
-	std::unordered_map<objid, OrbView> orbViewsCameraToOrb;
 
-
-};
-OrbData orbData;
-
-std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
-	for (auto& orb : orbs){
-		if (orb.index == index){
-			return &orb;
-		}
-	}
-	return std::nullopt;
-}
 
 std::vector<Orb> defaultOrbs {
 	Orb {
@@ -225,24 +189,28 @@ std::vector<Orb> defaultOrbs {
 		.position = glm::vec3(0.f, 0.f, 0.f),
 		.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
 		.text = "level 0\nTutorial Level\nPress Action To Play",
+		.level = "video",
 	},
 	Orb {
 		.index = 1,
 		.position = glm::vec3(2.f, 0.f, 0.f),
 		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
 		.text = "level 1\nTutorial Level\nPress Action To Play",
+		.level = "intro",
 	},
 	Orb {
 		.index = 2,
 		.position = glm::vec3(2.f, 1.f, 0.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 2\nTutorial Level\nPress Action To Play",
+		.level = "ball",
 	},
 	Orb {
 		.index = 3,
 		.position = glm::vec3(2.f, 1.f, -2.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 3\nTutorial Level\nPress Action To Play",
+		.level = "arena",
 	},
 };
 std::vector<OrbConnection> defaultConnections {
@@ -268,113 +236,6 @@ std::vector<OrbConnection> defaultConnections {
 	},
 };
 
-glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
-	glm::vec3 offset = gameapi -> getGameObjectPos(orbUi.id, true, "getOrbPosition pos");
-	auto scale = gameapi -> getGameObjectScale(orbUi.id, "getOrbPosition scale");
-	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn");
-	auto orbFrom = getOrb(orbUi.orbs, index);
-	modassert(orbFrom.has_value(), std::string("orbFrom does not exist: ") + std::to_string(index));
-	auto position = orbFrom.value() -> position;
-	return offset +  (rotation * (scale * position));
-}
-
-glm::quat getOrbRotation(OrbUi& orbUi, int index){
-	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn");
-	return rotation;	
-}
-
-void drawOrbs(OrbUi& orbUi, int ownerId){
-	for (auto& orb : orbUi.orbs){
-		auto orbPosition = getOrbPosition(orbUi, orb.index);
-		drawSphereVecGfx(orbPosition, 0.2f, orb.tint);
-	}
-	for (auto& connection : orbUi.connections){
-		auto orbFrom = getOrbPosition(orbUi, connection.indexFrom);
-		auto orbTo = getOrbPosition(orbUi, connection.indexTo);
-		gameapi -> drawLine(orbFrom, orbTo, false, ownerId, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-	}
-}
-
-void handleOrbViews(std::unordered_map<objid, OrbView>& orbViewsCameraToOrb){
-	for (auto& [cameraId, objView] : orbViewsCameraToOrb){
-		OrbUi& orbUi = orbData.orbUis.at(objView.orbId);
-
-		auto targetOrb = getOrb(orbUi.orbs, objView.targetIndex);
-		modassert(targetOrb.has_value(), "handleOrbViews could not find target orb");
-		if (targetOrb.value() -> text != ""){
-			gameapi -> drawText(targetOrb.value() -> text, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-		}
-
-		auto orbPosition = getOrbPosition(orbUi, objView.actualIndex);
-		auto orbRotation = getOrbRotation(orbUi, objView.actualIndex);
-
-		if (objView.startTime.has_value()){
-			float elapsedAmount = gameapi -> timeSeconds(false) - objView.startTime.value();
-			float percentage = elapsedAmount / 0.2f;
-
-			auto targetOrbPosition = getOrbPosition(orbUi, objView.targetIndex);
-			orbPosition = lerp(orbPosition, targetOrbPosition, percentage);
-
-			std::cout << "handleOrbViews: " << percentage << ", target = " << objView.targetIndex << ", actual = " << objView.actualIndex << std::endl;
-			if (percentage > 1.f){
-				orbPosition = targetOrbPosition;
-				objView.actualIndex = objView.targetIndex;
-				objView.startTime = std::nullopt;
-	      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
-			}
-		}
-
-		std::cout << "handleOrbViews set position: " << gameapi -> getGameObjNameForId(cameraId).value() << ", to : " << print(orbPosition) << std::endl;
-		std::cout << "handleOrbViews set rotn: " << print(orbRotation) << std::endl << std::endl;
-
-		gameapi -> setGameObjectRot(cameraId, orbRotation, true, Hint { .hint = "handleOrbViews set orb camera rotn" });
-
-		glm::vec3 cameraOffset = orbRotation * glm::vec3(0.f, 0.f, 2.f);
-		gameapi -> setGameObjectPosition(cameraId, orbPosition + cameraOffset, true, Hint { .hint = "handleOrbViews set orb camera" });
-		
-	}
-}
-
-int getMaxOrbIndex(OrbUi& orbUi){
-	int maxIndex = 0;
-	for (auto& orb : orbUi.orbs){
-		if (orb.index > maxIndex){
-			maxIndex = orb.index;
-		}
-	}
-	return maxIndex;
-}
-void handleOrbControls(int key, int action){
-	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
-		bool changedIndex = false;
-		if (isMoveLeftKey(key) && (action == 1)){
-			orbView.targetIndex--;
-			changedIndex = true;
-			if (orbView.targetIndex < 0){
-				orbView.targetIndex = 0;
-				changedIndex = false;
-			}
-		}
-		if (isMoveRightKey(key) && (action == 1)){
-			orbView.targetIndex++;
-			changedIndex = true;
-			for (auto &[id, orbUi] : orbData.orbUis){
-				if (orbView.orbId != id){
-					continue;
-				}
-				auto maxIndex = getMaxOrbIndex(orbUi);
-				if(orbView.targetIndex > maxIndex){
-					orbView.targetIndex = maxIndex;
-					changedIndex = false;
-				}
-			}
-		}
-		if (changedIndex){
-			orbView.startTime = gameapi -> timeSeconds(false);
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
-		}
-	}
-}
 
 
 std::vector<TagUpdater> tagupdates = { 
@@ -955,8 +816,8 @@ std::vector<TagUpdater> tagupdates = {
 			modassert(orbId.has_value(), "orbview target does not exist");
 			orbData.orbViewsCameraToOrb[id] = OrbView {
 				.orbId = orbId.value(),
-				.actualIndex = 1,
-				.targetIndex = 1,
+				.actualIndex = 0,
+				.targetIndex = 0,
 				.startTime = std::nullopt,
 			};
 		},
@@ -964,7 +825,7 @@ std::vector<TagUpdater> tagupdates = {
   		orbData.orbViewsCameraToOrb.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		handleOrbViews(orbData.orbViewsCameraToOrb);
+  		handleOrbViews(orbData);
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
