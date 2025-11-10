@@ -22,6 +22,7 @@ struct Orb {
 	glm::vec4 tint;
 	std::string text;
 
+	std::optional<std::string> mesh;
 	std::string level;
 };
 struct OrbConnection {
@@ -36,13 +37,16 @@ struct OrbUi {
 struct OrbData {
 	std::unordered_map<objid, OrbUi> orbUis;
 	std::unordered_map<objid, OrbView> orbViewsCameraToOrb;
+
+	std::unordered_map<objid, std::unordered_map<int, objid>> orbIdToIndexToMeshId;
+
 };
 
 std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index);
 glm::vec3 getOrbPosition(OrbUi& orbUi, int index);
 glm::quat getOrbRotation(OrbUi& orbUi, int index);
 
-void drawOrbs(OrbUi& orbUi, int ownerId);
+void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId);
 
 void handleOrbViews(OrbData& orbData);
 

@@ -189,6 +189,7 @@ std::vector<Orb> defaultOrbs {
 		.position = glm::vec3(0.f, 0.f, 0.f),
 		.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
 		.text = "level 0\nVideo\nPress Action To Play",
+		.mesh = "../gameresources/build/uncategorized/arcade.gltf",
 		.level = "video",
 	},
 	Orb {
@@ -196,6 +197,7 @@ std::vector<Orb> defaultOrbs {
 		.position = glm::vec3(2.f, 0.f, 0.f),
 		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
 		.text = "level 1\nIntro\nPress Action To Play",
+		.mesh = std::nullopt,
 		.level = "ball",
 	},
 	Orb {
@@ -203,6 +205,7 @@ std::vector<Orb> defaultOrbs {
 		.position = glm::vec3(2.f, 1.f, 0.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 2\nBall Rollingl\nPress Action To Play",
+		.mesh = "../gameresources/build/uncategorized/arcade.gltf",
 		.level = "ball2",
 	},
 	Orb {
@@ -210,6 +213,7 @@ std::vector<Orb> defaultOrbs {
 		.position = glm::vec3(2.f, 1.f, -2.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 3\nArena\nPress Action To Play",
+		.mesh = std::nullopt,
 		.level = "arena",
 	},
 };
@@ -794,14 +798,25 @@ std::vector<TagUpdater> tagupdates = {
   		orbData.orbUis.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
+ 			std::set<objid> cachesToRemove;
+			for (auto& [orbUiId, indexToMesh] : orbData.orbIdToIndexToMeshId){
+				if (indexToMesh.size() == 0 || orbData.orbUis.find(orbUiId) == orbData.orbUis.end()){
+					cachesToRemove.insert(orbUiId);
+				}
+			}
+			for (auto cacheToRemove : cachesToRemove){
+				for (auto&[index, meshObjId] :  orbData.orbIdToIndexToMeshId.at(cacheToRemove)){
+					gameapi -> removeObjectById(meshObjId);
+				}
+				orbData.orbIdToIndexToMeshId.erase(cacheToRemove);
+			}
+
 			for (auto& [id, orbUi] : orbData.orbUis){
 				auto objExists = gameapi -> gameobjExists(id);
 				if (!objExists){
 					continue;
 				}
-  			auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - orb select");
-	  		auto scale = glm::vec3(1.f, 1.f, 1.f);
-	  		drawOrbs(orbUi, id);  			
+	  		drawOrbs(orbData, orbUi, id);  			
 			}
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {

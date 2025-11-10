@@ -26,11 +26,46 @@ glm::quat getOrbRotation(OrbUi& orbUi, int index){
 	return rotation;	
 }
 
-void drawOrbs(OrbUi& orbUi, int ownerId){
+std::optional<objid> orbMeshCache(OrbData& orbData, objid orbId, int index){
+	if (orbData.orbIdToIndexToMeshId.find(orbId) == orbData.orbIdToIndexToMeshId.end()){
+		return std::nullopt;
+	}
+	auto& indexToObjId = orbData.orbIdToIndexToMeshId.at(orbId);
+	if (indexToObjId.find(index) != indexToObjId.end()){
+		return indexToObjId.at(index);
+	}
+	return std::nullopt;
+}
+void saveMeshToOrbCache(OrbData& orbData, objid orbId, int index, objid meshId){
+	if (orbData.orbIdToIndexToMeshId.find(orbId) == orbData.orbIdToIndexToMeshId.end()){
+		orbData.orbIdToIndexToMeshId[orbId] = {};
+	}
+	orbData.orbIdToIndexToMeshId.at(orbId)[index] = meshId;
+}
+
+void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId){
 	for (auto& orb : orbUi.orbs){
 		auto orbPosition = getOrbPosition(orbUi, orb.index);
 		drawSphereVecGfx(orbPosition, 0.2f, orb.tint);
+
+		auto orbMeshId = orbMeshCache(orbData, orbUi.id, orb.index);
+		if (orb.mesh.has_value() &&  !orbMeshId.has_value()){
+  			GameobjAttributes attr { 
+  				.attr = {
+					{ "mesh", orb.mesh.value() },
+  				} 
+  			};
+  			std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  			auto meshId = gameapi -> makeObjectAttr(gameapi -> listSceneId(ownerId), std::string("orb-mesh") + uniqueNameSuffix() , attr, submodelAttributes);
+  			modassert(meshId.has_value(), "meshId was not created");
+  			saveMeshToOrbCache(orbData, orbUi.id, orb.index, meshId.value());
+		}
+
+		if (orbMeshId.has_value()){
+			gameapi -> setGameObjectPosition(orbMeshId.value(), orbPosition, true, Hint { .hint = "[gamelogic] - orb set mesh posn" });
+		}
 	}
+
 	for (auto& connection : orbUi.connections){
 		auto orbFrom = getOrbPosition(orbUi, connection.indexFrom);
 		auto orbTo = getOrbPosition(orbUi, connection.indexTo);
@@ -40,6 +75,9 @@ void drawOrbs(OrbUi& orbUi, int ownerId){
 
 void handleOrbViews(OrbData& orbData){
 	for (auto& [cameraId, objView] : orbData.orbViewsCameraToOrb){
+		if (orbData.orbUis.find(objView.orbId) == orbData.orbUis.end()){
+			continue;
+		}
 		OrbUi& orbUi = orbData.orbUis.at(objView.orbId);
 
 		auto targetOrb = getOrb(orbUi.orbs, objView.targetIndex);
@@ -99,6 +137,9 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	OrbSelection orbSelection {};
 
 	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
+		if (orbData.orbUis.find(orbView.orbId) == orbData.orbUis.end()){
+			continue;
+		}
 		bool changedIndex = false;
 		if (isMoveLeftKey(key) && (action == 1)){
 			orbView.targetIndex--;
