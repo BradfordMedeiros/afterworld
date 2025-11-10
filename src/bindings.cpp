@@ -257,16 +257,36 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
-std::optional<std::string> levelByShortcutName(std::string shortcut){
-  auto query = gameapi -> compileSqlQuery("select filepath, shortcut from levels", {});
+struct LevelInfo {
+  std::string filepath;
+  std::vector<std::vector<std::string>> additionalTokens;
+};
+std::optional<LevelInfo> levelByShortcutName(std::string shortcut){
+  auto query = gameapi -> compileSqlQuery("select filepath, shortcut, attr from levels", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
+
   for (auto row : result){
     auto filepath = row.at(0);
     auto shortcutResult = row.at(1);
+  
+    std::string additionalTokensStr = row.at(2);
+
+    auto rowData = split(additionalTokensStr, ';');
+
+    std::vector<std::vector<std::string>> additionalTokens;
+    for (auto& tokenStr: rowData){
+      auto values = split(tokenStr, ':');
+      modassert(values.size() == 3, "invalid number of attr in level");
+      additionalTokens.push_back(values);
+    }
+
     if (shortcutResult == shortcut){
-      return filepath;
+      return LevelInfo {
+        .filepath = filepath,
+        .additionalTokens = additionalTokens,
+      };
     }
   }
   return std::nullopt;
@@ -332,9 +352,13 @@ void maybeDisplayGameOver(){
   }
 }
 
+struct SceneLoadInfo {
+  std::string sceneFile;
+  std::vector<std::vector<std::string>> additionalTokens;
+};
 struct SceneRouterPath {
   std::vector<std::string> paths;
-  std::optional<std::function<std::string(std::vector<std::string> params)>> scene;
+  std::optional<std::function<SceneLoadInfo(std::vector<std::string> params)>> scene;
   std::optional<std::function<ScenarioOptions(std::vector<std::string> params)>> scenarioOptions;
   bool makePlayer;
   std::optional<std::string> player;
@@ -355,17 +379,25 @@ struct SceneRouterOptions {
 std::vector<SceneRouterPath> routerPaths = {
   SceneRouterPath {
     .paths = { "mainmenu/", "mainmenu/levelselect/", "mainmenu/settings/", "debug/wheel/" },
-    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/menu.rawscene"; },
+    .scene = [](std::vector<std::string> params) -> SceneLoadInfo { 
+      return SceneLoadInfo {
+        .sceneFile = "../afterworld/scenes/menu.rawscene",
+        .additionalTokens = {},
+      };
+    },
     .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = std::nullopt,
   },
   SceneRouterPath {
     .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
-    .scene = [](std::vector<std::string> params) -> std::string {
+    .scene = [](std::vector<std::string> params) -> SceneLoadInfo {
       auto sceneFile = levelByShortcutName(params.at(0));
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
-      return sceneFile.value();
+      return SceneLoadInfo {
+        .sceneFile = sceneFile.value().filepath,
+        .additionalTokens = sceneFile.value().additionalTokens,
+      };
     },
     .scenarioOptions = [](std::vector<std::string> params) -> ScenarioOptions {
       return scenarioOptionsByShortcutName(params.at(0));
@@ -375,21 +407,36 @@ std::vector<SceneRouterPath> routerPaths = {
   },
   SceneRouterPath {
     .paths = { "loading/" },
-    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/loading.rawscene"; },
+    .scene = [](std::vector<std::string> params) -> SceneLoadInfo { 
+      return SceneLoadInfo {
+        .sceneFile = "../afterworld/scenes/loading.rawscene",
+        .additionalTokens = {},
+      };
+    },
     .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = std::nullopt,
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
-    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/models.rawscene"; },
+    .scene = [](std::vector<std::string> params) -> SceneLoadInfo { 
+      return SceneLoadInfo {
+        .sceneFile = "../afterworld/scenes/dev/models.rawscene",
+        .additionalTokens = {},
+      };
+    },
     .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = "maincamera",
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
-    .scene = [](std::vector<std::string> params) -> std::string { return "../afterworld/scenes/dev/particles.rawscene"; },
+    .scene = [](std::vector<std::string> params) -> SceneLoadInfo { 
+      return SceneLoadInfo {
+        .sceneFile = "../afterworld/scenes/dev/particles.rawscene",
+        .additionalTokens = {},
+      };
+    },
     .scenarioOptions = std::nullopt,
     .makePlayer = false,
     .player = "maincamera",
@@ -559,7 +606,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   modlog("router scene route, router, has router = ", print(router.has_value()));
   //modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
-  std::optional<std::string> sceneToLoad;
+  std::optional<SceneLoadInfo> sceneToLoad;
   std::optional<ScenarioOptions> scenarioOptions;
 
 
@@ -576,14 +623,15 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
 
   if (router.has_value() && router.value() -> scene.has_value()){
     sceneToLoad = router.value() -> scene.value()(params);
-    modlog("router scene route load", sceneToLoad.value());
+    modlog("router scene route load", sceneToLoad.value().sceneFile);
   }
   if (router.has_value() && router.value() -> scenarioOptions.has_value()){
     scenarioOptions = router.value() -> scenarioOptions.value()(params);
   }
   
 
-  bool currentSceneFileLoaded = sceneToLoad.has_value() && sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().sceneFile.has_value() && sceneManagement.managedScene.value().sceneFile.value() == sceneToLoad.value();
+  // This is kind of weird now since can load things with additional tokens.  Maybe should be aware of the level name or something? 
+  bool currentSceneFileLoaded = sceneToLoad.has_value() && sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().sceneFile.has_value() && sceneManagement.managedScene.value().sceneFile.value() == sceneToLoad.value().sceneFile;
 
   if (sceneManagement.managedScene.has_value()){
     if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex && currentSceneFileLoaded){
@@ -607,7 +655,13 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     std::optional<objid> sceneId;
     if (sceneToLoad.has_value()){
       setTempCamera(std::nullopt, 0); // find a better place for this, should be reconciled better
-      sceneId = gameapi -> loadScene(sceneToLoad.value(), {}, std::nullopt, {});
+
+      if (sceneToLoad.value().additionalTokens.size() > 0){
+        std::cout << "additional tokens: " << print(sceneToLoad.value().additionalTokens.at(0)) << std::endl;
+      }else{
+        std::cout << "additional tokens: " << "none" << std::endl;
+      }
+      sceneId = gameapi -> loadScene(sceneToLoad.value().sceneFile, sceneToLoad.value().additionalTokens, std::nullopt, {});
     }
     if (scenarioOptions.has_value()){
       setScenarioOptions(scenarioOptions.value());
@@ -623,7 +677,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .id = sceneId,
       .index = currentIndex,
       .path = currentPath,
-      .sceneFile = sceneToLoad,
+      .sceneFile = sceneToLoad.value().sceneFile,
       .player = router.value() -> player,
       .makePlayer = router.value() -> makePlayer,
     };

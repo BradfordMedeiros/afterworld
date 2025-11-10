@@ -19,6 +19,6 @@ struct BallModeOptions{
 GameTypeInfo getBallMode();
 
 void createBallObj(objid sceneId);
-void createLevelObj(objid sceneId);
+void createLevelObj(objid sceneId, std::string ballLevel);
 
 #endif 

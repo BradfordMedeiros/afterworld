@@ -85,10 +85,10 @@ void createBallObj(objid sceneId){
 }
 
 
-void createLevelObj(objid sceneId){
+void createLevelObj(objid sceneId, std::string ballLevel){
   GameobjAttributes attr { 
   	.attr = {
-		{ "mesh", "../afterworld/scenes/levels/trench/balls/easy_drops.obj" },
+		{ "mesh", ballLevel },
 		{ "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
 		{ "position", glm::vec3(68.32f, -22.1f, 166.6f) },
   	} 

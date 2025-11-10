@@ -196,14 +196,14 @@ std::vector<Orb> defaultOrbs {
 		.position = glm::vec3(2.f, 0.f, 0.f),
 		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
 		.text = "level 1\nIntro\nPress Action To Play",
-		.level = "intro",
+		.level = "ball",
 	},
 	Orb {
 		.index = 2,
 		.position = glm::vec3(2.f, 1.f, 0.f),
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 2\nBall Rollingl\nPress Action To Play",
-		.level = "ball",
+		.level = "ball2",
 	},
 	Orb {
 		.index = 3,
@@ -859,8 +859,10 @@ std::vector<TagUpdater> tagupdates = {
 			auto modeStr = std::get_if<std::string>(&value);
 			modassert(modeStr, "modeStr not a string");
 			if (*modeStr == "ball"){
+				auto level = getSingleAttr(id, "ball-level");
+				modassert(level.has_value(), "mode no level provided");
 				createBallObj(gameapi -> listSceneId(id));
-				createLevelObj(gameapi -> listSceneId(id));
+				createLevelObj(gameapi -> listSceneId(id), level.value());
 
 				BallModeOptions modeOptions {
 				  .testNumber = 100323,
