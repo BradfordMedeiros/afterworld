@@ -39,6 +39,7 @@ struct ConsoleInterface {
   std::function<void(int)> deliverAmmo;
   std::function<void(bool)> disableActiveEntity;
   std::function<void(std::string)> spawnByTag;
+  std::function<void(std::string, bool)> markLevelComplete;
 };
 
 extern Component consoleComponent;

@@ -16,6 +16,10 @@ struct OrbView {
 	int targetIndex;
 	std::optional<float> startTime;
 };
+
+struct OrbProgress {
+	bool complete;
+};
 struct Orb {
 	int index;
 	glm::vec3 position;
@@ -24,6 +28,7 @@ struct Orb {
 
 	std::optional<std::string> mesh;
 	std::string level;
+	std::function<OrbProgress()> getOrbProgress;
 };
 struct OrbConnection {
 	int indexFrom;

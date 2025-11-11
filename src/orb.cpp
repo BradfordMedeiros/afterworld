@@ -46,7 +46,13 @@ void saveMeshToOrbCache(OrbData& orbData, objid orbId, int index, objid meshId){
 void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId){
 	for (auto& orb : orbUi.orbs){
 		auto orbPosition = getOrbPosition(orbUi, orb.index);
-		drawSphereVecGfx(orbPosition, 0.2f, orb.tint);
+
+		auto isComplete = orb.getOrbProgress().complete;
+		if (isComplete){
+			drawSphereVecGfx(orbPosition, 0.2f, orb.tint);
+		}else{
+			drawSphereVecGfx(orbPosition, 0.2f, glm::vec4(1.f, 0.f, 0.f, 1.f));
+		}
 
 		auto orbMeshId = orbMeshCache(orbData, orbUi.id, orb.index);
 		if (orb.mesh.has_value() &&  !orbMeshId.has_value()){
@@ -62,11 +68,18 @@ void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId){
 		}
 
 		if (orbMeshId.has_value()){
+			auto orbRotation = getOrbRotation(orbUi, orb.index);
 			gameapi -> setGameObjectPosition(orbMeshId.value(), orbPosition, true, Hint { .hint = "[gamelogic] - orb set mesh posn" });
+			gameapi -> setGameObjectRot(orbMeshId.value(), orbRotation, true, Hint { .hint = "[gamelogic] - orb set mesh rotn" });
 		}
 	}
 
 	for (auto& connection : orbUi.connections){
+		auto complete = getOrb(orbUi.orbs, connection.indexFrom).value() -> getOrbProgress().complete;
+		if (!complete){
+			continue;
+		}
+
 		auto orbFrom = getOrbPosition(orbUi, connection.indexFrom);
 		auto orbTo = getOrbPosition(orbUi, connection.indexTo);
 		gameapi -> drawLine(orbFrom, orbTo, false, ownerId, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
@@ -137,10 +150,15 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	OrbSelection orbSelection {};
 
 	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
+
 		if (orbData.orbUis.find(orbView.orbId) == orbData.orbUis.end()){
 			continue;
 		}
 		bool changedIndex = false;
+
+		auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex).value();
+		auto isComplete = selectedOrb -> getOrbProgress().complete;
+
 		if (isMoveLeftKey(key) && (action == 1)){
 			orbView.targetIndex--;
 			changedIndex = true;
@@ -149,7 +167,7 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 				changedIndex = false;
 			}
 		}
-		if (isMoveRightKey(key) && (action == 1)){
+		if (isMoveRightKey(key) && (action == 1) && isComplete){
 			orbView.targetIndex++;
 			changedIndex = true;
 			auto orbUi = getOrbUi(orbData, orbView.orbId).value();

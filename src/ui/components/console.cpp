@@ -199,6 +199,21 @@ std::vector<CommandDispatch> commands {
     },
   },
   CommandDispatch {
+    .command = "marklevel",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      *valid = false;
+      auto values = split(command, ' ');
+      if (values.size() != 3){
+        return std::nullopt;
+      }
+      auto levelName = values.at(1);
+      bool levelComplete = values.at(2) == "true";
+      consoleInterface.markLevelComplete(levelName, levelComplete);
+      return std::nullopt;    
+    },
+  },
+
+  CommandDispatch {
     .command = "die",
     .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
       *valid = true;

@@ -21,6 +21,20 @@ int totalCrystals();
 void pickupCrystal(std::string name);
 bool hasCrystal(std::string& name);
 
+
+////////////////////////////////////////////////////
+
+struct LevelProgress {
+  std::string level;
+  bool complete;
+};
+std::vector<LevelProgress> loadLevelProgress();
+void saveLevelProgress();
+int completedLevels();
+int totalLevels();
+void markLevelComplete(std::string name, bool complete);
+bool isLevelComplete(std::string name);
+
 //////////////
 
 void saveData();
