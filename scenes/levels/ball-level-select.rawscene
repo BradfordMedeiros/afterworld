@@ -4,8 +4,10 @@ floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 floor:physics:enabled
 floor:rotation:0 -1 1.19209e-07 180.04
 floor:scale:100 100 10
+
 >camera-view:orbview:levelselect
 >camera-view:position:10 5.1 2
+
 !light:globallight:true
 !light:angle:-10
 !light:rotation:1 0 1.19209e-07 0
@@ -14,10 +16,17 @@ floor:scale:100 100 10
 !light:spin:true
 
 levelselect:orbui:true
+levelselect:spin:true
 levelselect:texture:./res/textures/skyboxs/sky/bottom.jpg
 levelselect:mesh:../gameresources/build/primitives/sphere.gltf
 levelselect:scale:5 5 5
 levelselect:position:0 5.1 0
+
+playerspawn:mode:orb-select
 playerspawn:playerspawn:true
 playerspawn:teleport:true
 playerspawn:position:0 20 20
+
+
+arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
+arcade:scale:1 1 1

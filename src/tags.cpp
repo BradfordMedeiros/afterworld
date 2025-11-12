@@ -9,11 +9,13 @@ extern Director director;
 extern Vehicles vehicles;
 extern GameTypes gametypeSystem;
 extern OrbData orbData;
+extern std::optional<std::string> activeLevel;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void setCanExitVehicle(bool canExit);
+void goToLevel(std::string levelShortName);
 
 struct TagUpdater {
 	std::string attribute;
@@ -776,6 +778,7 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = [](Tags& tags) -> void {
   		handleOrbViews(orbData);
+  		std::cout << "active level: " << print(activeLevel) << std::endl;
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
@@ -800,6 +803,27 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+
+	TagUpdater {
+		.attribute = "skip",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+ 			auto levelComplete = getSingleAttr(id, "markcomplete");
+ 			if (levelComplete.has_value()){
+ 				markLevelComplete(levelComplete.value(), true);
+ 			}
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		if (key == "advance"){
+  			gameapi -> sendNotifyMessage("ball-game", std::string("reset"));
+	  		goToLevel("ballselect");
+  		}
   	},
 	},
 
@@ -851,7 +875,8 @@ std::vector<TagUpdater> tagupdates = {
 					setShowBallOptions(ballOptions);
 				};
 				modeOptions.setLevelFinished = []() -> void {
-					pushHistory({ "mainmenu" }, true);
+					markLevelComplete(activeLevel.value(), true);
+					goToLevel("ballselect");
 				};
 			
 				changeGameType(gametypeSystem, "ball", &modeOptions);

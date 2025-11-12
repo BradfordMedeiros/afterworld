@@ -63,6 +63,7 @@ struct GameState {
 };
 
 GameState* gameStatePtr = NULL;
+std::optional<std::string> activeLevel;
 
 MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
@@ -247,6 +248,7 @@ SceneManagement createSceneManagement(){
 
 void goToLevel(std::string levelShortName){
   pushHistory({ "playing", levelShortName }, true);
+  activeLevel = levelShortName;
 }
 void goToLink(std::string link){
   pushHistory({ "loading" }, true);
@@ -647,6 +649,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
       }
       sceneManagement.managedScene = std::nullopt;
+      activeLevel = std::nullopt;
       sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     }
   }
@@ -682,6 +685,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .player = router.value() -> player,
       .makePlayer = router.value() -> makePlayer,
     };
+    activeLevel = std::nullopt;
     sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     modlog("router scene route load", sceneManagement.managedScene.value().path);
     startLevel(sceneManagement.managedScene.value());
@@ -1515,7 +1519,14 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   if (selectedOrb.selectedOrb.has_value()){
     std::cout << "handleOrbViews orb: " << print(*selectedOrb.selectedOrb.value()) << std::endl;
     goToLevel(selectedOrb.selectedOrb.value() -> level);
+    return;
   }
+
+  if (isJumpKey(key) && action == 1){
+    gameapi -> sendNotifyMessage("advance", true);
+    return;
+  }
+
 }
 
 

@@ -1,6 +1,7 @@
 #include "./ball.h"
 
 bool isReloadKey(int button);
+bool isTeleportButton(int button);
 
 extern CustomApiBindings* gameapi;
 
@@ -9,18 +10,18 @@ GameTypeInfo getBallMode(){
 	  .gametypeName = "ball",
 	  .events = { "ball-game" },
 	  .createGametype = [](void* data) -> std::any {
-		int scoreLimit = 3;
-		std::vector<std::string> teamNames = { "red", "blue" };
-		std::vector<int> scores = { 0, 0 };
-		modassert(teamNames.size() == scores.size(), "team names is not score size");
+			int scoreLimit = 3;
+			std::vector<std::string> teamNames = { "red", "blue" };
+			std::vector<int> scores = { 0, 0 };
+			modassert(teamNames.size() == scores.size(), "team names is not score size");
 
-		BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
-		std::cout << "ball mode: " << modeOptions -> testNumber << std::endl;
-		modeOptions -> setPlayerControl([gameapi]() -> void {
-			// This is lame, but whatever
-			gameapi -> sendNotifyMessage("ball-game", std::string("start"));
-		});
-		modeOptions -> changeUi(true);
+			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
+			std::cout << "ball mode: " << modeOptions -> testNumber << std::endl;
+			modeOptions -> setPlayerControl([gameapi]() -> void {
+				// This is lame, but whatever
+				gameapi -> sendNotifyMessage("ball-game", std::string("start"));
+			});
+			modeOptions -> changeUi(true);
 
 	    return *modeOptions; 
 	  },
@@ -56,6 +57,9 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballMode, "ballMode options");
 	  	if(isReloadKey(key) && action == 0){
 	  		gameapi -> sendNotifyMessage("ball-game", std::string("reset"));
+	  	}
+	  	if (isTeleportButton(key) && action == 0){
+	  		gameapi -> sendNotifyMessage("ball-game", std::string("complete"));
 	  	}
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },

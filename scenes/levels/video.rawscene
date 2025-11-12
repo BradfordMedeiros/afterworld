@@ -3,7 +3,9 @@
 ]video:show:enabled
 ]video:shader:./res/shaders/video/fragment.glsl,./res/shaders/video/vertex.glsl
 ]video:layer:basicui2
-]video:video:../gameresources/video/bigbuck.webm
+
+]video:texturepath:bigbuck
+]video:skip:true
 
 
 floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf

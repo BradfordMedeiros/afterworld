@@ -22,10 +22,10 @@ std::vector<Orb> ballGameOrbs {
 		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
 		.text = "level 1\nIntro\nPress Action To Play",
 		.mesh = std::nullopt,
-		.level = "ball",
+		.level = "intro",
 		.getOrbProgress = []() -> OrbProgress {
 			return OrbProgress {
-				.complete = isLevelComplete("ball"),
+				.complete = isLevelComplete("intro"),
 			};
 		},
 	},
