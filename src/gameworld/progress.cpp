@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 extern std::vector<CrystalPickup> crystals;   // static-state extern
 extern std::vector<LevelProgress> levelProgresses;
 
-const char* CRYSTAL_SAVE_FILE = "../afterworld/data/save/save.json";
+const char* PROGRESS_SAVE_FILE = "../afterworld/data/save/save.json";
 
 bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
   if (values.find("crystals") == values.end()){
@@ -23,7 +23,7 @@ bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, 
 
 std::vector<CrystalPickup> loadCrystals(){
   bool success = false;
-  auto data = gameapi -> loadFromJsonFile (CRYSTAL_SAVE_FILE, &success);
+  auto data = gameapi -> loadFromJsonFile (PROGRESS_SAVE_FILE, &success);
   if (!success){
     modassertwarn(false, "load save file failed");
     data = {};
@@ -97,21 +97,17 @@ void pickupCrystal(std::string name){
 //////////////////////////////////
 
 std::vector<LevelProgress> loadLevelProgress(){
-  return {
-    LevelProgress {
-      .level = "ball",
-      .complete = false,
-    },
-    LevelProgress {
-      .level = "ball2",
-      .complete = true,
-    },
-    LevelProgress {
-      .level = "video",
-      .complete = false,
-    },
-  };
+  auto boolValues = getSaveBoolValues("levelprogress", "complete");
+  std::vector<LevelProgress> progress;
+  for (auto &boolValue : boolValues){
+    progress.push_back(LevelProgress {
+      .level = boolValue.field,
+      .complete = boolValue.value,
+    });
+  }
+  return progress;
 }
+
 void saveLevelProgress(){
   std::unordered_map<std::string, JsonType> progressValues;
   for (auto& levelProgress : levelProgresses){

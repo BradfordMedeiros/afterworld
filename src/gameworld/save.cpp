@@ -63,3 +63,44 @@ bool getSaveBoolValue(std::string scope, std::string key, float defaultValue){
 std::string getSaveStringValue(std::string scope, std::string key, std::string defaultValue){
   return getSaveValue<std::string>(scope, key, defaultValue);
 }
+
+
+template <typename T>
+void getSaveValue(std::string scope, std::string subfield, std::vector<T>& _values, std::vector<std::string>& _names){
+  bool success = false;
+  auto data = gameapi -> loadFromJsonFile (SAVE_FILE, &success);
+  if (!success){
+    modassertwarn(false, "load save file failed");
+    data = {};
+  }
+  if (data.find(scope) == data.end()){
+    data[scope] = {};
+  }
+  for (auto& [key, value] : data.at(scope)){
+    auto keys = split(key, '|');
+    if (keys.size() == 2 && keys.at(1) == subfield){
+      auto name = keys.at(0);
+      std::cout << "name is: " << name << std::endl;
+      T* typeValue = std::get_if<T>(&value);
+      if (typeValue){
+        _values.push_back(*typeValue);
+        _names.push_back(name);
+      }
+    }
+  } 
+}
+
+std::vector<BoolValueResult> getSaveBoolValues(std::string scope, std::string key){
+  std::vector<bool> values;
+  std::vector<std::string> names;
+  getSaveValue(scope, key, values, names);
+  std::vector<BoolValueResult> results;
+  modassert(values.size() == names.size(), "getSaveBoolValues mismatch sizes, programming error");
+  for (int i = 0; i < values.size(); i++){
+    results.push_back(BoolValueResult {
+      .field = names.at(i),
+      .value = values.at(i),
+    });
+  }
+  return results;
+}

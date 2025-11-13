@@ -11,4 +11,10 @@ float getSaveFloatValue(std::string scope, std::string key, float defaultValue);
 bool getSaveBoolValue(std::string scope, std::string key, float defaultValue);
 std::string getSaveStringValue(std::string scope, std::string key, std::string defaultValue);
 
+struct BoolValueResult {
+  std::string field;
+  bool value;
+};
+std::vector<BoolValueResult> getSaveBoolValues(std::string scope, std::string key);
+
 #endif 
