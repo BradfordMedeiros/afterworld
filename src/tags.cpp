@@ -16,6 +16,7 @@ std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void setCanExitVehicle(bool canExit);
 void goToLevel(std::string levelShortName);
+void goBackMainMenu();
 
 struct TagUpdater {
 	std::string attribute;
@@ -183,6 +184,10 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 	return true;
 }
 
+struct Skippable {
+	std::optional<std::string> advanceToLevel;
+};
+std::unordered_map<objid, Skippable> skippable;
 
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
@@ -807,22 +812,33 @@ std::vector<TagUpdater> tagupdates = {
 	},
 
 	TagUpdater {
-		.attribute = "skip",
+		.attribute = "advance",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+ 			auto advanceToLevel = getSingleAttr(id, "advance");
+			skippable[id] = Skippable{
+				.advanceToLevel = advanceToLevel,
+			};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
  			auto levelComplete = getSingleAttr(id, "markcomplete");
  			if (levelComplete.has_value()){
  				markLevelComplete(levelComplete.value(), true);
  			}
+ 			skippable.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
 
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   		if (key == "advance"){
-  			gameapi -> sendNotifyMessage("ball-game", std::string("reset"));
-	  		goToLevel("ballselect");
+  			for (auto& [id, skip] : skippable){
+  				if (skip.advanceToLevel.has_value()){
+	  				goToLevel(skip.advanceToLevel.value());
+  				}else{
+	  				goBackMainMenu();
+  				}
+  				return;
+  			}
   		}
   	},
 	},
@@ -838,18 +854,20 @@ std::vector<TagUpdater> tagupdates = {
 				createBallObj(gameapi -> listSceneId(id));
 				createLevelObj(gameapi -> listSceneId(id), level.value());
 
-				BallModeOptions modeOptions {
-				  .testNumber = 100323,
-				};
+				BallModeOptions modeOptions {};
+
 				modeOptions.getBallId = []() -> std::optional<objid> {
 				  auto vehicles = getVehicleIds();
+ 				  modassert(vehicles.size() == 1, "invalid expected vehicle size");
 					return vehicles.at(0);
 				};
 				modeOptions.setPlayerControl = [](std::function<void()> fn) -> void {
   				gameapi -> schedule(0, true, 1, NULL, [fn](void*) -> void {
 					  auto activePlayer = getActivePlayerId(0);
 					  auto vehicles = getVehicleIds();
-					  std::cout << "vehicles: " << print(vehicles) << ", playerid: " << print(activePlayer) << std::endl;
+					  modassert(vehicles.size() == 1, "invalid expected vehicle size");
+					  std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]" << ", playerid: " << print(activePlayer) << ", [" << gameapi -> getGameObjNameForId(activePlayer.value()).value()  <<  "]" << std::endl;
+					  std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
 					  enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
 					  setCanExitVehicle(false);
 					  fn();
