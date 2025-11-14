@@ -659,6 +659,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     std::optional<objid> sceneId;
     if (sceneToLoad.has_value()){
       setTempCamera(std::nullopt, 0); // find a better place for this, should be reconciled better
+      setDisablePlayerControl(false, 0);
 
       if (sceneToLoad.value().additionalTokens.size() > 0){
         std::cout << "additional tokens: " << print(sceneToLoad.value().additionalTokens.at(0)) << std::endl;

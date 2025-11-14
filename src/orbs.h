@@ -28,6 +28,7 @@ struct Orb {
 
 	std::optional<std::string> mesh;
 	std::string level;
+	std::optional<std::string> image;
 	std::function<OrbProgress()> getOrbProgress;
 };
 struct OrbConnection {

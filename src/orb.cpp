@@ -95,6 +95,9 @@ void handleOrbViews(OrbData& orbData){
 
 		auto targetOrb = getOrb(orbUi.orbs, objView.targetIndex);
 		modassert(targetOrb.has_value(), "handleOrbViews could not find target orb");
+		if (targetOrb.value() -> image.has_value()){
+			gameapi -> drawRect(-0.5f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
+		}
 		if (targetOrb.value() -> text != ""){
 			gameapi -> drawText(targetOrb.value() -> text, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 		}

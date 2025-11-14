@@ -10,6 +10,7 @@ std::vector<Orb> ballGameOrbs {
 		.text = "level 0\nVideo\nPress Action To Play",
 		.mesh = "../gameresources/build/uncategorized/arcade.gltf",
 		.level = "video",
+		.image = "../gameresources/build/textures/creepguy.png",
 		.getOrbProgress = []() -> OrbProgress {
 			return OrbProgress {
 				.complete = isLevelComplete("video"),
@@ -23,6 +24,7 @@ std::vector<Orb> ballGameOrbs {
 		.text = "level 1\nIntro\nPress Action To Play",
 		.mesh = std::nullopt,
 		.level = "intro",
+		.image = "../gameresources/build/textures/creepydog.jpg",
 		.getOrbProgress = []() -> OrbProgress {
 			return OrbProgress {
 				.complete = isLevelComplete("intro"),
