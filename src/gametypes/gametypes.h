@@ -24,4 +24,6 @@ void gametypesOnKey(GameTypes& gametypes, int rawKey, int rawScancode, int rawAc
 void changeGameType(GameTypes& gametypes, const char* name, void* data);
 std::optional<GametypeData> getGametypeData(GameTypes&);
 
+void onGametypesFrame(GameTypes& gametypes);
+
 #endif 

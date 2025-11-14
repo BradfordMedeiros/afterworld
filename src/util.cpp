@@ -539,3 +539,21 @@ ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonIn
   };
   return cameraUpdate;
 }
+
+
+std::string print(BallPowerup powerup){
+  if (powerup == BIG_JUMP){
+    return "[BIG_JUMP]";
+  }else if (powerup == LAUNCH_FORWARD){
+    return "[LAUNCH_FORWARD]";
+  }else if (powerup == LOW_GRAVITY){
+    return "[LOW_GRAVITY]";
+  }else if (powerup == REVERSE_GRAVITY){
+    return "[REVERSE_GRAVITY]";
+  }else if (powerup == TELEPORT){
+    return "[TELEPORT]";
+  }
+  return "[unknown]";
+}
+
+

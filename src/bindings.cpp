@@ -1963,6 +1963,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         onFrameAi(aiData, showAi);
       }
       onFrameDaynight();
+      onGametypesFrame(gametypeSystem);
 
       updateArcade();
       drawArcade();

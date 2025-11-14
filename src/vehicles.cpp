@@ -51,7 +51,7 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
       .shouldJump = false,
       .shouldUsePowerUp = false,
       .teleportPosition = std::nullopt,
-      .powerup = REVERSE_GRAVITY,
+      .powerup = std::nullopt,
     };
   }
 
@@ -360,3 +360,9 @@ void setPowerupBall(Vehicles& vehicles, objid vehicleId, std::optional<BallPower
   VehicleShip* vehicleShip = std::get_if<VehicleShip>(&vehicle.vehicle);
 }
 
+std::optional<BallPowerup> getBallPowerup(Vehicles& vehicles, objid vehicleId){
+  auto& vehicle = vehicles.vehicles.at(vehicleId);
+  VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+  modassert(vehicleBall, "vehicle is not a powerup");
+  return vehicleBall -> powerup;
+}

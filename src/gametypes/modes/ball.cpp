@@ -31,7 +31,7 @@ GameTypeInfo getBallMode(){
 
 	  	std::string* message = std::any_cast<std::string>(&value);
 	  	modassert(message, "invalid type ball-mode");
-	  	std::cout << "from ball modde: " << event << ", " << *message << std::endl;
+	  	std::cout << "from ball mode: " << event << ", " << *message << std::endl;
 	  	if (*message == "start"){
 	  	   auto ballId = ballMode -> getBallId().value();
 	  	   auto pos = gameapi -> getGameObjectPos(ballId, true, "[gamelogic] get ball position for start");
@@ -62,6 +62,39 @@ GameTypeInfo getBallMode(){
 	  		gameapi -> sendNotifyMessage("ball-game", std::string("complete"));
 	  	}
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
+	  },
+	  .onFrame = [](std::any& gametype) -> void {
+	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
+	  	modassert(ballMode, "ballMode options");
+	  	std::cout << "ball onframe" << std::endl;
+	  	if (ballMode -> ballId.has_value()){
+	  		auto powerup = ballMode -> getPowerup();
+	  		if (powerup.has_value()){
+		  		std::cout << "powerup: " << print(powerup.value()) << std::endl;
+	  			if (powerup.value() == BIG_JUMP){
+	 		  		ballMode -> setPowerupTexture("../gameresources/build/textures/ballgame/jump.png");
+	 		  		return;
+	  			}else if (powerup.value() == LAUNCH_FORWARD){
+	 		  		ballMode -> setPowerupTexture("../gameresources/build/textures/ballgame/dash.png");
+	 		  		return;
+	  			}else if (powerup.value() == LOW_GRAVITY){
+	 		  		ballMode -> setPowerupTexture("../gameresources/build/textures/ballgame/bounce.png");
+	 		  		return;
+	  			}else if (powerup.value() == REVERSE_GRAVITY){
+	 		  		ballMode -> setPowerupTexture("../gameresources/build/textures/ballgame/bounce.normal.png");
+	 		  		return;
+	  			}else if (powerup.value() == TELEPORT){
+	 		  		ballMode -> setPowerupTexture("../gameresources/build/textures/ballgame/teleport.png");
+	 		  		return;
+	  			}else{
+	  				modassert(false, "invalid powerup size ball.cpp");
+	  			}
+	  		}
+	  	}
+
+  		ballMode -> setPowerupTexture("../gameresources/build/textures/ballgame/none.png");
+
+
 	  },
 	};
 	return ballMode;

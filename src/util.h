@@ -162,5 +162,7 @@ struct ThirdPersonCameraUpdate {
   glm::quat yAxisRotation;
 };
 ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id);
+enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT };
+std::string print(BallPowerup powerup);
 
 #endif

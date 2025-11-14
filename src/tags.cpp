@@ -878,6 +878,8 @@ std::vector<TagUpdater> tagupdates = {
 						setShowBallOptions(
 							BallComponentOptions {
 								//.winMessage = "you win congrats",
+								.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
+
 							}
 						);
 					}else{
@@ -896,7 +898,25 @@ std::vector<TagUpdater> tagupdates = {
 					markLevelComplete(activeLevel.value(), true);
 					goToLevel("ballselect");
 				};
-			
+				modeOptions.getPowerup = []() -> std::optional<BallPowerup> {
+					auto activePlayer = getActivePlayerId(0);
+					auto vehicleIds = getVehicleIds();
+					modassert(vehicleIds.size() == 1, "invalid expected vehicle size");
+					return getBallPowerup(vehicles, vehicleIds.at(0));
+				};
+				modeOptions.setPowerupTexture = [](std::string texture) -> void {
+					auto ballOptions = showBallOptions();
+					if (!ballOptions.has_value()){
+						modassert(false, "no ballOptions");
+						return;
+					}
+					if (ballOptions.has_value()){
+						auto newBallOptions = ballOptions.value();
+						newBallOptions.powerupTexture = texture;;
+						setShowBallOptions(newBallOptions);
+					}
+				};
+
 				changeGameType(gametypeSystem, "ball", &modeOptions);
 			}else if (*modeStr == "orb-select"){
 				auto cameraId = findObjByShortName(">camera-view", gameapi -> listSceneId(id));

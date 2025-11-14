@@ -10,3 +10,10 @@ playerspawn:teleport:true
 playerspawn:playerspawn:true
 playerspawn:position:5.68 -2.98 13.6
 playerspawn:mode:ball
+
+texture0:texture:../gameresources/build/textures/ballgame/jump.png
+texture1:texture:../gameresources/build/textures/ballgame/dash.png
+texture2:texture:../gameresources/build/textures/ballgame/teleport.png
+texture3:texture:../gameresources/build/textures/ballgame/bounce.png
+texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+texture5:texture:../gameresources/build/textures/ballgame/none.png

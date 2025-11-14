@@ -81,3 +81,9 @@ std::optional<GametypeData> getGametypeData(GameTypes& gametypes){
   auto scoreInfo = gametypes.meta -> getScoreInfo(gametypes.gametype, gametypes.startTime.value());
   return scoreInfo;
 }
+
+void onGametypesFrame(GameTypes& gametypes){
+  if (gametypes.meta){
+    gametypes.meta -> onFrame(gametypes.gametype);
+  }
+}

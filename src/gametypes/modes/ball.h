@@ -11,6 +11,8 @@ struct BallModeOptions{
    std::function<void(bool)> changeUi;
    std::function<void(std::optional<float>)> showTimeElapsed;
    std::function<void()> setLevelFinished;
+   std::function<std::optional<BallPowerup>()> getPowerup;
+   std::function<void(std::string)> setPowerupTexture;
 
    std::optional<glm::vec3> initialBallPos;
    std::optional<objid> ballId;

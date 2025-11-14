@@ -18,7 +18,6 @@ struct BallConfig {
   float gravity;
 };
 
-enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT };
 struct VehicleBall {
   BallConfig ballConfig;
 
@@ -63,5 +62,6 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams);
 
 /// vehicle type specific stuff
 void setPowerupBall(Vehicles& vehicle, objid vehicleId, std::optional<BallPowerup> powerup);
+std::optional<BallPowerup> getBallPowerup(Vehicles& vehicle, objid vehicleId);
 
 #endif
