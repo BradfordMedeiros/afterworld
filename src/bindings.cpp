@@ -1623,6 +1623,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     exit(0);
   }
 
+  
+
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
     gameStatePtr = gameState;

@@ -30,3 +30,6 @@ playerspawn:position:0 20 20
 
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
 arcade:scale:1 1 1
+
+orb1:texture:../gameresources/build/textures/creepguy.png
+orb2:texture:../gameresources/build/textures/creepydog.jpg

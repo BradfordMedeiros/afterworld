@@ -850,9 +850,11 @@ std::vector<TagUpdater> tagupdates = {
 			modassert(modeStr, "modeStr not a string");
 			if (*modeStr == "ball"){
 				auto level = getSingleAttr(id, "ball-level");
-				modassert(level.has_value(), "mode no level provided");
 				createBallObj(gameapi -> listSceneId(id));
-				createLevelObj(gameapi -> listSceneId(id), level.value());
+
+				if (level.has_value()){
+					createLevelObj(gameapi -> listSceneId(id), level.value());
+				}
 
 				BallModeOptions modeOptions {};
 
