@@ -20,7 +20,7 @@ struct BallModeOptions{
 
 GameTypeInfo getBallMode();
 
-void createBallObj(objid sceneId);
+void createBallObj(objid sceneId, glm::vec3 position);
 void createLevelObj(objid sceneId, std::string ballLevel);
 
 

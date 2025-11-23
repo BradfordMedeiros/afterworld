@@ -4,9 +4,7 @@
 !light:rotation:1 0 1.19209e-07 0
 !light:position:-12.93 -58.31 11.98
 
-playerspawn:teleport:true
 playerspawn:playerspawn:true
-playerspawn:position:5.68 -2.98 13.6
 playerspawn:mode:ball
 
 texture0:texture:../gameresources/build/textures/ballgame/jump.png

@@ -100,7 +100,7 @@ GameTypeInfo getBallMode(){
 	return ballMode;
 }
 
-void createBallObj(objid sceneId){
+void createBallObj(objid sceneId, glm::vec3 position){
   GameobjAttributes attr { 
   	.attr = {
   		{ "vehicle", "ball" },
@@ -113,7 +113,7 @@ void createBallObj(objid sceneId){
 		{ "physics_shape", "shape_sphere" },
 		{ "physics", "enabled" },
 		{ "layer", "transparency" },
-		{ "position", glm::vec3(5.68f, -4.98f, 13.6f) }
+		{ "position", position}
   	} 
   };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;

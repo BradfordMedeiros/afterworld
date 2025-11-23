@@ -850,7 +850,10 @@ std::vector<TagUpdater> tagupdates = {
 			modassert(modeStr, "modeStr not a string");
 			if (*modeStr == "ball"){
 				auto level = getSingleAttr(id, "ball-level");
-				createBallObj(gameapi -> listSceneId(id));
+				auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
+				auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
+
+				createBallObj(gameapi -> listSceneId(id), position);
 
 				if (level.has_value()){
 					createLevelObj(gameapi -> listSceneId(id), level.value());
