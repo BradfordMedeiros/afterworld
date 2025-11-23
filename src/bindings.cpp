@@ -159,9 +159,8 @@ void startLevel(ManagedScene& managedScene){
 
   std::vector<objid> playerIds;
   if (managedScene.makePlayer){
-    auto playerLocationObj = findObjByShortName("playerspawn", std::nullopt);
-    modassert(playerLocationObj.has_value(), "no initial spawnpoint");
-    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj.value(), true, "[gamelogic] startLevel get player spawnpoint");
+    auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
+    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
 
     int numberOfPlayers = getNumberOfPlayers();
     for (int i  = 0; i < numberOfPlayers; i++){
