@@ -615,7 +615,22 @@ void debugOnKey(int key, int scancode, int action, int mods){
   //	exit(0);
   //}
 
+
+	if (key == 'U' && action == 1){
+	  auto effekserObj = findObjByShortName("+emitter", std::nullopt);
+	  static bool loop = false;
+	  loop = !loop;
+	  gameapi -> setSingleGameObjectAttr(effekserObj.value(), "state", loop ? "enabled" : "disabled");
+	}  
   if (key == 'M' && action == 1){
+	  auto effekserObj = findObjByShortName("+emitter", std::nullopt);
+	  if (effekserObj.has_value()){
+	  	static bool turnOn = true;
+	  	gameapi -> setParticleState(effekserObj.value(), turnOn);
+	  	turnOn = !turnOn;
+	  }
+
+
   	//addNPrefabs(gameapi -> rootSceneId(), 1, 1, 1, "../afterworld/scenes/prefabs/enemy/tv.rawscene");
   
     auto isOnline = gameapi -> isServerOnline("http://127.0.0.1:8085/");
