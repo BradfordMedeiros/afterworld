@@ -236,7 +236,6 @@ void handleSpawnCollision(int32_t obj1, int32_t obj2){
 }
 
 void handleLevelEndCollision(int32_t obj1, int32_t obj2){
-
   bool didCollideLevelEnd = false;
   if (isControlledVehicle(obj1)){
     auto objAttr = getAttrHandle(obj2);
@@ -256,6 +255,33 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
   if (didCollideLevelEnd){
     // obviously this is kind of overly coupled to the ball game here. 
     setBallLevelComplete();
+  }
+}
+
+
+void doTeleport(int32_t obj, std::string destination){
+  modassert(false, std::string("teleport placeholder to: ") + destination);
+}
+void handleTeleportCollision(int32_t obj1, int32_t obj2){
+  std::optional<std::string> teleportTarget;
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto teleportZone = getStrAttr(objAttr, "teleport_zone");
+    if (teleportZone.has_value()){
+      teleportTarget = teleportZone.value();
+      doTeleport(obj1, teleportZone.value());
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto teleportZone = getStrAttr(objAttr, "teleport_zone");
+    if (teleportZone.has_value()){
+      teleportTarget = teleportZone.value();
+      doTeleport(obj2, teleportZone.value());
+    }
+  }
+
+  if (teleportTarget.has_value()){
+    std::cout << "teleport: should teleport: " << teleportTarget.value() << std::endl;
   }
 }
 
