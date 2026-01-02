@@ -184,6 +184,12 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 	return true;
 }
 
+void setBallLevelComplete(){
+	changeGameType(gametypeSystem, NULL, NULL);
+	markLevelComplete(activeLevel.value(), true);
+	goToLevel("ballselect");
+}
+
 struct Skippable {
 	std::optional<std::string> advanceToLevel;
 };
@@ -900,8 +906,7 @@ std::vector<TagUpdater> tagupdates = {
 					setShowBallOptions(ballOptions);
 				};
 				modeOptions.setLevelFinished = []() -> void {
-					markLevelComplete(activeLevel.value(), true);
-					goToLevel("ballselect");
+					setBallLevelComplete();
 				};
 				modeOptions.getPowerup = []() -> std::optional<BallPowerup> {
 					auto activePlayer = getActivePlayerId(0);

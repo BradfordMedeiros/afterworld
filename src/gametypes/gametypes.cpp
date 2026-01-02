@@ -25,6 +25,13 @@ void gametypesOnKey(GameTypes& gametypes, int rawKey, int rawScancode, int rawAc
 }
 
 void changeGameType(GameTypes& gametypes, const char* name, void* data){
+  if (name == NULL){
+    gametypes.name = "";
+    gametypes.startTime = std::nullopt;
+    gametypes.meta = NULL;
+    gametypes.gametype.reset();
+    return;
+  }
   gametypes.name = name;
   auto gametypeInfo = gametypeByName(name);
   if (!gametypeInfo){

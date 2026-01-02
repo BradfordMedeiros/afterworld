@@ -9,6 +9,7 @@ void doDialogMessage(std::string& value);
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 bool isControlledPlayer(int playerId);
 bool isControlledVehicle(int vehicleId);
+void setBallLevelComplete();
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -253,7 +254,8 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
 
   std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
   if (didCollideLevelEnd){
-    modassert(false, "this should trigger the player end 2");
+    // obviously this is kind of overly coupled to the ball game here. 
+    setBallLevelComplete();
   }
 }
 
