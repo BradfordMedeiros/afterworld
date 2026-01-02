@@ -38,6 +38,7 @@ void setMainPlayerControl(int playerIndex);
 void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
 bool isControlledPlayer(int playerId);
+bool isControlledVehicle(int vehicleId);
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);

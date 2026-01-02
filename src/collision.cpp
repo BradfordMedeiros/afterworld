@@ -8,6 +8,7 @@ void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 bool isControlledPlayer(int playerId);
+bool isControlledVehicle(int vehicleId);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -230,6 +231,29 @@ void handleSpawnCollision(int32_t obj1, int32_t obj2){
       spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj2);
     }
+  }
+}
+
+void handleLevelEndCollision(int32_t obj1, int32_t obj2){
+
+  bool didCollideLevelEnd = false;
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto playerEndAttr = getStrAttr(objAttr, "player_end");
+    if (playerEndAttr.has_value()){
+      didCollideLevelEnd = true;
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto playerEndAttr = getStrAttr(objAttr, "player_end");
+    if (playerEndAttr.has_value()){
+      didCollideLevelEnd = true;
+    }
+  }
+
+  std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
+  if (didCollideLevelEnd){
+    modassert(false, "this should trigger the player end 2");
   }
 }
 

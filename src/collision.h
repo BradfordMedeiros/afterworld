@@ -14,6 +14,7 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
 void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal);
 void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
 void handleSpawnCollision(int32_t obj1, int32_t obj2);
+void handleLevelEndCollision(int32_t obj1, int32_t obj2);
 
 void showTriggerVolumes(bool showTriggerVolumes);
 

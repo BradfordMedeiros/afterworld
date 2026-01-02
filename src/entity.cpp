@@ -51,6 +51,28 @@ bool isControlledPlayer(int playerId){
 	return false;
 }
 
+std::optional<ControllableEntity*> getControllableEntity(objid id){
+	if (controllableEntities.find(id) == controllableEntities.end()){
+		return std::nullopt;
+	}
+	return &controllableEntities.at(id);
+}
+
+bool isControlledVehicle(int vehicleId){
+	for (auto& player : players){
+		if (!player.playerId.has_value()){
+			continue;
+		}
+		auto controllableEntity = getControllableEntity(player.playerId.value());
+		if (controllableEntity.has_value()){
+			if (controllableEntity.value() -> vehicle.has_value() && controllableEntity.value() -> vehicle.value() == vehicleId){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 ControlledPlayer& getControlledPlayer(int playerIndex){
 	for (auto& player : players){
 		if (player.viewport == playerIndex){
