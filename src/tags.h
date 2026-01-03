@@ -62,6 +62,10 @@ struct Autodoor {
 	std::string toggleSignal;
 };
 
+struct TeleportExit {
+	std::optional<std::string> exit;
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -69,7 +73,7 @@ struct Tags {
 	std::unordered_map<objid, float> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::unordered_map<objid, HealthColorObject> healthColorObjects;
-	std::set<objid> teleportObjs;
+	std::unordered_map<objid, TeleportExit> teleportObjs;
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, ManagedRecording> recordings;

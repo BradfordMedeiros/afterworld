@@ -10,6 +10,7 @@ void applyImpulseAffectMovement(objid id, glm::vec3 force);
 bool isControlledPlayer(int playerId);
 bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
+void doTeleport(int32_t obj, std::string destination);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -259,9 +260,6 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
 }
 
 
-void doTeleport(int32_t obj, std::string destination){
-  modassert(false, std::string("teleport placeholder to: ") + destination);
-}
 void handleTeleportCollision(int32_t obj1, int32_t obj2){
   std::optional<std::string> teleportTarget;
   if (isControlledVehicle(obj1)){
@@ -278,10 +276,6 @@ void handleTeleportCollision(int32_t obj1, int32_t obj2){
       teleportTarget = teleportZone.value();
       doTeleport(obj2, teleportZone.value());
     }
-  }
-
-  if (teleportTarget.has_value()){
-    std::cout << "teleport: should teleport: " << teleportTarget.value() << std::endl;
   }
 }
 

@@ -1436,6 +1436,23 @@ void objectRemoved(objid idRemoved){
   onObjRemoved(aiData, idRemoved);
 }
 
+void handleTeleport(objid idToTeleport, objid teleporterId){
+  auto teleportPosition = gameapi -> getGameObjectPos(teleporterId, true, "gamelogic get teleport position");
+  gameapi -> setGameObjectPosition(idToTeleport, teleportPosition, true, Hint { .hint = "teleport set posn" });
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+}
+
+void doTeleport(int32_t idToTeleport, std::string destination){
+  std::cout << "doTeleport: " << idToTeleport << ", = " << destination << std::endl;
+  for (auto& [teleporterId, teleportExit] : tags.teleportObjs){
+    if (teleportExit.exit.has_value() && teleportExit.exit.value() == destination){
+      handleTeleport(idToTeleport, teleporterId);
+      std::cout << "doTeleport: found the exit" << std::endl;
+      return;
+    }
+  }
+}
+
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
   GameState* gameState = static_cast<GameState*>(data);
 
@@ -1451,8 +1468,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
       // maybe raycast down, and then set the position so it fits 
       auto teleportPosition = getTeleportPosition(tags);
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex) && teleportPosition.has_value()){
-        playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
-        gameapi -> setGameObjectPosition(controlledPlayer.playerId.value(), teleportPosition.value().position, true, Hint { .hint = "teleport" });
+        handleTeleport(controlledPlayer.playerId.value(), teleportPosition.value().id);
         gameapi -> removeByGroupId(teleportPosition.value().id);
       }
     }

@@ -49,7 +49,7 @@ struct SettingConfiguration {
   std::optional<std::function<void()>> initSetting;
 };
 
-float originalFov = 45;
+float originalFov = 90.f;
 void setZoom(float percentage, bool hideGun){
   gameapi -> setLayerState({
       StrValues {
@@ -152,7 +152,7 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         },
       },
       .initSetting = []() -> void {
-        auto fov = getSaveFloatValue("settings", "fov", 45.f);
+        auto fov = getSaveFloatValue("settings", "fov", 90.f);
         originalFov = fov;
         setZoom(1.f, false);
       },

@@ -539,7 +539,11 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "teleport",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-  		tags.teleportObjs.insert(id);
+	  	auto attrHandle = getAttrHandle(id);
+			auto teleportExit = getStrAttr(attrHandle, "teleport_exit");
+  		tags.teleportObjs[id] = TeleportExit{
+  			.exit = teleportExit,
+  		};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		tags.teleportObjs.erase(id);
@@ -1038,7 +1042,7 @@ std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
 
 	auto index = randomNumber(0, tags.teleportObjs.size() - 1);
 	int currIndex = 0;
-	for(auto id : tags.teleportObjs){
+	for(auto &[id, teleportExit] : tags.teleportObjs){
 		if (currIndex == index){
 			auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - getTeleportPosition");
 			return TeleportInfo {
