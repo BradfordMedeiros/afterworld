@@ -594,6 +594,25 @@ void wakeUpTv(objid id, bool active){
   }
 }
 
+void deliverPowerup(objid vehicle, objid powerupId, std::string& powerup){
+  if (powerup == "jump"){
+    setPowerupBall(vehicles, vehicle, BIG_JUMP);
+  }else if (powerup == "dash"){
+    setPowerupBall(vehicles, vehicle, LAUNCH_FORWARD);
+  }else if (powerup == "low_gravity"){
+    setPowerupBall(vehicles, vehicle, LOW_GRAVITY);
+  }else if (powerup == "teleport"){
+    setPowerupBall(vehicles, vehicle, TELEPORT);
+  }else{
+    modassert(false, std::string("invalid powerup type: ") + powerup);
+    setPowerupBall(vehicles, vehicle, std::nullopt);
+  }
+
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+  gameapi -> removeObjectById(powerupId);
+}
+
+
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
   showTriggerVolumes(isEditorMode);
@@ -2289,6 +2308,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     handleLevelEndCollision(obj1, obj2);
     handleTeleportCollision(obj1, obj2);
+    handlePowerupCollision(obj1, obj2);
 
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);

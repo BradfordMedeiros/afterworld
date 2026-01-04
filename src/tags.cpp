@@ -820,7 +820,7 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
-
+	// Is this duplicate with the end level thing?
 	TagUpdater {
 		.attribute = "advance",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {

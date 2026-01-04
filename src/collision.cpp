@@ -11,6 +11,7 @@ bool isControlledPlayer(int playerId);
 bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
 void doTeleport(int32_t obj, std::string destination);
+void deliverPowerup(objid vehicle, objid powerupId, std::string& powerup);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -259,7 +260,6 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-
 void handleTeleportCollision(int32_t obj1, int32_t obj2){
   std::optional<std::string> teleportTarget;
   if (isControlledVehicle(obj1)){
@@ -275,6 +275,22 @@ void handleTeleportCollision(int32_t obj1, int32_t obj2){
     if (teleportZone.has_value()){
       teleportTarget = teleportZone.value();
       doTeleport(obj2, teleportZone.value());
+    }
+  }
+}
+
+void handlePowerupCollision(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto powerup = getStrAttr(objAttr, "powerup");
+    if (powerup.has_value()){
+      deliverPowerup(obj1, obj2, powerup.value());
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto powerup = getStrAttr(objAttr, "powerup");
+    if (powerup.has_value()){
+      deliverPowerup(obj2, obj1, powerup.value()); 
     }
   }
 }
