@@ -105,14 +105,13 @@ void createBallObj(objid sceneId, glm::vec3 position){
   	.attr = {
   		{ "vehicle", "ball" },
 		{ "texture", "./res/textures/wood.jpg" },
-		{ "tint", glm::vec4(1.f, 1.f, 1.f, 0.7f) },
+		{ "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
 		{ "physics_restitution", 0.5f },
 		{ "mesh", "../gameresources/build/primitives/sphere.gltf" },
 		{ "physics_mass" , 10.f },
 		{ "physics_type", "dynamic" },
 		{ "physics_shape", "shape_sphere" },
 		{ "physics", "enabled" },
-		{ "layer", "transparency" },
 		{ "position", position}
   	} 
   };

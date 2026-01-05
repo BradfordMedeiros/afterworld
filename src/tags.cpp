@@ -948,6 +948,58 @@ std::vector<TagUpdater> tagupdates = {
   	},
 	},
 
+	TagUpdater {
+		.attribute = "powerup",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+	    auto powerup = getSingleAttr(id, "powerup");
+	    auto respawnRate = getSingleFloatAttr(id, "powerup-rate");
+
+	    std::optional<int> respawnRateMs;
+	    if (respawnRate.has_value()){
+	    	respawnRateMs = static_cast<int>(respawnRate.value());
+	    }
+
+			tags.powerups[id] = Powerup {
+				.type = powerup.value(),
+				.respawnRateMs = respawnRateMs,
+				.disabledVisually = false,
+			};
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.powerups.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		float currTime = gameapi -> timeSeconds(false);
+  		for (auto& [id, powerup] : tags.powerups){
+  			if (powerup.lastRemoveTime.has_value() && !powerup.disabledVisually){
+    			setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 0.2f));
+    			powerup.disabledVisually = true;
+  			}
+  			if (!powerup.lastRemoveTime.has_value() && powerup.disabledVisually){
+    			setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+    			powerup.disabledVisually = false;
+  			}
+
+  			if (!powerup.lastRemoveTime.has_value()){
+  				continue;
+  			}
+  			if (!powerup.respawnRateMs.has_value()){
+  				continue;
+  			}
+
+  			float respawnTime = powerup.respawnRateMs.value() / 1000.f;
+  			auto elapsedTime = currTime - powerup.lastRemoveTime.value();
+
+  			std::cout << "powerup: currtime = " << currTime << ", elapsedTime = " << elapsedTime << ", lastremove = " << powerup.lastRemoveTime.value() << std::endl;
+
+  			if (elapsedTime > respawnTime){
+	  			powerup.lastRemoveTime = std::nullopt;
+  			}
+  		}
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
 };
 
  

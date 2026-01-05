@@ -594,22 +594,32 @@ void wakeUpTv(objid id, bool active){
   }
 }
 
-void deliverPowerup(objid vehicle, objid powerupId, std::string& powerup){
-  if (powerup == "jump"){
+void deliverPowerup(objid vehicle, objid powerupId){
+  auto& powerup = tags.powerups.at(powerupId);
+  if (powerup.lastRemoveTime.has_value()){
+    return;
+  }
+
+  if (powerup.type == "jump"){
     setPowerupBall(vehicles, vehicle, BIG_JUMP);
-  }else if (powerup == "dash"){
+  }else if (powerup.type == "dash"){
     setPowerupBall(vehicles, vehicle, LAUNCH_FORWARD);
-  }else if (powerup == "low_gravity"){
+  }else if (powerup.type == "low_gravity"){
     setPowerupBall(vehicles, vehicle, LOW_GRAVITY);
-  }else if (powerup == "teleport"){
+  }else if (powerup.type == "teleport"){
     setPowerupBall(vehicles, vehicle, TELEPORT);
   }else{
-    modassert(false, std::string("invalid powerup type: ") + powerup);
+    modassert(false, std::string("invalid powerup type: ") + powerup.type);
     setPowerupBall(vehicles, vehicle, std::nullopt);
   }
 
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
-  gameapi -> removeObjectById(powerupId);
+  
+  if(!powerup.respawnRateMs.has_value()){
+    gameapi -> removeObjectById(powerupId);
+  }else{
+    powerup.lastRemoveTime = gameapi -> timeSeconds(false);
+  }
 }
 
 

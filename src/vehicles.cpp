@@ -279,7 +279,7 @@ void onVehicleFrameBall(objid id, Vehicle& vehicle, ControlParams& controlParams
     
     if (vehicleBall -> powerup.has_value()){
       if (vehicleBall -> powerup.value() == BIG_JUMP){
-        gameapi -> applyImpulse(id, glm::vec3(0.f, 5 * vehicleBall -> ballConfig.jumpMagnitude, 0.f));
+        gameapi -> applyImpulse(id, glm::vec3(0.f, 2 * vehicleBall -> ballConfig.jumpMagnitude, 0.f));
       }else if (vehicleBall -> powerup.value() == LAUNCH_FORWARD){
         auto direction = rotation * glm::vec3(0.f, vehicleBall -> ballConfig.jumpMagnitude, -1 * vehicleBall -> ballConfig.jumpMagnitude);
         gameapi -> applyImpulse(id, direction);

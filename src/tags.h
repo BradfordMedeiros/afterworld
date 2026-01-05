@@ -66,6 +66,14 @@ struct TeleportExit {
 	std::optional<std::string> exit;
 };
 
+struct Powerup {
+	std::string type;
+	std::optional<int> respawnRateMs;
+	std::optional<float> lastRemoveTime;
+
+	bool disabledVisually;
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -78,6 +86,7 @@ struct Tags {
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, ManagedRecording> recordings;
 	std::unordered_map<objid, Autodoor> autodoors;
+	std::unordered_map<objid, Powerup> powerups;
 	Switches switches;
 
 	UiData* uiData;
