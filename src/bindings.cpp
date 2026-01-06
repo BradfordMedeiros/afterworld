@@ -1955,6 +1955,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
 
+    drawAllCurves(id);
+
     ////////////////////////////////////////////////////
     if (isInGameMode()){
       for (auto& player : getPlayers()){
@@ -1964,7 +1966,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
       }
 
-      drawAllCurves(id);
       handleEntitiesOnRails(id, gameapi -> rootSceneId());
       //handleEntitiesRace();
 

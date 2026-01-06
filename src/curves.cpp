@@ -5,6 +5,13 @@ extern CustomApiBindings* gameapi;
 std::unordered_map<objid, LinePoints> rails;  // static-state
 std::unordered_map<objid, EntityOnRail> entityToRail; // static-state
 std::unordered_map<objid, RaceData> entityToRaceData; // static-state
+std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
+
+std::optional<objid> railIdForName(std::string name){
+	for (auto& rail : rails){
+	}
+	return std::nullopt;
+}
 
 void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
   for (int i = 0; i < (line.points.size() - 1); i++){
@@ -13,11 +20,26 @@ void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
     gameapi -> drawLine(pointFrom, pointTo, false, owner, std::nullopt, std::nullopt, std::nullopt);
   }
 }
-const bool DRAW_CURVES = false;
+
+void addRails(std::vector<RailNode>& railNodes){
+	LinePoints linePoints {
+	 	.railName = "testrail",
+	  .points = {},
+	  .indexs = {},
+	};
+	for (auto& node : railNodes){
+		linePoints.points.push_back(node.point);
+		linePoints.indexs.push_back(node.railIndex);
+	}
+
+	rails[0] = linePoints;
+}
+
+const bool DRAW_CURVES = true;
 void drawAllCurves(objid ownerId){
 	if (DRAW_CURVES){
   	for (auto &[id, line] : rails){
-  		drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);
+  		drawCurve(line, glm::vec3(0.f, 2.f, 0.f), ownerId);
   	}		
 	}
 }
@@ -267,7 +289,7 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
     .attr = {
 			{ "mesh", meshName },
 			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
-			{ "texture", "./res/textures/testgradient2.png" },
+			{ "texture", "./res/textures/wood.jpg" },
 		}
   };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
@@ -298,27 +320,14 @@ std::optional<NearbyRail> nearbyRail(glm::vec3 position, glm::vec3 forwardDir){
 }
 
 
-void initializeRails(objid sceneId){
-	rails[0] = LinePoints {
-  	.points = {
-   		glm::vec3(0.f, -27.f, 0.f),
-   		glm::vec3(50.f, -27.f, 0.f),
-   		glm::vec3(55.f, -27.f, -10.f),
-   		glm::vec3(55.f, -17.f, -60.f),
-   		glm::vec3(30.f, -17.f, -60.f),
-   		glm::vec3(0.f, -27.f, 0.f),
-    		//glm::vec3(0.f, -27.f, 0.f),
-  	},
-	};
-
-	generateMeshForRail(sceneId, rails.at(0));
-}
-
 void handleEntitiesOnRails(objid ownerId, objid sceneId){
-	static bool doOnce = false;
-	if (doOnce){
-		doOnce = false;
-		initializeRails(sceneId);
+	static glm::vec3 position(0.f, 0.f, 0.f);
+	for (auto &[id, managedRailMovement] : managedRailMovements){
+		position.x -= gameapi -> timeElapsed() * 5.f;
+		if (position.x < -50.f){
+			position.x = 0.f;
+		}
+  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + position, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
 	}
 
  	for (auto &[id, entityOnRail] : entityToRail){

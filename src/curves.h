@@ -3,8 +3,14 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 
+struct ManagedRailMovement {
+  objid railId;
+  glm::vec3 initialObjectPos;
+};
 struct LinePoints {
+  std::string railName;
   std::vector<glm::vec3> points;
+  std::vector<int> indexs;
 };
 
 struct RaceData {
@@ -18,6 +24,13 @@ struct EntityOnRail {
   objid railId;
   bool direction;
 };
+
+struct RailNode {
+  std::string rail;
+  int railIndex;
+  glm::vec3 point;
+};
+void addRails(std::vector<RailNode>& railNodes);
 
 void drawAllCurves(objid ownerId);
 

@@ -10,6 +10,8 @@ extern Vehicles vehicles;
 extern GameTypes gametypeSystem;
 extern OrbData orbData;
 extern std::optional<std::string> activeLevel;
+extern std::unordered_map<objid, LinePoints> rails;
+extern std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
@@ -1000,6 +1002,63 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
+
+	TagUpdater {
+		.attribute = "rail",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+	  	auto attrHandle = getAttrHandle(id);
+	  	auto railData = getStrAttr(attrHandle, "data-pos");
+	  	modassert(railData.has_value(), "no data for rail");
+
+	  	auto railNamesRaw = getStrAttr(attrHandle, "data-name");
+	  	modassert(railNamesRaw.has_value(), "no name for rails");
+	  	auto railNames = split(railNamesRaw.value(), ',');
+	  	auto railIndexsRaw = getStrAttr(attrHandle, "data-index");
+	  	modassert(railIndexsRaw.has_value(), "no index for rails");
+	  	std::vector<int> railIndexs;
+	  	for(auto& railIndexStr : split(railIndexsRaw.value(), ',')){
+	  		int railIndex = std::atoi(railIndexStr.c_str());
+	  		railIndexs.push_back(railIndex);
+	  	}
+
+	  	auto posValuesStr = split(railData.value(), ',');	
+	  	std::cout << "rail raw data: " << print(posValuesStr) << std::endl;
+	  	std::cout << "rail names: " << print(railNames) << std::endl;
+	  	std::cout << "rail indexs: " << print(railIndexs) << std::endl;
+
+			std::vector<RailNode> nodes;
+	  	for (int i = 0; i < posValuesStr.size(); i++){
+  		  auto& posStr = posValuesStr.at(i);
+  		  auto railName = railNames.at(i);
+  		  auto railIndex = railIndexs.at(i);
+	  		auto posVec = parseVec3(posStr);
+	  		nodes.push_back(RailNode {
+	  			.rail = railName,
+	  			.railIndex = railIndex,
+	  			.point = posVec,
+	  		});
+	  	}
+
+	  	addRails(nodes);
+
+	  	std::string targetEntity = "entity_dynamic_7";
+	  	auto managedRailEntityId = gameapi -> getGameObjectByName(targetEntity, gameapi -> listSceneId(id)).value();
+	  	managedRailMovements[managedRailEntityId] = ManagedRailMovement {
+	  		.railId = 0,
+	  		.initialObjectPos = gameapi -> getGameObjectPos(managedRailEntityId, true, "[gamelogic] - managed rail movement get init pos"),
+	  	};
+
+
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		rails.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  	
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	}
 };
 
  
