@@ -12,6 +12,7 @@ extern OrbData orbData;
 extern std::optional<std::string> activeLevel;
 extern std::unordered_map<objid, LinePoints> rails;
 extern std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
+std::set<objid> managedRailMovementsBuffer; // because this can be added before the rail its referencing is available
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
@@ -1040,17 +1041,6 @@ std::vector<TagUpdater> tagupdates = {
 	  	}
 
 	  	addRails(nodes);
-
-	  	std::string targetEntity = "entity_dynamic_7";
-	  	auto managedRailEntityId = gameapi -> getGameObjectByName(targetEntity, gameapi -> listSceneId(id)).value();
-	  	auto railId = railIdForName("rail1");
-
-	  	managedRailMovements[managedRailEntityId] = ManagedRailMovement {
-	  		.railId = railId.value(),
-	  		.initialObjectPos = gameapi -> getGameObjectPos(managedRailEntityId, true, "[gamelogic] - managed rail movement get init pos"),
-	  	};
-
-
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		rails.erase(id);
@@ -1060,7 +1050,35 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
-	}
+	},
+	TagUpdater {
+		.attribute = "curve",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			managedRailMovementsBuffer.insert(id);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		managedRailMovementsBuffer.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		auto bufferToAdd = managedRailMovementsBuffer;
+  		for (auto id : bufferToAdd){
+  	  	auto attrHandle = getAttrHandle(id);
+				auto curve = getStrAttr(attrHandle, "curve").value();
+				auto railId = railIdForName(curve);
+				if (railId.has_value()){
+					managedRailMovementsBuffer.erase(id);
+					managedRailMovements[id] = ManagedRailMovement {
+						.railId = railId.value(),
+						.initialObjectPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] - managed rail movement get init pos"),
+					};
+				}
+  		}
+
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	},
+	},
+
 };
 
  
