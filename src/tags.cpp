@@ -1043,8 +1043,10 @@ std::vector<TagUpdater> tagupdates = {
 
 	  	std::string targetEntity = "entity_dynamic_7";
 	  	auto managedRailEntityId = gameapi -> getGameObjectByName(targetEntity, gameapi -> listSceneId(id)).value();
+	  	auto railId = railIdForName("rail1");
+
 	  	managedRailMovements[managedRailEntityId] = ManagedRailMovement {
-	  		.railId = 0,
+	  		.railId = railId.value(),
 	  		.initialObjectPos = gameapi -> getGameObjectPos(managedRailEntityId, true, "[gamelogic] - managed rail movement get init pos"),
 	  	};
 

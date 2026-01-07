@@ -8,7 +8,10 @@ std::unordered_map<objid, RaceData> entityToRaceData; // static-state
 std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 
 std::optional<objid> railIdForName(std::string name){
-	for (auto& rail : rails){
+	for (auto& [id, rail] : rails){
+		if (rail.railName == name){
+			return id;
+		}
 	}
 	return std::nullopt;
 }
@@ -23,7 +26,7 @@ void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
 
 void addRails(std::vector<RailNode>& railNodes){
 	LinePoints linePoints {
-	 	.railName = "testrail",
+	 	.railName = "rail1",
 	  .points = {},
 	  .indexs = {},
 	};
@@ -31,7 +34,6 @@ void addRails(std::vector<RailNode>& railNodes){
 		linePoints.points.push_back(node.point);
 		linePoints.indexs.push_back(node.railIndex);
 	}
-
 	rails[0] = linePoints;
 }
 
