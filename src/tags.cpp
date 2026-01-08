@@ -1070,6 +1070,7 @@ std::vector<TagUpdater> tagupdates = {
 					managedRailMovements[id] = ManagedRailMovement {
 						.railId = railId.value(),
 						.initialObjectPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] - managed rail movement get init pos"),
+						.initialStartTime = gameapi -> timeSeconds(false),
 					};
 				}
   		}

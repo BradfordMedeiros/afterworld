@@ -6,8 +6,11 @@
 struct ManagedRailMovement {
   objid railId;
   glm::vec3 initialObjectPos;
+
+  float initialStartTime;
 };
 struct LinePoints {
+  objid railId;
   std::string railName;
   std::vector<glm::vec3> points;
   std::vector<int> indexs;

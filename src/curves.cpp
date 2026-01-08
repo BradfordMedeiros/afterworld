@@ -2,15 +2,28 @@
 
 extern CustomApiBindings* gameapi;
 
-std::unordered_map<objid, LinePoints> rails;  // static-state
+std::unordered_map<objid, std::vector<LinePoints>> rails;  // static-state
 std::unordered_map<objid, EntityOnRail> entityToRail; // static-state
 std::unordered_map<objid, RaceData> entityToRaceData; // static-state
 std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 
 std::optional<objid> railIdForName(std::string name){
-	for (auto& [id, rail] : rails){
-		if (rail.railName == name){
-			return id;
+	for (auto& [ownerId, railsForId] : rails){
+		for (auto& rail : railsForId){
+			if (rail.railName == name){
+				return rail.railId;
+			}
+		}
+	}
+	return std::nullopt;
+}
+
+std::optional<LinePoints*> railForId(objid id){
+	for (auto &[ownerId, railsForOwner] : rails){
+		for (auto& rail : railsForOwner){
+			if (rail.railId == id){
+				return &rail;
+			}
 		}
 	}
 	return std::nullopt;
@@ -25,37 +38,39 @@ void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
 }
 
 void addRails(objid ownerId, std::vector<RailNode>& railNodes){
-	std::set<std::string> railNames;
-
-	LinePoints linePoints {
-	 	.railName = "rail1",
-	  .points = {},
-	  .indexs = {},
-	};
+	auto railId = getUniqueObjId();
 
 	std::unordered_map<std::string, LinePoints> nameToRail;
-
 	for (auto& node : railNodes){
-		railNames.insert(node.rail);
-		linePoints.points.push_back(node.point);
-		linePoints.indexs.push_back(node.railIndex);
-	}
-
-	for (auto& [ownerId, rail] : rails){
-		if (railNames.count(rail.railName) > 0){
-			modassert(false, std::string("rail name already exists: ") + rail.railName);
-		}
-	}
-
-	for (auto& railName : railNames){
+		auto railName = node.rail;
 		nameToRail[railName] = LinePoints {
+			.railId = railId,
 			.railName = railName,
 			.points = {},
 			.indexs = {},
 		};
 	}
 
-	rails[0] = linePoints;
+	for (auto& node : railNodes){
+		auto& rail = nameToRail.at(node.rail);
+		rail.points.push_back(node.point);
+		rail.indexs.push_back(node.railIndex);
+	}
+
+	for (auto& [ownerId, railsForId] : rails){
+		for (auto& rail : railsForId){
+			if (nameToRail.find(rail.railName) != nameToRail.end()){
+				modassert(false, "rail name already exists");	
+			}
+		}
+	}
+
+	for (auto&[_, rail] : nameToRail){
+		if (rails.find(ownerId) == rails.end()){
+			rails[ownerId] = {};
+		}
+		rails.at(ownerId).push_back(rail);
+	}
 }
 
 void removeRails(objid ownerId){
@@ -65,8 +80,10 @@ void removeRails(objid ownerId){
 const bool DRAW_CURVES = true;
 void drawAllCurves(objid ownerId){
 	if (DRAW_CURVES){
-  	for (auto &[id, line] : rails){
-  		drawCurve(line, glm::vec3(0.f, 2.f, 0.f), ownerId);
+  	for (auto &[_, railsForId] : rails){
+  		for (auto& line : railsForId){
+	  		drawCurve(line, glm::vec3(0.f, 2.f, 0.f), ownerId);
+  		}
   	}		
 	}
 }
@@ -325,45 +342,104 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
 
 const float RAIL_GRACE_DISTANCE = 0.5f;
 std::optional<NearbyRail> nearbyRail(glm::vec3 position, glm::vec3 forwardDir){
- 	for (auto &[id, line] : rails){
-		auto points = calcSegmentForPoint(line, position);
-		for (int i = 0; i < points.size(); i++){
-			auto& point = points.at(i);
-			if (point.distance < RAIL_GRACE_DISTANCE){
-				auto lowPoint = line.points.at(point.lineSegment.lowIndex);
-				auto highPoint = line.points.at(point.lineSegment.highIndex);
-				auto railDir = highPoint - lowPoint;
-
-				auto dir = glm::dot(forwardDir, railDir);
-				std::cout << "seg: " << dir << std::endl;
-				return NearbyRail {
-					.id = id,
-					.direction = dir >= 0.f,
-				};
+ 	for (auto &[ownerId, railsForId] : rails){
+ 		for (auto& line : railsForId){
+			auto points = calcSegmentForPoint(line, position);
+			for (int i = 0; i < points.size(); i++){
+				auto& point = points.at(i);
+				if (point.distance < RAIL_GRACE_DISTANCE){
+					auto lowPoint = line.points.at(point.lineSegment.lowIndex);
+					auto highPoint = line.points.at(point.lineSegment.highIndex);
+					auto railDir = highPoint - lowPoint;
+					auto dir = glm::dot(forwardDir, railDir);
+					std::cout << "seg: " << dir << std::endl;
+					return NearbyRail {
+						.id = line.railId,
+						.direction = dir >= 0.f,
+					};
+				}
 			}
-		}
+ 		}
  	}
 	return std::nullopt;
 }
 
+glm::vec3 calculatePointOnRail(LinePoints& line, float startTime, float currTime, float speed){
+	float elapsedTime = currTime - startTime;
+	std::cout << "calculateProjectPoint: elapsedTime: " << elapsedTime << std::endl;
+	if (line.points.size() == 0){
+		std::cout << "calculateProjectPoint: 0 length" << std::endl;
+		return glm::vec3(0.f, 0.f, 0.f);
+	}
+	if (line.points.size() == 1){
+		std::cout << "calculateProjectPoint: 1 length" << std::endl;
+		return line.points.at(0);
+	}
+
+	float targetDistance = elapsedTime * speed;
+
+	float previousSegmentDistance = 0.f;
+	for (int i = 0; i < (line.points.size() - 1); i++){
+		auto fromPoint = line.points.at(i);
+		auto toPoint = line.points.at(i + 1);
+
+		auto segmentDistance = glm::distance(fromPoint, toPoint);
+		if ((previousSegmentDistance + segmentDistance) > targetDistance){
+			auto remainingDistance = targetDistance - previousSegmentDistance;
+			float fraction = remainingDistance / segmentDistance;
+			std::cout << "calculateProjectPoint: returning fractional segment: fromPoint = " << i << ", toPoint = " << (i + 1) << ", fraction = " << fraction << ", targetDistance = " << targetDistance << ", prev = " << previousSegmentDistance << std::endl;
+
+			float x = fromPoint.x + ((toPoint.x - fromPoint.x) * fraction);
+			float y = fromPoint.y + ((toPoint.y - fromPoint.y) * fraction);
+			float z = fromPoint.z + ((toPoint.z - fromPoint.z) * fraction);
+			auto newPoint = glm::vec3(x, y, z);
+
+			std::cout << "calculateProjectPoint: point: " << print(newPoint) << std::endl;
+			return newPoint;
+		}else{
+			previousSegmentDistance += segmentDistance;
+		}
+	}
+
+	std::cout << "calculateProjectPoint: time exceeeded distance" << std::endl;
+	return line.points.at(line.points.size() - 1);
+}
+
+glm::vec3 calculateRelativeOnRail(LinePoints& line, float startTime, float currTime, float speed){
+	auto rootPoint = line.points.at(0);
+	return calculatePointOnRail(line, startTime, currTime, speed) - rootPoint;
+}
+
+float railLength(LinePoints& line){
+	float totalLength = 0;
+	for (int i = 0; i < (line.points.size() - 1); i++){
+		auto fromPoint = line.points.at(i);
+		auto toPoint = line.points.at(i + 1);
+		totalLength += glm::distance(fromPoint, toPoint);
+	}
+	return totalLength;
+}
 
 void handleEntitiesOnRails(objid ownerId, objid sceneId){
-	static glm::vec3 position(0.f, 0.f, 0.f);
 	for (auto &[id, managedRailMovement] : managedRailMovements){
-		position.x -= gameapi -> timeElapsed() * 5.f;
-		if (position.x < -50.f){
-			position.x = 0.f;
-		}
-  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + position, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+		auto rail = railForId(managedRailMovement.railId);
+		float length = railLength(*rail.value());
+
+		bool fixedSpeed = false;
+		float targetTime = 20.f;
+
+		float speed = fixedSpeed ? 5.f : (length / targetTime);
+		auto railPosition = calculateRelativeOnRail(*rail.value(), managedRailMovement.initialStartTime, gameapi -> timeSeconds(false), speed);
+  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railPosition, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
 	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
  		auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] curves - entity agent on rail");
-  	auto curvePoint = calculateCurvePoint(rails.at(entityOnRail.railId), position, entityOnRail.direction);
+  	auto curvePoint = calculateCurvePoint(*railForId(entityOnRail.railId).value(), position, entityOnRail.direction);
   	auto direction = entityOnRail.direction ? 1  : -1;
 
   	float railDistancePerSecond = 10.f;
-  	auto nextPoint = calculateNextPointOnRail(rails.at(entityOnRail.railId), curvePoint, direction * railDistancePerSecond * gameapi -> timeElapsed());
+  	auto nextPoint = calculateNextPointOnRail(*railForId(entityOnRail.railId).value(), curvePoint, direction * railDistancePerSecond * gameapi -> timeElapsed());
   	gameapi -> setGameObjectPosition(id, nextPoint, true, Hint { .hint = "handleEntitiesOnRails" });
  	}
 }
@@ -372,9 +448,9 @@ void handleEntitiesRace(){
  	for (auto &[id, raceData] : entityToRaceData){
 		static objid activeRaceRailId = 0;
   	auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] curves - entities race data");
-	  handleRace(raceData, position, rails.at(activeRaceRailId));
-  	auto distance = distanceRemaining(rails.at(activeRaceRailId), raceData.currentPosition, raceData.percentageToNext);
-	  auto totalDistance = getTotalDistanceForCurve(rails.at(0));
+	  handleRace(raceData, position, *railForId(activeRaceRailId).value());
+  	auto distance = distanceRemaining(*railForId(activeRaceRailId).value(), raceData.currentPosition, raceData.percentageToNext);
+	  auto totalDistance = getTotalDistanceForCurve(*railForId(activeRaceRailId).value());
   	gameapi -> drawText(std::string("race: ") + std::to_string(distance), 0.f, 0.f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   	gameapi -> drawText(std::string("percentage: ") + std::to_string(distance / totalDistance), 0.f, -0.1f, 10, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   	if (raceData.complete){
