@@ -1040,10 +1040,10 @@ std::vector<TagUpdater> tagupdates = {
 	  		});
 	  	}
 
-	  	addRails(nodes);
+	  	addRails(id, nodes);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		rails.erase(id);
+  		removeRails(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   	

@@ -30,7 +30,8 @@ struct RailNode {
   int railIndex;
   glm::vec3 point;
 };
-void addRails(std::vector<RailNode>& railNodes);
+void addRails(objid ownerId, std::vector<RailNode>& railNodes);
+void removeRails(objid ownerId);
 std::optional<objid> railIdForName(std::string name);
 
 void drawAllCurves(objid ownerId);

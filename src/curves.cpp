@@ -24,17 +24,42 @@ void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
   }
 }
 
-void addRails(std::vector<RailNode>& railNodes){
+void addRails(objid ownerId, std::vector<RailNode>& railNodes){
+	std::set<std::string> railNames;
+
 	LinePoints linePoints {
 	 	.railName = "rail1",
 	  .points = {},
 	  .indexs = {},
 	};
+
+	std::unordered_map<std::string, LinePoints> nameToRail;
+
 	for (auto& node : railNodes){
+		railNames.insert(node.rail);
 		linePoints.points.push_back(node.point);
 		linePoints.indexs.push_back(node.railIndex);
 	}
+
+	for (auto& [ownerId, rail] : rails){
+		if (railNames.count(rail.railName) > 0){
+			modassert(false, std::string("rail name already exists: ") + rail.railName);
+		}
+	}
+
+	for (auto& railName : railNames){
+		nameToRail[railName] = LinePoints {
+			.railName = railName,
+			.points = {},
+			.indexs = {},
+		};
+	}
+
 	rails[0] = linePoints;
+}
+
+void removeRails(objid ownerId){
+	rails.erase(ownerId);
 }
 
 const bool DRAW_CURVES = true;
