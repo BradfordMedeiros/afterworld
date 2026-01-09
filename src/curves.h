@@ -3,12 +3,21 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 
+enum ManagedMovementType { MOVEMENT_TYPE_FORWARD, MOVEMENT_TYPE_FORWARD_REPEAT };
 struct ManagedRailMovement {
   objid railId;
   glm::vec3 initialObjectPos;
 
-  float initialStartTime;
+  bool autostart;
+  std::optional<float> initialStartTime;
+
+  ManagedMovementType type;
+  std::optional<std::string> trigger;
 };
+
+void triggerMovement(std::string trigger, std::optional<int> railIndex);
+
+
 struct LinePoints {
   objid railId;
   std::string railName;
@@ -49,6 +58,7 @@ void removeFromRace(objid entityId);
 
 void handleEntitiesOnRails(objid owner, objid sceneId);
 void handleEntitiesRace();
+
 
 struct NearbyRail {
   objid id;

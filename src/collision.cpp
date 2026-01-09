@@ -12,6 +12,7 @@ bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
 void doTeleport(int32_t obj, std::string destination);
 void deliverPowerup(objid vehicle, objid powerupId);
+void triggerMovement(std::string trigger, std::optional<int> railIndex);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -233,6 +234,34 @@ void handleSpawnCollision(int32_t obj1, int32_t obj2){
     if (spawnPointTag.has_value()){
       spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
       gameapi -> removeByGroupId(obj2);
+    }
+  }
+}
+
+void handleTriggerZone(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto triggerZone = getStrAttr(objAttr, "trigger_zone");
+    if (triggerZone.has_value()){
+      auto triggerData = getFloatAttr(objAttr, "trigger_data");
+      if (triggerData.has_value()){
+        auto triggerValue  = static_cast<int>(triggerData.value());
+        triggerMovement(triggerZone.value(), triggerValue);
+      }else{
+        triggerMovement(triggerZone.value(), std::nullopt);
+      }
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto triggerZone = getStrAttr(objAttr, "trigger_zone");
+    if (triggerZone.has_value()){
+      auto triggerData = getFloatAttr(objAttr, "trigger_data");
+      if (triggerData.has_value()){
+        auto triggerValue  = static_cast<int>(triggerData.value());
+        triggerMovement(triggerZone.value(), triggerValue);
+      }else{
+        triggerMovement(triggerZone.value(), std::nullopt);
+      }
     }
   }
 }

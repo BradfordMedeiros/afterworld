@@ -1064,13 +1064,17 @@ std::vector<TagUpdater> tagupdates = {
   		for (auto id : bufferToAdd){
   	  	auto attrHandle = getAttrHandle(id);
 				auto curve = getStrAttr(attrHandle, "curve").value();
+				auto trigger = getStrAttr(attrHandle, "trigger");
 				auto railId = railIdForName(curve);
 				if (railId.has_value()){
 					managedRailMovementsBuffer.erase(id);
 					managedRailMovements[id] = ManagedRailMovement {
 						.railId = railId.value(),
 						.initialObjectPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] - managed rail movement get init pos"),
-						.initialStartTime = gameapi -> timeSeconds(false),
+						.autostart = false,
+						.initialStartTime = std::nullopt,
+						.type = MOVEMENT_TYPE_FORWARD,
+						.trigger = trigger,
 					};
 				}
   		}
@@ -1081,6 +1085,8 @@ std::vector<TagUpdater> tagupdates = {
 	},
 
 };
+
+
 
  
 

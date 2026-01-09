@@ -7,6 +7,17 @@ std::unordered_map<objid, EntityOnRail> entityToRail; // static-state
 std::unordered_map<objid, RaceData> entityToRaceData; // static-state
 std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 
+void triggerMovement(std::string trigger, std::optional<int> railIndex){
+	for (auto& [id, managedMovement] : managedRailMovements){
+		if (managedMovement.trigger.has_value() && !managedMovement.initialStartTime.has_value()){
+			if (managedMovement.trigger.value() == trigger){
+				std::cout << "triggerMovement: " << (railIndex.has_value() ? railIndex.value() : -1) << std::endl;
+				managedMovement.initialStartTime = gameapi -> timeSeconds(false);
+			}
+		}
+	}
+}
+
 std::optional<objid> railIdForName(std::string name){
 	for (auto& [ownerId, railsForId] : rails){
 		for (auto& rail : railsForId){
@@ -35,6 +46,28 @@ void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
     auto pointTo = line.points.at(i + 1) + point;
     gameapi -> drawLine(pointFrom, pointTo, false, owner, std::nullopt, std::nullopt, std::nullopt);
   }
+}
+
+void sortRail(LinePoints& line){
+	std::vector<int> arrIndexs;
+	for (int i = 0; i < line.points.size(); i++){
+		arrIndexs.push_back(i);
+	}
+	std::sort(arrIndexs.begin(), arrIndexs.end(), [&](int i, int j) {
+	    return line.indexs.at(i) < line.indexs.at(j);
+	});
+
+	std::vector<glm::vec3> newPoints;
+	std::vector<int> newIndexs;
+  newPoints.reserve(line.points.size());
+  newIndexs.reserve(line.indexs.size());
+
+	for (int i = 0; i < arrIndexs.size(); i++){
+		newPoints.push_back(line.points.at(arrIndexs.at(i)));
+		newIndexs.push_back(line.indexs.at(arrIndexs.at(i)));	
+	}
+	line.points = newPoints;
+	line.indexs = newIndexs;
 }
 
 void addRails(objid ownerId, std::vector<RailNode>& railNodes){
@@ -69,6 +102,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		if (rails.find(ownerId) == rails.end()){
 			rails[ownerId] = {};
 		}
+		sortRail(rail);
 		rails.at(ownerId).push_back(rail);
 	}
 }
@@ -429,8 +463,16 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 		float targetTime = 20.f;
 
 		float speed = fixedSpeed ? 5.f : (length / targetTime);
-		auto railPosition = calculateRelativeOnRail(*rail.value(), managedRailMovement.initialStartTime, gameapi -> timeSeconds(false), speed);
+
+		if (!managedRailMovement.initialStartTime.has_value()){
+			if (!managedRailMovement.autostart){
+				continue;
+			}
+			managedRailMovement.initialStartTime = gameapi -> timeSeconds(false);
+		}
+		auto railPosition = calculateRelativeOnRail(*rail.value(), managedRailMovement.initialStartTime.value(), gameapi -> timeSeconds(false), speed);
   	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railPosition, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+	
 	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
