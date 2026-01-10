@@ -486,51 +486,22 @@ void triggerMovement(std::string trigger, std::optional<int> railIndex){
 				std::cout << "triggerMovement: " << (railIndex.has_value() ? railIndex.value() : -1) << std::endl;
 				if (!managedMovement.triggerIndex.has_value()){
 					managedMovement.initialStartTime = gameapi -> timeSeconds(false);
-
 				}else{
-					if (managedMovement.triggerIndex.has_value()){
-						bool didReverse = false;
-						if (railIndex.value() == managedMovement.triggerIndex.value()){
-							// do nothing
-						}else if (railIndex.value() > managedMovement.triggerIndex.value()){
-							auto rail = railForId(managedMovement.railId);
-							auto railSpeed = calculateRailSpeed(*rail.value(), managedMovement);
-				
-							didReverse = managedMovement.reverse != false;
+					auto rail = railForId(managedMovement.railId);
+					auto newTargetDistance = railLength(*rail.value(), railIndex.value());
+					auto railData = calculateRailSpeed(*rail.value(), managedMovement);
+					float diff = newTargetDistance - railData.targetDistance;
 
-							managedMovement.reverse = false;
-
-							std::cout << "index bigger, maxTimeFromStart = " << railSpeed.currentTimeFromStart << ", targetDistance = " << railSpeed.targetDistance << std::endl;
-
-							if (!didReverse){
-								managedMovement.initialStartTime = gameapi -> timeSeconds(false) - railSpeed.currentTimeFromStart;
-							}else{
-								managedMovement.initialStartTime = gameapi -> timeSeconds(false) - (railSpeed.fullRailTime - railSpeed.currentTimeFromStart);
-							}
-						}else {
-							auto rail = railForId(managedMovement.railId);
-							auto railSpeedOld = calculateRailSpeed(*rail.value(), managedMovement);
-
-							didReverse = managedMovement.reverse != true;
-
-							managedMovement.reverse = true;
-							auto railSpeed = calculateRailSpeed(*rail.value(), managedMovement);
-
-							std::cout << "index bigger, maxTimeFromStart = " << railSpeed.currentTimeFromStart << ", targetDistance = " << railSpeed.targetDistance << std::endl;
-							if (!didReverse){
-								managedMovement.initialStartTime = gameapi -> timeSeconds(false) - railSpeed.currentTimeFromStart;
-							}else{
-								managedMovement.initialStartTime = gameapi -> timeSeconds(false) - (railSpeed.fullRailTime - railSpeed.currentTimeFromStart);
-							}
-
-
-						} 
-
-						std::cout << "did reverse: " << didReverse << ", triggerIndex:  " << print(railIndex) << ", reversed = " << managedMovement.reverse <<  std::endl;
-
-					}else{
-						managedMovement.initialStartTime = gameapi -> timeSeconds(false);
+					if (diff >= 0.f){ 
+						managedMovement.reverse = false;
+						float timeFromStart = railData.targetDistance / railData.speed;
+						managedMovement.initialStartTime = gameapi -> timeSeconds(false) - timeFromStart;
+					}else {
+						managedMovement.reverse = true;
+						float timeFromStart = (railData.totalRailLength - railData.targetDistance) / railData.speed;
+						managedMovement.initialStartTime = gameapi -> timeSeconds(false) - timeFromStart;
 					}
+					
 				}
 				managedMovement.triggerIndex = railIndex;
 
