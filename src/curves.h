@@ -9,7 +9,10 @@ struct ManagedRailMovement {
   glm::vec3 initialObjectPos;
 
   bool autostart;
+
+  bool reverse = false;
   std::optional<float> initialStartTime;
+  std::optional<int> triggerIndex;
 
   ManagedMovementType type;
   std::optional<std::string> trigger;
