@@ -7,6 +7,7 @@ enum ManagedMovementType { MOVEMENT_TYPE_FORWARD, MOVEMENT_TYPE_FORWARD_REPEAT }
 struct ManagedRailMovement {
   objid railId;
   glm::vec3 initialObjectPos;
+  glm::quat initialObjectRot;
 
   bool autostart;
 
@@ -25,6 +26,7 @@ struct LinePoints {
   objid railId;
   std::string railName;
   std::vector<glm::vec3> points;
+  std::vector<glm::quat> rotations;
   std::vector<int> indexs;
 };
 
@@ -44,6 +46,7 @@ struct RailNode {
   std::string rail;
   int railIndex;
   glm::vec3 point;
+  glm::quat rotation;
 };
 void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);

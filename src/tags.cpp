@@ -187,6 +187,20 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 	return true;
 }
 
+glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
+	float pitchRad = glm::radians(pitch);
+	float yawRad   = glm::radians(yaw);
+	float rollRad  = glm::radians(roll);
+
+	glm::quat qPitch = glm::angleAxis(pitchRad, glm::vec3(0, 0, -1));
+	glm::quat qYaw   = glm::angleAxis(yawRad,   glm::vec3(0, 1,  0));
+	glm::quat qRoll  = glm::angleAxis(rollRad,  glm::vec3(1, 0,  0));
+
+	glm::quat q = qYaw * qPitch * qRoll;
+	
+	return q;
+}
+
 void setBallLevelComplete(){
 	changeGameType(gametypeSystem, NULL, NULL);
 	markLevelComplete(activeLevel.value(), true);
@@ -1011,6 +1025,9 @@ std::vector<TagUpdater> tagupdates = {
 	  	auto railData = getStrAttr(attrHandle, "data-pos");
 	  	modassert(railData.has_value(), "no data for rail");
 
+	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
+	  	modassert(railDataRot.has_value(), "no data for rail-rot");
+
 	  	auto railNamesRaw = getStrAttr(attrHandle, "data-name");
 	  	modassert(railNamesRaw.has_value(), "no name for rails");
 	  	auto railNames = split(railNamesRaw.value(), ',');
@@ -1023,20 +1040,25 @@ std::vector<TagUpdater> tagupdates = {
 	  	}
 
 	  	auto posValuesStr = split(railData.value(), ',');	
+	  	auto rotValuesStr = split(railDataRot.value(), ',');
 	  	std::cout << "rail raw data: " << print(posValuesStr) << std::endl;
+	  	std::cout << "rail rot data: " << print(rotValuesStr) << std::endl;
 	  	std::cout << "rail names: " << print(railNames) << std::endl;
 	  	std::cout << "rail indexs: " << print(railIndexs) << std::endl;
 
 			std::vector<RailNode> nodes;
 	  	for (int i = 0; i < posValuesStr.size(); i++){
   		  auto& posStr = posValuesStr.at(i);
+  		  auto& rotStr = rotValuesStr.at(i);
   		  auto railName = railNames.at(i);
   		  auto railIndex = railIndexs.at(i);
 	  		auto posVec = parseVec3(posStr);
+	  		auto rotVec = parseVec3(rotStr);
 	  		nodes.push_back(RailNode {
 	  			.rail = railName,
 	  			.railIndex = railIndex,
 	  			.point = posVec,
+	  			.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
 	  		});
 	  	}
 
@@ -1071,6 +1093,7 @@ std::vector<TagUpdater> tagupdates = {
 					managedRailMovements[id] = ManagedRailMovement {
 						.railId = railId.value(),
 						.initialObjectPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] - managed rail movement get init pos"),
+						.initialObjectRot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] - managed rail movement get init rot"),
 						.autostart = false,
 						.initialStartTime = std::nullopt,
 						.type = MOVEMENT_TYPE_FORWARD,

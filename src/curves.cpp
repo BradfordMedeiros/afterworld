@@ -47,15 +47,19 @@ void sortRail(LinePoints& line){
 	});
 
 	std::vector<glm::vec3> newPoints;
+	std::vector<glm::quat> newRotations;
 	std::vector<int> newIndexs;
   newPoints.reserve(line.points.size());
+  newRotations.reserve(line.rotations.size());
   newIndexs.reserve(line.indexs.size());
 
 	for (int i = 0; i < arrIndexs.size(); i++){
 		newPoints.push_back(line.points.at(arrIndexs.at(i)));
+		newRotations.push_back(line.rotations.at(arrIndexs.at(i)));
 		newIndexs.push_back(line.indexs.at(arrIndexs.at(i)));	
 	}
 	line.points = newPoints;
+	line.rotations = newRotations;
 	line.indexs = newIndexs;
 }
 
@@ -69,6 +73,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 			.railId = railId,
 			.railName = railName,
 			.points = {},
+			.rotations = {},
 			.indexs = {},
 		};
 	}
@@ -76,6 +81,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 	for (auto& node : railNodes){
 		auto& rail = nameToRail.at(node.rail);
 		rail.points.push_back(node.point);
+		rail.rotations.push_back(node.rotation);
 		rail.indexs.push_back(node.railIndex);
 	}
 
@@ -435,9 +441,18 @@ glm::vec3 calculatePointOnRail(LinePoints& line, float targetDistance){
 	return line.points.at(line.points.size() - 1);
 }
 
-glm::vec3 calculateRelativeOnRail(LinePoints& line, float targetDistance){
+struct RailTransform {
+	glm::vec3 position;
+	glm::quat rotation;
+};
+
+RailTransform calculateRelativeOnRail(LinePoints& line, float targetDistance){
 	auto rootPoint = line.points.at(0);
-	return calculatePointOnRail(line, targetDistance) - rootPoint;
+	auto positionOffset = calculatePointOnRail(line, targetDistance) - rootPoint;
+	return RailTransform {
+		.position = positionOffset,
+		.rotation = line.rotations.at(0),
+	};
 }
 
 struct RailSpeed {
@@ -449,13 +464,10 @@ struct RailSpeed {
 	float fullRailTime;
 };
 RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailMovement){
-	bool fixedSpeed = true;
-	float targetTime = 20.f;
-
 	float totalRailLength = railLength(line, std::nullopt);
 	float length = managedRailMovement.reverse ? (totalRailLength - railLength(line, managedRailMovement.triggerIndex)) : railLength(line, managedRailMovement.triggerIndex);
 
-	float speed = fixedSpeed ? 5.f : (length / targetTime);
+	float speed = 15.f;
 	float actualTime = length / speed;
 
 	float elapsedTime = gameapi -> timeSeconds(false) - managedRailMovement.initialStartTime.value();
@@ -524,8 +536,11 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 		auto railSpeed = calculateRailSpeed(*rail.value(), managedRailMovement);
 
 		std::cout << "target distance: " << railSpeed.targetDistance << " / " << railSpeed.totalRailLength << std::endl;
-		auto railPosition = calculateRelativeOnRail(*rail.value(), railSpeed.targetDistance);
-  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railPosition, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+		auto railTransform = calculateRelativeOnRail(*rail.value(), railSpeed.targetDistance);
+  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railTransform.position, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+
+
+  	gameapi -> setGameObjectRot(id, railTransform.rotation * managedRailMovement.initialObjectRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
 	
 	}
 
