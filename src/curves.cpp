@@ -405,14 +405,25 @@ float railLength(LinePoints& line, std::optional<int> index){
 	return totalLength;
 }
 
-glm::vec3 calculatePointOnRail(LinePoints& line, float targetDistance){
+struct PointOnRail {
+	glm::vec3 position;
+	glm::quat rotation;
+};
+PointOnRail calculatePointOnRail(LinePoints& line, float targetDistance){
 	if (line.points.size() == 0){
 		std::cout << "calculateProjectPoint: 0 length" << std::endl;
-		return glm::vec3(0.f, 0.f, 0.f);
+		modassert(false, "no points calculatePointOnRail");
+		return PointOnRail {
+			.position = glm::vec3(0.f, 0.f, 0.f),
+			.rotation = glm::identity<glm::quat>(),
+		};
 	}
 	if (line.points.size() == 1){
 		std::cout << "calculateProjectPoint: 1 length" << std::endl;
-		return line.points.at(0);
+		return PointOnRail {
+			.position = line.points.at(0),
+			.rotation = line.rotations.at(0),
+		};
 	}
 
 	float previousSegmentDistance = 0.f;
@@ -431,14 +442,26 @@ glm::vec3 calculatePointOnRail(LinePoints& line, float targetDistance){
 			float z = fromPoint.z + ((toPoint.z - fromPoint.z) * fraction);
 			auto newPoint = glm::vec3(x, y, z);
 
+			auto& lowRotation = line.rotations.at(i);
+			auto& highRotation = line.rotations.at(i + 1);
+ 			
+ 			glm::quat newRotation = glm::slerp(lowRotation, highRotation, glm::clamp(fraction, 0.0f, 1.0f));
+
 			std::cout << "calculateProjectPoint: point: " << print(newPoint) << std::endl;
-			return newPoint;
+			return PointOnRail {
+				.position = newPoint,
+				.rotation = newRotation,
+			};
 		}else{
 			previousSegmentDistance += segmentDistance;
 		}
 	}
 
-	return line.points.at(line.points.size() - 1);
+	auto pos = line.points.at(line.points.size() - 1);
+	return PointOnRail {
+		.position = pos,
+		.rotation = line.rotations.at(line.rotations.size() - 1),
+	};
 }
 
 struct RailTransform {
@@ -448,10 +471,11 @@ struct RailTransform {
 
 RailTransform calculateRelativeOnRail(LinePoints& line, float targetDistance){
 	auto rootPoint = line.points.at(0);
-	auto positionOffset = calculatePointOnRail(line, targetDistance) - rootPoint;
+	auto pointOnRail = calculatePointOnRail(line, targetDistance);
+	auto positionOffset =  pointOnRail.position - rootPoint;
 	return RailTransform {
 		.position = positionOffset,
-		.rotation = line.rotations.at(0),
+		.rotation = pointOnRail.rotation,
 	};
 }
 
