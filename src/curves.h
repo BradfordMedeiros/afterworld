@@ -10,6 +10,7 @@ struct ManagedRailMovement {
   glm::quat initialObjectRot;
 
   bool autostart;
+  bool loop = false;
 
   bool reverse = false;
   std::optional<float> initialStartTime;

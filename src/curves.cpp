@@ -496,8 +496,8 @@ RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailM
 
 	float elapsedTime = gameapi -> timeSeconds(false) - managedRailMovement.initialStartTime.value();
 	std::cout << "calculateProjectPoint: elapsedTime: " << elapsedTime << std::endl;
-	float targetDistance = glm::min(length, elapsedTime * speed);
 
+	float targetDistance = glm::min(length, elapsedTime * speed);
 	if (managedRailMovement.reverse){
 		targetDistance = glm::max((totalRailLength - length), totalRailLength - (elapsedTime * speed));
 	}
@@ -562,10 +562,14 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 		std::cout << "target distance: " << railSpeed.targetDistance << " / " << railSpeed.totalRailLength << std::endl;
 		auto railTransform = calculateRelativeOnRail(*rail.value(), railSpeed.targetDistance);
   	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railTransform.position, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
-
-
   	gameapi -> setGameObjectRot(id, railTransform.rotation * managedRailMovement.initialObjectRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
 	
+		std::cout << "rail info: " << railSpeed.time << ", time: " << railSpeed.currentTimeFromStart << std::endl;
+		if (managedRailMovement.loop && railSpeed.currentTimeFromStart >= railSpeed.time){
+			std::cout << "rail info finished" << std::endl;
+			managedRailMovement.initialStartTime = gameapi -> timeSeconds(false);
+		}
+
 	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
