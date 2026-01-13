@@ -1031,6 +1031,7 @@ std::vector<TagUpdater> tagupdates = {
 	  	auto railNamesRaw = getStrAttr(attrHandle, "data-name");
 	  	modassert(railNamesRaw.has_value(), "no name for rails");
 	  	auto railNames = split(railNamesRaw.value(), ',');
+
 	  	auto railIndexsRaw = getStrAttr(attrHandle, "data-index");
 	  	modassert(railIndexsRaw.has_value(), "no index for rails");
 	  	std::vector<int> railIndexs;
@@ -1039,10 +1040,19 @@ std::vector<TagUpdater> tagupdates = {
 	  		railIndexs.push_back(railIndex);
 	  	}
 
+	  	auto railTimesRaw = getStrAttr(attrHandle, "data-time");
+	  	modassert(railTimesRaw.has_value(), "no time for rails");
+	  	std::vector<int> railTimes;
+	  	for(auto& railTimeStr : split(railTimesRaw.value(), ',')){
+	  		int railTime = std::atoi(railTimeStr.c_str());
+	  		railTimes.push_back(railTime);
+	  	}
+
 	  	auto posValuesStr = split(railData.value(), ',');	
 	  	auto rotValuesStr = split(railDataRot.value(), ',');
 	  	std::cout << "rail raw data: " << print(posValuesStr) << std::endl;
 	  	std::cout << "rail rot data: " << print(rotValuesStr) << std::endl;
+	  	std::cout << "rail time data: " << print(railTimes) << std::endl;
 	  	std::cout << "rail names: " << print(railNames) << std::endl;
 	  	std::cout << "rail indexs: " << print(railIndexs) << std::endl;
 
@@ -1052,6 +1062,7 @@ std::vector<TagUpdater> tagupdates = {
   		  auto& rotStr = rotValuesStr.at(i);
   		  auto railName = railNames.at(i);
   		  auto railIndex = railIndexs.at(i);
+  		  auto railTime = railTimes.at(i);
 	  		auto posVec = parseVec3(posStr);
 	  		auto rotVec = parseVec3(rotStr);
 	  		nodes.push_back(RailNode {
@@ -1059,6 +1070,7 @@ std::vector<TagUpdater> tagupdates = {
 	  			.railIndex = railIndex,
 	  			.point = posVec,
 	  			.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
+	  			.time = railTime,
 	  		});
 	  	}
 

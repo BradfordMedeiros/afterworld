@@ -49,18 +49,23 @@ void sortRail(LinePoints& line){
 	std::vector<glm::vec3> newPoints;
 	std::vector<glm::quat> newRotations;
 	std::vector<int> newIndexs;
+	std::vector<int> newTimes;
+
   newPoints.reserve(line.points.size());
   newRotations.reserve(line.rotations.size());
   newIndexs.reserve(line.indexs.size());
+  newTimes.reserve(line.times.size());
 
 	for (int i = 0; i < arrIndexs.size(); i++){
 		newPoints.push_back(line.points.at(arrIndexs.at(i)));
 		newRotations.push_back(line.rotations.at(arrIndexs.at(i)));
 		newIndexs.push_back(line.indexs.at(arrIndexs.at(i)));	
+		newTimes.push_back(line.times.at(arrIndexs.at(i)));
 	}
 	line.points = newPoints;
 	line.rotations = newRotations;
 	line.indexs = newIndexs;
+	line.times = newTimes;
 }
 
 void addRails(objid ownerId, std::vector<RailNode>& railNodes){
@@ -75,6 +80,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 			.points = {},
 			.rotations = {},
 			.indexs = {},
+			.times = {},
 		};
 	}
 
@@ -83,6 +89,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		rail.points.push_back(node.point);
 		rail.rotations.push_back(node.rotation);
 		rail.indexs.push_back(node.railIndex);
+		rail.times.push_back(node.time);
 	}
 
 	for (auto& [ownerId, railsForId] : rails){
@@ -485,33 +492,42 @@ struct RailSpeed {
 	float targetDistance;
 	float totalRailLength;
 	float currentTimeFromStart;
-	float fullRailTime;
 };
 RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailMovement){
+
+	float elapsedTime = gameapi -> timeSeconds(false) - managedRailMovement.initialStartTime.value();
+
+	
+	for (int i = 0; i < (line.times.size() - 1); i++){
+		auto timeOne = line.times.at(i);
+		auto timeTwo = line.times.at(i + 1);
+
+		bool isInRange = elapsedTime >= timeOne && elapsedTime < timeTwo;
+
+		std::cout << "time index managedMovement: " << i << ", start = " << managedRailMovement.initialStartTime.value() <<  " , t0 = " << timeOne << ", t1 = " << timeTwo << ", elapsed = " << elapsedTime << ", inRange = " << isInRange << std::endl;
+
+	}
+
 	float totalRailLength = railLength(line, std::nullopt);
 	float length = managedRailMovement.reverse ? (totalRailLength - railLength(line, managedRailMovement.triggerIndex)) : railLength(line, managedRailMovement.triggerIndex);
 
-	float speed = 15.f;
-	float actualTime = length / speed;
+	float actualTime = length / managedRailMovement.speed;
 
-	float elapsedTime = gameapi -> timeSeconds(false) - managedRailMovement.initialStartTime.value();
 	std::cout << "calculateProjectPoint: elapsedTime: " << elapsedTime << std::endl;
 
-	float targetDistance = glm::min(length, elapsedTime * speed);
+	float targetDistance = glm::min(length, elapsedTime * managedRailMovement.speed);
 	if (managedRailMovement.reverse){
-		targetDistance = glm::max((totalRailLength - length), totalRailLength - (elapsedTime * speed));
+		targetDistance = glm::max((totalRailLength - length), totalRailLength - (elapsedTime * managedRailMovement.speed));
 	}
 
-	float currentTimeFromStart = (targetDistance) / speed;
- 	float fullRailTime = totalRailLength / speed;
+	float currentTimeFromStart = (targetDistance) / managedRailMovement.speed;
 
 	return RailSpeed {
 		.time = actualTime,
-		.speed = speed,
+		.speed = managedRailMovement.speed,
 		.targetDistance = targetDistance,
 		.totalRailLength = totalRailLength,
 		.currentTimeFromStart = currentTimeFromStart,
-		.fullRailTime = fullRailTime,
 	};
 }
 

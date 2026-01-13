@@ -11,6 +11,7 @@ struct ManagedRailMovement {
 
   bool autostart;
   bool loop = false;
+  float speed = 5.f;
 
   bool reverse = false;
   std::optional<float> initialStartTime;
@@ -29,6 +30,7 @@ struct LinePoints {
   std::vector<glm::vec3> points;
   std::vector<glm::quat> rotations;
   std::vector<int> indexs;
+  std::vector<int> times;
 };
 
 struct RaceData {
@@ -48,6 +50,7 @@ struct RailNode {
   int railIndex;
   glm::vec3 point;
   glm::quat rotation;
+  int time;
 };
 void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);
