@@ -3,21 +3,19 @@
 
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 
-enum ManagedMovementType { MOVEMENT_TYPE_FORWARD, MOVEMENT_TYPE_FORWARD_REPEAT };
 struct ManagedRailMovement {
   objid railId;
   glm::vec3 initialObjectPos;
   glm::quat initialObjectRot;
 
   bool autostart;
-  bool loop = false;
+  bool loop = true;
   float speed = 5.f;
 
   bool reverse = false;
   std::optional<float> initialStartTime;
   std::optional<int> triggerIndex;
 
-  ManagedMovementType type;
   std::optional<std::string> trigger;
 };
 

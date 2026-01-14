@@ -1108,7 +1108,6 @@ std::vector<TagUpdater> tagupdates = {
 						.initialObjectRot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] - managed rail movement get init rot"),
 						.autostart = false,
 						.initialStartTime = std::nullopt,
-						.type = MOVEMENT_TYPE_FORWARD,
 						.trigger = trigger,
 					};
 				}

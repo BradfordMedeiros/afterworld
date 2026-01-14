@@ -487,47 +487,75 @@ RailTransform calculateRelativeOnRail(LinePoints& line, float targetDistance){
 }
 
 struct RailSpeed {
-	float time;
-	float speed;
 	float targetDistance;
-	float totalRailLength;
 	float currentTimeFromStart;
 };
+
+int timeToTriggerIndex(LinePoints& line, std::optional<int> index){
+	if (!index.has_value()){
+		return line.times.at(line.times.size() - 1);
+	}
+	int totalTime = 0;
+	for (int i = 0; i < line.indexs.size(); i++){
+		if (i == index.value()){ // shouldnt i be comparing to the value here?
+			return line.times.at(i);
+		}
+	}
+
+	modassert(false, std::string("invalid trigger index: ") + std::to_string(index.value()));
+	return 0;
+}
+
 RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailMovement){
-
 	float elapsedTime = gameapi -> timeSeconds(false) - managedRailMovement.initialStartTime.value();
+	auto timeToTrigger = timeToTriggerIndex(line, managedRailMovement.triggerIndex);
 
-	
+	if (managedRailMovement.reverse){
+		auto totalTime = timeToTriggerIndex(line, std::nullopt);
+		elapsedTime = totalTime - elapsedTime;
+	}
+
+	if (managedRailMovement.reverse){
+		if (elapsedTime < timeToTrigger){
+			elapsedTime = timeToTrigger;
+		}
+	}else{
+		if (elapsedTime > timeToTrigger){
+			elapsedTime = timeToTrigger;
+		}
+	}
+
+	float targetDistance = 0.f;
 	for (int i = 0; i < (line.times.size() - 1); i++){
 		auto timeOne = line.times.at(i);
 		auto timeTwo = line.times.at(i + 1);
-
 		bool isInRange = elapsedTime >= timeOne && elapsedTime < timeTwo;
 
-		std::cout << "time index managedMovement: " << i << ", start = " << managedRailMovement.initialStartTime.value() <<  " , t0 = " << timeOne << ", t1 = " << timeTwo << ", elapsed = " << elapsedTime << ", inRange = " << isInRange << std::endl;
+		float fraction = (elapsedTime - timeOne) / (timeTwo - timeOne);
+		if (fraction < 0.f){
+			fraction = 0.f;
+		}
+		if (fraction > 1.f){
+			fraction = 1.f;
+		}
 
+		std::cout << "time index managedMovement: " << i << ", start = " << managedRailMovement.initialStartTime.value() <<  " , t0 = " << timeOne << ", t1 = " << timeTwo << ", effectiveTime = " << elapsedTime << ", inRange = " << isInRange << ", fraction = " << fraction << std::endl;
+
+		float segmentLength = glm::distance(line.points.at(i), line.points.at(i + 1));
+		if (isInRange){
+			targetDistance += segmentLength * fraction;
+			return RailSpeed {
+				.targetDistance = targetDistance,
+				.currentTimeFromStart = elapsedTime,
+			};
+		}
+		targetDistance += segmentLength;
 	}
 
 	float totalRailLength = railLength(line, std::nullopt);
-	float length = managedRailMovement.reverse ? (totalRailLength - railLength(line, managedRailMovement.triggerIndex)) : railLength(line, managedRailMovement.triggerIndex);
-
-	float actualTime = length / managedRailMovement.speed;
-
-	std::cout << "calculateProjectPoint: elapsedTime: " << elapsedTime << std::endl;
-
-	float targetDistance = glm::min(length, elapsedTime * managedRailMovement.speed);
-	if (managedRailMovement.reverse){
-		targetDistance = glm::max((totalRailLength - length), totalRailLength - (elapsedTime * managedRailMovement.speed));
-	}
-
-	float currentTimeFromStart = (targetDistance) / managedRailMovement.speed;
-
-	return RailSpeed {
-		.time = actualTime,
-		.speed = managedRailMovement.speed,
-		.targetDistance = targetDistance,
-		.totalRailLength = totalRailLength,
-		.currentTimeFromStart = currentTimeFromStart,
+	return RailSpeed{
+		.targetDistance = totalRailLength,
+		.currentTimeFromStart = elapsedTime,
 	};
 }
 
@@ -546,14 +574,13 @@ void triggerMovement(std::string trigger, std::optional<int> railIndex){
 
 					if (diff >= 0.f){ 
 						managedMovement.reverse = false;
-						float timeFromStart = railData.targetDistance / railData.speed;
-						managedMovement.initialStartTime = gameapi -> timeSeconds(false) - timeFromStart;
+						managedMovement.initialStartTime = gameapi -> timeSeconds(false) - railData.currentTimeFromStart;
 					}else {
 						managedMovement.reverse = true;
-						float timeFromStart = (railData.totalRailLength - railData.targetDistance) / railData.speed;
-						managedMovement.initialStartTime = gameapi -> timeSeconds(false) - timeFromStart;
+						auto& line = *rail.value();
+						float timeFromEnd = line.times.at(line.times.size() - 1);
+						managedMovement.initialStartTime = gameapi -> timeSeconds(false) - (timeFromEnd - railData.currentTimeFromStart);
 					}
-					
 				}
 				managedMovement.triggerIndex = railIndex;
 
@@ -574,15 +601,13 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 		}
 
 		auto railSpeed = calculateRailSpeed(*rail.value(), managedRailMovement);
-
-		std::cout << "target distance: " << railSpeed.targetDistance << " / " << railSpeed.totalRailLength << std::endl;
 		auto railTransform = calculateRelativeOnRail(*rail.value(), railSpeed.targetDistance);
+		auto fullRailTime = timeToTriggerIndex(*rail.value(), std::nullopt);
   	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railTransform.position, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
   	gameapi -> setGameObjectRot(id, railTransform.rotation * managedRailMovement.initialObjectRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
 	
-		std::cout << "rail info: " << railSpeed.time << ", time: " << railSpeed.currentTimeFromStart << std::endl;
-		if (managedRailMovement.loop && railSpeed.currentTimeFromStart >= railSpeed.time){
-			std::cout << "rail info finished" << std::endl;
+		//std::cout << "rail info: " << railSpeed.endOfRailTime << ", time: " << railSpeed.currentTimeFromStart << std::endl;
+		if (managedRailMovement.loop && railSpeed.currentTimeFromStart >= fullRailTime){
 			managedRailMovement.initialStartTime = gameapi -> timeSeconds(false);
 		}
 
