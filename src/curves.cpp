@@ -412,85 +412,6 @@ float railLength(LinePoints& line, std::optional<int> index){
 	return totalLength;
 }
 
-struct PointOnRail {
-	glm::vec3 position;
-	glm::quat rotation;
-};
-PointOnRail calculatePointOnRail(LinePoints& line, float targetDistance){
-	if (line.points.size() == 0){
-		std::cout << "calculateProjectPoint: 0 length" << std::endl;
-		modassert(false, "no points calculatePointOnRail");
-		return PointOnRail {
-			.position = glm::vec3(0.f, 0.f, 0.f),
-			.rotation = glm::identity<glm::quat>(),
-		};
-	}
-	if (line.points.size() == 1){
-		std::cout << "calculateProjectPoint: 1 length" << std::endl;
-		return PointOnRail {
-			.position = line.points.at(0),
-			.rotation = line.rotations.at(0),
-		};
-	}
-
-	float previousSegmentDistance = 0.f;
-	for (int i = 0; i < (line.points.size() - 1); i++){
-		auto fromPoint = line.points.at(i);
-		auto toPoint = line.points.at(i + 1);
-
-		auto segmentDistance = glm::distance(fromPoint, toPoint);
-		if ((previousSegmentDistance + segmentDistance) > targetDistance){
-			auto remainingDistance = targetDistance - previousSegmentDistance;
-			float fraction = remainingDistance / segmentDistance;
-			std::cout << "calculateProjectPoint: returning fractional segment: fromPoint = " << i << ", toPoint = " << (i + 1) << ", fraction = " << fraction << ", targetDistance = " << targetDistance << ", prev = " << previousSegmentDistance << std::endl;
-
-			float x = fromPoint.x + ((toPoint.x - fromPoint.x) * fraction);
-			float y = fromPoint.y + ((toPoint.y - fromPoint.y) * fraction);
-			float z = fromPoint.z + ((toPoint.z - fromPoint.z) * fraction);
-			auto newPoint = glm::vec3(x, y, z);
-
-			auto& lowRotation = line.rotations.at(i);
-			auto& highRotation = line.rotations.at(i + 1);
- 			
- 			glm::quat newRotation = glm::slerp(lowRotation, highRotation, glm::clamp(fraction, 0.0f, 1.0f));
-
-			std::cout << "calculateProjectPoint: point: " << print(newPoint) << std::endl;
-			return PointOnRail {
-				.position = newPoint,
-				.rotation = newRotation,
-			};
-		}else{
-			previousSegmentDistance += segmentDistance;
-		}
-	}
-
-	auto pos = line.points.at(line.points.size() - 1);
-	return PointOnRail {
-		.position = pos,
-		.rotation = line.rotations.at(line.rotations.size() - 1),
-	};
-}
-
-struct RailTransform {
-	glm::vec3 position;
-	glm::quat rotation;
-};
-
-RailTransform calculateRelativeOnRail(LinePoints& line, float targetDistance){
-	auto rootPoint = line.points.at(0);
-	auto pointOnRail = calculatePointOnRail(line, targetDistance);
-	auto positionOffset =  pointOnRail.position - rootPoint;
-	return RailTransform {
-		.position = positionOffset,
-		.rotation = pointOnRail.rotation,
-	};
-}
-
-struct RailSpeed {
-	float targetDistance;
-	float currentTimeFromStart;
-};
-
 int timeToTriggerIndex(LinePoints& line, std::optional<int> index){
 	if (!index.has_value()){
 		return line.times.at(line.times.size() - 1);
@@ -505,6 +426,13 @@ int timeToTriggerIndex(LinePoints& line, std::optional<int> index){
 	modassert(false, std::string("invalid trigger index: ") + std::to_string(index.value()));
 	return 0;
 }
+
+struct RailSpeed {
+	float targetDistance;
+	float currentTimeFromStart;
+	glm::vec3 position;
+	glm::quat rotation;
+};
 
 RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailMovement){
 	float elapsedTime = gameapi -> timeSeconds(false) - managedRailMovement.initialStartTime.value();
@@ -544,18 +472,38 @@ RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailM
 		float segmentLength = glm::distance(line.points.at(i), line.points.at(i + 1));
 		if (isInRange){
 			targetDistance += segmentLength * fraction;
+
+			auto fromPoint = line.points.at(i);
+			auto toPoint = line.points.at(i + 1);
+			float x = fromPoint.x + ((toPoint.x - fromPoint.x) * fraction);
+			float y = fromPoint.y + ((toPoint.y - fromPoint.y) * fraction);
+			float z = fromPoint.z + ((toPoint.z - fromPoint.z) * fraction);
+			auto position = glm::vec3(x, y, z);
+
+			auto& lowRotation = line.rotations.at(i);
+			auto& highRotation = line.rotations.at(i + 1);
+ 			glm::quat newRotation = glm::slerp(lowRotation, highRotation, glm::clamp(fraction, 0.0f, 1.0f));
+
+
 			return RailSpeed {
 				.targetDistance = targetDistance,
 				.currentTimeFromStart = elapsedTime,
+				.position = position,
+				.rotation = newRotation,
 			};
 		}
 		targetDistance += segmentLength;
 	}
 
 	float totalRailLength = railLength(line, std::nullopt);
+	glm::vec3 position = managedRailMovement.reverse ? line.points.at(0) : line.points.at(line.points.size() - 1);
+	auto rotation = managedRailMovement.reverse ? line.rotations.at(0) : line.rotations.at(line.rotations.size() - 1);
+
 	return RailSpeed{
 		.targetDistance = totalRailLength,
 		.currentTimeFromStart = elapsedTime,
+		.position = position,
+		.rotation = rotation,
 	};
 }
 
@@ -601,10 +549,11 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 		}
 
 		auto railSpeed = calculateRailSpeed(*rail.value(), managedRailMovement);
-		auto railTransform = calculateRelativeOnRail(*rail.value(), railSpeed.targetDistance);
+		auto positionOffset =  railSpeed.position - rail.value() -> points.at(0);
+		
 		auto fullRailTime = timeToTriggerIndex(*rail.value(), std::nullopt);
-  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + railTransform.position, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
-  	gameapi -> setGameObjectRot(id, railTransform.rotation * managedRailMovement.initialObjectRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
+  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + positionOffset, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+  	gameapi -> setGameObjectRot(id, railSpeed.rotation * managedRailMovement.initialObjectRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
 	
 		//std::cout << "rail info: " << railSpeed.endOfRailTime << ", time: " << railSpeed.currentTimeFromStart << std::endl;
 		if (managedRailMovement.loop && railSpeed.currentTimeFromStart >= fullRailTime){
