@@ -10,7 +10,6 @@ struct ManagedRailMovement {
 
   bool autostart;
   bool loop = true;
-  float speed = 5.f;
 
   bool reverse = false;
   std::optional<float> initialStartTime;
