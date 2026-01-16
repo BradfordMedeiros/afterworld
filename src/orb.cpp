@@ -96,7 +96,13 @@ void handleOrbViews(OrbData& orbData){
 		auto targetOrb = getOrb(orbUi.orbs, objView.targetIndex);
 		modassert(targetOrb.has_value(), "handleOrbViews could not find target orb");
 		if (targetOrb.value() -> image.has_value()){
-			gameapi -> drawRect(-0.5f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
+			float opacity = objView.startTime.has_value() ? ((gameapi -> timeSeconds(false) - objView.startTime.value()) / 0.5f) : 1.f;
+			if (opacity > 1.f) {
+				opacity = 1.f;
+			}
+			//gameapi -> drawRect(-0.5f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
+			gameapi -> drawRect(0.f, 0.f, 1.5f, 1.5f, false, glm::vec4(1.f, 1.f, 1.f, opacity), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
+
 		}
 		if (targetOrb.value() -> text != ""){
 			gameapi -> drawText(targetOrb.value() -> text, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
@@ -116,7 +122,6 @@ void handleOrbViews(OrbData& orbData){
 			if (percentage > 1.f){
 				orbPosition = targetOrbPosition;
 				objView.actualIndex = objView.targetIndex;
-				objView.startTime = std::nullopt;
 	      		playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 			}
 		}

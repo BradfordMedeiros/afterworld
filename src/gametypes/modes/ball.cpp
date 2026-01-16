@@ -105,19 +105,34 @@ void createBallObj(objid sceneId, glm::vec3 position){
   	.attr = {
   		{ "vehicle", "ball" },
 		{ "texture", "./res/textures/wood.jpg" },
-		{ "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
+		{ "tint", glm::vec4(1.f, 1.f, 1.f, 0.1f) },
 		{ "physics_restitution", 0.5f },
 		{ "mesh", "../gameresources/build/primitives/sphere.gltf" },
 		{ "physics_mass" , 10.f },
 		{ "physics_type", "dynamic" },
 		{ "physics_shape", "shape_sphere" },
 		{ "physics", "enabled" },
-		{ "position", position}
+		{ "position", position},
+		{ "layer", "transparency" },
   	} 
   };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);
   modassert(ball.has_value(), "ball was not created");
+
+  GameobjAttributes emitterAttr { 
+  	.attr = {
+ 			{ "effekseer", "./res/particles/Laser01.efkefc" },
+ 			{ "state", "enabled" },
+  	} 
+  };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
+  auto ballSpirit = gameapi -> makeObjectAttr(sceneId, std::string("+ballSpirit"), emitterAttr, submodelAttributesEmitter);
+  modassert(ballSpirit.has_value(), "ballSpirit was not created");
+
+  gameapi -> makeParent(ballSpirit.value(), ball.value());
+
+
 }
 
 
