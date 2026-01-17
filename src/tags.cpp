@@ -207,6 +207,85 @@ void setBallLevelComplete(){
 	goToLevel("ballselect");
 }
 
+
+void startBallMode(objid sceneId){
+	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
+	auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
+
+	createBallObj(sceneId, position);
+
+	BallModeOptions modeOptions {};
+
+	modeOptions.getBallId = []() -> std::optional<objid> {
+	  auto vehicles = getVehicleIds();
+ 	  modassert(vehicles.size() == 1, "invalid expected vehicle size");
+		return vehicles.at(0);
+	};
+	modeOptions.setPlayerControl = [](std::function<void()> fn) -> void {
+  	gameapi -> schedule(0, true, 1, NULL, [fn](void*) -> void {
+		  auto activePlayer = getActivePlayerId(0);
+		  auto vehicles = getVehicleIds();
+		  modassert(vehicles.size() == 1, "invalid expected vehicle size");
+		  modassert(activePlayer.has_value(), "ball set active player no active player");
+		  std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]" << ", playerid: " << print(activePlayer) << ", [" << gameapi -> getGameObjNameForId(activePlayer.value()).value()  <<  "]" << std::endl;
+		  std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
+		  enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
+		  setCanExitVehicle(false);
+		  fn();
+  	});
+	};
+	modeOptions.changeUi = [](bool showBallUi) -> void {
+		if (showBallUi){
+			setShowBallOptions(
+				BallComponentOptions {
+					//.winMessage = "you win congrats",
+					.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
+				}
+			);
+		}else{
+			setShowBallOptions(std::nullopt);
+		}
+	};
+	modeOptions.showTimeElapsed = [](std::optional<float> startTime) -> void {
+		if (!showBallOptions().has_value()){
+			return;
+		}
+		auto ballOptions = showBallOptions().value();
+		ballOptions.startTime = startTime;
+		setShowBallOptions(ballOptions);
+	};
+	modeOptions.setLevelFinished = []() -> void {
+		setBallLevelComplete();
+	};
+	modeOptions.getPowerup = []() -> std::optional<BallPowerup> {
+		auto activePlayer = getActivePlayerId(0);
+		auto vehicleIds = getVehicleIds();
+		if (vehicleIds.size() == 0){
+			return std::nullopt;
+		}
+		return getBallPowerup(vehicles, vehicleIds.at(0));
+	};
+	modeOptions.setPowerupTexture = [](std::string texture) -> void {
+		auto ballOptions = showBallOptions();
+		if (!ballOptions.has_value()){
+			return;
+		}
+		if (ballOptions.has_value()){
+			auto newBallOptions = ballOptions.value();
+			newBallOptions.powerupTexture = texture;;
+			setShowBallOptions(newBallOptions);
+		}
+	};
+
+	changeGameType(gametypeSystem, "ball", &modeOptions);
+}
+
+void endBallMode(){
+	setCanExitVehicle(true);
+	setShowBallOptions(std::nullopt);
+	changeGameType(gametypeSystem, NULL, NULL);
+}
+
 struct Skippable {
 	std::optional<std::string> advanceToLevel;
 };
@@ -503,7 +582,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "condition",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
@@ -745,7 +823,6 @@ std::vector<TagUpdater> tagupdates = {
   		}
   	},
 	},
-
 	TagUpdater {
 		.attribute = "globallight",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -757,7 +834,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
-
 	TagUpdater {
 		.attribute = "orbui",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -815,8 +891,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
-	
-
 	TagUpdater {
 		.attribute = "vehicle",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -869,86 +943,13 @@ std::vector<TagUpdater> tagupdates = {
   		}
   	},
 	},
-
 	TagUpdater {
 		.attribute = "mode",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			auto modeStr = std::get_if<std::string>(&value);
 			modassert(modeStr, "modeStr not a string");
 			if (*modeStr == "ball"){
-				auto level = getSingleAttr(id, "ball-level");
-				auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
-				auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
-
-				createBallObj(gameapi -> listSceneId(id), position);
-
-				if (level.has_value()){
-					createLevelObj(gameapi -> listSceneId(id), level.value());
-				}
-
-				BallModeOptions modeOptions {};
-
-				modeOptions.getBallId = []() -> std::optional<objid> {
-				  auto vehicles = getVehicleIds();
- 				  modassert(vehicles.size() == 1, "invalid expected vehicle size");
-					return vehicles.at(0);
-				};
-				modeOptions.setPlayerControl = [](std::function<void()> fn) -> void {
-  				gameapi -> schedule(0, true, 1, NULL, [fn](void*) -> void {
-					  auto activePlayer = getActivePlayerId(0);
-					  auto vehicles = getVehicleIds();
-					  modassert(vehicles.size() == 1, "invalid expected vehicle size");
-					  std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]" << ", playerid: " << print(activePlayer) << ", [" << gameapi -> getGameObjNameForId(activePlayer.value()).value()  <<  "]" << std::endl;
-					  std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
-					  enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
-					  setCanExitVehicle(false);
-					  fn();
-  				});
-				};
-				modeOptions.changeUi = [](bool showBallUi) -> void {
-					if (showBallUi){
-						setShowBallOptions(
-							BallComponentOptions {
-								//.winMessage = "you win congrats",
-								.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
-
-							}
-						);
-					}else{
-						setShowBallOptions(std::nullopt);
-					}
-				};
-				modeOptions.showTimeElapsed = [](std::optional<float> startTime) -> void {
-					if (!showBallOptions().has_value()){
-						return;
-					}
-					auto ballOptions = showBallOptions().value();
-					ballOptions.startTime = startTime;
-					setShowBallOptions(ballOptions);
-				};
-				modeOptions.setLevelFinished = []() -> void {
-					setBallLevelComplete();
-				};
-				modeOptions.getPowerup = []() -> std::optional<BallPowerup> {
-					auto activePlayer = getActivePlayerId(0);
-					auto vehicleIds = getVehicleIds();
-					modassert(vehicleIds.size() == 1, "invalid expected vehicle size");
-					return getBallPowerup(vehicles, vehicleIds.at(0));
-				};
-				modeOptions.setPowerupTexture = [](std::string texture) -> void {
-					auto ballOptions = showBallOptions();
-					if (!ballOptions.has_value()){
-						modassert(false, "no ballOptions");
-						return;
-					}
-					if (ballOptions.has_value()){
-						auto newBallOptions = ballOptions.value();
-						newBallOptions.powerupTexture = texture;;
-						setShowBallOptions(newBallOptions);
-					}
-				};
-
-				changeGameType(gametypeSystem, "ball", &modeOptions);
+				// do nothing
 			}else if (*modeStr == "orb-select"){
 				auto cameraId = findObjByShortName(">camera-view", gameapi -> listSceneId(id));
 				setTempCamera(cameraId.value(), 0);
@@ -957,14 +958,12 @@ std::vector<TagUpdater> tagupdates = {
 			}
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		setCanExitVehicle(true);
-  		setShowBallOptions(std::nullopt);
+
   	},
   	.onFrame = std::nullopt,
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
-
 	TagUpdater {
 		.attribute = "powerup",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -1017,7 +1016,6 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
-
 	TagUpdater {
 		.attribute = "rail",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {

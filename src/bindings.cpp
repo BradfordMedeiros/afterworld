@@ -158,6 +158,9 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unorde
   ).value();
 }
 
+void startBallMode(objid sceneId);
+void endBallMode();
+
 void startLevel(ManagedScene& managedScene){
   if (!managedScene.id.has_value()){
     return;
@@ -202,10 +205,26 @@ void startLevel(ManagedScene& managedScene){
     }
   }else if (gamemodeBall){
     //modassert(false, "gamemode ball not implemented");
+    auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
+    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
+    
+    // TODO - no reason to actually create the prefab here
+    auto prefabId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position, {});    
+
+    auto playerId = findObjByShortName("maincamera", sceneId);
+    modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
+    setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
+
+    startBallMode(sceneId.value());
   }
 
 }
-
+void endLevel(ManagedScene& managedScene){
+  auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
+  if (gamemodeBall){
+    endBallMode();
+  }
+}
 
 std::optional<ZoomOptions> zoomOptions;
 void setTotalZoom(float multiplier, objid id){
@@ -716,6 +735,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }else{
       modlog("router scene route unload", sceneManagement.managedScene.value().path);
       if (sceneManagement.managedScene.value().id.has_value()){
+        endLevel(sceneManagement.managedScene.value());
         auto sceneFileName = gameapi -> listSceneFiles(sceneManagement.managedScene.value().id.value()).at(0);
         auto sceneName = gameapi -> sceneNameById(sceneManagement.managedScene.value().id.value());
         modlog("router scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
