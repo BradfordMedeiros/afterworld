@@ -158,8 +158,6 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unorde
   ).value();
 }
 
-void startBallMode(objid sceneId);
-void endBallMode();
 
 void startLevel(ManagedScene& managedScene){
   if (!managedScene.id.has_value()){

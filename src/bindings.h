@@ -37,6 +37,7 @@
 #include "./gameworld/progress.h"
 #include "./options.h"
 #include "./vehicles.h"
+#include "./mode.h"
 
 #include "./arcade/arcade.h"
 
