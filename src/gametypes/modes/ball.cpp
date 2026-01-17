@@ -122,7 +122,7 @@ void createBallObj(objid sceneId, glm::vec3 position){
 
   GameobjAttributes emitterAttr { 
   	.attr = {
- 			{ "effekseer", "./res/particles/Laser01.efkefc" },
+ 			{ "effekseer", "./res/particles/spirit.efkefc" },
  			{ "state", "enabled" },
   	} 
   };

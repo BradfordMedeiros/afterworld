@@ -29,13 +29,21 @@ Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 std::string defaultAudioClipPath;
 
+struct GameModeNone{};
+struct GameModeFps {
+  bool makePlayer = false;
+  std::optional<std::string> player;
+};
+struct GameModeBall{};
+
+typedef std::variant<GameModeNone, GameModeFps, GameModeBall> GameMode;
+
 struct ManagedScene {
   std::optional<objid> id; 
   int index;
   std::string path;
   std::optional<std::string> sceneFile;
-  std::optional<std::string> player;
-  bool makePlayer;
+  GameMode gameMode = GameModeNone{};
 };
 struct SceneManagement {
   std::vector<Level> levels;
@@ -158,37 +166,44 @@ void startLevel(ManagedScene& managedScene){
   std::optional<objid> sceneId = managedScene.id;
 
   std::vector<objid> playerIds;
-  if (managedScene.makePlayer){
-    auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
-    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
 
-    int numberOfPlayers = getNumberOfPlayers();
-    for (int i  = 0; i < numberOfPlayers; i++){
-      auto initialPosition = position + glm::vec3(1.f * i, 0.f, 0.f); // TODO - this is bad, this should just have a few initial spawnpoints
-      auto playerId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  initialPosition, {});    
-      playerIds.push_back(playerId);
+  auto gamemodeFps = std::get_if<GameModeFps>(&managedScene.gameMode);
+  auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
+  if (gamemodeFps){
+    if (gamemodeFps -> makePlayer){
+      auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
+      glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
+      int numberOfPlayers = getNumberOfPlayers();
+      for (int i  = 0; i < numberOfPlayers; i++){
+        auto initialPosition = position + glm::vec3(1.f * i, 0.f, 0.f); // TODO - this is bad, this should just have a few initial spawnpoints
+        auto playerId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  initialPosition, {});    
+        playerIds.push_back(playerId);
+      }
     }
-  }
 
-  spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
+    spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
 
-  if (playerIds.size() == 0 && managedScene.player.has_value()){
-    // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
-    auto playerId = findObjByShortName(managedScene.player.value(), sceneId);
-    modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
-    modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-    setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
-  }
-
-  if (playerIds.size() > 0){
-    for (int i = 0; i < playerIds.size(); i++){
-      auto prefabId = playerIds.at(i);
-      auto playerId = findBodyPart(prefabId, managedScene.player.value().c_str());
+    if (playerIds.size() == 0 && gamemodeFps -> player.has_value()){
+      // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
+      auto playerId = findObjByShortName(gamemodeFps -> player.value(), sceneId);
       modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
       modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-      setActivePlayer(movement, weapons, aiData, playerId, i);
+      setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
     }
+
+    if (playerIds.size() > 0){
+      for (int i = 0; i < playerIds.size(); i++){
+        auto prefabId = playerIds.at(i);
+        auto playerId = findBodyPart(prefabId, gamemodeFps -> player.value().c_str());
+        modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
+        modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
+        setActivePlayer(movement, weapons, aiData, playerId, i);
+      }
+    }
+  }else if (gamemodeBall){
+    //modassert(false, "gamemode ball not implemented");
   }
+
 }
 
 
@@ -319,6 +334,29 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
   return defaultScenario;
 }
 
+GameMode gamemodeByShortcutName(std::string shortcut){
+  auto query = gameapi -> compileSqlQuery("select shortcut, mode from levels", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query gamemodeByShortcutName");
+  for (auto row : result){
+    auto shortcutResult = row.at(0);
+    if (shortcutResult == shortcut){
+      auto modeStr = row.at(1);
+      if (modeStr == "none"){
+        return GameModeNone{}; 
+      }
+      if (modeStr == "ball"){
+        return GameModeBall{};
+      }
+    }
+  }
+  return GameModeFps {
+    .makePlayer = true,
+    .player = "maincamera",
+  };
+}
+
 
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
@@ -362,8 +400,7 @@ struct SceneRouterPath {
   std::vector<std::string> paths;
   std::optional<std::function<SceneLoadInfo(std::vector<std::string> params)>> scene;
   std::optional<std::function<ScenarioOptions(std::vector<std::string> params)>> scenarioOptions;
-  bool makePlayer;
-  std::optional<std::string> player;
+  std::function<GameMode(std::vector<std::string> params)> getGameMode = [](std::vector<std::string> params) -> GameMode { return GameModeNone{}; };
 };
 
 struct PathAndParams {
@@ -388,8 +425,6 @@ std::vector<SceneRouterPath> routerPaths = {
       };
     },
     .scenarioOptions = std::nullopt,
-    .makePlayer = false,
-    .player = std::nullopt,
   },
   SceneRouterPath {
     .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
@@ -404,8 +439,9 @@ std::vector<SceneRouterPath> routerPaths = {
     .scenarioOptions = [](std::vector<std::string> params) -> ScenarioOptions {
       return scenarioOptionsByShortcutName(params.at(0));
     },
-    .makePlayer = true,
-    .player = "maincamera",
+    .getGameMode = [](std::vector<std::string> params) -> GameMode {
+      return gamemodeByShortcutName(params.at(0));
+    },
   },
   SceneRouterPath {
     .paths = { "loading/" },
@@ -416,8 +452,9 @@ std::vector<SceneRouterPath> routerPaths = {
       };
     },
     .scenarioOptions = std::nullopt,
-    .makePlayer = false,
-    .player = std::nullopt,
+    .getGameMode = [](std::vector<std::string> params) -> GameMode {
+      return GameModeFps{};
+    }
   },
   SceneRouterPath {
     .paths = { "mainmenu/modelviewer/" },
@@ -428,8 +465,12 @@ std::vector<SceneRouterPath> routerPaths = {
       };
     },
     .scenarioOptions = std::nullopt,
-    .makePlayer = false,
-    .player = "maincamera",
+    .getGameMode = [](std::vector<std::string> params) -> GameMode {
+      return GameModeFps {
+        .makePlayer = false,
+        .player = "maincamera",
+      };
+    }
   },
   SceneRouterPath {
     .paths = { "mainmenu/particleviewer/" },
@@ -440,8 +481,12 @@ std::vector<SceneRouterPath> routerPaths = {
       };
     },
     .scenarioOptions = std::nullopt,
-    .makePlayer = false,
-    .player = "maincamera",
+    .getGameMode = [](std::vector<std::string> params) -> GameMode {
+      return GameModeFps {
+        .makePlayer = false,
+        .player = "maincamera",
+      };
+    }
   },
 };
 
@@ -711,8 +756,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .index = currentIndex,
       .path = currentPath,
       .sceneFile = sceneToLoad.value().sceneFile,
-      .player = router.value() -> player,
-      .makePlayer = router.value() -> makePlayer,
+      .gameMode = router.value() -> getGameMode(params),
     };
     activeLevel = std::nullopt;
     sceneManagement.changedLevelFrame = gameapi -> currentFrame();
