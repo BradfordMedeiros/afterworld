@@ -3,21 +3,6 @@
 
 #include "../common.h"
 
-struct BallModeOptions{
-   int testNumber;
 
-   std::function<std::optional<objid>()> getBallId;
-   std::function<void(std::function<void()>)> setPlayerControl;
-   std::function<void(bool)> changeUi;
-   std::function<void(std::optional<float>)> showTimeElapsed;
-   std::function<void()> setLevelFinished;
-   std::function<std::optional<BallPowerup>()> getPowerup;
-   std::function<void(std::string)> setPowerupTexture;
-
-   std::optional<glm::vec3> initialBallPos;
-   std::optional<objid> ballId;
-};
-
-GameTypeInfo getBallMode();
 
 #endif 

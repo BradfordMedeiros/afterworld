@@ -7,6 +7,11 @@
 #include "./entity.h"
 #include "./gameworld/progress.h"
 
+struct BallModeOptions{
+   std::optional<glm::vec3> initialBallPos;
+   std::optional<objid> ballId;
+};
+
 void startBallMode(objid sceneId);
 void endBallMode();
 
