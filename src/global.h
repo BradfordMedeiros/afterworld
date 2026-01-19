@@ -20,6 +20,7 @@ struct GlobalState {
   bool showKeyboard;
 
   bool showGameHud;
+  bool disableHud;
 
   bool disableUiInput;
   bool zoomIntoArcade;
@@ -72,6 +73,7 @@ bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
 void setShowZoomArcade(bool showArcade);
+void setHudEnabled(bool enableHud);
 
 std::optional<BallComponentOptions> showBallOptions();
 void setShowBallOptions(std::optional<BallComponentOptions> ballOptions);

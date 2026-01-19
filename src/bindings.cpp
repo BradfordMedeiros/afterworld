@@ -219,6 +219,7 @@ void startLevel(ManagedScene& managedScene){
   }else if (gamemodeOrb){
     auto cameraId = findObjByShortName(">camera-view", sceneId);
     setTempCamera(cameraId.value(), 0);
+    setHudEnabled(false);
   }
 
 }
@@ -226,6 +227,11 @@ void endLevel(ManagedScene& managedScene){
   auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
   if (gamemodeBall){
     endBallMode();
+  }
+
+  auto gamemodeOrb = std::get_if<GameModeOrb>(&managedScene.gameMode);
+  if (gamemodeOrb){
+    setHudEnabled(true);
   }
 }
 

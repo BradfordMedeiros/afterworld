@@ -109,12 +109,16 @@ void startBallMode(objid sceneId){
 	BallModeOptions modeOptions {};
 
 	changeGameType(gametypeSystem, "ball", &modeOptions);
+
+	setHudEnabled(false);
 }
 
 void endBallMode(){
 	setCanExitVehicle(true);
 	setShowBallOptions(std::nullopt);
 	changeGameType(gametypeSystem, NULL, NULL);
+
+	setHudEnabled(true);
 }
 
 GameTypeInfo getBallMode(){

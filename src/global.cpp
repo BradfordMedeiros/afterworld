@@ -14,6 +14,7 @@ GlobalState global {  // static-state
   .showConsole = false,
   .showKeyboard = false,
   .showGameHud = false,
+  .disableHud = false,
   .disableUiInput = false,
   .zoomIntoArcade = false,
   .showTerminal = false,
@@ -67,7 +68,7 @@ DebugConfig debugPrintGlobal(){
 
 void updateState(){
   global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
-  global.showGameHud = !global.disableGameInput;
+  global.showGameHud = !global.disableGameInput && !global.disableHud;
 
   if (global.routeState.showMouse){
     gameapi -> setWorldState({
@@ -247,6 +248,11 @@ void setShowTerminal(bool showTerminal){
 
 void setShowZoomArcade(bool zoomIn){
   getGlobalState().zoomIntoArcade = zoomIn;
+  updateState();
+}
+
+void setHudEnabled(bool enableHud){
+  getGlobalState().disableHud = !enableHud;
   updateState();
 }
 
