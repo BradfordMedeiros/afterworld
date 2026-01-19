@@ -35,8 +35,9 @@ struct GameModeFps {
   std::optional<std::string> player;
 };
 struct GameModeBall{};
+struct GameModeOrb {};
 
-typedef std::variant<GameModeNone, GameModeFps, GameModeBall> GameMode;
+typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeOrb> GameMode;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -170,6 +171,7 @@ void startLevel(ManagedScene& managedScene){
 
   auto gamemodeFps = std::get_if<GameModeFps>(&managedScene.gameMode);
   auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
+  auto gamemodeOrb = std::get_if<GameModeOrb>(&managedScene.gameMode);
   if (gamemodeFps){
     if (gamemodeFps -> makePlayer){
       auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
@@ -214,6 +216,9 @@ void startLevel(ManagedScene& managedScene){
     setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
 
     startBallMode(sceneId.value());
+  }else if (gamemodeOrb){
+    auto cameraId = findObjByShortName(">camera-view", sceneId);
+    setTempCamera(cameraId.value(), 0);
   }
 
 }
@@ -365,6 +370,9 @@ GameMode gamemodeByShortcutName(std::string shortcut){
       }
       if (modeStr == "ball"){
         return GameModeBall{};
+      }
+      if (modeStr == "orb"){
+        return GameModeOrb{};
       }
     }
   }

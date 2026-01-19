@@ -859,27 +859,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
 	},
 	TagUpdater {
-		.attribute = "mode",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			auto modeStr = std::get_if<std::string>(&value);
-			modassert(modeStr, "modeStr not a string");
-			if (*modeStr == "ball"){
-				// do nothing
-			}else if (*modeStr == "orb-select"){
-				auto cameraId = findObjByShortName(">camera-view", gameapi -> listSceneId(id));
-				setTempCamera(cameraId.value(), 0);
-			}else{
-				modassert(false, "invalid mode type");
-			}
-		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
-	},
-	TagUpdater {
 		.attribute = "powerup",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 	    auto powerup = getSingleAttr(id, "powerup");
