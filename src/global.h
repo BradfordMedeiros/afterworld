@@ -26,6 +26,7 @@ struct GlobalState {
   bool zoomIntoArcade;
 
   bool showTerminal;
+  bool showLiveMenu;
   float lastToggleTerminalTime;
 
   float xNdc;
@@ -72,6 +73,7 @@ bool middleMouseDown();
 bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
+void setShowLiveMenu(bool showLiveMenu);
 void setShowZoomArcade(bool showArcade);
 void setHudEnabled(bool enableHud);
 

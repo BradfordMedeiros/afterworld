@@ -36,8 +36,9 @@ struct GameModeFps {
 };
 struct GameModeBall{};
 struct GameModeOrb {};
+struct GameModeIntro{};
 
-typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeOrb> GameMode;
+typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeOrb, GameModeIntro> GameMode;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -172,6 +173,7 @@ void startLevel(ManagedScene& managedScene){
   auto gamemodeFps = std::get_if<GameModeFps>(&managedScene.gameMode);
   auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
   auto gamemodeOrb = std::get_if<GameModeOrb>(&managedScene.gameMode);
+  auto gamemodeIntro = std::get_if<GameModeIntro>(&managedScene.gameMode);
   if (gamemodeFps){
     if (gamemodeFps -> makePlayer){
       auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
@@ -220,6 +222,12 @@ void startLevel(ManagedScene& managedScene){
     auto cameraId = findObjByShortName(">camera-view", sceneId);
     setTempCamera(cameraId.value(), 0);
     setHudEnabled(false);
+  }else if (gamemodeIntro){
+
+    auto cameraId = findObjByShortName(">menu-view", sceneId);
+    setTempCamera(cameraId.value(), 0);
+    setHudEnabled(false);
+    setShowLiveMenu(true);
   }
 
 }
@@ -232,6 +240,11 @@ void endLevel(ManagedScene& managedScene){
   auto gamemodeOrb = std::get_if<GameModeOrb>(&managedScene.gameMode);
   if (gamemodeOrb){
     setHudEnabled(true);
+  }
+
+  auto gamemodeIntro = std::get_if<GameModeIntro>(&managedScene.gameMode);
+  if (gamemodeIntro){
+    setShowLiveMenu(false);
   }
 }
 
@@ -380,6 +393,9 @@ GameMode gamemodeByShortcutName(std::string shortcut){
       if (modeStr == "orb"){
         return GameModeOrb{};
       }
+      if (modeStr == "intro"){
+        return GameModeIntro{};
+      }
     }
   }
   return GameModeFps {
@@ -458,7 +474,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .scenarioOptions = std::nullopt,
   },
   SceneRouterPath {
-    .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/" },
+    .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/"},
     .scene = [](std::vector<std::string> params) -> SceneLoadInfo {
       auto sceneFile = levelByShortcutName(params.at(0));
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
@@ -557,6 +573,7 @@ std::vector<SceneRouterOptions> routerPathOptions = {
       .paths = {  
         PathAndParams { .path = "playing/*/", .params = { "editor" } }, 
         PathAndParams { .path = "playing/*/", .params = { "terminal" } }, 
+        PathAndParams { .path = "playing/*/", .params = { "livemenu" } }, 
       },
       .paused = false,
       .inGameMode = true,
@@ -1094,6 +1111,9 @@ UiContext getUiContext(GameState& gameState){
       return scoreOptions;
    },
    .getBallMode = showBallOptions,
+   .getMenuOptions = []() -> std::optional<MainMenu2Options> {
+      return MainMenu2Options{};
+   },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);

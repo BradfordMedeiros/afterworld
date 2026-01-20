@@ -130,6 +130,8 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
             .scoreOptions = uiContext.getScoreConfig(),
             .terminalConfig = uiContext.showTerminal(),
             .ballMode = uiContext.getBallMode(),
+            .menuOptions = uiContext.getMenuOptions(),
+
           } 
         },
       },

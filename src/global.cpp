@@ -18,6 +18,7 @@ GlobalState global {  // static-state
   .disableUiInput = false,
   .zoomIntoArcade = false,
   .showTerminal = false,
+  .showLiveMenu = false,
   .lastToggleTerminalTime = 0.f,
   .xNdc = 0.f,
   .yNdc = 0.f,
@@ -245,6 +246,19 @@ void setShowTerminal(bool showTerminal){
     updateState();
   }
 }
+
+void setShowLiveMenu(bool showLiveMenu){
+  if (showLiveMenu){
+    pushHistoryParam("livemenu");
+  }else{
+    rmHistoryParam("livemenu");
+  }
+
+  getGlobalState().showLiveMenu = showLiveMenu;
+  updateState();
+
+}
+
 
 void setShowZoomArcade(bool zoomIn){
   getGlobalState().zoomIntoArcade = zoomIn;

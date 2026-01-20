@@ -51,6 +51,11 @@ Component playingComponent {
 	    terminalComponent.draw(drawTools, terminalProps);    
 	  }
 
+    if (playingOptions -> menuOptions.has_value()){
+      Props defaultProps { .props = {}};
+      mainMenu2.draw(drawTools, defaultProps);      
+    }
+
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },
 };

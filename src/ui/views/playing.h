@@ -7,6 +7,7 @@
 #include "../components/game/score.h"
 #include "../components/game/terminal.h"
 #include "./ball.h"
+#include "./mainmenu2.h"
 
 struct PlayingOptions {
 	bool showHud;
@@ -14,6 +15,8 @@ struct PlayingOptions {
 	std::optional<ScoreOptions> scoreOptions;
 	std::optional<TerminalConfig> terminalConfig;
 	std::optional<BallComponentOptions> ballMode;
+
+	std::optional<MainMenu2Options> menuOptions;
 };
 extern Component playingComponent;
 
