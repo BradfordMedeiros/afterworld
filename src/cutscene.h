@@ -110,8 +110,25 @@ void onCutsceneObjRemoved(objid id);
 
 /////////////////////////////
 
-void playCutscene2(objid ownerObjId, std::string cutsceneName);
+struct EasyCutscene {
+  std::set<int> playedEvents;
+  std::unordered_map<int, float> startTime;
+  std::any storage;
+
+  std::vector<int> idsThisFrame;
+  std::set<int> playedEventsThisFrame;
+  bool firstRun = true;
+  bool finished = false;
+};
+
+void playCutscene2(objid ownerObjId, std::function<void(EasyCutscene&)> cutsceneFn);
 void tickCutscenes2();
 
+bool initialize(EasyCutscene& easyCutscene);
+void waitUntil(EasyCutscene& easyCutscene, int index, int milliseconds);
+void run(EasyCutscene& easyCutscene, int index, std::function<void()> fn);
+bool finished(EasyCutscene& easyCutscene, int index);
+bool finishedThisFrame(EasyCutscene& easyCutscene, int index);
+bool finalize(EasyCutscene& cutscene);
 
 #endif

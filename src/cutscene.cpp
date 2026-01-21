@@ -494,17 +494,6 @@ void onCutsceneObjRemoved(objid id){
 }
 
 //////////////////////////
-struct EasyCutscene {
-  std::optional<float> initialTime = gameapi -> timeSeconds(false);
-  std::set<int> playedEvents;
-  std::unordered_map<int, float> startTime;
-  std::any storage;
-
-  std::vector<int> idsThisFrame;
-  std::set<int> playedEventsThisFrame;
-  bool firstRun = true;
-  bool finished = false;
-};
 
 bool initialize(EasyCutscene& easyCutscene){
 	bool firstRun = easyCutscene.firstRun;
@@ -592,52 +581,13 @@ struct CutsceneInstance2 {
 };
 
 
-void testCutscene2(EasyCutscene& cutscene){
-	auto showRed = finished(cutscene, 0);
-	auto showGreen = finished(cutscene, 1);
-
-	if (initialize(cutscene)){
-		std::cout << "testCutscene2 initial" << std::endl;
-	}
-	if (finalize(cutscene)){
-		std::cout << "testCutscene2 finalize" << std::endl;
-	}
-
-	waitUntil(cutscene, 0, 5000);
-	waitUntil(cutscene, 1, 10000);
-	waitUntil(cutscene, 2, 15000);
-
-	if (finishedThisFrame(cutscene, 0)){
-		std::cout << "testCutscene2 event 0 finished" << std::endl;
-	}
-	if (finishedThisFrame(cutscene, 1)){
-		std::cout << "testCutscene2 event 1 finished" << std::endl;
-	}
-	if (finishedThisFrame(cutscene, 2)){
-		std::cout << "testCutscene2 event 2 finished" << std::endl;
-	}
-	
-	glm::vec4 color = glm::vec4(0.f, 0.f, 1.f, 1.f);
-	if (showRed){
-		color = glm::vec4(1.f, 0.f, 0.f, 1.f);
-	}
-	if (showGreen){
-		color = glm::vec4(0.f, 1.f, 0.f, 1.f);
-	}
-  gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-}
 
 std::unordered_map<objid, CutsceneInstance2> playingCutscenes2 {};
-std::unordered_map<std::string, std::function<void(EasyCutscene&)>> cutscenes2 {
-	{ "test", testCutscene2 },
-};
 
-void playCutscene2(objid ownerObjId, std::string cutsceneName){
-	modassert(cutscenes2.find(cutsceneName) != cutscenes2.end(), std::string("play custscene, cutscene does not exist: ") + cutsceneName)
-
+void playCutscene2(objid ownerObjId, std::function<void(EasyCutscene&)> cutsceneFn){
 	CutsceneInstance2 cutsceneInstance {
 		.ownerObjId = ownerObjId,
-		.cutsceneFn = cutscenes2.at(cutsceneName),
+		.cutsceneFn = cutsceneFn,
 	};
 
 	auto cutsceneId = getUniqueObjId();

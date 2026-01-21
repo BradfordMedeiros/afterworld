@@ -80,11 +80,57 @@ MovementEntityData& getMovementData(){
 }
 
 
+void testCutscene2(EasyCutscene& cutscene){
+  auto showRed = finished(cutscene, 0);
+  auto showGreen = finished(cutscene, 1);
+
+  if (initialize(cutscene)){
+    std::cout << "testCutscene2 initial" << std::endl;
+    showLetterBox("Nothing to Be Afraid Of", 10.f);
+  }
+  if (finalize(cutscene)){
+    std::cout << "testCutscene2 finalize" << std::endl;
+  }
+
+  waitUntil(cutscene, 0, 5000);
+  waitUntil(cutscene, 1, 10000);
+  waitUntil(cutscene, 2, 15000);
+
+  if (finishedThisFrame(cutscene, 0)){
+
+    std::cout << "testCutscene2 event 0 finished" << std::endl;
+  }
+  if (finishedThisFrame(cutscene, 1)){
+    std::cout << "testCutscene2 event 1 finished" << std::endl;
+  }
+  if (finishedThisFrame(cutscene, 2)){
+    std::cout << "testCutscene2 event 2 finished" << std::endl;
+  }
+  
+  glm::vec4 color = glm::vec4(0.f, 0.f, 1.f, 0.2f);
+  if (showRed){
+    color = glm::vec4(1.f, 0.f, 0.f, 0.2f);
+  }else if (showGreen){
+    color = glm::vec4(0.f, 1.f, 0.f, 0.2f);
+  }else{
+        std::string text = "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else.";
+
+      gameapi -> drawText(text, 0.f + 0.1f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  }
+  gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+}
+
 void onMenu2NewGameClick(){
   setShowLiveMenu(false);
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
 
-  playCutscene2(getUniqueObjId(), "test");
+  playCutscene2(getUniqueObjId(), testCutscene2);
   /*auto cameraId = findObjByShortName(">menu-view", std::nullopt);
   auto initialPos = gameapi -> getGameObjectPos(cameraId.value(), true, "onMenu2NewGameClick");
   float initialTime = gameapi -> timeSeconds(false);
