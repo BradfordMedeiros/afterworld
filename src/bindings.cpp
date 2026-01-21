@@ -79,7 +79,7 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
-
+extern GLFWwindow* window;
 void testCutscene2(EasyCutscene& cutscene){
   auto showRed = finished(cutscene, 0);
   auto showGreen = finished(cutscene, 1);
@@ -93,8 +93,15 @@ void testCutscene2(EasyCutscene& cutscene){
   }
 
   waitUntil(cutscene, 0, 5000);
-  waitUntil(cutscene, 1, 10000);
+
+  waitFor(cutscene, 1, []() -> bool { 
+    return glfwGetKey(window, 'K') == GLFW_PRESS;
+  });
+
   waitUntil(cutscene, 2, 15000);
+  run(cutscene, 3, []() -> void {
+    std::cout << "testCutscene2 ran run event" << std::endl;
+  });
 
   if (finishedThisFrame(cutscene, 0)){
 
@@ -126,11 +133,12 @@ void testCutscene2(EasyCutscene& cutscene){
   gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
 }
 
+std::optional<objid> currentCutscene;
 void onMenu2NewGameClick(){
   setShowLiveMenu(false);
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
 
-  playCutscene2(getUniqueObjId(), testCutscene2);
+  currentCutscene = playCutscene2(testCutscene2);
   /*auto cameraId = findObjByShortName(">menu-view", std::nullopt);
   auto initialPos = gameapi -> getGameObjectPos(cameraId.value(), true, "onMenu2NewGameClick");
   float initialTime = gameapi -> timeSeconds(false);
@@ -330,6 +338,9 @@ void endLevel(ManagedScene& managedScene){
   auto gamemodeIntro = std::get_if<GameModeIntro>(&managedScene.gameMode);
   if (gamemodeIntro){
     setShowLiveMenu(false);
+    if (currentCutscene.has_value()){
+      removeCutscene(currentCutscene.value());
+    }
   }
 }
 

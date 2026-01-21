@@ -520,16 +520,28 @@ void waitUntil(EasyCutscene& easyCutscene, int index, int milliseconds){
   }
 }
 
+void waitFor(EasyCutscene& easyCutscene, int index, std::function<bool()> fn){
+	easyCutscene.idsThisFrame.push_back(index);
+
+  if (easyCutscene.playedEvents.count(index) > 0){
+    return;
+  }
+
+  bool success = fn();
+  if (success){
+  	easyCutscene.playedEvents.insert(index);
+  	easyCutscene.playedEventsThisFrame.insert(index);
+  }
+}
+
 void run(EasyCutscene& easyCutscene, int index, std::function<void()> fn){
-	bool dependenciesClear = false;
-	if (easyCutscene.idsThisFrame.size() == 0){
-		dependenciesClear = true;
-	}else{
-		auto index = easyCutscene.idsThisFrame.at(easyCutscene.idsThisFrame.size() - 1);
-		if (easyCutscene.playedEvents.count(index) > 0){
-			dependenciesClear = true;
+	bool dependenciesClear = true;
+	for (auto id : easyCutscene.idsThisFrame){
+		if (easyCutscene.playedEvents.count(id) == 0){
+			dependenciesClear = false;
+			break;
 		}
-	}	
+	}
 
 	easyCutscene.idsThisFrame.push_back(index);
 
@@ -556,37 +568,15 @@ bool finalize(EasyCutscene& cutscene){
 }
 
 
-void playTestCutscene(EasyCutscene& easyCutscene){
-  if (initialize(easyCutscene)){
-    // ponteitally get initial object positions and shove into std any whatever
-  }
-  waitUntil(easyCutscene, 0, 1000);
-  waitUntil(easyCutscene, 1, 2000);
-  run(easyCutscene, 2, []() -> void {
-    std::cout << "hello world" << std::endl;
-  });
-
-  if (finished(easyCutscene, 1)){
-
-  }
-  std::cout << "wow" << std::endl;
-}
-
-
-
 struct CutsceneInstance2 {
-	objid ownerObjId;
 	EasyCutscene easyCutscene;
 	std::function<void(EasyCutscene&)> cutsceneFn;
 };
 
-
-
 std::unordered_map<objid, CutsceneInstance2> playingCutscenes2 {};
 
-void playCutscene2(objid ownerObjId, std::function<void(EasyCutscene&)> cutsceneFn){
+objid playCutscene2(std::function<void(EasyCutscene&)> cutsceneFn){
 	CutsceneInstance2 cutsceneInstance {
-		.ownerObjId = ownerObjId,
 		.cutsceneFn = cutsceneFn,
 	};
 
@@ -594,10 +584,11 @@ void playCutscene2(objid ownerObjId, std::function<void(EasyCutscene&)> cutscene
 	playingCutscenes2[cutsceneId] = cutsceneInstance;
 
 	modlog("cutscene", std::string("added cutscene2: ") + std::to_string(cutsceneId));
+	return cutsceneId;
 }
 
-void onCutsceneObjRemoved2(objid id){
-
+void removeCutscene(objid id){
+	playingCutscenes2.erase(id);
 }
 
 void tickCutscenes2(){
@@ -611,8 +602,13 @@ void tickCutscenes2(){
 		if (cutscene.easyCutscene.idsThisFrame.size() == 0){
 			shouldFinalize = true;
 		}else{
-			auto lastEventId = cutscene.easyCutscene.idsThisFrame.at(cutscene.easyCutscene.idsThisFrame.size() - 1);
-			auto finalIdFinished = cutscene.easyCutscene.playedEvents.count(lastEventId) > 0;
+			bool finalIdFinished = true;
+			for (auto& id : cutscene.easyCutscene.idsThisFrame){
+				if (cutscene.easyCutscene.playedEvents.count(id) == 0){
+					finalIdFinished = false;
+					break;
+				}
+			}
 			if (finalIdFinished){
 				shouldFinalize = true;
 			}
@@ -620,6 +616,8 @@ void tickCutscenes2(){
 
 		if (shouldFinalize){
 		  cutscene.easyCutscene.finished = true;
+			cutscene.easyCutscene.idsThisFrame = {};
+			cutscene.easyCutscene.playedEventsThisFrame = {};
 		  cutscene.cutsceneFn(cutscene.easyCutscene);
 		  cutscenesToRemove.push_back(cutsceneId);
 		}

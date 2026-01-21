@@ -121,11 +121,14 @@ struct EasyCutscene {
   bool finished = false;
 };
 
-void playCutscene2(objid ownerObjId, std::function<void(EasyCutscene&)> cutsceneFn);
+objid playCutscene2(std::function<void(EasyCutscene&)> cutsceneFn);
+void removeCutscene(objid id);
+
 void tickCutscenes2();
 
 bool initialize(EasyCutscene& easyCutscene);
 void waitUntil(EasyCutscene& easyCutscene, int index, int milliseconds);
+void waitFor(EasyCutscene& easyCutscene, int index, std::function<bool()> fn);
 void run(EasyCutscene& easyCutscene, int index, std::function<void()> fn);
 bool finished(EasyCutscene& easyCutscene, int index);
 bool finishedThisFrame(EasyCutscene& easyCutscene, int index);
