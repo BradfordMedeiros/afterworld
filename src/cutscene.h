@@ -133,5 +133,17 @@ void run(EasyCutscene& easyCutscene, int index, std::function<void()> fn);
 bool finished(EasyCutscene& easyCutscene, int index);
 bool finishedThisFrame(EasyCutscene& easyCutscene, int index);
 bool finalize(EasyCutscene& cutscene);
+void store(EasyCutscene& cutscene, std::any data);
+
+template <typename T>
+T* getStorage(EasyCutscene& cutscene){
+  try {
+    T* value = std::any_cast<T>(&cutscene.storage);
+    return value;
+  }catch(...){
+    return NULL;
+  }
+}
+
 
 #endif

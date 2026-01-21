@@ -80,6 +80,9 @@ MovementEntityData& getMovementData(){
 }
 
 extern GLFWwindow* window;
+struct TestCutsceneData {
+  int value;
+};
 void testCutscene2(EasyCutscene& cutscene){
   auto showRed = finished(cutscene, 0);
   auto showGreen = finished(cutscene, 1);
@@ -87,6 +90,11 @@ void testCutscene2(EasyCutscene& cutscene){
   if (initialize(cutscene)){
     std::cout << "testCutscene2 initial" << std::endl;
     showLetterBox("Nothing to Be Afraid Of", 10.f);
+
+    TestCutsceneData testCutsceneData {
+      .value = 102,
+    };
+    store(cutscene, testCutsceneData);
   }
   if (finalize(cutscene)){
     std::cout << "testCutscene2 finalize" << std::endl;
@@ -99,8 +107,12 @@ void testCutscene2(EasyCutscene& cutscene){
   });
 
   waitUntil(cutscene, 2, 15000);
-  run(cutscene, 3, []() -> void {
+  run(cutscene, 3, [&cutscene]() -> void {
     std::cout << "testCutscene2 ran run event" << std::endl;
+
+    TestCutsceneData* value = getStorage<TestCutsceneData>(cutscene);
+    modassert(value, "value is null");
+    std::cout << "testCutscene2 data: " << value -> value << std::endl;
   });
 
   if (finishedThisFrame(cutscene, 0)){

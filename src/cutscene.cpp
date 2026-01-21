@@ -567,6 +567,9 @@ bool finalize(EasyCutscene& cutscene){
 	return cutscene.finished;
 }
 
+void store(EasyCutscene& cutscene, std::any data){
+	cutscene.storage = data;
+}
 
 struct CutsceneInstance2 {
 	EasyCutscene easyCutscene;
