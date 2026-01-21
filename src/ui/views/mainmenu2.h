@@ -7,7 +7,8 @@
 #include "./style.h"
 
 struct MainMenu2Options {
-
+	glm::vec4 backgroundColor;
+	float offsetY;
 };
 
 extern Component mainMenu2;

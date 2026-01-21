@@ -107,4 +107,11 @@ void tickCutscenes(CutsceneApi& api, float time);
 void onCutsceneMessages(std::string& key);
 void onCutsceneObjRemoved(objid id);
 
+
+/////////////////////////////
+
+void playCutscene2(objid ownerObjId, std::string cutsceneName);
+void tickCutscenes2();
+
+
 #endif

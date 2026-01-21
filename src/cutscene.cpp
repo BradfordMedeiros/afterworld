@@ -5,7 +5,6 @@ extern CustomApiBindings* gameapi;
 std::unordered_map<objid, CutsceneInstance> playingCutscenes;     // static-state
 std::unordered_map<objid, std::function<void()>> perFrameEvents;  // static-state
 
-
 void doCutsceneEvent(CutsceneApi& api, CutsceneEvent& event, float time, float duration){
 	auto debugTextDisplayPtr = std::get_if<DebugTextDisplay>(&event.type);
 	auto imageDisplayPtr = std::get_if<ImageDisplay>(&event.type);
@@ -493,3 +492,190 @@ void onCutsceneObjRemoved(objid id){
 		}		
 	}
 }
+
+//////////////////////////
+struct EasyCutscene {
+  std::optional<float> initialTime = gameapi -> timeSeconds(false);
+  std::set<int> playedEvents;
+  std::unordered_map<int, float> startTime;
+  std::any storage;
+
+  std::vector<int> idsThisFrame;
+  std::set<int> playedEventsThisFrame;
+  bool firstRun = true;
+  bool finished = false;
+};
+
+bool initialize(EasyCutscene& easyCutscene){
+	bool firstRun = easyCutscene.firstRun;
+	if (firstRun){
+		easyCutscene.firstRun = false;
+	}
+  return firstRun;
+}
+
+void waitUntil(EasyCutscene& easyCutscene, int index, int milliseconds){
+	easyCutscene.idsThisFrame.push_back(index);
+
+  if (easyCutscene.playedEvents.count(index) > 0){
+    return;
+  }
+
+  if (easyCutscene.startTime.find(index) == easyCutscene.startTime.end()){
+	  easyCutscene.startTime[index] = gameapi -> timeSeconds(false);
+  }
+  auto timeElapsed = gameapi -> timeSeconds(false) - easyCutscene.startTime.at(index);
+  if (timeElapsed > (milliseconds / 1000.f)){
+  	easyCutscene.playedEvents.insert(index);
+  	easyCutscene.playedEventsThisFrame.insert(index);
+  }
+}
+
+void run(EasyCutscene& easyCutscene, int index, std::function<void()> fn){
+	bool dependenciesClear = false;
+	if (easyCutscene.idsThisFrame.size() == 0){
+		dependenciesClear = true;
+	}else{
+		auto index = easyCutscene.idsThisFrame.at(easyCutscene.idsThisFrame.size() - 1);
+		if (easyCutscene.playedEvents.count(index) > 0){
+			dependenciesClear = true;
+		}
+	}	
+
+	easyCutscene.idsThisFrame.push_back(index);
+
+	if (dependenciesClear && easyCutscene.playedEvents.count(index) == 0){
+		fn();
+		easyCutscene.playedEvents.insert(index);
+		easyCutscene.playedEventsThisFrame.insert(index);
+	}
+}
+
+bool finished(EasyCutscene& easyCutscene, int index){
+  if (easyCutscene.playedEvents.count(index) > 0){
+    return true;
+  }
+  return false;
+}
+
+bool finishedThisFrame(EasyCutscene& easyCutscene, int index){
+	return easyCutscene.playedEventsThisFrame.count(index) > 0;
+}
+
+bool finalize(EasyCutscene& cutscene){
+	return cutscene.finished;
+}
+
+
+void playTestCutscene(EasyCutscene& easyCutscene){
+  if (initialize(easyCutscene)){
+    // ponteitally get initial object positions and shove into std any whatever
+  }
+  waitUntil(easyCutscene, 0, 1000);
+  waitUntil(easyCutscene, 1, 2000);
+  run(easyCutscene, 2, []() -> void {
+    std::cout << "hello world" << std::endl;
+  });
+
+  if (finished(easyCutscene, 1)){
+
+  }
+  std::cout << "wow" << std::endl;
+}
+
+
+
+struct CutsceneInstance2 {
+	objid ownerObjId;
+	EasyCutscene easyCutscene;
+	std::function<void(EasyCutscene&)> cutsceneFn;
+};
+
+
+void testCutscene2(EasyCutscene& cutscene){
+	auto showRed = finished(cutscene, 0);
+	auto showGreen = finished(cutscene, 1);
+
+	if (initialize(cutscene)){
+		std::cout << "testCutscene2 initial" << std::endl;
+	}
+	if (finalize(cutscene)){
+		std::cout << "testCutscene2 finalize" << std::endl;
+	}
+
+	waitUntil(cutscene, 0, 5000);
+	waitUntil(cutscene, 1, 10000);
+	waitUntil(cutscene, 2, 15000);
+
+	if (finishedThisFrame(cutscene, 0)){
+		std::cout << "testCutscene2 event 0 finished" << std::endl;
+	}
+	if (finishedThisFrame(cutscene, 1)){
+		std::cout << "testCutscene2 event 1 finished" << std::endl;
+	}
+	if (finishedThisFrame(cutscene, 2)){
+		std::cout << "testCutscene2 event 2 finished" << std::endl;
+	}
+	
+	glm::vec4 color = glm::vec4(0.f, 0.f, 1.f, 1.f);
+	if (showRed){
+		color = glm::vec4(1.f, 0.f, 0.f, 1.f);
+	}
+	if (showGreen){
+		color = glm::vec4(0.f, 1.f, 0.f, 1.f);
+	}
+  gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+}
+
+std::unordered_map<objid, CutsceneInstance2> playingCutscenes2 {};
+std::unordered_map<std::string, std::function<void(EasyCutscene&)>> cutscenes2 {
+	{ "test", testCutscene2 },
+};
+
+void playCutscene2(objid ownerObjId, std::string cutsceneName){
+	modassert(cutscenes2.find(cutsceneName) != cutscenes2.end(), std::string("play custscene, cutscene does not exist: ") + cutsceneName)
+
+	CutsceneInstance2 cutsceneInstance {
+		.ownerObjId = ownerObjId,
+		.cutsceneFn = cutscenes2.at(cutsceneName),
+	};
+
+	auto cutsceneId = getUniqueObjId();
+	playingCutscenes2[cutsceneId] = cutsceneInstance;
+
+	modlog("cutscene", std::string("added cutscene2: ") + std::to_string(cutsceneId));
+}
+
+void onCutsceneObjRemoved2(objid id){
+
+}
+
+void tickCutscenes2(){
+	std::vector<objid> cutscenesToRemove;
+	for (auto& [cutsceneId, cutscene] : playingCutscenes2){
+		cutscene.easyCutscene.idsThisFrame = {};
+		cutscene.easyCutscene.playedEventsThisFrame = {};
+		cutscene.cutsceneFn(cutscene.easyCutscene);
+
+		bool shouldFinalize = false;
+		if (cutscene.easyCutscene.idsThisFrame.size() == 0){
+			shouldFinalize = true;
+		}else{
+			auto lastEventId = cutscene.easyCutscene.idsThisFrame.at(cutscene.easyCutscene.idsThisFrame.size() - 1);
+			auto finalIdFinished = cutscene.easyCutscene.playedEvents.count(lastEventId) > 0;
+			if (finalIdFinished){
+				shouldFinalize = true;
+			}
+		}
+
+		if (shouldFinalize){
+		  cutscene.easyCutscene.finished = true;
+		  cutscene.cutsceneFn(cutscene.easyCutscene);
+		  cutscenesToRemove.push_back(cutsceneId);
+		}
+	}
+	for (auto id : cutscenesToRemove){
+		playingCutscenes2.erase(id);
+	}
+}
+

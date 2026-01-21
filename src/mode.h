@@ -15,4 +15,8 @@ struct BallModeOptions{
 void startBallMode(objid sceneId);
 void endBallMode();
 
+
+void startIntroMode(objid sceneId);
+void endIntroMode();
+
 #endif

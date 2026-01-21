@@ -1,11 +1,15 @@
 #include "./mainmenu.h"
 
-Props createLevelListPropsBall(){
+
+bool onMenu2NewGameClick();
+
+Props createLevelListPropsBall(float offset){
   std::vector<ListComponentData> levels;
   levels.push_back(ListComponentData {
     .name = "New Game",
     .onClick = []() -> void {
       //pushHistory({ "levelselect" }, false);
+      onMenu2NewGameClick();
     }
   });
   levels.push_back(ListComponentData {
@@ -26,8 +30,8 @@ Props createLevelListPropsBall(){
   Props levelProps {
     .props = {
       PropPair { .symbol = listItemsSymbol, .value = levels },
-      //PropPair { .symbol = xoffsetSymbol,   .value = 0.f },
-      PropPair { .symbol = yoffsetSymbol,   .value = 0.2f },
+      PropPair { .symbol = xoffsetSymbol,   .value = 0.f  },
+      PropPair { .symbol = yoffsetSymbol,   .value = 0.2f - offset  },
       PropPair { .symbol = colorSymbol,      .value = glm::vec4(0.f, 0.f, 0.f, 0.3f) },
       PropPair { .symbol = flowVertical,    .value = UILayoutFlowNegative2 },
       PropPair { .symbol = itemPaddingSymbol, .value = 0.04f },
@@ -40,6 +44,11 @@ Props createLevelListPropsBall(){
 Component mainMenu2 {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     static std::string title("Soul Delivery");
+
+    auto mainMenuOptions = typeFromProps<MainMenu2Options>(props, valueSymbol);
+    modassert(mainMenuOptions, "no main menu2 options");
+
+    float alpha = mainMenuOptions -> backgroundColor.w;
 
     Props listItemProps {
       .props = {
@@ -70,14 +79,16 @@ Component mainMenu2 {
     };
     Props listLayoutProps {
       .props = {
-        { .symbol = yoffsetSymbol, .value = 0.4f },
+        { .symbol = yoffsetSymbol, .value = 0.4f + mainMenuOptions -> offsetY },
+        { .symbol = xoffsetSymbol, .value = 0.f },
         { .symbol = layoutSymbol, .value = layout },
       },
     };
     layoutComponent.draw(drawTools, listLayoutProps);
 
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, mainMenuOptions -> backgroundColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
-    auto levelSelection = withPropsCopy(listComponent, createLevelListPropsBall());
+    auto levelSelection = withPropsCopy(listComponent, createLevelListPropsBall(mainMenuOptions -> offsetY));
     return levelSelection.draw(drawTools, props);
   },
 };

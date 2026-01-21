@@ -212,3 +212,12 @@ GameTypeInfo getBallMode(){
 	return ballMode;
 }
 
+
+
+/////////////////
+void startIntroMode(objid sceneId){
+	
+}
+void endIntroMode(){
+
+}

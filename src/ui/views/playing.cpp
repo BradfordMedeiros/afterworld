@@ -52,7 +52,11 @@ Component playingComponent {
 	  }
 
     if (playingOptions -> menuOptions.has_value()){
-      Props defaultProps { .props = {}};
+      Props defaultProps { 
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = playingOptions -> menuOptions.value() }
+        }
+      };
       mainMenu2.draw(drawTools, defaultProps);      
     }
 

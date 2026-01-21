@@ -79,6 +79,45 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
+
+void onMenu2NewGameClick(){
+  setShowLiveMenu(false);
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+
+  playCutscene2(getUniqueObjId(), "test");
+  /*auto cameraId = findObjByShortName(">menu-view", std::nullopt);
+  auto initialPos = gameapi -> getGameObjectPos(cameraId.value(), true, "onMenu2NewGameClick");
+  float initialTime = gameapi -> timeSeconds(false);
+
+  simpleOnFrame([cameraId, initialPos, initialTime]() -> void {
+    float timeElapsed = gameapi -> timeSeconds(false) - initialTime;
+
+    auto newPosition = initialPos + glm::vec3(0.f, 0.f, timeElapsed * -10.f);
+    gameapi -> setGameObjectPosition(cameraId.value(), newPosition, true, Hint { .hint = "onMenu2NewGameClick set cam"  });
+
+    std::string text = "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else.";
+
+
+    if (timeElapsed > 3.f){
+      float alpha = (timeElapsed - 3.f) / 3.f;
+      if (alpha > 1.f){
+        alpha = 1.f;
+      }
+      gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, glm::vec4(0.1f, 0.1f, 0.1f, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      gameapi -> drawText(text, 0.f + 0.1f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f * alpha), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    }
+
+
+  }, 10000.f);*/
+
+}
+
 std::vector<int> getVehicleIds(){
   std::vector<int>  vehicleIds;
   for (auto& [id, vehicle] : vehicles.vehicles){
@@ -218,12 +257,12 @@ void startLevel(ManagedScene& managedScene){
     setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
 
     startBallMode(sceneId.value());
+
   }else if (gamemodeOrb){
     auto cameraId = findObjByShortName(">camera-view", sceneId);
     setTempCamera(cameraId.value(), 0);
     setHudEnabled(false);
   }else if (gamemodeIntro){
-
     auto cameraId = findObjByShortName(">menu-view", sceneId);
     setTempCamera(cameraId.value(), 0);
     setHudEnabled(false);
@@ -1112,7 +1151,40 @@ UiContext getUiContext(GameState& gameState){
    },
    .getBallMode = showBallOptions,
    .getMenuOptions = []() -> std::optional<MainMenu2Options> {
-      return MainMenu2Options{};
+      float duration = 0.2f;
+
+      static bool showMenu = false;
+      bool wasShowingMenu = showMenu;
+      showMenu = getGlobalState().showLiveMenu;
+      static std::optional<float> lastShowTime;
+
+      glm::vec4 baseColor(0.f, 0.f, 1.f, 0.2f);
+
+      if (showMenu){
+        lastShowTime = std::nullopt;
+        return MainMenu2Options {
+          .backgroundColor = baseColor,
+          .offsetY = 0.f, 
+        };
+      }
+
+      if (wasShowingMenu && !showMenu){
+        lastShowTime = gameapi -> timeSeconds(false);
+      }
+      if (!lastShowTime.has_value()){
+        return std::nullopt;
+      }
+
+      auto timeElapsed = gameapi -> timeSeconds(false) - lastShowTime.value();
+      if (timeElapsed > duration){
+        return std::nullopt;
+      }
+      auto percentage = timeElapsed / duration;
+
+      return MainMenu2Options{
+        .backgroundColor = glm::vec4(baseColor.r, baseColor.g, baseColor.b, (1.f - percentage) * baseColor.w),
+        .offsetY = 0.f + percentage,
+      };
    },
    .levels = LevelUIInterface {
       .goToLevel = [&gameState](Level& level) -> void {
@@ -1667,9 +1739,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     gameapi -> sendNotifyMessage("advance", true);
     return;
   }
-
 }
-
 
 void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
   GameState* gameState = static_cast<GameState*>(data);
@@ -1750,10 +1820,6 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
     }
   }
 }
-
-
-
-
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -1955,6 +2021,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
+    tickCutscenes2();
 
     std::vector<EntityUpdate> entityUpdates;
     //////// needs multiviewport work ///////////////////////////////
