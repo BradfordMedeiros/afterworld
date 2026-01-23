@@ -1,35 +1,55 @@
 # Generated scene 
-floor:texture:../gameresources/build/misc/keyboard.png
-floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
-floor:physics:enabled
-floor:rotation:0 -1 1.19209e-07 180.04
-floor:scale:100 100 10
+#floor:texture:../gameresources/build/misc/keyboard.png
+#floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+#floor:physics:enabled
+#floor:rotation:0 -1 1.19209e-07 180.04
+#floor:scale:100 100 10
 
->camera-view:orbview:levelselect
+#>camera-view:orbview:levelselect
 >camera-view:position:10 5.1 2
 
+>menu-view:rotation:0.984808 -1.24095e-08 -0.173648 0
+>menu-view:position:15.1 13.6 51.3
+#>menu-view:spin:true
+
 !light:globallight:true
-!light:angle:-10
-!light:rotation:1 0 1.19209e-07 0
-!light:position:-12.93 -58.31 11.98
+!light:position:0 100 0
 !light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
 !light:spin:true
 
-levelselect:orbui:true
-levelselect:spin:true
-levelselect:texture:./res/textures/skyboxs/sky/bottom.jpg
-levelselect:mesh:../gameresources/build/primitives/sphere.gltf
-levelselect:scale:5 5 5
-levelselect:position:0 5.1 0
+#levelselect:orbui:true
+#levelselect:spin:true
+#levelselect:texture:./res/textures/skyboxs/sky/bottom.jpg
+#levelselect:mesh:../gameresources/build/primitives/sphere.gltf
+#levelselect:scale:5 5 5
+#levelselect:position:50 50 -50
 
-playerspawn:mode:orb-select
 playerspawn:playerspawn:true
 playerspawn:teleport:true
 playerspawn:position:0 20 20
-
 
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
 arcade:scale:1 1 1
 
 orb1:texture:../gameresources/build/textures/creepguy.png
 orb2:texture:../gameresources/build/textures/creepydog.jpg
+
+twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
+
+entity_worldspawn_0:mesh:./build/temp.brush
+entity_worldspawn_0:physics_shape:shape_exact
+entity_worldspawn_0:physics:enabled
+entity_worldspawn_0:position:0 0 0
+
+
+combined_entities_rail:rail:true
+combined_entities_rail:data-pos:0 0 0,0 10 0,0 10 -50
+combined_entities_rail:data-rot:0 0 0,0 0 0,0 0 0
+combined_entities_rail:data-name:rail1,rail1,rail1
+combined_entities_rail:data-index:0,1,2
+combined_entities_rail:data-time:0,2,10
+
+combined_entities_orb:orbui:true
+combined_entities_orb:data-pos:-24.8 0.8 -0.8,-0.8 0.8 -0.8,26.4 0.8 -0.8,26.4 5.8 -0.8
+combined_entities_orb:data-name:testorb,testorb,testorb,testorb
+combined_entities_orb:position:0 20 0

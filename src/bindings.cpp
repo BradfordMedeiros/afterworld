@@ -79,78 +79,13 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
-extern GLFWwindow* window;
-struct TestCutsceneData {
-  int value;
-};
-void testCutscene2(EasyCutscene& cutscene){
-  auto showRed = finished(cutscene, 0);
-  auto showGreen = finished(cutscene, 1);
-
-  if (initialize(cutscene)){
-    std::cout << "testCutscene2 initial" << std::endl;
-    showLetterBox("Nothing to Be Afraid Of", 10.f);
-
-    TestCutsceneData testCutsceneData {
-      .value = 102,
-    };
-    store(cutscene, testCutsceneData);
-  }
-  if (finalize(cutscene)){
-    std::cout << "testCutscene2 finalize" << std::endl;
-  }
-
-  waitUntil(cutscene, 0, 5000);
-
-  waitFor(cutscene, 1, []() -> bool { 
-    return glfwGetKey(window, 'K') == GLFW_PRESS;
-  });
-
-  waitUntil(cutscene, 2, 15000);
-  run(cutscene, 3, [&cutscene]() -> void {
-    std::cout << "testCutscene2 ran run event" << std::endl;
-
-    TestCutsceneData* value = getStorage<TestCutsceneData>(cutscene);
-    modassert(value, "value is null");
-    std::cout << "testCutscene2 data: " << value -> value << std::endl;
-  });
-
-  if (finishedThisFrame(cutscene, 0)){
-
-    std::cout << "testCutscene2 event 0 finished" << std::endl;
-  }
-  if (finishedThisFrame(cutscene, 1)){
-    std::cout << "testCutscene2 event 1 finished" << std::endl;
-  }
-  if (finishedThisFrame(cutscene, 2)){
-    std::cout << "testCutscene2 event 2 finished" << std::endl;
-  }
-  
-  glm::vec4 color = glm::vec4(0.f, 0.f, 1.f, 0.2f);
-  if (showRed){
-    color = glm::vec4(1.f, 0.f, 0.f, 0.2f);
-  }else if (showGreen){
-    color = glm::vec4(0.f, 1.f, 0.f, 0.2f);
-  }else{
-        std::string text = "I remember a nightmare I had as a child.\n\n"
-"A large pyramid\n"
-"moving slowly\n"
-"on a tilted plane.\n\n"
-"There was nothing.\n"
-"And yet,\n"
-"it terrified me more than anything else.";
-
-      gameapi -> drawText(text, 0.f + 0.1f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  }
-  gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-}
 
 std::optional<objid> currentCutscene;
 void onMenu2NewGameClick(){
   setShowLiveMenu(false);
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
 
-  currentCutscene = playCutscene2(testCutscene2);
+  currentCutscene = playCutscene(ballIntroOpening, std::nullopt);
   /*auto cameraId = findObjByShortName(">menu-view", std::nullopt);
   auto initialPos = gameapi -> getGameObjectPos(cameraId.value(), true, "onMenu2NewGameClick");
   float initialTime = gameapi -> timeSeconds(false);
@@ -265,7 +200,6 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unorde
   ).value();
 }
 
-
 void startLevel(ManagedScene& managedScene){
   if (!managedScene.id.has_value()){
     return;
@@ -334,7 +268,6 @@ void startLevel(ManagedScene& managedScene){
     setHudEnabled(false);
     setShowLiveMenu(true);
   }
-
 }
 void endLevel(ManagedScene& managedScene){
   auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
@@ -1387,38 +1320,6 @@ UiContext getUiContext(GameState& gameState){
   return uiContext;
 }
 
-CutsceneApi cutsceneApi {
-  .showLetterBox = showLetterBox,
-  .setCameraPosition = [](std::optional<std::string> camera, glm::vec3 position, glm::quat rotation, std::optional<float> duration) -> void {
-    modlog("cutscene api", "setCameraPosition");
-    if (!camera.has_value()){
-      setTempCamera(std::nullopt, getDefaultPlayerIndex());
-    }else{
-      auto testViewObj = findObjByShortName(camera.value(), std::nullopt);
-      setTempCamera(testViewObj.value(), getDefaultPlayerIndex());      
-      gameapi -> moveCameraTo(testViewObj.value(), position, duration);
-      gameapi -> setGameObjectRot(testViewObj.value(), rotation, true, Hint { .hint = "cutscene - setCameraPosition" });  // tempchecked
-    }
-  },
-  .setPlayerControllable = [](bool isPlayable) -> void {
-    modlog("cutscene api", "setPlayerControllable");
-    setDisablePlayerControl(!isPlayable, 0);
-  },
-  .goToNextLevel = []() -> void {
-    modassert(false, "next level concept does not exist anymore");
-  }, 
-  .setWorldState = [](std::string field, std::string name, AttributeValue value) -> void {
-    modlog("cutscene api", "setWorldState");
-    gameapi -> setWorldState({
-      ObjectValue {
-        .object = field,
-        .attribute = name,
-        .value = value,
-      },
-    });  
-  }
-};
-
 ArcadeApi arcadeApi {
   .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
       return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
@@ -2089,7 +1990,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     }
 
-    tickCutscenes(cutsceneApi, gameapi -> timeSeconds(false));
     tickCutscenes2();
 
     std::vector<EntityUpdate> entityUpdates;
@@ -2528,7 +2428,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       zoomIntoArcade(attrValue -> id, getPlayerIndex(attrValue -> playerId.value()).value());
     }
 
-    onCutsceneMessages(key);
     gametypesOnMessage(gametypeSystem, key, value);
     onAiOnMessage(aiData, key, value);
 

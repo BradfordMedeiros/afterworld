@@ -205,6 +205,26 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	return orbSelection;
 }
 
+void setCameraToOrbView(OrbData& orbData, objid cameraId, std::string orbUiName){
+	std::optional<objid> orbId;
+	for (auto &[id, orbUi] : orbData.orbUis){
+		if (orbUi.name == orbUiName){
+			orbId = id;
+			break;
+		}
+	}
+	modassert(orbId.has_value(), std::string("setCameraToOrbView no orbUi: ") + orbUiName);
+	orbData.orbViewsCameraToOrb[cameraId] = OrbView {
+		.orbId = orbId.value(),
+		.actualIndex = 0,
+		.targetIndex = 0,
+		.startTime = std::nullopt,
+	};
+}
+void removeCameraFromOrbView(OrbData& orbData, objid cameraId){
+  orbData.orbViewsCameraToOrb.erase(cameraId);
+}
+
 std::string print(Orb& orb){
 	std::string data;
 	data += "index = [" + std::to_string(orb.index) + "] ";

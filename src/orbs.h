@@ -37,6 +37,7 @@ struct OrbConnection {
 };
 struct OrbUi {
 	objid id;
+	std::string name;
 	std::vector<Orb> orbs;
 	std::vector<OrbConnection> connections;
 };
@@ -60,7 +61,10 @@ struct OrbSelection {
 	std::optional<Orb*> selectedOrb;
 };	
 OrbSelection handleOrbControls(OrbData& orbData, int key, int action);
+void setCameraToOrbView(OrbData& orbData, objid cameraId, std::string orbUiName);
+void removeCameraFromOrbView(OrbData& orbData, objid cameraId);
 
 std::string print(Orb& orb);
+
 
 #endif 

@@ -587,3 +587,19 @@ void handleEntitiesRace(){
   	}
  	}
 }
+
+void addManagedRailMovement(objid idToMove, objid railId, glm::vec3 initialObjectPos, glm::quat initialObjectRot){
+	managedRailMovements[idToMove] = ManagedRailMovement {
+		.railId = railId,
+		.initialObjectPos = initialObjectPos, 
+		.initialObjectRot = initialObjectRot,
+		.autostart = true,
+		.loop = false,
+		.initialStartTime = gameapi -> timeSeconds(false),
+		.trigger = std::nullopt,
+	};
+}
+
+void removeManagedRailMovement(objid idToMove){
+	managedRailMovements.erase(idToMove);
+}

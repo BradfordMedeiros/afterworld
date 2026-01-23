@@ -85,8 +85,50 @@ std::vector<OrbConnection> ballGameConnections {
 OrbUi createOrbUi(objid id){
   OrbUi orbUi {
     .id = id,
+    .name = "testui",
     .orbs = ballGameOrbs,
     .connections = ballGameConnections,
   };
   return orbUi;	
+}
+
+OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas){
+	OrbUi orbUi {
+		.id = id,
+		.name = name,
+	};
+	std::vector<Orb> ballGameOrbs;
+	std::vector<OrbConnection> ballGameConnections;
+
+	for (int i = 0; i < orbDatas.size(); i++){
+		Orb orb {
+			.index = i,
+			.position = orbDatas.at(i).pos,
+			.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
+			.text = "level 0\nVideo\nPress Action To Play",
+			.mesh = std::nullopt,
+			.level = "video",
+			.image = "../gameresources/build/textures/creepguy.png",
+			.getOrbProgress = []() -> OrbProgress {
+				return OrbProgress {
+					.complete = true,
+				};
+			},
+		};
+		ballGameOrbs.push_back(orb);
+	}
+
+	for (int i = 0; i < (ballGameOrbs.size() - 1); i++){
+		ballGameConnections.push_back(OrbConnection {
+			.indexFrom = i,
+			.indexTo = i + 1,
+		});
+		std::cout << "orbui : from = " << i << ", to = " << (i + 1) << std::endl;
+	}
+
+	orbUi.orbs = ballGameOrbs;
+	orbUi.connections = ballGameConnections;
+	return orbUi;
+
+	//return createOrbUi(id);
 }

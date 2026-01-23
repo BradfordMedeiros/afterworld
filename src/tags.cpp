@@ -201,6 +201,20 @@ glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
 	return q;
 }
 
+std::vector<glm::vec3> parseDataVec3(std::string& value){
+	std::vector<glm::vec3> values;
+	auto posValuesStr = split(value, ',');	
+	for (auto& posValueStr : posValuesStr){
+		auto posVec = parseVec3(posValueStr);	  	
+		values.push_back(posVec);
+	}
+	return values;
+}
+
+std::vector<std::string> parseDataString(std::string& value){
+	return split(value, ',');
+}
+
 struct Skippable {
 	std::optional<std::string> advanceToLevel;
 };
@@ -683,10 +697,10 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "cutscene",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			auto cutscene = getSingleAttr(id, "cutscene");
-			playCutscene(id, cutscene.value(), gameapi -> timeSeconds(false));
+			playCutsceneScript(id, cutscene.value());
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-	    onCutsceneObjRemoved(id);
+	    removeCutscene(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
@@ -752,7 +766,36 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "orbui",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			orbData.orbUis[id] = createOrbUi(id);			
+	  	auto attrHandle = getAttrHandle(id);
+	  	auto orbPositionStrs = getStrAttr(attrHandle, "data-pos");
+	  	modassert(orbPositionStrs.has_value(), "no data for orbs");
+			auto orbPositions = parseDataVec3(orbPositionStrs.value());
+
+			auto orbNamesStr = getStrAttr(attrHandle, "data-name");
+	  	modassert(orbNamesStr.has_value(), "no data-nam for orbs");
+	  	std::set<std::string> names;
+
+	  	auto orbNames = parseDataString(orbNamesStr.value());
+	  	for (auto& name : orbNames){
+	  		names.insert(name);
+	  	}
+	  	if (names.size() > 1){
+	  		modassert(false, "orbui more than one name in data-name for orbui");
+	  	}
+
+			std::vector<OrbDataConfig> orbDatas;
+			for (int i = 0; i < orbPositions.size(); i++){
+				orbDatas.push_back(OrbDataConfig {
+					.pos = orbPositions.at(i),
+				});
+			}
+
+			std::cout << "orbui: ";
+			for (auto pos : orbPositions){
+				std::cout << print(pos) << " ";
+			}
+			std::cout << std::endl;
+			orbData.orbUis[id] = createOrbUi2(id, orbNames.at(0), orbDatas);			
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		orbData.orbUis.erase(id);
@@ -789,15 +832,10 @@ std::vector<TagUpdater> tagupdates = {
 			modassert(strValue, "orbview target not a thing");
 			auto orbId = findObjByShortName(*strValue, std::nullopt);
 			modassert(orbId.has_value(), "orbview target does not exist");
-			orbData.orbViewsCameraToOrb[id] = OrbView {
-				.orbId = orbId.value(),
-				.actualIndex = 0,
-				.targetIndex = 0,
-				.startTime = std::nullopt,
-			};
+			setCameraToOrbView(orbData, id, "testorbui");
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		orbData.orbViewsCameraToOrb.erase(id);
+  		removeCameraFromOrbView(orbData, id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		handleOrbViews(orbData);
@@ -914,15 +952,18 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "rail",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 	  	auto attrHandle = getAttrHandle(id);
+
 	  	auto railData = getStrAttr(attrHandle, "data-pos");
 	  	modassert(railData.has_value(), "no data for rail");
-
+			auto dataPositions = parseDataVec3(railData.value());
+	
 	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
 	  	modassert(railDataRot.has_value(), "no data for rail-rot");
+	  	auto dataRotations = parseDataVec3(railDataRot.value());
 
 	  	auto railNamesRaw = getStrAttr(attrHandle, "data-name");
 	  	modassert(railNamesRaw.has_value(), "no name for rails");
-	  	auto railNames = split(railNamesRaw.value(), ',');
+	  	auto railNames = parseDataString(railNamesRaw.value());
 
 	  	auto railIndexsRaw = getStrAttr(attrHandle, "data-index");
 	  	modassert(railIndexsRaw.has_value(), "no index for rails");
@@ -940,23 +981,13 @@ std::vector<TagUpdater> tagupdates = {
 	  		railTimes.push_back(railTime);
 	  	}
 
-	  	auto posValuesStr = split(railData.value(), ',');	
-	  	auto rotValuesStr = split(railDataRot.value(), ',');
-	  	std::cout << "rail raw data: " << print(posValuesStr) << std::endl;
-	  	std::cout << "rail rot data: " << print(rotValuesStr) << std::endl;
-	  	std::cout << "rail time data: " << print(railTimes) << std::endl;
-	  	std::cout << "rail names: " << print(railNames) << std::endl;
-	  	std::cout << "rail indexs: " << print(railIndexs) << std::endl;
-
 			std::vector<RailNode> nodes;
-	  	for (int i = 0; i < posValuesStr.size(); i++){
-  		  auto& posStr = posValuesStr.at(i);
-  		  auto& rotStr = rotValuesStr.at(i);
+	  	for (int i = 0; i < dataPositions.size(); i++){
   		  auto railName = railNames.at(i);
   		  auto railIndex = railIndexs.at(i);
   		  auto railTime = railTimes.at(i);
-	  		auto posVec = parseVec3(posStr);
-	  		auto rotVec = parseVec3(rotStr);
+	  		auto posVec = dataPositions.at(i);
+	  		auto rotVec = dataRotations.at(i);
 	  		nodes.push_back(RailNode {
 	  			.rail = railName,
 	  			.railIndex = railIndex,
@@ -984,6 +1015,7 @@ std::vector<TagUpdater> tagupdates = {
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		managedRailMovementsBuffer.erase(id);
+  		removeManagedRailMovement(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		auto bufferToAdd = managedRailMovementsBuffer;

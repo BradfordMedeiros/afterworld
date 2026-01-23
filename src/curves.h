@@ -52,6 +52,7 @@ struct RailNode {
 void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);
 std::optional<objid> railIdForName(std::string name);
+std::optional<LinePoints*> railForId(objid id);
 
 void drawAllCurves(objid ownerId);
 
@@ -73,5 +74,8 @@ struct NearbyRail {
 };
 
 std::optional<NearbyRail> nearbyRail(glm::vec3 position, glm::vec3 forwardDir);
+
+void addManagedRailMovement(objid idToMove, objid railId, glm::vec3 initialObjectPos, glm::quat initialObjectRot);
+void removeManagedRailMovement(objid idToMove);
 
 #endif
