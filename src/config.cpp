@@ -108,7 +108,7 @@ OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDa
 			.text = "level 0\nVideo\nPress Action To Play",
 			.mesh = std::nullopt,
 			.level = "video",
-			.image = "../gameresources/build/textures/creepguy.png",
+			.image = std::nullopt,
 			.getOrbProgress = []() -> OrbProgress {
 				return OrbProgress {
 					.complete = true,

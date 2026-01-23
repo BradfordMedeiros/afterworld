@@ -61,8 +61,8 @@ struct OrbSelection {
 	std::optional<Orb*> selectedOrb;
 };	
 OrbSelection handleOrbControls(OrbData& orbData, int key, int action);
-void setCameraToOrbView(OrbData& orbData, objid cameraId, std::string orbUiName);
-void removeCameraFromOrbView(OrbData& orbData, objid cameraId);
+void setCameraToOrbView(objid cameraId, std::string orbUiName);
+void removeCameraFromOrbView(objid cameraId);
 
 std::string print(Orb& orb);
 

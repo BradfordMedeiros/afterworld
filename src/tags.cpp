@@ -826,25 +826,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
 	},
 	TagUpdater {
-		.attribute = "orbview",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			std::string* strValue = std::get_if<std::string>(&value);
-			modassert(strValue, "orbview target not a thing");
-			auto orbId = findObjByShortName(*strValue, std::nullopt);
-			modassert(orbId.has_value(), "orbview target does not exist");
-			setCameraToOrbView(orbData, id, "testorbui");
-		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeCameraFromOrbView(orbData, id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		handleOrbViews(orbData);
-  		std::cout << "active level: " << print(activeLevel) << std::endl;
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
-	},
-	TagUpdater {
 		.attribute = "vehicle",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			auto vehicleType = std::get_if<std::string>(&value);

@@ -1600,6 +1600,8 @@ void objectRemoved(objid idRemoved){
 
   onObjectRemovedWater(water, idRemoved);
   handleTagsOnObjectRemoved(tags, idRemoved);
+  removeCameraFromOrbView(idRemoved);
+
   onObjRemoved(aiData, idRemoved);
 }
 
@@ -2149,6 +2151,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onTagsFrame(tags);
+    handleOrbViews(orbData);
+    
     doStateControllerAnimations();
 
     if (levelShortcutToLoad.has_value()){

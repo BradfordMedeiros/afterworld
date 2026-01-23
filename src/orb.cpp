@@ -1,6 +1,7 @@
 #include "./orbs.h"
 
 extern CustomApiBindings* gameapi;
+extern OrbData orbData;
 
 std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
 	for (auto& orb : orbs){
@@ -205,7 +206,7 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	return orbSelection;
 }
 
-void setCameraToOrbView(OrbData& orbData, objid cameraId, std::string orbUiName){
+void setCameraToOrbView(objid cameraId, std::string orbUiName){
 	std::optional<objid> orbId;
 	for (auto &[id, orbUi] : orbData.orbUis){
 		if (orbUi.name == orbUiName){
@@ -221,7 +222,7 @@ void setCameraToOrbView(OrbData& orbData, objid cameraId, std::string orbUiName)
 		.startTime = std::nullopt,
 	};
 }
-void removeCameraFromOrbView(OrbData& orbData, objid cameraId){
+void removeCameraFromOrbView(objid cameraId){
   orbData.orbViewsCameraToOrb.erase(cameraId);
 }
 

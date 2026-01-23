@@ -162,6 +162,8 @@ void showLetterBox(std::string title, float duration);
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
+void setCameraToOrbView(objid cameraId, std::string orbUiName);
+
 #include "./curves.h"
 
 extern GLFWwindow* window;
@@ -289,6 +291,8 @@ void ballIntroOpening(EasyCutscene& cutscene){
   if (finalize(cutscene)){
   	removeManagedRailMovement(introData -> cameraId);
     showLetterBox("", 0.f);
+    setCameraToOrbView(introData -> cameraId, "testorb");
+    showLetterBox("Level Selection", 10.f /* this is hackey, just give this a first class option */);
   }
 
   waitUntil(cutscene, getIndex(), 5000);

@@ -14,6 +14,7 @@ struct LetterboxFade {
   float fontSize;
 };
 void showLetterBox(std::string title, float duration);
+void showLetterBox(std::string title, std::optional<float> fadeIn, std::optional<float> hold, std::optional<float> fadeOut);
 
 extern Component fadeComponent;
 

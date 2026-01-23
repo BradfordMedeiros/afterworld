@@ -75,7 +75,6 @@ void showLetterBox(std::string title, float duration){
   letterBoxStartTime = gameapi -> timeSeconds(false);
 }
 
-
 Component fadeComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     auto fade = calculateFade(letterbox, letterBoxStartTime);
