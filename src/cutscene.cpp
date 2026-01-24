@@ -298,7 +298,6 @@ void ballIntroOpening(EasyCutscene& cutscene){
   	removeManagedRailMovement(introData -> cameraId);
     showLetterBox("", 0.f);
     setCameraToOrbView(introData -> cameraId, "testorb");
-    showLetterBox("Level Selection", 10.f /* this is hackey, just give this a first class option */);
   }
 
   if (glfwGetKey(window, 'K')){

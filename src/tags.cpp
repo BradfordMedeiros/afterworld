@@ -777,7 +777,7 @@ std::vector<TagUpdater> tagupdates = {
 			std::cout << std::endl;
 
 			auto orbNamesStr = getStrAttr(attrHandle, "data-name");
-	  	modassert(orbNamesStr.has_value(), "no data-nam for orbs");
+	  	modassert(orbNamesStr.has_value(), "no data-name for orbs");
 	  	std::set<std::string> names;
 
 	  	auto orbNames = parseDataString(orbNamesStr.value());
@@ -789,16 +789,22 @@ std::vector<TagUpdater> tagupdates = {
 				});
 			}
 
+			auto orbConnStr = getStrAttr(attrHandle, "data-conn");
+			modassert(orbConnStr.has_value(), "no data-conn for orbs");
+			auto orbConnStrs = split(orbConnStr.value(), ',');
+
 			std::vector<OrbConnection> orbConns;
-			orbConns.push_back(OrbConnection{
-				.indexFrom = 0,
-				.indexTo = 2,
-			});
-			orbConns.push_back(OrbConnection {
-				.indexFrom = 0,
-				.indexTo = 3,
-			});
-		
+			for (int i = 0; i < orbConnStrs.size(); i++){
+				auto toConns = split(orbConnStrs.at(i), '-');
+				for (auto& conn : toConns){
+					auto toIndex = std::atoi(conn.c_str());
+					orbConns.push_back(OrbConnection {
+						.indexFrom = i,
+						.indexTo = toIndex,
+					});
+				}
+			}
+
 			orbData.orbUis[id] = createOrbUi2(id, "testorb", orbDatas, orbConns);			
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
