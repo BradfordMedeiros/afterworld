@@ -12,13 +12,15 @@ std::unordered_map<objid, CutsceneInstance2> playingCutscenes2 {};
 std::vector<objid> cutscenesToRemove;
 
 objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId){
+	auto cutsceneId = ownerId.has_value() ? ownerId.value() : getUniqueObjId();
 	CutsceneInstance2 cutsceneInstance {
-		.easyCutscene = EasyCutscene{},
+		.easyCutscene = EasyCutscene{
+			.cutsceneId = cutsceneId,
+		},
 		.cutsceneFn = cutsceneFn,
 		.ownerId = ownerId,
 	};
 
-	auto cutsceneId = ownerId.has_value() ? ownerId.value() : getUniqueObjId();
 	playingCutscenes2[cutsceneId] = cutsceneInstance;
 
 	modlog("cutscene", std::string("cutscene added: ") + std::to_string(cutsceneId));
@@ -154,6 +156,9 @@ void store(EasyCutscene& cutscene, std::any data){
 	cutscene.storage = data;
 }
 
+void setCutsceneFinished(EasyCutscene& cutscene){
+	removeCutscene(cutscene.cutsceneId);
+}
 
 
 ///////////////
@@ -283,6 +288,7 @@ void ballIntroOpening(EasyCutscene& cutscene){
     store(cutscene, ballIntroData);
 
     showLetterBox("Nothing to Be Afraid Of", 10.f);
+    //setCutsceneFinished(cutscene);
   }
 
   BallIntroData* introData = getStorage<BallIntroData>(cutscene);
@@ -295,6 +301,10 @@ void ballIntroOpening(EasyCutscene& cutscene){
     showLetterBox("Level Selection", 10.f /* this is hackey, just give this a first class option */);
   }
 
+  if (glfwGetKey(window, 'K')){
+  	setCutsceneFinished(cutscene);
+  }
+  
   waitUntil(cutscene, getIndex(), 5000);
   run(cutscene, getIndex(), [introData]() -> void {
   	introData -> showText = false;

@@ -9,7 +9,7 @@ struct OrbDataConfig {
 	glm::vec3 pos;
 };
 
-OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas);
+OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas, std::vector<OrbConnection>& orbConns);
 
 
 #endif

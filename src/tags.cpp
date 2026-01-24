@@ -770,18 +770,17 @@ std::vector<TagUpdater> tagupdates = {
 	  	auto orbPositionStrs = getStrAttr(attrHandle, "data-pos");
 	  	modassert(orbPositionStrs.has_value(), "no data for orbs");
 			auto orbPositions = parseDataVec3(orbPositionStrs.value());
+			std::cout << "orbui: ";
+			for (auto pos : orbPositions){
+				std::cout << print(pos) << " ";
+			}
+			std::cout << std::endl;
 
 			auto orbNamesStr = getStrAttr(attrHandle, "data-name");
 	  	modassert(orbNamesStr.has_value(), "no data-nam for orbs");
 	  	std::set<std::string> names;
 
 	  	auto orbNames = parseDataString(orbNamesStr.value());
-	  	for (auto& name : orbNames){
-	  		names.insert(name);
-	  	}
-	  	if (names.size() > 1){
-	  		modassert(false, "orbui more than one name in data-name for orbui");
-	  	}
 
 			std::vector<OrbDataConfig> orbDatas;
 			for (int i = 0; i < orbPositions.size(); i++){
@@ -790,12 +789,17 @@ std::vector<TagUpdater> tagupdates = {
 				});
 			}
 
-			std::cout << "orbui: ";
-			for (auto pos : orbPositions){
-				std::cout << print(pos) << " ";
-			}
-			std::cout << std::endl;
-			orbData.orbUis[id] = createOrbUi2(id, orbNames.at(0), orbDatas);			
+			std::vector<OrbConnection> orbConns;
+			orbConns.push_back(OrbConnection{
+				.indexFrom = 0,
+				.indexTo = 2,
+			});
+			orbConns.push_back(OrbConnection {
+				.indexFrom = 0,
+				.indexTo = 3,
+			});
+		
+			orbData.orbUis[id] = createOrbUi2(id, "testorb", orbDatas, orbConns);			
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		orbData.orbUis.erase(id);

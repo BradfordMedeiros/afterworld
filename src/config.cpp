@@ -92,7 +92,7 @@ OrbUi createOrbUi(objid id){
   return orbUi;	
 }
 
-OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas){
+OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas, std::vector<OrbConnection>& orbConns){
 	OrbUi orbUi {
 		.id = id,
 		.name = name,
@@ -118,16 +118,8 @@ OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDa
 		ballGameOrbs.push_back(orb);
 	}
 
-	for (int i = 0; i < (ballGameOrbs.size() - 1); i++){
-		ballGameConnections.push_back(OrbConnection {
-			.indexFrom = i,
-			.indexTo = i + 1,
-		});
-		std::cout << "orbui : from = " << i << ", to = " << (i + 1) << std::endl;
-	}
-
 	orbUi.orbs = ballGameOrbs;
-	orbUi.connections = ballGameConnections;
+	orbUi.connections = orbConns;
 	return orbUi;
 
 	//return createOrbUi(id);

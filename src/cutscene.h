@@ -13,6 +13,7 @@ struct EasyCutscene {
   std::set<int> playedEventsThisFrame;
   bool firstRun = true;
   bool finished = false;
+  objid cutsceneId;
 };
 
 objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId);
@@ -28,6 +29,7 @@ bool finished(EasyCutscene& easyCutscene, int index);
 bool finishedThisFrame(EasyCutscene& easyCutscene, int index);
 bool finalize(EasyCutscene& cutscene);
 void store(EasyCutscene& cutscene, std::any data);
+void setCutsceneFinished(EasyCutscene& cutscene);
 
 template <typename T>
 T* getStorage(EasyCutscene& cutscene){

@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
 LetterboxFade letterbox {
   .title = "",
   .animationDuration = 0.f,
@@ -13,19 +12,6 @@ LetterboxFade letterbox {
   .fontSize = 0.02f,
 };
 
-
-void drawTitleBorders(DrawingTools& drawTools, float percentage, std::string& title){
-  modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
-  float barHeight = 0.2f * percentage;
-  drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  const float textPaddingRight = 0.04f;
-  drawLeftText(drawTools, title, 1.f - textPaddingRight, -1.f + (barHeight * 0.5f), letterbox.fontSize, std::nullopt, std::nullopt);
-}
-
-void drawFadeAnimation(DrawingTools& drawTools, float percentage){
-  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.x, letterbox.fadeColor.y, letterbox.fadeColor.z, letterbox.fadeColor.w * percentage), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-}
 
 struct FadeResult {
   float barPercentage;
@@ -79,8 +65,19 @@ Component fadeComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     auto fade = calculateFade(letterbox, letterBoxStartTime);
     if (fade.has_value()){
-      drawFadeAnimation(drawTools, fade.value());
-      drawTitleBorders(drawTools, fade.value(), letterbox.title);
+      float percentage = fade.value();
+      {
+        // background
+        drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.x, letterbox.fadeColor.y, letterbox.fadeColor.z, letterbox.fadeColor.w * percentage), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      }
+      { // title borders
+        modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
+        float barHeight = 0.2f * percentage;
+        drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        const float textPaddingRight = 0.04f;
+        drawLeftText(drawTools, letterbox.title, 1.f - textPaddingRight, -1.f + (barHeight * 0.5f), letterbox.fontSize, std::nullopt, std::nullopt);
+      }
     }else {
       letterBoxStartTime = std::nullopt;
     }
