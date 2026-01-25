@@ -828,7 +828,8 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         std::cout << "additional tokens: " << print(sceneToLoad.value().additionalTokens.at(0)) << std::endl;
       }else{
         std::cout << "additional tokens: " << "none" << std::endl;
-      }
+    }
+
       sceneId = gameapi -> loadScene(sceneToLoad.value().sceneFile, sceneToLoad.value().additionalTokens, std::nullopt, {});
     }
     if (scenarioOptions.has_value()){
@@ -1160,7 +1161,7 @@ UiContext getUiContext(GameState& gameState){
       showMenu = getGlobalState().showLiveMenu;
       static std::optional<float> lastShowTime;
 
-      glm::vec4 baseColor(0.f, 0.f, 1.f, 0.2f);
+      glm::vec4 baseColor(1.f, 1.f, 1.f, 0.66f);
 
       if (showMenu){
         lastShowTime = std::nullopt;

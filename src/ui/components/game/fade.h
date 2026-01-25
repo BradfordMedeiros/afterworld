@@ -10,11 +10,12 @@ struct LetterboxFade {
   std::optional<float> animationHold;
   std::optional<float> fadeOutDuration;
   glm::vec4 boxColor;
-  glm::vec4 fadeColor;
+  std::optional<glm::vec4> fadeColor;
   float fontSize;
 };
 void showLetterBox(std::string title, float duration);
-void showLetterBox(std::string title, std::optional<float> fadeIn, std::optional<float> hold, std::optional<float> fadeOut);
+void showLetterBoxHold(std::string title, float fadeInTime);
+void hideLetterBox();
 
 extern Component fadeComponent;
 

@@ -86,7 +86,20 @@ Component mainMenu2 {
     };
     layoutComponent.draw(drawTools, listLayoutProps);
 
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, mainMenuOptions -> backgroundColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    bool useCoolShader = false;
+    static bool didLoadShader = false;
+    static unsigned int* shaderId = 0;
+    if (useCoolShader){
+      if (!didLoadShader){
+        shaderId = gameapi -> loadShader("storyboard", "../afterworld/shaders/storyboard");
+        didLoadShader = true;
+      }
+    }
+
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, mainMenuOptions -> backgroundColor, true, std::nullopt, "./res/textures/wood.jpg",  ShapeOptions {
+      .shaderId = useCoolShader ? std::optional<unsigned int>(*shaderId) : std::optional<unsigned int>(std::nullopt),
+      .zIndex = -1,
+    }, std::nullopt);
 
     auto levelSelection = withPropsCopy(listComponent, createLevelListPropsBall(mainMenuOptions -> offsetY));
     return levelSelection.draw(drawTools, props);

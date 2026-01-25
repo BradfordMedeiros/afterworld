@@ -13,10 +13,6 @@ LetterboxFade letterbox {
 };
 
 
-struct FadeResult {
-  float barPercentage;
-  float fadePercentage;
-};
 
 std::optional<float> calculateFade(LetterboxFade& fade, std::optional<float> letterBoxStartTime){
   if (!letterBoxStartTime.has_value()){
@@ -48,17 +44,27 @@ std::optional<float> calculateFade(LetterboxFade& fade, std::optional<float> let
 
 std::optional<float> letterBoxStartTime = std::nullopt;
 
-void showLetterBox(std::string title, float duration){
+void showLetterBoxDetail(std::string title, float fadeOutDuration, std::optional<glm::vec4> backgroundColor, glm::vec4 boxColor, float holdDuration, float fadeIn){
   letterbox = LetterboxFade {
     .title = title,
-    .animationDuration = duration * 0.25f,
-    .animationHold = duration * 0.5f,
-    .fadeOutDuration = duration * 0.25f ,
-    .boxColor = glm::vec4(0.f, 0.f, 0.f, 0.8f),
-    .fadeColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.6f),
+    .animationDuration = fadeIn,
+    .animationHold = holdDuration,
+    .fadeOutDuration = fadeOutDuration,
+    .boxColor = boxColor,
+    .fadeColor = backgroundColor,
     .fontSize = 0.02f,
   };
   letterBoxStartTime = gameapi -> timeSeconds(false);
+}
+
+void showLetterBox(std::string title, float duration){
+  showLetterBoxDetail(title, duration * 0.25f, glm::vec4(0.f, 0.f, 0.f, 0.2f), glm::vec4(0.f, 0.f, 0.f, 0.8f), duration * 0.5f, duration * 0.25f);
+}
+void showLetterBoxHold(std::string title, float fadeInTime){
+  showLetterBoxDetail(title, 0.f, std::nullopt, glm::vec4(0.f, 0.f, 0.f, 0.8f), 10000000.f, fadeInTime);
+}
+void hideLetterBox(){
+  letterBoxStartTime = std::nullopt;
 }
 
 Component fadeComponent {
@@ -68,7 +74,9 @@ Component fadeComponent {
       float percentage = fade.value();
       {
         // background
-        drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.x, letterbox.fadeColor.y, letterbox.fadeColor.z, letterbox.fadeColor.w * percentage), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        if (letterbox.fadeColor.has_value()){
+          drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.value().x, letterbox.fadeColor.value().y, letterbox.fadeColor.value().z, letterbox.fadeColor.value().w * percentage), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        }
       }
       { // title borders
         modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));

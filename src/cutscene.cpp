@@ -164,6 +164,9 @@ void setCutsceneFinished(EasyCutscene& cutscene){
 ///////////////
 
 void showLetterBox(std::string title, float duration);
+void showLetterBoxHold(std::string title, float fadeInTime);
+void hideLetterBox();
+
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
@@ -194,7 +197,7 @@ void playOpening(EasyCutscene& cutscene){
 		});
 	}
 	if (finalize(cutscene)){
-		showLetterBox("", 0.f);
+		hideLetterBox();
 	}
 
   OpeningData* value = getStorage<OpeningData>(cutscene);
@@ -298,6 +301,7 @@ void ballIntroOpening(EasyCutscene& cutscene){
   	removeManagedRailMovement(introData -> cameraId);
     showLetterBox("", 0.f);
     setCameraToOrbView(introData -> cameraId, "testorb");
+    showLetterBoxHold("Level Select", 0.f);
   }
 
   if (glfwGetKey(window, 'K')){
