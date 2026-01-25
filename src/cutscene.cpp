@@ -171,6 +171,7 @@ void setDisablePlayerControl(bool isDisabled, int playerIndex);
 int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 void setCameraToOrbView(objid cameraId, std::string orbUiName);
+void setLifetimeObject(objid id, std::function<void()> fn);
 
 #include "./curves.h"
 
@@ -302,6 +303,9 @@ void ballIntroOpening(EasyCutscene& cutscene){
     showLetterBox("", 0.f);
     setCameraToOrbView(introData -> cameraId, "testorb");
     showLetterBoxHold("Level Select", 0.f);
+    setLifetimeObject(introData -> cameraId, []() -> void {
+    	hideLetterBox();
+    });
   }
 
   if (glfwGetKey(window, 'K')){

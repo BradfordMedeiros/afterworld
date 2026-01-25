@@ -28,6 +28,7 @@ Waypoints waypoints {
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 std::string defaultAudioClipPath;
+std::unordered_map<objid, std::function<void()>> lifetimeObjects;
 
 struct GameModeNone{};
 struct GameModeFps {
@@ -1078,6 +1079,11 @@ std::optional<objid> activeSceneForSelected(){
   return sceneId;
 }
 
+
+void setLifetimeObject(objid id, std::function<void()> fn){
+  modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), "already lifetime object");
+  lifetimeObjects[id] = fn;
+}
 
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
@@ -2220,6 +2226,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
     lastMaterial = material;
+
+
+    std::set<objid> lifetimeIdsToRemove;
+    for (auto &[id, fn] : lifetimeObjects){
+      if (!gameapi -> gameobjExists(id)){
+        fn();
+        lifetimeIdsToRemove.insert(id);
+      }
+    }
+    for (auto id : lifetimeIdsToRemove){
+      lifetimeObjects.erase(id);
+    }
+    lifetimeIdsToRemove = {};
   };
 
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
