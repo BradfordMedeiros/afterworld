@@ -92,6 +92,29 @@ OrbUi createOrbUi(objid id){
   return orbUi;	
 }
 
+
+struct OrbMappingValue {
+	std::string text;
+	std::string level;
+};
+std::unordered_map<std::string, OrbMappingValue> nameToOrbMapping {
+	{ "one", OrbMappingValue { 
+			.text = "this is level one",
+			.level = "video",
+		}
+	},
+	{ "two", OrbMappingValue { 
+			.text = "this is level two",
+			.level = "video",
+		}
+	},
+	{ "three", OrbMappingValue { 
+			.text = "this is level three",
+			.level = "video",
+		}
+	},
+};
+
 OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas, std::vector<OrbConnection>& orbConns){
 	OrbUi orbUi {
 		.id = id,
@@ -101,17 +124,21 @@ OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDa
 	std::vector<OrbConnection> ballGameConnections;
 
 	for (int i = 0; i < orbDatas.size(); i++){
+		modassert(nameToOrbMapping.find(orbDatas.at(i).level) != nameToOrbMapping.end(), "no mapping for orbui level");
+		auto& orbMappingValue = nameToOrbMapping.at(orbDatas.at(i).level);
+		auto level = orbMappingValue.level;
+
 		Orb orb {
 			.index = i,
 			.position = orbDatas.at(i).pos,
 			.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
-			.text = "level 0\nVideo\nPress Action To Play",
+			.text = orbMappingValue.text,
 			.mesh = std::nullopt,
-			.level = "video",
+			.level = orbMappingValue.level,
 			.image = std::nullopt,
-			.getOrbProgress = []() -> OrbProgress {
+			.getOrbProgress = [level]() -> OrbProgress {
 				return OrbProgress {
-					.complete = true,
+					.complete = isLevelComplete(level),
 				};
 			},
 		};
@@ -121,6 +148,4 @@ OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDa
 	orbUi.orbs = ballGameOrbs;
 	orbUi.connections = orbConns;
 	return orbUi;
-
-	//return createOrbUi(id);
 }

@@ -776,6 +776,10 @@ std::vector<TagUpdater> tagupdates = {
 			}
 			std::cout << std::endl;
 
+			auto orbLevelsStr = getStrAttr(attrHandle, "data-level");
+			modassert(orbLevelsStr.has_value(), "no data for orb levels");
+			auto orbLevels = split(orbLevelsStr.value(), ',');
+
 			auto orbNamesStr = getStrAttr(attrHandle, "data-name");
 	  	modassert(orbNamesStr.has_value(), "no data-name for orbs");
 	  	std::set<std::string> names;
@@ -786,6 +790,7 @@ std::vector<TagUpdater> tagupdates = {
 			for (int i = 0; i < orbPositions.size(); i++){
 				orbDatas.push_back(OrbDataConfig {
 					.pos = orbPositions.at(i),
+					.level = orbLevels.at(i),
 				});
 			}
 
