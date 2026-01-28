@@ -1,5 +1,3 @@
-########## Base file content: /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.template ##########
-
 # Generated scene 
 #floor:texture:../gameresources/build/misc/keyboard.png
 #floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -37,24 +35,3 @@ orb2:texture:../gameresources/build/textures/creepydog.jpg
 
 twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
 
-
-
-##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.map
-
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.brush
-entity_worldspawn_0:physics_shape:shape_exact
-entity_worldspawn_0:physics:enabled
-entity_worldspawn_0:position:0 0 0
-
-
-combined_entities_rail:rail:true
-combined_entities_rail:data-pos:39.2 0.8 24.8,39.2 32.8 24.8
-combined_entities_rail:data-rot:0 0 0,0 0 0
-combined_entities_rail:data-name:rail1,rail1
-combined_entities_rail:data-index:0,1
-combined_entities_rail:data-time:0,10
-combined_entities_orb:orbui:true
-combined_entities_orb:data-pos:-24.8 0.8 -0.8,-24.8 1.6 -32.8,26.4 6.4 -0.8
-combined_entities_orb:data-conn:1.2,,0
-combined_entities_orb:data-name:one,two,three
-combined_entities_orb:data-level:one,two,one

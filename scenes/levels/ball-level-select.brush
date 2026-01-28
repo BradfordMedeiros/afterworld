@@ -1,0 +1,76 @@
+// Game: Generic
+// Format: Standard
+// entity 0
+{
+"classname" "worldspawn"
+"_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+// brush 0
+{
+( -512 1024 -256 ) ( -512 1025 -256 ) ( -512 1024 -255 ) arcade/trench/city/bricks/bricks_12 128 -128 0 1 1
+( 640 -640 -256 ) ( 640 -640 -255 ) ( 641 -640 -256 ) arcade/trench/city/bricks/bricks_12 -384 -128 0 1 1
+( 640 1024 -256 ) ( 641 1024 -256 ) ( 640 1025 -256 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
+( 768 1152 0 ) ( 768 1153 0 ) ( 769 1152 0 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
+( 768 1152 -128 ) ( 769 1152 -128 ) ( 768 1152 -127 ) arcade/trench/city/bricks/bricks_12 -384 -128 0 1 1
+( 768 1152 -128 ) ( 768 1152 -127 ) ( 768 1153 -128 ) arcade/trench/city/bricks/bricks_12 128 -128 0 1 1
+}
+// brush 1
+{
+( -256 1024 -1024 ) ( -256 1025 -1024 ) ( -256 1024 -1023 ) arcade/trench/city/bricks/bricks_12 512 88 0 1 1
+( -256 1024 -1024 ) ( -256 1024 -1023 ) ( -255 1024 -1024 ) arcade/trench/city/bricks/bricks_12 0 88 0 1 1
+( -256 1024 -1024 ) ( -255 1024 -1024 ) ( -256 1025 -1024 ) arcade/trench/city/bricks/bricks_12 0 -176 0 1 1
+( 384 1152 640 ) ( 384 1153 640 ) ( 385 1152 640 ) arcade/trench/city/bricks/bricks_12 0 -176 0 1 1
+( 384 1152 -896 ) ( 385 1152 -896 ) ( 384 1152 -895 ) arcade/trench/city/bricks/bricks_12 0 88 0 1 1
+( 384 1152 -896 ) ( 384 1152 -895 ) ( 384 1153 -896 ) arcade/trench/city/bricks/bricks_12 512 88 0 1 1
+}
+// brush 2
+{
+( -704 1408 -256 ) ( -704 1409 -256 ) ( -704 1408 -255 ) arcade/trench/city/bricks/bricks_12 -320 0 0 1 1
+( -704 768 -256 ) ( -704 768 -255 ) ( -703 768 -256 ) arcade/trench/city/bricks/bricks_12 -192 0 0 1 1
+( -704 1408 -256 ) ( -703 1408 -256 ) ( -704 1409 -256 ) arcade/trench/city/bricks/bricks_12 -192 320 0 1 1
+( -256 1600 384 ) ( -256 1601 384 ) ( -255 1600 384 ) arcade/trench/city/bricks/bricks_12 -192 320 0 1 1
+( -256 1600 -192 ) ( -255 1600 -192 ) ( -256 1600 -191 ) arcade/trench/city/bricks/bricks_12 -192 0 0 1 1
+( -256 1600 -192 ) ( -256 1600 -191 ) ( -256 1601 -192 ) arcade/trench/city/bricks/bricks_12 -320 0 0 1 1
+}
+}
+// entity 1
+{
+"classname" "orb"
+"origin" "-248 8 8"
+"orb" "one"
+"conn" "two,three"
+"level" "one"
+}
+// entity 2
+{
+"classname" "orb"
+"origin" "-248 328 16"
+"orb" "two"
+"angles" "0 0 0"
+"conn" ""
+"level" "two"
+}
+// entity 3
+{
+"classname" "orb"
+"origin" "264 8 64"
+"orb" "three"
+"angles" "-63 0 0"
+"conn" "one"
+"level" "one"
+}
+// entity 4
+{
+"classname" "rail"
+"origin" "392 -248 8"
+"rail" "rail1"
+"rail-index" "0"
+"time" "0"
+}
+// entity 5
+{
+"classname" "rail"
+"origin" "392 -248 328"
+"rail" "rail1"
+"rail-index" "1"
+"time" "10"
+}
