@@ -80,44 +80,26 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
+void setLifetimeObject(objid id, std::function<void()> fn){
+  modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), "already lifetime object");
+  lifetimeObjects[id] = fn;
+}
 
 std::optional<objid> currentCutscene;
 void onMenu2NewGameClick(){
   setShowLiveMenu(false);
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
-
   currentCutscene = playCutscene(ballIntroOpening, std::nullopt);
-  /*auto cameraId = findObjByShortName(">menu-view", std::nullopt);
-  auto initialPos = gameapi -> getGameObjectPos(cameraId.value(), true, "onMenu2NewGameClick");
-  float initialTime = gameapi -> timeSeconds(false);
+}
 
-  simpleOnFrame([cameraId, initialPos, initialTime]() -> void {
-    float timeElapsed = gameapi -> timeSeconds(false) - initialTime;
-
-    auto newPosition = initialPos + glm::vec3(0.f, 0.f, timeElapsed * -10.f);
-    gameapi -> setGameObjectPosition(cameraId.value(), newPosition, true, Hint { .hint = "onMenu2NewGameClick set cam"  });
-
-    std::string text = "I remember a nightmare I had as a child.\n\n"
-"A large pyramid\n"
-"moving slowly\n"
-"on a tilted plane.\n\n"
-"There was nothing.\n"
-"And yet,\n"
-"it terrified me more than anything else.";
-
-
-    if (timeElapsed > 3.f){
-      float alpha = (timeElapsed - 3.f) / 3.f;
-      if (alpha > 1.f){
-        alpha = 1.f;
-      }
-      gameapi -> drawRect(0.5f, 0.f, 1.f, 2.f, false, glm::vec4(0.1f, 0.1f, 0.1f, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-      gameapi -> drawText(text, 0.f + 0.1f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f * alpha), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-    }
-
-
-  }, 10000.f);*/
-
+void onMenu2ContinueClick(){
+  setShowLiveMenu(false);
+  auto cameraId = findObjByShortName(">menu-view", std::nullopt);
+  setCameraToOrbView(cameraId.value(), "testorb");
+  showLetterBoxHold("Level Select", 0.f);
+  setLifetimeObject(cameraId.value(), []() -> void {
+    hideLetterBox();
+  });
 }
 
 std::vector<int> getVehicleIds(){
@@ -268,6 +250,7 @@ void startLevel(ManagedScene& managedScene){
     setTempCamera(cameraId.value(), 0);
     setHudEnabled(false);
     setShowLiveMenu(true);
+    showLetterBoxHold("", 0.f);
   }
 }
 void endLevel(ManagedScene& managedScene){
@@ -1080,10 +1063,6 @@ std::optional<objid> activeSceneForSelected(){
 }
 
 
-void setLifetimeObject(objid id, std::function<void()> fn){
-  modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), "already lifetime object");
-  lifetimeObjects[id] = fn;
-}
 
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 

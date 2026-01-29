@@ -2,20 +2,20 @@
 
 
 bool onMenu2NewGameClick();
+bool onMenu2ContinueClick();
 
 Props createLevelListPropsBall(float offset){
   std::vector<ListComponentData> levels;
   levels.push_back(ListComponentData {
     .name = "New Game",
     .onClick = []() -> void {
-      //pushHistory({ "levelselect" }, false);
       onMenu2NewGameClick();
     }
   });
   levels.push_back(ListComponentData {
     .name = "Continue",
     .onClick = []() -> void {
-      //pushHistory({ "settings" }, false);
+      onMenu2ContinueClick();
     }
   });
   levels.push_back(ListComponentData {
@@ -86,7 +86,7 @@ Component mainMenu2 {
     };
     layoutComponent.draw(drawTools, listLayoutProps);
 
-    bool useCoolShader = false;
+    bool useCoolShader = true;
     static bool didLoadShader = false;
     static unsigned int* shaderId = 0;
     if (useCoolShader){
