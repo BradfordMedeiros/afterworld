@@ -23,6 +23,7 @@ struct OrbProgress {
 struct Orb {
 	int index;
 	glm::vec3 position;
+	glm::quat rotation;
 	glm::vec4 tint;
 	std::string text;
 

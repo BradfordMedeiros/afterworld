@@ -786,10 +786,16 @@ std::vector<TagUpdater> tagupdates = {
 
 	  	auto orbNames = parseDataString(orbNamesStr.value());
 
+	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
+	  	modassert(railDataRot.has_value(), "no data for rail-rot");
+	  	auto dataRotations = parseDataVec3(railDataRot.value());
+
 			std::vector<OrbDataConfig> orbDatas;
 			for (int i = 0; i < orbPositions.size(); i++){
+				auto rotVec = dataRotations.at(i);
 				orbDatas.push_back(OrbDataConfig {
 					.pos = orbPositions.at(i),
+					.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
 					.level = orbLevels.at(i),
 				});
 			}

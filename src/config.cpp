@@ -6,6 +6,7 @@ std::vector<Orb> ballGameOrbs {
 	Orb {
 		.index = 0,
 		.position = glm::vec3(0.f, 0.f, 0.f),
+		.rotation = MOD_ORIENTATION_FORWARD,
 		.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
 		.text = "level 0\nVideo\nPress Action To Play",
 		.mesh = "../gameresources/build/uncategorized/arcade.gltf",
@@ -20,6 +21,7 @@ std::vector<Orb> ballGameOrbs {
 	Orb {
 		.index = 1,
 		.position = glm::vec3(2.f, 0.f, 0.f),
+		.rotation = MOD_ORIENTATION_FORWARD,
 		.tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
 		.text = "level 1\nIntro\nPress Action To Play",
 		.mesh = std::nullopt,
@@ -34,6 +36,7 @@ std::vector<Orb> ballGameOrbs {
 	Orb {
 		.index = 2,
 		.position = glm::vec3(2.f, 1.f, 0.f),
+		.rotation = MOD_ORIENTATION_FORWARD,
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 2\nBall Rollingl\nPress Action To Play",
 		.mesh = "../gameresources/build/uncategorized/arcade.gltf",
@@ -47,6 +50,7 @@ std::vector<Orb> ballGameOrbs {
 	Orb {
 		.index = 3,
 		.position = glm::vec3(2.f, 1.f, -2.f),
+		.rotation = MOD_ORIENTATION_FORWARD,
 		.tint = glm::vec4(0.f, 1.f, 1.f, 1.f),
 		.text = "level 3\nArena\nPress Action To Play",
 		.mesh = std::nullopt,
@@ -131,6 +135,7 @@ OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDa
 		Orb orb {
 			.index = i,
 			.position = orbDatas.at(i).pos,
+			.rotation = orbDatas.at(i).rotation,
 			.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
 			.text = orbMappingValue.text,
 			.mesh = std::nullopt,

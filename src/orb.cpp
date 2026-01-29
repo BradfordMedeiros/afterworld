@@ -23,7 +23,10 @@ glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
 }
 
 glm::quat getOrbRotation(OrbUi& orbUi, int index){
-	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn");
+	auto orbFrom = getOrb(orbUi.orbs, index);
+	modassert(orbFrom.has_value(), std::string("orbFrom does not exist: ") + std::to_string(index));
+
+	auto rotation = gameapi -> getGameObjectRotation(orbUi.id, true, "getOrbPosition rotn") * orbFrom.value() -> rotation;
 	return rotation;	
 }
 
@@ -119,11 +122,15 @@ void handleOrbViews(OrbData& orbData){
 			auto targetOrbPosition = getOrbPosition(orbUi, objView.targetIndex);
 			orbPosition = lerp(orbPosition, targetOrbPosition, percentage);
 
+			auto targetOrbRotation = getOrbRotation(orbUi, objView.targetIndex);
+			orbRotation = glm::slerp(orbRotation, targetOrbRotation, percentage);
+
 			std::cout << "handleOrbViews: " << percentage << ", target = " << objView.targetIndex << ", actual = " << objView.actualIndex << std::endl;
 			if (percentage > 1.f){
 				orbPosition = targetOrbPosition;
+				orbRotation = targetOrbRotation;
 				objView.actualIndex = objView.targetIndex;
-	      		playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+	      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 			}
 		}
 
@@ -231,6 +238,7 @@ std::string print(Orb& orb){
 	data += "index = [" + std::to_string(orb.index) + "] ";
 	data += "tint =  [" + print(orb.tint) + "] ";
 	data += "position = [" + print(orb.position) + "] ";
+	data += "rotation = [ " + print(orb.rotation) + "] ";
 	data += "level = [" + orb.level + "] ";
 
 	return data;

@@ -7,6 +7,7 @@ OrbUi createOrbUi(objid id);
 
 struct OrbDataConfig {
 	glm::vec3 pos;
+	glm::quat rotation;
 	std::string level;
 };
 

@@ -61,7 +61,7 @@ void showLetterBox(std::string title, float duration){
   showLetterBoxDetail(title, duration * 0.25f, glm::vec4(0.f, 0.f, 0.f, 0.2f), glm::vec4(0.f, 0.f, 0.f, 0.8f), duration * 0.5f, duration * 0.25f);
 }
 void showLetterBoxHold(std::string title, float fadeInTime){
-  showLetterBoxDetail(title, 0.f, std::nullopt, glm::vec4(0.f, 0.f, 0.f, 0.8f), 10000000.f, fadeInTime);
+  showLetterBoxDetail(title, 0.f, std::nullopt, glm::vec4(1.f, 1.f, 1.f, 0.8f), 10000000.f, fadeInTime);
 }
 void hideLetterBox(){
   letterBoxStartTime = std::nullopt;
@@ -81,8 +81,8 @@ Component fadeComponent {
       { // title borders
         modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
         float barHeight = 0.2f * percentage;
-        drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-        drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+        drawTools.drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, "./res/textures/wood.jpg", std::nullopt, std::nullopt);
+        drawTools.drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, true, std::nullopt, "./res/textures/wood.jpg", std::nullopt, std::nullopt);
         const float textPaddingRight = 0.04f;
         drawLeftText(drawTools, letterbox.title, 1.f - textPaddingRight, -1.f + (barHeight * 0.5f), letterbox.fontSize, std::nullopt, std::nullopt);
       }
