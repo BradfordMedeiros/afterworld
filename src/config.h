@@ -13,5 +13,4 @@ struct OrbDataConfig {
 
 OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas, std::vector<OrbConnection>& orbConns);
 
-
 #endif

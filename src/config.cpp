@@ -103,17 +103,17 @@ struct OrbMappingValue {
 };
 std::unordered_map<std::string, OrbMappingValue> nameToOrbMapping {
 	{ "one", OrbMappingValue { 
-			.text = "this is level one",
+			.text = "this is dev",
 			.level = "dev",
 		}
 	},
 	{ "two", OrbMappingValue { 
-			.text = "this is level two",
+			.text = "this is video",
 			.level = "video",
 		}
 	},
 	{ "three", OrbMappingValue { 
-			.text = "this is level three",
+			.text = "this is video (again)",
 			.level = "video",
 		}
 	},

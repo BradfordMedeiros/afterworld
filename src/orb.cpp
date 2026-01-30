@@ -3,6 +3,9 @@
 extern CustomApiBindings* gameapi;
 extern OrbData orbData;
 
+bool showDebugInfo = true;
+bool unlockAllLevels = true;
+
 std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
 	for (auto& orb : orbs){
 		if (orb.index == index){
@@ -54,6 +57,7 @@ void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId){
 		auto isComplete = orb.getOrbProgress().complete;
 		if (isComplete){
 			drawSphereVecGfx(orbPosition, 0.2f, orb.tint);
+			drawSphereVecGfx(orbPosition, 0.1f, orb.tint);
 		}else{
 			drawSphereVecGfx(orbPosition, 0.2f, glm::vec4(1.f, 0.f, 0.f, 1.f));
 		}
@@ -141,6 +145,13 @@ void handleOrbViews(OrbData& orbData){
 
 		glm::vec3 cameraOffset = orbRotation * glm::vec3(0.f, 0.f, 2.f);
 		gameapi -> setGameObjectPosition(cameraId, orbPosition + cameraOffset, true, Hint { .hint = "handleOrbViews set orb camera" });
+
+
+		if (showDebugInfo){
+			auto isComplete = targetOrb.value() -> getOrbProgress().complete;
+			gameapi -> drawText(isComplete ? "complete" : "not complete", 0.f, 0.8f, 12, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+		}
+
 	}
 }
 
@@ -174,6 +185,9 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 
 		auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex).value();
 		auto isComplete = selectedOrb -> getOrbProgress().complete;
+		if (unlockAllLevels){
+			isComplete = true;
+		}
 
 		if (isMoveLeftKey(key) && (action == 1)){
 			orbView.targetIndex--;
@@ -196,14 +210,14 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 		}
 		if (changedIndex){
 			orbView.startTime = gameapi -> timeSeconds(false);
-      		playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 		}
 
 		if (isJumpKey(key) && (action == 1)){
 			auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
 			if (selectedOrb.has_value()){
 				orbSelection.selectedOrb = selectedOrb;
-	      		playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+	      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 			}
 		}
 
@@ -213,7 +227,7 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	return orbSelection;
 }
 
-void setCameraToOrbView(objid cameraId, std::string orbUiName){
+void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex){
 	std::optional<objid> orbId;
 	for (auto &[id, orbUi] : orbData.orbUis){
 		if (orbUi.name == orbUiName){
@@ -224,13 +238,45 @@ void setCameraToOrbView(objid cameraId, std::string orbUiName){
 	modassert(orbId.has_value(), std::string("setCameraToOrbView no orbUi: ") + orbUiName);
 	orbData.orbViewsCameraToOrb[cameraId] = OrbView {
 		.orbId = orbId.value(),
-		.actualIndex = 0,
-		.targetIndex = 0,
+		.actualIndex = targetIndex.has_value() ? targetIndex.value() : 0,
+		.targetIndex = targetIndex.has_value() ? targetIndex.value() : 0,
 		.startTime = std::nullopt,
 	};
 }
+
 void removeCameraFromOrbView(objid cameraId){
   orbData.orbViewsCameraToOrb.erase(cameraId);
+}
+
+std::optional<int> getMaxCompleteOrbIndex(OrbUi& orbUi){
+	std::optional<int> maxCompleteIndex;
+	for (auto& orb : orbUi.orbs){
+		auto progress = orb.getOrbProgress();
+		if (progress.complete){
+			if (!maxCompleteIndex.has_value()){
+				maxCompleteIndex = orb.index;
+			}else if (orb.index > maxCompleteIndex.value()){
+				maxCompleteIndex = orb.index;
+			}
+		}
+	}
+	return maxCompleteIndex;
+}
+
+std::optional<OrbUi*> orbUiByName(std::string orbUiName){
+	for (auto &[id, orbUi] : orbData.orbUis){
+		if (orbUi.name == orbUiName){
+			return &orbUi;
+		}
+	}
+	return std::nullopt;
+}
+
+std::optional<int> getActiveOrbViewIndex(objid cameraId){
+	if (orbData.orbViewsCameraToOrb.find(cameraId) == orbData.orbViewsCameraToOrb.end()){
+		return std::nullopt;
+	}
+	return orbData.orbViewsCameraToOrb.at(cameraId).targetIndex;
 }
 
 std::string print(Orb& orb){

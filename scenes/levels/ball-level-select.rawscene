@@ -50,11 +50,12 @@ entity_worldspawn_0:position:0 0 0
 combined_entities_rail:rail:true
 combined_entities_rail:data-pos:39.2 0.8 24.8,39.2 32.8 24.8
 combined_entities_rail:data-rot:0 0 0,0 0 0
-combined_entities_rail:data-name:rail1,rail1
+combined_entities_rail:data-name:cutscene1-rail,cutscene1-rail
 combined_entities_rail:data-index:0,1
 combined_entities_rail:data-time:0,10
 combined_entities_orb:orbui:true
 combined_entities_orb:data-pos:-24.8 0.8 -0.8,-24.8 1.6 -32.8,26.4 6.4 -0.8
+combined_entities_orb:data-rot:0 0 0,0 0 0,0 90 0
 combined_entities_orb:data-conn:1.2,,0
 combined_entities_orb:data-name:one,two,three
 combined_entities_orb:data-level:one,two,one

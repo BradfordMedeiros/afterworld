@@ -35,6 +35,8 @@ int totalLevels();
 void markLevelComplete(std::string name, bool complete);
 bool isLevelComplete(std::string name);
 
+void resetProgress();
+
 //////////////
 
 void saveData();

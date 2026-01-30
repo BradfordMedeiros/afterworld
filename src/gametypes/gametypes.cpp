@@ -3,12 +3,14 @@
 extern CustomApiBindings* gameapi;
 
 GameTypeInfo getBallMode();
+GameTypeInfo getBallIntroMode();
 
 std::vector<GameTypeInfo> gametypes = {
   getTargetKill(),
   getDeathmatchMode(),
   getRaceMode(),
   getBallMode(),
+  getBallIntroMode(),
 };
 
 GameTypeInfo* gametypeByName(const char* name) {

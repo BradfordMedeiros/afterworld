@@ -5,16 +5,36 @@ extern CustomApiBindings* gameapi;
 extern GameTypes gametypeSystem;
 extern std::optional<std::string> activeLevel;
 extern Vehicles vehicles;
+extern std::optional<objid> currentCutscene;
 
 void setCanExitVehicle(bool canExit);
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
+void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex);
+void setLifetimeObject(objid id, std::function<void()> fn);
+void removeCutscene(objid id);
+
+void ballModeLevelSelect(std::optional<int> targetIndex){
+  setShowLiveMenu(false);
+  auto cameraId = findObjByShortName(">menu-view", std::nullopt);
+
+  auto orbUi = orbUiByName("testorb");
+  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
+  setCameraToOrbView(cameraId.value(), "testorb", maxCompletedIndex);
+  showLetterBoxHold("Level Select", 0.f);
+  setLifetimeObject(cameraId.value(), []() -> void {
+    hideLetterBox();
+  });
+}
 
 void setBallLevelComplete(){
+	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
 	changeGameType(gametypeSystem, NULL, NULL);
 	markLevelComplete(activeLevel.value(), true);
 	goToLevel("ballselect");
+
+  ballModeLevelSelect(std::nullopt);
 }
 
 void createBallObj(objid sceneId, glm::vec3 position){
@@ -213,11 +233,59 @@ GameTypeInfo getBallMode(){
 }
 
 
+struct IntroModeOptions {
+   objid cameraId;
+};
 
-/////////////////
+/////////////////e
 void startIntroMode(objid sceneId){
-	
+  auto cameraId = findObjByShortName(">menu-view", sceneId);
+  setTempCamera(cameraId.value(), 0);
+  setHudEnabled(false);
+  setShowLiveMenu(true);
+  showLetterBoxHold("", 0.f);
+
+  IntroModeOptions modeOptions {
+  	.cameraId = cameraId.value(),
+  };
+	changeGameType(gametypeSystem, "ball-intro", &modeOptions);
 }
 void endIntroMode(){
+	changeGameType(gametypeSystem, NULL, NULL);
+  setShowLiveMenu(false);
+  if (currentCutscene.has_value()){
+    removeCutscene(currentCutscene.value());
+  }
+}
 
+GameTypeInfo getBallIntroMode(){
+	GameTypeInfo ballIntroMode = GameTypeInfo {
+	  .gametypeName = "ball-intro",
+	  .events = { "ball-intro" },
+	  .createGametype = [](void* data) -> std::any {
+			IntroModeOptions* modeOptions = static_cast<IntroModeOptions*>(data);
+	    return *modeOptions; 
+	  },
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
+	   	return false;
+	  },
+	  .getDebugText = [](std::any& gametype) -> std::string {
+	    return std::string("ball mode");
+	  },
+	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
+	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
+	  },
+	  .onFrame = [](std::any& gametype) -> void {
+	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
+	  	modassert(introMode, "introMode options");
+	  	auto orbIndex = getActiveOrbViewIndex(introMode -> cameraId);
+
+	  	for (int i = 0; i < 5; i++){
+	  		auto tint = (orbIndex.has_value() &&  (i == orbIndex.value())) ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(0.1f, 0.1f, 0.1f, 0.8f);
+        gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+	  	}
+	  	std::cout << "ballintro mode frame" << std::endl;
+	  },
+	};
+	return ballIntroMode;
 }

@@ -155,6 +155,12 @@ bool isLevelComplete(std::string name){
   }
   return false;
 }
+
+void resetProgress(){
+  levelProgresses = {};
+  saveLevelProgress();
+}
+
 //////////////////////////
 
 void saveData(){

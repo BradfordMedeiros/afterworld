@@ -170,8 +170,7 @@ void hideLetterBox();
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
-void setCameraToOrbView(objid cameraId, std::string orbUiName);
-void setLifetimeObject(objid id, std::function<void()> fn);
+void ballModeLevelSelect(std::optional<int> targetIndex);
 
 #include "./curves.h"
 
@@ -276,7 +275,7 @@ void ballIntroOpening(EasyCutscene& cutscene){
 
     gameapi -> setGameObjectPosition(cameraId.value(), initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
 
-		auto railId = railIdForName("rail1");
+		auto railId = railIdForName("cutscene1-rail");
 		if (railId.has_value()){
 			auto rail = railForId(railId.value());
 
@@ -300,12 +299,7 @@ void ballIntroOpening(EasyCutscene& cutscene){
 
   if (finalize(cutscene)){
   	removeManagedRailMovement(introData -> cameraId);
-    showLetterBox("", 0.f);
-    setCameraToOrbView(introData -> cameraId, "testorb");
-    showLetterBoxHold("Level Select", 0.f);
-    setLifetimeObject(introData -> cameraId, []() -> void {
-    	hideLetterBox();
-    });
+    ballModeLevelSelect(std::nullopt);
   }
 
   if (glfwGetKey(window, 'K')){

@@ -6,12 +6,12 @@
 "_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
 // brush 0
 {
-( -512 1024 -256 ) ( -512 1025 -256 ) ( -512 1024 -255 ) arcade/trench/city/bricks/bricks_12 128 -128 0 1 1
-( 640 -640 -256 ) ( 640 -640 -255 ) ( 641 -640 -256 ) arcade/trench/city/bricks/bricks_12 -384 -128 0 1 1
-( 640 1024 -256 ) ( 641 1024 -256 ) ( 640 1025 -256 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
-( 768 1152 0 ) ( 768 1153 0 ) ( 769 1152 0 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
-( 768 1152 -128 ) ( 769 1152 -128 ) ( 768 1152 -127 ) arcade/trench/city/bricks/bricks_12 -384 -128 0 1 1
-( 768 1152 -128 ) ( 768 1152 -127 ) ( 768 1153 -128 ) arcade/trench/city/bricks/bricks_12 128 -128 0 1 1
+( -512 1152 0 ) ( -512 -640 0 ) ( -512 -640 -256 ) arcade/trench/city/bricks/bricks_12 128 -128 0 1 1
+( 48 -240 -256 ) ( 768 1152 -256 ) ( -512 1152 -256 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
+( -512 1152 0 ) ( 768 1152 0 ) ( 48 -240 0 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
+( 768 1152 -256 ) ( 768 1152 0 ) ( -512 1152 0 ) arcade/trench/city/bricks/bricks_12 -384 -128 0 1 1
+( -512 -640 0 ) ( 48 -240 0 ) ( 48 -240 -256 ) arcade/trench/city/bricks/bricks_12 274.28574 -128 0 0.43750006 1
+( 48 -240 0 ) ( 768 1152 0 ) ( 768 1152 -256 ) arcade/trench/city/bricks/bricks_12 -203.03448 -128 0 0.7767855 1
 }
 // brush 1
 {
@@ -30,6 +30,20 @@
 ( -256 1600 384 ) ( -256 1601 384 ) ( -255 1600 384 ) arcade/trench/city/bricks/bricks_12 -192 320 0 1 1
 ( -256 1600 -192 ) ( -255 1600 -192 ) ( -256 1600 -191 ) arcade/trench/city/bricks/bricks_12 -192 0 0 1 1
 ( -256 1600 -192 ) ( -256 1600 -191 ) ( -256 1601 -192 ) arcade/trench/city/bricks/bricks_12 -320 0 0 1 1
+}
+// brush 3
+{
+( -512 1152 -464 ) ( -512 1152 -208 ) ( -736 -1270.3839362678095 -192 ) arcade/trench/city/bricks/bricks_12 220.4769 -374.03293 1.8751323 1.0963279 1.0086207
+( -512 -1078.384236452649 -464 ) ( -512 1152 -464 ) ( -736 -1270.3839362678095 -192 ) arcade/trench/city/bricks/bricks_12 302.34366 -465.8482 0 1 0.78831744
+( -512 1152 -464 ) ( 1152 1504 -96 ) ( -512 1152 -208 ) arcade/trench/city/bricks/bricks_12 -380.48236 -302.10504 3.8422651 0.9923985 1.0138174
+( -512 1152 -208 ) ( 1152 1504 -96 ) ( -736 -1270.3839362678095 -192 ) arcade/trench/city/bricks/bricks_12 -243.85278 -96.36618 11.942614 1.0035362 1.0464135
+( 348.1379052035327 -464 -464 ) ( 1184 1152 -464 ) ( -512 1152 -464 ) arcade/trench/city/bricks/bricks_12 -384 640 0 1 1
+( -512 1152 -464 ) ( 1184 1152 -464 ) ( 1152 1504 -96 ) arcade/trench/city/bricks/bricks_12 -578.67584 -417.9358 0 1 0.6834865
+( -736 -1270.3839362678095 -192 ) ( 1152 1504 -96 ) ( 348.137627856172 -464 -224 ) arcade/trench/city/bricks/bricks_12 -175.36957 -138.3179 24.362215 1.721057 0.7941137
+( -736 -1270.3839362678095 -192 ) ( 348.1379052035327 -464 -464 ) ( -512 -1078.384236452649 -464 ) arcade/trench/city/bricks/bricks_12 -32.693054 -394.27908 4.219465 0.5533084 0.9365201
+( 348.137627856172 -464 -224 ) ( 348.1379052035327 -464 -464 ) ( -736 -1270.3839362678095 -192 ) arcade/trench/city/bricks/bricks_12 -31.3432 -394.2685 4.219326 0.55330837 0.9370206
+( 1152 1504 -96 ) ( 1184 1152 -464 ) ( 348.137627856172 -464 -224 ) arcade/trench/city/bricks/bricks_12 24.706068 60.285606 296.12024 5.3544836 1.0723282
+( 348.137627856172 -464 -224 ) ( 1184 1152 -464 ) ( 348.1379052035327 -464 -464 ) arcade/trench/city/bricks/bricks_12 15.502167 -336 0 0.7767855 1
 }
 }
 // entity 1
@@ -54,7 +68,7 @@
 "classname" "orb"
 "origin" "264 8 64"
 "orb" "three"
-"angles" "-63 0 0"
+"angles" "0 90 0"
 "conn" "one"
 "level" "one"
 }
@@ -62,7 +76,7 @@
 {
 "classname" "rail"
 "origin" "392 -248 8"
-"rail" "rail1"
+"rail" "cutscene1-rail"
 "rail-index" "0"
 "time" "0"
 }
@@ -70,7 +84,7 @@
 {
 "classname" "rail"
 "origin" "392 -248 328"
-"rail" "rail1"
+"rail" "cutscene1-rail"
 "rail-index" "1"
 "time" "10"
 }

@@ -1,0 +1,36 @@
+# Probably does not need to exist, but quicker to load 
+
+#maincamera:mesh:../gameresources/build/characters/plaguerobot.gltf  # I just commented out this line
+#enemy/model:texture:/home/brad/Desktop/art/deadinternet.png
+
+maincamera/model:tint:0 0 1 1
+
+maincamera:physics_angle:0 0 0
+maincamera:physics:enabled
+maincamera:physics_type:dynamic
+maincamera:physics_shape:shape_sphere
+
+maincamera:physics_mass:5
+maincamera:physics_layer:8
+
+
+#maincamera:team:red
+maincamera:health:130
+maincamera:health-remove:kill
+maincamera:physics_damping_linear:0.9
+maincamera:animation:character
+maincamera:player:default
+maincamera:goal:idle-enemy
+#maincamera:goal-type:idle
+#maincamera:goal-value:2
+maincamera:agent:basic
+maincamera:agent-target:blue
+maincamera:goal-info:target
+
+maincamera:goal-type:move
+
+
+##########
+
+
+maincamera:team:blue

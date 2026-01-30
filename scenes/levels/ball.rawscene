@@ -1,8 +1,6 @@
 !light:spin:true
 !light:globallight:true
-!light:angle:-10
-!light:rotation:1 0 1.19209e-07 0
-!light:position:-12.93 -58.31 11.98
+!light:position:0 50 0
 
 playerspawn:playerspawn:true
 playerspawn:mode:ball

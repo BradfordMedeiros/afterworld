@@ -6,6 +6,7 @@
 #include "./vehicles.h"
 #include "./entity.h"
 #include "./gameworld/progress.h"
+#include "./orbs.h"
 
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
@@ -14,7 +15,7 @@ struct BallModeOptions{
 
 void startBallMode(objid sceneId);
 void endBallMode();
-
+void ballModeLevelSelect(std::optional<int> targetIndex);
 
 void startIntroMode(objid sceneId);
 void endIntroMode();

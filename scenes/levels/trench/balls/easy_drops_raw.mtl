@@ -1,9 +1,0 @@
-newmtl clean/metalbridgetoprailbig
-map_Kd ../../../../../gameresources/textures/clean/metalbridgetoprailbig.jpg
-
-newmtl clean/metalgrid
-map_Kd ../../../../../gameresources/textures/clean/metalgrid.jpg
-
-newmtl worntv
-map_Kd ../../../../../gameresources/textures/worntv.jpg
-

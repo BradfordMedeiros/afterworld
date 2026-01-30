@@ -87,19 +87,15 @@ void setLifetimeObject(objid id, std::function<void()> fn){
 
 std::optional<objid> currentCutscene;
 void onMenu2NewGameClick(){
+  resetProgress();
   setShowLiveMenu(false);
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
   currentCutscene = playCutscene(ballIntroOpening, std::nullopt);
 }
 
+
 void onMenu2ContinueClick(){
-  setShowLiveMenu(false);
-  auto cameraId = findObjByShortName(">menu-view", std::nullopt);
-  setCameraToOrbView(cameraId.value(), "testorb");
-  showLetterBoxHold("Level Select", 0.f);
-  setLifetimeObject(cameraId.value(), []() -> void {
-    hideLetterBox();
-  });
+  ballModeLevelSelect(std::nullopt);
 }
 
 std::vector<int> getVehicleIds(){
@@ -233,7 +229,7 @@ void startLevel(ManagedScene& managedScene){
     glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
     
     // TODO - no reason to actually create the prefab here
-    auto prefabId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  position, {});    
+    auto prefabId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  position, {});    
 
     auto playerId = findObjByShortName("maincamera", sceneId);
     modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
@@ -246,11 +242,7 @@ void startLevel(ManagedScene& managedScene){
     setTempCamera(cameraId.value(), 0);
     setHudEnabled(false);
   }else if (gamemodeIntro){
-    auto cameraId = findObjByShortName(">menu-view", sceneId);
-    setTempCamera(cameraId.value(), 0);
-    setHudEnabled(false);
-    setShowLiveMenu(true);
-    showLetterBoxHold("", 0.f);
+    startIntroMode(sceneId.value());
   }
 }
 void endLevel(ManagedScene& managedScene){
@@ -266,10 +258,7 @@ void endLevel(ManagedScene& managedScene){
 
   auto gamemodeIntro = std::get_if<GameModeIntro>(&managedScene.gameMode);
   if (gamemodeIntro){
-    setShowLiveMenu(false);
-    if (currentCutscene.has_value()){
-      removeCutscene(currentCutscene.value());
-    }
+    endIntroMode();
   }
 }
 
