@@ -279,11 +279,22 @@ GameTypeInfo getBallIntroMode(){
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
 	  	auto orbIndex = getActiveOrbViewIndex(introMode -> cameraId);
+	  	auto orbUiPtr = orbUiByName("testorb");
+	  	auto& orbUi = *orbUiPtr.value();
 
-	  	for (int i = 0; i < 5; i++){
-	  		auto tint = (orbIndex.has_value() &&  (i == orbIndex.value())) ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(0.1f, 0.1f, 0.1f, 0.8f);
-        gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+	  	for (int i = 0; i < orbUi.orbs.size(); i++){
+	  		auto& orb = orbUi.orbs.at(i);
+	  		auto isComplete = orb.getOrbProgress().complete;
+	  		bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
+        gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+        if (isComplete){
+	        gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.01f, 0.01f, false, glm::vec4(1.0f, 0.9216f, 0.2314f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+        }
+        if (selected){
+        	gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+        }
 	  	}
+
 	  	std::cout << "ballintro mode frame" << std::endl;
 	  },
 	};

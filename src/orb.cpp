@@ -279,6 +279,7 @@ std::optional<int> getActiveOrbViewIndex(objid cameraId){
 	return orbData.orbViewsCameraToOrb.at(cameraId).targetIndex;
 }
 
+
 std::string print(Orb& orb){
 	std::string data;
 	data += "index = [" + std::to_string(orb.index) + "] ";
