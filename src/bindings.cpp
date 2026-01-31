@@ -85,17 +85,11 @@ void setLifetimeObject(objid id, std::function<void()> fn){
   lifetimeObjects[id] = fn;
 }
 
-std::optional<objid> currentCutscene;
 void onMenu2NewGameClick(){
-  resetProgress();
-  setShowLiveMenu(false);
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
-  currentCutscene = playCutscene(ballIntroOpening, std::nullopt);
+  ballModeNewGame();
 }
-
-
 void onMenu2ContinueClick(){
-  ballModeLevelSelect(std::nullopt);
+  ballModeLevelSelect();
 }
 
 std::vector<int> getVehicleIds(){

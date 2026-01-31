@@ -170,7 +170,7 @@ void hideLetterBox();
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
-void ballModeLevelSelect(std::optional<int> targetIndex);
+void ballModeLevelSelect();
 
 #include "./curves.h"
 
@@ -299,7 +299,7 @@ void ballIntroOpening(EasyCutscene& cutscene){
 
   if (finalize(cutscene)){
   	removeManagedRailMovement(introData -> cameraId);
-    ballModeLevelSelect(std::nullopt);
+    ballModeLevelSelect();
   }
 
   if (glfwGetKey(window, 'K')){

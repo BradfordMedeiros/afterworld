@@ -5,28 +5,13 @@ extern CustomApiBindings* gameapi;
 extern GameTypes gametypeSystem;
 extern std::optional<std::string> activeLevel;
 extern Vehicles vehicles;
-extern std::optional<objid> currentCutscene;
+std::optional<objid> currentCutscene;
 
 void setCanExitVehicle(bool canExit);
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
-void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex);
 void setLifetimeObject(objid id, std::function<void()> fn);
-void removeCutscene(objid id);
-
-void ballModeLevelSelect(std::optional<int> targetIndex){
-  setShowLiveMenu(false);
-  auto cameraId = findObjByShortName(">menu-view", std::nullopt);
-
-  auto orbUi = orbUiByName("testorb");
-  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
-  setCameraToOrbView(cameraId.value(), "testorb", maxCompletedIndex);
-  showLetterBoxHold("Level Select", 0.f);
-  setLifetimeObject(cameraId.value(), []() -> void {
-    hideLetterBox();
-  });
-}
 
 void setBallLevelComplete(){
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
@@ -34,7 +19,7 @@ void setBallLevelComplete(){
 	markLevelComplete(activeLevel.value(), true);
 	goToLevel("ballselect");
 
-  ballModeLevelSelect(std::nullopt);
+  ballModeLevelSelect();
 }
 
 void createBallObj(objid sceneId, glm::vec3 position){
@@ -258,6 +243,26 @@ void endIntroMode(){
   }
 }
 
+void ballModeNewGame(){
+  resetProgress();
+  setShowLiveMenu(false);
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+  currentCutscene = playCutscene(ballIntroOpening, std::nullopt);
+}
+
+void ballModeLevelSelect(){
+  setShowLiveMenu(false);
+  auto cameraId = findObjByShortName(">menu-view", std::nullopt);
+
+  auto orbUi = orbUiByName("testorb");
+  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
+  setCameraToOrbView(cameraId.value(), "testorb", maxCompletedIndex);
+  showLetterBoxHold("Level Select", 0.f);
+  setLifetimeObject(cameraId.value(), []() -> void {
+    hideLetterBox();
+  });
+}
+
 GameTypeInfo getBallIntroMode(){
 	GameTypeInfo ballIntroMode = GameTypeInfo {
 	  .gametypeName = "ball-intro",
@@ -276,6 +281,10 @@ GameTypeInfo getBallIntroMode(){
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
+	  	bool shouldShowProgress = !getGlobalState().showLiveMenu;
+	  	if (!shouldShowProgress){
+	  		return;
+	  	}
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
 	  	auto orbIndex = getActiveOrbViewIndex(introMode -> cameraId);
