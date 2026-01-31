@@ -108,14 +108,11 @@ std::optional<BallPowerup> getPowerup(){
 void startBallMode(objid sceneId){
 	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
 	auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
-
 	createBallObj(sceneId, position);
-
 	BallModeOptions modeOptions {};
-
 	changeGameType(gametypeSystem, "ball", &modeOptions);
-
 	setHudEnabled(false);
+
 }
 
 void endBallMode(){
@@ -126,10 +123,29 @@ void endBallMode(){
 	setHudEnabled(true);
 }
 
+void ballStartGameplay(EasyCutscene& cutscene){
+
+  if (initialize(cutscene)){
+		setDisablePlayerControl(true, 0);
+  }
+  if (finalize(cutscene)){
+
+  }
+
+  waitUntil(cutscene, 0, 500);
+  run(cutscene, 1, []() -> void {
+    showLetterBox("Learning to Roll", 10.f);
+  });
+  run(cutscene, 2, []() -> void {
+  	setDisablePlayerControl(false, 0);
+  });
+
+}
+
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
-	  .events = { "ball-game" },
+	  .events = { "ball" },
 	  .createGametype = [](void* data) -> std::any {
 			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
 			{
@@ -141,6 +157,8 @@ GameTypeInfo getBallMode(){
 				std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
 				enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
 				setCanExitVehicle(false);
+
+				playCutscene(ballStartGameplay, std::nullopt);
 			}
 
 		  auto ballId = getBallId().value();
@@ -217,12 +235,11 @@ GameTypeInfo getBallMode(){
 	return ballMode;
 }
 
-
+/////////////////////////////////////////////////////////
 struct IntroModeOptions {
    objid cameraId;
 };
 
-/////////////////e
 void startIntroMode(objid sceneId){
   auto cameraId = findObjByShortName(">menu-view", sceneId);
   setTempCamera(cameraId.value(), 0);
