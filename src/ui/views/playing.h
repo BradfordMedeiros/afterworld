@@ -17,6 +17,8 @@ struct PlayingOptions {
 	std::optional<BallComponentOptions> ballMode;
 
 	std::optional<MainMenu2Options> menuOptions;
+
+
 };
 extern Component playingComponent;
 

@@ -40,29 +40,22 @@ void ballEndGameplay(EasyCutscene& cutscene){
   waitUntil(cutscene, 0, 2000);
 
   if (finishedThisFrame(cutscene, 0)){
-		setShowBallOptions(std::nullopt);
-  }
-  if (finished(cutscene, 0)){
-  	// draw the ui
-    gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-	
-	  gameapi -> drawText("Level Complete", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	  gameapi -> drawText("Click to Continue", 0.f, -0.1f, 6, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+		setShowBallOptions(
+				BallComponentOptions {
+					.levelComplete = BallLevelComplete{},
+				}
+		);
   }
 
 	waitFor(cutscene, 1, []() -> bool {
-		return glfwGetKey(window, 'K');
+		return getGlobalState().leftMouseDown;
 	});
 
   run(cutscene, 2, []() -> void {
+ 		setShowBallOptions(std::nullopt);
   	goToLevel("ballselect");
   	ballModeLevelSelect();
   });
-
- 	if (!finished(cutscene, 0)){
-	  gameapi -> drawText("Level Complete", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
- 	}
-
 }
 
 void setBallLevelComplete(){
@@ -119,7 +112,6 @@ void changeUi(bool showBallUi){
 		if (showBallUi){
 			setShowBallOptions(
 				BallComponentOptions {
-					//.winMessage = "you win congrats",
 					.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
 				}
 			);

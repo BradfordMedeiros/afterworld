@@ -9,9 +9,13 @@
 #include "./style.h"
 
 
+struct BallLevelComplete {
+
+};
+
 struct BallComponentOptions {
 	std::optional<float> startTime;
-	std::optional<std::string> winMessage;
+	std::optional<BallLevelComplete> levelComplete;
 	std::optional<std::string> powerupTexture;
 };
 extern Component ballComponent;

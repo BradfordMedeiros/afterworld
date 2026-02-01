@@ -7,8 +7,10 @@ Component ballComponent {
     BallComponentOptions* ballOptions = typeFromProps<BallComponentOptions>(props, valueSymbol);
     modassert(ballOptions, "ballOptions null");
   
-    if (ballOptions -> winMessage.has_value()){
-      drawCenteredTextReal(drawTools, ballOptions -> winMessage.value(), 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
+    if (ballOptions -> levelComplete.has_value()){
+      drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.9f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      drawCenteredTextReal(drawTools, "Level Complete", 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
+      drawCenteredTextReal(drawTools, "Click to Continue", 0.f, -0.1f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
     }
     if (ballOptions -> startTime.has_value()){
       auto elapsedTime = gameapi -> timeSeconds(true) - ballOptions -> startTime.value();
