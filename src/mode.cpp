@@ -11,15 +11,51 @@ void setCanExitVehicle(bool canExit);
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
-void setLifetimeObject(objid id, std::function<void()> fn);
+void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
+
+bool inBallMode = false;
+
+void ballStartGameplay(EasyCutscene& cutscene){
+  if (initialize(cutscene)){
+		setDisablePlayerControl(true, 0);
+  }
+  if (finalize(cutscene)){
+  }
+
+  waitUntil(cutscene, 0, 500);
+  run(cutscene, 1, []() -> void {
+    showLetterBox("Learning to Roll", 10.f);
+  });
+  run(cutscene, 2, []() -> void {
+  	setDisablePlayerControl(false, 0);
+  });
+}
+void ballEndGameplay(EasyCutscene& cutscene){
+	if (initialize(cutscene)){
+	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+		setDisablePlayerControl(true, 0);
+	}
+  waitUntil(cutscene, 0, 2000);
+  run(cutscene, 1, []() -> void {
+  	goToLevel("ballselect");
+  	ballModeLevelSelect();
+  });
+
+ 	if (!finished(cutscene, 1)){
+	  gameapi -> drawText("Level Complete", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+ 	}
+
+}
 
 void setBallLevelComplete(){
+	if (!inBallMode){
+		return;
+	}
+	inBallMode = false;
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
 	changeGameType(gametypeSystem, NULL, NULL);
 	markLevelComplete(activeLevel.value(), true);
-	goToLevel("ballselect");
-
-  ballModeLevelSelect();
+	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
 void createBallObj(objid sceneId, glm::vec3 position){
@@ -106,40 +142,21 @@ std::optional<BallPowerup> getPowerup(){
 
 
 void startBallMode(objid sceneId){
+	inBallMode = true;
 	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
 	auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
 	createBallObj(sceneId, position);
 	BallModeOptions modeOptions {};
 	changeGameType(gametypeSystem, "ball", &modeOptions);
 	setHudEnabled(false);
-
 }
 
 void endBallMode(){
+	inBallMode = false;
 	setCanExitVehicle(true);
 	setShowBallOptions(std::nullopt);
 	changeGameType(gametypeSystem, NULL, NULL);
-
 	setHudEnabled(true);
-}
-
-void ballStartGameplay(EasyCutscene& cutscene){
-
-  if (initialize(cutscene)){
-		setDisablePlayerControl(true, 0);
-  }
-  if (finalize(cutscene)){
-
-  }
-
-  waitUntil(cutscene, 0, 500);
-  run(cutscene, 1, []() -> void {
-    showLetterBox("Learning to Roll", 10.f);
-  });
-  run(cutscene, 2, []() -> void {
-  	setDisablePlayerControl(false, 0);
-  });
-
 }
 
 GameTypeInfo getBallMode(){
@@ -179,9 +196,6 @@ GameTypeInfo getBallMode(){
 	  	modassert(message, "invalid type ball-mode");
 	  	std::cout << "from ball mode: " << event << ", " << *message << std::endl;
 
-	  	if (*message == "complete"){
-	  		setBallLevelComplete();
-	  	}
 	  	if (*message == "reset"){
 	  		modassert(ballMode -> initialBallPos.has_value(), "no initial ball position");
 	  		gameapi -> setGameObjectPosition(ballMode -> ballId.value(), ballMode -> initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
@@ -268,6 +282,7 @@ void ballModeNewGame(){
 }
 
 void ballModeLevelSelect(){
+	std::cout << "ballModeLevelSelect" << std::endl;
   setShowLiveMenu(false);
   auto cameraId = findObjByShortName(">menu-view", std::nullopt);
 
@@ -277,7 +292,7 @@ void ballModeLevelSelect(){
   showLetterBoxHold("Level Select", 0.f);
   setLifetimeObject(cameraId.value(), []() -> void {
     hideLetterBox();
-  });
+  }, "ball mode level select");
 }
 
 GameTypeInfo getBallIntroMode(){

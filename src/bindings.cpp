@@ -28,7 +28,12 @@ Waypoints waypoints {
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 std::string defaultAudioClipPath;
-std::unordered_map<objid, std::function<void()>> lifetimeObjects;
+
+struct LifeTimeObject {
+  std::function<void()> fn;
+  std::string hint;
+};
+std::unordered_map<objid, LifeTimeObject> lifetimeObjects;
 
 struct GameModeNone{};
 struct GameModeFps {
@@ -80,9 +85,13 @@ MovementEntityData& getMovementData(){
   return gameStatePtr -> movementEntities;
 }
 
-void setLifetimeObject(objid id, std::function<void()> fn){
-  modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), "already lifetime object");
-  lifetimeObjects[id] = fn;
+void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
+  std::cout << "lifetimeObject add: " << gameapi -> getGameObjNameForId(id).value() << ", hint = " << hint << std::endl;
+  modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), std::string("already lifetime object: ") + lifetimeObjects.at(id).hint);
+  lifetimeObjects[id] = LifeTimeObject {
+    .fn = fn,
+    .hint = hint,
+  };
 }
 
 void onMenu2NewGameClick(){
@@ -2191,13 +2200,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
 
     std::set<objid> lifetimeIdsToRemove;
-    for (auto &[id, fn] : lifetimeObjects){
+    for (auto &[id, lifetimeObject] : lifetimeObjects){
       if (!gameapi -> gameobjExists(id)){
-        fn();
+        lifetimeObject.fn();
         lifetimeIdsToRemove.insert(id);
       }
     }
     for (auto id : lifetimeIdsToRemove){
+      std::cout << "lifetimeObject rm: hint = " << lifetimeObjects.at(id).hint << std::endl;
       lifetimeObjects.erase(id);
     }
     lifetimeIdsToRemove = {};
