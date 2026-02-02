@@ -87,7 +87,7 @@ MovementEntityData& getMovementData(){
 
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
   std::cout << "lifetimeObject add: " << gameapi -> getGameObjNameForId(id).value() << ", hint = " << hint << std::endl;
-  modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), std::string("already lifetime object: ") + lifetimeObjects.at(id).hint);
+  //modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), std::string("already lifetime object: ") + lifetimeObjects.at(id).hint);
   lifetimeObjects[id] = LifeTimeObject {
     .fn = fn,
     .hint = hint,
@@ -1171,8 +1171,18 @@ UiContext getUiContext(GameState& gameState){
         modassert(false, std::string("level ui goToLevel: ") + level.name);
         goToLevel(level.name);
       },
-      .goToMenu = [&gameState]() -> void {
-        pushHistory({ "mainmenu" }, true);
+      .goToMenu = []() -> void {
+        auto gamemodeIntro = std::get_if<GameModeIntro>(&gameStatePtr -> sceneManagement.managedScene.value().gameMode);
+        auto gamemodeBall = std::get_if<GameModeBall>(&gameStatePtr -> sceneManagement.managedScene.value().gameMode);
+        if (gamemodeIntro){
+          goToLevel("ballselect");
+          startIntroMode(gameStatePtr -> sceneManagement.managedScene.value().id.value());
+        }else if (gamemodeBall){
+          goToLevel("ballselect");
+          ballModeLevelSelect();
+        }else{
+          pushHistory({ "mainmenu" }, true);
+        }
       }
     },
     .pauseInterface = PauseInterface {

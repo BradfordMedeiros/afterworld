@@ -17,7 +17,7 @@ struct EasyCutscene {
 };
 
 objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId);
-void removeCutscene(objid id);
+void removeCutscene(objid id, bool forceTick = false);
 
 void tickCutscenes2();
 
@@ -41,8 +41,6 @@ T* getStorage(EasyCutscene& cutscene){
   }
 }
 
-//////
 void playCutsceneScript(objid ownerObjId, std::string cutsceneName);
-void ballIntroOpening(EasyCutscene& cutscene);
 
 #endif

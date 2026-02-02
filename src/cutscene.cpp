@@ -27,8 +27,11 @@ objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<
 	return cutsceneId;
 }
 
-void removeCutscene(objid id){
+void removeCutscene(objid id, bool forceTick){
 	cutscenesToRemove.push_back(id);
+	if (forceTick){ // maybe this should just tick this one 
+		tickCutscenes2();
+	}
 }
 
 void tickCutscenes2(){
@@ -244,103 +247,6 @@ void playOpening(EasyCutscene& cutscene){
 	run(cutscene, 7, []() -> void {
 		setDisablePlayerControl(false, 0);
 	});
-}
-
-struct NodePosition {
-	glm::vec3 position;
-};
-struct BallIntroData {
-	bool showText;
-	glm::vec3 initialPos;
-	objid cameraId;
-	std::vector<int> times;
-};
-void ballIntroOpening(EasyCutscene& cutscene){
-	int index = -1;
-	auto getIndex = [&index]() -> int {
-		index++;
-		return index;
-	};
-
-  if (initialize(cutscene)){
-    glm::vec3 initialPos = glm::vec3(0.f, 10.f, 0.f);
-    auto cameraId = findObjByShortName(">menu-view", std::nullopt);
-    auto initialRot = gameapi -> getGameObjectRotation(cameraId.value(), true, "[gamelogic] - ballIntroOpening");
-
-  	BallIntroData ballIntroData {
-    	.showText = true,
-    	.initialPos = initialPos,
-    	.cameraId = cameraId.value(),
-    };
-
-    gameapi -> setGameObjectPosition(cameraId.value(), initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
-
-		auto railId = railIdForName("cutscene1-rail");
-		if (railId.has_value()){
-			auto rail = railForId(railId.value());
-
-			std::cout << "cutscene rail: ";
-			for (auto& time : rail.value() -> times){
-				std::cout << time << " ";
-			}
-			ballIntroData.times = rail.value() -> times;
-
-			std::cout << std::endl;
-			addManagedRailMovement(cameraId.value(), railId.value(), initialPos, initialRot);
-		}
-    store(cutscene, ballIntroData);
-
-    showLetterBox("Nothing to Be Afraid Of", 10.f);
-    //setCutsceneFinished(cutscene);
-  }
-
-  BallIntroData* introData = getStorage<BallIntroData>(cutscene);
-  modassert(introData, "intro data is null");
-
-  if (finalize(cutscene)){
-  	removeManagedRailMovement(introData -> cameraId);
-    ballModeLevelSelect();
-  }
-
-  if (glfwGetKey(window, 'K')){
-  	setCutsceneFinished(cutscene);
-  }
-  
-  waitUntil(cutscene, getIndex(), 5000);
-  run(cutscene, getIndex(), [introData]() -> void {
-  	introData -> showText = false;
-  });
-
-
-  for (auto time : introData -> times){
-  	auto waitIndex = getIndex();
-	  waitUntil(cutscene, waitIndex, time * 1000);
-	  if (finishedThisFrame(cutscene, waitIndex)){
-	  	std::cout << "cutscene rail end node: " << time << std::endl;
-	  }
-  }
-
-
- 	auto finalId = getIndex();
-  waitUntil(cutscene, finalId, 10000);
- 	if (finished(cutscene, finalId)){
-   	removeManagedRailMovement(introData -> cameraId);
-  	gameapi -> drawText("finished cutscene", 0.f + 0.1f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
- 	}
- 
- 	waitUntil(cutscene, getIndex(), 15000);
-
-  if (introData -> showText){
-  	std::string text = "I remember a nightmare I had as a child.\n\n"
-"A large pyramid\n"
-"moving slowly\n"
-"on a tilted plane.\n\n"
-"There was nothing.\n"
-"And yet,\n"
-"it terrified me more than anything else.";
-  	gameapi -> drawText(text, 0.f + 0.1f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  }
-
 }
 
 void playCutsceneScript(objid ownerObjId, std::string cutsceneName){
