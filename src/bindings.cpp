@@ -1687,7 +1687,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
       toggleAutodoor(id, autodoor);
     }
   }
-
+  
   auto selectedOrb = handleOrbControls(orbData, key, action);
   if (selectedOrb.selectedOrb.has_value()){
     std::cout << "handleOrbViews orb: " << print(*selectedOrb.selectedOrb.value()) << std::endl;

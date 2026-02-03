@@ -37,7 +37,7 @@ struct OrbConnection {
 	int indexTo;
 };
 struct OrbUi {
-	objid id;
+	objid ownerId;
 	std::string name;
 	std::vector<Orb> orbs;
 	std::vector<OrbConnection> connections;

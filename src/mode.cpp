@@ -389,18 +389,33 @@ void ballModeNewGame(){
   currentCutscene = playCutscene(ballIntroOpening, std::nullopt);
 }
 
+struct LevelOrbNavInfo {
+	std::string orbUi;
+	std::optional<int> orbIndex;
+	std::optional<int> maxCompletedIndex;
+};
+
+std::string activeOrbUi = "testorb3";
+LevelOrbNavInfo getLevelOrbInfo(objid cameraId){
+	std::string orbUiName = activeOrbUi;
+  auto orbUi = orbUiByName(orbUiName);
+  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
+ 	auto orbIndex = getActiveOrbViewIndex(cameraId);
+	return LevelOrbNavInfo {
+		.orbUi = orbUiName,
+		.orbIndex = orbIndex,
+		.maxCompletedIndex = maxCompletedIndex,
+	};
+}
+
 void ballModeLevelSelect(){
 	std::cout << "ballModeLevelSelect" << std::endl;
   setShowLiveMenu(false);
   auto cameraId = findObjByShortName(">menu-view", std::nullopt);
-
-  auto orbUi = orbUiByName("testorb");
-  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
-  setCameraToOrbView(cameraId.value(), "testorb", maxCompletedIndex);
+  auto levelNavInfo = getLevelOrbInfo(cameraId.value());
+  setCameraToOrbView(cameraId.value(), levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex);
   showLetterBoxHold("Level Select", 0.f);
-  setLifetimeObject(cameraId.value(), []() -> void {
-    hideLetterBox();
-  }, "ball mode level select");
+  setLifetimeObject(cameraId.value(), []() -> void { hideLetterBox(); }, "ball mode level select");
 }
 
 GameTypeInfo getBallIntroMode(){
@@ -419,6 +434,20 @@ GameTypeInfo getBallIntroMode(){
 	  },
 	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
+	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
+	  	modassert(introMode, "introMode options onKey");
+
+	  	if (key == 'U'){
+	  		activeOrbUi = "testorb";
+				removeCameraFromOrbView(introMode -> cameraId);
+				setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
+	  	}else if (key == 'I'){
+	  		activeOrbUi = "testorb3";
+				removeCameraFromOrbView(introMode -> cameraId);
+				setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
+	  	}else if (key == 'O'){
+	  		modassert(false, "not yet implemented");
+	  	}
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
 	  	bool shouldShowProgress = !getGlobalState().showLiveMenu;
@@ -427,8 +456,9 @@ GameTypeInfo getBallIntroMode(){
 	  	}
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
-	  	auto orbIndex = getActiveOrbViewIndex(introMode -> cameraId);
-	  	auto orbUiPtr = orbUiByName("testorb");
+	  	auto levelOrbInfo = getLevelOrbInfo(introMode -> cameraId);
+	  	auto orbIndex = levelOrbInfo.orbIndex;
+	  	auto orbUiPtr = orbUiByName(levelOrbInfo.orbUi);
 	  	auto& orbUi = *orbUiPtr.value();
 
 	  	for (int i = 0; i < orbUi.orbs.size(); i++){

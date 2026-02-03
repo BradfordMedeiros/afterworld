@@ -53,24 +53,27 @@
 "orb" "one"
 "conn" "two,three"
 "level" "one"
+"orbui" "testorb"
 }
 // entity 2
 {
 "classname" "orb"
-"origin" "-248 328 16"
+"origin" "-248 328 96"
 "orb" "two"
 "angles" "0 0 0"
 "conn" ""
 "level" "two"
+"orbui" "testorb"
 }
 // entity 3
 {
 "classname" "orb"
-"origin" "264 8 64"
+"origin" "152 8 16"
 "orb" "three"
 "angles" "0 90 0"
-"conn" "one"
+"conn" "four"
 "level" "one"
+"orbui" "testorb"
 }
 // entity 4
 {
@@ -87,4 +90,31 @@
 "rail" "cutscene1-rail"
 "rail-index" "1"
 "time" "10"
+}
+// entity 6
+{
+"classname" "orb"
+"origin" "-136 -120 8"
+"orb" "one"
+"conn" "two"
+"level" "one"
+"orbui" "testorb3"
+}
+// entity 7
+{
+"classname" "orb"
+"origin" "-56 -120 8"
+"orb" "two"
+"conn" "one"
+"level" "one"
+"orbui" "testorb3"
+}
+// entity 8
+{
+"classname" "orb"
+"origin" "24 -120 8"
+"orb" "four"
+"conn" "two,three"
+"level" "one"
+"orbui" "testorb"
 }

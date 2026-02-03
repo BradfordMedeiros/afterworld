@@ -88,8 +88,8 @@ std::vector<OrbConnection> ballGameConnections {
 
 OrbUi createOrbUi(objid id){
   OrbUi orbUi {
-    .id = id,
-    .name = "testui",
+    .ownerId = id,
+    .name = "testorb2",
     .orbs = ballGameOrbs,
     .connections = ballGameConnections,
   };
@@ -119,38 +119,65 @@ std::unordered_map<std::string, OrbMappingValue> nameToOrbMapping {
 	},
 };
 
-OrbUi createOrbUi2(objid id, std::string name, std::vector<OrbDataConfig>& orbDatas, std::vector<OrbConnection>& orbConns){
-	OrbUi orbUi {
-		.id = id,
-		.name = name,
-	};
-	std::vector<Orb> ballGameOrbs;
-	std::vector<OrbConnection> ballGameConnections;
+std::set<std::string> allOrbUis(std::vector<OrbDataConfig>& orbDatas){
+	std::set<std::string> values;
+	for (auto& orbData : orbDatas){
+		values.insert(orbData.orbUi);
+	}
+	return values;
+}
 
-	for (int i = 0; i < orbDatas.size(); i++){
-		modassert(nameToOrbMapping.find(orbDatas.at(i).level) != nameToOrbMapping.end(), "no mapping for orbui level");
-		auto& orbMappingValue = nameToOrbMapping.at(orbDatas.at(i).level);
-		auto level = orbMappingValue.level;
+std::vector<OrbUi> createOrbUi2(objid id, std::vector<OrbDataConfig>& orbDatas, std::vector<OrbDataConection>& orbConns){
+	std::vector<OrbUi> orbUis;
 
-		Orb orb {
-			.index = i,
-			.position = orbDatas.at(i).pos,
-			.rotation = orbDatas.at(i).rotation,
-			.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
-			.text = orbMappingValue.text,
-			.mesh = std::nullopt,
-			.level = orbMappingValue.level,
-			.image = std::nullopt,
-			.getOrbProgress = [level]() -> OrbProgress {
-				return OrbProgress {
-					.complete = isLevelComplete(level),
-				};
-			},
+	auto orbUiNames = allOrbUis(orbDatas);
+
+	for (auto& orbUiName : orbUiNames){
+		OrbUi orbUi {
+			.ownerId = id,
+			.name = orbUiName,
 		};
-		ballGameOrbs.push_back(orb);
+		std::vector<Orb> ballGameOrbs;
+		std::vector<OrbConnection> ballGameConnections;
+
+		for (int i = 0; i < orbDatas.size(); i++){
+			if (orbDatas.at(i).orbUi != orbUiName){
+				continue;
+			}
+			modassert(nameToOrbMapping.find(orbDatas.at(i).level) != nameToOrbMapping.end(), "no mapping for orbui level");
+			auto& orbMappingValue = nameToOrbMapping.at(orbDatas.at(i).level);
+			auto level = orbMappingValue.level;
+			Orb orb {
+				.index = i,
+				.position = orbDatas.at(i).pos,
+				.rotation = orbDatas.at(i).rotation,
+				.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
+				.text = orbMappingValue.text,
+				.mesh = std::nullopt,
+				.level = orbMappingValue.level,
+				.image = std::nullopt,
+				.getOrbProgress = [level]() -> OrbProgress {
+					return OrbProgress {
+						.complete = isLevelComplete(level),
+					};
+				},
+			};
+			ballGameOrbs.push_back(orb);
+		}
+
+		orbUi.orbs = ballGameOrbs;
+
+		std::vector<OrbConnection> connections;
+		for (auto& orbConn : orbConns){
+			if (orbConn.orbUi != orbUiName){
+				continue;
+			}
+			connections.push_back(orbConn.connection);
+		}
+		orbUi.connections = connections;
+	
+		orbUis.push_back(orbUi);
 	}
 
-	orbUi.orbs = ballGameOrbs;
-	orbUi.connections = orbConns;
-	return orbUi;
+	return orbUis;
 }

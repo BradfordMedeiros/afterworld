@@ -786,6 +786,10 @@ std::vector<TagUpdater> tagupdates = {
 
 	  	auto orbNames = parseDataString(orbNamesStr.value());
 
+			auto orbUisStr = getStrAttr(attrHandle, "data-orbui");
+	  	modassert(orbUisStr.has_value(), "no data-orbui for orbs");
+	  	auto orbUisData = parseDataString(orbUisStr.value());
+
 	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
 	  	modassert(railDataRot.has_value(), "no data for rail-rot");
 	  	auto dataRotations = parseDataVec3(railDataRot.value());
@@ -797,6 +801,7 @@ std::vector<TagUpdater> tagupdates = {
 					.pos = orbPositions.at(i),
 					.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
 					.level = orbLevels.at(i),
+					.orbUi = orbUisData.at(i),
 				});
 			}
 
@@ -804,22 +809,36 @@ std::vector<TagUpdater> tagupdates = {
 			modassert(orbConnStr.has_value(), "no data-conn for orbs");
 			auto orbConnStrs = split(orbConnStr.value(), ',');
 
-			std::vector<OrbConnection> orbConns;
+			std::vector<OrbDataConection> orbConns;
 			for (int i = 0; i < orbConnStrs.size(); i++){
 				auto toConns = split(orbConnStrs.at(i), '-');
 				for (auto& conn : toConns){
 					auto toIndex = std::atoi(conn.c_str());
-					orbConns.push_back(OrbConnection {
-						.indexFrom = i,
-						.indexTo = toIndex,
+					orbConns.push_back(OrbDataConection {
+							.connection = OrbConnection {
+								.indexFrom = i,
+								.indexTo = toIndex,
+							},
+							.orbUi = orbUisData.at(i),
 					});
 				}
 			}
 
-			orbData.orbUis[id] = createOrbUi2(id, "testorb", orbDatas, orbConns);			
+			auto orbUis = createOrbUi2(id, orbDatas, orbConns);
+			for (auto& orbUi : orbUis){
+				orbData.orbUis[getUniqueObjId()] = orbUi;			
+			}
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		orbData.orbUis.erase(id);
+  		std::set<objid> idsToRemove;
+  		for (auto&[id, orbUi] : orbData.orbUis){
+  			if (orbUi.ownerId == id){
+  				idsToRemove.insert(id);
+  			}
+  		}
+  		for (auto id : idsToRemove){
+	  		orbData.orbUis.erase(id);
+  		}
   	},
   	.onFrame = [](Tags& tags) -> void {
  			std::set<objid> cachesToRemove;
