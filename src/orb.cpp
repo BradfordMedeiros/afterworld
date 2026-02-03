@@ -14,6 +14,24 @@ std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
 	}
 	return std::nullopt;
 }
+std::vector<int> getAllConnections(OrbUi& orbUi, int index){
+	std::set<int> connectsTo;
+	for (int i = 0; i < orbUi.connections.size(); i++){
+		auto& connection = orbUi.connections.at(i);
+		if (connection.indexFrom == index){
+			connectsTo.insert(connection.indexTo);
+		}
+		if (connection.indexTo == index){
+			connectsTo.insert(connection.indexFrom);
+		}
+	}
+
+	std::vector<int> allValues;
+	for (auto id : connectsTo){
+		allValues.push_back(id);
+	}
+	return allValues;
+}
 
 glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
 	glm::vec3 offset = gameapi -> getGameObjectPos(orbUi.ownerId, true, "getOrbPosition pos");
@@ -155,15 +173,7 @@ void handleOrbViews(OrbData& orbData){
 	}
 }
 
-int getMaxOrbIndex(OrbUi& orbUi){
-	int maxIndex = 0;
-	for (auto& orb : orbUi.orbs){
-		if (orb.index > maxIndex){
-			maxIndex = orb.index;
-		}
-	}
-	return maxIndex;
-}
+
 int getMinOrbIndex(OrbUi& orbUi){
 	int minIndex = orbUi.orbs.at(0).index;
 	for (auto& orb : orbUi.orbs){
@@ -176,22 +186,28 @@ int getMinOrbIndex(OrbUi& orbUi){
 
 // These two should probably be based on the connections but in practice this is ok
 int getPrevOrbIndex(OrbUi& orbUi, int targetIndex){
-	// maybe go to the orb, then find the connection, then go to that 
+	auto connections = getAllConnections(orbUi, targetIndex);
+	std::cout << "connections: from: " << targetIndex << ", conn = " << print(connections) << std::endl;
 	auto newTargetIndex = targetIndex;
-	newTargetIndex--;
-	auto minIndex = getMinOrbIndex(orbUi);
-	if (newTargetIndex < minIndex){
-		newTargetIndex = minIndex;
+	for (int i = (connections.size() - 1); i >= 0; i--){
+		auto id = connections.at(i);
+		if (id < targetIndex){
+			newTargetIndex = id;
+			break;
+		}
 	}
 	return newTargetIndex;
 }
 
 int getNextOrbIndex(OrbUi& orbUi, int targetIndex){
+	auto connections = getAllConnections(orbUi, targetIndex);
+	std::cout << "connections: from: " << targetIndex << ", conn = " << print(connections) << std::endl;
 	auto newTargetIndex = targetIndex;
-	newTargetIndex++;
-	auto maxIndex = getMaxOrbIndex(orbUi);
-	if(newTargetIndex > maxIndex){
-		newTargetIndex = maxIndex;
+	for (auto id : connections){
+		if (id > targetIndex){
+			newTargetIndex = id;
+			break;
+		}
 	}
 	return newTargetIndex;
 }

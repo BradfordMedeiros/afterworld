@@ -395,9 +395,23 @@ struct LevelOrbNavInfo {
 	std::optional<int> maxCompletedIndex;
 };
 
-std::string activeOrbUi = "testorb3";
+static int activeLayer = 0;
+struct LevelOrbLayer {
+	std::string orbUi;
+};
+std::vector<LevelOrbLayer> orbLayers {
+	LevelOrbLayer {
+		.orbUi = "testorb",
+	},
+	LevelOrbLayer {
+		.orbUi = "testorb3",
+	},
+};
+
 LevelOrbNavInfo getLevelOrbInfo(objid cameraId){
-	std::string orbUiName = activeOrbUi;
+	auto& orbLayer = orbLayers.at(activeLayer);
+
+	std::string orbUiName = orbLayer.orbUi;
   auto orbUi = orbUiByName(orbUiName);
   auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
  	auto orbIndex = getActiveOrbViewIndex(cameraId);
@@ -438,11 +452,21 @@ GameTypeInfo getBallIntroMode(){
 	  	modassert(introMode, "introMode options onKey");
 
 	  	if (key == 'U'){
-	  		activeOrbUi = "testorb";
+	  		activeLayer--;
+	  		if (activeLayer < 0){
+	  			activeLayer = 0;
+	  		}
+	  		auto activeOrbUi = orbLayers.at(activeLayer).orbUi;
+
 				removeCameraFromOrbView(introMode -> cameraId);
 				setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
 	  	}else if (key == 'I'){
-	  		activeOrbUi = "testorb3";
+	  		activeLayer++;
+	  		if (activeLayer >= orbLayers.size()){
+	  			activeLayer = orbLayers.size() - 1;
+	  		}
+	  		auto activeOrbUi = orbLayers.at(activeLayer).orbUi;
+
 				removeCameraFromOrbView(introMode -> cameraId);
 				setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
 	  	}else if (key == 'O'){
