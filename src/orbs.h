@@ -60,6 +60,8 @@ void handleOrbViews(OrbData& orbData);
 
 struct OrbSelection {
 	std::optional<Orb*> selectedOrb;
+	bool moveLeft = false;
+	bool moveRight = false;
 };	
 OrbSelection handleOrbControls(OrbData& orbData, int key, int action);
 void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex);

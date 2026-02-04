@@ -1694,6 +1694,11 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     goToLevel(selectedOrb.selectedOrb.value() -> level);
     return;
   }
+  if (selectedOrb.moveRight){
+    nextOrbLayer();
+  }else if (selectedOrb.moveLeft){
+    prevOrbLayer();
+  }
 
   if (isJumpKey(key) && action == 1){
     gameapi -> sendNotifyMessage("advance", true);

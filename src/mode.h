@@ -19,6 +19,8 @@ void endBallMode();
 
 void startIntroMode(objid sceneId);
 void endIntroMode();
+void nextOrbLayer();
+void prevOrbLayer();
 
 void ballModeNewGame();
 void ballModeLevelSelect();

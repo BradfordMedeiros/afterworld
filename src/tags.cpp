@@ -1151,6 +1151,14 @@ void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
 	}
 }
 
+void startRotate(objid id){
+	tags.idToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
+}
+void stopRotate(objid id){
+	tags.idToRotateTimeAdded.erase(id);
+}
+
+
 
 std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
 	if (tags.teleportObjs.size() == 0){

@@ -239,12 +239,22 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 
 		{
 			auto oldIndex = orbView.targetIndex;
+			auto orbUi = getOrbUi(orbData, orbView.orbId).value();
+
 			if (isMoveLeftKey(key) && (action == 1)){
-				auto orbUi = getOrbUi(orbData, orbView.orbId).value();
+				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
+				if (connections.size() == 0 || orbView.targetIndex < connections.at(0) /* min index */){
+					std::cout << "reached min index: " << orbView.targetIndex << std::endl;
+					orbSelection.moveLeft = true;
+				}
 				orbView.targetIndex = getPrevOrbIndex(*orbUi, orbView.targetIndex);
 			}
 			if (isMoveRightKey(key) && (action == 1) && isComplete){
-				auto orbUi = getOrbUi(orbData, orbView.orbId).value();
+				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
+				if (connections.size() == 0 || orbView.targetIndex > connections.at(connections.size() - 1) /* max index */){
+					std::cout << "reached max index: " << orbView.targetIndex << std::endl;
+					orbSelection.moveRight = true;
+				}
 				orbView.targetIndex = getNextOrbIndex(*orbUi, orbView.targetIndex);
 			}
 			if (oldIndex != orbView.targetIndex){

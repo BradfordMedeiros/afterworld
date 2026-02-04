@@ -15,6 +15,9 @@ void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
 
+void startRotate(objid id);
+void stopRotate(objid id);
+
 bool inBallMode = false;
 
 void ballStartGameplay(EasyCutscene& cutscene){
@@ -262,6 +265,7 @@ GameTypeInfo getBallMode(){
 /////////////////////////////////////////////////////////
 struct IntroModeOptions {
    objid cameraId;
+   int activeLayer;
 };
 
 void startIntroMode(objid sceneId){
@@ -278,6 +282,7 @@ void startIntroMode(objid sceneId){
 
   IntroModeOptions modeOptions {
   	.cameraId = cameraId.value(),
+  	.activeLayer = 0,
   };
 	changeGameType(gametypeSystem, "ball-intro", &modeOptions);
 }
@@ -303,8 +308,9 @@ void ballIntroOpening(EasyCutscene& cutscene){
 	};
 
   if (initialize(cutscene)){
-    glm::vec3 initialPos = glm::vec3(0.f, 10.f, 0.f);
+    //glm::vec3 initialPos = glm::vec3(0.f, 10.f, 0.f);
     auto cameraId = findObjByShortName(">menu-view", std::nullopt);
+  	auto initialPos = gameapi -> getGameObjectPos(cameraId.value(), true, "[gamelogic] - ballIntroOpening pos");
     auto initialRot = gameapi -> getGameObjectRotation(cameraId.value(), true, "[gamelogic] - ballIntroOpening");
 
   	BallIntroData ballIntroData {
@@ -407,6 +413,18 @@ std::vector<LevelOrbLayer> orbLayers {
 		.orbUi = "testorb3",
 	},
 };
+void nextOrbLayer(){
+	activeLayer++;
+	if (activeLayer >= orbLayers.size()){
+		activeLayer = orbLayers.size() - 1;
+	}
+}
+void prevOrbLayer(){
+	activeLayer--;
+	if (activeLayer < 0){
+		activeLayer = 0;
+	}
+}
 
 LevelOrbNavInfo getLevelOrbInfo(objid cameraId){
 	auto& orbLayer = orbLayers.at(activeLayer);
@@ -456,19 +474,11 @@ GameTypeInfo getBallIntroMode(){
 	  		if (activeLayer < 0){
 	  			activeLayer = 0;
 	  		}
-	  		auto activeOrbUi = orbLayers.at(activeLayer).orbUi;
-
-				removeCameraFromOrbView(introMode -> cameraId);
-				setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
 	  	}else if (key == 'I'){
 	  		activeLayer++;
 	  		if (activeLayer >= orbLayers.size()){
 	  			activeLayer = orbLayers.size() - 1;
 	  		}
-	  		auto activeOrbUi = orbLayers.at(activeLayer).orbUi;
-
-				removeCameraFromOrbView(introMode -> cameraId);
-				setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
 	  	}else if (key == 'O'){
 	  		modassert(false, "not yet implemented");
 	  	}
@@ -496,6 +506,23 @@ GameTypeInfo getBallIntroMode(){
         if (selected){
         	gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
         }
+	  	}
+
+	  	if (activeLayer != introMode -> activeLayer){
+	  		introMode -> activeLayer = activeLayer;
+	  		auto position = gameapi -> getGameObjectPos(introMode -> cameraId, true, "active layer get orb pos");
+	  		auto rotation = gameapi -> getGameObjectRotation(introMode -> cameraId, true, "active layer get orb rot");
+ 				std::cout << "handleOrbViews 2 set position: " << gameapi -> getGameObjNameForId(introMode -> cameraId).value() << ", to : " << print(position) << std::endl;
+
+ 				stopRotate(introMode -> cameraId);
+				removeCameraFromOrbView(introMode -> cameraId);
+				
+				//gameapi -> setGameObjectPosition(introMode -> cameraId, position, true, Hint { .hint = "[gamelogic] - set cam pos before switch orb" });
+				//gameapi -> setGameObjectRot(introMode -> cameraId, rotation, true, Hint { .hint = "[gamelogic] - set cam rotn before switch orb" });
+
+	  		auto activeOrbUi = orbLayers.at(activeLayer).orbUi;
+				//setCameraToOrbView(introMode -> cameraId, activeOrbUi, std::nullopt);
+				playCutscene(ballIntroOpening, std::nullopt);
 	  	}
 
 	  	std::cout << "ballintro mode frame" << std::endl;
