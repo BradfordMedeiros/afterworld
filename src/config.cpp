@@ -117,6 +117,16 @@ std::unordered_map<std::string, OrbMappingValue> nameToOrbMapping {
 			.level = "video",
 		}
 	},
+	{ "testorb", OrbMappingValue { 
+			.text = "this testorb",
+			.level = "testorb",
+		}
+	},
+	{ "testorb3", OrbMappingValue { 
+			.text = "this testorb 3",
+			.level = "testorb3",
+		}
+	},
 };
 
 std::set<std::string> allOrbUis(std::vector<OrbDataConfig>& orbDatas){

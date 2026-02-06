@@ -54,6 +54,8 @@ std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index);
 glm::vec3 getOrbPosition(OrbUi& orbUi, int index);
 glm::quat getOrbRotation(OrbUi& orbUi, int index);
 
+int getMinOrbIndex(OrbUi& orbUi);
+
 void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId);
 
 void handleOrbViews(OrbData& orbData);
@@ -65,6 +67,8 @@ struct OrbSelection {
 };	
 OrbSelection handleOrbControls(OrbData& orbData, int key, int action);
 void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex);
+
+
 void removeCameraFromOrbView(objid cameraId);
 std::optional<int> getMaxCompleteOrbIndex(OrbUi& orbUi);
 std::optional<OrbUi*> orbUiByName(std::string orbUiName);

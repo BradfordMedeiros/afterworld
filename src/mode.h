@@ -22,6 +22,8 @@ void endIntroMode();
 void nextOrbLayer();
 void prevOrbLayer();
 
+void onModeOrbSelect(OrbSelection& selectedOrb);
+
 void ballModeNewGame();
 void ballModeLevelSelect();
 

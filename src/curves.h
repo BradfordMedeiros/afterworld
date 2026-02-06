@@ -53,6 +53,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);
 std::optional<objid> railIdForName(std::string name);
 std::optional<LinePoints*> railForId(objid id);
+int timeToTriggerIndex(LinePoints& line, std::optional<int> index);
 
 void drawAllCurves(objid ownerId);
 

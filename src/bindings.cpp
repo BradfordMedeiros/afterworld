@@ -1689,16 +1689,8 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   }
   
   auto selectedOrb = handleOrbControls(orbData, key, action);
-  if (selectedOrb.selectedOrb.has_value()){
-    std::cout << "handleOrbViews orb: " << print(*selectedOrb.selectedOrb.value()) << std::endl;
-    goToLevel(selectedOrb.selectedOrb.value() -> level);
-    return;
-  }
-  if (selectedOrb.moveRight){
-    nextOrbLayer();
-  }else if (selectedOrb.moveLeft){
-    prevOrbLayer();
-  }
+
+  onModeOrbSelect(selectedOrb);
 
   if (isJumpKey(key) && action == 1){
     gameapi -> sendNotifyMessage("advance", true);
