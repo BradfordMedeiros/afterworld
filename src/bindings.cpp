@@ -98,7 +98,7 @@ void onMenu2NewGameClick(){
   ballModeNewGame();
 }
 void onMenu2ContinueClick(){
-  ballModeLevelSelect();
+  ballModeLevelSelect(true);
 }
 
 std::vector<int> getVehicleIds(){
@@ -1179,7 +1179,7 @@ UiContext getUiContext(GameState& gameState){
           startIntroMode(gameStatePtr -> sceneManagement.managedScene.value().id.value());
         }else if (gamemodeBall){
           goToLevel("ballselect");
-          ballModeLevelSelect();
+          ballModeLevelSelect(true);
         }else{
           pushHistory({ "mainmenu" }, true);
         }
@@ -1689,7 +1689,6 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   }
   
   auto selectedOrb = handleOrbControls(orbData, key, action);
-
   onModeOrbSelect(selectedOrb);
 
   if (isJumpKey(key) && action == 1){

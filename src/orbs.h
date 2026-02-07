@@ -15,6 +15,12 @@ struct OrbView {
 	int actualIndex;
 	int targetIndex;
 	std::optional<float> startTime;
+
+	bool attachedToOrb;
+	std::optional<glm::vec3> initialPosition;
+	std::optional<glm::quat> initialRotation;
+	std::optional<float> moveToOrbStartTime;
+	std::optional<float> duration;
 };
 
 struct OrbProgress {
@@ -62,17 +68,26 @@ void handleOrbViews(OrbData& orbData);
 
 struct OrbSelection {
 	std::optional<Orb*> selectedOrb;
+	std::optional<OrbView*> orbView;
+	std::optional<OrbUi*> orbUi;
 	bool moveLeft = false;
 	bool moveRight = false;
+
+	bool moveLeftKey = false;
+	bool moveRightKey = false;
 };	
 OrbSelection handleOrbControls(OrbData& orbData, int key, int action);
-void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex);
-
+void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time);
 
 void removeCameraFromOrbView(objid cameraId);
 std::optional<int> getMaxCompleteOrbIndex(OrbUi& orbUi);
 std::optional<OrbUi*> orbUiByName(std::string orbUiName);
 std::optional<int>  getActiveOrbViewIndex(objid cameraId);
+
+void setOrbSelectIndex(OrbView& orbView, int targetIndex);
+
+int getPrevOrbIndex(OrbUi& orbUi, int targetIndex);
+int getNextOrbIndex(OrbUi& orbUi, int targetIndex);
 
 std::string print(Orb& orb);
 

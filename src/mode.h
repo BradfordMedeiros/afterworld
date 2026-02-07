@@ -25,6 +25,6 @@ void prevOrbLayer();
 void onModeOrbSelect(OrbSelection& selectedOrb);
 
 void ballModeNewGame();
-void ballModeLevelSelect();
+void ballModeLevelSelect(bool setOrbView);
 
 #endif

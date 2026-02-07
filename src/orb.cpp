@@ -51,6 +51,7 @@ glm::quat getOrbRotation(OrbUi& orbUi, int index){
 	return rotation;	
 }
 
+
 std::optional<objid> orbMeshCache(OrbData& orbData, objid orbId, int index){
 	if (orbData.orbIdToIndexToMeshId.find(orbId) == orbData.orbIdToIndexToMeshId.end()){
 		return std::nullopt;
@@ -118,6 +119,25 @@ void handleOrbViews(OrbData& orbData){
 			continue;
 		}
 		OrbUi& orbUi = orbData.orbUis.at(objView.orbId);
+		if (!objView.attachedToOrb){
+			auto currTime = gameapi -> timeSeconds(false);
+			auto elapsedTime = currTime - objView.moveToOrbStartTime.value();
+			float percentage = elapsedTime / objView.duration.value();
+			if (percentage > 1.f){
+				objView.attachedToOrb = true;
+			}else{
+				auto targetOrbPosition = getOrbPosition(orbUi, objView.targetIndex);
+				auto effectivePosition = lerp(objView.initialPosition.value(), targetOrbPosition, percentage);
+
+				auto targetOrbRotation = getOrbRotation(orbUi, objView.targetIndex);
+				auto effectiveRotation = glm::slerp(objView.initialRotation.value(), targetOrbRotation, percentage);
+
+				gameapi -> setGameObjectPosition(cameraId, effectivePosition, true, Hint { .hint = "handleOrbViews set orb camera move to" });
+				gameapi -> setGameObjectRot(cameraId, effectiveRotation, true, Hint { .hint = "handleOrbViews set orb camera rotn move to rot" });
+
+				continue;
+			}
+		}
 
 		auto targetOrb = getOrb(orbUi.orbs, objView.targetIndex);
 		modassert(targetOrb.has_value(), std::string("handleOrbViews could not find target orb: ") + std::to_string(objView.targetIndex));
@@ -128,7 +148,6 @@ void handleOrbViews(OrbData& orbData){
 			}
 			//gameapi -> drawRect(-0.5f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
 			gameapi -> drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, opacity), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
-
 		}
 		if (targetOrb.value() -> text != ""){
 			gameapi -> drawText(targetOrb.value() -> text, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
@@ -163,7 +182,6 @@ void handleOrbViews(OrbData& orbData){
 
 		glm::vec3 cameraOffset = orbRotation * glm::vec3(0.f, 0.f, 2.f);
 		gameapi -> setGameObjectPosition(cameraId, orbPosition + cameraOffset, true, Hint { .hint = "handleOrbViews set orb camera" });
-
 
 		if (showDebugInfo){
 			auto isComplete = targetOrb.value() -> getOrbProgress().complete;
@@ -221,6 +239,16 @@ std::optional<OrbUi*> getOrbUi(OrbData& orbData, objid id){
 	}
 	return std::nullopt;
 }
+
+void setOrbSelectIndex(OrbView& orbView, int targetIndex){
+	auto oldIndex = orbView.targetIndex;
+	orbView.targetIndex = targetIndex;
+	if (oldIndex != targetIndex){
+		orbView.startTime = gameapi -> timeSeconds(false);
+	  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+	}
+}
+
 OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	OrbSelection orbSelection {};
 
@@ -228,6 +256,11 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 		if (orbData.orbUis.find(orbView.orbId) == orbData.orbUis.end()){
 			continue;
 		}
+
+		if (!orbView.attachedToOrb){
+			continue;
+		}
+
 		bool changedIndex = false;
 
 		auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
@@ -237,9 +270,9 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 			isComplete = true;
 		}
 
+		auto orbUi = getOrbUi(orbData, orbView.orbId).value();
 		{
 			auto oldIndex = orbView.targetIndex;
-			auto orbUi = getOrbUi(orbData, orbView.orbId).value();
 
 			if (isMoveLeftKey(key) && (action == 1)){
 				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
@@ -247,7 +280,10 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 					std::cout << "reached min index: " << orbView.targetIndex << std::endl;
 					orbSelection.moveLeft = true;
 				}
-				orbView.targetIndex = getPrevOrbIndex(*orbUi, orbView.targetIndex);
+				orbSelection.moveLeftKey = true;
+				setOrbSelectIndex(orbView, getPrevOrbIndex(*orbUi, orbView.targetIndex));
+				orbSelection.orbView = &orbView;
+				orbSelection.orbUi = orbUi;
 			}
 			if (isMoveRightKey(key) && (action == 1) && isComplete){
 				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
@@ -255,11 +291,9 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 					std::cout << "reached max index: " << orbView.targetIndex << std::endl;
 					orbSelection.moveRight = true;
 				}
-				orbView.targetIndex = getNextOrbIndex(*orbUi, orbView.targetIndex);
-			}
-			if (oldIndex != orbView.targetIndex){
-				orbView.startTime = gameapi -> timeSeconds(false);
-    	  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+				orbSelection.moveRightKey = true;
+				orbSelection.orbView = &orbView;
+				orbSelection.orbUi = orbUi;
 			}
 		}
 
@@ -267,7 +301,8 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 			auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
 			if (selectedOrb.has_value()){
 				orbSelection.selectedOrb = selectedOrb;
-	      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+				orbSelection.orbView = &orbView;
+				orbSelection.orbUi = orbUi;
 			}
 		}
 	}
@@ -275,7 +310,8 @@ OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
 	return orbSelection;
 }
 
-void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex){
+
+void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time){
 	for (auto &[id, orbUi] : orbData.orbUis){
 		if (orbUi.name == orbUiName){
 			orbData.orbViewsCameraToOrb[cameraId] = OrbView {
@@ -283,12 +319,19 @@ void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int
 				.actualIndex = targetIndex.has_value() ? targetIndex.value() : getMinOrbIndex(orbUi),
 				.targetIndex = targetIndex.has_value() ? targetIndex.value() : getMinOrbIndex(orbUi),
 				.startTime = std::nullopt,
+
+				.attachedToOrb = time.has_value() ? false : true,
+				.initialPosition = gameapi -> getGameObjectPos(cameraId, true, "[gamelogic] - setCameraToOrbView initial position"),
+				.initialRotation = gameapi -> getGameObjectRotation(cameraId, true, "[gamelogic] - setCameraToOrbView initial rotation"),
+				.moveToOrbStartTime = gameapi -> timeSeconds(false),
+				.duration = time,
 			};
 			return;
 		}
 	}
 	modassert(false, std::string("setCameraToOrbView no orbUi: ") + orbUiName);
 }
+
 
 void removeCameraFromOrbView(objid cameraId){
   orbData.orbViewsCameraToOrb.erase(cameraId);
