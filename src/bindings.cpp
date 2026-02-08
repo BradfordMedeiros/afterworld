@@ -98,7 +98,7 @@ void onMenu2NewGameClick(){
   ballModeNewGame();
 }
 void onMenu2ContinueClick(){
-  ballModeLevelSelect(true);
+  ballModeLevelSelect();
 }
 
 std::vector<int> getVehicleIds(){
@@ -1179,7 +1179,7 @@ UiContext getUiContext(GameState& gameState){
           startIntroMode(gameStatePtr -> sceneManagement.managedScene.value().id.value());
         }else if (gamemodeBall){
           goToLevel("ballselect");
-          ballModeLevelSelect(true);
+          ballModeLevelSelect();
         }else{
           pushHistory({ "mainmenu" }, true);
         }

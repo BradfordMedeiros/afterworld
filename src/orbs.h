@@ -32,7 +32,6 @@ struct Orb {
 	glm::quat rotation;
 	glm::vec4 tint;
 	std::string text;
-
 	std::optional<std::string> mesh;
 	std::string level;
 	std::optional<std::string> image;
@@ -51,7 +50,6 @@ struct OrbUi {
 struct OrbData {
 	std::unordered_map<objid, OrbUi> orbUis;
 	std::unordered_map<objid, OrbView> orbViewsCameraToOrb;
-
 	std::unordered_map<objid, std::unordered_map<int, objid>> orbIdToIndexToMeshId;
 
 };
@@ -60,26 +58,26 @@ std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index);
 glm::vec3 getOrbPosition(OrbUi& orbUi, int index);
 glm::quat getOrbRotation(OrbUi& orbUi, int index);
 
-int getMinOrbIndex(OrbUi& orbUi);
-
 void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId);
-
 void handleOrbViews(OrbData& orbData);
 
 struct OrbSelection {
-	std::optional<Orb*> selectedOrb;
-	std::optional<OrbView*> orbView;
-	std::optional<OrbUi*> orbUi;
+	objid cameraId;
+	std::optional<Orb*> currentOrb;
+	OrbView* orbView;
+	OrbUi* orbUi;
 	bool moveLeft = false;
 	bool moveRight = false;
 
 	bool moveLeftKey = false;
 	bool moveRightKey = false;
+	bool selectKey = false;
 };	
-OrbSelection handleOrbControls(OrbData& orbData, int key, int action);
-void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time);
+std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action);
 
+void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time);
 void removeCameraFromOrbView(objid cameraId);
+
 std::optional<int> getMaxCompleteOrbIndex(OrbUi& orbUi);
 std::optional<OrbUi*> orbUiByName(std::string orbUiName);
 std::optional<int>  getActiveOrbViewIndex(objid cameraId);
@@ -88,6 +86,10 @@ void setOrbSelectIndex(OrbView& orbView, int targetIndex);
 
 int getPrevOrbIndex(OrbUi& orbUi, int targetIndex);
 int getNextOrbIndex(OrbUi& orbUi, int targetIndex);
+int getMinOrbIndex(OrbUi& orbUi);
+
+int numberOfOrbs(OrbView& orbView);
+std::optional<OrbView*> orbViewForCamera(objid cameraId);
 
 std::string print(Orb& orb);
 

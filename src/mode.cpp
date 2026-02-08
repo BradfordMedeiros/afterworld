@@ -57,7 +57,7 @@ void ballEndGameplay(EasyCutscene& cutscene){
   run(cutscene, 2, []() -> void {
  		setShowBallOptions(std::nullopt);
   	goToLevel("ballselect");
-  	ballModeLevelSelect(true);
+  	ballModeLevelSelect();
   });
 }
 
@@ -267,6 +267,10 @@ struct IntroModeOptions {
    int activeLayer;
 };
 
+static int activeLayer = 0;
+static std::optional<int> activeWorld = std::nullopt;
+std::optional<objid> orbCameraId;
+
 void startIntroMode(objid sceneId){
 	if (currentCutscene.has_value()){
 		removeCutscene(currentCutscene.value(), true);
@@ -278,6 +282,7 @@ void startIntroMode(objid sceneId){
   setHudEnabled(false);
   setShowLiveMenu(true);
   showLetterBoxHold("", 0.f);
+  orbCameraId = cameraId;
 
   IntroModeOptions modeOptions {
   	.cameraId = cameraId.value(),
@@ -320,8 +325,6 @@ struct LevelOrbLayer {
 	std::string orbUi;
 };
 
-static int activeLayer = 0;
-static std::optional<int> activeWorld = std::nullopt;
 std::vector<LevelOrbLayer> orbLayers {
 	LevelOrbLayer {
 		.orbUi = "testorb",
@@ -347,6 +350,11 @@ std::string currentOverworldName(){
   modassert(false, "should not have reached here currentOverworldName");
 	return "unknown";
 }
+
+bool isOverworld(){
+	return activeLayer == (orbLayers.size() - 1);
+}
+
 void goToOverWorld(){
 	auto& activeLayerName = orbLayers.at(activeLayer).orbUi;
   auto orbUi = orbUiByName(orbLayers.at(orbLayers.size() - 1).orbUi);
@@ -381,6 +389,45 @@ LevelOrbNavInfo getLevelOrbInfo(objid cameraId){
 		.maxCompletedIndex = orbUiName == "metaworld" ? activeWorld : maxCompletedIndex,
 	};
 }
+
+void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
+	if (!orbCameraId.has_value()){
+		return;
+	}
+
+	for (auto& selectedOrb : selectedOrbs){
+		if (selectedOrb.cameraId == orbCameraId.value()){
+			auto& selectedOrb = selectedOrbs.at(0);
+			if (selectedOrb.moveRightKey){
+				OrbView& orbView = *selectedOrb.orbView;
+				setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+			}else if (selectedOrb.moveLeftKey){
+				OrbView& orbView = *selectedOrb.orbView;
+				setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+			}
+			if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value() && activeLayer == orbLayers.size() - 1){
+				for (int i = 0; i < orbLayers.size() - 1; i++){
+					if (orbLayers.at(i).orbUi == selectedOrb.currentOrb.value() -> level){
+						activeLayer = i;
+					}
+				}
+				return;
+			}
+  		if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value()){
+  		  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+  		  goToLevel(selectedOrb.currentOrb.value() -> level);
+  		  return;
+  		}
+  		if (selectedOrb.moveRight){
+  		  goToOverWorld();
+  		}else if (selectedOrb.moveLeft){
+  		  goToOverWorld();
+  		}
+		}
+	}
+}
+
+
 
 
 std::unordered_map<std::string, CutsceneOption> cutsceneDatas {
@@ -459,7 +506,7 @@ std::function<void(EasyCutscene&)> createCutscene(std::string option, std::optio
 
   	if (finalize(cutscene)){
   		removeManagedRailMovement(introData -> cameraId);
-  	  ballModeLevelSelect(true);
+  	  ballModeLevelSelect();
   	}
 
   	if (skipAnimation || hasAlreadyPlayed){
@@ -493,49 +540,13 @@ void ballModeNewGame(){
   currentCutscene = playCutscene(createCutscene("testorb", glm::vec3(0.f, 10.f, 0.f), false), std::nullopt);
 }
 
-void onModeOrbSelect(OrbSelection& selectedOrb){
-	if (selectedOrb.moveRightKey && selectedOrb.orbView.has_value()){
-		OrbView& orbView = *selectedOrb.orbView.value();
-		OrbUi& orbUi = *selectedOrb.orbUi.value();
-		setOrbSelectIndex(orbView, getNextOrbIndex(orbUi, orbView.targetIndex));
-	}else if (selectedOrb.moveLeftKey && selectedOrb.orbView.has_value()){
-		OrbView& orbView = *selectedOrb.orbView.value();
-		OrbUi& orbUi = *selectedOrb.orbUi.value();
-		setOrbSelectIndex(orbView, getPrevOrbIndex(orbUi, orbView.targetIndex));
-	}
-	
 
-	if (selectedOrb.selectedOrb.has_value() && activeLayer == orbLayers.size() - 1){
-		for (int i = 0; i < orbLayers.size() - 1; i++){
-			if (orbLayers.at(i).orbUi == selectedOrb.selectedOrb.value() -> level){
-				activeLayer = i;
-			}
-		}
-		return;
-	}
-
-  if (selectedOrb.selectedOrb.has_value()){
-    std::cout << "handleOrbViews orb: " << print(*selectedOrb.selectedOrb.value()) << std::endl;
-    playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
-    goToLevel(selectedOrb.selectedOrb.value() -> level);
-    return;
-  }
-  if (selectedOrb.moveRight){
-    goToOverWorld();
-  }else if (selectedOrb.moveLeft){
-    goToOverWorld();
-  }
-}
-
-
-void ballModeLevelSelect(bool setOrbView){
+void ballModeLevelSelect(){
 	std::cout << "ballModeLevelSelect" << std::endl;
   setShowLiveMenu(false);
   auto cameraId = findObjByShortName(">menu-view", std::nullopt);
   auto levelNavInfo = getLevelOrbInfo(cameraId.value());
-  if (setOrbView){
-	  setCameraToOrbView(cameraId.value(), levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 0.1f);
-  }
+	setCameraToOrbView(cameraId.value(), levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 0.1f);
   showLetterBoxHold("Level Select", 0.f);
   setLifetimeObject(cameraId.value(), []() -> void { hideLetterBox(); }, "ball mode level select");
 }
@@ -622,6 +633,8 @@ GameTypeInfo getBallIntroMode(){
 
 	  	std::string bestTime = "best time: 13.34s";
 	  	gameapi -> drawText(bestTime, -0.8f, 0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+
+	  	gameapi -> drawText(std::string("overworld: ") + (isOverworld() ? "true" : "false"), -0.8f, -0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
 
 	  	std::cout << "ballintro mode frame" << std::endl;

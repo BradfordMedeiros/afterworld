@@ -22,9 +22,9 @@ void endIntroMode();
 void nextOrbLayer();
 void prevOrbLayer();
 
-void onModeOrbSelect(OrbSelection& selectedOrb);
+void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs);
 
 void ballModeNewGame();
-void ballModeLevelSelect(bool setOrbView);
+void ballModeLevelSelect();
 
 #endif

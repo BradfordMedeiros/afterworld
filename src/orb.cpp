@@ -4,7 +4,6 @@ extern CustomApiBindings* gameapi;
 extern OrbData orbData;
 
 bool showDebugInfo = true;
-bool unlockAllLevels = true;
 
 std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
 	for (auto& orb : orbs){
@@ -249,65 +248,52 @@ void setOrbSelectIndex(OrbView& orbView, int targetIndex){
 	}
 }
 
-OrbSelection handleOrbControls(OrbData& orbData, int key, int action){
-	OrbSelection orbSelection {};
+std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action){
+	std::vector<OrbSelection> orbSelections;
+
 
 	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
 		if (orbData.orbUis.find(orbView.orbId) == orbData.orbUis.end()){
 			continue;
 		}
-
 		if (!orbView.attachedToOrb){
 			continue;
 		}
 
-		bool changedIndex = false;
-
-		auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
-		modassert(selectedOrb.has_value(), std::string("selected orb does not have a value: ") + std::to_string(orbView.targetIndex));
-		auto isComplete = selectedOrb.value() -> getOrbProgress().complete;
-		if (unlockAllLevels){
-			isComplete = true;
-		}
+		OrbSelection orbSelection {};
+		orbSelection.cameraId = id;
 
 		auto orbUi = getOrbUi(orbData, orbView.orbId).value();
-		{
-			auto oldIndex = orbView.targetIndex;
+		orbSelection.orbView = &orbView;
+		orbSelection.orbUi = orbUi;
 
+		{
 			if (isMoveLeftKey(key) && (action == 1)){
 				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
 				if (connections.size() == 0 || orbView.targetIndex < connections.at(0) /* min index */){
-					std::cout << "reached min index: " << orbView.targetIndex << std::endl;
 					orbSelection.moveLeft = true;
 				}
 				orbSelection.moveLeftKey = true;
-				setOrbSelectIndex(orbView, getPrevOrbIndex(*orbUi, orbView.targetIndex));
-				orbSelection.orbView = &orbView;
-				orbSelection.orbUi = orbUi;
 			}
-			if (isMoveRightKey(key) && (action == 1) && isComplete){
+			if (isMoveRightKey(key) && (action == 1)){
 				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
 				if (connections.size() == 0 || orbView.targetIndex > connections.at(connections.size() - 1) /* max index */){
-					std::cout << "reached max index: " << orbView.targetIndex << std::endl;
 					orbSelection.moveRight = true;
 				}
 				orbSelection.moveRightKey = true;
-				orbSelection.orbView = &orbView;
-				orbSelection.orbUi = orbUi;
 			}
 		}
+
+		auto currentOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
+		orbSelection.currentOrb = currentOrb;
 
 		if (isJumpKey(key) && (action == 1)){
-			auto selectedOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
-			if (selectedOrb.has_value()){
-				orbSelection.selectedOrb = selectedOrb;
-				orbSelection.orbView = &orbView;
-				orbSelection.orbUi = orbUi;
-			}
+			orbSelection.selectKey = true;
 		}
+		orbSelections.push_back(orbSelection);
 	}
 
-	return orbSelection;
+	return orbSelections;
 }
 
 
@@ -368,6 +354,19 @@ std::optional<int> getActiveOrbViewIndex(objid cameraId){
 	return orbData.orbViewsCameraToOrb.at(cameraId).targetIndex;
 }
 
+
+int numberOfOrbs(OrbView& orbView){
+	auto orbId = orbView.orbId;
+	auto& orbUi = orbData.orbUis.at(orbId);
+	return orbUi.orbs.size();
+}
+
+std::optional<OrbView*>  orbViewForCamera(objid cameraId){
+	if (orbData.orbViewsCameraToOrb.find(cameraId) == orbData.orbViewsCameraToOrb.end()){
+		return std::nullopt;
+	}
+	return &orbData.orbViewsCameraToOrb.at(cameraId);
+}
 
 std::string print(Orb& orb){
 	std::string data;
