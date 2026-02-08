@@ -66,12 +66,13 @@ struct OrbSelection {
 	std::optional<Orb*> currentOrb;
 	OrbView* orbView;
 	OrbUi* orbUi;
-	bool moveLeft = false;
-	bool moveRight = false;
+	bool moveLeftNoSpace= false;
+	bool moveRightNoSpace = false;
 
 	bool moveLeftKey = false;
 	bool moveRightKey = false;
 	bool selectKey = false;
+	bool optionKey = false;
 };	
 std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action);
 

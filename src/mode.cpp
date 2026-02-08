@@ -397,32 +397,47 @@ void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
 
 	for (auto& selectedOrb : selectedOrbs){
 		if (selectedOrb.cameraId == orbCameraId.value()){
-			auto& selectedOrb = selectedOrbs.at(0);
-			if (selectedOrb.moveRightKey){
-				OrbView& orbView = *selectedOrb.orbView;
-				setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
-			}else if (selectedOrb.moveLeftKey){
-				OrbView& orbView = *selectedOrb.orbView;
-				setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
-			}
-			if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value() && activeLayer == orbLayers.size() - 1){
-				for (int i = 0; i < orbLayers.size() - 1; i++){
-					if (orbLayers.at(i).orbUi == selectedOrb.currentOrb.value() -> level){
-						activeLayer = i;
-					}
+			if (isOverworld()){
+				if (selectedOrb.moveRightKey){
+					OrbView& orbView = *selectedOrb.orbView;
+					setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+				}else if (selectedOrb.moveLeftKey){
+					OrbView& orbView = *selectedOrb.orbView;
+					setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
 				}
-				return;
+
+				if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value() && activeLayer == orbLayers.size() - 1){
+					for (int i = 0; i < orbLayers.size() - 1; i++){
+						if (orbLayers.at(i).orbUi == selectedOrb.currentOrb.value() -> level){
+							activeLayer = i;
+						}
+					}
+					return;
+				}
+			}else{
+				if (selectedOrb.moveRightNoSpace){
+  		  	goToOverWorld();
+  			}
+  			if (selectedOrb.moveLeftNoSpace){
+  			  goToOverWorld();
+  			}
+  			if (selectedOrb.optionKey){
+  				goToOverWorld();
+  			}
+  			
+				if (selectedOrb.moveRightKey){
+					OrbView& orbView = *selectedOrb.orbView;
+					setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+				}else if (selectedOrb.moveLeftKey){
+					OrbView& orbView = *selectedOrb.orbView;
+					setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+				}
+				if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value()){
+  		  	playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+  		  	goToLevel(selectedOrb.currentOrb.value() -> level);
+  		  	return;
+  			}
 			}
-  		if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value()){
-  		  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
-  		  goToLevel(selectedOrb.currentOrb.value() -> level);
-  		  return;
-  		}
-  		if (selectedOrb.moveRight){
-  		  goToOverWorld();
-  		}else if (selectedOrb.moveLeft){
-  		  goToOverWorld();
-  		}
 		}
 	}
 }
@@ -567,12 +582,6 @@ GameTypeInfo getBallIntroMode(){
 	  },
 	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
-	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
-	  	modassert(introMode, "introMode options onKey");
-
-			if (key == 'O'){
-	  		goToOverWorld();
-	  	}
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
 	  	bool shouldShowProgress = !getGlobalState().showLiveMenu;

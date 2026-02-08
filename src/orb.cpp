@@ -271,14 +271,14 @@ std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int actio
 			if (isMoveLeftKey(key) && (action == 1)){
 				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
 				if (connections.size() == 0 || orbView.targetIndex < connections.at(0) /* min index */){
-					orbSelection.moveLeft = true;
+					orbSelection.moveLeftNoSpace = true;
 				}
 				orbSelection.moveLeftKey = true;
 			}
 			if (isMoveRightKey(key) && (action == 1)){
 				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
 				if (connections.size() == 0 || orbView.targetIndex > connections.at(connections.size() - 1) /* max index */){
-					orbSelection.moveRight = true;
+					orbSelection.moveRightNoSpace = true;
 				}
 				orbSelection.moveRightKey = true;
 			}
@@ -289,6 +289,10 @@ std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int actio
 
 		if (isJumpKey(key) && (action == 1)){
 			orbSelection.selectKey = true;
+		}
+
+		if (key == 'O' && (action == 1)){
+			orbSelection.optionKey = true;
 		}
 		orbSelections.push_back(orbSelection);
 	}
