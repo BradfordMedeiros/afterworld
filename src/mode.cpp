@@ -268,7 +268,7 @@ struct IntroModeOptions {
 };
 
 static int activeLayer = 0;
-static std::optional<int> activeWorld = std::nullopt;
+static std::string activeWorldName;
 std::optional<objid> orbCameraId;
 
 void startIntroMode(objid sceneId){
@@ -286,7 +286,6 @@ void startIntroMode(objid sceneId){
 
   IntroModeOptions modeOptions {
   	.cameraId = cameraId.value(),
-  	.activeLayer = 0,
   };
 	changeGameType(gametypeSystem, "ball-intro", &modeOptions);
 }
@@ -338,17 +337,7 @@ std::vector<LevelOrbLayer> orbLayers {
 };
 
 std::string currentOverworldName(){
-	if (!activeWorld.has_value()){
-		return orbLayers.at(0).orbUi;
-	}
-  auto& orbUi = *orbUiByName("metaworld").value();
-  for (int i = 0; i < orbUi.orbs.size(); i++){
-  	if (activeWorld.value() == orbUi.orbs.at(i).index){
-  		return orbUi.orbs.at(i).level;
-  	}
-  }
-  modassert(false, "should not have reached here currentOverworldName");
-	return "unknown";
+	return activeWorldName;
 }
 
 bool isOverworld(){
@@ -356,37 +345,29 @@ bool isOverworld(){
 }
 
 void goToOverWorld(){
-	auto& activeLayerName = orbLayers.at(activeLayer).orbUi;
-  auto orbUi = orbUiByName(orbLayers.at(orbLayers.size() - 1).orbUi);
-  auto &orbs = orbUi.value() -> orbs;
-
-  bool foundOrb = false;
-  for (int i = 0; i < orbs.size(); i++){
-  	if (activeLayerName == orbs.at(i).level){
-  		activeWorld = orbs.at(i).index;
-  		std::cout << "goToOverWorld found orb: " << activeLayerName << ", activeworld: " << (activeWorld.has_value() ? activeWorld.value() : -1) << std::endl;
-  		foundOrb = true;
- 			break;
-  	}
-  }
-
-  if (!foundOrb){
-  	activeWorld = std::nullopt;
-  }
+	activeWorldName = orbLayers.at(activeLayer).orbUi;
 	activeLayer = orbLayers.size() - 1;
 }
 
 LevelOrbNavInfo getLevelOrbInfo(objid cameraId){
 	auto& orbLayer = orbLayers.at(activeLayer);
-
-	std::string orbUiName = orbLayer.orbUi;
-  auto orbUi = orbUiByName(orbUiName);
-  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
+  auto orbUi = orbUiByName(orbLayer.orbUi);
  	auto orbIndex = getActiveOrbViewIndex(cameraId);
+
+ 	auto metaworldIndex = getMaxCompleteOrbIndex(*orbUi.value());
+ 	if (orbLayer.orbUi == "metaworld"){
+ 		auto& orbs = orbUi.value() -> orbs;
+ 		for (auto& orb : orbs){
+ 			if (orb.level == activeWorldName){
+ 				metaworldIndex = orb.index;
+ 			}
+ 		}
+ 	}
+
 	return LevelOrbNavInfo {
-		.orbUi = orbUiName,
+		.orbUi = orbLayer.orbUi,
 		.orbIndex = orbIndex,
-		.maxCompletedIndex = orbUiName == "metaworld" ? activeWorld : maxCompletedIndex,
+		.maxCompletedIndex = orbLayer.orbUi == "metaworld" ? metaworldIndex : getMaxCompleteOrbIndex(*orbUi.value()),
 	};
 }
 
@@ -401,14 +382,23 @@ void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
 				if (selectedOrb.moveRightKey){
 					OrbView& orbView = *selectedOrb.orbView;
 					setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+					auto orb = selectedOrbForCamera(orbCameraId.value());
+					if (orb.has_value()){
+						activeWorldName = orb.value() -> level;
+					}
 				}else if (selectedOrb.moveLeftKey){
 					OrbView& orbView = *selectedOrb.orbView;
 					setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+					auto orb = selectedOrbForCamera(orbCameraId.value());
+					if (orb.has_value()){
+						activeWorldName = orb.value() -> level;
+					}
 				}
 
 				if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value() && activeLayer == orbLayers.size() - 1){
 					for (int i = 0; i < orbLayers.size() - 1; i++){
 						if (orbLayers.at(i).orbUi == selectedOrb.currentOrb.value() -> level){
+							activeWorldName = selectedOrb.currentOrb.value() -> level;
 							activeLayer = i;
 						}
 					}
@@ -424,7 +414,7 @@ void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
   			if (selectedOrb.optionKey){
   				goToOverWorld();
   			}
-  			
+
 				if (selectedOrb.moveRightKey){
 					OrbView& orbView = *selectedOrb.orbView;
 					setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
@@ -614,14 +604,10 @@ GameTypeInfo getBallIntroMode(){
 
 	  		introMode -> activeLayer = activeLayer;
 	  		auto position = gameapi -> getGameObjectPos(introMode -> cameraId, true, "active layer get orb pos");
-	  		auto rotation = gameapi -> getGameObjectRotation(introMode -> cameraId, true, "active layer get orb rot");
- 				std::cout << "handleOrbViews 2 set position: " << gameapi -> getGameObjNameForId(introMode -> cameraId).value() << ", to : " << print(position) << std::endl;
 
  				stopRotate(introMode -> cameraId);
 				removeCameraFromOrbView(introMode -> cameraId);
 				
-	  		auto activeOrbUi = orbLayers.at(activeLayer).orbUi;
-
 				if (currentCutscene.has_value()){
 					removeCutscene(currentCutscene.value(), true);
 				}

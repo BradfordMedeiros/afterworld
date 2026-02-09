@@ -50,7 +50,6 @@ glm::quat getOrbRotation(OrbUi& orbUi, int index){
 	return rotation;	
 }
 
-
 std::optional<objid> orbMeshCache(OrbData& orbData, objid orbId, int index){
 	if (orbData.orbIdToIndexToMeshId.find(orbId) == orbData.orbIdToIndexToMeshId.end()){
 		return std::nullopt;
@@ -61,6 +60,7 @@ std::optional<objid> orbMeshCache(OrbData& orbData, objid orbId, int index){
 	}
 	return std::nullopt;
 }
+
 void saveMeshToOrbCache(OrbData& orbData, objid orbId, int index, objid meshId){
 	if (orbData.orbIdToIndexToMeshId.find(orbId) == orbData.orbIdToIndexToMeshId.end()){
 		orbData.orbIdToIndexToMeshId[orbId] = {};
@@ -190,7 +190,6 @@ void handleOrbViews(OrbData& orbData){
 	}
 }
 
-
 int getMinOrbIndex(OrbUi& orbUi){
 	int minIndex = orbUi.orbs.at(0).index;
 	for (auto& orb : orbUi.orbs){
@@ -300,7 +299,6 @@ std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int actio
 	return orbSelections;
 }
 
-
 void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time){
 	for (auto &[id, orbUi] : orbData.orbUis){
 		if (orbUi.name == orbUiName){
@@ -321,7 +319,6 @@ void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int
 	}
 	modassert(false, std::string("setCameraToOrbView no orbUi: ") + orbUiName);
 }
-
 
 void removeCameraFromOrbView(objid cameraId){
   orbData.orbViewsCameraToOrb.erase(cameraId);
@@ -358,18 +355,37 @@ std::optional<int> getActiveOrbViewIndex(objid cameraId){
 	return orbData.orbViewsCameraToOrb.at(cameraId).targetIndex;
 }
 
-
 int numberOfOrbs(OrbView& orbView){
 	auto orbId = orbView.orbId;
 	auto& orbUi = orbData.orbUis.at(orbId);
 	return orbUi.orbs.size();
 }
 
-std::optional<OrbView*>  orbViewForCamera(objid cameraId){
+std::optional<OrbView*> orbViewForCamera(objid cameraId){
 	if (orbData.orbViewsCameraToOrb.find(cameraId) == orbData.orbViewsCameraToOrb.end()){
 		return std::nullopt;
 	}
 	return &orbData.orbViewsCameraToOrb.at(cameraId);
+}
+
+std::optional<Orb*> selectedOrbForCamera(objid cameraId){
+	auto orbView = orbViewForCamera(cameraId);
+	if (!orbView.has_value()){
+		return std::nullopt;
+	}
+	if (orbData.orbUis.find(orbView.value() -> orbId) == orbData.orbUis.end()){
+		return std::nullopt;
+	}
+	OrbUi& orbUi = orbData.orbUis.at(orbView.value() -> orbId);
+
+	auto targetIndex = orbView.value() -> targetIndex;
+	for (auto& orb : orbUi.orbs){
+		if (orb.index == targetIndex){
+			return &orb;
+		}
+	}
+
+	return std::nullopt;
 }
 
 std::string print(Orb& orb){

@@ -91,6 +91,7 @@ int getMinOrbIndex(OrbUi& orbUi);
 
 int numberOfOrbs(OrbView& orbView);
 std::optional<OrbView*> orbViewForCamera(objid cameraId);
+std::optional<Orb*> selectedOrbForCamera(objid cameraId);
 
 std::string print(Orb& orb);
 
