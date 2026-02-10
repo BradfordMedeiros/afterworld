@@ -44,6 +44,7 @@ std::vector<CrystalPickup> loadCrystals(){
         .hasCrystal = hasCrystal(data, crystal),
         .crystal = Crystal {
           .label = crystal,
+          .level = item.levelShortname,
         },
       });
     }
@@ -62,17 +63,38 @@ void saveCrystals(){
   persistSaveMap("crystals", crystalValues);
 }
 
-int numberOfCrystals(){
+bool isCrystalForLevel(CrystalPickup& crystal, std::optional<std::vector<std::string>> levels){
+  if (!levels.has_value()){
+    return true;
+  }
+  for (auto& level : levels.value()){
+    if (level == crystal.crystal.level){
+      return true;
+    }
+  }
+  return true;
+}
+int numberOfCrystals(std::optional<std::vector<std::string>> levels){
   int totalCount = 0;
   for (auto& crystal : crystals){
+    if (!isCrystalForLevel(crystal, levels)){
+      continue;
+    }
     if (crystal.hasCrystal){
       totalCount++;
     }
   }
   return totalCount;
 }
-int totalCrystals(){
-  return crystals.size();
+int totalCrystals(std::optional<std::vector<std::string>> levels){
+  int count = 0;
+  for (auto& crystal : crystals){
+    if (!isCrystalForLevel(crystal, levels)){
+      continue;
+    }
+    count++;
+  }
+  return count;
 }
 
 bool hasCrystal(std::string& name){
@@ -196,17 +218,28 @@ void saveData(){
 
 //////////////// ball mode ////////////////////
 
-ProgressInfo getProgressInfo(std::string currentLevel){
-  return ProgressInfo {
+ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string> level, std::vector<std::string> worldLevels){
+  std::cout << "getProgressInfo: " << currentWorld << ", " << print(level) << ", " << print(worldLevels) << std::endl;
+  ProgressInfo progressInfo {
     .inOverworld = true,
-    .currentWorld = currentLevel,
+    .worldProgressInfo = WorldProgressInfo{
+      .currentWorld = currentWorld,
+      .gemCount = numberOfCrystals(worldLevels),
+      .totalGemCount = totalCrystals(worldLevels),
+    },
     .completedLevels = completedLevels(),
     .totalLevels = totalLevels(),
-    .gemCount = numberOfCrystals(),
-    .totalGemCount = totalCrystals(),
-    .level = LevelProgressInfo {
+    .gemCount = numberOfCrystals(std::nullopt),
+    .totalGemCount = totalCrystals(std::nullopt),
+    .level = std::nullopt,
+  };
+  if (level.has_value()){
+    progressInfo.level = LevelProgressInfo {
+      .gemCount = numberOfCrystals(std::vector<std::string>({ level.value() })),
+      .totalGemCount = totalCrystals(std::vector<std::string>({ level.value() })),
       .bestTime = 15.f,
       .parTime = 90.f,
-    },
-  };
+    };
+  }
+  return progressInfo;
 }

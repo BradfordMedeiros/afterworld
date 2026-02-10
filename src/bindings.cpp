@@ -2090,8 +2090,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       handleDirector(director);
       setUiGemCount(GemCount {
-        .currentCount = numberOfCrystals(),
-        .totalCount = totalCrystals(),
+        .currentCount = numberOfCrystals(std::nullopt),
+        .totalCount = totalCrystals(std::nullopt),
       });
     }
 

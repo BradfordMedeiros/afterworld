@@ -8,6 +8,7 @@
 
 struct Crystal {
   std::string label;
+  std::string level;
 };
 struct CrystalPickup {
   bool hasCrystal;
@@ -16,8 +17,8 @@ struct CrystalPickup {
 
 std::vector<CrystalPickup> loadCrystals();
 void saveCrystals();
-int numberOfCrystals();
-int totalCrystals();
+int numberOfCrystals(std::optional<std::vector<std::string>> levels);
+int totalCrystals(std::optional<std::vector<std::string>> levels);
 void pickupCrystal(std::string name);
 bool hasCrystal(std::string& name);
 
@@ -45,12 +46,21 @@ void saveData();
 // ball mode
 
 struct LevelProgressInfo {
+  int gemCount;
+  int totalGemCount;
   std::optional<float> bestTime;
   float parTime;
 };
+struct WorldProgressInfo {
+  std::string currentWorld;
+  int gemCount;
+  int totalGemCount;
+};
+
 struct ProgressInfo {
   bool inOverworld;
   std::string currentWorld;
+  WorldProgressInfo worldProgressInfo;
   int completedLevels;
   int totalLevels;
   int gemCount;
@@ -58,7 +68,7 @@ struct ProgressInfo {
   std::optional<LevelProgressInfo> level;
 };
 
-ProgressInfo getProgressInfo(std::string currentLevel);
+ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string> level, std::vector<std::string> worldLevels);
 
 
 #endif

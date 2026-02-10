@@ -585,6 +585,8 @@ GameTypeInfo getBallIntroMode(){
 	  	auto orbUiPtr = orbUiByName(levelOrbInfo.orbUi);
 	  	auto& orbUi = *orbUiPtr.value();
 
+	  	std::vector<std::string> allLevels;
+
 	  	for (int i = 0; i < orbUi.orbs.size(); i++){
 	  		auto& orb = orbUi.orbs.at(i);
 	  		auto isComplete = orb.getOrbProgress().complete;
@@ -596,7 +598,10 @@ GameTypeInfo getBallIntroMode(){
         if (selected){
         	gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
         }
+
+        allLevels.push_back(orb.level);
 	  	}
+
 
 	  	if (activeLayer != introMode -> activeLayer){
 				bool fromOverworld = introMode -> activeLayer == (orbLayers.size() - 1);
@@ -624,16 +629,16 @@ GameTypeInfo getBallIntroMode(){
 	  		std::vector<std::string> levelInfos;
 	  	};
 
-	  	auto progressInfo = getProgressInfo(currentOverworldName());
+	  	auto progressInfo = getProgressInfo(currentOverworldName(), isOverworld() ? std::optional<std::string>(std::nullopt) : "dev", allLevels);
 	  	DescInfo descInfo {
 	  		.mainInfos = {
 	  			std::string("overworld: ") + (progressInfo.inOverworld ? "true" : "false"),
 	  			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
 	  		},
 	  		.hubInfos = {
-	  			std::string("world: ") + progressInfo.currentWorld,
+	  			std::string("world: ") + progressInfo.worldProgressInfo.currentWorld,
 	  			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
-	  			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
+	  			std::string("total gems: ") + std::to_string(progressInfo.worldProgressInfo.gemCount) + " / " + std::to_string(progressInfo.worldProgressInfo.totalGemCount),
 	  		},
 	  		.levelInfos = {},
 	  	};
@@ -647,6 +652,7 @@ GameTypeInfo getBallIntroMode(){
 	  		descInfo.levelInfos = {
 	  			std::string("par time: ") + parTime + "s",
 	  			std::string("best time: ") + bestTime + "s",
+	  			std::string("total gems: ") + std::to_string(progressInfo.level.value().gemCount) + " / " + std::to_string(progressInfo.level.value().totalGemCount),
 	  		};
 	  	}
 
