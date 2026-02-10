@@ -618,18 +618,60 @@ GameTypeInfo getBallIntroMode(){
 				currentCutscene = playCutscene(createCutscene("testorb3", position, toOverworld || fromOverworld), std::nullopt);
 	  	}
 
-	  	gameapi -> drawText(std::string("world: ") + currentOverworldName(), -0.8f, 0.5f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	  	
-	  	std::string numberOfLevels = "number gems: "; 
+	  	struct DescInfo {
+	  		std::vector<std::string> mainInfos;
+	  		std::vector<std::string> hubInfos;
+	  		std::vector<std::string> levelInfos;
+	  	};
+
+	  	auto progressInfo = getProgressInfo(currentOverworldName());
+	  	DescInfo descInfo {
+	  		.mainInfos = {
+	  			std::string("overworld: ") + (progressInfo.inOverworld ? "true" : "false"),
+	  			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
+	  		},
+	  		.hubInfos = {
+	  			std::string("world: ") + progressInfo.currentWorld,
+	  			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
+	  			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
+	  		},
+	  		.levelInfos = {},
+	  	};
+
+	  	if (progressInfo.level.has_value()){
+  			std::string parTime = print(progressInfo.level.value().parTime, 2);
+  			std::string bestTime = "n/a";
+  			if(progressInfo.level.value().bestTime.has_value()){
+  				bestTime = print(progressInfo.level.value().bestTime.value(), 2);
+  			}
+	  		descInfo.levelInfos = {
+	  			std::string("par time: ") + parTime + "s",
+	  			std::string("best time: ") + bestTime + "s",
+	  		};
+	  	}
+
+ 			for (int i = 0; i < descInfo.hubInfos.size(); i++){
+	 	  		gameapi -> drawText(descInfo.hubInfos.at(i), -0.9f, 0.7f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  	}
+			for (int i = 0; i < descInfo.mainInfos.size(); i++){
+	 	  		gameapi -> drawText(descInfo.mainInfos.at(i), -0.9f, -0.6f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  	}
+	  	if (!isOverworld()){
+	  		for (int i = 0; i < descInfo.levelInfos.size(); i++){
+	 	  		gameapi -> drawText(descInfo.levelInfos.at(i), 0.6f, 0.7f - (i * 0.1f), 8, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  		}	  		
+	  	}
+
+	  	/*std::string numberOfLevels = "total gems: "; 
 	  	gameapi -> drawText(std::string(numberOfLevels) + std::to_string(12) + " / " + std::to_string(20), -0.8f, 0.4f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 	  	
-	  	std::string parTime = "par time: 120s";
-	  	gameapi -> drawText(parTime, -0.8f, 0.3f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  	if (isOverworld()){
 
-	  	std::string bestTime = "best time: 13.34s";
-	  	gameapi -> drawText(bestTime, -0.8f, 0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  	}else{
 
-	  	gameapi -> drawText(std::string("overworld: ") + (isOverworld() ? "true" : "false"), -0.8f, -0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  	}*/
+	  	
+
 
 
 	  	std::cout << "ballintro mode frame" << std::endl;

@@ -1812,8 +1812,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> dragSelect = std::nullopt;
     gameState -> uiData.uiContext = getUiContext(*gameState);
 
-    crystals = loadCrystals();
     levelProgresses = loadLevelProgress();
+    crystals = loadCrystals();
 
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){

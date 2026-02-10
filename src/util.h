@@ -6,6 +6,8 @@
 #include "../../ModEngine/src/common/symbols.h"
 #include "../../ModEngine/src/main_api.h"
 
+#include <sstream>
+#include <iomanip>
 #include <bits/stdc++.h>
 
 std::string strFromFirstSqlResult(std::vector<std::vector<std::string>>& sqlResult, int index);
@@ -164,5 +166,7 @@ struct ThirdPersonCameraUpdate {
 ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id);
 enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT };
 std::string print(BallPowerup powerup);
+
+std::string print(float number, int precision);
 
 #endif

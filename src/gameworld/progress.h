@@ -41,4 +41,24 @@ void resetProgress();
 
 void saveData();
 
+////////////////////
+// ball mode
+
+struct LevelProgressInfo {
+  std::optional<float> bestTime;
+  float parTime;
+};
+struct ProgressInfo {
+  bool inOverworld;
+  std::string currentWorld;
+  int completedLevels;
+  int totalLevels;
+  int gemCount;
+  int totalGemCount;
+  std::optional<LevelProgressInfo> level;
+};
+
+ProgressInfo getProgressInfo(std::string currentLevel);
+
+
 #endif

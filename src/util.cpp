@@ -556,4 +556,9 @@ std::string print(BallPowerup powerup){
   return "[unknown]";
 }
 
-
+std::string print(float number, int precision){
+  std::ostringstream oss;
+  oss << std::fixed << std::setprecision(precision) << number;
+  std::string result = oss.str();
+  return result;
+}

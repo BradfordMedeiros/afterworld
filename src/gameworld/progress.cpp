@@ -6,6 +6,14 @@ extern std::vector<LevelProgress> levelProgresses;
 
 const char* PROGRESS_SAVE_FILE = "../afterworld/data/save/save.json";
 
+struct PlaylistType {
+  std::string playlist;
+  std::string levelShortname;
+  std::vector<std::string> crystals;
+};
+
+std::vector<PlaylistType> playlist;
+
 bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
   if (values.find("crystals") == values.end()){
     return false;
@@ -29,22 +37,19 @@ std::vector<CrystalPickup> loadCrystals(){
     data = {};
   }
 
-  return {
-    CrystalPickup {
-      .hasCrystal = hasCrystal(data, "e1m1"),
-      .crystal = Crystal {
-        .label = "e1m1",
-      },
-    },
-    CrystalPickup {
-      .hasCrystal = hasCrystal(data, "e1m2"),
-      .crystal = Crystal {
-        .label = "e1m2",
-      },
-    },
-  };
+  std::vector<CrystalPickup> crystalPickups;
+  for (auto& item : playlist){
+    for (auto &crystal : item.crystals){
+      crystalPickups.push_back(CrystalPickup {
+        .hasCrystal = hasCrystal(data, crystal),
+        .crystal = Crystal {
+          .label = crystal,
+        },
+      });
+    }
+  }
+  return crystalPickups;
 }
-
 
 void saveCrystals(){
   std::unordered_map<std::string, JsonType> crystalValues;
@@ -78,6 +83,7 @@ bool hasCrystal(std::string& name){
   }
   return false;
 }
+
 void pickupCrystal(std::string name){
   bool pickedUp = false;
   for (auto& crystal : crystals){
@@ -94,7 +100,26 @@ void pickupCrystal(std::string name){
   }
 }
 
-//////////////////////////////////
+std::vector<PlaylistType> loadPlaylist(){
+  auto query = gameapi -> compileSqlQuery("select name, level, crystals from playlist", {});
+  bool validSql = false;
+  auto result = gameapi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+  std::vector<PlaylistType> levels = {};
+  for (auto &row : result){
+    auto playlistName = row.at(0);
+    auto levelShortname = row.at(1);
+    auto crystalsStr = row.at(2);
+    auto crystals = split(crystalsStr, ';');
+    levels.push_back(PlaylistType {
+      .playlist = playlistName,
+      .levelShortname = levelShortname,
+      .crystals = crystals,
+    });
+    std::cout << "playlist: adding: " << levelShortname << ", crystals: " << print(crystals) << std::endl;
+  }
+  return levels;
+}
 
 std::vector<LevelProgress> loadLevelProgress(){
   auto boolValues = getSaveBoolValues("levelprogress", "complete");
@@ -105,6 +130,7 @@ std::vector<LevelProgress> loadLevelProgress(){
       .complete = boolValue.value,
     });
   }
+  playlist = loadPlaylist(); // maybe this should be separate
   return progress;
 }
 
@@ -128,7 +154,7 @@ int completedLevels(){
   return count;
 }
 int totalLevels(){
-  return levelProgresses.size();
+  return playlist.size();
 }
 void markLevelComplete(std::string name, bool complete){
   modlog("progress markLevelComplete", name + " - " + (complete ? "true" : "false"));
@@ -166,4 +192,21 @@ void resetProgress(){
 void saveData(){
 	saveCrystals();
   saveLevelProgress();
+}
+
+//////////////// ball mode ////////////////////
+
+ProgressInfo getProgressInfo(std::string currentLevel){
+  return ProgressInfo {
+    .inOverworld = true,
+    .currentWorld = currentLevel,
+    .completedLevels = completedLevels(),
+    .totalLevels = totalLevels(),
+    .gemCount = numberOfCrystals(),
+    .totalGemCount = totalCrystals(),
+    .level = LevelProgressInfo {
+      .bestTime = 15.f,
+      .parTime = 90.f,
+    },
+  };
 }
