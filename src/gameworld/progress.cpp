@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern std::vector<CrystalPickup> crystals;   // static-state extern
 extern std::vector<LevelProgress> levelProgresses;
+// i should just combine crystals into level progress
 
 const char* PROGRESS_SAVE_FILE = "../afterworld/data/save/save.json";
 
@@ -10,6 +11,7 @@ struct PlaylistType {
   std::string playlist;
   std::string levelShortname;
   std::vector<std::string> crystals;
+  std::optional<float> parTime;
 };
 
 std::vector<PlaylistType> playlist;
@@ -123,7 +125,7 @@ void pickupCrystal(std::string name){
 }
 
 std::vector<PlaylistType> loadPlaylist(){
-  auto query = gameapi -> compileSqlQuery("select name, level, crystals from playlist", {});
+  auto query = gameapi -> compileSqlQuery("select name, level, crystals, par from playlist", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -133,10 +135,13 @@ std::vector<PlaylistType> loadPlaylist(){
     auto levelShortname = row.at(1);
     auto crystalsStr = row.at(2);
     auto crystals = split(crystalsStr, ';');
+    auto parTimeStr = row.at(3);
+    auto parTime = parTimeStr == "" ? std::optional<float>(std::nullopt) : std::atof(parTimeStr.c_str());
     levels.push_back(PlaylistType {
       .playlist = playlistName,
       .levelShortname = levelShortname,
       .crystals = crystals,
+      .parTime = parTime,
     });
     std::cout << "playlist: adding: " << levelShortname << ", crystals: " << print(crystals) << std::endl;
   }
@@ -145,13 +150,37 @@ std::vector<PlaylistType> loadPlaylist(){
 
 std::vector<LevelProgress> loadLevelProgress(){
   auto boolValues = getSaveBoolValues("levelprogress", "complete");
-  std::vector<LevelProgress> progress;
+  auto floatValues = getSaveFloatValues("levelprogress", "bestTime");
+
+
+  std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
   for (auto &boolValue : boolValues){
-    progress.push_back(LevelProgress {
+    levelToLevelProgress[boolValue.field] = LevelProgress {
       .level = boolValue.field,
       .complete = boolValue.value,
-    });
+      .bestTime = std::nullopt,
+    };
   }
+
+  for (auto &floatValue : floatValues){
+    if (levelToLevelProgress.find(floatValue.field) == levelToLevelProgress.end()){
+      levelToLevelProgress[floatValue.field] = LevelProgress {
+        .level = floatValue.field,
+        .complete = false,
+        .bestTime = floatValue.value,
+      };
+    }else{
+      levelToLevelProgress.at(floatValue.field).bestTime = floatValue.value; 
+    }
+  }
+
+
+  std::vector<LevelProgress> progress;
+  for (auto& [_, levelProgress] : levelToLevelProgress){
+    progress.push_back(levelProgress);
+  }
+
+
   playlist = loadPlaylist(); // maybe this should be separate
   return progress;
 }
@@ -159,11 +188,16 @@ std::vector<LevelProgress> loadLevelProgress(){
 void saveLevelProgress(){
   std::unordered_map<std::string, JsonType> progressValues;
   for (auto& levelProgress : levelProgresses){
-    std::string key = levelProgress.level + std::string("|") + std::string("complete");
     if (levelProgress.complete){
-      progressValues[key] = true;
+      std::string levelCompleteKey = levelProgress.level + std::string("|") + std::string("complete");
+      progressValues[levelCompleteKey] = true;
+    }
+    if (levelProgress.bestTime.has_value()){
+      std::string bestTimeKey = levelProgress.level + std::string("|") + std::string("bestTime");
+      progressValues[bestTimeKey] = levelProgress.bestTime.value();;
     }
   }
+
   persistSaveMap("levelprogress", progressValues);
 }
 int completedLevels(){
@@ -178,19 +212,36 @@ int completedLevels(){
 int totalLevels(){
   return playlist.size();
 }
-void markLevelComplete(std::string name, bool complete){
+
+std::optional<LevelProgress*> getLevelProgress(std::string level){
+  for (auto& levelProgress : levelProgresses){
+    if (levelProgress.level == level){
+      return &levelProgress;
+    }
+  }
+  return std::nullopt;
+}
+
+void markLevelComplete(std::string name, bool complete, std::optional<float> time){
   modlog("progress markLevelComplete", name + " - " + (complete ? "true" : "false"));
   bool foundLevel = false;
   for (auto& levelProgress : levelProgresses){
     if (levelProgress.level == name){
       foundLevel = true;
       levelProgress.complete = complete;
+      if (time.has_value()){
+        levelProgress.bestTime = time;
+      }
+      if (!complete){
+        levelProgress.bestTime = std::nullopt;
+      }
     }
   }
   if (!foundLevel){
     levelProgresses.push_back(LevelProgress {
       .level = name,
       .complete = complete,
+      .bestTime = time,
     });    
   }
   saveLevelProgress();
@@ -216,6 +267,23 @@ void saveData(){
   saveLevelProgress();
 }
 
+std::optional<float> bestTime(std::string& level){
+  auto levelProgress = getLevelProgress(level);
+  if (!levelProgress.has_value()){
+    return std::nullopt;
+  }
+  return levelProgress.value() -> bestTime;
+}
+
+float parTime(std::string& level){
+  for (auto& playlistLevel : playlist){
+    if (playlistLevel.levelShortname == level){
+      return playlistLevel.parTime.has_value() ? playlistLevel.parTime.value() : 0.f;
+    }
+  }
+  return 0.f;
+}
+
 //////////////// ball mode ////////////////////
 
 ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string> level, std::vector<std::string> worldLevels){
@@ -237,8 +305,8 @@ ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string
     progressInfo.level = LevelProgressInfo {
       .gemCount = numberOfCrystals(std::vector<std::string>({ level.value() })),
       .totalGemCount = totalCrystals(std::vector<std::string>({ level.value() })),
-      .bestTime = 15.f,
-      .parTime = 90.f,
+      .bestTime = bestTime(level.value()),
+      .parTime = parTime(level.value()),
     };
   }
   return progressInfo;

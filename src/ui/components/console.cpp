@@ -208,7 +208,7 @@ std::vector<CommandDispatch> commands {
       }
       auto levelName = values.at(1);
       bool levelComplete = values.at(2) == "true";
-      consoleInterface.markLevelComplete(levelName, levelComplete);
+      consoleInterface.markLevelComplete(levelName, levelComplete, std::nullopt);
       return std::nullopt;    
     },
   },

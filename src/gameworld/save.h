@@ -17,4 +17,11 @@ struct BoolValueResult {
 };
 std::vector<BoolValueResult> getSaveBoolValues(std::string scope, std::string key);
 
+
+struct FloatValueResult {
+  std::string field;
+  float value;
+};
+std::vector<FloatValueResult> getSaveFloatValues(std::string scope, std::string key);
+
 #endif 

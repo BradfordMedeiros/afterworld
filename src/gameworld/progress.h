@@ -28,12 +28,13 @@ bool hasCrystal(std::string& name);
 struct LevelProgress {
   std::string level;
   bool complete;
+  std::optional<float> bestTime;
 };
 std::vector<LevelProgress> loadLevelProgress();
 void saveLevelProgress();
 int completedLevels();
 int totalLevels();
-void markLevelComplete(std::string name, bool complete);
+void markLevelComplete(std::string name, bool complete, std::optional<float> time);
 bool isLevelComplete(std::string name);
 
 void resetProgress();

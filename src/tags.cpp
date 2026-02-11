@@ -897,7 +897,7 @@ std::vector<TagUpdater> tagupdates = {
   	.onRemove = [](Tags& tags, int32_t id) -> void {
  			auto levelComplete = getSingleAttr(id, "markcomplete");
  			if (levelComplete.has_value()){
- 				markLevelComplete(levelComplete.value(), true);
+ 				markLevelComplete(levelComplete.value(), true, std::nullopt);
  			}
  			skippable.erase(id);
   	},

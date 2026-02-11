@@ -68,7 +68,7 @@ void setBallLevelComplete(){
 	inBallMode = false;
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
 	changeGameType(gametypeSystem, NULL, NULL);
-	markLevelComplete(activeLevel.value(), true);
+	markLevelComplete(activeLevel.value(), true, 45.f);
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 

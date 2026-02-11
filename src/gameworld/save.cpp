@@ -29,7 +29,6 @@ void persistSaveMap(std::string scope, std::unordered_map<std::string, JsonType>
 
 
 
-
 template <typename T>
 T getSaveValue(std::string scope, std::string key, T defaultValue){
   bool success = false;
@@ -98,6 +97,21 @@ std::vector<BoolValueResult> getSaveBoolValues(std::string scope, std::string ke
   modassert(values.size() == names.size(), "getSaveBoolValues mismatch sizes, programming error");
   for (int i = 0; i < values.size(); i++){
     results.push_back(BoolValueResult {
+      .field = names.at(i),
+      .value = values.at(i),
+    });
+  }
+  return results;
+}
+
+std::vector<FloatValueResult> getSaveFloatValues(std::string scope, std::string key){
+  std::vector<float> values;
+  std::vector<std::string> names;
+  getSaveValue(scope, key, values, names);
+  std::vector<FloatValueResult> results;
+  modassert(values.size() == names.size(), "getSaveFloatValues mismatch sizes, programming error");
+  for (int i = 0; i < values.size(); i++){
+    results.push_back(FloatValueResult {
       .field = names.at(i),
       .value = values.at(i),
     });
