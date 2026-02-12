@@ -69,6 +69,7 @@ void setBallLevelComplete(){
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
 	changeGameType(gametypeSystem, NULL, NULL);
 	markLevelComplete(activeLevel.value(), true, 45.f);
+
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
@@ -667,18 +668,6 @@ GameTypeInfo getBallIntroMode(){
 	 	  		gameapi -> drawText(descInfo.levelInfos.at(i), 0.6f, 0.7f - (i * 0.1f), 8, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 	  		}	  		
 	  	}
-
-	  	/*std::string numberOfLevels = "total gems: "; 
-	  	gameapi -> drawText(std::string(numberOfLevels) + std::to_string(12) + " / " + std::to_string(20), -0.8f, 0.4f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	  	
-	  	if (isOverworld()){
-
-	  	}else{
-
-	  	}*/
-	  	
-
-
 
 	  	std::cout << "ballintro mode frame" << std::endl;
 	  },

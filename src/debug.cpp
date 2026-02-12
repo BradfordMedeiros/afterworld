@@ -428,8 +428,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	auto activeCamera = gameapi -> getCameraTransform(getDefaultPlayerIndex());
   	visualizeScale(activeCamera.position, activeCamera.rotation, visualizationDistance);
 
-  	saveCrystals();
-
   	/*std::unordered_map<std::string, std::unordered_map<std::string, std::string>> allValues;
 
   	allValues["crystals"] = {

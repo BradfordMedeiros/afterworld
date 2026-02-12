@@ -118,3 +118,18 @@ std::vector<FloatValueResult> getSaveFloatValues(std::string scope, std::string 
   }
   return results;
 }
+
+std::vector<VecStrResult> getSaveVecStrValues(std::string scope, std::string key){
+  std::vector<std::vector<std::string>> values;
+  std::vector<std::string> names;
+  getSaveValue(scope, key, values, names);
+  std::vector<VecStrResult> results;
+  modassert(values.size() == names.size(), "getSaveVecStrValues mismatch sizes, programming error");
+  for (int i = 0; i < values.size(); i++){
+    results.push_back(VecStrResult {
+      .field = names.at(i),
+      .value = values.at(i),
+    });
+  }
+  return results;
+}

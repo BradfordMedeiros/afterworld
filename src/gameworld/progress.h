@@ -6,17 +6,6 @@
 #include "../global.h"
 #include "./save.h"
 
-struct Crystal {
-  std::string label;
-  std::string level;
-};
-struct CrystalPickup {
-  bool hasCrystal;
-  Crystal crystal;
-};
-
-std::vector<CrystalPickup> loadCrystals();
-void saveCrystals();
 int numberOfCrystals(std::optional<std::vector<std::string>> levels);
 int totalCrystals(std::optional<std::vector<std::string>> levels);
 void pickupCrystal(std::string name);
@@ -29,6 +18,7 @@ struct LevelProgress {
   std::string level;
   bool complete;
   std::optional<float> bestTime;
+  std::set<std::string> crystals;
 };
 std::vector<LevelProgress> loadLevelProgress();
 void saveLevelProgress();

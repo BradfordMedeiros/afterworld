@@ -24,4 +24,11 @@ struct FloatValueResult {
 };
 std::vector<FloatValueResult> getSaveFloatValues(std::string scope, std::string key);
 
+struct VecStrResult {
+  std::string field;
+  std::vector<std::string> value;
+};
+std::vector<VecStrResult> getSaveVecStrValues(std::string scope, std::string key);
+
+
 #endif 

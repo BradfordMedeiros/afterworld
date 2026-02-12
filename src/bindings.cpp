@@ -12,7 +12,6 @@ std::unordered_map<objid, ArcadeInstance> arcadeInstances;
 std::unordered_map<objid, HitPoints> hitpoints = {}; 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::unordered_map<objid, Inventory> scopenameToInventory;
-std::vector<CrystalPickup> crystals; 
 std::vector<LevelProgress> levelProgresses;
 std::unordered_map<objid, glm::vec3> impulses;
 OrbData orbData;
@@ -1813,7 +1812,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     gameState -> uiData.uiContext = getUiContext(*gameState);
 
     levelProgresses = loadLevelProgress();
-    crystals = loadCrystals();
 
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){
