@@ -12,7 +12,7 @@ bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
 void doTeleport(int32_t obj, std::string destination);
 void deliverPowerup(objid vehicle, objid powerupId);
-void pickupCrystal(std::string name);
+void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 
 void handleInteract(objid gameObjId){
@@ -330,13 +330,15 @@ void handleGemCollision(int32_t obj1, int32_t obj2){
     auto objAttr = getAttrHandle(obj2);
     auto gem = getStrAttr(objAttr, "gem");
     if (gem.has_value()){
-      pickupCrystal(gem.value());
+      stageCrystal(gem.value());
+      gameapi -> removeObjectById(obj2);
     }
   }else if (isControlledVehicle(obj2)){
     auto objAttr = getAttrHandle(obj1);
     auto gem = getStrAttr(objAttr, "gem");
     if (gem.has_value()){
-      pickupCrystal(gem.value());
+      stageCrystal(gem.value());
+      gameapi -> removeObjectById(obj1);
     }
   } 
 }

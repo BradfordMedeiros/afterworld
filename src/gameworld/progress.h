@@ -8,8 +8,11 @@
 
 int numberOfCrystals(std::optional<std::vector<std::string>> levels);
 int totalCrystals(std::optional<std::vector<std::string>> levels);
+void stageCrystal(std::string name);
+void commitCrystals();
 void pickupCrystal(std::string name);
 bool hasCrystal(std::string& name);
+
 
 
 ////////////////////////////////////////////////////

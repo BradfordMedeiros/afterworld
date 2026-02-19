@@ -69,7 +69,8 @@ void setBallLevelComplete(){
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
 	changeGameType(gametypeSystem, NULL, NULL);
 	markLevelComplete(activeLevel.value(), true, 45.f);
-
+	commitCrystals();
+	
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 

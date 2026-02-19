@@ -13,7 +13,8 @@ struct PlaylistType {
   std::optional<float> parTime;
 };
 
-std::vector<PlaylistType> playlist;
+std::vector<PlaylistType> playlist;   // TODO static
+std::set<std::string> stagedCrystals; // TODO static
 
 std::optional<LevelProgress*> getLevelProgress(std::string level){
   for (auto& levelProgress : levelProgresses){
@@ -88,14 +89,23 @@ void pickupCrystal(std::string name){
   std::cout << "pickup crystal: " << name << std::endl;
   for (auto& level : playlist){
     auto levelProgress = getLevelProgress(level.levelShortname);
-    if (levelProgress.has_value()){
-      if (level.crystals.count(name) > 0){
-        levelProgress.value() -> crystals.insert(name);
-      }
+    modassert(levelProgress.has_value(), std::string("level progress no value: ") + level.levelShortname);
+    if (level.crystals.count(name) > 0){
+      levelProgress.value() -> crystals.insert(name);
     }
   }
 
   saveLevelProgress();
+}
+
+void stageCrystal(std::string name){
+  stagedCrystals.insert(name);
+}
+void commitCrystals(){
+  for (auto crystal : stagedCrystals){
+    pickupCrystal(crystal);
+  }
+  stagedCrystals = {};
 }
 
 std::vector<PlaylistType> loadPlaylist(){
@@ -129,11 +139,25 @@ std::vector<PlaylistType> loadPlaylist(){
 }
 
 std::vector<LevelProgress> loadLevelProgress(){
+  playlist = loadPlaylist(); // maybe this should be separate
+
+  std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
+  for (auto& playlistLevel : playlist){
+    if (levelToLevelProgress.find(playlistLevel.levelShortname) == levelToLevelProgress.end()){
+      levelToLevelProgress[playlistLevel.levelShortname] = LevelProgress {
+        .level = playlistLevel.levelShortname,
+        .complete = false,
+        .bestTime = std::nullopt,
+        .crystals = {},
+      };
+    }
+  }
+
+
   auto boolValues = getSaveBoolValues("levelprogress", "complete");
   auto floatValues = getSaveFloatValues("levelprogress", "bestTime");
   auto vecStrValues = getSaveVecStrValues("levelprogress", "crystals");
 
-  std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
   for (auto &boolValue : boolValues){
     levelToLevelProgress[boolValue.field] = LevelProgress {
       .level = boolValue.field,
@@ -178,7 +202,8 @@ std::vector<LevelProgress> loadLevelProgress(){
     progress.push_back(levelProgress);
   }
 
-  playlist = loadPlaylist(); // maybe this should be separate
+
+
   return progress;
 }
 
@@ -256,6 +281,22 @@ bool isLevelComplete(std::string name){
 
 void resetProgress(){
   levelProgresses = {};
+  std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
+  for (auto& playlistLevel : playlist){
+    if (levelToLevelProgress.find(playlistLevel.levelShortname) == levelToLevelProgress.end()){
+      levelToLevelProgress[playlistLevel.levelShortname] = LevelProgress {
+        .level = playlistLevel.levelShortname,
+        .complete = false,
+        .bestTime = std::nullopt,
+        .crystals = {},
+      };
+    }
+  }
+  for (auto& [_, levelProgress] : levelToLevelProgress){
+    levelProgresses.push_back(levelProgress);
+  }
+
+
   saveLevelProgress();
 }
 
