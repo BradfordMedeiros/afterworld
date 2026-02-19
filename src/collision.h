@@ -19,6 +19,7 @@ void handleTriggerZone(int32_t obj1, int32_t obj2);
 void handleLevelEndCollision(int32_t obj1, int32_t obj2);
 void handleTeleportCollision(int32_t obj1, int32_t obj2);
 void handlePowerupCollision(int32_t obj1, int32_t obj2);
+void handleGemCollision(int32_t obj1, int32_t obj2);
 
 void showTriggerVolumes(bool showTriggerVolumes);
 

@@ -2451,6 +2451,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleLevelEndCollision(obj1, obj2);
     handleTeleportCollision(obj1, obj2);
     handlePowerupCollision(obj1, obj2);
+    handleGemCollision(obj1, obj2);
+    
     handleTriggerZone(obj1, obj2);
 
     onCollisionEnterWater(water, obj1, obj2);
