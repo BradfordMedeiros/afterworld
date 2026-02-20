@@ -9,7 +9,7 @@ void doDialogMessage(std::string& value);
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 bool isControlledPlayer(int playerId);
 bool isControlledVehicle(int vehicleId);
-void setBallLevelComplete();
+void setBallLevelComplete(float time);
 void doTeleport(int32_t obj, std::string destination);
 void deliverPowerup(objid vehicle, objid powerupId);
 void stageCrystal(std::string name);

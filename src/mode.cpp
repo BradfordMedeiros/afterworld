@@ -70,7 +70,7 @@ void setBallLevelComplete(){
 	changeGameType(gametypeSystem, NULL, NULL);
 	markLevelComplete(activeLevel.value(), true, 45.f);
 	commitCrystals();
-	
+
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
@@ -373,6 +373,17 @@ LevelOrbNavInfo getLevelOrbInfo(objid cameraId){
 	};
 }
 
+std::optional<std::string> overworldLevel(){
+	if (!orbCameraId.has_value()){
+		return std::nullopt;
+	}
+	std::optional<Orb*> orb = selectedOrbForCamera(orbCameraId.value());
+	if (!orb.has_value()){
+		return std::nullopt;
+	}
+	return orb.value() -> level;
+}
+
 void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
 	if (!orbCameraId.has_value()){
 		return;
@@ -424,9 +435,11 @@ void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
 					OrbView& orbView = *selectedOrb.orbView;
 					setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
 				}
-				if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value()){
+
+				auto level= overworldLevel();
+				if (selectedOrb.selectKey && level.has_value()){
   		  	playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
-  		  	goToLevel(selectedOrb.currentOrb.value() -> level);
+  		  	goToLevel(level.value());
   		  	return;
   			}
 			}
@@ -631,7 +644,8 @@ GameTypeInfo getBallIntroMode(){
 	  		std::vector<std::string> levelInfos;
 	  	};
 
-	  	auto progressInfo = getProgressInfo(currentOverworldName(), isOverworld() ? std::optional<std::string>(std::nullopt) : "dev", allLevels);
+	  	std::optional<std::string> levelName = isOverworld() ? std::optional<std::string>(std::nullopt) : overworldLevel();
+	  	auto progressInfo = getProgressInfo(currentOverworldName(), levelName, allLevels);
 	  	DescInfo descInfo {
 	  		.mainInfos = {
 	  			std::string("overworld: ") + (progressInfo.inOverworld ? "true" : "false"),
@@ -652,6 +666,7 @@ GameTypeInfo getBallIntroMode(){
   				bestTime = print(progressInfo.level.value().bestTime.value(), 2);
   			}
 	  		descInfo.levelInfos = {
+	  			std::string("current level: ") + levelName.value(),
 	  			std::string("par time: ") + parTime + "s",
 	  			std::string("best time: ") + bestTime + "s",
 	  			std::string("total gems: ") + std::to_string(progressInfo.level.value().gemCount) + " / " + std::to_string(progressInfo.level.value().totalGemCount),
