@@ -14,7 +14,7 @@ struct BallLevelComplete {
 };
 
 struct BallComponentOptions {
-	std::optional<float> startTime;
+	std::optional<std::function<float()>> elapsedTime;
 	std::optional<BallLevelComplete> levelComplete;
 	std::optional<std::string> powerupTexture;
 };

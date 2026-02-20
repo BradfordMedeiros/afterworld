@@ -27,7 +27,7 @@ std::vector<LevelProgress> loadLevelProgress();
 void saveLevelProgress();
 int completedLevels();
 int totalLevels();
-void markLevelComplete(std::string name, bool complete, std::optional<float> time);
+void markLevelComplete(std::string name, float time);
 bool isLevelComplete(std::string name);
 
 void resetProgress();

@@ -12,10 +12,10 @@ Component ballComponent {
       drawCenteredTextReal(drawTools, "Level Complete", 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
       drawCenteredTextReal(drawTools, "Click to Continue", 0.f, -0.1f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
     }
-    if (ballOptions -> startTime.has_value()){
-      auto elapsedTime = gameapi -> timeSeconds(true) - ballOptions -> startTime.value();
-      drawCenteredTextReal(drawTools, std::to_string(elapsedTime), 0.f, 0.4f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
+    if (ballOptions -> elapsedTime.has_value()){
+      drawCenteredTextReal(drawTools, std::to_string(ballOptions -> elapsedTime.value()()), 0.f, 0.4f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
     }
+
   	//drawCenteredTextReal(drawTools, ballOptions -> text, 0.f, 0.f, 0.02f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt);
 
     if (ballOptions -> powerupTexture.has_value()){

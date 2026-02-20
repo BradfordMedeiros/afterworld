@@ -19,6 +19,8 @@ void startRotate(objid id);
 void stopRotate(objid id);
 
 bool inBallMode = false;
+std::optional<float> ballStartTime;
+std::optional<float> finalBallTime;
 
 void ballStartGameplay(EasyCutscene& cutscene){
   if (initialize(cutscene)){
@@ -67,8 +69,13 @@ void setBallLevelComplete(){
 	}
 	inBallMode = false;
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
+
+	auto timeElapsed = gameapi -> timeSeconds(false) - ballStartTime.value();
+
 	changeGameType(gametypeSystem, NULL, NULL);
-	markLevelComplete(activeLevel.value(), true, 45.f);
+	markLevelComplete(activeLevel.value(), timeElapsed);
+	finalBallTime = timeElapsed;
+
 	commitCrystals();
 
 	playCutscene(ballEndGameplay, std::nullopt);	
@@ -125,12 +132,22 @@ void changeUi(bool showBallUi){
 		}
 }
 
-void showTimeElapsed(std::optional<float> startTime){
-		if (!showBallOptions().has_value()){
+void showTimeElapsed(bool shouldShow){
+		if (!showBallOptions().has_value() || !ballStartTime.has_value()){
 			return;
 		}
 		auto ballOptions = showBallOptions().value();
-		ballOptions.startTime = startTime;
+		if (!shouldShow){
+			ballOptions.elapsedTime = std::nullopt;
+		}else{
+			ballOptions.elapsedTime = []() -> float {
+				if (finalBallTime.has_value()){
+					return finalBallTime.value();
+				}
+				return gameapi -> timeSeconds(false) - ballStartTime.value();
+			};
+		}
+		
 		setShowBallOptions(ballOptions);
 }
 
@@ -157,6 +174,8 @@ std::optional<BallPowerup> getPowerup(){
 
 void startBallMode(objid sceneId){
 	inBallMode = true;
+	ballStartTime = gameapi -> timeSeconds(false);
+
 	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
 	auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
 	createBallObj(sceneId, position);
@@ -167,6 +186,9 @@ void startBallMode(objid sceneId){
 
 void endBallMode(){
 	inBallMode = false;
+	ballStartTime = std::nullopt;
+	finalBallTime = std::nullopt;
+
 	setCanExitVehicle(true);
 	setShowBallOptions(std::nullopt);
 	changeGameType(gametypeSystem, NULL, NULL);
@@ -196,9 +218,9 @@ GameTypeInfo getBallMode(){
 	  	auto pos = gameapi -> getGameObjectPos(ballId, true, "[gamelogic] get ball position for start");
 	  	modeOptions -> initialBallPos = pos;
 	  	modeOptions -> ballId = ballId;
- 	   	showTimeElapsed(gameapi -> timeSeconds(true));
 
 			changeUi(true);
+ 	   	showTimeElapsed(true);
 
 	    return *modeOptions; 
 	  },

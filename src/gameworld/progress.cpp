@@ -244,25 +244,22 @@ int totalLevels(){
   return playlist.size();
 }
 
-void markLevelComplete(std::string name, bool complete, std::optional<float> time){
-  modlog("progress markLevelComplete", name + " - " + (complete ? "true" : "false"));
+void markLevelComplete(std::string name, float time){
+  modlog("progress markLevelComplete", name + " - " + std::to_string(time));
   bool foundLevel = false;
   for (auto& levelProgress : levelProgresses){
     if (levelProgress.level == name){
       foundLevel = true;
-      levelProgress.complete = complete;
-      if (time.has_value()){
+      levelProgress.complete = true;
+      if (!levelProgress.bestTime.has_value() || levelProgress.bestTime.value() > time){
         levelProgress.bestTime = time;
-      }
-      if (!complete){
-        levelProgress.bestTime = std::nullopt;
       }
     }
   }
   if (!foundLevel){
     levelProgresses.push_back(LevelProgress {
       .level = name,
-      .complete = complete,
+      .complete = true,
       .bestTime = time,
     });    
   }
