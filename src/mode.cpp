@@ -86,7 +86,7 @@ void createBallObj(objid sceneId, glm::vec3 position){
   	.attr = {
   		{ "vehicle", "ball" },
 			{ "texture", "./res/textures/wood.jpg" },
-			{ "tint", glm::vec4(1.f, 1.f, 1.f, 0.1f) },
+			{ "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
 			{ "physics_restitution", 0.5f },
 			{ "mesh", "../gameresources/build/primitives/sphere.gltf" },
 			{ "physics_mass" , 10.f },
@@ -670,7 +670,7 @@ GameTypeInfo getBallIntroMode(){
 	  	auto progressInfo = getProgressInfo(currentOverworldName(), levelName, allLevels);
 	  	DescInfo descInfo {
 	  		.mainInfos = {
-	  			std::string("overworld: ") + (progressInfo.inOverworld ? "true" : "false"),
+	  			std::string("overworld: ") + (isOverworld() ? "true" : "false"),
 	  			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
 	  		},
 	  		.hubInfos = {

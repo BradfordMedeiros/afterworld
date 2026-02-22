@@ -325,7 +325,6 @@ float parTime(std::string& level){
 ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string> level, std::vector<std::string> worldLevels){
   std::cout << "getProgressInfo: " << currentWorld << ", " << print(level) << ", " << print(worldLevels) << std::endl;
   ProgressInfo progressInfo {
-    .inOverworld = true,
     .worldProgressInfo = WorldProgressInfo{
       .currentWorld = currentWorld,
       .gemCount = numberOfCrystals(worldLevels),

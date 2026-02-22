@@ -52,7 +52,6 @@ struct WorldProgressInfo {
 };
 
 struct ProgressInfo {
-  bool inOverworld;
   std::string currentWorld;
   WorldProgressInfo worldProgressInfo;
   int completedLevels;
