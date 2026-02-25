@@ -142,18 +142,30 @@ void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
     glm::vec3 oppositeNormal(normal.x * -1, normal.y * -1, normal.z * -1);
     auto attr = getAttrHandle(obj1);
     auto bounceAmount = getVec3Attr(attr, "bounce");
+    auto bounceType = getStrAttr(attr, "bouncetype");
     if (bounceAmount.has_value()){
-      auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), oppositeNormal) * bounceAmount.value();
-      applyImpulseAffectMovement(obj2, impulse);
+      if (bounceType.has_value() && bounceType.value() == "fixed"){
+        applyImpulseAffectMovement(obj2, bounceAmount.value());
+      }else{
+        auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), oppositeNormal) * bounceAmount.value();
+        std::cout << "bouncepad: " << print(impulse) << std::endl;
+        applyImpulseAffectMovement(obj2, impulse);
+      }
     }    
   }
 
   {
     auto attr = getAttrHandle(obj2);
     auto bounceAmount = getVec3Attr(attr, "bounce");
+    auto bounceType = getStrAttr(attr, "bouncetype");
     if (bounceAmount.has_value()){
-      auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * bounceAmount.value();
-      applyImpulseAffectMovement(obj1, impulse);
+      if (bounceType.has_value() && bounceType.value() == "fixed"){
+        applyImpulseAffectMovement(obj1, bounceAmount.value());
+      }else{
+        auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * bounceAmount.value();
+        std::cout << "bouncepad: " << print(impulse) << std::endl;
+        applyImpulseAffectMovement(obj1, impulse);
+      }
     }    
   }
 }

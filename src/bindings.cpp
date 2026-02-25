@@ -2441,6 +2441,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj1Exists = gameapi -> gameobjExists(obj1); // this check shouldn't be necessary, is bug
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
     modassert(gameobj1Exists && gameobj2Exists, "collision enter: objs do not exist");
+
+    auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * glm::vec3(0.f, 0.f, -10.f);
+    drawDebugRaycast(pos, pos + direction, -1);
+
+
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
