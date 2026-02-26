@@ -228,7 +228,6 @@ glm::vec3 getGameObjectVelocity(objid id){
 void setGameObjectVelocity(objid id, glm::vec3 velocity){
   gameapi -> setPhysicsVelocity(id, velocity);
 }
-
 void setGameObjectTint(objid id, glm::vec4 tint){
   gameapi -> setSingleGameObjectAttr(id, "tint", tint);
 }

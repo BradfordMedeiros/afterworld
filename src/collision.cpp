@@ -279,6 +279,35 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
   }
 }
 
+
+std::unordered_map<objid, glm::vec3> extraVelocity;
+
+glm::vec3 getSurfaceVelocityModifiers(objid id){
+  if (extraVelocity.find(id) != extraVelocity.end()){
+    return extraVelocity.at(id);
+  }
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+
+void addSurfaceModifier(int32_t objId, glm::vec3 amount){
+  extraVelocity[objId] = amount;
+}
+void removeSurfaceModifier(int32_t obj1, int32_t obj2){
+
+}
+void handleSurfaceCollision(int32_t obj1, int32_t obj2){
+  auto objAttr1 = getAttrHandle(obj1);
+  auto objAttr2 = getAttrHandle(obj2);
+  auto obj1ModSpeed = getVec3Attr(objAttr1, "modspeed");
+  auto obj2ModSpeed = getVec3Attr(objAttr2, "modspeed");
+  if (obj1ModSpeed.has_value() && !obj2ModSpeed.has_value()){
+    addSurfaceModifier(obj2, obj1ModSpeed.value());
+  }else if (!obj1ModSpeed.has_value() && obj2ModSpeed.has_value()){
+    addSurfaceModifier(obj1, obj2ModSpeed.value());
+  }
+}
+
+
 void handleLevelEndCollision(int32_t obj1, int32_t obj2){
   bool didCollideLevelEnd = false;
   if (isControlledVehicle(obj1)){

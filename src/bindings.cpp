@@ -2445,7 +2445,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * glm::vec3(0.f, 0.f, -10.f);
     drawDebugRaycast(pos, pos + direction, -1);
 
-
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
@@ -2459,6 +2458,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleGemCollision(obj1, obj2);
     
     handleTriggerZone(obj1, obj2);
+
+    handleSurfaceCollision(obj1, obj2);
 
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);

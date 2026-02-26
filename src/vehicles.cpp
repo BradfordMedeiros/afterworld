@@ -5,6 +5,7 @@ extern CustomApiBindings* gameapi;
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void disableEntity(objid id);
 void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
+glm::vec3 getSurfaceVelocityModifiers(objid id);
 
 Vehicles createVehicles(){
   return Vehicles{};
@@ -317,9 +318,13 @@ void onVehicleFrameBall(objid id, Vehicle& vehicle, ControlParams& controlParams
     direction.x = 1.f;
   }
 
+  float timeThisFrame = gameapi -> timeElapsed();
+  auto extraVelocity = getSurfaceVelocityModifiers(id) * timeThisFrame;
+  std::cout << "extra vel: " << print(extraVelocity) << std::endl;
+
   // should normalize the direction here
   auto amount = rotation * glm::vec3(magnitude * direction.x, magnitude * direction.y, magnitude * direction.z);
-  gameapi -> applyImpulse(id, amount);
+  gameapi -> applyImpulse(id, amount + extraVelocity);
 
   auto torqueAmount = rotation * glm::vec3(torqueMagnitude * direction.z, torqueMagnitude * direction.y, -1 * torqueMagnitude * direction.x);
   gameapi -> applyTorque(id, torqueAmount);
