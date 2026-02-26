@@ -2470,6 +2470,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modassert(gameobj1Exists && gameobj2Exists, "collision exit: objs do not exist");
     handleCollision(obj1, obj2, "switch-exit", "switch-exit-key", "exit");
     onCollisionExitWater(water, obj1, obj2);
+    removeSurfaceModifier(obj1, obj2);
   };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double rawXPos, double rawYPos, float rawXNdc, float rawYNdc) -> void { 
@@ -2511,6 +2512,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     modlog("objchange onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
     objectRemoved(idRemoved);
+    removeSurfaceModifier(idRemoved);
   };
 
   return binding;

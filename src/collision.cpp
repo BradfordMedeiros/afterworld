@@ -303,9 +303,6 @@ glm::vec3 getSurfaceVelocityModifiers(objid id){
       return hitpoint.normal * surface.velocity;
     };
   }
-
-
-
   return glm::vec3(0.f, 0.f, 0.f);
 }
 
@@ -316,8 +313,21 @@ void addSurfaceModifier(int32_t objId, glm::vec3 amount, int32_t surfaceId){
   };
 }
 void removeSurfaceModifier(int32_t obj1, int32_t obj2){
-
+  if (extraVelocity.find(obj1) != extraVelocity.end()){
+    if (extraVelocity.at(obj1).surfaceId == obj2){
+      extraVelocity.erase(obj1);
+    }
+  }
+  if (extraVelocity.find(obj2) != extraVelocity.end()){
+    if (extraVelocity.at(obj2).surfaceId == obj1){
+      extraVelocity.erase(obj2);
+    }
+  }
 }
+void removeSurfaceModifier(int32_t id){
+  extraVelocity.erase(id);
+}
+
 void handleSurfaceCollision(int32_t obj1, int32_t obj2){
   auto objAttr1 = getAttrHandle(obj1);
   auto objAttr2 = getAttrHandle(obj2);
