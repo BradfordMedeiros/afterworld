@@ -13,6 +13,8 @@ extern std::optional<std::string> activeLevel;
 extern std::unordered_map<objid, LinePoints> rails;
 extern std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 std::set<objid> managedRailMovementsBuffer; // because this can be added before the rail its referencing is available
+struct Laser { };
+std::unordered_map<objid, Laser> lasers;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
@@ -20,6 +22,7 @@ void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void setCanExitVehicle(bool canExit);
 void goToLevel(std::string levelShortName);
 void goBackMainMenu();
+glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 
 struct TagUpdater {
 	std::string attribute;
@@ -148,6 +151,23 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 }
 
 
+
+void addLaser(objid id){
+	lasers[id] = Laser{};
+}
+void removeLaser(objid id){
+	lasers.erase(id);
+}
+void onLaserFrame(){
+	for (auto& [id, laser] : lasers){
+  	auto fromPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - laser");
+ 		auto rotation = gameapi -> getGameObjectRotation(id, true, "[gamelogic] - tags - laser");
+ 		auto toPos =  2.f * (rotation * glm::vec3(0.f, 0.f, -1.f));
+
+ 		gameapi -> drawLine(fromPosition, fromPosition + toPos, false, -1, std::nullopt,  std::nullopt, std::nullopt);
+	}
+}
+
 struct GlassTexture {
 	objid id;
 	std::string name;
@@ -185,20 +205,6 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 
 	 gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTexture.id, true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
 	return true;
-}
-
-glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
-	float pitchRad = glm::radians(pitch);
-	float yawRad   = glm::radians(yaw);
-	float rollRad  = glm::radians(roll);
-
-	glm::quat qPitch = glm::angleAxis(pitchRad, glm::vec3(0, 0, -1));
-	glm::quat qYaw   = glm::angleAxis(yawRad,   glm::vec3(0, 1,  0));
-	glm::quat qRoll  = glm::angleAxis(rollRad,  glm::vec3(1, 0,  0));
-
-	glm::quat q = qYaw * qPitch * qRoll;
-	
-	return q;
 }
 
 std::vector<glm::vec3> parseDataVec3(std::string& value){
@@ -1062,12 +1068,22 @@ std::vector<TagUpdater> tagupdates = {
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
+	TagUpdater {
+		.attribute = "laser",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			addLaser(id);
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		removeLaser(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  		onLaserFrame();
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+	},
 
 };
 
-
-
- 
 
 
 void setMenuBackground(std::string background){
