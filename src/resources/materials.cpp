@@ -120,7 +120,6 @@ void loadParticleEmitters(objid rootSceneId){
     modlog("load particle emitters - loading", row.at(0));
   }
   modlog("load particle emitters", "finish");
-
 }
 std::optional<objid> getParticleEmitter(std::string& emitterName){
   for (auto &emitter : particleEmitters){

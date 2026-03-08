@@ -154,7 +154,25 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 
 void addLaser(objid id){
 	lasers[id] = Laser{};
+	auto sceneId = gameapi -> listSceneId(id);
+	GameobjAttributes emitterAttr { 
+  	.attr = {
+ 			{ "effekseer", "./res/particles/Laser02.efkefc" },
+ 			{ "state", "enabled" },
+  	} 
+  };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
+  auto laserParticle = gameapi -> makeObjectAttr(sceneId, std::string("+laser") + std::to_string(getUniqueObjId()), emitterAttr, submodelAttributesEmitter);
+  modassert(laserParticle.has_value(), "laserParticle was not created");
+  gameapi -> makeParent(laserParticle.value(), id);
+
+  // TODO HACK - this seems to be a bug where the emitter does not take the parent position
+	simpleOnFrame([laserParticle]() -> void {
+	  gameapi -> setGameObjectPosition(laserParticle.value(),glm::vec3(0.f, 0.1f, 0.f), false, Hint { .hint = "[gamelogic] - set laser pos" });
+	}, 0.f);
+
 }
+
 void removeLaser(objid id){
 	lasers.erase(id);
 }
