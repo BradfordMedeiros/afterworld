@@ -1,5 +1,7 @@
 #include "./tags.h"
 
+glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
+
 extern CustomApiBindings* gameapi;
 
 extern Tags tags;
@@ -155,23 +157,37 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 void addLaser(objid id){
 	lasers[id] = Laser{};
 	auto sceneId = gameapi -> listSceneId(id);
-	GameobjAttributes emitterAttr { 
-  	.attr = {
- 			{ "effekseer", "./res/particles/Laser02.efkefc" },
- 			{ "state", "enabled" },
-  	} 
-  };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
-  auto laserParticle = gameapi -> makeObjectAttr(sceneId, std::string("+laser") + std::to_string(getUniqueObjId()), emitterAttr, submodelAttributesEmitter);
-  modassert(laserParticle.has_value(), "laserParticle was not created");
-  gameapi -> makeParent(laserParticle.value(), id);
+	
 
-  // TODO HACK - this seems to be a bug where the emitter does not take the parent position
-	simpleOnFrame([laserParticle]() -> void {
-	  gameapi -> setGameObjectPosition(laserParticle.value(),glm::vec3(0.f, 0.1f, 0.f), false, Hint { .hint = "[gamelogic] - set laser pos" });
-	}, 0.f);
+	{
+		GameobjAttributes emitterAttr { 
+  		.attr = {
+ 				{ "effekseer", "./res/particles/Laser02.efkefc" },
+ 				{ "state", "enabled" },
+ 				{ "killplane", "true" },
+  		} 
+  	};
+  	std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
+  	auto laserParticle = gameapi -> makeObjectAttr(sceneId, std::string("+laser") + std::to_string(getUniqueObjId()), emitterAttr, submodelAttributesEmitter);
 
-}
+  	modassert(laserParticle.has_value(), "laserParticle was not created");
+  	gameapi -> makeParent(laserParticle.value(), id);
+
+  	// TODO HACK - this seems to be a bug where the emitter does not take the parent position
+		simpleOnFrame([laserParticle]() -> void {
+		  gameapi -> setGameObjectPosition(laserParticle.value(), glm::vec3(0.f, 0.1f, 0.f), false, Hint { .hint = "[gamelogic] - set laser pos" });
+		}, 0.f);
+
+		PhysicsCreateRect shape {
+  		.width = 0.2f,
+  		.height = 2.5f, 
+  		.depth = 0.2f,
+		};
+		auto offset = glm::vec3(0.f, shape.height * 5.f* 0.5f, 0.f);
+		gameapi -> createPhysicsBody(laserParticle.value(), shape, offset);
+	}
+
+ }
 
 void removeLaser(objid id){
 	lasers.erase(id);
@@ -1089,6 +1105,9 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "laser",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+
+			auto attrHandle = getAttrHandle(id);
+
 			addLaser(id);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {

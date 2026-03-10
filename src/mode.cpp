@@ -14,6 +14,7 @@ void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
+void createExplosion(glm::vec3 position, float outerRadius, float damage);
 
 void startRotate(objid id);
 void stopRotate(objid id);
@@ -195,6 +196,10 @@ void endBallMode(){
 	setHudEnabled(true);
 }
 
+void explodeBall(){
+	gameapi -> sendNotifyMessage("ball", std::string("explodeball"));
+}
+
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
@@ -218,6 +223,7 @@ GameTypeInfo getBallMode(){
 	  	auto pos = gameapi -> getGameObjectPos(ballId, true, "[gamelogic] get ball position for start");
 	  	modeOptions -> initialBallPos = pos;
 	  	modeOptions -> ballId = ballId;
+	  	modeOptions -> didLose = false;
 
 			changeUi(true);
  	   	showTimeElapsed(true);
@@ -235,6 +241,12 @@ GameTypeInfo getBallMode(){
 	  	if (*message == "reset"){
 	  		modassert(ballMode -> initialBallPos.has_value(), "no initial ball position");
 	  		gameapi -> setGameObjectPosition(ballMode -> ballId.value(), ballMode -> initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
+	  		ballMode -> didLose = false;
+	  	}
+	  	if (*message == "explodeball"){
+	  		ballMode -> didLose = true;
+	  		auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
+	  		createExplosion(position, 5.f, 0.f);
 	  	}
 	   	return false;
 	  },
@@ -246,7 +258,12 @@ GameTypeInfo getBallMode(){
 	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballMode, "ballMode options");
 	  	if(isReloadKey(key) && action == 0){
-	  		gameapi -> sendNotifyMessage("ball-game", std::string("reset"));
+	  		gameapi -> sendNotifyMessage("ball", std::string("reset"));
+	  	}
+	  	if (isToggleThirdPersonKey(key) && action == 0){
+	  		ballMode -> didLose = true;
+	  		auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
+	  		createExplosion(position, 5.f, 0.f);
 	  	}
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },
@@ -280,6 +297,10 @@ GameTypeInfo getBallMode(){
 	  	}
 
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png");
+
+  		if (ballMode -> didLose){
+	  		gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  		}
 	  },
 	};
 	return ballMode;

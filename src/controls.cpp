@@ -224,11 +224,11 @@ void testPhysicsObjects(){
 			.depth = boundInfo2.zMax - boundInfo2.zMin,
 		};
 		{
-			gameapi -> createPhysicsBody(box1.value(), rectShape1);
+			gameapi -> createPhysicsBody(box1.value(), rectShape1, std::nullopt);
 			gameapi -> setPhysicsOptions(box1.value(), physicsOptions1);
 		}
 		{
-			gameapi -> createPhysicsBody(box2.value(), rectShape2);
+			gameapi -> createPhysicsBody(box2.value(), rectShape2, std::nullopt);
 			gameapi -> setPhysicsOptions(box2.value(), physicsOptions2);
 		}
 	}else{

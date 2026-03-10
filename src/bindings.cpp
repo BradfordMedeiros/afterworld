@@ -2447,6 +2447,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleDamageCollision(obj1, obj2);
+    handleKillplaneCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
     handleBouncepadCollision(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);

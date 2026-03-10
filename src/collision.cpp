@@ -14,6 +14,7 @@ void doTeleport(int32_t obj, std::string destination);
 void deliverPowerup(objid vehicle, objid powerupId);
 void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
+void explodeBall();
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -74,7 +75,6 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 }
 
 void handleDamageCollision(objid obj1, objid obj2){
-  
   {
     auto objAttr1 = getAttrHandle(obj1);
     auto damageAmount = getFloatAttr(objAttr1, "touchdamage");
@@ -93,6 +93,33 @@ void handleDamageCollision(objid obj1, objid obj2){
       modlog("damage collision 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
       doDamageMessage(obj1, damageAmount2.value());
       gameapi -> removeByGroupId(obj2);
+    }
+  }
+}
+
+void doKillplane(objid id){
+  if (isControlledVehicle(id)){
+    explodeBall();
+  }
+}
+
+void handleKillplaneCollision(objid obj1, objid obj2){
+  {
+    auto objAttr1 = getAttrHandle(obj1);
+    auto killplane = getStrAttr(objAttr1, "killplane");
+    if (killplane.has_value()){
+      modlog("killplane 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doKillplane(obj2);
+    }
+  }
+   
+  {
+
+    auto objAttr2 = getAttrHandle(obj2);
+    auto killplane = getStrAttr(objAttr2, "killplane");
+    if (killplane.has_value()){
+      modlog("killplane 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doKillplane(obj1);
     }
   }
 }

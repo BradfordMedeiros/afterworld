@@ -716,7 +716,7 @@ void createHitbox(objid playerModel){
 			auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
 			std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
 
-			gameapi -> createPhysicsBody(headValue.value(), value.shape);
+			gameapi -> createPhysicsBody(headValue.value(), value.shape, std::nullopt);
 			rigidBodyOpts physicsOptions {
 	  	  .linear = glm::vec3(1.f, 1.f, 1.f),
 	  	  .angular = glm::vec3(0.f, 0.f, 0.f),
