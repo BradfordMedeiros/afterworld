@@ -224,6 +224,8 @@ GameTypeInfo getBallMode(){
 	  	modeOptions -> initialBallPos = pos;
 	  	modeOptions -> ballId = ballId;
 	  	modeOptions -> didLose = false;
+	  	modeOptions -> shouldReset = false;
+	  	modeOptions -> didReset = false;
 
 			changeUi(true);
  	   	showTimeElapsed(true);
@@ -240,13 +242,15 @@ GameTypeInfo getBallMode(){
 
 	  	if (*message == "reset"){
 	  		modassert(ballMode -> initialBallPos.has_value(), "no initial ball position");
-	  		gameapi -> setGameObjectPosition(ballMode -> ballId.value(), ballMode -> initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
-	  		ballMode -> didLose = false;
+	  		ballMode -> shouldReset = true;
 	  	}
+
 	  	if (*message == "explodeball"){
 	  		ballMode -> didLose = true;
 	  		auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
 	  		createExplosion(position, 5.f, 0.f);
+	  		setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
+	  		setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
 	  	}
 	   	return false;
 	  },
@@ -272,6 +276,18 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballMode, "ballMode options");
 	  	std::cout << "ball onframe" << std::endl;
 	  	if (ballMode -> ballId.has_value()){
+	  		if (ballMode -> didReset){ 
+	  			ballMode -> didReset = false;
+		  		setGameObjectMeshEnabled(ballMode -> ballId.value(), true);
+		  		setGameObjectPhysicsEnable(ballMode -> ballId.value(), true);
+	  		}
+	  		if (ballMode -> shouldReset){
+		  		gameapi -> setGameObjectPosition(ballMode -> ballId.value(), ballMode -> initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
+		  		ballMode -> didLose = false;
+					ballMode -> shouldReset = false;
+					ballMode -> didReset = true;
+	  		}
+
 	  		auto powerup = getPowerup();
 	  		if (powerup.has_value()){
 		  		std::cout << "powerup: " << print(powerup.value()) << std::endl;

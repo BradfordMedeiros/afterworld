@@ -157,9 +157,14 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 void addLaser(objid id){
 	lasers[id] = Laser{};
 	auto sceneId = gameapi -> listSceneId(id);
-	
-
 	{
+
+		// the laser square is 5x5 (1x1 but then scale is 5 natively)
+		float objectScale = gameapi -> getGameObjectScale(id, true).y;
+
+		float length = 20.f; // laser scale is supposed to be 1x1 
+		float width = 1.f;
+
 		GameobjAttributes emitterAttr { 
   		.attr = {
  				{ "effekseer", "./res/particles/Laser02.efkefc" },
@@ -174,16 +179,17 @@ void addLaser(objid id){
   	gameapi -> makeParent(laserParticle.value(), id);
 
   	// TODO HACK - this seems to be a bug where the emitter does not take the parent position
-		simpleOnFrame([laserParticle]() -> void {
-		  gameapi -> setGameObjectPosition(laserParticle.value(), glm::vec3(0.f, 0.1f, 0.f), false, Hint { .hint = "[gamelogic] - set laser pos" });
+		simpleOnFrame([laserParticle, width, length, objectScale]() -> void {
+		  gameapi -> setGameObjectScale(laserParticle.value(), glm::vec3(width, length, width), true);
+		  gameapi -> setGameObjectPosition(laserParticle.value(), glm::vec3(0.f, (1.f / objectScale) * length * 0.5f, 0.f), false, Hint { .hint = "[gamelogic] - set laser pos" });
 		}, 0.f);
 
 		PhysicsCreateRect shape {
-  		.width = 0.2f,
-  		.height = 2.5f, 
-  		.depth = 0.2f,
+  		.width = 1.f,
+  		.height = 1.f, 
+  		.depth = 1.f,
 		};
-		auto offset = glm::vec3(0.f, shape.height * 5.f* 0.5f, 0.f);
+		auto offset = glm::vec3(0.f, 0.f, 0.f);
 		gameapi -> createPhysicsBody(laserParticle.value(), shape, offset);
 	}
 

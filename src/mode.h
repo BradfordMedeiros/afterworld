@@ -13,6 +13,8 @@ struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    std::optional<objid> ballId;
    bool didLose;
+   bool shouldReset;
+   bool didReset;
 };
 
 void startBallMode(objid sceneId);
