@@ -154,7 +154,7 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 
 
 
-void addLaser(objid id){
+void addLaser(objid id, float length){
 	lasers[id] = Laser{};
 	auto sceneId = gameapi -> listSceneId(id);
 	{
@@ -162,7 +162,6 @@ void addLaser(objid id){
 		// the laser square is 5x5 (1x1 but then scale is 5 natively)
 		float objectScale = gameapi -> getGameObjectScale(id, true).y;
 
-		float length = 20.f; // laser scale is supposed to be 1x1 
 		float width = 1.f;
 
 		GameobjAttributes emitterAttr { 
@@ -1111,10 +1110,9 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "laser",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-
 			auto attrHandle = getAttrHandle(id);
-
-			addLaser(id);
+			auto laserLength = getFloatAttr(attrHandle, "laserlength");
+			addLaser(id, laserLength.has_value() ? laserLength.value() : 5.f);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		removeLaser(id);
