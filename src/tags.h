@@ -74,6 +74,12 @@ struct Powerup {
 	bool disabledVisually;
 };
 
+struct TriggerColor {
+	std::string trigger;
+	std::optional<glm::vec4> activeColor;
+	std::optional<glm::vec4> unactiveColor;
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
@@ -87,6 +93,7 @@ struct Tags {
 	std::unordered_map<objid, ManagedRecording> recordings;
 	std::unordered_map<objid, Autodoor> autodoors;
 	std::unordered_map<objid, Powerup> powerups;
+	std::unordered_map<objid, TriggerColor> triggerColors;
 	Switches switches;
 
 	UiData* uiData;

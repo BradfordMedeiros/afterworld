@@ -14,6 +14,7 @@ void doTeleport(int32_t obj, std::string destination);
 void deliverPowerup(objid vehicle, objid powerupId);
 void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
+void triggerColor(std::string trigger);
 void explodeBall();
 
 void handleInteract(objid gameObjId){
@@ -287,8 +288,10 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
       if (triggerData.has_value()){
         auto triggerValue  = static_cast<int>(triggerData.value());
         triggerMovement(triggerZone.value(), triggerValue);
+        triggerColor(triggerZone.value());
       }else{
         triggerMovement(triggerZone.value(), std::nullopt);
+        triggerColor(triggerZone.value());
       }
     }
   }else if (isControlledVehicle(obj2)){
@@ -299,8 +302,10 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
       if (triggerData.has_value()){
         auto triggerValue  = static_cast<int>(triggerData.value());
         triggerMovement(triggerZone.value(), triggerValue);
+        triggerColor(triggerZone.value());
       }else{
         triggerMovement(triggerZone.value(), std::nullopt);
+        triggerColor(triggerZone.value());
       }
     }
   }

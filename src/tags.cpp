@@ -260,6 +260,17 @@ std::vector<std::string> parseDataString(std::string& value){
 	return split(value, ',');
 }
 
+void triggerColor(std::string trigger){
+	for (auto& [id, triggerColor] : tags.triggerColors){
+		if (!triggerColor.activeColor.has_value()){
+			continue;
+		}
+		if (triggerColor.trigger == trigger){
+			setGameObjectTint(id, triggerColor.activeColor.value());
+		}
+	}
+}
+
 struct Skippable {
 	std::optional<std::string> advanceToLevel;
 };
@@ -1119,6 +1130,28 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onFrame = [](Tags& tags) -> void {
   		onLaserFrame();
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+	},
+
+	TagUpdater {
+		.attribute = "triggercolor",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		  auto objHandle = getAttrHandle(id);
+			auto trigger = getStrAttr(objHandle, "triggercolor").value();
+			tags.triggerColors[id] = TriggerColor {
+				.trigger = trigger,
+				.activeColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
+				.unactiveColor = glm::vec4(0.f, 0.f, 1.f, 1.f),
+			};
+			if (tags.triggerColors.at(id).unactiveColor.has_value()){
+				setGameObjectTint(id, tags.triggerColors.at(id).unactiveColor.value());
+			}
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		tags.triggerColors.erase(id);
+  	},
+  	.onFrame = [](Tags& tags) -> void {
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
