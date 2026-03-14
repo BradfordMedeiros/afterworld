@@ -285,6 +285,7 @@ GameTypeInfo getBallMode(){
 		  		gameapi -> setGameObjectPosition(ballMode -> ballId.value(), ballMode -> initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
 		  		ballMode -> didLose = false;
 					ballMode -> shouldReset = false;
+					ballStartTime = gameapi -> timeSeconds(false);
 					ballMode -> didReset = true;
 	  		}
 
