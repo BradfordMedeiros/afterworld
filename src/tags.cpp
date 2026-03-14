@@ -1138,11 +1138,14 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "triggercolor",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 		  auto objHandle = getAttrHandle(id);
+			auto activeColor = getVec4Attr(objHandle, "activecolor");
+			auto unactiveColor = getVec4Attr(objHandle, "unactivecolor");
+
 			auto trigger = getStrAttr(objHandle, "triggercolor").value();
 			tags.triggerColors[id] = TriggerColor {
 				.trigger = trigger,
-				.activeColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
-				.unactiveColor = glm::vec4(0.f, 0.f, 1.f, 1.f),
+				.activeColor = activeColor.has_value() ? activeColor.value() : std::optional<glm::vec4>(std::nullopt),
+				.unactiveColor = unactiveColor.has_value() ? unactiveColor.value() : std::optional<glm::vec4>(std::nullopt),
 			};
 			if (tags.triggerColors.at(id).unactiveColor.has_value()){
 				setGameObjectTint(id, tags.triggerColors.at(id).unactiveColor.value());
