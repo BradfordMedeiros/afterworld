@@ -43,6 +43,6 @@
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 std::vector<const char*> getAdditionalPathsToValidate();
-
+void setupGameCompileFn(std::unordered_map<std::string, std::string>& args);
 
 #endif
