@@ -38,6 +38,7 @@
 #include "./options.h"
 #include "./vehicles.h"
 #include "./mode.h"
+#include "./compile.h"
 
 #include "./arcade/arcade.h"
 
