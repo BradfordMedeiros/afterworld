@@ -299,7 +299,7 @@ bool shouldStepUp(objid id){ // check this logic
   return anyCollideableBelow && aboveHitpoints.size() == 0;
 }
 
-std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY);
+std::vector<std::optional<HitObject>> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY);
 
 
 struct CollisionSpace {
@@ -341,17 +341,17 @@ bool checkCollision(HitObject& hitpoint, CollisionSpace& collisionSpace, glm::qu
   return value >= collisionSpace.comparison;
 }
 
-std::vector<bool> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY){
-  std::vector<bool> values;
+std::vector<std::optional<HitObject>> getCollisionSpaces(std::vector<HitObject>& hitpoints, glm::quat rotationWithoutY){
+  std::vector<std::optional<HitObject>> values;
   for (auto &collisionSpace : collisionSpaces){
-    bool inCollisionSpace = false;
+    std::optional<HitObject> hitObject;
     for (auto &hitpoint : hitpoints){
       if (checkCollision(hitpoint, collisionSpace, rotationWithoutY)){
-        inCollisionSpace = true;
+        hitObject = hitpoint;
         break;
       }
     }
-    values.push_back(inCollisionSpace);
+    values.push_back(hitObject);
   }
   return values;
 }
@@ -488,7 +488,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 
   std::vector<glm::quat> hitDirections;
   auto collisions = checkMovementCollisions(playerId, hitDirections, rotationWithoutY);
-  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN).has_value();
    
   movementState.inWater = false;
   for (auto id : collisions.allCollisions){

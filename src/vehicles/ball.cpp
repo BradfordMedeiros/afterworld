@@ -2,6 +2,14 @@
 
 extern CustomApiBindings* gameapi;
 
+/*
+  TODO 
+  - maybe move collision disallow to move into a wall (option, kind of like how it works atm)
+  - experiment with downward along the ramp
+  
+  TODO - tweraks params
+*/
+
 glm::vec3 getSurfaceVelocityModifiers(objid id);
 
 VehicleBall doCreateVehicleBall(objid vehicleId){
@@ -26,10 +34,11 @@ VehicleBall doCreateVehicleBall(objid vehicleId){
   return vehicleBall;
 }
 
-const float AERIAL_MAG_SCALE = 10.f;
+const float AERIAL_MAG_SCALE = 0.5f;
 const float AERIAL_TORQUE_SCALE = 1.f;
+const bool RELATIVE_JUMP = true;
 
-bool checkIfGrounded(objid id){
+std::optional<HitObject> checkIfGrounded(objid id){
   auto playerDirection = gameapi -> getGameObjectRotation(id, true, "vehicle - ball - check grounded");
   auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
   directionVec.y = 0.f;
@@ -38,8 +47,9 @@ bool checkIfGrounded(objid id){
    
   std::vector<glm::quat> hitDirections;
   auto collisions = checkMovementCollisions(id, hitDirections, rotationWithoutY);
-  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
-  return isGrounded;
+
+  auto downCollision = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+  return downCollision;
 }
 
 void printBallDebug(VehicleBall& vehicleBall){
@@ -52,8 +62,8 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     return;
   }
 
-  auto isGrounded = checkIfGrounded(id);
-  vehicleBall.isGrounded = isGrounded;
+  auto groundHit = checkIfGrounded(id);
+  vehicleBall.isGrounded = groundHit.has_value();
   auto rotation = lookThirdPersonCalc(state.managedCamera, id).yAxisRotation;
 
   //////////// CORE MOVEMENT ////////////
@@ -91,15 +101,26 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     gameapi -> applyTorque(id, torqueAmount);
 
     if (vehicleBall.shouldJump && vehicleBall.isGrounded){
-      gameapi -> applyImpulse(id, glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f));
+      if (RELATIVE_JUMP){
+        auto jumpImpulse = glm::normalize(groundHit.value().normal) * glm::vec3(0.f, 0.f, -1.f * vehicleBall.ballConfig.jumpMagnitude); 
+        gameapi -> applyImpulse(id, jumpImpulse);
+      }else{
+        auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
+        gameapi -> applyImpulse(id, jumpImpulse);
+      }
+
     }
     vehicleBall.shouldJump = false;
 
     /// debug visualization
     auto position  =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for debug");
     gameapi -> drawLine(position, position + glm::vec3(0.f, 1.f, 0.f), false, id, std::nullopt, std::nullopt, std::nullopt);
-    gameapi -> drawLine(position, position + amount, false, id, std::nullopt, std::nullopt, std::nullopt);
+    //gameapi -> drawLine(position, position + amount, false, id, std::nullopt, std::nullopt, std::nullopt);
 
+    if (groundHit.has_value()){
+      auto delta = 5.f * (groundHit.value().normal * glm::vec3(0.f, 0.f, -1.f));
+      gameapi -> drawLine(groundHit.value().point, groundHit.value().point + delta, false, id, std::nullopt, std::nullopt, std::nullopt);
+    }
   }
 
   ////////// POWERUP ////////////////////////////
