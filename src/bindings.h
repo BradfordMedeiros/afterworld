@@ -36,7 +36,7 @@
 #include "./vector_gfx.h"
 #include "./gameworld/progress.h"
 #include "./options.h"
-#include "./vehicles.h"
+#include "./vehicles/vehicles.h"
 #include "./mode.h"
 #include "./compile.h"
 

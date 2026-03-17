@@ -2263,7 +2263,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
             auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
 
-            auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).managedCamera, controllable.value() -> vehicle.value());
+            auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).state.managedCamera, controllable.value() -> vehicle.value());
             glm::vec3 screenShake = thirdPerson.rotation * player.shakeOffset;
 
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });

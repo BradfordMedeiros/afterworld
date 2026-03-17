@@ -1,0 +1,134 @@
+#include "./ball.h"
+
+extern CustomApiBindings* gameapi;
+
+glm::vec3 getSurfaceVelocityModifiers(objid id);
+
+VehicleBall doCreateVehicleBall(objid vehicleId){
+  BallConfig ballConfig {
+    .magnitude = 100.f,
+    .torque = 50.f,
+    .jumpMagnitude = 100.f,
+    .mass = 10.f,
+    .friction = 1.f,
+    .restitution = 0.5f,
+    .gravity = -9.81f,
+  };
+  VehicleBall vehicleBall {
+    .ballConfig = ballConfig,
+    .isGrounded = false,
+    .shouldJump = false,
+    .shouldUsePowerUp = false,
+    .teleportPosition = std::nullopt,
+    .powerup = std::nullopt,
+  };
+  setGameObjectPhysics(vehicleId, ballConfig.mass, ballConfig.restitution, ballConfig.friction, glm::vec3(0.f, ballConfig.gravity, 0.f));
+  return vehicleBall;
+}
+
+const float AERIAL_MAG_SCALE = 10.f;
+const float AERIAL_TORQUE_SCALE = 1.f;
+
+bool checkIfGrounded(objid id){
+  auto playerDirection = gameapi -> getGameObjectRotation(id, true, "vehicle - ball - check grounded");
+  auto directionVec = playerDirection * glm::vec3(0.f, 0.f, -1.f); 
+  directionVec.y = 0.f;
+  auto rotationWithoutY = quatFromDirection(directionVec);
+
+   
+  std::vector<glm::quat> hitDirections;
+  auto collisions = checkMovementCollisions(id, hitDirections, rotationWithoutY);
+  bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+  return isGrounded;
+}
+
+void printBallDebug(VehicleBall& vehicleBall){
+  std::cout << "is grounded: " << vehicleBall.isGrounded << std::endl;
+
+}
+
+void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams){
+  if (!state.occupied.has_value()){
+    return;
+  }
+
+  auto isGrounded = checkIfGrounded(id);
+  vehicleBall.isGrounded = isGrounded;
+  auto rotation = lookThirdPersonCalc(state.managedCamera, id).yAxisRotation;
+
+  //////////// CORE MOVEMENT ////////////
+  std::cout << "onVehicleFrameBall onFrame" << std::endl;
+  {
+    auto magnitude = vehicleBall.ballConfig.magnitude *    (vehicleBall.isGrounded ? 1.f : AERIAL_MAG_SCALE);
+    auto torqueMagnitude = vehicleBall.ballConfig.torque * (vehicleBall.isGrounded ? 1.f : AERIAL_TORQUE_SCALE);
+
+    glm::vec3 direction(0.f, 0.f, 0.f);
+    if (controlParams.goForward){
+      direction.z = -1.f;
+    }
+    if (controlParams.goBackward){
+      direction.z = 1.f;
+    }
+    if (controlParams.goLeft){
+      direction.x = -1.f;
+    }
+    if (controlParams.goRight){
+      direction.x = 1.f;
+    }
+    if (glm::length(direction) > 0.001f){
+      direction = glm::normalize(direction);
+    }
+
+    auto extraVelocityForce = getSurfaceVelocityModifiers(id);
+    std::cout << "extra vel: " << print(extraVelocityForce) << std::endl;
+
+    // should normalize the direction here
+    auto amount = rotation * glm::vec3(magnitude * direction.x, magnitude * direction.y, magnitude * direction.z);
+
+    gameapi -> applyForce(id, amount + extraVelocityForce);
+
+    auto torqueAmount = rotation * glm::vec3(torqueMagnitude * direction.z, torqueMagnitude * direction.y, -1 * torqueMagnitude * direction.x);
+    gameapi -> applyTorque(id, torqueAmount);
+
+    if (vehicleBall.shouldJump && vehicleBall.isGrounded){
+      gameapi -> applyImpulse(id, glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f));
+    }
+    vehicleBall.shouldJump = false;
+
+    /// debug visualization
+    auto position  =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for debug");
+    gameapi -> drawLine(position, position + glm::vec3(0.f, 1.f, 0.f), false, id, std::nullopt, std::nullopt, std::nullopt);
+    gameapi -> drawLine(position, position + amount, false, id, std::nullopt, std::nullopt, std::nullopt);
+
+  }
+
+  ////////// POWERUP ////////////////////////////
+  {
+    if (vehicleBall.shouldUsePowerUp){
+      if (vehicleBall.teleportPosition.has_value()){
+        // TODO This needs to preserve the direction too
+        gameapi -> setGameObjectPosition(id, vehicleBall.teleportPosition.value(), true, Hint { .hint = "vehicle teleport position" });
+        vehicleBall.teleportPosition = std::nullopt;
+      }
+      if (vehicleBall.powerup.has_value()){
+        if (vehicleBall.powerup.value() == BIG_JUMP){
+          gameapi -> applyImpulse(id, glm::vec3(0.f, 2 * vehicleBall.ballConfig.jumpMagnitude, 0.f));
+        }else if (vehicleBall.powerup.value() == LAUNCH_FORWARD){
+          auto direction = rotation * glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, -1 * vehicleBall.ballConfig.jumpMagnitude);
+          gameapi -> applyImpulse(id, direction);
+        }else if (vehicleBall.powerup.value() == LOW_GRAVITY){
+          setGameObjectGravity(id, glm::vec3(0.f, 0.2f * vehicleBall.ballConfig.gravity, 0.f));
+        }else if (vehicleBall.powerup.value() == REVERSE_GRAVITY){
+          // This needs changes in the camera to feel correct
+          setGameObjectGravity(id, glm::vec3(0.f, -1.f * vehicleBall.ballConfig.gravity, 0.f));
+        } else if (vehicleBall.powerup.value() == TELEPORT){
+          vehicleBall.teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
+        }
+        vehicleBall.powerup = std::nullopt;
+      }
+    }
+    vehicleBall.shouldUsePowerUp = false;
+  }
+
+  //std::cout << "onVehicleFrameBall: " << id << " , apply force = " << print(amount) <<  ", apply torque = " << print(torqueAmount) <<  ", name = " << gameapi -> getGameObjNameForId(id).value() << ", occupied = " << gameapi -> getGameObjNameForId(vehicle.occupied.value()).value() << std::endl;
+}

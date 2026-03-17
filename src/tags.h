@@ -15,7 +15,7 @@
 #include "./gameworld/switch.h"
 #include "./arcade/arcade.h"
 #include "./entity.h"
-#include "./vehicles.h"
+#include "./vehicles/vehicles.h"
 #include "./orbs.h"
 #include "./config.h"
 

@@ -1,46 +1,14 @@
 #ifndef MOD_AFTERWORLD_VEHICLES
 #define MOD_AFTERWORLD_VEHICLES
 
-#include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util.h"
-#include "./controls.h"
-#include "./movement/movementcore.h"
-
-struct VehicleShip {};
-
-struct BallConfig {
-  float magnitude;
-  float torque;
-  float jumpMagnitude;
-  float mass;
-  float friction;
-  float restitution;
-  float gravity;
-};
-
-struct VehicleBall {
-  BallConfig ballConfig;
-
-  // state
-  bool isGrounded;
-  bool shouldJump;
-  bool shouldUsePowerUp;
-
-  std::optional<glm::vec3> teleportPosition;
-
-  std::optional<BallPowerup> powerup;
-};
+#include "./common.h"
+#include "./ball.h"
+#include "./ship.h"
 
 typedef std::variant<VehicleShip, VehicleBall> VehicleType;
 
 struct Vehicle {
-  std::optional<objid> occupied;
-
-  glm::vec3 controls;
-  ThirdPersonCameraInfo managedCamera;
-
-  std::optional<objid> sound;
-
+  VehicleState state;
   VehicleType vehicle;
 };
 

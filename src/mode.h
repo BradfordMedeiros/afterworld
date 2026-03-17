@@ -3,7 +3,7 @@
 
 #include "./gametypes/gametypes.h"
 #include "./global.h"
-#include "./vehicles.h"
+#include "./vehicles/vehicles.h"
 #include "./entity.h"
 #include "./gameworld/progress.h"
 #include "./orbs.h"
