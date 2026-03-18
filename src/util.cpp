@@ -423,10 +423,7 @@ void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float
   gameapi -> playClip(clipName, sceneId, volume, position);
 }
 void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
-  if (!volume.has_value()){
-    volume = 1.f;
-  }
-  volume = volume.value() * gameplayVolume;
+ 
   gameapi -> playClipById(id, volume, position);
 }
 

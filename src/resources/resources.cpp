@@ -98,7 +98,6 @@ void unloadManagedTexturesLoaded(objid id){
 }
 
 
-
 void ensureDefaultSoundsLoadced(objid sceneId){
   std::string activateClip = paths::ACTIVATE_SOUND;
   if (activateClip != ""){
@@ -141,6 +140,23 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.teleportObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), teleportClip, false);
   }
 
+  //////// Ball Game Sounds, probably should have a way to do this dynamically
+  if (sounds.balljumpObjId.has_value()){
+    gameapi -> removeByGroupId(sounds.balljumpObjId.value());
+  }
+  sounds.balljumpObjId = createSound(sceneId, ("&code-balljump") + uniqueNameSuffix(), teleportClip, false);
+
+  if (sounds.powerupObjId.has_value()){
+    gameapi -> removeByGroupId(sounds.powerupObjId.value());
+  }
+  sounds.powerupObjId = createSound(sceneId, ("&code-powerup") + uniqueNameSuffix(), teleportClip, false);
+
+  if (sounds.rollObjId.has_value()){
+    gameapi -> removeByGroupId(sounds.rollObjId.value());
+  }
+  sounds.rollObjId = createSound(sceneId, ("&code-powerup") + uniqueNameSuffix(), teleportClip, false);
+
+  //////////////////////////////////////////////////////////////////////////////
 
 }
 

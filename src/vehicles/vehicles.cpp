@@ -37,7 +37,8 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
   if (isShip){
     vehicles.vehicles.at(vehicleId).vehicle = VehicleShip{};
   }else{
-    vehicles.vehicles.at(vehicleId).vehicle = doCreateVehicleBall(vehicleId);
+
+    vehicles.vehicles.at(vehicleId).vehicle = doCreateVehicleBall(vehicleId, vehicles.vehicles.at(vehicleId).state);
   }
 
   modlog("vehicle add vehicle", std::to_string(vehicleId) + ", sound = " + print(soundId));

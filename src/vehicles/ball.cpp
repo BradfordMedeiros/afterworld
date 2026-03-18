@@ -2,6 +2,9 @@
 
 extern CustomApiBindings* gameapi;
 
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+
+
 /*
   TODO 
   - maybe move collision disallow to move into a wall (option, kind of like how it works atm)
@@ -12,7 +15,7 @@ extern CustomApiBindings* gameapi;
 
 glm::vec3 getSurfaceVelocityModifiers(objid id);
 
-VehicleBall doCreateVehicleBall(objid vehicleId){
+VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state){
   BallConfig ballConfig {
     .magnitude = 100.f,
     .torque = 50.f,
@@ -31,6 +34,7 @@ VehicleBall doCreateVehicleBall(objid vehicleId){
     .powerup = std::nullopt,
   };
   setGameObjectPhysics(vehicleId, ballConfig.mass, ballConfig.restitution, ballConfig.friction, glm::vec3(0.f, ballConfig.gravity, 0.f));
+
   return vehicleBall;
 }
 
@@ -62,6 +66,15 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     return;
   }
 
+  if (!vehicleBall.soundId.has_value()){
+    auto ballSound = findChildObjBySuffix(id, "ballsoundmove");
+    if (ballSound.has_value()){
+      vehicleBall.soundId = ballSound.value();
+      playGameplayClipById(vehicleBall.soundId.value(), std::nullopt, std::nullopt);
+    }
+  }
+
+ 
   auto groundHit = checkIfGrounded(id);
   vehicleBall.isGrounded = groundHit.has_value();
   auto rotation = lookThirdPersonCalc(state.managedCamera, id).yAxisRotation;
@@ -108,7 +121,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
         gameapi -> applyImpulse(id, jumpImpulse);
       }
-
+      playGameplayClipById(getManagedSounds().balljumpObjId.value(), std::nullopt, std::nullopt);
     }
     vehicleBall.shouldJump = false;
 
@@ -147,6 +160,8 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         }
         vehicleBall.powerup = std::nullopt;
       }
+
+      playGameplayClipById(getManagedSounds().powerupObjId.value(), std::nullopt, std::nullopt);
     }
     vehicleBall.shouldUsePowerUp = false;
   }

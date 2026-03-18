@@ -24,9 +24,12 @@ struct VehicleBall {
   std::optional<glm::vec3> teleportPosition;
 
   std::optional<BallPowerup> powerup;
+
+  std::optional<objid> soundId;
+  float lastPlayTime = 0.f;
 };
 
-VehicleBall doCreateVehicleBall(objid vehicleId);
+VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state);
 void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams);
 
 #endif
