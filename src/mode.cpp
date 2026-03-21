@@ -120,7 +120,7 @@ void createBallObj(objid sceneId, glm::vec3 position){
   {
   	GameobjAttributes emitterAttr { 
   		.attr = {
-  			{ "clip", "../gameresources/sound/engine.ogg" },
+  			{ "clip", "../gameresources/sound/rolling.ogg" },
  				{ "loop", "true" },
   		} 
   	};

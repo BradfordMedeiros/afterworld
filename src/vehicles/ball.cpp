@@ -74,6 +74,21 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     }
   }
 
+  auto velocity = getGameObjectVelocity(id);
+  std::cout << "ball velocity: " << glm::length(velocity) << std::endl;
+  float percentage = glm::length(velocity) / 10.f;
+  if (percentage > 2.f){
+    percentage = 2.f;
+  }
+  percentage *= 0.5f;
+
+  if (!vehicleBall.isGrounded){
+    percentage = 0.f;
+  }
+
+  //gameapi -> setSoundPitch(vehicleBall.soundId.value(), percentage);
+  gameapi -> setSoundVolume(vehicleBall.soundId.value(), 5 * percentage);
+
  
   auto groundHit = checkIfGrounded(id);
   vehicleBall.isGrounded = groundHit.has_value();
