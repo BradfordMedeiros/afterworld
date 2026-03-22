@@ -40,7 +40,7 @@ void ballStartGameplay(EasyCutscene& cutscene){
 }
 void ballEndGameplay(EasyCutscene& cutscene){
 	if (initialize(cutscene)){
-	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
 		setDisablePlayerControl(true, 0);
 	}
   waitUntil(cutscene, 0, 2000);
@@ -521,7 +521,7 @@ void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
 
 				auto level= overworldLevel();
 				if (selectedOrb.selectKey && level.has_value()){
-  		  	playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+  		  	playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
   		  	goToLevel(level.value());
   		  	return;
   			}
@@ -639,7 +639,7 @@ void ballModeNewGame(){
 
   resetProgress();
   setShowLiveMenu(false);
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
   currentCutscene = playCutscene(createCutscene("testorb", glm::vec3(0.f, 10.f, 0.f), false), std::nullopt);
 }
 

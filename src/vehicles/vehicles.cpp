@@ -60,7 +60,7 @@ void enterVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   modlog("vehicle enter vehicle", std::to_string(vehicleId));
 
   if (vehicle.state.sound.has_value()){
-    playGameplayClipById(vehicle.state.sound.value(), std::nullopt, std::nullopt); 
+    playGameplayClipById(vehicle.state.sound.value(), std::nullopt, std::nullopt, false); 
   }
   disableEntity(vehicle.state.occupied.value());
 }

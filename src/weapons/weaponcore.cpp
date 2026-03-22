@@ -469,7 +469,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
     }
 
     if (soundEmitterId.has_value()){
-      playGameplayClipById(soundEmitterId.value(), std::nullopt, hitpoint.point);
+      playGameplayClipById(soundEmitterId.value(), std::nullopt, hitpoint.point, false);
     }
 
 
@@ -506,7 +506,7 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
   }
 
   if (gunCore.weaponCore -> soundResource.has_value()){
-    playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos);
+    playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos, false);
   }
 
   if (gunCore.weaponCore -> muzzleParticle.has_value() && gunId.has_value()){

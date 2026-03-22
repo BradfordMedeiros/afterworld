@@ -170,7 +170,6 @@ void handleOrbViews(OrbData& orbData){
 				orbPosition = targetOrbPosition;
 				orbRotation = targetOrbRotation;
 				objView.actualIndex = objView.targetIndex;
-	      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
 			}
 		}
 
@@ -243,7 +242,7 @@ void setOrbSelectIndex(OrbView& orbView, int targetIndex){
 	orbView.targetIndex = targetIndex;
 	if (oldIndex != targetIndex){
 		orbView.startTime = gameapi -> timeSeconds(false);
-	  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+	  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
 	}
 }
 

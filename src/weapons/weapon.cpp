@@ -133,7 +133,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
       auto activateValue = getStrAttr(attrHandle, "activate-value");
       if (activateKey.has_value()){
         auto pos = gameapi -> getGameObjectPos(activateableItem.value(), true, "[gamelogic] onWeaponsFrameEntity - activatable item sound location");
-        playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos);
+        playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, pos, false);
 
         MessageWithId activateMessage {
           .playerId = playerId,

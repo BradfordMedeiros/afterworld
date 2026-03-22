@@ -6,7 +6,7 @@ extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
 
 bool enableRagdollKill = true;
 
-void playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+ALuint playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
 void onAiHealthChange(objid targetId, float remainingHealth);
 void setIsAlive(objid id, bool alive);
 void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
@@ -53,7 +53,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 		auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex()); // TODO - this shoiuldn't be here, only if it is damaged by the player
 		if(playerPosition.has_value()){
 			//modassert(false, "hitmarker sound try play!");
-			playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, playerPosition.value()); 
+			playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, playerPosition.value(), false); 
 
 			if (*_enemyDead){
 				float magnitude = 10;

@@ -136,7 +136,7 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 		applyImpulseAffectMovement(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
 	}
 
-	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position);
+	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position, false);
 	auto activePlayer = getActivePlayerId(getDefaultPlayerIndex());
 	if (activePlayer.has_value()){
 		emitExplosion(rootSceneId(), activePlayer.value(), position, glm::vec3(1.f, 1.f, 1.f));

@@ -138,7 +138,7 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   if (force > 50){
     {
       float volume = 1.f;  // should adjust based on force, how much? 
-      playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position);
+      playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position, false);
 
 
       auto attr = getAttrHandle(obj1);

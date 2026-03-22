@@ -276,7 +276,7 @@ void setTotalZoom(float multiplier, objid id){
   }
   setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(getMovementData(), multiplier, id);
-  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
 }
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force){
@@ -434,7 +434,7 @@ void setPausedMode(bool shouldBePaused){
     auto playingPath = getPathParts(0);
     if (playingPath.has_value() && playingPath.value() == "playing"){
       pushHistory({ "paused" });
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
     }
     downTime = gameapi -> timeSeconds(true);
   }
@@ -722,7 +722,7 @@ void deliverPowerup(objid vehicle, objid powerupId){
     setPowerupBall(vehicles, vehicle, std::nullopt);
   }
 
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
   
   if(!powerup.respawnRateMs.has_value()){
     gameapi -> removeObjectById(powerupId);
@@ -1220,7 +1220,7 @@ UiContext getUiContext(GameState& gameState){
     .showPreviousModel = modelViewerPrevModel,
     .showNextModel = modelViewerNextModel,
     .playSound = []() -> void {
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
     },
     .consoleInterface = ConsoleInterface {
       .setNormalMode = [&gameState]() -> void {
@@ -1319,7 +1319,7 @@ ArcadeApi arcadeApi {
   },
   .releaseTextures = unloadManagedTexturesLoaded,
   .playSound = [](objid clipId) -> void {
-    playGameplayClipById(clipId, std::nullopt, std::nullopt);
+    playGameplayClipById(clipId, std::nullopt, std::nullopt, false);
   },
   .getResolution = [](objid id) -> glm::vec2 {
     auto texture = arcadeTextureId(id);
@@ -1556,12 +1556,12 @@ void ensureAmbientSound(std::vector<TagInfo>& tags){
     AudioClip& audioClip = audioClips.at(clipToPlay.value());
     playingClip = clipToPlay.value();
 
-    playGameplayClipById(audioClip.id, std::nullopt, std::nullopt); 
+    playGameplayClipById(audioClip.id, std::nullopt, std::nullopt, false); 
   }
 
   if (!inAudioZone && !playingDefaultClip && defaultAudioClip.has_value()){
     playingDefaultClip = true;
-    playGameplayClipById(defaultAudioClip.value(), std::nullopt, std::nullopt); 
+    playGameplayClipById(defaultAudioClip.value(), std::nullopt, std::nullopt, true); 
   }
 
   std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
@@ -1595,7 +1595,7 @@ void objectRemoved(objid idRemoved){
 void handleTeleport(objid idToTeleport, objid teleporterId){
   auto teleportPosition = gameapi -> getGameObjectPos(teleporterId, true, "gamelogic get teleport position");
   gameapi -> setGameObjectPosition(idToTeleport, teleportPosition, true, Hint { .hint = "teleport set posn" });
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt);
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
 }
 
 void doTeleport(int32_t idToTeleport, std::string destination){
@@ -2376,7 +2376,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == "terminal" && !getGlobalState().showTerminal){
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
       showTerminal("test");
     }
 
@@ -2397,7 +2397,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
       auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true, "[gamelogic] get position for gem pickup to play sound");
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position);
+      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position, false);
 
       auto gem = getSingleAttr(itemAcquiredMessage -> itemId, "gem-label");
       if (gem.has_value()){
