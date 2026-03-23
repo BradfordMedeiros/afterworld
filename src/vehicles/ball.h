@@ -26,6 +26,8 @@ struct VehicleBall {
   std::optional<BallPowerup> powerup;
 
   std::optional<objid> soundId;
+  std::optional<objid> oneshotSoundSource;
+
   float lastPlayTime = 0.f;
 };
 

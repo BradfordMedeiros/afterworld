@@ -424,12 +424,12 @@ void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float
 }
 ALuint playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
-  gameapi -> playOneshot(id, position, volume, loop);
+  return gameapi -> playOneshot(id, position, volume, loop, false);
 }
 
-void playGameplayClipCentered(objid id){
-  auto view = gameapi -> getView();
-  gameapi -> playOneshot(id, view.position, std::nullopt, false);
+ALuint playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
+  std::cout << "playGameplayClipById: " << loop << std::endl;
+  return gameapi -> playOneshot(id, std::nullopt, volume, loop, true);
 }
 
 std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId){

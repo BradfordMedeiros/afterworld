@@ -70,7 +70,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     auto ballSound = findChildObjBySuffix(id, "ballsoundmove");
     if (ballSound.has_value()){
       vehicleBall.soundId = ballSound.value();
-      playGameplayClipById(vehicleBall.soundId.value(), std::nullopt, std::nullopt, false);
+      vehicleBall.oneshotSoundSource = playGameplayClipByIdCenter(vehicleBall.soundId.value(), 5.f, true);
     }
   }
 
@@ -87,8 +87,8 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   }
 
   //gameapi -> setSoundPitch(vehicleBall.soundId.value(), percentage);
-  gameapi -> setSoundVolume(vehicleBall.soundId.value(), 5 * percentage);
-
+  //gameapi -> setSoundVolume(vehicleBall.soundId.value(), 5 * percentage);
+  gameapi -> setSoundVolumeOneshot(vehicleBall.oneshotSoundSource.value(), 5.f * percentage);
  
   auto groundHit = checkIfGrounded(id);
   vehicleBall.isGrounded = groundHit.has_value();
@@ -136,7 +136,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
         gameapi -> applyImpulse(id, jumpImpulse);
       }
-      playGameplayClipCentered(getManagedSounds().balljumpObjId.value());
+      playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
     }
     vehicleBall.shouldJump = false;
 
