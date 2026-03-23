@@ -408,19 +408,22 @@ float getGameplayVolume(){
   return gameplayVolume;
 }
 
-void playMusicClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+OneShot playMusicClipById(objid id, std::optional<float> volume){
   if (!volume.has_value()){
     volume = 1.f;
   }
   volume = volume.value() * musicVolume;
-  gameapi -> playClipById(id, volume, position);
+  return gameapi -> playOneshot(id, std::nullopt, volume, false, true);
 }
-void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
+OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   if (!volume.has_value()){
     volume = 1.f;
   }
   volume = volume.value() * gameplayVolume;
-  gameapi -> playClip(clipName, sceneId, volume, position);
+
+  auto clipId = gameapi -> getClipByName(clipName, sceneId);
+  modassert(clipId.has_value(), "playGameplayClip clipName does not exist");
+  return gameapi -> playOneshot(clipId.value(), position, volume, false, false);
 }
 OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;

@@ -634,7 +634,7 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "autoplay",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-  		playMusicClipById(id, std::nullopt, std::nullopt);
+  		playMusicClipById(id, std::nullopt);
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {},
   	.onFrame = std::nullopt,

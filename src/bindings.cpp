@@ -722,7 +722,7 @@ void deliverPowerup(objid vehicle, objid powerupId){
     setPowerupBall(vehicles, vehicle, std::nullopt);
   }
 
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
   
   if(!powerup.respawnRateMs.has_value()){
     gameapi -> removeObjectById(powerupId);

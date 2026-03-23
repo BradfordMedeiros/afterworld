@@ -176,7 +176,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         vehicleBall.powerup = std::nullopt;
       }
 
-      playGameplayClipById(getManagedSounds().powerupObjId.value(), std::nullopt, std::nullopt, false);
+      playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
     }
     vehicleBall.shouldUsePowerUp = false;
   }

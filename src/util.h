@@ -100,8 +100,8 @@ void setGameplayVolume(float volume);
 float getMusicVolume();
 float getGameplayVolume();
 
-void playMusicClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
-void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
+OneShot playMusicClipById(objid id, std::optional<float> volume);
+OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
 OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop);
 
