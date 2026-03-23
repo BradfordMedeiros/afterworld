@@ -422,12 +422,12 @@ void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float
   volume = volume.value() * gameplayVolume;
   gameapi -> playClip(clipName, sceneId, volume, position);
 }
-ALuint playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
+OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
   return gameapi -> playOneshot(id, position, volume, loop, false);
 }
 
-ALuint playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
+OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
   return gameapi -> playOneshot(id, std::nullopt, volume, loop, true);
 }

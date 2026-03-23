@@ -102,8 +102,8 @@ float getGameplayVolume();
 
 void playMusicClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
-ALuint playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
-ALuint playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop);
+OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
+OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop);
 
 std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId);
 

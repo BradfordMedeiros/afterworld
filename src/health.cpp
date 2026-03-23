@@ -6,7 +6,7 @@ extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
 
 bool enableRagdollKill = true;
 
-ALuint playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
+OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
 void onAiHealthChange(objid targetId, float remainingHealth);
 void setIsAlive(objid id, bool alive);
 void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
