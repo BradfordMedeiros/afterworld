@@ -151,8 +151,12 @@ struct ControlParams {
 struct ThirdPersonCameraInfo {
   bool thirdPersonMode;
   float distanceFromTarget;
+  
   float angleX;
   float angleY;
+  float targetAngleX = 0.f;
+  float targetAngleY = 0.f;
+
   float actualDistanceFromTarget;
   glm::vec3 additionalCameraOffset;
   glm::vec3 zoomOffset;
@@ -164,7 +168,7 @@ struct ThirdPersonCameraUpdate {
   glm::quat rotation;
   glm::quat yAxisRotation;
 };
-ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id);
+ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id, bool useTargetAngle);
 enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT };
 std::string print(BallPowerup powerup);
 

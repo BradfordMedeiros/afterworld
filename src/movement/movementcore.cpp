@@ -216,7 +216,7 @@ ThirdPersonCameraUpdate lookThirdPerson(MovementParams& moveParams, MovementStat
   thirdPersonInfo.actualZoomOffset.x = glm::lerp(thirdPersonInfo.actualZoomOffset.x, lookParams.ironsight ? (thirdPersonInfo.zoomOffset.x * reverseMultiplier) : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
   thirdPersonInfo.actualZoomOffset.y = glm::lerp(thirdPersonInfo.actualZoomOffset.y, lookParams.ironsight ? thirdPersonInfo.zoomOffset.y : 0.f, glm::clamp(lookParams.elapsedTime * zoomSpeed, 0.f, 1.f));
 
-  return lookThirdPersonCalc(thirdPersonInfo, id);
+  return lookThirdPersonCalc(thirdPersonInfo, id, false);
 }
 
 void toggleCrouch(MovementParams& moveParams, MovementState& movementState, objid id, bool shouldCrouch){

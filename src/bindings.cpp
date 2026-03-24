@@ -2263,7 +2263,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
             auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
 
-            auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).state.managedCamera, controllable.value() -> vehicle.value());
+            auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).state.managedCamera, controllable.value() -> vehicle.value(), false);
             glm::vec3 screenShake = thirdPerson.rotation * player.shakeOffset;
 
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
@@ -2273,7 +2273,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           }
 
           if (movementEntity.managedCamera.thirdPersonMode){
-            auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id);
+            auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id, false);
             glm::vec3 screenShake = thirdPersonInfo.rotation * player.shakeOffset;
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
             gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        

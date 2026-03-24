@@ -519,12 +519,19 @@ void drawRightText(std::string text, float ndiOffsetX, float ndiOffsetY, float n
 }
 
 
-ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id){
+ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id, bool useTargetAngle){
   float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
 
-  float x = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
-  float z = -glm::cos(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
-  float y = glm::sin(thirdPersonInfo.angleY) * thirdPersonInfo.actualDistanceFromTarget;
+  float x,y,z;
+  if (useTargetAngle){
+    x = glm::sin(thirdPersonInfo.targetAngleX) * thirdPersonInfo.distanceFromTarget;
+    z = -glm::cos(thirdPersonInfo.targetAngleX) * thirdPersonInfo.distanceFromTarget;
+    y = glm::sin(thirdPersonInfo.targetAngleY) * thirdPersonInfo.distanceFromTarget;
+  }else{
+    x = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
+    z = -glm::cos(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
+    y = glm::sin(thirdPersonInfo.angleY) * thirdPersonInfo.actualDistanceFromTarget;
+  }
 
   auto targetLocation = gameapi -> getGameObjectPos(id, true, "[gamelogic] lookThirdPersonCalc");
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);

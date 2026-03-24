@@ -6,7 +6,7 @@ void onVehicleFrameShip(objid id, VehicleState& state, VehicleShip& vehicleShip,
   if (state.occupied.has_value()){
     // Would be nice to make this work more similarly to movement system but this is simple so
 
-    auto thirdPerson = lookThirdPersonCalc(state.managedCamera, id);
+    auto thirdPerson = lookThirdPersonCalc(state.managedCamera, id, false);
 
     auto oldRotation = gameapi -> getGameObjectRotation(id, true, "[gamelogic] vehicle velocity rot"); 
     gameapi -> setGameObjectRot(id, thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle rotn" }); // shouldn't be instant

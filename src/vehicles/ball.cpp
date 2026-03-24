@@ -66,6 +66,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     return;
   }
 
+  // INIT /////////////////
   if (!vehicleBall.soundId.has_value()){
     auto ballSound = findChildObjBySuffix(id, "ballsoundmove");
     if (ballSound.has_value()){
@@ -73,26 +74,12 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
       vehicleBall.oneshotSoundSource = playGameplayClipByIdCenter(vehicleBall.soundId.value(), 5.f, true);
     }
   }
-
-  auto velocity = getGameObjectVelocity(id);
-  std::cout << "ball velocity: " << glm::length(velocity) << std::endl;
-  float percentage = glm::length(velocity) / 10.f;
-  if (percentage > 2.f){
-    percentage = 2.f;
-  }
-  percentage *= 0.5f;
-
-  if (!vehicleBall.isGrounded){
-    percentage = 0.f;
-  }
-
-  //gameapi -> setSoundPitch(vehicleBall.soundId.value(), percentage);
-  //gameapi -> setSoundVolume(vehicleBall.soundId.value(), 5 * percentage);
-  gameapi -> setSoundVolumeOneshot(vehicleBall.oneshotSoundSource.value(), 5.f * percentage);
  
+  // PER FRAME STATE CHECK 
   auto groundHit = checkIfGrounded(id);
   vehicleBall.isGrounded = groundHit.has_value();
-  auto rotation = lookThirdPersonCalc(state.managedCamera, id).yAxisRotation;
+
+  auto rotation = lookThirdPersonCalc(state.managedCamera, id, false).yAxisRotation;
 
   //////////// CORE MOVEMENT ////////////
   std::cout << "onVehicleFrameBall onFrame" << std::endl;
@@ -174,11 +161,29 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
           vehicleBall.teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
         }
         vehicleBall.powerup = std::nullopt;
-      }
 
-      playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
+        playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
+      }
     }
     vehicleBall.shouldUsePowerUp = false;
+  }
+
+
+  /// SOUND ///////////////////
+  {
+    auto velocity = getGameObjectVelocity(id);
+    std::cout << "ball velocity: " << glm::length(velocity) << std::endl;
+    float percentage = glm::length(velocity) / 10.f;
+    if (percentage > 2.f){
+      percentage = 2.f;
+    }
+    percentage *= 0.5f;
+    if (!vehicleBall.isGrounded){
+      percentage = 0.f;
+    }
+    //gameapi -> setSoundPitch(vehicleBall.soundId.value(), percentage);
+    //gameapi -> setSoundVolume(vehicleBall.soundId.value(), 5 * percentage);
+    gameapi -> setSoundVolumeOneshot(vehicleBall.oneshotSoundSource.value(), 5.f * percentage);
   }
 
   //std::cout << "onVehicleFrameBall: " << id << " , apply force = " << print(amount) <<  ", apply torque = " << print(torqueAmount) <<  ", name = " << gameapi -> getGameObjNameForId(id).value() << ", occupied = " << gameapi -> getGameObjNameForId(vehicle.occupied.value()).value() << std::endl;

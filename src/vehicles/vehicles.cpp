@@ -6,6 +6,10 @@ std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void disableEntity(objid id);
 void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
+const bool SHOULD_SMOOTH_ANGLES = false;      
+const bool SHOULD_SMOOTH_ZOOM = true;
+const bool SHOULD_LIMIT_CAMERA = true;
+
 Vehicles createVehicles(){
   return Vehicles{};
 }
@@ -25,6 +29,8 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
         .distanceFromTarget = -5.f,
         .angleX = 0.f,
         .angleY = 0.f,
+        .targetAngleX = 0.f,
+        .targetAngleY = 0.f,
         .actualDistanceFromTarget = -5.f,
         .additionalCameraOffset = glm::vec3(0.f, 2.5f, 0.f),
         .zoomOffset = glm::vec3(0.f, 0.f, 0.f),
@@ -97,12 +103,63 @@ void onVehicleKey(Vehicles& vehicles, int key, int action){
   }
 }
 
+float limitCameraDistance(objid id, glm::vec3 position, glm::quat rotation, glm::vec3 cameraPos, ThirdPersonCameraInfo& camera){
+  if (!SHOULD_LIMIT_CAMERA){
+    return camera.distanceFromTarget;
+  }
+  auto distance = glm::distance(position, cameraPos);
+  auto hitobjects = gameapi -> raycast(position, rotation, -1 * distance, std::nullopt);
+
+  float limitedDistance = camera.distanceFromTarget;
+  for (auto& hitobject : hitobjects){
+    //gameapi -> drawLine(hitobject.point, hitobject.point + glm::vec3(0.f, 10.f, 0.f), true, id, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    auto distance = glm::distance(position, hitobject.point);
+    if (limitedDistance > distance){
+      limitedDistance = (distance - 0.001f);
+    }
+  }
+  if (hitobjects.size() > 0){
+    playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, std::nullopt, false); 
+  }
+
+  std::cout << "limited distance: " << limitedDistance << std::endl;
+  return limitedDistance;
+}
+
 void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
   for (auto &[id, vehicle] :  vehicles.vehicles){
     if (vehicle.state.occupied.has_value()){
-      vehicle.state.managedCamera.angleX += gameapi -> timeElapsed() * controlParams.lookVelocity.x;
-      vehicle.state.managedCamera.angleY += gameapi -> timeElapsed() * controlParams.lookVelocity.y;
-      vehicle.state.managedCamera.actualDistanceFromTarget += gameapi -> timeElapsed() * controlParams.zoom_delta * 20.f /*arbitary multiplier */;
+      vehicle.state.managedCamera.distanceFromTarget += gameapi -> timeElapsed() * controlParams.zoom_delta * 20.f /*arbitary multiplier */;
+      vehicle.state.managedCamera.targetAngleX += gameapi -> timeElapsed() * controlParams.lookVelocity.x;
+      vehicle.state.managedCamera.targetAngleY += gameapi -> timeElapsed() * controlParams.lookVelocity.y;
+
+      auto position  =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get vehicle position for camera");
+      auto camera = lookThirdPersonCalc(vehicle.state.managedCamera, id, false);
+      auto adjustedDistance = limitCameraDistance(id, position, camera.rotation, camera.position, vehicle.state.managedCamera);
+     // vehicle.state.managedCamera.actualDistanceFromTarget = adjustedDistance;
+      //vehicle.state.managedCamera.distanceFromTarget = adjustedDistance;
+
+
+      auto deltaTime = gameapi -> timeElapsed();
+      float smoothTime = 0.1f; // seconds to catch up
+      float alpha = 1.0f - std::exp(-deltaTime / smoothTime);
+
+
+
+      if (SHOULD_SMOOTH_ZOOM){
+        vehicle.state.managedCamera.actualDistanceFromTarget = glm::mix(vehicle.state.managedCamera.actualDistanceFromTarget, adjustedDistance, alpha);
+      }else{
+        vehicle.state.managedCamera.actualDistanceFromTarget = adjustedDistance;
+      }
+      
+      if (SHOULD_SMOOTH_ANGLES){
+        vehicle.state.managedCamera.angleX = glm::mix(vehicle.state.managedCamera.angleX, vehicle.state.managedCamera.targetAngleX, alpha);
+        vehicle.state.managedCamera.angleY = glm::mix(vehicle.state.managedCamera.angleY, vehicle.state.managedCamera.targetAngleY, alpha);
+      }else{
+        vehicle.state.managedCamera.angleX = vehicle.state.managedCamera.targetAngleX;
+        vehicle.state.managedCamera.angleY = vehicle.state.managedCamera.targetAngleY;
+      }
+
     }
 
     {
