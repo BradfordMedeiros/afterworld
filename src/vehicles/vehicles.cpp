@@ -114,8 +114,16 @@ float limitCameraDistance(objid id, glm::vec3 position, glm::quat rotation, glm:
   for (auto& hitobject : hitobjects){
     //gameapi -> drawLine(hitobject.point, hitobject.point + glm::vec3(0.f, 10.f, 0.f), true, id, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
     auto distance = glm::distance(position, hitobject.point);
-    if (limitedDistance > distance){
-      limitedDistance = (distance - 0.001f);
+    if (camera.distanceFromTarget > 0){
+      if (limitedDistance > distance){
+        limitedDistance = (distance - 0.001f);
+      }
+    }else{
+      // negative camera distance
+      distance *= -1.f;
+      if (limitedDistance < distance){
+        limitedDistance = (distance + 0.001f);
+      }
     }
   }
   if (hitobjects.size() > 0){
