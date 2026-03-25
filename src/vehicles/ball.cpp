@@ -3,7 +3,8 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
-
+void applyScreenshake(int playerIndex, glm::vec3 impulse);
+int getDefaultPlayerIndex();
 
 /*
   TODO 
@@ -76,8 +77,16 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   }
  
   // PER FRAME STATE CHECK 
+  auto velocity = getGameObjectVelocity(id);
   auto groundHit = checkIfGrounded(id);
+  bool justGrounded = !vehicleBall.isGrounded && groundHit;
   vehicleBall.isGrounded = groundHit.has_value();
+  if (justGrounded){
+    //playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false); 
+
+    float shakeY = velocity.y * 5.f;
+    applyScreenshake(getDefaultPlayerIndex(), glm::vec3(0.f, shakeY, 0.f));
+  }
 
   auto rotation = lookThirdPersonCalc(state.managedCamera, id, false).yAxisRotation;
 
@@ -129,13 +138,12 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 
     /// debug visualization
     auto position  =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for debug");
-    gameapi -> drawLine(position, position + glm::vec3(0.f, 1.f, 0.f), false, id, std::nullopt, std::nullopt, std::nullopt);
+    //gameapi -> drawLine(position, position + glm::vec3(0.f, 1.f, 0.f), false, id, std::nullopt, std::nullopt, std::nullopt);
     //gameapi -> drawLine(position, position + amount, false, id, std::nullopt, std::nullopt, std::nullopt);
-
-    if (groundHit.has_value()){
-      auto delta = 5.f * (groundHit.value().normal * glm::vec3(0.f, 0.f, -1.f));
-      gameapi -> drawLine(groundHit.value().point, groundHit.value().point + delta, false, id, std::nullopt, std::nullopt, std::nullopt);
-    }
+    //if (groundHit.has_value()){
+    //  auto delta = 5.f * (groundHit.value().normal * glm::vec3(0.f, 0.f, -1.f));
+    //  gameapi -> drawLine(groundHit.value().point, groundHit.value().point + delta, false, id, std::nullopt, std::nullopt, std::nullopt);
+    //}
   }
 
   ////////// POWERUP ////////////////////////////
@@ -171,7 +179,6 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 
   /// SOUND ///////////////////
   {
-    auto velocity = getGameObjectVelocity(id);
     std::cout << "ball velocity: " << glm::length(velocity) << std::endl;
     float percentage = glm::length(velocity) / 10.f;
     if (percentage > 2.f){

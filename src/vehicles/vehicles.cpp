@@ -126,9 +126,6 @@ float limitCameraDistance(objid id, glm::vec3 position, glm::quat rotation, glm:
       }
     }
   }
-  if (hitobjects.size() > 0){
-    playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, std::nullopt, false); 
-  }
 
   std::cout << "limited distance: " << limitedDistance << std::endl;
   return limitedDistance;
@@ -144,14 +141,10 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
       auto position  =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get vehicle position for camera");
       auto camera = lookThirdPersonCalc(vehicle.state.managedCamera, id, false);
       auto adjustedDistance = limitCameraDistance(id, position, camera.rotation, camera.position, vehicle.state.managedCamera);
-     // vehicle.state.managedCamera.actualDistanceFromTarget = adjustedDistance;
-      //vehicle.state.managedCamera.distanceFromTarget = adjustedDistance;
-
 
       auto deltaTime = gameapi -> timeElapsed();
-      float smoothTime = 0.1f; // seconds to catch up
+      float smoothTime = 0.05f; // seconds to catch up
       float alpha = 1.0f - std::exp(-deltaTime / smoothTime);
-
 
 
       if (SHOULD_SMOOTH_ZOOM){
