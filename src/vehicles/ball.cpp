@@ -132,6 +132,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
         gameapi -> applyImpulse(id, jumpImpulse);
       }
+      applyScreenshake(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
       playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
     }
     vehicleBall.shouldJump = false;
