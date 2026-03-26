@@ -15,6 +15,7 @@ struct BallModeOptions{
    bool didLose;
    bool shouldReset;
    bool didReset;
+
 };
 
 void startBallMode(objid sceneId);

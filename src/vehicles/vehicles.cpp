@@ -196,3 +196,12 @@ std::optional<BallPowerup> getBallPowerup(Vehicles& vehicles, objid vehicleId){
   modassert(vehicleBall, "vehicle is not a ball");
   return vehicleBall -> powerup;
 }
+
+std::optional<VehicleBall*> getVehicleBall(Vehicles& vehicles, objid vehicleId){
+  auto& vehicle = vehicles.vehicles.at(vehicleId);
+  VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+  if (vehicleBall){
+    return vehicleBall;
+  }
+  return std::nullopt;
+}

@@ -223,10 +223,17 @@ void explodeBall(){
 	gameapi -> sendNotifyMessage("ball", std::string("explodeball"));
 }
 
+struct GravityHole {
+
+};
+void gravityHoleBall(){
+	gameapi -> sendNotifyMessage("ballgravity", GravityHole{});
+}
+
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
-	  .events = { "ball" },
+	  .events = { "ball", "ballgravity" },
 	  .createGametype = [](void* data) -> std::any {
 			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
 			{
@@ -250,6 +257,7 @@ GameTypeInfo getBallMode(){
 	  	modeOptions -> shouldReset = false;
 	  	modeOptions -> didReset = false;
 
+
 			changeUi(true);
  	   	showTimeElapsed(true);
 
@@ -258,6 +266,12 @@ GameTypeInfo getBallMode(){
 	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
 	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballMode, "ballMode options");
+
+	  	if (event == "ballgravity"){
+	  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
+	  		setBallGravityWell(ballMode -> ballId.value(), *ballVehicle.value(), true);
+	  		return false;
+	  	}
 
 	  	std::string* message = std::any_cast<std::string>(&value);
 	  	modassert(message, "invalid type ball-mode");
@@ -275,6 +289,8 @@ GameTypeInfo getBallMode(){
 	  		setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
 	  		setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
 	  	}
+
+
 	   	return false;
 	  },
 	  .getDebugText = [](std::any& gametype) -> std::string {

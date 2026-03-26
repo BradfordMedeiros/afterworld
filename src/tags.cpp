@@ -1135,6 +1135,21 @@ std::vector<TagUpdater> tagupdates = {
 	},
 
 	TagUpdater {
+		.attribute = "gravityhole",
+		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+
+		},
+  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  	},
+  	.onFrame = [](Tags& tags) -> void {
+  	},
+  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+	},
+	
+	
+
+
+	TagUpdater {
 		.attribute = "triggercolor",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 		  auto objHandle = getAttrHandle(id);

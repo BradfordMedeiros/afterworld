@@ -318,8 +318,29 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "laserlength",
           .attributeValue = laserLength.value(),
         });       
+    
+    }else if (*className.value() == "gravityhole"){
+        *shouldWrite = true;
+        addCoreTrench(entity, attributes, "../gameresources/build/objtypes/gravityhole.gltf");
 
-        ///////////////////////////////
+        auto rotationEuler = getVec3Value(entity, "angles");
+        if (rotationEuler.has_value()){
+          auto rotation = quatFromTrenchBroomAngles(
+            rotationEuler.value().x,
+            rotationEuler.value().y,
+            rotationEuler.value().z
+          );
+          auto vecValue = serializeQuatToVec4(rotation);
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "rotation",
+            .attributeValue = vecValue,
+          });
+        }
+        
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "gravityhole",
+          .attributeValue = "true",
+        });     
 
     }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;

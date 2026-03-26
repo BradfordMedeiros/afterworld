@@ -124,17 +124,24 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     auto torqueAmount = rotation * glm::vec3(torqueMagnitude * direction.z, torqueMagnitude * direction.y, -1 * torqueMagnitude * direction.x);
     gameapi -> applyTorque(id, torqueAmount);
 
-    if (vehicleBall.shouldJump && vehicleBall.isGrounded){
-      if (RELATIVE_JUMP){
-        auto jumpImpulse = glm::normalize(groundHit.value().normal) * glm::vec3(0.f, 0.f, -1.f * vehicleBall.ballConfig.jumpMagnitude); 
-        gameapi -> applyImpulse(id, jumpImpulse);
-      }else{
-        auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
-        gameapi -> applyImpulse(id, jumpImpulse);
-      }
-      applyScreenshake(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
+    if (vehicleBall.shouldJump && vehicleBall.inGravityWell){
+      setBallGravityWell(id, vehicleBall, false);
+      gameapi -> applyImpulse(id, glm::vec3(0.f, 200.f, 0.f));
       playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
+    }else{
+      if (vehicleBall.shouldJump && vehicleBall.isGrounded){
+        if (RELATIVE_JUMP){
+          auto jumpImpulse = glm::normalize(groundHit.value().normal) * glm::vec3(0.f, 0.f, -1.f * vehicleBall.ballConfig.jumpMagnitude); 
+          gameapi -> applyImpulse(id, jumpImpulse);
+        }else{
+          auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
+          gameapi -> applyImpulse(id, jumpImpulse);
+        }
+        applyScreenshake(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
+        playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
+      }  
     }
+
     vehicleBall.shouldJump = false;
 
     /// debug visualization
@@ -195,4 +202,23 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   }
 
   //std::cout << "onVehicleFrameBall: " << id << " , apply force = " << print(amount) <<  ", apply torque = " << print(torqueAmount) <<  ", name = " << gameapi -> getGameObjNameForId(id).value() << ", occupied = " << gameapi -> getGameObjNameForId(vehicle.occupied.value()).value() << std::endl;
+}
+
+void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter){
+  if (enter){
+    // Otherwise the recollides with itself immediately
+    auto currTime = gameapi -> timeSeconds(false);
+    auto elapsedTime = currTime - vehicleBall.lastGravityTime;
+    if (elapsedTime < 1.f){
+      return;
+    }
+    std::cout << "gravity well enter" << std::endl;
+    setGameObjectPhysicsEnable(id, false);
+    vehicleBall.lastGravityTime = currTime;
+    vehicleBall.inGravityWell = true;
+  }else{
+    std::cout << "gravity well exit" << std::endl;
+    setGameObjectPhysicsEnable(id, true);
+    vehicleBall.inGravityWell = false;
+  }
 }

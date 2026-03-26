@@ -31,5 +31,6 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams);
 /// vehicle type specific stuff
 void setPowerupBall(Vehicles& vehicle, objid vehicleId, std::optional<BallPowerup> powerup);
 std::optional<BallPowerup> getBallPowerup(Vehicles& vehicle, objid vehicleId);
+std::optional<VehicleBall*> getVehicleBall(Vehicles& vehicles, objid vehicleId);
 
 #endif
