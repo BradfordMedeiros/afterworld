@@ -5,6 +5,9 @@ extern CustomApiBindings* gameapi;
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 void applyScreenshake(int playerIndex, glm::vec3 impulse);
 int getDefaultPlayerIndex();
+bool addToGravityWell(objid gravityWellId, objid managed);
+void removeFromGravityWell(objid managed);
+void goToNextGravityWell(objid managed, glm::vec3 dir);
 
 /*
   TODO 
@@ -125,8 +128,10 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     gameapi -> applyTorque(id, torqueAmount);
 
     if (vehicleBall.shouldJump && vehicleBall.inGravityWell){
-      setBallGravityWell(id, vehicleBall, false);
-      gameapi -> applyImpulse(id, glm::vec3(0.f, 200.f, 0.f));
+      //setBallGravityWell(id, vehicleBall, false, 0);
+      goToNextGravityWell(id, rotation * glm::vec3(0.f, 0.f, -1.f));
+
+      //gameapi -> applyImpulse(id, glm::vec3(0.f, 200.f, 0.f));
       playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
     }else{
       if (vehicleBall.shouldJump && vehicleBall.isGrounded){
@@ -204,7 +209,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   //std::cout << "onVehicleFrameBall: " << id << " , apply force = " << print(amount) <<  ", apply torque = " << print(torqueAmount) <<  ", name = " << gameapi -> getGameObjNameForId(id).value() << ", occupied = " << gameapi -> getGameObjNameForId(vehicle.occupied.value()).value() << std::endl;
 }
 
-void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter){
+void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gravityWellId){
   if (enter){
     // Otherwise the recollides with itself immediately
     auto currTime = gameapi -> timeSeconds(false);
@@ -216,9 +221,11 @@ void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter){
     setGameObjectPhysicsEnable(id, false);
     vehicleBall.lastGravityTime = currTime;
     vehicleBall.inGravityWell = true;
+    addToGravityWell(gravityWellId, id);
   }else{
     std::cout << "gravity well exit" << std::endl;
     setGameObjectPhysicsEnable(id, true);
     vehicleBall.inGravityWell = false;
+    removeFromGravityWell(id);
   }
 }

@@ -38,6 +38,6 @@ struct VehicleBall {
 
 VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state);
 void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams);
-void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter);
+void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gravityWellId);
 
 #endif

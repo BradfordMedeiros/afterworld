@@ -276,6 +276,75 @@ struct Skippable {
 };
 std::unordered_map<objid, Skippable> skippable;
 
+struct GravityWell {
+	objid id;
+	std::optional<objid> managedItem;
+};
+std::unordered_map<objid, GravityWell> gravityWells;
+
+std::optional<GravityWell*> gravityWellByManaged(objid managed){
+	for (auto& [id, gravityWell] : gravityWells){
+		if (gravityWell.managedItem.has_value() && gravityWell.managedItem.value() == managed){
+			return &gravityWell;
+		}
+	}
+	return std::nullopt;
+}
+bool addToGravityWell(objid gravityWellId, objid managed){
+	auto& gravityWell = gravityWells.at(gravityWellId);
+	if (gravityWell.managedItem.has_value()){
+		return false;
+	}
+	gravityWell.managedItem = managed;
+	return true;
+}
+void removeFromGravityWell(objid managed){
+	auto gravityWell = gravityWellByManaged(managed);
+	if (gravityWell.has_value()){
+		gravityWell.value() -> managedItem = std::nullopt;
+	}
+}
+
+// Go to the closest gravity well in the direction specified by the direction
+void goToNextGravityWell(objid managed, glm::vec3 moveDirection){
+	auto gravityWell = gravityWellByManaged(managed);
+
+	std::optional<objid> newWellId;
+	std::optional<float> newDistance;
+	if (gravityWell.has_value()){
+		auto wellFromPosition = gameapi -> getGameObjectPos(gravityWell.value() -> id, true, "[gamelogic] goToNextGravityWell closest well from");
+
+		for (auto& [id, well] : gravityWells){
+			if(gravityWell.value() -> id == well.id){
+				continue;
+			}
+			auto wellToPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] goToNextGravityWell closest well to");
+			auto distance = glm::distance(wellFromPosition, wellToPos);
+
+			auto direction = wellToPos - wellFromPosition;
+			auto dir = glm::dot(direction, moveDirection);
+			if (dir < 0){
+				continue;
+			}
+			if (!newDistance.has_value()){
+				newWellId = id;
+				newDistance = distance;
+			}else{
+				if (distance < newDistance.value()){
+					newDistance = distance;
+					newWellId = id;
+				}
+			}
+		}
+	}
+
+	if (newWellId.has_value()){
+		gravityWell.value() -> managedItem = std::nullopt;
+		gravityWells.at(newWellId.value()).managedItem = managed;		
+	}
+
+}
+
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "animation",  // TODO this should probably move to entity
@@ -1137,11 +1206,32 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "gravityhole",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-
+			gravityWells[id] = GravityWell{
+				.id = id,
+			};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
+  		gravityWells.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
+  		for (auto& [id, gravityWell] : gravityWells){
+  			if (!gravityWell.managedItem.has_value()){
+  				continue;
+  			}
+				auto position = gameapi -> getGameObjectPos(gravityWell.managedItem.value(), true, "[gamelogic] gravityhole");
+			
+				auto wellPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] wellPosition");
+  			auto targetWellPosition = wellPosition + glm::vec3(0.f, 2.f, 0.f);
+
+  			auto direction = targetWellPosition - position;
+  			float speed = gameapi -> timeElapsed() * 5.f;
+  			auto newPosition = position + glm::vec3(direction.x * speed, direction.y * speed, direction.z * speed);
+			
+
+				gameapi -> setGameObjectPosition(gravityWell.managedItem.value(), newPosition, false, Hint { .hint = "[gamelogic] - set well item posn" });
+
+  		}
+
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},

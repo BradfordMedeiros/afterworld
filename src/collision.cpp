@@ -16,7 +16,7 @@ void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
 void explodeBall();
-void gravityHoleBall();
+void gravityHoleBall(objid gravityHoleId);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -126,9 +126,9 @@ void handleKillplaneCollision(objid obj1, objid obj2){
   }
 }
 
-void doGravityHole(objid id){
+void doGravityHole(objid id, objid gravityHole){
   if (isControlledVehicle(id)){
-    gravityHoleBall();
+    gravityHoleBall(gravityHole);
   }
 }
 void handleGravityHoleCollision(objid obj1, objid obj2){
@@ -137,7 +137,7 @@ void handleGravityHoleCollision(objid obj1, objid obj2){
     auto gravityHole = getStrAttr(objAttr1, "gravityhole");
     if (gravityHole.has_value()){
       modlog("gravityHole 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doGravityHole(obj2);
+      doGravityHole(obj2, obj1);
     }
   }
    
@@ -147,7 +147,7 @@ void handleGravityHoleCollision(objid obj1, objid obj2){
     auto gravityHole = getStrAttr(objAttr2, "gravityhole");
     if (gravityHole.has_value()){
       modlog("gravityHole 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doGravityHole(obj1);
+      doGravityHole(obj1, obj2);
     }
   }
 }

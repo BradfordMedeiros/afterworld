@@ -224,10 +224,12 @@ void explodeBall(){
 }
 
 struct GravityHole {
-
+	objid gravityHoleId;
 };
-void gravityHoleBall(){
-	gameapi -> sendNotifyMessage("ballgravity", GravityHole{});
+void gravityHoleBall(objid gravityHoleId){
+	gameapi -> sendNotifyMessage("ballgravity", GravityHole{
+		.gravityHoleId = gravityHoleId,
+	});
 }
 
 GameTypeInfo getBallMode(){
@@ -268,8 +270,10 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballMode, "ballMode options");
 
 	  	if (event == "ballgravity"){
+		  	GravityHole* gravityHole = std::any_cast<GravityHole>(&value);
+		  	modassert(gravityHole, "expected type for ballgravity");
 	  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
-	  		setBallGravityWell(ballMode -> ballId.value(), *ballVehicle.value(), true);
+	  		setBallGravityWell(ballMode -> ballId.value(), *ballVehicle.value(), true, gravityHole -> gravityHoleId);
 	  		return false;
 	  	}
 
