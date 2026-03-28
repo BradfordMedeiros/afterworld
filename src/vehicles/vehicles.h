@@ -26,6 +26,8 @@ bool isVehicle(Vehicles& vehicle, objid id);
 std::vector<int> getVehicleIds();
 
 void onVehicleKey(Vehicles& vehicle, int key, int action);
+void onVehicleMouseClick(Vehicles& vehicle, int button, int action, int mods);
+
 void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams);
 
 /// vehicle type specific stuff

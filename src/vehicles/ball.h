@@ -30,6 +30,7 @@ struct VehicleBall {
 
   float lastGravityTime = 0.f;
   bool inGravityWell = false;
+  bool shouldExitGravityWell = false;
 
   float lastPlayTime = 0.f;
 
@@ -38,6 +39,8 @@ struct VehicleBall {
 
 VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state);
 void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams);
+void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mods);
+void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action);
 void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gravityWellId);
 
 #endif

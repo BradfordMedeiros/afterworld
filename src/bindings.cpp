@@ -1704,6 +1704,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
   }
   onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
+  onVehicleMouseClick(vehicles, button, action, mods);
 
   modlog("input", std::string("on mouse down: button = ") + std::to_string(button) + std::string(", action = ") + std::to_string(action));
 

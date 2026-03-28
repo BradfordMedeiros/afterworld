@@ -127,13 +127,20 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     auto torqueAmount = rotation * glm::vec3(torqueMagnitude * direction.z, torqueMagnitude * direction.y, -1 * torqueMagnitude * direction.x);
     gameapi -> applyTorque(id, torqueAmount);
 
-    if (vehicleBall.shouldJump && vehicleBall.inGravityWell){
+    if (vehicleBall.shouldExitGravityWell && vehicleBall.inGravityWell){
       //setBallGravityWell(id, vehicleBall, false, 0);
       goToNextGravityWell(id, rotation * glm::vec3(0.f, 0.f, -1.f));
 
       //gameapi -> applyImpulse(id, glm::vec3(0.f, 200.f, 0.f));
       playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
     }else{
+      if (vehicleBall.shouldJump && vehicleBall.inGravityWell){
+        setBallGravityWell(id, vehicleBall, false, 0);
+
+        playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
+        auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
+        gameapi -> applyImpulse(id, jumpImpulse);
+      }
       if (vehicleBall.shouldJump && vehicleBall.isGrounded){
         if (RELATIVE_JUMP){
           auto jumpImpulse = glm::normalize(groundHit.value().normal) * glm::vec3(0.f, 0.f, -1.f * vehicleBall.ballConfig.jumpMagnitude); 
@@ -147,6 +154,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
       }  
     }
 
+    vehicleBall.shouldExitGravityWell = false;
     vehicleBall.shouldJump = false;
 
     /// debug visualization
@@ -207,6 +215,20 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   }
 
   //std::cout << "onVehicleFrameBall: " << id << " , apply force = " << print(amount) <<  ", apply torque = " << print(torqueAmount) <<  ", name = " << gameapi -> getGameObjNameForId(id).value() << ", occupied = " << gameapi -> getGameObjNameForId(vehicle.occupied.value()).value() << std::endl;
+}
+
+void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mods){
+  if (button == 0 && action == 1){
+    vehicleBall.shouldExitGravityWell = true;
+  }
+}
+void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action){
+  if(isJumpKey(key) /* space */ && action == 1){
+    vehicleBall.shouldJump = true;
+  }
+  if (isInteractKey(key) && action == 1){
+    vehicleBall.shouldUsePowerUp = true;
+  }
 }
 
 void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gravityWellId){

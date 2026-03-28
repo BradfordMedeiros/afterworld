@@ -92,12 +92,18 @@ void onVehicleKey(Vehicles& vehicles, int key, int action){
     if (vehicle.state.occupied.has_value()){
       VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
       if (vehicleBall){
-        if(isJumpKey(key) /* space */ && action == 1){
-          vehicleBall -> shouldJump = true;
-        }
-        if (isInteractKey(key) && action == 1){
-          vehicleBall -> shouldUsePowerUp = true;
-        }
+        onVehicleBallKey(*vehicleBall, key, action);
+      }
+    }
+  }
+}
+
+void onVehicleMouseClick(Vehicles& vehicles, int button, int action, int mods){
+  for (auto &[id, vehicle] :  vehicles.vehicles){
+    if (vehicle.state.occupied.has_value()){
+      VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+      if (vehicleBall){
+        onVehicleBallMouse(*vehicleBall, button, action, mods);
       }
     }
   }
