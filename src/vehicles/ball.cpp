@@ -7,7 +7,7 @@ void applyScreenshake(int playerIndex, glm::vec3 impulse);
 int getDefaultPlayerIndex();
 bool addToGravityWell(objid gravityWellId, objid managed);
 void removeFromGravityWell(objid managed);
-void goToNextGravityWell(objid managed, glm::vec3 dir);
+std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 dir);
 
 /*
   TODO 
@@ -129,9 +129,11 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 
     if (vehicleBall.shouldExitGravityWell && vehicleBall.inGravityWell){
       //setBallGravityWell(id, vehicleBall, false, 0);
-      goToNextGravityWell(id, rotation * glm::vec3(0.f, 0.f, -1.f));
-
-      //gameapi -> applyImpulse(id, glm::vec3(0.f, 200.f, 0.f));
+      auto impulse = goToNextGravityWell(id, rotation * glm::vec3(0.f, 0.f, -1.f));
+      if (impulse.has_value()){
+        setBallGravityWell(id, vehicleBall, false, 0);
+        gameapi -> applyImpulse(id, impulse.value());
+      }
       playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
     }else{
       if (vehicleBall.shouldJump && vehicleBall.inGravityWell){
