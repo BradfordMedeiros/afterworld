@@ -1218,7 +1218,7 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			gravityWells[id] = GravityWell{
 				.id = id,
-				.launcher = glm::vec3(0.f, 100.f, -100.f),
+				.launcher = glm::vec3(0.f, 100.f, 0.f),
 			};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
@@ -1233,9 +1233,7 @@ std::vector<TagUpdater> tagupdates = {
 			
 				auto wellPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] wellPosition");
 				auto wellRotation =  gameapi -> getGameObjectRotation(id, true, "[gamelogic] wellRotation");
-
   			auto targetWellPosition = wellPosition + (wellRotation * glm::vec3(0.f, 1.f, 0.f));
-
 
   			auto direction = targetWellPosition - position;
   			float speed = gameapi -> timeElapsed() * 5.f;
