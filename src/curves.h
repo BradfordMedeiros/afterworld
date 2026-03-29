@@ -20,7 +20,7 @@ struct ManagedRailMovement {
 
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 
-
+enum LinePointVisualize { VISUALIZE_NONE, VISUALIZE_LINE };
 struct LinePoints {
   objid railId;
   std::string railName;
@@ -28,6 +28,7 @@ struct LinePoints {
   std::vector<glm::quat> rotations;
   std::vector<int> indexs;
   std::vector<int> times;
+  std::vector<LinePointVisualize> visuals;
 };
 
 struct RaceData {
@@ -48,6 +49,7 @@ struct RailNode {
   glm::vec3 point;
   glm::quat rotation;
   int time;
+  std::optional<std::string> visual;
 };
 void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);

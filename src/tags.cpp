@@ -1137,6 +1137,10 @@ std::vector<TagUpdater> tagupdates = {
 	  		railTimes.push_back(railTime);
 	  	}
 
+	  	auto railVisualizeRaw = getStrAttr(attrHandle, "data-visual");
+	  	modassert(railVisualizeRaw.has_value(), "no visual for rails");
+	  	auto railVisualizations = parseDataString(railVisualizeRaw.value());
+
 			std::vector<RailNode> nodes;
 	  	for (int i = 0; i < dataPositions.size(); i++){
   		  auto railName = railNames.at(i);
@@ -1144,12 +1148,14 @@ std::vector<TagUpdater> tagupdates = {
   		  auto railTime = railTimes.at(i);
 	  		auto posVec = dataPositions.at(i);
 	  		auto rotVec = dataRotations.at(i);
+	  		auto railVisual = railVisualizations.at(i);
 	  		nodes.push_back(RailNode {
 	  			.rail = railName,
 	  			.railIndex = railIndex,
 	  			.point = posVec,
 	  			.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
 	  			.time = railTime,
+	  			.visual = railVisual != "" ? railVisual : std::optional<std::string>(std::nullopt),
 	  		});
 	  	}
 

@@ -7,6 +7,7 @@ struct RailEntity {
   std::string railName;
   int railIndex;
   int railTime;
+  std::optional<std::string> visualization;
 };
 struct OrbEntity {
   glm::vec3 position;
@@ -460,12 +461,16 @@ CompileMapFns getCompileMapForBallGame(){
         auto railTime = getIntValue(entity, "time");
         auto rotationEuler = getVec3Value(entity, "angles");
 
+        auto railVisualization = getValue(entity, "rail-visual");
+        auto railVisualizationStr = railVisualization.has_value() ? *railVisualization.value() : "";
+
         ballGameCompile.rails.push_back(RailEntity {
           .position = position.value(),
           .rotation = rotationEuler.has_value() ? rotationEuler.value() : glm::vec3(0.f, 0.f, 0.f),
           .railName = *rail.value(),
           .railIndex = railIndex.value(),
           .railTime = railTime.has_value() ? railTime.value() : -1,
+          .visualization = railVisualizationStr,
         });
     }else if (*className.value() == "orb"){
         auto position = getScaledVec3Value(mapData, entity, "origin");
@@ -638,6 +643,16 @@ CompileMapFns getCompileMapForBallGame(){
           }
           generatedScene += data;
         }
+
+        {
+          std::string data = "combined_entities_rail:data-visual:";
+          for (int i = 0; i < ballGameCompile.rails.size(); i++){
+            auto visualization = ballGameCompile.rails.at(i).visualization.has_value() ? ballGameCompile.rails.at(i).visualization.value() : "";
+            data = data + visualization + ((i == (ballGameCompile.rails.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+
     }
     if (ballGameCompile.orbs.size() != 0){
         generatedScene += "combined_entities_orb:orbui:true\n";

@@ -81,6 +81,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 			.rotations = {},
 			.indexs = {},
 			.times = {},
+			.visuals = {},
 		};
 	}
 
@@ -90,6 +91,14 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		rail.rotations.push_back(node.rotation);
 		rail.indexs.push_back(node.railIndex);
 		rail.times.push_back(node.time);
+
+		if (!node.visual.has_value()){
+			rail.visuals.push_back(VISUALIZE_NONE);
+		}else if (node.visual.value() == "line"){
+			rail.visuals.push_back(VISUALIZE_LINE);
+		}else{
+			modassert(false, "rail visualization not supported");
+		}
 	}
 
 	for (auto& [ownerId, railsForId] : rails){
