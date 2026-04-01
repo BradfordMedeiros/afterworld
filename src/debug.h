@@ -21,4 +21,6 @@ void debugOnKey(int key, int scancode, int action, int mods);
 // since hard to eg save state etc 
 void simpleOnFrame(std::function<void()> fn, float duration);
 
+void onDebugMessage(std::string& key, std::any& value);
+
 #endif 

@@ -31,6 +31,7 @@ struct VehicleBall {
   float lastGravityTime = 0.f;
   bool inGravityWell = false;
   bool shouldExitGravityWell = false;
+  std::optional<float> lastAutoTime;
 
   float lastPlayTime = 0.f;
 

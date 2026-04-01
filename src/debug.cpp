@@ -741,3 +741,9 @@ void simpleOnFrame(std::function<void()> fn, float duration){
 		.fn = fn,
 	});
 }
+
+void onDebugMessage(std::string& key, std::any& value){
+	if (key == "testtrigger"){
+		modassert(false, "on debug message testtrigger");
+	}
+}

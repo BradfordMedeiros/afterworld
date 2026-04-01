@@ -8,6 +8,7 @@ int getDefaultPlayerIndex();
 bool addToGravityWell(objid gravityWellId, objid managed);
 void removeFromGravityWell(objid managed);
 std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 dir);
+bool shouldAutolaunchGravityWell(objid managed);
 
 /*
   TODO 
@@ -127,7 +128,16 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     auto torqueAmount = rotation * glm::vec3(torqueMagnitude * direction.z, torqueMagnitude * direction.y, -1 * torqueMagnitude * direction.x);
     gameapi -> applyTorque(id, torqueAmount);
 
-    if (vehicleBall.shouldExitGravityWell && vehicleBall.inGravityWell){
+    const float AUTO_GRAVITY_WELL_TIME = 0.5f;
+    auto shouldAuto = shouldAutolaunchGravityWell(id);
+    auto currentTime = gameapi -> timeSeconds(false);
+    auto enoughTime = !vehicleBall.lastAutoTime.has_value() || ((currentTime - vehicleBall.lastAutoTime.value()) > AUTO_GRAVITY_WELL_TIME);
+    std::cout << "should auto: " << shouldAuto << std::endl;
+    auto autoExitGravityWell = shouldAuto && enoughTime;
+    if ((autoExitGravityWell || vehicleBall.shouldExitGravityWell) && vehicleBall.inGravityWell){
+      if (shouldAuto){
+        vehicleBall.lastAutoTime = currentTime;
+      }
       //setBallGravityWell(id, vehicleBall, false, 0);
       auto impulse = goToNextGravityWell(id, rotation * glm::vec3(0.f, 0.f, -1.f));
       if (impulse.has_value()){

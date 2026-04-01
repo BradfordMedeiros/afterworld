@@ -278,6 +278,9 @@ std::unordered_map<objid, Skippable> skippable;
 
 struct GravityWell {
 	objid id;
+	
+	bool autolaunch;
+
 	std::optional<objid> managedItem;
 	std::optional<glm::vec3> launcher;
 };
@@ -353,6 +356,20 @@ std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 moveDirect
 
 	}
 	return impulse;
+}
+
+bool shouldAutolaunchGravityWell(objid managed){
+	auto gravityWellPtr = gravityWellByManaged(managed);
+	if (!gravityWellPtr.has_value()){
+		return false;
+	}
+
+	auto& gravityWell = *gravityWellByManaged(managed).value();
+	float currTime = gameapi -> timeSeconds(false);
+	if (gravityWell.autolaunch){
+		return true;
+ 	}
+	return false;
 }
 
 std::vector<TagUpdater> tagupdates = { 
@@ -1222,9 +1239,14 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "gravityhole",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			auto attrHandle = getAttrHandle(id);
+			auto launcherAmount = getVec3Attr(attrHandle, "launch");
+			auto autolaunch = getStrAttr(attrHandle, "holemode");
+
 			gravityWells[id] = GravityWell{
 				.id = id,
-				.launcher = glm::vec3(0.f, 100.f, 0.f),
+				.autolaunch = autolaunch.has_value() ? (autolaunch.value() == "auto") : false,
+				.launcher = launcherAmount,
 			};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
@@ -1235,6 +1257,7 @@ std::vector<TagUpdater> tagupdates = {
   			if (!gravityWell.managedItem.has_value()){
   				continue;
   			}
+
 				auto position = gameapi -> getGameObjectPos(gravityWell.managedItem.value(), true, "[gamelogic] gravityhole");
 			
 				auto wellPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] wellPosition");
@@ -1242,7 +1265,7 @@ std::vector<TagUpdater> tagupdates = {
   			auto targetWellPosition = wellPosition + (wellRotation * glm::vec3(0.f, 1.f, 0.f));
 
   			auto direction = targetWellPosition - position;
-  			float speed = gameapi -> timeElapsed() * 5.f;
+  			float speed = gameapi -> timeElapsed() * 0.5f;
   			auto newPosition = position + glm::vec3(direction.x * speed, direction.y * speed, direction.z * speed);
 			
 

@@ -20,7 +20,7 @@ struct ManagedRailMovement {
 
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 
-enum LinePointVisualize { VISUALIZE_NONE, VISUALIZE_LINE };
+enum LinePointVisualize { VISUALIZE_NONE, VISUALIZE_LINE, VISUALIZE_CONN };
 struct LinePoints {
   objid railId;
   std::string railName;

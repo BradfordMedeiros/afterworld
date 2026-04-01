@@ -29,12 +29,67 @@ std::optional<LinePoints*> railForId(objid id){
 	return std::nullopt;
 }
 
+struct PointConnection {
+	int from;
+	int to;
+};
+bool containsConnectionFrom(std::vector<PointConnection>& connections, int from){
+	for (auto& connection : connections){
+		if (connection.from == from){
+			return true;
+		}
+	}
+	return false;
+}
 void drawCurve(LinePoints& line, glm::vec3 point, objid owner){
-  for (int i = 0; i < (line.points.size() - 1); i++){
+  std::vector<PointConnection> pointConnections;
+  for (int i = 0; i < line.points.size(); i++){
     auto pointFrom = line.points.at(i) + point;
-    auto pointTo = line.points.at(i + 1) + point;
-    gameapi -> drawLine(pointFrom, pointTo, false, owner, std::nullopt, std::nullopt, std::nullopt);
+    auto rotation = line.rotations.at(i);
+    auto visual = line.visuals.at(i);
+    if (visual == VISUALIZE_LINE){
+    	glm::vec3 up = pointFrom + (rotation * glm::vec3(0.f, 1.f, 0.f));
+    	glm::vec3 forward = pointFrom + (rotation * glm::vec3(0.f, 0.f, -1.f));
+    	glm::vec3 right = pointFrom + (rotation * glm::vec3(1.f, 0.f, 0.f));
+
+    	gameapi -> drawLine(pointFrom, up, false, owner, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    	gameapi -> drawLine(pointFrom, forward, false, owner, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    	gameapi -> drawLine(pointFrom, right, false, owner, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    }else if (visual == VISUALIZE_CONN){
+    	if ((i - 1) >= 0){
+    		int pointFrom = i - 1;
+    		int pointTo = i;
+    		if (!containsConnectionFrom(pointConnections, pointFrom)){
+    			pointConnections.push_back(PointConnection {
+    				.from = pointFrom,
+    				.to = pointTo,
+    			});   
+    		}
+    	}
+    	if ((i + 1) < line.points.size()){
+    		int pointFrom = i;
+    		int pointTo = i + 1;
+     		if (!containsConnectionFrom(pointConnections, pointFrom)){
+    			pointConnections.push_back(PointConnection {
+    				.from = pointFrom,
+    				.to = pointTo,
+    			});    			
+    		}
+    	}
+    }else if (visual == VISUALIZE_NONE){
+    	// do nothing
+    }else{
+    	modassert(false, "invalid visual type draw curve");
+    }
   }
+  std::cout << "point connection---------------: size = " << line.points.size() << std::endl;
+  for (auto& pointConnection : pointConnections){
+  	auto pointFrom = line.points.at(pointConnection.from);
+  	auto pointTo = line.points.at(pointConnection.to);
+   	gameapi -> drawLine(pointFrom, pointTo, false, owner, std::nullopt, std::nullopt, std::nullopt);
+   	std::cout << "point connection: " << print(pointFrom) << " | " << print(pointTo) << std::endl;
+  }
+
 }
 
 void sortRail(LinePoints& line){
@@ -92,12 +147,14 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		rail.indexs.push_back(node.railIndex);
 		rail.times.push_back(node.time);
 
-		if (!node.visual.has_value()){
+		if (!node.visual.has_value() || node.visual.value() == "none"){
 			rail.visuals.push_back(VISUALIZE_NONE);
 		}else if (node.visual.value() == "line"){
 			rail.visuals.push_back(VISUALIZE_LINE);
+		}else if (node.visual.value() == "conn"){
+			rail.visuals.push_back(VISUALIZE_CONN);
 		}else{
-			modassert(false, "rail visualization not supported");
+			modassert(false, std::string("rail visualization not supported: ") + node.visual.value());
 		}
 	}
 
@@ -127,7 +184,7 @@ void drawAllCurves(objid ownerId){
 	if (DRAW_CURVES){
   	for (auto &[_, railsForId] : rails){
   		for (auto& line : railsForId){
-	  		drawCurve(line, glm::vec3(0.f, 2.f, 0.f), ownerId);
+	  		drawCurve(line, glm::vec3(0.f, 0.f, 0.f), ownerId);
   		}
   	}		
 	}

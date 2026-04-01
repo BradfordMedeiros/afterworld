@@ -322,6 +322,17 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
         triggerColor(triggerZone.value());
       }
     }
+
+    auto triggerEvent = getStrAttr(objAttr, "trigger_event");
+    if (triggerEvent.has_value()){
+      auto triggerEventValue = getStrAttr(objAttr, "trigger_event_value");
+      if (triggerEventValue.has_value()){
+        gameapi -> sendNotifyMessage(triggerEvent.value(), triggerEventValue.value());
+      }else{
+        gameapi -> sendNotifyMessage(triggerEvent.value(), std::string(""));
+      }
+    }
+
   }else if (isControlledVehicle(obj2)){
     auto objAttr = getAttrHandle(obj1);
     auto triggerZone = getStrAttr(objAttr, "trigger_zone");
@@ -334,6 +345,15 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
       }else{
         triggerMovement(triggerZone.value(), std::nullopt);
         triggerColor(triggerZone.value());
+      }
+    }
+    auto triggerEvent = getStrAttr(objAttr, "trigger_event");
+    if (triggerEvent.has_value()){
+      auto triggerEventValue = getStrAttr(objAttr, "trigger_event_value");
+      if (triggerEventValue.has_value()){
+        gameapi -> sendNotifyMessage(triggerEvent.value(), triggerEventValue.value());
+      }else{
+        gameapi -> sendNotifyMessage(triggerEvent.value(), std::string(""));
       }
     }
   }

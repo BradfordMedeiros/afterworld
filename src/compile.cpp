@@ -275,6 +275,26 @@ CompileMapFns getCompileMapForBallGame(){
           });
         }
         addTriggerColor(entity, attributes);
+
+        auto triggerEvent = getValue(entity, "trigger_event");
+        if (triggerEvent.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "trigger_event",
+            .attributeValue = *triggerEvent.value(),
+          });     
+        }
+
+        auto triggerEventValue = getValue(entity, "trigger_event_value");
+        if (triggerEventValue.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "trigger_event_value",
+            .attributeValue = *triggerEventValue.value(),
+          });     
+        }
+
+        
+
+
     }else if (*className.value() == "killplane"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
@@ -342,6 +362,23 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "gravityhole",
           .attributeValue = "true",
         });     
+
+        auto launch = getVec3Value(entity, "launch");
+        if (launch.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "launch",
+            .attributeValue = changeCoord(launch.value()),
+          });     
+        }
+
+        auto holemode = getValue(entity, "mode");
+        if (holemode.has_value()){
+          //modassert(*holemode.value() == "auto", "unsupported mode for gravityhole");
+          //attributes.push_back(GameobjAttributeOpts {
+          //  .field = "holemode",
+          //  .attributeValue = *holemode.value(),
+          //}); 
+        }
 
     }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
