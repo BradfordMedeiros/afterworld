@@ -363,6 +363,25 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });     
 
+        auto wellname = getValue(entity, "name");
+        if (wellname.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "wellname",
+            .attributeValue = *wellname.value(),
+          });        
+        }
+
+        auto targetwell = getValue(entity, "target");
+        if (targetwell.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "targetwell",
+            .attributeValue = *targetwell.value(),
+          });        
+        }
+
+
+
+
         auto launch = getVec3Value(entity, "launch");
         if (launch.has_value()){
           attributes.push_back(GameobjAttributeOpts {
@@ -373,11 +392,11 @@ CompileMapFns getCompileMapForBallGame(){
 
         auto holemode = getValue(entity, "mode");
         if (holemode.has_value()){
-          //modassert(*holemode.value() == "auto", "unsupported mode for gravityhole");
-          //attributes.push_back(GameobjAttributeOpts {
-          //  .field = "holemode",
-          //  .attributeValue = *holemode.value(),
-          //}); 
+          modassert(*holemode.value() == "auto", "unsupported mode for gravityhole");
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "holemode",
+            .attributeValue = *holemode.value(),
+          }); 
         }
 
     }else if (*className.value() == "bouncepad"){
