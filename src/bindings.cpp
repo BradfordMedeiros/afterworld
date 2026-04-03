@@ -717,6 +717,8 @@ void deliverPowerup(objid vehicle, objid powerupId){
     setPowerupBall(vehicles, vehicle, LOW_GRAVITY);
   }else if (powerup.type == "teleport"){
     setPowerupBall(vehicles, vehicle, TELEPORT);
+  }else if (powerup.type == "invincibility"){
+    setPowerupBall(vehicles, vehicle, INVINCIBILITY);
   }else{
     modassert(false, std::string("invalid powerup type: ") + powerup.type);
     setPowerupBall(vehicles, vehicle, std::nullopt);

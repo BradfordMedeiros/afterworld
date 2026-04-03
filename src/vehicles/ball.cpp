@@ -198,12 +198,21 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         }else if (vehicleBall.powerup.value() == REVERSE_GRAVITY){
           // This needs changes in the camera to feel correct
           setGameObjectGravity(id, glm::vec3(0.f, -1.f * vehicleBall.ballConfig.gravity, 0.f));
-        } else if (vehicleBall.powerup.value() == TELEPORT){
+        }else if (vehicleBall.powerup.value() == TELEPORT){
           vehicleBall.teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
+        }else if (vehicleBall.powerup.value() == INVINCIBILITY){
+          vehicleBall.invincibleStart = gameapi -> timeSeconds(false);
         }
         vehicleBall.powerup = std::nullopt;
 
         playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
+      }
+    }
+
+    if (vehicleBall.invincibleStart.has_value()){
+      auto diff = gameapi -> timeSeconds(false) - vehicleBall.invincibleStart.value();
+      if (diff > 5.f){
+        vehicleBall.invincibleStart = std::nullopt;
       }
     }
     vehicleBall.shouldUsePowerUp = false;

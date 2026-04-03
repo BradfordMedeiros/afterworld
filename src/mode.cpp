@@ -287,11 +287,14 @@ GameTypeInfo getBallMode(){
 	  	}
 
 	  	if (*message == "explodeball"){
-	  		ballMode -> didLose = true;
-	  		auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
-	  		createExplosion(position, 5.f, 0.f);
-	  		setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
-	  		setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
+	  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
+	  		if (!ballVehicle.value() -> invincibleStart.has_value()){
+	  			ballMode -> didLose = true;
+	  			auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
+	  			createExplosion(position, 5.f, 0.f);
+	  			setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
+	  			setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
+	  		}
 	  	}
 
 
@@ -349,6 +352,9 @@ GameTypeInfo getBallMode(){
 	 		  		return;
 	  			}else if (powerup.value() == TELEPORT){
 	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.png");
+	 		  		return;
+	  			}else if (powerup.value() == INVINCIBILITY){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.normal.png");
 	 		  		return;
 	  			}else{
 	  				modassert(false, "invalid powerup size ball.cpp");

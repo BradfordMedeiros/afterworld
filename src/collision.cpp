@@ -99,6 +99,10 @@ void handleDamageCollision(objid obj1, objid obj2){
   }
 }
 
+/////////////////////////
+bool isInKillPlane(objid id){
+  return false;
+}
 void doKillplane(objid id){
   if (isControlledVehicle(id)){
     explodeBall();
@@ -125,6 +129,7 @@ void handleKillplaneCollision(objid obj1, objid obj2){
     }
   }
 }
+///////////////////////////////////
 
 void doGravityHole(objid id, objid gravityHole){
   if (isControlledVehicle(id)){
@@ -151,7 +156,6 @@ void handleGravityHoleCollision(objid obj1, objid obj2){
     }
   }
 }
-
 
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force){
   static float lastForce = 0.f;
@@ -227,7 +231,6 @@ void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
 }
 
 
-
 bool isPlayer(objid id){
   auto playerAttr = getSingleAttr(id, "player");
   return playerAttr.has_value() && playerAttr.value() == "default";
@@ -287,7 +290,6 @@ void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
     tryPickupItem(obj1, obj2);
   }
 }
-
 
 void handleSpawnCollision(int32_t obj1, int32_t obj2){
   if (isControlledPlayer(obj2)){

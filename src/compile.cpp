@@ -106,7 +106,7 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "player_start"){
       *modelName = "playerspawn";
       *shouldWrite = true;
-    }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity"){
+    }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       *shouldWrite = true;
 
       attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -166,6 +166,11 @@ CompileMapFns getCompileMapForBallGame(){
         attributes.push_back(GameobjAttributeOpts {
           .field = "powerup",
           .attributeValue = "teleport",
+        });          
+      }else if (*className.value() == "powerup_invincibility"){
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "powerup",
+          .attributeValue = "invincibility",
         });          
       }else{
         modassert(false, "invalid powerup type");

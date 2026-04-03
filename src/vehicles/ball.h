@@ -21,6 +21,8 @@ struct VehicleBall {
   bool shouldJump;
   bool shouldUsePowerUp;
 
+  std::optional<float> invincibleStart;
+
   std::optional<glm::vec3> teleportPosition;
 
   std::optional<BallPowerup> powerup;
@@ -34,7 +36,6 @@ struct VehicleBall {
   std::optional<float> lastAutoTime;
 
   float lastPlayTime = 0.f;
-
 
 };
 
