@@ -2476,6 +2476,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
     modassert(gameobj1Exists && gameobj2Exists, "collision exit: objs do not exist");
     handleCollision(obj1, obj2, "switch-exit", "switch-exit-key", "exit");
+    handleRemoveKillplaneCollision(obj1, obj2);
     onCollisionExitWater(water, obj1, obj2);
     removeSurfaceModifier(obj1, obj2);
   };
@@ -2520,6 +2521,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modlog("objchange onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
     objectRemoved(idRemoved);
     removeSurfaceModifier(idRemoved);
+    handleRemoveKillplaneCollision(idRemoved);
   };
 
 

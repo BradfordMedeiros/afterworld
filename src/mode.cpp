@@ -15,6 +15,7 @@ void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
 void createExplosion(glm::vec3 position, float outerRadius, float damage);
+void handleRemoveKillplaneCollision(objid);
 
 void startRotate(objid id);
 void stopRotate(objid id);
@@ -219,10 +220,6 @@ void endBallMode(){
 	setHudEnabled(true);
 }
 
-void explodeBall(){
-	gameapi -> sendNotifyMessage("ball", std::string("explodeball"));
-}
-
 struct GravityHole {
 	objid gravityHoleId;
 };
@@ -259,7 +256,6 @@ GameTypeInfo getBallMode(){
 	  	modeOptions -> shouldReset = false;
 	  	modeOptions -> didReset = false;
 
-
 			changeUi(true);
  	   	showTimeElapsed(true);
 
@@ -286,18 +282,6 @@ GameTypeInfo getBallMode(){
 	  		ballMode -> shouldReset = true;
 	  	}
 
-	  	if (*message == "explodeball"){
-	  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
-	  		if (!ballVehicle.value() -> invincibleStart.has_value()){
-	  			ballMode -> didLose = true;
-	  			auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
-	  			createExplosion(position, 5.f, 0.f);
-	  			setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
-	  			setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
-	  		}
-	  	}
-
-
 	   	return false;
 	  },
 	  .getDebugText = [](std::any& gametype) -> std::string {
@@ -322,6 +306,19 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballMode, "ballMode options");
 	  	std::cout << "ball onframe" << std::endl;
 	  	if (ballMode -> ballId.has_value()){
+	  		if (isInKillPlane(ballMode -> ballId.value()) && !ballMode -> didLose && !ballMode -> didReset){ // didReset b/c otherwise at same pos
+		  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
+	  			if (!ballVehicle.value() -> invincibleStart.has_value()){
+	  				ballMode -> didLose = true;
+	  				auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
+	  				createExplosion(position, 5.f, 0.f);
+	  				setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
+	  				setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
+		  			handleRemoveKillplaneCollision(ballMode -> ballId.value());
+	  			}
+
+	  		}
+
 	  		if (ballMode -> didReset){ 
 	  			ballMode -> didReset = false;
 		  		setGameObjectMeshEnabled(ballMode -> ballId.value(), true);

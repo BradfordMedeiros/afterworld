@@ -8,6 +8,7 @@
 #include "./gameworld/progress.h"
 #include "./orbs.h"
 #include "./cutscene.h"
+#include "./collision.h"
 
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;

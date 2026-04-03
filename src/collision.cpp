@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern Director director;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
+std::set<objid> objectsInKillplane;
 
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
@@ -15,7 +16,6 @@ void deliverPowerup(objid vehicle, objid powerupId);
 void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
-void explodeBall();
 void gravityHoleBall(objid gravityHoleId);
 
 void handleInteract(objid gameObjId){
@@ -100,12 +100,14 @@ void handleDamageCollision(objid obj1, objid obj2){
 }
 
 /////////////////////////
+
 bool isInKillPlane(objid id){
-  return false;
+  return objectsInKillplane.count(id) > 0;
 }
 void doKillplane(objid id){
   if (isControlledVehicle(id)){
-    explodeBall();
+    std::cout << "killplane: add: " << id << std::endl;
+    objectsInKillplane.insert(id);
   }
 }
 
@@ -129,6 +131,25 @@ void handleKillplaneCollision(objid obj1, objid obj2){
     }
   }
 }
+
+void handleRemoveKillplaneCollision(objid obj1){
+  if (objectsInKillplane.count(obj1) > 0){
+    std::cout << "killplane: rm: " << obj1 << std::endl;
+    objectsInKillplane.erase(obj1);    
+  }
+}
+
+void handleRemoveKillplaneCollision(objid obj1, objid obj2){
+  if (objectsInKillplane.count(obj1) > 0){
+    std::cout << "killplane: rm: " << obj1 << std::endl;
+    objectsInKillplane.erase(obj1);
+  }
+  if (objectsInKillplane.count(obj2) > 0){
+    std::cout << "killplane: rm: " << obj2 << std::endl;
+    objectsInKillplane.erase(obj2);
+  }
+}
+
 ///////////////////////////////////
 
 void doGravityHole(objid id, objid gravityHole){
