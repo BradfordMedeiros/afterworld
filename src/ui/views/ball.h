@@ -17,6 +17,9 @@ struct BallComponentOptions {
 	std::optional<std::function<float()>> elapsedTime;
 	std::optional<BallLevelComplete> levelComplete;
 	std::optional<std::string> powerupTexture;
+
+	std::optional<float> powerupStartTime;
+	std::optional<float> powerupDuration;
 };
 extern Component ballComponent;
 

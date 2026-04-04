@@ -170,6 +170,12 @@ struct ThirdPersonCameraUpdate {
 };
 ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id, bool useTargetAngle);
 enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT, INVINCIBILITY };
+struct BallPowerupState {
+  std::optional<float> useTime;
+  std::optional<float> duration;
+  BallPowerup powerup;
+};
+
 std::string print(BallPowerup powerup);
 
 std::string print(float number, int precision);

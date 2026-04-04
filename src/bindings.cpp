@@ -709,19 +709,21 @@ void deliverPowerup(objid vehicle, objid powerupId){
     return;
   }
 
+  auto vehicleBall = getVehicleBall(vehicles, vehicle);
+  modassert(vehicleBall.has_value(), "deliver powerup, not a ball");
   if (powerup.type == "jump"){
-    setPowerupBall(vehicles, vehicle, BIG_JUMP);
+    setPowerupBall(*vehicleBall.value(), BIG_JUMP);
   }else if (powerup.type == "dash"){
-    setPowerupBall(vehicles, vehicle, LAUNCH_FORWARD);
+    setPowerupBall(*vehicleBall.value(), LAUNCH_FORWARD);
   }else if (powerup.type == "low_gravity"){
-    setPowerupBall(vehicles, vehicle, LOW_GRAVITY);
+    setPowerupBall(*vehicleBall.value(), LOW_GRAVITY);
   }else if (powerup.type == "teleport"){
-    setPowerupBall(vehicles, vehicle, TELEPORT);
+    setPowerupBall(*vehicleBall.value(), TELEPORT);
   }else if (powerup.type == "invincibility"){
-    setPowerupBall(vehicles, vehicle, INVINCIBILITY);
+    setPowerupBall(*vehicleBall.value(), INVINCIBILITY);
   }else{
     modassert(false, std::string("invalid powerup type: ") + powerup.type);
-    setPowerupBall(vehicles, vehicle, std::nullopt);
+    setPowerupBall(*vehicleBall.value(), std::nullopt);
   }
 
   playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);

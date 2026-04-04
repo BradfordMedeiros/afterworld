@@ -181,38 +181,44 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 
   ////////// POWERUP ////////////////////////////
   {
+    const float POWERUP_DURATION = 5.f;
     if (vehicleBall.shouldUsePowerUp){
       if (vehicleBall.teleportPosition.has_value()){
         // TODO This needs to preserve the direction too
         gameapi -> setGameObjectPosition(id, vehicleBall.teleportPosition.value(), true, Hint { .hint = "vehicle teleport position" });
         vehicleBall.teleportPosition = std::nullopt;
       }
-      if (vehicleBall.powerup.has_value()){
-        if (vehicleBall.powerup.value() == BIG_JUMP){
+      if (vehicleBall.powerup.has_value() && !vehicleBall.powerup.value().useTime.has_value()){
+        if (vehicleBall.powerup.value().powerup == BIG_JUMP){
           gameapi -> applyImpulse(id, glm::vec3(0.f, 2 * vehicleBall.ballConfig.jumpMagnitude, 0.f));
-        }else if (vehicleBall.powerup.value() == LAUNCH_FORWARD){
+          vehicleBall.powerup = std::nullopt;
+        }else if (vehicleBall.powerup.value().powerup == LAUNCH_FORWARD){
           auto direction = rotation * glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, -1 * vehicleBall.ballConfig.jumpMagnitude);
           gameapi -> applyImpulse(id, direction);
-        }else if (vehicleBall.powerup.value() == LOW_GRAVITY){
+          vehicleBall.powerup = std::nullopt;
+        }else if (vehicleBall.powerup.value().powerup == LOW_GRAVITY){
           setGameObjectGravity(id, glm::vec3(0.f, 0.2f * vehicleBall.ballConfig.gravity, 0.f));
-        }else if (vehicleBall.powerup.value() == REVERSE_GRAVITY){
+          vehicleBall.powerup = std::nullopt;
+        }else if (vehicleBall.powerup.value().powerup == REVERSE_GRAVITY){
           // This needs changes in the camera to feel correct
           setGameObjectGravity(id, glm::vec3(0.f, -1.f * vehicleBall.ballConfig.gravity, 0.f));
-        }else if (vehicleBall.powerup.value() == TELEPORT){
+          vehicleBall.powerup = std::nullopt;
+        }else if (vehicleBall.powerup.value().powerup == TELEPORT){
           vehicleBall.teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
-        }else if (vehicleBall.powerup.value() == INVINCIBILITY){
-          vehicleBall.invincibleStart = gameapi -> timeSeconds(false);
+          vehicleBall.powerup = std::nullopt;
+        }else if (vehicleBall.powerup.value().powerup == INVINCIBILITY){
+          vehicleBall.powerup.value().useTime = gameapi -> timeSeconds(false);
+          vehicleBall.powerup.value().duration = POWERUP_DURATION;
         }
-        vehicleBall.powerup = std::nullopt;
 
         playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
       }
     }
 
-    if (vehicleBall.invincibleStart.has_value()){
-      auto diff = gameapi -> timeSeconds(false) - vehicleBall.invincibleStart.value();
-      if (diff > 5.f){
-        vehicleBall.invincibleStart = std::nullopt;
+    if (vehicleBall.powerup.has_value() && vehicleBall.powerup.value().useTime.has_value()){
+      auto diff = gameapi -> timeSeconds(false) - vehicleBall.powerup.value().useTime.value();
+      if (diff > POWERUP_DURATION){
+        vehicleBall.powerup = std::nullopt;
       }
     }
     vehicleBall.shouldUsePowerUp = false;
@@ -241,7 +247,9 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mods){
   if (button == 0 && action == 1){
     vehicleBall.shouldExitGravityWell = true;
+    vehicleBall.shouldUsePowerUp = true;
   }
+
 }
 void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action){
   if(isJumpKey(key) /* space */ && action == 1){
@@ -270,5 +278,19 @@ void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gr
     setGameObjectPhysicsEnable(id, true);
     vehicleBall.inGravityWell = false;
     removeFromGravityWell(id);
+  }
+}
+
+std::optional<BallPowerupState> getBallPowerup(VehicleBall& vehicleBall){
+  return vehicleBall.powerup;
+}
+
+void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup){
+  if (!powerup.has_value()){
+    vehicleBall.powerup = std::nullopt;
+  }else{
+    vehicleBall.powerup = BallPowerupState {
+      .powerup = powerup.value(),
+    };
   }
 }

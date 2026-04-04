@@ -17,8 +17,20 @@ Component ballComponent {
     }
 
     if (ballOptions -> powerupTexture.has_value()){
-      drawTools.drawRect(0.8f, 0.8f, 0.2f, 0.2f, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), true, std::nullopt, ballOptions -> powerupTexture.value(), std::nullopt, std::nullopt);
+      auto powerupUsed = ballOptions -> powerupStartTime.has_value();
+      drawTools.drawRect(0.8f, 0.8f, 0.2f, 0.2f, false, glm::vec4(1.f, 1.f, 1.f, powerupUsed ? 0.2 : 0.9f), true, std::nullopt, ballOptions -> powerupTexture.value(), std::nullopt, std::nullopt);
     }
+
+    if (ballOptions -> powerupDuration.has_value()){
+      auto elapsedTime = gameapi -> timeSeconds(false) - ballOptions -> powerupStartTime.value();
+      auto percentage = 1.f - (elapsedTime / ballOptions -> powerupDuration.value());
+      if (percentage < 0){
+        percentage = 0.f;
+      }
+      drawTools.drawRect(0.8f, 0.7f, 0.1f * percentage, 0.02f, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    }
+
+
 
     return BoundingBox2D {
     	.x = 0,

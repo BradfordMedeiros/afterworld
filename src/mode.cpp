@@ -176,25 +176,30 @@ void showTimeElapsed(bool shouldShow){
 		setShowBallOptions(ballOptions);
 }
 
-void setPowerupTexture(std::string texture){
+void setPowerupTexture(std::string texture, std::optional<float> startTime, std::optional<float> duration){
 	auto ballOptions = showBallOptions();
 	if (!ballOptions.has_value()){
 		return;
 	}
 	if (ballOptions.has_value()){
 		auto newBallOptions = ballOptions.value();
-		newBallOptions.powerupTexture = texture;;
+		newBallOptions.powerupTexture = texture;
+		newBallOptions.powerupStartTime = startTime;
+		newBallOptions.powerupDuration = duration;
 		setShowBallOptions(newBallOptions);
 	}
 }
 
-std::optional<BallPowerup> getPowerup(){
+std::optional<BallPowerupState> getPowerup(){
 	auto activePlayer = getActivePlayerId(0);
 	auto vehicleIds = getVehicleIds();
 	if (vehicleIds.size() == 0){
 		return std::nullopt;
 	}
-	return getBallPowerup(vehicles, vehicleIds.at(0));
+
+	auto vehicleBall = getVehicleBall(vehicles, vehicleIds.at(0));
+	modassert(vehicleBall.has_value(), "get powerup - not a ball");
+	return getBallPowerup(*vehicleBall.value());
 } 
 
 void startBallMode(objid sceneId){
@@ -308,7 +313,7 @@ GameTypeInfo getBallMode(){
 	  	if (ballMode -> ballId.has_value()){
 	  		if (isInKillPlane(ballMode -> ballId.value()) && !ballMode -> didLose && !ballMode -> didReset){ // didReset b/c otherwise at same pos
 		  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
-	  			if (!ballVehicle.value() -> invincibleStart.has_value()){
+	  			if (!(ballVehicle.value() -> powerup.has_value() && ballVehicle.value() -> powerup.value().powerup == INVINCIBILITY && ballVehicle.value() -> powerup.value().useTime.has_value())){
 	  				ballMode -> didLose = true;
 	  				auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
 	  				createExplosion(position, 5.f, 0.f);
@@ -334,24 +339,24 @@ GameTypeInfo getBallMode(){
 
 	  		auto powerup = getPowerup();
 	  		if (powerup.has_value()){
-		  		std::cout << "powerup: " << print(powerup.value()) << std::endl;
-	  			if (powerup.value() == BIG_JUMP){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/jump.png");
+		  		std::cout << "powerup: " << print(powerup.value().powerup) << std::endl;
+	  			if (powerup.value().powerup == BIG_JUMP){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/jump.png", std::nullopt, std::nullopt);
 	 		  		return;
-	  			}else if (powerup.value() == LAUNCH_FORWARD){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/dash.png");
+	  			}else if (powerup.value().powerup == LAUNCH_FORWARD){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/dash.png", std::nullopt, std::nullopt);
 	 		  		return;
-	  			}else if (powerup.value() == LOW_GRAVITY){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/bounce.png");
+	  			}else if (powerup.value().powerup == LOW_GRAVITY){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/bounce.png", std::nullopt, std::nullopt);
 	 		  		return;
-	  			}else if (powerup.value() == REVERSE_GRAVITY){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/bounce.normal.png");
+	  			}else if (powerup.value().powerup == REVERSE_GRAVITY){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/bounce.normal.png", std::nullopt, std::nullopt);
 	 		  		return;
-	  			}else if (powerup.value() == TELEPORT){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.png");
+	  			}else if (powerup.value().powerup == TELEPORT){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.png", std::nullopt, std::nullopt);
 	 		  		return;
-	  			}else if (powerup.value() == INVINCIBILITY){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.normal.png");
+	  			}else if (powerup.value().powerup == INVINCIBILITY){
+	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.normal.png", powerup.value().useTime, powerup.value().duration);
 	 		  		return;
 	  			}else{
 	  				modassert(false, "invalid powerup size ball.cpp");
@@ -359,7 +364,7 @@ GameTypeInfo getBallMode(){
 	  		}
 	  	}
 
-  		setPowerupTexture("../gameresources/build/textures/ballgame/none.png");
+  		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
   		if (ballMode -> didLose){
 	  		gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);

@@ -188,21 +188,6 @@ bool isVehicle(Vehicles& vehicles, objid id){
   return vehicles.vehicles.find(id) != vehicles.vehicles.end();
 }
 
-
-void setPowerupBall(Vehicles& vehicles, objid vehicleId, std::optional<BallPowerup> powerup){
-  auto& vehicle = vehicles.vehicles.at(vehicleId);
-  VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
-  modassert(vehicleBall, "vehicle is not a ball");
-  vehicleBall -> powerup = powerup;
-}
-
-std::optional<BallPowerup> getBallPowerup(Vehicles& vehicles, objid vehicleId){
-  auto& vehicle = vehicles.vehicles.at(vehicleId);
-  VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
-  modassert(vehicleBall, "vehicle is not a ball");
-  return vehicleBall -> powerup;
-}
-
 std::optional<VehicleBall*> getVehicleBall(Vehicles& vehicles, objid vehicleId){
   auto& vehicle = vehicles.vehicles.at(vehicleId);
   VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);

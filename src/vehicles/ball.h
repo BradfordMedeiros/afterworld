@@ -21,11 +21,9 @@ struct VehicleBall {
   bool shouldJump;
   bool shouldUsePowerUp;
 
-  std::optional<float> invincibleStart;
-
   std::optional<glm::vec3> teleportPosition;
 
-  std::optional<BallPowerup> powerup;
+  std::optional<BallPowerupState> powerup;
 
   std::optional<objid> soundId;
   std::optional<OneShot> oneshotSoundSource;
@@ -44,5 +42,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mods);
 void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action);
 void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gravityWellId);
+std::optional<BallPowerupState> getBallPowerup(VehicleBall& vehicleBall);
+void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup);
 
 #endif
