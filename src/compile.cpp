@@ -80,6 +80,23 @@ void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes
   addTriggerColor(entity, attributes);
 }
 
+void addRotation(Entity& entity, std::vector<GameobjAttributeOpts>& attributes){
+  // this is wrong
+  auto rotationEuler = getVec3Value(entity, "angles");
+  if (rotationEuler.has_value()){
+    auto rotation = quatFromTrenchBroomAngles(
+      rotationEuler.value().x,
+      rotationEuler.value().y,
+      rotationEuler.value().z
+    );
+    auto vecValue = serializeQuatToVec4(rotation);
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "rotation",
+      .attributeValue = vecValue,
+    });
+  }
+}
+
 struct BallGameCompile {
   std::vector<RailEntity> rails;
   std::vector<OrbEntity> orbs;
@@ -317,20 +334,7 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });   
 
-        // this is wrong
-        auto rotationEuler = getVec3Value(entity, "angles");
-        if (rotationEuler.has_value()){
-          auto rotation = quatFromTrenchBroomAngles(
-            rotationEuler.value().x,
-            rotationEuler.value().y,
-            rotationEuler.value().z
-          );
-          auto vecValue = serializeQuatToVec4(rotation);
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "rotation",
-            .attributeValue = vecValue,
-          });
-        }
+        addRotation(entity, attributes);
 
         auto laserLength = getScaledFloatValue(mapData, entity, "length");
         attributes.push_back(GameobjAttributeOpts {
@@ -341,20 +345,8 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, paths::GRAVITYHOLE_MODEL);
 
-        auto rotationEuler = getVec3Value(entity, "angles");
-        if (rotationEuler.has_value()){
-          auto rotation = quatFromTrenchBroomAngles(
-            rotationEuler.value().x,
-            rotationEuler.value().y,
-            rotationEuler.value().z
-          );
-          auto vecValue = serializeQuatToVec4(rotation);
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "rotation",
-            .attributeValue = vecValue,
-          });
-        }
-        
+        addRotation(entity, attributes);
+
         attributes.push_back(GameobjAttributeOpts {
           .field = "gravityhole",
           .attributeValue = "true",
@@ -569,20 +561,9 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "scale",
           .attributeValue = glm::vec3(5.f, 5.f, 5.f),
         });
-        auto rotationEuler = getVec3Value(entity, "angles");
-        if (rotationEuler.has_value()){
-          auto rotation = quatFromTrenchBroomAngles(
-            rotationEuler.value().x,
-            rotationEuler.value().y,
-            rotationEuler.value().z
-          );
-          auto vecValue = serializeQuatToVec4(rotation);
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "rotation",
-            .attributeValue = vecValue,
-          });
-        }
 
+        addRotation(entity, attributes);
+        
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
 
