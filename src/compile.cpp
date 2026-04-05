@@ -218,7 +218,6 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = keyValue.value,
         });
       }
-
     }else if (*className.value() == "player_end"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -243,7 +242,6 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "player_end",
           .attributeValue = "true",
         });
-
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -296,18 +294,13 @@ CompileMapFns getCompileMapForBallGame(){
             .attributeValue = *triggerEventValue.value(),
           });     
         }
-
-        
-
-
     }else if (*className.value() == "killplane"){
-        *shouldWrite = true;
-        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "killplane",
-          .attributeValue = "true",
-        });
-        
+      *shouldWrite = true;
+      addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "killplane",
+        .attributeValue = "true",
+      });
     }else if (*className.value() == "laser"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, "../gameresources/build/objtypes/spawnpoint.gltf");
@@ -344,7 +337,6 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "laserlength",
           .attributeValue = laserLength.value(),
         });       
-    
     }else if (*className.value() == "gravityhole"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, "../gameresources/build/objtypes/gravityhole.gltf");
@@ -403,7 +395,6 @@ CompileMapFns getCompileMapForBallGame(){
             .attributeValue = *holemode.value(),
           }); 
         }
-
     }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
@@ -420,7 +411,6 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "modspeed",
           .attributeValue = modspeed.value(),
         });
-
     }else if (*className.value() == "water"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -435,7 +425,6 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "physics",
           .attributeValue = "enabled",
         });
-
     }else if (*className.value() == "teleport_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -507,7 +496,6 @@ CompileMapFns getCompileMapForBallGame(){
             .attributeValue = *trigger.value(),
           });
         }
-
     }else if (*className.value() == "rail"){
         auto position = getScaledVec3Value(mapData, entity, "origin");
         if (!position.has_value()){
@@ -566,6 +554,34 @@ CompileMapFns getCompileMapForBallGame(){
         auto connections = split(*conn.value(), ',');
         orbEntity.conn = connections;
         ballGameCompile.orbs.push_back(orbEntity);
+    }else if (*className.value() == "camera"){
+        *shouldWrite = true;
+        *modelName = std::string(">") + *modelName;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = "./res/models/box/crate.gltf",
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "tint",
+          .attributeValue = glm::vec4(1.f, 0.f, 1.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "scale",
+          .attributeValue = glm::vec3(5.f, 5.f, 5.f),
+        });
+        auto rotationEuler = getVec3Value(entity, "angles");
+        if (rotationEuler.has_value()){
+          auto rotation = quatFromTrenchBroomAngles(
+            rotationEuler.value().x,
+            rotationEuler.value().y,
+            rotationEuler.value().z
+          );
+          auto vecValue = serializeQuatToVec4(rotation);
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "rotation",
+            .attributeValue = vecValue,
+          });
+        }
 
     }else if (*className.value() == "gem"){
         *shouldWrite = true;

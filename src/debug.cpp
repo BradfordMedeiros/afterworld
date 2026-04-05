@@ -746,4 +746,8 @@ void onDebugMessage(std::string& key, std::any& value){
 	if (key == "testtrigger"){
 		modassert(false, "on debug message testtrigger");
 	}
+	if (key == "testcam"){
+		auto cameraId = findObjByShortName(">entity_camera_53", std::nullopt);
+		setTempCamera(cameraId.value(), 0);
+	}
 }

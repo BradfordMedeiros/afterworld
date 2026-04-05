@@ -99,24 +99,28 @@ void createBallObj(objid sceneId, glm::vec3 position){
 			{ "layer", "transparency" },
   	} 
   };
-
-  	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
  	auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);  
-  {
 
-  	modassert(ball.has_value(), "ball was not created");
-  	GameobjAttributes emitterAttr { 
-  		.attr = {
- 				{ "effekseer", "./res/particles/spirit.efkefc" },
- 				{ "state", "enabled" },
-  		} 
-  	};
-  	std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
-  	auto ballSpirit = gameapi -> makeObjectAttr(sceneId, std::string("+ballSpirit"), emitterAttr, submodelAttributesEmitter);
-  	modassert(ballSpirit.has_value(), "ballSpirit was not created");
+  bool addParticle = true;
 
-  	gameapi -> makeParent(ballSpirit.value(), ball.value());
-	}
+  if (addParticle){
+  
+  	{
+  		modassert(ball.has_value(), "ball was not created");
+  		GameobjAttributes emitterAttr { 
+  			.attr = {
+ 					{ "effekseer", "./res/particles/spirit.efkefc" },
+ 					{ "state", "enabled" },
+  			} 
+  		};
+  		std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
+  		auto ballSpirit = gameapi -> makeObjectAttr(sceneId, std::string("+ballSpirit"), emitterAttr, submodelAttributesEmitter);
+  		modassert(ballSpirit.has_value(), "ballSpirit was not created");
+  		gameapi -> makeParent(ballSpirit.value(), ball.value());
+		}  	
+  }
+
 
   {
   	GameobjAttributes emitterAttr { 

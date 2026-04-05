@@ -32,7 +32,7 @@ void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip){
         .targetAngleX = 0.f,
         .targetAngleY = 0.f,
         .actualDistanceFromTarget = -5.f,
-        .additionalCameraOffset = glm::vec3(0.f, 2.5f, 0.f),
+        .additionalCameraOffset = glm::vec3(0.f, 1.f, 0.f),
         .zoomOffset = glm::vec3(0.f, 0.f, 0.f),
         .actualZoomOffset = glm::vec3(0.f, 0.f, 0.f),
         .reverseCamera = false,
