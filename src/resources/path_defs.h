@@ -28,6 +28,12 @@ DEFINE_RESOURCE(UI_ZOOM_IMAGE, "../gameresources/ui/zoom.png")
 DEFINE_RESOURCE(TERMINAL_BACKGROUND, "../gameresources/build/terminals/terminal.png")
 
 
+// Ball Game Compiler
+DEFINE_RESOURCE(LASER_MODEL, "../gameresources/build/objtypes/spawnpoint.gltf")
+DEFINE_RESOURCE(GRAVITYHOLE_MODEL, "../gameresources/build/objtypes/gravityhole.gltf")
+DEFINE_RESOURCE(GEM_MODEL, "./res/models/box/crate.gltf")
+DEFINE_RESOURCE(POWERUP_MODEL, "./res/models/box/crate.gltf")
+
 // ARCADE 
 ////////////////////////////////////////////////////////////////////////////////////
 

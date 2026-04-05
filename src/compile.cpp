@@ -129,7 +129,7 @@ CompileMapFns getCompileMapForBallGame(){
       // Replace with a better powerup model
       attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
         .field = "mesh",
-        .attributeValue = "./res/models/box/crate.gltf",
+        .attributeValue = paths::POWERUP_MODEL,
       });
 
       // When it becomes deactivated (respawnable but used) make it transparent
@@ -303,7 +303,7 @@ CompileMapFns getCompileMapForBallGame(){
       });
     }else if (*className.value() == "laser"){
         *shouldWrite = true;
-        addCoreTrench(entity, attributes, "../gameresources/build/objtypes/spawnpoint.gltf");
+        addCoreTrench(entity, attributes, paths::LASER_MODEL);
         attributes.push_back(GameobjAttributeOpts {
           .field = "tint",
           .attributeValue = glm::vec4(0.f, 1.f, 0.f, 1.f),
@@ -339,7 +339,7 @@ CompileMapFns getCompileMapForBallGame(){
         });       
     }else if (*className.value() == "gravityhole"){
         *shouldWrite = true;
-        addCoreTrench(entity, attributes, "../gameresources/build/objtypes/gravityhole.gltf");
+        addCoreTrench(entity, attributes, paths::GRAVITYHOLE_MODEL);
 
         auto rotationEuler = getVec3Value(entity, "angles");
         if (rotationEuler.has_value()){
@@ -557,15 +557,15 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "camera"){
         *shouldWrite = true;
         *modelName = std::string(">") + *modelName;
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        attributes.push_back(GameobjAttributeOpts { 
           .field = "mesh",
           .attributeValue = "./res/models/box/crate.gltf",
         });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        attributes.push_back(GameobjAttributeOpts {  
           .field = "tint",
           .attributeValue = glm::vec4(1.f, 0.f, 1.f, 1.f),
         });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        attributes.push_back(GameobjAttributeOpts { 
           .field = "scale",
           .attributeValue = glm::vec3(5.f, 5.f, 5.f),
         });
@@ -606,7 +606,7 @@ CompileMapFns getCompileMapForBallGame(){
         // Replace with a better gem model
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
-          .attributeValue = "./res/models/box/crate.gltf",
+          .attributeValue = paths::GEM_MODEL,
         });
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "tint",
