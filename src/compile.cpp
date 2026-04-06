@@ -83,18 +83,18 @@ void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes
 void addRotation(Entity& entity, std::vector<GameobjAttributeOpts>& attributes){
   // this is wrong
   auto rotationEuler = getVec3Value(entity, "angles");
-  if (rotationEuler.has_value()){
-    auto rotation = quatFromTrenchBroomAngles(
-      rotationEuler.value().x,
-      rotationEuler.value().y,
-      rotationEuler.value().z
-    );
-    auto vecValue = serializeQuatToVec4(rotation);
-    attributes.push_back(GameobjAttributeOpts {
-      .field = "rotation",
-      .attributeValue = vecValue,
-    });
-  }
+  auto rotationAngles = rotationEuler.has_value() ? rotationEuler.value() : glm::vec3(0.f, 0.f, 0.f);
+  auto rotation = quatFromTrenchBroomAngles(
+    rotationAngles.x,
+    rotationAngles.y,
+    rotationAngles.z
+  );
+  auto vecValue = serializeQuatToVec4(rotation);
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "rotation",
+    .attributeValue = vecValue,
+  });
+  
 }
 
 struct BallGameCompile {
@@ -109,9 +109,12 @@ CompileMapFns getCompileMapForBallGame(){
     auto origin = getValue(entity, "origin");
     auto className = getValue(entity, "classname");
 
+
     modassert(className.has_value(), std::string("no className index = ") + std::to_string(entity.index));
     std::cout << "compile index: " << entity.index << std::endl;
     std::cout << "origin: " << (origin.has_value() ? *origin.value() : "no origin") << std::endl;
+
+    addRotation(entity, attributes);
   
     int layerIndex = -1;
     if (isLayerEntity(entity, &layerIndex) && entity.brushes.size() > 0){
@@ -334,7 +337,6 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });   
 
-        addRotation(entity, attributes);
 
         auto laserLength = getScaledFloatValue(mapData, entity, "length");
         attributes.push_back(GameobjAttributeOpts {
@@ -345,7 +347,6 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, paths::GRAVITYHOLE_MODEL);
 
-        addRotation(entity, attributes);
 
         attributes.push_back(GameobjAttributeOpts {
           .field = "gravityhole",
