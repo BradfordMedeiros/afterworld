@@ -3,7 +3,8 @@
 extern CustomApiBindings* gameapi;
 extern Director director;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
-std::set<objid> objectsInKillplane;
+extern std::set<objid> objectsInKillplane;
+extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
@@ -17,6 +18,7 @@ void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
 void gravityHoleBall(objid gravityHoleId);
+void setTempCamera(std::optional<objid> camera, int playerIndex);
 
 void handleInteract(objid gameObjId){
   auto objAttr = getAttrHandle(gameObjId);
@@ -356,6 +358,13 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
       }
     }
 
+    auto cameraTarget = getStrAttr(objAttr, "camera_target");
+    if (cameraTarget.has_value()){
+      auto ids = gameapi -> getObjectsByAttr("cameratag", cameraTarget.value(), std::nullopt);
+      modassert(ids.size() > 0, "no ids found for this camera tag");
+      setTempCamera(ids.at(0), 0);
+    }
+
   }else if (isControlledVehicle(obj2)){
     auto objAttr = getAttrHandle(obj1);
     auto triggerZone = getStrAttr(objAttr, "trigger_zone");
@@ -379,6 +388,14 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
         gameapi -> sendNotifyMessage(triggerEvent.value(), std::string(""));
       }
     }
+
+    auto cameraTarget = getStrAttr(objAttr, "camera_target");
+    if (cameraTarget.has_value()){
+      auto ids = gameapi -> getObjectsByAttr("cameratag", cameraTarget.value(), std::nullopt);
+      modassert(ids.size() > 0, "no ids found for this camera tag");
+      setTempCamera(ids.at(0), 0);
+    }
+
   }
 }
 

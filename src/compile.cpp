@@ -357,6 +357,15 @@ CompileMapFns getCompileMapForBallGame(){
             .attributeValue = *triggerEventValue.value(),
           });     
         }
+
+        auto cameraTarget = getValue(entity, "camera");
+        if (cameraTarget.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "camera_target",
+            .attributeValue = *cameraTarget.value(),
+          });      
+        }
+
     }else if (*className.value() == "killplane"){
       *shouldWrite = true;
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
@@ -590,6 +599,14 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "camera"){
         *shouldWrite = true;
         *modelName = std::string(">") + *modelName;
+
+        auto tag = getValue(entity, "tag");
+        if (tag.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "cameratag",
+            .attributeValue = *tag.value(),
+          });
+        }
 
         addRotation(entity, attributes);
         

@@ -30,7 +30,11 @@ VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state){
     .restitution = 0.5f,
     .gravity = -9.81f,
   };
+  auto innerObj = findChildObjBySuffix(vehicleId, "eye");
+  modassert(innerObj.has_value(), "no eye for the vehicle");
   VehicleBall vehicleBall {
+    .id = vehicleId,
+    .innerObj = innerObj.value(),
     .ballConfig = ballConfig,
     .isGrounded = false,
     .shouldJump = false,
@@ -209,6 +213,9 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         }else if (vehicleBall.powerup.value().powerup == INVINCIBILITY){
           vehicleBall.powerup.value().useTime = gameapi -> timeSeconds(false);
           vehicleBall.powerup.value().duration = POWERUP_DURATION;
+          setGameObjectTint(id, glm::vec4(0.f, 1.f, 0.f, 1.f));
+          gameapi -> setGameObjectPosition(vehicleBall.innerObj, glm::vec3(0.f, 0.2f, 0.f), false,  Hint { .hint = "[gamelog] - set eye" });
+
         }
 
         playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
@@ -218,6 +225,8 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     if (vehicleBall.powerup.has_value() && vehicleBall.powerup.value().useTime.has_value()){
       auto diff = gameapi -> timeSeconds(false) - vehicleBall.powerup.value().useTime.value();
       if (diff > POWERUP_DURATION){
+        setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+        gameapi -> setGameObjectPosition(vehicleBall.innerObj, glm::vec3(0.f, 0.f, 0.f), false, Hint { .hint = "[gamelog] - set eye" });
         vehicleBall.powerup = std::nullopt;
       }
     }
@@ -286,6 +295,9 @@ std::optional<BallPowerupState> getBallPowerup(VehicleBall& vehicleBall){
 }
 
 void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup){
+  setGameObjectTint(vehicleBall.id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+  gameapi -> setGameObjectPosition(vehicleBall.innerObj, glm::vec3(0.f, 0.f, 0.f), false, Hint { .hint = "[gamelog] - set eye" });
+
   if (!powerup.has_value()){
     vehicleBall.powerup = std::nullopt;
   }else{

@@ -14,6 +14,9 @@ std::unordered_map<objid, ControllableEntity> controllableEntities;
 std::unordered_map<objid, Inventory> scopenameToInventory;
 std::vector<LevelProgress> levelProgresses;
 std::unordered_map<objid, glm::vec3> impulses;
+std::set<objid> objectsInKillplane;
+std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
+
 OrbData orbData;
 
 Water water;

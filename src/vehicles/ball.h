@@ -14,6 +14,8 @@ struct BallConfig {
 };
 
 struct VehicleBall {
+  objid id;
+  objid innerObj;
   BallConfig ballConfig;
 
   // state
