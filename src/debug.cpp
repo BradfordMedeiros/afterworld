@@ -742,12 +742,25 @@ void simpleOnFrame(std::function<void()> fn, float duration){
 	});
 }
 
+
+void setCameraBack(EasyCutscene& cutscene){
+  waitUntil(cutscene, 0, 2000);
+
+  run(cutscene, 1, []() -> void {
+ 		//setTempCamera(std::nullopt, 0);
+  });
+}
+
 void onDebugMessage(std::string& key, std::any& value){
 	if (key == "testtrigger"){
 		modassert(false, "on debug message testtrigger");
 	}
 	if (key == "testcam"){
-		auto cameraId = findObjByShortName(">entity_camera_53", std::nullopt);
+		auto cameraId = findObjByShortName(">entity_camera_52", std::nullopt);
 		setTempCamera(cameraId.value(), 0);
+
+		playCutscene(setCameraBack, std::nullopt);	
+
+
 	}
 }

@@ -68,6 +68,7 @@ struct TeleportExit {
 
 struct Powerup {
 	std::string type;
+	glm::vec4 tint;
 	std::optional<int> respawnRateMs;
 	std::optional<float> lastRemoveTime;
 
@@ -80,11 +81,15 @@ struct TriggerColor {
 	std::optional<glm::vec4> unactiveColor;
 };
 
+struct SpinObject {
+	float timeAdded;
+};
+
 struct Tags {
 	std::set<objid> textureScrollObjIds;
 	AudioZones audiozones;
 	InGameUi inGameUi;
-	std::unordered_map<objid, float> idToRotateTimeAdded;
+	std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::unordered_map<objid, HealthColorObject> healthColorObjects;
 	std::unordered_map<objid, TeleportExit> teleportObjs;

@@ -713,7 +713,9 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "spin",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-  		tags.idToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
+  		tags.idToRotateTimeAdded[id] = SpinObject {
+  			.timeAdded = gameapi -> timeSeconds(false),
+  		};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		tags.idToRotateTimeAdded.erase(id);
@@ -722,9 +724,9 @@ std::vector<TagUpdater> tagupdates = {
   		if (!isInGameMode2()){
   			return;
   		}
-  		for (auto &[id, time] : tags.idToRotateTimeAdded){
-  			auto timeElapsed = gameapi -> timeSeconds(false) - time;
-  			float degrees = (360.f * timeElapsed) * 0.02f; // 0.2f is the turns per seconds 
+  		for (auto &[id, spinObject] : tags.idToRotateTimeAdded){
+  			auto timeElapsed = gameapi -> timeSeconds(false) - spinObject.timeAdded;
+  			float degrees = (360.f * timeElapsed) * 0.1f; // 0.2f is the turns per seconds 
   			std::cout << "gun id, rotate degrees: " << degrees << std::endl;
   			float angle = glm::radians(degrees);
 	  		float x = glm::cos(angle);
@@ -1097,8 +1099,11 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "powerup",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+			auto attrHandle = getAttrHandle(id);
+
 	    auto powerup = getSingleAttr(id, "powerup");
 	    auto respawnRate = getSingleFloatAttr(id, "powerup-rate");
+	    auto tint = getVec4Attr(attrHandle, "tint");
 
 	    std::optional<int> respawnRateMs;
 	    if (respawnRate.has_value()){
@@ -1107,6 +1112,7 @@ std::vector<TagUpdater> tagupdates = {
 
 			tags.powerups[id] = Powerup {
 				.type = powerup.value(),
+				.tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
 				.respawnRateMs = respawnRateMs,
 				.disabledVisually = false,
 			};
@@ -1118,11 +1124,11 @@ std::vector<TagUpdater> tagupdates = {
   		float currTime = gameapi -> timeSeconds(false);
   		for (auto& [id, powerup] : tags.powerups){
   			if (powerup.lastRemoveTime.has_value() && !powerup.disabledVisually){
-    			setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 0.2f));
+    			setGameObjectTint(id, glm::vec4(powerup.tint.x, powerup.tint.y, powerup.tint.z, 0.2f * powerup.tint.w));
     			powerup.disabledVisually = true;
   			}
   			if (!powerup.lastRemoveTime.has_value() && powerup.disabledVisually){
-    			setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+    			setGameObjectTint(id, powerup.tint);
     			powerup.disabledVisually = false;
   			}
 
@@ -1431,7 +1437,9 @@ void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
 }
 
 void startRotate(objid id){
-	tags.idToRotateTimeAdded[id] = gameapi -> timeSeconds(false);
+	tags.idToRotateTimeAdded[id] = SpinObject {
+		.timeAdded = gameapi -> timeSeconds(false),
+	};
 }
 void stopRotate(objid id){
 	tags.idToRotateTimeAdded.erase(id);

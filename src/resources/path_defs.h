@@ -29,10 +29,14 @@ DEFINE_RESOURCE(TERMINAL_BACKGROUND, "../gameresources/build/terminals/terminal.
 
 
 // Ball Game Compiler
-DEFINE_RESOURCE(LASER_MODEL, "../gameresources/build/objtypes/spawnpoint.gltf")
+DEFINE_RESOURCE(LASER_MODEL, "../gameresources/build/objtypes/laser.gltf")
 DEFINE_RESOURCE(GRAVITYHOLE_MODEL, "../gameresources/build/objtypes/gravityhole.gltf")
 DEFINE_RESOURCE(GEM_MODEL, "./res/models/box/crate.gltf")
-DEFINE_RESOURCE(POWERUP_MODEL, "./res/models/box/crate.gltf")
+DEFINE_RESOURCE(POWERUP_MODEL, "../gameresources/build/objtypes/powerup.gltf")
+DEFINE_RESOURCE(POWERUP_MODEL_JUMP, "../gameresources/build/objtypes/powerup.gltf")
+DEFINE_RESOURCE(POWERUP_MODEL_DASH, "../gameresources/build/objtypes/powerup.gltf")
+DEFINE_RESOURCE(POWERUP_MODEL_TELEPORT, "../gameresources/build/objtypes/powerup.gltf")
+DEFINE_RESOURCE(POWERUP_MODEL_INVINCIBILITY, "../gameresources/build/objtypes/powerup.gltf")
 
 // ARCADE 
 ////////////////////////////////////////////////////////////////////////////////////

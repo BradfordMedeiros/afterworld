@@ -129,10 +129,6 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       *shouldWrite = true;
 
-      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-        .field = "scale",
-        .attributeValue = glm::vec3(1.f, 1.f, 1.f),
-      });
       attributes.push_back(GameobjAttributeOpts {
         .field = "physics_shape",
         .attributeValue = "shape_sphere",
@@ -146,17 +142,16 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = "nocollide",
       });
 
-      // Replace with a better powerup model
-      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-        .field = "mesh",
-        .attributeValue = paths::POWERUP_MODEL,
-      });
-
       // When it becomes deactivated (respawnable but used) make it transparent
       // So hence this layer
       attributes.push_back(GameobjAttributeOpts {
         .field = "layer",
         .attributeValue = "transparency",
+      });
+
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "spin",
+        .attributeValue = "true",
       });
 
       auto rate = getIntValue(entity, "rate");
@@ -171,27 +166,75 @@ CompileMapFns getCompileMapForBallGame(){
         attributes.push_back(GameobjAttributeOpts {
           .field = "powerup",
           .attributeValue = "jump",
-        });          
+        });
+        attributes.push_back(GameobjAttributeOpts {  
+          .field = "tint",
+          .attributeValue = glm::vec4(1.f, 0.f, 0.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = paths::POWERUP_MODEL_JUMP,
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = paths::POWERUP_MODEL_JUMP,
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "texture",
+          .attributeValue = paths::INVADERS_SHIP,
+        });
       }else if (*className.value() == "powerup_dash"){
         attributes.push_back(GameobjAttributeOpts {
           .field = "powerup",
           .attributeValue = "dash",
-        });          
+        });
+        attributes.push_back(GameobjAttributeOpts {  
+          .field = "tint",
+          .attributeValue = glm::vec4(0.f, 0.f, 1.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = paths::POWERUP_MODEL_DASH,
+        });
       }else if (*className.value() == "powerup_teleport"){
         attributes.push_back(GameobjAttributeOpts {
           .field = "powerup",
           .attributeValue = "low_gravity",
-        });          
+        });
+        attributes.push_back(GameobjAttributeOpts {  
+          .field = "tint",
+          .attributeValue = glm::vec4(0.f, 1.f, 1.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = paths::POWERUP_MODEL_TELEPORT,
+        });
       }else if (*className.value() == "powerup_lowgravity"){
         attributes.push_back(GameobjAttributeOpts {
           .field = "powerup",
           .attributeValue = "teleport",
-        });          
+        });
+        attributes.push_back(GameobjAttributeOpts {  
+          .field = "tint",
+          .attributeValue = glm::vec4(1.f, 0.f, 1.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = paths::POWERUP_MODEL_TELEPORT,
+        });
       }else if (*className.value() == "powerup_invincibility"){
         attributes.push_back(GameobjAttributeOpts {
           .field = "powerup",
           .attributeValue = "invincibility",
-        });          
+        });
+        attributes.push_back(GameobjAttributeOpts {  
+          .field = "tint",
+          .attributeValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = paths::POWERUP_MODEL_INVINCIBILITY,
+        });
       }else{
         modassert(false, "invalid powerup type");
       }
@@ -328,10 +371,7 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "tint",
           .attributeValue = glm::vec4(0.f, 1.f, 0.f, 1.f),
         });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "scale",
-          .attributeValue = glm::vec3(5.f, 5.f, 5.f),
-        });
+
         attributes.push_back(GameobjAttributeOpts {
           .field = "laser",
           .attributeValue = "true",
@@ -550,28 +590,12 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "camera"){
         *shouldWrite = true;
         *modelName = std::string(">") + *modelName;
-        attributes.push_back(GameobjAttributeOpts { 
-          .field = "mesh",
-          .attributeValue = "./res/models/box/crate.gltf",
-        });
-        attributes.push_back(GameobjAttributeOpts {  
-          .field = "tint",
-          .attributeValue = glm::vec4(1.f, 0.f, 1.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts { 
-          .field = "scale",
-          .attributeValue = glm::vec3(5.f, 5.f, 5.f),
-        });
 
         addRotation(entity, attributes);
         
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
 
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "scale",
-          .attributeValue = glm::vec3(1.f, 1.f, 1.f),
-        });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
           .attributeValue = "shape_sphere",
