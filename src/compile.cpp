@@ -358,6 +358,7 @@ CompileMapFns getCompileMapForBallGame(){
           });     
         }
 
+
         auto cameraTarget = getValue(entity, "camera");
         if (cameraTarget.has_value()){
           attributes.push_back(GameobjAttributeOpts {
@@ -366,6 +367,11 @@ CompileMapFns getCompileMapForBallGame(){
           });      
         }
 
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "trigger_bound",
+          .attributeValue = "true",
+        });   
+        
     }else if (*className.value() == "killplane"){
       *shouldWrite = true;
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");

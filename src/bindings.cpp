@@ -2470,6 +2470,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleGemCollision(obj1, obj2);
     
     handleTriggerZone(obj1, obj2);
+    handleOnTriggerEnter(obj1, obj2);
 
     handleSurfaceCollision(obj1, obj2);
 
@@ -2484,6 +2485,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleRemoveKillplaneCollision(obj1, obj2);
     onCollisionExitWater(water, obj1, obj2);
     removeSurfaceModifier(obj1, obj2);
+    handleOnTriggerExit(obj1, obj2);
   };
 
   binding.onMouseMoveCallback = [](objid id, void* data, double rawXPos, double rawYPos, float rawXNdc, float rawYNdc) -> void { 
@@ -2527,6 +2529,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     objectRemoved(idRemoved);
     removeSurfaceModifier(idRemoved);
     handleRemoveKillplaneCollision(idRemoved);
+    handleOnTriggerRemove(idRemoved);
   };
 
 
