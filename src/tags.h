@@ -57,11 +57,6 @@ struct LinkGunObj {
 
 };
 
-struct Autodoor {
-	bool open;
-	std::string toggleSignal;
-};
-
 struct TeleportExit {
 	std::optional<std::string> exit;
 };
@@ -96,7 +91,6 @@ struct Tags {
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, ManagedRecording> recordings;
-	std::unordered_map<objid, Autodoor> autodoors;
 	std::unordered_map<objid, Powerup> powerups;
 	std::unordered_map<objid, TriggerColor> triggerColors;
 	Switches switches;
@@ -123,7 +117,6 @@ struct TeleportInfo {
 std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 
 void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
-void toggleAutodoor(objid id, Autodoor& autodoor);
 
 void handleOrbControls(int key, int action);
 

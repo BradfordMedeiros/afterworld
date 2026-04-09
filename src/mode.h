@@ -24,8 +24,6 @@ void endBallMode();
 
 void startIntroMode(objid sceneId);
 void endIntroMode();
-void nextOrbLayer();
-void prevOrbLayer();
 
 void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs);
 

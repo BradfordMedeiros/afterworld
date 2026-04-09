@@ -1688,12 +1688,6 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     }
   }
 
-  if (key == 'I' && action == 0){
-    for (auto &[id, autodoor] : tags.autodoors){
-      toggleAutodoor(id, autodoor);
-    }
-  }
-  
   auto selectedOrb = handleOrbControls(orbData, key, action);
   onModeOrbSelect(selectedOrb);
 
