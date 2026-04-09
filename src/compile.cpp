@@ -313,7 +313,7 @@ CompileMapFns getCompileMapForBallGame(){
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
-          .attributeValue = "shape_exact",
+          .attributeValue = "shape_box",
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics",
