@@ -1,0 +1,5 @@
+#ifndef MOD_AFTERWORLD_GIZMO
+#define MOD_AFTERWORLD_GIZMO
+
+
+#endif 
