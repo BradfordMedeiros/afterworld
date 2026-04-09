@@ -39,8 +39,8 @@
 #include "./vehicles/vehicles.h"
 #include "./mode.h"
 #include "./compile.h"
-
 #include "./arcade/arcade.h"
+#include "./terminal.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 std::vector<const char*> getAdditionalPathsToValidate();

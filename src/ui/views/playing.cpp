@@ -5,6 +5,15 @@ Component playingComponent {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
     modassert(playingOptions, "playing options not defined");
 
+
+    if (playingOptions -> terminalConfig.has_value()){
+      Props terminalProps { 
+        .props = { PropPair { .symbol = valueSymbol, .value = playingOptions -> terminalConfig.value() }},
+      };
+      terminalComponent.draw(drawTools, terminalProps);    
+    }
+
+
     auto ballOptions = playingOptions -> ballMode;
     if (ballOptions.has_value()){
   	  Props ballProps { 
@@ -44,12 +53,6 @@ Component playingComponent {
  	    scoreComponent.draw(drawTools, scoreProps);
 	  }
 
-	  if (playingOptions -> terminalConfig.has_value()){
-    	Props terminalProps { 
-    	  .props = { PropPair { .symbol = valueSymbol, .value = playingOptions -> terminalConfig.value() }},
-    	};
-	    terminalComponent.draw(drawTools, terminalProps);    
-	  }
 
     if (playingOptions -> menuOptions.has_value()){
       Props defaultProps { 

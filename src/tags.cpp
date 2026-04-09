@@ -591,7 +591,6 @@ std::vector<TagUpdater> tagupdates = {
   		glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - destroy");
   		auto sceneId = gameapi -> listSceneId(id);
   		createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);  		
-
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
@@ -1231,7 +1230,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
-
 	TagUpdater {
 		.attribute = "gravityhole",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
@@ -1283,14 +1281,9 @@ std::vector<TagUpdater> tagupdates = {
 				gameapi -> setGameObjectPosition(gravityWell.managedItem.value(), newPosition, false, Hint { .hint = "[gamelogic] - set well item posn" });
 
   		}
-
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
-	
-	
-
-
 	TagUpdater {
 		.attribute = "triggercolor",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
