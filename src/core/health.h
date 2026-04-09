@@ -3,11 +3,11 @@
 
 #include <iostream>
 #include <vector>
-#include "../../ModEngine/src/cscript/cscript_binding.h"
-#include "./util.h"
-#include "./global.h"
-#include "./entity.h"
-#include "./gameworld/waypoint.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../util.h"
+#include "../global.h"
+#include "../entity.h"
+#include "../gameworld/waypoint.h"
 
 struct HitPoints {
 	float current;

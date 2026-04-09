@@ -1,10 +1,10 @@
 #ifndef MOD_AFTERWORLD_MOVEMENT_CORE
 #define MOD_AFTERWORLD_MOVEMENT_CORE 
 
-#include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "../util.h"
-#include "../resources/resources.h"
-#include "../curves.h"
+#include "../../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../../util.h"
+#include "../../resources/resources.h"
+#include "../../curves.h"
 
 
 struct MovementParams {

@@ -3,10 +3,10 @@
 
 #include <string>
 #include <vector>
-#include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "../util.h"
-#include "../resources/materials.h"
-#include "../resources/layer.h"
+#include "../../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../../util.h"
+#include "../../resources/materials.h"
+#include "../../resources/layer.h"
 
 struct WeaponParams {
   // gun intrinsic stuff

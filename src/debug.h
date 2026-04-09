@@ -13,6 +13,7 @@
 #include "./entity.h"
 #include "./gametypes/gametypes.h"
 #include "./gameworld/progress.h"
+#include "./ai/scene_ai.h"
 
 void debugOnFrame();
 void debugOnKey(int key, int scancode, int action, int mods);

@@ -1,10 +1,10 @@
 #ifndef MOD_AFTERWORLD_ENTITY
 #define MOD_AFTERWORLD_ENTITY
 
-#include "./weapons/weaponcore.h"
-#include "./movement/movement.h"
+#include "./core/weapons/weaponcore.h"
+#include "./core/movement/movement.h"
+#include "./core/health.h"
 #include "./ai/ai.h"
-#include "./health.h"
 #include "./curves.h"
 #include "./resources/layer.h"
 

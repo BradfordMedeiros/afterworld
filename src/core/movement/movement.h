@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "./movementcore.h"
-#include "../controls.h"
+#include "../../controls.h"
 
 struct Movement {
   std::vector<ControlParams> controlParams;

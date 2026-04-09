@@ -4,7 +4,7 @@
 #include "../../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../controls.h"
-#include "../movement/movementcore.h"
+#include "../core/movement/movementcore.h"
 
 struct VehicleState {
   std::optional<objid> occupied;

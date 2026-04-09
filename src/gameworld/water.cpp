@@ -152,8 +152,8 @@ void onObjectRemovedWater(Water& water, objid idRemoved){
  	water.objectsInWater.erase(idRemoved);
 }
 
-void onFrameWater(Water& water){
- 	if (isPaused()){
+void onFrameWater(Water& water, bool isPaused){
+ 	if (isPaused){
  		return;
  	}
  	applyWaterForces(water);

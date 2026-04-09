@@ -295,8 +295,7 @@ void printDebugSpawnpoint(){
 	}
 }
 
-void raiseTurret(objid id, bool raiseUp);
-void wakeUpTv(objid id, bool active);
+
 
 objid createPrefab2(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
   GameobjAttributes attr = {

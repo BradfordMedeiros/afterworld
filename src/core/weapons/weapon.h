@@ -3,11 +3,11 @@
 
 #include <iostream>
 #include <vector>
-#include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "../resources/materials.h"
+#include "../../../../ModEngine/src/cscript/cscript_binding.h"
 #include "./weaponcore.h"
-#include "../resources/resources.h"
-#include "../controls.h"
+#include "../../resources/resources.h"
+#include "../../controls.h"
+#include "../../resources/materials.h"
 
 struct MessageWithId {
   std::optional<objid> playerId;

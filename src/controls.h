@@ -2,8 +2,8 @@
 #define MOD_AFTERWORLD_CONTROLS
 
 #include "./util.h"
-#include "./inventory.h"
-#include "./weapons/weapon.h"
+#include "./core/inventory.h"
+#include "./core/weapons/weapon.h"
 #include "./in-game-ui.h"
 
 bool isJumpKey(int key);

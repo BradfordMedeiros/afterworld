@@ -9,7 +9,7 @@
 #include "./director/director.h"
 #include "./global.h"
 #include "./in-game-ui.h"
-#include "./health.h"
+#include "./core/health.h"
 #include "./debug.h"
 #include "./vector_gfx.h"
 #include "./gameworld/switch.h"

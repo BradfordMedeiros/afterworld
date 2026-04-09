@@ -687,24 +687,10 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
 
 
 bool isGunZoomed(objid id){
-  return getWeaponState(weapons, id).isGunZoomed;
+  auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
+  return gunZoomed;
 }
 
-
-void raiseTurret(objid id, bool raiseUp){
-  Agent& agent = getAgent(aiData, id);
-  if (isAgentTurret(agent)){
-    auto isGunRaised = isGunRaisedTurret(agent);
-    setGunTurret(agent, !isGunRaised);
-  }
-}
-
-void wakeUpTv(objid id, bool active){
-  Agent& agent = getAgent(aiData, id);
-  if (isAgentTv(agent)){
-    setTvActive(agent, active);
-  }
-}
 
 void deliverPowerup(objid vehicle, objid powerupId){
   auto& powerup = tags.powerups.at(powerupId);
@@ -737,7 +723,6 @@ void deliverPowerup(objid vehicle, objid powerupId){
     powerup.lastRemoveTime = gameapi -> timeSeconds(false);
   }
 }
-
 
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
@@ -837,72 +822,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     startLevel(sceneManagement.managedScene.value());
    
   }
-}
-
-/*
-
-struct AxisInfo {
-  float leftTrigger;
-  float rightTrigger;
-  float leftStickX;
-  float leftStickY;
-  float rightStickX;
-  float rightStickY;
-};
-
-enum BUTTON_TYPE { BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y, BUTTON_LEFT_STICK, BUTTON_RIGHT_STICK, BUTTON_START, BUTTON_LB, BUTTON_RB, BUTTON_HOME, BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT };
-std::string print(BUTTON_TYPE button);
-
-struct ButtonInfo {
-  bool a = false;
-  bool b = false;
-  bool x = false;
-  bool y = false;
-  bool leftStick = false;
-  bool rightStick = false;
-  bool start = false;
-  bool leftBumper = false;
-  bool rightBumper = false;
-  bool home = false;
-  bool up = false;
-  bool down = false;
-  bool left = false;
-  bool right = false;
-};
-struct ControlInfo {
-  AxisInfo axisInfo;
-  ButtonInfo buttonInfo;
-};*/
-std::string print(ControlInfo& controlInfo){
-  std::string content;
-  content += std::string("controller| a: ") + (controlInfo.buttonInfo.a ? "true" : "false") + "\n";
-  content += std::string("controller| b: ") + (controlInfo.buttonInfo.b ? "true" : "false") + "\n";
-  content += std::string("controller| x: ") + (controlInfo.buttonInfo.x ? "true" : "false") + "\n";
-  content += std::string("controller| y: ") + (controlInfo.buttonInfo.y ? "true" : "false") + "\n";
-
-  content += std::string("controller| leftStick: ") + (controlInfo.buttonInfo.leftStick ? "true" : "false") + "\n";
-  content += std::string("controller| rightStick: ") + (controlInfo.buttonInfo.rightStick ? "true" : "false") + "\n";
-
-  content += std::string("controller| start: ") + (controlInfo.buttonInfo.start ? "true" : "false") + "\n";
-
-  content += std::string("controller| leftBumper: ") + (controlInfo.buttonInfo.leftBumper ? "true" : "false") + "\n";
-  content += std::string("controller| rightBumper: ") + (controlInfo.buttonInfo.rightBumper ? "true" : "false") + "\n";
-
-  content += std::string("controller| home: ") + (controlInfo.buttonInfo.home ? "true" : "false") + "\n";
-
-  content += std::string("controller| up: ") + (controlInfo.buttonInfo.up ? "true" : "false") + "\n";
-  content += std::string("controller| down: ") + (controlInfo.buttonInfo.down ? "true" : "false") + "\n";
-  content += std::string("controller| left: ") + (controlInfo.buttonInfo.left ? "true" : "false") + "\n";
-  content += std::string("controller| right: ") + (controlInfo.buttonInfo.right ? "true" : "false") + "\n";
-
-  content += std::string("controller| leftTrigger: ") + std::to_string(controlInfo.axisInfo.leftTrigger) + "\n";
-  content += std::string("controller| rightTrigger: ") + std::to_string(controlInfo.axisInfo.rightTrigger) + "\n";
-  content += std::string("controller| leftStickX: ") + std::to_string(controlInfo.axisInfo.leftStickX) + "\n";
-  content += std::string("controller| leftStickY: ") + std::to_string(controlInfo.axisInfo.leftStickY) + "\n";
-  content += std::string("controller| rightStickX: ") + std::to_string(controlInfo.axisInfo.rightStickX) + "\n";
-  content += std::string("controller| rightStickY: ") + std::to_string(controlInfo.axisInfo.rightStickY) + "\n";
-
-  return content;
 }
 
 glm::vec2 smoothVelocity(glm::vec2 lookVelocity);
@@ -1713,13 +1632,10 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
-  
   if (getArgEnabled("help")){
     printGameOptionsHelp();
     exit(0);
   }
-
- 
 
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     GameState* gameState = new GameState;
@@ -2054,7 +1970,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           setUiHealth(player.viewport, uiHealth);
         }
       }
-      onFrameWater(water);
+      onFrameWater(water, isPaused());
 
       if (!hasOption("no-ai")){
         static bool showAi = getArgEnabled("ai-debug");

@@ -3,7 +3,7 @@
 
 #include "./util.h"
 #include "./resources/resources.h"
-#include "./inventory.h"
+#include "./core/inventory.h"
 #include "./director/director.h"
 
 void handleInteract(objid gameObjId);
