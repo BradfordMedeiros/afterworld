@@ -3,11 +3,11 @@
 
 #include "./gametypes/gametypes.h"
 #include "./global.h"
-#include "./vehicles/vehicles.h"
+#include "./core/vehicles/vehicles.h"
 #include "./entity.h"
 #include "./gameworld/progress.h"
 #include "./orbs.h"
-#include "./cutscene.h"
+#include "./interaction/cutscene.h"
 #include "./collision.h"
 
 struct BallModeOptions{

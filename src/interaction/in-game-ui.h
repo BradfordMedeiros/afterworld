@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <vector>
-#include "./util.h"
-#include "./ui/views/mainui.h"
-#include "./vector_gfx.h"
+#include "../util.h"
+#include "../ui/views/mainui.h"
+#include "../vector_gfx.h"
 
 struct TextDisplay {
 	objid textureId;

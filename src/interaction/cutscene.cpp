@@ -175,10 +175,6 @@ int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 void ballModeLevelSelect();
 
-#include "./curves.h"
-
-extern GLFWwindow* window;
-
 struct OpeningData {
 	std::string text;
 	float time;

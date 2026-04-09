@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "./util.h"
+#include "../util.h"
 
 void loadDialogTree();
 void doDialogMessage(std::string& value);

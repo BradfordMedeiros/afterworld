@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_TERMINAL
 #define MOD_AFTERWORLD_TERMINAL
 
-#include "./ui/components/game/terminal.h"
+#include "../ui/components/game/terminal.h"
 
 struct TerminalInterface {
   std::string name;

@@ -7,7 +7,7 @@
 #include "./global.h"
 #include "./controls.h"
 #include "./spawn.h"
-#include "./cutscene.h"
+#include "./interaction/cutscene.h"
 #include "./tags.h"
 #include "./options.h"
 #include "./entity.h"

@@ -1,8 +1,8 @@
 #ifndef MOD_AFTERWORLD_CUTSCENE
 #define MOD_AFTERWORLD_CUTSCENE
 
-#include "./util.h"
-#include "./resources/paths.h"
+#include "../util.h"
+#include "../resources/paths.h"
 
 struct EasyCutscene {
   std::set<int> playedEvents;

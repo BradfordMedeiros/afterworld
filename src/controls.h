@@ -4,7 +4,7 @@
 #include "./util.h"
 #include "./core/inventory.h"
 #include "./core/weapons/weapon.h"
-#include "./in-game-ui.h"
+#include "./interaction/in-game-ui.h"
 
 bool isJumpKey(int key);
 bool isGrindKey(int key);
