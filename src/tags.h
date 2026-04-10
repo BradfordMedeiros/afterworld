@@ -30,10 +30,6 @@ struct AudioZones {
 	std::optional<CurrentPlayingData> currentPlaying;
 };
 
-struct ManagedRecording{
-	std::string signal;
-};
-
 struct UiData {
   UiContext uiContext;
   HandlerFns uiCallbacks;
@@ -91,7 +87,6 @@ struct Tags {
 	std::unordered_map<objid, TeleportExit> teleportObjs;
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
-	std::unordered_map<objid, ManagedRecording> recordings;
 	std::unordered_map<objid, Powerup> powerups;
 	Switches switches;
 
@@ -115,8 +110,6 @@ struct TeleportInfo {
 };
 
 std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
-
-void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 
 void handleOrbControls(int key, int action);
 

@@ -3,7 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 void setMenuBackground(std::string background);
-void playRecordingBySignal(std::string signal, std::string rec, bool reverse);
 bool isSignalLocked(std::string signal);
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields);
 
@@ -147,11 +146,11 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
           .value = ElevatorUiOptions {
             .onClickUp = []() -> void {
               modlog("main ui game", "elevator up");
-              playRecordingBySignal("test", "../afterworld/data/recordings/move.rec", false);
+              modassert(false, "elavator up not implemented");
             },
             .onClickDown = []() -> void {
               modlog("main ui game", "elevator down");
-              playRecordingBySignal("test", "../afterworld/data/recordings/move.rec", true);
+              modassert(false, "elavator down not implemented");
             },
             .canClickUp = !isSignalLocked("test"),
             .canClickDown = !isSignalLocked("test"),

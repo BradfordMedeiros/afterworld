@@ -95,24 +95,6 @@ bool isSignalLocked(std::string signal){
 	}
 	return lockedSignals.at(signal).locked;
 };
-// RECORDING_PLAY_ONCE, RECORDING_PLAY_LOOP 
-// RECORDING_PLAY_ONCE_REVERSE
-void playRecordingBySignal(std::string signal, std::string rec, bool reverse){
-	for (auto &[id, recording] : tags.recordings){
-		if (recording.signal == signal){
-			auto length = gameapi -> recordingLength(rec);
-			gameapi -> playRecording(id, rec, reverse ? RECORDING_PLAY_ONCE_REVERSE : RECORDING_PLAY_ONCE, std::nullopt);
-			modlog("play recording playback length", std::to_string(length));
-			lockedSignals[signal] = Signal {
-				.locked = true,
-			};
-  		gameapi -> schedule(-1, true, length * 1000, NULL, [id, signal](void*) -> void {
-				modlog("play recording playback stopped", "done");
-				lockedSignals.erase(signal);
-  		});
-		}
-	}
-}
 
 void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
@@ -171,20 +153,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
 		 	removeEntityController(tags.animationController, id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
-	},
-	TagUpdater {
-		.attribute = "recording",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
-			auto signal = maybeUnwrapAttrOpt<std::string>(attrValue).value();
- 			tags.recordings[id] = ManagedRecording{
- 				.signal = signal,
- 			};
-  	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.recordings.erase(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
@@ -1118,7 +1086,6 @@ Tags createTags(UiData* uiData){
   tags.teleportObjs = {};
   tags.explosionObjects = {};
   tags.linkGunObj = {};
-  tags.recordings = {};
   tags.switches = Switches{
   	.switches = {},
   };
