@@ -161,7 +161,6 @@ void setScenarioOptions(ScenarioOptions& options){
   modlog("set scenario options: ambient", print(options.ambientLight));
   modlog("set scenario options: skyboxColor", print(options.skyboxColor));
   modlog("set scenario options: skybox", print(options.skybox));
-
 }
 
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
@@ -676,12 +675,10 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
   return std::nullopt;
 }
 
-
 bool isGunZoomed(objid id){
   auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
   return gunZoomed;
 }
-
 
 void deliverPowerup(objid vehicle, objid powerupId){
   auto& powerup = tags.powerups.at(powerupId);
@@ -902,8 +899,6 @@ std::optional<objid> activeSceneForSelected(){
   auto sceneId = gameapi -> listSceneId(selectedId);
   return sceneId;
 }
-
-
 
 UiContext getUiContext(GameState& gameState){
   std::function<void()> pause = [&gameState]() -> void { 
@@ -1199,10 +1194,6 @@ void doAnimationTrigger(objid entityId, const char* transition){
   }
 }
 
-
-// gameapi -> playAnimation(id, "walk",  LOOP, std::nullopt);
-// gameapi -> playAnimation(id, "shoot", ONESHOT, { /* everything but walk */ });
-
 void doStateControllerAnimations(){
   for (auto entityId : tags.animationController.pendingAnimations){
     if (!hasControllerState(tags.animationController, entityId)){
@@ -1285,18 +1276,6 @@ bool entityInShootingMode(objid id){
   return isInShootingMode(id).value();
 }
 
-
-std::optional<objid> findChildObjBySuffix(objid id, const char* objName){
-  auto children = gameapi -> getChildrenIdsAndParent(id);
-  for (auto childId : children){
-    auto name = gameapi -> getGameObjNameForId(childId).value();
-    if (stringEndsWith(name, objName)){
-      return childId;
-    }
-  }
-  return std::nullopt;
-}
-
 void zoomIntoArcade(std::optional<objid> id, int playerIndex){
   bool zoomIn = id.has_value();
   setShowZoomArcade(zoomIn);
@@ -1372,7 +1351,6 @@ void ensureAllAudioZonesLoaded(){
       }
     }
   }
-
 }
 
 std::optional<std::string> playingClip;
@@ -1442,23 +1420,6 @@ void objectRemoved(objid idRemoved){
   onObjRemoved(aiData, idRemoved);
 }
 
-void handleTeleport(objid idToTeleport, objid teleporterId){
-  auto teleportPosition = gameapi -> getGameObjectPos(teleporterId, true, "gamelogic get teleport position");
-  gameapi -> setGameObjectPosition(idToTeleport, teleportPosition, true, Hint { .hint = "teleport set posn" });
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
-}
-
-void doTeleport(int32_t idToTeleport, std::string destination){
-  std::cout << "doTeleport: " << idToTeleport << ", = " << destination << std::endl;
-  for (auto& [teleporterId, teleportExit] : tags.teleportObjs){
-    if (teleportExit.exit.has_value() && teleportExit.exit.value() == destination){
-      handleTeleport(idToTeleport, teleporterId);
-      std::cout << "doTeleport: found the exit" << std::endl;
-      return;
-    }
-  }
-}
-
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
   GameState* gameState = static_cast<GameState*>(data);
 
@@ -1472,7 +1433,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     if (isTeleportButton(key) && !isPaused()){
       // this probably should be aware of the bounds, an not allow to clip into wall for example
       // maybe raycast down, and then set the position so it fits 
-      auto teleportPosition = getTeleportPosition(tags);
+      auto teleportPosition = getTeleportPosition();
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex) && teleportPosition.has_value()){
         handleTeleport(controlledPlayer.playerId.value(), teleportPosition.value().id);
         gameapi -> removeByGroupId(teleportPosition.value().id);

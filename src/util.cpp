@@ -573,3 +573,14 @@ std::string print(float number, int precision){
   std::string result = oss.str();
   return result;
 }
+
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName){
+  auto children = gameapi -> getChildrenIdsAndParent(id);
+  for (auto childId : children){
+    auto name = gameapi -> getGameObjNameForId(childId).value();
+    if (stringEndsWith(name, objName)){
+      return childId;
+    }
+  }
+  return std::nullopt;
+}

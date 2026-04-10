@@ -49,9 +49,7 @@ struct ExplosionObj {
 	float time;
 };
 
-struct TeleportExit {
-	std::optional<std::string> exit;
-};
+
 
 struct Powerup {
 	std::string type;
@@ -74,7 +72,6 @@ struct Tags {
 	std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
 	std::unordered_map<objid, HealthColorObject> healthColorObjects;
-	std::unordered_map<objid, TeleportExit> teleportObjs;
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, Powerup> powerups;
 
@@ -92,12 +89,6 @@ void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved);
 
 void setMenuBackground(std::string background);
 
-struct TeleportInfo {
-	objid id;
-	glm::vec3 position;
-};
-
-std::optional<TeleportInfo> getTeleportPosition(Tags& tags);
 
 void handleOrbControls(int key, int action);
 

@@ -63,4 +63,16 @@ void addLinkGunObj(objid id);
 void removeLinkGunObj(objid id);
 void onLinkGunObjFrame();
 
+struct TeleportExit {
+	std::optional<std::string> exit;
+};
+struct TeleportInfo {
+	objid id;
+	glm::vec3 position;
+};
+
+void handleTeleport(objid idToTeleport, objid teleporterId);
+void doTeleport(int32_t idToTeleport, std::string destination);
+std::optional<TeleportInfo> getTeleportPosition();
+
 #endif 

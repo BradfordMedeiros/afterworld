@@ -18,6 +18,7 @@ std::set<objid> managedRailMovementsBuffer; // because this can be added before 
 extern std::unordered_map<objid, Laser> lasers;
 extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
+std::unordered_map<objid, TeleportExit> teleportObjs;
 
 void goToLevel(std::string levelShortName);
 void goBackMainMenu();
@@ -394,12 +395,12 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
 	  	auto attrHandle = getAttrHandle(id);
 			auto teleportExit = getStrAttr(attrHandle, "teleport_exit");
-  		tags.teleportObjs[id] = TeleportExit{
+  		teleportObjs[id] = TeleportExit{
   			.exit = teleportExit,
   		};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.teleportObjs.erase(id);
+  		teleportObjs.erase(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage =  std::nullopt,
@@ -1002,7 +1003,6 @@ Tags createTags(UiData* uiData){
   tags.idToRotateTimeAdded = {};
   tags.emissionObjects = {};
   tags.healthColorObjects = {};
-  tags.teleportObjs = {};
   tags.explosionObjects = {};
 
   ///// animations ////
@@ -1027,24 +1027,4 @@ void startRotate(objid id){
 }
 void stopRotate(objid id){
 	tags.idToRotateTimeAdded.erase(id);
-}
-
-std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
-	if (tags.teleportObjs.size() == 0){
-		return std::nullopt;
-	}
-
-	auto index = randomNumber(0, tags.teleportObjs.size() - 1);
-	int currIndex = 0;
-	for(auto &[id, teleportExit] : tags.teleportObjs){
-		if (currIndex == index){
-			auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - getTeleportPosition");
-			return TeleportInfo {
-				.id = id,
-				.position = position
-			};
-		}
-		currIndex++;
-	}
-	return std::nullopt;
 }

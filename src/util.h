@@ -180,4 +180,6 @@ std::string print(BallPowerup powerup);
 
 std::string print(float number, int precision);
 
+std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+
 #endif

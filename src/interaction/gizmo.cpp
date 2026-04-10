@@ -7,6 +7,7 @@ extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
 extern std::unordered_map<objid, glm::vec3> impulses;
 extern std::unordered_map<objid, LinkGunObj> linkGunObj;
+extern std::unordered_map<objid, TeleportExit> teleportObjs;
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -313,4 +314,41 @@ void onLinkGunObjFrame(){
 		auto pos1 = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - link orb - vert lines");
 		gameapi -> drawLine(pos1, pos1 + glm::vec3(0.f, 0.4f, 0.f), false, id, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
 	}
+}
+
+void handleTeleport(objid idToTeleport, objid teleporterId){
+  auto teleportPosition = gameapi -> getGameObjectPos(teleporterId, true, "gamelogic get teleport position");
+  gameapi -> setGameObjectPosition(idToTeleport, teleportPosition, true, Hint { .hint = "teleport set posn" });
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+}
+
+void doTeleport(int32_t idToTeleport, std::string destination){
+  std::cout << "doTeleport: " << idToTeleport << ", = " << destination << std::endl;
+  for (auto& [teleporterId, teleportExit] : teleportObjs){
+    if (teleportExit.exit.has_value() && teleportExit.exit.value() == destination){
+      handleTeleport(idToTeleport, teleporterId);
+      std::cout << "doTeleport: found the exit" << std::endl;
+      return;
+    }
+  }
+}
+
+std::optional<TeleportInfo> getTeleportPosition(){
+	if (teleportObjs.size() == 0){
+		return std::nullopt;
+	}
+
+	auto index = randomNumber(0, teleportObjs.size() - 1);
+	int currIndex = 0;
+	for(auto &[id, teleportExit] : teleportObjs){
+		if (currIndex == index){
+			auto position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - getTeleportPosition");
+			return TeleportInfo {
+				.id = id,
+				.position = position
+			};
+		}
+		currIndex++;
+	}
+	return std::nullopt;
 }
