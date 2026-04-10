@@ -9,6 +9,7 @@
 #include "./director/director.h"
 #include "./global.h"
 #include "./interaction/in-game-ui.h"
+#include "./interaction/gizmo.h"
 #include "./core/health.h"
 #include "./core/vehicles/vehicles.h"
 #include "./debug.h"
@@ -92,7 +93,6 @@ struct Tags {
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, ManagedRecording> recordings;
 	std::unordered_map<objid, Powerup> powerups;
-	std::unordered_map<objid, TriggerColor> triggerColors;
 	Switches switches;
 
 	UiData* uiData;

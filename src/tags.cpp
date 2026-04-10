@@ -15,8 +15,9 @@ extern std::optional<std::string> activeLevel;
 extern std::unordered_map<objid, LinePoints> rails;
 extern std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 std::set<objid> managedRailMovementsBuffer; // because this can be added before the rail its referencing is available
-struct Laser { };
-std::unordered_map<objid, Laser> lasers;
+extern std::unordered_map<objid, Laser> lasers;
+extern std::unordered_map<objid, GravityWell> gravityWells;
+extern std::unordered_map<objid, TriggerColor> triggerColors;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
@@ -82,9 +83,6 @@ std::string queryInitialBackground(){
 void updateQueryBackground(std::string image){
 	persistSave("settings", "background", image);
 }
-void updateBackground(objid id, std::string image){
-  setGameObjectTexture(id, image);
-}
 
 struct Signal {
 	bool locked;   // should remove on unloading 
@@ -143,99 +141,6 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 }
 
 
-
-void addLaser(objid id, float length){
-	lasers[id] = Laser{};
-	auto sceneId = gameapi -> listSceneId(id);
-	{
-
-		// the laser square is 5x5 (1x1 but then scale is 5 natively)
-		float objectScale = gameapi -> getGameObjectScale(id, true).y;
-
-		float width = 1.f;
-
-		GameobjAttributes emitterAttr { 
-  		.attr = {
- 				{ "effekseer", "./res/particles/Laser02.efkefc" },
- 				{ "state", "enabled" },
- 				{ "killplane", "true" },
-  		} 
-  	};
-  	std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
-  	auto laserParticle = gameapi -> makeObjectAttr(sceneId, std::string("+laser") + std::to_string(getUniqueObjId()), emitterAttr, submodelAttributesEmitter);
-
-  	modassert(laserParticle.has_value(), "laserParticle was not created");
-  	gameapi -> makeParent(laserParticle.value(), id);
-
-  	// TODO HACK - this seems to be a bug where the emitter does not take the parent position
-		simpleOnFrame([laserParticle, width, length, objectScale]() -> void {
-		  gameapi -> setGameObjectScale(laserParticle.value(), glm::vec3(width, length, width), true);
-		  gameapi -> setGameObjectPosition(laserParticle.value(), glm::vec3(0.f, (1.f / objectScale) * length * 0.5f, 0.f), false, Hint { .hint = "[gamelogic] - set laser pos" });
-		}, 0.f);
-
-		PhysicsCreateRect shape {
-  		.width = 1.f,
-  		.height = 1.f, 
-  		.depth = 1.f,
-		};
-		auto offset = glm::vec3(0.f, 0.f, 0.f);
-		gameapi -> createPhysicsBody(laserParticle.value(), shape, offset);
-	}
-
- }
-
-void removeLaser(objid id){
-	lasers.erase(id);
-}
-void onLaserFrame(){
-	for (auto& [id, laser] : lasers){
-  	auto fromPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - laser");
- 		auto rotation = gameapi -> getGameObjectRotation(id, true, "[gamelogic] - tags - laser");
- 		auto toPos =  2.f * (rotation * glm::vec3(0.f, 0.f, -1.f));
-
- 		gameapi -> drawLine(fromPosition, fromPosition + toPos, false, -1, std::nullopt,  std::nullopt, std::nullopt);
-	}
-}
-
-struct GlassTexture {
-	objid id;
-	std::string name;
-};
-std::unordered_map<objid, GlassTexture> objIdToGlassTexture;
-
-void createGlassTexture(objid id){
-	std::string textureName = std::string("glass-texture") + uniqueNameSuffix();
-	auto glassTextureId = gameapi -> createTexture(textureName, 1000, 10000, id);
-	objIdToGlassTexture[id] = GlassTexture {
-		.id = glassTextureId,
-		.name = textureName,
-	};
-  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.75f), glassTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
- 	updateBackground(id, objIdToGlassTexture.at(id).name);
-}
-void removeGlassTexture(objid id){
-	auto textureName = objIdToGlassTexture.at(id).name;
-	gameapi -> freeTexture(textureName, id);
-	objIdToGlassTexture.erase(id);
-}
-
-// This should add normals, and drawRect should be able to subtractively add or something like that, so that
-// can make the drawRect call subtract alpha
-//
-// This also only worked for glass the player is looking at...which is okay enough, but lame
-// probably could do a quick render on  the object or something to map pos/normal of hit to uv space of object
-bool maybeAddGlassBulletHole(objid id, objid playerId){
-	if (objIdToGlassTexture.find(id) == objIdToGlassTexture.end()){
-		return false;
-	}
-	GlassTexture& glassTexture = objIdToGlassTexture.at(id);
-  auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-	float bulletHoleSize = randomNumber(0.f, 0.1f) + 0.1;
-
-	 gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTexture.id, true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
-	return true;
-}
-
 std::vector<glm::vec3> parseDataVec3(std::string& value){
 	std::vector<glm::vec3> values;
 	auto posValuesStr = split(value, ',');	
@@ -250,142 +155,11 @@ std::vector<std::string> parseDataString(std::string& value){
 	return split(value, ',');
 }
 
-void triggerColor(std::string trigger){
-	for (auto& [id, triggerColor] : tags.triggerColors){
-		if (!triggerColor.activeColor.has_value()){
-			continue;
-		}
-		if (triggerColor.trigger == trigger){
-			setGameObjectTint(id, triggerColor.activeColor.value());
-		}
-	}
-}
 
 struct Skippable {
 	std::optional<std::string> advanceToLevel;
 };
 std::unordered_map<objid, Skippable> skippable;
-
-struct GravityWell {
-	objid id;
-	std::optional<std::string> name;
-	std::optional<std::string> target;
-
-	bool autolaunch;
-
-	std::optional<objid> managedItem;
-	std::optional<glm::vec3> launcher;
-};
-std::unordered_map<objid, GravityWell> gravityWells;
-
-std::optional<GravityWell*> gravityWellByManaged(objid managed){
-	for (auto& [id, gravityWell] : gravityWells){
-		if (gravityWell.managedItem.has_value() && gravityWell.managedItem.value() == managed){
-			return &gravityWell;
-		}
-	}
-	return std::nullopt;
-}
-bool addToGravityWell(objid gravityWellId, objid managed){
-	auto& gravityWell = gravityWells.at(gravityWellId);
-	if (gravityWell.managedItem.has_value()){
-		return false;
-	}
-	gravityWell.managedItem = managed;
-	return true;
-}
-void removeFromGravityWell(objid managed){
-	auto gravityWell = gravityWellByManaged(managed);
-	if (gravityWell.has_value()){
-		gravityWell.value() -> managedItem = std::nullopt;
-	}
-}
-
-// Go to the closest gravity well in the direction specified by the direction
-std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 moveDirection){
-	std::optional<glm::vec3> impulse;
-
-	auto gravityWell = gravityWellByManaged(managed);
-
-	std::optional<objid> newWellId;
-	std::optional<float> newDistance;
-	if (gravityWell.has_value()){
-		auto wellFromPosition = gameapi -> getGameObjectPos(gravityWell.value() -> id, true, "[gamelogic] goToNextGravityWell closest well from");
-
-		if (!gravityWell.value() -> launcher.has_value()){
-			for (auto& [id, well] : gravityWells){
-				if(gravityWell.value() -> id == well.id){
-					continue;
-				}
-
-				if (gravityWell.value() -> target.has_value()){
-					if (well.name.has_value() && (well.name.value() == gravityWell.value() -> target.value())){
-						newWellId = id;
-						break;
-					}
-				}else{
-					auto wellToPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] goToNextGravityWell closest well to");
-					auto distance = glm::distance(wellFromPosition, wellToPos);
-					auto direction = wellToPos - wellFromPosition;
-					auto dir = glm::dot(direction, moveDirection);
-					if (dir < 0){
-						continue;
-					}
-					if (!newDistance.has_value()){
-						newWellId = id;
-						newDistance = distance;
-					}else{
-						if (distance < newDistance.value()){
-							newDistance = distance;
-							newWellId = id;
-						}
-					}					
-				}
-
-			}
-
-			if (newWellId.has_value()){
-				gravityWell.value() -> managedItem = std::nullopt;
-				gravityWells.at(newWellId.value()).managedItem = managed;		
-			}
-
-		}else{
-				gravityWell.value() -> managedItem = std::nullopt;
-				auto launcherRot = gameapi -> getGameObjectRotation(gravityWell.value() -> id, true, "[gamelogic] - gravity well launcher");
-				impulse = launcherRot * gravityWell.value() -> launcher.value();
-		}	
-
-	}
-	return impulse;
-}
-
-glm::vec3 getTargetWellPosition(GravityWell& gravityWell){
-	auto wellPosition =  gameapi -> getGameObjectPos(gravityWell.id, true, "[gamelogic] wellPosition");
-	auto wellRotation =  gameapi -> getGameObjectRotation(gravityWell.id, true, "[gamelogic] wellRotation");
-  auto targetWellPosition = wellPosition + (wellRotation * glm::vec3(0.f, 1.f, 0.f));
-	return targetWellPosition;
-}
-
-bool shouldAutolaunchGravityWell(objid managed){
-	auto gravityWellPtr = gravityWellByManaged(managed);
-	if (!gravityWellPtr.has_value()){
-		return false;
-	}
-
-	auto& gravityWell = *gravityWellByManaged(managed).value();
-	float currTime = gameapi -> timeSeconds(false);
-	if (!gravityWell.autolaunch){
-		return false;
- 	}
-
-	auto wellPosition = getTargetWellPosition(gravityWell);
-	auto managedPosition = gameapi -> getGameObjectPos(managed, true, "[gamelogic] gravity well managed pos");
-	auto distance = glm::distance(wellPosition, managedPosition);
-	if (distance < 0.1f){
-		return true;
-	}
-	return false;
-}
 
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
@@ -755,7 +529,7 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "background",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	updateBackground(id, queryInitialBackground());
+	  	setGameObjectTexture(id, queryInitialBackground());
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {},
   	.onFrame = std::nullopt,
@@ -880,7 +654,7 @@ std::vector<TagUpdater> tagupdates = {
 			std::string textureName = std::string("arcade-texture") + std::to_string(id);
 			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
 	 	  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
-		 	updateBackground(id, textureName);
+		 	setGameObjectTexture(id, textureName);
 
   		auto arcadeType = getSingleAttr(id, "arcade");
 			addArcadeType(id, arcadeType.value(), arcadeTextureId);
@@ -1251,36 +1025,7 @@ std::vector<TagUpdater> tagupdates = {
   		gravityWells.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
-  		for (auto& [id, gravityWell] : gravityWells){
-  			if (!gravityWell.managedItem.has_value()){
-  				continue;
-  			}
-
-				auto position = gameapi -> getGameObjectPos(gravityWell.managedItem.value(), true, "[gamelogic] gravityhole");
-			
-				auto targetWellPosition = getTargetWellPosition(gravityWell);
-				auto distance = targetWellPosition - position;
-  			auto direction = glm::normalize(distance);
-
-  			float speed = gameapi -> timeElapsed() * 10.f;
-  			auto offset = glm::vec3(direction.x * speed, direction.y * speed, direction.z * speed);
-
-  			// without this is will osscilate 
-  			if ((offset.x > 0 && distance.x < offset.x) || (offset.x < 0 && distance.x > offset.x)){
-  				offset.x = distance.x;
-  			}
-  			if ((offset.y > 0 &&  distance.y < offset.y) || (offset.y < 0 && distance.y > offset.y)){
-  				offset.y = distance.y;
-  			}
-  			if ((offset.z > 0 && distance.z < offset.z) || (offset.z < 0 && distance.z > offset.z)){
-  				offset.z = distance.z;
-  			}
-  			auto newPosition = position + offset;
-			
-
-				gameapi -> setGameObjectPosition(gravityWell.managedItem.value(), newPosition, false, Hint { .hint = "[gamelogic] - set well item posn" });
-
-  		}
+  		onFrameGravityWells();
   	},
   	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
 	},
@@ -1292,17 +1037,17 @@ std::vector<TagUpdater> tagupdates = {
 			auto unactiveColor = getVec4Attr(objHandle, "unactivecolor");
 
 			auto trigger = getStrAttr(objHandle, "triggercolor").value();
-			tags.triggerColors[id] = TriggerColor {
+			triggerColors[id] = TriggerColor {
 				.trigger = trigger,
 				.activeColor = activeColor.has_value() ? activeColor.value() : std::optional<glm::vec4>(std::nullopt),
 				.unactiveColor = unactiveColor.has_value() ? unactiveColor.value() : std::optional<glm::vec4>(std::nullopt),
 			};
-			if (tags.triggerColors.at(id).unactiveColor.has_value()){
-				setGameObjectTint(id, tags.triggerColors.at(id).unactiveColor.value());
+			if (triggerColors.at(id).unactiveColor.has_value()){
+				setGameObjectTint(id, triggerColors.at(id).unactiveColor.value());
 			}
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.triggerColors.erase(id);
+  		triggerColors.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   	},
@@ -1311,12 +1056,10 @@ std::vector<TagUpdater> tagupdates = {
 
 };
 
-
-
 void setMenuBackground(std::string background){
   auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);
   for (auto id : backgrounds){
-  	updateBackground(id, background);
+  	setGameObjectTexture(id, background);
   }
  	updateQueryBackground(background);
 }
@@ -1402,8 +1145,6 @@ void startRotate(objid id){
 void stopRotate(objid id){
 	tags.idToRotateTimeAdded.erase(id);
 }
-
-
 
 std::optional<TeleportInfo> getTeleportPosition(Tags& tags){
 	if (tags.teleportObjs.size() == 0){

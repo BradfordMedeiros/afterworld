@@ -2,12 +2,10 @@
 
 CustomApiBindings* gameapi = NULL;
 
-
 Weapons weapons{};
 Movement movement = createMovement();
 Director director = createDirector();
 Vehicles vehicles = createVehicles();
-
 std::unordered_map<objid, ArcadeInstance> arcadeInstances; 
 std::unordered_map<objid, HitPoints> hitpoints = {}; 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
@@ -16,17 +14,18 @@ std::vector<LevelProgress> levelProgresses;
 std::unordered_map<objid, glm::vec3> impulses;
 std::set<objid> objectsInKillplane;
 std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
-
+std::unordered_map<objid, GlassTexture> objIdToGlassTexture;
+std::unordered_map<objid, Laser> lasers;
+std::unordered_map<objid, GravityWell> gravityWells;
+std::unordered_map<objid, TriggerColor> triggerColors;
 OrbData orbData;
-
 Water water;
 SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
-Waypoints waypoints {
-  .waypoints = {},
-};
+Waypoints waypoints;
+
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 std::string defaultAudioClipPath;
