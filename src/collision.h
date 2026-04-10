@@ -7,7 +7,6 @@
 #include "./director/director.h"
 
 void handleInteract(objid gameObjId);
-void handleSwitch(std::string switchValue);
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey);
 void handleDamageCollision(objid obj1, objid obj2);
 

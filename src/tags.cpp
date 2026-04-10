@@ -20,9 +20,6 @@ extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
 
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
-std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
-void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
-void setCanExitVehicle(bool canExit);
 void goToLevel(std::string levelShortName);
 void goBackMainMenu();
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
@@ -73,7 +70,6 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
   ).value();
 }
 
-
 std::string queryInitialBackground(){
 	if (hasOption("background")){
 		return getArgOption("background");
@@ -82,44 +78,6 @@ std::string queryInitialBackground(){
 }
 void updateQueryBackground(std::string image){
 	persistSave("settings", "background", image);
-}
-
-struct Signal {
-	bool locked;   // should remove on unloading 
-};
-std::unordered_map<std::string, Signal> lockedSignals {};
-
-bool isSignalLocked(std::string signal){
-	if(lockedSignals.find(signal) == lockedSignals.end()){
-		return false;
-	}
-	return lockedSignals.at(signal).locked;
-};
-
-void createExplosion(glm::vec3 position, float outerRadius, float damage){
-	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
-	for (auto &hitobject : hitObjects){
-		doDamageMessage(hitobject.id, damage);
-
-		float force = 30.f;
-		auto dirVec = glm::normalize(hitobject.point - position);
-		applyImpulseAffectMovement(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
-	}
-
-	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position, false);
-	auto activePlayer = getActivePlayerId(getDefaultPlayerIndex());
-	if (activePlayer.has_value()){
-		emitExplosion(rootSceneId(), activePlayer.value(), position, glm::vec3(1.f, 1.f, 1.f));
-	}
-
-	std::cout << "hitobjects: [";
-	for (auto &hitobject : hitObjects){
-		std::cout << gameapi -> getGameObjNameForId(hitobject.id).value() << " ";
-	}
-	std::cout << "]" << std::endl;
-	simpleOnFrame([position, outerRadius]() -> void {
-		drawSphereVecGfx(position, outerRadius, glm::vec4(0.f, 0.f, 1.f, 1.f));
-	}, 0.2f);
 }
 
 
@@ -135,6 +93,16 @@ std::vector<glm::vec3> parseDataVec3(std::string& value){
 
 std::vector<std::string> parseDataString(std::string& value){
 	return split(value, ',');
+}
+
+void onAddConditionId(objid id, std::string& value){
+	auto gem = getSingleAttr(id, "gem-label");
+	if (gem.has_value()){
+		if (hasCrystal(gem.value())){
+			gameapi -> removeByGroupId(id);
+			return;
+		}		
+	}
 }
 
 
@@ -153,32 +121,6 @@ std::vector<TagUpdater> tagupdates = {
   	},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
 		 	removeEntityController(tags.animationController, id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
-	},
-	TagUpdater {
-		.attribute = "switch",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
-			auto onSignal = getSingleAttr(id, "switch");
-			auto offSignal = getSingleAttr(id, "switch-reverse");
-			addSwitch(tags.switches, id, onSignal, offSignal);
-  	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeSwitch(tags.switches, id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
-	},
-	TagUpdater {
-		.attribute = "switch-reverse",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
-			auto onSignal = getSingleAttr(id, "switch");
-			auto offSignal = getSingleAttr(id, "switch-reverse");
-			addSwitch(tags.switches, id, onSignal, offSignal);
-  	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeSwitch(tags.switches, id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
@@ -414,7 +356,6 @@ std::vector<TagUpdater> tagupdates = {
 	  	for (auto &[id, _] : tags.linkGunObj){
 				auto pos1 = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - link orb - vert lines");
 	  		gameapi -> drawLine(pos1, pos1 + glm::vec3(0.f, 0.4f, 0.f), false, id, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
 	  	}
   	},
   	.onMessage = std::nullopt,
@@ -1086,9 +1027,7 @@ Tags createTags(UiData* uiData){
   tags.teleportObjs = {};
   tags.explosionObjects = {};
   tags.linkGunObj = {};
-  tags.switches = Switches{
-  	.switches = {},
-  };
+
   ///// animations ////
   tags.animationController = createStateController();
   addAnimationController(tags.animationController);

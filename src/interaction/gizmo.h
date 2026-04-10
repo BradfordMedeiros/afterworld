@@ -43,7 +43,18 @@ void onFrameGravityWells();
 
 // Go to the closest gravity well in the direction specified by the direction
 std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 moveDirection);
-
 bool shouldAutolaunchGravityWell(objid managed);
+
+
+//////////////////
+struct TriggerColor {
+	std::string trigger;
+	std::optional<glm::vec4> activeColor;
+	std::optional<glm::vec4> unactiveColor;
+};
+
+void createExplosion(glm::vec3 position, float outerRadius, float damage);
+void applyImpulseAffectMovement(objid id, glm::vec3 force);
+std::optional<glm::vec3> getImpulseThisFrame(objid id);
 
 #endif 

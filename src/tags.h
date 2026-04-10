@@ -14,7 +14,6 @@
 #include "./core/vehicles/vehicles.h"
 #include "./debug.h"
 #include "./vector_gfx.h"
-#include "./gameworld/switch.h"
 #include "./arcade/arcade.h"
 #include "./entity.h"
 #include "./orbs.h"
@@ -67,11 +66,6 @@ struct Powerup {
 	bool disabledVisually;
 };
 
-struct TriggerColor {
-	std::string trigger;
-	std::optional<glm::vec4> activeColor;
-	std::optional<glm::vec4> unactiveColor;
-};
 
 struct SpinObject {
 	float timeAdded;
@@ -88,7 +82,6 @@ struct Tags {
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
 	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, Powerup> powerups;
-	Switches switches;
 
 	UiData* uiData;
 

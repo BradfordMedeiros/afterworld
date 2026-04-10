@@ -5,6 +5,7 @@ extern std::unordered_map<objid, GlassTexture> objIdToGlassTexture;
 extern std::unordered_map<objid, Laser> lasers;
 extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
+extern std::unordered_map<objid, glm::vec3> impulses;
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -42,7 +43,7 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 }
 
 
-//// laser //////////////////////////////////////////
+//// laser ////////////////////////////////////////// 
 void addLaser(objid id, float length){
 	lasers[id] = Laser{};
 	auto sceneId = gameapi -> listSceneId(id);
@@ -243,3 +244,42 @@ void triggerColor(std::string trigger){
 		}
 	}
 }
+
+
+void createExplosion(glm::vec3 position, float outerRadius, float damage){
+	auto hitObjects = gameapi -> contactTestShape(position, glm::identity<glm::quat>(), glm::vec3(1.f * outerRadius, 1.f * outerRadius, 1.f * outerRadius));
+	for (auto &hitobject : hitObjects){
+		doDamageMessage(hitobject.id, damage);
+
+		float force = 30.f;
+		auto dirVec = glm::normalize(hitobject.point - position);
+		applyImpulseAffectMovement(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
+	}
+
+	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position, false);
+	auto activePlayer = getActivePlayerId(getDefaultPlayerIndex());
+	if (activePlayer.has_value()){
+		emitExplosion(rootSceneId(), activePlayer.value(), position, glm::vec3(1.f, 1.f, 1.f));
+	}
+
+	std::cout << "hitobjects: [";
+	for (auto &hitobject : hitObjects){
+		std::cout << gameapi -> getGameObjNameForId(hitobject.id).value() << " ";
+	}
+	std::cout << "]" << std::endl;
+	simpleOnFrame([position, outerRadius]() -> void {
+		drawSphereVecGfx(position, outerRadius, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	}, 0.2f);
+}
+
+void applyImpulseAffectMovement(objid id, glm::vec3 force){
+  gameapi -> applyImpulse(id, force);
+  impulses[id] = force;
+}
+std::optional<glm::vec3> getImpulseThisFrame(objid id){
+  if (impulses.find(id) == impulses.end()){
+    return std::nullopt;
+  }
+  return impulses.at(id);
+}
+

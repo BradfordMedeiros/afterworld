@@ -3,7 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 void setMenuBackground(std::string background);
-bool isSignalLocked(std::string signal);
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields);
 
 float wheelRotationOffset = 0.f;
@@ -152,8 +151,8 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
               modlog("main ui game", "elevator down");
               modassert(false, "elavator down not implemented");
             },
-            .canClickUp = !isSignalLocked("test"),
-            .canClickDown = !isSignalLocked("test"),
+            .canClickUp = []() -> bool { return false; },
+            .canClickDown =  []() -> bool { return false; },
           },
         },
       },

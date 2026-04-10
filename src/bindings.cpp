@@ -281,16 +281,6 @@ void setTotalZoom(float multiplier, objid id){
   playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
 }
 
-void applyImpulseAffectMovement(objid id, glm::vec3 force){
-  gameapi -> applyImpulse(id, force);
-  impulses[id] = force;
-}
-std::optional<glm::vec3> getImpulseThisFrame(objid id){
-  if (impulses.find(id) == impulses.end()){
-    return std::nullopt;
-  }
-  return impulses.at(id);
-}
 
 bool disableAnimation = false;
 bool disableTpsMesh = false;
@@ -2195,12 +2185,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       handleInteract(*gameObjId);
       return;
     }
-    if (key == "switch"){
-      auto strValue = anycast<std::string>(value); 
-      modassert(strValue != NULL, "switch value invalid");
-      handleSwitch(tags.switches, *strValue);
-      return;
-    }
 
     if (key == "alert"){
       auto strValue = anycast<std::string>(value); 
@@ -2258,13 +2242,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       saveData();
     }
-    if (key == "activate-switch"){
-      auto attrValue = anycast<MessageWithId>(value); 
-      modassert(attrValue, "activate-switch message invalid");
-      auto switchValue = getSingleAttr(attrValue -> id, "activate-switch-type");
-      modassert(switchValue.has_value(), "activate-switch does not have a activate-switch-type");
-      handleSwitch(tags.switches, switchValue.value());
-    }
+
 
     if (key == "play-material-sound"){
       auto soundPosition = anycast<MessagePlaySound>(value);
@@ -2274,7 +2252,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (key == "arcade"){
       auto attrValue = anycast<MessageWithId>(value); 
-      modassert(attrValue, "activate-switch message invalid arcade");
+      modassert(attrValue, "message invalid arcade");
       zoomIntoArcade(attrValue -> id, getPlayerIndex(attrValue -> playerId.value()).value());
     }
 
