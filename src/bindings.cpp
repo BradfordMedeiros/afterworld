@@ -18,6 +18,8 @@ std::unordered_map<objid, GlassTexture> objIdToGlassTexture;
 std::unordered_map<objid, Laser> lasers;
 std::unordered_map<objid, GravityWell> gravityWells;
 std::unordered_map<objid, TriggerColor> triggerColors;
+std::unordered_map<objid, LinkGunObj> linkGunObj;
+
 OrbData orbData;
 Water water;
 SoundData soundData;

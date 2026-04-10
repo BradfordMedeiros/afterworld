@@ -49,10 +49,6 @@ struct ExplosionObj {
 	float time;
 };
 
-struct LinkGunObj {
-
-};
-
 struct TeleportExit {
 	std::optional<std::string> exit;
 };
@@ -80,7 +76,6 @@ struct Tags {
 	std::unordered_map<objid, HealthColorObject> healthColorObjects;
 	std::unordered_map<objid, TeleportExit> teleportObjs;
 	std::unordered_map<objid, ExplosionObj> explosionObjects;
-	std::unordered_map<objid, LinkGunObj> linkGunObj;
 	std::unordered_map<objid, Powerup> powerups;
 
 	UiData* uiData;

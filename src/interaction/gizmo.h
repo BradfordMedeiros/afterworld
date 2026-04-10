@@ -57,4 +57,10 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage);
 void applyImpulseAffectMovement(objid id, glm::vec3 force);
 std::optional<glm::vec3> getImpulseThisFrame(objid id);
 
+
+struct LinkGunObj {};
+void addLinkGunObj(objid id);
+void removeLinkGunObj(objid id);
+void onLinkGunObjFrame();
+
 #endif 

@@ -6,6 +6,7 @@ extern std::unordered_map<objid, Laser> lasers;
 extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
 extern std::unordered_map<objid, glm::vec3> impulses;
+extern std::unordered_map<objid, LinkGunObj> linkGunObj;
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -283,3 +284,33 @@ std::optional<glm::vec3> getImpulseThisFrame(objid id){
   return impulses.at(id);
 }
 
+
+void addLinkGunObj(objid id){
+	linkGunObj[id] = LinkGunObj {};
+}
+void removeLinkGunObj(objid id){
+  linkGunObj.erase(id);
+  for (auto &[id, linkObj] : linkGunObj){
+  	doDamageMessage(id, 1000.f);
+  }
+}
+void onLinkGunObjFrame(){
+  // check the nodes, if 
+  for (auto &[id1, linkObj1] : linkGunObj){
+	  for (auto &[id2, linkObj2] : linkGunObj){
+  		if (id1 == id2){
+  			continue;
+  		}
+			auto pos1 = gameapi -> getGameObjectPos(id1, true, "[gamelogic] tags - linkorb positions");
+ 			auto pos2 = gameapi -> getGameObjectPos(id2, true, "[gamelogic] tags - linkorb positions");
+ 			if (pos1.x < pos2.x){  // just so we only draw one connection between each, arbitrary function
+  	 		gameapi -> drawLine(pos1, pos2, false, id1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+  	 	}
+	  }
+	}
+
+	for (auto &[id, _] : linkGunObj){
+		auto pos1 = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - link orb - vert lines");
+		gameapi -> drawLine(pos1, pos1 + glm::vec3(0.f, 0.4f, 0.f), false, id, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+	}
+}
