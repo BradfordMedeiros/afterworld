@@ -352,3 +352,14 @@ std::optional<TeleportInfo> getTeleportPosition(){
 	}
 	return std::nullopt;
 }
+
+void updateQueryBackground(std::string image){
+	persistSave("settings", "background", image);
+}
+void setMenuBackground(std::string background){
+	auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);
+	for (auto id : backgrounds){
+		setGameObjectTexture(id, background);
+	}
+	updateQueryBackground(background);
+}

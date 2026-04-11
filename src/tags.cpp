@@ -69,9 +69,7 @@ std::string queryInitialBackground(){
 	}
 	return getSaveStringValue("settings", "background", "../gameresources/textures/backgrounds/test3.png");
 }
-void updateQueryBackground(std::string image){
-	persistSave("settings", "background", image);
-}
+
 
 
 std::vector<glm::vec3> parseDataVec3(std::string& value){
@@ -401,31 +399,31 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "autoplay",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-  		playMusicClipById(id, std::nullopt);
+  			playMusicClipById(id, std::nullopt);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {},
-  	.onFrame = std::nullopt,
-  	.onMessage =  std::nullopt,
+  		.onRemove = [](Tags& tags, int32_t id) -> void {},
+  		.onFrame = std::nullopt,
+  		.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "background",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	setGameObjectTexture(id, queryInitialBackground());
+	  		setGameObjectTexture(id, queryInitialBackground());
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  		.onRemove = [](Tags& tags, int32_t id) -> void {},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "glasstexture",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	createGlassTexture(id);
+	  		createGlassTexture(id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeGlassTexture(id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			removeGlassTexture(id);
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "waypoint",
@@ -533,32 +531,32 @@ std::vector<TagUpdater> tagupdates = {
 			modlog("arcade", "on add");
 			std::string textureName = std::string("arcade-texture") + std::to_string(id);
 			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
-	 	  gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+            gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
 		 	setGameObjectTexture(id, textureName);
 
-  		auto arcadeType = getSingleAttr(id, "arcade");
-			addArcadeType(id, arcadeType.value(), arcadeTextureId);
+  		    auto arcadeType = getSingleAttr(id, "arcade");
+            addArcadeType(id, arcadeType.value(), arcadeTextureId);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-			std::string textureName = std::string("arcade-texture") + std::to_string(id);
- 			gameapi -> freeTexture(textureName, id);
-			maybeRemoveArcadeType(id);
-			unloadManagedSounds(id);
-			unloadManagedTexturesLoaded(id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  	     .onRemove = [](Tags& tags, int32_t id) -> void {
+	     		std::string textureName = std::string("arcade-texture") + std::to_string(id);
+ 	      		gameapi -> freeTexture(textureName, id);
+	       		maybeRemoveArcadeType(id);
+	       		unloadManagedSounds(id);
+	       		unloadManagedTexturesLoaded(id);
+  	     },
+  	     .onFrame = std::nullopt,
+  	     .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "globallight",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			gameapi -> setGlobalLight(id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
+  	    .onRemove = [](Tags& tags, int32_t id) -> void {
+  	    },
+  	    .onFrame = std::nullopt,
+  	    .onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	    },
 	},
 	TagUpdater {
 		.attribute = "orbui",
@@ -933,14 +931,6 @@ std::vector<TagUpdater> tagupdates = {
 	},
 
 };
-
-void setMenuBackground(std::string background){
-  auto backgrounds = gameapi -> getObjectsByAttr("background", std::nullopt, std::nullopt);
-  for (auto id : backgrounds){
-  	setGameObjectTexture(id, background);
-  }
- 	updateQueryBackground(background);
-}
 
 void onTagsMessage(Tags& tags, std::string& key, std::any& value){
   for (auto &tagUpdate : tagupdates){
