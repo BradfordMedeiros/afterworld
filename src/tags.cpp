@@ -979,13 +979,9 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-Tags createTags(UiData* uiData){
+Tags createTags(){
   Tags tags{};
-
-  ///// animations ////
-
   addAnimationController(animationController);
-  
   return tags;
 }
 

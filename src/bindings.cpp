@@ -1123,31 +1123,35 @@ UiContext getUiContext(GameState& gameState){
   return uiContext;
 }
 
-ArcadeApi arcadeApi {
-  .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
-    return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
-  },
-  .releaseSounds = [](objid id) -> void {
-    unloadManagedSounds(id);
-  },
-  .ensureTexturesLoaded = [](objid id, std::vector<std::string> textures) -> void {
-    ensureManagedTexturesLoaded(id, rootSceneId(), textures);
-  },
-  .releaseTextures = unloadManagedTexturesLoaded,
-  .playSound = [](objid clipId) -> void {
-    playGameplayClipById(clipId, std::nullopt, std::nullopt, false);
-  },
-  .getResolution = [](objid id) -> glm::vec2 {
-    auto texture = arcadeTextureId(id);
-    if (texture.has_value()){
-      return glm::vec2(1000, 1000); // this is overly coupled to the create texture call in tags
+ArcadeApi createArcadeApi(){
+  ArcadeApi arcadeApi {
+    .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
+      return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
+    },
+    .releaseSounds = [](objid id) -> void {
+      unloadManagedSounds(id);
+    },
+    .ensureTexturesLoaded = [](objid id, std::vector<std::string> textures) -> void {
+      ensureManagedTexturesLoaded(id, rootSceneId(), textures);
+    },
+    .releaseTextures = unloadManagedTexturesLoaded,
+    .playSound = [](objid clipId) -> void {
+      playGameplayClipById(clipId, std::nullopt, std::nullopt, false);
+    },
+    .getResolution = [](objid id) -> glm::vec2 {
+      auto texture = arcadeTextureId(id);
+      if (texture.has_value()){
+        return glm::vec2(1000, 1000); // this is overly coupled to the create texture call in tags
+      }
+      auto resolutionAttr = getWorldStateAttr("rendering", "resolution").value();
+      glm::vec2* resolution = std::get_if<glm::vec2>(&resolutionAttr);
+      modassert(resolution, "resolution value invalid");
+      return *resolution;
     }
-    auto resolutionAttr = getWorldStateAttr("rendering", "resolution").value();
-    glm::vec2* resolution = std::get_if<glm::vec2>(&resolutionAttr);
-    modassert(resolution, "resolution value invalid");
-    return *resolution;
-  }
-};
+  };
+  return arcadeApi;
+}
+ArcadeApi arcadeApi = createArcadeApi();
 
 
 UiStateContext uiStateContext {
@@ -1546,7 +1550,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         "../gameresources/build/weapons/fork.gltf",
       });
   
-    tags = createTags(&gameState -> uiData);
+    tags = createTags();
+    uiData = &gameState -> uiData;
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
     generateWaterMesh();

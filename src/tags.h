@@ -69,7 +69,7 @@ struct Tags {
 	
 };
 
-Tags createTags(UiData* uiData);
+Tags createTags();
 void onTagsMessage(Tags& tags, std::string& key, std::any& value);
 void onTagsFrame(Tags& tags);
 void handleOnAddedTags(Tags& tags, int32_t idAdded);
