@@ -40,7 +40,6 @@ UiData* uiData = NULL;
 std::optional<glm::vec3> oldGravity;  // wtf?
 ArcadeApi arcadeApi = createArcadeApi();
 
-Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
 
 struct LifeTimeObject {
@@ -1193,7 +1192,7 @@ void objectRemoved(objid idRemoved){
   onMainUiObjectsChanged();
 
   onObjectRemovedWater(water, idRemoved);
-  handleTagsOnObjectRemoved(tags, idRemoved);
+  handleTagsOnObjectRemoved(idRemoved);
   removeCameraFromOrbView(idRemoved);
 
   onObjRemoved(aiData, idRemoved);
@@ -1520,12 +1519,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         "../gameresources/build/weapons/fork.gltf",
       });
   
-    tags = Tags{};
     addAnimationController(animationController);
 
     uiData = &gameState -> uiData;
 
-    handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
+    handleOnAddedTagsInitial(); // not sure i actually need this since are there any objects added?
     generateWaterMesh();
         
     if (hasOption("arcade")){
@@ -1719,7 +1717,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       drawArcade();
     }
 
-    onTagsFrame(tags);
+    onTagsFrame();
     handleOrbViews(orbData);
     
     doStateControllerAnimations(validateAnimationControllerAnimations, disableAnimation);
@@ -1962,7 +1960,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onWeatherMessage(weather, value, gameapi -> rootSceneId());
     }
 
-    onTagsMessage(tags, key, value);
+    onTagsMessage(key, value);
 
     onDebugMessage(key, value);
   };
@@ -2038,7 +2036,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modlog("objchange onObjectAdded", gameapi -> getGameObjNameForId(idAdded).value());
 
     onAddControllableEntity(aiData, gameStatePtr -> movementEntities, idAdded);
-    handleOnAddedTags(tags, idAdded);
+    handleOnAddedTags(idAdded);
 
     onMainUiObjectsChanged();
     onObjAdded(aiData, idAdded);

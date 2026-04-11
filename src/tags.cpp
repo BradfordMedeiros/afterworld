@@ -4,7 +4,6 @@ glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 
 extern CustomApiBindings* gameapi;
 
-extern Tags tags;
 extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
@@ -35,32 +34,15 @@ glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 
 struct TagUpdater {
 	std::string attribute;
-	std::function<void(Tags& tags, int32_t idAdded, AttributeValue value)> onAdd;
-	std::function<void(Tags& tags, int32_t idAdded)> onRemove;
-	std::optional<std::function<void(Tags&)>> onFrame;
-	std::optional<std::function<void(Tags&, std::string& key, std::any& value)>> onMessage;
+	std::function<void(int32_t idAdded, AttributeValue value)> onAdd;
+	std::function<void(int32_t idAdded)> onRemove;
+	std::optional<std::function<void()>> onFrame;
+	std::optional<std::function<void(std::string& key, std::any& value)>> onMessage;
 };
 
 bool isInGameMode2(){
 	return getGlobalState().routeState.inGameMode;	
 }
-
-void handleScroll(std::set<objid>& textureScrollObjIds){
-	for (auto id : textureScrollObjIds){
-	  modlog("tags", "scroll object: " + std::to_string(id));
-		auto attrHandle = getAttrHandle(id);
-		auto scrollSpeed = getVec3Attr(attrHandle, "scrollspeed").value();
-		auto offset = getVec2Attr(attrHandle, "textureoffset").value();
-
-		auto elapsedTime = gameapi -> timeElapsed();
-		scrollSpeed.x *= elapsedTime;
-		scrollSpeed.y *= elapsedTime;
-		offset.x += scrollSpeed.x;
-		offset.y += scrollSpeed.y;
-		setGameObjectTextureOffset(id, offset);
-	}
-}
-
 
 
 std::string queryInitialBackground(){
@@ -69,7 +51,6 @@ std::string queryInitialBackground(){
 	}
 	return getSaveStringValue("settings", "background", "../gameresources/textures/backgrounds/test3.png");
 }
-
 
 
 std::vector<glm::vec3> parseDataVec3(std::string& value){
@@ -105,12 +86,12 @@ std::unordered_map<objid, Skippable> skippable;
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "animation",  // TODO this should probably move to entity
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
   		auto animationControllerValue = getSingleAttr(id, "animation");
   		addEntityController(animationController, id, getSymbol(animationControllerValue.value()));
   	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  	.onRemove = [](int32_t id) -> void {
 		 	removeEntityController(animationController, id);
   	},
   	.onFrame = std::nullopt,
@@ -118,46 +99,46 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "scrollspeed",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
 			auto value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
 			modassert(value.has_value(), "scrollspeed not vec3");
-  		//std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
-  		textureScrollObjIds.insert(id);
-  	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
- 		textureScrollObjIds.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
-  		if (!isInGameMode2()){
-  			return;
-  		}
-		handleScroll(textureScrollObjIds);
-  	},
-  	.onMessage = std::nullopt,
+  		    //std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
+  		    textureScrollObjIds.insert(id);
+  	    },
+  	    .onRemove = [](int32_t id) -> void {
+ 	    	textureScrollObjIds.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
+  	    	if (!isInGameMode2()){
+  	    		return;
+  	    	}
+	    	handleScroll(textureScrollObjIds);
+  	    },
+  	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "health",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
  			modlog("health", "entity added: " + std::to_string(id));
  			addEntityIdHitpoints(id);
-  	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-			modlog("health", "entity removed: " + std::to_string(id));
-			removeEntityIdHitpoints(id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  	     },
+  	     .onRemove = [](int32_t id) -> void {
+	        modlog("health", "entity removed: " + std::to_string(id));
+	        removeEntityIdHitpoints(id);
+  	     },
+  	     .onFrame = std::nullopt,
+  	     .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "ambient",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
   		//modassert(false, "on add ambient");
   		modlog("ambient", std::string("entity added") + gameapi -> getGameObjNameForId(id).value());
   		audiozones.audiozoneIds.insert(id);
   		std::cout << "audio zones: " << print(audiozones.audiozoneIds) << std::endl;
   	},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
+  	.onRemove = [](int32_t id) -> void {
   		modlog("ambient", std::string("entity removed") + std::to_string(id));
   		audiozones.audiozoneIds.erase(id);
   		if (audiozones.currentPlaying.has_value()){
@@ -167,7 +148,7 @@ std::vector<TagUpdater> tagupdates = {
   		}
   		std::cout << "audio zones: " << print(audiozones.audiozoneIds) << std::endl;
   	},
-  	.onFrame = [](Tags& tags) -> void {
+  	.onFrame = []() -> void {
   		// TODO perframe
   		// This doesn't need to be per frame, can easily make this on the collision callbacks
   		auto transform = gameapi -> getView();
@@ -230,67 +211,67 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "spawn",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
 			spawnAddId(director.managedSpawnpoints, id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		spawnRemoveId(director.managedSpawnpoints, id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		if (!isInGameMode2()){
-  			return;
-  		}
-			onSpawnTick(director.managedSpawnpoints);
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	spawnRemoveId(director.managedSpawnpoints, id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	if (!isInGameMode2()){
+  	    		return;
+  	    	}
+	        onSpawnTick(director.managedSpawnpoints);
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "spawn-managed",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
 			modlog("spawn-manage added: ", gameapi -> getGameObjNameForId(id).value());
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		spawnRemoveId(director.managedSpawnpoints, id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {},
-  	.onMessage = std::nullopt,
+  	    .onRemove = [](int32_t id) -> void {
+  	    	spawnRemoveId(director.managedSpawnpoints, id);
+  	    },
+  	    .onFrame = []() -> void {},
+  	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "destroy",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		 // when this object it removed, get the position, and spawn a prefab there 
-  		if (!isInGameMode2()){
-				return;
-  		}
-  		glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - destroy");
-  		auto sceneId = gameapi -> listSceneId(id);
-  		createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);  		
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+		.onAdd = [](int32_t id, AttributeValue) -> void {},
+  		.onRemove = [](int32_t id) -> void {
+  			 // when this object it removed, get the position, and spawn a prefab there 
+  			if (!isInGameMode2()){
+					return;
+  			}
+  			glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - destroy");
+  			auto sceneId = gameapi -> listSceneId(id);
+  			createPrefab(position, getSingleAttr(id, "destroy").value(), sceneId);  		
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "explode",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		if (!isInGameMode2()){
-  			return;
-  		}
- 		  // when this object it removed, get the position, and spawn a prefab there 
-  		glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - explode");
+		.onAdd = [](int32_t id, AttributeValue) -> void {},
+  		.onRemove = [](int32_t id) -> void {
+  			if (!isInGameMode2()){
+  				return;
+  			}
+ 			// when this object it removed, get the position, and spawn a prefab there 
+  			glm::vec3 position = gameapi -> getGameObjectPos(id, true, "[gamelogic] tags - explode");
 
-  		auto attrHandle = getAttrHandle(id);
+  			auto attrHandle = getAttrHandle(id);
 			auto explodeDamage = getFloatAttr(attrHandle, "explode").value();
 			auto explodeRadius = getFloatAttr(attrHandle, "explode-radius");
-  		createExplosion(position, explodeRadius.has_value() ? explodeRadius.value() : 5.f, explodeDamage);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  			createExplosion(position, explodeRadius.has_value() ? explodeRadius.value() : 5.f, explodeDamage);
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "damageafter",  // make this remove-after and then can just use the explode
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
 			// do not do it this way...
   			auto attrHandle = getAttrHandle(id);
 			auto explodeAfterSeconds = getFloatAttr(attrHandle, "damageafter").value();
@@ -298,128 +279,112 @@ std::vector<TagUpdater> tagupdates = {
 				.time = gameapi -> timeSeconds(false) + explodeAfterSeconds,
 			};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		explosionObjects.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-   		auto currTime = gameapi -> timeSeconds(false);
-
-   		std::vector<objid> explodedObjs;
-   		for (auto &[id, explosionObj] : explosionObjects){
-  			if (currTime >= explosionObj.time){
-  				explodedObjs.push_back(id);
-					doDamageMessage(id, 100.f);
-  			}
-  		}
-  		for (auto id : explodedObjs){
-  			explosionObjects.erase(id);
-  		}
-  	},
-  	.onMessage = std::nullopt,
+  	    .onRemove = [](int32_t id) -> void {
+  	    	explosionObjects.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+   	    	auto currTime = gameapi -> timeSeconds(false);
+    
+   	    	std::vector<objid> explodedObjs;
+   	    	for (auto &[id, explosionObj] : explosionObjects){
+  	    		if (currTime >= explosionObj.time){
+  	    			explodedObjs.push_back(id);
+	    				doDamageMessage(id, 100.f);
+  	    		}
+  	    	}
+  	    	for (auto id : explodedObjs){
+  	    		explosionObjects.erase(id);
+  	    	}
+  	    },
+  	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "linkorb", 
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
 			addLinkGunObj(id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeLinkGunObj(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		onLinkGunObjFrame();
-  	},
-  	.onMessage = std::nullopt,
+  	    .onRemove = [](int32_t id) -> void {
+  	    	removeLinkGunObj(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	onLinkGunObjFrame();
+  	    },
+  	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "condition",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
  			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
 			onAddConditionId(id, value);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {},
+  	.onRemove = [](int32_t id) -> void {},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "in-game-ui",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = []( int32_t id, AttributeValue) -> void {
 			createInGamesUiInstance(inGameUi, id);
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  		.onRemove = [](int32_t id) -> void {
   			freeInGameUiInstance(inGameUi, id);
   		},
-  		.onFrame = [](Tags& tags) -> void {},
-  		.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void { 		  
+  		.onFrame = []() -> void {},
+  		.onMessage = [](std::string& key, std::any& value) -> void { 		  
   		},
 	},
 	TagUpdater {
 		.attribute = "spin",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-  			idToRotateTimeAdded[id] = SpinObject {
-  				.timeAdded = gameapi -> timeSeconds(false),
-  			};
+		.onAdd = [](int32_t id, AttributeValue) -> void {
+            startRotate(id);
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
-  			idToRotateTimeAdded.erase(id);
+  		.onRemove = [](int32_t id) -> void {
+            stopRotate(id);
   		},
-  		.onFrame = [](Tags& tags) -> void {
-  			if (!isInGameMode2()){
-  				return;
-  			}
-  			for (auto &[id, spinObject] : idToRotateTimeAdded){
-  				auto timeElapsed = gameapi -> timeSeconds(false) - spinObject.timeAdded;
-  				float degrees = (360.f * timeElapsed) * 0.1f; // 0.2f is the turns per seconds 
-  				std::cout << "gun id, rotate degrees: " << degrees << std::endl;
-  				float angle = glm::radians(degrees);
-	  			float x = glm::cos(angle);
-	  			float z = glm::sin(angle);
-  				auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
-  				auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
-  				auto newOrientation = orientationFromPos(fromLocation, targetLocation);
-  				gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" }); // tempchecked
-  			}
+  		.onFrame = []() -> void {
+  			onRotateFrame(isInGameMode2());
   		},
   		.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "teleport",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	auto attrHandle = getAttrHandle(id);
+		.onAdd = [](int32_t id, AttributeValue) -> void {
+	  	    auto attrHandle = getAttrHandle(id);
 			auto teleportExit = getStrAttr(attrHandle, "teleport_exit");
-  		teleportObjs[id] = TeleportExit{
-  			.exit = teleportExit,
-  		};
+  	        teleportObjs[id] = TeleportExit{
+  			   .exit = teleportExit,
+  		    };
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		teleportObjs.erase(id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage =  std::nullopt,
+  		.onRemove = [](int32_t id) -> void {
+  			teleportObjs.erase(id);
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "autoplay",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
   			playMusicClipById(id, std::nullopt);
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {},
+  		.onRemove = [](int32_t id) -> void {},
   		.onFrame = std::nullopt,
   		.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "background",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
 	  		setGameObjectTexture(id, queryInitialBackground());
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {},
+  		.onRemove = [](int32_t id) -> void {},
   		.onFrame = std::nullopt,
   		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "glasstexture",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
+		.onAdd = [](int32_t id, AttributeValue) -> void {
 	  		createGlassTexture(id);
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  		.onRemove = [](int32_t id) -> void {
   			removeGlassTexture(id);
   		},
   		.onFrame = std::nullopt,
@@ -427,14 +392,14 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "waypoint",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-	  	addWaypoint(waypoints, id, id);
-	  	auto hitpoints = getHealth(id);
-	  	if (hitpoints.has_value()){
-	  		updateHealth(waypoints, id, hitpoints.value().current / hitpoints.value().total);
-	  	}
+		.onAdd = [](int32_t id, AttributeValue) -> void {
+	  	    addWaypoint(waypoints, id, id);
+	  	    auto hitpoints = getHealth(id);
+	  	    if (hitpoints.has_value()){
+	  	    	updateHealth(waypoints, id, hitpoints.value().current / hitpoints.value().total);
+	  	    }
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  		.onRemove = [](int32_t id) -> void {
   			removeWaypoint(waypoints, id);
   		},
   		.onFrame = std::nullopt,
@@ -442,40 +407,30 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "autoemission",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto period = maybeUnwrapAttrOpt<float>(value).value();
 	  		auto attrHandle = getAttrHandle(id);
 			auto emissionLow = getVec3Attr(attrHandle, "autoemission-low");
 			auto emissionHigh = getVec3Attr(attrHandle, "autoemission-high");
 
-	  		emissionObjects[id] = EmissionObject {
-	  			.lowColor = emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
-	  			.highColor = emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
-	  			.period = period,
-	  		};
+            addEmissionObj(
+                id,
+                emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
+                emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+                period
+            );
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
-  			emissionObjects.erase(id);
+  		.onRemove = [](int32_t id) -> void {
+            removeEmissionObj(id);
   		},
-  		.onFrame = [](Tags& tags) -> void {
-  			for (auto &[id, emissionObject] : emissionObjects){
-					float integer = 0.f;
-					float remaining = std::modf(gameapi -> timeSeconds(false) / emissionObject.period, &integer);
-					float interp = remaining < 0.5f ? (remaining * 2.f) : (1.f - ((remaining - 0.5f) * 2.f));
- 					modlog("emission object interp", std::to_string(interp));
-		  			glm::vec3 newColor(
-		  				emissionObject.lowColor.r + ((emissionObject.highColor.r - emissionObject.lowColor.r) * interp), 
-		  				emissionObject.lowColor.g + ((emissionObject.highColor.g - emissionObject.lowColor.g) * interp), 
-		  				emissionObject.lowColor.b + ((emissionObject.highColor.b - emissionObject.lowColor.b) * interp)
-		  			);
-		  			setGameObjectEmission(id, newColor);
-  			}
+  		.onFrame = []() -> void {
+            onEmissionFrame();
   		},
   		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "healthcolor",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 	  		auto attrHandle = getAttrHandle(id);
 			auto colorLow = getVec3Attr(attrHandle, "healthcolor-low");
 			auto colorHigh = getVec3Attr(attrHandle, "healthcolor");
@@ -488,46 +443,46 @@ std::vector<TagUpdater> tagupdates = {
 	  			.target = target,
 	  		};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		healthColorObjects.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		if (!isInGameMode2()){
-  			return;
-  		}
-  		for (auto &[id, healthColorObject] : healthColorObjects){
-				auto health = getHealth(id);
-				float percentageHealth = health.value().current / health.value().total;
-	  		glm::vec4 newColor(
-	  			healthColorObject.lowColor.r + ((healthColorObject.highColor.r - healthColorObject.lowColor.r) * percentageHealth), 
-	  			healthColorObject.lowColor.g + ((healthColorObject.highColor.g - healthColorObject.lowColor.g) * percentageHealth), 
-	  			healthColorObject.lowColor.b + ((healthColorObject.highColor.b - healthColorObject.lowColor.b) * percentageHealth),
-	  			1.f
-	  		);
-	  		if (healthColorObject.target.has_value()){
-		  		setGameObjectTint(healthColorObject.target.value(), newColor);
-	  		}else{
-		  		setGameObjectTint(id, newColor);
-	  		}
-  		}
-  	},
-  	.onMessage = std::nullopt,
+  	    .onRemove = [](int32_t id) -> void {
+  	    	healthColorObjects.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	if (!isInGameMode2()){
+  	    		return;
+  	    	}
+  	    	for (auto &[id, healthColorObject] : healthColorObjects){
+	    			auto health = getHealth(id);
+	    			float percentageHealth = health.value().current / health.value().total;
+	      		glm::vec4 newColor(
+	      			healthColorObject.lowColor.r + ((healthColorObject.highColor.r - healthColorObject.lowColor.r) * percentageHealth), 
+	      			healthColorObject.lowColor.g + ((healthColorObject.highColor.g - healthColorObject.lowColor.g) * percentageHealth), 
+	      			healthColorObject.lowColor.b + ((healthColorObject.highColor.b - healthColorObject.lowColor.b) * percentageHealth),
+	      			1.f
+	      		);
+	      		if (healthColorObject.target.has_value()){
+	    	  		setGameObjectTint(healthColorObject.target.value(), newColor);
+	      		}else{
+	    	  		setGameObjectTint(id, newColor);
+	      		}
+  	    	}
+  	    },
+  	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "cutscene",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto cutscene = getSingleAttr(id, "cutscene");
 			playCutsceneScript(id, cutscene.value());
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-	    removeCutscene(id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  	    .onRemove = [](int32_t id) -> void {
+	        removeCutscene(id);
+  	    },
+  	    .onFrame = std::nullopt,
+  	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "arcade",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			modlog("arcade", "on add");
 			std::string textureName = std::string("arcade-texture") + std::to_string(id);
 			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
@@ -537,7 +492,7 @@ std::vector<TagUpdater> tagupdates = {
   		    auto arcadeType = getSingleAttr(id, "arcade");
             addArcadeType(id, arcadeType.value(), arcadeTextureId);
 		},
-  	     .onRemove = [](Tags& tags, int32_t id) -> void {
+  	     .onRemove = [](int32_t id) -> void {
 	     		std::string textureName = std::string("arcade-texture") + std::to_string(id);
  	      		gameapi -> freeTexture(textureName, id);
 	       		maybeRemoveArcadeType(id);
@@ -549,18 +504,18 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "globallight",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			gameapi -> setGlobalLight(id);
 		},
-  	    .onRemove = [](Tags& tags, int32_t id) -> void {
+  	    .onRemove = [](int32_t id) -> void {
   	    },
   	    .onFrame = std::nullopt,
-  	    .onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  	    .onMessage = [](std::string& key, std::any& value) -> void {
   	    },
 	},
 	TagUpdater {
 		.attribute = "orbui",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 	  	auto attrHandle = getAttrHandle(id);
 	  	auto orbPositionStrs = getStrAttr(attrHandle, "data-pos");
 	  	modassert(orbPositionStrs.has_value(), "no data for orbs");
@@ -624,45 +579,44 @@ std::vector<TagUpdater> tagupdates = {
 				orbData.orbUis[getUniqueObjId()] = orbUi;			
 			}
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		std::set<objid> idsToRemove;
-  		for (auto&[id, orbUi] : orbData.orbUis){
-  			if (orbUi.ownerId == id){
-  				idsToRemove.insert(id);
-  			}
-  		}
-  		for (auto id : idsToRemove){
-	  		orbData.orbUis.erase(id);
-  		}
-  	},
-  	.onFrame = [](Tags& tags) -> void {
- 			std::set<objid> cachesToRemove;
-			for (auto& [orbUiId, indexToMesh] : orbData.orbIdToIndexToMeshId){
-				if (indexToMesh.size() == 0 || orbData.orbUis.find(orbUiId) == orbData.orbUis.end()){
-					cachesToRemove.insert(orbUiId);
-				}
-			}
-			for (auto cacheToRemove : cachesToRemove){
-				for (auto&[index, meshObjId] :  orbData.orbIdToIndexToMeshId.at(cacheToRemove)){
-					gameapi -> removeObjectById(meshObjId);
-				}
-				orbData.orbIdToIndexToMeshId.erase(cacheToRemove);
-			}
-
-			for (auto& [id, orbUi] : orbData.orbUis){
-				auto objExists = gameapi -> gameobjExists(id);
-				if (!objExists){
-					continue;
-				}
-	  		drawOrbs(orbData, orbUi, id);  			
-			}
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	std::set<objid> idsToRemove;
+  	    	for (auto&[id, orbUi] : orbData.orbUis){
+  	    		if (orbUi.ownerId == id){
+  	    			idsToRemove.insert(id);
+  	    		}
+  	    	}
+  	    	for (auto id : idsToRemove){
+	        		orbData.orbUis.erase(id);
+  	    	}
+  	    },
+  	    .onFrame = []() -> void {
+ 	    		std::set<objid> cachesToRemove;
+	    		for (auto& [orbUiId, indexToMesh] : orbData.orbIdToIndexToMeshId){
+	    			if (indexToMesh.size() == 0 || orbData.orbUis.find(orbUiId) == orbData.orbUis.end()){
+	    				cachesToRemove.insert(orbUiId);
+	    			}
+	    		}
+	    		for (auto cacheToRemove : cachesToRemove){
+	    			for (auto&[index, meshObjId] :  orbData.orbIdToIndexToMeshId.at(cacheToRemove)){
+	    				gameapi -> removeObjectById(meshObjId);
+	    			}
+	    			orbData.orbIdToIndexToMeshId.erase(cacheToRemove);
+	    		}
+    
+	    		for (auto& [id, orbUi] : orbData.orbUis){
+	    			auto objExists = gameapi -> gameobjExists(id);
+	    			if (!objExists){
+	    				continue;
+	    			}
+	      		drawOrbs(orbData, orbUi, id);  			
+	    		}
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "vehicle",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto vehicleType = std::get_if<std::string>(&value);
 			modassert(vehicleType, "vehicle type not defined as str");
 			if (*vehicleType == "" || *vehicleType == "ship"){
@@ -673,49 +627,46 @@ std::vector<TagUpdater> tagupdates = {
 				modassert(false, std::string("vehicle type not supported: ") + *vehicleType);
 			}
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeVehicle(vehicles, id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	removeVehicle(vehicles, id);
+  	    },
+  	    .onFrame = std::nullopt,
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	// Is this duplicate with the end level thing?
 	TagUpdater {
 		.attribute = "advance",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
  			auto advanceToLevel = getSingleAttr(id, "advance");
 			skippable[id] = Skippable{
 				.advanceToLevel = advanceToLevel,
 			};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
- 			auto levelComplete = getSingleAttr(id, "markcomplete");
- 			if (levelComplete.has_value()){
- 				markLevelComplete(levelComplete.value(), 0.f);
- 			}
- 			skippable.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		if (key == "advance"){
-  			for (auto& [id, skip] : skippable){
-  				if (skip.advanceToLevel.has_value()){
-	  				goToLevel(skip.advanceToLevel.value());
-  				}else{
-	  				goBackMainMenu();
-  				}
-  				return;
-  			}
-  		}
-  	},
+  	    .onRemove = [](int32_t id) -> void {
+ 	    		auto levelComplete = getSingleAttr(id, "markcomplete");
+ 	    		if (levelComplete.has_value()){
+ 	    			markLevelComplete(levelComplete.value(), 0.f);
+ 	    		}
+ 	    		skippable.erase(id);
+  	    },
+  	    .onFrame = []() -> void {},
+  	    .onMessage = [](std::string& key, std::any& value) -> void {
+  	    	if (key == "advance"){
+  	    		for (auto& [id, skip] : skippable){
+  	    			if (skip.advanceToLevel.has_value()){
+	      				goToLevel(skip.advanceToLevel.value());
+  	    			}else{
+	      				goBackMainMenu();
+  	    			}
+  	    			return;
+  	    		}
+  	    	}
+  	    },
 	},
 	TagUpdater {
 		.attribute = "powerup",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			  auto attrHandle = getAttrHandle(id);
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
+			auto attrHandle = getAttrHandle(id);
 	    	auto powerup = getSingleAttr(id, "powerup");
 	    	auto respawnRate = getSingleFloatAttr(id, "powerup-rate");
 	    	auto tint = getVec4Attr(attrHandle, "tint");
@@ -732,44 +683,43 @@ std::vector<TagUpdater> tagupdates = {
 				.disabledVisually = false,
 			};
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  		.onRemove = [](int32_t id) -> void {
   			powerups.erase(id);
   		},
-  	.onFrame = [](Tags& tags) -> void {
-  		float currTime = gameapi -> timeSeconds(false);
-  		for (auto& [id, powerup] : powerups){
-  			if (powerup.lastRemoveTime.has_value() && !powerup.disabledVisually){
-    			setGameObjectTint(id, glm::vec4(powerup.tint.x, powerup.tint.y, powerup.tint.z, 0.2f * powerup.tint.w));
-    			powerup.disabledVisually = true;
-  			}
-  			if (!powerup.lastRemoveTime.has_value() && powerup.disabledVisually){
-    			setGameObjectTint(id, powerup.tint);
-    			powerup.disabledVisually = false;
-  			}
-
-  			if (!powerup.lastRemoveTime.has_value()){
-  				continue;
-  			}
-  			if (!powerup.respawnRateMs.has_value()){
-  				continue;
-  			}
-
-  			float respawnTime = powerup.respawnRateMs.value() / 1000.f;
-  			auto elapsedTime = currTime - powerup.lastRemoveTime.value();
-
-  			std::cout << "powerup: currtime = " << currTime << ", elapsedTime = " << elapsedTime << ", lastremove = " << powerup.lastRemoveTime.value() << std::endl;
-
-  			if (elapsedTime > respawnTime){
-	  			powerup.lastRemoveTime = std::nullopt;
-  			}
-  		}
-  	},
-  			.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  		},
+  	    .onFrame = []() -> void {
+  	    	float currTime = gameapi -> timeSeconds(false);
+  	    	for (auto& [id, powerup] : powerups){
+  	    		if (powerup.lastRemoveTime.has_value() && !powerup.disabledVisually){
+        			setGameObjectTint(id, glm::vec4(powerup.tint.x, powerup.tint.y, powerup.tint.z, 0.2f * powerup.tint.w));
+        			powerup.disabledVisually = true;
+  	    		}
+  	    		if (!powerup.lastRemoveTime.has_value() && powerup.disabledVisually){
+        			setGameObjectTint(id, powerup.tint);
+        			powerup.disabledVisually = false;
+  	    		}
+    
+  	    		if (!powerup.lastRemoveTime.has_value()){
+  	    			continue;
+  	    		}
+  	    		if (!powerup.respawnRateMs.has_value()){
+  	    			continue;
+  	    		}
+    
+  	    		float respawnTime = powerup.respawnRateMs.value() / 1000.f;
+  	    		auto elapsedTime = currTime - powerup.lastRemoveTime.value();
+    
+  	    		std::cout << "powerup: currtime = " << currTime << ", elapsedTime = " << elapsedTime << ", lastremove = " << powerup.lastRemoveTime.value() << std::endl;
+    
+  	    		if (elapsedTime > respawnTime){
+	      			powerup.lastRemoveTime = std::nullopt;
+  	    		}
+  	    	}
+  	    },
+  		.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "rail",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 	  	auto attrHandle = getAttrHandle(id);
 
 	  	auto railData = getStrAttr(attrHandle, "data-pos");
@@ -824,25 +774,25 @@ std::vector<TagUpdater> tagupdates = {
 
 	  	addRails(id, nodes);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeRails(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  	
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	removeRails(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {
+  	    },
 	},
 	TagUpdater {
 		.attribute = "curve",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			managedRailMovementsBuffer.insert(id);
 		},
-  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  		.onRemove = [](int32_t id) -> void {
   			managedRailMovementsBuffer.erase(id);
   			removeManagedRailMovement(id);
   		},
-  		.onFrame = [](Tags& tags) -> void {
+  		.onFrame = []() -> void {
   			auto bufferToAdd = managedRailMovementsBuffer;
   			for (auto id : bufferToAdd){
   	  			auto attrHandle = getAttrHandle(id);
@@ -862,27 +812,26 @@ std::vector<TagUpdater> tagupdates = {
 				}
   			}
   		},
-  		.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
+  		.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "laser",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto attrHandle = getAttrHandle(id);
 			auto laserLength = getFloatAttr(attrHandle, "laserlength");
 			addLaser(id, laserLength.has_value() ? laserLength.value() : 5.f);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeLaser(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		onLaserFrame();
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	removeLaser(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	onLaserFrame();
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "gravityhole",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto attrHandle = getAttrHandle(id);
 			auto wellName = getStrAttr(attrHandle, "wellname");
 			auto targetWell = getStrAttr(attrHandle, "targetwell");
@@ -897,17 +846,17 @@ std::vector<TagUpdater> tagupdates = {
 				.launcher = launcherAmount,
 			};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		gravityWells.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		onFrameGravityWells();
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	gravityWells.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	onFrameGravityWells();
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "triggercolor",
-		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
 		  auto objHandle = getAttrHandle(id);
 			auto activeColor = getVec4Attr(objHandle, "activecolor");
 			auto unactiveColor = getVec4Attr(objHandle, "unactivecolor");
@@ -922,41 +871,41 @@ std::vector<TagUpdater> tagupdates = {
 				setGameObjectTint(id, triggerColors.at(id).unactiveColor.value());
 			}
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		triggerColors.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	triggerColors.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 
 };
 
-void onTagsMessage(Tags& tags, std::string& key, std::any& value){
+void onTagsMessage(std::string& key, std::any& value){
   for (auto &tagUpdate : tagupdates){
   	if (tagUpdate.onMessage.has_value()){
-  		tagUpdate.onMessage.value()(tags, key, value);
+  		tagUpdate.onMessage.value()(key, value);
   	}
   }
 }
-void onTagsFrame(Tags& tags){
+void onTagsFrame(){
 	for (auto &tagUpdate : tagupdates){
 		if (tagUpdate.onFrame.has_value()){
-			tagUpdate.onFrame.value()(tags);
+			tagUpdate.onFrame.value()();
 		}
 	}
 }
 
-void handleOnAddedTags(Tags& tags, int32_t idAdded){
+void handleOnAddedTags(int32_t idAdded){
   auto objHandle = getAttrHandle(idAdded);
 	for (auto &tagUpdate : tagupdates){
     auto attrValue = getAttr(objHandle, tagUpdate.attribute.c_str());
     if (attrValue.has_value()){
-	    tagUpdate.onAdd(tags, idAdded, attrValue.value());
+	    tagUpdate.onAdd(idAdded, attrValue.value());
     }
 	}
 }
-void handleOnAddedTagsInitial(Tags& tags){
+void handleOnAddedTagsInitial(){
   std::set<objid> idsAlreadyExisting;
   for (auto &tagUpdate : tagupdates){
   	auto ids = gameapi -> getObjectsByAttr(tagUpdate.attribute, std::nullopt, std::nullopt);
@@ -965,24 +914,15 @@ void handleOnAddedTagsInitial(Tags& tags){
   	}
   }
   for (auto idAdded : idsAlreadyExisting){
-  	handleOnAddedTags(tags, idAdded);
+  	handleOnAddedTags(idAdded);
   }
 }
 
 
-void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
+void handleTagsOnObjectRemoved(int32_t idRemoved){
  	for (auto &tagUpdate : tagupdates){
 	    if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
-        tagUpdate.onRemove(tags, idRemoved);
+        tagUpdate.onRemove(idRemoved);
       }
 	}
-}
-
-void startRotate(objid id){
-	idToRotateTimeAdded[id] = SpinObject {
-		.timeAdded = gameapi -> timeSeconds(false),
-	};
-}
-void stopRotate(objid id){
-	idToRotateTimeAdded.erase(id);
 }

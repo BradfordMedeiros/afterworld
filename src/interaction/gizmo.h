@@ -75,4 +75,25 @@ void handleTeleport(objid idToTeleport, objid teleporterId);
 void doTeleport(int32_t idToTeleport, std::string destination);
 std::optional<TeleportInfo> getTeleportPosition();
 
+struct SpinObject {
+	float timeAdded;
+};
+/////// Minor effect coloring, rotation, etc
+void startRotate(objid id);
+void stopRotate(objid id);
+void onRotateFrame(bool inGameMode);
+
+struct EmissionObject {
+	glm::vec3 lowColor;
+	glm::vec3 highColor;
+	float period;
+};
+
+void addEmissionObj(objid id, glm::vec3 lowColor, glm::vec3 highColor, float period);
+void removeEmissionObj(objid id);
+void onEmissionFrame();
+
+
+void handleScroll(std::set<objid>& textureScrollObjIds);
+
 #endif 

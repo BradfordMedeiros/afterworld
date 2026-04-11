@@ -34,11 +34,7 @@ struct UiData {
   HandlerFns uiCallbacks;
 };
 
-struct EmissionObject {
-	glm::vec3 lowColor;
-	glm::vec3 highColor;
-	float period;
-};
+
 struct HealthColorObject {
 	glm::vec3 lowColor;
 	glm::vec3 highColor;
@@ -59,17 +55,11 @@ struct Powerup {
 };
 
 
-struct SpinObject {
-	float timeAdded;
-};
-
-struct Tags {};
-
-void onTagsMessage(Tags& tags, std::string& key, std::any& value);
-void onTagsFrame(Tags& tags);
-void handleOnAddedTags(Tags& tags, int32_t idAdded);
-void handleOnAddedTagsInitial(Tags& tags);
-void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved);
+void onTagsMessage(std::string& key, std::any& value);
+void onTagsFrame();
+void handleOnAddedTags(int32_t idAdded);
+void handleOnAddedTagsInitial();
+void handleTagsOnObjectRemoved(int32_t idRemoved);
 
 void setMenuBackground(std::string background);
 

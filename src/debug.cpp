@@ -1,7 +1,6 @@
 #include "./debug.h"
 
 extern CustomApiBindings* gameapi;
-extern Tags tags;
 extern GameTypes gametypeSystem;
 extern Director director;
 

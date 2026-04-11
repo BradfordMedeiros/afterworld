@@ -8,6 +8,8 @@ extern std::unordered_map<objid, TriggerColor> triggerColors;
 extern std::unordered_map<objid, glm::vec3> impulses;
 extern std::unordered_map<objid, LinkGunObj> linkGunObj;
 extern std::unordered_map<objid, TeleportExit> teleportObjs;
+extern std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
+extern std::unordered_map<objid, EmissionObject> emissionObjects;
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -362,4 +364,75 @@ void setMenuBackground(std::string background){
 		setGameObjectTexture(id, background);
 	}
 	updateQueryBackground(background);
+}
+
+
+void startRotate(objid id){
+	idToRotateTimeAdded[id] = SpinObject {
+		.timeAdded = gameapi -> timeSeconds(false),
+	};
+}
+void stopRotate(objid id){
+	idToRotateTimeAdded.erase(id);
+}
+
+void onRotateFrame(bool inGameMode){
+  if (!inGameMode){
+  	return;
+  }
+  for (auto &[id, spinObject] : idToRotateTimeAdded){
+  	auto timeElapsed = gameapi -> timeSeconds(false) - spinObject.timeAdded;
+  	float degrees = (360.f * timeElapsed) * 0.1f; // 0.2f is the turns per seconds 
+  	std::cout << "gun id, rotate degrees: " << degrees << std::endl;
+  	float angle = glm::radians(degrees);
+		float x = glm::cos(angle);
+		float z = glm::sin(angle);
+  	auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
+  	auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
+  	auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+  	gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" }); // tempchecked
+  }
+}
+
+void addEmissionObj(objid id, glm::vec3 lowColor, glm::vec3 highColor, float period){
+		emissionObjects[id] = EmissionObject {
+			.lowColor = lowColor,
+			.highColor = highColor,
+			.period = period,
+		};
+}
+
+void removeEmissionObj(objid id){
+		emissionObjects.erase(id);
+}
+
+void onEmissionFrame(){
+    for (auto &[id, emissionObject] : emissionObjects){
+	      float integer = 0.f;
+	      float remaining = std::modf(gameapi -> timeSeconds(false) / emissionObject.period, &integer);
+	      float interp = remaining < 0.5f ? (remaining * 2.f) : (1.f - ((remaining - 0.5f) * 2.f));
+ 	      modlog("emission object interp", std::to_string(interp));
+		  	glm::vec3 newColor(
+		  		emissionObject.lowColor.r + ((emissionObject.highColor.r - emissionObject.lowColor.r) * interp), 
+		  		emissionObject.lowColor.g + ((emissionObject.highColor.g - emissionObject.lowColor.g) * interp), 
+		  		emissionObject.lowColor.b + ((emissionObject.highColor.b - emissionObject.lowColor.b) * interp)
+		  	);
+		  	setGameObjectEmission(id, newColor);
+    }
+}
+
+void handleScroll(std::set<objid>& textureScrollObjIds){
+	for (auto id : textureScrollObjIds){
+	  modlog("tags", "scroll object: " + std::to_string(id));
+		auto attrHandle = getAttrHandle(id);
+		auto scrollSpeed = getVec3Attr(attrHandle, "scrollspeed").value();
+		auto offset = getVec2Attr(attrHandle, "textureoffset").value();
+
+		auto elapsedTime = gameapi -> timeElapsed();
+		scrollSpeed.x *= elapsedTime;
+		scrollSpeed.y *= elapsedTime;
+		offset.x += scrollSpeed.x;
+		offset.y += scrollSpeed.y;
+		setGameObjectTextureOffset(id, offset);
+	}
 }
