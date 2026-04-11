@@ -66,15 +66,7 @@ struct SpinObject {
 };
 
 struct Tags {
-	InGameUi inGameUi;
-	std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
-	std::unordered_map<objid, EmissionObject> emissionObjects;
-	std::unordered_map<objid, HealthColorObject> healthColorObjects;
-	std::unordered_map<objid, ExplosionObj> explosionObjects;
-	std::unordered_map<objid, Powerup> powerups;
-
-	UiData* uiData;
-
+	
 };
 
 Tags createTags(UiData* uiData);

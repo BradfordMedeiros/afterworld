@@ -18,10 +18,16 @@ std::set<objid> managedRailMovementsBuffer; // because this can be added before 
 extern std::unordered_map<objid, Laser> lasers;
 extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
-std::unordered_map<objid, TeleportExit> teleportObjs;
+extern std::unordered_map<objid, TeleportExit> teleportObjs;
+extern std::unordered_map<objid, Powerup> powerups;
 extern StateController animationController;
 extern std::set<objid> textureScrollObjIds;
 extern AudioZones audiozones;
+extern InGameUi inGameUi;
+extern std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
+extern std::unordered_map<objid, EmissionObject> emissionObjects;
+extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
+extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 
 void goToLevel(std::string levelShortName);
 void goBackMainMenu();
@@ -41,7 +47,7 @@ bool isInGameMode2(){
 
 void handleScroll(std::set<objid>& textureScrollObjIds){
 	for (auto id : textureScrollObjIds){
-		modlog("tags", "scroll object: " + std::to_string(id));
+	  modlog("tags", "scroll object: " + std::to_string(id));
 		auto attrHandle = getAttrHandle(id);
 		auto scrollSpeed = getVec3Attr(attrHandle, "scrollspeed").value();
 		auto offset = getVec2Attr(attrHandle, "textureoffset").value();
@@ -288,27 +294,27 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "damageafter",  // make this remove-after and then can just use the explode
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
 			// do not do it this way...
-  		auto attrHandle = getAttrHandle(id);
+  			auto attrHandle = getAttrHandle(id);
 			auto explodeAfterSeconds = getFloatAttr(attrHandle, "damageafter").value();
-			tags.explosionObjects[id] = ExplosionObj {
+			explosionObjects[id] = ExplosionObj {
 				.time = gameapi -> timeSeconds(false) + explodeAfterSeconds,
 			};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.explosionObjects.erase(id);
+  		explosionObjects.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
    		auto currTime = gameapi -> timeSeconds(false);
 
    		std::vector<objid> explodedObjs;
-   		for (auto &[id, explosionObj] : tags.explosionObjects){
+   		for (auto &[id, explosionObj] : explosionObjects){
   			if (currTime >= explosionObj.time){
   				explodedObjs.push_back(id);
 					doDamageMessage(id, 100.f);
   			}
   		}
   		for (auto id : explodedObjs){
-  			tags.explosionObjects.erase(id);
+  			explosionObjects.erase(id);
   		}
   	},
   	.onMessage = std::nullopt,
@@ -339,43 +345,43 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "in-game-ui",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-			createInGamesUiInstance(tags.inGameUi, id);
+			createInGamesUiInstance(inGameUi, id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		freeInGameUiInstance(tags.inGameUi, id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void { 		  
-  	},
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			freeInGameUiInstance(inGameUi, id);
+  		},
+  		.onFrame = [](Tags& tags) -> void {},
+  		.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void { 		  
+  		},
 	},
 	TagUpdater {
 		.attribute = "spin",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
-  		tags.idToRotateTimeAdded[id] = SpinObject {
-  			.timeAdded = gameapi -> timeSeconds(false),
-  		};
+  			idToRotateTimeAdded[id] = SpinObject {
+  				.timeAdded = gameapi -> timeSeconds(false),
+  			};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.idToRotateTimeAdded.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		if (!isInGameMode2()){
-  			return;
-  		}
-  		for (auto &[id, spinObject] : tags.idToRotateTimeAdded){
-  			auto timeElapsed = gameapi -> timeSeconds(false) - spinObject.timeAdded;
-  			float degrees = (360.f * timeElapsed) * 0.1f; // 0.2f is the turns per seconds 
-  			std::cout << "gun id, rotate degrees: " << degrees << std::endl;
-  			float angle = glm::radians(degrees);
-	  		float x = glm::cos(angle);
-	  		float z = glm::sin(angle);
-  			auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
-  			auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
-  			auto newOrientation = orientationFromPos(fromLocation, targetLocation);
-  			gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" }); // tempchecked
-  		}
-  	},
-  	.onMessage =  std::nullopt,
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			idToRotateTimeAdded.erase(id);
+  		},
+  		.onFrame = [](Tags& tags) -> void {
+  			if (!isInGameMode2()){
+  				return;
+  			}
+  			for (auto &[id, spinObject] : idToRotateTimeAdded){
+  				auto timeElapsed = gameapi -> timeSeconds(false) - spinObject.timeAdded;
+  				float degrees = (360.f * timeElapsed) * 0.1f; // 0.2f is the turns per seconds 
+  				std::cout << "gun id, rotate degrees: " << degrees << std::endl;
+  				float angle = glm::radians(degrees);
+	  			float x = glm::cos(angle);
+	  			float z = glm::sin(angle);
+  				auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
+  				auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
+  				auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+  				gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" }); // tempchecked
+  			}
+  		},
+  		.onMessage =  std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "teleport",
@@ -430,69 +436,68 @@ std::vector<TagUpdater> tagupdates = {
 	  		updateHealth(waypoints, id, hitpoints.value().current / hitpoints.value().total);
 	  	}
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		removeWaypoint(waypoints, id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			removeWaypoint(waypoints, id);
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "autoemission",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			auto period = maybeUnwrapAttrOpt<float>(value).value();
-	  	auto attrHandle = getAttrHandle(id);
+	  		auto attrHandle = getAttrHandle(id);
 			auto emissionLow = getVec3Attr(attrHandle, "autoemission-low");
 			auto emissionHigh = getVec3Attr(attrHandle, "autoemission-high");
 
-	  	tags.emissionObjects[id] = EmissionObject {
-	  		.lowColor = emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
-	  		.highColor = emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
-	  		.period = period,
-	  	};
+	  		emissionObjects[id] = EmissionObject {
+	  			.lowColor = emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
+	  			.highColor = emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+	  			.period = period,
+	  		};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.emissionObjects.erase(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		for (auto &[id, emissionObject] : tags.emissionObjects){
-				float integer = 0.f;
-				float remaining = std::modf(gameapi -> timeSeconds(false) / emissionObject.period, &integer);
-				float interp = remaining < 0.5f ? (remaining * 2.f) : (1.f - ((remaining - 0.5f) * 2.f));
- 				modlog("emission object interp", std::to_string(interp));
-
-	  		glm::vec3 newColor(
-	  			emissionObject.lowColor.r + ((emissionObject.highColor.r - emissionObject.lowColor.r) * interp), 
-	  			emissionObject.lowColor.g + ((emissionObject.highColor.g - emissionObject.lowColor.g) * interp), 
-	  			emissionObject.lowColor.b + ((emissionObject.highColor.b - emissionObject.lowColor.b) * interp)
-	  		);
-	  		setGameObjectEmission(id, newColor);
-  		}
-  	},
-  	.onMessage = std::nullopt,
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			emissionObjects.erase(id);
+  		},
+  		.onFrame = [](Tags& tags) -> void {
+  			for (auto &[id, emissionObject] : emissionObjects){
+					float integer = 0.f;
+					float remaining = std::modf(gameapi -> timeSeconds(false) / emissionObject.period, &integer);
+					float interp = remaining < 0.5f ? (remaining * 2.f) : (1.f - ((remaining - 0.5f) * 2.f));
+ 					modlog("emission object interp", std::to_string(interp));
+		  			glm::vec3 newColor(
+		  				emissionObject.lowColor.r + ((emissionObject.highColor.r - emissionObject.lowColor.r) * interp), 
+		  				emissionObject.lowColor.g + ((emissionObject.highColor.g - emissionObject.lowColor.g) * interp), 
+		  				emissionObject.lowColor.b + ((emissionObject.highColor.b - emissionObject.lowColor.b) * interp)
+		  			);
+		  			setGameObjectEmission(id, newColor);
+  			}
+  		},
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "healthcolor",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-	  	auto attrHandle = getAttrHandle(id);
+	  		auto attrHandle = getAttrHandle(id);
 			auto colorLow = getVec3Attr(attrHandle, "healthcolor-low");
 			auto colorHigh = getVec3Attr(attrHandle, "healthcolor");
 			auto colorTarget = getStrAttr(attrHandle, "healthcolor-target");
 			auto target = colorTarget.has_value() ? findBodyPart(id, colorTarget.value().c_str()) : std::nullopt;
 
-	  	tags.healthColorObjects[id] = HealthColorObject {
-	  		.lowColor = colorLow.has_value() ? colorLow.value(): glm::vec3(0.f, 0.f, 0.f),
-	  		.highColor = colorHigh.has_value() ? colorHigh.value() : glm::vec3(1.f, 1.f, 1.f),
-	  		.target = target,
-	  	};
+	  		healthColorObjects[id] = HealthColorObject {
+	  			.lowColor = colorLow.has_value() ? colorLow.value(): glm::vec3(0.f, 0.f, 0.f),
+	  			.highColor = colorHigh.has_value() ? colorHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+	  			.target = target,
+	  		};
 		},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.healthColorObjects.erase(id);
+  		healthColorObjects.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		if (!isInGameMode2()){
   			return;
   		}
-  		for (auto &[id, healthColorObject] : tags.healthColorObjects){
+  		for (auto &[id, healthColorObject] : healthColorObjects){
 				auto health = getHealth(id);
 				float percentageHealth = health.value().current / health.value().total;
 	  		glm::vec4 newColor(
@@ -712,30 +717,29 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "powerup",
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
-			auto attrHandle = getAttrHandle(id);
+			  auto attrHandle = getAttrHandle(id);
+	    	auto powerup = getSingleAttr(id, "powerup");
+	    	auto respawnRate = getSingleFloatAttr(id, "powerup-rate");
+	    	auto tint = getVec4Attr(attrHandle, "tint");
 
-	    auto powerup = getSingleAttr(id, "powerup");
-	    auto respawnRate = getSingleFloatAttr(id, "powerup-rate");
-	    auto tint = getVec4Attr(attrHandle, "tint");
+	    	std::optional<int> respawnRateMs;
+	    	if (respawnRate.has_value()){
+	    		respawnRateMs = static_cast<int>(respawnRate.value());   
+	    	}  
 
-	    std::optional<int> respawnRateMs;
-	    if (respawnRate.has_value()){
-	    	respawnRateMs = static_cast<int>(respawnRate.value());
-	    }
-
-			tags.powerups[id] = Powerup {
+			powerups[id] = Powerup {
 				.type = powerup.value(),
 				.tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
 				.respawnRateMs = respawnRateMs,
 				.disabledVisually = false,
 			};
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		tags.powerups.erase(id);
-  	},
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			powerups.erase(id);
+  		},
   	.onFrame = [](Tags& tags) -> void {
   		float currTime = gameapi -> timeSeconds(false);
-  		for (auto& [id, powerup] : tags.powerups){
+  		for (auto& [id, powerup] : powerups){
   			if (powerup.lastRemoveTime.has_value() && !powerup.disabledVisually){
     			setGameObjectTint(id, glm::vec4(powerup.tint.x, powerup.tint.y, powerup.tint.z, 0.2f * powerup.tint.w));
     			powerup.disabledVisually = true;
@@ -762,8 +766,8 @@ std::vector<TagUpdater> tagupdates = {
   			}
   		}
   	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
-  	},
+  			.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  		},
 	},
 	TagUpdater {
 		.attribute = "rail",
@@ -836,14 +840,14 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue value) -> void {
 			managedRailMovementsBuffer.insert(id);
 		},
-  	.onRemove = [](Tags& tags, int32_t id) -> void {
-  		managedRailMovementsBuffer.erase(id);
-  		removeManagedRailMovement(id);
-  	},
-  	.onFrame = [](Tags& tags) -> void {
-  		auto bufferToAdd = managedRailMovementsBuffer;
-  		for (auto id : bufferToAdd){
-  	  	auto attrHandle = getAttrHandle(id);
+  		.onRemove = [](Tags& tags, int32_t id) -> void {
+  			managedRailMovementsBuffer.erase(id);
+  			removeManagedRailMovement(id);
+  		},
+  		.onFrame = [](Tags& tags) -> void {
+  			auto bufferToAdd = managedRailMovementsBuffer;
+  			for (auto id : bufferToAdd){
+  	  			auto attrHandle = getAttrHandle(id);
 				auto curve = getStrAttr(attrHandle, "curve").value();
 				auto trigger = getStrAttr(attrHandle, "trigger");
 				auto railId = railIdForName(curve);
@@ -858,10 +862,9 @@ std::vector<TagUpdater> tagupdates = {
 						.trigger = trigger,
 					};
 				}
-  		}
-
-  	},
-  	.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
+  			}
+  		},
+  		.onMessage = [](Tags& tags, std::string& key, std::any& value) -> void {
   	},
 	},
 	TagUpdater {
@@ -978,14 +981,6 @@ void handleOnAddedTagsInitial(Tags& tags){
 
 Tags createTags(UiData* uiData){
   Tags tags{};
-  tags.uiData = uiData;
-  tags.inGameUi = InGameUi {
-  	.textDisplays = {},
-  };
-  tags.idToRotateTimeAdded = {};
-  tags.emissionObjects = {};
-  tags.healthColorObjects = {};
-  tags.explosionObjects = {};
 
   ///// animations ////
 
@@ -996,17 +991,17 @@ Tags createTags(UiData* uiData){
 
 void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
  	for (auto &tagUpdate : tagupdates){
-	  if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
-      tagUpdate.onRemove(tags, idRemoved);
-    }
+	    if (hasAttribute(idRemoved, tagUpdate.attribute.c_str())){
+        tagUpdate.onRemove(tags, idRemoved);
+      }
 	}
 }
 
 void startRotate(objid id){
-	tags.idToRotateTimeAdded[id] = SpinObject {
+	idToRotateTimeAdded[id] = SpinObject {
 		.timeAdded = gameapi -> timeSeconds(false),
 	};
 }
 void stopRotate(objid id){
-	tags.idToRotateTimeAdded.erase(id);
+	idToRotateTimeAdded.erase(id);
 }

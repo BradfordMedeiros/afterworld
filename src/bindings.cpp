@@ -18,6 +18,8 @@ std::unordered_map<objid, GlassTexture> objIdToGlassTexture;
 std::unordered_map<objid, Laser> lasers;
 std::unordered_map<objid, GravityWell> gravityWells;
 std::unordered_map<objid, TriggerColor> triggerColors;
+std::unordered_map<objid, TeleportExit> teleportObjs;
+std::unordered_map<objid, Powerup> powerups;
 std::unordered_map<objid, LinkGunObj> linkGunObj;
 StateController animationController = createStateController();
 OrbData orbData;
@@ -29,6 +31,13 @@ Weather weather;
 Waypoints waypoints;
 std::set<objid> textureScrollObjIds;
 AudioZones audiozones;
+InGameUi inGameUi;
+std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
+std::unordered_map<objid, EmissionObject> emissionObjects;
+std::unordered_map<objid, HealthColorObject> healthColorObjects;
+std::unordered_map<objid, ExplosionObj> explosionObjects;
+UiData* uiData = NULL;
+std::optional<glm::vec3> oldGravity;  // wtf?
 
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
@@ -654,7 +663,7 @@ bool isGunZoomed(objid id){
 }
 
 void deliverPowerup(objid vehicle, objid powerupId){
-  auto& powerup = tags.powerups.at(powerupId);
+  auto& powerup = powerups.at(powerupId);
   if (powerup.lastRemoveTime.has_value()){
     return;
   }
@@ -756,7 +765,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         std::cout << "additional tokens: " << print(sceneToLoad.value().additionalTokens.at(0)) << std::endl;
       }else{
         std::cout << "additional tokens: " << "none" << std::endl;
-    }
+      }
 
       sceneId = gameapi -> loadScene(sceneToLoad.value().sceneFile, sceneToLoad.value().additionalTokens, std::nullopt, {});
     }
@@ -829,7 +838,6 @@ DebugConfig debugPrintAnimations(int playerIndex){
   return debugConfig;
 }
 
-std::optional<glm::vec3> oldGravity;
 void setNoClipMode(bool enable){
   ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
@@ -1306,9 +1314,9 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
   GameState* gameState = static_cast<GameState*>(data);
 
   if (!getGlobalState().disableUiInput){
-    onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, tags.uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
   }
-  onInGameUiMouseCallback(uiStateContext, tags.uiData -> uiContext, tags.inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
+  onInGameUiMouseCallback(uiStateContext, uiData -> uiContext, inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
   onVehicleMouseClick(vehicles, button, action, mods);
 
@@ -1360,7 +1368,7 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
   if (!getGlobalState().disableUiInput){
     onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
   }
-  onInGameUiMouseMoveCallback(tags.inGameUi, xPos, yPos, xNdc, yNdc);
+  onInGameUiMouseMoveCallback(inGameUi, xPos, yPos, xNdc, yNdc);
   onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
 
   float movementX = xNdc - getGlobalState().xNdc;
@@ -1699,10 +1707,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
     std::optional<glm::vec2> mainUiCursorCoord;
-    gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, tags.uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
-    modassert(tags.uiData, "tags.uiData NULL");
+    gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
+    modassert(uiData, "uiData NULL");
     
-    onInGameUiFrame(uiStateContext, tags.inGameUi, tags.uiData->uiContext, std::nullopt, ndiCoord);
+    onInGameUiFrame(uiStateContext, inGameUi, uiData->uiContext, std::nullopt, ndiCoord);
     
     if (isInGameMode()){
       std::optional<UiHealth> uiHealth;
@@ -2044,9 +2052,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto scrollCallback = remapScrollCallback(rawAmount);
 
     if (!getGlobalState().disableUiInput){
-      onMainUiScroll(uiStateContext, tags.uiData->uiContext, scrollCallback.amount);
+      onMainUiScroll(uiStateContext, uiData->uiContext, scrollCallback.amount);
     }
-    onInGameUiScrollCallback(tags.inGameUi, scrollCallback.amount);
+    onInGameUiScrollCallback(inGameUi, scrollCallback.amount);
     onMovementScrollCallback(movement, scrollCallback.amount, scrollCallback.playerPort);
   };
 
