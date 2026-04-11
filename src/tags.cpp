@@ -979,11 +979,6 @@ void handleOnAddedTagsInitial(Tags& tags){
   }
 }
 
-Tags createTags(){
-  Tags tags{};
-  addAnimationController(animationController);
-  return tags;
-}
 
 void handleTagsOnObjectRemoved(Tags& tags, int32_t idRemoved){
  	for (auto &tagUpdate : tagupdates){

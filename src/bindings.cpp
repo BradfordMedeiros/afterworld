@@ -1520,14 +1520,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         "../gameresources/build/weapons/fork.gltf",
       });
   
-    tags = createTags();
+    tags = Tags{};
+    addAnimationController(animationController);
+
     uiData = &gameState -> uiData;
 
     handleOnAddedTagsInitial(tags); // not sure i actually need this since are there any objects added?
     generateWaterMesh();
-    
-    //addWaterObj(gameapi -> rootSceneId());
-    
+        
     if (hasOption("arcade")){
       addArcadeType(-1, getArgOption("arcade"), std::nullopt);
       getGlobalState().disableUiInput = true;

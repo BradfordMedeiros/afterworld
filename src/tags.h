@@ -49,8 +49,6 @@ struct ExplosionObj {
 	float time;
 };
 
-
-
 struct Powerup {
 	std::string type;
 	glm::vec4 tint;
@@ -65,11 +63,8 @@ struct SpinObject {
 	float timeAdded;
 };
 
-struct Tags {
-	
-};
+struct Tags {};
 
-Tags createTags();
 void onTagsMessage(Tags& tags, std::string& key, std::any& value);
 void onTagsFrame(Tags& tags);
 void handleOnAddedTags(Tags& tags, int32_t idAdded);
