@@ -19,7 +19,7 @@ std::unordered_map<objid, Laser> lasers;
 std::unordered_map<objid, GravityWell> gravityWells;
 std::unordered_map<objid, TriggerColor> triggerColors;
 std::unordered_map<objid, LinkGunObj> linkGunObj;
-
+StateController animationController = createStateController();
 OrbData orbData;
 Water water;
 SoundData soundData;
@@ -27,6 +27,8 @@ GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
 Waypoints waypoints;
+std::set<objid> textureScrollObjIds;
+AudioZones audiozones;
 
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
@@ -103,14 +105,6 @@ void onMenu2ContinueClick(){
   ballModeLevelSelect();
 }
 
-std::vector<int> getVehicleIds(){
-  std::vector<int>  vehicleIds;
-  for (auto& [id, vehicle] : vehicles.vehicles){
-    vehicleIds.push_back(id);
-  }
-  return vehicleIds;
-}
-
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id){
   enterVehicle(vehicles, vehicleId, id);
   std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
@@ -118,13 +112,15 @@ void enterVehicleRaw(int playerIndex, objid vehicleId, objid id){
   controllable.value() -> vehicle = vehicleId;
 }
 
-
-bool canExitVehicle = true;
+bool canExitVehicleValue = true;
 void setCanExitVehicle(bool canExit){
-  canExitVehicle = canExit;
+  canExitVehicleValue = canExit;
+}
+bool canExitVehicle(){
+  return canExitVehicleValue;
 }
 void exitVehicleRaw(int playerIndex, objid vehicleId, objid id){
-  if (!canExitVehicle){
+  if (!canExitVehicle()){
     return;
   }
   exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
@@ -160,27 +156,6 @@ void setScenarioOptions(ScenarioOptions& options){
   modlog("set scenario options: ambient", print(options.ambientLight));
   modlog("set scenario options: skyboxColor", print(options.skyboxColor));
   modlog("set scenario options: skybox", print(options.skybox));
-}
-
-objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
-  GameobjAttributes attr = {
-    .attr = {
-      { "scene", prefab },
-      { "position", pos },
-    },
-  };
-
-  for (auto &[key, payload] : additionalFields){
-    attr.attr[key] = payload;
-  }
-
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
-  return gameapi -> makeObjectAttr(
-    sceneId, 
-    std::string("[prefab-instance-") + uniqueNameSuffix(), 
-    attr, 
-    submodelAttributes
-  ).value();
 }
 
 void startLevel(ManagedScene& managedScene){
@@ -411,7 +386,6 @@ GameMode gamemodeByShortcutName(std::string shortcut){
     .player = "maincamera",
   };
 }
-
 
 double downTime = 0;
 void setPausedMode(bool shouldBePaused){
@@ -811,13 +785,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   }
 }
 
-glm::vec2 smoothVelocity(glm::vec2 lookVelocity);
 
-
-bool keyIsDown(int key){
-  extern GLFWwindow* window;
-  return glfwGetKey(window, key) == GLFW_PRESS;
-}
 glm::vec2 getMouseVelocity(){
   return getGlobalState().mouseVelocity;
 }
@@ -859,10 +827,6 @@ DebugConfig debugPrintAnimations(int playerIndex){
     debugConfig.data.push_back({ "animations" });
   }
   return debugConfig;
-}
-
-void deliverCurrentGunAmmo(objid id, int ammoAmount){
-  deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }
 
 std::optional<glm::vec3> oldGravity;
@@ -1153,7 +1117,7 @@ UiContext getUiContext(GameState& gameState){
 
 ArcadeApi arcadeApi {
   .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
-      return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
+    return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
   },
   .releaseSounds = [](objid id) -> void {
     unloadManagedSounds(id);
@@ -1177,56 +1141,6 @@ ArcadeApi arcadeApi {
   }
 };
 
-bool hasAnimation(objid entityId, std::string& animationName){
-  return gameapi -> listAnimations(entityId).count(animationName) > 0;
-}
-
-
-void doAnimationTrigger(objid entityId, const char* transition){
-  if (!hasControllerState(tags.animationController, entityId)){
-    return;
-  }
-  bool changedState = triggerControllerState(tags.animationController, entityId, getSymbol(transition));
-  if (changedState){
-    modlog("statecontroller state changed", std::to_string(entityId));
-    tags.animationController.pendingAnimations.insert(entityId);
-  }
-}
-
-void doStateControllerAnimations(){
-  for (auto entityId : tags.animationController.pendingAnimations){
-    if (!hasControllerState(tags.animationController, entityId)){
-      continue;
-    }
-    auto stateAnimation = stateAnimationForController(tags.animationController, entityId);
-    bool stateAnimationHasAnimation = stateAnimation && stateAnimation -> animation.has_value();
-    bool matchingAnimation = stateAnimationHasAnimation && hasAnimation(entityId, stateAnimation -> animation.value());
-
-    if (stateAnimationHasAnimation){
-      modlog("statecontroller want animation", stateAnimation -> animation.value());
-    }
-    if (!disableAnimation && matchingAnimation){
-      modlog("statecontroller animation controller play animation for state", nameForSymbol(stateAnimation -> state) + ", " + std::to_string(entityId) + ", " + print(stateAnimation -> animationBehavior));
-      pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value());
-//      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, {});
-
-      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, controllableEntities.at(entityId).disableAnimationIds, 0, true, std::nullopt);  
-
-    }else{
-      if (stateAnimationHasAnimation && !matchingAnimation){
-        if (validateAnimationControllerAnimations){
-          modassert(false, std::string("no matching animation: ") + stateAnimation -> animation.value());
-        }
-        modlog("statecontroller animation controller play animation no matching animation for state", nameForSymbol(stateAnimation -> state) + ", for animation: " + stateAnimation -> animation.value() + ", " + std::to_string(entityId));
-        pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value() + " -- missing animation");
-
-      }
-      modlog("statecontroller stop animation", std::to_string(entityId));
-      gameapi -> stopAnimation(entityId);
-    }
-  }
-  tags.animationController.pendingAnimations = {};
-}
 
 UiStateContext uiStateContext {
   .routerHistory = &getMainRouterHistory(),
@@ -1262,18 +1176,6 @@ AIInterface aiInterface {
   .doDamage = doDamageMessage,
 };
 
-float querySelectDistance(){
-  auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(traitQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-  float selectDistance = floatFromFirstSqlResult(result, 0);
-  return selectDistance;
-}
-
-bool entityInShootingMode(objid id){
-  return isInShootingMode(id).value();
-}
 
 void zoomIntoArcade(std::optional<objid> id, int playerIndex){
   bool zoomIn = id.has_value();
@@ -1837,7 +1739,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onTagsFrame(tags);
     handleOrbViews(orbData);
     
-    doStateControllerAnimations();
+    doStateControllerAnimations(validateAnimationControllerAnimations, disableAnimation);
 
     if (levelShortcutToLoad.has_value()){
       goToLevel(levelShortcutToLoad.value());

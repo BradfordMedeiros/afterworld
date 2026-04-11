@@ -66,8 +66,6 @@ struct SpinObject {
 };
 
 struct Tags {
-	std::set<objid> textureScrollObjIds;
-	AudioZones audiozones;
 	InGameUi inGameUi;
 	std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 	std::unordered_map<objid, EmissionObject> emissionObjects;
@@ -77,7 +75,6 @@ struct Tags {
 
 	UiData* uiData;
 
-	StateController animationController;
 };
 
 Tags createTags(UiData* uiData);

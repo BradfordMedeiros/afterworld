@@ -19,6 +19,9 @@ extern std::unordered_map<objid, Laser> lasers;
 extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
 std::unordered_map<objid, TeleportExit> teleportObjs;
+extern StateController animationController;
+extern std::set<objid> textureScrollObjIds;
+extern AudioZones audiozones;
 
 void goToLevel(std::string levelShortName);
 void goBackMainMenu();
@@ -52,23 +55,7 @@ void handleScroll(std::set<objid>& textureScrollObjIds){
 	}
 }
 
-objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
-	std::cout << "create prefab placeholder: " << print(position) << ", " << prefab << std::endl;
 
-  GameobjAttributes attr = {
-    .attr = {
-      { "scene", prefab },
-			{ "position", position },
-    },
-  };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
-  return gameapi -> makeObjectAttr(
-    sceneId, 
-    std::string("[instance-") + uniqueNameSuffix(), 
-    attr, 
-    submodelAttributes
-  ).value();
-}
 
 std::string queryInitialBackground(){
 	if (hasOption("background")){
@@ -116,11 +103,11 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "animation",  // TODO this should probably move to entity
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue attrValue) -> void {
 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
-  		auto animationController = getSingleAttr(id, "animation");
-  		addEntityController(tags.animationController, id, getSymbol(animationController.value()));
+  		auto animationControllerValue = getSingleAttr(id, "animation");
+  		addEntityController(animationController, id, getSymbol(animationControllerValue.value()));
   	},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
-		 	removeEntityController(tags.animationController, id);
+		 	removeEntityController(animationController, id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
@@ -131,17 +118,17 @@ std::vector<TagUpdater> tagupdates = {
 			auto value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
 			modassert(value.has_value(), "scrollspeed not vec3");
   		//std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
-  		tags.textureScrollObjIds.insert(id);
+  		textureScrollObjIds.insert(id);
   	},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
- 			tags.textureScrollObjIds.erase(id);
+ 		textureScrollObjIds.erase(id);
   	},
   	.onFrame = [](Tags& tags) -> void {
   		//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
   		if (!isInGameMode2()){
   			return;
   		}
-			handleScroll(tags.textureScrollObjIds);
+		handleScroll(textureScrollObjIds);
   	},
   	.onMessage = std::nullopt,
 	},
@@ -163,18 +150,18 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](Tags& tags, int32_t id, AttributeValue) -> void {
   		//modassert(false, "on add ambient");
   		modlog("ambient", std::string("entity added") + gameapi -> getGameObjNameForId(id).value());
-  		tags.audiozones.audiozoneIds.insert(id);
-  		std::cout << "audio zones: " << print(tags.audiozones.audiozoneIds) << std::endl;
+  		audiozones.audiozoneIds.insert(id);
+  		std::cout << "audio zones: " << print(audiozones.audiozoneIds) << std::endl;
   	},
   	.onRemove = [](Tags& tags, int32_t id) -> void {
   		modlog("ambient", std::string("entity removed") + std::to_string(id));
-  		tags.audiozones.audiozoneIds.erase(id);
-  		if (tags.audiozones.currentPlaying.has_value()){
+  		audiozones.audiozoneIds.erase(id);
+  		if (audiozones.currentPlaying.has_value()){
   			// clip might have already been removed. 
-  			gameapi -> stopClip(tags.audiozones.currentPlaying.value().clipToPlay, tags.audiozones.currentPlaying.value().sceneId);
-	  		tags.audiozones.currentPlaying = std::nullopt;
+  			gameapi -> stopClip(audiozones.currentPlaying.value().clipToPlay, audiozones.currentPlaying.value().sceneId);
+	  		audiozones.currentPlaying = std::nullopt;
   		}
-  		std::cout << "audio zones: " << print(tags.audiozones.audiozoneIds) << std::endl;
+  		std::cout << "audio zones: " << print(audiozones.audiozoneIds) << std::endl;
   	},
   	.onFrame = [](Tags& tags) -> void {
   		// TODO perframe
@@ -183,14 +170,14 @@ std::vector<TagUpdater> tagupdates = {
   		auto hitObjects = gameapi -> contactTestShape(transform.position, transform.rotation, glm::vec3(1.f, 1.f, 1.f));
   		std::set<objid> audioZones;
   		for (auto &hitobject : hitObjects){
-  			if (tags.audiozones.audiozoneIds.count(hitobject.id) > 0){
+  			if (audiozones.audiozoneIds.count(hitobject.id) > 0){
   				audioZones.insert(hitobject.id);
   			}
   		}
 
   		std::optional<objid> ambientZoneDefault = std::nullopt;
   		if (audioZones.size() == 0){
-  			for (auto id : tags.audiozones.audiozoneIds){
+  			for (auto id : audiozones.audiozoneIds){
   				auto isDefault = getSingleAttr(id, "ambient_default").has_value();
   				if (isDefault){
   					ambientZoneDefault = id;
@@ -205,21 +192,21 @@ std::vector<TagUpdater> tagupdates = {
   		bool stoppedClip = false;
   		bool startedClip = false;
   		
-  		if (tags.audiozones.currentPlaying.has_value()){
-  			if (audioZones.count(tags.audiozones.currentPlaying.value().id) == 0){
+  		if (audiozones.currentPlaying.has_value()){
+  			if (audioZones.count(audiozones.currentPlaying.value().id) == 0){
   				// stop playing clip
-  				auto currentPlaying = tags.audiozones.currentPlaying.value();
+  				auto currentPlaying = audiozones.currentPlaying.value();
   				gameapi -> stopClip(currentPlaying.clipToPlay, currentPlaying.sceneId);
   				stoppedClip = true;
-  				tags.audiozones.currentPlaying = std::nullopt;
+  				audiozones.currentPlaying = std::nullopt;
   			}
   		}
 
-	  	if (audioZones.size() > 0 && !tags.audiozones.currentPlaying.has_value()){
+	  	if (audioZones.size() > 0 && !audiozones.currentPlaying.has_value()){
 	  		auto firstId = *(audioZones.begin());
 	  		auto sceneId = gameapi -> listSceneId(firstId);
 	  		auto clipToPlay = getSingleAttr(firstId, "ambient").value();
-	  		tags.audiozones.currentPlaying = CurrentPlayingData { .id = firstId, .sceneId = sceneId, .clipToPlay = clipToPlay };
+	  		audiozones.currentPlaying = CurrentPlayingData { .id = firstId, .sceneId = sceneId, .clipToPlay = clipToPlay };
 	  		playGameplayClip(std::move(clipToPlay), sceneId, std::nullopt, std::nullopt);
 	  		startedClip = true;
   		}
@@ -990,13 +977,8 @@ void handleOnAddedTagsInitial(Tags& tags){
 }
 
 Tags createTags(UiData* uiData){
-	Tags tags{};
-	tags.uiData = uiData;
-  tags.textureScrollObjIds = {};
-  tags.audiozones = AudioZones {
-  	.audiozoneIds = {},
-  	.currentPlaying = std::nullopt,
-  };
+  Tags tags{};
+  tags.uiData = uiData;
   tags.inGameUi = InGameUi {
   	.textDisplays = {},
   };
@@ -1006,8 +988,8 @@ Tags createTags(UiData* uiData){
   tags.explosionObjects = {};
 
   ///// animations ////
-  tags.animationController = createStateController();
-  addAnimationController(tags.animationController);
+
+  addAnimationController(animationController);
   
   return tags;
 }

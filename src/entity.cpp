@@ -267,6 +267,10 @@ std::optional<bool> isInShootingMode(objid id){
 	return controllableEntities.at(id).isInShootingMode;
 }
 
+bool entityInShootingMode(objid id){
+  return isInShootingMode(id).value();
+}
+
 void setInShootingMode(objid id, bool shootingMode){
 	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setInShootingMode for unregistered controllableEntity: ") + std::to_string(id));
 	controllableEntities.at(id).isInShootingMode = shootingMode;
@@ -778,4 +782,12 @@ std::optional<RigHit> handleRigHit(objid id) {
 		.isHeadShot = isHead,
 		.mainId = groupId,
 	};
+}
+
+std::set<objid>& getDisabledAnimationIds(objid entityId){
+  return controllableEntities.at(entityId).disableAnimationIds;
+}
+
+void deliverCurrentGunAmmo(objid id, int ammoAmount){
+  deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }

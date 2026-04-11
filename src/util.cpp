@@ -584,3 +584,42 @@ std::optional<objid> findChildObjBySuffix(objid id, const char* objName){
   }
   return std::nullopt;
 }
+
+objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields){
+  GameobjAttributes attr = {
+    .attr = {
+      { "scene", prefab },
+      { "position", pos },
+    },
+  };
+
+  for (auto &[key, payload] : additionalFields){
+    attr.attr[key] = payload;
+  }
+
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+  return gameapi -> makeObjectAttr(
+    sceneId, 
+    std::string("[prefab-instance-") + uniqueNameSuffix(), 
+    attr, 
+    submodelAttributes
+  ).value();
+}
+
+objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
+  std::cout << "create prefab placeholder: " << print(position) << ", " << prefab << std::endl;
+
+  GameobjAttributes attr = {
+    .attr = {
+      { "scene", prefab },
+      { "position", position },
+    },
+  };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+  return gameapi -> makeObjectAttr(
+    sceneId, 
+    std::string("[instance-") + uniqueNameSuffix(), 
+    attr, 
+    submodelAttributes
+  ).value();
+}

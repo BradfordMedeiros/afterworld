@@ -136,11 +136,6 @@ void createBallObj(objid sceneId, glm::vec3 position){
   	gameapi -> makeParent(ballSound.value(), ball.value());
 	}
 
-
-  /*
-  			{ "clip", "../gameresources/sound/rain.wav" },
-			{ "loop", "true" },
-			*/
 }
 
 std::optional<objid> getBallId(){
@@ -150,15 +145,15 @@ std::optional<objid> getBallId(){
 }
 
 void changeUi(bool showBallUi){
-		if (showBallUi){
-			setShowBallOptions(
-				BallComponentOptions {
-					.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
-				}
-			);
-		}else{
-			setShowBallOptions(std::nullopt);
-		}
+	if (showBallUi){
+		setShowBallOptions(
+			BallComponentOptions {
+				.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
+			}
+		);
+	}else{
+		setShowBallOptions(std::nullopt);
+	}
 }
 
 void showTimeElapsed(bool shouldShow){

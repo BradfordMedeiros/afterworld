@@ -111,5 +111,6 @@ struct RigHit {
 std::string print(RigHit& righit);
 std::optional<RigHit> handleRigHit(objid id);
 
+void deliverCurrentGunAmmo(objid id, int ammoAmount);
 
 #endif 

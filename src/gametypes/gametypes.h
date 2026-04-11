@@ -6,7 +6,6 @@
 #include "./modes/targetkill.h"
 #include "./modes/deathmatch.h"
 #include "./modes/race.h"
-#include "./modes/ball.h"
 
 struct GameTypes  {
   std::string name;

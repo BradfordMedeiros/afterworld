@@ -5,12 +5,14 @@
 #include <vector>
 #include <stack>
 #include "./ai/scene_ai.h"
+#include "./animation/scene_animation.h"
 #include "./entity.h"
 #include "./gameworld/daynight.h"
 #include "./core/weapons/weapon.h"
 #include "./core/movement/movement.h"
 #include "./core/inventory.h"
 #include "./core/vehicles/vehicles.h"
+#include "./core/scene_core.h"
 #include "./tags.h"
 #include "./interaction/dialog.h"
 #include "./interaction/terminal.h"

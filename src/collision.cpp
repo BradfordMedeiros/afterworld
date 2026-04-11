@@ -1,6 +1,7 @@
 #include "./collision.h"
 
 extern CustomApiBindings* gameapi;
+
 extern Director director;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 extern std::set<objid> objectsInKillplane;
