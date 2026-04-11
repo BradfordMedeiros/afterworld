@@ -30,7 +30,6 @@ Waypoints waypoints;
 
 Tags tags{};
 std::optional<std::string> levelShortcutToLoad;
-std::string defaultAudioClipPath;
 
 struct LifeTimeObject {
   std::function<void()> fn;
@@ -1291,110 +1290,6 @@ void zoomIntoArcade(std::optional<objid> id, int playerIndex){
   }
 }
 
-
-// The default audio clip mechanism is kind of lame, since if you go between and audio zone
-// and a default audio zone, it will replay the clip.  Some clips this is fine, but i don't 
-// dig restarting it just because it uses a different system than the octree method. 
-// I'd prefer this to be just using the tags system and be able to set a default tag value
-// if you fall outside of the octree cell. 
-struct AudioClip {
-  objid id;
-  std::string name;
-};
-std::unordered_map<std::string, AudioClip> audioClips;
-std::optional<objid> octreeId;
-
-std::optional<objid> defaultAudioClip;
-int loadedDefaultAudioClipFrame = -1;
-bool playingDefaultClip = false;
-
-void ensureAllAudioZonesLoaded(){
-  auto mainOctreeId = gameapi -> getMainOctreeId();
-
-  bool changedOctreeState = false;
-  if (octreeId != mainOctreeId){
-    modlog("octree tags", "unloading");
-    for (auto &[_, audioClip] : audioClips){
-      gameapi -> removeByGroupId(audioClip.id);
-    }
-    audioClips = {};    
-    octreeId = mainOctreeId;
-    changedOctreeState = true;
-  }
-
-  if (changedOctreeState){
-    modlog("octree tags", "loading");
-    auto allTags = gameapi -> getAllTags(getSymbol("audio"));
-    for (auto &tag : allTags){
-      auto soundObjName = std::string("&code-sound") + uniqueNameSuffix();
-      audioClips[tag.value] = AudioClip {
-        .id = createSound(gameapi -> listSceneId(octreeId.value()), soundObjName, tag.value, true),
-        .name = soundObjName,
-      }; 
-      modlog("octree tags load sound", tag.value);
-    }
-  }
-
-  auto loadLevelFrame = gameStatePtr -> sceneManagement.changedLevelFrame;
-  if (loadedDefaultAudioClipFrame < loadLevelFrame){
-    playingDefaultClip = false;
-    loadedDefaultAudioClipFrame = loadLevelFrame;
-    modlog("octree tags - default audio", "reload");
-    if (defaultAudioClip.has_value()){
-      gameapi -> removeByGroupId(defaultAudioClip.value());
-    }
-    auto soundObjName = std::string("&code-sound") + uniqueNameSuffix();
-
-    if (gameStatePtr -> sceneManagement.managedScene.has_value()){
-      if (defaultAudioClipPath != ""){
-        defaultAudioClip = createSound(gameapi -> rootSceneId(), soundObjName, defaultAudioClipPath, true);      
-      }
-    }
-  }
-}
-
-std::optional<std::string> playingClip;
-void ensureAmbientSound(std::vector<TagInfo>& tags){
-  std::optional<std::string> clipToPlay;
-  bool inAudioZone = false;
-  if (tags.size() > 0){
-    inAudioZone = true;
-    clipToPlay = tags.at(tags.size() - 1).value;
-  }
- 
-
-  ensureAllAudioZonesLoaded();
-
-  if((!inAudioZone && playingClip.has_value()) || (inAudioZone && playingClip.has_value() && clipToPlay.has_value() && playingClip.value() != clipToPlay.value())){
-    modlog("octree tags ensureAmbientSound", "stop clip");
-    AudioClip& audioClip = audioClips.at(playingClip.value());
-    auto sceneId = gameapi -> listSceneId(octreeId.value());
-    gameapi -> stopClip(audioClip.name, sceneId);
-    playingClip = std::nullopt;
-  }
-  if (inAudioZone && !playingClip.has_value()){
-    if (playingDefaultClip){
-      gameapi -> stopClipById(defaultAudioClip.value());
-      playingDefaultClip = false;
-    }
-
-    modlog("octree tags ensureAmbientSound play clip", clipToPlay.value());
-
-    modassert(audioClips.find(clipToPlay.value()) != audioClips.end(), "octree tags could not find clip");
-    AudioClip& audioClip = audioClips.at(clipToPlay.value());
-    playingClip = clipToPlay.value();
-
-    playGameplayClipById(audioClip.id, std::nullopt, std::nullopt, false); 
-  }
-
-  if (!inAudioZone && !playingDefaultClip && defaultAudioClip.has_value()){
-    playingDefaultClip = true;
-    playGameplayClipById(defaultAudioClip.value(), std::nullopt, std::nullopt, true); 
-  }
-
-  std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
-}
-
 void objectRemoved(objid idRemoved){
   for (auto& controlledPlayer : getPlayers()){
     if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
@@ -1418,6 +1313,10 @@ void objectRemoved(objid idRemoved){
   removeCameraFromOrbView(idRemoved);
 
   onObjRemoved(aiData, idRemoved);
+
+  removeSurfaceModifier(idRemoved);
+  handleRemoveKillplaneCollision(idRemoved);
+  handleOnTriggerRemove(idRemoved);
 }
 
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
@@ -1582,6 +1481,35 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
   }
 }
 
+void onTranslateController(objid id, void* data){
+  auto info = gameapi -> getControlInfo(0);     
+  if (info.has_value()){
+    ControlInfo2& controls = info.value();
+    auto keycallbacks = remapFrameToKeys(0, controls);
+    for (auto& keycallback : keycallbacks){
+      onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
+    }
+    auto mouseCallbacks = remapFrameToMouse(0, controls);
+    for (auto& mouseCallback : mouseCallbacks){
+      onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
+    }
+    float deadzone = 0.15f;
+    float rightStickX = controls.thisFrame.axisInfo.rightStickX;
+    float rightStickY = controls.thisFrame.axisInfo.rightStickY;
+    if (rightStickX < deadzone && rightStickX > (-1 * deadzone)){
+      rightStickX = 0.f;
+    }
+    if (rightStickY < deadzone && rightStickY > (-1 * deadzone)){
+      rightStickY = 0.f;
+    }
+    float sensitivity = 10.f;
+    if (controls.thisFrame.buttonInfo.rightStick){
+      sensitivity = 2.f;
+    }
+    onMouseMoveCallback(id, data, sensitivity * rightStickX, sensitivity * -1 * rightStickY, 0.f, 0.f, 0.f);
+  }
+}
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   if (getArgEnabled("help")){
@@ -1702,11 +1630,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     ensurePrecachedModels(
       gameapi -> rootSceneId(),
-    { 
-      "../gameresources/build/weapons/scrapgun.gltf",
-      "../gameresources/build/weapons/electrogun.gltf",
-      "../gameresources/build/weapons/fork.gltf",
-    });
+      { 
+        "../gameresources/build/weapons/scrapgun.gltf",
+        "../gameresources/build/weapons/electrogun.gltf",
+        "../gameresources/build/weapons/fork.gltf",
+      });
   
     tags = createTags(&gameState -> uiData);
 
@@ -1723,11 +1651,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     return gameState;
   };
+
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     removeAllMovementCores();  // is this pointless?
     delete gameState;
   };
+
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
  
@@ -1746,36 +1676,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
 
-    auto info = gameapi -> getControlInfo(0);     
-    if (info.has_value()){
-      ControlInfo2& controls = info.value();
-      auto keycallbacks = remapFrameToKeys(0, controls);
-      for (auto& keycallback : keycallbacks){
-        onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
-      }
-      auto mouseCallbacks = remapFrameToMouse(0, controls);
-      for (auto& mouseCallback : mouseCallbacks){
-        onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
-      }
-
-      float deadzone = 0.15f;
-
-      float rightStickX = controls.thisFrame.axisInfo.rightStickX;
-      float rightStickY = controls.thisFrame.axisInfo.rightStickY;
-      if (rightStickX < deadzone && rightStickX > (-1 * deadzone)){
-        rightStickX = 0.f;
-      }
-      if (rightStickY < deadzone && rightStickY > (-1 * deadzone)){
-        rightStickY = 0.f;
-      }
-
-      float sensitivity = 10.f;
-      if (controls.thisFrame.buttonInfo.rightStick){
-        sensitivity = 2.f;
-      }
-      onMouseMoveCallback(id, data, sensitivity * rightStickX, sensitivity * -1 * rightStickY, 0.f, 0.f, 0.f);
-
-    }
+    onTranslateController(id, data);
 
     tickCutscenes2();
 
@@ -1785,11 +1686,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (isInGameMode()){
       // Control params are reset by movement so put before that
       onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
-
     }
 
     if (isInGameMode()){
-
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         std::vector<MovementActivePlayer> activePlayers;
@@ -1960,52 +1859,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     /// temp code 
     // TODO multiviewport sound
     auto cameraPos = gameapi -> getCameraTransform(getDefaultPlayerIndex());
-    auto audioSymbol = getSymbol("audio");
-    auto tags = gameapi -> getTag(audioSymbol, cameraPos.position);
-    std::cout << "tags game camera pos is: " << print(cameraPos.position) << ", tags: [";
-    bool inAudioZone = false;
-    for (auto tag : tags){
-      std::cout << std::endl << "tags   " << nameForSymbol(tag.key) << " " << tag.value << std::endl;
-      if (tag.key == audioSymbol){
-        inAudioZone = true;     
-      }
-    }
-    ensureAmbientSound(tags);
-    std::cout << "]" << std::endl;
+    ensureAmbientSound(cameraPos.position, gameStatePtr -> sceneManagement.changedLevelFrame, gameStatePtr -> sceneManagement.managedScene.has_value());
 
-    static std::optional<OctreeMaterial> material;
-    static std::optional<OctreeMaterial> lastMaterial;
-    static float changeTime = 0.f;
-
-    material = gameapi -> getMaterial(cameraPos.position);
-
-    bool changed = material != lastMaterial;
-    if (changed){
-      changeTime = gameapi -> timeSeconds(false);
-    }
+    drawWaterOverlay(isInGameMode(), getGlobalState().isFreeCam, cameraPos.position);
     
-    std::cout << "material is: " << ((material == OCTREE_MATERIAL_WATER) ? "water" : "not water") << std::endl;
-    
-    bool isWater = material.has_value() && material.value() == OCTREE_MATERIAL_WATER;
-    float timeElapsed = gameapi -> timeSeconds(false) - changeTime;
-    float fadeDuration = 0.1f;
-    glm::vec3 tintColor(0.f, 0.1f, 0.3f);
-    float alpha = timeElapsed / fadeDuration;
-    if (alpha > 1){
-      alpha = 1;
-    }
-
-    if (isInGameMode() || getGlobalState().isFreeCam){
-      if (isWater){
-        gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-      }else{
-        // this is wrong since starts from 0.3
-        gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, 0.3 - (alpha * 0.3)), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-      }
-    }
-    lastMaterial = material;
-
-
     std::set<objid> lifetimeIdsToRemove;
     for (auto &[id, lifetimeObject] : lifetimeObjects){
       if (!gameapi -> gameobjExists(id)){
@@ -2103,10 +1960,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     modlog("controller connection event", std::to_string(joystick) + " - " + (connected ? "connected" : "disconnected"));
     std::cout << "controller onController debug" << std::endl;
     if (connected){
-
     }
-
   };
+
   binding.onControllerKey = [](int32_t id, void* data, int joystick, BUTTON_TYPE button, bool keyDown){
     modlog("controller key", std::to_string(joystick) + ", key = " + print(button) + ", keydown = " + (keyDown ? "true" : "false"));
 
@@ -2115,12 +1971,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       auto keycallback = keycallbackOpt.value();
       onKeyCallback(id, data, keycallback.key, keycallback.scancode, keycallback.action, keycallback.mods, keycallback.playerPort);
     }
-
-    //auto values = gameapi -> controllerInput(joystick);
-    //values.axis.leftTrigger > 
   };
-
-  std::cout << "controller: created onControllerKey" << std::endl;
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
     GameState* gameState = static_cast<GameState*>(data);
@@ -2230,6 +2081,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onDebugMessage(key, value);
   };
+
   binding.onCollisionEnter = [](objid id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1); // this check shouldn't be necessary, is bug
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
@@ -2260,6 +2112,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);
   };
+
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {
     auto gameobj1Exists = gameapi -> gameobjExists(obj1);
     auto gameobj2Exists = gameapi -> gameobjExists(obj2);
@@ -2280,12 +2133,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMouseCallback = [](objid id, void* data, int rawButton, int rawAction, int rawMods) -> void {
-
     std::cout << "controller mouse rawButton: " << rawButton << ", action = " << rawAction << std::endl;
-
     auto mouseCallback = remapMouseCallback(rawButton, rawAction, rawMods);
     onMouseCallback(id, data, mouseCallback.button, mouseCallback.action, mouseCallback.mods, mouseCallback.playerPort);
-
   };
 
   binding.onScrollCallback = [](objid id, void* data, double rawAmount) -> void {
@@ -2297,6 +2147,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onInGameUiScrollCallback(tags.inGameUi, scrollCallback.amount);
     onMovementScrollCallback(movement, scrollCallback.amount, scrollCallback.playerPort);
   };
+
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
     GameState* gameState = static_cast<GameState*>(data);
     modlog("objchange onObjectAdded", gameapi -> getGameObjNameForId(idAdded).value());
@@ -2307,14 +2158,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onMainUiObjectsChanged();
     onObjAdded(aiData, idAdded);
   };
+
   binding.onObjectRemoved = [](int32_t _, void* data, int32_t idRemoved) -> void {
     modlog("objchange onObjectRemoved", gameapi -> getGameObjNameForId(idRemoved).value());
     objectRemoved(idRemoved);
-    removeSurfaceModifier(idRemoved);
-    handleRemoveKillplaneCollision(idRemoved);
-    handleOnTriggerRemove(idRemoved);
   };
-
 
   return binding;
 }

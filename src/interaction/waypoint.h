@@ -15,8 +15,6 @@ struct Waypoints {
 void addWaypoint(Waypoints& waypoints, objid id, std::optional<objid> waypointId);
 void removeWaypoint(Waypoints& waypoints, objid id);
 void updateHealth(Waypoints& waypoints, objid id, std::optional<float> health);
-
 void drawWaypoints(Waypoints& waypoints, glm::vec3 playerPos);
-
 
 #endif 

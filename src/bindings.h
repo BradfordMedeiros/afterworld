@@ -20,6 +20,7 @@
 #include "./gameworld/weather.h"
 #include "./resources/sound.h"
 #include "./gameworld/water.h"
+#include "./gameworld/audio.h"
 #include "./gametypes/gametypes.h"
 #include "./director/spawn.h"
 #include "./director/director.h"
