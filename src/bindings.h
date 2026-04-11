@@ -18,6 +18,7 @@
 #include "./interaction/terminal.h"
 #include "./interaction/cutscene.h"
 #include "./interaction/in-game-ui.h"
+#include "./arcade/scene_arcade.h"
 #include "./debug.h"
 #include "./gameworld/weather.h"
 #include "./resources/sound.h"

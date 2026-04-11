@@ -1,8 +1,7 @@
 #include "./arcade.h"
 
 extern ArcadeApi arcadeApi;
-
-extern std::unordered_map<objid, ArcadeInstance> arcadeInstances; // static-state extern
+extern std::unordered_map<objid, ArcadeInstance> arcadeInstances;
 
 void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 	modassert(arcadeInstances.find(id) == arcadeInstances.end(), "arcade instance already exists");
@@ -45,7 +44,6 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 	}else{
 		modassert(false, "invalid type");
 	}
-
 }
 
 void maybeRemoveArcadeType(objid id){
