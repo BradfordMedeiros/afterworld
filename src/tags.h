@@ -18,16 +18,7 @@
 #include "./entity.h"
 #include "./orbs.h"
 #include "./config.h"
-
-struct CurrentPlayingData {
-	objid id;
-	objid sceneId;
-	std::string clipToPlay;
-};
-struct AudioZones {
-	std::set<objid> audiozoneIds;
-	std::optional<CurrentPlayingData> currentPlaying;
-};
+#include "./gameworld/audio.h"
 
 struct UiData {
   UiContext uiContext;

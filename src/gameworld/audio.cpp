@@ -1,6 +1,7 @@
 #include "./audio.h"
 
 extern CustomApiBindings* gameapi;
+extern AudioZones audiozones;
 
 struct AudioClip {
   objid id;
@@ -107,4 +108,83 @@ void ensureAmbientSound(glm::vec3 cameraPos, int changedLevelFrame, bool hasMana
   }
 
   std::cout << "tags ensure ambient sound: " << inAudioZone << std::endl;
+}
+
+
+void addAudioZone(objid id){
+    //modassert(false, "on add ambient");
+    modlog("ambient", std::string("entity added") + gameapi -> getGameObjNameForId(id).value());
+    audiozones.audiozoneIds.insert(id);
+    std::cout << "audio zones: " << print(audiozones.audiozoneIds) << std::endl;  
+}
+
+void removeAudioZone(objid id){
+    modlog("ambient", std::string("entity removed") + std::to_string(id));
+    audiozones.audiozoneIds.erase(id);
+    if (audiozones.currentPlaying.has_value()){
+      // clip might have already been removed. 
+      gameapi -> stopClip(audiozones.currentPlaying.value().clipToPlay, audiozones.currentPlaying.value().sceneId);
+      audiozones.currentPlaying = std::nullopt;
+    }
+    std::cout << "audio zones: " << print(audiozones.audiozoneIds) << std::endl;
+}
+
+void onAudioZoneFrame(){
+      // TODO perframe
+      // This doesn't need to be per frame, can easily make this on the collision callbacks
+      auto transform = gameapi -> getView();
+      auto hitObjects = gameapi -> contactTestShape(transform.position, transform.rotation, glm::vec3(1.f, 1.f, 1.f));
+      std::set<objid> audioZones;
+      for (auto &hitobject : hitObjects){
+        if (audiozones.audiozoneIds.count(hitobject.id) > 0){
+          audioZones.insert(hitobject.id);
+        }
+      }
+
+      std::optional<objid> ambientZoneDefault = std::nullopt;
+      if (audioZones.size() == 0){
+        for (auto id : audiozones.audiozoneIds){
+          auto isDefault = getSingleAttr(id, "ambient_default").has_value();
+          if (isDefault){
+            ambientZoneDefault = id;
+            break;
+          }
+        }
+      }
+      if (ambientZoneDefault.has_value()){
+        audioZones.insert(ambientZoneDefault.value());
+      }
+
+      bool stoppedClip = false;
+      bool startedClip = false;
+      
+      if (audiozones.currentPlaying.has_value()){
+        if (audioZones.count(audiozones.currentPlaying.value().id) == 0){
+          // stop playing clip
+          auto currentPlaying = audiozones.currentPlaying.value();
+          gameapi -> stopClip(currentPlaying.clipToPlay, currentPlaying.sceneId);
+          stoppedClip = true;
+          audiozones.currentPlaying = std::nullopt;
+        }
+      }
+
+      if (audioZones.size() > 0 && !audiozones.currentPlaying.has_value()){
+        auto firstId = *(audioZones.begin());
+        auto sceneId = gameapi -> listSceneId(firstId);
+        auto clipToPlay = getSingleAttr(firstId, "ambient").value();
+        audiozones.currentPlaying = CurrentPlayingData { .id = firstId, .sceneId = sceneId, .clipToPlay = clipToPlay };
+        playGameplayClip(std::move(clipToPlay), sceneId, std::nullopt, std::nullopt);
+        startedClip = true;
+      }
+
+      if (stoppedClip || startedClip){
+        std::cout << "ambient: started = " << (startedClip ? "true" : "false") << ", stopped = " << (stoppedClip ? "true" : "false") << ", audio zones: " << print(audioZones) << std::endl; 
+      }
+
+
+      // get the view location 
+      // contact test as ca 
+      //    --  std::vector<HitObject> (*contactTestShape)(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
+      // get the audio zone we are in, if any
+      // play that audio zone 
 }

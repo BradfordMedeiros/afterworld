@@ -10,4 +10,21 @@
 extern std::string defaultAudioClipPath;
 void ensureAmbientSound(glm::vec3 cameraPos, int changedLevelFrame, bool hasManagedScene);
 
+
+/////////////
+struct CurrentPlayingData {
+	objid id;
+	objid sceneId;
+	std::string clipToPlay;
+};
+
+struct AudioZones {
+	std::set<objid> audiozoneIds;
+	std::optional<CurrentPlayingData> currentPlaying;
+};
+
+void addAudioZone(objid id);
+void removeAudioZone(objid id);
+void onAudioZoneFrame();
+
 #endif 
