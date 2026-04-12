@@ -1544,6 +1544,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrame = [](int32_t id, void* data) -> void {
     GameState* gameState = static_cast<GameState*>(data);
  
+    // CONTROLS ///////////////////////////
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
       getGlobalState().texCoordUv = texCoordUv;
@@ -1561,7 +1562,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onTranslateController(id, data);
 
+    if (levelShortcutToLoad.has_value()){
+      goToLevel(levelShortcutToLoad.value());
+      levelShortcutToLoad = std::nullopt;
+    }
 
+    // CORE LOGIC ///////////////////////// 
+    // This has some mixed logic with ui stuff and some non core stuff
     std::vector<EntityUpdate> entityUpdates;
     //////// needs multiviewport work ///////////////////////////////
 
@@ -1654,8 +1661,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     auto cameraPos = gameapi -> getCameraTransform(getDefaultPlayerIndex());
 
-
-    /// utilities nad just per frame work
+    /// GENERAL UPDATES
     {
       tickCutscenes2();
       if (isInGameMode()){
@@ -1681,67 +1687,60 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
       debugOnFrame();
     }
-    //////////////////////////////////
 
-
-
-    ////////////////////////////////////////////////////
-
-    drawAllCurves(id);
-    if (isInGameMode()){
-      for (auto& player : getPlayers()){
-        auto playerPosition = getActivePlayerPosition(player.viewport);
-        if (playerPosition.has_value()){
-          drawWaypoints(waypoints, playerPosition.value());
-        }
-      }
-      drawWaterOverlay(isInGameMode(), getGlobalState().isFreeCam, cameraPos.position);
-
-      setUiGemCount(GemCount {
-        .currentCount = numberOfCrystals(std::nullopt),
-        .totalCount = totalCrystals(std::nullopt),
-      });
-    }
-
-    //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
-    std::optional<glm::vec2> mainUiCursorCoord;
-    gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
-    modassert(uiData, "uiData NULL");
-    
-    onInGameUiFrame(uiStateContext, inGameUi, uiData->uiContext, std::nullopt, ndiCoord);
-    
-    if (isInGameMode()){
-      std::optional<UiHealth> uiHealth;
-      {
+    // UI UPDATES //////////////////
+    {
+      drawAllCurves(id);
+      if (isInGameMode()){
         for (auto& player : getPlayers()){
-          ControlledPlayer& controlledPlayer = getControlledPlayer(player.viewport);
-          auto activePlayer = controlledPlayer.playerId;
-          if (activePlayer.has_value()){
-            auto health = getHealth(activePlayer.value());
-            if (health.has_value()){
-              uiHealth = UiHealth {
-                .health = health.value().current,
-                .totalHealth = health.value().total,
-              };
-            }
+          auto playerPosition = getActivePlayerPosition(player.viewport);
+          if (playerPosition.has_value()){
+            drawWaypoints(waypoints, playerPosition.value());
           }
-          setUiHealth(player.viewport, uiHealth);
+        }
+        drawWaterOverlay(isInGameMode(), getGlobalState().isFreeCam, cameraPos.position);
+  
+        setUiGemCount(GemCount {
+          .currentCount = numberOfCrystals(std::nullopt),
+          .totalCount = totalCrystals(std::nullopt),
+        });
+      }
+    
+      //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+      std::optional<glm::vec2> mainUiCursorCoord;
+      gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
+      modassert(uiData, "uiData NULL");
+    
+      onInGameUiFrame(uiStateContext, inGameUi, uiData->uiContext, std::nullopt, ndiCoord);
+    
+      if (isInGameMode()){
+        std::optional<UiHealth> uiHealth;
+        {
+          for (auto& player : getPlayers()){
+            ControlledPlayer& controlledPlayer = getControlledPlayer(player.viewport);
+            auto activePlayer = controlledPlayer.playerId;
+            if (activePlayer.has_value()){
+              auto health = getHealth(activePlayer.value());
+              if (health.has_value()){
+                uiHealth = UiHealth {
+                  .health = health.value().current,
+                  .totalHealth = health.value().total,
+                };
+              }
+            }
+            setUiHealth(player.viewport, uiHealth);
+          }
         }
       }
+    }
 
+    // ARCADE ///////////////
+    if (isInGameMode()){
       updateArcade();
-      drawArcade();
+      drawArcade();  
     }
 
-
-    if (levelShortcutToLoad.has_value()){
-      goToLevel(levelShortcutToLoad.value());
-      levelShortcutToLoad = std::nullopt;
-    }
-
-
-    // Post update stuff
-
+    // POST UPDATE STATEKEEPING //////////////////////
     for (auto &update : entityUpdates){
       if (update.pos.has_value()){
         gameapi -> setGameObjectPosition(update.id, update.pos.value(), true, Hint { .hint = update.posHint });  

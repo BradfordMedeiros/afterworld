@@ -831,14 +831,15 @@ void onTagsFrame(){
 }
 
 void handleOnAddedTags(int32_t idAdded){
-  auto objHandle = getAttrHandle(idAdded);
+	auto objHandle = getAttrHandle(idAdded);
 	for (auto &tagUpdate : tagupdates){
-    auto attrValue = getAttr(objHandle, tagUpdate.attribute.c_str());
-    if (attrValue.has_value()){
-	    tagUpdate.onAdd(idAdded, attrValue.value());
-    }
+    	auto attrValue = getAttr(objHandle, tagUpdate.attribute.c_str());
+    	if (attrValue.has_value()){
+		    tagUpdate.onAdd(idAdded, attrValue.value());
+    	}
 	}
 }
+
 void handleOnAddedTagsInitial(){
   std::set<objid> idsAlreadyExisting;
   for (auto &tagUpdate : tagupdates){
