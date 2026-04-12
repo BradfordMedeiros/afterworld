@@ -1561,17 +1561,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     onTranslateController(id, data);
 
-    tickCutscenes2();
 
     std::vector<EntityUpdate> entityUpdates;
     //////// needs multiviewport work ///////////////////////////////
 
     if (isInGameMode()){
-      // Control params are reset by movement so put before that
       onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
-    }
 
-    if (isInGameMode()){
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
         std::vector<MovementActivePlayer> activePlayers;
@@ -1656,9 +1652,42 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
     }
 
-    drawAllCurves(id);
+    auto cameraPos = gameapi -> getCameraTransform(getDefaultPlayerIndex());
+
+
+    /// utilities nad just per frame work
+    {
+      tickCutscenes2();
+      if (isInGameMode()){
+        handleEntitiesOnRails(id, gameapi -> rootSceneId());
+        handleDirector(director);
+        //handleEntitiesRace();
+        onFrameWater(water, isPaused());
+        if (!hasOption("no-ai")){
+          static bool showAi = getArgEnabled("ai-debug");
+          onFrameAi(aiData, showAi);
+        }
+        onFrameDaynight();
+        onGametypesFrame(gametypeSystem);
+  
+        onTagsFrame();
+        handleOrbViews(orbData);
+  
+        doStateControllerAnimations(validateAnimationControllerAnimations, disableAnimation);
+  
+        /// temp code 
+        // TODO multiviewport sound
+        ensureAmbientSound(cameraPos.position, gameStatePtr -> sceneManagement.changedLevelFrame, gameStatePtr -> sceneManagement.managedScene.has_value());
+      }
+      debugOnFrame();
+    }
+    //////////////////////////////////
+
+
 
     ////////////////////////////////////////////////////
+
+    drawAllCurves(id);
     if (isInGameMode()){
       for (auto& player : getPlayers()){
         auto playerPosition = getActivePlayerPosition(player.viewport);
@@ -1666,12 +1695,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           drawWaypoints(waypoints, playerPosition.value());
         }
       }
+      drawWaterOverlay(isInGameMode(), getGlobalState().isFreeCam, cameraPos.position);
 
-      handleEntitiesOnRails(id, gameapi -> rootSceneId());
-      //handleEntitiesRace();
-
-
-      handleDirector(director);
       setUiGemCount(GemCount {
         .currentCount = numberOfCrystals(std::nullopt),
         .totalCount = totalCrystals(std::nullopt),
@@ -1687,7 +1712,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
     if (isInGameMode()){
       std::optional<UiHealth> uiHealth;
-
       {
         for (auto& player : getPlayers()){
           ControlledPlayer& controlledPlayer = getControlledPlayer(player.viewport);
@@ -1704,31 +1728,19 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           setUiHealth(player.viewport, uiHealth);
         }
       }
-      onFrameWater(water, isPaused());
-
-      if (!hasOption("no-ai")){
-        static bool showAi = getArgEnabled("ai-debug");
-        onFrameAi(aiData, showAi);
-      }
-      onFrameDaynight();
-      onGametypesFrame(gametypeSystem);
 
       updateArcade();
       drawArcade();
     }
 
-    onTagsFrame();
-    handleOrbViews(orbData);
-    
-    doStateControllerAnimations(validateAnimationControllerAnimations, disableAnimation);
 
     if (levelShortcutToLoad.has_value()){
       goToLevel(levelShortcutToLoad.value());
       levelShortcutToLoad = std::nullopt;
     }
 
-    // debug
-    debugOnFrame();
+
+    // Post update stuff
 
     for (auto &update : entityUpdates){
       if (update.pos.has_value()){
@@ -1738,13 +1750,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         gameapi -> setGameObjectRot(update.id, update.rot.value(), true, Hint { .hint = update.rotHint });
       }
     }
-
-    /// temp code 
-    // TODO multiviewport sound
-    auto cameraPos = gameapi -> getCameraTransform(getDefaultPlayerIndex());
-    ensureAmbientSound(cameraPos.position, gameStatePtr -> sceneManagement.changedLevelFrame, gameStatePtr -> sceneManagement.managedScene.has_value());
-
-    drawWaterOverlay(isInGameMode(), getGlobalState().isFreeCam, cameraPos.position);
     
     std::set<objid> lifetimeIdsToRemove;
     for (auto &[id, lifetimeObject] : lifetimeObjects){

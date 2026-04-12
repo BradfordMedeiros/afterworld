@@ -88,14 +88,14 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "animation",  // TODO this should probably move to entity
 		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
-  		auto animationControllerValue = getSingleAttr(id, "animation");
-  		addEntityController(animationController, id, getSymbol(animationControllerValue.value()));
-  	},
-  	.onRemove = [](int32_t id) -> void {
-		 	removeEntityController(animationController, id);
-  	},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  			auto animationControllerValue = getSingleAttr(id, "animation");
+  			addEntityController(animationController, id, getSymbol(animationControllerValue.value()));
+  		},
+  		.onRemove = [](int32_t id) -> void {
+			removeEntityController(animationController, id);
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "scrollspeed",
