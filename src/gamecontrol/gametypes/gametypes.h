@@ -1,11 +1,9 @@
 #ifndef MOD_AFTERWORLD_GAMETYPES
 #define MOD_AFTERWORLD_GAMETYPES
 
-#include "../../../ModEngine/src/cscript/cscript_binding.h"
-#include "../util.h"
-#include "./modes/targetkill.h"
-#include "./modes/deathmatch.h"
-#include "./modes/race.h"
+#include "../../../../ModEngine/src/cscript/cscript_binding.h"
+#include "../../util.h"
+#include "./common.h"
 
 struct GameTypes  {
   std::string name;

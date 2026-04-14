@@ -2,7 +2,7 @@
 #define MOD_AFTERWORLD_GAMETYPES_COMMON
 
 #include <functional>
-#include "../util.h"
+#include "../../util.h"
 
 struct GametypeData {
   const char* gametypeName;

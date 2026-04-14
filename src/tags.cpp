@@ -8,7 +8,6 @@ extern Waypoints waypoints;
 extern ArcadeApi arcadeApi;
 extern Director director;
 extern Vehicles vehicles;
-extern GameTypes gametypeSystem;
 extern OrbData orbData;
 extern std::optional<std::string> activeLevel;
 extern std::unordered_map<objid, LinePoints> rails;

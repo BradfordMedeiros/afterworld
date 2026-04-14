@@ -1,7 +1,6 @@
 #include "./debug.h"
 
 extern CustomApiBindings* gameapi;
-extern GameTypes gametypeSystem;
 extern Director director;
 
 void spawnProcMesh(objid sceneId){
@@ -419,7 +418,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
 	  	//setIsAlive(getActivePlayerId().value(), false);
   	}
-  //  changeGameType(gametypeSystem, "targetkill");
   }
 
   if (key == '[' && action == 0){

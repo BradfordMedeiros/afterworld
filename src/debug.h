@@ -11,7 +11,6 @@
 #include "./tags.h"
 #include "./options.h"
 #include "./gamecontrol/entity.h"
-#include "./gametypes/gametypes.h"
 #include "./gameworld/progress.h"
 #include "./ai/scene_ai.h"
 
