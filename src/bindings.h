@@ -6,7 +6,8 @@
 #include <stack>
 #include "./ai/scene_ai.h"
 #include "./animation/scene_animation.h"
-#include "./entity.h"
+#include "./gamecontrol/entity.h"
+#include "./gamecontrol/mode.h"
 #include "./gameworld/daynight.h"
 #include "./core/weapons/weapon.h"
 #include "./core/movement/movement.h"
@@ -42,7 +43,6 @@
 #include "./vector_gfx.h"
 #include "./gameworld/progress.h"
 #include "./options.h"
-#include "./mode.h"
 #include "./compile.h"
 #include "./arcade/arcade.h"
 

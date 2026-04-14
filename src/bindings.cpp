@@ -48,17 +48,6 @@ struct LifeTimeObject {
 };
 std::unordered_map<objid, LifeTimeObject> lifetimeObjects;
 
-struct GameModeNone{};
-struct GameModeFps {
-  bool makePlayer = false;
-  std::optional<std::string> player;
-};
-struct GameModeBall{};
-struct GameModeOrb {};
-struct GameModeIntro{};
-
-typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeOrb, GameModeIntro> GameMode;
-
 struct ManagedScene {
   std::optional<objid> id; 
   int index;
@@ -121,13 +110,6 @@ void enterVehicleRaw(int playerIndex, objid vehicleId, objid id){
   controllable.value() -> vehicle = vehicleId;
 }
 
-bool canExitVehicleValue = true;
-void setCanExitVehicle(bool canExit){
-  canExitVehicleValue = canExit;
-}
-bool canExitVehicle(){
-  return canExitVehicleValue;
-}
 void exitVehicleRaw(int playerIndex, objid vehicleId, objid id){
   if (!canExitVehicle()){
     return;
@@ -167,88 +149,8 @@ void setScenarioOptions(ScenarioOptions& options){
   modlog("set scenario options: skybox", print(options.skybox));
 }
 
-void startLevel(ManagedScene& managedScene){
-  if (!managedScene.id.has_value()){
-    return;
-  }
 
-  std::optional<objid> sceneId = managedScene.id;
 
-  std::vector<objid> playerIds;
-
-  auto gamemodeFps = std::get_if<GameModeFps>(&managedScene.gameMode);
-  auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
-  auto gamemodeOrb = std::get_if<GameModeOrb>(&managedScene.gameMode);
-  auto gamemodeIntro = std::get_if<GameModeIntro>(&managedScene.gameMode);
-  if (gamemodeFps){
-    if (gamemodeFps -> makePlayer){
-      auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
-      glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
-      int numberOfPlayers = getNumberOfPlayers();
-      for (int i  = 0; i < numberOfPlayers; i++){
-        auto initialPosition = position + glm::vec3(1.f * i, 0.f, 0.f); // TODO - this is bad, this should just have a few initial spawnpoints
-        auto playerId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player.rawscene",  initialPosition, {});    
-        playerIds.push_back(playerId);
-      }
-    }
-
-    spawnFromAllSpawnpoints(director.managedSpawnpoints, "onload");
-
-    if (playerIds.size() == 0 && gamemodeFps -> player.has_value()){
-      // this doesn't work...it's looking for the player both times and order is indeterminant so sometimes it will fail setting the active player
-      auto playerId = findObjByShortName(gamemodeFps -> player.value(), sceneId);
-      modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
-      modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-      setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
-    }
-
-    if (playerIds.size() > 0){
-      for (int i = 0; i < playerIds.size(); i++){
-        auto prefabId = playerIds.at(i);
-        auto playerId = findBodyPart(prefabId, gamemodeFps -> player.value().c_str());
-        modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
-        modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-        setActivePlayer(movement, weapons, aiData, playerId, i);
-      }
-    }
-  }else if (gamemodeBall){
-    //modassert(false, "gamemode ball not implemented");
-    auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
-    glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
-    
-    // TODO - no reason to actually create the prefab here
-    auto prefabId = createPrefab(sceneId.value(), "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  position, {});    
-
-    auto playerId = findObjByShortName("maincamera", sceneId);
-    modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
-    setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
-
-    startBallMode(sceneId.value());
-
-  }else if (gamemodeOrb){
-    auto cameraId = findObjByShortName(">camera-view", sceneId);
-    setTempCamera(cameraId.value(), 0);
-    setHudEnabled(false);
-  }else if (gamemodeIntro){
-    startIntroMode(sceneId.value());
-  }
-}
-void endLevel(ManagedScene& managedScene){
-  auto gamemodeBall = std::get_if<GameModeBall>(&managedScene.gameMode);
-  if (gamemodeBall){
-    endBallMode();
-  }
-
-  auto gamemodeOrb = std::get_if<GameModeOrb>(&managedScene.gameMode);
-  if (gamemodeOrb){
-    setHudEnabled(true);
-  }
-
-  auto gamemodeIntro = std::get_if<GameModeIntro>(&managedScene.gameMode);
-  if (gamemodeIntro){
-    endIntroMode();
-  }
-}
 
 std::optional<ZoomOptions> zoomOptions;
 void setTotalZoom(float multiplier, objid id){
@@ -381,9 +283,6 @@ GameMode gamemodeByShortcutName(std::string shortcut){
       }
       if (modeStr == "ball"){
         return GameModeBall{};
-      }
-      if (modeStr == "orb"){
-        return GameModeOrb{};
       }
       if (modeStr == "intro"){
         return GameModeIntro{};
@@ -657,11 +556,6 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
   return std::nullopt;
 }
 
-bool isGunZoomed(objid id){
-  auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
-  return gunZoomed;
-}
-
 void deliverPowerup(objid vehicle, objid powerupId){
   auto& powerup = powerups.at(powerupId);
   if (powerup.lastRemoveTime.has_value()){
@@ -742,7 +636,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }else{
       modlog("router scene route unload", sceneManagement.managedScene.value().path);
       if (sceneManagement.managedScene.value().id.has_value()){
-        endLevel(sceneManagement.managedScene.value());
+        stopMode(sceneManagement.managedScene.value().gameMode);
         auto sceneFileName = gameapi -> listSceneFiles(sceneManagement.managedScene.value().id.value()).at(0);
         auto sceneName = gameapi -> sceneNameById(sceneManagement.managedScene.value().id.value());
         modlog("router scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
@@ -789,53 +683,12 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     activeLevel = std::nullopt;
     sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     modlog("router scene route load", sceneManagement.managedScene.value().path);
-    startLevel(sceneManagement.managedScene.value());
-   
+    startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
   }
 }
-
 
 glm::vec2 getMouseVelocity(){
   return getGlobalState().mouseVelocity;
-}
-
-DebugConfig debugPrintAnimations(int playerIndex){
-  DebugConfig debugConfig { .data = {} };
-  std::vector<objid> ids;
-  ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-  if (controlledPlayer.playerId.has_value()){
-    ids.push_back(controlledPlayer.playerId.value());
-  }
-  if (ids.size() > 0){
-    auto id = ids.at(0);
-    auto name = gameapi -> getGameObjNameForId(id).value();
-    debugConfig.data.push_back({"object", name });
-    auto animationNames = gameapi -> listAnimations(id);
-    for (auto &animation : animationNames){
-      bool isNamePose = animation.find("pose-") == 0;
-      if (isNamePose){
-        debugConfig.data.push_back({ animation, DebugItem {
-          .text = "[POSE]",
-          .onClick = [id, animation]() -> void {
-            gameapi -> setAnimationPose(id, animation, 0.f);
-          },
-        }});   
-      }else{
-        debugConfig.data.push_back({ animation, DebugItem {
-          .text = "[PLAY]",
-          .onClick = [id, animation]() -> void {
-            gameapi -> playAnimation(id, animation, ONESHOT, std::nullopt, 0, false, std::nullopt);
-          },
-        }});        
-      }
-    }
-    if (animationNames.size() == 0){
-      debugConfig.data.push_back({ "[no-animations]" });
-    }
-  }else{
-    debugConfig.data.push_back({ "animations" });
-  }
-  return debugConfig;
 }
 
 void setNoClipMode(bool enable){
@@ -1049,7 +902,7 @@ UiContext getUiContext(GameState& gameState){
         if (wasInEditorMode){
           // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
           gameapi -> schedule(0, true, 0, NULL, [&gameState](void*) -> void {
-            startLevel(gameState.sceneManagement.managedScene.value());
+            //startLevel(gameState.sceneManagement.managedScene.value());
           });          
         }
 

@@ -15,7 +15,7 @@
 #include "./debug.h"
 #include "./vector_gfx.h"
 #include "./arcade/arcade.h"
-#include "./entity.h"
+#include "./gamecontrol/entity.h"
 #include "./orbs.h"
 #include "./config.h"
 #include "./gameworld/audio.h"

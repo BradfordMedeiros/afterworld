@@ -791,3 +791,8 @@ std::set<objid>& getDisabledAnimationIds(objid entityId){
 void deliverCurrentGunAmmo(objid id, int ammoAmount){
   deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }
+
+bool isGunZoomed(objid id){
+  auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
+  return gunZoomed;
+}

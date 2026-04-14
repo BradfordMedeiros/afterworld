@@ -221,7 +221,6 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
 }
 
 void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
-
   {
     glm::vec3 oppositeNormal(normal.x * -1, normal.y * -1, normal.z * -1);
     auto attr = getAttrHandle(obj1);

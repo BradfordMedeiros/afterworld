@@ -1,12 +1,12 @@
 #ifndef MOD_AFTERWORLD_ENTITY
 #define MOD_AFTERWORLD_ENTITY
 
-#include "./core/weapons/weaponcore.h"
-#include "./core/movement/movement.h"
-#include "./core/health.h"
-#include "./ai/ai.h"
-#include "./curves.h"
-#include "./resources/layer.h"
+#include "../core/weapons/weaponcore.h"
+#include "../core/movement/movement.h"
+#include "../core/health.h"
+#include "../ai/ai.h"
+#include "../curves.h"
+#include "../resources/layer.h"
 
 struct ControlledPlayer {
 	int viewport; // this is used interchangably with the player index (eg player 1, 2, etc)
@@ -112,5 +112,8 @@ std::string print(RigHit& righit);
 std::optional<RigHit> handleRigHit(objid id);
 
 void deliverCurrentGunAmmo(objid id, int ammoAmount);
+
+bool isGunZoomed(objid id);
+
 
 #endif 

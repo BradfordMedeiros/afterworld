@@ -10,7 +10,7 @@
 #include "./interaction/cutscene.h"
 #include "./tags.h"
 #include "./options.h"
-#include "./entity.h"
+#include "./gamecontrol/entity.h"
 #include "./gametypes/gametypes.h"
 #include "./gameworld/progress.h"
 #include "./ai/scene_ai.h"
@@ -23,5 +23,6 @@ void debugOnKey(int key, int scancode, int action, int mods);
 void simpleOnFrame(std::function<void()> fn, float duration);
 
 void onDebugMessage(std::string& key, std::any& value);
+DebugConfig debugPrintAnimations(int playerIndex);
 
 #endif 

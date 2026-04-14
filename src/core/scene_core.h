@@ -10,4 +10,7 @@
 std::vector<int> getVehicleIds();
 float querySelectDistance();
 
+void setCanExitVehicle(bool canExit);
+bool canExitVehicle();
+
 #endif

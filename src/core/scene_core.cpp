@@ -21,3 +21,11 @@ float querySelectDistance(){
   return selectDistance;
 }
 
+bool canExitVehicleValue = true;
+void setCanExitVehicle(bool canExit){
+  canExitVehicleValue = canExit;
+}
+bool canExitVehicle(){
+  return canExitVehicleValue;
+}
+

@@ -6,7 +6,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../global.h"
-#include "../entity.h"
+#include "../gamecontrol/entity.h"
 #include "../interaction/waypoint.h"
 
 struct HitPoints {
