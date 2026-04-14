@@ -2,25 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-GameTypeInfo getBallMode();
-GameTypeInfo getBallIntroMode();
-
-std::vector<GameTypeInfo> gametypes = {
-  getTargetKill(),
-  getDeathmatchMode(),
-  getRaceMode(),
-  getBallMode(),
-  getBallIntroMode(),
-};
-
-GameTypeInfo* gametypeByName(const char* name) {
-  for (auto &gametype : gametypes){
-    if (gametype.gametypeName == name){
-      return &gametype;
-    }
-  }
-  return NULL;
-}
 
 void gametypesOnKey(GameTypes& gametypes, int rawKey, int rawScancode, int rawAction, int rawMods){
   if (gametypes.meta){
@@ -28,41 +9,35 @@ void gametypesOnKey(GameTypes& gametypes, int rawKey, int rawScancode, int rawAc
   }
 }
 
-void changeGameType(GameTypes& gametypes, const char* name, void* data){
-  if (name == NULL){
-    gametypes.name = "";
-    gametypes.startTime = std::nullopt;
-    gametypes.meta = NULL;
-    gametypes.gametype.reset();
-    return;
-  }
+void changeGameType(GameTypes& gametypes, GameTypeInfo& gametype, const char* name, void* data){
   gametypes.name = name;
-  auto gametypeInfo = gametypeByName(name);
-  if (!gametypeInfo){
-    gametypes.meta = NULL;
-    modassert(false, "no matching gametype");
-    return;
-  }
-  gametypes.meta = gametypeInfo;
-  gametypes.gametype = gametypeInfo -> createGametype(data);
+  gametypes.meta = gametype;
+  gametypes.gametype = gametype.createGametype(data);
   gametypes.startTime = gameapi -> timeSeconds(false);
+}
+
+void changeGameTypeNone(GameTypes& gametypes){
+  gametypes.name = "";
+  gametypes.startTime = std::nullopt;
+  gametypes.meta = std::nullopt;
+  gametypes.gametype.reset();
 }
 
 GameTypes createGametypes(){
   GameTypes gametypes;
   gametypes.startTime = std::nullopt;
-  gametypes.meta = NULL;
+  gametypes.meta = std::nullopt;
   return gametypes;
 }
 
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value){
   modlog("gametypes", std::string("on message: ") + key);
-  if (gametypes.meta){
-    for (auto &event : gametypes.meta -> events){
+  if (gametypes.meta.has_value()){
+    for (auto &event : gametypes.meta.value().events){
       if (key == event){
-        bool gameFinished = gametypes.meta -> onEvent(gametypes.gametype, event, value);
+        bool gameFinished = gametypes.meta.value().onEvent(gametypes.gametype, event, value);
         if (gameFinished){
-          changeGameType(gametypes, "nogame", NULL);
+          changeGameTypeNone(gametypes);
           return;
         }
       }
@@ -82,19 +57,19 @@ DebugConfig debugPrintGametypes(GameTypes& gametype){
 }
 
 std::optional<GametypeData> getGametypeData(GameTypes& gametypes){
-  if (gametypes.meta == NULL){
+  if (!gametypes.meta.has_value()){
     return std::nullopt;
   }
   if (!gametypes.startTime.has_value()){
     return std::nullopt;
   }
 
-  auto scoreInfo = gametypes.meta -> getScoreInfo(gametypes.gametype, gametypes.startTime.value());
+  auto scoreInfo = gametypes.meta.value().getScoreInfo(gametypes.gametype, gametypes.startTime.value());
   return scoreInfo;
 }
 
 void onGametypesFrame(GameTypes& gametypes){
-  if (gametypes.meta){
-    gametypes.meta -> onFrame(gametypes.gametype);
+  if (gametypes.meta.has_value()){
+    gametypes.meta.value().onFrame(gametypes.gametype);
   }
 }

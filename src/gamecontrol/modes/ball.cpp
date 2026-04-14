@@ -5,6 +5,10 @@ extern CustomApiBindings* gameapi;
 extern GameTypes gametypeSystem;
 extern std::optional<std::string> activeLevel;
 extern Vehicles vehicles;
+extern Movement movement;
+extern Weapons weapons;
+extern AiData aiData;
+
 
 void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void goToLevel(std::string levelShortName);
@@ -65,7 +69,7 @@ void setBallLevelComplete(){
 
 	auto timeElapsed = gameapi -> timeSeconds(false) - ballStartTime.value();
 
-	changeGameType(gametypeSystem, NULL, NULL);
+	changeGameTypeNone(gametypeSystem);
 	markLevelComplete(activeLevel.value(), timeElapsed);
 	finalBallTime = timeElapsed;
 
@@ -195,20 +199,38 @@ std::optional<BallPowerupState> getPowerup(){
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    std::optional<objid> ballId;
-   bool didLose;
-   bool shouldReset;
-   bool didReset;
+   bool didLose = false;
+   bool shouldReset = false;
+   bool didReset = false;
 };
 
+GameTypeInfo getBallMode();
+
 void startBallMode(objid sceneId){
+  //modassert(false, "gamemode ball not implemented");
+  auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
+  glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
+    
+  // TODO - no reason to actually create the prefab here
+  auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  position, {});    
+  auto playerId = findObjByShortName("maincamera", sceneId);
+  modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
+  setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
+
+  //////////
+
 	inBallMode = true;
 	ballStartTime = gameapi -> timeSeconds(false);
 
 	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
-	auto position = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
-	createBallObj(sceneId, position);
+	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
+
+	createBallObj(sceneId, playerSpawnPosition);
 	BallModeOptions modeOptions {};
-	changeGameType(gametypeSystem, "ball", &modeOptions);
+
+	GameTypeInfo ballMode = getBallMode();
+	changeGameType(gametypeSystem, ballMode, "ball", &modeOptions);
+
 	setHudEnabled(false);
 }
 
@@ -219,7 +241,7 @@ void endBallMode(){
 
 	setCanExitVehicle(true);
 	setShowBallOptions(std::nullopt);
-	changeGameType(gametypeSystem, NULL, NULL);
+	changeGameTypeNone(gametypeSystem);
 	setHudEnabled(true);
 }
 

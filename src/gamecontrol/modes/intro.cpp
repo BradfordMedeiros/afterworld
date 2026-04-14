@@ -19,6 +19,8 @@ struct IntroModeOptions {
    int activeLayer;
 };
 
+GameTypeInfo getBallIntroMode();
+
 void startIntroMode(objid sceneId){
 	if (currentCutscene.has_value()){
 		removeCutscene(currentCutscene.value(), true);
@@ -34,11 +36,12 @@ void startIntroMode(objid sceneId){
   IntroModeOptions modeOptions {
   	.cameraId = cameraId.value(),
   };
-	changeGameType(gametypeSystem, "ball-intro", &modeOptions);
+  auto ballIntro = getBallIntroMode();
+	changeGameType(gametypeSystem, ballIntro, "ball-intro", &modeOptions);
 }
 
 void endIntroMode(){
-  changeGameType(gametypeSystem, NULL, NULL);
+  changeGameTypeNone(gametypeSystem);
   setShowLiveMenu(false);
   if (currentCutscene.has_value()){
     removeCutscene(currentCutscene.value());
