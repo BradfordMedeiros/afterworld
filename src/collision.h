@@ -15,10 +15,6 @@ void handleOnTriggerEnter(objid obj1, objid obj2);
 void handleOnTriggerExit(objid obj1, objid obj2);
 void handleOnTriggerRemove(objid triggerZone);
 
-void handleSurfaceCollision(int32_t obj1, int32_t obj2);
-void removeSurfaceModifier(int32_t obj1, int32_t obj2);
-void removeSurfaceModifier(int32_t id);
-
 void handlePowerupCollision(int32_t obj1, int32_t obj2);
 
 

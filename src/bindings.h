@@ -9,6 +9,7 @@
 #include "./gamecontrol/entity.h"
 #include "./gamecontrol/mode.h"
 #include "./gameworld/daynight.h"
+#include "./gameworld/surface.h"
 #include "./core/weapons/weapon.h"
 #include "./core/movement/movement.h"
 #include "./core/inventory.h"
