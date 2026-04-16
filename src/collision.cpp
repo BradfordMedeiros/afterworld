@@ -6,10 +6,7 @@ extern Director director;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
-void doDamageMessage(objid targetId, float damage);
 bool isControlledVehicle(int vehicleId);
-void setBallLevelComplete();
-void deliverPowerup(objid vehicle, objid powerupId);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
@@ -255,19 +252,5 @@ void handleSurfaceCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-void handlePowerupCollision(int32_t obj1, int32_t obj2){
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto powerup = getStrAttr(objAttr, "powerup");
-    if (powerup.has_value()){
-      deliverPowerup(obj1, obj2);
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto powerup = getStrAttr(objAttr, "powerup");
-    if (powerup.has_value()){
-      deliverPowerup(obj2, obj1); 
-    }
-  }
-}
+
 

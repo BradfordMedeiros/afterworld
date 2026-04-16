@@ -17,5 +17,6 @@ void endBallMode();
 
 void handleGravityHoleCollision(objid obj1, objid obj2);
 void handleLevelEndCollision(int32_t obj1, int32_t obj2);
+void handlePowerupCollision(int32_t obj1, int32_t obj2);
 
 #endif 

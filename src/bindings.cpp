@@ -542,37 +542,7 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
   return std::nullopt;
 }
 
-void deliverPowerup(objid vehicle, objid powerupId){
-  auto& powerup = powerups.at(powerupId);
-  if (powerup.lastRemoveTime.has_value()){
-    return;
-  }
 
-  auto vehicleBall = getVehicleBall(vehicles, vehicle);
-  modassert(vehicleBall.has_value(), "deliver powerup, not a ball");
-  if (powerup.type == "jump"){
-    setPowerupBall(*vehicleBall.value(), BIG_JUMP);
-  }else if (powerup.type == "dash"){
-    setPowerupBall(*vehicleBall.value(), LAUNCH_FORWARD);
-  }else if (powerup.type == "low_gravity"){
-    setPowerupBall(*vehicleBall.value(), LOW_GRAVITY);
-  }else if (powerup.type == "teleport"){
-    setPowerupBall(*vehicleBall.value(), TELEPORT);
-  }else if (powerup.type == "invincibility"){
-    setPowerupBall(*vehicleBall.value(), INVINCIBILITY);
-  }else{
-    modassert(false, std::string("invalid powerup type: ") + powerup.type);
-    setPowerupBall(*vehicleBall.value(), std::nullopt);
-  }
-
-  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
-  
-  if(!powerup.respawnRateMs.has_value()){
-    gameapi -> removeObjectById(powerupId);
-  }else{
-    powerup.lastRemoveTime = gameapi -> timeSeconds(false);
-  }
-}
 
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
