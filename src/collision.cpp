@@ -11,7 +11,6 @@ void doDialogMessage(std::string& value);
 bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
 void deliverPowerup(objid vehicle, objid powerupId);
-void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
@@ -207,7 +206,6 @@ void handleOnTriggerExit(objid obj1, objid obj2){
   removeFromTriggerZone(obj2, obj1);
 }
 
-
 void handleOnTriggerRemove(objid id){
   auto triggerName = gameapi -> getGameObjNameForId(id).value();
 
@@ -241,7 +239,6 @@ void handleOnTriggerEnter(objid obj1, objid obj2){
     }
   }
 }
-
 
 void handleTriggerZone(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){
@@ -410,20 +407,3 @@ void handlePowerupCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-void handleGemCollision(int32_t obj1, int32_t obj2){
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto gem = getStrAttr(objAttr, "gem");
-    if (gem.has_value()){
-      stageCrystal(gem.value());
-      gameapi -> removeObjectById(obj2);
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto gem = getStrAttr(objAttr, "gem");
-    if (gem.has_value()){
-      stageCrystal(gem.value());
-      gameapi -> removeObjectById(obj1);
-    }
-  } 
-}

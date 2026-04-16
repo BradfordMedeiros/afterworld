@@ -23,7 +23,6 @@ void removeSurfaceModifier(int32_t id);
 
 void handleLevelEndCollision(int32_t obj1, int32_t obj2);
 void handlePowerupCollision(int32_t obj1, int32_t obj2);
-void handleGemCollision(int32_t obj1, int32_t obj2);
 
 
 #endif 
