@@ -76,6 +76,29 @@ void setBallLevelComplete(){
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
+void handleLevelEndCollision(int32_t obj1, int32_t obj2){
+  bool didCollideLevelEnd = false;
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto playerEndAttr = getStrAttr(objAttr, "player_end");
+    if (playerEndAttr.has_value()){
+      didCollideLevelEnd = true;
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto playerEndAttr = getStrAttr(objAttr, "player_end");
+    if (playerEndAttr.has_value()){
+      didCollideLevelEnd = true;
+    }
+  }
+
+  std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
+  if (didCollideLevelEnd){
+    // obviously this is kind of overly coupled to the ball game here. 
+    setBallLevelComplete();
+  }
+}
+
 void createBallObj(objid sceneId, glm::vec3 position){
   GameobjAttributes attr { 
   	.attr = {

@@ -58,45 +58,6 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   }
 }
 
-void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force){
-  static float lastForce = 0.f;
-  if (force > 1){
-    lastForce  = force;
-  }
-
-
-  static unsigned int forceStat = gameapi -> stat("last-force");
-  gameapi -> logStat(forceStat, lastForce);
-
-  if (force > 50){
-    {
-      float volume = 1.f;  // should adjust based on force, how much? 
-      playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position, false);
-
-      auto attr = getAttrHandle(obj1);
-      auto collideDamage = getFloatAttr(attr, "collide_damage"); 
-      if (collideDamage.has_value()){
-        doDamageMessage(obj1, collideDamage.value());   
-      }
-    }
-    {
-      auto attr = getAttrHandle(obj2);
-      auto collideDamage = getFloatAttr(attr, "collide_damage"); 
-      if (collideDamage.has_value()){
-        doDamageMessage(obj2, collideDamage.value());   
-      }
-    }
-
-  }
-
-
-  // i think could calculate the area (which maybe just simplify from volume), and that gives a rough value for pressure
-  // then from that pressure, 
-  // and then use some sort of that value, maybe mass?  and some coefficient?  to dtermine if should break
-  // can also be used to inflict damage on another object
-}
-
-
 void addToTriggerZone(objid id, objid triggerZone){
   //modassert(false, std::string("addToTriggerZone: ") + idName + ", " + triggerName);
   if (triggerZoneIdToElements.find(triggerZone) == triggerZoneIdToElements.end()){
@@ -291,29 +252,6 @@ void handleSurfaceCollision(int32_t obj1, int32_t obj2){
     addSurfaceModifier(obj2, obj1ModSpeed.value(), obj1);
   }else if (!obj1ModSpeed.has_value() && obj2ModSpeed.has_value()){
     addSurfaceModifier(obj1, obj2ModSpeed.value(), obj2);
-  }
-}
-
-void handleLevelEndCollision(int32_t obj1, int32_t obj2){
-  bool didCollideLevelEnd = false;
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto playerEndAttr = getStrAttr(objAttr, "player_end");
-    if (playerEndAttr.has_value()){
-      didCollideLevelEnd = true;
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto playerEndAttr = getStrAttr(objAttr, "player_end");
-    if (playerEndAttr.has_value()){
-      didCollideLevelEnd = true;
-    }
-  }
-
-  std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
-  if (didCollideLevelEnd){
-    // obviously this is kind of overly coupled to the ball game here. 
-    setBallLevelComplete();
   }
 }
 
