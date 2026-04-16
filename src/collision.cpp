@@ -2,8 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-extern Director director;
-extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
 bool isControlledVehicle(int vehicleId);
