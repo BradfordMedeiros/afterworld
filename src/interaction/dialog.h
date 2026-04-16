@@ -8,4 +8,6 @@
 void loadDialogTree();
 void doDialogMessage(std::string& value);
 
+void handleDialogInteract(objid gameObjId);
+
 #endif 

@@ -1721,7 +1721,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (!gameapi -> getGameObjNameForId(*gameObjId).has_value()){
         return;
       }
-      handleInteract(*gameObjId);
+      handleDialogInteract(*gameObjId);
       return;
     }
 

@@ -1,5 +1,7 @@
 #include "./inventory.h"
 
+extern CustomApiBindings* gameapi;
+
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
 
 const int INFINITE_ITEM_COUNT = 9999;
@@ -102,3 +104,64 @@ void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInvent
     }
 }
 
+
+
+bool isPlayer(objid id){
+  auto playerAttr = getSingleAttr(id, "player");
+  return playerAttr.has_value() && playerAttr.value() == "default";
+}
+bool isPickup(objid id){
+  auto playerAttr = getSingleAttr(id, "pickup");
+  return playerAttr.has_value();
+}
+void tryPickupItem(objid gameObjId, objid playerId){
+  objid inventory = playerId;
+
+  auto objAttr = getAttrHandle(gameObjId);
+  auto pickup = getStrAttr(objAttr, "pickup");
+  if (pickup.has_value()){
+    auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
+    auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
+    auto pickupType = getStrAttr(objAttr, "pickup-type");
+    auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
+    auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
+
+    auto oldItemCount = currentItemCount(scopenameToInventory, inventory, pickup.value());
+    auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
+    updateItemCount(scopenameToInventory, inventory, pickup.value(), newItemCount);
+
+    if (!pickupRemove.has_value()){
+      gameapi -> removeByGroupId(gameObjId);
+    }else if (pickupRemove.value() == "prefab"){
+      auto prefabRootId = gameapi -> prefabId(gameObjId);
+      modassert(prefabRootId.has_value(), "inventory remove prefab, but object id is not a prefab type");
+      gameapi -> removeByGroupId(prefabRootId.value());
+    }
+    
+    if (pickupTrigger.has_value()){
+      ItemAcquiredMessage itemAcquiredMessage {
+        .targetId = playerId,
+        .itemId = gameObjId,
+        .amount = static_cast<int>(newItemCount),
+      };
+      gameapi -> sendNotifyMessage(pickupTrigger.value(), itemAcquiredMessage);
+    }
+  }
+}
+void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
+  modlog("handleInventoryOnCollision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+
+  auto obj1IsPlayer = isPlayer(obj1);
+  auto obj2IsPlayer = isPlayer(obj2);
+  auto obj1IsPickup = isPickup(obj1);
+  auto obj2IsPickup = isPickup(obj2);
+
+  std::cout << "handleInventoryOnCollision obj1IsPlayer = " << obj1IsPlayer << ", obj2IsPlayer = " << obj2IsPlayer << std::endl;
+  std::cout << "handleInventoryOnCollision obj1IsPickup = " << obj1IsPickup << ", obj2IsPickup = " << obj2IsPickup << std::endl;
+
+  if (obj1IsPlayer && obj2IsPickup){
+    tryPickupItem(obj2, obj1);
+  }else if (obj2IsPlayer && obj1IsPickup){
+    tryPickupItem(obj1, obj2);
+  }
+}

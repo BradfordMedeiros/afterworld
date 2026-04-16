@@ -27,4 +27,11 @@ int ammoForGun(objid inventory, std::string& gun);
 void setGunAmmo(objid inventory, std::string gun, int currentAmmo);
 void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInventory);
 
+struct ItemAcquiredMessage {
+  objid targetId;
+  objid itemId;
+  int amount;
+};
+void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
+
 #endif

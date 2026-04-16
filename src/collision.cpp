@@ -7,26 +7,12 @@ extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-
 extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
 void doDamageMessage(objid targetId, float damage);
-void doDialogMessage(std::string& value);
 bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
 void deliverPowerup(objid vehicle, objid powerupId);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
-
-void handleInteract(objid gameObjId){
-  auto objAttr = getAttrHandle(gameObjId);
-  auto chatNode = getStrAttr(objAttr, "chatnode");
-  if (chatNode.has_value()){
-    doDialogMessage(chatNode.value());
-  }
-  auto triggerSwitch = getStrAttr(objAttr, "trigger-switch");
-  if (triggerSwitch.has_value()){
-    gameapi -> sendNotifyMessage("switch", triggerSwitch.value());
-  }
-}
-
 
 bool passesSwitchFilter(ObjectAttrHandle& handle, objid otherObjId){
   auto switchFilter = getStrAttr(handle, "switch-filter");
@@ -72,7 +58,6 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
   }
 }
 
-
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force){
   static float lastForce = 0.f;
   if (force > 1){
@@ -111,65 +96,6 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   // can also be used to inflict damage on another object
 }
 
-bool isPlayer(objid id){
-  auto playerAttr = getSingleAttr(id, "player");
-  return playerAttr.has_value() && playerAttr.value() == "default";
-}
-bool isPickup(objid id){
-  auto playerAttr = getSingleAttr(id, "pickup");
-  return playerAttr.has_value();
-}
-void tryPickupItem(objid gameObjId, objid playerId){
-  objid inventory = playerId;
-
-  auto objAttr = getAttrHandle(gameObjId);
-  auto pickup = getStrAttr(objAttr, "pickup");
-  if (pickup.has_value()){
-    auto pickupTrigger = getStrAttr(objAttr, "pickup-trigger");
-    auto pickupQuantity = getFloatAttr(objAttr, "pickup-amount");
-    auto pickupType = getStrAttr(objAttr, "pickup-type");
-    auto pickupRemove = getStrAttr(objAttr, "pickup-remove");
-    auto quantityAmount = pickupQuantity.has_value() ? pickupQuantity.value() : 1.f;
-
-    auto oldItemCount = currentItemCount(scopenameToInventory, inventory, pickup.value());
-    auto newItemCount = (pickupType.has_value() && pickupType.value() == "replace") ? quantityAmount : (oldItemCount + quantityAmount);
-    updateItemCount(scopenameToInventory, inventory, pickup.value(), newItemCount);
-
-    if (!pickupRemove.has_value()){
-      gameapi -> removeByGroupId(gameObjId);
-    }else if (pickupRemove.value() == "prefab"){
-      auto prefabRootId = gameapi -> prefabId(gameObjId);
-      modassert(prefabRootId.has_value(), "inventory remove prefab, but object id is not a prefab type");
-      gameapi -> removeByGroupId(prefabRootId.value());
-    }
-    
-    if (pickupTrigger.has_value()){
-      ItemAcquiredMessage itemAcquiredMessage {
-        .targetId = playerId,
-        .itemId = gameObjId,
-        .amount = static_cast<int>(newItemCount),
-      };
-      gameapi -> sendNotifyMessage(pickupTrigger.value(), itemAcquiredMessage);
-    }
-  }
-}
-void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
-  modlog("handleInventoryOnCollision: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-
-  auto obj1IsPlayer = isPlayer(obj1);
-  auto obj2IsPlayer = isPlayer(obj2);
-  auto obj1IsPickup = isPickup(obj1);
-  auto obj2IsPickup = isPickup(obj2);
-
-  std::cout << "handleInventoryOnCollision obj1IsPlayer = " << obj1IsPlayer << ", obj2IsPlayer = " << obj2IsPlayer << std::endl;
-  std::cout << "handleInventoryOnCollision obj1IsPickup = " << obj1IsPickup << ", obj2IsPickup = " << obj2IsPickup << std::endl;
-
-  if (obj1IsPlayer && obj2IsPickup){
-    tryPickupItem(obj2, obj1);
-  }else if (obj2IsPlayer && obj1IsPickup){
-    tryPickupItem(obj1, obj2);
-  }
-}
 
 void addToTriggerZone(objid id, objid triggerZone){
   //modassert(false, std::string("addToTriggerZone: ") + idName + ", " + triggerName);

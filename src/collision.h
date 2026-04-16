@@ -6,7 +6,6 @@
 #include "./core/inventory.h"
 #include "./director/director.h"
 
-void handleInteract(objid gameObjId);
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey);
 
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force);
