@@ -9,8 +9,6 @@ extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
-void applyImpulseAffectMovement(objid id, glm::vec3 force);
-bool isControlledPlayer(int playerId);
 bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
 void doTeleport(int32_t obj, std::string destination);
@@ -79,28 +77,6 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
 
 }
 
-void handleDamageCollision(objid obj1, objid obj2){
-  {
-    auto objAttr1 = getAttrHandle(obj1);
-    auto damageAmount = getFloatAttr(objAttr1, "touchdamage");
-    if (damageAmount.has_value()){
-      modlog("damage collision 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doDamageMessage(obj2, damageAmount.value());
-      gameapi -> removeByGroupId(obj1);
-    }
-  }
-   
-  {
-
-    auto objAttr2 = getAttrHandle(obj2);
-    auto damageAmount2 = getFloatAttr(objAttr2, "touchdamage");
-    if (damageAmount2.has_value()){
-      modlog("damage collision 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doDamageMessage(obj1, damageAmount2.value());
-      gameapi -> removeByGroupId(obj2);
-    }
-  }
-}
 
 /////////////////////////
 
@@ -220,39 +196,6 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   // can also be used to inflict damage on another object
 }
 
-void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal){
-  {
-    glm::vec3 oppositeNormal(normal.x * -1, normal.y * -1, normal.z * -1);
-    auto attr = getAttrHandle(obj1);
-    auto bounceAmount = getVec3Attr(attr, "bounce");
-    auto bounceType = getStrAttr(attr, "bouncetype");
-    if (bounceAmount.has_value()){
-      if (bounceType.has_value() && bounceType.value() == "fixed"){
-        applyImpulseAffectMovement(obj2, bounceAmount.value());
-      }else{
-        auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), oppositeNormal) * bounceAmount.value();
-        std::cout << "bouncepad: " << print(impulse) << std::endl;
-        applyImpulseAffectMovement(obj2, impulse);
-      }
-    }    
-  }
-
-  {
-    auto attr = getAttrHandle(obj2);
-    auto bounceAmount = getVec3Attr(attr, "bounce");
-    auto bounceType = getStrAttr(attr, "bouncetype");
-    if (bounceAmount.has_value()){
-      if (bounceType.has_value() && bounceType.value() == "fixed"){
-        applyImpulseAffectMovement(obj1, bounceAmount.value());
-      }else{
-        auto impulse = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), normal) * bounceAmount.value();
-        std::cout << "bouncepad: " << print(impulse) << std::endl;
-        applyImpulseAffectMovement(obj1, impulse);
-      }
-    }    
-  }
-}
-
 
 bool isPlayer(objid id){
   auto playerAttr = getSingleAttr(id, "player");
@@ -314,23 +257,6 @@ void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-void handleSpawnCollision(int32_t obj1, int32_t obj2){
-  if (isControlledPlayer(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger");
-    if (spawnPointTag.has_value()){
-      spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
-      gameapi -> removeByGroupId(obj1);
-    }
-  }else if (isControlledPlayer(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger"); 
-    if (spawnPointTag.has_value()){
-      spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
-      gameapi -> removeByGroupId(obj2);
-    }
-  }
-}
 
 void addToTriggerZone(objid id, objid triggerZone){
   //modassert(false, std::string("addToTriggerZone: ") + idName + ", " + triggerName);
@@ -555,24 +481,6 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-void handleTeleportCollision(int32_t obj1, int32_t obj2){
-  std::optional<std::string> teleportTarget;
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto teleportZone = getStrAttr(objAttr, "teleport_zone");
-    if (teleportZone.has_value()){
-      teleportTarget = teleportZone.value();
-      doTeleport(obj1, teleportZone.value());
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto teleportZone = getStrAttr(objAttr, "teleport_zone");
-    if (teleportZone.has_value()){
-      teleportTarget = teleportZone.value();
-      doTeleport(obj2, teleportZone.value());
-    }
-  }
-}
 
 void handlePowerupCollision(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){

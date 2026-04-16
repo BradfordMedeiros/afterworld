@@ -103,20 +103,6 @@ void onMenu2ContinueClick(){
   ballModeLevelSelect();
 }
 
-void enterVehicleRaw(int playerIndex, objid vehicleId, objid id){
-  enterVehicle(vehicles, vehicleId, id);
-  std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
-  modassert(controllable.has_value() && controllable.value() != NULL, "controllable invalid");
-  controllable.value() -> vehicle = vehicleId;
-}
-
-void exitVehicleRaw(int playerIndex, objid vehicleId, objid id){
-  if (!canExitVehicle()){
-    return;
-  }
-  exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
-  getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
-}
 
 void applyScreenshake(int playerIndex, glm::vec3 impulse){
   if (hasOption("no-shake")){
@@ -1121,9 +1107,9 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   if (isInteractKey(key) && (action == 1) && controlledPlayer.playerId.has_value()){
     if (getActiveControllable(playerIndex).value() -> vehicle.has_value()){
-      exitVehicleRaw(playerIndex, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.playerId.value());
+      exitVehicleEntity(playerIndex, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.playerId.value());
     }else if (getActiveControllable(playerIndex).value() -> lookingAtVehicle.has_value()){
-      enterVehicleRaw(playerIndex, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
+      enterVehicleEntity(playerIndex, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.playerId.value());
     }
   }
 
@@ -1831,16 +1817,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     drawDebugRaycast(pos, pos + direction, -1);
 
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
-    handleDamageCollision(obj1, obj2);
+    handleCollisionDamage(obj1, obj2);
     handleKillplaneCollision(obj1, obj2);
     handleGravityHoleCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
-    handleBouncepadCollision(obj1, obj2, normal);
+    handleCollisionBouncepad(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);
-    handleSpawnCollision(obj1, obj2);
+    handleSpawnCollision(director, obj1, obj2);
 
     handleLevelEndCollision(obj1, obj2);
-    handleTeleportCollision(obj1, obj2);
+    handleCollisionTeleport(obj1, obj2);
     handlePowerupCollision(obj1, obj2);
     handleGemCollision(obj1, obj2);
     

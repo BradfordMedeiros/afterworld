@@ -44,7 +44,6 @@ objid spawnEntity(int spawnTypeSymbol, objid spawnOwnerId, objid sceneId, glm::v
   return -1;
 }
 
-
 int spawnTypeFromAttr(std::optional<std::string>&& value){
   modlog("do spawn spawner create", value.value());
   if (value.value() == "enemy"){

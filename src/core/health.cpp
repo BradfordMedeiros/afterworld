@@ -207,3 +207,26 @@ DebugConfig debugPrintHealth(){
 	}
 	return debugConfig;	
 }
+
+void handleCollisionDamage(objid obj1, objid obj2){
+  {
+    auto objAttr1 = getAttrHandle(obj1);
+    auto damageAmount = getFloatAttr(objAttr1, "touchdamage");
+    if (damageAmount.has_value()){
+      modlog("damage collision 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doDamageMessage(obj2, damageAmount.value());
+      gameapi -> removeByGroupId(obj1);
+    }
+  }
+   
+  {
+
+    auto objAttr2 = getAttrHandle(obj2);
+    auto damageAmount2 = getFloatAttr(objAttr2, "touchdamage");
+    if (damageAmount2.has_value()){
+      modlog("damage collision 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doDamageMessage(obj1, damageAmount2.value());
+      gameapi -> removeByGroupId(obj2);
+    }
+  }
+}

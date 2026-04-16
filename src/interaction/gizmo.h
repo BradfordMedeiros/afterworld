@@ -74,6 +74,7 @@ struct TeleportInfo {
 void handleTeleport(objid idToTeleport, objid teleporterId);
 void doTeleport(int32_t idToTeleport, std::string destination);
 std::optional<TeleportInfo> getTeleportPosition();
+void handleCollisionTeleport(int32_t obj1, int32_t obj2);
 
 struct SpinObject {
 	float timeAdded;
@@ -95,5 +96,7 @@ void onEmissionFrame();
 
 
 void handleScroll(std::set<objid>& textureScrollObjIds);
+
+void handleCollisionBouncepad(objid obj1, objid obj2, glm::vec3 normal);
 
 #endif 

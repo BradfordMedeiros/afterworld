@@ -20,4 +20,6 @@ void doDamageMessage(objid targetId, float damageAmount);
 std::optional<HitPoints> getHealth(objid id);
 DebugConfig debugPrintHealth();
 
+void handleCollisionDamage(objid obj1, objid obj2);
+
 #endif

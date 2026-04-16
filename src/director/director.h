@@ -10,6 +10,7 @@ struct Director {
 
 Director createDirector();
 void handleDirector(Director& director);
+void handleSpawnCollision(Director& director, int32_t obj1, int32_t obj2);
 
 
 #endif 

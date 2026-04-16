@@ -8,7 +8,6 @@
 
 void handleInteract(objid gameObjId);
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey);
-void handleDamageCollision(objid obj1, objid obj2);
 
 void handleKillplaneCollision(objid obj1, objid obj2);
 void handleRemoveKillplaneCollision(objid obj1);
@@ -17,9 +16,7 @@ bool isInKillPlane(objid id);
 
 void handleGravityHoleCollision(objid obj1, objid obj2);
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force);
-void handleBouncepadCollision(objid obj1, objid obj2, glm::vec3 normal);
 void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
-void handleSpawnCollision(int32_t obj1, int32_t obj2);
 
 void handleTriggerZone(int32_t obj1, int32_t obj2);
 void handleOnTriggerEnter(objid obj1, objid obj2);
@@ -31,7 +28,6 @@ void removeSurfaceModifier(int32_t obj1, int32_t obj2);
 void removeSurfaceModifier(int32_t id);
 
 void handleLevelEndCollision(int32_t obj1, int32_t obj2);
-void handleTeleportCollision(int32_t obj1, int32_t obj2);
 void handlePowerupCollision(int32_t obj1, int32_t obj2);
 void handleGemCollision(int32_t obj1, int32_t obj2);
 

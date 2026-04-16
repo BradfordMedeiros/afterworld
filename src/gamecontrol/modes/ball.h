@@ -8,6 +8,7 @@
 #include "../../gameworld/progress.h"
 #include "../../orbs.h"
 #include "../../interaction/cutscene.h"
+#include "../../interaction/gizmo.h"
 #include "../../collision.h"
 #include "../entity.h"
 

@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
 extern Movement movement;
+extern Vehicles vehicles;
 
 MovementEntityData& getMovementData();
 void objectRemoved(objid idRemoved);
@@ -795,4 +796,19 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount){
 bool isGunZoomed(objid id){
   auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
   return gunZoomed;
+}
+
+void enterVehicleEntity(int playerIndex, objid vehicleId, objid id){
+  enterVehicle(vehicles, vehicleId, id);
+  std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
+  modassert(controllable.has_value() && controllable.value() != NULL, "controllable invalid");
+  controllable.value() -> vehicle = vehicleId;
+}
+
+void exitVehicleEntity(int playerIndex, objid vehicleId, objid id){
+  if (!canExitVehicle()){
+    return;
+  }
+  exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
+  getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
 }

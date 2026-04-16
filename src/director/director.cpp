@@ -2,6 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
+bool isControlledPlayer(int playerId);
+
 Director createDirector(){
 	return Director{
 		.lastEnemySpawnTime = 0.f,
@@ -35,4 +37,22 @@ void handleDirector(Director& director){
 		}
 	}
 	std::cout << "number of enenmies: " << numberOfSpawnManaged(director.managedSpawnpoints) << std::endl;
+}
+
+void handleSpawnCollision(Director& director, int32_t obj1, int32_t obj2){
+  if (isControlledPlayer(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger");
+    if (spawnPointTag.has_value()){
+      spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
+      gameapi -> removeByGroupId(obj1);
+    }
+  }else if (isControlledPlayer(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto spawnPointTag = getStrAttr(objAttr, "spawn-trigger"); 
+    if (spawnPointTag.has_value()){
+      spawnFromAllSpawnpoints(director.managedSpawnpoints, spawnPointTag.value().c_str());
+      gameapi -> removeByGroupId(obj2);
+    }
+  }
 }

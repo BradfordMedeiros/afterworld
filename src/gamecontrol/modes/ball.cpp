@@ -10,10 +10,8 @@ extern Weapons weapons;
 extern AiData aiData;
 
 
-void enterVehicleRaw(int playerIndex, objid vehicleId, objid id);
 void goToLevel(std::string levelShortName);
 bool isReloadKey(int button);
-void createExplosion(glm::vec3 position, float outerRadius, float damage);
 void handleRemoveKillplaneCollision(objid);
 
 bool inBallMode = false;
@@ -267,7 +265,7 @@ GameTypeInfo getBallMode(){
 				modassert(activePlayer.has_value(), "ball set active player no active player");
 				std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]" << ", playerid: " << print(activePlayer) << ", [" << gameapi -> getGameObjNameForId(activePlayer.value()).value()  <<  "]" << std::endl;
 				std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
-				enterVehicleRaw(0, vehicles.at(0), activePlayer.value());
+				enterVehicleEntity(0, vehicles.at(0), activePlayer.value());
 				setCanExitVehicle(false);
 
 				playCutscene(ballStartGameplay, std::nullopt);

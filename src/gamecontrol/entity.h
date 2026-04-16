@@ -3,6 +3,8 @@
 
 #include "../core/weapons/weaponcore.h"
 #include "../core/movement/movement.h"
+#include "../core/vehicles/vehicles.h"
+#include "../core/scene_core.h"
 #include "../core/health.h"
 #include "../ai/ai.h"
 #include "../curves.h"
@@ -115,5 +117,7 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount);
 
 bool isGunZoomed(objid id);
 
+void enterVehicleEntity(int playerIndex, objid vehicleId, objid id);
+void exitVehicleEntity(int playerIndex, objid vehicleId, objid id);
 
 #endif 
