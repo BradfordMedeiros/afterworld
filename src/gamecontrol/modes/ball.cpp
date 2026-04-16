@@ -252,6 +252,33 @@ void gravityHoleBall(objid gravityHoleId){
 	});
 }
 
+void doGravityHole(objid id, objid gravityHole){
+  if (isControlledVehicle(id)){
+    gravityHoleBall(gravityHole);
+  }
+}
+void handleGravityHoleCollision(objid obj1, objid obj2){
+  {
+    auto objAttr1 = getAttrHandle(obj1);
+    auto gravityHole = getStrAttr(objAttr1, "gravityhole");
+    if (gravityHole.has_value()){
+      modlog("gravityHole 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doGravityHole(obj2, obj1);
+    }
+  }
+   
+  {
+
+    auto objAttr2 = getAttrHandle(obj2);
+    auto gravityHole = getStrAttr(objAttr2, "gravityhole");
+    if (gravityHole.has_value()){
+      modlog("gravityHole 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doGravityHole(obj1, obj2);
+    }
+  }
+}
+
+
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",

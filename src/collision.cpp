@@ -4,19 +4,16 @@ extern CustomApiBindings* gameapi;
 
 extern Director director;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
-extern std::set<objid> objectsInKillplane;
 extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
 void doDamageMessage(objid targetId, float damage);
 void doDialogMessage(std::string& value);
 bool isControlledVehicle(int vehicleId);
 void setBallLevelComplete();
-void doTeleport(int32_t obj, std::string destination);
 void deliverPowerup(objid vehicle, objid powerupId);
 void stageCrystal(std::string name);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 void triggerColor(std::string trigger);
-void gravityHoleBall(objid gravityHoleId);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 
 void handleInteract(objid gameObjId){
@@ -74,88 +71,8 @@ void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::stri
       gameapi -> removeByGroupId(obj2);
     }
   }
-
 }
 
-
-/////////////////////////
-
-bool isInKillPlane(objid id){
-  return objectsInKillplane.count(id) > 0;
-}
-void doKillplane(objid id){
-  if (isControlledVehicle(id)){
-    std::cout << "killplane: add: " << id << std::endl;
-    objectsInKillplane.insert(id);
-  }
-}
-
-void handleKillplaneCollision(objid obj1, objid obj2){
-  {
-    auto objAttr1 = getAttrHandle(obj1);
-    auto killplane = getStrAttr(objAttr1, "killplane");
-    if (killplane.has_value()){
-      modlog("killplane 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doKillplane(obj2);
-    }
-  }
-   
-  {
-
-    auto objAttr2 = getAttrHandle(obj2);
-    auto killplane = getStrAttr(objAttr2, "killplane");
-    if (killplane.has_value()){
-      modlog("killplane 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doKillplane(obj1);
-    }
-  }
-}
-
-void handleRemoveKillplaneCollision(objid obj1){
-  if (objectsInKillplane.count(obj1) > 0){
-    std::cout << "killplane: rm: " << obj1 << std::endl;
-    objectsInKillplane.erase(obj1);    
-  }
-}
-
-void handleRemoveKillplaneCollision(objid obj1, objid obj2){
-  if (objectsInKillplane.count(obj1) > 0){
-    std::cout << "killplane: rm: " << obj1 << std::endl;
-    objectsInKillplane.erase(obj1);
-  }
-  if (objectsInKillplane.count(obj2) > 0){
-    std::cout << "killplane: rm: " << obj2 << std::endl;
-    objectsInKillplane.erase(obj2);
-  }
-}
-
-///////////////////////////////////
-
-void doGravityHole(objid id, objid gravityHole){
-  if (isControlledVehicle(id)){
-    gravityHoleBall(gravityHole);
-  }
-}
-void handleGravityHoleCollision(objid obj1, objid obj2){
-  {
-    auto objAttr1 = getAttrHandle(obj1);
-    auto gravityHole = getStrAttr(objAttr1, "gravityhole");
-    if (gravityHole.has_value()){
-      modlog("gravityHole 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doGravityHole(obj2, obj1);
-    }
-  }
-   
-  {
-
-    auto objAttr2 = getAttrHandle(obj2);
-    auto gravityHole = getStrAttr(objAttr2, "gravityhole");
-    if (gravityHole.has_value()){
-      modlog("gravityHole 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
-      doGravityHole(obj1, obj2);
-    }
-  }
-}
 
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force){
   static float lastForce = 0.f;
@@ -171,7 +88,6 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
     {
       float volume = 1.f;  // should adjust based on force, how much? 
       playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position, false);
-
 
       auto attr = getAttrHandle(obj1);
       auto collideDamage = getFloatAttr(attr, "collide_damage"); 
@@ -195,7 +111,6 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
   // and then use some sort of that value, maybe mass?  and some coefficient?  to dtermine if should break
   // can also be used to inflict damage on another object
 }
-
 
 bool isPlayer(objid id){
   auto playerAttr = getSingleAttr(id, "player");
@@ -256,7 +171,6 @@ void handleInventoryOnCollision(int32_t obj1, int32_t obj2){
     tryPickupItem(obj1, obj2);
   }
 }
-
 
 void addToTriggerZone(objid id, objid triggerZone){
   //modassert(false, std::string("addToTriggerZone: ") + idName + ", " + triggerName);
@@ -457,7 +371,6 @@ void handleSurfaceCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-
 void handleLevelEndCollision(int32_t obj1, int32_t obj2){
   bool didCollideLevelEnd = false;
   if (isControlledVehicle(obj1)){
@@ -480,7 +393,6 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
     setBallLevelComplete();
   }
 }
-
 
 void handlePowerupCollision(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){
@@ -514,8 +426,4 @@ void handleGemCollision(int32_t obj1, int32_t obj2){
       gameapi -> removeObjectById(obj1);
     }
   } 
-}
-
-void showTriggerVolumes(bool showTriggerVolumes){
-
 }

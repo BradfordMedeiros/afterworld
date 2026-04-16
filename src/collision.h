@@ -9,12 +9,6 @@
 void handleInteract(objid gameObjId);
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey);
 
-void handleKillplaneCollision(objid obj1, objid obj2);
-void handleRemoveKillplaneCollision(objid obj1);
-void handleRemoveKillplaneCollision(objid obj1, objid obj2);
-bool isInKillPlane(objid id);
-
-void handleGravityHoleCollision(objid obj1, objid obj2);
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force);
 void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
 
@@ -31,6 +25,5 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2);
 void handlePowerupCollision(int32_t obj1, int32_t obj2);
 void handleGemCollision(int32_t obj1, int32_t obj2);
 
-void showTriggerVolumes(bool showTriggerVolumes);
 
 #endif 

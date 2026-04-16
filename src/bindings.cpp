@@ -576,7 +576,6 @@ void deliverPowerup(objid vehicle, objid powerupId){
 
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
-  showTriggerVolumes(isEditorMode);
 }
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, std::vector<std::string>& queryParams){

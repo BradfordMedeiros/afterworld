@@ -15,5 +15,7 @@
 void startBallMode(objid sceneId);
 void endBallMode();
 
+void handleGravityHoleCollision(objid obj1, objid obj2);
+
 
 #endif 

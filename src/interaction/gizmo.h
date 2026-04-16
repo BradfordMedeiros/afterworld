@@ -99,4 +99,9 @@ void handleScroll(std::set<objid>& textureScrollObjIds);
 
 void handleCollisionBouncepad(objid obj1, objid obj2, glm::vec3 normal);
 
+void handleKillplaneCollision(objid obj1, objid obj2);
+void handleRemoveKillplaneCollision(objid obj1);
+void handleRemoveKillplaneCollision(objid obj1, objid obj2);
+bool isInKillPlane(objid id);
+
 #endif 

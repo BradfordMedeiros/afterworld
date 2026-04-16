@@ -10,6 +10,7 @@ extern std::unordered_map<objid, LinkGunObj> linkGunObj;
 extern std::unordered_map<objid, TeleportExit> teleportObjs;
 extern std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 extern std::unordered_map<objid, EmissionObject> emissionObjects;
+extern std::set<objid> objectsInKillplane;
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -488,5 +489,56 @@ void handleCollisionBouncepad(objid obj1, objid obj2, glm::vec3 normal){
         applyImpulseAffectMovement(obj1, impulse);
       }
     }    
+  }
+}
+
+
+
+bool isInKillPlane(objid id){
+  return objectsInKillplane.count(id) > 0;
+}
+void doKillplane(objid id){
+  if (isControlledVehicle(id)){
+    std::cout << "killplane: add: " << id << std::endl;
+    objectsInKillplane.insert(id);
+  }
+}
+
+void handleKillplaneCollision(objid obj1, objid obj2){
+  {
+    auto objAttr1 = getAttrHandle(obj1);
+    auto killplane = getStrAttr(objAttr1, "killplane");
+    if (killplane.has_value()){
+      modlog("killplane 1: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doKillplane(obj2);
+    }
+  }
+   
+  {
+
+    auto objAttr2 = getAttrHandle(obj2);
+    auto killplane = getStrAttr(objAttr2, "killplane");
+    if (killplane.has_value()){
+      modlog("killplane 2: ", gameapi -> getGameObjNameForId(obj1).value() + ", " + gameapi -> getGameObjNameForId(obj2).value());
+      doKillplane(obj1);
+    }
+  }
+}
+
+void handleRemoveKillplaneCollision(objid obj1){
+  if (objectsInKillplane.count(obj1) > 0){
+    std::cout << "killplane: rm: " << obj1 << std::endl;
+    objectsInKillplane.erase(obj1);    
+  }
+}
+
+void handleRemoveKillplaneCollision(objid obj1, objid obj2){
+  if (objectsInKillplane.count(obj1) > 0){
+    std::cout << "killplane: rm: " << obj1 << std::endl;
+    objectsInKillplane.erase(obj1);
+  }
+  if (objectsInKillplane.count(obj2) > 0){
+    std::cout << "killplane: rm: " << obj2 << std::endl;
+    objectsInKillplane.erase(obj2);
   }
 }
