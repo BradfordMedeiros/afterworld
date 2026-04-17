@@ -812,3 +812,10 @@ void exitVehicleEntity(int playerIndex, objid vehicleId, objid id){
   exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
   getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
 }
+
+void applyScreenshake(int playerIndex, glm::vec3 impulse){
+  if (hasOption("no-shake")){
+    return;
+  }
+  getControlledPlayer(playerIndex).shakeImpulse = impulse;
+}

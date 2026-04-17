@@ -9,6 +9,7 @@
 #include "../ai/ai.h"
 #include "../curves.h"
 #include "../resources/layer.h"
+#include "../options.h"
 
 struct ControlledPlayer {
 	int viewport; // this is used interchangably with the player index (eg player 1, 2, etc)
@@ -119,5 +120,7 @@ bool isGunZoomed(objid id);
 
 void enterVehicleEntity(int playerIndex, objid vehicleId, objid id);
 void exitVehicleEntity(int playerIndex, objid vehicleId, objid id);
+
+void applyScreenshake(int playerIndex, glm::vec3 impulse);
 
 #endif 

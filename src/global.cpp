@@ -276,3 +276,7 @@ std::optional<BallComponentOptions> showBallOptions(){
 void setShowBallOptions(std::optional<BallComponentOptions> ballOptions){
   getGlobalState().ballOptions = ballOptions;
 }
+
+glm::vec2 getMouseVelocity(){
+  return getGlobalState().mouseVelocity;
+}

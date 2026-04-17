@@ -106,13 +106,6 @@ void onMenu2ContinueClick(){
 }
 
 
-void applyScreenshake(int playerIndex, glm::vec3 impulse){
-  if (hasOption("no-shake")){
-    return;
-  }
-  getControlledPlayer(playerIndex).shakeImpulse = impulse;
-}
-
 void setScenarioOptions(ScenarioOptions& options){
   gameapi -> setWorldState({ 
     ObjectValue {
@@ -136,8 +129,6 @@ void setScenarioOptions(ScenarioOptions& options){
   modlog("set scenario options: skyboxColor", print(options.skyboxColor));
   modlog("set scenario options: skybox", print(options.skybox));
 }
-
-
 
 
 std::optional<ZoomOptions> zoomOptions;
@@ -544,8 +535,6 @@ std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vect
   return std::nullopt;
 }
 
-
-
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
 }
@@ -642,10 +631,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     modlog("router scene route load", sceneManagement.managedScene.value().path);
     startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
   }
-}
-
-glm::vec2 getMouseVelocity(){
-  return getGlobalState().mouseVelocity;
 }
 
 void setNoClipMode(bool enable){
@@ -938,7 +923,6 @@ UiStateContext uiStateContext {
   .uiState = createUiState(),
 };
 
-
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
     setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
@@ -966,7 +950,6 @@ AIInterface aiInterface {
   },
   .doDamage = doDamageMessage,
 };
-
 
 void zoomIntoArcade(std::optional<objid> id, int playerIndex){
   bool zoomIn = id.has_value();
