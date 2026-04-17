@@ -1,4 +1,4 @@
-#include "./scene_arcade.h"
+#include "./interfaces.h"
 
 std::vector<objid> ensureSoundLoadedBySceneId(objid id, objid sceneId, std::vector<std::string>& soundsToLoad);
 void unloadManagedSounds(objid id);
@@ -33,3 +33,4 @@ ArcadeApi createArcadeApi(){
   };
   return arcadeApi;
 }
+

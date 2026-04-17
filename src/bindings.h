@@ -21,7 +21,6 @@
 #include "./interaction/terminal.h"
 #include "./interaction/cutscene.h"
 #include "./interaction/in-game-ui.h"
-#include "./arcade/scene_arcade.h"
 #include "./debug.h"
 #include "./gameworld/weather.h"
 #include "./resources/sound.h"
@@ -47,6 +46,8 @@
 #include "./compile.h"
 #include "./arcade/arcade.h"
 #include "./scene_routing.h"
+#include "./interfaces.h"
+
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 std::vector<const char*> getAdditionalPathsToValidate();

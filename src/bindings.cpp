@@ -36,7 +36,7 @@ std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 std::unordered_map<objid, EmissionObject> emissionObjects;
 std::unordered_map<objid, HealthColorObject> healthColorObjects;
 std::unordered_map<objid, ExplosionObj> explosionObjects;
-UiData* uiData = NULL;
+UiData* uiDataPtr = NULL;
 std::optional<glm::vec3> oldGravity;  // wtf?
 ArcadeApi arcadeApi = createArcadeApi();
 std::unordered_map<objid, ExtraSurfaceVelocity> extraVelocity;
@@ -62,24 +62,17 @@ struct SceneManagement {
   int changedLevelFrame;
 };
 
-struct GameState {
-  SceneManagement sceneManagement;
-  MovementEntityData movementEntities;
+SceneManagement sceneManagement;
+MovementEntityData movementEntities;
+std::optional<std::string> dragSelect;
+std::optional<glm::vec2> selecting;
+UiData uiData;
+DebugPrintType printType;
 
-  std::optional<std::string> dragSelect;
-  std::optional<glm::vec2> selecting;
-
-  UiData uiData;
-
-  DebugPrintType printType;
-};
-
-GameState* gameStatePtr = NULL;
 std::optional<std::string> activeLevel;
-
-MovementEntityData& getMovementData(){
-  return gameStatePtr -> movementEntities;
-}
+int numberOfPlayers = 1;
+int mainPlayerControl = 0;
+std::vector<ControlledPlayer> players; // TODO static state
 
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
   std::cout << "lifetimeObject add: " << gameapi -> getGameObjNameForId(id).value() << ", hint = " << hint << std::endl;
@@ -132,7 +125,7 @@ void setTotalZoom(float multiplier, objid id){
     zoomOptions = std::nullopt;
   }
   setZoom(multiplier, isZoomedIn);
-  setZoomSensitivity(getMovementData(), multiplier, id);
+  setZoomSensitivity(movementEntities, multiplier, id);
   playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
 }
 
@@ -329,8 +322,8 @@ void setNoClipMode(bool enable){
 }
 
 std::optional<objid> activeSceneForSelected(){
-  if(gameStatePtr -> sceneManagement.managedScene.has_value() && gameStatePtr -> sceneManagement.managedScene.value().id.has_value()){
-    return gameStatePtr -> sceneManagement.managedScene.value().id.value();
+  if(sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().id.has_value()){
+    return sceneManagement.managedScene.value().id.value();
   }
 
   auto selected = gameapi -> selected();
@@ -342,8 +335,8 @@ std::optional<objid> activeSceneForSelected(){
   return sceneId;
 }
 
-UiContext getUiContext(GameState& gameState){
-  std::function<void()> pause = [&gameState]() -> void { 
+UiContext getUiContext(){
+  std::function<void()> pause = []() -> void { 
     setPausedMode(true); 
   };
   std::function<void()> resume = []() -> void { 
@@ -376,27 +369,27 @@ UiContext getUiContext(GameState& gameState){
    .showKeyboard = []() -> bool { 
       return getGlobalState().showKeyboard;
    },
-   .debugConfig = [&gameState]() -> std::optional<DebugConfig> {
-      if (gameState.printType == DEBUG_GLOBAL){
+   .debugConfig = []() -> std::optional<DebugConfig> {
+      if (printType == DEBUG_GLOBAL){
         return debugPrintGlobal();
       }
-      if (gameState.printType == DEBUG_INVENTORY){
+      if (printType == DEBUG_INVENTORY){
         debugPrintInventory(scopenameToInventory);
         return std::nullopt;
       }
-      if (gameState.printType == DEBUG_GAMETYPE){
+      if (printType == DEBUG_GAMETYPE){
         return debugPrintGametypes(gametypeSystem);
       }
-      if (gameState.printType == DEBUG_AI){
+      if (printType == DEBUG_AI){
         return debugPrintAi(aiData);
       }
-      if (gameState.printType == DEBUG_HEALTH){
+      if (printType == DEBUG_HEALTH){
         return debugPrintHealth();
       }
-      if (gameState.printType == DEBUG_ACTIVEPLAYER){
+      if (printType == DEBUG_ACTIVEPLAYER){
         return debugPrintActivePlayer(getDefaultPlayerIndex());
       }
-      if (gameState.printType == DEBUG_ANIMATION){
+      if (printType == DEBUG_ANIMATION){
         return debugPrintAnimations(getDefaultPlayerIndex());
       }
       return std::nullopt;
@@ -453,16 +446,16 @@ UiContext getUiContext(GameState& gameState){
       };
    },
    .levels = LevelUIInterface {
-      .goToLevel = [&gameState](Level& level) -> void {
+      .goToLevel = [](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);
         goToLevel(level.name);
       },
       .goToMenu = []() -> void {
-        auto gamemodeIntro = std::get_if<GameModeIntro>(&gameStatePtr -> sceneManagement.managedScene.value().gameMode);
-        auto gamemodeBall = std::get_if<GameModeBall>(&gameStatePtr -> sceneManagement.managedScene.value().gameMode);
+        auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);
+        auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
         if (gamemodeIntro){
           goToLevel("ballselect");
-          startIntroMode(gameStatePtr -> sceneManagement.managedScene.value().id.value());
+          startIntroMode(sceneManagement.managedScene.value().id.value());
         }else if (gamemodeBall){
           goToLevel("ballselect");
           ballModeLevelSelect();
@@ -490,7 +483,7 @@ UiContext getUiContext(GameState& gameState){
       },
     },
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
-    .loadScene = [&gameState](std::string scene) -> void {
+    .loadScene = [](std::string scene) -> void {
       modassert(false, "load scene not yet implemented");
       goToLevel(scene);
     },
@@ -510,7 +503,7 @@ UiContext getUiContext(GameState& gameState){
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
     },
     .consoleInterface = ConsoleInterface {
-      .setNormalMode = [&gameState]() -> void {
+      .setNormalMode = []() -> void {
         auto wasInEditorMode = !isInGameMode();
         setActivePlayerEditorMode(false, getDefaultPlayerIndex());
         setShowFreecam(false);
@@ -519,13 +512,13 @@ UiContext getUiContext(GameState& gameState){
 
         if (wasInEditorMode){
           // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
-          gameapi -> schedule(0, true, 0, NULL, [&gameState](void*) -> void {
+          gameapi -> schedule(0, true, 0, NULL, [](void*) -> void {
             //startLevel(gameState.sceneManagement.managedScene.value());
           });          
         }
 
       },
-      .setShowEditor = [&gameState]() -> void {
+      .setShowEditor = []() -> void {
         setActivePlayerEditorMode(true, getDefaultPlayerIndex());
         setShowFreecam(false);
         setShowEditor(true);
@@ -533,8 +526,8 @@ UiContext getUiContext(GameState& gameState){
 
         bool liveEdit = false;
         if (!liveEdit){
-          if (gameState.sceneManagement.managedScene.value().id.has_value()){
-            gameapi -> resetScene(gameState.sceneManagement.managedScene.value().id.value());
+          if (sceneManagement.managedScene.value().id.has_value()){
+            gameapi -> resetScene(sceneManagement.managedScene.value().id.value());
           }
         }
 
@@ -546,7 +539,7 @@ UiContext getUiContext(GameState& gameState){
       },
       .setNoClip = setNoClipMode,
       .setBackground = setMenuBackground,
-      .goToLevel = [&gameState](std::optional<std::string> level) -> void {
+      .goToLevel = [](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
         goToLevel(level.value());
       },
@@ -568,10 +561,10 @@ UiContext getUiContext(GameState& gameState){
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
       },
-      .setShowDebugUi = [&gameState](DebugPrintType printType) -> void {
-        gameState.printType = printType;
+      .setShowDebugUi = [](DebugPrintType newPrintType) -> void {
+        printType = newPrintType;
       },
-      .showWeapon = [&gameState](bool showWeapon) -> void {
+      .showWeapon = [](bool showWeapon) -> void {
         modlog("console weapons", std::string("show weapon: ") + print(showWeapon));
         setShowWeaponModel(showWeapon);
       },
@@ -601,16 +594,16 @@ UiStateContext uiStateContext {
 
 AIInterface aiInterface {
   .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
-    setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, MovementRequest {
+    setEntityTargetLocation(movementEntities, agentId, MovementRequest {
       .position = targetPosition,
       .speed = speed * 0.6f,
     });
   },
   .stopMoving = [](objid agentId) -> void {
-    setEntityTargetLocation(gameStatePtr -> movementEntities, agentId, std::nullopt);
+    setEntityTargetLocation(movementEntities, agentId, std::nullopt);
   },
   .look = [](objid agentId, glm::quat direction) -> void {
-    setEntityTargetRotation(gameStatePtr -> movementEntities, agentId, direction);
+    setEntityTargetRotation(movementEntities, agentId, direction);
   },
   .fireGun = [](objid agentId) -> void {
     fireGun(weapons, agentId);
@@ -619,7 +612,7 @@ AIInterface aiInterface {
     maybeChangeGun(getWeaponState(weapons, agentId), gun,  agentId /*inventory */);
   },
   .changeTraits = [](objid agentId, const char* profile) -> void {
-    changeMovementEntityType(getMovementData(), agentId, profile);
+    changeMovementEntityType(movementEntities, agentId, profile);
   },
   .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
     gameapi -> playAnimation(agentId, animation, animationType, std::nullopt, 0, false, std::nullopt);
@@ -655,7 +648,7 @@ void objectRemoved(objid idRemoved){
     }
   }
 
-  maybeRemoveControllableEntity(aiData, gameStatePtr -> movementEntities, idRemoved);
+  maybeRemoveControllableEntity(aiData, movementEntities, idRemoved);
 
   onActivePlayerRemoved(idRemoved);
   onMainUiObjectsChanged();
@@ -672,8 +665,6 @@ void objectRemoved(objid idRemoved){
 }
 
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
-  GameState* gameState = static_cast<GameState*>(data);
-
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
   if (action == 1){
@@ -695,7 +686,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     }
 
     if (!getGlobalState().disableUiInput){
-      onMainUiKeyPress(uiStateContext, gameState -> uiData.uiCallbacks, key, scancode, action, mods);
+      onMainUiKeyPress(uiStateContext, uiData.uiCallbacks, key, scancode, action, mods);
     }
     onInGameUiKeyCallback(key, scancode, action, mods);
   }
@@ -717,7 +708,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     }
   }
   if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
-    onMovementKeyCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), key, action, controlledPlayer.viewport);
+    onMovementKeyCallback(movementEntities, movement, controlledPlayer.playerId.value(), key, action, controlledPlayer.viewport);
   }
 
   if (key == 'Q' && action == 0) { 
@@ -753,12 +744,10 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 }
 
 void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
-  GameState* gameState = static_cast<GameState*>(data);
-
   if (!getGlobalState().disableUiInput){
-    onMainUiMousePress(uiStateContext, gameState -> uiData.uiContext, uiData -> uiCallbacks, button, action, getGlobalState().selectedId);
+    onMainUiMousePress(uiStateContext, uiData.uiContext, uiDataPtr -> uiCallbacks, button, action, getGlobalState().selectedId);
   }
-  onInGameUiMouseCallback(uiStateContext, uiData -> uiContext, inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
+  onInGameUiMouseCallback(uiStateContext, uiDataPtr -> uiContext, inGameUi, button, action, getGlobalState().lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
   onVehicleMouseClick(vehicles, button, action, mods);
 
@@ -766,14 +755,14 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
 
   if (button == 1){
     if (action == 0){
-      gameState -> selecting = std::nullopt;
+      selecting = std::nullopt;
       getGlobalState().rightMouseDown = false;
     }else if (action == 1){
-      gameState -> selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+      selecting = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
       getGlobalState().rightMouseDown = true;
       if (false){
         ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-        raycastFromCameraAndMoveTo(gameState -> movementEntities, controlledPlayer.playerId.value(), 0);
+        raycastFromCameraAndMoveTo(movementEntities, controlledPlayer.playerId.value(), 0);
       }
       nextTerminalPage();
     }
@@ -805,10 +794,8 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
 }
 
 void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float xNdc, float yNdc, int playerPort){ 
-  GameState* gameState = static_cast<GameState*>(data);
-
   if (!getGlobalState().disableUiInput){
-    onMainUiMouseMove(uiStateContext,  gameState -> uiData.uiContext, xPos, yPos, xNdc, yNdc);
+    onMainUiMouseMove(uiStateContext,  uiData.uiContext, xPos, yPos, xNdc, yNdc);
   }
   onInGameUiMouseMoveCallback(inGameUi, xPos, yPos, xNdc, yNdc);
   onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
@@ -828,7 +815,7 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
     if (controlledPlayer.playerId.has_value() && !isPlayerControlDisabled(playerIndex)){
       //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
       glm::vec2 smoothedMovement = glm::vec2(xPos, yPos);
-      onMovementMouseMoveCallback(gameState -> movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y, playerIndex);
+      onMovementMouseMoveCallback(movementEntities, movement, controlledPlayer.playerId.value(), smoothedMovement.x, smoothedMovement.y, playerIndex);
     }
   }
 }
@@ -870,15 +857,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   }
 
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    GameState* gameState = new GameState;
-    gameStatePtr = gameState;
-
     weapons = createWeapons();
 
-    gameState -> sceneManagement = createSceneManagement();
-    gameState -> movementEntities = MovementEntityData {};
-    gameState -> selecting = std::nullopt;
-    gameState -> uiData = {
+    sceneManagement = createSceneManagement();
+    movementEntities = MovementEntityData {};
+    selecting = std::nullopt;
+    uiData = {
       .uiContext = {},
       .uiCallbacks = HandlerFns {
         .handlerFns = {},
@@ -891,15 +875,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     initGlobal();
     setGlobalModeValues(getGlobalState().showEditor);
-    gameState -> dragSelect = std::nullopt;
-    gameState -> uiData.uiContext = getUiContext(*gameState);
+    dragSelect = std::nullopt;
+    uiData.uiContext = getUiContext();
 
     levelProgresses = loadLevelProgress();
 
     auto args = gameapi -> getArgs();
     if (args.find("dragselect") != args.end()){
-      gameState -> dragSelect = args.at("dragselect");
-      modlog("bindings", std::string("drag select value: ") + gameState -> dragSelect.value());
+      dragSelect = args.at("dragselect");
+      modlog("bindings", std::string("drag select value: ") + dragSelect.value());
     }
 
     if (args.find("coop") != args.end()){
@@ -911,22 +895,22 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setDrawDebugVector(true);
     }
 
-    gameState -> printType = DEBUG_NONE;
+    printType = DEBUG_NONE;
 
     if (getArgChoice("print-type", "inventory")){
-      gameState -> printType = DEBUG_INVENTORY;
+      printType = DEBUG_INVENTORY;
     }else if (getArgChoice("print-type", "global")){
-      gameState -> printType = DEBUG_GLOBAL;
+      printType = DEBUG_GLOBAL;
     }else if (getArgChoice("print-type", "gametype")){
-      gameState -> printType = DEBUG_GAMETYPE;
+      printType = DEBUG_GAMETYPE;
     }else if (getArgChoice("print-type", "ai")){
-      gameState -> printType = DEBUG_AI;
+      printType = DEBUG_AI;
     }else if (getArgChoice("print-type", "health")){
-      gameState -> printType = DEBUG_HEALTH;
+      printType = DEBUG_HEALTH;
     }else if (getArgChoice("print-type", "active")){
-      gameState -> printType = DEBUG_ACTIVEPLAYER;
+      printType = DEBUG_ACTIVEPLAYER;
     }else if (getArgChoice("print-type", "animation")){
-      gameState -> printType = DEBUG_ANIMATION;
+      printType = DEBUG_ANIMATION;
     }
     
     if (args.find("uiselection-texture") != args.end()){
@@ -942,10 +926,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     initSettings();
     registerOnRouteChanged(
       getMainRouterHistory(),
-      [gameState]() -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
+      []() -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
         auto currentPath = fullHistoryStr();
         auto queryParams = historyParams();
-        onSceneRouteChange(gameState -> sceneManagement, currentPath, queryParams);
+        onSceneRouteChange(sceneManagement, currentPath, queryParams);
         modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
       }
     );
@@ -990,7 +974,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   
     addAnimationController(animationController);
 
-    uiData = &gameState -> uiData;
+    uiDataPtr = &uiData;
 
     handleOnAddedTagsInitial(); // not sure i actually need this since are there any objects added?
     generateWaterMesh();
@@ -1001,18 +985,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
 
-    return gameState;
+    return NULL;
   };
 
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    GameState* gameState = static_cast<GameState*>(data);
     removeAllMovementCores();  // is this pointless?
-    delete gameState;
   };
 
-  binding.onFrame = [](int32_t id, void* data) -> void {
-    GameState* gameState = static_cast<GameState*>(data);
- 
+  binding.onFrame = [](int32_t id, void* data) -> void { 
     // CONTROLS ///////////////////////////
     gameapi -> idAtCoordAsync(getGlobalState().xNdc, getGlobalState().yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().selectedId = selectedId;
@@ -1025,7 +1005,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     });
 
     auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
-    if (gameState -> dragSelect.has_value() && gameState -> selecting.has_value()){
+    if (dragSelect.has_value() && selecting.has_value()){
       //selectWithBorder(gameState -> selecting.value(), glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc));
     }
 
@@ -1055,7 +1035,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           });
         }
 
-        auto uiUpdate = onMovementFrame(gameState -> movementEntities, movement, isGunZoomed, disableTpsMesh, entityUpdates, activePlayers);
+        auto uiUpdate = onMovementFrame(movementEntities, movement, isGunZoomed, disableTpsMesh, entityUpdates, activePlayers);
         setUiSpeed(uiUpdate.velocity, false ? uiUpdate.lookVelocity : std::nullopt);
       }
 
@@ -1152,7 +1132,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   
         /// temp code 
         // TODO multiviewport sound
-        ensureAmbientSound(cameraPos.position, gameStatePtr -> sceneManagement.changedLevelFrame, gameStatePtr -> sceneManagement.managedScene.has_value());
+        ensureAmbientSound(cameraPos.position, sceneManagement.changedLevelFrame, sceneManagement.managedScene.has_value());
       }
       debugOnFrame();
     }
@@ -1177,10 +1157,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
       //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
       std::optional<glm::vec2> mainUiCursorCoord;
-      gameState -> uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
-      modassert(uiData, "uiData NULL");
+      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiDataPtr -> uiContext, getGlobalState().selectedId, std::nullopt, mainUiCursorCoord);
+      modassert(uiDataPtr, "uiDataPtr NULL");
     
-      onInGameUiFrame(uiStateContext, inGameUi, uiData->uiContext, std::nullopt, ndiCoord);
+      onInGameUiFrame(uiStateContext, inGameUi, uiDataPtr->uiContext, std::nullopt, ndiCoord);
     
       if (isInGameMode()){
         std::optional<UiHealth> uiHealth;
@@ -1235,7 +1215,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");
-    GameState* gameState = static_cast<GameState*>(data);
 
     auto& allPlayers = getPlayers();
     for (auto& player : allPlayers){
@@ -1244,10 +1223,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       if (activePlayer.has_value()){
         auto id = activePlayer.value();
-        if (getMovementData().movementEntities.find(id) == getMovementData().movementEntities.end()){
+        if (movementEntities.movementEntities.find(id) == movementEntities.movementEntities.end()){
           continue;
         }
-        MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+        MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 
         const float shakeStiffness = 100.f;
         const float shakeDamping = 20.f;
@@ -1330,8 +1309,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    GameState* gameState = static_cast<GameState*>(data);
-
     if (key == "save-gun"){
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       saveGunTransform(getWeaponState(weapons, controlledPlayer.playerId.value()).weaponValues);
@@ -1342,7 +1319,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       return;
     }
     if (key == "reload-config:levels"){
-      gameState -> sceneManagement.levels = loadLevels();
+      sceneManagement.levels = loadLevels();
       return;
     }
 
@@ -1498,17 +1475,16 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     auto scrollCallback = remapScrollCallback(rawAmount);
 
     if (!getGlobalState().disableUiInput){
-      onMainUiScroll(uiStateContext, uiData->uiContext, scrollCallback.amount);
+      onMainUiScroll(uiStateContext, uiDataPtr->uiContext, scrollCallback.amount);
     }
     onInGameUiScrollCallback(inGameUi, scrollCallback.amount);
     onMovementScrollCallback(movement, scrollCallback.amount, scrollCallback.playerPort);
   };
 
   binding.onObjectAdded = [](int32_t _, void* data, int32_t idAdded) -> void {
-    GameState* gameState = static_cast<GameState*>(data);
     modlog("objchange onObjectAdded", gameapi -> getGameObjNameForId(idAdded).value());
 
-    onAddControllableEntity(aiData, gameStatePtr -> movementEntities, idAdded);
+    onAddControllableEntity(aiData, movementEntities, idAdded);
     handleOnAddedTags(idAdded);
 
     onMainUiObjectsChanged();

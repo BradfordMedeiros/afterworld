@@ -5,17 +5,15 @@ extern Weapons weapons;
 extern Movement movement;
 extern Vehicles vehicles;
 
-MovementEntityData& getMovementData();
 void objectRemoved(objid idRemoved);
-std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 
 extern std::unordered_map<objid, ControllableEntity> controllableEntities;  // static-state extern
 extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
+extern MovementEntityData movementEntities;
 
-int numberOfPlayers = 1;
-int mainPlayerControl = 0;
-
-std::vector<ControlledPlayer> players; // TODO static state
+extern int numberOfPlayers;
+extern int mainPlayerControl;
+extern std::vector<ControlledPlayer> players; // TODO static state
 
 void addPlayerPort(int playerIndex){
 	ControlledPlayer player {
@@ -281,7 +279,7 @@ void setIsAlive(objid id, bool alive){
 	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setIsAlive for unregistered controllableEntity: ") + std::to_string(id));
 	controllableEntities.at(id).isAlive = alive;
 	//maybeDisableAi(aiData, id.value());
-	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	movementEntity.movementState.alive = alive;
 }
 
@@ -359,7 +357,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 }
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-  setActivePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId), playerIndex);
+  setActivePlayer(movement, weapons, aiData, getNextEntity(movementEntities, controlledPlayer.playerId), playerIndex);
 }
 
 void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex){
@@ -388,7 +386,7 @@ void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::op
 }
 void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	observePlayer(movement, weapons, aiData, getNextEntity(getMovementData(), controlledPlayer.playerId), playerIndex);
+	observePlayer(movement, weapons, aiData, getNextEntity(movementEntities, controlledPlayer.playerId), playerIndex);
 }
 
 int getDefaultPlayerIndex(){
@@ -444,7 +442,7 @@ std::optional<bool> activePlayerAlive(int playerIndex){
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
-  auto alive = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.alive;
+  auto alive = movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState.alive;
   return alive;
 }
 std::optional<bool> activePlayerFalling(int playerIndex){
@@ -452,11 +450,11 @@ std::optional<bool> activePlayerFalling(int playerIndex){
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
-  auto falling = getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.falling;
+  auto falling = movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState.falling;
   return falling;
 }
 void setIsFalling(objid id, bool falling){
-	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	movementEntity.movementState.falling = falling;
 }
 
@@ -466,10 +464,10 @@ std::optional<bool> activePlayerReloading(int playerIndex){
 	if (!controlledPlayer.playerId.has_value()){
 		return std::nullopt;
 	}
-	return isReloading(getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState);
+	return isReloading(movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState);
 }
 void setIsReloading(objid id, bool reloading){
-	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	if (!reloading){
 		movementEntity.movementState.reloading = std::nullopt;
 	}else{
@@ -517,7 +515,7 @@ void killActivePlayer(int playerIndex){
 
 glm::vec3 getPlayerVelocity(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-  return getMovementData().movementEntities.at(controlledPlayer.playerId.value()).movementState.velocity;
+  return movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState.velocity;
 }
 
 std::optional<glm::vec3> getActivePlayerPosition(int playerIndex){
@@ -539,7 +537,7 @@ std::optional<glm::quat> getActivePlayerRotation(int playerIndex){
 FiringTransform getFireTransform(objid id, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
-	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 
 	if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id)){ // only use the third person code for the active player
 		// this 0 out only works if these vectors are parallel, otherwise would have to solve the parametric eqtns 
@@ -567,7 +565,7 @@ WeaponEntityData getWeaponEntityData(objid id){
 	int playerIndex = getDefaultPlayerIndex();
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
-	MovementEntity& movementEntity = getMovementData().movementEntities.at(id);
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
   return WeaponEntityData {
     .inventory = id,
     .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
@@ -650,7 +648,7 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 	  gameapi -> setGameObjectPosition(id, pos.value(), true, Hint{ .hint = "[gamelogic] - reenableEntity" });
 	}
 	if (rot.has_value()){
-		setMovementEntityRotation(getMovementData(), id, rot.value());
+		setMovementEntityRotation(movementEntities, id, rot.value());
 	}
 }
 
