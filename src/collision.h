@@ -2,20 +2,7 @@
 #define MOD_AFTERWORLD_COLLISION
 
 #include "./util.h"
-#include "./resources/resources.h"
-#include "./core/inventory.h"
-#include "./director/director.h"
 
 void handleCollision(objid obj1, objid obj2, std::string attrForValue, std::string attrForKey, std::string removeKey);
-
-void handleInventoryOnCollision(int32_t obj1, int32_t obj2);
-
-void handleTriggerZone(int32_t obj1, int32_t obj2);
-void handleOnTriggerEnter(objid obj1, objid obj2);
-void handleOnTriggerExit(objid obj1, objid obj2);
-void handleOnTriggerRemove(objid triggerZone);
-
-void handlePowerupCollision(int32_t obj1, int32_t obj2);
-
 
 #endif 

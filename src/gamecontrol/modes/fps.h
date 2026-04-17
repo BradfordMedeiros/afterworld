@@ -10,6 +10,7 @@
 #include "../../interaction/cutscene.h"
 #include "../../collision.h"
 #include "../entity.h"
+#include "../../director/director.h"
 
 void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePlayer);
 void stopFpsMode();
