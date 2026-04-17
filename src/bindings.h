@@ -46,6 +46,7 @@
 #include "./options.h"
 #include "./compile.h"
 #include "./arcade/arcade.h"
+#include "./scene_routing.h"
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
 std::vector<const char*> getAdditionalPathsToValidate();
