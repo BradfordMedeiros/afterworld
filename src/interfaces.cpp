@@ -5,6 +5,8 @@ void unloadManagedSounds(objid id);
 void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::string> textures);
 void unloadManagedTexturesLoaded(objid id);
 
+extern MovementEntityData movementEntities;
+
 ArcadeApi createArcadeApi(){
   ArcadeApi arcadeApi {
     .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
@@ -34,3 +36,30 @@ ArcadeApi createArcadeApi(){
   return arcadeApi;
 }
 
+AIInterface aiInterface {
+  .move = [](objid agentId, glm::vec3 targetPosition, float speed) -> void {
+    setEntityTargetLocation(movementEntities, agentId, MovementRequest {
+      .position = targetPosition,
+      .speed = speed * 0.6f,
+    });
+  },
+  .stopMoving = [](objid agentId) -> void {
+    setEntityTargetLocation(movementEntities, agentId, std::nullopt);
+  },
+  .look = [](objid agentId, glm::quat direction) -> void {
+    setEntityTargetRotation(movementEntities, agentId, direction);
+  },
+  .fireGun = [](objid agentId) -> void {
+    fireGun(weapons, agentId);
+  },
+  .changeGun = [](objid agentId, const char* gun) -> void {
+    maybeChangeGun(getWeaponState(weapons, agentId), gun,  agentId /*inventory */);
+  },
+  .changeTraits = [](objid agentId, const char* profile) -> void {
+    changeMovementEntityType(movementEntities, agentId, profile);
+  },
+  .playAnimation = [](objid agentId, const char* animation, AnimationType animationType){
+    gameapi -> playAnimation(agentId, animation, animationType, std::nullopt, 0, false, std::nullopt);
+  },
+  .doDamage = doDamageMessage,
+};
