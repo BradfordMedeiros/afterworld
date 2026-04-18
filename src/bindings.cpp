@@ -347,10 +347,8 @@ void goToMenu(){
   auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
   if (gamemodeIntro){
     goToLevel("ballselect");
-    startIntroMode(sceneManagement.managedScene.value().id.value());
   }else if (gamemodeBall){
     goToLevel("ballselect");
-    ballModeLevelSelect();
   }else{
     pushHistory({ "mainmenu" }, true);
   }
