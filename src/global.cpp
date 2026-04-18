@@ -132,13 +132,6 @@ bool isPaused(){
 	return global.routeState.paused;
 }
 
-void enterGameMode(){
-  modassert(false, "enter game mode not yet implemented");
-}
-void exitGameMode(){
-  modassert(false, "exit game mode not yet implemented");
-}
-
 void setRouterGameState(RouteState routeState){
   global.routeState = routeState;
   updateState();

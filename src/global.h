@@ -55,8 +55,6 @@ struct GlobalState {
 
 void setPaused(bool paused);
 bool isPaused();
-void enterGameMode();
-void exitGameMode();
 
 void setRouterGameState(RouteState routeState);
 

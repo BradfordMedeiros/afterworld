@@ -469,8 +469,8 @@ UiContext getUiContext(){
     .worldPlayInterface = WorldPlayInterface {
       .isGameMode = []() -> bool { return getGlobalState().routeState.inGameMode; },
       .isPaused = isPaused,
-      .enterGameMode = enterGameMode,
-      .exitGameMode = exitGameMode,
+      .enterGameMode = []() -> void {},
+      .exitGameMode = []() -> void {},
       .pause = pause,
       .resume = resume,
       .saveScene = []() -> void {
