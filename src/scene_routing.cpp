@@ -197,9 +197,9 @@ std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = {  
         PathAndParams { .path = "playing/*/paused/" }, 
-        PathAndParams { .path = "playing/*/dead/" },
+        PathAndParams { .path = "playing/*/*/" }, 
       },
-      .getInteract = withDefaults(basicInteract(true, true, true)),
+      .getInteract = withDefaults(basicInteract(false, true, true)),
     },
     SceneRouterOptions {
       .paths = { 
@@ -231,7 +231,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .scenarioOptions = std::nullopt,
   },
   SceneRouterPath {
-    .paths = { "playing/*/",  "playing/*/paused/", "playing/*/dead/"},
+    .paths = { "playing/*/",  "playing/*/paused/", "playing/*/*/" },
     .scene = [](std::vector<std::string> params) -> SceneLoadInfo {
       auto sceneFile = levelByShortcutName(params.at(0));
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
