@@ -77,13 +77,10 @@ void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, in
 void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, double xPos, double yPos, float xNdc, float yNdc);
 void onMainUiObjectsChanged();
 void pushHistory(std::vector<std::string> route, bool replace = false);
-void pushHistoryParam(std::string param);
-void rmHistoryParam(std::string param);
 
 
 void popHistory();
 std::string getCurrentPath();
-std::vector<std::string> historyParams();
 std::string fullHistoryStr();
 std::optional<std::string> getPathParts(int index);
 void sendUiAlert(std::string message);

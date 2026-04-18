@@ -6,12 +6,11 @@ RouterHistory createHistory(){
 	return RouterHistory {
     .currentRouteTime = 0.f,
     .history = {},
-    .params = {},
     .registerOnRouteChangedFn = std::nullopt,
 	};
 }
 
-void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace, bool removeParams){
+void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace){
   history.currentRouteTime = gameapi -> timeSeconds(true);
   if (replace){
     history.history = {};
@@ -21,9 +20,6 @@ void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool 
   }
   if (history.registerOnRouteChangedFn.has_value()){
     history.registerOnRouteChangedFn.value()();
-  }
-  if (removeParams){
-    history.params = {};
   }
 }
 
@@ -36,34 +32,6 @@ void popHistory(RouterHistory& history){
   if (history.registerOnRouteChangedFn.has_value()){
     history.registerOnRouteChangedFn.value()();
   }  
-}
-
-void pushHistoryParam(RouterHistory& history, std::string param){
-  for (auto &paramVal : history.params){
-    if (paramVal ==  param){
-      return;
-    }
-  }
-  history.params.push_back(param);
-  if (history.registerOnRouteChangedFn.has_value()){
-    history.registerOnRouteChangedFn.value()();
-  }  
-}
-
-void rmHistoryParam(RouterHistory& history, std::string param){
-  auto originalSize = history.params.size();
-  std::vector<std::string> newParams;
-  for (auto &paramVal : history.params){
-    if (paramVal != param){
-      newParams.push_back(paramVal);
-    }
-  }
-  history.params = newParams;
-  if (history.params.size() != originalSize){
-    if (history.registerOnRouteChangedFn.has_value()){
-      history.registerOnRouteChangedFn.value()();
-    }  
-  }
 }
 
 std::string fullHistoryStr(RouterHistory& history){
@@ -79,19 +47,11 @@ std::string fullDebugStr(RouterHistory& history){
   for (auto &path : history.history){
     str += path + "/";
   }
-  str += "#";
-  for (auto &param : history.params){
-    str += param + "/";
-  }
   return str; 
 }
 
 std::string getCurrentPath(RouterHistory& history){
   return history.history.at(history.history.size() - 1);
-}
-
-std::vector<std::string> historyParams(RouterHistory& history){
-  return history.params;
 }
 
 std::optional<std::string> getPathParts(RouterHistory& history, int index){

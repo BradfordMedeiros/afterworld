@@ -3,43 +3,56 @@
 extern CustomApiBindings* gameapi;
 
 
+std::function<InteractState()> basicInteract(bool paused, bool inGameMode, bool showMouse){
+  return [paused, inGameMode, showMouse]() -> InteractState {
+    return InteractState {
+      .paused = paused,
+      .inGameMode = inGameMode,
+      .showMouse = showMouse,
+    };
+  };
+}
+
+std::function<InteractState()> withDefaults(std::function<InteractState()> interact){
+  return [interact]() -> InteractState {
+    if (getGlobalState().showConsole){
+      return InteractState {
+        .paused = true,
+        .inGameMode = false,
+        .showMouse = true,
+      };
+    }
+    if (getGlobalState().showEditor){
+       return InteractState {
+        .paused = false,
+        .inGameMode = true,
+        .showMouse = true,
+      };     
+    }
+    return interact();
+  };
+}
+
+
 SceneRouterOptions defaultRouterOptions(std::string path){
   SceneRouterOptions options {
     .paths = { 
-      PathAndParams { .path = path, .params = {} }, 
+      PathAndParams { .path = path }, 
     },
-    .paused = false,
-    .inGameMode = false,
-    .showMouse = true,
+    .getInteract = basicInteract(false, false, true),
   };
   return options;
 }
 
-bool matchQueryParams(std::vector<std::string>& queryParams, std::vector<std::string>& routerParams){
-  for (auto &routerParam : routerParams){
-    bool foundMatch = false;
-    for (auto &queryParam : queryParams){
-      if (queryParam == routerParam){
-        foundMatch = true;
-        break;
-      }
-    }
-    if (!foundMatch){
-      return false;
-    }
-  }
-  return true;
-}
 
 extern std::vector<SceneRouterOptions> routerPathOptions;
-std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vector<std::string>& queryParams, int * _index){
+std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, int * _index){
   *_index = 0;
   for (int i = 0; i < routerPathOptions.size(); i++){
     auto &routerOptions = routerPathOptions.at(i);
     for (int j = 0; j < routerOptions.paths.size(); j++){
       auto pathMatch = matchPath(path, routerOptions.paths.at(j).path);
-      auto queryParamsMatch = matchQueryParams(queryParams, routerOptions.paths.at(j).params);
-      if (pathMatch.matches && queryParamsMatch){
+      if (pathMatch.matches){
         *_index = i;
         return &routerOptions;
       }
@@ -151,69 +164,55 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
   return std::nullopt;
 }
 
+
+
 std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = { 
-        PathAndParams { .path = "*/", .params = { "console" }}, 
-        PathAndParams { .path = "*/*/", .params = { "console" }}, 
+        PathAndParams { .path = "mainmenu/" }, 
+        PathAndParams { .path = "mainmenu/levelselect/" }, 
+        PathAndParams { .path = "mainmenu/settings/" }, 
       },
-      .paused = true,
-      .inGameMode = false,
-      .showMouse = true,
-    },
-    SceneRouterOptions {
-      .paths = { 
-        PathAndParams { .path = "mainmenu/", .params = {} }, 
-        PathAndParams { .path = "mainmenu/levelselect/", .params = {} }, 
-        PathAndParams { .path = "mainmenu/settings/", .params = {} }, 
-      },
-      .paused = false,
-      .inGameMode = false,
-      .showMouse = true,
+      .getInteract = withDefaults(basicInteract(false, false, true)),
     },
     SceneRouterOptions {
       .paths = {  
-        PathAndParams { .path = "playing/*/", .params = { "editor" } }, 
-        PathAndParams { .path = "playing/*/", .params = { "terminal" } }, 
-        PathAndParams { .path = "playing/*/", .params = { "livemenu" } }, 
+        PathAndParams { .path = "playing/*/" }, 
       },
-      .paused = false,
-      .inGameMode = true,
-      .showMouse = true,
+      .getInteract = withDefaults([]() -> InteractState {
+        if (getGlobalState().showTerminal || getGlobalState().showLiveMenu){
+          return InteractState {
+            .paused = false,
+            .inGameMode = true,
+            .showMouse = true,
+          };
+        }
+        return InteractState {
+            .paused = false,
+            .inGameMode = true,
+            .showMouse = false,
+        };
+      }),
     },
     SceneRouterOptions {
       .paths = {  
-        PathAndParams { .path = "playing/*/", .params = {} }, 
+        PathAndParams { .path = "playing/*/paused/" }, 
+        PathAndParams { .path = "playing/*/dead/" },
       },
-      .paused = false,
-      .inGameMode = true,
-      .showMouse = false,
-    },
-    SceneRouterOptions {
-      .paths = {  
-        PathAndParams { .path = "playing/*/paused/", .params = {} }, 
-        PathAndParams { .path = "playing/*/dead/", .params = {} },
-      },
-      .paused = true,
-      .inGameMode = true,
-      .showMouse = true,
+      .getInteract = withDefaults(basicInteract(true, true, true)),
     },
     SceneRouterOptions {
       .paths = { 
-        PathAndParams { .path = "mainmenu/modelviewer/", .params = {} },  
-        PathAndParams { .path = "mainmenu/particleviewer/", .params = {} },
+        PathAndParams { .path = "mainmenu/modelviewer/" },  
+        PathAndParams { .path = "mainmenu/particleviewer/" },
       },
-      .paused = false,
-      .inGameMode = false,
-      .showMouse = true,
+      .getInteract = withDefaults(basicInteract(false, false, true)),
     },
     SceneRouterOptions {
       .paths = { 
-        PathAndParams { .path = "loading/", .params = {} },  
+        PathAndParams { .path = "loading/" },  
       },
-      .paused = true,
-      .inGameMode = false,
-      .showMouse = true,
+      .getInteract = withDefaults(basicInteract(true, false, true)),
     },
     defaultRouterOptions("debug/"),
     defaultRouterOptions("debug/wheel/"),

@@ -9,16 +9,19 @@
 
 struct PathAndParams {
   std::string path;
-  std::vector<std::string> params;
 };
-struct SceneRouterOptions {
-  std::vector<PathAndParams> paths;
+
+struct InteractState {
   bool paused;
   bool inGameMode;
   bool showMouse;
 };
+struct SceneRouterOptions {
+  std::vector<PathAndParams> paths;
+  std::function<InteractState()> getInteract;
+};
 
-std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, std::vector<std::string>& queryParams, int * _index);
+std::optional<SceneRouterOptions*> getRouterOptions(std::string& path, int * _index);
 
 struct SceneLoadInfo {
   std::string sceneFile;

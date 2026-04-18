@@ -1,8 +1,6 @@
 #include "./global.h"
 
 extern CustomApiBindings* gameapi;
-void pushHistoryParam(std::string);
-void rmHistoryParam(std::string);
 void setActivePlayerEditorMode(bool, int);
 int getDefaultPlayerIndex();
 void persistSave(std::string scope, std::string key, JsonType value);
@@ -155,12 +153,6 @@ void setShowEditor(bool shouldShowEditor){
   modlog("update show editor", std::to_string(shouldShowEditor));
   global.showEditor = shouldShowEditor;
   persistSave("settings", "show-editor", shouldShowEditor);
-
-  if (shouldShowEditor){
-    pushHistoryParam("editor");
-  }else{
-    rmHistoryParam("editor");
-  }
 }
 
 void setShowFreecam(bool isFreeCam){
@@ -219,22 +211,12 @@ void setShowConsole(bool showConsole){
     return;
   }
   global.showConsole = showConsole;
-  if (showConsole){
-    pushHistoryParam("console");
-  }else{
-    rmHistoryParam("console");
-  }
   updateState();
 }
 
 
 
 void setShowTerminal(bool showTerminal){
-  if (showTerminal){
-    pushHistoryParam("terminal");
-  }else{
-    rmHistoryParam("terminal");
-  }
   if (showTerminal == getGlobalState().showTerminal){
     return;
   }
@@ -248,12 +230,6 @@ void setShowTerminal(bool showTerminal){
 }
 
 void setShowLiveMenu(bool showLiveMenu){
-  if (showLiveMenu){
-    pushHistoryParam("livemenu");
-  }else{
-    rmHistoryParam("livemenu");
-  }
-
   getGlobalState().showLiveMenu = showLiveMenu;
   updateState();
 

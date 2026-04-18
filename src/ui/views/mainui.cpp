@@ -689,19 +689,8 @@ void popHistory(){
   popHistory(mainRouterHistory);
 }
 
-void pushHistoryParam(std::string param){
-  pushHistoryParam(mainRouterHistory, param);
-}
-void rmHistoryParam(std::string param){
-  rmHistoryParam(mainRouterHistory, param);
-}
-
 std::string getCurrentPath(){
   return getCurrentPath(mainRouterHistory);
-}
-
-std::vector<std::string> historyParams(){
-  return historyParams(mainRouterHistory);
 }
 
 std::string fullHistoryStr(){

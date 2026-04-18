@@ -48,6 +48,7 @@ struct LifeTimeObject {
   std::string hint;
 };
 std::unordered_map<objid, LifeTimeObject> lifetimeObjects;
+std::optional<SceneRouterOptions*> currentRoute;
 
 struct ManagedScene {
   std::optional<objid> id; 
@@ -208,7 +209,8 @@ void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
 }
 
-void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, std::vector<std::string>& queryParams){
+
+void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
   modlog("router scene route", std::string("path is: ") + currentPath);
 
   int currentIndex = 0;
@@ -220,17 +222,12 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   std::optional<SceneLoadInfo> sceneToLoad;
   std::optional<ScenarioOptions> scenarioOptions;
 
-
   int matchedRouterOption = 0;
-  auto routerOptions = getRouterOptions(currentPath, queryParams, &matchedRouterOption);
+  auto routerOptions = getRouterOptions(currentPath, &matchedRouterOption);
+  currentRoute = routerOptions;
+
   modassert(routerOptions.has_value(), std::string("no router options for: ") + currentPath);
   modlog("router", std::string("matched router option: ") + std::to_string(matchedRouterOption));
-  setRouterGameState(RouteState{
-    .paused = routerOptions.value() -> paused,
-    .inGameMode = routerOptions.value() -> inGameMode,
-    .showMouse = routerOptions.value() -> showMouse,
-  });
-  setPaused(routerOptions.value() -> paused);
 
   if (router.has_value() && router.value() -> scene.has_value()){
     sceneToLoad = router.value() -> scene.value()(params);
@@ -593,7 +590,6 @@ UiStateContext uiStateContext {
 };
 
 
-
 void zoomIntoArcade(std::optional<objid> id, int playerIndex){
   bool zoomIn = id.has_value();
   setShowZoomArcade(zoomIn);
@@ -902,8 +898,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getMainRouterHistory(),
       []() -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
         auto currentPath = fullHistoryStr();
-        auto queryParams = historyParams();
-        onSceneRouteChange(sceneManagement, currentPath, queryParams);
+        onSceneRouteChange(sceneManagement, currentPath);
         modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
       }
     );
@@ -984,6 +979,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     onTranslateController(id, data);
+
+    if (currentRoute.has_value()){
+      auto interactState = currentRoute.value() -> getInteract();
+      setRouterGameState(RouteState{
+        .paused = interactState.paused,
+        .inGameMode = interactState.inGameMode,
+        .showMouse = interactState.showMouse,
+      });
+      setPaused(interactState.paused);
+    }
+
 
     if (levelShortcutToLoad.has_value()){
       goToLevel(levelShortcutToLoad.value());
