@@ -11,6 +11,7 @@ GlobalState global {  // static-state
   .showScreenspaceGrid = false,
   .showConsole = false,
   .showKeyboard = false,
+  .showGameOver = false,
   .showGameHud = false,
   .disableHud = false,
   .disableUiInput = false,

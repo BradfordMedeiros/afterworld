@@ -6,6 +6,7 @@
 #include "../components/game/zoom.h"
 #include "../components/game/score.h"
 #include "../components/game/terminal.h"
+#include "./pausemenu.h"
 #include "./ball.h"
 #include "./mainmenu2.h"
 
@@ -17,7 +18,7 @@ struct PlayingOptions {
 	std::optional<BallComponentOptions> ballMode;
 
 	std::optional<MainMenu2Options> menuOptions;
-
+	bool showGameOver;
 
 };
 extern Component playingComponent;

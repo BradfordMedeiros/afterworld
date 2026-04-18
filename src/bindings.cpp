@@ -195,15 +195,6 @@ void togglePauseIfInGame(){
   setPausedMode(!paused);
 }
 
-void maybeDisplayGameOver(){
-  if (allPlayersDead()){
-    auto playingPath = getPathParts(0);
-    bool isPlaying = playingPath.has_value() && playingPath.value() == "playing";
-    if (isPlaying){
-      pushHistory({ "dead" });
-    }
-  }
-}
 
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
@@ -225,6 +216,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   int matchedRouterOption = 0;
   auto routerOptions = getRouterOptions(currentPath, &matchedRouterOption);
   currentRoute = routerOptions;
+
+  // reset state
+
+  getGlobalState().showGameOver = false;
+  ///
 
   modassert(routerOptions.has_value(), std::string("no router options for: ") + currentPath);
   modlog("router", std::string("matched router option: ") + std::to_string(matchedRouterOption));
@@ -332,6 +328,19 @@ std::optional<objid> activeSceneForSelected(){
   return sceneId;
 }
 
+void goToMenu(){
+  auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);
+  auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
+  if (gamemodeIntro){
+    goToLevel("ballselect");
+    startIntroMode(sceneManagement.managedScene.value().id.value());
+  }else if (gamemodeBall){
+    goToLevel("ballselect");
+    ballModeLevelSelect();
+  }else{
+    pushHistory({ "mainmenu" }, true);
+  }
+}
 UiContext getUiContext(){
   std::function<void()> pause = []() -> void { 
     setPausedMode(true); 
@@ -354,6 +363,7 @@ UiContext getUiContext(){
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
+   .showGameOver = []() -> bool { return getGlobalState().showGameOver; },
    .showTerminal = []() -> std::optional<TerminalConfig> {
       if (!terminalInterface.has_value()){
         return std::optional<TerminalConfig>(std::nullopt); 
@@ -447,19 +457,7 @@ UiContext getUiContext(){
         modassert(false, std::string("level ui goToLevel: ") + level.name);
         goToLevel(level.name);
       },
-      .goToMenu = []() -> void {
-        auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);
-        auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
-        if (gamemodeIntro){
-          goToLevel("ballselect");
-          startIntroMode(sceneManagement.managedScene.value().id.value());
-        }else if (gamemodeBall){
-          goToLevel("ballselect");
-          ballModeLevelSelect();
-        }else{
-          pushHistory({ "mainmenu" }, true);
-        }
-      }
+      .goToMenu = goToMenu,
     },
     .pauseInterface = PauseInterface {
       .elapsedTime = []() -> float { return gameapi -> timeSeconds(true) - downTime; },

@@ -1,10 +1,16 @@
 #include "./playing.h"
 
+
 Component playingComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
     modassert(playingOptions, "playing options not defined");
 
+    auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt));
+    if (playingOptions -> showGameOver){
+      auto defaultProps = getDefaultProps();
+      return deadComponent.draw(drawTools, defaultProps);    
+    }
 
     if (playingOptions -> terminalConfig.has_value()){
       Props terminalProps { 

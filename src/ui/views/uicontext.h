@@ -33,6 +33,7 @@ struct UiContext {
   std::function<bool()> showConsole;
   std::function<bool()> showScreenspaceGrid;
   std::function<bool()> showGameHud;
+  std::function<bool()> showGameOver;
   std::function<std::optional<TerminalConfig>()> showTerminal;
   std::function<std::optional<ZoomOptions>()> showZoomOverlay;
   std::function<bool()> showKeyboard;

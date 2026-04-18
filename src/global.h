@@ -19,6 +19,8 @@ struct GlobalState {
   bool showConsole;
   bool showKeyboard;
 
+
+  bool showGameOver;
   bool showGameHud;
   bool disableHud;
 

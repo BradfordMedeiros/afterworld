@@ -275,7 +275,6 @@ void setInShootingMode(objid id, bool shootingMode){
 	controllableEntities.at(id).isInShootingMode = shootingMode;
 }
 
-void maybeDisplayGameOver();
 
 void setIsAlive(objid id, bool alive){
 	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setIsAlive for unregistered controllableEntity: ") + std::to_string(id));
@@ -283,12 +282,10 @@ void setIsAlive(objid id, bool alive){
 	//maybeDisableAi(aiData, id.value());
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	movementEntity.movementState.alive = alive;
-	auto& controlledPlayer = getControlledPlayer(0);  // obviously not for co-op
-	if (controlledPlayer.playerId.has_value()){
-		if (controlledPlayer.playerId.value() == id){
-			maybeDisplayGameOver();
-		}
-	}
+
+  if (allPlayersDead()){
+      getGlobalState().showGameOver = true;
+  }
 }
 
 bool isCamera(objid id){

@@ -8,7 +8,7 @@
 extern Component pauseMenuComponent;
 
 Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext);
-Props deadMenuProps(std::optional<objid> mappingId, UiContext& uiContext);
+Props deadMenuProps(std::optional<objid> mappingId);
 
 #endif
 

@@ -180,6 +180,13 @@ std::vector<SceneRouterOptions> routerPathOptions = {
         PathAndParams { .path = "playing/*/" }, 
       },
       .getInteract = withDefaults([]() -> InteractState {
+        if (getGlobalState().showGameOver){
+          return InteractState {
+            .paused = false,
+            .inGameMode = true,
+            .showMouse = true,
+          };      
+        }
         if (getGlobalState().showTerminal || getGlobalState().showLiveMenu){
           return InteractState {
             .paused = false,
