@@ -799,3 +799,23 @@ DebugConfig debugPrintAnimations(int playerIndex){
   }
   return debugConfig;
 }
+
+DebugConfig debugPrintGlobal(){
+	auto global = getGlobalState();
+  DebugConfig debugConfig { .data = {} };
+  debugConfig.data.push_back({ "showEditor", print(global.showEditor) });
+  debugConfig.data.push_back({ "showConsole", print(global.showConsole) });
+  debugConfig.data.push_back({ "showKeyboard" , print(global.showKeyboard), DebugItem {
+    .text = "TOGGLE",
+    .onClick = []() -> void {
+      toggleKeyboard();
+    },
+  }});
+  debugConfig.data.push_back({ "showGameHud" , print(global.showGameHud) });
+  debugConfig.data.push_back({ "showTerminal" , print(global.showTerminal) });
+  debugConfig.data.push_back({ "disableGameInput", print(global.disableGameInput) });
+  debugConfig.data.push_back({ "routeState.paused", print(global.routeState.paused) });
+  debugConfig.data.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });
+  debugConfig.data.push_back({ "routeState.showMouse", print(global.routeState.showMouse) });
+  return debugConfig;
+}

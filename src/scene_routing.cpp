@@ -204,7 +204,6 @@ std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = {  
         PathAndParams { .path = "playing/*/paused/" }, 
-        PathAndParams { .path = "playing/*/*/" }, 
       },
       .getInteract = withDefaults(basicInteract(false, true, true)),
     },

@@ -80,6 +80,5 @@ void setHudEnabled(bool enableHud);
 std::optional<BallComponentOptions> showBallOptions();
 void setShowBallOptions(std::optional<BallComponentOptions> ballOptions);
 
-DebugConfig debugPrintGlobal();
 
 #endif 

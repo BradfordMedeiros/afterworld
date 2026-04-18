@@ -23,5 +23,6 @@ void simpleOnFrame(std::function<void()> fn, float duration);
 
 void onDebugMessage(std::string& key, std::any& value);
 DebugConfig debugPrintAnimations(int playerIndex);
+DebugConfig debugPrintGlobal();
 
 #endif 

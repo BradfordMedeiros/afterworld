@@ -5,7 +5,12 @@
 #include "./ai/ai.h"
 #include "./core/movement/movement.h"
 #include "./core/health.h"
+#include "./interaction/terminal.h"
+#include "./debug.h"
+#include "./gamecontrol/gametypes/gametypes.h"
 
 ArcadeApi createArcadeApi();
 extern AIInterface aiInterface;
 extern Weapons weapons;
+
+UiContext getUiContext();
