@@ -71,7 +71,6 @@ void updateState();
 GlobalState& getGlobalState();
 void initGlobal();
 void setShowEditor(bool shouldShowEditor);
-void setShowFreecam(bool isFreeCam);
 void toggleKeyboard();
 
 bool leftMouseDown();

@@ -11,6 +11,5 @@
 
 ArcadeApi createArcadeApi();
 extern AIInterface aiInterface;
-extern Weapons weapons;
 
 UiContext getUiContext();

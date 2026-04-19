@@ -6,6 +6,7 @@ void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::strin
 void unloadManagedTexturesLoaded(objid id);
 
 extern MovementEntityData movementEntities;
+extern Weapons weapons;
 
 ArcadeApi createArcadeApi(){
   ArcadeApi arcadeApi {
@@ -244,7 +245,7 @@ UiContext getUiContext(){
       .setNormalMode = []() -> void {
         auto wasInEditorMode = !isInGameMode();
         setActivePlayerEditorMode(false, getDefaultPlayerIndex());
-        setShowFreecam(false);
+        getGlobalState().isFreeCam = false;
         setShowEditor(false);
         setGlobalModeValues(false);
 
@@ -261,7 +262,7 @@ UiContext getUiContext(){
       },
       .setFreeCam = []() -> void {
         setActivePlayerEditorMode(true, getDefaultPlayerIndex());
-        setShowFreecam(true);
+        getGlobalState().isFreeCam = true;
         setShowEditor(false);
       },
       .setNoClip = setNoClipMode,

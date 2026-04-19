@@ -91,9 +91,6 @@ void setShowEditor(bool shouldShowEditor){
   persistSave("settings", "show-editor", shouldShowEditor);
 }
 
-void setShowFreecam(bool isFreeCam){
-  global.isFreeCam = isFreeCam;
-}
 
 void toggleKeyboard(){
   global.systemConfig.showKeyboard = !global.systemConfig.showKeyboard;

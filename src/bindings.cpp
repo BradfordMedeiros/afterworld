@@ -216,7 +216,7 @@ void setGlobalModeValues(bool isEditorMode){
 
 void doToggleShowEditor(){
   setActivePlayerEditorMode(true, getDefaultPlayerIndex());
-  setShowFreecam(false);
+  global.isFreeCam = false;
   setShowEditor(true);
   setGlobalModeValues(true);
 
