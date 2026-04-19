@@ -60,8 +60,6 @@ struct GlobalState {
 
   RouteState routeState;
   bool userRequestedPause;
-
-  std::optional<BallComponentOptions> ballOptions;
 };
 
 bool disableGameInput();
@@ -69,8 +67,6 @@ bool disableGameInput();
 void setPaused(bool paused);
 bool isPaused();
 void updateState();
-
-void setRouterGameState(RouteState routeState);
 
 GlobalState& getGlobalState();
 void initGlobal();

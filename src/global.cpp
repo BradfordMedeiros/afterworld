@@ -8,25 +8,7 @@ void setActivePlayerEditorMode(bool, int);
 int getDefaultPlayerIndex();
 void persistSave(std::string scope, std::string key, JsonType value);
 
-GlobalState global {  // static-state
-  .showEditor = false,
-  .isFreeCam = false,
-  .showGameOver = false,
-  .showGameHud = false,
-  .disableHud = false,
-  .disableUiInput = false,
-  .zoomIntoArcade = false,
-  .showTerminal = false,
-  .showLiveMenu = false,
-  .lastToggleTerminalTime = 0.f,
-
-  .routeState = RouteState {
-    .paused = true,
-    .inGameMode = false,
-    .showMouse = true,
-  },
-  .userRequestedPause = false,
-};
+extern GlobalState global;
 
 bool disableGameInput(){
   auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
@@ -98,10 +80,6 @@ bool isPaused(){
 	return global.userRequestedPause;
 }
 
-void setRouterGameState(RouteState routeState){
-  global.routeState = routeState;
-}
-
 GlobalState& getGlobalState(){
   return global;
 }
@@ -122,7 +100,6 @@ void toggleKeyboard(){
   persistSave("settings", "show-keyboard", global.systemConfig.showKeyboard);
 }
 
-
 void initGlobal(){
   auto args = gameapi -> getArgs();
   if (args.find("godmode") != args.end()){
@@ -133,7 +110,6 @@ void initGlobal(){
   setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
   global.systemConfig.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
 }
-
 
 bool queryConsoleCanEnable(){
   auto query = gameapi -> compileSqlQuery("select console from session", {});

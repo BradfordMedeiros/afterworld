@@ -76,6 +76,26 @@ int numberOfPlayers = 1;
 int mainPlayerControl = 0;
 std::vector<ControlledPlayer> players; // TODO static state
 
+GlobalState global {  // static-state
+  .showEditor = false,
+  .isFreeCam = false,
+  .showGameOver = false,
+  .showGameHud = false,
+  .disableHud = false,
+  .disableUiInput = false,
+  .zoomIntoArcade = false,
+  .showTerminal = false,
+  .showLiveMenu = false,
+  .lastToggleTerminalTime = 0.f,
+
+  .routeState = RouteState {
+    .paused = true,
+    .inGameMode = false,
+    .showMouse = true,
+  },
+  .userRequestedPause = false,
+};
+
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
   std::cout << "lifetimeObject add: " << gameapi -> getGameObjNameForId(id).value() << ", hint = " << hint << std::endl;
   //modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), std::string("already lifetime object: ") + lifetimeObjects.at(id).hint);
@@ -752,11 +772,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     if (currentRoute.has_value()){
       auto interactState = currentRoute.value() -> getInteract();
-      setRouterGameState(RouteState{
+      getGlobalState().routeState = RouteState{
         .paused = interactState.paused,
         .inGameMode = interactState.inGameMode,
         .showMouse = interactState.showMouse || getGlobalState().userRequestedPause,
-      });
+      };
       setPaused(interactState.paused || getGlobalState().userRequestedPause);
     }
     updateState();
