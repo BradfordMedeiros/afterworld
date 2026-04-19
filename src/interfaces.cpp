@@ -159,7 +159,6 @@ UiContext getUiContext(){
       };
       return scoreOptions;
    },
-   .getBallMode = showBallOptions,
    .getMenuOptions = []() -> std::optional<MainMenu2Options> {
       float duration = 0.2f;
 

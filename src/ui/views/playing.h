@@ -12,16 +12,19 @@
 
 struct UiModeNone{};
 struct FpsModeUi {};
-struct BallModeUi {};
+struct BallModeUi {
+	BallComponentOptions ballMode;
+};
 typedef std::variant<UiModeNone, FpsModeUi, BallModeUi> UiMode;
 void changeUiMode(UiMode);
+
+std::optional<BallModeUi*> getBallModeUI();
 
 struct PlayingOptions {
 	bool showHud;
 	std::optional<ZoomOptions> showZoomOverlay;
 	std::optional<ScoreOptions> scoreOptions;
 	std::optional<TerminalConfig> terminalConfig;
-	std::optional<BallComponentOptions> ballMode;
 
 	std::optional<MainMenu2Options> menuOptions;
 	bool showGameOver;

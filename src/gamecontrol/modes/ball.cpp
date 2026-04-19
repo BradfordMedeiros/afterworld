@@ -41,11 +41,7 @@ void ballEndGameplay(EasyCutscene& cutscene){
   waitUntil(cutscene, 0, 2000);
 
   if (finishedThisFrame(cutscene, 0)){
-		setShowBallOptions(
-				BallComponentOptions {
-					.levelComplete = BallLevelComplete{},
-				}
-		);
+  	getBallModeUI().value() -> ballMode.levelComplete = BallLevelComplete{};
   }
 
 	waitFor(cutscene, 1, []() -> bool {
@@ -53,7 +49,6 @@ void ballEndGameplay(EasyCutscene& cutscene){
 	});
 
   run(cutscene, 2, []() -> void {
- 		setShowBallOptions(std::nullopt);
   	goToLevel("ballselect");
   });
 }
@@ -160,27 +155,15 @@ std::optional<objid> getBallId(){
 	  return vehicles.at(0);
 }
 
-void changeUi(bool showBallUi){
-	if (showBallUi){
-		setShowBallOptions(
-			BallComponentOptions {
-				.powerupTexture = "../gameresources/build/textures/ballgame/jump.png",
-			}
-		);
-	}else{
-		setShowBallOptions(std::nullopt);
-	}
-}
 
 void showTimeElapsed(bool shouldShow){
-		if (!showBallOptions().has_value() || !ballStartTime.has_value()){
+		if (!ballStartTime.has_value()){
 			return;
 		}
-		auto ballOptions = showBallOptions().value();
 		if (!shouldShow){
-			ballOptions.elapsedTime = std::nullopt;
+			getBallModeUI().value() -> ballMode.elapsedTime = std::nullopt;
 		}else{
-			ballOptions.elapsedTime = []() -> float {
+			getBallModeUI().value() -> ballMode.elapsedTime = []() -> float {
 				if (finalBallTime.has_value()){
 					return finalBallTime.value();
 				}
@@ -188,21 +171,12 @@ void showTimeElapsed(bool shouldShow){
 			};
 		}
 		
-		setShowBallOptions(ballOptions);
 }
 
 void setPowerupTexture(std::string texture, std::optional<float> startTime, std::optional<float> duration){
-	auto ballOptions = showBallOptions();
-	if (!ballOptions.has_value()){
-		return;
-	}
-	if (ballOptions.has_value()){
-		auto newBallOptions = ballOptions.value();
-		newBallOptions.powerupTexture = texture;
-		newBallOptions.powerupStartTime = startTime;
-		newBallOptions.powerupDuration = duration;
-		setShowBallOptions(newBallOptions);
-	}
+	getBallModeUI().value() -> ballMode.powerupTexture = texture;
+	getBallModeUI().value() -> ballMode.powerupStartTime = startTime;
+	getBallModeUI().value() -> ballMode.powerupDuration = duration;
 }
 
 std::optional<BallPowerupState> getPowerup(){
@@ -261,7 +235,6 @@ void endBallMode(){
 	finalBallTime = std::nullopt;
 
 	setCanExitVehicle(true);
-	setShowBallOptions(std::nullopt);
 	changeGameTypeNone(gametypeSystem);
 	setHudEnabled(true);
 }
@@ -329,7 +302,6 @@ GameTypeInfo getBallMode(){
 	  	modeOptions -> shouldReset = false;
 	  	modeOptions -> didReset = false;
 
-			changeUi(true);
  	   	showTimeElapsed(true);
 
 	    return *modeOptions; 

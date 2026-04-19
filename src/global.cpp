@@ -8,7 +8,6 @@ void setActivePlayerEditorMode(bool, int);
 int getDefaultPlayerIndex();
 void persistSave(std::string scope, std::string key, JsonType value);
 
-
 GlobalState global {  // static-state
   .showEditor = false,
   .isFreeCam = false,
@@ -28,6 +27,19 @@ GlobalState global {  // static-state
   },
   .userRequestedPause = false,
 };
+
+bool leftMouseDown(){
+  return global.control.leftMouseDown;
+}
+bool rightMouseDown(){
+  return global.control.rightMouseDown;
+}
+bool middleMouseDown(){
+  return global.control.middleMouseDown;
+}
+glm::vec2 getMouseVelocity(){
+  return getGlobalState().control.mouseVelocity;
+}
 
 bool disableGameInput(){
   auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
@@ -136,16 +148,6 @@ void initGlobal(){
 }
 
 
-bool leftMouseDown(){
-  return global.control.leftMouseDown;
-}
-bool rightMouseDown(){
-  return global.control.rightMouseDown;
-}
-bool middleMouseDown(){
-  return global.control.middleMouseDown;
-}
-
 bool queryConsoleCanEnable(){
   auto query = gameapi -> compileSqlQuery("select console from session", {});
   bool validSql = false;
@@ -192,15 +194,4 @@ void setShowZoomArcade(bool zoomIn){
 
 void setHudEnabled(bool enableHud){
   getGlobalState().disableHud = !enableHud;
-}
-
-std::optional<BallComponentOptions> showBallOptions(){
-  return getGlobalState().ballOptions;
-}
-void setShowBallOptions(std::optional<BallComponentOptions> ballOptions){
-  getGlobalState().ballOptions = ballOptions;
-}
-
-glm::vec2 getMouseVelocity(){
-  return getGlobalState().control.mouseVelocity;
 }

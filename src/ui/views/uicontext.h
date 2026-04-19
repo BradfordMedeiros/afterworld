@@ -41,7 +41,6 @@ struct UiContext {
   std::function<std::optional<DebugConfig>()> debugConfig;
 
   std::function<std::optional<ScoreOptions>()> getScoreConfig;
-  std::function<std::optional<BallComponentOptions>()> getBallMode;
   std::function<std::optional<MainMenu2Options>()> getMenuOptions;
 
 

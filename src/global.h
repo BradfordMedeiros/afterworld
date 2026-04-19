@@ -89,8 +89,4 @@ void setShowLiveMenu(bool showLiveMenu);
 void setShowZoomArcade(bool showArcade);
 void setHudEnabled(bool enableHud);
 
-std::optional<BallComponentOptions> showBallOptions();
-void setShowBallOptions(std::optional<BallComponentOptions> ballOptions);
-
-
 #endif 

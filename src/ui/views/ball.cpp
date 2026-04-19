@@ -30,8 +30,6 @@ Component ballComponent {
       drawTools.drawRect(0.8f, 0.7f, 0.1f * percentage, 0.02f, false, glm::vec4(1.f, 1.f, 1.f, 0.9f), true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
 
-
-
     return BoundingBox2D {
     	.x = 0,
     	.y = 0,
