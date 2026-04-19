@@ -49,7 +49,7 @@ void ballEndGameplay(EasyCutscene& cutscene){
   }
 
 	waitFor(cutscene, 1, []() -> bool {
-		return getGlobalState().leftMouseDown;
+		return getGlobalState().control.leftMouseDown;
 	});
 
   run(cutscene, 2, []() -> void {

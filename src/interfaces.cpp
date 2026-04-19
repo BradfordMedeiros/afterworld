@@ -82,13 +82,13 @@ void setPausedMode(bool shouldBePaused);
 void goToMenu();
 void doToggleShowEditor();
 
+void pauseOnMenu(){
+  setPausedMode(true); 
+}
+void resumeOnMenu(){
+  setPausedMode(false); 
+}
 UiContext getUiContext(){
-  std::function<void()> pause = []() -> void { 
-    setPausedMode(true); 
-  };
-  std::function<void()> resume = []() -> void { 
-    setPausedMode(false); 
-  };
   UiContext uiContext {
    .isDebugMode = []() -> bool { 
     auto args = gameapi -> getArgs();
@@ -102,9 +102,12 @@ UiContext getUiContext(){
       return getGlobalState().showEditor;
    },
    .showConsole = showConsole,
-   .showScreenspaceGrid = []() -> bool { return getGlobalState().showScreenspaceGrid; },
+   .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
    .showGameOver = []() -> bool { return getGlobalState().showGameOver; },
+   .showPause = []() -> bool { 
+        return getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
+    },
    .showTerminal = []() -> std::optional<TerminalConfig> {
       if (!terminalInterface.has_value()){
         return std::optional<TerminalConfig>(std::nullopt); 
@@ -115,7 +118,7 @@ UiContext getUiContext(){
       return zoomOptions; 
    },
    .showKeyboard = []() -> bool { 
-      return getGlobalState().showKeyboard;
+      return getGlobalState().systemConfig.showKeyboard;
    },
    .debugConfig = []() -> std::optional<DebugConfig> {
       if (printType == DEBUG_GLOBAL){
@@ -202,16 +205,16 @@ UiContext getUiContext(){
     },
     .pauseInterface = PauseInterface {
       .elapsedTime = []() -> float { return gameapi -> timeSeconds(true) - downTime; },
-      .pause = pause,
-      .resume = resume,
+      .pause = pauseOnMenu,
+      .resume = resumeOnMenu,
     },
     .worldPlayInterface = WorldPlayInterface {
       .isGameMode = []() -> bool { return getGlobalState().routeState.inGameMode; },
       .isPaused = isPaused,
       .enterGameMode = []() -> void {},
       .exitGameMode = []() -> void {},
-      .pause = pause,
-      .resume = resume,
+      .pause = pauseOnMenu,
+      .resume = resumeOnMenu,
       .saveScene = []() -> void {
         auto sceneId = activeSceneForSelected();
         modassert(sceneId.has_value(), "save scene - no active scene");

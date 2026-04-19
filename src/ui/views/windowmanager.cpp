@@ -28,7 +28,7 @@ void windowSetEnabled(int symbol, bool enable, glm::vec2 initialPos){
 
 }
 void windowOnDrag(int symbol){
-  auto position = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
+  auto position = glm::vec2(getGlobalState().control.xNdc, getGlobalState().control.yNdc);
   windowData.at(symbol).initialDragPos = position;
 }
 bool windowIsBeingDragged(int symbol){
@@ -41,10 +41,10 @@ void windowOnRelease(){
 			continue;
 		}
     if (window.horizontal){
-      window.windowOffset.x += getGlobalState().xNdc - window.initialDragPos.value().x;
+      window.windowOffset.x += getGlobalState().control.xNdc - window.initialDragPos.value().x;
     }
     if (window.vertical){
-      window.windowOffset.y += getGlobalState().yNdc - window.initialDragPos.value().y;
+      window.windowOffset.y += getGlobalState().control.yNdc - window.initialDragPos.value().y;
     }
   	window.initialDragPos = std::nullopt;
 	}
@@ -57,7 +57,7 @@ glm::vec2 windowGetOffset(int symbol){
   WindowData& window = windowData.at(symbol);
   glm::vec2 draggedOffset(0.f, 0.f);
   if (windowIsBeingDragged(symbol)){
-    draggedOffset = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc) - window.initialDragPos.value();
+    draggedOffset = glm::vec2(getGlobalState().control.xNdc, getGlobalState().control.yNdc) - window.initialDragPos.value();
   }
   auto windowOffset = window.windowOffset;
   float x = window.horizontal ?  windowOffset.x + draggedOffset.x : windowOffset.x;

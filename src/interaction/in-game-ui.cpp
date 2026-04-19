@@ -63,12 +63,12 @@ void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiC
 		textDisplay.handlerFns = handleDrawMainUi(
 			actualUiState, 
 			uiContext, 
-			getGlobalState().selectedId, 
+			getGlobalState().control.selectedId, 
 			textDisplay.textureId, 
 			drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt)
 		);
 
-		auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
+		auto ndiCoords = uvToNdi(getGlobalState().control.texCoordUvView);
     gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
 			modlog("ui pick color on game ui id", std::to_string(selectedId.value()));
 			if (selectedId.has_value()){
@@ -102,7 +102,7 @@ void onInGameUiMouseCallback(UiStateContext& uiState, UiContext& uiContext, InGa
 	if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
 		return;
 	}
-	auto ndiCoords = uvToNdi(getGlobalState().texCoordUvView);
+	auto ndiCoords = uvToNdi(getGlobalState().control.texCoordUvView);
 
 	TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
   UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;

@@ -337,7 +337,7 @@ std::vector<NestedListItem> nestedListTest = {
         .item = ImListItem {
           .value = "screen grid",
           .onClick = []() -> void { 
-            getGlobalState().showScreenspaceGrid = !getGlobalState().showScreenspaceGrid; 
+            getGlobalState().systemConfig.showScreenspaceGrid = !getGlobalState().systemConfig.showScreenspaceGrid; 
           },
           .mappingId = mappingId++,
         },

@@ -12,13 +12,40 @@ struct RouteState {
   bool showMouse;
 };
 
+struct SystemConfig {
+  bool showScreenspaceGrid = false;
+  bool showConsole = false;
+  bool showKeyboard = false;
+};
+
+struct ControlData {
+  // Frame control data
+  float xNdc = 0.f;
+  float yNdc = 0.f;
+  glm::vec2 mouseVelocity = glm::vec2(0.f, 0.f);
+
+  glm::vec2 texCoordUv = glm::vec2(0.f, 0.f);
+  glm::vec2 texCoordUvView = glm::vec2(0.f, 0.f);
+
+  bool leftMouseDown = false;
+  bool rightMouseDown = false;
+  bool middleMouseDown = false;
+
+  // User state
+  std::optional<objid> selectedId;
+  std::optional<objid> lookAtId;
+
+  // Settings
+  float xsensitivity = 1.f;
+  float ysensitivity = 1.f;
+  bool invertY = false;
+};
+
 struct GlobalState {
+  SystemConfig systemConfig; 
+  ControlData control;
   bool showEditor;
   bool isFreeCam;
-  bool showScreenspaceGrid;
-  bool showConsole;
-  bool showKeyboard;
-
 
   bool showGameOver;
   bool showGameHud;
@@ -31,32 +58,17 @@ struct GlobalState {
   bool showLiveMenu;
   float lastToggleTerminalTime;
 
-  float xNdc;
-  float yNdc;
-  glm::vec2 mouseVelocity;
-  glm::vec2 texCoordUv;
-  glm::vec2 texCoordUvView;
-  std::optional<objid> selectedId;
-  std::optional<objid> lookAtId;
-
-  bool godMode;
-
-  float xsensitivity;
-  float ysensitivity;
-  bool invertY;
-  bool disableGameInput;
-
-  bool leftMouseDown;
-  bool rightMouseDown;
-  bool middleMouseDown;
-
   RouteState routeState;
+  bool userRequestedPause;
 
   std::optional<BallComponentOptions> ballOptions;
 };
 
+bool disableGameInput();
+
 void setPaused(bool paused);
 bool isPaused();
+void updateState();
 
 void setRouterGameState(RouteState routeState);
 

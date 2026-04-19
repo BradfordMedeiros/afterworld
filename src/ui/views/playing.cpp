@@ -6,8 +6,16 @@ Component playingComponent {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
     modassert(playingOptions, "playing options not defined");
 
-    auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt));
+
+    std::cout << "show pause: " << playingOptions -> showPause << std::endl;
+    if (playingOptions -> showPause){
+      auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(std::nullopt));
+      auto defaultProps = getDefaultProps();
+      return pauseComponent.draw(drawTools, defaultProps);     
+    }
+
     if (playingOptions -> showGameOver){
+      auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt));
       auto defaultProps = getDefaultProps();
       return deadComponent.draw(drawTools, defaultProps);    
     }

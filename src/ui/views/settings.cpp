@@ -80,14 +80,14 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
     SettingConfiguration {
       .config = DockCheckboxConfig {
         .label = "Invert Aim",
-        .isChecked = []() -> bool { return getGlobalState().invertY; },
+        .isChecked = []() -> bool { return getGlobalState().control.invertY; },
         .onChecked = [](bool isChecked) -> void {
-          getGlobalState().invertY = isChecked;
+          getGlobalState().control.invertY = isChecked;
           persistSave("settings", "invertY", isChecked);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().invertY = getSaveBoolValue("settings", "invertY", false);
+        getGlobalState().control.invertY = getSaveBoolValue("settings", "invertY", false);
       },
     },
     SettingConfiguration {
@@ -95,14 +95,14 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .label = "X-Sensitivity",
         .min = 0.f,
         .max = 5.f,
-        .percentage = []() -> float { return getGlobalState().xsensitivity; },
+        .percentage = []() -> float { return getGlobalState().control.xsensitivity; },
         .onSlide = [](float amount) -> void {
-          getGlobalState().xsensitivity = amount;
+          getGlobalState().control.xsensitivity = amount;
           persistSave("settings", "xsensitivity", amount);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().xsensitivity = getSaveFloatValue("settings", "xsensitivity", 1.f);
+        getGlobalState().control.xsensitivity = getSaveFloatValue("settings", "xsensitivity", 1.f);
       },
     },
     SettingConfiguration {
@@ -110,14 +110,14 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
         .label = "Y-Sensitivity",
         .min = 0.f,
         .max = 5.f,
-        .percentage = []() -> float { return getGlobalState().ysensitivity; },
+        .percentage = []() -> float { return getGlobalState().control.ysensitivity; },
         .onSlide = [](float amount) -> void {
-          getGlobalState().ysensitivity = amount;
+          getGlobalState().control.ysensitivity = amount;
           persistSave("settings", "ysensitivity", amount);
         },
       },
       .initSetting = []() -> void {
-        getGlobalState().ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
+        getGlobalState().control.ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
       },
     },
   }},

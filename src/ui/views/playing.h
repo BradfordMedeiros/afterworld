@@ -19,6 +19,7 @@ struct PlayingOptions {
 
 	std::optional<MainMenu2Options> menuOptions;
 	bool showGameOver;
+	bool showPause;
 
 };
 extern Component playingComponent;

@@ -40,7 +40,7 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
 		return false;
 	}
 	GlassTexture& glassTexture = objIdToGlassTexture.at(id);
-  	auto ndiCoord = uvToNdi(getGlobalState().texCoordUvView);
+  	auto ndiCoord = uvToNdi(getGlobalState().control.texCoordUvView);
 	float bulletHoleSize = randomNumber(0.f, 0.1f) + 0.1;
 
 	 gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTexture.id, true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);

@@ -1,6 +1,8 @@
 #include "./pausemenu.h"
 
 void goToMenu();
+void resumeOnMenu();
+float elapsedMenuTime();
 
 Component pauseMenuComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -31,21 +33,21 @@ Component pauseMenuComponent {
   },
 };
 
-Props pauseMenuProps(std::optional<objid> mappingId, UiContext& uiContext){
+Props pauseMenuProps(std::optional<objid> mappingId){
   std::vector<ImListItem> listItems;
   listItems.push_back(ImListItem {
     .value = "Resume",
-    .onClick = uiContext.pauseInterface.resume,
+    .onClick = resumeOnMenu,
     .mappingId = uniqueMenuItemMappingId(),
   });
   listItems.push_back(ImListItem {
     .value = "Main Menu",
-    .onClick = uiContext.levels.goToMenu,
+    .onClick = goToMenu,
     .mappingId = uniqueMenuItemMappingId(),
   });
   Props props {
     .props = {
-      { .symbol = elapsedTimeSymbol, .value = uiContext.pauseInterface.elapsedTime() },
+      { .symbol = elapsedTimeSymbol, .value = elapsedMenuTime() },
       { .symbol = valueSymbol, .value = listItems } ,
       { .symbol = yoffsetSymbol, .value = 0.2f },
     },
@@ -62,7 +64,7 @@ Props deadMenuProps(std::optional<objid> mappingId){
   });
   Props props {
     .props = {
-      { .symbol = elapsedTimeSymbol, .value = 1.f  },
+      { .symbol = elapsedTimeSymbol, .value = elapsedMenuTime()  },
       { .symbol = valueSymbol, .value = listItems } ,
       { .symbol = yoffsetSymbol, .value = 0.2f },
       { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.8f ) },

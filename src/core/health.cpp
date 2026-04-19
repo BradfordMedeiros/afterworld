@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 extern Waypoints waypoints;
 extern std::unordered_map<objid, HitPoints> hitpoints ;  // static-state extern
+extern bool godMode;
 
 bool enableRagdollKill = true;
 
@@ -41,7 +42,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount) + " " + gameapi -> getGameObjNameForId(id).value());
 
 	auto activePlayerId = getActivePlayerId(getDefaultPlayerIndex());
-	float adjustedDamageAmount = (getGlobalState().godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
+	float adjustedDamageAmount = (godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
 
 	auto newHealthAmount = hitpoints.at(id).current - adjustedDamageAmount;
 	hitpoints.at(id).current = newHealthAmount;

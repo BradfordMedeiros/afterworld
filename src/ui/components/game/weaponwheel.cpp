@@ -54,7 +54,7 @@ void drawCirclePartition(DrawingTools& drawTools, int i, int mappingId, glm::vec
 Component weaponWheelComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
   	auto mappingId = uniqueMenuItemMappingId();
-  	auto partitionIndex = currentPartition(getGlobalState().xNdc, getGlobalState().yNdc);
+  	auto partitionIndex = currentPartition(getGlobalState().control.xNdc, getGlobalState().control.yNdc);
   	for (int i = 0; i < RESOLUTION; i++){
   		auto selectedPartitionIndex = partitionIndex == i;
   		if (selectedPartitionIndex){

@@ -1,16 +1,17 @@
 #include "./global.h"
 
 extern CustomApiBindings* gameapi;
+
+extern bool godMode;
+
 void setActivePlayerEditorMode(bool, int);
 int getDefaultPlayerIndex();
 void persistSave(std::string scope, std::string key, JsonType value);
 
+
 GlobalState global {  // static-state
   .showEditor = false,
   .isFreeCam = false,
-  .showScreenspaceGrid = false,
-  .showConsole = false,
-  .showKeyboard = false,
   .showGameOver = false,
   .showGameHud = false,
   .disableHud = false,
@@ -19,36 +20,22 @@ GlobalState global {  // static-state
   .showTerminal = false,
   .showLiveMenu = false,
   .lastToggleTerminalTime = 0.f,
-  .xNdc = 0.f,
-  .yNdc = 0.f,
-  .mouseVelocity = glm::vec2(0.f, 0.f),
-  .texCoordUv = glm::vec2(0.f, 0.f),
-  .texCoordUvView = glm::vec2(0.f, 0.f),
-  .selectedId = std::nullopt,
-  .lookAtId = std::nullopt,
-
-  .godMode = false,
-
-  .xsensitivity = 1.f,
-  .ysensitivity = 1.f,
-  .invertY = false,
-  .disableGameInput = false,
-
-  .leftMouseDown = false,
-  .rightMouseDown = false,
-  .middleMouseDown = false,
 
   .routeState = RouteState {
     .paused = true,
     .inGameMode = false,
     .showMouse = true,
   },
+  .userRequestedPause = false,
 };
 
+bool disableGameInput(){
+  auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
+  return shouldDisable;
+}
 
 void updateState(){
-  global.disableGameInput = global.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
-  global.showGameHud = !global.disableGameInput && !global.disableHud;
+  global.showGameHud = !disableGameInput() && !global.disableHud;
 
   if (global.routeState.showMouse){
     gameapi -> setWorldState({
@@ -105,17 +92,15 @@ void updateState(){
 
 void setPaused(bool paused){
   modlog("paused toggle", std::string("paused state: ") + print(paused));
-  global.routeState.paused = paused;
-  updateState();
+  global.userRequestedPause = paused;
 }
 
 bool isPaused(){
-	return global.routeState.paused;
+	return global.userRequestedPause;
 }
 
 void setRouterGameState(RouteState routeState){
   global.routeState = routeState;
-  updateState();
 }
 
 GlobalState& getGlobalState(){
@@ -131,38 +116,35 @@ void setShowEditor(bool shouldShowEditor){
 
 void setShowFreecam(bool isFreeCam){
   global.isFreeCam = isFreeCam;
-  updateState();
 }
 
 void toggleKeyboard(){
-  global.showKeyboard = !global.showKeyboard;
-  persistSave("settings", "show-keyboard", global.showKeyboard);
+  global.systemConfig.showKeyboard = !global.systemConfig.showKeyboard;
+  persistSave("settings", "show-keyboard", global.systemConfig.showKeyboard);
 }
 
 
 void initGlobal(){
   auto args = gameapi -> getArgs();
   if (args.find("godmode") != args.end()){
-    global.godMode = true;
+    godMode = true;
   }
   global.showEditor = getSaveBoolValue("settings", "show-editor", false);
   setShowEditor(global.showEditor);
   setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
-  global.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
-  updateState();
+  global.systemConfig.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
 }
 
 
 bool leftMouseDown(){
-  return global.leftMouseDown;
+  return global.control.leftMouseDown;
 }
 bool rightMouseDown(){
-  return global.rightMouseDown;
+  return global.control.rightMouseDown;
 }
 bool middleMouseDown(){
-  return global.middleMouseDown;
+  return global.control.middleMouseDown;
 }
-
 
 bool queryConsoleCanEnable(){
   auto query = gameapi -> compileSqlQuery("select console from session", {});
@@ -176,7 +158,7 @@ bool showConsole(){
   if (!canEnableConsole){
    return false;
   }
-  return getGlobalState().showConsole;
+  return getGlobalState().systemConfig.showConsole;
 }
 
 void setShowConsole(bool showConsole){
@@ -184,11 +166,8 @@ void setShowConsole(bool showConsole){
   if (!canEnableConsole){
     return;
   }
-  global.showConsole = showConsole;
-  updateState();
+  global.systemConfig.showConsole = showConsole;
 }
-
-
 
 void setShowTerminal(bool showTerminal){
   if (showTerminal == getGlobalState().showTerminal){
@@ -199,25 +178,20 @@ void setShowTerminal(bool showTerminal){
   if (currTime - getGlobalState().lastToggleTerminalTime > 0.1f){
     getGlobalState().lastToggleTerminalTime = currTime;
     getGlobalState().showTerminal = showTerminal;
-    updateState();
   }
 }
 
 void setShowLiveMenu(bool showLiveMenu){
   getGlobalState().showLiveMenu = showLiveMenu;
-  updateState();
-
 }
 
 
 void setShowZoomArcade(bool zoomIn){
   getGlobalState().zoomIntoArcade = zoomIn;
-  updateState();
 }
 
 void setHudEnabled(bool enableHud){
   getGlobalState().disableHud = !enableHud;
-  updateState();
 }
 
 std::optional<BallComponentOptions> showBallOptions(){
@@ -228,5 +202,5 @@ void setShowBallOptions(std::optional<BallComponentOptions> ballOptions){
 }
 
 glm::vec2 getMouseVelocity(){
-  return getGlobalState().mouseVelocity;
+  return getGlobalState().control.mouseVelocity;
 }

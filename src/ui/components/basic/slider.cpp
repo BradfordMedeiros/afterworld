@@ -40,7 +40,7 @@ Component sliderInner  {
 
       std::cout << "slider tracked location: " << print(handler.trackedLocationData) << std::endl;
 
-      float percentage = (getGlobalState().xNdc - actualLeft) / (actualRight - actualLeft);
+      float percentage = (getGlobalState().control.xNdc - actualLeft) / (actualRight - actualLeft);
       std::cout << "slider : percentage: " << percentage << std::endl;
       onSlide(percentage);
     });

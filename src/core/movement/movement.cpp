@@ -239,10 +239,6 @@ void removePlayerPortFromMovement(Movement& movement, int port){
 }
 
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, int key, int action, int playerIndex){
-  if (isPaused() || getGlobalState().disableGameInput){
-    return;
-  }
-
   ControlParams& controlParams = getControlParamsByPort(movement, playerIndex);
   if (isCrouchKey(key)){  // ctrl
     if (action == 0 || action == 1){
@@ -330,12 +326,8 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
 }
 
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos, int playerPort){
-  if (isPaused() || getGlobalState().disableGameInput){
-    return;
-  }
-
-  float xsensitivity = getGlobalState().xsensitivity;
-  float ysensitivity = getGlobalState().ysensitivity * (getGlobalState().invertY ? -1.f : 1.f);
+  float xsensitivity = getGlobalState().control.xsensitivity;
+  float ysensitivity = getGlobalState().control.ysensitivity * (getGlobalState().control.invertY ? -1.f : 1.f);
 
   MovementEntity& movementEntity = movementEntityData.movementEntities.at(activeId);
 

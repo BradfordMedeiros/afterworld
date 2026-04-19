@@ -85,8 +85,6 @@ Component withSimpleAnimatedLayout(Component& component){
 }
 
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
-  auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(selectedId, uiContext));
-
   auto levelSelect = withPropsCopy(
     levelSelectComponent, 
     Props { .props = {
@@ -129,6 +127,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
             .ballMode = uiContext.getBallMode(),
             .menuOptions = uiContext.getMenuOptions(),
             .showGameOver = uiContext.showGameOver(),
+            .showPause = uiContext.showPause(),
           } 
         },
       },
@@ -177,7 +176,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.125f)) },
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
     { "playing/*/",  playingView },
-    { "playing/*/paused/", pauseComponent },
     { "mainmenu/modelviewer/", withNavigation(uiContext, modelViewer) },
     { "mainmenu/particleviewer/", withNavigation(uiContext, particleViewer) },
     { "gamemenu/elevatorcontrol/", elevatorView },

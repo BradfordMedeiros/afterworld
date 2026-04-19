@@ -390,7 +390,7 @@ void setupViewports(){
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
-  	modlog("console visibility", print(getGlobalState().showConsole));
+  	modlog("console visibility", print(getGlobalState().systemConfig.showConsole));
   }
 
   if (key == 'K' && action == 1){
@@ -804,8 +804,8 @@ DebugConfig debugPrintGlobal(){
 	auto global = getGlobalState();
   DebugConfig debugConfig { .data = {} };
   debugConfig.data.push_back({ "showEditor", print(global.showEditor) });
-  debugConfig.data.push_back({ "showConsole", print(global.showConsole) });
-  debugConfig.data.push_back({ "showKeyboard" , print(global.showKeyboard), DebugItem {
+  debugConfig.data.push_back({ "showConsole", print(global.systemConfig.showConsole) });
+  debugConfig.data.push_back({ "showKeyboard" , print(global.systemConfig.showKeyboard), DebugItem {
     .text = "TOGGLE",
     .onClick = []() -> void {
       toggleKeyboard();
@@ -813,7 +813,6 @@ DebugConfig debugPrintGlobal(){
   }});
   debugConfig.data.push_back({ "showGameHud" , print(global.showGameHud) });
   debugConfig.data.push_back({ "showTerminal" , print(global.showTerminal) });
-  debugConfig.data.push_back({ "disableGameInput", print(global.disableGameInput) });
   debugConfig.data.push_back({ "routeState.paused", print(global.routeState.paused) });
   debugConfig.data.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });
   debugConfig.data.push_back({ "routeState.showMouse", print(global.routeState.showMouse) });

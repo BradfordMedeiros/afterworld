@@ -15,7 +15,7 @@ std::function<InteractState()> basicInteract(bool paused, bool inGameMode, bool 
 
 std::function<InteractState()> withDefaults(std::function<InteractState()> interact){
   return [interact]() -> InteractState {
-    if (getGlobalState().showConsole){
+    if (getGlobalState().systemConfig.showConsole){
       return InteractState {
         .paused = true,
         .inGameMode = false,
@@ -195,17 +195,11 @@ std::vector<SceneRouterOptions> routerPathOptions = {
           };
         }
         return InteractState {
-            .paused = false,
+            .paused = getGlobalState().userRequestedPause,
             .inGameMode = true,
             .showMouse = false,
         };
       }),
-    },
-    SceneRouterOptions {
-      .paths = {  
-        PathAndParams { .path = "playing/*/paused/" }, 
-      },
-      .getInteract = withDefaults(basicInteract(false, true, true)),
     },
     SceneRouterOptions {
       .paths = { 
@@ -237,7 +231,7 @@ std::vector<SceneRouterPath> routerPaths = {
     .scenarioOptions = std::nullopt,
   },
   SceneRouterPath {
-    .paths = { "playing/*/",  "playing/*/paused/", "playing/*/*/" },
+    .paths = { "playing/*/" },
     .scene = [](std::vector<std::string> params) -> SceneLoadInfo {
       auto sceneFile = levelByShortcutName(params.at(0));
       modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
