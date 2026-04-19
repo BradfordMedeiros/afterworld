@@ -6,17 +6,23 @@ void startMode(GameMode& gameMode, objid sceneId){
   auto gamemodeIntro = std::get_if<GameModeIntro>(&gameMode);
   auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
   if (gamemodeFps){
+    changeUiMode(FpsModeUi{});
     startFpsMode(sceneId, gamemodeFps -> player, gamemodeFps -> makePlayer);
   }else if (gamemodeBall){
+    changeUiMode(BallModeUi{});
     startBallMode(sceneId);
   }else if (gamemodeIntro){
+    changeUiMode(UiModeNone{});
     startIntroMode(sceneId);
   }else if (gamemodeNone){
   	// do nothing
+    changeUiMode(UiModeNone{});
   }
 }
 
 void stopMode(GameMode& gameMode){
+  changeUiMode(UiModeNone{});
+
   auto gamemodeFps = std::get_if<GameModeFps>(&gameMode);
   if (gamemodeFps){
     stopFpsMode();

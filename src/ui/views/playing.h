@@ -10,6 +10,12 @@
 #include "./ball.h"
 #include "./mainmenu2.h"
 
+struct UiModeNone{};
+struct FpsModeUi {};
+struct BallModeUi {};
+typedef std::variant<UiModeNone, FpsModeUi, BallModeUi> UiMode;
+void changeUiMode(UiMode);
+
 struct PlayingOptions {
 	bool showHud;
 	std::optional<ZoomOptions> showZoomOverlay;
@@ -20,8 +26,9 @@ struct PlayingOptions {
 	std::optional<MainMenu2Options> menuOptions;
 	bool showGameOver;
 	bool showPause;
-
 };
+
+
 extern Component playingComponent;
 
 #endif

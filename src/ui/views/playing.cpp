@@ -1,11 +1,28 @@
 #include "./playing.h"
 
+UiMode uiMode = UiModeNone{};
+
+void changeUiMode(UiMode newUiMode){
+  uiMode = newUiMode;
+}
+
 
 Component playingComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
     modassert(playingOptions, "playing options not defined");
 
+    auto uiModeNone = std::get_if<UiModeNone>(&uiMode);
+    auto uiModeFps = std::get_if<FpsModeUi>(& uiMode);
+    auto uiModeBall = std::get_if<BallModeUi>(&uiMode);
+
+    if (uiModeNone){
+      drawCenteredText(drawTools, "none", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
+    }else if (uiModeFps){
+      drawCenteredText(drawTools, "fps", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
+    }else if (uiModeBall){
+      drawCenteredText(drawTools, "ball", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
+    }
 
     std::cout << "show pause: " << playingOptions -> showPause << std::endl;
     if (playingOptions -> showPause){
