@@ -8,6 +8,7 @@
 #include "../../resources/resources.h"
 #include "../../controls.h"
 #include "../../resources/materials.h"
+#include "../inventory.h"
 
 struct MessageWithId {
   std::optional<objid> playerId;

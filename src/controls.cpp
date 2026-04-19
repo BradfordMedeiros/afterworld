@@ -661,8 +661,20 @@ RemappedScrollCallback remapScrollCallback(double amount){
   };
 }
 
-
 bool keyIsDown(int key){
   extern GLFWwindow* window;
   return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
+bool leftMouseDown(){
+  return getGlobalState().control.leftMouseDown;
+}
+bool rightMouseDown(){
+  return getGlobalState().control.rightMouseDown;
+}
+bool middleMouseDown(){
+  return getGlobalState().control.middleMouseDown;
+}
+glm::vec2 getMouseVelocity(){
+  return getGlobalState().control.mouseVelocity;
 }

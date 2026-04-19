@@ -2,9 +2,9 @@
 #define MOD_AFTERWORLD_CONTROLS
 
 #include "./util.h"
-#include "./core/inventory.h"
 #include "./core/weapons/weapon.h"
 #include "./interaction/in-game-ui.h"
+#include "./global.h"
 
 bool isJumpKey(int key);
 bool isGrindKey(int key);
@@ -68,5 +68,10 @@ struct RemappedScrollCallback {
 };
 RemappedScrollCallback remapScrollCallback(double amount);
 
+
+bool leftMouseDown();
+bool rightMouseDown();
+bool middleMouseDown();
+glm::vec2 getMouseVelocity();
 
 #endif

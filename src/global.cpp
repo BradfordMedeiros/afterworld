@@ -28,19 +28,6 @@ GlobalState global {  // static-state
   .userRequestedPause = false,
 };
 
-bool leftMouseDown(){
-  return global.control.leftMouseDown;
-}
-bool rightMouseDown(){
-  return global.control.rightMouseDown;
-}
-bool middleMouseDown(){
-  return global.control.middleMouseDown;
-}
-glm::vec2 getMouseVelocity(){
-  return getGlobalState().control.mouseVelocity;
-}
-
 bool disableGameInput(){
   auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
   return shouldDisable;
