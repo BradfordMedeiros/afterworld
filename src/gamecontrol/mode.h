@@ -18,4 +18,6 @@ typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeIntro> Gam
 void startMode(GameMode& gameMode, objid sceneId);
 void stopMode(GameMode& gameMode);
 
+
+
 #endif 

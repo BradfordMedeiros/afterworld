@@ -9,6 +9,7 @@ void goToLevel(std::string levelShortName);
 void ballModeLevelSelect();
 void stopRotate(objid id);
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
+void inputOverride(bool paused, bool showMouse);
 
 std::optional<objid> currentCutscene;
 int activeLayer = 0;
@@ -22,7 +23,63 @@ struct IntroModeOptions {
 
 GameTypeInfo getBallIntroMode();
 
-void startIntroMode(objid sceneId){
+void setShowLiveMenu(bool showMenu){
+	if (showMenu){
+   inputOverride(false, true);
+   changeUiMode(LiveMenu {
+   		.options = MainMenu2Options {
+   			.backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
+   			.offsetY = 0.f,
+   		},
+   });
+	}else{
+    inputOverride(false, false);
+		changeUiMode(UiModeNone{});
+	}
+
+
+}
+
+/*
+   .getMenuOptions = []() -> std::optional<MainMenu2Options> {
+      float duration = 0.2f;
+
+      static bool showMenu = false;
+      bool wasShowingMenu = showMenu;
+      showMenu = getGlobalState().showLiveMenu;
+      static std::optional<float> lastShowTime;
+
+      glm::vec4 baseColor(1.f, 1.f, 1.f, 0.66f);
+
+      if (showMenu){
+        lastShowTime = std::nullopt;
+        return MainMenu2Options {
+          .backgroundColor = baseColor,
+          .offsetY = 0.f, 
+        };
+      }
+
+      if (wasShowingMenu && !showMenu){
+        lastShowTime = gameapi -> timeSeconds(false);
+      }
+      if (!lastShowTime.has_value()){
+        return std::nullopt;
+      }
+
+      auto timeElapsed = gameapi -> timeSeconds(false) - lastShowTime.value();
+      if (timeElapsed > duration){
+        return std::nullopt;
+      }
+      auto percentage = timeElapsed / duration;
+
+      return MainMenu2Options{
+        .backgroundColor = glm::vec4(baseColor.r, baseColor.g, baseColor.b, (1.f - percentage) * baseColor.w),
+        .offsetY = 0.f + percentage,
+      };
+   },*/
+
+
+void startIntroMode(objid sceneId){	
 	if (currentCutscene.has_value()){
 		removeCutscene(currentCutscene.value(), true);
 		currentCutscene = std::nullopt;
@@ -42,8 +99,8 @@ void startIntroMode(objid sceneId){
 }
 
 void endIntroMode(){
-  changeGameTypeNone(gametypeSystem);
   setShowLiveMenu(false);
+  changeGameTypeNone(gametypeSystem);
   if (currentCutscene.has_value()){
     removeCutscene(currentCutscene.value());
   }
@@ -312,10 +369,10 @@ GameTypeInfo getBallIntroMode(){
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
-	  	bool shouldShowProgress = !getGlobalState().showLiveMenu;
-	  	if (!shouldShowProgress){
-	  		return;
-	  	}
+	  	//bool shouldShowProgress = !getGlobalState().showLiveMenu;
+	  	//if (!shouldShowProgress){
+	  	//	return;
+	  	//}
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
 	  	auto levelOrbInfo = getLevelOrbInfo(introMode -> cameraId);
@@ -420,8 +477,8 @@ void ballModeNewGame(){
   }
 
   resetProgress();
-  setShowLiveMenu(false);
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+  setShowLiveMenu(false);
   currentCutscene = playCutscene(createCutscene("testorb", glm::vec3(0.f, 10.f, 0.f), false), std::nullopt);
 }
 

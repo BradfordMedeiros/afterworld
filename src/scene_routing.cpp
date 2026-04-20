@@ -164,7 +164,17 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
   return std::nullopt;
 }
 
-
+std::optional<InteractState> modeInputOverride;
+void inputOverride(bool paused, bool showMouse){
+  modeInputOverride = InteractState {
+    .paused = paused,
+    .inGameMode = true,
+    .showMouse = showMouse,
+  };
+}
+void inputOverride(){
+  modeInputOverride = std::nullopt;
+}
 
 std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
@@ -180,6 +190,9 @@ std::vector<SceneRouterOptions> routerPathOptions = {
         PathAndParams { .path = "playing/*/" }, 
       },
       .getInteract = withDefaults([]() -> InteractState {
+        if (modeInputOverride.has_value()){
+          return modeInputOverride.value();
+        }
         if (getGlobalState().showGameOver){
           return InteractState {
             .paused = false,
@@ -187,7 +200,7 @@ std::vector<SceneRouterOptions> routerPathOptions = {
             .showMouse = true,
           };      
         }
-        if (getGlobalState().showTerminal || getGlobalState().showLiveMenu){
+        if (getGlobalState().showTerminal){
           return InteractState {
             .paused = false,
             .inGameMode = true,

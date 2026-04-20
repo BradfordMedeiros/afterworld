@@ -84,7 +84,6 @@ GlobalState global {  // static-state
   .disableHud = false,
   .disableUiInput = false,
   .showTerminal = false,
-  .showLiveMenu = false,
   .lastToggleTerminalTime = 0.f,
 
   .routeState = RouteState {

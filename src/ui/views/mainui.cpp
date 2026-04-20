@@ -124,7 +124,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
             .showZoomOverlay = uiContext.showZoomOverlay(),
             .scoreOptions = uiContext.getScoreConfig(),
             .terminalConfig = uiContext.showTerminal(),
-            .menuOptions = uiContext.getMenuOptions(),
             .showGameOver = uiContext.showGameOver(),
             .showPause = uiContext.showPause(),
           } 

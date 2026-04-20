@@ -14,6 +14,14 @@ std::optional<BallModeUi*> getBallModeUI(){
   return uiModeBall;
 }
 
+std::optional<LiveMenu*> getLiveMenuUi(){
+  auto liveMenu = std::get_if<LiveMenu>(&uiMode);
+  if (liveMenu == NULL){
+    return std::nullopt;
+  }
+  return liveMenu;
+}
+
 Component playingComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
@@ -22,6 +30,7 @@ Component playingComponent {
     auto uiModeNone = std::get_if<UiModeNone>(&uiMode);
     auto uiModeFps = std::get_if<FpsModeUi>(& uiMode);
     auto uiModeBall = std::get_if<BallModeUi>(&uiMode);
+    auto uiModeLiveMenu = std::get_if<LiveMenu>(&uiMode);
 
     if (uiModeNone){
       drawCenteredText(drawTools, "none", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
@@ -29,6 +38,8 @@ Component playingComponent {
       drawCenteredText(drawTools, "fps", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }else if (uiModeBall){
       drawCenteredText(drawTools, "ball", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
+    }else if (uiModeLiveMenu){
+      drawCenteredText(drawTools, "livemenu", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }
 
     std::cout << "show pause: " << playingOptions -> showPause << std::endl;
@@ -60,7 +71,16 @@ Component playingComponent {
       };
       ballComponent.draw(drawTools, ballProps);    
       return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
+    }else if (uiModeLiveMenu){
+      Props defaultProps { 
+        .props = {
+          PropPair { .symbol = valueSymbol, .value = uiModeLiveMenu -> options }
+        }
+      };
+      mainMenu2.draw(drawTools, defaultProps);      
+      return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
     }
+
 
     if (playingOptions -> showHud){
   	  auto hudProps = getDefaultProps();
@@ -89,16 +109,6 @@ Component playingComponent {
     	};
  	    scoreComponent.draw(drawTools, scoreProps);
 	  }
-
-
-    if (playingOptions -> menuOptions.has_value()){
-      Props defaultProps { 
-        .props = {
-          PropPair { .symbol = valueSymbol, .value = playingOptions -> menuOptions.value() }
-        }
-      };
-      mainMenu2.draw(drawTools, defaultProps);      
-    }
 
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },

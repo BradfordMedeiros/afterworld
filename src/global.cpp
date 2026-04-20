@@ -143,11 +143,6 @@ void setShowTerminal(bool showTerminal){
   }
 }
 
-void setShowLiveMenu(bool showLiveMenu){
-  getGlobalState().showLiveMenu = showLiveMenu;
-}
-
-
 void setHudEnabled(bool enableHud){
   getGlobalState().disableHud = !enableHud;
 }

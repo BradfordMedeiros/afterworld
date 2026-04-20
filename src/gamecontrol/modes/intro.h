@@ -11,6 +11,8 @@
 #include "../../collision.h"
 #include "../entity.h"
 #include "../../ui/components/game/fade.h"
+#include "../../ui/views/playing.h"
+
 
 void startIntroMode(objid sceneId);
 void endIntroMode();

@@ -53,7 +53,6 @@ struct GlobalState {
   bool disableUiInput;
 
   bool showTerminal;
-  bool showLiveMenu;
   float lastToggleTerminalTime;
 
   RouteState routeState;
@@ -74,7 +73,6 @@ void toggleKeyboard();
 bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
-void setShowLiveMenu(bool showLiveMenu);
 void setHudEnabled(bool enableHud);
 
 #endif 
