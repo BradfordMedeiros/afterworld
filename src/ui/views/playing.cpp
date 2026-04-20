@@ -79,14 +79,10 @@ Component playingComponent {
       };
       mainMenu2.draw(drawTools, defaultProps);      
       return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
+    }else if (uiModeFps){
+      auto hudProps = getDefaultProps();
+      hudComponent.draw(drawTools, hudProps);   
     }
-
-
-    if (playingOptions -> showHud){
-  	  auto hudProps = getDefaultProps();
-	    hudComponent.draw(drawTools, hudProps);
-    }
-
 
   	if (playingOptions -> showZoomOverlay.has_value()){
   	  Props zoomProps { 

@@ -16,8 +16,6 @@ bool disableGameInput(){
 }
 
 void updateState(){
-  global.showGameHud = !disableGameInput() && !global.disableHud;
-
   if (global.routeState.showMouse){
     gameapi -> setWorldState({
       ObjectValue {
@@ -141,8 +139,4 @@ void setShowTerminal(bool showTerminal){
     getGlobalState().lastToggleTerminalTime = currTime;
     getGlobalState().showTerminal = showTerminal;
   }
-}
-
-void setHudEnabled(bool enableHud){
-  getGlobalState().disableHud = !enableHud;
 }

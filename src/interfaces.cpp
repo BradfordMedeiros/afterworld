@@ -104,7 +104,6 @@ UiContext getUiContext(){
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
-   .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
    .showGameOver = []() -> bool { return getGlobalState().showGameOver; },
    .showPause = []() -> bool { 
         return getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;

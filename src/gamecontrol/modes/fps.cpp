@@ -7,6 +7,8 @@ extern Movement movement;
 extern Weapons weapons;
 extern AiData aiData;
 
+//    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
+
 void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePlayer){
   std::vector<objid> playerIds;
 

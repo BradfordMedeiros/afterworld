@@ -47,9 +47,6 @@ struct GlobalState {
   bool isFreeCam;
 
   bool showGameOver;
-  bool showGameHud;
-  bool disableHud;
-
   bool disableUiInput;
 
   bool showTerminal;
@@ -73,6 +70,5 @@ void toggleKeyboard();
 bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
-void setHudEnabled(bool enableHud);
 
 #endif 

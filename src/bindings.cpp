@@ -80,8 +80,6 @@ GlobalState global {  // static-state
   .showEditor = false,
   .isFreeCam = false,
   .showGameOver = false,
-  .showGameHud = false,
-  .disableHud = false,
   .disableUiInput = false,
   .showTerminal = false,
   .lastToggleTerminalTime = 0.f,

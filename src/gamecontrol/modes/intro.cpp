@@ -87,7 +87,6 @@ void startIntroMode(objid sceneId){
   auto cameraId = findObjByShortName(">menu-view", sceneId);
 	removeCameraFromOrbView(cameraId.value());
   setTempCamera(cameraId.value(), 0);
-  setHudEnabled(false);
   setShowLiveMenu(true);
   showLetterBoxHold("", 0.f);
   orbCameraId = cameraId;

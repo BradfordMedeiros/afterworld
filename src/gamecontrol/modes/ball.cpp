@@ -225,8 +225,6 @@ void startBallMode(objid sceneId){
 
 	GameTypeInfo ballMode = getBallMode();
 	changeGameType(gametypeSystem, ballMode, "ball", &modeOptions);
-
-	setHudEnabled(false);
 }
 
 void endBallMode(){
@@ -236,7 +234,6 @@ void endBallMode(){
 
 	setCanExitVehicle(true);
 	changeGameTypeNone(gametypeSystem);
-	setHudEnabled(true);
 }
 
 struct GravityHole {

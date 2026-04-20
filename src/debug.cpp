@@ -811,7 +811,6 @@ DebugConfig debugPrintGlobal(){
       toggleKeyboard();
     },
   }});
-  debugConfig.data.push_back({ "showGameHud" , print(global.showGameHud) });
   debugConfig.data.push_back({ "showTerminal" , print(global.showTerminal) });
   debugConfig.data.push_back({ "routeState.paused", print(global.routeState.paused) });
   debugConfig.data.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });

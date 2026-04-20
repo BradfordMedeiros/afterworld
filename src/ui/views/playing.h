@@ -11,7 +11,9 @@
 #include "./mainmenu2.h"
 
 struct UiModeNone{};
-struct FpsModeUi {};
+struct FpsModeUi {
+	
+};
 struct BallModeUi {
 	BallComponentOptions ballMode;
 };
@@ -25,7 +27,6 @@ std::optional<BallModeUi*> getBallModeUI();
 std::optional<LiveMenu*> getLiveMenuUi();
 
 struct PlayingOptions {
-	bool showHud;
 	std::optional<ZoomOptions> showZoomOverlay;
 	std::optional<ScoreOptions> scoreOptions;
 	std::optional<TerminalConfig> terminalConfig;
