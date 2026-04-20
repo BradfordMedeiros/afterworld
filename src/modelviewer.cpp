@@ -5,6 +5,12 @@ extern CustomApiBindings* gameapi;
 const float minScale = 0.1f;
 const float maxScale = 5.f;
 
+
+bool leftMouseDown();
+bool rightMouseDown();
+bool middleMouseDown();
+
+
 struct CameraData {
   glm::vec3 initialCameraPos;
   float rotationXDegrees;

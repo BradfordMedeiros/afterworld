@@ -181,6 +181,7 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
     addAiAgent(aiData, idAdded, agent.value());
     controllableEntities[idAdded] = ControllableEntity {
     	.isInShootingMode = true,
+    	.zoomIntoArcade = false,
     	.isAlive = true,
     	.lookingAtVehicle = std::nullopt,
     	.disableAnimationIds = entityIdsToDisable(idAdded),
@@ -821,4 +822,27 @@ void applyScreenshake(int playerIndex, glm::vec3 impulse){
     return;
   }
   getControlledPlayer(playerIndex).shakeImpulse = impulse;
+}
+
+void zoomIntoArcade(std::optional<objid> id, int playerIndex){
+  bool zoomIn = id.has_value();
+  //getGlobalState().zoomIntoArcade = zoomIn;
+  setDisablePlayerControl(zoomIn, 0);
+  if (!zoomIn){
+    setTempCamera(std::nullopt, playerIndex);          
+  }else{
+    auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
+    modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
+    auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
+    auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
+    setTempCamera(arcadeCameraId.value(), playerIndex);     
+  }
+}
+
+std::optional<bool> isZoomedIntoArcade(int playerIndex){
+	auto controlledPlayer = getActiveControllable(playerIndex);
+  if (!controlledPlayer.has_value()){
+  	return false;
+  }
+  return controlledPlayer.value() -> zoomIntoArcade;
 }

@@ -1,13 +1,14 @@
 #include "./intro.h"
 
-void goToLevel(std::string levelShortName);
-
-void ballModeLevelSelect();
-void stopRotate(objid id);
-void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
+extern CustomApiBindings* gameapi;
 
 extern GameTypes gametypeSystem;
 extern GLFWwindow* window;
+
+void goToLevel(std::string levelShortName);
+void ballModeLevelSelect();
+void stopRotate(objid id);
+void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
 
 std::optional<objid> currentCutscene;
 int activeLayer = 0;

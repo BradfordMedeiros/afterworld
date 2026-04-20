@@ -83,7 +83,6 @@ GlobalState global {  // static-state
   .showGameHud = false,
   .disableHud = false,
   .disableUiInput = false,
-  .zoomIntoArcade = false,
   .showTerminal = false,
   .showLiveMenu = false,
   .lastToggleTerminalTime = 0.f,
@@ -374,21 +373,6 @@ void goToMenu(){
 }
 
 
-void zoomIntoArcade(std::optional<objid> id, int playerIndex){
-  bool zoomIn = id.has_value();
-  setShowZoomArcade(zoomIn);
-  setDisablePlayerControl(zoomIn, 0);
-  if (!zoomIn){
-    setTempCamera(std::nullopt, playerIndex);          
-  }else{
-    auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
-    modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
-    auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
-    auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
-    setTempCamera(arcadeCameraId.value(), playerIndex);     
-  }
-}
-
 void objectRemoved(objid idRemoved){
   for (auto& controlledPlayer : getPlayers()){
     if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == idRemoved){
@@ -476,7 +460,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   debugOnKey(key, scancode, action, mods);
 
-  if (isInteractKey(key) && (action == 1) && getGlobalState().zoomIntoArcade){
+  if (isInteractKey(key) && (action == 1) && isZoomedIntoArcade(playerIndex).value()){
     zoomIntoArcade(std::nullopt, playerIndex);
   }
   onKeyArcade(key, scancode, action, mods);

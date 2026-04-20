@@ -148,10 +148,6 @@ void setShowLiveMenu(bool showLiveMenu){
 }
 
 
-void setShowZoomArcade(bool zoomIn){
-  getGlobalState().zoomIntoArcade = zoomIn;
-}
-
 void setHudEnabled(bool enableHud){
   getGlobalState().disableHud = !enableHud;
 }

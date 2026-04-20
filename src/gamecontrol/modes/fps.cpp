@@ -1,5 +1,7 @@
 #include "./fps.h"
 
+extern CustomApiBindings* gameapi;
+
 extern Director director;
 extern Movement movement;
 extern Weapons weapons;

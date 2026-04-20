@@ -4,7 +4,6 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./gameworld/save.h"
-#include "./ui/views/ball.h"
 
 struct RouteState {
   bool paused;
@@ -52,7 +51,6 @@ struct GlobalState {
   bool disableHud;
 
   bool disableUiInput;
-  bool zoomIntoArcade;
 
   bool showTerminal;
   bool showLiveMenu;
@@ -73,15 +71,10 @@ void initGlobal();
 void setShowEditor(bool shouldShowEditor);
 void toggleKeyboard();
 
-bool leftMouseDown();
-bool rightMouseDown();
-bool middleMouseDown();
-
 bool showConsole();
 void setShowConsole(bool showConsole);
 void setShowTerminal(bool showTerminal);
 void setShowLiveMenu(bool showLiveMenu);
-void setShowZoomArcade(bool showArcade);
 void setHudEnabled(bool enableHud);
 
 #endif 

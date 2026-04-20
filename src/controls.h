@@ -3,7 +3,6 @@
 
 #include "./util.h"
 #include "./core/weapons/weapon.h"
-#include "./interaction/in-game-ui.h"
 #include "./global.h"
 
 bool isJumpKey(int key);

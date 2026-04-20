@@ -27,6 +27,7 @@ struct ControlledPlayer {
 
 struct ControllableEntity {
 	bool isInShootingMode;  // not sure if this should be in here but w/e
+	bool zoomIntoArcade;
 	bool isAlive;
 	std::optional<objid> lookingAtVehicle;
 	std::optional<objid> vehicle;
@@ -122,5 +123,8 @@ void enterVehicleEntity(int playerIndex, objid vehicleId, objid id);
 void exitVehicleEntity(int playerIndex, objid vehicleId, objid id);
 
 void applyScreenshake(int playerIndex, glm::vec3 impulse);
+
+void zoomIntoArcade(std::optional<objid> id, int playerIndex);
+std::optional<bool> isZoomedIntoArcade(int playerIndex);
 
 #endif 

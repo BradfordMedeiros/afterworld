@@ -4,6 +4,10 @@ const float modelViewerButtonPadding = 0.02f;
 const int rightButtonSymbol = getSymbol("right-button");
 const int leftButtonSymbol = getSymbol("left-button");
 
+bool leftMouseDown();
+bool rightMouseDown();
+bool middleMouseDown();
+
 Component modelSelector {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::string* title = typeFromProps<std::string>(props, valueSymbol);

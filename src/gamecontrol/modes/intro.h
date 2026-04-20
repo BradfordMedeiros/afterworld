@@ -10,6 +10,7 @@
 #include "../../interaction/cutscene.h"
 #include "../../collision.h"
 #include "../entity.h"
+#include "../../ui/components/game/fade.h"
 
 void startIntroMode(objid sceneId);
 void endIntroMode();
