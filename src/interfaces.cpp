@@ -106,7 +106,17 @@ UiContext getUiContext(){
         return getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
     },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
-      return zoomOptions; 
+      auto activeControllable = getActiveControllable(0);
+      if (!activeControllable.has_value()){
+        return std::nullopt;
+      }
+      auto& entity =  *activeControllable.value();
+      if (!entity.zoomAmount.has_value()){
+        return std::nullopt;
+      }
+      return ZoomOptions {
+        .zoomAmount = entity.zoomAmount.value(),
+      }; 
    },
    .showKeyboard = []() -> bool { 
       return getGlobalState().systemConfig.showKeyboard;

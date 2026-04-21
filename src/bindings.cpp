@@ -36,7 +36,6 @@ std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 std::unordered_map<objid, EmissionObject> emissionObjects;
 std::unordered_map<objid, HealthColorObject> healthColorObjects;
 std::unordered_map<objid, ExplosionObj> explosionObjects;
-UiData* uiDataPtr = NULL;
 std::optional<glm::vec3> oldGravity;  // wtf?
 ArcadeApi arcadeApi = createArcadeApi();
 std::unordered_map<objid, ExtraSurfaceVelocity> extraVelocity;
@@ -124,15 +123,13 @@ void setScenarioOptions(ScenarioOptions& options){
   modlog("set scenario options: skybox", print(options.skybox));
 }
 
-std::optional<ZoomOptions> zoomOptions;
-void setTotalZoom(float multiplier, objid id){
+void setTotalZoom(int playerIndex, float multiplier, objid id){
+  auto& player = *getActiveControllable(playerIndex).value();
   bool isZoomedIn = multiplier < 1.f;
   if (isZoomedIn){
-    zoomOptions = ZoomOptions {
-      .zoomAmount = static_cast<int>((1.f / multiplier)),
-    };
+    player.zoomAmount = static_cast<int>((1.f / multiplier));
   }else{
-    zoomOptions = std::nullopt;
+    player.zoomAmount = std::nullopt;
   }
   setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(movementEntities, multiplier, id);
@@ -182,6 +179,19 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
+void goToMenu(){
+  auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);
+  auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
+  if (gamemodeIntro){
+    goToLevel("ballselect");
+  }else if (gamemodeBall){
+    goToLevel("ballselect");
+  }else{
+    pushHistory({ "mainmenu" }, true);
+  }
+}
+
+
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
 }
@@ -200,6 +210,24 @@ void doToggleShowEditor(){
   }
 }
 
+void setNoClipMode(bool enable){
+  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
+  if (controlledPlayer.playerId.has_value()){
+    if (enable){
+      oldGravity = getSingleVec3Attr(controlledPlayer.playerId.value(), "physics_gravity");
+      setGameObjectGravity(controlledPlayer.playerId.value(), glm::vec3(0.f, 0.f, 0.f));
+      gameapi -> setSingleGameObjectAttr(controlledPlayer.playerId.value(), "physics_collision", "nocollide");
+
+    }else{
+      if(oldGravity.has_value()){
+        setGameObjectGravity(controlledPlayer.playerId.value(), oldGravity.value());
+        gameapi -> setSingleGameObjectAttr(controlledPlayer.playerId.value(), "physics_collision", "collide");
+        oldGravity = std::nullopt;
+      }
+    }
+  }
+}
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
   modlog("router scene route", std::string("path is: ") + currentPath);
@@ -290,25 +318,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   }
 }
 
-void setNoClipMode(bool enable){
-  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-
-  if (controlledPlayer.playerId.has_value()){
-    if (enable){
-      oldGravity = getSingleVec3Attr(controlledPlayer.playerId.value(), "physics_gravity");
-      setGameObjectGravity(controlledPlayer.playerId.value(), glm::vec3(0.f, 0.f, 0.f));
-      gameapi -> setSingleGameObjectAttr(controlledPlayer.playerId.value(), "physics_collision", "nocollide");
-
-    }else{
-      if(oldGravity.has_value()){
-        setGameObjectGravity(controlledPlayer.playerId.value(), oldGravity.value());
-        gameapi -> setSingleGameObjectAttr(controlledPlayer.playerId.value(), "physics_collision", "collide");
-        oldGravity = std::nullopt;
-      }
-    }
-  }
-}
-
 std::optional<objid> activeSceneForSelected(){
   if(sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().id.has_value()){
     return sceneManagement.managedScene.value().id.value();
@@ -321,18 +330,6 @@ std::optional<objid> activeSceneForSelected(){
   auto selectedId = gameapi -> selected().at(0);
   auto sceneId = gameapi -> listSceneId(selectedId);
   return sceneId;
-}
-
-void goToMenu(){
-  auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);
-  auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
-  if (gamemodeIntro){
-    goToLevel("ballselect");
-  }else if (gamemodeBall){
-    goToLevel("ballselect");
-  }else{
-    pushHistory({ "mainmenu" }, true);
-  }
 }
 
 
@@ -445,8 +442,8 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 }
 
 void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
-  onMainUiMousePress(uiStateContext, uiData.uiContext, uiDataPtr -> uiCallbacks, button, action, getGlobalState().control.selectedId);
-  onInGameUiMouseCallback(uiStateContext, uiDataPtr -> uiContext, inGameUi, button, action, getGlobalState().control.lookAtId /* this needs to come from the texture */);
+  onMainUiMousePress(uiStateContext, uiData.uiContext, uiData.uiCallbacks, button, action, getGlobalState().control.selectedId);
+  onInGameUiMouseCallback(uiStateContext, uiData.uiContext, inGameUi, button, action, getGlobalState().control.lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
   onVehicleMouseClick(vehicles, button, action, mods);
 
@@ -486,7 +483,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
     if (!isPaused() && !disableGameInput() && !isPlayerControlDisabled(playerIndex)){
       auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.playerId.value()), button, action, controlledPlayer.playerId.value(), selectDistance);
       if (uiUpdate.zoomAmount.has_value()){
-        setTotalZoom(uiUpdate.zoomAmount.value(), controlledPlayer.playerId.value());
+        setTotalZoom(playerIndex, uiUpdate.zoomAmount.value(), controlledPlayer.playerId.value());
       }
     }
   }
@@ -684,8 +681,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   
     addAnimationController(animationController);
 
-    uiDataPtr = &uiData;
-
     handleOnAddedTagsInitial(); // not sure i actually need this since are there any objects added?
     generateWaterMesh();
         
@@ -876,10 +871,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
       //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
       std::optional<glm::vec2> mainUiCursorCoord;
-      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiDataPtr -> uiContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord);
-      modassert(uiDataPtr, "uiDataPtr NULL");
-    
-      onInGameUiFrame(uiStateContext, inGameUi, uiDataPtr->uiContext, std::nullopt, ndiCoord);
+      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData.uiContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord);
+
+      onInGameUiFrame(uiStateContext, inGameUi, uiData.uiContext, std::nullopt, ndiCoord);
     
       if (isInGameMode()){
         std::optional<UiHealth> uiHealth;
@@ -1193,7 +1187,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onScrollCallback = [](objid id, void* data, double rawAmount) -> void {
     auto scrollCallback = remapScrollCallback(rawAmount);
 
-    onMainUiScroll(uiStateContext, uiDataPtr->uiContext, scrollCallback.amount);
+    onMainUiScroll(uiStateContext, uiData.uiContext, scrollCallback.amount);
     onInGameUiScrollCallback(inGameUi, scrollCallback.amount);
     onMovementScrollCallback(movement, scrollCallback.amount, scrollCallback.playerPort);
   };

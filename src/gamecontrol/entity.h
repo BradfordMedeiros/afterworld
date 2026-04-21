@@ -32,6 +32,7 @@ struct ControllableEntity {
 	std::optional<objid> lookingAtVehicle;
 	std::optional<objid> vehicle;
 	std::set<objid> disableAnimationIds;
+	std::optional<int> zoomAmount;
 };
 
 ControlledPlayer& getControlledPlayer(int playerIndex);

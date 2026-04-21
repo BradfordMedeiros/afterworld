@@ -600,8 +600,8 @@ void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, doubl
 }
 
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
-  modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
-  modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
+  //modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
+  //modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
 
   UiState& uiState = uiStateContext.uiState;
   commonState = &uiState;
