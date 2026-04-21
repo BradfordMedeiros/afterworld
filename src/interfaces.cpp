@@ -78,6 +78,8 @@ std::optional<objid> activeSceneForSelected();
 void goToLevel(std::string levelShortName);
 void setGlobalModeValues(bool isEditorMode);
 void setNoClipMode(bool enable);
+void setFreeCam();
+
 void goToMenu();
 void doToggleShowEditor();
 
@@ -223,11 +225,7 @@ UiContext getUiContext(){
       .setShowEditor = []() -> void {
         doToggleShowEditor();
       },
-      .setFreeCam = []() -> void {
-        setActivePlayerEditorMode(true, getDefaultPlayerIndex());
-        getGlobalState().isFreeCam = true;
-        setShowEditor(false);
-      },
+      .setFreeCam = setFreeCam,
       .setNoClip = setNoClipMode,
       .setBackground = setMenuBackground,
       .goToLevel = [](std::optional<std::string> level) -> void {

@@ -229,6 +229,29 @@ void setNoClipMode(bool enable){
   }
 }
 
+void setFreeCam(){
+  setActivePlayerEditorMode(true, getDefaultPlayerIndex());
+  getGlobalState().isFreeCam = true;
+  setShowEditor(false); 
+}
+
+void setNormalMode(){
+  return;
+  auto wasInEditorMode = !isInGameMode();
+  setActivePlayerEditorMode(false, getDefaultPlayerIndex());
+  getGlobalState().isFreeCam = false;
+  setShowEditor(false);
+  setGlobalModeValues(false);
+
+  if (wasInEditorMode){
+    // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
+    gameapi -> schedule(0, true, 0, NULL, [](void*) -> void {
+      //startLevel(gameState.sceneManagement.managedScene.value());
+    });          
+  }
+}
+
+
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
   modlog("router scene route", std::string("path is: ") + currentPath);
 
