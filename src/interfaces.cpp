@@ -76,12 +76,12 @@ extern bool disableTpsMesh;
 
 std::optional<objid> activeSceneForSelected();
 void goToLevel(std::string levelShortName);
-void setGlobalModeValues(bool isEditorMode);
-void setNoClipMode(bool enable);
+void setNoClipMode();
 void setFreeCam();
+void setNormalMode();
+void setEditorMode();
 
 void goToMenu();
-void doToggleShowEditor();
 
 void pauseOnMenu(){
   getGlobalState().userRequestedPause = true;
@@ -207,24 +207,8 @@ UiContext getUiContext(){
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
     },
     .consoleInterface = ConsoleInterface {
-      .setNormalMode = []() -> void {
-        auto wasInEditorMode = !isInGameMode();
-        setActivePlayerEditorMode(false, getDefaultPlayerIndex());
-        getGlobalState().isFreeCam = false;
-        setShowEditor(false);
-        setGlobalModeValues(false);
-
-        if (wasInEditorMode){
-          // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
-          gameapi -> schedule(0, true, 0, NULL, [](void*) -> void {
-            //startLevel(gameState.sceneManagement.managedScene.value());
-          });          
-        }
-
-      },
-      .setShowEditor = []() -> void {
-        doToggleShowEditor();
-      },
+      .setNormalMode = setNormalMode,
+      .setShowEditor = setEditorMode,
       .setFreeCam = setFreeCam,
       .setNoClip = setNoClipMode,
       .setBackground = setMenuBackground,

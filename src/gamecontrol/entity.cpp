@@ -22,7 +22,7 @@ void addPlayerPort(int playerIndex){
 		.playerId = std::nullopt,
 		.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
 		.tempCamera = std::nullopt,
-		.editorMode = false,
+		.freeCamera = false,
 		.disablePlayerControl = false,	
 	};
 	players.push_back(player);
@@ -233,7 +233,7 @@ void updateCamera(int playerIndex){
 	modassert(!tempCameraDoesNotExistButShould, "temp camera has value but obj does not exist");
 	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");	
 
-	if (controlledPlayer.editorMode){
+	if (controlledPlayer.freeCamera){
 		gameapi -> setActiveCamera(std::nullopt, controlledPlayer.viewport);
 		return;
 	}
@@ -283,8 +283,6 @@ void setIsAlive(objid id, bool alive){
 	//maybeDisableAi(aiData, id.value());
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	movementEntity.movementState.alive = alive;
-
-
 }
 
 bool isCamera(objid id){
@@ -489,14 +487,10 @@ bool allPlayersDead(){
 	return true;	
 }
 
-void setActivePlayerEditorMode(bool editorMode, int playerIndex){
+void setPlayerFreeCamera(int playerIndex, bool editorMode){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	controlledPlayer.editorMode = editorMode;
+	controlledPlayer.freeCamera = editorMode;
 	updateCamera(playerIndex);
-}
-bool isInGameMode(){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-	return !controlledPlayer.editorMode;
 }
 
 void setTempCamera(std::optional<objid> camera, int playerIndex){

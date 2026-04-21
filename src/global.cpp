@@ -1,89 +1,15 @@
 #include "./global.h"
 
 extern CustomApiBindings* gameapi;
-
-extern bool godMode;
-
-void setActivePlayerEditorMode(bool, int);
-int getDefaultPlayerIndex();
-void persistSave(std::string scope, std::string key, JsonType value);
-
 extern GlobalState global;
-
-bool disableGameInput(){
-  auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.isFreeCam;
-  return shouldDisable;
-}
-
-void updateState(){
-  if (global.routeState.showMouse){
-    gameapi -> setWorldState({
-      ObjectValue {
-        .object = "mouse",
-        .attribute = "cursor",
-        .value = "normal",
-      },
-    });
-  }else{
-    gameapi -> setWorldState({
-      ObjectValue {
-        .object = "mouse",
-        .attribute = "cursor",
-        .value = "capture",
-      },
-    });    
-  }
-
-  if (global.showEditor){
-    gameapi -> setWorldState({ 
-      ObjectValue {
-        .object = "editor",
-        .attribute = "disableinput",
-        .value = "false",
-      },
-    });    
-  }else if (global.isFreeCam){
-    gameapi -> setWorldState({ 
-      ObjectValue {
-        .object = "editor",
-        .attribute = "disableinput",
-        .value = "camera",
-      },
-    });    
-  }else{
-    gameapi -> setWorldState({ 
-      ObjectValue {
-        .object = "editor",
-        .attribute = "disableinput",
-        .value = "true",
-      },
-    });  
-  }
-
-  gameapi -> setWorldState({
-   ObjectValue {
-     .object = "world",
-     .attribute = "paused",
-     .value = (global.routeState.paused || global.showEditor) ? "true" : "false",
-   }
-  });
-}
-
-bool isPaused(){
-	return global.routeState.paused || global.userRequestedPause;
-}
 
 GlobalState& getGlobalState(){
   return global;
 }
 
-
-void setShowEditor(bool shouldShowEditor){
-  modlog("update show editor", std::to_string(shouldShowEditor));
-  global.showEditor = shouldShowEditor;
-  persistSave("settings", "show-editor", shouldShowEditor);
+bool isPaused(){
+  return global.routeState.paused || global.userRequestedPause;
 }
-
 
 void toggleKeyboard(){
   global.systemConfig.showKeyboard = !global.systemConfig.showKeyboard;
@@ -104,7 +30,6 @@ bool showConsole(){
   }
   return getGlobalState().systemConfig.showConsole;
 }
-
 void setShowConsole(bool showConsole){
   static bool canEnableConsole = queryConsoleCanEnable();
   if (!canEnableConsole){

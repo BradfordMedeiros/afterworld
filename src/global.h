@@ -50,14 +50,11 @@ struct GlobalState {
 };
 
 bool disableGameInput();
-
 bool isPaused();
-void updateState();
 
 GlobalState& getGlobalState();
-void setShowEditor(bool shouldShowEditor);
-void toggleKeyboard();
 
+void toggleKeyboard();
 bool showConsole();
 void setShowConsole(bool showConsole);
 

@@ -100,7 +100,6 @@ std::vector<CommandDispatch> commands {
     .command = "play",
     .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
       consoleInterface.setNormalMode();
-      consoleInterface.setNoClip(false);
       return std::nullopt;
     }, 
   },
@@ -121,7 +120,7 @@ std::vector<CommandDispatch> commands {
   CommandDispatch {
     .command = "noclip",
     .fn = [](ConsoleInterface& consoleInterface, std::string& commandStr, bool* valid) -> std::optional<std::string> {
-      consoleInterface.setNoClip(true);
+      consoleInterface.setNoClip();
       return std::nullopt;
     }, 
   },

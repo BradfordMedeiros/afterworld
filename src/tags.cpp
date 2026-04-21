@@ -30,6 +30,7 @@ extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 void goToLevel(std::string levelShortName);
 void goBackMainMenu();
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
+bool isInGameMode2();
 
 struct TagUpdater {
 	std::string attribute;
@@ -38,11 +39,6 @@ struct TagUpdater {
 	std::optional<std::function<void()>> onFrame;
 	std::optional<std::function<void(std::string& key, std::any& value)>> onMessage;
 };
-
-bool isInGameMode2(){
-	return getGlobalState().routeState.inGameMode;	
-}
-
 
 std::string queryInitialBackground(){
 	if (hasOption("background")){

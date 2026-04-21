@@ -191,16 +191,23 @@ void goToMenu(){
   }
 }
 
+bool isInGameMode2(){
+  return getGlobalState().routeState.inGameMode;  
+}
 
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
 }
 
-void doToggleShowEditor(){
-  setActivePlayerEditorMode(true, getDefaultPlayerIndex());
+
+void setEditorMode(){
+  // this should be for all players (at least for now i guess)
   global.isFreeCam = false;
-  setShowEditor(true);
+  global.showEditor = true;
+  persistSave("settings", "show-editor", true);
   setGlobalModeValues(true);
+
+  setPlayerFreeCamera(getDefaultPlayerIndex(), true);
 
   bool liveEdit = false;
   if (!liveEdit){
@@ -210,7 +217,25 @@ void doToggleShowEditor(){
   }
 }
 
-void setNoClipMode(bool enable){
+void setNormalMode(){
+  global.isFreeCam = false;
+  global.showEditor = false;
+  persistSave("settings", "show-editor", false);
+  setGlobalModeValues(false);
+
+  setPlayerFreeCamera(getDefaultPlayerIndex(), false);
+}
+
+void setFreeCam(){
+  global.isFreeCam = true;
+  global.showEditor = false;
+  persistSave("settings", "show-editor", false);
+
+  setPlayerFreeCamera(getDefaultPlayerIndex(), true);
+}
+
+void setNoClipMode(){
+  bool enable = true;
   ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
   if (controlledPlayer.playerId.has_value()){
@@ -229,26 +254,63 @@ void setNoClipMode(bool enable){
   }
 }
 
-void setFreeCam(){
-  setActivePlayerEditorMode(true, getDefaultPlayerIndex());
-  getGlobalState().isFreeCam = true;
-  setShowEditor(false); 
+void updateState(){
+  if (global.routeState.showMouse){
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "normal",
+      },
+    });
+  }else{
+    gameapi -> setWorldState({
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "cursor",
+        .value = "capture",
+      },
+    });    
+  }
+
+  if (global.showEditor){
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "false",
+      },
+    });    
+  }else if (global.isFreeCam){
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "camera",
+      },
+    });    
+  }else{
+    gameapi -> setWorldState({ 
+      ObjectValue {
+        .object = "editor",
+        .attribute = "disableinput",
+        .value = "true",
+      },
+    });  
+  }
+
+  gameapi -> setWorldState({
+   ObjectValue {
+     .object = "world",
+     .attribute = "paused",
+     .value = (global.routeState.paused || global.showEditor) ? "true" : "false",
+   }
+  });
 }
 
-void setNormalMode(){
-  return;
-  auto wasInEditorMode = !isInGameMode();
-  setActivePlayerEditorMode(false, getDefaultPlayerIndex());
-  getGlobalState().isFreeCam = false;
-  setShowEditor(false);
-  setGlobalModeValues(false);
-
-  if (wasInEditorMode){
-    // reset scene does not work in the same frame so...just delay it for now... TODO HACKEY SHIT
-    gameapi -> schedule(0, true, 0, NULL, [](void*) -> void {
-      //startLevel(gameState.sceneManagement.managedScene.value());
-    });          
-  }
+bool disableGameInput(){
+  auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.isFreeCam;
+  return shouldDisable;
 }
 
 
@@ -306,9 +368,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   if (router.has_value()){
     std::optional<objid> sceneId;
     if (sceneToLoad.has_value()){
-      setTempCamera(std::nullopt, 0); // find a better place for this, should be reconciled better
-      setDisablePlayerControl(false, 0);
-
       if (sceneToLoad.value().additionalTokens.size() > 0){
         std::cout << "additional tokens: " << print(sceneToLoad.value().additionalTokens.at(0)) << std::endl;
       }else{
@@ -317,16 +376,14 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
 
       sceneId = gameapi -> loadScene(sceneToLoad.value().sceneFile, sceneToLoad.value().additionalTokens, std::nullopt, {});
     }
-    if (scenarioOptions.has_value()){
-      setScenarioOptions(scenarioOptions.value());
-    }else{
-      ScenarioOptions defaultSettings {
-        .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
-        .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
-        .skybox = "./res/textures/skyboxs/desert/",
-      };
-      setScenarioOptions(defaultSettings);
-    }
+    
+    static ScenarioOptions defaultSettings {
+      .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
+      .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
+      .skybox = "./res/textures/skyboxs/desert/",
+    };
+    setScenarioOptions(scenarioOptions.has_value() ? scenarioOptions.value() : defaultSettings);
+    
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
       .index = currentIndex,
@@ -600,12 +657,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           godMode = true;
         }
         global.showEditor = getSaveBoolValue("settings", "show-editor", false);
-        setShowEditor(global.showEditor);
-        setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
+        if (global.showEditor){
+          setEditorMode();
+        }
         global.systemConfig.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
     }
 
-    setGlobalModeValues(getGlobalState().showEditor);
     dragSelect = std::nullopt;
     uiData.uiContext = getUiContext();
 
@@ -758,7 +815,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     std::vector<EntityUpdate> entityUpdates;
     //////// needs multiviewport work ///////////////////////////////
 
-    if (isInGameMode()){
+    if (isInGameMode2()){
       onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
 
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
@@ -850,7 +907,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     /// GENERAL UPDATES
     {
       tickCutscenes2();
-      if (isInGameMode()){
+      if (isInGameMode2()){
         handleEntitiesOnRails(id, gameapi -> rootSceneId());
         handleDirector(director);
         //handleEntitiesRace();
@@ -877,14 +934,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     // UI UPDATES //////////////////
     {
       drawAllCurves(id);
-      if (isInGameMode()){
+      if (isInGameMode2()){
         for (auto& player : getPlayers()){
           auto playerPosition = getActivePlayerPosition(player.viewport);
           if (playerPosition.has_value()){
             drawWaypoints(waypoints, playerPosition.value());
           }
         }
-        drawWaterOverlay(isInGameMode(), getGlobalState().isFreeCam, cameraPos.position);
+        drawWaterOverlay(isInGameMode2(), getGlobalState().isFreeCam, cameraPos.position);
   
         setUiGemCount(GemCount {
           .currentCount = numberOfCrystals(std::nullopt),
@@ -898,7 +955,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       onInGameUiFrame(uiStateContext, inGameUi, uiData.uiContext, std::nullopt, ndiCoord);
     
-      if (isInGameMode()){
+      if (isInGameMode2()){
         std::optional<UiHealth> uiHealth;
         {
           for (auto& player : getPlayers()){
@@ -920,7 +977,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     // ARCADE ///////////////
-    if (isInGameMode()){
+    if (isInGameMode2()){
       updateArcade();
       drawArcade();  
     }

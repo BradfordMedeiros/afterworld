@@ -5,6 +5,12 @@ extern GameTypes gametypeSystem;
 void inputOverride();
 
 void startMode(GameMode& gameMode, objid sceneId){
+  auto& allPlayers = getPlayers();
+  for (auto& player : allPlayers){
+    setTempCamera(std::nullopt, player.viewport);
+    setDisablePlayerControl(false, player.viewport);
+  }
+
   inputOverride();
 
   auto gamemodeFps = std::get_if<GameModeFps>(&gameMode);
@@ -51,5 +57,10 @@ void stopMode(GameMode& gameMode){
   changeGameTypeNone(gametypeSystem);
   getGlobalState().userRequestedPause = false;
 
+  auto& allPlayers = getPlayers();
+  for (auto& player : allPlayers){
+    setTempCamera(std::nullopt, player.viewport);
+    setDisablePlayerControl(false, player.viewport);
+  }
 }
 

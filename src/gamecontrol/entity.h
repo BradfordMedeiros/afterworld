@@ -17,7 +17,7 @@ struct ControlledPlayer {
 	std::optional<objid> playerId;
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempCamera;
-	bool editorMode;
+	bool freeCamera;
 	bool disablePlayerControl;  // this maybe should be in global? 
 
 	glm::vec3 shakeOffset = glm::vec3(0.f, 0.f, 0.f);
@@ -82,8 +82,7 @@ std::optional<bool> activePlayerAlive(int playerIndex);
 std::optional<bool> activePlayerFalling(int playerIndex);
 std::optional<bool> activePlayerReloading(int playerIndex);
 
-void setActivePlayerEditorMode(bool editorMode, int playerIndex);
-bool isInGameMode();
+void setPlayerFreeCamera(int playerIndex, bool editorMode);
 
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 std::optional<objid> getTempCamera(int playerIndex);

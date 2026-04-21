@@ -525,28 +525,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }*/
 
 
-  if (key == 'C' && action == 0){
-  	auto testViewObj = findObjByShortName(">testview", std::nullopt);
-  	if (getTempCamera(getDefaultPlayerIndex()).has_value()){
-	  	setTempCamera(std::nullopt, getDefaultPlayerIndex());
-  	}else{
-  		if (testViewObj.has_value()){
-		  	setTempCamera(testViewObj.value(), getDefaultPlayerIndex());
-  		}
-  	}
-  }
-  if (key == 'V' && action == 0){
-  	auto testViewObj = findObjByShortName(">testview2", std::nullopt);
-  	if (getTempCamera(getDefaultPlayerIndex()).has_value()){
-	  	setTempCamera(std::nullopt, getDefaultPlayerIndex());
-  	}else{
-  		if (testViewObj.has_value()){
-		  	setTempCamera(testViewObj.value(), getDefaultPlayerIndex());
-  		}
-  	}
-  }
-
-
   if (key == 75){
   	//spawnProcMesh(gameapi -> listSceneId(id));
   }
@@ -739,26 +717,11 @@ void simpleOnFrame(std::function<void()> fn, float duration){
 }
 
 
-void setCameraBack(EasyCutscene& cutscene){
-  waitUntil(cutscene, 0, 2000);
-
-  run(cutscene, 1, []() -> void {
- 		//setTempCamera(std::nullopt, 0);
-  });
-}
-
 void onDebugMessage(std::string& key, std::any& value){
 	if (key == "testtrigger"){
 		modassert(false, "on debug message testtrigger");
 	}
-	if (key == "testcam"){
-		auto cameraId = findObjByShortName(">entity_camera_52", std::nullopt);
-		setTempCamera(cameraId.value(), 0);
 
-		playCutscene(setCameraBack, std::nullopt);	
-
-
-	}
 }
 
 DebugConfig debugPrintAnimations(int playerIndex){
