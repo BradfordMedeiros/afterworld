@@ -9,6 +9,9 @@
 struct MainMenu2Options {
 	glm::vec4 backgroundColor;
 	float offsetY;
+
+	std::function<void()> onNewGame = []() -> void {};
+	std::function<void()> onContinueGame = []() -> void {};
 };
 
 extern Component mainMenu2;

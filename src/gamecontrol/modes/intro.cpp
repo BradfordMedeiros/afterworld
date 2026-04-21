@@ -30,6 +30,12 @@ void setShowLiveMenu(bool showMenu){
    		.options = MainMenu2Options {
    			.backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
    			.offsetY = 0.f,
+				.onNewGame = []() -> void {
+					ballModeNewGame();
+				},
+				.onContinueGame = []() -> void {
+					ballModeLevelSelect();
+				},
    		},
    });
 	}else{

@@ -76,6 +76,10 @@ int numberOfPlayers = 1;
 int mainPlayerControl = 0;
 std::vector<ControlledPlayer> players;
 
+bool disableAnimation = false;
+bool disableTpsMesh = false;
+bool validateAnimationControllerAnimations = true;
+
 GlobalState global { 
   .showEditor = false,
   .isFreeCam = false,
@@ -94,13 +98,6 @@ void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
     .fn = fn,
     .hint = hint,
   };
-}
-
-void onMenu2NewGameClick(){
-  ballModeNewGame();
-}
-void onMenu2ContinueClick(){
-  ballModeLevelSelect();
 }
 
 void setScenarioOptions(ScenarioOptions& options){
@@ -141,10 +138,6 @@ void setTotalZoom(float multiplier, objid id){
   setZoomSensitivity(movementEntities, multiplier, id);
   playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
 }
-
-bool disableAnimation = false;
-bool disableTpsMesh = false;
-bool validateAnimationControllerAnimations = true;
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -591,7 +584,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
         global.systemConfig.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
     }
-    
+
     setGlobalModeValues(getGlobalState().showEditor);
     dragSelect = std::nullopt;
     uiData.uiContext = getUiContext();

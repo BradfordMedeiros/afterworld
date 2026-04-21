@@ -1,22 +1,14 @@
 #include "./mainmenu.h"
 
-
-bool onMenu2NewGameClick();
-bool onMenu2ContinueClick();
-
-Props createLevelListPropsBall(float offset){
+Props createLevelListPropsBall(float offset, std::function<void()> onNewGame, std::function<void()> onContinue){
   std::vector<ListComponentData> levels;
   levels.push_back(ListComponentData {
     .name = "New Game",
-    .onClick = []() -> void {
-      onMenu2NewGameClick();
-    }
+    .onClick = onNewGame,
   });
   levels.push_back(ListComponentData {
     .name = "Continue",
-    .onClick = []() -> void {
-      onMenu2ContinueClick();
-    }
+    .onClick = onContinue,
   });
   levels.push_back(ListComponentData {
     .name = "Quit",
@@ -101,7 +93,7 @@ Component mainMenu2 {
       .zIndex = -1,
     }, std::nullopt);
 
-    auto levelSelection = withPropsCopy(listComponent, createLevelListPropsBall(mainMenuOptions -> offsetY));
+    auto levelSelection = withPropsCopy(listComponent, createLevelListPropsBall(mainMenuOptions -> offsetY, mainMenuOptions -> onNewGame, mainMenuOptions -> onContinueGame));
     return levelSelection.draw(drawTools, props);
   },
 };
