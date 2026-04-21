@@ -3,6 +3,32 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<TerminalInterface> terminalInterface;  // TODO static state
+bool shouldShowTerminal = false;
+float lastToggleTerminalTime = 0.f;
+
+
+void setShowTerminal(bool showTerminal){
+  if (showTerminal){
+    setTerminalConfig(terminalInterface.value().terminalConfig);
+  }else{
+    setTerminalConfig(std::nullopt);
+  }
+  if (showTerminal == shouldShowTerminal){
+    return;
+  }
+
+  auto currTime = gameapi -> timeSeconds(false);
+  if (currTime - lastToggleTerminalTime > 0.1f){
+    lastToggleTerminalTime = currTime;
+    shouldShowTerminal = showTerminal;
+  }
+}
+
+
+bool isShowingTerminal(){
+  return shouldShowTerminal;
+}
+
 
 std::unordered_map<std::string, std::vector<TerminalDisplayType>> terminals {
   { "test", {
@@ -39,6 +65,7 @@ void showTerminal(std::optional<std::string> name){
     .terminalConfig = getTerminalConfig(name.value(), pageIndex),
   };
   setShowTerminal(true);
+  *getTerminalConfig().value() = terminalInterface.value().terminalConfig; 
 }
 void nextTerminalPage(){
   if (terminalInterface.has_value()){
@@ -51,6 +78,7 @@ void nextTerminalPage(){
       return;
     }
     terminal.terminalConfig = getTerminalConfig(terminalInterface.value().name, terminal.pageIndex);
+    *getTerminalConfig().value() = terminalInterface.value().terminalConfig; 
   }
 }
 void prevTerminalPage(){
@@ -61,5 +89,6 @@ void prevTerminalPage(){
       terminal.pageIndex--;
     }
     terminal.terminalConfig = getTerminalConfig(terminalInterface.value().name, terminal.pageIndex);
+    *getTerminalConfig().value() = terminalInterface.value().terminalConfig; 
   }
 }

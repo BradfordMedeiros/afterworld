@@ -284,9 +284,7 @@ void setIsAlive(objid id, bool alive){
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	movementEntity.movementState.alive = alive;
 
-  if (allPlayersDead()){
-      getGlobalState().showGameOver = true;
-  }
+
 }
 
 bool isCamera(objid id){

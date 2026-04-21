@@ -45,30 +45,20 @@ struct GlobalState {
   ControlData control;
   bool showEditor;
   bool isFreeCam;
-
-  bool showGameOver;
-  bool disableUiInput;
-
-  bool showTerminal;
-  float lastToggleTerminalTime;
-
   RouteState routeState;
   bool userRequestedPause;
 };
 
 bool disableGameInput();
 
-void setPaused(bool paused);
 bool isPaused();
 void updateState();
 
 GlobalState& getGlobalState();
-void initGlobal();
 void setShowEditor(bool shouldShowEditor);
 void toggleKeyboard();
 
 bool showConsole();
 void setShowConsole(bool showConsole);
-void setShowTerminal(bool showTerminal);
 
 #endif 

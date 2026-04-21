@@ -193,20 +193,6 @@ std::vector<SceneRouterOptions> routerPathOptions = {
         if (modeInputOverride.has_value()){
           return modeInputOverride.value();
         }
-        if (getGlobalState().showGameOver){
-          return InteractState {
-            .paused = false,
-            .inGameMode = true,
-            .showMouse = true,
-          };      
-        }
-        if (getGlobalState().showTerminal){
-          return InteractState {
-            .paused = false,
-            .inGameMode = true,
-            .showMouse = true,
-          };
-        }
         return InteractState {
             .paused = getGlobalState().userRequestedPause,
             .inGameMode = true,

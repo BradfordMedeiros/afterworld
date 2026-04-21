@@ -14,7 +14,6 @@ struct LevelUIInterface {
   std::function<void()> goToMenu;
 };
 struct PauseInterface {
-  std::function<float()> elapsedTime;
   std::function<void()> pause;
   std::function<void()> resume;
 };
@@ -32,9 +31,7 @@ struct UiContext {
   std::function<bool()> showEditor;
   std::function<bool()> showConsole;
   std::function<bool()> showScreenspaceGrid;
-  std::function<bool()> showGameOver;
   std::function<bool()> showPause;
-  std::function<std::optional<TerminalConfig>()> showTerminal;
   std::function<std::optional<ZoomOptions>()> showZoomOverlay;
   std::function<bool()> showKeyboard;
   std::function<std::optional<DebugConfig>()> debugConfig;

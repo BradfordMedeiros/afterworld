@@ -2,7 +2,11 @@
 
 void goToMenu();
 void resumeOnMenu();
-float elapsedMenuTime();
+
+
+float elapsedMenuTime(){
+  return 1.f;
+}
 
 Component pauseMenuComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {

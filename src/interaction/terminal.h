@@ -14,5 +14,6 @@ extern std::optional<TerminalInterface> terminalInterface;
 void showTerminal(std::optional<std::string> name);
 void nextTerminalPage();
 void prevTerminalPage();
+bool isShowingTerminal();
 
 #endif 

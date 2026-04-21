@@ -73,21 +73,19 @@ extern GameTypes gametypeSystem;
 extern Director director;
 extern AiData aiData;
 extern bool disableTpsMesh;
-extern double downTime;
 
 std::optional<objid> activeSceneForSelected();
 void goToLevel(std::string levelShortName);
 void setGlobalModeValues(bool isEditorMode);
 void setNoClipMode(bool enable);
-void setPausedMode(bool shouldBePaused);
 void goToMenu();
 void doToggleShowEditor();
 
 void pauseOnMenu(){
-  setPausedMode(true); 
+  getGlobalState().userRequestedPause = true;
 }
 void resumeOnMenu(){
-  setPausedMode(false); 
+  getGlobalState().userRequestedPause = false;
 }
 UiContext getUiContext(){
   UiContext uiContext {
@@ -104,16 +102,9 @@ UiContext getUiContext(){
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
-   .showGameOver = []() -> bool { return getGlobalState().showGameOver; },
    .showPause = []() -> bool { 
         return getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
     },
-   .showTerminal = []() -> std::optional<TerminalConfig> {
-      if (!terminalInterface.has_value()){
-        return std::optional<TerminalConfig>(std::nullopt); 
-      }
-      return getGlobalState().showTerminal ? terminalInterface.value().terminalConfig : std::optional<TerminalConfig>(std::nullopt); 
-   },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
       return zoomOptions; 
    },
@@ -167,7 +158,6 @@ UiContext getUiContext(){
       .goToMenu = goToMenu,
     },
     .pauseInterface = PauseInterface {
-      .elapsedTime = []() -> float { return gameapi -> timeSeconds(true) - downTime; },
       .pause = pauseOnMenu,
       .resume = resumeOnMenu,
     },

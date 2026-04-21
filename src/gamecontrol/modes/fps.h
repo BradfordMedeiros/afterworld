@@ -11,6 +11,7 @@
 #include "../../collision.h"
 #include "../entity.h"
 #include "../../director/director.h"
+#include "../../ui/views/playing.h"
 
 void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePlayer);
 void stopFpsMode();

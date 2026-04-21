@@ -20,18 +20,20 @@ struct BallModeUi {
 struct LiveMenu {
 	MainMenu2Options options;
 };
-typedef std::variant<UiModeNone, FpsModeUi, BallModeUi, LiveMenu> UiMode;
+struct GameOverUi {};
+
+typedef std::variant<UiModeNone, FpsModeUi, BallModeUi, LiveMenu, GameOverUi> UiMode;
 void changeUiMode(UiMode);
 
 std::optional<BallModeUi*> getBallModeUI();
 std::optional<LiveMenu*> getLiveMenuUi();
 
+void setTerminalConfig(std::optional<TerminalConfig> terminalConfig);
+std::optional<TerminalConfig*> getTerminalConfig();
+
 struct PlayingOptions {
 	std::optional<ZoomOptions> showZoomOverlay;
 	std::optional<ScoreOptions> scoreOptions;
-	std::optional<TerminalConfig> terminalConfig;
-
-	bool showGameOver;
 	bool showPause;
 };
 

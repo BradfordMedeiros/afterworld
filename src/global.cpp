@@ -11,7 +11,7 @@ void persistSave(std::string scope, std::string key, JsonType value);
 extern GlobalState global;
 
 bool disableGameInput(){
-  auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.showTerminal || global.isFreeCam;
+  auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.isFreeCam;
   return shouldDisable;
 }
 
@@ -69,13 +69,8 @@ void updateState(){
   });
 }
 
-void setPaused(bool paused){
-  modlog("paused toggle", std::string("paused state: ") + print(paused));
-  global.userRequestedPause = paused;
-}
-
 bool isPaused(){
-	return global.userRequestedPause;
+	return global.routeState.paused || global.userRequestedPause;
 }
 
 GlobalState& getGlobalState(){
@@ -93,17 +88,6 @@ void setShowEditor(bool shouldShowEditor){
 void toggleKeyboard(){
   global.systemConfig.showKeyboard = !global.systemConfig.showKeyboard;
   persistSave("settings", "show-keyboard", global.systemConfig.showKeyboard);
-}
-
-void initGlobal(){
-  auto args = gameapi -> getArgs();
-  if (args.find("godmode") != args.end()){
-    godMode = true;
-  }
-  global.showEditor = getSaveBoolValue("settings", "show-editor", false);
-  setShowEditor(global.showEditor);
-  setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
-  global.systemConfig.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
 }
 
 bool queryConsoleCanEnable(){
@@ -127,16 +111,4 @@ void setShowConsole(bool showConsole){
     return;
   }
   global.systemConfig.showConsole = showConsole;
-}
-
-void setShowTerminal(bool showTerminal){
-  if (showTerminal == getGlobalState().showTerminal){
-    return;
-  }
-
-  auto currTime = gameapi -> timeSeconds(false);
-  if (currTime - getGlobalState().lastToggleTerminalTime > 0.1f){
-    getGlobalState().lastToggleTerminalTime = currTime;
-    getGlobalState().showTerminal = showTerminal;
-  }
 }

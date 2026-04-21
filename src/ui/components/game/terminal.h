@@ -4,6 +4,7 @@
 #include "../common.h"
 #include "../../../global.h"
 #include "../../../resources/paths.h"
+#include "../../../ui/views/playing.h"
 
 struct TerminalImage {
   std::string image;

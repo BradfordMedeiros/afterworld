@@ -6,10 +6,41 @@ extern Director director;
 extern Movement movement;
 extern Weapons weapons;
 extern AiData aiData;
+extern GameTypes gametypeSystem;
 
 //    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
+void inputOverride(bool paused, bool showMouse);
+
+GameTypeInfo getFpsMode(){
+  GameTypeInfo ballMode = GameTypeInfo {
+    .gametypeName = "fps",
+    .events = { },
+    .createGametype = [](void* data) -> std::any {
+      return NULL; 
+    },
+    .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
+      return false;
+    },
+    .getDebugText = [](std::any& gametype) -> std::string {
+    },
+    .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
+    .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
+    .onFrame = [](std::any& gametype) -> void {
+      if (allPlayersDead()){
+          inputOverride(false, true);
+          changeUiMode(GameOverUi{});
+      }
+    },
+  };
+  return ballMode;
+}
+
+
 
 void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePlayer){
+  GameTypeInfo fpsMode = getFpsMode();
+  changeGameType(gametypeSystem, fpsMode, "fps", NULL);
+
   std::vector<objid> playerIds;
 
   if (makePlayer){

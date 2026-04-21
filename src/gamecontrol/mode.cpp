@@ -1,5 +1,7 @@
 #include "./mode.h"
 
+extern GameTypes gametypeSystem;
+
 void inputOverride();
 
 void startMode(GameMode& gameMode, objid sceneId){
@@ -46,6 +48,7 @@ void stopMode(GameMode& gameMode){
 
   inputOverride();
   changeUiMode(UiModeNone{});
+  changeGameTypeNone(gametypeSystem);
   getGlobalState().userRequestedPause = false;
 
 }

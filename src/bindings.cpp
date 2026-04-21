@@ -74,16 +74,11 @@ DebugPrintType printType;
 std::optional<std::string> activeLevel;
 int numberOfPlayers = 1;
 int mainPlayerControl = 0;
-std::vector<ControlledPlayer> players; // TODO static state
+std::vector<ControlledPlayer> players;
 
-GlobalState global {  // static-state
+GlobalState global { 
   .showEditor = false,
   .isFreeCam = false,
-  .showGameOver = false,
-  .disableUiInput = false,
-  .showTerminal = false,
-  .lastToggleTerminalTime = 0.f,
-
   .routeState = RouteState {
     .paused = true,
     .inGameMode = false,
@@ -194,18 +189,6 @@ void goBackMainMenu(){
   pushHistory({ "mainmenu" }, true);
 }
 
-double downTime = 0;
-void setPausedMode(bool shouldBePaused){
-  setPaused(shouldBePaused);
-  downTime = gameapi -> timeSeconds(true);
-  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
-}
-
-float elapsedMenuTime(){
-  return gameapi -> timeSeconds(true) - downTime;
-}
-
-
 void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
 }
@@ -224,11 +207,6 @@ void doToggleShowEditor(){
   }
 }
 
-void togglePauseIfInGame(){
-  bool paused = isPaused();
-  setPausedMode(!paused);
-}
-
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
   modlog("router scene route", std::string("path is: ") + currentPath);
@@ -245,11 +223,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   int matchedRouterOption = 0;
   auto routerOptions = getRouterOptions(currentPath, &matchedRouterOption);
   currentRoute = routerOptions;
-
-  // reset state
-
-  getGlobalState().showGameOver = false;
-  ///
 
   modassert(routerOptions.has_value(), std::string("no router options for: ") + currentPath);
   modlog("router", std::string("matched router option: ") + std::to_string(matchedRouterOption));
@@ -405,7 +378,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   if (action == 1){
     auto playerId = controlledPlayer.playerId;
     if (isPauseKey(key)){
-      togglePauseIfInGame();
+      getGlobalState().userRequestedPause = !getGlobalState().userRequestedPause;
     } 
     if (isTeleportButton(key) && !isPaused()){
       // this probably should be aware of the bounds, an not allow to clip into wall for example
@@ -420,9 +393,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
       showTerminal(std::nullopt);
     }
 
-    if (!getGlobalState().disableUiInput){
-      onMainUiKeyPress(uiStateContext, uiData.uiCallbacks, key, scancode, action, mods);
-    }
+    onMainUiKeyPress(uiStateContext, uiData.uiCallbacks, key, scancode, action, mods);
     onInGameUiKeyCallback(key, scancode, action, mods);
   }
   handleHotkey(key, action);
@@ -481,9 +452,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 }
 
 void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
-  if (!getGlobalState().disableUiInput){
-    onMainUiMousePress(uiStateContext, uiData.uiContext, uiDataPtr -> uiCallbacks, button, action, getGlobalState().control.selectedId);
-  }
+  onMainUiMousePress(uiStateContext, uiData.uiContext, uiDataPtr -> uiCallbacks, button, action, getGlobalState().control.selectedId);
   onInGameUiMouseCallback(uiStateContext, uiDataPtr -> uiContext, inGameUi, button, action, getGlobalState().control.lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
   onVehicleMouseClick(vehicles, button, action, mods);
@@ -531,9 +500,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
 }
 
 void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float xNdc, float yNdc, int playerPort){ 
-  if (!getGlobalState().disableUiInput){
-    onMainUiMouseMove(uiStateContext,  uiData.uiContext, xPos, yPos, xNdc, yNdc);
-  }
+  onMainUiMouseMove(uiStateContext,  uiData.uiContext, xPos, yPos, xNdc, yNdc);
   onInGameUiMouseMoveCallback(inGameUi, xPos, yPos, xNdc, yNdc);
   onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
 
@@ -614,7 +581,17 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     addPlayerPort(0);
 
-    initGlobal();
+    {
+        auto args = gameapi -> getArgs();
+        if (args.find("godmode") != args.end()){
+          godMode = true;
+        }
+        global.showEditor = getSaveBoolValue("settings", "show-editor", false);
+        setShowEditor(global.showEditor);
+        setActivePlayerEditorMode(global.showEditor, getDefaultPlayerIndex());
+        global.systemConfig.showKeyboard = getSaveBoolValue("settings", "show-keyboard", false);
+    }
+    
     setGlobalModeValues(getGlobalState().showEditor);
     dragSelect = std::nullopt;
     uiData.uiContext = getUiContext();
@@ -721,7 +698,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         
     if (hasOption("arcade")){
       addArcadeType(-1, getArgOption("arcade"), std::nullopt);
-      getGlobalState().disableUiInput = true;
     }
 
 
@@ -754,14 +730,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (currentRoute.has_value()){
       auto interactState = currentRoute.value() -> getInteract();
       getGlobalState().routeState = RouteState{
-        .paused = interactState.paused,
+        .paused = interactState.paused || getGlobalState().userRequestedPause,
         .inGameMode = interactState.inGameMode,
         .showMouse = interactState.showMouse || getGlobalState().userRequestedPause,
       };
-      setPaused(interactState.paused || getGlobalState().userRequestedPause);
     }
     updateState();
-
 
     if (levelShortcutToLoad.has_value()){
       goToLevel(levelShortcutToLoad.value());
@@ -1108,7 +1082,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       spawnFromAllSpawnpoints(director.managedSpawnpoints, strValue -> c_str());
     }
 
-    if (key == "terminal" && !getGlobalState().showTerminal){
+    if (key == "terminal" && !isShowingTerminal()){
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
       showTerminal("test");
     }
@@ -1226,9 +1200,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onScrollCallback = [](objid id, void* data, double rawAmount) -> void {
     auto scrollCallback = remapScrollCallback(rawAmount);
 
-    if (!getGlobalState().disableUiInput){
-      onMainUiScroll(uiStateContext, uiDataPtr->uiContext, scrollCallback.amount);
-    }
+    onMainUiScroll(uiStateContext, uiDataPtr->uiContext, scrollCallback.amount);
     onInGameUiScrollCallback(inGameUi, scrollCallback.amount);
     onMovementScrollCallback(movement, scrollCallback.amount, scrollCallback.playerPort);
   };

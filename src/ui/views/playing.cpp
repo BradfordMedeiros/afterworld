@@ -1,6 +1,7 @@
 #include "./playing.h"
 
 UiMode uiMode = UiModeNone{};
+std::optional<TerminalConfig> terminal;
 
 void changeUiMode(UiMode newUiMode){
   uiMode = newUiMode;
@@ -22,6 +23,16 @@ std::optional<LiveMenu*> getLiveMenuUi(){
   return liveMenu;
 }
 
+void setTerminalConfig(std::optional<TerminalConfig> terminalConfig){
+  terminal = terminalConfig;
+}
+std::optional<TerminalConfig*> getTerminalConfig(){
+  if (!terminal.has_value()){
+    return std::nullopt;
+  }  
+  return &terminal.value();
+}
+
 Component playingComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     PlayingOptions* playingOptions = typeFromProps<PlayingOptions>(props, valueSymbol);
@@ -31,6 +42,7 @@ Component playingComponent {
     auto uiModeFps = std::get_if<FpsModeUi>(& uiMode);
     auto uiModeBall = std::get_if<BallModeUi>(&uiMode);
     auto uiModeLiveMenu = std::get_if<LiveMenu>(&uiMode);
+    auto uiModeGameOver = std::get_if<GameOverUi>(&uiMode);
 
     if (uiModeNone){
       drawCenteredText(drawTools, "none", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
@@ -40,6 +52,8 @@ Component playingComponent {
       drawCenteredText(drawTools, "ball", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }else if (uiModeLiveMenu){
       drawCenteredText(drawTools, "livemenu", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
+    }else if (uiModeGameOver){
+      drawCenteredText(drawTools, "gameover", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }
 
     std::cout << "show pause: " << playingOptions -> showPause << std::endl;
@@ -49,15 +63,9 @@ Component playingComponent {
       return pauseComponent.draw(drawTools, defaultProps);     
     }
 
-    if (playingOptions -> showGameOver){
-      auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt));
-      auto defaultProps = getDefaultProps();
-      return deadComponent.draw(drawTools, defaultProps);    
-    }
-
-    if (playingOptions -> terminalConfig.has_value()){
+    if (terminal.has_value()){
       Props terminalProps { 
-        .props = { PropPair { .symbol = valueSymbol, .value = playingOptions -> terminalConfig.value() }},
+        .props = { PropPair { .symbol = valueSymbol, .value = terminal.value() }},
       };
       terminalComponent.draw(drawTools, terminalProps);    
     }
@@ -82,6 +90,10 @@ Component playingComponent {
     }else if (uiModeFps){
       auto hudProps = getDefaultProps();
       hudComponent.draw(drawTools, hudProps);   
+    }else if (uiModeGameOver){
+      auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt));
+      auto defaultProps = getDefaultProps();
+      return deadComponent.draw(drawTools, defaultProps);    
     }
 
   	if (playingOptions -> showZoomOverlay.has_value()){
