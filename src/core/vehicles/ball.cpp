@@ -3,7 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
-void applyScreenshake(int playerIndex, glm::vec3 impulse);
+void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 int getDefaultPlayerIndex();
 bool addToGravityWell(objid gravityWellId, objid managed);
 void removeFromGravityWell(objid managed);
@@ -93,7 +93,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     //playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false); 
 
     float shakeY = velocity.y * 5.f;
-    applyScreenshake(getDefaultPlayerIndex(), glm::vec3(0.f, shakeY, 0.f));
+    applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(0.f, shakeY, 0.f));
   }
 
   auto rotation = lookThirdPersonCalc(state.managedCamera, id, false).yAxisRotation;
@@ -165,7 +165,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
           auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
           gameapi -> applyImpulse(id, jumpImpulse);
         }
-        applyScreenshake(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
+        applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
         playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
       }  
     }

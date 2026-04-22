@@ -65,8 +65,6 @@ struct MovementActivePlayer {
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, std::function<bool(objid)> isGunZoomed, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates, std::vector<MovementActivePlayer>& player);
 
 void setActiveMovementEntity(Movement& movement, bool observeMode, int playerPort);
-std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId);
-
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest);
 void setEntityTargetRotation(MovementEntityData& movementEntityData, objid id, std::optional<glm::quat> rotation);
 void raycastFromCameraAndMoveTo(MovementEntityData& movementEntityData, objid entityId, int viewportIndex);

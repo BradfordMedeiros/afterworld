@@ -3,8 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
-void disableEntity(objid id);
-void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
 const bool SHOULD_SMOOTH_ANGLES = false;      
 const bool SHOULD_SMOOTH_ZOOM = true;
@@ -68,10 +66,9 @@ void enterVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   if (vehicle.state.sound.has_value()){
     playGameplayClipById(vehicle.state.sound.value(), std::nullopt, std::nullopt, false); 
   }
-  disableEntity(vehicle.state.occupied.value());
 }
 
-void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
+ExitVehicleInfo exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   //vehicles.vehicles.at(vehicleId).occupied = false;
   modlog("vehicle exit vehicle", std::to_string(vehicleId));
   Vehicle& vehicle = vehicles.vehicles.at(vehicleId);
@@ -79,12 +76,15 @@ void exitVehicle(Vehicles& vehicles, objid vehicleId, objid id){
   auto position = gameapi -> getGameObjectPos(vehicleId, true, "[gamelogic] exit vehicle get pos") + glm::vec3(0.f, 30.f, 0.f);
   auto vehicleRot = gameapi -> getGameObjectRotation(vehicleId, true, "[gamelogic] vehicle exit get rot"); 
 
-  reenableEntity(vehicle.state.occupied.value(), position, vehicleRot);
-
   vehicle.state.occupied = std::nullopt;
   if (vehicle.state.sound.has_value()){
     gameapi -> stopClipById(vehicle.state.sound.value());
   }
+
+  return ExitVehicleInfo {
+    .position = position,
+    .rotation = vehicleRot,
+  };
 }
 
 void onVehicleKey(Vehicles& vehicles, int key, int action){

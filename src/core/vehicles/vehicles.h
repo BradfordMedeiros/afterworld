@@ -20,7 +20,14 @@ Vehicles createVehicles();
 void addVehicle(Vehicles& vehicles, objid vehicleId, bool isShip);
 void removeVehicle(Vehicles& vehicles, objid vehicleId);
 void enterVehicle(Vehicles& vehicle, objid vehicleId, objid id);
-void exitVehicle(Vehicles& vehicle, objid vehicleId, objid id);
+
+struct ExitVehicleInfo {
+  glm::vec3 position;
+  glm::quat rotation;
+};
+ExitVehicleInfo exitVehicle(Vehicles& vehicle, objid vehicleId, objid id);
+
+
 bool isVehicle(Vehicles& vehicle, objid id);
 
 std::vector<int> getVehicleIds();

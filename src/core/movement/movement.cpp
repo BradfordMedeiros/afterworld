@@ -89,32 +89,6 @@ void setActiveMovementEntity(Movement& movement, bool observeMode, int playerPor
   controlParams.observeMode = observeMode;
 }
 
-std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
-  if (movementEntityData.movementEntities.size() == 0){
-    return std::nullopt;
-  }
-  std::vector<objid> allEntities;
-  for (auto &[id, _] : movementEntityData.movementEntities){
-    allEntities.push_back(id);
-  }
-  if (!activeId.has_value()){
-    return allEntities.at(0);
-  }
-  auto currId = activeId.value();
-  std::optional<int> currentIndex = 0;
-  for (int i = 0; i < allEntities.size(); i++){
-    if (currId == allEntities.at(i)){
-      currentIndex = i;
-      break;
-    }
-  }
-  auto index = currentIndex.value() + 1;
-  if (index >= allEntities.size()){
-    index = 0;
-  }
-
-  return allEntities.at(index);
-}
 
 void setEntityTargetLocation(MovementEntityData& movementEntityData, objid id, std::optional<MovementRequest> movementRequest){
   movementEntityData.movementEntities.at(id).targetLocation = movementRequest;

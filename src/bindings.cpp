@@ -892,7 +892,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (uiUpdate.didFire){
           modlog("ui update", "fire gun");
           float magnitude = static_cast<int>(std::rand()) % 5;
-          applyScreenshake(getDefaultPlayerIndex(), glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
+          applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
         }else{
           setShowActivate(false);
           setUIAmmoCount(0, 0);

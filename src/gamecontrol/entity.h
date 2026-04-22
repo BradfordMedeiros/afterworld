@@ -6,9 +6,9 @@
 #include "../core/vehicles/vehicles.h"
 #include "../core/scene_core.h"
 #include "../core/health.h"
+#include "../core/ragdoll.h"
 #include "../ai/ai.h"
 #include "../curves.h"
-#include "../resources/layer.h"
 #include "../options.h"
 
 struct ControlledPlayer {
@@ -47,7 +47,6 @@ bool isControlledVehicle(int vehicleId);
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
 void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
-bool controllableEntityExists(objid id);
 
 std::optional<objid> findBodyPart(objid entityId, const char* part);  // should move into a util
 std::vector<objid> findBodyPartAndChilren(objid entityId, const char* part);
@@ -104,16 +103,7 @@ void setEntityFirstPerson(objid id);
 void disableEntity(objid id);
 void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
-void createHitbox(objid id);
 void enterRagdoll(objid id);
-
-struct RigHit {
-	bool isHeadShot;
-	objid mainId;
-};
-
-std::string print(RigHit& righit);
-std::optional<RigHit> handleRigHit(objid id);
 
 void deliverCurrentGunAmmo(objid id, int ammoAmount);
 
@@ -122,7 +112,7 @@ bool isGunZoomed(objid id);
 void enterVehicleEntity(int playerIndex, objid vehicleId, objid id);
 void exitVehicleEntity(int playerIndex, objid vehicleId, objid id);
 
-void applyScreenshake(int playerIndex, glm::vec3 impulse);
+void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 
 void zoomIntoArcade(std::optional<objid> id, int playerIndex);
 std::optional<bool> isZoomedIntoArcade(int playerIndex);

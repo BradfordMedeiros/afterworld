@@ -5,15 +5,16 @@ extern Weapons weapons;
 extern Movement movement;
 extern Vehicles vehicles;
 
-void objectRemoved(objid idRemoved);
-
-extern std::unordered_map<objid, ControllableEntity> controllableEntities;  // static-state extern
-extern std::unordered_map<objid, Inventory> scopenameToInventory;     // static-state extern
+extern std::unordered_map<objid, ControllableEntity> controllableEntities;
+extern std::unordered_map<objid, Inventory> scopenameToInventory;
 extern MovementEntityData movementEntities;
 
 extern int numberOfPlayers;
 extern int mainPlayerControl;
-extern std::vector<ControlledPlayer> players; // TODO static state
+extern std::vector<ControlledPlayer> players;
+
+void objectRemoved(objid idRemoved);
+
 
 void addPlayerPort(int playerIndex){
 	ControlledPlayer player {
@@ -57,21 +58,6 @@ std::optional<ControllableEntity*> getControllableEntity(objid id){
 	return &controllableEntities.at(id);
 }
 
-bool isControlledVehicle(int vehicleId){
-	for (auto& player : players){
-		if (!player.playerId.has_value()){
-			continue;
-		}
-		auto controllableEntity = getControllableEntity(player.playerId.value());
-		if (controllableEntity.has_value()){
-			if (controllableEntity.value() -> vehicle.has_value() && controllableEntity.value() -> vehicle.value() == vehicleId){
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 ControlledPlayer& getControlledPlayer(int playerIndex){
 	for (auto& player : players){
 		if (player.viewport == playerIndex){
@@ -101,74 +87,6 @@ void setMainPlayerControl(int playerIndex){
 
 std::optional<objid> getPlayerId(int playerIndex){
 	return getControlledPlayer(playerIndex).playerId;
-}
-
-std::optional<objid> findBodyPart(objid entityId, const char* part){
-  auto children = gameapi -> getChildrenIdsAndParent(entityId);
-  for (auto childId : children){
-    auto name = gameapi -> getGameObjNameForId(childId).value();
-    if (stringEndsWith(name, part)){
-      return childId;
-    }
-  } 
-  return std::nullopt;
-}
-
-std::vector<objid> findBodyPartAndChilren(objid entityId, const char* part){
-  auto bodyPart = findBodyPart(entityId, part);
-  if (!bodyPart.has_value()){
-  	return {};
-  }
-  auto childIds = gameapi -> getChildrenIdsAndParent(bodyPart.value());
-  std::vector<objid> ids;
-  for (auto id : childIds){
-  	ids.push_back(id);
-  }
-  return ids;
-}
-
-std::set<objid> entityIdsToDisable(objid entityId){
-	std::set<objid> ids;
-  auto leftHand = findBodyPart(entityId, "LeftHand");
-  auto rightHand = findBodyPart(entityId, "RightHand");
-  auto neck = findBodyPart(entityId, "Neck");
-  auto head = findBodyPart(entityId, "Head");
-  if (leftHand.has_value()){
-	  ids.insert(leftHand.value());
-  }
-  if (rightHand.has_value()){
-	  ids.insert(rightHand.value());
-  }
-  if (neck.has_value()){
-	  ids.insert(neck.value());
-  }
-  if (head.has_value()){
-	  ids.insert(head.value());
-  }
-	return ids;
-}
-
-std::set<objid> entityIdsToEnableForShooting(objid entityId){
-	std::set<objid> ids;
-	//{
-  //	auto newIds = findBodyPartAndChilren(entityId, "RightShoulder");
-  //	for (auto id : newIds){
-  //		ids.insert(id);
-  //	}
-	//}
-	//{
-  //	auto newIds = findBodyPartAndChilren(entityId, "LeftShoulder");
-  //	for (auto id : newIds){
-  //		ids.insert(id);
-  //	}
-	//}
-	{
-  	auto newIds = findBodyPartAndChilren(entityId, "Spine");
-  	for (auto id : newIds){
-  		ids.insert(id);
-  	}
-	}
-	return ids;
 }
 
 void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
@@ -206,10 +124,6 @@ void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementE
   removeWeaponId(weapons, idRemoved);
   removeInventory(scopenameToInventory, idRemoved);
   controllableEntities.erase(idRemoved);
-}
-
-bool controllableEntityExists(objid id){
-	return controllableEntities.find(id) != controllableEntities.end();
 }
 
 void updateCamera(int playerIndex){
@@ -300,7 +214,6 @@ bool hasCameraAncestor(objid id){
 	return hasCameraAncestor(parent.value());
 }
 
-
 void maybeReEnableMesh(objid id){
 	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
 	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
@@ -329,7 +242,6 @@ void maybeDisableMesh(objid id){
 	}
 }
 
-
 void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex){
 	modlog("set active player", std::to_string(playerIndex) + " set to: " + print(id));
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
@@ -357,6 +269,34 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 
   updateCamera(playerIndex);
 }
+
+std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
+  if (movementEntityData.movementEntities.size() == 0){
+    return std::nullopt;
+  }
+  std::vector<objid> allEntities;
+  for (auto &[id, _] : movementEntityData.movementEntities){
+    allEntities.push_back(id);
+  }
+  if (!activeId.has_value()){
+    return allEntities.at(0);
+  }
+  auto currId = activeId.value();
+  std::optional<int> currentIndex = 0;
+  for (int i = 0; i < allEntities.size(); i++){
+    if (currId == allEntities.at(i)){
+      currentIndex = i;
+      break;
+    }
+  }
+  auto index = currentIndex.value() + 1;
+  if (index >= allEntities.size()){
+    index = 0;
+  }
+
+  return allEntities.at(index);
+}
+
 void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
   setActivePlayer(movement, weapons, aiData, getNextEntity(movementEntities, controlledPlayer.playerId), playerIndex);
@@ -412,7 +352,6 @@ std::vector<ControlledPlayer>& getPlayers(){
 	modassert(players.size() > 0, "invalid player size");
 	return players;
 }
-
 
 void onActivePlayerRemoved(objid id){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
@@ -573,42 +512,6 @@ WeaponEntityData getWeaponEntityData(objid id){
   };
 }
 
-DebugConfig debugPrintActivePlayer(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-
-  DebugConfig debugConfig { .data = {} };
-
-  {
-  	std::string activeCameraName = "";
-  	auto activeCameraId = gameapi -> getActiveCamera(std::nullopt);
-  	if (activeCameraId.has_value()){
-  		activeCameraName = gameapi -> getGameObjNameForId(activeCameraId.value()).value();
-  	}
-	  debugConfig.data.push_back({"activeCameraName", print(activeCameraId) + " [" + activeCameraName + "]" });
-	}
-
-	{
-	  std::string playerName = "";
-	  if (controlledPlayer.playerId.has_value()){
-	  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
-	  }
-	  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) + + " [" + playerName + "]" });
-	}
-
-	{
-  	std::string cameraName = "";
-  	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-  		cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
-  	}
-  	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
-	}
-
-	auto inThirdPerson = activePlayerInThirdPerson(playerIndex);
-	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
-
-  return debugConfig;
-}
-
 std::optional<ControllableEntity*> getActiveControllable(int playerIndex){
 	auto activePlayer = getActivePlayerId(playerIndex);
 	if (!activePlayer.has_value()){
@@ -650,91 +553,6 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 	}
 }
 
-
-/////////////////////
-
-struct BoneShape {
-	std::string bone;
-	ShapeCreateType shape;
-};
-std::vector<BoneShape> boneValues = {
-	BoneShape {
-		.bone = "Hand",
-		//.shape = PhysicsCreateSphere {
- 		//	.radius = 0.5f,
-		//},
-		.shape = PhysicsCreateRect {
- 			.width = 0.2f,
- 			.height = 0.2f,
- 			.depth = 0.2f,
-		},
-	},
-	BoneShape {
-		.bone = "Hips",
-		//.shape = PhysicsCreateSphere {
- 		//	.radius = 0.5f,
-		//},
-		.shape = PhysicsCreateRect {
- 			.width = 0.2f,
- 			.height = 0.2f,
- 			.depth = 0.2f,
-		},
-	},
-	BoneShape {
-		.bone = "LeftUpLeg",
-		//.shape = PhysicsCreateSphere {
- 		//	.radius = 0.5f,
-		//},
-		.shape = PhysicsCreateRect {
- 			.width = 0.2f,
- 			.height = 0.2f,
- 			.depth = 0.2f,
-		},
-	},
-	BoneShape {
-		.bone = "RightUpLeg",
-		//.shape = PhysicsCreateSphere {
- 		//	.radius = 0.5f,
-		//},
-		.shape = PhysicsCreateRect {
- 			.width = 0.2f,
- 			.height = 0.2f,
- 			.depth = 0.2f,
-		},
-	},
-	BoneShape {
-		.bone = "Head",
-		.shape = PhysicsCreateSphere {
- 			.radius = 0.5f,
-		},
-	},
-};
-
-void createHitbox(objid playerModel){
-	for (auto &value : boneValues){
-		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
-		if (headValue.has_value()){
-			auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
-			std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
-
-			gameapi -> createPhysicsBody(headValue.value(), value.shape, std::nullopt);
-			rigidBodyOpts physicsOptions {
-	  	  .linear = glm::vec3(1.f, 1.f, 1.f),
-	  	  .angular = glm::vec3(0.f, 0.f, 0.f),
-	  	  .gravity = glm::vec3(0.f, -9.f, 0.f),
-	  	  .friction = 1.f,
-	  	  .restitution = 1.f,
-	  	  .mass = 1.f,
-	  	  .layer = physicsLayers.bones,
-	  	  .linearDamping = 0.f,
-	  	  .isStatic = true,
-	  	  .hasCollisions = false,
-			};
-			gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);	
-		}	
-	}
-}
-
 void enterRagdoll(objid playerModel){
 	objectRemoved(playerModel);
 	setGameObjectPhysicsEnable(playerModel, false);
@@ -760,25 +578,9 @@ void enterRagdoll(objid playerModel){
 	}
 }
 
-std::string print(RigHit& righit){
-	std::string value = "";
-	value += std::string("headshot: ") + (righit.isHeadShot ? "true" : "false");
-	return value;
-}
-std::optional<RigHit> handleRigHit(objid id) {
-	auto groupId = gameapi -> groupId(id);
-	auto isControllable = controllableEntityExists(groupId);
-	if (!isControllable){
-		return std::nullopt;
-	}
-	auto objectName = gameapi -> getGameObjNameForId(id).value();
-	auto isHead = objectName.find("Head") != std::string::npos;
-	std::cout << "doDamage: is head: " << (isHead ? "true" : "false") << std::endl;
-
-	return RigHit {
-		.isHeadShot = isHead,
-		.mainId = groupId,
-	};
+bool isControllableEntity(objid id){
+	auto isControllable = controllableEntities.find(id) != controllableEntities.end();
+	return isControllable;
 }
 
 std::set<objid>& getDisabledAnimationIds(objid entityId){
@@ -796,6 +598,7 @@ bool isGunZoomed(objid id){
 
 void enterVehicleEntity(int playerIndex, objid vehicleId, objid id){
   enterVehicle(vehicles, vehicleId, id);
+  disableEntity(id);
   std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
   modassert(controllable.has_value() && controllable.value() != NULL, "controllable invalid");
   controllable.value() -> vehicle = vehicleId;
@@ -805,11 +608,29 @@ void exitVehicleEntity(int playerIndex, objid vehicleId, objid id){
   if (!canExitVehicle()){
     return;
   }
-  exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
+  auto vehicleInfo = exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
+  reenableEntity(id, vehicleInfo.position, vehicleInfo.rotation);
+
   getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
 }
 
-void applyScreenshake(int playerIndex, glm::vec3 impulse){
+bool isControlledVehicle(int vehicleId){
+	for (auto& player : players){
+		if (!player.playerId.has_value()){
+			continue;
+		}
+		auto controllableEntity = getControllableEntity(player.playerId.value());
+		if (controllableEntity.has_value()){
+			if (controllableEntity.value() -> vehicle.has_value() && controllableEntity.value() -> vehicle.value() == vehicleId){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse){
   if (hasOption("no-shake")){
     return;
   }
@@ -837,4 +658,41 @@ std::optional<bool> isZoomedIntoArcade(int playerIndex){
   	return false;
   }
   return controlledPlayer.value() -> zoomIntoArcade;
+}
+
+
+DebugConfig debugPrintActivePlayer(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
+  DebugConfig debugConfig { .data = {} };
+
+  {
+  	std::string activeCameraName = "";
+  	auto activeCameraId = gameapi -> getActiveCamera(std::nullopt);
+  	if (activeCameraId.has_value()){
+  		activeCameraName = gameapi -> getGameObjNameForId(activeCameraId.value()).value();
+  	}
+	  debugConfig.data.push_back({"activeCameraName", print(activeCameraId) + " [" + activeCameraName + "]" });
+	}
+
+	{
+	  std::string playerName = "";
+	  if (controlledPlayer.playerId.has_value()){
+	  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
+	  }
+	  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) + + " [" + playerName + "]" });
+	}
+
+	{
+  	std::string cameraName = "";
+  	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+  		cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
+  	}
+  	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
+	}
+
+	auto inThirdPerson = activePlayerInThirdPerson(playerIndex);
+	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
+
+  return debugConfig;
 }
