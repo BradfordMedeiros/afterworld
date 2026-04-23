@@ -14,7 +14,7 @@
 struct ControlledPlayer {
 	int viewport; // this is used interchangably with the player index (eg player 1, 2, etc)
 	glm::vec2 lookVelocity;
-	std::optional<objid> playerId;
+	std::optional<objid> entityId;
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempCamera;
 	bool freeCamera;
@@ -37,60 +37,63 @@ struct ControllableEntity {
 
 ControlledPlayer& getControlledPlayer(int playerIndex);
 ControlledPlayer& getMainControlledPlayer();
-void setNumberPlayers(int numPlayers);
 int getNumberOfPlayers();
 void setMainPlayerControl(int playerIndex);
 void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
 bool isControlledPlayer(int playerId);
 bool isControlledVehicle(int vehicleId);
-
-void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded);
-void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved);
-
-std::optional<objid> findBodyPart(objid entityId, const char* part);  // should move into a util
-std::vector<objid> findBodyPartAndChilren(objid entityId, const char* part);
-
 int getDefaultPlayerIndex();
-std::optional<objid> getActivePlayerId(int playerIndex);
-std::optional<int> getPlayerIndex(objid id);
+
+void onAddEntity(objid idAdded);
+void onRemoveEntity(objid idRemoved);
+
+std::optional<objid> getEntityForPlayerIndex(int playerIndex);
+void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex);
+
+void setEntityNextForPlayerIndex(int playerIndex);
+void observeEntity(std::optional<objid> id, int playerIndex);
+void observeEntityNext(int playerIndex);
+
+std::optional<int> getPlayerIndexForEntity(objid id);
 std::vector<ControlledPlayer>& getPlayers();
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
-std::optional<bool> activePlayerInThirdPerson(int playerIndex);
 
-std::optional<bool> isInShootingMode(objid id);
-void setInShootingMode(objid id, bool shootingMode);
-void setIsAlive(objid id, bool alive);
-void setIsFalling(objid id, bool falling);
-void setIsReloading(objid id, bool reloading);
+void setEntityInShootingMode(objid id, bool shootingMode);
+std::optional<bool> isEntityInShootingMode(objid id);
+
+void setEntityIsAlive(objid id, bool alive);
+std::optional<bool> activePlayerAlive(int playerIndex);
+
+void setEntityIsFalling(objid id, bool falling);
+std::optional<bool> activePlayerFalling(int playerIndex);
+
+void setEntityIsReloading(objid id, bool reloading);
+std::optional<bool> activePlayerReloading(int playerIndex);
+
+bool isEntityGunZoomed(objid id);
+
+void setEntityThirdPerson(objid id);
+void setEntityFirstPerson(objid id);
+
+
 
 bool allPlayersDead();
 
-void maybeReEnableMesh(objid id);
-void maybeDisableMesh(objid id);
 
-void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int player);
-void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex);
-void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex);
-void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex);
 
 void onActivePlayerRemoved(objid id);
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 bool isPlayerControlDisabled(int playerIndex);
-std::optional<bool> activePlayerAlive(int playerIndex);
-std::optional<bool> activePlayerFalling(int playerIndex);
-std::optional<bool> activePlayerReloading(int playerIndex);
 
 void setPlayerFreeCamera(int playerIndex, bool editorMode);
 
 void setTempCamera(std::optional<objid> camera, int playerIndex);
-std::optional<objid> getTempCamera(int playerIndex);
 
-void killActivePlayer(int playerIndex);
+void killPlayer(int playerIndex);
 
 glm::vec3 getPlayerVelocity(int playerIndex);
 std::optional<glm::vec3> getActivePlayerPosition(int playerIndex);
-std::optional<glm::quat> getActivePlayerRotation(int playerIndex);
 
 WeaponEntityData getWeaponEntityData(objid id);
 
@@ -98,19 +101,15 @@ DebugConfig debugPrintActivePlayer(int playerIndex);
 
 std::optional<ControllableEntity*> getActiveControllable(int playerIndex);
 
-void setEntityThirdPerson(objid id);
-void setEntityFirstPerson(objid id);
+
 void disableEntity(objid id);
 void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
 
-void enterRagdoll(objid id);
-
 void deliverCurrentGunAmmo(objid id, int ammoAmount);
 
-bool isGunZoomed(objid id);
 
-void enterVehicleEntity(int playerIndex, objid vehicleId, objid id);
-void exitVehicleEntity(int playerIndex, objid vehicleId, objid id);
+void entityEnterVehicle(int playerIndex, objid vehicleId, objid id);
+void entityExitVehicle(int playerIndex, objid vehicleId, objid id);
 
 void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 

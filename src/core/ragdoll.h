@@ -24,10 +24,9 @@ struct RigHit {
 std::optional<RigHit> handleRigHit(objid id);
 std::string print(RigHit& righit);
 
-
+void enterRagdoll(objid playerModel);
 
 std::optional<objid> findBodyPart(objid entityId, const char* part);
-std::vector<objid> findBodyPartAndChildren(objid entityId, const char* part);
 
 std::set<objid> entityIdsToDisable(objid entityId);
 std::set<objid> entityIdsToEnableForShooting(objid entityId);

@@ -2,7 +2,8 @@
 
 extern CustomApiBindings* gameapi;
 
-bool isControllableEntity(objid id);
+bool isEntity(objid id);
+void objectRemoved(objid idRemoved);
 
 std::vector<BoneShape> boneValues = {
 	BoneShape {
@@ -85,7 +86,7 @@ void createHitbox(objid playerModel){
 
 std::optional<RigHit> handleRigHit(objid id) {
 	auto groupId = gameapi -> groupId(id);
-	auto isControllable = isControllableEntity(groupId);
+	auto isControllable = isEntity(groupId);
 	if (!isControllable){
 		return std::nullopt;
 	}
@@ -172,4 +173,29 @@ std::set<objid> entityIdsToEnableForShooting(objid entityId){
   	}
 	}
 	return ids;
+}
+
+void enterRagdoll(objid playerModel){
+	objectRemoved(playerModel);
+	setGameObjectPhysicsEnable(playerModel, false);
+
+	for (auto &value : boneValues){
+		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
+		auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
+		std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
+
+		rigidBodyOpts physicsOptions {
+		  .linear = glm::vec3(1.f, 1.f, 1.f),
+		  .angular = glm::vec3(0.f, 0.f, 0.f),
+		  .gravity = glm::vec3(0.f, -9.81f, 0.f),
+		  .friction = 5.f,
+		  .restitution = 1.f,
+		  .mass = 1.f,
+		  .layer = physicsLayers.bones,
+		  .linearDamping = 0.f,
+		  .isStatic = false,
+		  .hasCollisions = true,
+		};
+		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
+	}
 }

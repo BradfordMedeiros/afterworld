@@ -262,7 +262,7 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	}
 
 	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position, false);
-	auto activePlayer = getActivePlayerId(getDefaultPlayerIndex());
+	auto activePlayer = getEntityForPlayerIndex(getDefaultPlayerIndex());
 	if (activePlayer.has_value()){
 		emitExplosion(rootSceneId(), activePlayer.value(), position, glm::vec3(1.f, 1.f, 1.f));
 	}

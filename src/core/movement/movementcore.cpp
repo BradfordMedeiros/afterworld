@@ -2,7 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
-bool entityInShootingMode(objid id);
+std::optional<bool> isEntityInShootingMode(objid id);
 std::optional<glm::vec3> getImpulseThisFrame(objid id);
 
 struct MovementCore {
@@ -523,7 +523,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
   auto direction = glm::normalize(glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z));
   auto isWalking = calcIfWalking(movementState);
-  auto isHoldingGun = entityInShootingMode(playerId);
+  auto isHoldingGun = isEntityInShootingMode(playerId).value();
   animationConfig.isWalking = isWalking;
   animationConfig.isWalkingForward = animationConfig.isWalking && (movementState.moveVec.z < 0);
   animationConfig.isHoldingGun = isHoldingGun;

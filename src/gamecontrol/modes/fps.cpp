@@ -3,9 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 extern Director director;
-extern Movement movement;
-extern Weapons weapons;
-extern AiData aiData;
 extern GameTypes gametypeSystem;
 
 //    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
@@ -61,7 +58,7 @@ void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePla
     auto playerId = findObjByShortName(player.value(), sceneId);
     modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
     modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-    setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
+    setEntityForPlayerIndex(playerId.value(), 0);
   }
 
   if (playerIds.size() > 0){
@@ -70,7 +67,7 @@ void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePla
       auto playerId = findBodyPart(prefabId, player.value().c_str());
       modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
       modlog("router", std::string("setting active player: playerId id = ") + std::to_string(playerId.value()));
-      setActivePlayer(movement, weapons, aiData, playerId, i);
+      setEntityForPlayerIndex(playerId, i);
     }
   }
 }

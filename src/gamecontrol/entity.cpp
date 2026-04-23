@@ -4,23 +4,23 @@ extern CustomApiBindings* gameapi;
 extern Weapons weapons;
 extern Movement movement;
 extern Vehicles vehicles;
+extern AiData aiData;
 
 extern std::unordered_map<objid, ControllableEntity> controllableEntities;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;
 extern MovementEntityData movementEntities;
 
-extern int numberOfPlayers;
 extern int mainPlayerControl;
 extern std::vector<ControlledPlayer> players;
 
-void objectRemoved(objid idRemoved);
 
 
+// Player port / viewport functions
 void addPlayerPort(int playerIndex){
 	ControlledPlayer player {
 		.viewport = playerIndex,
 		.lookVelocity = glm::vec2(0.f, 0.f),  // should come from movement state
-		.playerId = std::nullopt,
+		.entityId = std::nullopt,
 		.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
 		.tempCamera = std::nullopt,
 		.freeCamera = false,
@@ -42,9 +42,24 @@ void removePlayerPort(int playerIndex){
 	removePlayerPortFromMovement(movement, playerIndex);
 }
 
+int getDefaultPlayerIndex(){
+	return mainPlayerControl;
+}
+
+int getNumberOfPlayers(){
+	return players.size();
+}
+
+void setMainPlayerControl(int playerIndex){
+	mainPlayerControl = playerIndex;
+}
+
+/////////////////
+
+
 bool isControlledPlayer(int playerId){
 	for (auto& player : players){
-		if (player.playerId.has_value() && player.playerId.value() == playerId){
+		if (player.entityId.has_value() && player.entityId.value() == playerId){
 			return true;
 		}
 	}
@@ -72,24 +87,12 @@ ControlledPlayer& getMainControlledPlayer(){
 	return players.at(getDefaultPlayerIndex());
 }
 
-void setNumberPlayers(int numPlayers){
-  modassert(numPlayers == 1 || numPlayers == 2, "invalid number of players");
-  numberOfPlayers = numPlayers;
-}
-
-int getNumberOfPlayers(){
-	return numberOfPlayers;
-}
-
-void setMainPlayerControl(int playerIndex){
-	mainPlayerControl = playerIndex;
-}
 
 std::optional<objid> getPlayerId(int playerIndex){
-	return getControlledPlayer(playerIndex).playerId;
+	return getControlledPlayer(playerIndex).entityId;
 }
 
-void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idAdded){
+void onAddEntity(objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));
   bool shouldAddWeapon = false;
   shouldAddWeapon = shouldAddWeapon || maybeAddMovementEntity(movementEntities, idAdded);
@@ -110,12 +113,11 @@ void onAddControllableEntity(AiData& aiData, MovementEntityData& movementEntitie
   if (shouldAddWeapon){
 	  addInventory(scopenameToInventory, idAdded);
 	  addWeaponId(weapons, idAdded);
-
     createHitbox(idAdded);
   }
 }
 
-void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementEntities, objid idRemoved){
+void onRemoveEntity(objid idRemoved){
 	if (controllableEntities.find(idRemoved) != controllableEntities.end()){
 		modlog("controllable entity removed id:", std::to_string(idRemoved));
 	}
@@ -126,13 +128,18 @@ void maybeRemoveControllableEntity(AiData& aiData, MovementEntityData& movementE
   controllableEntities.erase(idRemoved);
 }
 
+bool isEntity(objid id){
+	auto isControllable = controllableEntities.find(id) != controllableEntities.end();
+	return isControllable;
+}
+
 void updateCamera(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	// ensure viewports
-	if (numberOfPlayers == 1){
+	if (players.size() == 1){
   	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{}, {});
-	}else if (numberOfPlayers == 2){
+	}else if (players.size() == 2){
   	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{}, {});
 	  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{}, {});
 	}else {
@@ -165,38 +172,86 @@ std::optional<objid> getCameraForThirdPerson(int playerIndex){
 	return controlledPlayer.activePlayerManagedCameraId;
 }
 
-std::optional<bool> activePlayerInThirdPerson(int playerIndex){
+std::optional<bool> entityInThirdPersonByPlayerIndex(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	if (!controlledPlayer.playerId.has_value()){
+	if (!controlledPlayer.entityId.has_value()){
 		return std::nullopt;
 	}
-	bool thirdPerson = getWeaponEntityData(controlledPlayer.playerId.value()).thirdPersonMode;
+	bool thirdPerson = getWeaponEntityData(controlledPlayer.entityId.value()).thirdPersonMode;
 	return thirdPerson;
 }
 
-std::optional<bool> isInShootingMode(objid id){
+void setEntityInShootingMode(objid id, bool shootingMode){
+	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setInShootingMode for unregistered controllableEntity: ") + std::to_string(id));
+	controllableEntities.at(id).isInShootingMode = shootingMode;
+}
+
+std::optional<bool> isEntityInShootingMode(objid id){
 	if (controllableEntities.find(id) == controllableEntities.end()){
 		return false;
 	}
 	return controllableEntities.at(id).isInShootingMode;
 }
 
-bool entityInShootingMode(objid id){
-  return isInShootingMode(id).value();
-}
 
-void setInShootingMode(objid id, bool shootingMode){
-	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setInShootingMode for unregistered controllableEntity: ") + std::to_string(id));
-	controllableEntities.at(id).isInShootingMode = shootingMode;
-}
-
-
-void setIsAlive(objid id, bool alive){
+void setEntityIsAlive(objid id, bool alive){
 	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setIsAlive for unregistered controllableEntity: ") + std::to_string(id));
 	controllableEntities.at(id).isAlive = alive;
 	//maybeDisableAi(aiData, id.value());
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 	movementEntity.movementState.alive = alive;
+}
+std::optional<bool> activePlayerAlive(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	if (!controlledPlayer.entityId.has_value()){
+		return std::nullopt;
+	}
+  auto alive = movementEntities.movementEntities.at(controlledPlayer.entityId.value()).movementState.alive;
+  return alive;
+}
+
+void setEntityIsFalling(objid id, bool falling){
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
+	movementEntity.movementState.falling = falling;
+}
+std::optional<bool> activePlayerFalling(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	if (!controlledPlayer.entityId.has_value()){
+		return std::nullopt;
+	}
+  auto falling = movementEntities.movementEntities.at(controlledPlayer.entityId.value()).movementState.falling;
+  return falling;
+}
+
+void setEntityIsReloading(objid id, bool reloading){
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
+	if (!reloading){
+		movementEntity.movementState.reloading = std::nullopt;
+	}else{
+		movementEntity.movementState.reloading = gameapi -> timeSeconds(false);
+	}
+}
+std::optional<bool> activePlayerReloading(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+
+	if (!controlledPlayer.entityId.has_value()){
+		return std::nullopt;
+	}
+	return isReloading(movementEntities.movementEntities.at(controlledPlayer.entityId.value()).movementState);
+}
+
+bool isEntityGunZoomed(objid id){
+  auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
+  return gunZoomed;
+}
+
+
+void maybeReEnableMesh(objid id){
+	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
+	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
+		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
+		 gameapi -> setMeshEnabled(childId, true, {});
+	}
 }
 
 bool isCamera(objid id){
@@ -213,22 +268,13 @@ bool hasCameraAncestor(objid id){
 	}
 	return hasCameraAncestor(parent.value());
 }
-
-void maybeReEnableMesh(objid id){
-	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
-	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
-		 modlog("enable mesh", gameapi -> getGameObjNameForId(childId).value());
-		 gameapi -> setMeshEnabled(childId, true, {});
-	}
-}
-
 void maybeDisableMesh(objid id){
 	modlog("disable mesh main", gameapi -> getGameObjNameForId(id).value());
 	for (auto childId : gameapi -> getChildrenIdsAndParent(id)){
 		 modlog("disable mesh", gameapi -> getGameObjNameForId(childId).value());
 		 if (!hasCameraAncestor(childId)){ // guns are children of the camera 
 		 	 if (isControlledPlayer(id)){
-		 	 	int viewport = getPlayerIndex(id).value();
+		 	 	int viewport = getPlayerIndexForEntity(id).value();
 		 	 	ViewportMeshEnablement meshEnablement {
   					.enable = false,
   					.viewport = viewport,
@@ -242,15 +288,20 @@ void maybeDisableMesh(objid id){
 	}
 }
 
-void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex){
+std::optional<objid> getEntityForPlayerIndex(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	return controlledPlayer.entityId;
+}
+
+void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex){
 	modlog("set active player", std::to_string(playerIndex) + " set to: " + print(id));
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	if (!id.has_value()){
 		return;
 	}
-	if (controlledPlayer.playerId.has_value()){
-    maybeReEnableAi(aiData, controlledPlayer.playerId.value());
+	if (controlledPlayer.entityId.has_value()){
+    maybeReEnableAi(aiData, controlledPlayer.entityId.value());
 	}
 	setActiveMovementEntity(movement, false, playerIndex);
 	maybeDisableAi(aiData, id.value());
@@ -259,7 +310,7 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
 
-	controlledPlayer.playerId = id.value();
+	controlledPlayer.entityId = id.value();
 
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
@@ -270,12 +321,12 @@ void setActivePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::
   updateCamera(playerIndex);
 }
 
-std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::optional<objid> activeId){
-  if (movementEntityData.movementEntities.size() == 0){
+std::optional<objid> getNextEntity(std::optional<objid> activeId){
+  if (movementEntities.movementEntities.size() == 0){
     return std::nullopt;
   }
   std::vector<objid> allEntities;
-  for (auto &[id, _] : movementEntityData.movementEntities){
+  for (auto &[id, _] : movementEntities.movementEntities){
     allEntities.push_back(id);
   }
   if (!activeId.has_value()){
@@ -297,12 +348,12 @@ std::optional<objid> getNextEntity(MovementEntityData& movementEntityData, std::
   return allEntities.at(index);
 }
 
-void setActivePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
+void setEntityNextForPlayerIndex(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-  setActivePlayer(movement, weapons, aiData, getNextEntity(movementEntities, controlledPlayer.playerId), playerIndex);
+  setEntityForPlayerIndex(getNextEntity(controlledPlayer.entityId), playerIndex);
 }
 
-void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::optional<objid> id, int playerIndex){
+void observeEntity(std::optional<objid> id, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	if (!id.has_value()){
@@ -316,7 +367,7 @@ void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::op
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
 	}
 
-	controlledPlayer.playerId = id.value();
+	controlledPlayer.entityId = id.value();
 
   GameobjAttributes attr { .attr = {{ "position", glm::vec3(0.f, 0.f, 0.f) }} };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
@@ -326,22 +377,15 @@ void observePlayer(Movement& movement, Weapons& weapons, AiData& aiData, std::op
 
   updateCamera(playerIndex);
 }
-void observePlayerNext(Movement& movement, Weapons& weapons, AiData& aiData, int playerIndex){
+void observeEntityNext(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	observePlayer(movement, weapons, aiData, getNextEntity(movementEntities, controlledPlayer.playerId), playerIndex);
+	observeEntity(getNextEntity(controlledPlayer.entityId), playerIndex);
 }
 
-int getDefaultPlayerIndex(){
-	return mainPlayerControl;
-}
-std::optional<objid> getActivePlayerId(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	return controlledPlayer.playerId;
-}
 
-std::optional<int> getPlayerIndex(objid id){
+std::optional<int> getPlayerIndexForEntity(objid id){
 	for (auto &player : players){
-		if (player.playerId.has_value() && player.playerId.value() == id){
+		if (player.entityId.has_value() && player.entityId.value() == id){
 			return player.viewport;
 		}
 	}
@@ -360,8 +404,8 @@ void onActivePlayerRemoved(objid id){
 		controlledPlayer.tempCamera = std::nullopt;
 		updateCamera(getDefaultPlayerIndex());
 	}
-	if (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id){
-		controlledPlayer.playerId = std::nullopt;
+	if (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id){
+		controlledPlayer.entityId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
 		controlledPlayer.disablePlayerControl = false;
 		updateCamera(getDefaultPlayerIndex());
@@ -378,43 +422,10 @@ bool isPlayerControlDisabled(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	return controlledPlayer.disablePlayerControl;
 }
-std::optional<bool> activePlayerAlive(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	if (!controlledPlayer.playerId.has_value()){
-		return std::nullopt;
-	}
-  auto alive = movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState.alive;
-  return alive;
-}
-std::optional<bool> activePlayerFalling(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	if (!controlledPlayer.playerId.has_value()){
-		return std::nullopt;
-	}
-  auto falling = movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState.falling;
-  return falling;
-}
-void setIsFalling(objid id, bool falling){
-	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
-	movementEntity.movementState.falling = falling;
-}
 
-std::optional<bool> activePlayerReloading(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
-	if (!controlledPlayer.playerId.has_value()){
-		return std::nullopt;
-	}
-	return isReloading(movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState);
-}
-void setIsReloading(objid id, bool reloading){
-	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
-	if (!reloading){
-		movementEntity.movementState.reloading = std::nullopt;
-	}else{
-		movementEntity.movementState.reloading = gameapi -> timeSeconds(false);
-	}
-}
+////////////
+
 
 bool allPlayersDead(){
 	for (auto& player : players){
@@ -437,38 +448,26 @@ void setTempCamera(std::optional<objid> camera, int playerIndex){
 	controlledPlayer.tempCamera = camera;
 	updateCamera(playerIndex);
 }
-std::optional<objid> getTempCamera(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	return controlledPlayer.tempCamera;
-}
 
-void killActivePlayer(int playerIndex){
+void killPlayer(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
-  if (controlledPlayer.playerId.has_value()){
-    doDamageMessage(controlledPlayer.playerId.value(), 10000.f);   
+  if (controlledPlayer.entityId.has_value()){
+    doDamageMessage(controlledPlayer.entityId.value(), 10000.f);   
   }
 }
 
 glm::vec3 getPlayerVelocity(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-  return movementEntities.movementEntities.at(controlledPlayer.playerId.value()).movementState.velocity;
+  return movementEntities.movementEntities.at(controlledPlayer.entityId.value()).movementState.velocity;
 }
 
 std::optional<glm::vec3> getActivePlayerPosition(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	if (!controlledPlayer.playerId.has_value()){
+	if (!controlledPlayer.entityId.has_value()){
 		return std::nullopt;
 	}
-	return gameapi -> getGameObjectPos(controlledPlayer.playerId.value(), true, "[gamelogic] getActivePlayerPosition");
-}
-
-std::optional<glm::quat> getActivePlayerRotation(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	if (!controlledPlayer.playerId.has_value()){
-		return std::nullopt;
-	}
-	return gameapi -> getGameObjectRotation(controlledPlayer.playerId.value(), true, "[gamelogic] getActivePlayerRotation"); // tempchecked
+	return gameapi -> getGameObjectPos(controlledPlayer.entityId.value(), true, "[gamelogic] getActivePlayerPosition");
 }
 
 FiringTransform getFireTransform(objid id, int playerIndex){
@@ -476,7 +475,7 @@ FiringTransform getFireTransform(objid id, int playerIndex){
 
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 
-	if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.playerId.has_value() && controlledPlayer.playerId.value() == id)){ // only use the third person code for the active player
+	if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id)){ // only use the third person code for the active player
 		// this 0 out only works if these vectors are parallel, otherwise would have to solve the parametric eqtns 
 		// z is set to the player entity so it doesnt shoot from behind the character.
 		// for example, if you dont do this, if you zoom the cam out you can hit a target in the crosshair behind the character
@@ -513,7 +512,7 @@ WeaponEntityData getWeaponEntityData(objid id){
 }
 
 std::optional<ControllableEntity*> getActiveControllable(int playerIndex){
-	auto activePlayer = getActivePlayerId(playerIndex);
+	auto activePlayer = getEntityForPlayerIndex(playerIndex);
 	if (!activePlayer.has_value()){
 		return std::nullopt;
 	}
@@ -530,6 +529,7 @@ void setEntityFirstPerson(objid id){
 	maybeDisableMesh(id);
 }
 
+
 void disableEntity(objid id){
 	maybeDisableMesh(id);
 	setGameObjectPhysicsEnable(id, false);
@@ -540,7 +540,7 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 	setGameObjectPhysicsEnable(id, true);
 	setGameObjectVelocity(id, glm::vec3(0.f, 0.f, 0.f));
 
-	auto isActivePlayer = getActivePlayerId(playerIndex).has_value() && getActivePlayerId(playerIndex).value() == id;
+	auto isActivePlayer = getEntityForPlayerIndex(playerIndex).has_value() && getEntityForPlayerIndex(playerIndex).value() == id;
 	bool thirdPersonMode = getWeaponEntityData(id).thirdPersonMode;
 	if (!isActivePlayer || thirdPersonMode){
 		maybeReEnableMesh(id);
@@ -553,35 +553,7 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 	}
 }
 
-void enterRagdoll(objid playerModel){
-	objectRemoved(playerModel);
-	setGameObjectPhysicsEnable(playerModel, false);
 
-	for (auto &value : boneValues){
-		auto headValue = findChildObjBySuffix(playerModel, value.bone.c_str());
-		auto gameobj = gameapi -> getGameObjNameForId(headValue.value());
-		std::cout << "debug createPhysicsBody: " << gameobj.value() << std::endl;
-
-		rigidBodyOpts physicsOptions {
-		  .linear = glm::vec3(1.f, 1.f, 1.f),
-		  .angular = glm::vec3(0.f, 0.f, 0.f),
-		  .gravity = glm::vec3(0.f, -9.81f, 0.f),
-		  .friction = 5.f,
-		  .restitution = 1.f,
-		  .mass = 1.f,
-		  .layer = physicsLayers.bones,
-		  .linearDamping = 0.f,
-		  .isStatic = false,
-		  .hasCollisions = true,
-		};
-		gameapi -> setPhysicsOptions(headValue.value(), physicsOptions);		
-	}
-}
-
-bool isControllableEntity(objid id){
-	auto isControllable = controllableEntities.find(id) != controllableEntities.end();
-	return isControllable;
-}
 
 std::set<objid>& getDisabledAnimationIds(objid entityId){
   return controllableEntities.at(entityId).disableAnimationIds;
@@ -591,12 +563,10 @@ void deliverCurrentGunAmmo(objid id, int ammoAmount){
   deliverAmmoToCurrentGun(getWeaponState(weapons, id), ammoAmount, id);
 }
 
-bool isGunZoomed(objid id){
-  auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
-  return gunZoomed;
-}
 
-void enterVehicleEntity(int playerIndex, objid vehicleId, objid id){
+
+// Vehicle
+void entityEnterVehicle(int playerIndex, objid vehicleId, objid id){
   enterVehicle(vehicles, vehicleId, id);
   disableEntity(id);
   std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
@@ -604,7 +574,7 @@ void enterVehicleEntity(int playerIndex, objid vehicleId, objid id){
   controllable.value() -> vehicle = vehicleId;
 }
 
-void exitVehicleEntity(int playerIndex, objid vehicleId, objid id){
+void entityExitVehicle(int playerIndex, objid vehicleId, objid id){
   if (!canExitVehicle()){
     return;
   }
@@ -616,10 +586,10 @@ void exitVehicleEntity(int playerIndex, objid vehicleId, objid id){
 
 bool isControlledVehicle(int vehicleId){
 	for (auto& player : players){
-		if (!player.playerId.has_value()){
+		if (!player.entityId.has_value()){
 			continue;
 		}
-		auto controllableEntity = getControllableEntity(player.playerId.value());
+		auto controllableEntity = getControllableEntity(player.entityId.value());
 		if (controllableEntity.has_value()){
 			if (controllableEntity.value() -> vehicle.has_value() && controllableEntity.value() -> vehicle.value() == vehicleId){
 				return true;
@@ -630,6 +600,7 @@ bool isControlledVehicle(int vehicleId){
 }
 
 
+// Camera stuff
 void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse){
   if (hasOption("no-shake")){
     return;
@@ -660,7 +631,7 @@ std::optional<bool> isZoomedIntoArcade(int playerIndex){
   return controlledPlayer.value() -> zoomIntoArcade;
 }
 
-
+// Debug
 DebugConfig debugPrintActivePlayer(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
@@ -677,10 +648,10 @@ DebugConfig debugPrintActivePlayer(int playerIndex){
 
 	{
 	  std::string playerName = "";
-	  if (controlledPlayer.playerId.has_value()){
-	  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.playerId.value()).value();
+	  if (controlledPlayer.entityId.has_value()){
+	  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.entityId.value()).value();
 	  }
-	  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.playerId) + + " [" + playerName + "]" });
+	  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.entityId) + + " [" + playerName + "]" });
 	}
 
 	{
@@ -691,7 +662,7 @@ DebugConfig debugPrintActivePlayer(int playerIndex){
   	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
 	}
 
-	auto inThirdPerson = activePlayerInThirdPerson(playerIndex);
+	auto inThirdPerson = entityInThirdPersonByPlayerIndex(playerIndex);
 	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
 
   return debugConfig;

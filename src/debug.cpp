@@ -278,18 +278,11 @@ void printDebugSpawnpoint(){
 	auto id = getUniqueObjId();
 	std::string name = std::string("spawnpoint-") + std::to_string(id);
 
-	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
-		auto position = getActivePlayerPosition(getDefaultPlayerIndex()).value();
-		auto rotation = getActivePlayerRotation(getDefaultPlayerIndex()).value();
-
-		std::string positionString = name + ":position:" + print(position);
+	if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
 		std::string spawnString = name + ":spawn:enemy";
 		std::string meshString = name + ":mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf";
-
-		std::cout << positionString << " #spawn debug" << "\n";
 		std::cout << spawnString    << " #spawn debug" << "\n";
 		std::cout << meshString    << " #spawn debug" << "\n\n";
-
 	}
 }
 
@@ -396,17 +389,17 @@ void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 'K' && action == 1){
   	std::cout << "send notify message" << std::endl;
   	gameapi -> sendNotifyMessage("ball-game", std::string("complete"));
-  	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
+  	if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
   		static bool raiseUp = false;
   		raiseUp = !raiseUp;
-  		raiseTurret(getActivePlayerId(getDefaultPlayerIndex()).value(), raiseUp);
-  		wakeUpTv(getActivePlayerId(getDefaultPlayerIndex()).value(), raiseUp);  		
+  		raiseTurret(getEntityForPlayerIndex(getDefaultPlayerIndex()).value(), raiseUp);
+  		wakeUpTv(getEntityForPlayerIndex(getDefaultPlayerIndex()).value(), raiseUp);  		
 
   		//auto isFalling = activePlayerFalling();
   		//setIsFalling(getActivePlayerId().value(), !isFalling.value());
 
   		auto isReloading = activePlayerReloading(getDefaultPlayerIndex());
-  		setIsReloading(getActivePlayerId(getDefaultPlayerIndex()).value(), !isReloading.value());
+  		setEntityIsReloading(getEntityForPlayerIndex(getDefaultPlayerIndex()).value(), !isReloading.value());
   	}
   }
 
@@ -415,7 +408,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'R' && action == 1) {
-  	if (getActivePlayerId(getDefaultPlayerIndex()).has_value()){
+  	if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
 	  	//setIsAlive(getActivePlayerId().value(), false);
   	}
   }
@@ -728,8 +721,8 @@ DebugConfig debugPrintAnimations(int playerIndex){
   DebugConfig debugConfig { .data = {} };
   std::vector<objid> ids;
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-  if (controlledPlayer.playerId.has_value()){
-    ids.push_back(controlledPlayer.playerId.value());
+  if (controlledPlayer.entityId.has_value()){
+    ids.push_back(controlledPlayer.entityId.value());
   }
   if (ids.size() > 0){
     auto id = ids.at(0);

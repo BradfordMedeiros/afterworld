@@ -1,7 +1,7 @@
 #include "./weapon.h"
 
 extern CustomApiBindings* gameapi;
-bool entityInShootingMode(objid id);
+bool isEntityInShootingMode(objid id);
 
 bool showWeaponViewModel = true;
 
@@ -188,7 +188,7 @@ WeaponsUiUpdate onWeaponsFrameEntity(WeaponEntityState& weaponState, objid inven
   }
   weaponState.holdToggle = HOLD_TOGGLE_NONE;
 
-  auto isInShootingMode = entityInShootingMode(playerId);
+  auto isInShootingMode = isEntityInShootingMode(playerId);
   auto gunFireInfo = fireGunAndVisualize(weaponState.weaponValues.gunCore, weaponState.isHoldingFire && isPlayerAlive, weaponState.fireOnce && isPlayerAlive, weaponState.weaponValues.gunId, weaponState.weaponValues.muzzleId, playerId, inventory, fireTransform, isInShootingMode);
 
   weaponState.fireOnce = false;

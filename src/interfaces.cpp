@@ -229,7 +229,7 @@ UiContext getUiContext(){
         popHistory();
       },
       .die = []() -> void {
-        killActivePlayer(getDefaultPlayerIndex());
+        killPlayer(getDefaultPlayerIndex());
       },
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
@@ -244,8 +244,8 @@ UiContext getUiContext(){
       .deliverAmmo = [](int amount) -> void {
         ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
 
-        if(controlledPlayer.playerId.has_value()){
-          deliverCurrentGunAmmo(controlledPlayer.playerId.value(), amount);
+        if(controlledPlayer.entityId.has_value()){
+          deliverCurrentGunAmmo(controlledPlayer.entityId.value(), amount);
         }
       },
       .disableActiveEntity = [](bool enable) -> void {

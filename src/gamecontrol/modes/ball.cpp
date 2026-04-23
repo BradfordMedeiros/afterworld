@@ -180,7 +180,7 @@ void setPowerupTexture(std::string texture, std::optional<float> startTime, std:
 }
 
 std::optional<BallPowerupState> getPowerup(){
-	auto activePlayer = getActivePlayerId(0);
+	auto activePlayer = getEntityForPlayerIndex(0);
 	auto vehicleIds = getVehicleIds();
 	if (vehicleIds.size() == 0){
 		return std::nullopt;
@@ -210,7 +210,7 @@ void startBallMode(objid sceneId){
   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  position, {});    
   auto playerId = findObjByShortName("maincamera", sceneId);
   modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
-  setActivePlayer(movement, weapons, aiData, playerId.value(), 0);
+  setEntityForPlayerIndex(playerId.value(), 0);
 
   //////////
 
@@ -279,13 +279,13 @@ GameTypeInfo getBallMode(){
 	  .createGametype = [](void* data) -> std::any {
 			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
 			{
-				auto activePlayer = getActivePlayerId(0);
+				auto activePlayer = getEntityForPlayerIndex(0);
 				auto vehicles = getVehicleIds();
 				modassert(vehicles.size() == 1, "invalid expected vehicle size");
 				modassert(activePlayer.has_value(), "ball set active player no active player");
 				std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]" << ", playerid: " << print(activePlayer) << ", [" << gameapi -> getGameObjNameForId(activePlayer.value()).value()  <<  "]" << std::endl;
 				std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
-				enterVehicleEntity(0, vehicles.at(0), activePlayer.value());
+				entityEnterVehicle(0, vehicles.at(0), activePlayer.value());
 				setCanExitVehicle(false);
 
 				playCutscene(ballStartGameplay, std::nullopt);

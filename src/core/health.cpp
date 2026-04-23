@@ -9,7 +9,7 @@ bool enableRagdollKill = true;
 
 OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
 void onAiHealthChange(objid targetId, float remainingHealth);
-void setIsAlive(objid id, bool alive);
+void setEntityIsAlive(objid id, bool alive);
 void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
 
 void addEntityIdHitpoints(objid id){
@@ -41,7 +41,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	}
 	modlog("health", "damage to: " + std::to_string(id) + ", amount = " + std::to_string(amount) + " " + gameapi -> getGameObjNameForId(id).value());
 
-	auto activePlayerId = getActivePlayerId(getDefaultPlayerIndex());
+	auto activePlayerId = getEntityForPlayerIndex(getDefaultPlayerIndex());
 	float adjustedDamageAmount = (godMode && activePlayerId.has_value() && activePlayerId.value() == id) ? 0.f : amount;
 
 	auto newHealthAmount = hitpoints.at(id).current - adjustedDamageAmount;
@@ -76,7 +76,7 @@ void onNoHealth(objid targetId, float remainingHealth){
   	modlog("health kill", std::to_string(remainingHealth));
   }
   if (hasKillTag && remainingHealth > -100.f){
-  	setIsAlive(targetId, false);
+  	setEntityIsAlive(targetId, false);
   	if (enableRagdollKill){
 			enterRagdoll(targetId);
   	}
@@ -84,7 +84,7 @@ void onNoHealth(objid targetId, float remainingHealth){
   }
 
   if(hasKillTag){
-  	auto activePlayerId = getActivePlayerId(getDefaultPlayerIndex());
+  	auto activePlayerId = getEntityForPlayerIndex(getDefaultPlayerIndex());
  		if (activePlayerId.has_value()){
  			auto bloodPos = gameapi -> getGameObjectPos(targetId, true, "[gamelogic] health - onNoHealth");
 	  	emitGibs(rootSceneId(), activePlayerId.value(), bloodPos);

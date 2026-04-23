@@ -2,7 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
-std::optional<bool> isInShootingMode(objid id);
+std::optional<bool> isEntityInShootingMode(objid id);
 std::optional<objid> findBodyPart(objid entityId, const char* part);
 void setEntityThirdPerson(objid id);
 void setEntityFirstPerson(objid id);
@@ -25,7 +25,7 @@ struct AnimationGunUpdate {
 
 AnimationGunUpdate updateEntityGunPosition(objid entityId, glm::quat orientation){
   AnimationGunUpdate update {};
-  if (!isInShootingMode(entityId).value()){
+  if (!isEntityInShootingMode(entityId).value()){
     return update;
   }
 
