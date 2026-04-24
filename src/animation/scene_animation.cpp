@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 extern StateController animationController;
 
 void pushAlertMessage(std::string message);
-std::set<objid>& getDisabledAnimationIds(objid entityId);
+std::set<objid>& getEntityDisabledAnimationIds(objid entityId);
 
 bool hasAnimation(objid entityId, std::string& animationName){
   return gameapi -> listAnimations(entityId).count(animationName) > 0;
@@ -38,7 +38,7 @@ void doStateControllerAnimations(bool validateAnimationControllerAnimations, boo
       pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value());
       // gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, {});
 
-      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, getDisabledAnimationIds(entityId), 0, true, std::nullopt);  
+      gameapi -> playAnimation(entityId, stateAnimation -> animation.value(), stateAnimation -> animationBehavior, getEntityDisabledAnimationIds(entityId), 0, true, std::nullopt);  
 
     }else{
       if (stateAnimationHasAnimation && !matchingAnimation){

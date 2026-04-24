@@ -12,5 +12,6 @@ float querySelectDistance();
 
 void setCanExitVehicle(bool canExit);
 bool canExitVehicle();
+bool isControlledVehicle(int vehicleId);
 
 #endif

@@ -35,6 +35,13 @@ struct ControllableEntity {
 	std::optional<int> zoomAmount;
 };
 
+
+////////////////////// Core Add / Rm  //////////////////////
+
+void onAddEntity(objid idAdded);
+void onRemoveEntity(objid idRemoved);
+
+////////////////////// Player port / viewport functions //////////////////////
 ControlledPlayer& getControlledPlayer(int playerIndex);
 ControlledPlayer& getMainControlledPlayer();
 int getNumberOfPlayers();
@@ -42,78 +49,75 @@ void setMainPlayerControl(int playerIndex);
 void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
 bool isControlledPlayer(int playerId);
-bool isControlledVehicle(int vehicleId);
 int getDefaultPlayerIndex();
-
-void onAddEntity(objid idAdded);
-void onRemoveEntity(objid idRemoved);
-
+std::optional<int> getPlayerIndexForEntity(objid id);
 std::optional<objid> getEntityForPlayerIndex(int playerIndex);
-void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex);
 
+
+////////////////////// Core Entity To Viewport Binding //////////////////////
+void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex);
 void setEntityNextForPlayerIndex(int playerIndex);
 void observeEntity(std::optional<objid> id, int playerIndex);
 void observeEntityNext(int playerIndex);
 
-std::optional<int> getPlayerIndexForEntity(objid id);
+
 std::vector<ControlledPlayer>& getPlayers();
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
 
+////////////////////// Basic Entity Manipulation //////////////////////
 void setEntityInShootingMode(objid id, bool shootingMode);
 std::optional<bool> isEntityInShootingMode(objid id);
 
 void setEntityIsAlive(objid id, bool alive);
-std::optional<bool> activePlayerAlive(int playerIndex);
+std::optional<bool> isEntityAlive(objid id);
 
 void setEntityIsFalling(objid id, bool falling);
-std::optional<bool> activePlayerFalling(int playerIndex);
+std::optional<bool> isEntityFalling(objid id);
 
 void setEntityIsReloading(objid id, bool reloading);
-std::optional<bool> activePlayerReloading(int playerIndex);
+std::optional<bool> isEntityReloading(objid id);
 
 bool isEntityGunZoomed(objid id);
+void deliverEntityAmmo(objid id, int ammoAmount);
+glm::vec3 getEntityVelocity(objid id);
+
+void killEntity(objid id);
 
 void setEntityThirdPerson(objid id);
 void setEntityFirstPerson(objid id);
 
+void entityEnterVehicle(int playerIndex, objid vehicleId, objid id);
+void entityExitVehicle(int playerIndex, objid vehicleId, objid id);
 
 
+////////////////////// Convenience Utilities for player indexs //////////////////////
 bool allPlayersDead();
-
+std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex);
 
 
 void onActivePlayerRemoved(objid id);
 void setDisablePlayerControl(bool isDisabled, int playerIndex);
 bool isPlayerControlDisabled(int playerIndex);
 
-void setPlayerFreeCamera(int playerIndex, bool editorMode);
-
-void setTempCamera(std::optional<objid> camera, int playerIndex);
-
-void killPlayer(int playerIndex);
-
-glm::vec3 getPlayerVelocity(int playerIndex);
-std::optional<glm::vec3> getActivePlayerPosition(int playerIndex);
 
 WeaponEntityData getWeaponEntityData(objid id);
 
-DebugConfig debugPrintActivePlayer(int playerIndex);
 
 std::optional<ControllableEntity*> getActiveControllable(int playerIndex);
 
 
-void disableEntity(objid id);
-void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot);
-
-void deliverCurrentGunAmmo(objid id, int ammoAmount);
-
-
-void entityEnterVehicle(int playerIndex, objid vehicleId, objid id);
-void entityExitVehicle(int playerIndex, objid vehicleId, objid id);
-
-void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 
 void zoomIntoArcade(std::optional<objid> id, int playerIndex);
 std::optional<bool> isZoomedIntoArcade(int playerIndex);
+
+////////////////////// Camera Manipulation //////////////////////
+void setPlayerFreeCamera(int playerIndex, bool editorMode);
+void setTempCamera(std::optional<objid> camera, int playerIndex);
+void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
+
+
+////////////////////// Misc //////////////////////
+DebugConfig debugPrintActivePlayer(int playerIndex);
+
 
 #endif 

@@ -50,7 +50,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 	*_remainingHealth = newHealthAmount;
 
 	if (activePlayerId.has_value() && getManagedSounds().hitmarkerSoundObjId.has_value()){
-		auto playerPosition = getActivePlayerPosition(getDefaultPlayerIndex()); // TODO - this shoiuldn't be here, only if it is damaged by the player
+		auto playerPosition = getEntityPositionByPlayerIndex(getDefaultPlayerIndex()); // TODO - this shoiuldn't be here, only if it is damaged by the player
 		if(playerPosition.has_value()){
 			//modassert(false, "hitmarker sound try play!");
 			playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, playerPosition.value(), false); 

@@ -29,3 +29,7 @@ bool canExitVehicle(){
   return canExitVehicleValue;
 }
 
+bool isControlledVehicle(int vehicleId){
+  return vehicles.vehicles.at(vehicleId).state.occupied.has_value();
+}
+

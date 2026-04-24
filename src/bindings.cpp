@@ -838,8 +838,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       std::vector<WeaponsUiUpdate> uiUpdates;
       if (controlledPlayer.entityId.has_value() && !isPaused() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
-        auto alive = activePlayerAlive(getDefaultPlayerIndex()).value();
-        uiUpdates = onWeaponsFrame(weapons, controlledPlayer.entityId.value(), controlledPlayer.lookVelocity, getPlayerVelocity(getDefaultPlayerIndex()), getWeaponEntityData, 
+        auto alive = isEntityAlive(getEntityForPlayerIndex(getDefaultPlayerIndex()).value()).value();
+        uiUpdates = onWeaponsFrame(weapons, controlledPlayer.entityId.value(), controlledPlayer.lookVelocity, getEntityVelocity(getEntityForPlayerIndex(getDefaultPlayerIndex()).value()), getWeaponEntityData, 
           [](objid id) -> objid {
             ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
             return controlledPlayer.activePlayerManagedCameraId.value();  // kind of wrong, but i think, kind of right in practice
@@ -937,7 +937,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       drawAllCurves(id);
       if (isInGameMode2()){
         for (auto& player : getPlayers()){
-          auto playerPosition = getActivePlayerPosition(player.viewport);
+          auto playerPosition = getEntityPositionByPlayerIndex(player.viewport);
           if (playerPosition.has_value()){
             drawWaypoints(waypoints, playerPosition.value());
           }
@@ -1166,7 +1166,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "ammo"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
-      deliverCurrentGunAmmo(itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
+      deliverEntityAmmo(itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
     }
     if (key == "gem-pickup"){
       auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);

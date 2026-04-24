@@ -398,7 +398,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   		//auto isFalling = activePlayerFalling();
   		//setIsFalling(getActivePlayerId().value(), !isFalling.value());
 
-  		auto isReloading = activePlayerReloading(getDefaultPlayerIndex());
+  		auto isReloading = isEntityReloading(getEntityForPlayerIndex(getDefaultPlayerIndex()).value());
   		setEntityIsReloading(getEntityForPlayerIndex(getDefaultPlayerIndex()).value(), !isReloading.value());
   	}
   }

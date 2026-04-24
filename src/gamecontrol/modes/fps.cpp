@@ -19,6 +19,7 @@ GameTypeInfo getFpsMode(){
       return false;
     },
     .getDebugText = [](std::any& gametype) -> std::string {
+      return "";
     },
     .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
     .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
