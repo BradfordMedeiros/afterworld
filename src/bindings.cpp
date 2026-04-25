@@ -415,7 +415,7 @@ void objectRemoved(objid idRemoved){
   }
 
   onRemoveEntity(idRemoved);
-  
+
   onMainUiObjectsChanged();
 
   onObjectRemovedWater(water, idRemoved);
@@ -485,8 +485,9 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   debugOnKey(key, scancode, action, mods);
 
-  if (isInteractKey(key) && (action == 1) && isEntityFocusArcade(playerIndex).value()){
-    setEntityFocusArcade(std::nullopt, playerIndex);
+  if (isInteractKey(key) && (action == 1) && isEntityFocusArcade(getEntityForPlayerIndex(playerIndex).value()).value()){
+    auto entity = getEntityForPlayerIndex(playerIndex).value();
+    setEntityFocusArcade(std::nullopt, entity);
   }
   onKeyArcade(key, scancode, action, mods);
   gametypesOnKey(gametypeSystem, key, scancode, action, mods);
@@ -1174,7 +1175,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "arcade"){
       auto attrValue = anycast<MessageWithId>(value); 
       modassert(attrValue, "message invalid arcade");
-      setEntityFocusArcade(attrValue -> id, getPlayerIndexForEntity(attrValue -> playerId.value()).value());
+
+      setEntityFocusArcade(attrValue -> id, attrValue -> playerId.value());
     }
 
     gametypesOnMessage(gametypeSystem, key, value);

@@ -516,29 +516,27 @@ bool setEntityLookAt(objid id, std::optional<objid> lookAt){
 	return shouldDrawEnterText;
 }
 
-// Todo get rid of the player index here
-void setEntityFocusArcade(std::optional<objid> id, int playerIndex){
-  bool zoomIn = id.has_value();
+void setEntityFocusArcade(std::optional<objid> arcadeId, objid id){
+	auto playerIndex = getPlayerIndexForEntity(id).value();
+  bool zoomIn = arcadeId.has_value();
   //getGlobalState().zoomIntoArcade = zoomIn;
   setPlayerControlDisabled(zoomIn, 0);
   if (!zoomIn){
     setTempCamera(std::nullopt, playerIndex);          
   }else{
-    auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
+    auto arcadeCameraId = findChildObjBySuffix(arcadeId.value(), ">camera");
     modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
-    auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
-    auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
+    auto position = gameapi -> getGameObjectPos(arcadeId.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
+    auto rotation = gameapi -> getGameObjectRotation(arcadeId.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
     setTempCamera(arcadeCameraId.value(), playerIndex);     
   }
 }
 
-// Todo use entity id not player index
-std::optional<bool> isEntityFocusArcade(int playerIndex){
-	auto controlledPlayer = getActiveControllable(playerIndex);
-  if (!controlledPlayer.has_value()){
-  	return false;
-  }
-  return controlledPlayer.value() -> zoomIntoArcade;
+std::optional<bool> isEntityFocusArcade(objid id){
+	if (!isEntity(id)){
+		return std::nullopt;
+	}
+  return controllableEntities.at(id).zoomIntoArcade;
 }
 
 

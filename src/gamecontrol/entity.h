@@ -97,13 +97,12 @@ void entityActionVehicle(objid id);
 
 bool setEntityLookAt(objid id, std::optional<objid> lookAt);
 
+void setEntityFocusArcade(std::optional<objid> arcadeId, objid id);
+std::optional<bool> isEntityFocusArcade(objid id);
+
 ////////////////////// Convenience Utilities for player indexs //////////////////////
 bool allPlayersDead();
 std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex);
-
-// TODO - need to organize these better
-void setEntityFocusArcade(std::optional<objid> id, int playerIndex);
-std::optional<bool> isEntityFocusArcade(int playerIndex);
 
 ////////////////////// Camera Manipulation //////////////////////
 void setPlayerFreeCamera(int playerIndex, bool editorMode);
