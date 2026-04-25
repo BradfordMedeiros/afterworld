@@ -108,17 +108,17 @@ UiContext getUiContext(){
         return getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
     },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
-      auto activeControllable = getActiveControllable(0);
-      if (!activeControllable.has_value()){
+      auto entityId = getEntityForPlayerIndex(0);
+      if (!entityId.has_value()){
         return std::nullopt;
       }
-      auto& entity =  *activeControllable.value();
-      if (!entity.zoomAmount.has_value()){
+      auto zoomAmount = getEntityZoomAmount(entityId.value());
+      if (!zoomAmount.has_value()){
         return std::nullopt;
       }
       return ZoomOptions {
-        .zoomAmount = entity.zoomAmount.value(),
-      }; 
+        .zoomAmount = zoomAmount.value(),
+      };
    },
    .showKeyboard = []() -> bool { 
       return getGlobalState().systemConfig.showKeyboard;

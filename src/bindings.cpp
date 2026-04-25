@@ -122,18 +122,7 @@ void setScenarioOptions(ScenarioOptions& options){
   modlog("set scenario options: skybox", print(options.skybox));
 }
 
-void setTotalZoom(int playerIndex, float multiplier, objid id){
-  auto& player = *getActiveControllable(playerIndex).value();
-  bool isZoomedIn = multiplier < 1.f;
-  if (isZoomedIn){
-    player.zoomAmount = static_cast<int>((1.f / multiplier));
-  }else{
-    player.zoomAmount = std::nullopt;
-  }
-  setZoom(multiplier, isZoomedIn);
-  setZoomSensitivity(movementEntities, multiplier, id);
-  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
-}
+
 
 std::vector<Level> loadLevels(){
   auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
@@ -235,18 +224,18 @@ void setFreeCam(){
 
 void setNoClipMode(){
   bool enable = true;
-  ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+  auto entityId = getEntityForPlayerIndex(getDefaultPlayerIndex());
 
-  if (controlledPlayer.entityId.has_value()){
+  if (entityId.has_value()){
     if (enable){
-      oldGravity = getSingleVec3Attr(controlledPlayer.entityId.value(), "physics_gravity");
-      setGameObjectGravity(controlledPlayer.entityId.value(), glm::vec3(0.f, 0.f, 0.f));
-      gameapi -> setSingleGameObjectAttr(controlledPlayer.entityId.value(), "physics_collision", "nocollide");
+      oldGravity = getSingleVec3Attr(entityId.value(), "physics_gravity");
+      setGameObjectGravity(entityId.value(), glm::vec3(0.f, 0.f, 0.f));
+      gameapi -> setSingleGameObjectAttr(entityId.value(), "physics_collision", "nocollide");
 
     }else{
       if(oldGravity.has_value()){
-        setGameObjectGravity(controlledPlayer.entityId.value(), oldGravity.value());
-        gameapi -> setSingleGameObjectAttr(controlledPlayer.entityId.value(), "physics_collision", "collide");
+        setGameObjectGravity(entityId.value(), oldGravity.value());
+        gameapi -> setSingleGameObjectAttr(entityId.value(), "physics_collision", "collide");
         oldGravity = std::nullopt;
       }
     }
@@ -426,8 +415,7 @@ void objectRemoved(objid idRemoved){
   }
 
   onRemoveEntity(idRemoved);
-
-  onActivePlayerRemoved(idRemoved);
+  
   onMainUiObjectsChanged();
 
   onObjectRemovedWater(water, idRemoved);
@@ -497,18 +485,14 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   debugOnKey(key, scancode, action, mods);
 
-  if (isInteractKey(key) && (action == 1) && isZoomedIntoArcade(playerIndex).value()){
-    zoomIntoArcade(std::nullopt, playerIndex);
+  if (isInteractKey(key) && (action == 1) && isEntityFocusArcade(playerIndex).value()){
+    setEntityFocusArcade(std::nullopt, playerIndex);
   }
   onKeyArcade(key, scancode, action, mods);
   gametypesOnKey(gametypeSystem, key, scancode, action, mods);
 
   if (isInteractKey(key) && (action == 1) && controlledPlayer.entityId.has_value()){
-    if (getActiveControllable(playerIndex).value() -> vehicle.has_value()){
-      entityExitVehicle(playerIndex, getActiveControllable(playerIndex).value() -> vehicle.value(), controlledPlayer.entityId.value());
-    }else if (getActiveControllable(playerIndex).value() -> lookingAtVehicle.has_value()){
-      entityEnterVehicle(playerIndex, getActiveControllable(playerIndex).value() -> lookingAtVehicle.value(), controlledPlayer.entityId.value());
-    }
+    entityActionVehicle(controlledPlayer.entityId.value());
   }
 
   auto selectedOrb = handleOrbControls(orbData, key, action);
@@ -536,8 +520,8 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
       selecting = glm::vec2(getGlobalState().control.xNdc, getGlobalState().control.yNdc);
       getGlobalState().control.rightMouseDown = true;
       if (false){
-        ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-        raycastFromCameraAndMoveTo(movementEntities, controlledPlayer.entityId.value(), 0);
+        auto entityId = getEntityForPlayerIndex(playerIndex);
+        raycastFromCameraAndMoveTo(movementEntities, entityId.value(), 0);
       }
       nextTerminalPage();
     }
@@ -562,7 +546,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
     if (!isPaused() && !disableGameInput() && !isPlayerControlDisabled(playerIndex)){
       auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.entityId.value()), button, action, controlledPlayer.entityId.value(), selectDistance);
       if (uiUpdate.zoomAmount.has_value()){
-        setTotalZoom(playerIndex, uiUpdate.zoomAmount.value(), controlledPlayer.entityId.value());
+        setEntityZoom(controlledPlayer.entityId.value(), uiUpdate.zoomAmount.value());
       }
     }
   }
@@ -862,15 +846,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       }
 
       for (auto& uiUpdate : uiUpdates){
-        std::optional<objid> lookingAtVehicle;
-        if (uiUpdate.raycastId.has_value()){
-          if (isVehicle(vehicles, uiUpdate.raycastId.value()) &&  !getActiveControllable(getDefaultPlayerIndex()).value() -> vehicle.has_value()){
-            lookingAtVehicle = uiUpdate.raycastId.value();
-            gameapi -> drawText("Press E to enter", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-          }
+        auto raycastId = uiUpdate.raycastId;
+        auto entityId = getEntityForPlayerIndex(getDefaultPlayerIndex()).value();
+        auto shouldDrawEnterText = setEntityLookAt(entityId, raycastId);
+        if (shouldDrawEnterText){
+          gameapi -> drawText("Press E to enter", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
         }
-        getActiveControllable(getDefaultPlayerIndex()).value() -> lookingAtVehicle = lookingAtVehicle;
-
         setShowActivate(uiUpdate.showActivateUi);
 
         if (uiUpdate.ammoInfo.has_value()){
@@ -884,8 +865,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           setUIAmmoCount(0, 0);
         }
         if (uiUpdate.bloomAmount.has_value()){
-          ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-          drawBloom(controlledPlayer.entityId.value(), controlledPlayer.entityId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
+          auto entityId = getEntityForPlayerIndex(getDefaultPlayerIndex());
+          drawBloom(entityId.value(), entityId.value(), -1.f, uiUpdate.bloomAmount.value()); // 0.002f is just a min amount for visualization, not actual bloom
         }
         modlog("current weapon", uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : "");
         setUiWeapon(uiUpdate.currentGunName.has_value() ? *uiUpdate.currentGunName.value() : std::optional<std::string>(std::nullopt));
@@ -960,8 +941,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         std::optional<UiHealth> uiHealth;
         {
           for (auto& player : getPlayers()){
-            ControlledPlayer& controlledPlayer = getControlledPlayer(player.viewport);
-            auto activePlayer = controlledPlayer.entityId;
+            auto activePlayer = getEntityForPlayerIndex(player.viewport);
             if (activePlayer.has_value()){
               auto health = getHealth(activePlayer.value());
               if (health.has_value()){
@@ -1194,7 +1174,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "arcade"){
       auto attrValue = anycast<MessageWithId>(value); 
       modassert(attrValue, "message invalid arcade");
-      zoomIntoArcade(attrValue -> id, getPlayerIndexForEntity(attrValue -> playerId.value()).value());
+      setEntityFocusArcade(attrValue -> id, getPlayerIndexForEntity(attrValue -> playerId.value()).value());
     }
 
     gametypesOnMessage(gametypeSystem, key, value);

@@ -8,7 +8,7 @@ void startMode(GameMode& gameMode, objid sceneId){
   auto& allPlayers = getPlayers();
   for (auto& player : allPlayers){
     setTempCamera(std::nullopt, player.viewport);
-    setDisablePlayerControl(false, player.viewport);
+    setPlayerControlDisabled(false, player.viewport);
   }
 
   inputOverride();
@@ -60,7 +60,7 @@ void stopMode(GameMode& gameMode){
   auto& allPlayers = getPlayers();
   for (auto& player : allPlayers){
     setTempCamera(std::nullopt, player.viewport);
-    setDisablePlayerControl(false, player.viewport);
+    setPlayerControlDisabled(false, player.viewport);
   }
 }
 

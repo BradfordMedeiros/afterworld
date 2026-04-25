@@ -20,7 +20,7 @@ std::optional<float> finalBallTime;
 
 void ballStartGameplay(EasyCutscene& cutscene){
   if (initialize(cutscene)){
-		setDisablePlayerControl(true, 0);
+		setPlayerControlDisabled(true, 0);
   }
   if (finalize(cutscene)){
   }
@@ -30,13 +30,13 @@ void ballStartGameplay(EasyCutscene& cutscene){
     showLetterBox("Learning to Roll", 10.f);
   });
   run(cutscene, 2, []() -> void {
-  	setDisablePlayerControl(false, 0);
+  	setPlayerControlDisabled(false, 0);
   });
 }
 void ballEndGameplay(EasyCutscene& cutscene){
 	if (initialize(cutscene)){
 	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
-		setDisablePlayerControl(true, 0);
+		setPlayerControlDisabled(true, 0);
 	}
   waitUntil(cutscene, 0, 2000);
 
@@ -279,13 +279,13 @@ GameTypeInfo getBallMode(){
 	  .createGametype = [](void* data) -> std::any {
 			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
 			{
-				auto activePlayer = getEntityForPlayerIndex(0);
 				auto vehicles = getVehicleIds();
 				modassert(vehicles.size() == 1, "invalid expected vehicle size");
-				modassert(activePlayer.has_value(), "ball set active player no active player");
-				std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]" << ", playerid: " << print(activePlayer) << ", [" << gameapi -> getGameObjNameForId(activePlayer.value()).value()  <<  "]" << std::endl;
+				std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]"  << std::endl;
 				std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
-				entityEnterVehicle(0, vehicles.at(0), activePlayer.value());
+				auto playerIndex = getDefaultPlayerIndex();
+				auto entityId = getEntityForPlayerIndex(playerIndex).value();
+				setEntityInVehicle(entityId, vehicles.at(0));
 				setCanExitVehicle(false);
 
 				playCutscene(ballStartGameplay, std::nullopt);

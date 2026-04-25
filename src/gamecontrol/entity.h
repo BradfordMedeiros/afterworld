@@ -10,6 +10,7 @@
 #include "../ai/ai.h"
 #include "../curves.h"
 #include "../options.h"
+#include "../ui/views/settings.h"
 
 struct ControlledPlayer {
 	int viewport; // this is used interchangably with the player index (eg player 1, 2, etc)
@@ -37,11 +38,10 @@ struct ControllableEntity {
 
 
 ////////////////////// Core Add / Rm  //////////////////////
-
 void onAddEntity(objid idAdded);
 void onRemoveEntity(objid idRemoved);
 
-////////////////////// Player port / viewport functions //////////////////////
+////////////////////// Player port / viewport functions 
 ControlledPlayer& getControlledPlayer(int playerIndex);
 ControlledPlayer& getMainControlledPlayer();
 int getNumberOfPlayers();
@@ -50,9 +50,14 @@ void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
 bool isControlledPlayer(int playerId);
 int getDefaultPlayerIndex();
+void setPlayerControlDisabled(bool isDisabled, int playerIndex);
+bool isPlayerControlDisabled(int playerIndex);
+
+////////////////////// Lookup Utilities //////////////////////
 std::optional<int> getPlayerIndexForEntity(objid id);
 std::optional<objid> getEntityForPlayerIndex(int playerIndex);
-
+std::optional<ControllableEntity*> getActiveControllable(int playerIndex);
+std::vector<ControlledPlayer>& getPlayers();
 
 ////////////////////// Core Entity To Viewport Binding //////////////////////
 void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex);
@@ -60,8 +65,6 @@ void setEntityNextForPlayerIndex(int playerIndex);
 void observeEntity(std::optional<objid> id, int playerIndex);
 void observeEntityNext(int playerIndex);
 
-
-std::vector<ControlledPlayer>& getPlayers();
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
 
 ////////////////////// Basic Entity Manipulation //////////////////////
@@ -77,7 +80,10 @@ std::optional<bool> isEntityFalling(objid id);
 void setEntityIsReloading(objid id, bool reloading);
 std::optional<bool> isEntityReloading(objid id);
 
+void setEntityZoom(objid id, float multiplier);  // TODO restructure to entity id
 bool isEntityGunZoomed(objid id);
+std::optional<int> getEntityZoomAmount(objid id);
+
 void deliverEntityAmmo(objid id, int ammoAmount);
 glm::vec3 getEntityVelocity(objid id);
 
@@ -86,34 +92,26 @@ void killEntity(objid id);
 void setEntityThirdPerson(objid id);
 void setEntityFirstPerson(objid id);
 
-void entityEnterVehicle(int playerIndex, objid vehicleId, objid id);
-void entityExitVehicle(int playerIndex, objid vehicleId, objid id);
+void setEntityInVehicle(objid id, std::optional<objid> vehicleId);
+void entityActionVehicle(objid id);
 
+bool setEntityLookAt(objid id, std::optional<objid> lookAt);
 
 ////////////////////// Convenience Utilities for player indexs //////////////////////
 bool allPlayersDead();
 std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex);
 
-
-void onActivePlayerRemoved(objid id);
-void setDisablePlayerControl(bool isDisabled, int playerIndex);
-bool isPlayerControlDisabled(int playerIndex);
-
-
-WeaponEntityData getWeaponEntityData(objid id);
-
-
-std::optional<ControllableEntity*> getActiveControllable(int playerIndex);
-
-
-
-void zoomIntoArcade(std::optional<objid> id, int playerIndex);
-std::optional<bool> isZoomedIntoArcade(int playerIndex);
+// TODO - need to organize these better
+void setEntityFocusArcade(std::optional<objid> id, int playerIndex);
+std::optional<bool> isEntityFocusArcade(int playerIndex);
 
 ////////////////////// Camera Manipulation //////////////////////
 void setPlayerFreeCamera(int playerIndex, bool editorMode);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
+
+////////////////////// Glue //////////////////////
+WeaponEntityData getWeaponEntityData(objid id);
 
 
 ////////////////////// Misc //////////////////////

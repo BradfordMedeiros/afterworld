@@ -30,6 +30,9 @@ bool canExitVehicle(){
 }
 
 bool isControlledVehicle(int vehicleId){
+  if (vehicles.vehicles.find(vehicleId) == vehicles.vehicles.end()){
+    return false;
+  }
   return vehicles.vehicles.at(vehicleId).state.occupied.has_value();
 }
 

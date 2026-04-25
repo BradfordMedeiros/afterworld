@@ -73,6 +73,23 @@ void onAddEntity(objid idAdded){
     createHitbox(idAdded);
   }
 }
+
+void onActivePlayerRemoved(objid id){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+
+	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
+		controlledPlayer.tempCamera = std::nullopt;
+		updateCamera(getDefaultPlayerIndex());
+	}
+	if (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id){
+		controlledPlayer.entityId = std::nullopt;
+		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
+		controlledPlayer.disablePlayerControl = false;
+		updateCamera(getDefaultPlayerIndex());
+		return;
+	}
+}
+
 void onRemoveEntity(objid idRemoved){
 	if (controllableEntities.find(idRemoved) != controllableEntities.end()){
 		modlog("controllable entity removed id:", std::to_string(idRemoved));
@@ -82,6 +99,8 @@ void onRemoveEntity(objid idRemoved){
   removeWeaponId(weapons, idRemoved);
   removeInventory(scopenameToInventory, idRemoved);
   controllableEntities.erase(idRemoved);
+
+  onActivePlayerRemoved(idRemoved);
 }
 
 
@@ -147,6 +166,17 @@ int getDefaultPlayerIndex(){
 	return mainPlayerControl;
 }
 
+void setPlayerControlDisabled(bool isDisabled, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	controlledPlayer.disablePlayerControl = isDisabled;
+	updateCamera(playerIndex);
+}
+bool isPlayerControlDisabled(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	return controlledPlayer.disablePlayerControl;
+}
+
+////////////////////// Lookup Utilities //////////////////////
 std::optional<int> getPlayerIndexForEntity(objid id){
 	for (auto &player : players){
 		if (player.entityId.has_value() && player.entityId.value() == id){
@@ -163,6 +193,19 @@ std::optional<objid> getPlayerId(int playerIndex){
 std::optional<objid> getEntityForPlayerIndex(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	return controlledPlayer.entityId;
+}
+
+std::optional<ControllableEntity*> getActiveControllable(int playerIndex){
+	auto activePlayer = getEntityForPlayerIndex(playerIndex);
+	if (!activePlayer.has_value()){
+		return std::nullopt;
+	}
+	return &controllableEntities.at(activePlayer.value());
+}
+
+std::vector<ControlledPlayer>& getPlayers(){
+	modassert(players.size() > 0, "invalid player size");
+	return players;
 }
 
 
@@ -323,9 +366,28 @@ std::optional<bool> isEntityReloading(objid id){
 	return isReloading(movementEntities.movementEntities.at(id).movementState);
 }
 
+void setEntityZoom(objid id, float multiplier){
+  auto& player = controllableEntities.at(id);
+  bool isZoomedIn = multiplier < 1.f;
+  if (isZoomedIn){
+    player.zoomAmount = static_cast<int>((1.f / multiplier));
+  }else{
+    player.zoomAmount = std::nullopt;
+  }
+  setZoom(multiplier, isZoomedIn);
+  setZoomSensitivity(movementEntities, multiplier, id);
+  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
+}
 bool isEntityGunZoomed(objid id){
   auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;
   return gunZoomed;
+}
+
+std::optional<int> getEntityZoomAmount(objid id){
+	if (!isEntityGunZoomed(id)){
+		return std::nullopt;
+	}
+	return controllableEntities.at(id).zoomAmount;
 }
 
 void deliverEntityAmmo(objid id, int ammoAmount){
@@ -386,26 +448,24 @@ void maybeDisableMesh(objid id){
 	}
 }
 void setEntityThirdPerson(objid id){
+	modassert(isEntity(id), "setEntityThirdPerson not an entity");
 	maybeReEnableMesh(id);
 }
 void setEntityFirstPerson(objid id){
+	modassert(isEntity(id), "setEntityFirstPerson not an entity");
 	maybeDisableMesh(id);
 }
 
-// Vehicle
 void disableEntity(objid id){
 	maybeDisableMesh(id);
 	setGameObjectPhysicsEnable(id, false);
 }
-void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot){
-	int playerIndex = getDefaultPlayerIndex();
-	
+void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::quat> rot){	
 	setGameObjectPhysicsEnable(id, true);
 	setGameObjectVelocity(id, glm::vec3(0.f, 0.f, 0.f));
 
-	auto isActivePlayer = getEntityForPlayerIndex(playerIndex).has_value() && getEntityForPlayerIndex(playerIndex).value() == id;
 	bool thirdPersonMode = getWeaponEntityData(id).thirdPersonMode;
-	if (!isActivePlayer || thirdPersonMode){
+	if (thirdPersonMode){
 		maybeReEnableMesh(id);
 	}
 	if (pos.has_value()){
@@ -416,58 +476,79 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 	}
 }
 
-void entityEnterVehicle(int playerIndex, objid vehicleId, objid id){
-  enterVehicle(vehicles, vehicleId, id);
-  disableEntity(id);
-  std::optional<ControllableEntity*> controllable = getActiveControllable(playerIndex);
-  modassert(controllable.has_value() && controllable.value() != NULL, "controllable invalid");
-  controllable.value() -> vehicle = vehicleId;
+void setEntityInVehicle(objid id, std::optional<objid> vehicleId){
+	if (vehicleId.has_value()){
+		auto& controllable = controllableEntities.at(id);
+  	enterVehicle(vehicles, vehicleId.value(), id);
+  	disableEntity(id);
+  	controllable.vehicle = vehicleId.value();
+	}else{
+  	if (!canExitVehicle()){
+  	  return;
+  	}
+  	auto& controllable = controllableEntities.at(id);
+  	auto vehicleInfo = exitVehicle(vehicles, controllable.vehicle.value(), id);
+  	reenableEntity(id, vehicleInfo.position, vehicleInfo.rotation);
+ 		controllable.vehicle = std::nullopt;
+	}
 }
 
-void entityExitVehicle(int playerIndex, objid vehicleId, objid id){
-  if (!canExitVehicle()){
-    return;
+void entityActionVehicle(objid id){
+	auto& controllable = controllableEntities.at(id);
+	if (controllable.vehicle.has_value()){
+	  setEntityInVehicle(id, std::nullopt); 
+	}else if (controllable.lookingAtVehicle.has_value()){
+	  setEntityInVehicle(id, controllable.lookingAtVehicle.value());
+	}
+}
+
+bool setEntityLookAt(objid id, std::optional<objid> lookAt){
+	auto& controllable = controllableEntities.at(id);
+	bool shouldDrawEnterText = false;
+	std::optional<objid> lookingAtVehicle;
+	if (lookAt.has_value()){
+	  if (isVehicle(vehicles, lookAt.value()) &&  !controllable.vehicle.has_value()){
+	    lookingAtVehicle = lookAt.value();
+	    shouldDrawEnterText = true;
+	  }
+	}
+	controllable.lookingAtVehicle = lookingAtVehicle;
+	return shouldDrawEnterText;
+}
+
+// Todo get rid of the player index here
+void setEntityFocusArcade(std::optional<objid> id, int playerIndex){
+  bool zoomIn = id.has_value();
+  //getGlobalState().zoomIntoArcade = zoomIn;
+  setPlayerControlDisabled(zoomIn, 0);
+  if (!zoomIn){
+    setTempCamera(std::nullopt, playerIndex);          
+  }else{
+    auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
+    modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
+    auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
+    auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
+    setTempCamera(arcadeCameraId.value(), playerIndex);     
   }
-  auto vehicleInfo = exitVehicle(vehicles, getActiveControllable(playerIndex).value() -> vehicle.value(), id);
-  reenableEntity(id, vehicleInfo.position, vehicleInfo.rotation);
-  getActiveControllable(playerIndex).value() -> vehicle = std::nullopt;
+}
+
+// Todo use entity id not player index
+std::optional<bool> isEntityFocusArcade(int playerIndex){
+	auto controlledPlayer = getActiveControllable(playerIndex);
+  if (!controlledPlayer.has_value()){
+  	return false;
+  }
+  return controlledPlayer.value() -> zoomIntoArcade;
+}
+
+
+
+std::set<objid>& getEntityDisabledAnimationIds(objid entityId){
+  return controllableEntities.at(entityId).disableAnimationIds;
 }
 
 
 ////////////////////// Convenience Utilities for player indexs //////////////////////
-
-
-std::vector<ControlledPlayer>& getPlayers(){
-	modassert(players.size() > 0, "invalid player size");
-	return players;
-}
-
-void onActivePlayerRemoved(objid id){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-
-	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
-		controlledPlayer.tempCamera = std::nullopt;
-		updateCamera(getDefaultPlayerIndex());
-	}
-	if (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id){
-		controlledPlayer.entityId = std::nullopt;
-		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
-		controlledPlayer.disablePlayerControl = false;
-		updateCamera(getDefaultPlayerIndex());
-		return;
-	}
-}
-
-void setDisablePlayerControl(bool isDisabled, int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	controlledPlayer.disablePlayerControl = isDisabled;
-	updateCamera(playerIndex);
-}
-bool isPlayerControlDisabled(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	return controlledPlayer.disablePlayerControl;
-}
-
 
 bool allPlayersDead(){
 	for (auto& player : players){
@@ -488,6 +569,28 @@ std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex){
 }
 
 
+////////////////////// Camera Manipulation //////////////////////
+void setPlayerFreeCamera(int playerIndex, bool editorMode){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	controlledPlayer.freeCamera = editorMode;
+	updateCamera(playerIndex);
+}
+
+void setTempCamera(std::optional<objid> camera, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	controlledPlayer.tempCamera = camera;
+	updateCamera(playerIndex);
+}
+
+void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse){
+  if (hasOption("no-shake")){
+    return;
+  }
+  getControlledPlayer(playerIndex).shakeImpulse = impulse;
+}
+
+
+////////////////////// Glue //////////////////////
 FiringTransform getFireTransform(objid id, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
@@ -527,65 +630,6 @@ WeaponEntityData getWeaponEntityData(objid id){
     .thirdPersonMode = movementEntity.managedCamera.thirdPersonMode,
     .fireTransform = getFireTransform(id, playerIndex),
   };
-}
-
-std::optional<ControllableEntity*> getActiveControllable(int playerIndex){
-	auto activePlayer = getEntityForPlayerIndex(playerIndex);
-	if (!activePlayer.has_value()){
-		return std::nullopt;
-	}
-	if (controllableEntities.find(activePlayer.value()) == controllableEntities.end()){
-		return std::nullopt;
-	}
-	return &controllableEntities.at(activePlayer.value());
-}
-
-std::set<objid>& getEntityDisabledAnimationIds(objid entityId){
-  return controllableEntities.at(entityId).disableAnimationIds;
-}
-
-
-void zoomIntoArcade(std::optional<objid> id, int playerIndex){
-  bool zoomIn = id.has_value();
-  //getGlobalState().zoomIntoArcade = zoomIn;
-  setDisablePlayerControl(zoomIn, 0);
-  if (!zoomIn){
-    setTempCamera(std::nullopt, playerIndex);          
-  }else{
-    auto arcadeCameraId = findChildObjBySuffix(id.value(), ">camera");
-    modassert(arcadeCameraId.has_value(), "arcadeCameraId does not have value");
-    auto position = gameapi -> getGameObjectPos(id.value(), true, "[gamelogic] zoomIntoArcade get arcade camera location");
-    auto rotation = gameapi -> getGameObjectRotation(id.value(), true, "[gamelogic] zoomIntoArcade get cmaera rotation");  // tempchecked
-    setTempCamera(arcadeCameraId.value(), playerIndex);     
-  }
-}
-
-std::optional<bool> isZoomedIntoArcade(int playerIndex){
-	auto controlledPlayer = getActiveControllable(playerIndex);
-  if (!controlledPlayer.has_value()){
-  	return false;
-  }
-  return controlledPlayer.value() -> zoomIntoArcade;
-}
-
-////////////////////// Camera Manipulation //////////////////////
-void setPlayerFreeCamera(int playerIndex, bool editorMode){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	controlledPlayer.freeCamera = editorMode;
-	updateCamera(playerIndex);
-}
-
-void setTempCamera(std::optional<objid> camera, int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	controlledPlayer.tempCamera = camera;
-	updateCamera(playerIndex);
-}
-
-void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse){
-  if (hasOption("no-shake")){
-    return;
-  }
-  getControlledPlayer(playerIndex).shakeImpulse = impulse;
 }
 
 ////////////////////// Misc //////////////////////
