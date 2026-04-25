@@ -74,23 +74,24 @@ void onAddEntity(objid idAdded){
   }
 }
 
-void onActivePlayerRemoved(objid id){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
+void onActivePlayerRemoved(objid id, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
 		controlledPlayer.tempCamera = std::nullopt;
-		updateCamera(getDefaultPlayerIndex());
+		updateCamera(playerIndex);
 	}
 	if (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id){
 		controlledPlayer.entityId = std::nullopt;
 		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
 		controlledPlayer.disablePlayerControl = false;
-		updateCamera(getDefaultPlayerIndex());
+		updateCamera(playerIndex);
 		return;
 	}
 }
 
 void onRemoveEntity(objid idRemoved){
+	auto playerIndex = getPlayerIndexForEntity(idRemoved);
 	if (controllableEntities.find(idRemoved) != controllableEntities.end()){
 		modlog("controllable entity removed id:", std::to_string(idRemoved));
 	}
@@ -100,7 +101,9 @@ void onRemoveEntity(objid idRemoved){
   removeInventory(scopenameToInventory, idRemoved);
   controllableEntities.erase(idRemoved);
 
-  onActivePlayerRemoved(idRemoved);
+  if (playerIndex.has_value()){
+	  onActivePlayerRemoved(idRemoved, playerIndex.value());
+  }
 }
 
 
@@ -539,13 +542,6 @@ std::optional<bool> isEntityFocusArcade(objid id){
   return controllableEntities.at(id).zoomIntoArcade;
 }
 
-
-
-std::set<objid>& getEntityDisabledAnimationIds(objid entityId){
-  return controllableEntities.at(entityId).disableAnimationIds;
-}
-
-
 ////////////////////// Convenience Utilities for player indexs //////////////////////
 
 bool allPlayersDead(){
@@ -617,7 +613,7 @@ FiringTransform getFireTransform(objid id, int playerIndex){
 }
 
 WeaponEntityData getWeaponEntityData(objid id){
-	int playerIndex = getDefaultPlayerIndex();
+	int playerIndex = getPlayerIndexForEntity(id).value();
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
@@ -628,6 +624,10 @@ WeaponEntityData getWeaponEntityData(objid id){
     .thirdPersonMode = movementEntity.managedCamera.thirdPersonMode,
     .fireTransform = getFireTransform(id, playerIndex),
   };
+}
+
+std::set<objid>& getEntityDisabledAnimationIds(objid entityId){
+  return controllableEntities.at(entityId).disableAnimationIds;
 }
 
 ////////////////////// Misc //////////////////////
