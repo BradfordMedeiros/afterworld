@@ -14,40 +14,6 @@ extern int mainPlayerControl;
 extern std::vector<ControlledPlayer> players;
 
 
-void updateCamera(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-
-	// ensure viewports
-	if (players.size() == 1){
-  	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{}, {});
-	}else if (players.size() == 2){
-  	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{}, {});
-	  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{}, {});
-	}else {
-		modassert(false, "invalid number of players");
-	}
-
-  ///////////////
-
-
-	bool tempCameraDoesNotExistButShould = controlledPlayer.tempCamera.has_value() && !gameapi -> gameobjExists(controlledPlayer.tempCamera.value());
-	bool activeCameraDoesNotExistButShould = controlledPlayer.activePlayerManagedCameraId.has_value() && !gameapi -> gameobjExists(controlledPlayer.activePlayerManagedCameraId.value());
-	modassert(!tempCameraDoesNotExistButShould, "temp camera has value but obj does not exist");
-	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");	
-
-	if (controlledPlayer.freeCamera){
-		gameapi -> setActiveCamera(std::nullopt, controlledPlayer.viewport);
-		return;
-	}
-	if (controlledPlayer.tempCamera.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), controlledPlayer.viewport);
-		return;
-	}
-	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), controlledPlayer.viewport);
-	}
-}
-
 ////////////////////// Core Add / Rm  //////////////////////
 void onAddEntity(objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));
@@ -58,6 +24,7 @@ void onAddEntity(objid idAdded){
   	shouldAddWeapon = true;
     addAiAgent(aiData, idAdded, agent.value());
     controllableEntities[idAdded] = ControllableEntity {
+	 		.disablePlayerControl = false,	
     	.isInShootingMode = true,
     	.zoomIntoArcade = false,
     	.isAlive = true,
@@ -78,14 +45,11 @@ void onActivePlayerRemoved(objid id, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
 	if (controlledPlayer.tempCamera.has_value() && controlledPlayer.tempCamera.value() == id){
-		controlledPlayer.tempCamera = std::nullopt;
-		updateCamera(playerIndex);
+		setTempCamera(std::nullopt, playerIndex);
 	}
 	if (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id){
 		controlledPlayer.entityId = std::nullopt;
-		controlledPlayer.activePlayerManagedCameraId = std::nullopt; // probably should delete this too
-		controlledPlayer.disablePlayerControl = false;
-		updateCamera(playerIndex);
+		setManagedCameraId(std::nullopt, playerIndex);
 		return;
 	}
 }
@@ -104,6 +68,20 @@ void onRemoveEntity(objid idRemoved){
   if (playerIndex.has_value()){
 	  onActivePlayerRemoved(idRemoved, playerIndex.value());
   }
+}
+
+bool updateEntityLookAt(objid id, std::optional<objid> lookAt){
+	auto& controllable = controllableEntities.at(id);
+	bool shouldDrawEnterText = false;
+	std::optional<objid> lookingAtVehicle;
+	if (lookAt.has_value()){
+	  if (isVehicle(vehicles, lookAt.value()) &&  !controllable.vehicle.has_value()){
+	    lookingAtVehicle = lookAt.value();
+	    shouldDrawEnterText = true;
+	  }
+	}
+	controllable.lookingAtVehicle = lookingAtVehicle;
+	return shouldDrawEnterText;
 }
 
 
@@ -130,6 +108,17 @@ void setMainPlayerControl(int playerIndex){
 	mainPlayerControl = playerIndex;
 }
 
+void updateViewports(){
+	if (players.size() == 1){
+  	gameapi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{}, {});
+	}else if (players.size() == 2){
+  	gameapi -> createViewport(0, 0.f, 0.5f, 1.f, 0.5f, DefaultBindingOption{}, {});
+	  gameapi -> createViewport(1, 0.f, 0.0f, 1.f, 0.5f, DefaultBindingOption{}, {});
+	}else {
+		modassert(false, "invalid number of players");
+	}
+}
+
 void addPlayerPort(int playerIndex){
 	ControlledPlayer player {
 		.viewport = playerIndex,
@@ -138,10 +127,10 @@ void addPlayerPort(int playerIndex){
 		.activePlayerManagedCameraId = std::nullopt, // this is fixed camera for fps mode
 		.tempCamera = std::nullopt,
 		.freeCamera = false,
-		.disablePlayerControl = false,	
 	};
 	players.push_back(player);
 	addPlayerPortToMovement(movement, playerIndex);
+	updateViewports();
 }
 
 void removePlayerPort(int playerIndex){
@@ -154,6 +143,7 @@ void removePlayerPort(int playerIndex){
 	}
 	players = newPlayers;
 	removePlayerPortFromMovement(movement, playerIndex);
+	updateViewports();
 }
 
 bool isControlledPlayer(int playerId){
@@ -167,16 +157,6 @@ bool isControlledPlayer(int playerId){
 
 int getDefaultPlayerIndex(){
 	return mainPlayerControl;
-}
-
-void setPlayerControlDisabled(bool isDisabled, int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	controlledPlayer.disablePlayerControl = isDisabled;
-	updateCamera(playerIndex);
-}
-bool isPlayerControlDisabled(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	return controlledPlayer.disablePlayerControl;
 }
 
 ////////////////////// Lookup Utilities //////////////////////
@@ -236,9 +216,7 @@ void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex){
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id.value()), std::string(">gen-player-camera-") + uniqueNameSuffix(), attr, submodelAttributes).value();
   gameapi -> makeParent(cameraId, id.value());
-  controlledPlayer.activePlayerManagedCameraId = cameraId;
-
-  updateCamera(playerIndex);
+  setManagedCameraId(cameraId, playerIndex);
 }
 
 std::optional<objid> getNextEntity(std::optional<objid> activeId){
@@ -284,7 +262,7 @@ void observeEntity(std::optional<objid> id, int playerIndex){
 
 	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
 		gameapi -> removeByGroupId(controlledPlayer.activePlayerManagedCameraId.value());
-		controlledPlayer.activePlayerManagedCameraId = std::nullopt;
+		setManagedCameraId(std::nullopt, playerIndex);
 	}
 
 	controlledPlayer.entityId = id.value();
@@ -293,10 +271,9 @@ void observeEntity(std::optional<objid> id, int playerIndex){
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   auto cameraId = gameapi -> makeObjectAttr(gameapi -> listSceneId(id.value()), std::string(">gen-player-camera-") + uniqueNameSuffix(), attr, submodelAttributes).value();
   gameapi -> makeParent(cameraId, id.value());
-  controlledPlayer.activePlayerManagedCameraId = cameraId;
-
-  updateCamera(playerIndex);
+  setManagedCameraId(cameraId, playerIndex);
 }
+
 void observeEntityNext(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	observeEntity(getNextEntity(controlledPlayer.entityId), playerIndex);
@@ -315,6 +292,14 @@ std::optional<objid> getCameraForThirdPerson(int playerIndex){
 
 
 ////////////////////// Basic Entity Manipulation //////////////////////
+void setEntityControlDisabled(bool isDisabled, objid id){
+	controllableEntities.at(id).disablePlayerControl = isDisabled;
+}
+
+bool isEntityControlDisabled(objid id){
+	return controllableEntities.at(id).disablePlayerControl;
+}
+
 void setEntityInShootingMode(objid id, bool shootingMode){
 	modassert(controllableEntities.find(id) != controllableEntities.end(), std::string("controllable entity setInShootingMode for unregistered controllableEntity: ") + std::to_string(id));
 	controllableEntities.at(id).isInShootingMode = shootingMode;
@@ -505,25 +490,12 @@ void entityActionVehicle(objid id){
 	}
 }
 
-bool setEntityLookAt(objid id, std::optional<objid> lookAt){
-	auto& controllable = controllableEntities.at(id);
-	bool shouldDrawEnterText = false;
-	std::optional<objid> lookingAtVehicle;
-	if (lookAt.has_value()){
-	  if (isVehicle(vehicles, lookAt.value()) &&  !controllable.vehicle.has_value()){
-	    lookingAtVehicle = lookAt.value();
-	    shouldDrawEnterText = true;
-	  }
-	}
-	controllable.lookingAtVehicle = lookingAtVehicle;
-	return shouldDrawEnterText;
-}
 
 void setEntityFocusArcade(std::optional<objid> arcadeId, objid id){
 	auto playerIndex = getPlayerIndexForEntity(id).value();
   bool zoomIn = arcadeId.has_value();
   //getGlobalState().zoomIntoArcade = zoomIn;
-  setPlayerControlDisabled(zoomIn, 0);
+  setEntityControlDisabled(zoomIn, id);
   if (!zoomIn){
     setTempCamera(std::nullopt, playerIndex);          
   }else{
@@ -564,15 +536,42 @@ std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex){
 
 
 ////////////////////// Camera Manipulation //////////////////////
-void setPlayerFreeCamera(int playerIndex, bool editorMode){
+void updateCamera(int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-	controlledPlayer.freeCamera = editorMode;
+
+	bool tempCameraDoesNotExistButShould = controlledPlayer.tempCamera.has_value() && !gameapi -> gameobjExists(controlledPlayer.tempCamera.value());
+	bool activeCameraDoesNotExistButShould = controlledPlayer.activePlayerManagedCameraId.has_value() && !gameapi -> gameobjExists(controlledPlayer.activePlayerManagedCameraId.value());
+	modassert(!tempCameraDoesNotExistButShould, "temp camera has value but obj does not exist");
+	modassert(!activeCameraDoesNotExistButShould, "active camera has value but obj does not exist");	
+
+	if (controlledPlayer.freeCamera){
+		gameapi -> setActiveCamera(std::nullopt, controlledPlayer.viewport);
+		return;
+	}
+	if (controlledPlayer.tempCamera.has_value()){
+		gameapi -> setActiveCamera(controlledPlayer.tempCamera.value(), controlledPlayer.viewport);
+		return;
+	}
+	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+		gameapi -> setActiveCamera(controlledPlayer.activePlayerManagedCameraId.value(), controlledPlayer.viewport);
+	}
+}
+
+void setManagedCameraId(std::optional<objid> camera, int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	controlledPlayer.activePlayerManagedCameraId = camera;
 	updateCamera(playerIndex);
 }
 
 void setTempCamera(std::optional<objid> camera, int playerIndex){
 	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 	controlledPlayer.tempCamera = camera;
+	updateCamera(playerIndex);
+}
+
+void setPlayerFreeCamera(int playerIndex, bool editorMode){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	controlledPlayer.freeCamera = editorMode;
 	updateCamera(playerIndex);
 }
 

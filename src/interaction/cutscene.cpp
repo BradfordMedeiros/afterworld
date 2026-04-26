@@ -170,7 +170,8 @@ void showLetterBox(std::string title, float duration);
 void showLetterBoxHold(std::string title, float fadeInTime);
 void hideLetterBox();
 
-void setPlayerControlDisabled(bool isDisabled, int playerIndex);
+void setEntityControlDisabled(bool isDisabled, objid id);
+std::optional<objid> getEntityForPlayerIndex(int playerIndex);
 int getDefaultPlayerIndex();
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 void ballModeLevelSelect();
@@ -189,7 +190,7 @@ void playOpening(EasyCutscene& cutscene){
 	}
 	if(initialize(cutscene)){
 		showLetterBox("", 25.f);
-		setPlayerControlDisabled(true, 0);
+		setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
 		store(cutscene, OpeningData{
 			.text = "You Have Fallen Asleep.",
 			.time = gameapi -> timeSeconds(false),
@@ -241,7 +242,7 @@ void playOpening(EasyCutscene& cutscene){
 
 	waitUntil(cutscene, 6, 30000);
 	run(cutscene, 7, []() -> void {
-		setPlayerControlDisabled(false, 0);
+		setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
 	});
 }
 

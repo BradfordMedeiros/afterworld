@@ -20,7 +20,7 @@ std::optional<float> finalBallTime;
 
 void ballStartGameplay(EasyCutscene& cutscene){
   if (initialize(cutscene)){
-		setPlayerControlDisabled(true, 0);
+    setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
   }
   if (finalize(cutscene)){
   }
@@ -30,13 +30,13 @@ void ballStartGameplay(EasyCutscene& cutscene){
     showLetterBox("Learning to Roll", 10.f);
   });
   run(cutscene, 2, []() -> void {
-  	setPlayerControlDisabled(false, 0);
+    setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
   });
 }
 void ballEndGameplay(EasyCutscene& cutscene){
 	if (initialize(cutscene)){
 	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
-		setPlayerControlDisabled(true, 0);
+    setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
 	}
   waitUntil(cutscene, 0, 2000);
 

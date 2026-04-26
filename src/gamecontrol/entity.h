@@ -19,14 +19,13 @@ struct ControlledPlayer {
 	std::optional<objid> activePlayerManagedCameraId;
 	std::optional<objid> tempCamera;
 	bool freeCamera;
-	bool disablePlayerControl;  // this maybe should be in global? 
-
 	glm::vec3 shakeOffset = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 shakeVelocity = glm::vec3(0.f, 0.f, 0.f);
 	std::optional<glm::vec3> shakeImpulse;
 };
 
 struct ControllableEntity {
+	bool disablePlayerControl;
 	bool isInShootingMode;  // not sure if this should be in here but w/e
 	bool zoomIntoArcade;
 	bool isAlive;
@@ -37,9 +36,10 @@ struct ControllableEntity {
 };
 
 
-////////////////////// Core Add / Rm  //////////////////////
+////////////////////// Core Add / Rm / Lifecycle  //////////////////////
 void onAddEntity(objid idAdded);
 void onRemoveEntity(objid idRemoved);
+bool updateEntityLookAt(objid id, std::optional<objid> lookAt);
 
 ////////////////////// Player port / viewport functions 
 ControlledPlayer& getControlledPlayer(int playerIndex);
@@ -50,8 +50,6 @@ void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
 bool isControlledPlayer(int playerId);
 int getDefaultPlayerIndex();
-void setPlayerControlDisabled(bool isDisabled, int playerIndex);
-bool isPlayerControlDisabled(int playerIndex);
 
 ////////////////////// Lookup Utilities //////////////////////
 std::optional<int> getPlayerIndexForEntity(objid id);
@@ -68,6 +66,9 @@ void observeEntityNext(int playerIndex);
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
 
 ////////////////////// Basic Entity Manipulation //////////////////////
+void setEntityControlDisabled(bool isDisabled, objid id);
+bool isEntityControlDisabled(objid id);
+
 void setEntityInShootingMode(objid id, bool shootingMode);
 std::optional<bool> isEntityInShootingMode(objid id);
 
@@ -85,6 +86,7 @@ bool isEntityGunZoomed(objid id);
 std::optional<int> getEntityZoomAmount(objid id);
 
 void deliverEntityAmmo(objid id, int ammoAmount);
+
 glm::vec3 getEntityVelocity(objid id);
 
 void killEntity(objid id);
@@ -95,8 +97,6 @@ void setEntityFirstPerson(objid id);
 void setEntityInVehicle(objid id, std::optional<objid> vehicleId);
 void entityActionVehicle(objid id);
 
-bool setEntityLookAt(objid id, std::optional<objid> lookAt);
-
 void setEntityFocusArcade(std::optional<objid> arcadeId, objid id);
 std::optional<bool> isEntityFocusArcade(objid id);
 
@@ -105,8 +105,9 @@ bool allPlayersDead();
 std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex);
 
 ////////////////////// Camera Manipulation //////////////////////
-void setPlayerFreeCamera(int playerIndex, bool editorMode);
+void setManagedCameraId(std::optional<objid> camera, int playerIndex);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
+void setPlayerFreeCamera(int playerIndex, bool editorMode);
 void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 
 ////////////////////// Glue //////////////////////

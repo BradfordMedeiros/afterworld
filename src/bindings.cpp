@@ -441,7 +441,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
       // this probably should be aware of the bounds, an not allow to clip into wall for example
       // maybe raycast down, and then set the position so it fits 
       auto teleportPosition = getTeleportPosition();
-      if (controlledPlayer.entityId.has_value() && !isPlayerControlDisabled(playerIndex) && teleportPosition.has_value()){
+      if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value()) && teleportPosition.has_value()){
         handleTeleport(controlledPlayer.entityId.value(), teleportPosition.value().id);
         gameapi -> removeByGroupId(teleportPosition.value().id);
       }
@@ -465,12 +465,12 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   onVehicleKey(vehicles, key, action);
 
-  if (controlledPlayer.entityId.has_value() && !isPlayerControlDisabled(playerIndex)){
+  if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
     if (!(isPaused() || disableGameInput())){
       onWeaponsKeyCallback(getWeaponState(weapons, controlledPlayer.entityId.value()), key, action, controlledPlayer.entityId.value());
     }
   }
-  if (controlledPlayer.entityId.has_value() && !isPlayerControlDisabled(playerIndex)){
+  if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
     if (!(isPaused() || disableGameInput())){
       onMovementKeyCallback(movementEntities, movement, controlledPlayer.entityId.value(), key, action, controlledPlayer.viewport);
     }
@@ -478,7 +478,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   if (key == 'Q' && action == 0) { 
     printWorldInfo(aiData.worldInfo);
-    if (controlledPlayer.entityId.has_value() && !isPlayerControlDisabled(playerIndex)){
+    if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       setEntityInShootingMode(controlledPlayer.entityId.value(), !isEntityInShootingMode(controlledPlayer.entityId.value()).value());
     }
   }
@@ -544,7 +544,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
   if (controlledPlayer.entityId.has_value()){
     static float selectDistance = querySelectDistance();
-    if (!isPaused() && !disableGameInput() && !isPlayerControlDisabled(playerIndex)){
+    if (!isPaused() && !disableGameInput() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.entityId.value()), button, action, controlledPlayer.entityId.value(), selectDistance);
       if (uiUpdate.zoomAmount.has_value()){
         setEntityZoom(controlledPlayer.entityId.value(), uiUpdate.zoomAmount.value());
@@ -567,10 +567,10 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
   { // per player code
     auto playerIndex = playerPort;
     ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-    if (controlledPlayer.entityId.has_value() && !isPaused() && !disableGameInput() && !isPlayerControlDisabled(playerIndex)){
+    if (controlledPlayer.entityId.has_value() && !isPaused() && !disableGameInput() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       controlledPlayer.lookVelocity = glm::vec2(movementX, movementY);
     }
-    if (controlledPlayer.entityId.has_value() && !isPlayerControlDisabled(playerIndex)){
+    if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       //glm::vec2 smoothedMovement = smoothVelocity(glm::vec2(xPos, yPos));
       glm::vec2 smoothedMovement = glm::vec2(xPos, yPos);
 
@@ -802,7 +802,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
 
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-      if (controlledPlayer.entityId.has_value() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
+      if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(getDefaultPlayerIndex()).value())){
         std::vector<MovementActivePlayer> activePlayers;
 
         for (auto& player : getPlayers()){
@@ -822,7 +822,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       impulses = {};
 
       std::vector<WeaponsUiUpdate> uiUpdates;
-      if (controlledPlayer.entityId.has_value() && !isPaused() && !isPlayerControlDisabled(getDefaultPlayerIndex())){
+      if (controlledPlayer.entityId.has_value() && !isPaused() && !isEntityControlDisabled(getEntityForPlayerIndex(getDefaultPlayerIndex()).value())){
         auto alive = isEntityAlive(getEntityForPlayerIndex(getDefaultPlayerIndex()).value()).value();
         uiUpdates = onWeaponsFrame(weapons, controlledPlayer.entityId.value(), controlledPlayer.lookVelocity, getEntityVelocity(getEntityForPlayerIndex(getDefaultPlayerIndex()).value()), getWeaponEntityData, 
           [](objid id) -> objid {
@@ -849,7 +849,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       for (auto& uiUpdate : uiUpdates){
         auto raycastId = uiUpdate.raycastId;
         auto entityId = getEntityForPlayerIndex(getDefaultPlayerIndex()).value();
-        auto shouldDrawEnterText = setEntityLookAt(entityId, raycastId);
+        auto shouldDrawEnterText = updateEntityLookAt(entityId, raycastId);
         if (shouldDrawEnterText){
           gameapi -> drawText("Press E to enter", 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
         }
