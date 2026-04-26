@@ -8,7 +8,7 @@
 #include "../core/health.h"
 #include "../core/ragdoll.h"
 #include "../ai/ai.h"
-#include "../curves.h"
+#include "../gameworld/curves.h"
 #include "../options.h"
 #include "../ui/views/settings.h"
 

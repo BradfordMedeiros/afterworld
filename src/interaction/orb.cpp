@@ -354,12 +354,6 @@ std::optional<int> getActiveOrbViewIndex(objid cameraId){
 	return orbData.orbViewsCameraToOrb.at(cameraId).targetIndex;
 }
 
-int numberOfOrbs(OrbView& orbView){
-	auto orbId = orbView.orbId;
-	auto& orbUi = orbData.orbUis.at(orbId);
-	return orbUi.orbs.size();
-}
-
 std::optional<OrbView*> orbViewForCamera(objid cameraId){
 	if (orbData.orbViewsCameraToOrb.find(cameraId) == orbData.orbViewsCameraToOrb.end()){
 		return std::nullopt;

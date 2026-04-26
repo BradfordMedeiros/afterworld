@@ -6,9 +6,9 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
-#include "./util.h"
-#include "./vector_gfx.h"
-#include "./controls.h"
+#include "../util.h"
+#include "../vector_gfx.h"
+#include "../controls.h"
 
 struct OrbView {
 	objid orbId;
@@ -55,9 +55,6 @@ struct OrbData {
 };
 
 std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index);
-glm::vec3 getOrbPosition(OrbUi& orbUi, int index);
-glm::quat getOrbRotation(OrbUi& orbUi, int index);
-
 void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId);
 void handleOrbViews(OrbData& orbData);
 
@@ -87,10 +84,7 @@ void setOrbSelectIndex(OrbView& orbView, int targetIndex);
 
 int getPrevOrbIndex(OrbUi& orbUi, int targetIndex);
 int getNextOrbIndex(OrbUi& orbUi, int targetIndex);
-int getMinOrbIndex(OrbUi& orbUi);
 
-int numberOfOrbs(OrbView& orbView);
-std::optional<OrbView*> orbViewForCamera(objid cameraId);
 std::optional<Orb*> selectedOrbForCamera(objid cameraId);
 
 std::string print(Orb& orb);

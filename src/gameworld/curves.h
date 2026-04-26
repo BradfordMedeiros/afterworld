@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_CURVES
 #define MOD_AFTERWORLD_CURVES
 
-#include "../../ModEngine/src/cscript/cscript_binding.h"
+#include "../../../ModEngine/src/cscript/cscript_binding.h"
 
 struct ManagedRailMovement {
   objid railId;

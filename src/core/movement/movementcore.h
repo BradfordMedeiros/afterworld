@@ -4,7 +4,7 @@
 #include "../../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../../util.h"
 #include "../../resources/resources.h"
-#include "../../curves.h"
+#include "../../gameworld/curves.h"
 
 
 struct MovementParams {

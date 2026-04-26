@@ -1,7 +1,7 @@
 #ifndef MOD_AFTERWORLD_CONFIG
 #define MOD_AFTERWORLD_CONFIG
 
-#include "./orbs.h"
+#include "./interaction/orbs.h"
 
 OrbUi createOrbUi(objid id);
 
