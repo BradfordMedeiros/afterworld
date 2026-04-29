@@ -17,7 +17,6 @@
 #include "../components/game/fade.h"
 #include "./navigation.h"
 #include "./ball.h"
-#include "../../modelviewer.h"
 #include "./loading.h"
 
 extern Component mainUI;

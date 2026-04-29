@@ -70,5 +70,13 @@ std::function<int()> optionsSelectedIndex(std::string key, std::string attribute
 std::function<void(std::string& choice, int)> optionsOnClickObj(std::string attribute, std::vector<AttributeValue> optionValueMapping);
 std::function<int()> optionsSelectedIndexObj(std::string attribute, std::vector<AttributeValue> optionValueMapping);
 
+
+void emitNewParticleViewerParticle();
+void setParticlesViewerShouldEmit(bool shouldEmit);
+bool getParticlesViewerShouldEmit();
+void setParticleAttribute(std::string, AttributeValue);
+std::optional<AttributeValue> getParticleAttribute(std::string);
+
+
 #endif
 
