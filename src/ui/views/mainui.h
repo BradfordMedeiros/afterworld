@@ -8,7 +8,6 @@
 #include "./playing.h"
 #include "./mainmenu.h"
 #include "./settings.h"
-#include "./modelviewer.h"
 #include "./editorview.h"
 #include "./windowmanager.h"
 #include "./uicontext.h"
