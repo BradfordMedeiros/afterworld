@@ -1277,8 +1277,6 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   std::vector<CScriptBinding> bindings;
   gameapi = &api;
   bindings.push_back(afterworldMainBinding(api, "native/main"));
-  bindings.push_back(modelviewerBinding(api, "native/modelviewer"));
-  bindings.push_back(particleviewerBinding(api, "native/particleviewer"));
   return bindings;
 } 
 

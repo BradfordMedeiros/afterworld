@@ -201,8 +201,6 @@ UiContext getUiContext(){
       gameapi -> resetScene(sceneId.value());
     },
     .activeSceneId = activeSceneForSelected,
-    .showPreviousModel = modelViewerPrevModel,
-    .showNextModel = modelViewerNextModel,
     .playSound = []() -> void {
       playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
     },
