@@ -53,7 +53,7 @@ void setControl(int controlSymbol, int key){
 	}else if (controlSymbol == grindSymbol){
 		grindKey = key;
 	}else if (controlSymbol == reverseGrindSymbol){
-		grindKey = key;
+		reverseGrindKey = key;
 	}else if (controlSymbol == moveForwardSymbol){
 		moveFowardKey = key;
 	}else if (controlSymbol == moveBackwardSymbol){
