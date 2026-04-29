@@ -63,6 +63,11 @@ struct SceneManagement {
   int changedLevelFrame;
 };
 
+struct UiData {
+  UiContext uiContext;
+  HandlerFns uiCallbacks;
+};
+
 SceneManagement sceneManagement;
 MovementEntityData movementEntities;
 std::optional<std::string> dragSelect;

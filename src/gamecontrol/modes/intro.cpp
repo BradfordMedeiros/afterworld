@@ -23,6 +23,9 @@ struct IntroModeOptions {
 
 GameTypeInfo getBallIntroMode();
 
+void ballModeNewGame();
+void ballModeLevelSelect();
+
 void setShowLiveMenu(bool showMenu){
 	if (showMenu){
    inputOverride(false, true);
@@ -42,48 +45,7 @@ void setShowLiveMenu(bool showMenu){
     inputOverride(false, false);
 		changeUiMode(UiModeNone{});
 	}
-
-
 }
-
-/*
-   .getMenuOptions = []() -> std::optional<MainMenu2Options> {
-      float duration = 0.2f;
-
-      static bool showMenu = false;
-      bool wasShowingMenu = showMenu;
-      showMenu = getGlobalState().showLiveMenu;
-      static std::optional<float> lastShowTime;
-
-      glm::vec4 baseColor(1.f, 1.f, 1.f, 0.66f);
-
-      if (showMenu){
-        lastShowTime = std::nullopt;
-        return MainMenu2Options {
-          .backgroundColor = baseColor,
-          .offsetY = 0.f, 
-        };
-      }
-
-      if (wasShowingMenu && !showMenu){
-        lastShowTime = gameapi -> timeSeconds(false);
-      }
-      if (!lastShowTime.has_value()){
-        return std::nullopt;
-      }
-
-      auto timeElapsed = gameapi -> timeSeconds(false) - lastShowTime.value();
-      if (timeElapsed > duration){
-        return std::nullopt;
-      }
-      auto percentage = timeElapsed / duration;
-
-      return MainMenu2Options{
-        .backgroundColor = glm::vec4(baseColor.r, baseColor.g, baseColor.b, (1.f - percentage) * baseColor.w),
-        .offsetY = 0.f + percentage,
-      };
-   },*/
-
 
 void startIntroMode(objid sceneId){	
 	if (currentCutscene.has_value()){

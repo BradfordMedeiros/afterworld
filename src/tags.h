@@ -20,12 +20,6 @@
 #include "./config.h"
 #include "./gameworld/audio.h"
 
-struct UiData {
-  UiContext uiContext;
-  HandlerFns uiCallbacks;
-};
-
-
 struct HealthColorObject {
 	glm::vec3 lowColor;
 	glm::vec3 highColor;

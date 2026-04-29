@@ -13,12 +13,8 @@
 #include "../../ui/components/game/fade.h"
 #include "../../ui/views/playing.h"
 
-
 void startIntroMode(objid sceneId);
 void endIntroMode();
-
 void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs);
-void ballModeNewGame();
-void ballModeLevelSelect();
 
 #endif 
