@@ -18,7 +18,6 @@ extern std::unordered_map<objid, GravityWell> gravityWells;
 extern std::unordered_map<objid, TriggerColor> triggerColors;
 extern std::unordered_map<objid, TeleportExit> teleportObjs;
 extern std::unordered_map<objid, Powerup> powerups;
-extern StateController animationController;
 extern std::set<objid> textureScrollObjIds;
 extern AudioZones audiozones;
 extern InGameUi inGameUi;
@@ -28,7 +27,6 @@ extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 
 void goToLevel(std::string levelShortName);
-void goBackMainMenu();
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 bool isInGameMode2();
 
@@ -72,26 +70,7 @@ void onAddConditionId(objid id, std::string& value){
 	}
 }
 
-
-struct Skippable {
-	std::optional<std::string> advanceToLevel;
-};
-std::unordered_map<objid, Skippable> skippable;
-
 std::vector<TagUpdater> tagupdates = { 
-	TagUpdater {
-		.attribute = "animation",  // TODO this should probably move to entity
-		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
-			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
-  			auto animationControllerValue = getSingleAttr(id, "animation");
-  			addEntityController(animationController, id, getSymbol(animationControllerValue.value()));
-  		},
-  		.onRemove = [](int32_t id) -> void {
-			removeEntityController(animationController, id);
-  		},
-  		.onFrame = std::nullopt,
-  		.onMessage = std::nullopt,
-	},
 	TagUpdater {
 		.attribute = "scrollspeed",
 		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
@@ -561,36 +540,6 @@ std::vector<TagUpdater> tagupdates = {
   	    },
   	    .onFrame = std::nullopt,
   	    .onMessage = [](std::string& key, std::any& value) -> void {},
-	},
-	// Is this duplicate with the end level thing?
-	TagUpdater {
-		.attribute = "advance",
-		.onAdd = [](int32_t id, AttributeValue value) -> void {
- 			auto advanceToLevel = getSingleAttr(id, "advance");
-			skippable[id] = Skippable{
-				.advanceToLevel = advanceToLevel,
-			};
-		},
-  	    .onRemove = [](int32_t id) -> void {
- 	    		auto levelComplete = getSingleAttr(id, "markcomplete");
- 	    		if (levelComplete.has_value()){
- 	    			markLevelComplete(levelComplete.value(), 0.f);
- 	    		}
- 	    		skippable.erase(id);
-  	    },
-  	    .onFrame = []() -> void {},
-  	    .onMessage = [](std::string& key, std::any& value) -> void {
-  	    	if (key == "advance"){
-  	    		for (auto& [id, skip] : skippable){
-  	    			if (skip.advanceToLevel.has_value()){
-	      				goToLevel(skip.advanceToLevel.value());
-  	    			}else{
-	      				goBackMainMenu();
-  	    			}
-  	    			return;
-  	    		}
-  	    	}
-  	    },
 	},
 	TagUpdater {
 		.attribute = "powerup",

@@ -28,6 +28,10 @@ Component pauseMenuComponent {
 
 	  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tint.x, tint.y, tint.z, tint.w * interpolateDuration(0.f, 1.f, elapsedTime, 0.2f)), true, std::nullopt /* selection id */, std::nullopt, std::nullopt, std::nullopt);
 
+    PauseOptions* pauseOptions = typeFromProps<PauseOptions>(props, interfaceSymbol);
+    modassert(pauseOptions, "pause options ptr");
+    std::cout << "value is: " << pauseOptions -> value << std::endl;
+
 //	  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png", std::nullopt);
 	  //drawTools.drawRect(0.f, 2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg", std::nullopt);
 	  //drawTools.drawRect(0.f, -2.f + 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(0.4f, 0.4f, 0.4f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg", std::nullopt);

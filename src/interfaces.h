@@ -7,7 +7,7 @@
 #include "./core/health.h"
 #include "./interaction/terminal.h"
 #include "./debug.h"
-#include "./gamecontrol/gametypes/gametypes.h"
+#include "./gamecontrol/gametypes.h"
 
 ArcadeApi createArcadeApi();
 extern AIInterface aiInterface;

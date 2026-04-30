@@ -79,8 +79,19 @@ GameMode gamemodeByShortcutName(std::string shortcut){
       if (modeStr == "intro"){
         return GameModeIntro{};
       }
+      if (modeStr == "video"){
+        return GameModeVideo{};
+      }
+
+      if (modeStr == "fps"){
+        return GameModeFps {
+          .makePlayer = true,
+          .player = "maincamera",
+        };
+      }
     }
   }
+
   return GameModeFps {
     .makePlayer = true,
     .player = "maincamera",

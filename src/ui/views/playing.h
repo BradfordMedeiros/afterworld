@@ -34,7 +34,7 @@ std::optional<TerminalConfig*> getTerminalConfig();
 struct PlayingOptions {
 	std::optional<ZoomOptions> showZoomOverlay;
 	std::optional<ScoreOptions> scoreOptions;
-	bool showPause;
+	std::optional<PauseOptions> pauseOptions;
 };
 
 

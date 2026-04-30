@@ -453,6 +453,7 @@ std::optional<std::function<void()>> nullClick = []() -> void {};
 const int horizontalSymbol = getSymbol("horizontal");
 const int listItemsSymbol = getSymbol("listitems");
 const int valueSymbol = getSymbol("value");
+const int interfaceSymbol = getSymbol("interface");
 const int onclickSymbol = getSymbol("onclick");
 const int onclickRightSymbol = getSymbol("onclick-right");
 const int onInputSymbol = getSymbol("oninput");

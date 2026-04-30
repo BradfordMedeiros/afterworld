@@ -144,6 +144,7 @@ extern std::optional<std::function<void()>> nullClick;
 extern const int horizontalSymbol;
 extern const int listItemsSymbol;
 extern const int valueSymbol;
+extern const int interfaceSymbol;
 extern const int onclickSymbol;
 extern const int onclickRightSymbol;
 extern const int onInputSymbol;

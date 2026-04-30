@@ -168,9 +168,6 @@ void goToLink(std::string link){
     goToLevel(link);
   });
 }
-void goBackMainMenu(){
-  pushHistory({ "mainmenu" }, true);
-}
 
 void goToMenu(){
   auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);

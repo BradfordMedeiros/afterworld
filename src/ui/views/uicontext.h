@@ -19,6 +19,10 @@ struct PauseInterface {
 };
 
 
+struct PauseOptions {
+  int value = 102;
+};
+
 struct TerminalConfig;
 struct ZoomOptions;
 struct ScoreOptions;
@@ -31,7 +35,7 @@ struct UiContext {
   std::function<bool()> showEditor;
   std::function<bool()> showConsole;
   std::function<bool()> showScreenspaceGrid;
-  std::function<bool()> showPause;
+  std::function<std::optional<PauseOptions>()> pauseOptions;
   std::function<std::optional<ZoomOptions>()> showZoomOverlay;
   std::function<bool()> showKeyboard;
   std::function<std::optional<DebugConfig>()> debugConfig;

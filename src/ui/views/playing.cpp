@@ -44,7 +44,7 @@ Component playingComponent {
     auto uiModeLiveMenu = std::get_if<LiveMenu>(&uiMode);
     auto uiModeGameOver = std::get_if<GameOverUi>(&uiMode);
 
-    if (uiModeNone){
+    /*if (uiModeNone){
       drawCenteredText(drawTools, "none", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }else if (uiModeFps){
       drawCenteredText(drawTools, "fps", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
@@ -54,13 +54,13 @@ Component playingComponent {
       drawCenteredText(drawTools, "livemenu", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }else if (uiModeGameOver){
       drawCenteredText(drawTools, "gameover", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
-    }
+    }*/
 
-    std::cout << "show pause: " << playingOptions -> showPause << std::endl;
-    if (playingOptions -> showPause){
-      auto pauseComponent = withPropsCopy(pauseMenuComponent, pauseMenuProps(std::nullopt));
-      auto defaultProps = getDefaultProps();
-      return pauseComponent.draw(drawTools, defaultProps);     
+    if (playingOptions -> pauseOptions.has_value()){
+      auto pauseProps = pauseMenuProps(std::nullopt);
+      auto pauseComponent = withPropsCopy(pauseMenuComponent, props);
+      pauseProps.props.push_back(PropPair { .symbol = interfaceSymbol, .value = playingOptions -> pauseOptions.value() });
+      return pauseComponent.draw(drawTools, pauseProps);     
     }
 
     if (terminal.has_value()){

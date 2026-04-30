@@ -104,8 +104,12 @@ UiContext getUiContext(){
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
-   .showPause = []() -> bool { 
-        return getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
+   .pauseOptions = []() -> std::optional<PauseOptions> { 
+        bool showPause = getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
+        if (!showPause){
+          return std::nullopt;
+        }
+        return PauseOptions {};
     },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
       auto entityId = getEntityForPlayerIndex(0);

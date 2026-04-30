@@ -11,6 +11,7 @@
 #include "../gameworld/curves.h"
 #include "../options.h"
 #include "../ui/views/settings.h"
+#include "../animation/state-controller.h"
 
 struct ControlledPlayer {
 	int viewport; // this is used interchangably with the player index (eg player 1, 2, etc)

@@ -5,6 +5,7 @@ extern Weapons weapons;
 extern Movement movement;
 extern Vehicles vehicles;
 extern AiData aiData;
+extern StateController animationController;
 
 extern std::unordered_map<objid, ControllableEntity> controllableEntities;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;
@@ -39,6 +40,12 @@ void onAddEntity(objid idAdded){
 	  addWeaponId(weapons, idAdded);
     createHitbox(idAdded);
   }
+
+  auto animationControllerValue = getSingleAttr(idAdded, "animation");
+  if (animationControllerValue.has_value()){
+	  addEntityController(animationController, idAdded, getSymbol(animationControllerValue.value()));
+  }
+
 }
 
 void onActivePlayerRemoved(objid id, int playerIndex){
@@ -50,7 +57,6 @@ void onActivePlayerRemoved(objid id, int playerIndex){
 	if (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id){
 		controlledPlayer.entityId = std::nullopt;
 		setManagedCameraId(std::nullopt, playerIndex);
-		return;
 	}
 }
 
@@ -63,6 +69,7 @@ void onRemoveEntity(objid idRemoved){
   maybeRemoveAiAgent(aiData, idRemoved);
   removeWeaponId(weapons, idRemoved);
   removeInventory(scopenameToInventory, idRemoved);
+	removeEntityController(animationController, idRemoved);
   controllableEntities.erase(idRemoved);
 
   if (playerIndex.has_value()){
