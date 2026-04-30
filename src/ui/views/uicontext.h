@@ -20,7 +20,8 @@ struct PauseInterface {
 
 
 struct PauseOptions {
-  int value = 102;
+   std::function<void()> resume;
+   std::function<void()> mainMenu;
 };
 
 struct TerminalConfig;

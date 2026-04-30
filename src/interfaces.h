@@ -9,6 +9,10 @@
 #include "./debug.h"
 #include "./gamecontrol/gametypes.h"
 
+struct PauseOverride {
+  std::function<void()> menu;
+};
+
 ArcadeApi createArcadeApi();
 extern AIInterface aiInterface;
 

@@ -1,9 +1,5 @@
 #include "./pausemenu.h"
 
-void goToMenu();
-void resumeOnMenu();
-
-
 float elapsedMenuTime(){
   return 1.f;
 }
@@ -28,9 +24,8 @@ Component pauseMenuComponent {
 
 	  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tint.x, tint.y, tint.z, tint.w * interpolateDuration(0.f, 1.f, elapsedTime, 0.2f)), true, std::nullopt /* selection id */, std::nullopt, std::nullopt, std::nullopt);
 
-    PauseOptions* pauseOptions = typeFromProps<PauseOptions>(props, interfaceSymbol);
-    modassert(pauseOptions, "pause options ptr");
-    std::cout << "value is: " << pauseOptions -> value << std::endl;
+    //PauseOptions* pauseOptions = typeFromProps<PauseOptions>(props, interfaceSymbol);
+    //modassert(pauseOptions, "pause options ptr");
 
 //	  drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.4f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/testgradient.png", std::nullopt);
 	  //drawTools.drawRect(0.f, 2.f - 2 * glm::min(1.0, elapsedTime / 0.4f), 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), std::nullopt /* texture id */, true, std::nullopt /* selection id */, "./res/textures/water.jpg", std::nullopt);
@@ -41,7 +36,7 @@ Component pauseMenuComponent {
   },
 };
 
-Props pauseMenuProps(std::optional<objid> mappingId){
+Props pauseMenuProps(std::optional<objid> mappingId, std::function<void()> resumeOnMenu, std::function<void()> goToMenu){
   std::vector<ImListItem> listItems;
   listItems.push_back(ImListItem {
     .value = "Resume",
@@ -63,7 +58,7 @@ Props pauseMenuProps(std::optional<objid> mappingId){
   return props;
 }
 
-Props deadMenuProps(std::optional<objid> mappingId){
+Props deadMenuProps(std::optional<objid> mappingId, std::function<void()> goToMenu){
   std::vector<ImListItem> listItems;
   listItems.push_back(ImListItem {
     .value = "Main Menu",

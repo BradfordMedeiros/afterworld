@@ -73,6 +73,26 @@ extern GameTypes gametypeSystem;
 extern Director director;
 extern AiData aiData;
 extern bool disableTpsMesh;
+extern std::optional<PauseOverride> pauseOverride;
+
+
+void goToMenu(){
+  if (pauseOverride.has_value()){
+    pauseOverride.value().menu();
+  }else{
+    pushHistory({ "mainmenu" }, true);
+  }
+}
+
+void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn){
+  if (!goToMenuFn.has_value()){
+    pauseOverride = std::nullopt;
+  }else{
+    pauseOverride = PauseOverride {
+      .menu = goToMenuFn.value(),
+    };   
+  }
+}
 
 std::optional<objid> activeSceneForSelected();
 void goToLevel(std::string levelShortName);
@@ -80,8 +100,6 @@ void setNoClipMode();
 void setFreeCam();
 void setNormalMode();
 void setEditorMode();
-
-void goToMenu();
 
 void pauseOnMenu(){
   getGlobalState().userRequestedPause = true;
@@ -109,7 +127,10 @@ UiContext getUiContext(){
         if (!showPause){
           return std::nullopt;
         }
-        return PauseOptions {};
+        return PauseOptions {
+          .resume = resumeOnMenu,
+          .mainMenu = goToMenu,
+        };
     },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
       auto entityId = getEntityForPlayerIndex(0);

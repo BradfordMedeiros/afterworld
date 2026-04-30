@@ -10,6 +10,7 @@ void ballModeLevelSelect();
 void stopRotate(objid id);
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
 void inputOverride(bool paused, bool showMouse);
+void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 
 std::optional<objid> currentCutscene;
 int activeLayer = 0;
@@ -47,7 +48,12 @@ void setShowLiveMenu(bool showMenu){
 	}
 }
 
+
 void startIntroMode(objid sceneId){	
+	setPauseMenuOverride([]() -> void {
+    goToLevel("ballselect");
+	});
+
 	if (currentCutscene.has_value()){
 		removeCutscene(currentCutscene.value(), true);
 		currentCutscene = std::nullopt;

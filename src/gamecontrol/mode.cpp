@@ -3,6 +3,7 @@
 extern GameTypes gametypeSystem;
 
 void inputOverride();
+void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 
 void startMode(GameMode& gameMode, objid sceneId){
   auto& allPlayers = getPlayers();
@@ -62,6 +63,7 @@ void stopMode(GameMode& gameMode){
   }
 
   inputOverride();
+  setPauseMenuOverride(std::nullopt);
   changeUiMode(UiModeNone{});
   changeGameTypeNone(gametypeSystem);
   getGlobalState().userRequestedPause = false;

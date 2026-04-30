@@ -11,6 +11,7 @@ extern AiData aiData;
 extern std::unordered_map<objid, Powerup> powerups;
 
 void goToLevel(std::string levelShortName);
+void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 bool isReloadKey(int button);
 void handleRemoveKillplaneCollision(objid);
 
@@ -202,6 +203,10 @@ struct BallModeOptions{
 GameTypeInfo getBallMode();
 
 void startBallMode(objid sceneId){
+	setPauseMenuOverride([]() -> void {
+    goToLevel("ballselect");
+	});
+  
   //modassert(false, "gamemode ball not implemented");
   auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
   glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");

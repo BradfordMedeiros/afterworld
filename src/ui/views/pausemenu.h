@@ -7,8 +7,8 @@
 
 extern Component pauseMenuComponent;
 
-Props pauseMenuProps(std::optional<objid> mappingId);
-Props deadMenuProps(std::optional<objid> mappingId);
+Props pauseMenuProps(std::optional<objid> mappingId, std::function<void()> resumeOnMenu, std::function<void()> goToMenu);
+Props deadMenuProps(std::optional<objid> mappingId, std::function<void()> goToMenu);
 
 #endif
 

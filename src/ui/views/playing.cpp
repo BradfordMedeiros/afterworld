@@ -57,7 +57,7 @@ Component playingComponent {
     }*/
 
     if (playingOptions -> pauseOptions.has_value()){
-      auto pauseProps = pauseMenuProps(std::nullopt);
+      auto pauseProps = pauseMenuProps(std::nullopt, playingOptions -> pauseOptions.value().resume, playingOptions -> pauseOptions.value().mainMenu);
       auto pauseComponent = withPropsCopy(pauseMenuComponent, props);
       pauseProps.props.push_back(PropPair { .symbol = interfaceSymbol, .value = playingOptions -> pauseOptions.value() });
       return pauseComponent.draw(drawTools, pauseProps);     
@@ -91,7 +91,10 @@ Component playingComponent {
       auto hudProps = getDefaultProps();
       hudComponent.draw(drawTools, hudProps);   
     }else if (uiModeGameOver){
-      auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt));
+      std::function<void()> goToMenu = []() -> void {
+        modassert(false, "goToMenu on dead menu not implemented");
+      };
+      auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt, goToMenu));
       auto defaultProps = getDefaultProps();
       return deadComponent.draw(drawTools, defaultProps);    
     }

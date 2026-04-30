@@ -169,17 +169,7 @@ void goToLink(std::string link){
   });
 }
 
-void goToMenu(){
-  auto gamemodeIntro = std::get_if<GameModeIntro>(&sceneManagement.managedScene.value().gameMode);
-  auto gamemodeBall = std::get_if<GameModeBall>(&sceneManagement.managedScene.value().gameMode);
-  if (gamemodeIntro){
-    goToLevel("ballselect");
-  }else if (gamemodeBall){
-    goToLevel("ballselect");
-  }else{
-    pushHistory({ "mainmenu" }, true);
-  }
-}
+std::optional<PauseOverride> pauseOverride;
 
 bool isInGameMode2(){
   return getGlobalState().routeState.inGameMode;  
