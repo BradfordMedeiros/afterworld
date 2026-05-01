@@ -49,7 +49,6 @@ struct GlobalState {
   bool userRequestedPause;
 };
 
-bool disableGameInput();
 bool isPaused();
 
 GlobalState& getGlobalState();
