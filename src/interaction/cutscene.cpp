@@ -1,6 +1,7 @@
 #include "./cutscene.h"
 
 extern CustomApiBindings* gameapi;
+extern GLFWwindow* window;
 
 struct CutsceneInstance2 {
 	EasyCutscene easyCutscene;
@@ -252,3 +253,115 @@ void playCutsceneScript(objid ownerObjId, std::string cutsceneName){
 		return;
 	}
 }
+
+
+///Below here are just default cutscene types, these should be generic probably 
+/////////////////
+
+
+
+std::unordered_map<std::string, CutsceneOption> cutsceneDatas {
+	{ "testorb", CutsceneOption {
+			.text = { "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else." },
+			.rail = "cutscene1-rail",
+			.letterbox = "Nothing to Be Afraid Of",
+	}},
+	{ "testorb3", CutsceneOption {
+			.text = { "This is the first page of text", "This is second page of text", "This is third page of text" },
+			.rail = "cutscene1-rail",
+			.letterbox = "Abstract Geometry",
+	}},
+};
+struct CutsceneIntroData {
+	bool showText;
+	glm::vec3 initialPos;
+	objid cameraId;
+	std::vector<int> times;
+	int railLengthMs;
+};
+
+std::function<void(EasyCutscene&)> simpleNarratedMovement(std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
+	auto& cutsceneData = cutsceneDatas.at(option);
+ 	auto text = cutsceneData.text;
+ 	auto rail = cutsceneData.rail;
+ 	auto letterboxText = cutsceneData.letterbox;
+
+ 	bool hasAlreadyPlayed = cutsceneData.hasAlreadyPlayed;
+ 	cutsceneData.hasAlreadyPlayed = true;
+
+	return [text, rail, letterboxText, position, skipAnimation, hasAlreadyPlayed, onFinish](EasyCutscene& cutscene) -> void {
+		int index = -1;
+		auto getIndex = [&index]() -> int {
+			index++;
+			return index;
+		};
+
+  	if (initialize(cutscene)){
+    	//glm::vec3 initialPos = glm::vec3(0.f, 10.f, 0.f);
+    	auto cameraId = findObjByShortName(">menu-view", std::nullopt);
+  		auto initialPos = position.has_value() ? position.value() : gameapi -> getGameObjectPos(cameraId.value(), true, "[gamelogic] - ballIntroOpening pos");
+    	auto initialRot = gameapi -> getGameObjectRotation(cameraId.value(), true, "[gamelogic] - ballIntroOpening");
+
+  		CutsceneIntroData ballIntroData {
+    		.showText = true,
+    		.initialPos = initialPos,
+    		.cameraId = cameraId.value(),
+    		.railLengthMs = 0,
+    	};
+
+    	gameapi -> setGameObjectPosition(cameraId.value(), initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
+
+			auto railId = railIdForName(rail);
+
+			if (railId.has_value()){
+				auto rail = railForId(railId.value());
+			 	auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
+			 	std::cout << "cutscene: total length: " << railTotalTimeMs << std::endl;
+
+				std::cout << "cutscene rail: ";
+				for (auto& time : rail.value() -> times){
+					std::cout << time << " ";
+				}
+				ballIntroData.times = rail.value() -> times;
+				ballIntroData.railLengthMs = railTotalTimeMs;
+
+				std::cout << std::endl;
+				addManagedRailMovement(cameraId.value(), railId.value(), initialPos, initialRot);
+			}
+    	store(cutscene, ballIntroData);
+    	showLetterBox(letterboxText, 10.f);
+  	}
+
+  	CutsceneIntroData* introData = getStorage<CutsceneIntroData>(cutscene);
+  	modassert(introData, "intro data is null");
+
+  	if (finalize(cutscene)){
+  		removeManagedRailMovement(introData -> cameraId);
+  	  onFinish();
+  	}
+
+  	if (skipAnimation || hasAlreadyPlayed){
+  		setCutsceneFinished(cutscene);
+  	}
+
+  	if (glfwGetKey(window, 'K')){
+  		setCutsceneFinished(cutscene);
+  	}
+  
+  	for (int i = 0; i < (text.size() + 1); i++){
+  		auto textIndex = getIndex();
+  		waitUntil(cutscene, textIndex, i * 5000);
+  		if (i < text.size() && finished(cutscene, textIndex)){
+	  		gameapi -> drawText(text.at(i), 0.f + 0.1f, i * -0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  		}
+  	}
+
+	};
+}
+

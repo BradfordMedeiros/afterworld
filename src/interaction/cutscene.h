@@ -3,6 +3,7 @@
 
 #include "../util.h"
 #include "../resources/paths.h"
+#include "../gameworld/curves.h"  // i dont like this dependency
 
 struct EasyCutscene {
   std::set<int> playedEvents;
@@ -42,5 +43,17 @@ T* getStorage(EasyCutscene& cutscene){
 }
 
 void playCutsceneScript(objid ownerObjId, std::string cutsceneName);
+
+
+struct CutsceneOption {
+  std::vector<std::string> text;
+  std::string rail;
+  std::string letterbox;
+
+  // state, not config data 
+  bool hasAlreadyPlayed = false;
+};
+extern std::unordered_map<std::string, CutsceneOption> cutsceneDatas;
+std::function<void(EasyCutscene&)> simpleNarratedMovement(std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish);
 
 #endif

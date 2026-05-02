@@ -500,44 +500,9 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }else if (key == 'P' && action == 0){
   	auto shader = gameapi -> shaderByName("ui2");
   	modlog("shader is: ", shader.has_value() ? std::to_string(shader.value()) : "no shader");
-  }/*else if (key == 'L' && action == 0){
-  	 auto id = findObjByShortName("boxfront/Cube", std::nullopt);
-
-  	 float duration = 5.f;
-  	 if (id.has_value()){
-  	 		auto idValue = id.value();
-  	 		float startTime = gameapi -> timeSeconds(false);
-	  	 	simpleOnFrame([idValue, startTime, duration]() -> void {
-	  	 		auto percentage = (gameapi -> timeSeconds(false) - startTime) / duration;
-	  	 		static glm::vec3 emissionAmount(0.f, 0.f, 0.f);
-  	 		 	setGameObjectEmission(idValue, glm::vec3(percentage * 5.f, 0.f, 0.f));
-  	 		 	setAmbientLight(glm::vec3((1.f - percentage) * 1.f, (1.f - percentage) * 1.f, (1.f - percentage) * 1.f));
-	  	 	}, duration);
-  	 }
-
-  }*/
-
-
-  if (key == 75){
-  	//spawnProcMesh(gameapi -> listSceneId(id));
   }
 
-  if (key == 'T'){
-  	std::cout << "currentmappingkeys\n------------------------------" << std::endl;
-    modlog("ndi print info", print(ndiPrintInfo));
-  	std::cout << "all mapped keys\n------------------------------" << std::endl;
-  	for (auto &key : allMappedKeys){
 
-  		std::cout << "KeyLocation {\n";
-  		std::cout << "  .key = '" << key.mappedKey.value() << "',\n";
-  		std::cout << "  .topLeft = " << printCode(key.point1.value()) << ",\n";
-  		std::cout << "  .bottomRight = " << printCode(key.point2.value()) << ",\n";
-  		std::cout << "},\n";
-  	}
-  	std::cout << "\n------------------------------------------" << std::endl;
-  	return;
-  	//allMappedKeys = {};
-  }
   if (key == 'U' && action == 0){
   	if (ndiPrintInfo.selectMode == NDI_SELECT_NONE){
   		ndiPrintInfo.selectMode = NDI_SELECT_KEY;
@@ -557,28 +522,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	ndiPrintInfo.ndiPoint.mappedKey = key;
 		ndiPrintInfo.selectMode = NDI_SELECT_TOP_LEFT;
   }
-
-  /*if (key == 'I' && action == 0){
-		glm::vec2 ndiCoord(getGlobalState().xNdc, getGlobalState().yNdc);
-  	if (ndiPrintInfo.selectMode == NDI_SELECT_TOP_LEFT){
- 			ndiPrintInfo.ndiPoint.point1 = ndiCoord;
- 			ndiPrintInfo.selectMode = NDI_SELECT_BOTTOM_RIGHT;
-  	}else if (ndiPrintInfo.selectMode == NDI_SELECT_BOTTOM_RIGHT){
-  		ndiPrintInfo.ndiPoint.point2 = ndiCoord;
-	  	bool mappingComplete = ndiPrintInfo.ndiPoint.point1.has_value() && ndiPrintInfo.ndiPoint.point2.has_value() && ndiPrintInfo.ndiPoint.mappedKey.has_value();
-	  	modassert(mappingComplete, "mapping not complete, code error");
-  		allMappedKeys.push_back(ndiPrintInfo.ndiPoint);
-  		ndiPrintInfo.ndiPoint.point1 = std::nullopt;
-  		ndiPrintInfo.ndiPoint.point2 = std::nullopt;
-  		ndiPrintInfo.ndiPoint.mappedKey = std::nullopt;
- 			ndiPrintInfo.selectMode = NDI_SELECT_KEY;
-  	}
-  }*/
-
-  //if (key == 'L' && action == 0){
-  //	std::cout << dumpAsString(tags.animationController, "character").value() << std::endl;
-  //	exit(0);
-  //}
 
 
 	if (key == 'U' && action == 1){
