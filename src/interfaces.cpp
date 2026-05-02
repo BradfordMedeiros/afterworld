@@ -174,18 +174,7 @@ UiContext getUiContext(){
       return std::nullopt;
    },
    .getScoreConfig = []() -> std::optional<ScoreOptions> {
-      auto gametypeData = getGametypeData(gametypeSystem);
-      if (!gametypeData.has_value() || getGlobalState().showEditor){
-        return std::nullopt;
-      }
-      ScoreOptions scoreOptions {
-        .timeRemaining = gametypeData.value().remainingTime,
-        .gametypeName = gametypeData.value().gametypeName,
-        .score1 = gametypeData.value().score1,
-        .score2 = gametypeData.value().score2,
-        .totalScore = gametypeData.value().totalScore,
-      };
-      return scoreOptions;
+      return std::nullopt;
    },
    .levels = LevelUIInterface {
       .goToLevel = [](Level& level) -> void {

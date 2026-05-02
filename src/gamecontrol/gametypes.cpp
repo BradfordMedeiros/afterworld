@@ -31,41 +31,19 @@ GameTypes createGametypes(){
 }
 
 void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value){
-  modlog("gametypes", std::string("on message: ") + key);
   if (gametypes.meta.has_value()){
-    for (auto &event : gametypes.meta.value().events){
-      if (key == event){
-        bool gameFinished = gametypes.meta.value().onEvent(gametypes.gametype, event, value);
-        if (gameFinished){
-          changeGameTypeNone(gametypes);
-          return;
-        }
-      }
-    }
+    gametypes.meta.value().onEvent(gametypes.gametype, key, value);
   }
 }
-
 
 DebugConfig debugPrintGametypes(GameTypes& gametype){
   DebugConfig debugConfig { .data = {} };
   if (!gametype.meta){
     debugConfig.data.push_back({ "gametype", "no gametype" });
   }else{
-    debugConfig.data.push_back({ "gametype", gametype.meta -> getDebugText(gametype.gametype) });
+    debugConfig.data.push_back({ "gametype", gametype.name });
   }
   return debugConfig;
-}
-
-std::optional<GametypeData> getGametypeData(GameTypes& gametypes){
-  if (!gametypes.meta.has_value()){
-    return std::nullopt;
-  }
-  if (!gametypes.startTime.has_value()){
-    return std::nullopt;
-  }
-
-  auto scoreInfo = gametypes.meta.value().getScoreInfo(gametypes.gametype, gametypes.startTime.value());
-  return scoreInfo;
 }
 
 void onGametypesFrame(GameTypes& gametypes){

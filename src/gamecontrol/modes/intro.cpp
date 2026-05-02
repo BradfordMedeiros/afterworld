@@ -199,25 +199,14 @@ void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs){
 GameTypeInfo getBallIntroMode(){
 	GameTypeInfo ballIntroMode = GameTypeInfo {
 	  .gametypeName = "ball-intro",
-	  .events = { "ball-intro" },
 	  .createGametype = [](void* data) -> std::any {
-		IntroModeOptions* modeOptions = static_cast<IntroModeOptions*>(data);
+			IntroModeOptions* modeOptions = static_cast<IntroModeOptions*>(data);
 	    return *modeOptions; 
 	  },
-	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
-	   	return false;
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {
 	  },
-	  .getDebugText = [](std::any& gametype) -> std::string {
-	    return std::string("ball mode");
-	  },
-	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
-	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
-	  },
+	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
 	  .onFrame = [](std::any& gametype) -> void {
-	  	//bool shouldShowProgress = !getGlobalState().showLiveMenu;
-	  	//if (!shouldShowProgress){
-	  	//	return;
-	  	//}
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
 	  	auto levelOrbInfo = getLevelOrbInfo(introMode -> cameraId);
@@ -241,7 +230,6 @@ GameTypeInfo getBallIntroMode(){
 	
         	allLevels.push_back(orb.level);
 	  	}
-
 
 	  	if (activeLayer != introMode -> activeLayer){
 			bool fromOverworld = introMode -> activeLayer == (orbLayers.size() - 1);
@@ -297,19 +285,17 @@ GameTypeInfo getBallIntroMode(){
 	  		};
 	  	}
 
- 		for (int i = 0; i < descInfo.hubInfos.size(); i++){
+ 			for (int i = 0; i < descInfo.hubInfos.size(); i++){
 	 		gameapi -> drawText(descInfo.hubInfos.at(i), -0.9f, 0.7f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 	  	}
-		for (int i = 0; i < descInfo.mainInfos.size(); i++){
-	 	  	gameapi -> drawText(descInfo.mainInfos.at(i), -0.9f, -0.6f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+			for (int i = 0; i < descInfo.mainInfos.size(); i++){
+	 	  gameapi -> drawText(descInfo.mainInfos.at(i), -0.9f, -0.6f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 	  	}
 	  	if (!isOverworld()){
 	  		for (int i = 0; i < descInfo.levelInfos.size(); i++){
-	 	  		gameapi -> drawText(descInfo.levelInfos.at(i), 0.6f, 0.7f - (i * 0.1f), 8, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	 		 		gameapi -> drawText(descInfo.levelInfos.at(i), 0.6f, 0.7f - (i * 0.1f), 8, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 	  		}	  		
 	  	}
-
-	  	std::cout << "ballintro mode frame" << std::endl;
 	  },
 	};
 	return ballIntroMode;

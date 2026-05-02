@@ -11,17 +11,11 @@ void inputOverride(bool paused, bool showMouse);
 GameTypeInfo getFpsMode(){
   GameTypeInfo ballMode = GameTypeInfo {
     .gametypeName = "fps",
-    .events = { },
     .createGametype = [](void* data) -> std::any {
       return NULL; 
     },
-    .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
-      return false;
+    .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {
     },
-    .getDebugText = [](std::any& gametype) -> std::string {
-      return "";
-    },
-    .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
     .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
     .onFrame = [](std::any& gametype) -> void {
       if (allPlayersDead()){

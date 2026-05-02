@@ -280,7 +280,6 @@ void handleGravityHoleCollision(objid obj1, objid obj2){
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
-	  .events = { "ball", "ballgravity" },
 	  .createGametype = [](void* data) -> std::any {
 			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
 			{
@@ -308,16 +307,19 @@ GameTypeInfo getBallMode(){
 
 	    return *modeOptions; 
 	  },
-	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> bool {
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {
 	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballMode, "ballMode options");
+	  	if (event != "ball" && event != "ballgravity"){
+	  		return;
+
+	  	}
 
 	  	if (event == "ballgravity"){
 		  	GravityHole* gravityHole = std::any_cast<GravityHole>(&value);
 		  	modassert(gravityHole, "expected type for ballgravity");
 	  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
 	  		setBallGravityWell(ballMode -> ballId.value(), *ballVehicle.value(), true, gravityHole -> gravityHoleId);
-	  		return false;
 	  	}
 
 	  	std::string* message = std::any_cast<std::string>(&value);
@@ -325,16 +327,12 @@ GameTypeInfo getBallMode(){
 	  	std::cout << "from ball mode: " << event << ", " << *message << std::endl;
 
 	  	if (*message == "reset"){
+		  	std::string* message = std::any_cast<std::string>(&value);
+		  	modassert(message, "invalid type ball-mode");
 	  		modassert(ballMode -> initialBallPos.has_value(), "no initial ball position");
 	  		ballMode -> shouldReset = true;
 	  	}
-
-	   	return false;
 	  },
-	  .getDebugText = [](std::any& gametype) -> std::string {
-	    return std::string("ball mode");
-	  },
-	  .getScoreInfo = [](std::any& gametype, float startTime) -> std::optional<GametypeData> { return std::nullopt; },
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
 	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballMode, "ballMode options");
