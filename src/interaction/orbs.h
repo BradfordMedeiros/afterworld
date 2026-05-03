@@ -104,11 +104,14 @@ struct MultiOrbView {
 };
 
 void setToMultiOrbView(objid cameraId);
+void removeCameraFromMultiOrbView(objid cameraId);
 bool isOverworld(MultiOrbView& multiOrbView);
 void goToOverWorld(MultiOrbView& multiOrbView);
 std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex);
 std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView);
 std::optional<MultiOrbView*> multiorbViewByCamera(objid cameraId);
+
+std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs);
 
 void handleMultiOrbViews();
 
