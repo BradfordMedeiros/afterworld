@@ -9,12 +9,6 @@ void setLifetimeObject(objid id, std::function<void()> fn, std::string hint);
 void inputOverride(bool paused, bool showMouse);
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 
-
-void setToMultiOrbView(objid cameraId);
-bool isOverworld(MultiOrbView& multiOrbView);
-std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex);
-std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView);
-
 std::optional<objid> currentCutscene;
 
 
@@ -22,10 +16,6 @@ struct IntroModeOptions {
    objid cameraId;
    int activeLayer;
 };
-
-
-extern std::optional<MultiOrbView> multiOrbViewOpt;
-
 
 void ballModeLevelSelect(){
 	std::cout << "ballModeLevelSelect" << std::endl;
@@ -55,6 +45,74 @@ void ballModeNewGame(){
 }
 
 
+struct WorldOrbInfos {
+	std::string level;
+	bool isComplete;
+	bool selected;
+};
+
+struct DescInfo {
+	std::vector<std::string> mainInfos;
+	std::vector<std::string> hubInfos;
+	std::vector<std::string> levelInfos;
+	std::vector<WorldOrbInfos> worldOrbInfos;
+};
+
+DescInfo getDescriptionInfo(MultiOrbView& multiOrbView){
+  std::vector<std::string> allLevels;
+
+	std::vector<WorldOrbInfos> worldOrbInfos;
+
+	{
+	  	std::optional<int> orbIndex = 0;
+	  	auto& orbUi = *currentMultiOrbUi(multiOrbView, &orbIndex).value();
+	  	for (int i = 0; i < orbUi.orbs.size(); i++){
+	  			auto& orb = orbUi.orbs.at(i);
+	  			auto isComplete = orb.getOrbProgress().complete;
+	  			bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
+     	  	allLevels.push_back(orb.level);
+	  			worldOrbInfos.push_back(WorldOrbInfos{
+	  				.level = orb.level,
+	  				.isComplete = isComplete,
+	  				.selected = selected,
+	  			});
+	  	}
+	}
+
+
+	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
+	auto progressInfo = getProgressInfo(multiOrbView.activeWorldName, levelName, allLevels);
+	DescInfo descInfo {
+		.mainInfos = {
+			std::string("overworld: ") + (isOverworld(multiOrbView) ? "true" : "false"),
+			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
+		},
+		.hubInfos = {
+			std::string("world: ") + progressInfo.worldProgressInfo.currentWorld,
+			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
+			std::string("total gems: ") + std::to_string(progressInfo.worldProgressInfo.gemCount) + " / " + std::to_string(progressInfo.worldProgressInfo.totalGemCount),
+		},
+		.levelInfos = {},
+	};
+
+	if (progressInfo.level.has_value()){
+ 		std::string parTime = print(progressInfo.level.value().parTime, 2);
+ 		std::string bestTime = "n/a";
+ 		if(progressInfo.level.value().bestTime.has_value()){
+ 			bestTime = print(progressInfo.level.value().bestTime.value(), 2);
+ 		}
+		descInfo.levelInfos = {
+			std::string("current level: ") + levelName.value(),
+			std::string("par time: ") + parTime + "s",
+			std::string("best time: ") + bestTime + "s",
+			std::string("total gems: ") + std::to_string(progressInfo.level.value().gemCount) + " / " + std::to_string(progressInfo.level.value().totalGemCount),
+		};
+	}
+
+	descInfo.worldOrbInfos = worldOrbInfos;
+
+	return descInfo;
+}
 
 GameTypeInfo getBallIntroMode(){
 	GameTypeInfo ballIntroMode = GameTypeInfo {
@@ -66,87 +124,46 @@ GameTypeInfo getBallIntroMode(){
 	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {},
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
 	  .onFrame = [](std::any& gametype) -> void {
-	  	if (!multiOrbViewOpt.has_value()){
-	  		return;
-	  	}
-	  	MultiOrbView& multiOrbView = multiOrbViewOpt.value();
-
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
-
-	  	std::optional<int> orbIndex = 0;
-	  	auto& orbUi = *currentMultiOrbUi(multiOrbViewOpt.value(), &orbIndex).value();
-
-	  	std::vector<std::string> allLevels;
-
-	  	for (int i = 0; i < orbUi.orbs.size(); i++){
-	  		auto& orb = orbUi.orbs.at(i);
-	  		auto isComplete = orb.getOrbProgress().complete;
-	  		bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
-        	gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-        	if (isComplete){
-	    	    gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.01f, 0.01f, false, glm::vec4(1.0f, 0.9216f, 0.2314f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-        	}
-        	if (selected){
-        		gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-        	}
-	
-        	allLevels.push_back(orb.level);
+	  	auto multiOrbViewPtr = multiorbViewByCamera(introMode -> cameraId);
+	  	if (!multiOrbViewPtr.has_value()){
+	  		return;
 	  	}
+	   	MultiOrbView& multiOrbView = *multiOrbViewPtr.value();
 
-	  	bool layerChanged = multiOrbView.activeLayer != introMode -> activeLayer;
-			bool fromOverworld = introMode -> activeLayer == (multiOrbView.orbLayers.size() - 1);
-			bool toOverworld = multiOrbView.activeLayer == (multiOrbView.orbLayers.size() - 1);
-	  	if (layerChanged){
-	  		auto position = gameapi -> getGameObjectPos(introMode -> cameraId, true, "active layer get orb pos");
+	   	{
+	   		bool layerChanged = multiOrbView.activeLayer != introMode -> activeLayer;
+				bool fromOverworld = introMode -> activeLayer == (multiOrbView.orbLayers.size() - 1);
+				bool toOverworld = multiOrbView.activeLayer == (multiOrbView.orbLayers.size() - 1);
+	  		if (layerChanged){
+	  			auto position = gameapi -> getGameObjectPos(introMode -> cameraId, true, "active layer get orb pos");
 
-				stopRotate(introMode -> cameraId);
-				removeCameraFromOrbView(introMode -> cameraId);
+					stopRotate(introMode -> cameraId);
+					removeCameraFromOrbView(introMode -> cameraId);
 				
-				if (currentCutscene.has_value()){
-					removeCutscene(currentCutscene.value(), true);
-				}
+					if (currentCutscene.has_value()){
+						removeCutscene(currentCutscene.value(), true);
+					}
 
-				std::cout << "overworld from: " << fromOverworld << std::endl;
-				std::cout << "overworld to: " << toOverworld << std::endl;
-				currentCutscene = playCutscene(simpleNarratedMovement("testorb3", position, toOverworld || fromOverworld, ballModeLevelSelect), std::nullopt);
-	  	}
-  		introMode -> activeLayer = multiOrbView.activeLayer;
+					std::cout << "overworld from: " << fromOverworld << std::endl;
+					std::cout << "overworld to: " << toOverworld << std::endl;
+					currentCutscene = playCutscene(simpleNarratedMovement("testorb3", position, toOverworld || fromOverworld, ballModeLevelSelect), std::nullopt);
+	  		}
+  			introMode -> activeLayer = multiOrbView.activeLayer;
+	   	}
 
 
-	  	struct DescInfo {
-	  		std::vector<std::string> mainInfos;
-	  		std::vector<std::string> hubInfos;
-	  		std::vector<std::string> levelInfos;
-	  	};
-
-	  	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
-	  	auto progressInfo = getProgressInfo(multiOrbView.activeWorldName, levelName, allLevels);
-	  	DescInfo descInfo {
-	  		.mainInfos = {
-	  			std::string("overworld: ") + (isOverworld(multiOrbView) ? "true" : "false"),
-	  			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
-	  		},
-	  		.hubInfos = {
-	  			std::string("world: ") + progressInfo.worldProgressInfo.currentWorld,
-	  			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
-	  			std::string("total gems: ") + std::to_string(progressInfo.worldProgressInfo.gemCount) + " / " + std::to_string(progressInfo.worldProgressInfo.totalGemCount),
-	  		},
-	  		.levelInfos = {},
-	  	};
-
-	  	if (progressInfo.level.has_value()){
-  			std::string parTime = print(progressInfo.level.value().parTime, 2);
-  			std::string bestTime = "n/a";
-  			if(progressInfo.level.value().bestTime.has_value()){
-  				bestTime = print(progressInfo.level.value().bestTime.value(), 2);
-  			}
-	  		descInfo.levelInfos = {
-	  			std::string("current level: ") + levelName.value(),
-	  			std::string("par time: ") + parTime + "s",
-	  			std::string("best time: ") + bestTime + "s",
-	  			std::string("total gems: ") + std::to_string(progressInfo.level.value().gemCount) + " / " + std::to_string(progressInfo.level.value().totalGemCount),
-	  		};
+	  	auto descInfo = getDescriptionInfo(multiOrbView);
+	  	for (int i = 0; i < descInfo.worldOrbInfos.size(); i++){
+	  		auto& info = descInfo.worldOrbInfos.at(i);
+        gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+        if (info.isComplete){
+	    	   gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.01f, 0.01f, false, glm::vec4(1.0f, 0.9216f, 0.2314f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+        }
+        if (info.selected){
+        	gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+        }
 	  	}
 
  			for (int i = 0; i < descInfo.hubInfos.size(); i++){

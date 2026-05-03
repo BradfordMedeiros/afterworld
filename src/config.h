@@ -3,7 +3,6 @@
 
 #include "./interaction/orbs.h"
 
-OrbUi createOrbUi(objid id);
 
 struct OrbDataConfig {
 	glm::vec3 pos;

@@ -90,4 +90,27 @@ std::optional<Orb*> selectedOrbForCamera(objid cameraId);
 std::string print(Orb& orb);
 
 
+//// multi view
+struct LevelOrbNavInfo {
+	std::string orbUi;
+	std::optional<int> orbIndex;
+	std::optional<int> maxCompletedIndex;
+};
+struct MultiOrbView {
+	std::vector<std::string> orbLayers = { "testorb", "testorb3", "metaworld" };
+	int activeLayer = 0;
+	std::string activeWorldName;
+	std::optional<objid> orbCameraId;
+};
+
+void setToMultiOrbView(objid cameraId);
+bool isOverworld(MultiOrbView& multiOrbView);
+void goToOverWorld(MultiOrbView& multiOrbView);
+std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex);
+std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView);
+std::optional<MultiOrbView*> multiorbViewByCamera(objid cameraId);
+
+void handleMultiOrbViews();
+
+
 #endif 
