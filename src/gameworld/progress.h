@@ -40,29 +40,35 @@ void saveData();
 ////////////////////
 // ball mode
 
+
+struct PlaylistProgressInfo {
+  std::string currentWorld;
+  int completedLevels;
+  int totalLevels;
+  int gemCount;
+  int totalGemCount;
+};
+
+PlaylistProgressInfo getPlaylistProgressInfo();
+
+
+struct WorldProgressInfo {
+  std::string currentWorld;
+  int gemCount;
+  int totalGemCount;
+};
+WorldProgressInfo getWorldProgressInfo(std::string currentWorld);
+
+
 struct LevelProgressInfo {
   int gemCount;
   int totalGemCount;
   std::optional<float> bestTime;
   float parTime;
 };
-struct WorldProgressInfo {
-  std::string currentWorld;
-  int gemCount;
-  int totalGemCount;
-};
+LevelProgressInfo getLevelProgressInfo(std::string currentWorld, std::string level);
 
-struct ProgressInfo {
-  std::string currentWorld;
-  WorldProgressInfo worldProgressInfo;
-  int completedLevels;
-  int totalLevels;
-  int gemCount;
-  int totalGemCount;
-  std::optional<LevelProgressInfo> level;
-};
 
-ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string> level, std::vector<std::string> worldLevels);
 
 
 #endif

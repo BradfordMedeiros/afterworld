@@ -13,10 +13,11 @@ struct PlaylistType {
   std::string levelShortname;
   std::set<std::string> crystals;
   std::optional<float> parTime;
+  std::optional<std::string> world;
 };
 
-std::vector<PlaylistType> playlist;   // TODO static
-std::set<std::string> stagedCrystals; // TODO static
+std::vector<PlaylistType> playlist;   // TODO STATIC
+std::set<std::string> stagedCrystals; // TODO STATIC
 
 std::optional<LevelProgress*> getLevelProgress(std::string level){
   for (auto& levelProgress : levelProgresses){
@@ -130,7 +131,7 @@ void handleGemCollision(int32_t obj1, int32_t obj2){
 
 
 std::vector<PlaylistType> loadPlaylist(){
-  auto query = gameapi -> compileSqlQuery("select name, level, crystals, par from playlist", {});
+  auto query = gameapi -> compileSqlQuery("select name, level, crystals, par, world from playlist", {});
   bool validSql = false;
   auto result = gameapi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
@@ -153,6 +154,7 @@ std::vector<PlaylistType> loadPlaylist(){
       .levelShortname = levelShortname,
       .crystals = crystals,
       .parTime = parTime,
+      .world = (row.at(4) == "" ? std::optional<std::string>(std::nullopt) : row.at(4)),
     });
     std::cout << "playlist: adding: " << levelShortname << ", crystals: " << print(crystals) << std::endl;
   }
@@ -342,28 +344,42 @@ float parTime(std::string& level){
 }
 
 //////////////// ball mode ////////////////////
+std::vector<std::string> playlistLevelsInWorld(std::string world){
+  std::vector<std::string> levels;
+  for (auto& playlistType : playlist){
+    if (playlistType.world == world){
+      levels.push_back(playlistType.levelShortname);
+    }
+  }
+  return levels;
+}
 
-ProgressInfo getProgressInfo(std::string currentWorld, std::optional<std::string> level, std::vector<std::string> worldLevels){
-  std::cout << "getProgressInfo: " << currentWorld << ", " << print(level) << ", " << print(worldLevels) << std::endl;
-  ProgressInfo progressInfo {
-    .worldProgressInfo = WorldProgressInfo{
-      .currentWorld = currentWorld,
-      .gemCount = numberOfCrystals(worldLevels),
-      .totalGemCount = totalCrystals(worldLevels),
-    },
+PlaylistProgressInfo getPlaylistProgressInfo(){
+  PlaylistProgressInfo progressInfo {
     .completedLevels = completedLevels(),
     .totalLevels = totalLevels(),
     .gemCount = numberOfCrystals(std::nullopt),
     .totalGemCount = totalCrystals(std::nullopt),
-    .level = std::nullopt,
   };
-  if (level.has_value()){
-    progressInfo.level = LevelProgressInfo {
-      .gemCount = numberOfCrystals(std::vector<std::string>({ level.value() })),
-      .totalGemCount = totalCrystals(std::vector<std::string>({ level.value() })),
-      .bestTime = bestTime(level.value()),
-      .parTime = parTime(level.value()),
-    };
-  }
   return progressInfo;
+}
+
+WorldProgressInfo getWorldProgressInfo(std::string currentWorld){
+  auto worldLevels = playlistLevelsInWorld(currentWorld);
+  WorldProgressInfo worldProgressInfo {
+    .currentWorld = currentWorld,
+    .gemCount = numberOfCrystals(worldLevels),
+    .totalGemCount = totalCrystals(worldLevels),
+  };
+  return worldProgressInfo;
+}
+
+LevelProgressInfo getLevelProgressInfo(std::string currentWorld, std::string level){
+  LevelProgressInfo levelProgressInfo {
+    .gemCount = numberOfCrystals(std::vector<std::string>({ level })),
+    .totalGemCount = totalCrystals(std::vector<std::string>({ level })),
+    .bestTime = bestTime(level),
+    .parTime = parTime(level),
+  };
+  return levelProgressInfo;
 }

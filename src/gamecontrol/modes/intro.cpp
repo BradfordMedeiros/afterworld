@@ -31,8 +31,6 @@ struct DescInfo {
 DescInfo getDescriptionInfo(MultiOrbView& multiOrbView){
 	bool onOverworld = isOverworld(multiOrbView);
 
-  std::vector<std::string> allLevels;
-
 	std::vector<WorldOrbInfos> worldOrbInfos;
 
 	{
@@ -42,7 +40,6 @@ DescInfo getDescriptionInfo(MultiOrbView& multiOrbView){
 	  			auto& orb = orbUi.orbs.at(i);
 	  			auto isComplete = orb.getOrbProgress().complete;
 	  			bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
-     	  	allLevels.push_back(orb.level);
 	  			worldOrbInfos.push_back(WorldOrbInfos{
 	  				.level = orb.level,
 	  				.isComplete = isComplete,
@@ -51,34 +48,38 @@ DescInfo getDescriptionInfo(MultiOrbView& multiOrbView){
 	  	}
 	}
 
-
+	std::string worldName = "test";  // multiOrbView.activeWorldName
 	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
-	auto progressInfo = getProgressInfo(multiOrbView.activeWorldName, levelName, allLevels);
+
+
+	auto progressInfo = getPlaylistProgressInfo();
+	auto worldProgressInfo = getWorldProgressInfo(worldName);
 	DescInfo descInfo {
 		.mainInfos = {
 			std::string("overworld: ") + (onOverworld ? "true" : "false"),
 			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
 		},
 		.hubInfos = {
-			std::string("world: ") + progressInfo.worldProgressInfo.currentWorld,
+			std::string("world: ") + worldProgressInfo.currentWorld,
 			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
-			std::string("total gems: ") + std::to_string(progressInfo.worldProgressInfo.gemCount) + " / " + std::to_string(progressInfo.worldProgressInfo.totalGemCount),
+			std::string("total gems: ") + std::to_string(worldProgressInfo.gemCount) + " / " + std::to_string(worldProgressInfo.totalGemCount),
 		},
 		.levelInfos = {},
 		.onOverworld = onOverworld,
 	};
 
-	if (progressInfo.level.has_value()){
- 		std::string parTime = print(progressInfo.level.value().parTime, 2);
+	if (levelName.has_value()){
+		auto levelProgressInfo = getLevelProgressInfo(worldName, levelName.value());
+ 		std::string parTime = print(levelProgressInfo.parTime, 2);
  		std::string bestTime = "n/a";
- 		if(progressInfo.level.value().bestTime.has_value()){
- 			bestTime = print(progressInfo.level.value().bestTime.value(), 2);
+ 		if(levelProgressInfo.bestTime.has_value()){
+ 			bestTime = print(levelProgressInfo.bestTime.value(), 2);
  		}
 		descInfo.levelInfos = {
 			std::string("current level: ") + levelName.value(),
 			std::string("par time: ") + parTime + "s",
 			std::string("best time: ") + bestTime + "s",
-			std::string("total gems: ") + std::to_string(progressInfo.level.value().gemCount) + " / " + std::to_string(progressInfo.level.value().totalGemCount),
+			std::string("total gems: ") + std::to_string(levelProgressInfo.gemCount) + " / " + std::to_string(levelProgressInfo.totalGemCount),
 		};
 	}
 
