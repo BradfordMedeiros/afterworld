@@ -83,6 +83,9 @@ bool disableAnimation = false;
 bool disableTpsMesh = false;
 bool validateAnimationControllerAnimations = true;
 
+MultiOrbView multiOrbView;
+
+
 GlobalState global { 
   .showEditor = false,
   .isFreeCam = false,
@@ -421,6 +424,116 @@ void objectRemoved(objid idRemoved){
   handleOnTriggerRemove(idRemoved);
 }
 
+
+bool isOverworld(MultiOrbView& multiOrbView){
+  return multiOrbView.activeLayer == (multiOrbView.orbLayers.size() - 1);
+}
+
+void goToOverWorld(MultiOrbView& multiOrbView){
+  multiOrbView.activeWorldName = multiOrbView.orbLayers.at(multiOrbView.activeLayer);
+  multiOrbView.activeLayer = multiOrbView.orbLayers.size() - 1;
+}
+
+
+std::optional<std::string> overworldLevel(MultiOrbView& multiOrbView){
+  if (!multiOrbView.orbCameraId.has_value()){
+    return std::nullopt;
+  }
+  std::optional<Orb*> orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
+  if (!orb.has_value()){
+    return std::nullopt;
+  }
+  return orb.value() -> level;
+}
+
+LevelOrbNavInfo getLevelOrbInfo(MultiOrbView& multiOrbView){
+  auto cameraId = multiOrbView.orbCameraId.value();
+  
+  auto& orbLayer = multiOrbView.orbLayers.at(multiOrbView.activeLayer);
+  auto orbUi = orbUiByName(orbLayer);
+  auto orbIndex = getActiveOrbViewIndex(cameraId);
+
+  auto metaworldIndex = getMaxCompleteOrbIndex(*orbUi.value());
+  if (orbLayer == "metaworld"){
+    auto& orbs = orbUi.value() -> orbs;
+    for (auto& orb : orbs){
+      if (orb.level == multiOrbView.activeWorldName){
+        metaworldIndex = orb.index;
+      }
+    }
+  }
+
+  return LevelOrbNavInfo {
+    .orbUi = orbLayer,
+    .orbIndex = orbIndex,
+    .maxCompletedIndex = orbLayer == "metaworld" ? metaworldIndex : getMaxCompleteOrbIndex(*orbUi.value()),
+  };
+}
+
+
+void onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs){
+  if (!multiOrbView.orbCameraId.has_value()){
+    return;
+  }
+
+  for (auto& selectedOrb : selectedOrbs){
+    if (selectedOrb.cameraId == multiOrbView.orbCameraId.value()){
+      if (isOverworld(multiOrbView)){
+        if (selectedOrb.moveRightKey){
+          OrbView& orbView = *selectedOrb.orbView;
+          setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+          auto orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
+          if (orb.has_value()){
+            multiOrbView.activeWorldName = orb.value() -> level;
+          }
+        }else if (selectedOrb.moveLeftKey){
+          OrbView& orbView = *selectedOrb.orbView;
+          setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+          auto orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
+          if (orb.has_value()){
+            multiOrbView.activeWorldName = orb.value() -> level;
+          }
+        }
+
+        if (selectedOrb.selectKey && selectedOrb.currentOrb.has_value() && multiOrbView.activeLayer == multiOrbView.orbLayers.size() - 1){
+          for (int i = 0; i < multiOrbView.orbLayers.size() - 1; i++){
+            if (multiOrbView.orbLayers.at(i) == selectedOrb.currentOrb.value() -> level){
+              multiOrbView.activeWorldName = selectedOrb.currentOrb.value() -> level;
+              multiOrbView.activeLayer = i;
+            }
+          }
+          return;
+        }
+      }else{
+        if (selectedOrb.moveRightNoSpace){
+          goToOverWorld(multiOrbView);
+        }
+        if (selectedOrb.moveLeftNoSpace){
+          goToOverWorld(multiOrbView);
+        }
+        if (selectedOrb.optionKey){
+          goToOverWorld(multiOrbView);
+        }
+
+        if (selectedOrb.moveRightKey){
+          OrbView& orbView = *selectedOrb.orbView;
+          setOrbSelectIndex(orbView, getNextOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+        }else if (selectedOrb.moveLeftKey){
+          OrbView& orbView = *selectedOrb.orbView;
+          setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
+        }
+
+        auto level= overworldLevel(multiOrbView);
+        if (selectedOrb.selectKey && level.has_value()){
+          playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
+          goToLevel(level.value());
+          return;
+        }
+      }
+    }
+  }
+}
+
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
@@ -489,7 +602,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   }
 
   auto selectedOrb = handleOrbControls(orbData, key, action);
-  onModeOrbSelect(selectedOrb);
+  onModeOrbSelect(multiOrbView, selectedOrb);
 
   if (isJumpKey(key) && action == 1){
     gameapi -> sendNotifyMessage("advance", true);

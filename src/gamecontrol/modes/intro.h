@@ -15,6 +15,17 @@
 
 void startIntroMode(objid sceneId);
 void endIntroMode();
-void onModeOrbSelect(std::vector<OrbSelection>& selectedOrbs);
+
+struct LevelOrbNavInfo {
+	std::string orbUi;
+	std::optional<int> orbIndex;
+	std::optional<int> maxCompletedIndex;
+};
+struct MultiOrbView {
+	std::vector<std::string> orbLayers = { "testorb", "testorb3", "metaworld" };
+	int activeLayer = 0;
+	std::string activeWorldName;
+	std::optional<objid> orbCameraId;
+};
 
 #endif 
