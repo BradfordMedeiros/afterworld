@@ -10,10 +10,10 @@ void inputOverride(bool paused, bool showMouse);
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 
 
+void setToMultiOrbView(objid cameraId);
 bool isOverworld(MultiOrbView& multiOrbView);
-std::optional<std::string> overworldLevel(MultiOrbView& multiOrbView);
-LevelOrbNavInfo getLevelOrbInfo(MultiOrbView& multiOrbView);
-
+std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex);
+std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView);
 
 std::optional<objid> currentCutscene;
 
@@ -24,11 +24,12 @@ struct IntroModeOptions {
 };
 
 
-extern MultiOrbView multiOrbView;
+extern std::optional<MultiOrbView> multiOrbViewOpt;
 
 
 void ballModeLevelSelect(){
 	std::cout << "ballModeLevelSelect" << std::endl;
+
   inputOverride(false, false);
 	changeUiMode(UiModeNone{});
   showLetterBoxHold("Level Select", 0.f);
@@ -36,13 +37,10 @@ void ballModeLevelSelect(){
   auto cameraId = findObjByShortName(">menu-view", std::nullopt);
   setLifetimeObject(cameraId.value(), []() -> void { hideLetterBox(); }, "ball mode level select");
 
-  // TODO - this should set to the multi view
-  auto levelNavInfo = getLevelOrbInfo(multiOrbView);
-	setCameraToOrbView(cameraId.value(), levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 0.1f);
+  setToMultiOrbView(cameraId.value());
 }
 
 void ballModeNewGame(){
-  multiOrbView.activeLayer = 0;
   for (auto& [_, cutscene] : cutsceneDatas){
   	cutscene.hasAlreadyPlayed = false;
   }
@@ -57,6 +55,7 @@ void ballModeNewGame(){
 }
 
 
+
 GameTypeInfo getBallIntroMode(){
 	GameTypeInfo ballIntroMode = GameTypeInfo {
 	  .gametypeName = "ball-intro",
@@ -67,12 +66,16 @@ GameTypeInfo getBallIntroMode(){
 	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {},
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
 	  .onFrame = [](std::any& gametype) -> void {
+	  	if (!multiOrbViewOpt.has_value()){
+	  		return;
+	  	}
+	  	MultiOrbView& multiOrbView = multiOrbViewOpt.value();
+
 	  	IntroModeOptions* introMode = std::any_cast<IntroModeOptions>(&gametype);
 	  	modassert(introMode, "introMode options");
-	  	auto levelOrbInfo = getLevelOrbInfo(multiOrbView);
-	  	auto orbIndex = levelOrbInfo.orbIndex;
-	  	auto orbUiPtr = orbUiByName(levelOrbInfo.orbUi);
-	  	auto& orbUi = *orbUiPtr.value();
+
+	  	std::optional<int> orbIndex = 0;
+	  	auto& orbUi = *currentMultiOrbUi(multiOrbViewOpt.value(), &orbIndex).value();
 
 	  	std::vector<std::string> allLevels;
 
@@ -117,7 +120,7 @@ GameTypeInfo getBallIntroMode(){
 	  		std::vector<std::string> levelInfos;
 	  	};
 
-	  	std::optional<std::string> levelName = isOverworld(multiOrbView) ? std::optional<std::string>(std::nullopt) : overworldLevel(multiOrbView);
+	  	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
 	  	auto progressInfo = getProgressInfo(multiOrbView.activeWorldName, levelName, allLevels);
 	  	DescInfo descInfo {
 	  		.mainInfos = {
@@ -191,7 +194,6 @@ void startIntroMode(objid sceneId){
   });
 
   showLetterBoxHold("", 0.f);
-  multiOrbView.orbCameraId = cameraId;
   IntroModeOptions modeOptions {
   	.cameraId = cameraId.value(),
   };

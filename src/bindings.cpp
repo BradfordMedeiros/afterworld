@@ -83,7 +83,7 @@ bool disableAnimation = false;
 bool disableTpsMesh = false;
 bool validateAnimationControllerAnimations = true;
 
-MultiOrbView multiOrbView;
+std::optional<MultiOrbView> multiOrbViewOpt;
 
 
 GlobalState global { 
@@ -425,26 +425,7 @@ void objectRemoved(objid idRemoved){
 }
 
 
-bool isOverworld(MultiOrbView& multiOrbView){
-  return multiOrbView.activeLayer == (multiOrbView.orbLayers.size() - 1);
-}
-
-void goToOverWorld(MultiOrbView& multiOrbView){
-  multiOrbView.activeWorldName = multiOrbView.orbLayers.at(multiOrbView.activeLayer);
-  multiOrbView.activeLayer = multiOrbView.orbLayers.size() - 1;
-}
-
-
-std::optional<std::string> overworldLevel(MultiOrbView& multiOrbView){
-  if (!multiOrbView.orbCameraId.has_value()){
-    return std::nullopt;
-  }
-  std::optional<Orb*> orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
-  if (!orb.has_value()){
-    return std::nullopt;
-  }
-  return orb.value() -> level;
-}
+std::unordered_map<objid, MultiOrbView> cameraToMultiView;
 
 LevelOrbNavInfo getLevelOrbInfo(MultiOrbView& multiOrbView){
   auto cameraId = multiOrbView.orbCameraId.value();
@@ -469,6 +450,55 @@ LevelOrbNavInfo getLevelOrbInfo(MultiOrbView& multiOrbView){
     .maxCompletedIndex = orbLayer == "metaworld" ? metaworldIndex : getMaxCompleteOrbIndex(*orbUi.value()),
   };
 }
+
+void setToMultiOrbView(objid cameraId){
+  multiOrbViewOpt = MultiOrbView{};
+  MultiOrbView& multiOrbView = multiOrbViewOpt.value();
+
+  multiOrbView.activeLayer = 0;
+  multiOrbView.orbCameraId = cameraId;
+
+  auto levelNavInfo = getLevelOrbInfo(multiOrbView);
+  setCameraToOrbView(cameraId, levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 0.1f);
+}
+
+bool isOverworld(MultiOrbView& multiOrbView){
+  return multiOrbView.activeLayer == (multiOrbView.orbLayers.size() - 1);
+}
+
+void goToOverWorld(MultiOrbView& multiOrbView){
+  multiOrbView.activeWorldName = multiOrbView.orbLayers.at(multiOrbView.activeLayer);
+  multiOrbView.activeLayer = multiOrbView.orbLayers.size() - 1;
+}
+
+
+std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView){
+  if (!isOverworld(multiOrbView)){
+    return std::nullopt;
+  }
+
+  if (!multiOrbView.orbCameraId.has_value()){
+    return std::nullopt;
+  }
+  std::optional<Orb*> orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
+  if (!orb.has_value()){
+    return std::nullopt;
+  }
+  return orb.value() -> level;
+}
+
+
+
+std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex){
+  auto levelOrbInfo = getLevelOrbInfo(multiOrbView);
+  auto orbIndex = levelOrbInfo.orbIndex;
+  *_orbIndex = orbIndex;
+
+  auto orbUiPtr = orbUiByName(levelOrbInfo.orbUi);
+  auto& orbUi = *orbUiPtr.value();  
+  return &orbUi;
+}
+
 
 
 void onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs){
@@ -523,7 +553,7 @@ void onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& sele
           setOrbSelectIndex(orbView, getPrevOrbIndex(*selectedOrb.orbUi, orbView.targetIndex));
         }
 
-        auto level= overworldLevel(multiOrbView);
+        auto level = getSelectedLevel(multiOrbView);
         if (selectedOrb.selectKey && level.has_value()){
           playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
           goToLevel(level.value());
@@ -602,7 +632,10 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   }
 
   auto selectedOrb = handleOrbControls(orbData, key, action);
-  onModeOrbSelect(multiOrbView, selectedOrb);
+
+  if (multiOrbViewOpt.has_value()){
+    onModeOrbSelect(multiOrbViewOpt.value(), selectedOrb);
+  }
 
   if (isJumpKey(key) && action == 1){
     gameapi -> sendNotifyMessage("advance", true);
