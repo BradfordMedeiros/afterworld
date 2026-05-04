@@ -1204,15 +1204,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleCollision(obj1, obj2, "switch-enter", "switch-enter-key", "enter");
     handleCollisionDamage(obj1, obj2);
     handleKillplaneCollision(obj1, obj2);
-    handleGravityHoleCollision(obj1, obj2);
     handleMomentumCollision(obj1, obj2, pos, normal, force);
     handleCollisionBouncepad(obj1, obj2, normal);
     handleInventoryOnCollision(obj1, obj2);
     handleSpawnCollision(director, obj1, obj2);
 
-    handleLevelEndCollision(obj1, obj2);
+    onModeCollision(sceneManagement.managedScene.value().gameMode, obj1, obj2);
+
     handleCollisionTeleport(obj1, obj2);
-    handlePowerupCollision(obj1, obj2);
     handleGemCollision(obj1, obj2);
     
     handleTriggerZone(obj1, obj2);

@@ -72,28 +72,6 @@ void setBallLevelComplete(){
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
-void handleLevelEndCollision(int32_t obj1, int32_t obj2){
-  bool didCollideLevelEnd = false;
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto playerEndAttr = getStrAttr(objAttr, "player_end");
-    if (playerEndAttr.has_value()){
-      didCollideLevelEnd = true;
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto playerEndAttr = getStrAttr(objAttr, "player_end");
-    if (playerEndAttr.has_value()){
-      didCollideLevelEnd = true;
-    }
-  }
-
-  std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
-  if (didCollideLevelEnd){
-    // obviously this is kind of overly coupled to the ball game here. 
-    setBallLevelComplete();
-  }
-}
 
 void createBallObj(objid sceneId, glm::vec3 position){
   GameobjAttributes attr { 
@@ -151,27 +129,9 @@ void createBallObj(objid sceneId, glm::vec3 position){
 }
 
 std::optional<objid> getBallId(){
-	  auto vehicles = getVehicleIds();
- 	  modassert(vehicles.size() == 1, "invalid expected vehicle size");
-	  return vehicles.at(0);
-}
-
-
-void showTimeElapsed(bool shouldShow){
-		if (!ballStartTime.has_value()){
-			return;
-		}
-		if (!shouldShow){
-			getBallModeUI().value() -> ballMode.elapsedTime = std::nullopt;
-		}else{
-			getBallModeUI().value() -> ballMode.elapsedTime = []() -> float {
-				if (finalBallTime.has_value()){
-					return finalBallTime.value();
-				}
-				return gameapi -> timeSeconds(false) - ballStartTime.value();
-			};
-		}
-		
+	auto vehicles = getVehicleIds();
+	modassert(vehicles.size() == 1, "invalid expected vehicle size");
+	return vehicles.at(0);
 }
 
 void setPowerupTexture(std::string texture, std::optional<float> startTime, std::optional<float> duration){
@@ -255,6 +215,62 @@ void doGravityHole(objid id, objid gravityHole){
     gravityHoleBall(gravityHole);
   }
 }
+
+void deliverPowerup(objid vehicle, objid powerupId){
+  auto& powerup = powerups.at(powerupId);
+  if (powerup.lastRemoveTime.has_value()){
+    return;
+  }
+
+  auto vehicleBall = getVehicleBall(vehicles, vehicle);
+  modassert(vehicleBall.has_value(), "deliver powerup, not a ball");
+  if (powerup.type == "jump"){
+    setPowerupBall(*vehicleBall.value(), BIG_JUMP);
+  }else if (powerup.type == "dash"){
+    setPowerupBall(*vehicleBall.value(), LAUNCH_FORWARD);
+  }else if (powerup.type == "low_gravity"){
+    setPowerupBall(*vehicleBall.value(), LOW_GRAVITY);
+  }else if (powerup.type == "teleport"){
+    setPowerupBall(*vehicleBall.value(), TELEPORT);
+  }else if (powerup.type == "invincibility"){
+    setPowerupBall(*vehicleBall.value(), INVINCIBILITY);
+  }else{
+    modassert(false, std::string("invalid powerup type: ") + powerup.type);
+    setPowerupBall(*vehicleBall.value(), std::nullopt);
+  }
+
+  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
+  
+  if(!powerup.respawnRateMs.has_value()){
+    gameapi -> removeObjectById(powerupId);
+  }else{
+    powerup.lastRemoveTime = gameapi -> timeSeconds(false);
+  }
+}
+
+void handleLevelEndCollision(int32_t obj1, int32_t obj2){
+  bool didCollideLevelEnd = false;
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto playerEndAttr = getStrAttr(objAttr, "player_end");
+    if (playerEndAttr.has_value()){
+      didCollideLevelEnd = true;
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto playerEndAttr = getStrAttr(objAttr, "player_end");
+    if (playerEndAttr.has_value()){
+      didCollideLevelEnd = true;
+    }
+  }
+
+  std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
+  if (didCollideLevelEnd){
+    // obviously this is kind of overly coupled to the ball game here. 
+    setBallLevelComplete();
+  }
+}
+
 void handleGravityHoleCollision(objid obj1, objid obj2){
   {
     auto objAttr1 = getAttrHandle(obj1);
@@ -276,6 +292,27 @@ void handleGravityHoleCollision(objid obj1, objid obj2){
   }
 }
 
+void handlePowerupCollision(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto powerup = getStrAttr(objAttr, "powerup");
+    if (powerup.has_value()){
+      deliverPowerup(obj1, obj2);
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto powerup = getStrAttr(objAttr, "powerup");
+    if (powerup.has_value()){
+      deliverPowerup(obj2, obj1); 
+    }
+  }
+}
+
+void handleBallModeCollision(objid obj1, objid obj2){
+  handleLevelEndCollision(obj1, obj2);
+  handleGravityHoleCollision(obj1, obj2);
+  handlePowerupCollision(obj1, obj2);
+}
 
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
@@ -303,7 +340,14 @@ GameTypeInfo getBallMode(){
 	  	modeOptions -> shouldReset = false;
 	  	modeOptions -> didReset = false;
 
- 	   	showTimeElapsed(true);
+	  	modassert(ballStartTime.has_value(), "no ball start time");
+			getBallModeUI().value() -> ballMode.elapsedTime = []() -> float {
+				if (finalBallTime.has_value()){
+					return finalBallTime.value();
+				}
+				return gameapi -> timeSeconds(false) - ballStartTime.value();
+			};
+			
 
 	    return *modeOptions; 
 	  },
@@ -412,55 +456,6 @@ GameTypeInfo getBallMode(){
 	  },
 	};
 	return ballMode;
-}
-
-
-void deliverPowerup(objid vehicle, objid powerupId){
-  auto& powerup = powerups.at(powerupId);
-  if (powerup.lastRemoveTime.has_value()){
-    return;
-  }
-
-  auto vehicleBall = getVehicleBall(vehicles, vehicle);
-  modassert(vehicleBall.has_value(), "deliver powerup, not a ball");
-  if (powerup.type == "jump"){
-    setPowerupBall(*vehicleBall.value(), BIG_JUMP);
-  }else if (powerup.type == "dash"){
-    setPowerupBall(*vehicleBall.value(), LAUNCH_FORWARD);
-  }else if (powerup.type == "low_gravity"){
-    setPowerupBall(*vehicleBall.value(), LOW_GRAVITY);
-  }else if (powerup.type == "teleport"){
-    setPowerupBall(*vehicleBall.value(), TELEPORT);
-  }else if (powerup.type == "invincibility"){
-    setPowerupBall(*vehicleBall.value(), INVINCIBILITY);
-  }else{
-    modassert(false, std::string("invalid powerup type: ") + powerup.type);
-    setPowerupBall(*vehicleBall.value(), std::nullopt);
-  }
-
-  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
-  
-  if(!powerup.respawnRateMs.has_value()){
-    gameapi -> removeObjectById(powerupId);
-  }else{
-    powerup.lastRemoveTime = gameapi -> timeSeconds(false);
-  }
-}
-
-void handlePowerupCollision(int32_t obj1, int32_t obj2){
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto powerup = getStrAttr(objAttr, "powerup");
-    if (powerup.has_value()){
-      deliverPowerup(obj1, obj2);
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto powerup = getStrAttr(objAttr, "powerup");
-    if (powerup.has_value()){
-      deliverPowerup(obj2, obj1); 
-    }
-  }
 }
 
 

@@ -74,3 +74,9 @@ void stopMode(GameMode& gameMode){
   }
 }
 
+void onModeCollision(GameMode& gameMode, objid obj1, objid obj2){
+  auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
+  if (gamemodeBall){
+    handleBallModeCollision(obj1, obj2);
+  }
+}
