@@ -113,7 +113,13 @@ std::optional<MultiOrbView*> multiorbViewByCamera(objid cameraId);
 
 std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs);
 
-void handleMultiOrbViews();
+
+struct WorldOrbInfos {
+	std::string level;
+	bool isComplete;
+	bool selected;
+};
+std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView);
 
 
 #endif 

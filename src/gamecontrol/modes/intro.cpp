@@ -14,11 +14,6 @@ struct IntroModeOptions {
    objid cameraId;
 };
 
-struct WorldOrbInfos {
-	std::string level;
-	bool isComplete;
-	bool selected;
-};
 
 struct DescInfo {
 	std::vector<std::string> mainInfos;
@@ -30,23 +25,6 @@ struct DescInfo {
 
 DescInfo getDescriptionInfo(MultiOrbView& multiOrbView){
 	bool onOverworld = isOverworld(multiOrbView);
-
-	std::vector<WorldOrbInfos> worldOrbInfos;
-
-	{
-	  	std::optional<int> orbIndex = 0;
-	  	auto& orbUi = *currentMultiOrbUi(multiOrbView, &orbIndex).value();
-	  	for (int i = 0; i < orbUi.orbs.size(); i++){
-	  			auto& orb = orbUi.orbs.at(i);
-	  			auto isComplete = orb.getOrbProgress().complete;
-	  			bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
-	  			worldOrbInfos.push_back(WorldOrbInfos{
-	  				.level = orb.level,
-	  				.isComplete = isComplete,
-	  				.selected = selected,
-	  			});
-	  	}
-	}
 
 	std::string worldName = "test";  // multiOrbView.activeWorldName
 	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
@@ -83,7 +61,7 @@ DescInfo getDescriptionInfo(MultiOrbView& multiOrbView){
 		};
 	}
 
-	descInfo.worldOrbInfos = worldOrbInfos;
+	descInfo.worldOrbInfos = getOrbUiData(multiOrbView);
 
 	return descInfo;
 }

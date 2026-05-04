@@ -906,7 +906,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   
         onTagsFrame();
         handleOrbViews(orbData);
-        handleMultiOrbViews();
         
         doStateControllerAnimations(validateAnimationControllerAnimations, disableAnimation);
   

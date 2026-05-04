@@ -548,6 +548,19 @@ std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vect
 }
 
 
-void handleMultiOrbViews(){
-
+std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView){
+	std::vector<WorldOrbInfos> worldOrbInfos;
+	std::optional<int> orbIndex = 0;
+	auto& orbUi = *currentMultiOrbUi(multiOrbView, &orbIndex).value();
+	for (int i = 0; i < orbUi.orbs.size(); i++){
+	  auto& orb = orbUi.orbs.at(i);
+	  auto isComplete = orb.getOrbProgress().complete;
+	  bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
+	  worldOrbInfos.push_back(WorldOrbInfos{
+	  	.level = orb.level,
+	  	.isComplete = isComplete,
+	  	.selected = selected,
+	  });
+	}
+	return worldOrbInfos;
 }
