@@ -7,17 +7,119 @@ extern std::optional<std::string> activeLevel;
 extern Vehicles vehicles;
 extern Movement movement;
 extern Weapons weapons;
-extern AiData aiData;
 extern std::unordered_map<objid, Powerup> powerups;
 
 void goToLevel(std::string levelShortName);
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
+void inputOverride(bool paused, bool showMouse);
+void inputOverride();
 bool isReloadKey(int button);
 void handleRemoveKillplaneCollision(objid);
+void stopRotate(objid id);
 
-bool inBallMode = false;
-std::optional<float> ballStartTime;
-std::optional<float> finalBallTime;
+struct BallModeOptions{
+   std::optional<glm::vec3> initialBallPos;
+   objid ballId;
+   objid sceneId;
+   bool didLose = false;
+   bool shouldReset = false;
+   bool didReset = false;
+   std::optional<float> ballStartTime;
+   std::optional<float> finalBallTime;
+
+
+   bool shouldChangeToOrb = false;
+   bool didChangeToOrb = false;
+   bool levelSelect = false;
+};
+
+BallModeOptions& getBallModeOptions(){
+	auto data = getGametypeData(gametypeSystem);
+	modassert(data.has_value(), "getBallMode options - gametype system empty data");
+ 	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(data.value());
+ 	modassert(ballModePtr, "no active ball mode");
+ 	return *ballModePtr;
+}
+
+struct DescInfo2 {
+	std::vector<std::string> mainInfos;
+	std::vector<std::string> hubInfos;
+	std::vector<std::string> levelInfos;
+	std::vector<WorldOrbInfos> worldOrbInfos;
+	bool onOverworld;
+};
+
+DescInfo2 getDescriptionInfo2(MultiOrbView& multiOrbView){
+	bool onOverworld = isOverworld(multiOrbView);
+
+	std::string worldName = "test";  // multiOrbView.activeWorldName
+	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
+
+
+	auto progressInfo = getPlaylistProgressInfo();
+	auto worldProgressInfo = getWorldProgressInfo(worldName);
+	DescInfo2 descInfo {
+		.mainInfos = {
+			std::string("overworld: ") + (onOverworld ? "true" : "false"),
+			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
+		},
+		.hubInfos = {
+			std::string("world: ") + worldProgressInfo.currentWorld,
+			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
+			std::string("total gems: ") + std::to_string(worldProgressInfo.gemCount) + " / " + std::to_string(worldProgressInfo.totalGemCount),
+		},
+		.levelInfos = {},
+		.onOverworld = onOverworld,
+	};
+
+	if (levelName.has_value()){
+		auto levelProgressInfo = getLevelProgressInfo(worldName, levelName.value());
+ 		std::string parTime = print(levelProgressInfo.parTime, 2);
+ 		std::string bestTime = "n/a";
+ 		if(levelProgressInfo.bestTime.has_value()){
+ 			bestTime = print(levelProgressInfo.bestTime.value(), 2);
+ 		}
+		descInfo.levelInfos = {
+			std::string("current level: ") + levelName.value(),
+			std::string("par time: ") + parTime + "s",
+			std::string("best time: ") + bestTime + "s",
+			std::string("total gems: ") + std::to_string(levelProgressInfo.gemCount) + " / " + std::to_string(levelProgressInfo.totalGemCount),
+		};
+	}
+
+	descInfo.worldOrbInfos = getOrbUiData(multiOrbView);
+
+	return descInfo;
+}
+
+void drawDescInfo2(DescInfo2& descInfo){
+	for (int i = 0; i < descInfo.worldOrbInfos.size(); i++){
+		 auto& info = descInfo.worldOrbInfos.at(i);
+     gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+     if (info.isComplete){
+	 	   gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.01f, 0.01f, false, glm::vec4(1.0f, 0.9216f, 0.2314f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+     }
+     if (info.selected){
+     	gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
+     }
+	}
+
+ 	for (int i = 0; i < descInfo.hubInfos.size(); i++){
+		gameapi -> drawText(descInfo.hubInfos.at(i), -0.9f, 0.7f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	}
+	for (int i = 0; i < descInfo.mainInfos.size(); i++){
+	 	gameapi -> drawText(descInfo.mainInfos.at(i), -0.9f, -0.6f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	}
+	if (!descInfo.onOverworld){
+	 	for (int i = 0; i < descInfo.levelInfos.size(); i++){
+	 		gameapi -> drawText(descInfo.levelInfos.at(i), 0.6f, 0.7f - (i * 0.1f), 8, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	 	}	  		
+	}
+}
+
+
+
+/// 
 
 void ballStartGameplay(EasyCutscene& cutscene){
   if (initialize(cutscene)){
@@ -55,25 +157,21 @@ void ballEndGameplay(EasyCutscene& cutscene){
 }
 
 void setBallLevelComplete(){
-	if (!inBallMode){
-		return;
-	}
-	inBallMode = false;
 	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
 
-	auto timeElapsed = gameapi -> timeSeconds(false) - ballStartTime.value();
+	auto& ballModeOptions = getBallModeOptions();
+	if (ballModeOptions.finalBallTime.has_value()){
+		return;
+	}
+	auto timeElapsed = gameapi -> timeSeconds(false) - ballModeOptions.ballStartTime.value();
+	ballModeOptions.finalBallTime = timeElapsed;
 
-	changeGameTypeNone(gametypeSystem);
 	markLevelComplete(activeLevel.value(), timeElapsed);
-	finalBallTime = timeElapsed;
-
 	commitCrystals();
-
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
-
-void createBallObj(objid sceneId, glm::vec3 position){
+objid createBallObj(objid sceneId, glm::vec3 position){
   GameobjAttributes attr { 
   	.attr = {
   		{ "vehicle", "ball" },
@@ -126,12 +224,7 @@ void createBallObj(objid sceneId, glm::vec3 position){
   	gameapi -> makeParent(ballSound.value(), ball.value());
 	}
 
-}
-
-std::optional<objid> getBallId(){
-	auto vehicles = getVehicleIds();
-	modassert(vehicles.size() == 1, "invalid expected vehicle size");
-	return vehicles.at(0);
+	return ball.value();
 }
 
 void setPowerupTexture(std::string texture, std::optional<float> startTime, std::optional<float> duration){
@@ -141,28 +234,23 @@ void setPowerupTexture(std::string texture, std::optional<float> startTime, std:
 }
 
 std::optional<BallPowerupState> getPowerup(){
-	auto activePlayer = getEntityForPlayerIndex(0);
-	auto vehicleIds = getVehicleIds();
-	if (vehicleIds.size() == 0){
-		return std::nullopt;
-	}
-
-	auto vehicleBall = getVehicleBall(vehicles, vehicleIds.at(0));
+	auto ballId = getBallModeOptions().ballId;
+	auto vehicleBall = getVehicleBall(vehicles, ballId);
 	modassert(vehicleBall.has_value(), "get powerup - not a ball");
 	return getBallPowerup(*vehicleBall.value());
 } 
 
-struct BallModeOptions{
-   std::optional<glm::vec3> initialBallPos;
-   std::optional<objid> ballId;
-   bool didLose = false;
-   bool shouldReset = false;
-   bool didReset = false;
-};
 
 GameTypeInfo getBallMode();
 
-void startBallMode(objid sceneId){
+
+void ballModeSetPlayMode(objid sceneId){
+	setTempCamera(std::nullopt, 0);
+
+	inputOverride();
+
+  changeUiMode(BallModeUi{});
+
 	setPauseMenuOverride([]() -> void {
     goToLevel("ballselect");
 	});
@@ -179,40 +267,84 @@ void startBallMode(objid sceneId){
 
   //////////
 
-	inBallMode = true;
-	ballStartTime = gameapi -> timeSeconds(false);
-
 	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
 	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
 
-	createBallObj(sceneId, playerSpawnPosition);
-	BallModeOptions modeOptions {};
+	auto ballId = createBallObj(sceneId, playerSpawnPosition);
+
 
 	GameTypeInfo ballMode = getBallMode();
+	BallModeOptions modeOptions {};
+	modeOptions.ballId = ballId;
+	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
+	modeOptions.sceneId = sceneId;
+
 	changeGameType(gametypeSystem, ballMode, "ball", &modeOptions);
 }
 
-void endBallMode(){
-	inBallMode = false;
-	ballStartTime = std::nullopt;
-	finalBallTime = std::nullopt;
+void ballModeNewGame2(objid sceneId){
+  for (auto& [_, cutscene] : cutsceneDatas){
+  	cutscene.hasAlreadyPlayed = false;
+  }
 
-	setCanExitVehicle(true);
-	changeGameTypeNone(gametypeSystem);
+  resetProgress();
+  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+
+  inputOverride(false, false);
+	changeUiMode(UiModeNone{});
+
+  auto currentCutscene = playCutscene(simpleNarratedMovement("testorb", glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { ballModeSetPlayMode(sceneId); }), std::nullopt);
 }
 
-struct GravityHole {
-	objid gravityHoleId;
-};
-void gravityHoleBall(objid gravityHoleId){
-	gameapi -> sendNotifyMessage("ballgravity", GravityHole{
-		.gravityHoleId = gravityHoleId,
+
+void startBallIntroMode(objid sceneId){	
+	setPauseMenuOverride([]() -> void {
+    goToLevel("ballselect");
 	});
+
+	//if (currentCutscene.has_value()){
+	//	removeCutscene(currentCutscene.value(), true);
+	//	currentCutscene = std::nullopt;
+	//}
+  auto cameraId = findObjByShortName(">menu-view", sceneId);
+	removeCameraFromMultiOrbView(cameraId.value());
+  setTempCamera(cameraId.value(), 0);
+
+  inputOverride(false, true);
+  changeUiMode(LiveMenu {
+   	.options = MainMenu2Options {
+   		.backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
+   		.offsetY = 0.f,
+			.onNewGame = [sceneId]() -> void {
+				ballModeNewGame2(sceneId);
+			},
+			.onContinueGame = [sceneId]() -> void {
+				ballModeSetPlayMode(sceneId);
+			},
+   	},
+  });
+  showLetterBoxHold("", 0.f);
+}
+
+
+void startBallMode(objid sceneId){
+  auto hasLevelSelect = gameapi -> getObjectsByAttr("levelselect", std::nullopt, std::nullopt).size() > 0;
+
+  if (hasLevelSelect){
+  	startBallIntroMode(sceneId);
+  }else{
+  	ballModeSetPlayMode(sceneId);
+  }
+}
+
+void endBallMode(){
 }
 
 void doGravityHole(objid id, objid gravityHole){
   if (isControlledVehicle(id)){
-    gravityHoleBall(gravityHole);
+  	auto& ballMode = getBallModeOptions();
+		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId);
+		setBallGravityWell(ballMode.ballId, *ballVehicle.value(), true, gravityHole);
   }
 }
 
@@ -318,107 +450,116 @@ GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
 	  .createGametype = [](void* data) -> std::any {
-			BallModeOptions* modeOptions = static_cast<BallModeOptions*>(data);
+			BallModeOptions* modeOptionsPtr = static_cast<BallModeOptions*>(data);
+			BallModeOptions& modeOptions = *modeOptionsPtr;
 			{
-				auto vehicles = getVehicleIds();
-				modassert(vehicles.size() == 1, "invalid expected vehicle size");
-				std::cout << "vehicles: " << print(vehicles) << "[" << gameapi -> getGameObjNameForId(vehicles.at(0)).value()  << "]"  << std::endl;
-				std::cout << "vehicles: " << gameapi -> getGameObjNameForId(gameapi -> getActiveCamera(std::nullopt).value()).value()  << std::endl;
 				auto playerIndex = getDefaultPlayerIndex();
 				auto entityId = getEntityForPlayerIndex(playerIndex).value();
-				setEntityInVehicle(entityId, vehicles.at(0));
+				setEntityInVehicle(entityId, modeOptions.ballId);
 				setCanExitVehicle(false);
 
 				playCutscene(ballStartGameplay, std::nullopt);
 			}
 
-		  auto ballId = getBallId().value();
-	  	auto pos = gameapi -> getGameObjectPos(ballId, true, "[gamelogic] get ball position for start");
-	  	modeOptions -> initialBallPos = pos;
-	  	modeOptions -> ballId = ballId;
-	  	modeOptions -> didLose = false;
-	  	modeOptions -> shouldReset = false;
-	  	modeOptions -> didReset = false;
+	  	auto pos = gameapi -> getGameObjectPos(modeOptions.ballId, true, "[gamelogic] get ball position for start");
+	  	modeOptions.initialBallPos = pos;
+	  	modeOptions.didLose = false;
+	  	modeOptions.shouldReset = false;
+	  	modeOptions.didReset = false;
 
-	  	modassert(ballStartTime.has_value(), "no ball start time");
+	  	modassert(modeOptions.ballStartTime.has_value(), "no ball start time");
 			getBallModeUI().value() -> ballMode.elapsedTime = []() -> float {
-				if (finalBallTime.has_value()){
-					return finalBallTime.value();
+				auto& ballModeOptions  = getBallModeOptions();
+				if (ballModeOptions.finalBallTime.has_value()){
+					return ballModeOptions.finalBallTime.value();
 				}
-				return gameapi -> timeSeconds(false) - ballStartTime.value();
+				return gameapi -> timeSeconds(false) - ballModeOptions.ballStartTime.value();
 			};
 			
-
-	    return *modeOptions; 
+	    return *modeOptionsPtr; 
 	  },
-	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {
-	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
-	  	modassert(ballMode, "ballMode options");
-	  	if (event != "ball" && event != "ballgravity"){
-	  		return;
-
-	  	}
-
-	  	if (event == "ballgravity"){
-		  	GravityHole* gravityHole = std::any_cast<GravityHole>(&value);
-		  	modassert(gravityHole, "expected type for ballgravity");
-	  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
-	  		setBallGravityWell(ballMode -> ballId.value(), *ballVehicle.value(), true, gravityHole -> gravityHoleId);
-	  	}
-
-	  	std::string* message = std::any_cast<std::string>(&value);
-	  	modassert(message, "invalid type ball-mode");
-	  	std::cout << "from ball mode: " << event << ", " << *message << std::endl;
-
-	  	if (*message == "reset"){
-		  	std::string* message = std::any_cast<std::string>(&value);
-		  	modassert(message, "invalid type ball-mode");
-	  		modassert(ballMode -> initialBallPos.has_value(), "no initial ball position");
-	  		ballMode -> shouldReset = true;
-	  	}
-	  },
+	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {},
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
-	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
-	  	modassert(ballMode, "ballMode options");
+	  	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(&gametype);
+	  	modassert(ballModePtr, "ballMode options");
+	  	BallModeOptions& ballMode = *ballModePtr;
 	  	if(isReloadKey(key) && action == 0){
-	  		gameapi -> sendNotifyMessage("ball", std::string("reset"));
+	  		//ballMode.shouldReset = true;
+
+	  			ballMode.shouldChangeToOrb = true;
+
 	  	}
+
+ 		  auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
 	  	if (isToggleThirdPersonKey(key) && action == 0){
-	  		ballMode -> didLose = true;
-	  		auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
-	  		createExplosion(position, 5.f, 0.f);
+	  		//ballMode.didLose = true;
+	  		//auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+	  		//createExplosion(position, 5.f, 0.f);
+	  		setTempCamera(std::nullopt, 0);
+	  		removeCameraFromMultiOrbView(cameraId.value());
 	  	}
+
+	  	if (key == 'I'){
+	  		ballMode.levelSelect = false;
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		goToOverWorld(*multiOrbViewPtr);
+	  	}
+	  	
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
-	  	BallModeOptions* ballMode = std::any_cast<BallModeOptions>(&gametype);
-	  	modassert(ballMode, "ballMode options");
-	  	std::cout << "ball onframe" << std::endl;
-	  	if (ballMode -> ballId.has_value()){
-	  		if (isInKillPlane(ballMode -> ballId.value()) && !ballMode -> didLose && !ballMode -> didReset){ // didReset b/c otherwise at same pos
-		  		auto ballVehicle = getVehicleBall(vehicles, ballMode -> ballId.value());
+	  	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(&gametype);
+	  	modassert(ballModePtr, "ballMode options");
+	  	BallModeOptions& ballMode = *ballModePtr;
+
+	  	if (ballMode.shouldChangeToOrb){
+	  		auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
+
+	  		auto viewTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
+				auto viewPosition = viewTransform.position;
+				auto viewRot = viewTransform.rotation;
+				stopRotate(cameraId.value());
+		  	gameapi -> setGameObjectPosition(cameraId.value(), viewPosition, true, Hint { .hint = "[gamelogic] - ball set pos" });
+		  	gameapi -> setGameObjectRot(cameraId.value(), viewRot, true, Hint { .hint = "[gamelogic] - ball set pos" });
+
+	  		ballMode.shouldChangeToOrb = false;
+	  		ballMode.didChangeToOrb = true;
+	  		return;
+	  	}
+	  	if (ballMode.didChangeToOrb){
+	  		ballMode.didChangeToOrb = false;
+	  		auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
+   			setTempCamera(cameraId.value(), 0);
+				setToMultiOrbView(cameraId.value());
+				ballMode.levelSelect = true;
+				return;
+	  	}
+
+	  	// below is the ball game logic itself
+	  		std::cout << "ball onframe" << std::endl;
+	  		if (isInKillPlane(ballMode.ballId) && !ballMode.didLose && !ballMode.didReset){ // didReset b/c otherwise at same pos
+		  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId);
 	  			if (!(ballVehicle.value() -> powerup.has_value() && ballVehicle.value() -> powerup.value().powerup == INVINCIBILITY && ballVehicle.value() -> powerup.value().useTime.has_value())){
-	  				ballMode -> didLose = true;
-	  				auto position = gameapi -> getGameObjectPos(ballMode -> ballId.value(), true, "[gamelogic] - ballIntroOpening pos");
+	  				ballMode.didLose = true;
+	  				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 	  				createExplosion(position, 5.f, 0.f);
-	  				setGameObjectMeshEnabled(ballMode -> ballId.value(), false);
-	  				setGameObjectPhysicsEnable(ballMode -> ballId.value(), false);
-		  			handleRemoveKillplaneCollision(ballMode -> ballId.value());
+	  				setGameObjectMeshEnabled(ballMode.ballId, false);
+	  				setGameObjectPhysicsEnable(ballMode.ballId, false);
+		  			handleRemoveKillplaneCollision(ballMode.ballId);
 	  			}
-
 	  		}
 
-	  		if (ballMode -> didReset){ 
-	  			ballMode -> didReset = false;
-		  		setGameObjectMeshEnabled(ballMode -> ballId.value(), true);
-		  		setGameObjectPhysicsEnable(ballMode -> ballId.value(), true);
+	  		if (ballMode.didReset){ 
+	  			ballMode.didReset = false;
+		  		setGameObjectMeshEnabled(ballMode.ballId, true);
+		  		setGameObjectPhysicsEnable(ballMode.ballId, true);
 	  		}
-	  		if (ballMode -> shouldReset){
-		  		gameapi -> setGameObjectPosition(ballMode -> ballId.value(), ballMode -> initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
-		  		ballMode -> didLose = false;
-					ballMode -> shouldReset = false;
-					ballStartTime = gameapi -> timeSeconds(false);
-					ballMode -> didReset = true;
+	  		if (ballMode.shouldReset){
+		  		gameapi -> setGameObjectPosition(ballMode.ballId, ballMode.initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
+		  		ballMode.didLose = false;
+					ballMode.shouldReset = false;
+					ballMode.ballStartTime = gameapi -> timeSeconds(false);
+					ballMode.didReset = true;
 	  		}
 
 	  		auto powerup = getPowerup();
@@ -446,11 +587,11 @@ GameTypeInfo getBallMode(){
 	  				modassert(false, "invalid powerup size ball.cpp");
 	  			}
 	  		}
-	  	}
+	  	
 
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
-  		if (ballMode -> didLose){
+  		if (ballMode.didLose){
 	  		gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
 	  },

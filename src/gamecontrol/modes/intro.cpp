@@ -153,6 +153,7 @@ void startIntroMode(objid sceneId){
   auto cameraId = findObjByShortName(">menu-view", sceneId);
 	removeCameraFromMultiOrbView(cameraId.value());
   setTempCamera(cameraId.value(), 0);
+  setToMultiOrbView(cameraId.value());
 
   inputOverride(false, true);
   changeUiMode(LiveMenu {

@@ -12,6 +12,7 @@ void startMode(GameMode& gameMode, objid sceneId){
   }
 
   inputOverride();
+  setCanExitVehicle(true);
 
   auto gamemodeFps = std::get_if<GameModeFps>(&gameMode);
   auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
@@ -22,7 +23,6 @@ void startMode(GameMode& gameMode, objid sceneId){
     changeUiMode(FpsModeUi{});
     startFpsMode(sceneId, gamemodeFps -> player, gamemodeFps -> makePlayer);
   }else if (gamemodeBall){
-    changeUiMode(BallModeUi{});
     startBallMode(sceneId);
   }else if (gamemodeIntro){
     changeUiMode(UiModeNone{});

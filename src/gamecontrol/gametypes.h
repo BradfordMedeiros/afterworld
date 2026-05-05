@@ -29,5 +29,6 @@ void changeGameType(GameTypes& gametypes, GameTypeInfo& gametype, const char* na
 void changeGameTypeNone(GameTypes& gametypes);
 
 void onGametypesFrame(GameTypes& gametypes);
+std::optional<std::any*> getGametypeData(GameTypes& gametypes);
 
 #endif 

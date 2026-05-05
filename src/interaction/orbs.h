@@ -58,20 +58,6 @@ std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index);
 void drawOrbs(OrbData& orbData, OrbUi& orbUi, int ownerId);
 void handleOrbViews(OrbData& orbData);
 
-struct OrbSelection {
-	objid cameraId;
-	std::optional<Orb*> currentOrb;
-	OrbView* orbView;
-	OrbUi* orbUi;
-	bool moveLeftNoSpace= false;
-	bool moveRightNoSpace = false;
-
-	bool moveLeftKey = false;
-	bool moveRightKey = false;
-	bool selectKey = false;
-	bool optionKey = false;
-};	
-std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action);
 
 void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time);
 void removeCameraFromOrbView(objid cameraId);
@@ -106,13 +92,13 @@ struct MultiOrbView {
 void setToMultiOrbView(objid cameraId);
 void removeCameraFromMultiOrbView(objid cameraId);
 bool isOverworld(MultiOrbView& multiOrbView);
+
 void goToOverWorld(MultiOrbView& multiOrbView);
+
+
 std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex);
 std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView);
 std::optional<MultiOrbView*> multiorbViewByCamera(objid cameraId);
-
-std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs);
-
 
 struct WorldOrbInfos {
 	std::string level;
@@ -121,5 +107,21 @@ struct WorldOrbInfos {
 };
 std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView);
 
+
+struct OrbSelection {
+	objid cameraId;
+	std::optional<Orb*> currentOrb;
+	OrbView* orbView;
+	OrbUi* orbUi;
+	bool moveLeftNoSpace= false;
+	bool moveRightNoSpace = false;
+
+	bool moveLeftKey = false;
+	bool moveRightKey = false;
+	bool selectKey = false;
+	bool optionKey = false;
+};	
+std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action);
+std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs);
 
 #endif 

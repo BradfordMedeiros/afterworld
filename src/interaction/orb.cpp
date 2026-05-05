@@ -247,57 +247,6 @@ void setOrbSelectIndex(OrbView& orbView, int targetIndex){
 	}
 }
 
-std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action){
-	std::vector<OrbSelection> orbSelections;
-
-
-	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
-		if (orbData.orbUis.find(orbView.orbId) == orbData.orbUis.end()){
-			continue;
-		}
-		if (!orbView.attachedToOrb){
-			continue;
-		}
-
-		OrbSelection orbSelection {};
-		orbSelection.cameraId = id;
-
-		auto orbUi = getOrbUi(orbData, orbView.orbId).value();
-		orbSelection.orbView = &orbView;
-		orbSelection.orbUi = orbUi;
-
-		{
-			if (isMoveLeftKey(key) && (action == 1)){
-				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
-				if (connections.size() == 0 || orbView.targetIndex < connections.at(0) /* min index */){
-					orbSelection.moveLeftNoSpace = true;
-				}
-				orbSelection.moveLeftKey = true;
-			}
-			if (isMoveRightKey(key) && (action == 1)){
-				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
-				if (connections.size() == 0 || orbView.targetIndex > connections.at(connections.size() - 1) /* max index */){
-					orbSelection.moveRightNoSpace = true;
-				}
-				orbSelection.moveRightKey = true;
-			}
-		}
-
-		auto currentOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
-		orbSelection.currentOrb = currentOrb;
-
-		if (isJumpKey(key) && (action == 1)){
-			orbSelection.selectKey = true;
-		}
-
-		if (key == 'O' && (action == 1)){
-			orbSelection.optionKey = true;
-		}
-		orbSelections.push_back(orbSelection);
-	}
-
-	return orbSelections;
-}
 
 void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time){
 	for (auto &[id, orbUi] : orbData.orbUis){
@@ -428,11 +377,12 @@ void setToMultiOrbView(objid cameraId){
   multiOrbView.orbCameraId = cameraId;
 
   auto levelNavInfo = getLevelOrbInfo(multiOrbView);
-  setCameraToOrbView(cameraId, levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 0.1f);
+  setCameraToOrbView(cameraId, levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 1.f);
 }
 
 void removeCameraFromMultiOrbView(objid cameraId){
 	multiOrbViews.erase(cameraId);
+	removeCameraFromOrbView(cameraId);
 }
 
 bool isOverworld(MultiOrbView& multiOrbView){
@@ -480,6 +430,84 @@ std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optiona
 }
 
 
+std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView){
+	std::vector<WorldOrbInfos> worldOrbInfos;
+	std::optional<int> orbIndex = 0;
+	auto& orbUi = *currentMultiOrbUi(multiOrbView, &orbIndex).value();
+	for (int i = 0; i < orbUi.orbs.size(); i++){
+	  auto& orb = orbUi.orbs.at(i);
+	  auto isComplete = orb.getOrbProgress().complete;
+	  bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
+	  worldOrbInfos.push_back(WorldOrbInfos{
+	  	.level = orb.level,
+	  	.isComplete = isComplete,
+	  	.selected = selected,
+	  });
+	}
+	return worldOrbInfos;
+}
+
+
+std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action){
+	std::vector<OrbSelection> orbSelections;
+
+
+	for (auto& [id, orbView] : orbData.orbViewsCameraToOrb){
+		if (orbData.orbUis.find(orbView.orbId) == orbData.orbUis.end()){
+			continue;
+		}
+		if (!orbView.attachedToOrb){
+			continue;
+		}
+
+		OrbSelection orbSelection {};
+		orbSelection.cameraId = id;
+
+		auto orbUi = getOrbUi(orbData, orbView.orbId).value();
+		orbSelection.orbView = &orbView;
+		orbSelection.orbUi = orbUi;
+
+		{
+			if (isMoveLeftKey(key) && (action == 1)){
+				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
+				if (connections.size() == 0 || orbView.targetIndex < connections.at(0) /* min index */){
+					orbSelection.moveLeftNoSpace = true;
+				}
+				orbSelection.moveLeftKey = true;
+			}
+			if (isMoveRightKey(key) && (action == 1)){
+				auto connections = getAllConnections(*orbUi, orbView.targetIndex);
+				if (connections.size() == 0 || orbView.targetIndex > connections.at(connections.size() - 1) /* max index */){
+					orbSelection.moveRightNoSpace = true;
+				}
+				orbSelection.moveRightKey = true;
+			}
+		}
+
+		auto currentOrb = getOrb(getOrbUi(orbData, orbView.orbId).value() -> orbs, orbView.targetIndex);
+		orbSelection.currentOrb = currentOrb;
+
+		if (isJumpKey(key) && (action == 1)){
+			orbSelection.selectKey = true;
+		}
+
+		if (key == 'P' && (action == 1)){
+			orbSelection.optionKey = true;
+		}
+		orbSelections.push_back(orbSelection);
+	}
+
+	return orbSelections;
+}
+
+
+void setToMultiOrbViewRight(MultiOrbView& multiOrbView){
+
+}
+void setToMultiOrbViewLeft(MultiOrbView& multiOrbView){
+	
+}
+
 std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs){
   if (!multiOrbView.orbCameraId.has_value()){
     return std::nullopt;
@@ -514,14 +542,9 @@ std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vect
           return std::nullopt;
         }
       }else{
-        if (selectedOrb.moveRightNoSpace){
-          goToOverWorld(multiOrbView);
-        }
-        if (selectedOrb.moveLeftNoSpace){
-          goToOverWorld(multiOrbView);
-        }
         if (selectedOrb.optionKey){
           goToOverWorld(multiOrbView);
+          ///modassert(false, "go to overworld toggle");
         }
 
         if (selectedOrb.moveRightKey){
@@ -545,22 +568,4 @@ std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vect
   }
 
   return std::nullopt;
-}
-
-
-std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView){
-	std::vector<WorldOrbInfos> worldOrbInfos;
-	std::optional<int> orbIndex = 0;
-	auto& orbUi = *currentMultiOrbUi(multiOrbView, &orbIndex).value();
-	for (int i = 0; i < orbUi.orbs.size(); i++){
-	  auto& orb = orbUi.orbs.at(i);
-	  auto isComplete = orb.getOrbProgress().complete;
-	  bool selected = orbIndex.has_value() &&  (orb.index == orbIndex.value());
-	  worldOrbInfos.push_back(WorldOrbInfos{
-	  	.level = orb.level,
-	  	.isComplete = isComplete,
-	  	.selected = selected,
-	  });
-	}
-	return worldOrbInfos;
 }
