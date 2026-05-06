@@ -492,14 +492,14 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     entityActionVehicle(controlledPlayer.entityId.value());
   }
 
-  auto selectedOrb = handleOrbControls(orbData, key, action);
-  for (auto& [cameraId, multiOrbView] : multiOrbViews){
-    auto level = onModeOrbSelect(multiOrbView, selectedOrb);
-    if (level.has_value()){
-      goToLevel(level.value());
-      modassert(false, "go to level from orb called");
-    }
-  }
+  //auto selectedOrb = handleOrbControls(orbData, key, action);
+  //for (auto& [cameraId, multiOrbView] : multiOrbViews){
+  //  auto level = onModeOrbSelect(multiOrbView, selectedOrb);
+  //  if (level.has_value()){
+  //    goToLevel(level.value());
+  //    modassert(false, "go to level from orb called");
+  //  }
+  //}
  
   if (isJumpKey(key) && action == 1){
     gameapi -> sendNotifyMessage("advance", true);

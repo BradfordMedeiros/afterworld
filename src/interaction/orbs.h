@@ -83,7 +83,7 @@ struct LevelOrbNavInfo {
 	std::optional<int> maxCompletedIndex;
 };
 struct MultiOrbView {
-	std::vector<std::string> orbLayers = { "testorb", "testorb3", "metaworld" };
+	std::vector<std::string> orbLayers = { "testorb", "testorb3"};
 	int activeLayer = 0;
 	std::string activeWorldName;
 	std::optional<objid> orbCameraId;
@@ -91,6 +91,9 @@ struct MultiOrbView {
 
 void setToMultiOrbView(objid cameraId);
 void removeCameraFromMultiOrbView(objid cameraId);
+void prevOrb(MultiOrbView& multiOrbView);
+void nextOrb(MultiOrbView& multiOrbView);
+
 bool isOverworld(MultiOrbView& multiOrbView);
 
 void goToOverWorld(MultiOrbView& multiOrbView);
@@ -107,21 +110,5 @@ struct WorldOrbInfos {
 };
 std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView);
 
-
-struct OrbSelection {
-	objid cameraId;
-	std::optional<Orb*> currentOrb;
-	OrbView* orbView;
-	OrbUi* orbUi;
-	bool moveLeftNoSpace= false;
-	bool moveRightNoSpace = false;
-
-	bool moveLeftKey = false;
-	bool moveRightKey = false;
-	bool selectKey = false;
-	bool optionKey = false;
-};	
-std::vector<OrbSelection> handleOrbControls(OrbData& orbData, int key, int action);
-std::optional<std::string> onModeOrbSelect(MultiOrbView& multiOrbView, std::vector<OrbSelection>& selectedOrbs);
 
 #endif 

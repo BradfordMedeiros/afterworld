@@ -504,6 +504,21 @@ GameTypeInfo getBallMode(){
 	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
 	  		goToOverWorld(*multiOrbViewPtr);
 	  	}
+	  	if (key == 'T' && action == 1){
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		nextOrb(*multiOrbViewPtr);
+	  	}
+	  	if (key == 'Y' && action == 1){
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		prevOrb(*multiOrbViewPtr);
+	  	}
+	  	if (key == 'U'){
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		auto level = getSelectedLevel(*multiOrbViewPtr);
+	  		if (level.has_value()){
+	  			goToLevel(level.value());
+	  		}
+	  	}
 	  	
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },
