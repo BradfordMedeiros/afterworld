@@ -54,6 +54,6 @@ struct CutsceneOption {
   bool hasAlreadyPlayed = false;
 };
 extern std::unordered_map<std::string, CutsceneOption> cutsceneDatas;
-std::function<void(EasyCutscene&)> simpleNarratedMovement(std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish);
+std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish);
 
 #endif

@@ -272,6 +272,18 @@ std::unordered_map<std::string, CutsceneOption> cutsceneDatas {
 			.rail = "cutscene1-rail",
 			.letterbox = "Nothing to Be Afraid Of",
 	}},
+	{ "testorb2", CutsceneOption {
+			.text = { "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else.", "More Text", "This is Even More Text So\nHello" },
+			.rail = "cutscene1-rail",
+			.letterbox = "Nothing to Be Afraid Of",
+	}},
+
 	{ "testorb3", CutsceneOption {
 			.text = { "This is the first page of text", "This is second page of text", "This is third page of text" },
 			.rail = "cutscene1-rail",
@@ -286,7 +298,7 @@ struct CutsceneIntroData {
 	int railLengthMs;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement(std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
+std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
 	auto& cutsceneData = cutsceneDatas.at(option);
  	auto text = cutsceneData.text;
  	auto rail = cutsceneData.rail;
@@ -304,18 +316,17 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(std::string option, st
 
   	if (initialize(cutscene)){
     	//glm::vec3 initialPos = glm::vec3(0.f, 10.f, 0.f);
-    	auto cameraId = findObjByShortName(">menu-view", std::nullopt);
-  		auto initialPos = position.has_value() ? position.value() : gameapi -> getGameObjectPos(cameraId.value(), true, "[gamelogic] - ballIntroOpening pos");
-    	auto initialRot = gameapi -> getGameObjectRotation(cameraId.value(), true, "[gamelogic] - ballIntroOpening");
+  		auto initialPos = position.has_value() ? position.value() : gameapi -> getGameObjectPos(cameraId, true, "[gamelogic] - ballIntroOpening pos");
+    	auto initialRot = gameapi -> getGameObjectRotation(cameraId, true, "[gamelogic] - ballIntroOpening");
 
   		CutsceneIntroData ballIntroData {
     		.showText = true,
     		.initialPos = initialPos,
-    		.cameraId = cameraId.value(),
+    		.cameraId = cameraId,
     		.railLengthMs = 0,
     	};
 
-    	gameapi -> setGameObjectPosition(cameraId.value(), initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
+    	gameapi -> setGameObjectPosition(cameraId, initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
 
 			auto railId = railIdForName(rail);
 
@@ -332,7 +343,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(std::string option, st
 				ballIntroData.railLengthMs = railTotalTimeMs;
 
 				std::cout << std::endl;
-				addManagedRailMovement(cameraId.value(), railId.value(), initialPos, initialRot);
+				addManagedRailMovement(cameraId, railId.value(), initialPos, initialRot);
 			}
     	store(cutscene, ballIntroData);
     	showLetterBox(letterboxText, 10.f);

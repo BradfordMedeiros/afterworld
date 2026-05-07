@@ -15,7 +15,6 @@ void inputOverride(bool paused, bool showMouse);
 void inputOverride();
 bool isReloadKey(int button);
 void handleRemoveKillplaneCollision(objid);
-void stopRotate(objid id);
 
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
@@ -117,24 +116,64 @@ void drawDescInfo2(DescInfo2& descInfo){
 	}
 }
 
+objid ensureTempCamera(objid sceneId){
+	std::string cameraName = ">tempcamera-ball";
+  auto cameraId = findObjByShortName(cameraName, sceneId);
+  if (cameraId.has_value()){
+  	return cameraId.value();
+  }
 
+  GameobjAttributes attr {.attr = {} };
+	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+ 	auto camera = gameapi -> makeObjectAttr(sceneId, cameraName, attr, submodelAttributes);  
+ 	modassert(camera.has_value(), "could not create tempcamera");
+ 	return camera.value();
+}
 
-/// 
 
 void ballStartGameplay(EasyCutscene& cutscene){
+	struct BallStartData {
+		bool cutsceneFinished = false;
+	};
+
   if (initialize(cutscene)){
     setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
+    BallStartData startData {};
+    store(cutscene, startData);
   }
   if (finalize(cutscene)){
   }
 
+
   waitUntil(cutscene, 0, 500);
   run(cutscene, 1, []() -> void {
-    showLetterBox("Learning to Roll", 10.f);
+    showLetterBox("I swear, haven't I been here before?", 10.f);
   });
-  run(cutscene, 2, []() -> void {
+
+
+  run(cutscene, 2, [&cutscene]() -> void {
+  		auto sceneId = gameapi -> listSceneId(getEntityForPlayerIndex(0).value());
+  		setTempCamera(ensureTempCamera(sceneId), 0);
+
+ 			playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), "testorb2", glm::vec3(0.f, 10.f, 0.f), false, [&cutscene]() -> void { 
+		  BallStartData* startData = getStorage<BallStartData>(cutscene);
+		  modassert(startData, "ballStartGameplay startData is null");
+		  startData -> cutsceneFinished = true;
+		}), std::nullopt);
+  });
+
+	waitFor(cutscene, 3, [&cutscene]() -> bool {
+	  BallStartData* startData = getStorage<BallStartData>(cutscene);
+		modassert(startData, "ballStartGameplay startData is null");
+		return startData -> cutsceneFinished;
+	});
+
+
+  run(cutscene, 4, []() -> void {
     setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
   });
+
+
 }
 void ballEndGameplay(EasyCutscene& cutscene){
 	if (initialize(cutscene)){
@@ -292,8 +331,9 @@ void ballModeNewGame2(objid sceneId){
   inputOverride(false, false);
 	changeUiMode(UiModeNone{});
 
-  auto currentCutscene = playCutscene(simpleNarratedMovement("testorb", glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { ballModeSetPlayMode(sceneId); }), std::nullopt);
+  auto currentCutscene = playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), "testorb", glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { ballModeSetPlayMode(sceneId); }), std::nullopt);
 }
+
 
 
 void startBallIntroMode(objid sceneId){	
@@ -492,31 +532,31 @@ GameTypeInfo getBallMode(){
 
 	  	}
 
- 		  auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
+ 		  auto cameraId = ensureTempCamera(ballMode.sceneId);
 	  	if (isToggleThirdPersonKey(key) && action == 0){
 	  		//ballMode.didLose = true;
 	  		//auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 	  		//createExplosion(position, 5.f, 0.f);
 	  		setTempCamera(std::nullopt, 0);
-	  		removeCameraFromMultiOrbView(cameraId.value());
+	  		removeCameraFromMultiOrbView(cameraId);
 	  	}
 
 	  	if (key == 'I' && action == 1){
 	  		//ballMode.levelSelect = false;
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
 	  		auto inOverWorld = isOverworld(*multiOrbViewPtr);
 	  		goToOverWorld(*multiOrbViewPtr, !inOverWorld);
 	  	}
 	  	if (key == 'T' && action == 1){
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
 	  		nextOrb(*multiOrbViewPtr);
 	  	}
 	  	if (key == 'Y' && action == 1){
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
 	  		prevOrb(*multiOrbViewPtr);
 	  	}
 	  	if (key == 'U'){
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
+	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
 	  		auto level = getSelectedLevel(*multiOrbViewPtr);
 	  		if (level.has_value()){
 	  			goToLevel(level.value());
@@ -531,14 +571,13 @@ GameTypeInfo getBallMode(){
 	  	BallModeOptions& ballMode = *ballModePtr;
 
 	  	if (ballMode.shouldChangeToOrb){
-	  		auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
+	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
 
 	  		auto viewTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
 				auto viewPosition = viewTransform.position;
 				auto viewRot = viewTransform.rotation;
-				stopRotate(cameraId.value());
-		  	gameapi -> setGameObjectPosition(cameraId.value(), viewPosition, true, Hint { .hint = "[gamelogic] - ball set pos" });
-		  	gameapi -> setGameObjectRot(cameraId.value(), viewRot, true, Hint { .hint = "[gamelogic] - ball set pos" });
+		  	gameapi -> setGameObjectPosition(cameraId, viewPosition, true, Hint { .hint = "[gamelogic] - ball set pos" });
+		  	gameapi -> setGameObjectRot(cameraId, viewRot, true, Hint { .hint = "[gamelogic] - ball set pos" });
 
 	  		ballMode.shouldChangeToOrb = false;
 	  		ballMode.didChangeToOrb = true;
@@ -546,9 +585,9 @@ GameTypeInfo getBallMode(){
 	  	}
 	  	if (ballMode.didChangeToOrb){
 	  		ballMode.didChangeToOrb = false;
-	  		auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
-   			setTempCamera(cameraId.value(), 0);
-				setToMultiOrbView(cameraId.value(), std::nullopt);
+	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
+   			setTempCamera(cameraId, 0);
+				setToMultiOrbView(cameraId, std::nullopt);
 
 				ballMode.levelSelect = true;
 				return;
