@@ -16,7 +16,6 @@ void startMode(GameMode& gameMode, objid sceneId){
 
   auto gamemodeFps = std::get_if<GameModeFps>(&gameMode);
   auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
-  auto gamemodeIntro = std::get_if<GameModeIntro>(&gameMode);
   auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
   auto gamemodeVideo = std::get_if<GameModeVideo>(&gameMode);
   if (gamemodeFps){
@@ -24,9 +23,6 @@ void startMode(GameMode& gameMode, objid sceneId){
     startFpsMode(sceneId, gamemodeFps -> player, gamemodeFps -> makePlayer);
   }else if (gamemodeBall){
     startBallMode(sceneId);
-  }else if (gamemodeIntro){
-    changeUiMode(UiModeNone{});
-    startIntroMode(sceneId);
   }else if (gamemodeNone){
   	// do nothing
     changeUiMode(UiModeNone{});
@@ -46,11 +42,6 @@ void stopMode(GameMode& gameMode){
   auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
   if (gamemodeBall){
     endBallMode();
-  }
-
-  auto gamemodeIntro = std::get_if<GameModeIntro>(&gameMode);
-  if (gamemodeIntro){
-    endIntroMode();
   }
 
   auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);

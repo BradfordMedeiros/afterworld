@@ -3,33 +3,39 @@
 bool isLevelComplete(std::string);
 
 struct OrbMappingValue {
-	std::string text;
 	std::string level;
 };
 std::unordered_map<std::string, OrbMappingValue> nameToOrbMapping {
 	{ "one", OrbMappingValue { 
-			.text = "this is dev",
 			.level = "dev",
 		}
 	},
 	{ "two", OrbMappingValue { 
-			.text = "this is video",
 			.level = "video",
 		}
 	},
 	{ "three", OrbMappingValue { 
-			.text = "this is video (again)",
 			.level = "video",
 		}
 	},
 	{ "testorb", OrbMappingValue { 
-			.text = "this testorb",
 			.level = "testorb",
 		}
 	},
 	{ "testorb3", OrbMappingValue { 
-			.text = "this testorb 3",
 			.level = "testorb3",
+		}
+	},
+	{ "w1", OrbMappingValue { 
+			.level = "dev",
+		}
+	},
+	{ "dev", OrbMappingValue { 
+			.level = "dev",
+		}
+	},
+	{ "video", OrbMappingValue { 
+			.level = "dev",
 		}
 	},
 };
@@ -59,7 +65,7 @@ std::vector<OrbUi> createOrbUi2(objid id, std::vector<OrbDataConfig>& orbDatas, 
 			if (orbDatas.at(i).orbUi != orbUiName){
 				continue;
 			}
-			modassert(nameToOrbMapping.find(orbDatas.at(i).level) != nameToOrbMapping.end(), "no mapping for orbui level");
+			modassert(nameToOrbMapping.find(orbDatas.at(i).level) != nameToOrbMapping.end(), std::string("no mapping for orbui level: ") + orbDatas.at(i).level);
 			auto& orbMappingValue = nameToOrbMapping.at(orbDatas.at(i).level);
 			auto level = orbMappingValue.level;
 			Orb orb {
@@ -67,7 +73,6 @@ std::vector<OrbUi> createOrbUi2(objid id, std::vector<OrbDataConfig>& orbDatas, 
 				.position = orbDatas.at(i).pos,
 				.rotation = orbDatas.at(i).rotation,
 				.tint = glm::vec4(1.f, 0.f, 1.f, 1.f),
-				.text = orbMappingValue.text,
 				.mesh = std::nullopt,
 				.level = orbMappingValue.level,
 				.image = std::nullopt,

@@ -149,9 +149,9 @@ void handleOrbViews(OrbData& orbData){
 			//gameapi -> drawRect(-0.5f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
 			gameapi -> drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, opacity), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
 		}
-		if (targetOrb.value() -> text != ""){
-			gameapi -> drawText(targetOrb.value() -> text, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-		}
+		
+		gameapi -> drawText(targetOrb.value() -> level, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+		
 
 		auto orbPosition = getOrbPosition(orbUi, objView.actualIndex);
 		auto orbRotation = getOrbRotation(orbUi, objView.actualIndex);
@@ -345,39 +345,19 @@ std::string print(Orb& orb){
 
 ///////// MULTIORB VIEW  ///////////////////////////
 
-LevelOrbNavInfo getLevelOrbInfo(MultiOrbView& multiOrbView){
-  auto cameraId = multiOrbView.orbCameraId.value();
-  
-  auto& orbLayer = multiOrbView.orbLayers.at(multiOrbView.activeLayer);
-  auto orbUi = orbUiByName(orbLayer);
-  auto orbIndex = getActiveOrbViewIndex(cameraId);
 
-  auto metaworldIndex = getMaxCompleteOrbIndex(*orbUi.value());
-  if (orbLayer == "metaworld"){
-    auto& orbs = orbUi.value() -> orbs;
-    for (auto& orb : orbs){
-      if (orb.level == multiOrbView.activeWorldName){
-        metaworldIndex = orb.index;
-      }
-    }
-  }
-
-  return LevelOrbNavInfo {
-    .orbUi = orbLayer,
-    .orbIndex = orbIndex,
-    .maxCompletedIndex = orbLayer == "metaworld" ? metaworldIndex : getMaxCompleteOrbIndex(*orbUi.value()),
-  };
-}
-
-void setToMultiOrbView(objid cameraId){
+void setToMultiOrbView(objid cameraId, std::optional<std::string> world){
   multiOrbViews[cameraId] = MultiOrbView{};
   MultiOrbView& multiOrbView = multiOrbViews.at(cameraId);
 
-  multiOrbView.activeLayer = 0;
   multiOrbView.orbCameraId = cameraId;
+  multiOrbView.onOverworld = !world.has_value();
 
-  auto levelNavInfo = getLevelOrbInfo(multiOrbView);
-  setCameraToOrbView(cameraId, levelNavInfo.orbUi, levelNavInfo.maxCompletedIndex, 1.f);
+  auto orbLayer = world.has_value() ? world.value() : "metaworld";
+  auto orbUi = orbUiByName(orbLayer);
+  auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
+
+  setCameraToOrbView(cameraId, orbLayer, maxCompletedIndex, 1.f);
 }
 
 void removeCameraFromMultiOrbView(objid cameraId){
@@ -403,27 +383,47 @@ void nextOrb(MultiOrbView& multiOrbView){
 }
 
 bool isOverworld(MultiOrbView& multiOrbView){
-  return multiOrbView.activeLayer == (multiOrbView.orbLayers.size() - 1);
+  return multiOrbView.onOverworld;
 }
 
-void goToOverWorld(MultiOrbView& multiOrbView){
-  multiOrbView.activeWorldName = multiOrbView.orbLayers.at(multiOrbView.activeLayer);
-  multiOrbView.activeLayer = multiOrbView.orbLayers.size() - 1;
+void goToOverWorld(MultiOrbView& multiOrbView, bool onOverworld){
+	bool currentState = multiOrbView.onOverworld;
+ 	multiOrbView.onOverworld = onOverworld;
+ 	if (currentState != multiOrbView.onOverworld){
+ 		if (multiOrbView.onOverworld){
+			auto currentWorld = orbUiForMultiview(multiOrbView).value() -> name;
+			std::optional<int> targetIndex;
+   		auto orbUi = orbUiByName("metaworld");
+			for (auto& orb : orbUi.value() -> orbs){
+				if (orb.level == currentWorld){
+					targetIndex = orb.index;
+				}
+			}
+			modassert(targetIndex.has_value(), "goToOverWorld no target index");
+  		setCameraToOrbView(multiOrbView.orbCameraId.value(), "metaworld", targetIndex.value(), 1.f);  // this orb needs to be the one coming from
+ 		}else{
+ 			std::optional<Orb*> orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
+ 			auto worldOrbUi = orb.value() -> level;
+
+		  auto orbLayer = worldOrbUi;
+   		auto orbUi = orbUiByName(orbLayer);
+   		std::cout << "orblayer: " << orbLayer << std::endl;
+  		auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
+  		setCameraToOrbView(multiOrbView.orbCameraId.value(), orbLayer, maxCompletedIndex, 1.f);  // this orb needs to be the one coming from
+
+ 		}
+ 	}
 }
 
 
 std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView){
-  if (isOverworld(multiOrbView)){
-    return std::nullopt;
+  if (multiOrbView.onOverworld){
+  	return std::nullopt;
   }
-
   if (!multiOrbView.orbCameraId.has_value()){
     return std::nullopt;
   }
   std::optional<Orb*> orb = selectedOrbForCamera(multiOrbView.orbCameraId.value());
-  if (!orb.has_value()){
-    return std::nullopt;
-  }
   return orb.value() -> level;
 }
 
@@ -435,21 +435,12 @@ std::optional<MultiOrbView*> multiorbViewByCamera(objid cameraId){
 }
 
 
-std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex){
-  auto levelOrbInfo = getLevelOrbInfo(multiOrbView);
-  auto orbIndex = levelOrbInfo.orbIndex;
-  *_orbIndex = orbIndex;
-
-  auto orbUiPtr = orbUiByName(levelOrbInfo.orbUi);
-  auto& orbUi = *orbUiPtr.value();  
-  return &orbUi;
-}
-
-
 std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView){
 	std::vector<WorldOrbInfos> worldOrbInfos;
-	std::optional<int> orbIndex = 0;
-	auto& orbUi = *currentMultiOrbUi(multiOrbView, &orbIndex).value();
+
+  auto orbUi = *orbUiForMultiview(multiOrbView).value();
+  auto orbIndex = getActiveOrbViewIndex(multiOrbView.orbCameraId.value());
+
 	for (int i = 0; i < orbUi.orbs.size(); i++){
 	  auto& orb = orbUi.orbs.at(i);
 	  auto isComplete = orb.getOrbProgress().complete;

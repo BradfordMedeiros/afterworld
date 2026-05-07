@@ -307,8 +307,11 @@ void startBallIntroMode(objid sceneId){
 	//	currentCutscene = std::nullopt;
 	//}
   auto cameraId = findObjByShortName(">menu-view", sceneId);
-	removeCameraFromMultiOrbView(cameraId.value());
-  setTempCamera(cameraId.value(), 0);
+  if (cameraId.has_value()){
+		removeCameraFromMultiOrbView(cameraId.value());
+	  setTempCamera(cameraId.value(), 0);  	
+  }
+
 
   inputOverride(false, true);
   changeUiMode(LiveMenu {
@@ -328,7 +331,7 @@ void startBallIntroMode(objid sceneId){
 
 
 void startBallMode(objid sceneId){
-  auto hasLevelSelect = gameapi -> getObjectsByAttr("levelselect", std::nullopt, std::nullopt).size() > 0;
+  auto hasLevelSelect = gameapi -> getObjectsByAttr("levelselect", std::nullopt, sceneId).size() > 0;
 
   if (hasLevelSelect){
   	startBallIntroMode(sceneId);
@@ -499,10 +502,11 @@ GameTypeInfo getBallMode(){
 	  		removeCameraFromMultiOrbView(cameraId.value());
 	  	}
 
-	  	if (key == 'I'){
-	  		ballMode.levelSelect = false;
+	  	if (key == 'I' && action == 1){
+	  		//ballMode.levelSelect = false;
 	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
-	  		goToOverWorld(*multiOrbViewPtr);
+	  		auto inOverWorld = isOverworld(*multiOrbViewPtr);
+	  		goToOverWorld(*multiOrbViewPtr, !inOverWorld);
 	  	}
 	  	if (key == 'T' && action == 1){
 	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId.value()).value();
@@ -545,7 +549,8 @@ GameTypeInfo getBallMode(){
 	  		ballMode.didChangeToOrb = false;
 	  		auto cameraId = findObjByShortName(">menu-view", ballMode.sceneId);
    			setTempCamera(cameraId.value(), 0);
-				setToMultiOrbView(cameraId.value());
+				setToMultiOrbView(cameraId.value(), std::nullopt);
+
 				ballMode.levelSelect = true;
 				return;
 	  	}

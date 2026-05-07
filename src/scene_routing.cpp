@@ -76,9 +76,6 @@ GameMode gamemodeByShortcutName(std::string shortcut){
       if (modeStr == "ball"){
         return GameModeBall{};
       }
-      if (modeStr == "intro"){
-        return GameModeIntro{};
-      }
       if (modeStr == "video"){
         return GameModeVideo{};
       }

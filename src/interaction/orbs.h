@@ -31,7 +31,6 @@ struct Orb {
 	glm::vec3 position;
 	glm::quat rotation;
 	glm::vec4 tint;
-	std::string text;
 	std::optional<std::string> mesh;
 	std::string level;
 	std::optional<std::string> image;
@@ -77,29 +76,20 @@ std::string print(Orb& orb);
 
 
 //// multi view
-struct LevelOrbNavInfo {
-	std::string orbUi;
-	std::optional<int> orbIndex;
-	std::optional<int> maxCompletedIndex;
-};
 struct MultiOrbView {
-	std::vector<std::string> orbLayers = { "testorb", "testorb3"};
-	int activeLayer = 0;
-	std::string activeWorldName;
 	std::optional<objid> orbCameraId;
+	bool onOverworld;
 };
 
-void setToMultiOrbView(objid cameraId);
+void setToMultiOrbView(objid cameraId, std::optional<std::string> world);
 void removeCameraFromMultiOrbView(objid cameraId);
 void prevOrb(MultiOrbView& multiOrbView);
 void nextOrb(MultiOrbView& multiOrbView);
 
 bool isOverworld(MultiOrbView& multiOrbView);
 
-void goToOverWorld(MultiOrbView& multiOrbView);
+void goToOverWorld(MultiOrbView& multiOrbView, bool onOverworld);
 
-
-std::optional<OrbUi*> currentMultiOrbUi(MultiOrbView& multiOrbView, std::optional<int>* _orbIndex);
 std::optional<std::string> getSelectedLevel(MultiOrbView& multiOrbView);
 std::optional<MultiOrbView*> multiorbViewByCamera(objid cameraId);
 

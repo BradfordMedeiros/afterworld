@@ -37,7 +37,7 @@ void playMaterialSound(SoundData& sound, int32_t sceneId, glm::vec3 position, st
 void onCollisionEnterSound(SoundData& sound, int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos){
   std::string material = "wood";
   auto clip = getClipForMaterial(sound, material);
-  if (clip){
+  if (false && clip){
     playGameplayClip(std::string("&material-" + material), sceneId, std::nullopt, pos);
     auto vel1 = getGameObjectVelocity(obj1);;
     auto vel2 = getGameObjectVelocity(obj2);;
