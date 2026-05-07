@@ -7,6 +7,8 @@
 #floor:rotation:0 -1 1.19209e-07 180.04
 #floor:scale:100 100 10
 
+levelselect:levelselect:true
+
 >camera-view:position:10 5.1 2
 
 >menu-view:rotation:0.984808 -1.24095e-08 -0.173648 0
@@ -25,9 +27,6 @@
 #levelselect:scale:5 5 5
 #levelselect:position:50 50 -50
 
-playerspawn:playerspawn:true
-playerspawn:teleport:true
-playerspawn:position:0 20 20
 
 arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
 arcade:scale:1 1 1
@@ -41,10 +40,14 @@ twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
 
 ##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.map
 
+entity_worldspawn_0:rotation:1 0 -5.96047e-08 0.0395647
 entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.brush
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
 entity_worldspawn_0:position:0 0 0
+
+playerspawn:rotation:1 0 -5.96047e-08 0.0395647
+playerspawn:position:-37.6 0.8 13.6
 
 
 combined_entities_rail:rail:true
@@ -53,9 +56,11 @@ combined_entities_rail:data-rot:0 0 0,0 0 0
 combined_entities_rail:data-name:cutscene1-rail,cutscene1-rail
 combined_entities_rail:data-index:0,1
 combined_entities_rail:data-time:0,10
+combined_entities_rail:data-visual:,
 combined_entities_orb:orbui:true
-combined_entities_orb:data-pos:-24.8 0.8 -0.8,-24.8 1.6 -32.8,26.4 6.4 -0.8
-combined_entities_orb:data-rot:0 0 0,0 0 0,0 90 0
-combined_entities_orb:data-conn:1.2,,0
-combined_entities_orb:data-name:one,two,three
-combined_entities_orb:data-level:one,two,one
+combined_entities_orb:data-pos:-24.8 0.8 -0.8,4 3.2 -5.6,208.8 2.4 72.8,-12 50.4 56.8,186.4 50.4 92
+combined_entities_orb:data-rot:0 0 0,45 0 -45,0 0 0,0 0 -45,0 0 -45
+combined_entities_orb:data-conn:1,,,4,
+combined_entities_orb:data-name:w1-1,w1-2,one,meta1,meta2
+combined_entities_orb:data-orbui:w1,w1,testorb3,metaworld,metaworld
+combined_entities_orb:data-level:dev,video,one,w1,testorb3

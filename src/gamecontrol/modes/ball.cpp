@@ -255,20 +255,19 @@ void ballModeSetPlayMode(objid sceneId){
     goToLevel("ballselect");
 	});
   
-  //modassert(false, "gamemode ball not implemented");
-  auto playerLocationObj = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
-  glm::vec3 position = gameapi -> getGameObjectPos(playerLocationObj, true, "[gamelogic] startLevel get player spawnpoint");
-    
+
+	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
+	modassert(playerSpawnId.has_value(), "ballModeSetPlayMode - cannot find playerspawn");
+	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
+
   // TODO - no reason to actually create the prefab here
-  auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  position, {});    
+  auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  playerSpawnPosition, {});    
   auto playerId = findObjByShortName("maincamera", sceneId);
   modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
   setEntityForPlayerIndex(playerId.value(), 0);
 
   //////////
 
-	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
-	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
 
 	auto ballId = createBallObj(sceneId, playerSpawnPosition);
 
