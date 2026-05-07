@@ -131,6 +131,38 @@ objid ensureTempCamera(objid sceneId){
 }
 
 
+std::unordered_map<std::string, CutsceneOption> cutsceneDatas {
+	{ "testorb", CutsceneOption {
+			.text = { "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else." },
+			.rail = "cutscene1-rail",
+			.letterbox = "Nothing to Be Afraid Of",
+	}},
+	{ "testorb2", CutsceneOption {
+			.text = { "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else.", "More Text", "This is Even More Text So\nHello0", "Wow", "Go", "cool" },
+			.rail = "cutscene1-rail",
+			.letterbox = "Nothing to Be Afraid Of",
+	}},
+
+	{ "testorb3", CutsceneOption {
+			.text = { "This is the first page of text", "This is second page of text", "This is third page of text" },
+			.rail = "cutscene1-rail",
+			.letterbox = "Abstract Geometry",
+	}},
+};
+
+
 void ballStartGameplay(EasyCutscene& cutscene){
 	struct BallStartData {
 		bool cutsceneFinished = false;
@@ -155,11 +187,12 @@ void ballStartGameplay(EasyCutscene& cutscene){
   		auto sceneId = gameapi -> listSceneId(getEntityForPlayerIndex(0).value());
   		setTempCamera(ensureTempCamera(sceneId), 0);
 
- 			playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), "testorb2", glm::vec3(0.f, 10.f, 0.f), false, [&cutscene]() -> void { 
-		  BallStartData* startData = getStorage<BallStartData>(cutscene);
-		  modassert(startData, "ballStartGameplay startData is null");
-		  startData -> cutsceneFinished = true;
-		}), std::nullopt);
+ 			playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), cutsceneDatas.at("testorb2"), glm::vec3(0.f, 10.f, 0.f), false, [&cutscene]() -> void { 
+		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
+		  	modassert(startData, "ballStartGameplay startData is null");
+		  	startData -> cutsceneFinished = true;
+   			setTempCamera(std::nullopt, 0);
+			}), std::nullopt);
   });
 
 	waitFor(cutscene, 3, [&cutscene]() -> bool {
@@ -321,17 +354,13 @@ void ballModeSetPlayMode(objid sceneId){
 }
 
 void ballModeNewGame2(objid sceneId){
-  for (auto& [_, cutscene] : cutsceneDatas){
-  	cutscene.hasAlreadyPlayed = false;
-  }
-
   resetProgress();
   playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
 
   inputOverride(false, false);
 	changeUiMode(UiModeNone{});
 
-  auto currentCutscene = playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), "testorb", glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { ballModeSetPlayMode(sceneId); }), std::nullopt);
+  auto currentCutscene = playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), cutsceneDatas.at("testorb"), glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { ballModeSetPlayMode(sceneId); }), std::nullopt);
 }
 
 

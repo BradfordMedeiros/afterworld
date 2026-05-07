@@ -260,36 +260,7 @@ void playCutsceneScript(objid ownerObjId, std::string cutsceneName){
 
 
 
-std::unordered_map<std::string, CutsceneOption> cutsceneDatas {
-	{ "testorb", CutsceneOption {
-			.text = { "I remember a nightmare I had as a child.\n\n"
-"A large pyramid\n"
-"moving slowly\n"
-"on a tilted plane.\n\n"
-"There was nothing.\n"
-"And yet,\n"
-"it terrified me more than anything else." },
-			.rail = "cutscene1-rail",
-			.letterbox = "Nothing to Be Afraid Of",
-	}},
-	{ "testorb2", CutsceneOption {
-			.text = { "I remember a nightmare I had as a child.\n\n"
-"A large pyramid\n"
-"moving slowly\n"
-"on a tilted plane.\n\n"
-"There was nothing.\n"
-"And yet,\n"
-"it terrified me more than anything else.", "More Text", "This is Even More Text So\nHello" },
-			.rail = "cutscene1-rail",
-			.letterbox = "Nothing to Be Afraid Of",
-	}},
 
-	{ "testorb3", CutsceneOption {
-			.text = { "This is the first page of text", "This is second page of text", "This is third page of text" },
-			.rail = "cutscene1-rail",
-			.letterbox = "Abstract Geometry",
-	}},
-};
 struct CutsceneIntroData {
 	bool showText;
 	glm::vec3 initialPos;
@@ -298,16 +269,12 @@ struct CutsceneIntroData {
 	int railLengthMs;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, std::string option, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
-	auto& cutsceneData = cutsceneDatas.at(option);
+std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, CutsceneOption cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
  	auto text = cutsceneData.text;
  	auto rail = cutsceneData.rail;
  	auto letterboxText = cutsceneData.letterbox;
 
- 	bool hasAlreadyPlayed = cutsceneData.hasAlreadyPlayed;
- 	cutsceneData.hasAlreadyPlayed = true;
-
-	return [text, rail, letterboxText, position, skipAnimation, hasAlreadyPlayed, onFinish](EasyCutscene& cutscene) -> void {
+	return [text, rail, letterboxText, position, skipAnimation, onFinish, cameraId](EasyCutscene& cutscene) -> void {
 		int index = -1;
 		auto getIndex = [&index]() -> int {
 			index++;
@@ -357,7 +324,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, std::s
   	  onFinish();
   	}
 
-  	if (skipAnimation || hasAlreadyPlayed){
+  	if (skipAnimation){
   		setCutsceneFinished(cutscene);
   	}
 
