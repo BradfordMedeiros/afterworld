@@ -45,12 +45,15 @@ T* getStorage(EasyCutscene& cutscene){
 void playCutsceneScript(objid ownerObjId, std::string cutsceneName);
 
 
-struct CutsceneOption {
-  std::vector<std::string> text;
+struct SimpleNarration {
+  std::string text;
+};
+struct NarratedMovement {
   std::string rail;
-  std::string letterbox;
+  std::optional<std::string> letterbox;
+  std::vector<SimpleNarration> narrations;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, CutsceneOption cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish);
+std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish);
 
 #endif

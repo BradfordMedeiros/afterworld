@@ -269,20 +269,9 @@ struct CutsceneIntroData {
 	int railLengthMs;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, CutsceneOption cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
- 	auto text = cutsceneData.text;
- 	auto rail = cutsceneData.rail;
- 	auto letterboxText = cutsceneData.letterbox;
-
-	return [text, rail, letterboxText, position, skipAnimation, onFinish, cameraId](EasyCutscene& cutscene) -> void {
-		int index = -1;
-		auto getIndex = [&index]() -> int {
-			index++;
-			return index;
-		};
-
+std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
+	return [cameraId, cutsceneData, position, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
   	if (initialize(cutscene)){
-    	//glm::vec3 initialPos = glm::vec3(0.f, 10.f, 0.f);
   		auto initialPos = position.has_value() ? position.value() : gameapi -> getGameObjectPos(cameraId, true, "[gamelogic] - ballIntroOpening pos");
     	auto initialRot = gameapi -> getGameObjectRotation(cameraId, true, "[gamelogic] - ballIntroOpening");
 
@@ -295,25 +284,41 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, Cutsce
 
     	gameapi -> setGameObjectPosition(cameraId, initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
 
-			auto railId = railIdForName(rail);
+			auto railId = railIdForName(cutsceneData.rail);
 
 			if (railId.has_value()){
 				auto rail = railForId(railId.value());
 			 	auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
-			 	std::cout << "cutscene: total length: " << railTotalTimeMs << std::endl;
+			 	std::cout << "simpleNarrate cutscene: total length: " << railTotalTimeMs << std::endl;
 
-				std::cout << "cutscene rail: ";
+				std::cout << "simpleNarrate cutscene rail: ";
 				for (auto& time : rail.value() -> times){
 					std::cout << time << " ";
 				}
+				std::cout << std::endl;
+
+				std::cout << "simpleNarrate cutscene text: ";
+				for (int i = 0; i < rail.value() -> times.size(); i++){
+					if (i < cutsceneData.narrations.size()){
+						std::cout << "[" << cutsceneData.narrations.at(i).text << "]" << " ";
+					}else{
+						std::cout << "[no narration]" << " ";
+					}
+				}
+				std::cout << std::endl;
+
+
 				ballIntroData.times = rail.value() -> times;
 				ballIntroData.railLengthMs = railTotalTimeMs;
 
 				std::cout << std::endl;
 				addManagedRailMovement(cameraId, railId.value(), initialPos, initialRot);
 			}
+			
     	store(cutscene, ballIntroData);
-    	showLetterBox(letterboxText, 10.f);
+    	if (cutsceneData.letterbox.has_value()){
+	    	showLetterBox(cutsceneData.letterbox.value(), ballIntroData.railLengthMs / 1000.f);
+    	}
   	}
 
   	CutsceneIntroData* introData = getStorage<CutsceneIntroData>(cutscene);
@@ -321,25 +326,28 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, Cutsce
 
   	if (finalize(cutscene)){
   		removeManagedRailMovement(introData -> cameraId);
+  		hideLetterBox();
+  		std::cout << "simpleNarrate finalize" << std::endl;
   	  onFinish();
   	}
 
-  	if (skipAnimation){
+  	if (skipAnimation || glfwGetKey(window, 'K')){
   		setCutsceneFinished(cutscene);
   	}
 
-  	if (glfwGetKey(window, 'K')){
-  		setCutsceneFinished(cutscene);
-  	}
-  
-  	for (int i = 0; i < (text.size() + 1); i++){
-  		auto textIndex = getIndex();
-  		waitUntil(cutscene, textIndex, i * 5000);
-  		if (i < text.size() && finished(cutscene, textIndex)){
-	  		gameapi -> drawText(text.at(i), 0.f + 0.1f, i * -0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	int index = 0;
+  	for (int i = 0; i < introData -> times.size(); i++){
+  		waitUntil(cutscene, index, introData -> times.at(i) * 1000);
+  		if (finished(cutscene, index) && !finished(cutscene, index + 1)){
+  			if (i < cutsceneData.narrations.size()){
+	  			auto text = cutsceneData.narrations.at(i).text;
+		  		gameapi -> drawText(text, 0.f + 0.1f, i * -0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  			}
   		}
+  		index++;
   	}
 
+ 		waitUntil(cutscene, index, introData -> railLengthMs);
 	};
 }
 
