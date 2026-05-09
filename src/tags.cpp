@@ -598,59 +598,72 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "rail",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
-	  	auto attrHandle = getAttrHandle(id);
+	  		auto attrHandle = getAttrHandle(id);
 
-	  	auto railData = getStrAttr(attrHandle, "data-pos");
-	  	modassert(railData.has_value(), "no data for rail");
+	  		auto railData = getStrAttr(attrHandle, "data-pos");
+	  		modassert(railData.has_value(), "no data for rail");
 			auto dataPositions = parseDataVec3(railData.value());
 	
-	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
-	  	modassert(railDataRot.has_value(), "no data for rail-rot");
-	  	auto dataRotations = parseDataVec3(railDataRot.value());
+	  		auto railDataRot = getStrAttr(attrHandle, "data-rot");
+	  		modassert(railDataRot.has_value(), "no data for rail-rot");
+	  		auto dataRotations = parseDataVec3(railDataRot.value());
 
-	  	auto railNamesRaw = getStrAttr(attrHandle, "data-name");
-	  	modassert(railNamesRaw.has_value(), "no name for rails");
-	  	auto railNames = parseDataString(railNamesRaw.value());
+	  		auto railNamesRaw = getStrAttr(attrHandle, "data-name");
+	  		modassert(railNamesRaw.has_value(), "no name for rails");
+	  		auto railNames = parseDataString(railNamesRaw.value());
 
-	  	auto railIndexsRaw = getStrAttr(attrHandle, "data-index");
-	  	modassert(railIndexsRaw.has_value(), "no index for rails");
-	  	std::vector<int> railIndexs;
-	  	for(auto& railIndexStr : split(railIndexsRaw.value(), ',')){
-	  		int railIndex = std::atoi(railIndexStr.c_str());
-	  		railIndexs.push_back(railIndex);
-	  	}
+	  		auto railIndexsRaw = getStrAttr(attrHandle, "data-index");
+	  		modassert(railIndexsRaw.has_value(), "no index for rails");
+	  		std::vector<int> railIndexs;
+	  		for(auto& railIndexStr : split(railIndexsRaw.value(), ',')){
+	  			int railIndex = std::atoi(railIndexStr.c_str());
+	  			railIndexs.push_back(railIndex);
+	  		}
 
-	  	auto railTimesRaw = getStrAttr(attrHandle, "data-time");
-	  	modassert(railTimesRaw.has_value(), "no time for rails");
-	  	std::vector<int> railTimes;
-	  	for(auto& railTimeStr : split(railTimesRaw.value(), ',')){
-	  		int railTime = std::atoi(railTimeStr.c_str());
-	  		railTimes.push_back(railTime);
-	  	}
+	  		auto railTimesRaw = getStrAttr(attrHandle, "data-time");
+	  		modassert(railTimesRaw.has_value(), "no time for rails");
+	  		std::vector<int> railTimes;
+	  		for(auto& railTimeStr : split(railTimesRaw.value(), ',')){
+	  			int railTime = std::atoi(railTimeStr.c_str());
+	  			railTimes.push_back(railTime);
+	  		}
 
-	  	auto railVisualizeRaw = getStrAttr(attrHandle, "data-visual");
-	  	modassert(railVisualizeRaw.has_value(), "no visual for rails");
-	  	auto railVisualizations = parseDataString(railVisualizeRaw.value());
+	  		auto railVisualizeRaw = getStrAttr(attrHandle, "data-visual");
+	  		modassert(railVisualizeRaw.has_value(), "no visual for rails");
+	  		auto railVisualizations = parseDataString(railVisualizeRaw.value());
+
+
+	  		auto railKeysStr = getStrAttr(attrHandle, "data-key");
+	  		modassert(railKeysStr.has_value(), "no railKeys for rails");
+	  		auto railKeys = parseDataString(railKeysStr.value());
+
+
 
 			std::vector<RailNode> nodes;
-	  	for (int i = 0; i < dataPositions.size(); i++){
-  		  auto railName = railNames.at(i);
-  		  auto railIndex = railIndexs.at(i);
-  		  auto railTime = railTimes.at(i);
-	  		auto posVec = dataPositions.at(i);
-	  		auto rotVec = dataRotations.at(i);
-	  		auto railVisual = railVisualizations.at(i);
-	  		nodes.push_back(RailNode {
-	  			.rail = railName,
-	  			.railIndex = railIndex,
-	  			.point = posVec,
-	  			.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
-	  			.time = railTime,
-	  			.visual = railVisual != "" ? railVisual : std::optional<std::string>(std::nullopt),
-	  		});
-	  	}
+	  		for (int i = 0; i < dataPositions.size(); i++){
+  		  		auto railName = railNames.at(i);
+  		  		auto railIndex = railIndexs.at(i);
+  		  		auto railTime = railTimes.at(i);
+	  			auto posVec = dataPositions.at(i);
+	  			auto rotVec = dataRotations.at(i);
+	  			auto railVisual = railVisualizations.at(i);
+	  			auto railKey = railKeys.at(i);
+	  			nodes.push_back(RailNode {
+	  				.rail = railName,
+	  				.railIndex = railIndex,
+	  				.point = posVec,
+	  				.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
+	  				.time = railTime,
+	  				.visual = railVisual != "" ? railVisual : std::optional<std::string>(std::nullopt),
+	  				.railKey = railKey != "" ? railKey : std::optional<std::string>(std::nullopt),
+	  			});
+	  		}
 
-	  	addRails(id, nodes);
+	  		for (auto& node : nodes){
+	  			std::cout << "simpleNarrate: node: " << node.rail << std::endl;
+	  		}
+
+	  		addRails(id, nodes);
 		},
   	    .onRemove = [](int32_t id) -> void {
   	    	removeRails(id);

@@ -130,7 +130,14 @@ objid ensureTempCamera(objid sceneId){
  	return camera.value();
 }
 
-
+std::optional<std::string> getRailName(){
+	std::string railName("levelintro");
+	auto rail = railIdForName(railName);
+	if (!rail.has_value()){
+		return std::nullopt;
+	}
+	return railName;
+}
 
 void ballStartGameplay(EasyCutscene& cutscene){
 	struct BallStartData {
@@ -147,22 +154,34 @@ void ballStartGameplay(EasyCutscene& cutscene){
 
   run(cutscene, 2, [&cutscene]() -> void {
   		auto sceneId = gameapi -> listSceneId(getEntityForPlayerIndex(0).value());
+
+  		auto rail = getRailName();
+  		if (!rail.has_value()){
+		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
+		  	modassert(startData, "ballStartGameplay startData is null");
+		  	startData -> cutsceneFinished = true;
+   			setTempCamera(std::nullopt, 0);
+   			return;
+  		}
+
   		setTempCamera(ensureTempCamera(sceneId), 0);
+  		
+  		std::vector<SimpleNarration> narrations;
+
+  		{
+  			auto railId = railIdForName(rail.value());
+  			auto& railPoints = *railForId(railId.value()).value();
+  			for (auto& key : railPoints.keys){
+  				narrations.push_back(SimpleNarration {
+  					.text = key.has_value() ? key.value() : "",
+  				});
+  			}
+  		}
 
   		NarratedMovement narratedMovement {
-  			.rail = "cutscene1-rail",
-  			//.letterbox = "Welcome to The World",
-  			.narrations = {
-  				SimpleNarration {
-  					.text = "this is the first part",
-  				},
-  				SimpleNarration {
-  					.text = "",
-  				},
-  				SimpleNarration {
-  					.text = "this is the third part",
-  				},
-  			},
+  			.rail = rail.value(),
+  			.letterbox = "Welcome to The World",
+  			.narrations = narrations,
   		};
  			playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), narratedMovement, glm::vec3(0.f, 10.f, 0.f), false, [&cutscene]() -> void { 
 		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
@@ -339,8 +358,8 @@ void ballModeNewGame2(objid sceneId){
 	changeUiMode(UiModeNone{});
 
   NarratedMovement narratedMovement {
-  	.rail = "cutscene1-rail",
-  	//.letterbox = "Welcome to The World",
+  	.rail = "intro",
+  	.letterbox = "Welcome to The World",
   	.narrations = {
   		SimpleNarration {
   			.text = "this is the first part",
@@ -353,8 +372,13 @@ void ballModeNewGame2(objid sceneId){
   		},
   	},
   };
+//
+  auto cameraId = ensureTempCamera(sceneId);
+	setTempCamera(cameraId, 0);
 
-  auto currentCutscene = playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), narratedMovement, glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { ballModeSetPlayMode(sceneId); }), std::nullopt);
+  auto currentCutscene = playCutscene(simpleNarratedMovement2(cameraId, narratedMovement, glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { 
+  		ballModeSetPlayMode(sceneId); 
+  }), std::nullopt);
 }
 
 

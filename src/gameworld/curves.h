@@ -29,6 +29,7 @@ struct LinePoints {
   std::vector<int> indexs;
   std::vector<int> times;
   std::vector<LinePointVisualize> visuals;
+  std::vector<std::optional<std::string>> keys;
 };
 
 struct RaceData {
@@ -50,12 +51,15 @@ struct RailNode {
   glm::quat rotation;
   int time;
   std::optional<std::string> visual;
+  std::optional<std::string> railKey;
 };
 void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);
 std::optional<objid> railIdForName(std::string name);
 std::optional<LinePoints*> railForId(objid id);
 int timeToTriggerIndex(LinePoints& line, std::optional<int> index);
+glm::vec3 initialRailPosition(LinePoints& line);
+glm::quat initialRailRotation(LinePoints& line);
 
 void drawAllCurves(objid ownerId);
 

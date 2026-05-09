@@ -124,10 +124,13 @@ void sortRail(LinePoints& line){
 }
 
 void addRails(objid ownerId, std::vector<RailNode>& railNodes){
-	auto railId = getUniqueObjId();
-
 	std::unordered_map<std::string, LinePoints> nameToRail;
 	for (auto& node : railNodes){
+		if (nameToRail.find(node.rail) != nameToRail.end()){
+			continue;
+		}
+
+		auto railId = getUniqueObjId();
 		auto railName = node.rail;
 		nameToRail[railName] = LinePoints {
 			.railId = railId,
@@ -137,6 +140,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 			.indexs = {},
 			.times = {},
 			.visuals = {},
+			.keys = {},
 		};
 	}
 
@@ -146,6 +150,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		rail.rotations.push_back(node.rotation);
 		rail.indexs.push_back(node.railIndex);
 		rail.times.push_back(node.time);
+		rail.keys.push_back(node.railKey);
 
 		if (!node.visual.has_value() || node.visual.value() == "none"){
 			rail.visuals.push_back(VISUALIZE_NONE);
@@ -173,6 +178,8 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		sortRail(rail);
 		rails.at(ownerId).push_back(rail);
 	}
+
+	std::cout << "simpleNarrate rail length: " << rails.size() << std::endl;
 }
 
 void removeRails(objid ownerId){
@@ -493,6 +500,14 @@ int timeToTriggerIndex(LinePoints& line, std::optional<int> index){
 	return 0;
 }
 
+glm::vec3 initialRailPosition(LinePoints& line){
+	return line.points.at(0);
+}
+
+glm::quat initialRailRotation(LinePoints& line){
+	return line.rotations.at(0);
+}
+
 struct RailSpeed {
 	float targetDistance;
 	float currentTimeFromStart;
@@ -654,7 +669,8 @@ void handleEntitiesRace(){
  	}
 }
 
-void addManagedRailMovement(objid idToMove, objid railId, glm::vec3 initialObjectPos, glm::quat initialObjectRot){
+void addManagedRailMovement(objid idToMove, objid railId, glm::vec3 initialObjectPos, glm::quat initialObjectRot){\
+	std::cout << "simpleNarrate addManagedRailMovement: " << railForId(railId).value() -> railName << std::endl;
 	managedRailMovements[idToMove] = ManagedRailMovement {
 		.railId = railId,
 		.initialObjectPos = initialObjectPos, 

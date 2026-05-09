@@ -255,12 +255,6 @@ void playCutsceneScript(objid ownerObjId, std::string cutsceneName){
 }
 
 
-///Below here are just default cutscene types, these should be generic probably 
-/////////////////
-
-
-
-
 struct CutsceneIntroData {
 	bool showText;
 	glm::vec3 initialPos;
@@ -272,8 +266,17 @@ struct CutsceneIntroData {
 std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
 	return [cameraId, cutsceneData, position, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
   	if (initialize(cutscene)){
+ 			auto railId = railIdForName(cutsceneData.rail);
+
   		auto initialPos = position.has_value() ? position.value() : gameapi -> getGameObjectPos(cameraId, true, "[gamelogic] - ballIntroOpening pos");
     	auto initialRot = gameapi -> getGameObjectRotation(cameraId, true, "[gamelogic] - ballIntroOpening");
+
+			if (railId.has_value()){
+				auto rail = railForId(railId.value());
+				initialPos = initialRailPosition(*rail.value());
+				initialRot = glm::identity<glm::quat>();
+			}
+
 
   		CutsceneIntroData ballIntroData {
     		.showText = true,
@@ -284,14 +287,18 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, Narra
 
     	gameapi -> setGameObjectPosition(cameraId, initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
 
-			auto railId = railIdForName(cutsceneData.rail);
+
+
+			std::cout << "simpleNarratedMovement2: " << cutsceneData.rail << std::endl;
 
 			if (railId.has_value()){
 				auto rail = railForId(railId.value());
 			 	auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
 			 	std::cout << "simpleNarrate cutscene: total length: " << railTotalTimeMs << std::endl;
 
-				std::cout << "simpleNarrate cutscene rail: ";
+			 	std::cout << "simpleNarrate name: " << rail.value() -> railName << std::endl;
+
+				/*std::cout << "simpleNarrate cutscene rail: ";
 				for (auto& time : rail.value() -> times){
 					std::cout << time << " ";
 				}
@@ -305,7 +312,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, Narra
 						std::cout << "[no narration]" << " ";
 					}
 				}
-				std::cout << std::endl;
+				std::cout << std::endl;*/
 
 
 				ballIntroData.times = rail.value() -> times;
@@ -341,7 +348,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, Narra
   		if (finished(cutscene, index) && !finished(cutscene, index + 1)){
   			if (i < cutsceneData.narrations.size()){
 	  			auto text = cutsceneData.narrations.at(i).text;
-		  		gameapi -> drawText(text, 0.f + 0.1f, i * -0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+		  		gameapi -> drawText(text, 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   			}
   		}
   		index++;
