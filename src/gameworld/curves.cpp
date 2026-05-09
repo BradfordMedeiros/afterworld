@@ -144,6 +144,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		};
 	}
 
+
 	for (auto& node : railNodes){
 		auto& rail = nameToRail.at(node.rail);
 		rail.points.push_back(node.point);
@@ -151,6 +152,18 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		rail.indexs.push_back(node.railIndex);
 		rail.times.push_back(node.time);
 		rail.keys.push_back(node.railKey);
+		RailInterpolation interpolation = INTERP_LINEAR;
+		if (node.interp.has_value()){
+			if (node.interp.value() == "none"){
+				interpolation = INTERP_NONE;
+			}else if (node.interp.value() == "linear"){
+				interpolation = INTERP_LINEAR;
+			}else{
+				modassert(false, std::string("iovalid interp type: ") + node.interp.value());
+			}
+		}
+
+		rail.interpTypes.push_back(interpolation);
 
 		if (!node.visual.has_value() || node.visual.value() == "none"){
 			rail.visuals.push_back(VISUALIZE_NONE);

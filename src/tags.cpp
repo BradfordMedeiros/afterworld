@@ -638,6 +638,9 @@ std::vector<TagUpdater> tagupdates = {
 	  		auto railKeys = parseDataString(railKeysStr.value());
 
 
+	  		auto railInterpStr = getStrAttr(attrHandle, "data-interp");
+	  		modassert(railInterpStr.has_value(), "no interp for rails");
+	  		auto railInterps = parseDataString(railInterpStr.value());
 
 			std::vector<RailNode> nodes;
 	  		for (int i = 0; i < dataPositions.size(); i++){
@@ -648,6 +651,7 @@ std::vector<TagUpdater> tagupdates = {
 	  			auto rotVec = dataRotations.at(i);
 	  			auto railVisual = railVisualizations.at(i);
 	  			auto railKey = railKeys.at(i);
+	  			auto railInterp = railInterps.at(i);
 	  			nodes.push_back(RailNode {
 	  				.rail = railName,
 	  				.railIndex = railIndex,
@@ -656,6 +660,7 @@ std::vector<TagUpdater> tagupdates = {
 	  				.time = railTime,
 	  				.visual = railVisual != "" ? railVisual : std::optional<std::string>(std::nullopt),
 	  				.railKey = railKey != "" ? railKey : std::optional<std::string>(std::nullopt),
+	  				.interp = railInterp != "" ? railInterp : std::optional<std::string>(std::nullopt),
 	  			});
 	  		}
 

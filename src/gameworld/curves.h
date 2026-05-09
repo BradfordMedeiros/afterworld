@@ -21,6 +21,7 @@ struct ManagedRailMovement {
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
 
 enum LinePointVisualize { VISUALIZE_NONE, VISUALIZE_LINE, VISUALIZE_CONN };
+enum RailInterpolation { INTERP_LINEAR, INTERP_NONE };
 struct LinePoints {
   objid railId;
   std::string railName;
@@ -30,6 +31,7 @@ struct LinePoints {
   std::vector<int> times;
   std::vector<LinePointVisualize> visuals;
   std::vector<std::optional<std::string>> keys;
+  std::vector<RailInterpolation> interpTypes;
 };
 
 struct RaceData {
@@ -52,6 +54,7 @@ struct RailNode {
   int time;
   std::optional<std::string> visual;
   std::optional<std::string> railKey;
+  std::optional<std::string> interp;
 };
 void addRails(objid ownerId, std::vector<RailNode>& railNodes);
 void removeRails(objid ownerId);

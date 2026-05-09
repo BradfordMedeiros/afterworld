@@ -263,20 +263,15 @@ struct CutsceneIntroData {
 	int railLengthMs;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, std::optional<glm::vec3> position, bool skipAnimation, std::function<void()> onFinish){
-	return [cameraId, cutsceneData, position, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
+std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish){
+	return [cameraId, cutsceneData, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
   	if (initialize(cutscene)){
  			auto railId = railIdForName(cutsceneData.rail);
-
-  		auto initialPos = position.has_value() ? position.value() : gameapi -> getGameObjectPos(cameraId, true, "[gamelogic] - ballIntroOpening pos");
-    	auto initialRot = gameapi -> getGameObjectRotation(cameraId, true, "[gamelogic] - ballIntroOpening");
-
-			if (railId.has_value()){
-				auto rail = railForId(railId.value());
-				initialPos = initialRailPosition(*rail.value());
-				initialRot = glm::identity<glm::quat>();
-			}
-
+ 			modassert(railId.has_value(), "simpleNarratedMovement2 no rail id");
+			auto rail = railForId(railId.value());
+  		auto initialPos = initialRailPosition(*rail.value());
+    	auto initialRot = glm::identity<glm::quat>();
+			auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
 
   		CutsceneIntroData ballIntroData {
     		.showText = true,
@@ -287,40 +282,11 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, Narra
 
     	gameapi -> setGameObjectPosition(cameraId, initialPos, true, Hint { .hint = "[gamelogic] - ballIntroOpening" });
 
+			ballIntroData.times = rail.value() -> times;
+			ballIntroData.railLengthMs = railTotalTimeMs;
 
-
-			std::cout << "simpleNarratedMovement2: " << cutsceneData.rail << std::endl;
-
-			if (railId.has_value()){
-				auto rail = railForId(railId.value());
-			 	auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
-			 	std::cout << "simpleNarrate cutscene: total length: " << railTotalTimeMs << std::endl;
-
-			 	std::cout << "simpleNarrate name: " << rail.value() -> railName << std::endl;
-
-				/*std::cout << "simpleNarrate cutscene rail: ";
-				for (auto& time : rail.value() -> times){
-					std::cout << time << " ";
-				}
-				std::cout << std::endl;
-
-				std::cout << "simpleNarrate cutscene text: ";
-				for (int i = 0; i < rail.value() -> times.size(); i++){
-					if (i < cutsceneData.narrations.size()){
-						std::cout << "[" << cutsceneData.narrations.at(i).text << "]" << " ";
-					}else{
-						std::cout << "[no narration]" << " ";
-					}
-				}
-				std::cout << std::endl;*/
-
-
-				ballIntroData.times = rail.value() -> times;
-				ballIntroData.railLengthMs = railTotalTimeMs;
-
-				std::cout << std::endl;
-				addManagedRailMovement(cameraId, railId.value(), initialPos, initialRot);
-			}
+			std::cout << std::endl;
+			addManagedRailMovement(cameraId, railId.value(), initialPos, initialRot);
 			
     	store(cutscene, ballIntroData);
     	if (cutsceneData.letterbox.has_value()){

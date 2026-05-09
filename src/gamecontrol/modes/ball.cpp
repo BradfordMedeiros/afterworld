@@ -183,7 +183,7 @@ void ballStartGameplay(EasyCutscene& cutscene){
   			.letterbox = "Welcome to The World",
   			.narrations = narrations,
   		};
- 			playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), narratedMovement, glm::vec3(0.f, 10.f, 0.f), false, [&cutscene]() -> void { 
+ 			playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), narratedMovement, false, [&cutscene]() -> void { 
 		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
 		  	modassert(startData, "ballStartGameplay startData is null");
 		  	startData -> cutsceneFinished = true;
@@ -376,7 +376,7 @@ void ballModeNewGame2(objid sceneId){
   auto cameraId = ensureTempCamera(sceneId);
 	setTempCamera(cameraId, 0);
 
-  auto currentCutscene = playCutscene(simpleNarratedMovement2(cameraId, narratedMovement, glm::vec3(0.f, 10.f, 0.f), false, [sceneId]() -> void { 
+  auto currentCutscene = playCutscene(simpleNarratedMovement2(cameraId, narratedMovement, false, [sceneId]() -> void { 
   		ballModeSetPlayMode(sceneId); 
   }), std::nullopt);
 }
@@ -405,9 +405,11 @@ void startBallIntroMode(objid sceneId){
    		.backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
    		.offsetY = 0.f,
 			.onNewGame = [sceneId]() -> void {
+				hideLetterBox();
 				ballModeNewGame2(sceneId);
 			},
 			.onContinueGame = [sceneId]() -> void {
+				hideLetterBox();
 				ballModeSetPlayMode(sceneId);
 			},
    	},
