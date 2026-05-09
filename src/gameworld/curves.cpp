@@ -569,6 +569,11 @@ RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailM
 
 			auto fromPoint = line.points.at(i);
 			auto toPoint = line.points.at(i + 1);
+			bool interpolate = line.interpTypes.at(i + 1);
+			if (interpolate == INTERP_NONE){
+				fraction = 0.f;
+			}
+
 			float x = fromPoint.x + ((toPoint.x - fromPoint.x) * fraction);
 			float y = fromPoint.y + ((toPoint.y - fromPoint.y) * fraction);
 			float z = fromPoint.z + ((toPoint.z - fromPoint.z) * fraction);
