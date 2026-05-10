@@ -347,6 +347,7 @@ std::string print(Orb& orb){
 
 
 void setToMultiOrbView(objid cameraId, std::optional<std::string> world){
+	std::cout << "setToMultiOrbView: " << (world.has_value() ? world.value() : "[no world]") << std::endl;
   multiOrbViews[cameraId] = MultiOrbView{};
   MultiOrbView& multiOrbView = multiOrbViews.at(cameraId);
 

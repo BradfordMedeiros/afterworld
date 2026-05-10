@@ -16,6 +16,12 @@ void inputOverride();
 bool isReloadKey(int button);
 void handleRemoveKillplaneCollision(objid);
 
+struct WorldView {
+	bool didChangeToOrb = false;
+	bool onMultiview = false;
+	std::string world;
+};
+
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    objid ballId;
@@ -27,8 +33,8 @@ struct BallModeOptions{
    std::optional<float> finalBallTime;
 
 
-   bool shouldChangeToOrb = false;
-   bool didChangeToOrb = false;
+   std::optional<WorldView> worldView;
+
    bool levelSelect = false;
 };
 
@@ -531,10 +537,37 @@ void handlePowerupCollision(int32_t obj1, int32_t obj2){
   }
 }
 
+void doWorldSelect(objid id, std::string& value){
+	auto& ballModeOptions = getBallModeOptions();
+	ballModeOptions.worldView = WorldView {
+		.world = value,
+	};
+}
+
+void handleMultiselectCollision(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto worldSelect = getStrAttr(objAttr, "worldselect");
+    if (worldSelect.has_value()){
+    	doWorldSelect(obj1, worldSelect.value());
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto worldSelect = getStrAttr(objAttr, "worldselect");
+    if (worldSelect.has_value()){
+    	doWorldSelect(obj2, worldSelect.value());
+    }
+  }
+}
+
 void handleBallModeCollision(objid obj1, objid obj2){
   handleLevelEndCollision(obj1, obj2);
   handleGravityHoleCollision(obj1, obj2);
   handlePowerupCollision(obj1, obj2);
+
+  handleMultiselectCollision(obj1, obj2);
+
+  // just check if it this the multiview here
 }
 
 GameTypeInfo getBallMode(){
@@ -574,44 +607,31 @@ GameTypeInfo getBallMode(){
 	  	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
-	  	if(isReloadKey(key) && action == 0){
-	  		//ballMode.shouldReset = true;
-
-	  			ballMode.shouldChangeToOrb = true;
-
-	  	}
-
  		  auto cameraId = ensureTempCamera(ballMode.sceneId);
-	  	if (isToggleThirdPersonKey(key) && action == 0){
-	  		//ballMode.didLose = true;
-	  		//auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
-	  		//createExplosion(position, 5.f, 0.f);
-	  		setTempCamera(std::nullopt, 0);
-	  		removeCameraFromMultiOrbView(cameraId);
+
+	  	if (ballMode.worldView.has_value() && ballMode.worldView.value().onMultiview){
+	  		if (key == 'U'){
+	  			setTempCamera(std::nullopt, 0);
+	  			removeCameraFromMultiOrbView(cameraId);
+	  		}
+	  		if (key == 'A'){
+	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
+	  			prevOrb(*multiOrbViewPtr);
+	  		}
+	  		if (key == 'D'){
+	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
+	  			nextOrb(*multiOrbViewPtr);  			
+	  		}
+	  		if (key == 32){
+	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
+	  			auto level = getSelectedLevel(*multiOrbViewPtr);
+	  			if (level.has_value()){
+	  				goToLevel(level.value());
+	  			}
+	  		}
+
 	  	}
 
-	  	if (key == 'I' && action == 1){
-	  		//ballMode.levelSelect = false;
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  		auto inOverWorld = isOverworld(*multiOrbViewPtr);
-	  		goToOverWorld(*multiOrbViewPtr, !inOverWorld);
-	  	}
-	  	if (key == 'T' && action == 1){
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  		nextOrb(*multiOrbViewPtr);
-	  	}
-	  	if (key == 'Y' && action == 1){
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  		prevOrb(*multiOrbViewPtr);
-	  	}
-	  	if (key == 'U'){
-	  		auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  		auto level = getSelectedLevel(*multiOrbViewPtr);
-	  		if (level.has_value()){
-	  			goToLevel(level.value());
-	  		}
-	  	}
-	  	
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
@@ -619,7 +639,7 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
 
-	  	if (ballMode.shouldChangeToOrb){
+	  	if (ballMode.worldView.has_value() && !ballMode.worldView.value().didChangeToOrb && !ballMode.worldView.value().onMultiview){
 	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
 
 	  		auto viewTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
@@ -628,17 +648,16 @@ GameTypeInfo getBallMode(){
 		  	gameapi -> setGameObjectPosition(cameraId, viewPosition, true, Hint { .hint = "[gamelogic] - ball set pos" });
 		  	gameapi -> setGameObjectRot(cameraId, viewRot, true, Hint { .hint = "[gamelogic] - ball set pos" });
 
-	  		ballMode.shouldChangeToOrb = false;
-	  		ballMode.didChangeToOrb = true;
+	  		ballMode.worldView.value().didChangeToOrb = true;
 	  		return;
 	  	}
-	  	if (ballMode.didChangeToOrb){
-	  		ballMode.didChangeToOrb = false;
+	  	if (ballMode.worldView.has_value() &&  !ballMode.worldView.value().onMultiview) {
+	  		ballMode.worldView.value().didChangeToOrb = false;
+	  		ballMode.worldView.value().onMultiview = true;
 	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
    			setTempCamera(cameraId, 0);
-				setToMultiOrbView(cameraId, std::nullopt);
-
-				ballMode.levelSelect = true;
+				//setToMultiOrbView(cameraId, ballMode.worldView.value().world);
+				setToMultiOrbView(cameraId, ballMode.worldView.value().world);
 				return;
 	  	}
 

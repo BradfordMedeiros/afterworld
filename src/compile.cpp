@@ -369,6 +369,14 @@ CompileMapFns getCompileMapForBallGame(){
           });      
         }
 
+        auto worldSelect = getValue(entity, "worldselect");
+        if (worldSelect.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "worldselect",
+            .attributeValue = *worldSelect.value(),
+          });      
+        }
+
         attributes.push_back(GameobjAttributeOpts {
           .field = "trigger_bound",
           .attributeValue = "true",
