@@ -159,6 +159,15 @@ void onFrameGravityWells(){
   	}
 }
 
+std::optional<objid> gravityWellForName(std::string name){
+  for (auto& [id, gravityWell] : gravityWells){
+  	if (gravityWell.name == name){
+  		return id;
+  	}
+  }
+	return std::nullopt;
+}
+
 // Go to the closest gravity well in the direction specified by the direction
 std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 moveDirection){
 	std::optional<glm::vec3> impulse;

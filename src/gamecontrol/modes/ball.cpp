@@ -445,6 +445,7 @@ void doGravityHole(objid id, objid gravityHole){
   }
 }
 
+
 void deliverPowerup(objid vehicle, objid powerupId){
   auto& powerup = powerups.at(powerupId);
   if (powerup.lastRemoveTime.has_value()){
@@ -612,7 +613,10 @@ GameTypeInfo getBallMode(){
 	  	if (ballMode.worldView.has_value() && ballMode.worldView.value().onMultiview){
 	  		if (key == 'U'){
 	  			setTempCamera(std::nullopt, 0);
+					hideLetterBox();
 	  			removeCameraFromMultiOrbView(cameraId);
+		      setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
+	  			ballMode.worldView = std::nullopt;
 	  		}
 	  		if (key == 'A'){
 	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
@@ -626,6 +630,8 @@ GameTypeInfo getBallMode(){
 	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
 	  			auto level = getSelectedLevel(*multiOrbViewPtr);
 	  			if (level.has_value()){
+		  			setTempCamera(std::nullopt, 0);
+						hideLetterBox();
 	  				goToLevel(level.value());
 	  			}
 	  		}
@@ -656,8 +662,16 @@ GameTypeInfo getBallMode(){
 	  		ballMode.worldView.value().onMultiview = true;
 	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
    			setTempCamera(cameraId, 0);
+ 			  showLetterBoxHold("", 0.f);
+	      setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
+
 				//setToMultiOrbView(cameraId, ballMode.worldView.value().world);
 				setToMultiOrbView(cameraId, ballMode.worldView.value().world);
+
+				auto gravityWellId = gravityWellForName(ballMode.worldView.value().world);
+				modassert(gravityWellId.has_value(), std::string("no gravity well for name: ") + ballMode.worldView.value().world);
+				doGravityHole(ballMode.ballId, gravityWellId.value());
+
 				return;
 	  	}
 

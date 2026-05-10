@@ -40,6 +40,7 @@ bool addToGravityWell(objid gravityWellId, objid managed);
 void removeFromGravityWell(objid managed);
 glm::vec3 getTargetWellPosition(GravityWell& gravityWell);
 void onFrameGravityWells();
+std::optional<objid> gravityWellForName(std::string name);
 
 // Go to the closest gravity well in the direction specified by the direction
 std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 moveDirection);
