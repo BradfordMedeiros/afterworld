@@ -26,6 +26,31 @@ extern std::unordered_map<objid, EmissionObject> emissionObjects;
 extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 
+
+struct TextureFlipbook {
+	int width;
+	int height;
+	float flipRate;
+};
+std::unordered_map<objid, TextureFlipbook> textureFlipbooks;
+void handleFlipbooks(std::unordered_map<objid, TextureFlipbook>& textureFlipbooks){
+ 	for (auto& [id, flipbook] : textureFlipbooks){
+		float width = 1.f / flipbook.width;
+		float height = 1.f / flipbook.height;
+		setGameObjectTextureSize(id, glm::vec2(width, height));
+
+		auto elapsedTime = gameapi -> timeSeconds(false);
+		glm::vec2 offset(0.f, 0.f);
+		offset.x = width * static_cast<int>(elapsedTime / flipbook.flipRate);
+
+		auto timePerColumn = flipbook.width * flipbook.flipRate;
+		offset.y = height * static_cast<int>(elapsedTime / timePerColumn);
+
+		setGameObjectTextureOffset(id, offset);
+
+  	}
+}
+
 void goToLevel(std::string levelShortName);
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 bool isInGameMode2();
@@ -91,6 +116,41 @@ std::vector<TagUpdater> tagupdates = {
   	    },
   	    .onMessage = std::nullopt,
 	},
+
+	TagUpdater {
+		.attribute = "flipbook",
+		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
+			auto valuePtr = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
+			modassert(valuePtr.has_value(), "scrollspeed not vec3");
+  		    //std::cout << "scroll: on object add: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
+
+  		    auto value = valuePtr.value();
+  		    int width = static_cast<int>(value.x);
+  		    int height = static_cast<int>(value.y);
+  		    float flipRate = value.z;
+  		    textureFlipbooks[id] = TextureFlipbook {
+  		    	.width = width,
+  		    	.height = height,
+  		    	.flipRate = flipRate,
+  		    };
+  	    },
+  	    .onRemove = [](int32_t id) -> void {
+ 	    	textureFlipbooks.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    	//std::cout << "scrollspeed: on frame: " << tags.textureScrollObjIds.size() <<  std::endl;
+  	    	if (!isInGameMode2()){
+  	    		return;
+  	    	}
+  	   
+	    	handleFlipbooks(textureFlipbooks);
+  	    },
+  	    .onMessage = std::nullopt,
+	},
+
+	
+
+
 	TagUpdater {
 		.attribute = "health",
 		.onAdd = [](int32_t id, AttributeValue) -> void {

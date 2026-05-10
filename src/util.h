@@ -60,6 +60,7 @@ bool hasAttribute(objid id, const char* key);
 
 void setGameObjectTexture(objid id, std::string texture);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);
+void setGameObjectTextureSize(objid id, glm::vec2 offset);
 void setGameObjectFriction(objid id, float friction);
 void setGameObjectGravity(objid id, glm::vec3 gravity);
 glm::vec3 getGameObjectVelocity(objid id);
