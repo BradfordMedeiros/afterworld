@@ -34,21 +34,25 @@ struct TextureFlipbook {
 };
 std::unordered_map<objid, TextureFlipbook> textureFlipbooks;
 void handleFlipbooks(std::unordered_map<objid, TextureFlipbook>& textureFlipbooks){
- 	for (auto& [id, flipbook] : textureFlipbooks){
-		float width = 1.f / flipbook.width;
-		float height = 1.f / flipbook.height;
-		setGameObjectTextureSize(id, glm::vec2(width, height));
+	float elapsedTime = gameapi->timeSeconds(false);
 
-		auto elapsedTime = gameapi -> timeSeconds(false);
+	for (auto& [id, flipbook] : textureFlipbooks){
+		float uvWidth  = 1.0f / static_cast<float>(flipbook.width);
+		float uvHeight = 1.0f / static_cast<float>(flipbook.height);
+
+		setGameObjectTextureSize(id, glm::vec2(uvWidth, uvHeight));
+
+		int totalFrames = flipbook.width * flipbook.height;
+		int currentFrame = static_cast<int>(elapsedTime * flipbook.flipRate) % totalFrames;
+		int column = currentFrame % flipbook.width;
+		int row    = currentFrame / flipbook.width;
+
 		glm::vec2 offset(0.f, 0.f);
-		offset.x = width * static_cast<int>(elapsedTime / flipbook.flipRate);
-
-		auto timePerColumn = flipbook.width * flipbook.flipRate;
-		offset.y = height * static_cast<int>(elapsedTime / timePerColumn);
+		offset.x = column * uvWidth;
+		offset.y = (flipbook.height - 1 - row) * uvHeight;
 
 		setGameObjectTextureOffset(id, offset);
-
-  	}
+	}
 }
 
 void goToLevel(std::string levelShortName);
