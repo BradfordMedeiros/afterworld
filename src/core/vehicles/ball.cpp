@@ -133,7 +133,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     gameapi -> applyTorque(id, torqueAmount);
 
     const float AUTO_GRAVITY_WELL_TIME = 0.5f;
-    auto shouldAuto = shouldAutolaunchGravityWell(id);
+    auto shouldAuto = shouldAutolaunchGravityWell(id) && !vehicleBall.disableAutolaunch;
     auto currentTime = gameapi -> timeSeconds(false);
     auto enoughTime = !vehicleBall.lastAutoTime.has_value() || ((currentTime - vehicleBall.lastAutoTime.value()) > AUTO_GRAVITY_WELL_TIME);
     std::cout << "should auto: " << shouldAuto << std::endl;
@@ -305,4 +305,8 @@ void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup
       .powerup = powerup.value(),
     };
   }
+}
+
+void setDisableAutolaunch(VehicleBall& vehicleBall, bool autolaunch){
+  vehicleBall.disableAutolaunch = autolaunch;
 }

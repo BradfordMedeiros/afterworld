@@ -617,6 +617,9 @@ GameTypeInfo getBallMode(){
 	  			removeCameraFromMultiOrbView(cameraId);
 		      setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
 	  			ballMode.worldView = std::nullopt;
+
+		  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId).value();
+	  			setDisableAutolaunch(*ballVehicle, false);
 	  		}
 	  		if (key == 'A'){
 	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
@@ -671,6 +674,9 @@ GameTypeInfo getBallMode(){
 				auto gravityWellId = gravityWellForName(ballMode.worldView.value().world);
 				modassert(gravityWellId.has_value(), std::string("no gravity well for name: ") + ballMode.worldView.value().world);
 				doGravityHole(ballMode.ballId, gravityWellId.value());
+
+	  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId).value();
+				setDisableAutolaunch(*ballVehicle, true);
 
 				return;
 	  	}

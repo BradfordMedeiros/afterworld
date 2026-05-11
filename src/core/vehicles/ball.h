@@ -33,6 +33,7 @@ struct VehicleBall {
   float lastGravityTime = 0.f;
   bool inGravityWell = false;
   bool shouldExitGravityWell = false;
+  bool disableAutolaunch = false;
   std::optional<float> lastAutoTime;
 
   float lastPlayTime = 0.f;
@@ -46,5 +47,6 @@ void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action);
 void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gravityWellId);
 std::optional<BallPowerupState> getBallPowerup(VehicleBall& vehicleBall);
 void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup);
+void setDisableAutolaunch(VehicleBall& vehicleBall, bool autolaunch);
 
 #endif
