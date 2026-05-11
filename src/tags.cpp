@@ -55,7 +55,6 @@ void handleFlipbooks(std::unordered_map<objid, TextureFlipbook>& textureFlipbook
 	}
 }
 
-void goToLevel(std::string levelShortName);
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 bool isInGameMode2();
 
