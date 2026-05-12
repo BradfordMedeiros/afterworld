@@ -24,6 +24,7 @@ enum LinePointVisualize { VISUALIZE_NONE, VISUALIZE_LINE, VISUALIZE_CONN };
 enum RailInterpolation { INTERP_LINEAR, INTERP_NONE };
 struct LinePoints {
   objid railId;
+  objid sceneId;
   std::string railName;
   std::vector<glm::vec3> points;
   std::vector<glm::quat> rotations;
@@ -56,9 +57,9 @@ struct RailNode {
   std::optional<std::string> railKey;
   std::optional<std::string> interp;
 };
-void addRails(objid ownerId, std::vector<RailNode>& railNodes);
+void addRails(objid ownerId, std::vector<RailNode>& railNodes, objid sceneId);
 void removeRails(objid ownerId);
-std::optional<objid> railIdForName(std::string name);
+std::optional<objid> railIdForName(std::string name, objid sceneId);
 std::optional<LinePoints*> railForId(objid id);
 int timeToTriggerIndex(LinePoints& line, std::optional<int> index);
 glm::vec3 initialRailPosition(LinePoints& line);

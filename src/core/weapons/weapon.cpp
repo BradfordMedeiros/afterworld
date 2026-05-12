@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 bool isEntityInShootingMode(objid id);
+bool isEntity(objid id);
 
 bool showWeaponViewModel = true;
 
@@ -233,6 +234,8 @@ std::vector<WeaponsUiUpdate> onWeaponsFrame(Weapons& weapons, objid playerId, gl
     .showActivateUi = false,
   };
   for (auto &[id, weaponEntityState] : weapons.idToWeapon){
+    std::cout << "entity exists: " << gameapi -> gameobjExists(id) << ", name = " << gameapi -> getGameObjNameForId(id).value() << ", entity = " << isEntity(id) << std::endl;
+    modassert(isEntity(id), "onWeaponsFrame not an entity");
     auto weaponEntityData = getWeaponEntityData(id);
     bool activePlayer = id == playerId;
 

@@ -63,6 +63,7 @@ void setEntityForPlayerIndex(std::optional<objid> id, int playerIndex);
 void setEntityNextForPlayerIndex(int playerIndex);
 void observeEntity(std::optional<objid> id, int playerIndex);
 void observeEntityNext(int playerIndex);
+bool isEntity(objid id);
 
 std::optional<objid> getCameraForThirdPerson(int playerIndex);
 

@@ -46,6 +46,11 @@ BallModeOptions& getBallModeOptions(){
  	return *ballModePtr;
 }
 
+bool inBallGametype(){
+	auto data = getGametypeData(gametypeSystem);
+	return data.has_value();
+}
+
 struct DescInfo2 {
 	std::vector<std::string> mainInfos;
 	std::vector<std::string> hubInfos;
@@ -136,14 +141,6 @@ objid ensureTempCamera(objid sceneId){
  	return camera.value();
 }
 
-std::optional<std::string> getRailName(){
-	std::string railName("levelintro");
-	auto rail = railIdForName(railName);
-	if (!rail.has_value()){
-		return std::nullopt;
-	}
-	return railName;
-}
 
 void ballStartGameplay(EasyCutscene& cutscene){
 	struct BallStartData {
@@ -160,9 +157,9 @@ void ballStartGameplay(EasyCutscene& cutscene){
 
   run(cutscene, 2, [&cutscene]() -> void {
   		auto sceneId = gameapi -> listSceneId(getEntityForPlayerIndex(0).value());
+ 		  auto railId = railIdForName("levelintro", 0);
 
-  		auto rail = getRailName();
-  		if (!rail.has_value()){
+  		if (!railId.has_value()){
 		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
 		  	modassert(startData, "ballStartGameplay startData is null");
 		  	startData -> cutsceneFinished = true;
@@ -174,27 +171,35 @@ void ballStartGameplay(EasyCutscene& cutscene){
   		
   		std::vector<SimpleNarration> narrations;
 
-  		{
-  			auto railId = railIdForName(rail.value());
-  			auto& railPoints = *railForId(railId.value()).value();
-  			for (auto& key : railPoints.keys){
-  				narrations.push_back(SimpleNarration {
-  					.text = key.has_value() ? key.value() : "",
-  				});
-  			}
+  		
+  		auto& railPoints = *railForId(railId.value()).value();
+  		for (auto& key : railPoints.keys){
+  			narrations.push_back(SimpleNarration {
+  				.text = key.has_value() ? key.value() : "",
+  			});
   		}
+  		
 
   		NarratedMovement narratedMovement {
-  			.rail = rail.value(),
+  			.railId = railId.value(),
   			.letterbox = "Welcome to The World",
   			.narrations = narrations,
   		};
- 			playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), narratedMovement, false, [&cutscene]() -> void { 
+
+  		bool skipCutscene = false;
+  		if (skipCutscene){
 		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
 		  	modassert(startData, "ballStartGameplay startData is null");
 		  	startData -> cutsceneFinished = true;
    			setTempCamera(std::nullopt, 0);
-			}), std::nullopt);
+  		}else{
+ 				playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), getBallModeOptions().sceneId, narratedMovement, false, [&cutscene]() -> void { 
+		  		BallStartData* startData = getStorage<BallStartData>(cutscene);
+		  		modassert(startData, "ballStartGameplay startData is null");
+		  		startData -> cutsceneFinished = true;
+   				setTempCamera(std::nullopt, 0);
+				}), std::nullopt);
+  		}
   });
 
 
@@ -363,8 +368,9 @@ void ballModeNewGame2(objid sceneId){
   inputOverride(false, false);
 	changeUiMode(UiModeNone{});
 
+  auto railId = railIdForName("intro", 0);
   NarratedMovement narratedMovement {
-  	.rail = "intro",
+  	.railId = railId.value(),
   	.letterbox = "Welcome to The World",
   	.narrations = {
   		SimpleNarration {
@@ -378,13 +384,18 @@ void ballModeNewGame2(objid sceneId){
   		},
   	},
   };
-//
+
   auto cameraId = ensureTempCamera(sceneId);
 	setTempCamera(cameraId, 0);
 
-  auto currentCutscene = playCutscene(simpleNarratedMovement2(cameraId, narratedMovement, false, [sceneId]() -> void { 
-  		ballModeSetPlayMode(sceneId); 
-  }), std::nullopt);
+	bool skipCutscene = false;
+	if (skipCutscene){
+  			ballModeSetPlayMode(sceneId); 
+	}else{
+  	auto currentCutscene = playCutscene(simpleNarratedMovement2(cameraId, sceneId, narratedMovement, false, [sceneId]() -> void { 
+  			ballModeSetPlayMode(sceneId); 
+  	}), std::nullopt);		
+	}
 }
 
 
@@ -420,7 +431,7 @@ void startBallIntroMode(objid sceneId){
 			},
    	},
   });
-  showLetterBoxHold("", 0.f);
+  showLetterBoxHold("This is the intro mode", 0.f);
 }
 
 
@@ -502,6 +513,8 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
 }
 
 void handleGravityHoleCollision(objid obj1, objid obj2){
+	return;
+	
   {
     auto objAttr1 = getAttrHandle(obj1);
     auto gravityHole = getStrAttr(objAttr1, "gravityhole");
@@ -539,6 +552,7 @@ void handlePowerupCollision(int32_t obj1, int32_t obj2){
 }
 
 void doWorldSelect(objid id, std::string& value){
+	std::cout << "worldView doWorldSelect called" << std::endl;
 	auto& ballModeOptions = getBallModeOptions();
 	ballModeOptions.worldView = WorldView {
 		.world = value,
@@ -546,16 +560,30 @@ void doWorldSelect(objid id, std::string& value){
 }
 
 void handleMultiselectCollision(int32_t obj1, int32_t obj2){
-  if (isControlledVehicle(obj1)){
+  auto nameObj1 = gameapi -> getGameObjNameForId(obj1).value();
+  auto nameObj2 = gameapi -> getGameObjNameForId(obj2).value();
+
+  //std::cout << "onModeCollision: " << nameObj1 << ", " << nameObj2 << std::endl;
+
+	if (!inBallGametype()){
+		return;
+	}
+
+	auto activeBall = getBallModeOptions().ballId;
+
+
+  if (isControlledVehicle(obj1) && obj1 == activeBall){
     auto objAttr = getAttrHandle(obj2);
     auto worldSelect = getStrAttr(objAttr, "worldselect");
     if (worldSelect.has_value()){
+		  std::cout << "onModeCollision: worldselect: " << nameObj2 << ", scene = " << gameapi -> listSceneId(obj2) << ", other: " << nameObj1 << "(" << obj1 <<  ")" << std::endl;
     	doWorldSelect(obj1, worldSelect.value());
     }
-  }else if (isControlledVehicle(obj2)){
+  }else if (isControlledVehicle(obj2) && obj2 == activeBall){
     auto objAttr = getAttrHandle(obj1);
     auto worldSelect = getStrAttr(objAttr, "worldselect");
     if (worldSelect.has_value()){
+		  std::cout << "onModeCollision: worldselect: " << nameObj1 << ", scene = " << gameapi -> listSceneId(obj1) <<  ", other: " << nameObj2  << "(" << obj2 << ")" << std::endl;
     	doWorldSelect(obj2, worldSelect.value());
     }
   }
@@ -616,26 +644,39 @@ GameTypeInfo getBallMode(){
 					hideLetterBox();
 	  			removeCameraFromMultiOrbView(cameraId);
 		      setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
+					
+					std::cout << "worldView set null 1" << std::endl;
 	  			ballMode.worldView = std::nullopt;
 
 		  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId).value();
 	  			setDisableAutolaunch(*ballVehicle, false);
 	  		}
 	  		if (key == 'A'){
-	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  			prevOrb(*multiOrbViewPtr);
+	  			auto multiOrbView = multiorbViewByCamera(cameraId);
+	  			if (multiOrbView.has_value()){
+		  			prevOrb(*multiOrbView.value());
+	  			}
 	  		}
 	  		if (key == 'D'){
-	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  			nextOrb(*multiOrbViewPtr);  			
+	  			auto multiOrbView = multiorbViewByCamera(cameraId);
+	  			if (multiOrbView.has_value()){
+		  			nextOrb(*multiOrbView.value());  			
+	  			}
 	  		}
 	  		if (key == 32){
-	  			auto multiOrbViewPtr = multiorbViewByCamera(cameraId).value();
-	  			auto level = getSelectedLevel(*multiOrbViewPtr);
-	  			if (level.has_value()){
-		  			setTempCamera(std::nullopt, 0);
-						hideLetterBox();
-	  				goToLevel(level.value());
+	   			setTempCamera(std::nullopt, 0);
+					hideLetterBox();
+					ballMode.worldView = std::nullopt;
+					goToLevel("dev");
+					return;
+
+	  			auto multiOrbView = multiorbViewByCamera(cameraId);
+	  			if (multiOrbView.has_value()){
+	  				auto level = getSelectedLevel(*multiOrbView.value());
+	  				if (level.has_value()){
+							std::cout << "worldView set null 2" << std::endl;
+	  					goToLevel(level.value());
+	  				}
 	  			}
 	  		}
 
@@ -665,14 +706,19 @@ GameTypeInfo getBallMode(){
 	  		ballMode.worldView.value().onMultiview = true;
 	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
    			setTempCamera(cameraId, 0);
- 			  showLetterBoxHold("", 0.f);
+
+   			static int multiViewCount = 0;
+ 			  showLetterBoxHold(std::string("This is the multiview: ") + std::to_string(multiViewCount++), 0.f);
 	      setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
 
-				//setToMultiOrbView(cameraId, ballMode.worldView.value().world);
 				setToMultiOrbView(cameraId, ballMode.worldView.value().world);
+				//setToMultiOrbView(cameraId, ballMode.worldView.value().world);
 
 				auto gravityWellId = gravityWellForName(ballMode.worldView.value().world);
-				modassert(gravityWellId.has_value(), std::string("no gravity well for name: ") + ballMode.worldView.value().world);
+				if (!gravityWellId.has_value()){
+					return;
+				}
+				//modassert(gravityWellId.has_value(), std::string("no gravity well for name: ") + ballMode.worldView.value().world);
 				doGravityHole(ballMode.ballId, gravityWellId.value());
 
 	  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId).value();

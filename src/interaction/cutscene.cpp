@@ -263,12 +263,11 @@ struct CutsceneIntroData {
 	int railLengthMs;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish){
-	return [cameraId, cutsceneData, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
+std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, objid sceneId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish){
+	return [cameraId, sceneId, cutsceneData, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
   	if (initialize(cutscene)){
- 			auto railId = railIdForName(cutsceneData.rail);
- 			modassert(railId.has_value(), "simpleNarratedMovement2 no rail id");
-			auto rail = railForId(railId.value());
+ 			auto rail = railForId(cutsceneData.railId);
+
   		auto initialPos = initialRailPosition(*rail.value());
     	auto initialRot = glm::identity<glm::quat>();
 			auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
@@ -286,7 +285,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, Narra
 			ballIntroData.railLengthMs = railTotalTimeMs;
 
 			std::cout << std::endl;
-			addManagedRailMovement(cameraId, railId.value(), initialPos, initialRot);
+			addManagedRailMovement(cameraId, cutsceneData.railId, initialPos, initialRot);
 			
     	store(cutscene, ballIntroData);
     	if (cutsceneData.letterbox.has_value()){

@@ -7,10 +7,10 @@ std::unordered_map<objid, EntityOnRail> entityToRail; // static-state
 std::unordered_map<objid, RaceData> entityToRaceData; // static-state
 std::unordered_map<objid, ManagedRailMovement> managedRailMovements;
 
-std::optional<objid> railIdForName(std::string name){
+std::optional<objid> railIdForName(std::string name, objid sceneId){
 	for (auto& [ownerId, railsForId] : rails){
 		for (auto& rail : railsForId){
-			if (rail.railName == name){
+			if (rail.railName == name ){
 				return rail.railId;
 			}
 		}
@@ -123,7 +123,7 @@ void sortRail(LinePoints& line){
 	line.times = newTimes;
 }
 
-void addRails(objid ownerId, std::vector<RailNode>& railNodes){
+void addRails(objid ownerId, std::vector<RailNode>& railNodes, objid sceneId){
 	std::unordered_map<std::string, LinePoints> nameToRail;
 	for (auto& node : railNodes){
 		if (nameToRail.find(node.rail) != nameToRail.end()){
@@ -134,6 +134,7 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 		auto railName = node.rail;
 		nameToRail[railName] = LinePoints {
 			.railId = railId,
+			.sceneId = sceneId,
 			.railName = railName,
 			.points = {},
 			.rotations = {},
@@ -179,7 +180,9 @@ void addRails(objid ownerId, std::vector<RailNode>& railNodes){
 	for (auto& [ownerId, railsForId] : rails){
 		for (auto& rail : railsForId){
 			if (nameToRail.find(rail.railName) != nameToRail.end()){
-				modassert(false, "rail name already exists");	
+				if (nameToRail.at(rail.railName).sceneId == rail.sceneId){
+					modassert(false, "rail name already exists in this scene");	
+				}
 			}
 		}
 	}

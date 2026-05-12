@@ -34,6 +34,8 @@ std::vector<int> getAllConnections(OrbUi& orbUi, int index){
 }
 
 glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
+	modassert(gameapi -> gameobjExists(orbUi.ownerId), "orb does not exist for this orb view");
+	
 	glm::vec3 offset = gameapi -> getGameObjectPos(orbUi.ownerId, true, "getOrbPosition pos");
 	auto scale = gameapi -> getGameObjectScale(orbUi.ownerId, "getOrbPosition scale");
 	auto rotation = gameapi -> getGameObjectRotation(orbUi.ownerId, true, "getOrbPosition rotn");
@@ -119,6 +121,10 @@ void handleOrbViews(OrbData& orbData){
 			continue;
 		}
 		OrbUi& orbUi = orbData.orbUis.at(objView.orbId);
+		if (!gameapi -> gameobjExists(orbUi.ownerId)){
+			std::cout << "orb view: id does not exist: " << orbUi.ownerId << std::endl;
+			continue;
+		}
 		if (!objView.attachedToOrb){
 			auto currTime = gameapi -> timeSeconds(false);
 			auto elapsedTime = currTime - objView.moveToOrbStartTime.value();
@@ -269,9 +275,35 @@ void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int
 	modassert(false, std::string("setCameraToOrbView no orbUi: ") + orbUiName);
 }
 
+
+void removeCameraFromMultiOrbView(objid cameraId){
+	multiOrbViews.erase(cameraId);
+	removeCameraFromOrbView(cameraId);
+}
+
 void removeCameraFromOrbView(objid cameraId){
   orbData.orbViewsCameraToOrb.erase(cameraId);
 }
+
+void handleOrbUiRemoved(objid id){
+  	std::set<objid> idsToRemove;
+  	for (auto&[id, orbUi] : orbData.orbUis){
+  		if (orbUi.ownerId == id){
+  			idsToRemove.insert(id);
+  		}
+  	}
+  	for (auto id : idsToRemove){
+	   		orbData.orbUis.erase(id);
+  	}
+  	for (auto& [cameraId, orbUi] : orbData.orbViewsCameraToOrb){
+  		if (id == orbUi.orbId){
+  			orbData.orbViewsCameraToOrb.erase(cameraId);
+  		}
+  	}
+}
+
+
+
 
 std::optional<int> getMaxCompleteOrbIndex(OrbUi& orbUi){
 	std::optional<int> maxCompleteIndex;
@@ -359,11 +391,6 @@ void setToMultiOrbView(objid cameraId, std::optional<std::string> world){
   auto maxCompletedIndex = getMaxCompleteOrbIndex(*orbUi.value());
 
   setCameraToOrbView(cameraId, orbLayer, maxCompletedIndex, 1.f);
-}
-
-void removeCameraFromMultiOrbView(objid cameraId){
-	multiOrbViews.erase(cameraId);
-	removeCameraFromOrbView(cameraId);
 }
 
 std::optional<OrbUi*> orbUiForMultiview(MultiOrbView& multiOrbView){

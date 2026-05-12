@@ -98,6 +98,7 @@ void onAddConditionId(objid id, std::string& value){
 	}
 }
 
+
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "scrollspeed",
@@ -551,15 +552,7 @@ std::vector<TagUpdater> tagupdates = {
 			}
 		},
   	    .onRemove = [](int32_t id) -> void {
-  	    	std::set<objid> idsToRemove;
-  	    	for (auto&[id, orbUi] : orbData.orbUis){
-  	    		if (orbUi.ownerId == id){
-  	    			idsToRemove.insert(id);
-  	    		}
-  	    	}
-  	    	for (auto id : idsToRemove){
-	        		orbData.orbUis.erase(id);
-  	    	}
+  	    	
   	    },
   	    .onFrame = []() -> void {
  	    		std::set<objid> cachesToRemove;
@@ -731,7 +724,7 @@ std::vector<TagUpdater> tagupdates = {
 	  			std::cout << "simpleNarrate: node: " << node.rail << std::endl;
 	  		}
 
-	  		addRails(id, nodes);
+	  		addRails(id, nodes, gameapi -> listSceneId(id));
 		},
   	    .onRemove = [](int32_t id) -> void {
   	    	removeRails(id);
@@ -757,7 +750,7 @@ std::vector<TagUpdater> tagupdates = {
   	  			auto attrHandle = getAttrHandle(id);
 				auto curve = getStrAttr(attrHandle, "curve").value();
 				auto trigger = getStrAttr(attrHandle, "trigger");
-				auto railId = railIdForName(curve);
+				auto railId = railIdForName(curve, gameapi -> listSceneId(id));
 				if (railId.has_value()){
 					managedRailMovementsBuffer.erase(id);
 					managedRailMovements[id] = ManagedRailMovement {

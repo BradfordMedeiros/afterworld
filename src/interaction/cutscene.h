@@ -49,11 +49,11 @@ struct SimpleNarration {
   std::string text;
 };
 struct NarratedMovement {
-  std::string rail;
+  objid railId;
   std::optional<std::string> letterbox;
   std::vector<SimpleNarration> narrations;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish);
+std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, objid sceneId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish);
 
 #endif

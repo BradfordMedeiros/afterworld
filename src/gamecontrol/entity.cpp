@@ -442,6 +442,11 @@ void maybeDisableMesh(objid id){
 		 }
 	}
 }
+
+bool isEntityInThirdPerson(objid id){
+	modassert(isEntity(id), "entityInThirdPerson not an entity");
+	return movementEntities.movementEntities.at(id).managedCamera.thirdPersonMode;	
+}
 void setEntityThirdPerson(objid id){
 	modassert(isEntity(id), "setEntityThirdPerson not an entity");
 	maybeReEnableMesh(id);
@@ -459,7 +464,7 @@ void reenableEntity(objid id, std::optional<glm::vec3> pos, std::optional<glm::q
 	setGameObjectPhysicsEnable(id, true);
 	setGameObjectVelocity(id, glm::vec3(0.f, 0.f, 0.f));
 
-	bool thirdPersonMode = getWeaponEntityData(id).thirdPersonMode;
+	bool thirdPersonMode = isEntityInThirdPerson(id);
 	if (thirdPersonMode){
 		maybeReEnableMesh(id);
 	}
@@ -591,12 +596,10 @@ void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse){
 
 
 ////////////////////// Glue //////////////////////
-FiringTransform getFireTransform(objid id, int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-
+FiringTransform getFireTransform(objid id,  objid entityId){
 	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 
-	if (movementEntity.managedCamera.thirdPersonMode && (controlledPlayer.entityId.has_value() && controlledPlayer.entityId.value() == id)){ // only use the third person code for the active player
+	if (movementEntity.managedCamera.thirdPersonMode && entityId == id){ // only use the third person code for the active player
 		// this 0 out only works if these vectors are parallel, otherwise would have to solve the parametric eqtns 
 		// z is set to the player entity so it doesnt shoot from behind the character.
 		// for example, if you dont do this, if you zoom the cam out you can hit a target in the crosshair behind the character
@@ -618,17 +621,23 @@ FiringTransform getFireTransform(objid id, int playerIndex){
 	};
 }
 
-WeaponEntityData getWeaponEntityData(objid id){
-	int playerIndex = getPlayerIndexForEntity(id).value();
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+WeaponEntityData getWeaponEntityData(objid entityId){
 
-	MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
+	MovementEntity& movementEntity = movementEntities.movementEntities.at(entityId);
+
+	glm::vec2 lookVelocity(0.f, 0.f);
+	auto playerIndex = getPlayerIndexForEntity(entityId);
+	if (playerIndex.has_value()){
+		ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex.value());
+    lookVelocity = controlledPlayer.lookVelocity; // this should be in the movementState instead....not be based off the players...
+	}
+
   return WeaponEntityData {
-    .inventory = id,
-    .lookVelocity = controlledPlayer.lookVelocity, // this should be in the movementState instead....not be based off the players...
+    .inventory = entityId,
+    .lookVelocity = lookVelocity,
     .velocity = movementEntity.movementState.velocity,
-    .thirdPersonMode = movementEntity.managedCamera.thirdPersonMode,
-    .fireTransform = getFireTransform(id, playerIndex),
+    .thirdPersonMode = isEntityInThirdPerson(entityId),
+    .fireTransform = getFireTransform(entityId, entityId),
   };
 }
 
@@ -642,7 +651,7 @@ std::optional<bool> entityInThirdPersonByPlayerIndex(int playerIndex){
 	if (!controlledPlayer.entityId.has_value()){
 		return std::nullopt;
 	}
-	bool thirdPerson = getWeaponEntityData(controlledPlayer.entityId.value()).thirdPersonMode;
+	bool thirdPerson = isEntityInThirdPerson(controlledPlayer.entityId.value());
 	return thirdPerson;
 }
 

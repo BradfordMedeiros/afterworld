@@ -413,10 +413,14 @@ void objectRemoved(objid idRemoved){
   onMainUiObjectsChanged();
 
   onObjectRemovedWater(water, idRemoved);
+  
   handleTagsOnObjectRemoved(idRemoved);
+
+
   removeCameraFromOrbView(idRemoved);
   removeCameraFromMultiOrbView(idRemoved);
-
+  handleOrbUiRemoved(idRemoved);
+  
   onObjRemoved(aiData, idRemoved);
 
   removeSurfaceModifier(idRemoved);

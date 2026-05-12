@@ -60,6 +60,7 @@ void handleOrbViews(OrbData& orbData);
 
 void setCameraToOrbView(objid cameraId, std::string orbUiName, std::optional<int> targetIndex, std::optional<float> time);
 void removeCameraFromOrbView(objid cameraId);
+void handleOrbUiRemoved(objid id);
 
 std::optional<int> getMaxCompleteOrbIndex(OrbUi& orbUi);
 std::optional<OrbUi*> orbUiByName(std::string orbUiName);
