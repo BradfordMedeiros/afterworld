@@ -478,6 +478,7 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "globallight",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			gameapi -> setGlobalLight(id);
+			gameapi -> applyVertexLighting();
 		},
   	    .onRemove = [](int32_t id) -> void {
   	    },

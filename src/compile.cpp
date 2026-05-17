@@ -382,6 +382,9 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });   
         
+    }else if (*className.value() == "lightzone"){
+      //modassert(false, "compile for light zone not yet implemented");
+      // do nothing, we just reference this in the brush
     }else if (*className.value() == "killplane"){
       *shouldWrite = true;
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
@@ -632,6 +635,15 @@ CompileMapFns getCompileMapForBallGame(){
 
         addRotation(entity, attributes);
         
+    }else if (*className.value() == "light"){
+      *shouldWrite = true;
+      *modelName = std::string("!") + *modelName;
+      auto color = getVec3Value(entity, "color");
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "color",
+        .attributeValue = color.has_value() ? color.value() : glm::vec3(1.f, 1.f, 1.f),
+      });
+
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
 

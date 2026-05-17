@@ -445,6 +445,13 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
   	modassert(false, "save values placeholder");*/
   }
+
+  if (key == 'M' && action == 0){
+  	//simpleBoolSerializer("voxellighting", "visualize", offsetof(engineState, visualizeVoxelLightingCells)),
+  	static bool visualizeLighting = false;
+  	visualizeLighting = !visualizeLighting;
+  	setVisualizeVoxelLighting(visualizeLighting);
+  }
   if (key == 'N' && action == 0){
   	visualizationDistance -= 1.f;
   	auto oldVoxelCellWidth = gameapi -> getVoxelLightingData().voxelCellWidth;
@@ -454,10 +461,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
 		gameapi -> setVoxelLighting(newVoxelCellWidth, newOffset);
 		modlog("voxel lighting set", std::to_string(newVoxelCellWidth) + " | " + print(newOffset));
   }
-  if (key == 'M' && action == 0){
-  	visualizationDistance += 1.f;
 
-  }
 
 	auto args = gameapi -> getArgs();
 	auto printKey = args.find("printkey") != args.end();

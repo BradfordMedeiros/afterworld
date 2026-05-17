@@ -298,6 +298,15 @@ void setAmbientLight(glm::vec3 light){
   });  
 }
 
+void setVisualizeVoxelLighting(bool enable){
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "voxellighting",
+      .attribute = "visualize",
+      .value = enable ? "true" : "false",
+    }
+  });  
+}
 
 std::string uniqueNameSuffix(){
   return std::to_string(getUniqueObjId());

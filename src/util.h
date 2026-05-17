@@ -76,6 +76,7 @@ void setGameObjectPhysicsOptions(objid id, glm::vec3 angle, glm::vec3 linear, gl
 void setGameObjectEmission(objid id, std::optional<glm::vec3> emission);
 
 void setAmbientLight(glm::vec3 light);
+void setVisualizeVoxelLighting(bool enable);
 
 std::string uniqueNameSuffix();
 
