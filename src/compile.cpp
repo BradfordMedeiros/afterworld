@@ -644,6 +644,25 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = color.has_value() ? color.value() : glm::vec3(1.f, 1.f, 1.f),
       });
 
+      auto type = getValue(entity, "type");
+      if (type.has_value()){
+        if (*type.value() == "spotlight"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "type",
+            .attributeValue = "spotlight",
+          });
+        }else if (*type.value() == "directional"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "type",
+            .attributeValue = "directional",
+          });
+        }else if (*type.value() == "point"){
+          // this is the default do nothing
+        }else{
+          modassert(false, "invalid light type");
+        }
+      }
+
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
 

@@ -192,7 +192,7 @@ void setEditorMode(){
   setPlayerFreeCamera(getDefaultPlayerIndex(), true);
 
   bool liveEdit = false;
-  if (!liveEdit){
+  if (!liveEdit && sceneManagement.managedScene.has_value()){
     if (sceneManagement.managedScene.value().id.has_value()){
       gameapi -> resetScene(sceneManagement.managedScene.value().id.value());
     }
@@ -485,10 +485,14 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 
   debugOnKey(key, scancode, action, mods);
 
-  if (isInteractKey(key) && (action == 1) && isEntityFocusArcade(getEntityForPlayerIndex(playerIndex).value()).value()){
-    auto entity = getEntityForPlayerIndex(playerIndex).value();
-    setEntityFocusArcade(std::nullopt, entity);
+  auto playerEntity = getEntityForPlayerIndex(playerIndex);
+  if (playerEntity.has_value()){
+    if (isInteractKey(key) && (action == 1) && isEntityFocusArcade(playerEntity.value()).value()){
+      auto entity = getEntityForPlayerIndex(playerIndex).value();
+      setEntityFocusArcade(std::nullopt, entity);
+    }
   }
+
   onKeyArcade(key, scancode, action, mods);
   gametypesOnKey(gametypeSystem, key, scancode, action, mods);
 
