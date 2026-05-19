@@ -1,0 +1,17 @@
+// Game: Generic
+// Format: Standard
+// entity 0
+{
+"classname" "worldspawn"
+"_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"_tb_layer_omit_from_export" "1"
+// brush 0
+{
+( -112 -112 -128 ) ( -112 -111 -128 ) ( -112 -112 -127 ) arcade/trench/grid -16 -128 0 1 1
+( 48 -112 -128 ) ( 48 -112 -127 ) ( 49 -112 -128 ) arcade/trench/grid -112 -128 0 1 1
+( 48 -112 -128 ) ( 49 -112 -128 ) ( 48 -111 -128 ) arcade/trench/grid -112 16 0 1 1
+( 112 96 -16 ) ( 112 97 -16 ) ( 113 96 -16 ) arcade/trench/grid -112 16 0 1 1
+( 112 96 -112 ) ( 113 96 -112 ) ( 112 96 -111 ) arcade/trench/grid -112 -128 0 1 1
+( 112 96 -112 ) ( 112 96 -111 ) ( 112 97 -112 ) arcade/trench/grid -16 -128 0 1 1
+}
+}

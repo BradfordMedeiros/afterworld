@@ -99,6 +99,16 @@ void addRotation(Entity& entity, std::vector<GameobjAttributeOpts>& attributes){
   
 }
 
+std::string getBallGameTemplate(std::string mapFile, std::optional<std::string> templateFile){
+  std::string templatePath = "../afterworld/scenes/levels/ball.rawscene";
+  if (templateFile.has_value()){
+    templatePath = templateFile.value();
+  }
+  std::cout << "Generate Template: " << templatePath << std::endl;
+  return templatePath;
+}
+
+
 struct BallGameCompile {
   std::vector<RailEntity> rails;
   std::vector<OrbEntity> orbs;
@@ -895,5 +905,6 @@ CompileMapFns getCompileMapForBallGame(){
   return CompileMapFns {
     .compileFn = compileFn,
     .finalizeFn = finalizeFn,
+    .getTemplateFn = getBallGameTemplate,
   };
 }
