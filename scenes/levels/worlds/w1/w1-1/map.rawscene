@@ -1,5 +1,8 @@
 ########## Base file content: ../afterworld/scenes/levels/ball.rawscene ##########
 
+!light:spin:true
+!light:globallight:true
+!light:position:0 50 0
 
 playerspawn:playerspawn:true
 playerspawn:mode:ball
@@ -7,11 +10,9 @@ playerspawn:mode:ball
 texture0:texture:../gameresources/build/textures/ballgame/jump.png
 texture1:texture:../gameresources/build/textures/ballgame/dash.png
 texture2:texture:../gameresources/build/textures/ballgame/teleport.png
-texture3:texture:../gameresources/build/textures/ballgame/teleport.normal.png
-texture4:texture:../gameresources/build/textures/ballgame/bounce.png
-texture5:texture:../gameresources/build/textures/ballgame/bounce.normal.png
-texture6:texture:../gameresources/build/textures/ballgame/none.png
-
+texture3:texture:../gameresources/build/textures/ballgame/bounce.png
+texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+texture5:texture:../gameresources/build/textures/ballgame/none.png
 
 ##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map
 
@@ -24,5 +25,8 @@ entity_worldspawn_0:position:0 0 0
 
 playerspawn:rotation:1 0 -5.96047e-08 0.0395647
 playerspawn:position:-15.2 -20 29.6
+
+playerspawn:rotation:1 0 -5.96047e-08 0.0395647
+playerspawn:position:-13.6 -20 114.4
 
 
