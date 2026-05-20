@@ -133,7 +133,7 @@ CompileMapFns getCompileMapForBallGame(){
       // same as world spawn, but without added keys
       *shouldWrite = true;
 
-      addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+      addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
 
     }else if (*className.value() == "player_start"){
       *modelName = "playerspawn";
@@ -297,7 +297,7 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
-          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".map",
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
@@ -321,7 +321,7 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
-          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".map",
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
@@ -397,7 +397,7 @@ CompileMapFns getCompileMapForBallGame(){
       // do nothing, we just reference this in the brush
     }else if (*className.value() == "killplane"){
       *shouldWrite = true;
-      addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+      addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
       attributes.push_back(GameobjAttributeOpts {
         .field = "killplane",
         .attributeValue = "true",
@@ -468,7 +468,7 @@ CompileMapFns getCompileMapForBallGame(){
         }
     }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
-        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
         auto magnitude = getIntValue(entity, "mag");
         attributes.push_back(GameobjAttributeOpts {
           .field = "bounce",
@@ -476,7 +476,7 @@ CompileMapFns getCompileMapForBallGame(){
         });
     }else if (*className.value() == "conveyer"){
         *shouldWrite = true;
-        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
         auto modspeed = getVec3Value(entity, "move");
         attributes.push_back(GameobjAttributeOpts {
           .field = "modspeed",
@@ -486,7 +486,7 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
-          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".map",
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
@@ -500,7 +500,7 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
-          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".map",
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
@@ -542,7 +542,7 @@ CompileMapFns getCompileMapForBallGame(){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
-          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".map",
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",

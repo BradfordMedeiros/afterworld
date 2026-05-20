@@ -17,7 +17,7 @@ texture5:texture:../gameresources/build/textures/ballgame/none.png
 ##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map
 
 entity_worldspawn_0:rotation:1 0 -5.96047e-08 0.0395647
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.brush
+entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
 entity_worldspawn_0:_tb_layer_omit_from_export:1

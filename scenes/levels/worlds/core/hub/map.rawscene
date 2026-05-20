@@ -35,14 +35,13 @@ orb1:texture:../gameresources/build/textures/creepguy.png
 orb2:texture:../gameresources/build/textures/creepydog.jpg
 
 twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
-twisty:scrollspeed:0.4 0 0 
 
 
 
 ##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map
 
 entity_worldspawn_0:rotation:1 0 -5.96047e-08 0.0395647
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.brush
+entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
 entity_worldspawn_0:_tb_layer_omit_from_export:1
@@ -52,7 +51,7 @@ playerspawn:rotation:1 0 -5.96047e-08 0.0395647
 playerspawn:position:-37.6 0.8 13.6
 
 entity_trigger_zone_16:rotation:1 0 -5.96047e-08 0.0395647
-entity_trigger_zone_16:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.brush,16.brush
+entity_trigger_zone_16:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,16.map
 entity_trigger_zone_16:physics_shape:shape_box
 entity_trigger_zone_16:physics:enabled
 entity_trigger_zone_16:physics_collision:nocollide
@@ -71,7 +70,7 @@ entity_gravityhole_17:holemode:auto
 entity_gravityhole_17:position:-5.6 5.6 -39.2
 
 entity_trigger_zone_18:rotation:1 0 -5.96047e-08 0.0395647
-entity_trigger_zone_18:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.brush,18.brush
+entity_trigger_zone_18:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,18.map
 entity_trigger_zone_18:physics_shape:shape_box
 entity_trigger_zone_18:physics:enabled
 entity_trigger_zone_18:physics_collision:nocollide
