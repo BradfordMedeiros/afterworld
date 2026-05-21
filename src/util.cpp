@@ -288,6 +288,10 @@ void setGameObjectEmission(objid id, std::optional<glm::vec3> emission){
   );
 }
 
+void setGameObjectEmitterEffectTint(objid id, glm::vec4 tint){
+  gameapi -> setSingleGameObjectAttr(id, "effect-tint", tint);
+}
+
 void setAmbientLight(glm::vec3 light){
   gameapi -> setWorldState({ 
     ObjectValue {

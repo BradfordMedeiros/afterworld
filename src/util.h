@@ -74,6 +74,7 @@ void setGameObjectPhysics(objid id, float mass, float restitution, float frictio
 void setGameObjectPhysicsMass(objid id, float mass);
 void setGameObjectPhysicsOptions(objid id, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity);
 void setGameObjectEmission(objid id, std::optional<glm::vec3> emission);
+void setGameObjectEmitterEffectTint(objid id, glm::vec4 tint);
 
 void setAmbientLight(glm::vec3 light);
 void setVisualizeVoxelLighting(bool enable);

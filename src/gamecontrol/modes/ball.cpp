@@ -251,7 +251,11 @@ void setBallLevelComplete(){
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
 
-objid createBallObj(objid sceneId, glm::vec3 position){
+struct BallObj {
+	objid id;
+	std::optional<objid> spiritId;
+};
+BallObj createBallObj(objid sceneId, glm::vec3 position){
   GameobjAttributes attr { 
   	.attr = {
   		{ "vehicle", "ball" },
@@ -271,6 +275,7 @@ objid createBallObj(objid sceneId, glm::vec3 position){
  	auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);  
 
   bool addParticle = true;
+  std::optional<objid> spiritId;
 
   if (addParticle){
   
@@ -278,13 +283,14 @@ objid createBallObj(objid sceneId, glm::vec3 position){
   		modassert(ball.has_value(), "ball was not created");
   		GameobjAttributes emitterAttr { 
   			.attr = {
- 					{ "effekseer", "./res/particles/spirit.efkefc" },
+ 					{ "effekseer", "./res/particles/spirit-white.efkefc" },
  					{ "state", "enabled" },
   			} 
   		};
   		std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
   		auto ballSpirit = gameapi -> makeObjectAttr(sceneId, std::string("+ballSpirit"), emitterAttr, submodelAttributesEmitter);
   		modassert(ballSpirit.has_value(), "ballSpirit was not created");
+  		spiritId = ballSpirit;
   		gameapi -> makeParent(ballSpirit.value(), ball.value());
 		}  	
   }
@@ -304,7 +310,10 @@ objid createBallObj(objid sceneId, glm::vec3 position){
   	gameapi -> makeParent(ballSound.value(), ball.value());
 	}
 
-	return ball.value();
+	return BallObj {
+		.id = ball.value(),
+		.spiritId = spiritId,
+	};
 }
 
 void setPowerupTexture(std::string texture, std::optional<float> startTime, std::optional<float> duration){
@@ -348,9 +357,10 @@ void ballModeSetPlayMode(objid sceneId){
 
   //////////
 
+  auto ballData = createBallObj(sceneId, playerSpawnPosition);
+	auto ballId = ballData.id;
 
-	auto ballId = createBallObj(sceneId, playerSpawnPosition);
-
+	setGameObjectEmitterEffectTint(ballData.spiritId.value(), glm::vec4(0.f, 1.f, 0.f, 1.f));
 
 	GameTypeInfo ballMode = getBallMode();
 	BallModeOptions modeOptions {};
