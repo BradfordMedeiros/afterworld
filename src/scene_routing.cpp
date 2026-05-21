@@ -295,17 +295,44 @@ std::vector<RawLevelData> getRawLevelData(){
     auto mapName = filePathData.dirPath + "/map.map";
     bool mapExists = fileExistsFromPackage(mapName);
     std::cout << "dyn map: " << mapName << ", exists = " << mapExists << std::endl;
-    
+      
+    glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
+    glm::vec3 skyboxColor(0.8f, 0.8f, 0.8f);
+    std::string skybox("../gameresources/skybox/storm");
+    std::string description("[no description]");
+
+    if (mapExists){
+      auto mapData = parseMapData(mapName);
+      auto& entity = getEntityByName(mapData, "worldspawn");
+      auto ambient = getVec3Value(entity, "ambient");
+      if (ambient.has_value()){
+        ambientLight = ambient.value();
+      }
+      auto skyboxcolor = getVec3Value(entity, "skyboxcolor");
+      if (skyboxcolor.has_value()){
+        skyboxColor = skyboxcolor.value();
+      }
+
+      auto skyboxAttr = getValue(entity, "skybox");
+      if (skyboxAttr.has_value()){
+        skybox = *skyboxAttr.value();
+      }
+
+      auto descriptionAttr = getValue(entity, "description");
+      if (descriptionAttr.has_value()){
+        description = *descriptionAttr.value();
+      }
+    }
 
     levelData.push_back(RawLevelData {
       .name = levelPathData.filename,
       .filepath = rawsceneFile,
-      .description = "placeholder description",
+      .description = description,
       .image = image,
       .shortcut = levelPathData.filename,
-      .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
-      .skyboxColor = glm::vec3(0.8f, 0.8f, 0.8f),
-      .skybox = "../gameresources/skybox/storm",
+      .ambientLight = ambientLight,
+      .skyboxColor = skyboxColor,
+      .skybox = skybox,
       .audioClipPath = "../gameresources/sound/rain.wav",
       .mode = "ball",
       .additionalTokens = {},      

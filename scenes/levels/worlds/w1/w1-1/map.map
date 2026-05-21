@@ -4,6 +4,10 @@
 {
 "classname" "worldspawn"
 "_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"skyboxcolor" "0.2 0.2 0.2"
+"ambient" "0.3 0.3 0.3"
+"skybox" "../gameresources/skybox/techno"
+"description" "Straight line to the end!"
 "_tb_layer_omit_from_export" "1"
 // brush 0
 {
