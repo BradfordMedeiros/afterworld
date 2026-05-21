@@ -130,22 +130,6 @@ void setScenarioOptions(ScenarioOptions& options){
 }
 
 
-
-std::vector<Level> loadLevels(){
-  auto query = gameapi -> compileSqlQuery("select filepath, name from levels", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  std::vector<Level> levels = {};
-  for (auto &row : result){
-    levels.push_back(Level {
-      .scene = row.at(0),
-      .name = row.at(1),
-    });
-  }
-  return levels;
-}
-
 SceneManagement createSceneManagement(){
   return SceneManagement {
     .levels = loadLevels(),

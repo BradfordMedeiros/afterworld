@@ -3,30 +3,9 @@
 extern CustomApiBindings* gameapi;
 
 int selectedLevel = 0;
-struct UILevel {
-  std::string name;
-  std::string description;
-  std::string image;
-  std::string shortcut;
-};
 
-std::vector<UILevel> queryLevels(){
-  auto query = gameapi -> compileSqlQuery("select name, description, image, shortcut from levels", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query queryLevels");
+std::vector<UILevel> queryLevels();
 
-  std::vector<UILevel> levels;
-  for (auto &row : result){
-    levels.push_back(UILevel{
-      .name = row.at(0),
-      .description = row.at(1),
-      .image = row.at(2),
-      .shortcut = row.at(3),
-    });
-  }
-  return levels;
-}
 
 std::function<void(int)> onSelectLevel = [](int levelIndex) -> void {
   std::cout << "on select level: " << levelIndex << std::endl;

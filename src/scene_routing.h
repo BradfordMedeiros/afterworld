@@ -43,5 +43,9 @@ struct SceneRouterPath {
 
 std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, std::vector<std::string>* _params);
 
+// level specific code
+std::vector<Level> loadLevels();
+
+
 
 #endif 

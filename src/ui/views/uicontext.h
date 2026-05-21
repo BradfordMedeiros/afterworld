@@ -9,6 +9,7 @@ struct Level {
   std::string scene;
   std::string name;
 };
+
 struct LevelUIInterface {
   std::function<void(Level&)> goToLevel;
   std::function<void()> goToMenu;

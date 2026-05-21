@@ -139,6 +139,14 @@ void unregisterUiSource(int symbol);
 void* uiConnect(int symbol);
 std::string uiStoreToStr();
 
+struct UILevel {
+  std::string name;
+  std::string description;
+  std::string image;
+  std::string shortcut;
+};
+
+
 extern std::optional<std::function<void()>> nullClick;
 
 extern const int horizontalSymbol;
