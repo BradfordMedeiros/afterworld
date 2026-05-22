@@ -138,6 +138,13 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "player_start"){
       *modelName = "playerspawn";
       *shouldWrite = true;
+    }else if (*className.value() == "activateable"){
+      //modassert(false, "activeable not yet implemented");
+      *shouldWrite = true;
+      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        .field = "mesh",
+        .attributeValue = paths::POWERUP_MODEL_JUMP,
+      });
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       *shouldWrite = true;
 

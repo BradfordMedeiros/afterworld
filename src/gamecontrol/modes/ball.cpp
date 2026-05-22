@@ -22,16 +22,26 @@ struct WorldView {
 	std::string world;
 };
 
+enum BallModeSpirit {
+	MODE_NONE,
+	MODE_RED,
+	MODE_BLUE,
+	MODE_YELLOW,
+	MODE_PURPLE,
+};
+
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    objid ballId;
+   objid spiritId;
    objid sceneId;
    bool didLose = false;
    bool shouldReset = false;
    bool didReset = false;
    std::optional<float> ballStartTime;
    std::optional<float> finalBallTime;
-
+   BallModeSpirit spirit = MODE_NONE;
+   std::optional<BallModeSpirit> changeSpirit;
 
    std::optional<WorldView> worldView;
 
@@ -360,13 +370,15 @@ void ballModeSetPlayMode(objid sceneId){
   auto ballData = createBallObj(sceneId, playerSpawnPosition);
 	auto ballId = ballData.id;
 
-	setGameObjectEmitterEffectTint(ballData.spiritId.value(), glm::vec4(0.f, 1.f, 0.f, 1.f));
 
 	GameTypeInfo ballMode = getBallMode();
 	BallModeOptions modeOptions {};
 	modeOptions.ballId = ballId;
+	modeOptions.spiritId = ballData.spiritId.value();
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
+
+	setGameObjectEmitterEffectTint(modeOptions.spiritId, glm::vec4(0.f, 1.f, 0.f, 0.f));
 
 	changeGameType(gametypeSystem, ballMode, "ball", &modeOptions);
 }
@@ -689,7 +701,22 @@ GameTypeInfo getBallMode(){
 	  				}
 	  			}
 	  		}
+	  	}
 
+	  	if (key == 'Z'){
+	  		ballMode.changeSpirit = MODE_NONE;
+	  	}
+	  	if (key == 'X'){
+	  		ballMode.changeSpirit = MODE_RED;
+	  	}
+	  	if (key == 'C'){
+	  		ballMode.changeSpirit = MODE_BLUE;
+	  	}
+	  	if (key == 'V'){
+	  		ballMode.changeSpirit = MODE_YELLOW;
+	  	}
+	  	if (key == 'B'){
+	  		ballMode.changeSpirit = MODE_PURPLE;
 	  	}
 
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
@@ -739,9 +766,28 @@ GameTypeInfo getBallMode(){
 
 	  	// below is the ball game logic itself
 	  		std::cout << "ball onframe" << std::endl;
+
+	  		if (ballMode.changeSpirit.has_value()){
+	  			ballMode.spirit = ballMode.changeSpirit.value();
+	  			ballMode.changeSpirit = std::nullopt;
+
+	  			if (ballMode.spirit == MODE_NONE){
+	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(0.f, 0.f, 0.f, 1.f));
+	  			}else if (ballMode.spirit == MODE_RED){
+	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(1.f, 0.f, 0.f, 1.f));
+	  			}else if (ballMode.spirit == MODE_BLUE){
+	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	  			}else if (ballMode.spirit == MODE_YELLOW){
+	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(1.f, 1.f, 0.f, 1.f));
+	  			}else if (ballMode.spirit == MODE_PURPLE){
+	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(1.f, 0.f, 1.f, 1.f));
+	  			}
+	  		}
+
+
 	  		if (isInKillPlane(ballMode.ballId) && !ballMode.didLose && !ballMode.didReset){ // didReset b/c otherwise at same pos
 		  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId);
-	  			if (!(ballVehicle.value() -> powerup.has_value() && ballVehicle.value() -> powerup.value().powerup == INVINCIBILITY && ballVehicle.value() -> powerup.value().useTime.has_value())){
+	  			if (ballMode.spirit != MODE_YELLOW && !(ballVehicle.value() -> powerup.has_value() && ballVehicle.value() -> powerup.value().powerup == INVINCIBILITY && ballVehicle.value() -> powerup.value().useTime.has_value())){
 	  				ballMode.didLose = true;
 	  				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 	  				createExplosion(position, 5.f, 0.f);

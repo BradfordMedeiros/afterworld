@@ -38,6 +38,9 @@ DEFINE_RESOURCE(POWERUP_MODEL_DASH, "../gameresources/build/objtypes/powerup.glt
 DEFINE_RESOURCE(POWERUP_MODEL_TELEPORT, "../gameresources/build/objtypes/powerup.gltf")
 DEFINE_RESOURCE(POWERUP_MODEL_INVINCIBILITY, "../gameresources/build/objtypes/powerup.gltf")
 
+DEFINE_RESOURCE(MUSHROOM, "../gameresources/build/uncategorized/metalmushroom.gltf")
+
+
 // ARCADE 
 ////////////////////////////////////////////////////////////////////////////////////
 
