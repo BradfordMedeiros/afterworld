@@ -141,10 +141,36 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "activateable"){
       //modassert(false, "activeable not yet implemented");
       *shouldWrite = true;
-      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+      attributes.push_back(GameobjAttributeOpts { 
         .field = "mesh",
-        .attributeValue = paths::POWERUP_MODEL_JUMP,
+        .attributeValue = paths::MUSHROOM,
       });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "scale",
+        .attributeValue = glm::vec3(10.f, 10.f, 10.f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "tint",
+        .attributeValue = glm::vec4(1.f, 0.f, 0.f, 0.8f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "layer",
+        .attributeValue = "transparency",
+      });
+
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "physics_shape",
+        .attributeValue = "shape_sphere",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "physics",
+        .attributeValue = "enabled",
+      });
+      //attributes.push_back(GameobjAttributeOpts {
+      //  .field = "physics_collision",
+      //  .attributeValue = "nocollide",
+      //});
+
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       *shouldWrite = true;
 
@@ -289,17 +315,6 @@ CompileMapFns getCompileMapForBallGame(){
       *shouldWrite = true;
 
       addCoreTrench(entity, attributes, brushFileOut);
-
-      for (auto &keyValue : entity.keyValues){
-        if (keyValue.key == "_tb_textures" || keyValue.key == "classname" || keyValue.key == "_tb_def"){
-          continue;
-        }
-        std::cout << "compile: worldspawn key: " << keyValue.key << ", value: " << keyValue.value << std::endl;
-        attributes.push_back(GameobjAttributeOpts {
-          .field = keyValue.key, 
-          .attributeValue = keyValue.value,
-        });
-      }
     }else if (*className.value() == "player_end"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
