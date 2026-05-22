@@ -171,6 +171,78 @@ CompileMapFns getCompileMapForBallGame(){
       //  .attributeValue = "nocollide",
       //});
 
+    }else if (*className.value() == "soul"){
+      *shouldWrite = true;
+      *modelName = std::string("+") + *modelName;
+
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "scale",
+        .attributeValue = glm::vec3(0.5f, 0.5f, 0.5f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "state",
+        .attributeValue = "enabled",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "effekseer",
+        .attributeValue = "./res/particles/spirit-white.efkefc",
+      });
+
+
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "physics_shape",
+        .attributeValue = "shape_sphere",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "physics",
+        .attributeValue = "enabled",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "physics_collision",
+        .attributeValue = "nocollide",
+      });
+
+
+
+      auto soulTypePtr = getValue(entity, "type");
+      modassert(soulTypePtr.has_value(), "soul needs a type field");
+
+      auto soulType = *soulTypePtr.value();
+      static std::vector<std::string> validTypes {
+        "red", "blue", "yellow", "purple",
+      };
+
+      bool validSoulType = false;
+      for (auto& validType : validTypes){
+        if (soulType == validType){
+          validSoulType = true;
+          break;
+        }
+      }
+      modassert(validSoulType, std::string("invalid soul type: ") + soulType);
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "soul",
+        .attributeValue = soulType,
+      });
+
+
+      glm::vec4 color(1.f, 1.f, 1.f, 1.f);
+      if (soulType == "red"){
+        color = glm::vec4(1.f, 0.f, 0.f, 1.f);
+      }else if (soulType == "blue"){
+        color = glm::vec4(0.f, 0.f, 1.f, 1.f);
+      }else if (soulType == "yellow"){
+        color = glm::vec4(1.f, 1.f, 0.f, 1.f);
+      }else if (soulType == "purple"){
+        color = glm::vec4(1.f, 0.f, 1.f, 1.f);
+      }
+
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "effect-tint",
+        .attributeValue = color,
+      });
+
+
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       *shouldWrite = true;
 

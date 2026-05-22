@@ -279,9 +279,17 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
 			{ "physics", "enabled" },
 			{ "position", position},
 			{ "layer", "transparency" },
+
   	} 
   };
+
 	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  submodelAttributes["ball1/eye"] = GameobjAttributes {
+  	.attr = {
+  		//{ "flipbook", glm::vec3(4.f, 4.f, 4.f) },
+  		// { "tint", glm::vec4(0.f, 0.f, 5.f, 1.f) },
+  	}
+  };
  	auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);  
 
   bool addParticle = true;
@@ -593,7 +601,6 @@ void handleMultiselectCollision(int32_t obj1, int32_t obj2){
 
 	auto activeBall = getBallModeOptions().ballId;
 
-
   if (isControlledVehicle(obj1) && obj1 == activeBall){
     auto objAttr = getAttrHandle(obj2);
     auto worldSelect = getStrAttr(objAttr, "worldselect");
@@ -611,12 +618,47 @@ void handleMultiselectCollision(int32_t obj1, int32_t obj2){
   }
 }
 
+void deliverSoul(std::string& soul, objid soulId){
+	auto& ballMode = getBallModeOptions();
+
+	if (soul == "red"){
+		ballMode.changeSpirit = MODE_RED;
+	}else if (soul == "blue"){
+		ballMode.changeSpirit = MODE_BLUE;
+	}else if (soul == "yellow"){
+		ballMode.changeSpirit = MODE_YELLOW;
+	}else if (soul == "purple"){
+		ballMode.changeSpirit = MODE_PURPLE;
+	}
+  gameapi -> removeObjectById(soulId);
+
+}
+
+void handleSoulCollision(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto soul = getStrAttr(objAttr, "soul");
+    if (soul.has_value()){
+      deliverSoul(soul.value(), obj2);
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto soul = getStrAttr(objAttr, "soul");
+    if (soul.has_value()){
+      deliverSoul(soul.value(), obj1);
+    }
+  }
+}
+
+
 void handleBallModeCollision(objid obj1, objid obj2){
   handleLevelEndCollision(obj1, obj2);
   handleGravityHoleCollision(obj1, obj2);
   handlePowerupCollision(obj1, obj2);
 
   handleMultiselectCollision(obj1, obj2);
+
+  handleSoulCollision(obj1, obj2);
 
   // just check if it this the multiview here
 }
@@ -703,19 +745,19 @@ GameTypeInfo getBallMode(){
 	  		}
 	  	}
 
-	  	if (key == 'Z'){
+	  	if (key == 'Z' && action == 1){
 	  		ballMode.changeSpirit = MODE_NONE;
 	  	}
-	  	if (key == 'X'){
+	  	if (key == 'X' && action == 1){
 	  		ballMode.changeSpirit = MODE_RED;
 	  	}
-	  	if (key == 'C'){
+	  	if (key == 'C' && action == 1){
 	  		ballMode.changeSpirit = MODE_BLUE;
 	  	}
-	  	if (key == 'V'){
+	  	if (key == 'V' && action == 1){
 	  		ballMode.changeSpirit = MODE_YELLOW;
 	  	}
-	  	if (key == 'B'){
+	  	if (key == 'B' && action == 1){
 	  		ballMode.changeSpirit = MODE_PURPLE;
 	  	}
 
@@ -770,6 +812,7 @@ GameTypeInfo getBallMode(){
 	  		if (ballMode.changeSpirit.has_value()){
 	  			ballMode.spirit = ballMode.changeSpirit.value();
 	  			ballMode.changeSpirit = std::nullopt;
+  			  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
 
 	  			if (ballMode.spirit == MODE_NONE){
 	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(0.f, 0.f, 0.f, 1.f));
