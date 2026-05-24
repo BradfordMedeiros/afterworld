@@ -116,7 +116,7 @@ struct BallGameCompile {
 
 CompileMapFns getCompileMapForBallGame(){
   auto ballGameCompileSharedPtr = std::make_shared<BallGameCompile>();
-  auto compileFn = [ballGameCompileSharedPtr](std::string& brushFileOut, MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
+  auto compileFn = [ballGameCompileSharedPtr](std::string& brushFileOut, MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName, std::vector<AdditionalEntity>& additionalEntities) -> void {
     auto& ballGameCompile = *ballGameCompileSharedPtr;
     auto origin = getValue(entity, "origin");
     auto className = getValue(entity, "classname");
@@ -173,6 +173,8 @@ CompileMapFns getCompileMapForBallGame(){
 
     }else if (*className.value() == "soul"){
       *shouldWrite = true;
+
+      auto originalModelName = *modelName;
       *modelName = std::string("+") + *modelName;
 
       attributes.push_back(GameobjAttributeOpts {
@@ -241,6 +243,33 @@ CompileMapFns getCompileMapForBallGame(){
         .field = "effect-tint",
         .attributeValue = color,
       });
+
+
+      {
+        std::vector<GameobjAttributeOpts> attributes;
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "mesh",
+          .attributeValue = paths::SOUL_HOLDER,
+        });
+
+        auto position = getEntityPosition(mapData, entity);
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "position",
+          .attributeValue = position + glm::vec3(0.f, -0.72f, 0.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+        additionalEntities.push_back(AdditionalEntity {
+          .modelName = originalModelName + "_holder",
+          .attributes = attributes,
+        });
+      }
 
 
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){

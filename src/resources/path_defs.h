@@ -39,6 +39,7 @@ DEFINE_RESOURCE(POWERUP_MODEL_TELEPORT, "../gameresources/build/objtypes/powerup
 DEFINE_RESOURCE(POWERUP_MODEL_INVINCIBILITY, "../gameresources/build/objtypes/powerup.gltf")
 
 DEFINE_RESOURCE(MUSHROOM, "../gameresources/build/uncategorized/metalmushroom.gltf")
+DEFINE_RESOURCE(SOUL_HOLDER, "../gameresources/build/uncategorized/soulspawn.gltf")
 
 
 // ARCADE 
