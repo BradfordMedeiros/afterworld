@@ -34,11 +34,15 @@ struct Activatable {
 std::unordered_map<objid, Activatable> activateables;
 
 void activateAllItems(){
+
+	static bool activate = false;
+	activate = !activate;
+
 	std::cout << "activateAllItems called" << std::endl;
 	for (auto& [id, item] : activateables){
 		std::cout << "activate: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
 
-		gameapi -> playAnimation(id, "activate", FORWARDS, std::nullopt, 0, false, std::nullopt);
+		gameapi -> playAnimation(id, activate ? "activate" : "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
 	}
 }
 
