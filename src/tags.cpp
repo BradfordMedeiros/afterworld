@@ -28,21 +28,76 @@ extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 
 
 struct Activatable {
-
+	objid id;
+	std::optional<float> activateLength;
+	std::optional<float> deactivateLength;
+	bool activated = false;
+	float lastActivateTime = 0;
 };
 
 std::unordered_map<objid, Activatable> activateables;
 
-void activateAllItems(){
+bool isActivating(Activatable& activateable){
+	if (!activateable.activated){
+		return false;
+	}
+	if (!activateable.activateLength.has_value()){
+		return false;
+	}
+	auto currTime = gameapi -> timeSeconds(false);
+	auto elapsedTime = currTime -  activateable.lastActivateTime;
+	auto finishedActivating = elapsedTime > activateable.activateLength.value();
+	return !finishedActivating;
+}
+bool isDeactivating(Activatable& activateable){
+	if (activateable.activated){
+		return false;
+	}
+	if (!activateable.deactivateLength.has_value()){
+		return false;
+	}
+	auto currTime = gameapi -> timeSeconds(false);
+	auto elapsedTime = currTime -  activateable.lastActivateTime;
+	auto finishedActivating = elapsedTime > activateable.deactivateLength.value();
+	return !finishedActivating;
+}
+bool isActivated(Activatable& activateable){
+	return activateable.activated;	
+}
+void activate(Activatable& activateable){
+	activateable.activated = true;
+	activateable.lastActivateTime = gameapi -> timeSeconds(false);
+	gameapi -> playAnimation(activateable.id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
+	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
 
-	static bool activate = false;
-	activate = !activate;
+}
+void deactivate(Activatable& activateable){
+	activateable.activated = false;
+	activateable.lastActivateTime = gameapi -> timeSeconds(false);
+	gameapi -> playAnimation(activateable.id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
+	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
+}
+
+void toggleActivation(Activatable& item){
+	if (isActivating(item) || isDeactivating(item)){
+		return;
+	}
+	if (isActivated(item)){
+		deactivate(item);
+	}else{
+		activate(item);
+	}
+}
+
+void activateAllItems(){
+	static bool shouldActivate = false;
+	shouldActivate = !shouldActivate;
 
 	std::cout << "activateAllItems called" << std::endl;
 	for (auto& [id, item] : activateables){
-		std::cout << "activate: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
-
-		gameapi -> playAnimation(id, activate ? "activate" : "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+		toggleActivation(item);
 	}
 }
 
@@ -853,8 +908,12 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "activatable",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
+			auto activateLength = gameapi -> animationLength(id, "activate");
+			auto deactivateLength = gameapi -> animationLength(id, "deactivate");
 		 	activateables[id] = Activatable {
-
+		 		.id = id,
+		 		.activateLength = activateLength,
+		 		.deactivateLength = deactivateLength,
 		 	};
 		},
   	    .onRemove = [](int32_t id) -> void {
