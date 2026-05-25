@@ -440,6 +440,51 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "player_end",
           .attributeValue = "true",
         });
+    }else if (*className.value() == "tube_exit"){
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = "../gameresources/build/uncategorized/darkwires_spawn.gltf",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "activatable",
+          .attributeValue = "true",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+          .submodel = "spikes",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+          .submodel = "spikes",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+          .submodel = "sphere",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+          .submodel = "sphere",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+          .submodel = "model",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+          .submodel = "model",
+        });
+
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
