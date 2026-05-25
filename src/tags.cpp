@@ -27,6 +27,21 @@ extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 
 
+struct Activatable {
+
+};
+
+std::unordered_map<objid, Activatable> activateables;
+
+void activateAllItems(){
+	std::cout << "activateAllItems called" << std::endl;
+	for (auto& [id, item] : activateables){
+		std::cout << "activate: " << gameapi -> getGameObjNameForId(id).value() << std::endl;
+
+		gameapi -> playAnimation(id, "activate", FORWARDS, std::nullopt, 0, false, std::nullopt);
+	}
+}
+
 struct TextureFlipbook {
 	int width;
 	int height;
@@ -831,7 +846,20 @@ std::vector<TagUpdater> tagupdates = {
   	    },
   	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
+	TagUpdater {
+		.attribute = "activatable",
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
+		 	activateables[id] = Activatable {
 
+		 	};
+		},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	activateables.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
+	},
 };
 
 void onTagsMessage(std::string& key, std::any& value){

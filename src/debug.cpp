@@ -380,6 +380,9 @@ void setupViewports(){
 	setupDebugView();
 }
 
+
+void activateAllItems();
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -403,15 +406,21 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	}
   }
 
+
+  if (key == 'R' && action == 1) {
+  	//if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
+	  //	//setIsAlive(getActivePlayerId().value(), false);
+  	//}
+
+  	activateAllItems();
+
+  }
+
   if (!getArgEnabled("dev")){
   	return;
   }
 
-  if (key == 'R' && action == 1) {
-  	if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
-	  	//setIsAlive(getActivePlayerId().value(), false);
-  	}
-  }
+
 
   if (key == '[' && action == 0){
   	auto activeCamera = gameapi -> getCameraTransform(getDefaultPlayerIndex());
