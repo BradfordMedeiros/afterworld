@@ -551,3 +551,81 @@ void handleRemoveKillplaneCollision(objid obj1, objid obj2){
     objectsInKillplane.erase(obj2);
   }
 }
+
+extern std::unordered_map<objid, Activatable> activateables;
+
+bool isActivating(Activatable& activateable){
+	if (!activateable.activated){
+		return false;
+	}
+	if (!activateable.activateLength.has_value()){
+		return false;
+	}
+	auto currTime = gameapi -> timeSeconds(false);
+	auto elapsedTime = currTime -  activateable.lastActivateTime;
+	auto finishedActivating = elapsedTime > activateable.activateLength.value();
+	return !finishedActivating;
+}
+bool isDeactivating(Activatable& activateable){
+	if (activateable.activated){
+		return false;
+	}
+	if (!activateable.deactivateLength.has_value()){
+		return false;
+	}
+	auto currTime = gameapi -> timeSeconds(false);
+	auto elapsedTime = currTime -  activateable.lastActivateTime;
+	auto finishedActivating = elapsedTime > activateable.deactivateLength.value();
+	return !finishedActivating;
+}
+bool isActivated(Activatable& activateable){
+	return activateable.activated;	
+}
+void activate(Activatable& activateable, std::optional<int> mask){
+	// mask if it's 0 it activates.
+	if (mask.has_value() && (mask.value() & activateable.mask)){
+		return;
+	}
+	if (activateable.activated){
+		return;
+	}
+	activateable.activated = true;
+	activateable.lastActivateTime = gameapi -> timeSeconds(false);
+	gameapi -> playAnimation(activateable.id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
+	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
+
+}
+void deactivate(Activatable& activateable){
+	if (!activateable.activated){
+		return;
+	}
+	activateable.activated = false;
+	activateable.lastActivateTime = gameapi -> timeSeconds(false);
+	gameapi -> playAnimation(activateable.id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
+	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
+}
+
+void toggleActivation(Activatable& item){
+	if (isActivating(item) || isDeactivating(item)){
+		return;
+	}
+	if (isActivated(item)){
+		deactivate(item);
+	}else{
+		activate(item, std::nullopt);
+	}
+}
+
+
+
+void activateAllItems(){
+	static bool shouldActivate = false;
+	shouldActivate = !shouldActivate;
+
+	std::cout << "activateAllItems called" << std::endl;
+	for (auto& [id, item] : activateables){
+		toggleActivation(item);
+	}
+}

@@ -105,4 +105,30 @@ void handleRemoveKillplaneCollision(objid obj1);
 void handleRemoveKillplaneCollision(objid obj1, objid obj2);
 bool isInKillPlane(objid id);
 
+
+struct ActivationManual { };
+struct ActivationNear {};
+
+typedef std::variant<ActivationManual, ActivationNear> ActivationType;
+struct Activatable {
+	objid id;
+	std::optional<float> activateLength;
+	std::optional<float> deactivateLength;
+	bool activated = false;
+	float lastActivateTime = 0;
+
+	int mask = 0;
+	ActivationType type = ActivationManual{};
+};
+
+
+bool isActivating(Activatable& activateable);
+bool isDeactivating(Activatable& activateable);
+bool isActivated(Activatable& activateable);
+void activate(Activatable& activateable, std::optional<int> mask);
+void deactivate(Activatable& activateable);
+void toggleActivation(Activatable& item);
+bool setCanActivate(objid id, bool canActivate);
+void activateAllItems();
+
 #endif 

@@ -25,83 +25,10 @@ extern std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 extern std::unordered_map<objid, EmissionObject> emissionObjects;
 extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
+extern std::unordered_map<objid, Activatable> activateables;
 
+extern std::unordered_map<objid, Activatable> activateables;
 
-struct ActivationManual { };
-struct ActivationNear {};
-
-typedef std::variant<ActivationManual, ActivationNear> ActivationType;
-struct Activatable {
-	objid id;
-	std::optional<float> activateLength;
-	std::optional<float> deactivateLength;
-	bool activated = false;
-	float lastActivateTime = 0;
-
-	ActivationType type = ActivationManual{};
-};
-
-std::unordered_map<objid, Activatable> activateables;
-
-bool isActivating(Activatable& activateable){
-	if (!activateable.activated){
-		return false;
-	}
-	if (!activateable.activateLength.has_value()){
-		return false;
-	}
-	auto currTime = gameapi -> timeSeconds(false);
-	auto elapsedTime = currTime -  activateable.lastActivateTime;
-	auto finishedActivating = elapsedTime > activateable.activateLength.value();
-	return !finishedActivating;
-}
-bool isDeactivating(Activatable& activateable){
-	if (activateable.activated){
-		return false;
-	}
-	if (!activateable.deactivateLength.has_value()){
-		return false;
-	}
-	auto currTime = gameapi -> timeSeconds(false);
-	auto elapsedTime = currTime -  activateable.lastActivateTime;
-	auto finishedActivating = elapsedTime > activateable.deactivateLength.value();
-	return !finishedActivating;
-}
-bool isActivated(Activatable& activateable){
-	return activateable.activated;	
-}
-void activate(Activatable& activateable){
-	if (activateable.activated){
-		return;
-	}
-	activateable.activated = true;
-	activateable.lastActivateTime = gameapi -> timeSeconds(false);
-	gameapi -> playAnimation(activateable.id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
-	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
-	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
-
-}
-void deactivate(Activatable& activateable){
-	if (!activateable.activated){
-		return;
-	}
-	activateable.activated = false;
-	activateable.lastActivateTime = gameapi -> timeSeconds(false);
-	gameapi -> playAnimation(activateable.id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
-	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
-	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
-}
-
-void toggleActivation(Activatable& item){
-	if (isActivating(item) || isDeactivating(item)){
-		return;
-	}
-	if (isActivated(item)){
-		deactivate(item);
-	}else{
-		activate(item);
-	}
-}
 
 void onActivationFrame(){
 	auto players = getPlayers();
@@ -124,8 +51,8 @@ void onActivationFrame(){
 				}
 				std::cout << "player position: " << print(playerPosition) << std::endl;
 
-				if (distance < 5.f && !isActivated(item)){
-					activate(item);
+				if (distance < 9.f && !isActivated(item)){
+					activate(item, 0b0);
 				}
 				if (distance > 10.f && isActivated(item)){
 					deactivate(item);
@@ -136,15 +63,6 @@ void onActivationFrame(){
 	}
 }
 
-void activateAllItems(){
-	static bool shouldActivate = false;
-	shouldActivate = !shouldActivate;
-
-	std::cout << "activateAllItems called" << std::endl;
-	for (auto& [id, item] : activateables){
-		toggleActivation(item);
-	}
-}
 
 struct TextureFlipbook {
 	int width;
@@ -955,10 +873,15 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto activateLength = gameapi -> animationLength(id, "activate");
 			auto deactivateLength = gameapi -> animationLength(id, "deactivate");
+	    	auto activeMaskFloat = getSingleFloatAttr(id, "activate-mask");
+
+	    	int mask = activeMaskFloat.has_value() ? static_cast<int>(activeMaskFloat.value()) : 0;   
+
 		 	activateables[id] = Activatable {
 		 		.id = id,
 		 		.activateLength = activateLength,
 		 		.deactivateLength = deactivateLength,
+		 		.mask = mask,
 		 		.type = ActivationNear{},
 		 	};
 		},

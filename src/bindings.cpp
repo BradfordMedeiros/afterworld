@@ -39,6 +39,7 @@ std::unordered_map<objid, ExplosionObj> explosionObjects;
 std::optional<glm::vec3> oldGravity;  // wtf?
 ArcadeApi arcadeApi = createArcadeApi();
 std::unordered_map<objid, ExtraSurfaceVelocity> extraVelocity;
+std::unordered_map<objid, Activatable> activateables;
 
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;

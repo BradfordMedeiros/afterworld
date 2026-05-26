@@ -814,6 +814,7 @@ GameTypeInfo getBallMode(){
 	  			ballMode.changeSpirit = std::nullopt;
   			  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
 
+  			  
 	  			if (ballMode.spirit == MODE_NONE){
 	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(0.f, 0.f, 0.f, 1.f));
 	  			}else if (ballMode.spirit == MODE_RED){
