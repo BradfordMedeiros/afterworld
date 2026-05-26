@@ -502,6 +502,15 @@ void entityActionVehicle(objid id){
 	}
 }
 
+std::optional<glm::vec3> entityVehiclePosition(objid id){
+	auto& controllable = controllableEntities.at(id);
+	if (!controllable.vehicle.has_value()){
+		return std::nullopt;
+	}
+  auto position = gameapi -> getGameObjectPos(controllable.vehicle.value(), true, "[gamelogic] entityVehiclePosition");
+  return position;
+}
+
 
 void setEntityFocusArcade(std::optional<objid> arcadeId, objid id){
 	auto playerIndex = getPlayerIndexForEntity(id).value();

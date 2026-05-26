@@ -27,12 +27,18 @@ extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 
 
+struct ActivationManual { };
+struct ActivationNear {};
+
+typedef std::variant<ActivationManual, ActivationNear> ActivationType;
 struct Activatable {
 	objid id;
 	std::optional<float> activateLength;
 	std::optional<float> deactivateLength;
 	bool activated = false;
 	float lastActivateTime = 0;
+
+	ActivationType type = ActivationManual{};
 };
 
 std::unordered_map<objid, Activatable> activateables;
@@ -65,6 +71,9 @@ bool isActivated(Activatable& activateable){
 	return activateable.activated;	
 }
 void activate(Activatable& activateable){
+	if (activateable.activated){
+		return;
+	}
 	activateable.activated = true;
 	activateable.lastActivateTime = gameapi -> timeSeconds(false);
 	gameapi -> playAnimation(activateable.id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
@@ -73,6 +82,9 @@ void activate(Activatable& activateable){
 
 }
 void deactivate(Activatable& activateable){
+	if (!activateable.activated){
+		return;
+	}
 	activateable.activated = false;
 	activateable.lastActivateTime = gameapi -> timeSeconds(false);
 	gameapi -> playAnimation(activateable.id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
@@ -88,6 +100,39 @@ void toggleActivation(Activatable& item){
 		deactivate(item);
 	}else{
 		activate(item);
+	}
+}
+
+void onActivationFrame(){
+	auto players = getPlayers();
+	for (auto& [id, item] : activateables){
+
+		auto activateNear = std::get_if<ActivationNear>(&item.type);
+		if (activateNear){
+			for (auto& player : players){
+				auto itemPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] onActivationFrame");
+				auto playerPosition = getEntityPositionByPlayerIndex(player.viewport).value();
+				float distance = glm::distance(playerPosition, itemPosition);
+				if (player.entityId.has_value()){
+					auto vehiclePosition = entityVehiclePosition(player.entityId.value());
+					if (vehiclePosition.has_value()){
+						auto vehicleDistance = glm::distance(vehiclePosition.value(), itemPosition);
+						if (vehicleDistance < distance){
+							distance = vehicleDistance;
+						}						
+					}
+				}
+				std::cout << "player position: " << print(playerPosition) << std::endl;
+
+				if (distance < 5.f && !isActivated(item)){
+					activate(item);
+				}
+				if (distance > 10.f && isActivated(item)){
+					deactivate(item);
+				}
+			}
+		}
+
 	}
 }
 
@@ -914,12 +959,14 @@ std::vector<TagUpdater> tagupdates = {
 		 		.id = id,
 		 		.activateLength = activateLength,
 		 		.deactivateLength = deactivateLength,
+		 		.type = ActivationNear{},
 		 	};
 		},
   	    .onRemove = [](int32_t id) -> void {
   	    	activateables.erase(id);
   	    },
   	    .onFrame = []() -> void {
+  	    	onActivationFrame();
   	    },
   	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
