@@ -890,6 +890,7 @@ GameTypeInfo getBallMode(){
 
   		auto ballPosition = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
   		for (auto& [id, item] : activateables){
+  			continue;
 			 	auto activatablePos = gameapi -> getGameObjectPos(id, true, "[gamelogic] ball - activateables pos");
 			 	auto distance = glm::distance(ballPosition, activatablePos);
 

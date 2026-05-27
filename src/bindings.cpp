@@ -1211,6 +1211,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleOnTriggerEnter(obj1, obj2);
 
     handleSurfaceCollision(obj1, obj2);
+    handleActivationCollision(obj1, obj2);
 
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);

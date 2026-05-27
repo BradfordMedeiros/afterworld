@@ -110,7 +110,9 @@ bool isInKillPlane(objid id);
 
 struct ActivationManual { };
 struct ActivationNear {};
-struct ActivationTouch {};
+struct ActivationTouch {
+	int delayMs = 0;
+};
 
 typedef std::variant<ActivationManual, ActivationNear, ActivationTouch> ActivationType;
 struct Activatable {
@@ -133,5 +135,6 @@ void deactivate(Activatable& activateable);
 void toggleActivation(Activatable& item);
 bool setCanActivate(objid id, bool canActivate);
 void activateAllItems();
+void handleActivationCollision(objid obj1, objid obj2);
 
 #endif 

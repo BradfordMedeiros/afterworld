@@ -148,6 +148,25 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
     .attributeValue = static_cast<float>(activateMask),
   });
 
+  auto methodPtr = getValue(entity, "method");
+  if (methodPtr.has_value()){
+    modassert(*methodPtr.value() == "touch" || *methodPtr.value() == "near", "invalid activate type");
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "activate-type",
+      .attributeValue = *methodPtr.value(),
+    });
+
+    if (*methodPtr.value() == "touch"){
+      auto delay = getIntValue(entity, "delay");
+      if (delay.has_value()){
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "activate-delay",
+          .attributeValue = static_cast<float>(delay.value()),
+        }); 
+      }
+    }
+  }
+
   for (auto& submodelPhysic : submodelPhysics){
     attributes.push_back(GameobjAttributeOpts {
       .field = "physics_shape",
@@ -527,7 +546,7 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "autodoor"){
       addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/building/autodoor.gltf", {});
     }else if (*className.value() == "dropper"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", {});
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", { "model" });
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this

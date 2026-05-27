@@ -882,13 +882,21 @@ std::vector<TagUpdater> tagupdates = {
 	    	ActivationType type = ActivationManual{};
 
 	    	auto activationTypeStr = getSingleAttr(id, "activate-type");
+		    auto activationDelay = getSingleFloatAttr(id, "activate-delay");
+
 	    	if (activationTypeStr.has_value()){
 	    		if (activationTypeStr.value() == "touch"){
-	    			type = ActivationTouch{};
+	    			ActivationTouch touchActivation{};
+	    			if (activationDelay.has_value()){
+	    				auto delayMs = static_cast<int>(activationDelay.value());
+	    				touchActivation.delayMs = delayMs;
+	    			}
+	    			type = touchActivation;
 	    		}else if (activationTypeStr.value() == "near"){
 	    			type = ActivationNear{};
 	    		}
 	    	}
+
 
 		 	activateables[id] = Activatable {
 		 		.id = id,

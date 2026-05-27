@@ -621,6 +621,25 @@ void toggleActivation(Activatable& item){
 	}
 }
 
+void maybeTriggerActivation(objid id){
+	std::cout << "touch: maybeTriggerActivation" << std::endl;
+	if (activateables.find(id) != activateables.end()){
+		auto& activateable = activateables.at(id);
+		auto touchActivatable = std::get_if<ActivationTouch>(&activateable.type);
+		if (touchActivatable){
+			std::cout << "touch: try activate" << std::endl;
+			activate(activateable, std::nullopt);
+		}
+	}
+}
+
+void handleActivationCollision(objid obj1, objid obj2){
+  if (isControlledPlayer(obj2) || isControlledVehicle(obj2)){
+    maybeTriggerActivation(obj1);
+  }else if (isControlledPlayer(obj1) || isControlledVehicle(obj1)){
+   	maybeTriggerActivation(obj2);
+  }
+}
 
 
 void activateAllItems(){
