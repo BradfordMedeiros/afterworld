@@ -11,6 +11,7 @@ extern std::unordered_map<objid, TeleportExit> teleportObjs;
 extern std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 extern std::unordered_map<objid, EmissionObject> emissionObjects;
 extern std::set<objid> objectsInKillplane;
+extern std::unordered_map<objid, Activatable> activateables;
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -137,9 +138,9 @@ void onFrameGravityWells(){
   		if (!gravityWell.managedItem.has_value()){
   			continue;
   		}
-		auto position = gameapi -> getGameObjectPos(gravityWell.managedItem.value(), true, "[gamelogic] gravityhole");
-		auto targetWellPosition = getTargetWellPosition(gravityWell);
-		auto distance = targetWellPosition - position;
+			auto position = gameapi -> getGameObjectPos(gravityWell.managedItem.value(), true, "[gamelogic] gravityhole");
+			auto targetWellPosition = getTargetWellPosition(gravityWell);
+			auto distance = targetWellPosition - position;
   		auto direction = glm::normalize(distance);
   		float speed = gameapi -> timeElapsed() * 10.f;
   		auto offset = glm::vec3(direction.x * speed, direction.y * speed, direction.z * speed);
@@ -397,9 +398,12 @@ void setMenuBackground(std::string background){
 }
 
 
-void startRotate(objid id){
+void startRotate(objid id, float speed){
+	auto initialRotation = gameapi -> getGameObjectRotation(id, true, "[gamelogic] - startRotate");
 	idToRotateTimeAdded[id] = SpinObject {
 		.timeAdded = gameapi -> timeSeconds(false),
+		.speed = speed,
+		.initialRotation = initialRotation,
 	};
 }
 void stopRotate(objid id){
@@ -412,14 +416,14 @@ void onRotateFrame(bool inGameMode){
   }
   for (auto &[id, spinObject] : idToRotateTimeAdded){
   	auto timeElapsed = gameapi -> timeSeconds(false) - spinObject.timeAdded;
-  	float degrees = (360.f * timeElapsed) * 0.02f; // 0.2f is the turns per seconds 
+  	float degrees = (360.f * timeElapsed) * spinObject.speed; // 0.2f is the turns per seconds 
   	std::cout << "gun id, rotate degrees: " << degrees << std::endl;
   	float angle = glm::radians(degrees);
 		float x = glm::cos(angle);
 		float z = glm::sin(angle);
   	auto fromLocation = glm::vec3(0.f, 0.f, 0.f);
   	auto targetLocation = fromLocation + glm::vec3(x, 0.f, z);
-  	auto newOrientation = orientationFromPos(fromLocation, targetLocation);
+  	auto newOrientation = spinObject.initialRotation * orientationFromPos(fromLocation, targetLocation);
   	gameapi -> setGameObjectRot(id, newOrientation, true, Hint { .hint = "tags - spin" }); // tempchecked
   }
 }
@@ -552,7 +556,6 @@ void handleRemoveKillplaneCollision(objid obj1, objid obj2){
   }
 }
 
-extern std::unordered_map<objid, Activatable> activateables;
 
 bool isActivating(Activatable& activateable){
 	if (!activateable.activated){

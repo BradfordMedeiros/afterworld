@@ -8,6 +8,7 @@ extern Vehicles vehicles;
 extern Movement movement;
 extern Weapons weapons;
 extern std::unordered_map<objid, Powerup> powerups;
+extern std::unordered_map<objid, Activatable> activateables;
 
 void goToLevel(std::string levelShortName);
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
@@ -886,6 +887,32 @@ GameTypeInfo getBallMode(){
   		if (ballMode.didLose){
 	  		gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
+
+  		auto ballPosition = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+  		for (auto& [id, item] : activateables){
+			 	auto activatablePos = gameapi -> getGameObjectPos(id, true, "[gamelogic] ball - activateables pos");
+			 	auto distance = glm::distance(ballPosition, activatablePos);
+
+				if (distance < 9.f && !isActivated(item)){
+					int mask = 0b1111;
+					if (ballMode.spirit == MODE_RED){
+						mask = 0b0001;
+					}else if (ballMode.spirit == MODE_YELLOW){
+						mask = 0b0010;
+					}else if (ballMode.spirit == MODE_BLUE){
+						mask = 0b0100;
+					}else if (ballMode.spirit == MODE_PURPLE){
+						mask = 0b1000;
+					}
+					activate(item, mask);
+				}
+				if (distance > 10.f && isActivated(item)){
+					deactivate(item);
+				}
+  		}	
+
+
+
 	  },
 	};
 	return ballMode;

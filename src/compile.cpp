@@ -96,7 +96,72 @@ void addRotation(Entity& entity, std::vector<GameobjAttributeOpts>& attributes){
     .field = "rotation",
     .attributeValue = vecValue,
   });
-  
+}
+
+glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<GameobjAttributeOpts>& attributes, std::string mesh, std::vector<std::string> submodelPhysics){
+  *_shouldWrite = true;
+
+  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+    .field = "mesh",
+    .attributeValue = mesh,
+  });
+
+  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+    .field = "activatable",
+    .attributeValue = "true",
+  });
+
+  auto soulTypePtr = getValue(entity, "type");
+  modassert(soulTypePtr.has_value(), "tube exit - no soul type specified");
+
+  auto soulType = *soulTypePtr.value();
+  static std::vector<std::string> validTypes {
+    "red", "blue", "yellow", "purple",
+  };
+
+  bool validSoulType = false;
+  for (auto& validType : validTypes){
+    if (soulType == validType){
+      validSoulType = true;
+      break;
+    }
+  }
+  modassert(validSoulType, "invalid soul type on tube exit");
+  int activateMask = 0;
+  glm::vec4 tint(1.f, 1.f, 1.f, 1.f);
+  if (soulType == "red"){
+    activateMask = 0b1110;
+    tint = glm::vec4(1.f, 0.f, 0.f, 1.f);
+  }else if (soulType == "yellow"){
+    activateMask = 0b1101;
+    tint = glm::vec4(1.f, 1.f, 0.f, 1.f);
+  }else if (soulType == "blue"){
+    activateMask = 0b1011;
+    tint = glm::vec4(0.f, 0.f, 1.f, 1.f);
+  }else if (soulType == "purple"){
+    activateMask = 0b0111;
+    tint = glm::vec4(1.f, 1.f, 0.f, 1.f);
+  }
+
+  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+    .field =  "activate-mask",
+    .attributeValue = static_cast<float>(activateMask),
+  });
+
+  for (auto& submodelPhysic : submodelPhysics){
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "physics_shape",
+      .attributeValue = "shape_exact",
+      .submodel = submodelPhysic,
+    });
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "physics",
+      .attributeValue = "enabled",
+      .submodel = submodelPhysic,
+    });
+  }
+
+  return tint;
 }
 
 std::string getBallGameTemplate(std::string mapFile, std::optional<std::string> templateFile){
@@ -166,6 +231,7 @@ CompileMapFns getCompileMapForBallGame(){
         .field = "physics",
         .attributeValue = "enabled",
       });
+
       //attributes.push_back(GameobjAttributeOpts {
       //  .field = "physics_collision",
       //  .attributeValue = "nocollide",
@@ -441,50 +507,27 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });
     }else if (*className.value() == "tube_exit"){
-        *shouldWrite = true;
+        auto tint = addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/uncategorized/darkwires_spawn.gltf", { "sphere", "model", "spikes" });
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = "../gameresources/build/uncategorized/darkwires_spawn.gltf",
-        });
-
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "activatable",
-          .attributeValue = "true",
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_shape",
-          .attributeValue = "shape_exact",
-          .submodel = "spikes",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics",
-          .attributeValue = "enabled",
-          .submodel = "spikes",
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_shape",
-          .attributeValue = "shape_exact",
-          .submodel = "sphere",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics",
-          .attributeValue = "enabled",
+          .field =  "tint",
+          .attributeValue = tint,
           .submodel = "sphere",
         });
 
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_shape",
-          .attributeValue = "shape_exact",
-          .submodel = "model",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics",
-          .attributeValue = "enabled",
-          .submodel = "model",
-        });
+    }else if (*className.value() == "spikes"){
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spikes_5x5.gltf", {});
 
+    }else if (*className.value() == "spinner"){
+      auto spin = getFloatValue(entity, "speed");
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spinner.gltf", {});
+      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        .field =  "spin",
+        .attributeValue = spin.has_value() ? spin.value() : 1.f,
+      });
+    }else if (*className.value() == "autodoor"){
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/building/autodoor.gltf", {});
+    }else if (*className.value() == "dropper"){
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", {});
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this

@@ -79,9 +79,11 @@ void handleCollisionTeleport(int32_t obj1, int32_t obj2);
 
 struct SpinObject {
 	float timeAdded;
+	float speed;
+	glm::quat initialRotation;
 };
 /////// Minor effect coloring, rotation, etc
-void startRotate(objid id);
+void startRotate(objid id, float speed);
 void stopRotate(objid id);
 void onRotateFrame(bool inGameMode);
 
@@ -108,8 +110,9 @@ bool isInKillPlane(objid id);
 
 struct ActivationManual { };
 struct ActivationNear {};
+struct ActivationTouch {};
 
-typedef std::variant<ActivationManual, ActivationNear> ActivationType;
+typedef std::variant<ActivationManual, ActivationNear, ActivationTouch> ActivationType;
 struct Activatable {
 	objid id;
 	std::optional<float> activateLength;

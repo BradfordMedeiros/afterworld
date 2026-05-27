@@ -33,9 +33,11 @@ extern std::unordered_map<objid, Activatable> activateables;
 void onActivationFrame(){
 	auto players = getPlayers();
 	for (auto& [id, item] : activateables){
-
+		auto activateTouch = std::get_if<ActivationTouch>(&item.type);
 		auto activateNear = std::get_if<ActivationNear>(&item.type);
-		if (activateNear){
+		if (activateTouch){
+
+		}else if (activateNear){
 			for (auto& player : players){
 				auto itemPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] onActivationFrame");
 				auto playerPosition = getEntityPositionByPlayerIndex(player.viewport).value();
@@ -59,7 +61,6 @@ void onActivationFrame(){
 				}
 			}
 		}
-
 	}
 }
 
@@ -345,7 +346,8 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "spin",
 		.onAdd = [](int32_t id, AttributeValue) -> void {
-            startRotate(id);
+			auto speed = getSingleFloatAttr(id, "spin");
+            startRotate(id, speed.value());
 		},
   		.onRemove = [](int32_t id) -> void {
             stopRotate(id);
@@ -877,12 +879,23 @@ std::vector<TagUpdater> tagupdates = {
 
 	    	int mask = activeMaskFloat.has_value() ? static_cast<int>(activeMaskFloat.value()) : 0;   
 
+	    	ActivationType type = ActivationManual{};
+
+	    	auto activationTypeStr = getSingleAttr(id, "activate-type");
+	    	if (activationTypeStr.has_value()){
+	    		if (activationTypeStr.value() == "touch"){
+	    			type = ActivationTouch{};
+	    		}else if (activationTypeStr.value() == "near"){
+	    			type = ActivationNear{};
+	    		}
+	    	}
+
 		 	activateables[id] = Activatable {
 		 		.id = id,
 		 		.activateLength = activateLength,
 		 		.deactivateLength = deactivateLength,
 		 		.mask = mask,
-		 		.type = ActivationNear{},
+		 		.type = type,
 		 	};
 		},
   	    .onRemove = [](int32_t id) -> void {
