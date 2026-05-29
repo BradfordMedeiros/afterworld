@@ -535,6 +535,10 @@ std::optional<bool> isEntityFocusArcade(objid id){
   return controllableEntities.at(id).zoomIntoArcade;
 }
 
+void setEntityActivateMask(objid id, std::optional<int> mask){
+	controllableEntities.at(id).activateMask = mask;
+}
+
 ////////////////////// Convenience Utilities for player indexs //////////////////////
 
 bool allPlayersDead(){
@@ -553,6 +557,18 @@ std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex){
 		return std::nullopt;
 	}
 	return gameapi -> getGameObjectPos(controlledPlayer.entityId.value(), true, "[gamelogic] getActivePlayerPosition");
+}
+
+std::optional<glm::vec3> getPositionMaybeInVehicleByPlayerIndex(int playerIndex){
+	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+	if (!controlledPlayer.entityId.has_value()){
+		return std::nullopt;
+	}
+	auto vehiclePosition = entityVehiclePosition(controlledPlayer.entityId.value());
+	if (vehiclePosition.has_value()){
+		return vehiclePosition.value();
+	}
+	return gameapi -> getGameObjectPos(controlledPlayer.entityId.value(), true, "[gamelogic] getPlayerPositionMaybeInVehicle");
 }
 
 

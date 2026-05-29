@@ -31,16 +31,40 @@ extern std::unordered_map<objid, Activatable> activateables;
 
 
 void onActivationFrame(){
+
 	auto players = getPlayers();
 	for (auto& [id, item] : activateables){
 		auto activateTouch = std::get_if<ActivationTouch>(&item.type);
 		auto activateNear = std::get_if<ActivationNear>(&item.type);
 		if (activateTouch){
-
+			if (activateTouch -> touched.has_value()){
+				auto elapsedTime = gameapi -> timeSeconds(false) - activateTouch -> touched.value();
+				auto enoughTime = (elapsedTime * 1000) > activateTouch -> delayMs;
+				if (enoughTime){
+					activate(item, std::nullopt);
+					activateTouch -> touched = std::nullopt;
+				}
+			}
 		}else if (activateNear){
+			bool shouldActivate = false;
+
+			std::optional<std::optional<int>> maskToUse;
 			for (auto& player : players){
+				auto activateMask = getActiveControllable(player.viewport).value() -> activateMask;
+				if (!maskToUse.has_value()){
+					maskToUse = activateMask;
+				}else {
+					if (!maskToUse.has_value()){
+						// this is already very permissive, do not change
+					}else if (!activateMask.has_value()){
+						maskToUse.value() = std::nullopt;
+					}else{
+						maskToUse.value() = maskToUse.value().value() & activateMask.value();
+					}
+				}
+
 				auto itemPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] onActivationFrame");
-				auto playerPosition = getEntityPositionByPlayerIndex(player.viewport).value();
+				auto playerPosition = getPositionMaybeInVehicleByPlayerIndex(player.viewport).value();
 				float distance = glm::distance(playerPosition, itemPosition);
 				if (player.entityId.has_value()){
 					auto vehiclePosition = entityVehiclePosition(player.entityId.value());
@@ -53,12 +77,21 @@ void onActivationFrame(){
 				}
 				std::cout << "player position: " << print(playerPosition) << std::endl;
 
-				if (distance < 9.f && !isActivated(item)){
-					activate(item, 0b0);
+				auto radius = activateNear -> radius.has_value() ? activateNear -> radius.value() : 10.f;
+				if (distance < radius){
+					shouldActivate = true;
+					break;
 				}
-				if (distance > 10.f && isActivated(item)){
-					deactivate(item);
-				}
+			}
+
+			bool didActivate = false;
+			if (shouldActivate){
+				std::cout << "activation near: activate" << std::endl;
+				didActivate = activate(item, maskToUse.value());
+			}
+			if (!shouldActivate || !didActivate){
+				std::cout << "activation near: deactivate" << std::endl;
+				deactivate(item);
 			}
 		}
 	}
@@ -893,7 +926,10 @@ std::vector<TagUpdater> tagupdates = {
 	    			}
 	    			type = touchActivation;
 	    		}else if (activationTypeStr.value() == "near"){
-	    			type = ActivationNear{};
+				    auto activationRadius = getSingleFloatAttr(id, "radius");
+	    			type = ActivationNear{
+	    				.radius = activationRadius,
+	    			};
 	    		}
 	    	}
 

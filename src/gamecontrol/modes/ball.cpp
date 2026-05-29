@@ -373,7 +373,7 @@ void ballModeSetPlayMode(objid sceneId){
   auto playerId = findObjByShortName("maincamera", sceneId);
   modassert(playerId.has_value(), "onSceneRouteChange, no playerId in scene to load");
   setEntityForPlayerIndex(playerId.value(), 0);
-
+  setEntityActivateMask(playerId.value(), 0b11111111);
   //////////
 
   auto ballData = createBallObj(sceneId, playerSpawnPosition);
@@ -813,6 +813,19 @@ GameTypeInfo getBallMode(){
 	  		if (ballMode.changeSpirit.has_value()){
 	  			ballMode.spirit = ballMode.changeSpirit.value();
 	  			ballMode.changeSpirit = std::nullopt;
+
+	  			int mask = 0b11111111;
+					if (ballMode.spirit == MODE_RED){
+						mask = 0b0001;
+					}else if (ballMode.spirit == MODE_YELLOW){
+						mask = 0b0010;
+					}else if (ballMode.spirit == MODE_BLUE){
+						mask = 0b0100;
+					}else if (ballMode.spirit == MODE_PURPLE){
+						mask = 0b1000;
+					}
+				  setEntityActivateMask(getEntityForPlayerIndex(0).value(), mask);
+
   			  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
 
   			  
@@ -887,32 +900,6 @@ GameTypeInfo getBallMode(){
   		if (ballMode.didLose){
 	  		gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
-
-  		auto ballPosition = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
-  		for (auto& [id, item] : activateables){
-  			continue;
-			 	auto activatablePos = gameapi -> getGameObjectPos(id, true, "[gamelogic] ball - activateables pos");
-			 	auto distance = glm::distance(ballPosition, activatablePos);
-
-				if (distance < 9.f && !isActivated(item)){
-					int mask = 0b1111;
-					if (ballMode.spirit == MODE_RED){
-						mask = 0b0001;
-					}else if (ballMode.spirit == MODE_YELLOW){
-						mask = 0b0010;
-					}else if (ballMode.spirit == MODE_BLUE){
-						mask = 0b0100;
-					}else if (ballMode.spirit == MODE_PURPLE){
-						mask = 0b1000;
-					}
-					activate(item, mask);
-				}
-				if (distance > 10.f && isActivated(item)){
-					deactivate(item);
-				}
-  		}	
-
-
 
 	  },
 	};

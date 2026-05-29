@@ -98,7 +98,7 @@ void addRotation(Entity& entity, std::vector<GameobjAttributeOpts>& attributes){
   });
 }
 
-glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<GameobjAttributeOpts>& attributes, std::string mesh, std::vector<std::string> submodelPhysics){
+glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<GameobjAttributeOpts>& attributes, std::string mesh, std::optional<std::string> activationSubmodel, std::vector<std::string> submodelPhysics){
   *_shouldWrite = true;
 
   attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -109,6 +109,7 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
   attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
     .field = "activatable",
     .attributeValue = "true",
+    .submodel = activationSubmodel,
   });
 
   auto soulTypePtr = getValue(entity, "type");
@@ -146,6 +147,7 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
   attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
     .field =  "activate-mask",
     .attributeValue = static_cast<float>(activateMask),
+    .submodel = activationSubmodel,
   });
 
   auto methodPtr = getValue(entity, "method");
@@ -154,7 +156,19 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
     attributes.push_back(GameobjAttributeOpts {
       .field = "activate-type",
       .attributeValue = *methodPtr.value(),
+      .submodel = activationSubmodel,
     });
+
+    if (*methodPtr.value() == "near"){
+      auto radius = getFloatValue(entity, "radius");
+      if (radius.has_value()){
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "radius",
+          .attributeValue = radius.value(),
+          .submodel = activationSubmodel,
+        });        
+      }
+    }
 
     if (*methodPtr.value() == "touch"){
       auto delay = getIntValue(entity, "delay");
@@ -162,10 +176,13 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
         attributes.push_back(GameobjAttributeOpts {
           .field = "activate-delay",
           .attributeValue = static_cast<float>(delay.value()),
+          .submodel = activationSubmodel,
         }); 
       }
     }
   }
+
+
 
   for (auto& submodelPhysic : submodelPhysics){
     attributes.push_back(GameobjAttributeOpts {
@@ -222,6 +239,11 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "player_start"){
       *modelName = "playerspawn";
       *shouldWrite = true;
+    }else if (*className.value() == "spawn_pipe"){
+      *shouldWrite = true;
+  
+      addCoreTrench(entity, attributes, "../gameresources/build/uncategorized/darkwires4.gltf");
+
     }else if (*className.value() == "activateable"){
       //modassert(false, "activeable not yet implemented");
       *shouldWrite = true;
@@ -526,7 +548,7 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });
     }else if (*className.value() == "tube_exit"){
-        auto tint = addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/uncategorized/darkwires_spawn.gltf", { "sphere", "model", "spikes" });
+        auto tint = addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/uncategorized/darkwires_spawn.gltf", std::nullopt, { "sphere", "model", "spikes", });
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field =  "tint",
           .attributeValue = tint,
@@ -534,19 +556,27 @@ CompileMapFns getCompileMapForBallGame(){
         });
 
     }else if (*className.value() == "spikes"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spikes_5x5.gltf", {});
-
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spikes_5x5.gltf", std::nullopt, { "model", "spiketip" });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "killplane",
+        .attributeValue = "true",
+        .submodel = "spiketip",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "scale",
+        .attributeValue = glm::vec3(3.f, 3.f, 3.f),
+      });
     }else if (*className.value() == "spinner"){
       auto spin = getFloatValue(entity, "speed");
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spinner.gltf", {});
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spinner.gltf", std::nullopt, {});
       attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
         .field =  "spin",
         .attributeValue = spin.has_value() ? spin.value() : 1.f,
       });
     }else if (*className.value() == "autodoor"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/building/autodoor.gltf", {});
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/building/autodoor.gltf", std::nullopt, {});
     }else if (*className.value() == "dropper"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", { "model" });
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", "model", { "model" });
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this

@@ -109,9 +109,12 @@ bool isInKillPlane(objid id);
 
 
 struct ActivationManual { };
-struct ActivationNear {};
+struct ActivationNear {
+	std::optional<float> radius;
+};
 struct ActivationTouch {
 	int delayMs = 0;
+	std::optional<float> touched;
 };
 
 typedef std::variant<ActivationManual, ActivationNear, ActivationTouch> ActivationType;
@@ -130,7 +133,7 @@ struct Activatable {
 bool isActivating(Activatable& activateable);
 bool isDeactivating(Activatable& activateable);
 bool isActivated(Activatable& activateable);
-void activate(Activatable& activateable, std::optional<int> mask);
+bool activate(Activatable& activateable, std::optional<int> mask);
 void deactivate(Activatable& activateable);
 void toggleActivation(Activatable& item);
 bool setCanActivate(objid id, bool canActivate);

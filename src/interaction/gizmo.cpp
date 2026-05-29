@@ -584,21 +584,22 @@ bool isDeactivating(Activatable& activateable){
 bool isActivated(Activatable& activateable){
 	return activateable.activated;	
 }
-void activate(Activatable& activateable, std::optional<int> mask){
+bool activate(Activatable& activateable, std::optional<int> mask){
 	// mask if it's 0 it activates.
 	if (mask.has_value() && (mask.value() & activateable.mask)){
-		return;
+		return false;
 	}
 	if (activateable.activated){
-		return;
+		return true;
 	}
 	activateable.activated = true;
 	activateable.lastActivateTime = gameapi -> timeSeconds(false);
 	gameapi -> playAnimation(activateable.id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
 	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
 	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
-
+	return true;
 }
+
 void deactivate(Activatable& activateable){
 	if (!activateable.activated){
 		return;
@@ -628,7 +629,8 @@ void maybeTriggerActivation(objid id){
 		auto touchActivatable = std::get_if<ActivationTouch>(&activateable.type);
 		if (touchActivatable){
 			std::cout << "touch: try activate" << std::endl;
-			activate(activateable, std::nullopt);
+			touchActivatable -> touched = gameapi -> timeSeconds(false);
+
 		}
 	}
 }

@@ -34,6 +34,7 @@ struct ControllableEntity {
 	std::optional<objid> vehicle;
 	std::set<objid> disableAnimationIds;
 	std::optional<int> zoomAmount;
+	std::optional<int> activateMask;
 };
 
 
@@ -103,9 +104,13 @@ std::optional<glm::vec3> entityVehiclePosition(objid id);
 void setEntityFocusArcade(std::optional<objid> arcadeId, objid id);
 std::optional<bool> isEntityFocusArcade(objid id);
 
+void setEntityActivateMask(objid id, std::optional<int> mask);
+
+
 ////////////////////// Convenience Utilities for player indexs //////////////////////
 bool allPlayersDead();
 std::optional<glm::vec3> getEntityPositionByPlayerIndex(int playerIndex);
+std::optional<glm::vec3> getPositionMaybeInVehicleByPlayerIndex(int playerIndex);
 
 ////////////////////// Camera Manipulation //////////////////////
 void setManagedCameraId(std::optional<objid> camera, int playerIndex);
