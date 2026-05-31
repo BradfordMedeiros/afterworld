@@ -630,7 +630,17 @@ void maybeTriggerActivation(objid id){
 		if (touchActivatable){
 			std::cout << "touch: try activate" << std::endl;
 			touchActivatable -> touched = gameapi -> timeSeconds(false);
+		}
 
+		auto triggerActivatable = std::get_if<ActivationTrigger>(&activateable.type);
+		if (triggerActivatable){
+			std::cout << "target: " << triggerActivatable -> target << std::endl;
+
+			for (auto& [id, activateable] : activateables){
+				if (activateable.name.has_value() && activateable.name.value() == triggerActivatable -> target){
+					activate(activateable, std::nullopt);
+				}
+			}
 		}
 	}
 }

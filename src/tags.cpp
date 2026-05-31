@@ -94,6 +94,13 @@ void onActivationFrame(){
 				deactivate(item);
 			}
 		}
+
+		if (item.autoreset.has_value() && item.activated){
+			auto timeElapsed = gameapi -> timeSeconds(false) - item.lastActivateTime;
+			if (timeElapsed > item.autoreset.value()){
+				deactivate(item);
+			}
+		}
 	}
 }
 
@@ -930,16 +937,26 @@ std::vector<TagUpdater> tagupdates = {
 	    			type = ActivationNear{
 	    				.radius = activationRadius,
 	    			};
+	    		}else if (activationTypeStr.value() == "trigger"){
+	    			auto target = getSingleAttr(id, "activate-target");
+	    			modassert(target.has_value(), "activateables trigger no target");
+	    			type = ActivationTrigger {
+	    				.target = target.value(),
+	    			};
 	    		}
 	    	}
 
+		    auto activateName = getSingleAttr(id, "activate-name");
+		    auto autoreset = getSingleFloatAttr(id, "activate-autoreset");
 
 		 	activateables[id] = Activatable {
 		 		.id = id,
 		 		.activateLength = activateLength,
 		 		.deactivateLength = deactivateLength,
+		 		.autoreset = autoreset,
 		 		.mask = mask,
 		 		.type = type,
+		 		.name = activateName,
 		 	};
 		},
   	    .onRemove = [](int32_t id) -> void {

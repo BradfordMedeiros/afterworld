@@ -116,17 +116,22 @@ struct ActivationTouch {
 	int delayMs = 0;
 	std::optional<float> touched;
 };
+struct ActivationTrigger {
+	std::string target;
+};
 
-typedef std::variant<ActivationManual, ActivationNear, ActivationTouch> ActivationType;
+typedef std::variant<ActivationManual, ActivationNear, ActivationTouch, ActivationTrigger> ActivationType;
 struct Activatable {
 	objid id;
 	std::optional<float> activateLength;
 	std::optional<float> deactivateLength;
 	bool activated = false;
 	float lastActivateTime = 0;
+	std::optional<float> autoreset;
 
 	int mask = 0;
 	ActivationType type = ActivationManual{};
+	std::optional<std::string> name;
 };
 
 

@@ -112,47 +112,59 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
     .submodel = activationSubmodel,
   });
 
-  auto soulTypePtr = getValue(entity, "type");
-  modassert(soulTypePtr.has_value(), "tube exit - no soul type specified");
-
-  auto soulType = *soulTypePtr.value();
-  static std::vector<std::string> validTypes {
-    "red", "blue", "yellow", "purple",
-  };
-
-  bool validSoulType = false;
-  for (auto& validType : validTypes){
-    if (soulType == validType){
-      validSoulType = true;
-      break;
-    }
-  }
-  modassert(validSoulType, "invalid soul type on tube exit");
-  int activateMask = 0;
   glm::vec4 tint(1.f, 1.f, 1.f, 1.f);
-  if (soulType == "red"){
-    activateMask = 0b1110;
-    tint = glm::vec4(1.f, 0.f, 0.f, 1.f);
-  }else if (soulType == "yellow"){
-    activateMask = 0b1101;
-    tint = glm::vec4(1.f, 1.f, 0.f, 1.f);
-  }else if (soulType == "blue"){
-    activateMask = 0b1011;
-    tint = glm::vec4(0.f, 0.f, 1.f, 1.f);
-  }else if (soulType == "purple"){
-    activateMask = 0b0111;
-    tint = glm::vec4(1.f, 1.f, 0.f, 1.f);
+
+
+  auto soulTypePtr = getValue(entity, "type");
+
+  if (soulTypePtr){
+    auto soulType = *soulTypePtr.value();
+    static std::vector<std::string> validTypes {
+      "red", "blue", "yellow", "purple",
+    };
+
+    bool validSoulType = false;
+    for (auto& validType : validTypes){
+      if (soulType == validType){
+        validSoulType = true;
+        break;
+      }
+    }
+    modassert(validSoulType, "invalid soul type on tube exit");
+    int activateMask = 0;
+    if (soulType == "red"){
+      activateMask = 0b1110;
+      tint = glm::vec4(1.f, 0.f, 0.f, 1.f);
+    }else if (soulType == "yellow"){
+      activateMask = 0b1101;
+      tint = glm::vec4(1.f, 1.f, 0.f, 1.f);
+    }else if (soulType == "blue"){
+      activateMask = 0b1011;
+      tint = glm::vec4(0.f, 0.f, 1.f, 1.f);
+    }else if (soulType == "purple"){
+      activateMask = 0b0111;
+      tint = glm::vec4(1.f, 1.f, 0.f, 1.f);
+    }
+
+    attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+      .field =  "activate-mask",
+      .attributeValue = static_cast<float>(activateMask),
+      .submodel = activationSubmodel,
+    });
   }
 
-  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-    .field =  "activate-mask",
-    .attributeValue = static_cast<float>(activateMask),
-    .submodel = activationSubmodel,
-  });
+  auto autoreset = getIntValue(entity, "autoreset");
+  if (autoreset.has_value()){
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "activate-autoreset",
+      .attributeValue =  static_cast<float>(autoreset.value()),
+      .submodel = activationSubmodel,
+    }); 
+  }
 
   auto methodPtr = getValue(entity, "method");
   if (methodPtr.has_value()){
-    modassert(*methodPtr.value() == "touch" || *methodPtr.value() == "near", "invalid activate type");
+    modassert(*methodPtr.value() == "touch" || *methodPtr.value() == "near" || *methodPtr.value() == "trigger", "invalid activate type");
     attributes.push_back(GameobjAttributeOpts {
       .field = "activate-type",
       .attributeValue = *methodPtr.value(),
@@ -182,6 +194,14 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
     }
   }
 
+  auto activateName = getValue(entity, "name");
+  if (activateName.has_value()){
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "activate-name",
+      .attributeValue = *activateName.value(),
+      .submodel = activationSubmodel,
+    });
+  }
 
 
   for (auto& submodelPhysic : submodelPhysics){
@@ -245,38 +265,40 @@ CompileMapFns getCompileMapForBallGame(){
       addCoreTrench(entity, attributes, "../gameresources/build/uncategorized/darkwires4.gltf");
 
     }else if (*className.value() == "activateable"){
-      //modassert(false, "activeable not yet implemented");
       *shouldWrite = true;
-      attributes.push_back(GameobjAttributeOpts { 
+      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
         .field = "mesh",
         .attributeValue = paths::MUSHROOM,
       });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "scale",
-        .attributeValue = glm::vec3(10.f, 10.f, 10.f),
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "tint",
-        .attributeValue = glm::vec4(1.f, 0.f, 0.f, 0.8f),
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "layer",
-        .attributeValue = "transparency",
+
+      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        .field = "activatable",
+        .attributeValue = "true",
       });
 
       attributes.push_back(GameobjAttributeOpts {
+        .field = "scale",
+        .attributeValue = glm::vec3(3.f, 3.f, 3.f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
         .field = "physics_shape",
-        .attributeValue = "shape_sphere",
+        .attributeValue = "shape_exact",
       });
       attributes.push_back(GameobjAttributeOpts {
         .field = "physics",
         .attributeValue = "enabled",
       });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "activate-type",
+        .attributeValue = "trigger",
+      });
 
-      //attributes.push_back(GameobjAttributeOpts {
-      //  .field = "physics_collision",
-      //  .attributeValue = "nocollide",
-      //});
+      auto targetName = getValue(entity, "target");
+      modassert(targetName.has_value(), "activatable but does not have a target to activate");
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "activate-target",
+        .attributeValue = *targetName.value(),
+      });
 
     }else if (*className.value() == "soul"){
       *shouldWrite = true;
@@ -566,6 +588,17 @@ CompileMapFns getCompileMapForBallGame(){
         .field = "scale",
         .attributeValue = glm::vec3(3.f, 3.f, 3.f),
       });
+    }else if (*className.value() == "crusher"){
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/crusher.gltf", std::nullopt,  { "model", "poles" });
+      //attributes.push_back(GameobjAttributeOpts {
+      //  .field = "killplane",
+      //  .attributeValue = "true",
+      //  .submodel = "spiketip",
+      //});
+      //attributes.push_back(GameobjAttributeOpts {
+      //  .field = "scale",
+      //  .attributeValue = glm::vec3(3.f, 3.f, 3.f),
+      //});
     }else if (*className.value() == "spinner"){
       auto spin = getFloatValue(entity, "speed");
       addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spinner.gltf", std::nullopt, {});
