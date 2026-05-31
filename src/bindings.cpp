@@ -40,6 +40,7 @@ std::optional<glm::vec3> oldGravity;  // wtf?
 ArcadeApi arcadeApi = createArcadeApi();
 std::unordered_map<objid, ExtraSurfaceVelocity> extraVelocity;
 std::unordered_map<objid, Activatable> activateables;
+std::unordered_map<objid, Breakable> breakables;
 
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;
@@ -1212,6 +1213,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     handleSurfaceCollision(obj1, obj2);
     handleActivationCollision(obj1, obj2);
+    handleBreakableCollision(obj1, obj2);
 
     onCollisionEnterWater(water, obj1, obj2);
     onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);

@@ -12,6 +12,8 @@ extern std::unordered_map<objid, SpinObject> idToRotateTimeAdded;
 extern std::unordered_map<objid, EmissionObject> emissionObjects;
 extern std::set<objid> objectsInKillplane;
 extern std::unordered_map<objid, Activatable> activateables;
+extern std::unordered_map<objid, Breakable> breakables;
+
 
 //// glass //////////////////////////////////////////
 void createGlassTexture(objid id){
@@ -652,6 +654,23 @@ void handleActivationCollision(objid obj1, objid obj2){
    	maybeTriggerActivation(obj2);
   }
 }
+
+
+void maybeBreakObject(objid id){
+	if (breakables.find(id) != breakables.end()){
+		auto& breakable = breakables.at(id);
+		gameapi -> removeByGroupId(gameapi -> groupId(id));
+	  playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
+	}
+}
+void handleBreakableCollision(objid obj1, objid obj2){
+  if (isControlledPlayer(obj2) || isControlledVehicle(obj2)){
+    maybeBreakObject(obj1);
+  }else if (isControlledPlayer(obj1) || isControlledVehicle(obj1)){
+   	maybeBreakObject(obj2);
+  }
+}
+
 
 
 void activateAllItems(){

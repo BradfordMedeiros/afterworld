@@ -26,8 +26,7 @@ extern std::unordered_map<objid, EmissionObject> emissionObjects;
 extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 extern std::unordered_map<objid, Activatable> activateables;
-
-extern std::unordered_map<objid, Activatable> activateables;
+extern std::unordered_map<objid, Breakable> breakables;
 
 
 void onActivationFrame(){
@@ -97,7 +96,7 @@ void onActivationFrame(){
 
 		if (item.autoreset.has_value() && item.activated){
 			auto timeElapsed = gameapi -> timeSeconds(false) - item.lastActivateTime;
-			if (timeElapsed > item.autoreset.value()){
+			if ((timeElapsed * 1000) > item.autoreset.value()){
 				deactivate(item);
 			}
 		}
@@ -967,6 +966,20 @@ std::vector<TagUpdater> tagupdates = {
   	    },
   	    .onMessage = [](std::string& key, std::any& value) -> void {},
 	},
+
+	TagUpdater {
+		.attribute = "breakable",
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
+			breakables[id] = Breakable{};
+		},
+  	    .onRemove = [](int32_t id) -> void {
+  	    	breakables.erase(id);
+  	    },
+  	    .onFrame = []() -> void {
+  	    },
+  	    .onMessage = [](std::string& key, std::any& value) -> void {},
+	},
+
 };
 
 void onTagsMessage(std::string& key, std::any& value){

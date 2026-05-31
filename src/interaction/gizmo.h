@@ -127,7 +127,7 @@ struct Activatable {
 	std::optional<float> deactivateLength;
 	bool activated = false;
 	float lastActivateTime = 0;
-	std::optional<float> autoreset;
+	std::optional<int> autoreset;
 
 	int mask = 0;
 	ActivationType type = ActivationManual{};
@@ -144,5 +144,8 @@ void toggleActivation(Activatable& item);
 bool setCanActivate(objid id, bool canActivate);
 void activateAllItems();
 void handleActivationCollision(objid obj1, objid obj2);
+
+struct Breakable {};
+void handleBreakableCollision(objid obj1, objid obj2);
 
 #endif 

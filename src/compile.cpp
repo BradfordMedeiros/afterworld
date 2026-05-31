@@ -400,6 +400,33 @@ CompileMapFns getCompileMapForBallGame(){
         });
       }
 
+    }else if (*className.value() == "shard"){
+      *shouldWrite = true;
+      addCoreTrench(entity, attributes, "../gameresources/build/primitives/sphere.gltf");
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "scrollspeed",
+        .attributeValue = glm::vec3(1.f, 1.f, 0.f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "scrollspeed",
+        .attributeValue = glm::vec3(1.f, 1.f, 0.f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "breakable",
+        .attributeValue = "true",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "physics_collision",
+        .attributeValue = "nocollide",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "tint",
+        .attributeValue = glm::vec4(0.f, 0.f, 1.f, 0.8f),
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "layer",
+        .attributeValue = "nolighting",
+      });
 
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       *shouldWrite = true;
