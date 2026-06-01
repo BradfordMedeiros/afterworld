@@ -302,8 +302,7 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
   		modassert(ball.has_value(), "ball was not created");
   		GameobjAttributes emitterAttr { 
   			.attr = {
- 					{ "effekseer", "./res/particles/electric.efkefc" },
- 					{ "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
+ 					{ "effekseer", "./res/particles/spirit-white.efkefc" },
  					{ "state", "enabled" },
   			} 
   		};
