@@ -412,6 +412,8 @@ void objectRemoved(objid idRemoved){
   removeSurfaceModifier(idRemoved);
   handleRemoveKillplaneCollision(idRemoved);
   handleOnTriggerRemove(idRemoved);
+
+  maybeResetActivatableObject(idRemoved);
 }
 
 

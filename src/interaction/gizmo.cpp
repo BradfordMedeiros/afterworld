@@ -657,10 +657,25 @@ void maybeTriggerActivation(objid id){
 	}
 }
 
+
+std::optional<objid> activateableObject;
+void setActivatableObject(std::optional<objid> obj){
+	activateableObject = obj;
+}
+void maybeResetActivatableObject(objid id){
+	if (activateableObject.has_value() && activateableObject.value() == id){
+		activateableObject = std::nullopt;
+	}
+}
+
 void handleActivationCollision(objid obj1, objid obj2){
-  if (isControlledPlayer(obj2) || isControlledVehicle(obj2)){
+	if (!activateableObject.has_value()){
+		return;
+	}
+
+  if (activateableObject.value() == obj2){
     maybeTriggerActivation(obj1);
-  }else if (isControlledPlayer(obj1) || isControlledVehicle(obj1)){
+  }else if (activateableObject.value() == obj1){
    	maybeTriggerActivation(obj2);
   }
 }

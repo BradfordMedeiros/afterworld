@@ -826,6 +826,12 @@ GameTypeInfo getBallMode(){
 					}
 				  setEntityActivateMask(getEntityForPlayerIndex(0).value(), mask);
 
+				  if (ballMode.spirit == MODE_BLUE){
+				  	setActivatableObject(ballMode.ballId);
+				  }else{
+					  setActivatableObject(std::nullopt);
+				  }
+
   			  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
 
   			  
