@@ -118,6 +118,8 @@ struct ActivationTouch {
 };
 struct ActivationTrigger {
 	std::string target;
+
+	std::optional<objid> lastActivateId;
 };
 
 typedef std::variant<ActivationManual, ActivationNear, ActivationTouch, ActivationTrigger> ActivationType;

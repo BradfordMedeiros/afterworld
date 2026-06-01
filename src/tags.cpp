@@ -35,6 +35,7 @@ void onActivationFrame(){
 	for (auto& [id, item] : activateables){
 		auto activateTouch = std::get_if<ActivationTouch>(&item.type);
 		auto activateNear = std::get_if<ActivationNear>(&item.type);
+		auto activateTrigger = std::get_if<ActivationTrigger>(&item.type);
 		if (activateTouch){
 			if (activateTouch -> touched.has_value()){
 				auto elapsedTime = gameapi -> timeSeconds(false) - activateTouch -> touched.value();
@@ -91,6 +92,15 @@ void onActivationFrame(){
 			if (!shouldActivate || !didActivate){
 				std::cout << "activation near: deactivate" << std::endl;
 				deactivate(item);
+			}
+		}else if (activateTrigger){
+			if (activateTrigger -> lastActivateId.has_value()){
+				auto& activatedItem = activateables.at(activateTrigger -> lastActivateId.value());
+				auto shouldReset = !isActivated(activatedItem);
+				if (shouldReset){
+					activateTrigger -> lastActivateId = std::nullopt;
+	    	  		setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+				}
 			}
 		}
 

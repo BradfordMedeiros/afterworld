@@ -636,17 +636,21 @@ void maybeTriggerActivation(objid id){
 
 		auto triggerActivatable = std::get_if<ActivationTrigger>(&activateable.type);
 		if (triggerActivatable){
-			std::cout << "target: " << triggerActivatable -> target << std::endl;
+			if (triggerActivatable -> lastActivateId.has_value()){
+				return;
+			}
 
 			auto sceneId = gameapi -> listSceneId(id);
 	 		auto activationPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] maybeTriggerActivation");
 
 		  playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
 			emitElectric(sceneId, activationPosition);
+  		setGameObjectTint(id, glm::vec4(0.6f, 0.6f, 0.6f, 1.f));
 
 			for (auto& [id, activateable] : activateables){
 				if (activateable.name.has_value() && activateable.name.value() == triggerActivatable -> target){
 					activate(activateable, std::nullopt);
+					triggerActivatable -> lastActivateId = id;
 				}
 			}
 		}
