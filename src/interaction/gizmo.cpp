@@ -638,6 +638,12 @@ void maybeTriggerActivation(objid id){
 		if (triggerActivatable){
 			std::cout << "target: " << triggerActivatable -> target << std::endl;
 
+			auto sceneId = gameapi -> listSceneId(id);
+	 		auto activationPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] maybeTriggerActivation");
+
+		  playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
+			emitElectric(sceneId, activationPosition);
+
 			for (auto& [id, activateable] : activateables){
 				if (activateable.name.has_value() && activateable.name.value() == triggerActivatable -> target){
 					activate(activateable, std::nullopt);

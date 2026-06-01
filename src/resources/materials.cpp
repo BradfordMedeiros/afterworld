@@ -214,7 +214,7 @@ void emitElectric(objid sceneId, glm::vec3 position){
       .attr = {
         { "effekseer", "./res/particles/electric.efkefc" },
         { "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
-        { "effect-tint", glm::vec4(0.f, 1.f, 0.f, 1.f) },
+        { "effect-tint", glm::vec4(0.f, 0.f, 1.f, 1.f) },
         //{ "state", "enabled" },
       } 
     };
