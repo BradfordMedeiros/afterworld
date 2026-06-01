@@ -412,8 +412,13 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  //	//setIsAlive(getActivePlayerId().value(), false);
   	//}
 
-  	activateAllItems();
+  	//activateAllItems();
 
+  	//static glm::vec3 position(0.f, 0.f, 0.f);
+  	//position.y += 5.f;
+
+  	auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
+  	emitElectric(gameapi -> rootSceneId(), position);
   }
 
   if (!getArgEnabled("dev")){

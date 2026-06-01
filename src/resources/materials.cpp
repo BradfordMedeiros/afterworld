@@ -175,7 +175,7 @@ void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 
   emitBlood(sceneId, lookAtId, position);
 }
 
-std::optional<objid> waterEmitter = std::nullopt;
+std::optional<objid> waterEmitter;
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position){
   modlog("water", "water emitter");
   //modassert(false, "emit blood not yet implemented");
@@ -202,4 +202,26 @@ void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position){
   velocity.y *= 100;
   velocity.z *= 100;
   gameapi -> emit(waterEmitter.value(), position3, std::nullopt, glm::vec3(0.f, 2.f, 0.f), std::nullopt, std::nullopt); 
+}
+
+std::optional<objid> electricEmitter;
+void emitElectric(objid sceneId, glm::vec3 position){
+  static bool callOnce = true;
+  if (callOnce){
+    callOnce = false;
+
+    GameobjAttributes emitterAttr { 
+      .attr = {
+        { "effekseer", "./res/particles/electric.efkefc" },
+        { "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
+        { "effect-tint", glm::vec4(0.f, 1.f, 0.f, 1.f) },
+        //{ "state", "enabled" },
+      } 
+    };
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    electricEmitter = gameapi -> makeObjectAttr(sceneId, "+electric-emitter", emitterAttr, submodelAttributes);
+  }
+
+  gameapi -> emit(electricEmitter.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
+
 }

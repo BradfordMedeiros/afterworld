@@ -31,5 +31,6 @@ std::optional<objid> getParticleEmitter(std::string& emitterName);
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 size);
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
+void emitElectric(objid sceneId, glm::vec3 position);
 
 #endif
