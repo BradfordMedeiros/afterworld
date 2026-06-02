@@ -651,9 +651,10 @@ objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec
       { "texture", "./res/textures/cyberguy2.png" },
 
 
-      { "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
+      { "tint", glm::vec4(1.f, 1.f, 1.f, 0.6f) },
 
-      { "layer", "nolighting" },
+     // { "layer", "nolighting" },
+      { "layer", "transparency" },
 
     } 
   };

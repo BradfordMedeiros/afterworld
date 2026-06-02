@@ -336,7 +336,7 @@ std::function<void(EasyCutscene&)> simpleNarration(std::vector<Narration> narrat
 						finishTimeMs = narration.at(i).endTimeMs;
 					}
 				}
-	    	showLetterBox("this is the cutscene", finishTimeMs / 1000.f);
+	    	showLetterBox("My First Failure", finishTimeMs / 1000.f);
   	}
 
   	auto elapsedTime = gameapi -> timeSeconds(false) - startTime;

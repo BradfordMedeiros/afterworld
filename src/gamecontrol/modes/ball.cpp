@@ -672,34 +672,44 @@ void handleBallModeCollision(objid obj1, objid obj2){
   // just check if it this the multiview here
 }
 
+
+std::vector<Narration> createNarration(std::vector<std::string> texts){
+	std::vector<Narration> narrations;
+
+	int timeMs = 0;
+	for (auto& text : texts){
+			int startTime = timeMs;
+			int endTime = startTime + (10 * 1000);
+			timeMs = endTime;
+ 			Narration narration {
+ 				.startTimeMs = startTime,
+ 				.endTimeMs = endTime,
+ 				.text = text,
+ 			};
+ 			narrations.push_back(narration);
+	}
+	return narrations;
+}
 void setToLevelEnd(){
 	auto& ballMode = getBallModeOptions();
 
 	// should this be here?
-	setGameObjectMeshEnabled(ballMode.ballId, true);
+	//setGameObjectMeshEnabled(ballMode.ballId, true);
 	setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
 	glm::vec3 position(100.f, 100.f, 100.f);
-	createObject(ballMode.sceneId, "../gameresources/build/primitives/sphere.gltf", position, glm::vec3(8.f, 8.f, 8.f));
+	auto sphereObj = createObject(ballMode.sceneId, "../gameresources/build/primitives/sphere.gltf", position, glm::vec3(8.f, 8.f, 8.f));
  	gameapi -> setGameObjectPosition(ballMode.ballId, position, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
 
 
+
+ 	auto ballId = ballMode.ballId;
  	playCutscene(
  		simpleNarration(
- 		{
- 			Narration {
- 				.startTimeMs = 0,
- 				.endTimeMs = 10000,
- 				.text = "hello world 1",
- 			},
-  		Narration {
- 				.startTimeMs = 10000,
- 				.endTimeMs = 20000,
- 				.text = "hello world 2",
- 			},
- 		},
- 		[]() -> void {
-
+ 		createNarration({ "I have fallen into this world", "No need to understand it", "I will try again" }),
+ 		[sphereObj, ballId]() -> void {
+ 			gameapi -> moveCameraTo(sphereObj, glm::vec3(0.f, 0.f, 0.f), 10.f);
+ 			gameapi -> moveCameraTo(ballId, glm::vec3(0.f, 0.f, 0.f), 10.f);
  		}), 
  		std::nullopt);
 }
@@ -957,7 +967,7 @@ GameTypeInfo getBallMode(){
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
   		if (ballMode.didLose){
-	  		gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  		//gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
 
 	  },
