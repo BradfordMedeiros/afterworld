@@ -54,6 +54,14 @@ struct NarratedMovement {
   std::vector<SimpleNarration> narrations;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, objid sceneId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish);
+std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish);
+
+struct Narration {
+  int startTimeMs;
+  int endTimeMs;
+  std::string text;
+};
+std::function<void(EasyCutscene&)> simpleNarration(std::vector<Narration> narration, std::function<void()> onFinish);
+
 
 #endif

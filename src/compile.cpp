@@ -293,6 +293,11 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = "trigger",
       });
 
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "layer",
+        .attributeValue = "nolighting",
+      });
+
       auto targetName = getValue(entity, "target");
       modassert(targetName.has_value(), "activatable but does not have a target to activate");
       attributes.push_back(GameobjAttributeOpts {

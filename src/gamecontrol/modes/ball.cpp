@@ -35,6 +35,7 @@ struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    objid ballId;
    objid spiritId;
+   objid eyeId;
    objid sceneId;
    bool didLose = false;
    bool shouldReset = false;
@@ -204,7 +205,7 @@ void ballStartGameplay(EasyCutscene& cutscene){
 		  	startData -> cutsceneFinished = true;
    			setTempCamera(std::nullopt, 0);
   		}else{
- 				playCutscene(simpleNarratedMovement2(ensureTempCamera(sceneId), getBallModeOptions().sceneId, narratedMovement, false, [&cutscene]() -> void { 
+ 				playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), narratedMovement, false, [&cutscene]() -> void { 
 		  		BallStartData* startData = getStorage<BallStartData>(cutscene);
 		  		modassert(startData, "ballStartGameplay startData is null");
 		  		startData -> cutsceneFinished = true;
@@ -264,6 +265,7 @@ void setBallLevelComplete(){
 
 struct BallObj {
 	objid id;
+	objid eyeId;
 	std::optional<objid> spiritId;
 };
 BallObj createBallObj(objid sceneId, glm::vec3 position){
@@ -292,6 +294,10 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
   	}
   };
  	auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);  
+
+	auto eyeId = findChildObjBySuffix(ball.value(), "eye");
+	modassert(eyeId.has_value(), "create ball no eye id");
+
 
   bool addParticle = true;
   std::optional<objid> spiritId;
@@ -331,6 +337,7 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
 
 	return BallObj {
 		.id = ball.value(),
+		.eyeId = eyeId.value(),
 		.spiritId = spiritId,
 	};
 }
@@ -383,6 +390,7 @@ void ballModeSetPlayMode(objid sceneId){
 	GameTypeInfo ballMode = getBallMode();
 	BallModeOptions modeOptions {};
 	modeOptions.ballId = ballId;
+	modeOptions.eyeId =  ballData.eyeId;
 	modeOptions.spiritId = ballData.spiritId.value();
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
@@ -423,7 +431,7 @@ void ballModeNewGame2(objid sceneId){
 	if (skipCutscene){
   			ballModeSetPlayMode(sceneId); 
 	}else{
-  	auto currentCutscene = playCutscene(simpleNarratedMovement2(cameraId, sceneId, narratedMovement, false, [sceneId]() -> void { 
+  	auto currentCutscene = playCutscene(simpleNarratedMovement(cameraId, narratedMovement, false, [sceneId]() -> void { 
   			ballModeSetPlayMode(sceneId); 
   	}), std::nullopt);		
 	}
@@ -664,6 +672,39 @@ void handleBallModeCollision(objid obj1, objid obj2){
   // just check if it this the multiview here
 }
 
+void setToLevelEnd(){
+	auto& ballMode = getBallModeOptions();
+
+	// should this be here?
+	setGameObjectMeshEnabled(ballMode.ballId, true);
+	setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
+
+	glm::vec3 position(100.f, 100.f, 100.f);
+	createObject(ballMode.sceneId, "../gameresources/build/primitives/sphere.gltf", position, glm::vec3(8.f, 8.f, 8.f));
+ 	gameapi -> setGameObjectPosition(ballMode.ballId, position, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
+
+
+ 	playCutscene(
+ 		simpleNarration(
+ 		{
+ 			Narration {
+ 				.startTimeMs = 0,
+ 				.endTimeMs = 10000,
+ 				.text = "hello world 1",
+ 			},
+  		Narration {
+ 				.startTimeMs = 10000,
+ 				.endTimeMs = 20000,
+ 				.text = "hello world 2",
+ 			},
+ 		},
+ 		[]() -> void {
+
+ 		}), 
+ 		std::nullopt);
+}
+
+
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
@@ -761,6 +802,9 @@ GameTypeInfo getBallMode(){
 	  	if (key == 'B' && action == 1){
 	  		ballMode.changeSpirit = MODE_PURPLE;
 	  	}
+	  	if (key == 'N' && action == 1){
+	  		ballMode.shouldReset = true;
+	  	}
 
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },
@@ -854,10 +898,18 @@ GameTypeInfo getBallMode(){
 	  			if (ballMode.spirit != MODE_YELLOW && !(ballVehicle.value() -> powerup.has_value() && ballVehicle.value() -> powerup.value().powerup == INVINCIBILITY && ballVehicle.value() -> powerup.value().useTime.has_value())){
 	  				ballMode.didLose = true;
 	  				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+	  				
+	  				//position = glm::vec3(100.f, 100.f, 100.f);
+
 	  				createExplosion(position, 5.f, 0.f);
 	  				setGameObjectMeshEnabled(ballMode.ballId, false);
 	  				setGameObjectPhysicsEnable(ballMode.ballId, false);
 		  			handleRemoveKillplaneCollision(ballMode.ballId);
+
+		  			emitKillEffect(position);
+		  			setGameObjectTint(ballMode.eyeId, glm::vec4(0.f, 0.f, 0.f, 1.f));
+	  			
+		  			setToLevelEnd();
 	  			}
 	  		}
 
@@ -865,6 +917,7 @@ GameTypeInfo getBallMode(){
 	  			ballMode.didReset = false;
 		  		setGameObjectMeshEnabled(ballMode.ballId, true);
 		  		setGameObjectPhysicsEnable(ballMode.ballId, true);
+	  			setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
 	  		}
 	  		if (ballMode.shouldReset){
 		  		gameapi -> setGameObjectPosition(ballMode.ballId, ballMode.initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });

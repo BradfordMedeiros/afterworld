@@ -263,8 +263,8 @@ struct CutsceneIntroData {
 	int railLengthMs;
 };
 
-std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, objid sceneId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish){
-	return [cameraId, sceneId, cutsceneData, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
+std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, NarratedMovement cutsceneData, bool skipAnimation, std::function<void()> onFinish){
+	return [cameraId, cutsceneData, skipAnimation, onFinish](EasyCutscene& cutscene) -> void {
   	if (initialize(cutscene)){
  			auto rail = railForId(cutsceneData.railId);
 
@@ -322,4 +322,43 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement2(objid cameraId, objid
  		waitUntil(cutscene, index, introData -> railLengthMs);
 	};
 }
+
+
+
+std::function<void(EasyCutscene&)> simpleNarration(std::vector<Narration> narration, std::function<void()> onFinish){
+	auto startTime = gameapi -> timeSeconds(false);
+
+	return [startTime, onFinish, narration](EasyCutscene& cutscene) -> void {
+  	if (initialize(cutscene)){
+				int finishTimeMs = 0.f;
+				for (int i = 0; i < narration.size(); i++){
+					if (narration.at(i).endTimeMs > finishTimeMs){
+						finishTimeMs = narration.at(i).endTimeMs;
+					}
+				}
+	    	showLetterBox("this is the cutscene", finishTimeMs / 1000.f);
+  	}
+
+  	auto elapsedTime = gameapi -> timeSeconds(false) - startTime;
+
+  	int index = 0;
+  	for (int i = 0; i < narration.size(); i++){
+  		if ((elapsedTime * 1000) > narration.at(i).startTimeMs){
+    		if (!finished(cutscene, index)){
+	  			auto& text = narration.at(i).text;
+		 			gameapi -> drawText(text, 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+		 		}			
+  		}
+  		waitUntil(cutscene, index, narration.at(i).endTimeMs);
+
+  		index++;
+  	}
+
+
+  	if (finalize(cutscene)){
+  	  onFinish();
+  	}
+	};
+}
+
 

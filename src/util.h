@@ -182,4 +182,6 @@ std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields);
 objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId);
 
+objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec3 scale);
+
 #endif

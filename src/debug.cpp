@@ -418,7 +418,14 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	//position.y += 5.f;
 
   	auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
-  	emitElectric(gameapi -> rootSceneId(), position);
+
+  	static bool shouldEmitElectric = false;
+  	shouldEmitElectric = !shouldEmitElectric;
+  	if (shouldEmitElectric){
+	  	emitElectric(position);
+  	}else{
+	  	emitElectric(position);
+  	}
   }
 
   if (!getArgEnabled("dev")){

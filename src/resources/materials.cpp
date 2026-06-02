@@ -171,9 +171,6 @@ void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position){
   emitBlood(sceneId, lookAtId, position);  // just emit blood for now
 }
 
-void emitExplosion(objid sceneId, objid lookAtId, glm::vec3 position, glm::vec3 size){
-  emitBlood(sceneId, lookAtId, position);
-}
 
 std::optional<objid> waterEmitter;
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position){
@@ -204,24 +201,51 @@ void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position){
   gameapi -> emit(waterEmitter.value(), position3, std::nullopt, glm::vec3(0.f, 2.f, 0.f), std::nullopt, std::nullopt); 
 }
 
-std::optional<objid> electricEmitter;
-void emitElectric(objid sceneId, glm::vec3 position){
-  static bool callOnce = true;
-  if (callOnce){
-    callOnce = false;
 
+
+objid createEffect(std::string path){
+    auto sceneId = gameapi -> rootSceneId();
     GameobjAttributes emitterAttr { 
       .attr = {
-        { "effekseer", "./res/particles/electric.efkefc" },
+        { "effekseer", path },
         { "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
         { "effect-tint", glm::vec4(0.f, 0.f, 1.f, 1.f) },
         //{ "state", "enabled" },
       } 
     };
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-    electricEmitter = gameapi -> makeObjectAttr(sceneId, "+electric-emitter", emitterAttr, submodelAttributes);
+    std::string emitterName = std::string("+emitter-") + std::to_string(getUniqueObjId());
+    auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
+    return emitter.value();
+}
+
+
+struct EffekData {
+  std::string path;
+  std::optional<objid> id;
+};
+std::unordered_map<std::string, EffekData> effects {
+    { "electric", EffekData { .path  = "./res/particles/electric.efkefc"  }},
+    { "killeffect", EffekData { .path  = "./res/particles/backgrounds.efkefc"  }},
+
+};
+
+void emitEffect(std::string effectName, glm::vec3 position){
+  auto& effect = effects.at(effectName);
+  if (!effect.id.has_value()){
+    effect.id = createEffect(effect.path);
   }
+  gameapi -> emit(effect.id.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
+}
 
-  gameapi -> emit(electricEmitter.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
+void emitElectric(glm::vec3 position){
+  emitEffect("electric", position);
+}
 
+void emitExplosion(glm::vec3 position){
+  emitBlood(gameapi -> rootSceneId(), 0, position);
+}
+
+void emitKillEffect(glm::vec3 position){
+   emitEffect("killeffect", position);
 }

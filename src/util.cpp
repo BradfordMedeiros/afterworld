@@ -639,3 +639,26 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId){
     submodelAttributes
   ).value();
 }
+
+
+objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec3 scale){
+  GameobjAttributes emitterAttr { 
+    .attr = {
+      { "mesh", mesh },
+      { "position", position },
+      { "scale", scale },
+      { "scrollspeed", glm::vec3(0.2f, 0.2f, 0.f) },
+      { "texture", "./res/textures/cyberguy2.png" },
+
+
+      { "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
+
+      { "layer", "nolighting" },
+
+    } 
+  };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::string emitterName = std::string("createObject-") + std::to_string(getUniqueObjId());
+  auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
+  return emitter.value();
+}

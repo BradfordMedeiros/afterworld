@@ -276,7 +276,7 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position, false);
 	auto activePlayer = getEntityForPlayerIndex(getDefaultPlayerIndex());
 	if (activePlayer.has_value()){
-		emitExplosion(rootSceneId(), activePlayer.value(), position, glm::vec3(1.f, 1.f, 1.f));
+		emitExplosion(position);
 	}
 
 	std::cout << "hitobjects: [";
@@ -644,7 +644,7 @@ void maybeTriggerActivation(objid id){
 	 		auto activationPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] maybeTriggerActivation");
 
 		  playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
-			emitElectric(sceneId, activationPosition);
+			emitElectric(activationPosition);
   		setGameObjectTint(id, glm::vec4(0.6f, 0.6f, 0.6f, 1.f));
 
 			for (auto& [id, activateable] : activateables){
