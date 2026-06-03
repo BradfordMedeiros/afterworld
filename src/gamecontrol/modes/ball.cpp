@@ -48,6 +48,9 @@ struct BallModeOptions{
    std::optional<WorldView> worldView;
 
    bool levelSelect = false;
+
+   std::optional<objid> rebirthSphere;
+   glm::vec3 playerSpawnPosition;
 };
 
 BallModeOptions& getBallModeOptions(){
@@ -394,6 +397,14 @@ void ballModeSetPlayMode(objid sceneId){
 	modeOptions.spiritId = ballData.spiritId.value();
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
+	modeOptions.playerSpawnPosition = playerSpawnPosition;
+
+	//auto sphereObj = createObject(sceneId, "../gameresources/build/primitives/sphere.gltf", glm::vec3(100.f, 100.f, 100.f), glm::vec3(8.f, 8.f, 8.f));
+
+	auto rebirthObj = gameapi -> getObjectsByAttr("rebirth", std::nullopt, sceneId);
+	modassert(rebirthObj.size() == 1, "no rebirth object in this scene");
+
+	modeOptions.rebirthSphere = rebirthObj.at(0);
 
 	setGameObjectEmitterEffectTint(modeOptions.spiritId, glm::vec4(0.f, 1.f, 0.f, 0.f));
 
@@ -697,19 +708,18 @@ void setToLevelEnd(){
 	//setGameObjectMeshEnabled(ballMode.ballId, true);
 	setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
-	glm::vec3 position(100.f, 100.f, 100.f);
-	auto sphereObj = createObject(ballMode.sceneId, "../gameresources/build/primitives/sphere.gltf", position, glm::vec3(8.f, 8.f, 8.f));
- 	gameapi -> setGameObjectPosition(ballMode.ballId, position, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
-
-
+	auto rebirthSpherePos = gameapi -> getGameObjectPos(ballMode.rebirthSphere.value(), true, "[gamelogic] setToLevelEnd get sphere loc");
+ 	gameapi -> setGameObjectPosition(ballMode.ballId, rebirthSpherePos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
 
  	auto ballId = ballMode.ballId;
  	playCutscene(
  		simpleNarration(
  		createNarration({ "I have fallen into this world", "No need to understand it", "I will try again" }),
- 		[sphereObj, ballId]() -> void {
- 			gameapi -> moveCameraTo(sphereObj, glm::vec3(0.f, 0.f, 0.f), 10.f);
- 			gameapi -> moveCameraTo(ballId, glm::vec3(0.f, 0.f, 0.f), 10.f);
+ 		[ballId]() -> void {
+ 			auto& ballOptions = getBallModeOptions();
+ 			auto sphereObj = ballOptions.rebirthSphere.value();
+ 			gameapi -> moveCameraTo(sphereObj, ballOptions.playerSpawnPosition , 10.f);
+ 			gameapi -> moveCameraTo(ballId, ballOptions.playerSpawnPosition, 10.f);
  		}), 
  		std::nullopt);
 }

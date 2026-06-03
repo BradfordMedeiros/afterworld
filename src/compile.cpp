@@ -998,6 +998,39 @@ CompileMapFns getCompileMapForBallGame(){
         }
       }
 
+    }else if (*className.value() == "moon"){
+        *shouldWrite = true;
+        glm::vec3 scale(8.f, 8.f, 8.f);
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "mesh",
+          .attributeValue = "../gameresources/build/primitives/sphere.gltf",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "scale",
+          .attributeValue = scale,
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "scrollspeed",
+          .attributeValue = glm::vec3(0.2f, 0.2f, 0.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "texture",
+          .attributeValue = "./res/textures/cyberguy2.png",
+        });        
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "tint",
+          .attributeValue = glm::vec4(1.f, 1.f, 1.f, 0.6f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "layer",
+          .attributeValue = "nolighting",   // nolighting
+        });       
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "rebirth",
+          .attributeValue = "true",
+        });       
+
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
 
