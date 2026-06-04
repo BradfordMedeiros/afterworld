@@ -50,6 +50,8 @@ struct BallModeOptions{
    bool levelSelect = false;
 
    std::optional<objid> rebirthSphere;
+   std::optional<glm::vec3> rebirthSphereInitialPos;
+
    glm::vec3 playerSpawnPosition;
 };
 
@@ -405,6 +407,8 @@ void ballModeSetPlayMode(objid sceneId){
 	modassert(rebirthObj.size() == 1, "no rebirth object in this scene");
 
 	modeOptions.rebirthSphere = rebirthObj.at(0);
+	auto rebirthSphereInitialPos = gameapi -> getGameObjectPos(modeOptions.rebirthSphere.value(), true, "[gamelogic] rebirthSphereInitialPos");
+	modeOptions.rebirthSphereInitialPos = rebirthSphereInitialPos;
 
 	setGameObjectEmitterEffectTint(modeOptions.spiritId, glm::vec4(0.f, 1.f, 0.f, 0.f));
 
@@ -684,13 +688,14 @@ void handleBallModeCollision(objid obj1, objid obj2){
 }
 
 
-std::vector<Narration> createNarration(std::vector<std::string> texts){
+std::vector<Narration> createNarration(std::vector<std::string> texts, int textLength, int* duration){
 	std::vector<Narration> narrations;
+	*duration = 0;
 
 	int timeMs = 0;
 	for (auto& text : texts){
 			int startTime = timeMs;
-			int endTime = startTime + (10 * 1000);
+			int endTime = startTime + textLength;
 			timeMs = endTime;
  			Narration narration {
  				.startTimeMs = startTime,
@@ -698,9 +703,69 @@ std::vector<Narration> createNarration(std::vector<std::string> texts){
  				.text = text,
  			};
  			narrations.push_back(narration);
+ 			*duration = endTime;
 	}
 	return narrations;
 }
+
+
+std::function<void(EasyCutscene&)> deathCutscene(){
+ 	int endTimeMs = 0;
+ 	auto narration = createNarration({ "I have fallen into this world", "No need to understand it", "I will try again" }, 5000, &endTimeMs);
+ 	float endTime = endTimeMs / 1000.f;
+
+	return [endTimeMs, endTime, narration](EasyCutscene& cutscene) -> void {
+		if(initialize(cutscene)){
+		  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
+
+ 			auto& ballMode = getBallModeOptions();
+
+		 	playCutscene(simpleNarration("The First Time I Died", narration, []() -> void {  }), std::nullopt);
+			std::cout << "death cutscene: initialize: t = " << gameapi -> timeSeconds(false) << std::endl;
+			std::cout << "death cutscene: initialize: endTime = " << endTime << ", ms = " << endTimeMs << std::endl;
+
+
+		}
+		if (finalize(cutscene)){
+			std::cout << "death cutscene: finalize: t = " << gameapi -> timeSeconds(false) << std::endl;
+		}
+
+		int initialDelay = 5000;
+
+
+		waitUntil(cutscene, 1, initialDelay);
+		run(cutscene, 2, []() -> void {
+ 			auto& ballMode = getBallModeOptions();
+			auto rebirthSpherePos = gameapi -> getGameObjectPos(ballMode.rebirthSphere.value(), true, "[gamelogic] setToLevelEnd get sphere loc");
+		 	gameapi -> setGameObjectPosition(ballMode.ballId, rebirthSpherePos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
+		});
+		waitUntil(cutscene, 3, initialDelay + 100);
+
+		run(cutscene, 4, [endTime]() -> void {
+			std::cout << "death cutscene: start move rebirth: t = " << gameapi -> timeSeconds(false) << std::endl;
+ 			auto& ballOptions = getBallModeOptions();
+ 			auto sphereObj = ballOptions.rebirthSphere.value();
+ 			gameapi -> moveCameraTo(sphereObj, ballOptions.playerSpawnPosition , endTime);
+ 			gameapi -> moveCameraTo(ballOptions.ballId, ballOptions.playerSpawnPosition , endTime);
+		});
+
+		waitUntil(cutscene, 5, initialDelay + endTimeMs + 100);
+
+		run(cutscene, 6, [endTime]() -> void {
+ 			auto& ballOptions = getBallModeOptions();
+			ballOptions.shouldReset = true;
+
+ 			auto sphereObj = ballOptions.rebirthSphere.value();
+ 			gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
+
+		});
+
+	};
+}
+
+
+
+
 void setToLevelEnd(){
 	auto& ballMode = getBallModeOptions();
 
@@ -708,20 +773,9 @@ void setToLevelEnd(){
 	//setGameObjectMeshEnabled(ballMode.ballId, true);
 	setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
-	auto rebirthSpherePos = gameapi -> getGameObjectPos(ballMode.rebirthSphere.value(), true, "[gamelogic] setToLevelEnd get sphere loc");
- 	gameapi -> setGameObjectPosition(ballMode.ballId, rebirthSpherePos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
 
- 	auto ballId = ballMode.ballId;
- 	playCutscene(
- 		simpleNarration(
- 		createNarration({ "I have fallen into this world", "No need to understand it", "I will try again" }),
- 		[ballId]() -> void {
- 			auto& ballOptions = getBallModeOptions();
- 			auto sphereObj = ballOptions.rebirthSphere.value();
- 			gameapi -> moveCameraTo(sphereObj, ballOptions.playerSpawnPosition , 10.f);
- 			gameapi -> moveCameraTo(ballId, ballOptions.playerSpawnPosition, 10.f);
- 		}), 
- 		std::nullopt);
+ 	auto cutscene = deathCutscene();
+ 	playCutscene(cutscene, std::nullopt);
 }
 
 
@@ -926,7 +980,6 @@ GameTypeInfo getBallMode(){
 	  				setGameObjectPhysicsEnable(ballMode.ballId, false);
 		  			handleRemoveKillplaneCollision(ballMode.ballId);
 
-		  			emitKillEffect(position);
 		  			setGameObjectTint(ballMode.eyeId, glm::vec4(0.f, 0.f, 0.f, 1.f));
 	  			
 		  			setToLevelEnd();

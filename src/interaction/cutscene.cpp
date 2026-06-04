@@ -325,7 +325,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, Narrat
 
 
 
-std::function<void(EasyCutscene&)> simpleNarration(std::vector<Narration> narration, std::function<void()> onFinish){
+std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::vector<Narration> narration, std::function<void()> onFinish){
 	auto startTime = gameapi -> timeSeconds(false);
 
 	return [startTime, onFinish, narration](EasyCutscene& cutscene) -> void {

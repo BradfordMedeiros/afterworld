@@ -61,7 +61,7 @@ struct Narration {
   int endTimeMs;
   std::string text;
 };
-std::function<void(EasyCutscene&)> simpleNarration(std::vector<Narration> narration, std::function<void()> onFinish);
+std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::vector<Narration> narration, std::function<void()> onFinish);
 
 
 #endif
