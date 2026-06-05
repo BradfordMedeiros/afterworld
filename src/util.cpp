@@ -292,6 +292,11 @@ void setGameObjectEmitterEffectTint(objid id, glm::vec4 tint){
   gameapi -> setSingleGameObjectAttr(id, "effect-tint", tint);
 }
 
+void setGameObjectLayer(objid id, std::string layer){
+  gameapi -> setSingleGameObjectAttr(id, "layer", layer);
+}
+
+
 void setAmbientLight(glm::vec3 light){
   gameapi -> setWorldState({ 
     ObjectValue {
@@ -663,3 +668,4 @@ objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec
   auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
   return emitter.value();
 }
+

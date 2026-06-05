@@ -75,6 +75,7 @@ void setGameObjectPhysicsMass(objid id, float mass);
 void setGameObjectPhysicsOptions(objid id, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity);
 void setGameObjectEmission(objid id, std::optional<glm::vec3> emission);
 void setGameObjectEmitterEffectTint(objid id, glm::vec4 tint);
+void setGameObjectLayer(objid id, std::string layer);
 
 void setAmbientLight(glm::vec3 light);
 void setVisualizeVoxelLighting(bool enable);
@@ -183,5 +184,6 @@ objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unorde
 objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId);
 
 objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec3 scale);
+
 
 #endif

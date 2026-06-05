@@ -744,6 +744,9 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 
  			auto sphereObj = ballOptions.rebirthSphere.value();
  			gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
+
+ 			setGameObjectLayer(ballOptions.eyeId, "");
+ 			setGameObjectLayer(ballOptions.rebirthSphere.value(), "");
 		}
 
 
@@ -768,6 +771,8 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 	  	auto ballPos = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] get ball position for start");
 		 	gameapi -> setGameObjectPosition(ballMode.rebirthSphere.value(), ballPos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
 
+ 			setGameObjectLayer(ballMode.eyeId, "no_depth");
+ 			setGameObjectLayer(ballMode.rebirthSphere.value(), "no_depth");
 		});
 		waitUntil(cutscene, 3, initialDelay + 100);
 
