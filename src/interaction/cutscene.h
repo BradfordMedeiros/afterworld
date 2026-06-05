@@ -14,6 +14,7 @@ struct EasyCutscene {
   std::set<int> playedEventsThisFrame;
   bool firstRun = true;
   bool finished = false;
+  bool requestRemoval = false;
   objid cutsceneId;
 };
 
@@ -31,6 +32,8 @@ bool finishedThisFrame(EasyCutscene& easyCutscene, int index);
 bool finalize(EasyCutscene& cutscene);
 void store(EasyCutscene& cutscene, std::any data);
 void setCutsceneFinished(EasyCutscene& cutscene);
+
+void setCutsceneFinished(objid id);
 
 template <typename T>
 T* getStorage(EasyCutscene& cutscene){
@@ -61,7 +64,7 @@ struct Narration {
   int endTimeMs;
   std::string text;
 };
-std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::vector<Narration> narration, std::function<void()> onFinish);
+std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::vector<Narration> narration);
 
 
 #endif

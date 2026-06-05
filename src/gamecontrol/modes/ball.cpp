@@ -1,6 +1,7 @@
 #include "./ball.h"
 
 extern CustomApiBindings* gameapi;
+extern GLFWwindow* window;
 
 extern GameTypes gametypeSystem;
 extern std::optional<std::string> activeLevel;
@@ -709,26 +710,51 @@ std::vector<Narration> createNarration(std::vector<std::string> texts, int textL
 }
 
 
+
+struct DeathCutsceneData {
+	std::optional<objid> narrationCutscene;
+};
 std::function<void(EasyCutscene&)> deathCutscene(){
  	int endTimeMs = 0;
  	auto narration = createNarration({ "I have fallen into this world", "No need to understand it", "I will try again" }, 5000, &endTimeMs);
  	float endTime = endTimeMs / 1000.f;
 
-	return [endTimeMs, endTime, narration](EasyCutscene& cutscene) -> void {
+ 	auto simpleNarrationCutscene = simpleNarration("The First Time I Died", narration);
+
+	return [endTimeMs, endTime, simpleNarrationCutscene](EasyCutscene& cutscene) -> void {
 		if(initialize(cutscene)){
 		  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
 
  			auto& ballMode = getBallModeOptions();
 
-		 	playCutscene(simpleNarration("The First Time I Died", narration, []() -> void {  }), std::nullopt);
+		 	auto narrationCutscene = playCutscene(simpleNarrationCutscene, std::nullopt);
 			std::cout << "death cutscene: initialize: t = " << gameapi -> timeSeconds(false) << std::endl;
 			std::cout << "death cutscene: initialize: endTime = " << endTime << ", ms = " << endTimeMs << std::endl;
 
+			DeathCutsceneData cutsceneData{};
+			cutsceneData.narrationCutscene = narrationCutscene;
+    	store(cutscene, cutsceneData);
 
 		}
 		if (finalize(cutscene)){
 			std::cout << "death cutscene: finalize: t = " << gameapi -> timeSeconds(false) << std::endl;
+
+			auto& ballOptions = getBallModeOptions();
+			ballOptions.shouldReset = true;
+
+ 			auto sphereObj = ballOptions.rebirthSphere.value();
+ 			gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
 		}
+
+
+		DeathCutsceneData* cutsceneData = getStorage<DeathCutsceneData>(cutscene);
+		modassert(cutsceneData, "no cutscene data");
+
+  	if (glfwGetKey(window, 'K') && cutsceneData -> narrationCutscene.has_value()){
+  		setCutsceneFinished(cutsceneData -> narrationCutscene.value());
+  		cutsceneData -> narrationCutscene = std::nullopt;
+  		setCutsceneFinished(cutscene);
+  	}
 
 		int initialDelay = 5000;
 
@@ -737,7 +763,11 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 		run(cutscene, 2, []() -> void {
  			auto& ballMode = getBallModeOptions();
 			auto rebirthSpherePos = gameapi -> getGameObjectPos(ballMode.rebirthSphere.value(), true, "[gamelogic] setToLevelEnd get sphere loc");
-		 	gameapi -> setGameObjectPosition(ballMode.ballId, rebirthSpherePos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
+		 	//gameapi -> setGameObjectPosition(ballMode.ballId, rebirthSpherePos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
+			
+	  	auto ballPos = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] get ball position for start");
+		 	gameapi -> setGameObjectPosition(ballMode.rebirthSphere.value(), ballPos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
+
 		});
 		waitUntil(cutscene, 3, initialDelay + 100);
 
@@ -751,14 +781,6 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 
 		waitUntil(cutscene, 5, initialDelay + endTimeMs + 100);
 
-		run(cutscene, 6, [endTime]() -> void {
- 			auto& ballOptions = getBallModeOptions();
-			ballOptions.shouldReset = true;
-
- 			auto sphereObj = ballOptions.rebirthSphere.value();
- 			gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
-
-		});
 
 	};
 }

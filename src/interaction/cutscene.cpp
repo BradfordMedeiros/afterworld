@@ -42,7 +42,7 @@ void tickCutscenes2(){
 		cutscene.cutsceneFn(cutscene.easyCutscene);
 
 		bool shouldRemoveThisFrame = false;
-		if (cutscene.easyCutscene.idsThisFrame.size() == 0){
+		if (cutscene.easyCutscene.idsThisFrame.size() == 0 || cutscene.easyCutscene.requestRemoval){
 			shouldRemoveThisFrame = true;
 		}else{
 			bool finalIdFinished = true;
@@ -108,7 +108,6 @@ void waitUntil(EasyCutscene& easyCutscene, int index, int milliseconds){
   	easyCutscene.playedEventsThisFrame.insert(index);
   }
 }
-
 void waitFor(EasyCutscene& easyCutscene, int index, std::function<bool()> fn){
 	easyCutscene.idsThisFrame.push_back(index);
 
@@ -162,6 +161,10 @@ void store(EasyCutscene& cutscene, std::any data){
 
 void setCutsceneFinished(EasyCutscene& cutscene){
 	removeCutscene(cutscene.cutsceneId);
+}
+
+void setCutsceneFinished(objid id){
+	playingCutscenes2.at(id).easyCutscene.requestRemoval = true;
 }
 
 
@@ -325,10 +328,10 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, Narrat
 
 
 
-std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::vector<Narration> narration, std::function<void()> onFinish){
+std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::vector<Narration> narration){
 	auto startTime = gameapi -> timeSeconds(false);
 
-	return [startTime, onFinish, narration](EasyCutscene& cutscene) -> void {
+	return [startTime, narration](EasyCutscene& cutscene) -> void {
   	if (initialize(cutscene)){
 				int finishTimeMs = 0.f;
 				for (int i = 0; i < narration.size(); i++){
@@ -337,6 +340,11 @@ std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::v
 					}
 				}
 	    	showLetterBox("My First Failure", finishTimeMs / 1000.f);
+  	}
+
+  	if (finalize(cutscene)){
+  		hideLetterBox();
+  	  return;
   	}
 
   	auto elapsedTime = gameapi -> timeSeconds(false) - startTime;
@@ -355,9 +363,6 @@ std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::v
   	}
 
 
-  	if (finalize(cutscene)){
-  	  onFinish();
-  	}
 	};
 }
 
