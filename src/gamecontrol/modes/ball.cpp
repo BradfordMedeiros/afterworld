@@ -713,6 +713,7 @@ std::vector<Narration> createNarration(std::vector<std::string> texts, int textL
 
 struct DeathCutsceneData {
 	std::optional<objid> narrationCutscene;
+	std::optional<float> startTintTime = 0;
 };
 std::function<void(EasyCutscene&)> deathCutscene(){
  	int endTimeMs = 0;
@@ -762,8 +763,34 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 		int initialDelay = 5000;
 
 
-		waitUntil(cutscene, 1, initialDelay);
-		run(cutscene, 2, []() -> void {
+
+		run(cutscene, 1, [cutsceneData]() -> void {
+			auto& ballOptions = getBallModeOptions();
+
+			float startTintTime = gameapi -> timeSeconds(false);
+			cutsceneData -> startTintTime = startTintTime;
+
+			setGameObjectTint(ballOptions.rebirthSphere.value(), glm::vec4(1.f, 0.f, 0.f, 0.1f));
+		});
+		if (!finished(cutscene, 2)){
+			auto& ballOptions = getBallModeOptions();
+			if (cutsceneData -> startTintTime.has_value()){
+				auto elapsedTime = gameapi -> timeSeconds(false) - cutsceneData -> startTintTime.value();
+
+				std::cout << "testthing elapsedTime: " << elapsedTime << std::endl;
+
+				float percentage = elapsedTime / 2.f;
+				if (percentage > 1.f){
+					percentage = 1.f;
+				}
+				setGameObjectTint(ballOptions.rebirthSphere.value(), glm::vec4(1.f, 1.f, 1.f, percentage));
+			}
+		}
+
+		waitUntil(cutscene, 2, initialDelay);
+
+
+		run(cutscene, 3, []() -> void {
  			auto& ballMode = getBallModeOptions();
 			auto rebirthSpherePos = gameapi -> getGameObjectPos(ballMode.rebirthSphere.value(), true, "[gamelogic] setToLevelEnd get sphere loc");
 		 	//gameapi -> setGameObjectPosition(ballMode.ballId, rebirthSpherePos, true, Hint { .hint = "[gamelogic] - setToLevelEnd" });
@@ -774,9 +801,9 @@ std::function<void(EasyCutscene&)> deathCutscene(){
  			setGameObjectLayer(ballMode.eyeId, "no_depth");
  			setGameObjectLayer(ballMode.rebirthSphere.value(), "no_depth");
 		});
-		waitUntil(cutscene, 3, initialDelay + 100);
+		waitUntil(cutscene, 4, initialDelay + 100);
 
-		run(cutscene, 4, [endTime]() -> void {
+		run(cutscene, 5, [endTime]() -> void {
 			std::cout << "death cutscene: start move rebirth: t = " << gameapi -> timeSeconds(false) << std::endl;
  			auto& ballOptions = getBallModeOptions();
  			auto sphereObj = ballOptions.rebirthSphere.value();
@@ -784,7 +811,7 @@ std::function<void(EasyCutscene&)> deathCutscene(){
  			gameapi -> moveCameraTo(ballOptions.ballId, ballOptions.playerSpawnPosition , endTime);
 		});
 
-		waitUntil(cutscene, 5, initialDelay + endTimeMs + 100);
+		waitUntil(cutscene, 6, initialDelay + endTimeMs + 100);
 
 
 	};

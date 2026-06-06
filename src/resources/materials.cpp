@@ -203,16 +203,20 @@ void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position){
 
 
 
-objid createEffect(std::string path){
+objid createEffect(std::string path, std::optional<glm::vec3> scale, std::optional<glm::vec4> tint){
     auto sceneId = gameapi -> rootSceneId();
     GameobjAttributes emitterAttr { 
       .attr = {
         { "effekseer", path },
-        { "scale", glm::vec3(0.2f, 0.2f, 0.2f) },
-        { "effect-tint", glm::vec4(0.f, 0.f, 1.f, 1.f) },
         //{ "state", "enabled" },
       } 
     };
+    if (scale.has_value()){
+      emitterAttr.attr["scale"] = scale.value();
+    }
+    if (tint.has_value()){
+      emitterAttr.attr["effect-tint"] = tint.value();
+    }
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     std::string emitterName = std::string("+emitter-") + std::to_string(getUniqueObjId());
     auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
@@ -223,17 +227,19 @@ objid createEffect(std::string path){
 struct EffekData {
   std::string path;
   std::optional<objid> id;
+  std::optional<glm::vec3> scale;
+  std::optional<glm::vec4> tint;
 };
 std::unordered_map<std::string, EffekData> effects {
-    { "electric", EffekData { .path  = "./res/particles/electric.efkefc"  }},
-    { "killeffect", EffekData { .path  = "./res/particles/backgrounds.efkefc"  }},
-
+    { "electric", EffekData { .path  = "./res/particles/electric.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
+    { "killeffect", EffekData { .path  = "./res/particles/backgrounds.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
+    { "warp", EffekData { .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f), .tint = glm::vec4(0.f, 0.f, 1.f, 1.f)  }},
 };
 
 void emitEffect(std::string effectName, glm::vec3 position){
   auto& effect = effects.at(effectName);
   if (!effect.id.has_value()){
-    effect.id = createEffect(effect.path);
+    effect.id = createEffect(effect.path, effect.scale, effect.tint);
   }
   gameapi -> emit(effect.id.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
 }
@@ -248,4 +254,8 @@ void emitExplosion(glm::vec3 position){
 
 void emitKillEffect(glm::vec3 position){
    emitEffect("killeffect", position);
+}
+
+void emitWarp(glm::vec3 position){
+  emitEffect("warp", position);
 }

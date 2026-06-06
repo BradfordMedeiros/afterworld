@@ -34,6 +34,7 @@ void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitExplosion(glm::vec3 position);
 void emitElectric(glm::vec3 position);
 void emitKillEffect(glm::vec3 position);
+void emitWarp(glm::vec3 position);
 
 #endif
 
