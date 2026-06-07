@@ -422,9 +422,9 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	static bool shouldEmitElectric = false;
   	shouldEmitElectric = !shouldEmitElectric;
   	if (shouldEmitElectric){
-	  	emitElectric(position);
+	  	emitWarp(position);
   	}else{
-	  	emitElectric(position);
+	  	emitWarp(position);
   	}
   }
 
