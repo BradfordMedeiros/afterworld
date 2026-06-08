@@ -235,7 +235,7 @@ std::unordered_map<std::string, EffekData> effects {
     { "killeffect", EffekData { .path  = "./res/particles/backgrounds.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
     { "warp", EffekData { .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f), .tint = glm::vec4(0.f, 0.f, 1.f, 1.f)  }},
    
-    { "rain", EffekData { .path  = "./res/particles/rain.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "rain", EffekData { .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
     { "splash", EffekData { .path  = "./res/particles/splash.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
 
 

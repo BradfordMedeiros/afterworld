@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 extern Director director;
+extern Weather weather;
 
 void spawnProcMesh(objid sceneId){
 	std::vector<glm::vec3> faces = {
@@ -421,11 +422,13 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
   	static bool shouldEmitElectric = false;
   	shouldEmitElectric = !shouldEmitElectric;
-  	if (shouldEmitElectric){
-	  	emitWarp(position);
-  	}else{
-	  	emitWarp(position);
-  	}
+  	//if (shouldEmitElectric){
+	  //	emitWarp(position);
+  	//}else{
+	  //	emitWarp(position);
+  	//}
+
+  	changeWeather(weather, "rain");
   }
 
   if (!getArgEnabled("dev")){

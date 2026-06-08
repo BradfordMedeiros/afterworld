@@ -12,6 +12,7 @@
 #include "./options.h"
 #include "./gamecontrol/entity.h"
 #include "./gameworld/progress.h"
+#include "./gameworld/weather.h"
 #include "./ai/scene_ai.h"
 
 void debugOnFrame();

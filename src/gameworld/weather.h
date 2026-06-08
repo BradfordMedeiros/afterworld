@@ -8,7 +8,7 @@ struct Weather {
 	std::optional<objid> weatherEmitter;
 };
 
-void onWeatherMessage(Weather& weather, std::any& value, objid sceneId);
-
+void changeWeather(Weather& weather, std::optional<std::string> name);
+void onWeatherFrame(Weather& weather);
 
 #endif

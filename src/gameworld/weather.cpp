@@ -4,46 +4,107 @@
 
 extern CustomApiBindings* gameapi;
 
-void changeWeather(Weather& weather, std::string name, objid sceneId){
+int getNumberOfPlayers();
+
+objid createWeatherEffect(std::string path, std::optional<glm::vec3> scale, std::optional<glm::vec4> tint){
+    auto sceneId = gameapi -> rootSceneId();
+    GameobjAttributes emitterAttr { 
+      .attr = {
+        { "effekseer", path },
+        { "state", "enabled" },
+      } 
+    };
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    std::string emitterName = std::string("+emitterweather-") + std::to_string(getUniqueObjId());
+    auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
+    return emitter.value();
+}
+
+//    { "rain", EffekData { .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+
+
+struct WeatherEffect {
+  std::string path;
+  bool flash = false;
+};
+
+std::unordered_map<std::string, WeatherEffect> weatherEffects {
+  { "rain", WeatherEffect { 
+      .path =  "./res/particles/rain2.efkefc",
+  }},
+  { 
+    "storm", WeatherEffect {
+      .path =  "./res/particles/rain2.efkefc",
+      .flash = true,
+  }},
+
+};
+
+void changeWeather(Weather& weather, std::optional<std::string> name){
   if (weather.weatherEmitter.has_value()){
     gameapi -> removeByGroupId(weather.weatherEmitter.value());
   }
   weather.weatherEmitter = std::nullopt;
-  if (name == "none"){
+
+  if (!name.has_value()){
+    std::cout << "weather: change to " << "none" << std::endl;
     return;
   }
-
-  auto query = gameapi -> compileSqlQuery("select texture, duration, rate, particle-limit, tint from weather where name = ?", { name });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-  GameobjAttributes particleAttr {
-    .attr = { 
-      { "state", "enabled" },    
-      { "+physics", "enabled" },
-      { "+physics_type", "dynamic" },  
-      { "+layer", "basicui" },    ///////
-      { "+mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf"},
-      { "+texture", strFromFirstSqlResult(result, 0) },
-      { "duration", floatFromFirstSqlResult(result, 1) },
-      { "rate", floatFromFirstSqlResult(result, 2) },
-      { "limit", floatFromFirstSqlResult(result, 3) },
-      {"+tint", vec4FromFirstSqlResult(result, 4)  },
-      {"position", glm::vec3(0, 1.5f, -1.f) }, 
-      {"+scale", glm::vec3(0.2f, 0.2f, 0.2f) },
-      { "+physics_gravity", glm::vec3(0.f, -1.f, -1.f) },
-      {"!position", glm::vec3(0.001f, 0.001f, 0.001f) },
-      {"?position", glm::vec3(0.1f, 0.001f, 0.001f) },
-    },
-  };
-  weather.weatherEmitter = gameapi -> makeObjectAttr(sceneId, std::string("+code-weather-") + uniqueNameSuffix(), particleAttr, submodelAttributes); 
+  
+  auto& effect = weatherEffects.at(name.value());
+  weather.weatherEmitter = createWeatherEffect(effect.path, std::nullopt, std::nullopt);
+  std::cout << "weather: change to " << name.value() << std::endl;
 }
 
-void onWeatherMessage(Weather& weather, std::any& value, objid sceneId){
-  auto strValue = anycast<std::string>(value);
-  modassert(strValue, "weather strValue is NULL");
-  changeWeather(weather, *strValue, sceneId);
-}
+void onWeatherFrame(Weather& weather){
+  auto numPlayers = getNumberOfPlayers();
+  modassert(numPlayers == 1, "weather system does not support more than 1 player");
 
+  if (!weather.weatherEmitter.has_value()){
+    return;
+  }
+  auto cameraTransform = gameapi -> getCameraTransform(0);
+  auto weatherEmitterId = weather.weatherEmitter.value();
+  gameapi -> setGameObjectPosition(weatherEmitterId, cameraTransform.position, true, Hint { .hint = "update weather transform" });  
+
+
+  static float lastLightingTime = gameapi -> timeSeconds(false);
+  static bool inLighting = false;
+  static glm::vec3 oldLighting(0.f, 0.f, 0.f);
+
+  auto currTime = gameapi -> timeSeconds(false);
+  if (currTime - lastLightingTime > 0.1f && inLighting){
+    inLighting = false;
+    gameapi -> setWorldState({ 
+       ObjectValue {
+         .object = "light",
+         .attribute = "amount",
+         .value = oldLighting,
+       },
+    });
+  }
+
+  if (currTime - lastLightingTime > 10.f){
+    std::cout << "weather: lighting flash" << std::endl;
+    lastLightingTime = currTime;
+    inLighting = true;
+
+    glm::vec3 ambientLight = glm::vec3(1.f, 1.f, 1.f);
+
+    //std::optional<AttributeValue> getWorldStateAttr(const char* object, const char* attribute){
+    auto ambientLightAttr = getWorldStateAttr("light", "amount");
+    modassert(ambientLightAttr.has_value(), "no ambient light state");
+    auto vec3Ptr = std::get_if<glm::vec3>(&ambientLightAttr.value());
+    modassert(vec3Ptr, "ambient light not vec3");
+    oldLighting = *vec3Ptr;
+
+    gameapi -> setWorldState({ 
+       ObjectValue {
+         .object = "light",
+         .attribute = "amount",
+         .value = ambientLight,
+       },
+    });
+
+  }
+}

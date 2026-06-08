@@ -887,6 +887,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     /// GENERAL UPDATES
     {
+      onWeatherFrame(weather);
       tickCutscenes2();
       if (isInGameMode2()){
         handleEntitiesOnRails(id, gameapi -> rootSceneId());
@@ -1179,10 +1180,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     gametypesOnMessage(gametypeSystem, key, value);
     onAiOnMessage(aiData, key, value);
-
-    if (key == "weather"){
-      onWeatherMessage(weather, value, gameapi -> rootSceneId());
-    }
 
     onTagsMessage(key, value);
 
