@@ -428,7 +428,17 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  //	emitWarp(position);
   	//}
 
-  	changeWeather(weather, "rain");
+  	if (shouldEmitElectric){
+	  	changeWeather(weather, "rain");
+  	}else{
+  		changeWeather(weather, std::nullopt);
+  	}
+
+
+  	auto fireworkPos = glm::vec3(-100.f + randomNumber(-50.f, 50.f), 50.f + randomNumber(-20.f, 20.f), randomNumber(-20.f, 20.f));
+  	emitFirework(fireworkPos);
+
+		playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
   }
 
   if (!getArgEnabled("dev")){

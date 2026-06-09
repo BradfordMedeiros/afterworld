@@ -3,6 +3,7 @@
 
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
+#include "../resources/materials.h"
 
 struct Weather {
 	std::optional<objid> weatherEmitter;

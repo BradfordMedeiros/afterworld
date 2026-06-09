@@ -56,6 +56,37 @@ void changeWeather(Weather& weather, std::optional<std::string> name){
   std::cout << "weather: change to " << name.value() << std::endl;
 }
 
+void handleSplash(glm::vec3 cameraPos){
+  auto rot = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, -1.f, 0.f));
+
+
+  auto hitpoints = gameapi -> raycast(cameraPos, rot, 100.f, std::nullopt);
+
+  auto hitpoint = closestHitpoint(hitpoints, cameraPos, std::nullopt);
+  if (hitpoint.has_value()){
+    auto toPosition = hitpoints.at(hitpoint.value()).point;
+    std::cout << "drawing splash" << std::endl;
+    //gameapi -> drawLine(
+    //  cameraPos,
+    //  toPosition,
+    //  false, 
+    //  -1, 
+    //  std::nullopt,  
+    //  std::nullopt, 
+    //  std::nullopt
+    //);
+
+    static float lastSplashTime = gameapi -> timeSeconds(false);
+    auto currTime = gameapi -> timeSeconds(false);
+    if (currTime - lastSplashTime > 0.1f){
+  
+      lastSplashTime = currTime;
+      std::cout << "weather emit splash" << std::endl;
+      emitSplash(toPosition);
+    }
+  }
+}
+
 void onWeatherFrame(Weather& weather){
   auto numPlayers = getNumberOfPlayers();
   modassert(numPlayers == 1, "weather system does not support more than 1 player");
@@ -64,6 +95,13 @@ void onWeatherFrame(Weather& weather){
     return;
   }
   auto cameraTransform = gameapi -> getCameraTransform(0);
+
+  auto forward = cameraTransform.rotation * glm::vec3(randomNumber(-1.f, 1.f), randomNumber(-1.f, 1.f), -1.f);
+  forward.y = 0.f;
+  forward = randomNumber(0.f, 10.f) * glm::normalize(forward);
+
+  handleSplash(cameraTransform.position + forward);
+
   auto weatherEmitterId = weather.weatherEmitter.value();
   gameapi -> setGameObjectPosition(weatherEmitterId, cameraTransform.position, true, Hint { .hint = "update weather transform" });  
 

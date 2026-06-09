@@ -236,11 +236,15 @@ std::unordered_map<std::string, EffekData> effects {
     { "warp", EffekData { .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f), .tint = glm::vec4(0.f, 0.f, 1.f, 1.f)  }},
    
     { "rain", EffekData { .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
-    { "splash", EffekData { .path  = "./res/particles/splash.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "splash", EffekData { .path  = "./res/particles/splash.efkefc" }},
 
 
     { "fire", EffekData { .path  = "./res/particles/fire.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
     { "fog", EffekData { .path  = "./res/particles/fog.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+
+    { "sparks", EffekData { .path  = "./res/particles/sparks.efkefc" , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
+    { "firework", EffekData { .path  = "./res/particles/firework.efkefc"  }},
+
 
 };
 
@@ -266,4 +270,16 @@ void emitKillEffect(glm::vec3 position){
 
 void emitWarp(glm::vec3 position){
   emitEffect("warp", position);
+}
+
+void emitSplash(glm::vec3 position){
+  emitEffect("splash", position);
+}
+
+void emitSparks(glm::vec3 position){
+  emitEffect("sparks", position);
+}
+
+void emitFirework(glm::vec3 position){
+  emitEffect("firework", position);
 }

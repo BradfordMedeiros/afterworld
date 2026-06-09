@@ -87,13 +87,15 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   // PER FRAME STATE CHECK 
   auto velocity = getGameObjectVelocity(id);
   auto groundHit = checkIfGrounded(id);
-  bool justGrounded = !vehicleBall.isGrounded && groundHit;
+  bool justGrounded = !vehicleBall.isGrounded && groundHit.has_value();
   vehicleBall.isGrounded = groundHit.has_value();
   if (justGrounded){
     //playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false); 
 
     float shakeY = velocity.y * 5.f;
     applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(0.f, shakeY, 0.f));
+
+    emitSparks(groundHit.value().point);
   }
 
   auto rotation = lookThirdPersonCalc(state.managedCamera, id, false).yAxisRotation;

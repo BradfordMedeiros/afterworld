@@ -35,6 +35,9 @@ void emitExplosion(glm::vec3 position);
 void emitElectric(glm::vec3 position);
 void emitKillEffect(glm::vec3 position);
 void emitWarp(glm::vec3 position);
+void emitSplash(glm::vec3 position);
+void emitSparks(glm::vec3 position);
+void emitFirework(glm::vec3 position);
 
 #endif
 
