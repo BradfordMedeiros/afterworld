@@ -233,14 +233,14 @@ struct EffekData {
 std::unordered_map<std::string, EffekData> effects {
     { "electric", EffekData { .path  = "./res/particles/electric.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
     { "killeffect", EffekData { .path  = "./res/particles/backgrounds.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
-    { "warp", EffekData { .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f), .tint = glm::vec4(0.f, 0.f, 1.f, 1.f)  }},
+    { "warp", EffekData { .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f)  }},
    
     { "rain", EffekData { .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
     { "splash", EffekData { .path  = "./res/particles/splash.efkefc" }},
 
 
     { "fire", EffekData { .path  = "./res/particles/fire.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
-    { "fog", EffekData { .path  = "./res/particles/fog.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "fog", EffekData { .path  = "./res/particles/fog.efkefc", .scale = glm::vec3(6.f, 6.f, 6.f) }},
 
     { "sparks", EffekData { .path  = "./res/particles/sparks.efkefc" , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
     { "firework", EffekData { .path  = "./res/particles/firework.efkefc"  }},
@@ -282,4 +282,8 @@ void emitSparks(glm::vec3 position){
 
 void emitFirework(glm::vec3 position){
   emitEffect("firework", position);
+}
+
+void emitFog(glm::vec3 position){
+  emitEffect("fog", position);
 }

@@ -439,6 +439,26 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	emitFirework(fireworkPos);
 
 		playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
+
+
+		static bool activate = false;
+		activate = !activate;
+
+		//auto id = findObjByShortName("entity_moon_27", std::nullopt).value();
+		//auto doorId = findObjByShortName("entity_moon_27/portal", std::nullopt).value();
+		//auto doorPosition = gameapi -> getGameObjectPos(doorId, true, "[gamelogic] - get door pos");
+		//auto floorId = findObjByShortName("entity_moon_27/floor", std::nullopt).value();
+		//auto floorPosition = gameapi -> getGameObjectPos(floorId, true, "[gamelogic] - get floorId pos");
+		//if (activate){
+		//	emitFog(doorPosition);
+	  //  gameapi -> playAnimation(id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+		//}else{
+	  //  gameapi -> playAnimation(id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+		//}
+
+		//emitWarp(floorPosition + glm::vec3(3.f, 1.f, 0.f));
+
+
   }
 
   if (!getArgEnabled("dev")){

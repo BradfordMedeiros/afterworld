@@ -166,11 +166,15 @@ void ballStartGameplay(EasyCutscene& cutscene){
 	};
 
   if (initialize(cutscene)){
+		std::cout << "ball mode: ballStartGameplay initialize" << std::endl;
+
     setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
     BallStartData startData {};
     store(cutscene, startData);
   }
   if (finalize(cutscene)){
+		std::cout << "ball mode: ballStartGameplay finalize" << std::endl;
+
   }
 
   run(cutscene, 2, [&cutscene]() -> void {
@@ -229,6 +233,8 @@ void ballStartGameplay(EasyCutscene& cutscene){
 
 
   run(cutscene, 4, []() -> void {
+  	auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
+  	emitWarp(position);
     setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
   });
 
@@ -377,9 +383,9 @@ void ballModeSetPlayMode(objid sceneId){
 	});
   
 
-	auto playerSpawnId = findObjByShortName("playerspawn", std::nullopt);
-	modassert(playerSpawnId.has_value(), "ballModeSetPlayMode - cannot find playerspawn");
-	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId.value(), true, "[gamelogic] ball - get playerspawn position");
+	auto playerSpawnId = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId).at(0);
+
+	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId, true, "[gamelogic] ball - get playerspawn position");
 
   // TODO - no reason to actually create the prefab here
   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  playerSpawnPosition, {});    

@@ -257,8 +257,11 @@ CompileMapFns getCompileMapForBallGame(){
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
 
     }else if (*className.value() == "player_start"){
-      *modelName = "playerspawn";
       *shouldWrite = true;
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "playerspawn",
+        .attributeValue = "true",
+      });
     }else if (*className.value() == "spawn_pipe"){
       *shouldWrite = true;
   
@@ -407,7 +410,7 @@ CompileMapFns getCompileMapForBallGame(){
 
     }else if (*className.value() == "shard"){
       *shouldWrite = true;
-      addCoreTrench(entity, attributes, "../gameresources/build/primitives/sphere.gltf");
+      addCoreTrench(entity, attributes, paths::SHARD);
       attributes.push_back(GameobjAttributeOpts {
         .field = "scrollspeed",
         .attributeValue = glm::vec3(1.f, 1.f, 0.f),
@@ -998,22 +1001,54 @@ CompileMapFns getCompileMapForBallGame(){
         }
       }
 
-    }else if (*className.value() == "moon"){
+    }else if (*className.value() == "moon" || *className.value() == "moonend"){
         *shouldWrite = true;
-        glm::vec3 scale(8.f, 8.f, 8.f);
+
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "activatable",
+          .attributeValue = "true",
+          .submodel = "portal",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "activate-type",
+          .attributeValue = "near",
+          .submodel = "portal",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "radius",
+          .attributeValue = 5.f,
+          .submodel = "portal",
+        });        
+  
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+          .submodel = "model",
+        });       
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+          .submodel = "model",
+        });     
 
         attributes.push_back(GameobjAttributeOpts {
           .field = "mesh",
-          .attributeValue = "../gameresources/build/primitives/sphere.gltf",
+          .attributeValue = "../gameresources/build/objtypes/moon.gltf",
         });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "scale",
-          .attributeValue = scale,
-        });
+
         attributes.push_back(GameobjAttributeOpts {
           .field = "scrollspeed",
-          .attributeValue = glm::vec3(0.2f, 0.2f, 0.f),
+          .attributeValue = glm::vec3(0.02f, 0.02f, 0.f),
+          .submodel = "model",
         });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "scrollspeed",
+          .attributeValue = glm::vec3(0.02f, 0.02f, 0.f),
+          .submodel = "door",
+        });
+        
         attributes.push_back(GameobjAttributeOpts {
           .field = "texture",
           .attributeValue = "./res/textures/cyberguy2.png",
@@ -1026,10 +1061,52 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "layer",
           .attributeValue = "nolighting",   // nolighting
         });       
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "rebirth",
-          .attributeValue = "true",
-        });       
+    
+        if (*className.value() == "moon"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "playerspawn",
+            .attributeValue = "true",
+          });
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "rebirth",
+            .attributeValue = "true",
+          });   
+        }else if (*className.value() == "moonend"){
+          auto originalModelName = *modelName;
+
+          std::vector<GameobjAttributeOpts> newAttributes;
+          newAttributes.push_back(GameobjAttributeOpts {
+            .field = "mesh",
+            .attributeValue = paths::GEM_MODEL,
+          });
+          newAttributes.push_back(GameobjAttributeOpts {
+            .field = "scale",
+            .attributeValue = glm::vec3(3.f, 3.f, 3.f),
+          });
+          newAttributes.push_back(GameobjAttributeOpts {
+            .field = "layer",
+            .attributeValue = "nolighting",
+          });
+                
+          newAttributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+            .field =  "spin",
+            .attributeValue = 1.f,
+          });
+
+          
+          auto position = getEntityPosition(mapData, entity);
+          newAttributes.push_back(GameobjAttributeOpts {
+            .field = "position",
+            .attributeValue = position + glm::vec3(0.f, -0.72f, 0.f),
+          });
+
+          additionalEntities.push_back(AdditionalEntity {
+            .modelName = originalModelName + "_gem",
+            .attributes = newAttributes,
+          });
+
+        }
+
 
     }else if (*className.value() == "gem"){
         *shouldWrite = true;

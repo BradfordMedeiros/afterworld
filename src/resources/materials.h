@@ -38,6 +38,7 @@ void emitWarp(glm::vec3 position);
 void emitSplash(glm::vec3 position);
 void emitSparks(glm::vec3 position);
 void emitFirework(glm::vec3 position);
+void emitFog(glm::vec3 position);
 
 #endif
 
