@@ -26,7 +26,115 @@ extern std::unordered_map<objid, EmissionObject> emissionObjects;
 extern std::unordered_map<objid, HealthColorObject> healthColorObjects;
 extern std::unordered_map<objid, ExplosionObj> explosionObjects;
 extern std::unordered_map<objid, Activatable> activateables;
+
+
 extern std::unordered_map<objid, Breakable> breakables;
+
+
+std::unordered_map<objid, Gem> gems;
+
+void updateGemStyle(objid id){
+	auto& gem = gems.at(id);
+
+	if (gem.alreadyPickedUp){
+		setGameObjectMeshEnabled(id, false);
+	}else if(!gem.canPickup){
+		setGameObjectMeshEnabled(id, true);
+		setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 0.2f));
+	}else{
+		setGameObjectMeshEnabled(id, true);
+		setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+	}
+}
+
+
+void addGem(objid id){
+	auto gem = getSingleAttr(id, "gem");
+	auto gemName = gem.value();
+	bool alreadyPickedUp = hasCrystal(gemName);
+	gems[id] = Gem{
+		.name = gemName,
+		.alreadyPickedUp = alreadyPickedUp,
+	};
+	updateGemStyle(id);
+}
+
+void doPickupGem(objid id){
+	auto& gem = gems.at(id);
+	if (gem.alreadyPickedUp){
+		return;
+	}
+	if (!gem.canPickup){
+		return;
+	}
+
+    gem.alreadyPickedUp = true;
+    stageCrystal(gem.name);
+    updateGemStyle(id);
+}
+
+bool isGem(objid id){
+	return gems.find(id) != gems.end();
+}
+
+void handleGemCollision(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+  	if (isGem(obj2)){
+  		doPickupGem(obj2);
+  	}
+  }else if (isControlledVehicle(obj2)){
+  	if (isGem(obj1)){
+  		doPickupGem(obj1);
+  	}
+  } 
+}
+
+void updateGemCanPickup(int numBroken){
+	for (auto& [id, gem] : gems){
+		if (numBroken == breakables.size()){
+			gem.canPickup = true;
+			updateGemStyle(id);
+		}
+	}
+}
+
+
+int numBroken(){
+	int count = 0;
+	for (auto& [id, breakable] : breakables){
+		if (breakable.isBroken){
+			count++;
+		}
+	}
+	return count;
+}
+
+void maybeBreakObject(objid id){
+	if (breakables.find(id) != breakables.end()){
+		auto& breakable = breakables.at(id);
+		if (breakable.isBroken){
+			return;
+		}
+
+		breakable.isBroken = true;
+		setGameObjectMeshEnabled(id, false);
+	  	playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
+	
+	  	auto totalBroken = numBroken();
+	  	updateGemCanPickup(totalBroken);
+	}
+}
+void handleBreakableCollision(objid obj1, objid obj2){
+  if (isControlledPlayer(obj2) || isControlledVehicle(obj2)){
+    maybeBreakObject(obj1);
+  }else if (isControlledPlayer(obj1) || isControlledVehicle(obj1)){
+   	maybeBreakObject(obj2);
+  }
+}
+
+
+
+
 
 
 void onActivationFrame(){
@@ -173,16 +281,6 @@ std::vector<glm::vec3> parseDataVec3(std::string& value){
 
 std::vector<std::string> parseDataString(std::string& value){
 	return split(value, ',');
-}
-
-void onAddConditionId(objid id, std::string& value){
-	auto gem = getSingleAttr(id, "gem-label");
-	if (gem.has_value()){
-		if (hasCrystal(gem.value())){
-			gameapi -> removeByGroupId(id);
-			return;
-		}		
-	}
 }
 
 
@@ -371,14 +469,16 @@ std::vector<TagUpdater> tagupdates = {
   	    .onMessage = std::nullopt,
 	},
 	TagUpdater {
-		.attribute = "condition",
+		.attribute = "gem",
 		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
- 			auto value = maybeUnwrapAttrOpt<std::string>(attrValue).value();
-			onAddConditionId(id, value);
+			addGem(id);
+			
 		},
-  	.onRemove = [](int32_t id) -> void {},
-  	.onFrame = std::nullopt,
-  	.onMessage = std::nullopt,
+  		.onRemove = [](int32_t id) -> void {
+  			gems.erase(id);
+  		},
+  		.onFrame = std::nullopt,
+  		.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "in-game-ui",

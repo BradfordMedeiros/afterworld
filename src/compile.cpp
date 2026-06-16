@@ -220,6 +220,60 @@ glm::vec4 addSimpleActivatable(bool* _shouldWrite, Entity& entity, std::vector<G
   return tint;
 }
 
+void addGem(std::string gem, std::vector<GameobjAttributeOpts>& attributes, std::optional<glm::vec3> position){
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "gem",
+    .attributeValue = gem,
+  });
+  
+
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "scale",
+    .attributeValue = glm::vec3(3.f, 3.f, 3.f),
+  });
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "physics_shape",
+    .attributeValue = "shape_sphere",
+  });
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "physics",
+    .attributeValue = "enabled",
+  });
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "physics_collision",
+    .attributeValue = "nocollide",
+  });
+
+  // Replace with a better gem model
+  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+    .field = "mesh",
+    .attributeValue = paths::GEM_MODEL,
+  });
+
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "condition",
+    .attributeValue = "true",
+  });
+
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "layer",
+    .attributeValue = "nolighting",
+  });
+                
+  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+    .field =  "spin",
+    .attributeValue = 1.f,
+  });
+
+  if (position.has_value()){
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "position",
+      .attributeValue = position.value(),
+    });
+  }
+
+}
+
 std::string getBallGameTemplate(std::string mapFile, std::optional<std::string> templateFile){
   std::string templatePath = "../afterworld/scenes/levels/ball.rawscene";
   if (templateFile.has_value()){
@@ -269,12 +323,12 @@ CompileMapFns getCompileMapForBallGame(){
 
     }else if (*className.value() == "activateable"){
       *shouldWrite = true;
-      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+      attributes.push_back(GameobjAttributeOpts {  
         .field = "mesh",
         .attributeValue = paths::MUSHROOM,
       });
 
-      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+      attributes.push_back(GameobjAttributeOpts { 
         .field = "activatable",
         .attributeValue = "true",
       });
@@ -308,6 +362,9 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = *targetName.value(),
       });
 
+    }else if (*className.value() == "simple_activate"){
+      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/primitives/medium.gltf", "model", { "model" });
+ 
     }else if (*className.value() == "soul"){
       *shouldWrite = true;
 
@@ -1073,32 +1130,10 @@ CompileMapFns getCompileMapForBallGame(){
           });   
         }else if (*className.value() == "moonend"){
           auto originalModelName = *modelName;
-
           std::vector<GameobjAttributeOpts> newAttributes;
-          newAttributes.push_back(GameobjAttributeOpts {
-            .field = "mesh",
-            .attributeValue = paths::GEM_MODEL,
-          });
-          newAttributes.push_back(GameobjAttributeOpts {
-            .field = "scale",
-            .attributeValue = glm::vec3(3.f, 3.f, 3.f),
-          });
-          newAttributes.push_back(GameobjAttributeOpts {
-            .field = "layer",
-            .attributeValue = "nolighting",
-          });
-                
-          newAttributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-            .field =  "spin",
-            .attributeValue = 1.f,
-          });
-
-          
+     
           auto position = getEntityPosition(mapData, entity);
-          newAttributes.push_back(GameobjAttributeOpts {
-            .field = "position",
-            .attributeValue = position + glm::vec3(0.f, -0.72f, 0.f),
-          });
+          addGem("default", newAttributes, position + glm::vec3(0.f, -0.72f, 0.f));
 
           additionalEntities.push_back(AdditionalEntity {
             .modelName = originalModelName + "_gem",
@@ -1110,51 +1145,9 @@ CompileMapFns getCompileMapForBallGame(){
 
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_shape",
-          .attributeValue = "shape_sphere",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics",
-          .attributeValue = "enabled",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_collision",
-          .attributeValue = "nocollide",
-        });
-
-        // Replace with a better gem model
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::GEM_MODEL,
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "tint",
-          .attributeValue = glm::vec4(1.f, 0.f, 0.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "layer",
-          .attributeValue = "transparency",
-        });
-
         auto gemValue = getValue(entity, "gem");
         modassert(gemValue.has_value(), "gem does not have a value");
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "gem",
-          .attributeValue = *gemValue.value(),
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "condition",
-          .attributeValue = "true",
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "gem-label",
-          .attributeValue = *gemValue.value(),
-        });
-
+        addGem(*gemValue.value(), attributes, std::nullopt);
     }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;

@@ -90,44 +90,39 @@ bool hasCrystal(std::string& name){
 
 void pickupCrystal(std::string name){
   std::cout << "pickup crystal: " << name << std::endl;
+
+  bool foundLevelForCrystal = false;
   for (auto& level : playlist){
     auto levelProgress = getLevelProgress(level.levelShortname);
     modassert(levelProgress.has_value(), std::string("level progress no value: ") + level.levelShortname);
     if (level.crystals.count(name) > 0){
+      std::cout << "progress pickup added to " << level.levelShortname << std::endl;
       levelProgress.value() -> crystals.insert(name);
+      foundLevelForCrystal = true;
     }
+  }
+
+
+  if (!foundLevelForCrystal){
+    std::cout << "progress pickup - missing level for crystal: " << name << std::endl;
   }
 
   saveLevelProgress();
 }
 
 void stageCrystal(std::string name){
+  std::cout << "progress stageCrystal: " << name << std::endl;
   stagedCrystals.insert(name);
 }
 void commitCrystals(){
   for (auto crystal : stagedCrystals){
     pickupCrystal(crystal);
   }
+  std::cout << "progress commitCrystals" << std::endl;
   stagedCrystals = {};
 }
 
-void handleGemCollision(int32_t obj1, int32_t obj2){
-  if (isControlledVehicle(obj1)){
-    auto objAttr = getAttrHandle(obj2);
-    auto gem = getStrAttr(objAttr, "gem");
-    if (gem.has_value()){
-      stageCrystal(gem.value());
-      gameapi -> removeObjectById(obj2);
-    }
-  }else if (isControlledVehicle(obj2)){
-    auto objAttr = getAttrHandle(obj1);
-    auto gem = getStrAttr(objAttr, "gem");
-    if (gem.has_value()){
-      stageCrystal(gem.value());
-      gameapi -> removeObjectById(obj1);
-    }
-  } 
-}
+
 
 
 std::vector<PlaylistType> loadPlaylist(){

@@ -150,7 +150,5 @@ void handleActivationCollision(objid obj1, objid obj2);
 void setActivatableObject(std::optional<objid> obj);
 void maybeResetActivatableObject(objid id);
 
-struct Breakable {};
-void handleBreakableCollision(objid obj1, objid obj2);
 
 #endif 

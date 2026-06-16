@@ -939,6 +939,9 @@ GameTypeInfo getBallMode(){
 	  	if (key == 'N' && action == 1){
 	  		ballMode.shouldReset = true;
 	  	}
+	  	if (key == '[' && action == 1){
+	  		commitCrystals();
+	  	}
 
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },

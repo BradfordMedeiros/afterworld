@@ -98,6 +98,10 @@ GlobalState global {
   .userRequestedPause = false,
 };
 
+void handleGemCollision(int32_t obj1, int32_t obj2);
+void handleBreakableCollision(objid obj1, objid obj2);
+
+
 void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
   std::cout << "lifetimeObject add: " << gameapi -> getGameObjNameForId(id).value() << ", hint = " << hint << std::endl;
   //modassert(lifetimeObjects.find(id) == lifetimeObjects.end(), std::string("already lifetime object: ") + lifetimeObjects.at(id).hint);
@@ -1148,22 +1152,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       modassert(itemAcquiredMessage != NULL, "ammo message not an ItemAcquiredMessage");
       deliverEntityAmmo(itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
     }
-    if (key == "gem-pickup"){
-      auto itemAcquiredMessage = anycast<ItemAcquiredMessage>(value);
-      modassert(itemAcquiredMessage != NULL, "gem-pickup message not an ItemAcquiredMessage");
-      auto position = gameapi -> getGameObjectPos(itemAcquiredMessage -> targetId, true, "[gamelogic] get position for gem pickup to play sound");
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, position, false);
-
-      auto gem = getSingleAttr(itemAcquiredMessage -> itemId, "gem-label");
-      if (gem.has_value()){
-        pickupCrystal(gem.value());
-      }else{
-        modassert(false, "no label for gem");
-      }
-
-      saveData();
-    }
-
 
     if (key == "play-material-sound"){
       auto soundPosition = anycast<MessagePlaySound>(value);
