@@ -606,17 +606,41 @@ CompileMapFns getCompileMapForBallGame(){
         modassert(false, "invalid powerup type");
       }
 
-    }else if (*className.value() == "vertical_bound_plane"){
+    }else if (*className.value() == "vertical_bound_point"){
       *shouldWrite = true;
+
+      auto position = getEntityPosition(mapData, entity);
+
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "ballplane",
+        .attributeValue = "true",
+      });
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "position", 
+        .attributeValue = position,
+      });
+
+    }else if (*className.value() == "vertical_bound_plane"){
+      /*shouldWrite = true;
 
       double yValueSum = 0;
       int totalPoints = 0;
 
+      auto position = getEntityPosition(mapData, entity);
+
       for (auto& brush : entity.brushes){
         for (auto &brushFace : brush.brushFaces){
-          yValueSum += brushFace.point1.y;
-          yValueSum += brushFace.point2.y;
-          yValueSum += brushFace.point3.y;
+
+          auto value = parseVecTrenchbroom(brushFace.point1, mapData.scale);
+
+          std::cout << "vert: " << print(position) << std::endl;
+          std::cout << "point1: " << print(brushFace.point1) << std::endl;
+          std::cout << "point2: " << print(brushFace.point2) << std::endl;
+          std::cout << "point3: " << print(brushFace.point3) << std::endl;
+
+          yValueSum += parseVecTrenchbroom(brushFace.point1, 1.f).y;
+          yValueSum += parseVecTrenchbroom(brushFace.point2, 1.f).y;
+          yValueSum += parseVecTrenchbroom(brushFace.point3, 1.f).y;
           totalPoints += 3;
         }
       }
@@ -632,7 +656,9 @@ CompileMapFns getCompileMapForBallGame(){
       attributes.push_back(GameobjAttributeOpts {
         .field = "position", 
         .attributeValue = glm::vec3(0.f, average, 0.f),
-      });
+      });*/
+
+      modassert(false, "vert bound plane not supported");
     }else if (*className.value() == "worldspawn"){
       *shouldWrite = true;
 

@@ -54,6 +54,8 @@ struct BallModeOptions{
    std::optional<glm::vec3> rebirthSphereInitialPos;
 
    glm::vec3 playerSpawnPosition;
+
+   std::optional<glm::vec3> ballplanePos;
 };
 
 BallModeOptions& getBallModeOptions(){
@@ -387,6 +389,8 @@ void ballModeSetPlayMode(objid sceneId){
 
 	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId, true, "[gamelogic] ball - get playerspawn position");
 
+	auto ballplanes = gameapi -> getObjectsByAttr("ballplane", std::nullopt, sceneId);
+
   // TODO - no reason to actually create the prefab here
   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  playerSpawnPosition, {});    
   auto playerId = findObjByShortName("maincamera", sceneId);
@@ -407,6 +411,12 @@ void ballModeSetPlayMode(objid sceneId){
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
 	modeOptions.playerSpawnPosition = playerSpawnPosition;
+
+	if (ballplanes.size() > 0){
+		auto ballplaneId = ballplanes.at(0);
+		auto ballplanePos = gameapi -> getGameObjectPos(ballplaneId, true, "[gamelogic] ballplane pos");
+		modeOptions.ballplanePos = ballplanePos;
+	}
 
 	//auto sphereObj = createObject(sceneId, "../gameresources/build/primitives/sphere.gltf", glm::vec3(100.f, 100.f, 100.f), glm::vec3(8.f, 8.f, 8.f));
 
@@ -1029,12 +1039,13 @@ GameTypeInfo getBallMode(){
 	  			}
 	  		}
 
+ 				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+
 
 	  		if (isInKillPlane(ballMode.ballId) && !ballMode.didLose && !ballMode.didReset){ // didReset b/c otherwise at same pos
 		  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId);
 	  			if (ballMode.spirit != MODE_YELLOW && !(ballVehicle.value() -> powerup.has_value() && ballVehicle.value() -> powerup.value().powerup == INVINCIBILITY && ballVehicle.value() -> powerup.value().useTime.has_value())){
 	  				ballMode.didLose = true;
-	  				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 	  				
 	  				//position = glm::vec3(100.f, 100.f, 100.f);
 
@@ -1046,6 +1057,15 @@ GameTypeInfo getBallMode(){
 		  			setGameObjectTint(ballMode.eyeId, glm::vec4(0.f, 0.f, 0.f, 1.f));
 	  			
 		  			setToLevelEnd();
+	  			}
+	  		}
+
+	  		if (ballMode.ballplanePos.has_value()){
+  				std::cout << "ballplane position: " << print(position) << std::endl;
+  				std::cout << "ballplane ballplanePos: " << print(ballMode.ballplanePos.value()) << std::endl;
+
+	  			if (position.y < ballMode.ballplanePos.value().y ){
+	
 	  			}
 	  		}
 

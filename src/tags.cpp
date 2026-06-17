@@ -135,8 +135,6 @@ void handleBreakableCollision(objid obj1, objid obj2){
 
 
 
-
-
 void onActivationFrame(){
 
 	auto players = getPlayers();
