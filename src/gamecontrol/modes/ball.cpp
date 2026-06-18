@@ -41,6 +41,7 @@ struct BallModeOptions{
    bool didLose = false;
    bool shouldReset = false;
    bool didReset = false;
+   std::optional<float> ballFallingTime;
    std::optional<float> ballStartTime;
    std::optional<float> finalBallTime;
    BallModeSpirit spirit = MODE_NONE;
@@ -1061,16 +1062,36 @@ GameTypeInfo getBallMode(){
 	  		}
 
 	  		if (ballMode.ballplanePos.has_value()){
-  				std::cout << "ballplane position: " << print(position) << std::endl;
-  				std::cout << "ballplane ballplanePos: " << print(ballMode.ballplanePos.value()) << std::endl;
+	  			if (position.y < ballMode.ballplanePos.value().y && !ballMode.ballFallingTime.has_value()){
+						//ballMode.shouldReset = true;
 
-	  			if (position.y < ballMode.ballplanePos.value().y ){
-	
+	  				ballMode.ballFallingTime = gameapi -> timeSeconds(false);
+
+	  				auto viewTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
+						auto viewPosition = viewTransform.position;
+						auto viewRot = viewTransform.rotation;
+
+						auto cameraId = ensureTempCamera(ballMode.sceneId);
+		  			setTempCamera(cameraId, 0);
+		  			gameapi -> setGameObjectPosition(cameraId, viewPosition, true, Hint { .hint = "[gamelogic] - ball fallplane cam pos" });
+		  			gameapi -> setGameObjectRot(cameraId, viewRot, true, Hint { .hint = "[gamelogic] - ball fallplane cam rot" });
+
+	  			}
+	  		}
+
+	  		if (ballMode.ballFallingTime.has_value()){
+		  		gameapi -> drawText("Falling", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  			auto timeElapsed = gameapi -> timeSeconds(false) - ballMode.ballFallingTime.value();
+	  			if (timeElapsed > 1.5f){
+	  				ballMode.shouldReset = true;
 	  			}
 	  		}
 
 	  		if (ballMode.didReset){ 
 	  			ballMode.didReset = false;
+	  			ballMode.ballFallingTime = std::nullopt;
+	   			setTempCamera(std::nullopt, 0);
+
 		  		setGameObjectMeshEnabled(ballMode.ballId, true);
 		  		setGameObjectPhysicsEnable(ballMode.ballId, true);
 	  			setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
