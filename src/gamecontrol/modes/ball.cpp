@@ -1098,6 +1098,8 @@ GameTypeInfo getBallMode(){
 	  		}
 	  		if (ballMode.shouldReset){
 		  		gameapi -> setGameObjectPosition(ballMode.ballId, ballMode.initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
+		  		setGameObjectVelocity(ballMode.ballId, glm::vec3(0.f, 0.f, 0.f));
+		  		
 		  		ballMode.didLose = false;
 					ballMode.shouldReset = false;
 					ballMode.ballStartTime = gameapi -> timeSeconds(false);
