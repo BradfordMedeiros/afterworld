@@ -1161,15 +1161,76 @@ CompileMapFns getCompileMapForBallGame(){
           });   
         }else if (*className.value() == "moonend"){
           auto originalModelName = *modelName;
-          std::vector<GameobjAttributeOpts> newAttributes;
-     
           auto position = getEntityPosition(mapData, entity);
-          addGem("default", newAttributes, position + glm::vec3(0.f, -0.72f, 0.f));
 
-          additionalEntities.push_back(AdditionalEntity {
-            .modelName = originalModelName + "_gem",
-            .attributes = newAttributes,
-          });
+          auto rotationAngles = getVec3Value(entity, "angles").value();
+          auto rotation = quatFromTrenchBroomAngles(
+            rotationAngles.x,
+            rotationAngles.y,
+            rotationAngles.z
+          );
+
+          {
+            std::vector<GameobjAttributeOpts> newAttributes;
+            addGem("default", newAttributes, position + (rotation * glm::vec3(0.f, 2.f, 0.f)));
+            additionalEntities.push_back(AdditionalEntity {
+              .modelName = originalModelName + "_gem",
+              .attributes = newAttributes,
+            });
+          }
+
+          {
+            std::vector<GameobjAttributeOpts> newAttributes;
+
+     
+
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "position",
+              .attributeValue = position + (rotation * glm::vec3(0.f, -2.f, -5.f)),
+            });
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "layer",
+              .attributeValue = "nolighting",
+            });
+
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "mesh",
+              .attributeValue = "../gameresources/build/uncategorized/warp.gltf",
+            });
+
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "physics_shape",
+              .attributeValue = "shape_exact",
+            });
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "physics",
+              .attributeValue = "enabled",
+            });
+
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "physics_shape",
+              .attributeValue = "shape_exact",
+              .submodel = "target",
+            });
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "physics",
+              .attributeValue = "enabled",
+              .submodel = "target",
+            });
+            newAttributes.push_back(GameobjAttributeOpts {
+              .field = "endwarp",
+              .attributeValue = "default",
+              .submodel = "target",
+            });
+
+
+            additionalEntities.push_back(AdditionalEntity {
+              .modelName = originalModelName + "_endwarp",
+              .attributes = newAttributes,
+            });
+          }
+
+
 
         }
 

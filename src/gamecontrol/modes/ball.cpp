@@ -57,6 +57,8 @@ struct BallModeOptions{
    glm::vec3 playerSpawnPosition;
 
    std::optional<glm::vec3> ballplanePos;
+
+   std::optional<objid> endwarp;
 };
 
 BallModeOptions& getBallModeOptions(){
@@ -244,21 +246,45 @@ void ballStartGameplay(EasyCutscene& cutscene){
 
 }
 void ballEndGameplay(EasyCutscene& cutscene){
+	//  			gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
+
 	if (initialize(cutscene)){
 	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
     setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
-	}
-  waitUntil(cutscene, 0, 2000);
 
-  if (finishedThisFrame(cutscene, 0)){
+
+		auto warpPos = gameapi -> getGameObjectPos(getBallModeOptions().endwarp.value(), true, "[gamelogic] ball - warp");
+		gameapi -> moveCameraTo(getBallModeOptions().ballId, warpPos + glm::vec3(0.f, 1.f, 0.f), 0.1f);
+	}
+
+	waitUntil(cutscene, 0, 100);
+	if (finishedThisFrame(cutscene, 0)){
+		auto warpPos = gameapi -> getGameObjectPos(getBallModeOptions().endwarp.value(), true, "[gamelogic] ball - warp");
+		gameapi -> moveCameraTo(getBallModeOptions().ballId, warpPos + glm::vec3(0.f, 1.f, 0.f), 5.f - 0.1f);
+
+
+  	emitWarp(warpPos);
+		setGameObjectTint(getBallModeOptions().eyeId, glm::vec4(1.f, 0.f, 0.f, 0.f));	
+		getBallModeOptions().changeSpirit = MODE_NONE;
+	}
+
+
+  waitUntil(cutscene, 1, 5000);
+
+  if (finishedThisFrame(cutscene, 1)){
   	getBallModeUI().value() -> ballMode.levelComplete = BallLevelComplete{};
+  	inputOverride(false, true);
   }
 
-	waitFor(cutscene, 1, []() -> bool {
+  if (!finished(cutscene, 1)){
+ 		gameapi -> drawText("Level Complete, Moving", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  }
+
+	waitFor(cutscene, 2, []() -> bool {
 		return getGlobalState().control.leftMouseDown;
 	});
 
-  run(cutscene, 2, []() -> void {
+  run(cutscene, 3, []() -> void {
   	goToLevel("ballselect");
   });
 }
@@ -387,10 +413,11 @@ void ballModeSetPlayMode(objid sceneId){
   
 
 	auto playerSpawnId = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId).at(0);
-
 	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId, true, "[gamelogic] ball - get playerspawn position");
 
 	auto ballplanes = gameapi -> getObjectsByAttr("ballplane", std::nullopt, sceneId);
+
+	auto endwarp = gameapi -> getObjectsByAttr("endwarp", std::nullopt, sceneId).at(0);
 
   // TODO - no reason to actually create the prefab here
   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  playerSpawnPosition, {});    
@@ -412,6 +439,7 @@ void ballModeSetPlayMode(objid sceneId){
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
 	modeOptions.playerSpawnPosition = playerSpawnPosition;
+	modeOptions.endwarp = endwarp;
 
 	if (ballplanes.size() > 0){
 		auto ballplaneId = ballplanes.at(0);
@@ -565,6 +593,8 @@ void deliverPowerup(objid vehicle, objid powerupId){
 }
 
 void handleLevelEndCollision(int32_t obj1, int32_t obj2){
+	auto& ballMode = getBallModeOptions();
+
   bool didCollideLevelEnd = false;
   if (isControlledVehicle(obj1)){
     auto objAttr = getAttrHandle(obj2);
@@ -572,11 +602,20 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
     if (playerEndAttr.has_value()){
       didCollideLevelEnd = true;
     }
+
+    if (ballMode.endwarp.has_value() && ballMode.endwarp.value() == obj2){
+    	didCollideLevelEnd = true;
+    }
+
   }else if (isControlledVehicle(obj2)){
     auto objAttr = getAttrHandle(obj1);
     auto playerEndAttr = getStrAttr(objAttr, "player_end");
     if (playerEndAttr.has_value()){
       didCollideLevelEnd = true;
+    }
+
+    if (ballMode.endwarp.has_value() && ballMode.endwarp.value() == obj1){
+    	didCollideLevelEnd = true;
     }
   }
 
