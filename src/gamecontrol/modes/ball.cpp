@@ -61,6 +61,11 @@ struct BallModeOptions{
    std::optional<objid> endwarp;
 };
 
+bool hasBallModeOptions(){
+	auto data = getGametypeData(gametypeSystem);
+	return data.has_value();
+}
+
 BallModeOptions& getBallModeOptions(){
 	auto data = getGametypeData(gametypeSystem);
 	modassert(data.has_value(), "getBallMode options - gametype system empty data");
@@ -246,8 +251,6 @@ void ballStartGameplay(EasyCutscene& cutscene){
 
 }
 void ballEndGameplay(EasyCutscene& cutscene){
-	//  			gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
-
 	if (initialize(cutscene)){
 	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
     setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
@@ -417,7 +420,6 @@ void ballModeSetPlayMode(objid sceneId){
 
 	auto ballplanes = gameapi -> getObjectsByAttr("ballplane", std::nullopt, sceneId);
 
-	auto endwarp = gameapi -> getObjectsByAttr("endwarp", std::nullopt, sceneId).at(0);
 
   // TODO - no reason to actually create the prefab here
   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/enemy/player-cheap.rawscene",  playerSpawnPosition, {});    
@@ -439,7 +441,11 @@ void ballModeSetPlayMode(objid sceneId){
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
 	modeOptions.playerSpawnPosition = playerSpawnPosition;
-	modeOptions.endwarp = endwarp;
+
+	auto endwarp = gameapi -> getObjectsByAttr("endwarp", std::nullopt, sceneId);
+	if (endwarp.size() > 0){
+		modeOptions.endwarp = endwarp.at(0);
+	}
 
 	if (ballplanes.size() > 0){
 		auto ballplaneId = ballplanes.at(0);
@@ -450,16 +456,17 @@ void ballModeSetPlayMode(objid sceneId){
 	//auto sphereObj = createObject(sceneId, "../gameresources/build/primitives/sphere.gltf", glm::vec3(100.f, 100.f, 100.f), glm::vec3(8.f, 8.f, 8.f));
 
 	auto rebirthObj = gameapi -> getObjectsByAttr("rebirth", std::nullopt, sceneId);
-	modassert(rebirthObj.size() == 1, "no rebirth object in this scene");
 
-	modeOptions.rebirthSphere = rebirthObj.at(0);
-	auto rebirthSphereInitialPos = gameapi -> getGameObjectPos(modeOptions.rebirthSphere.value(), true, "[gamelogic] rebirthSphereInitialPos");
-	modeOptions.rebirthSphereInitialPos = rebirthSphereInitialPos;
+	if (rebirthObj.size() > 0){
+		modeOptions.rebirthSphere = rebirthObj.at(0);
+		auto rebirthSphereInitialPos = gameapi -> getGameObjectPos(modeOptions.rebirthSphere.value(), true, "[gamelogic] rebirthSphereInitialPos");
+		modeOptions.rebirthSphereInitialPos = rebirthSphereInitialPos;		
+	}
+
 
 	setGameObjectEmitterEffectTint(modeOptions.spiritId, glm::vec4(0.f, 1.f, 0.f, 0.f));
 
  	setActivatableObject(modeOptions.ballId, 0b11111111);
-
 
 	changeGameType(gametypeSystem, ballMode, "ball", &modeOptions);
 }
@@ -736,6 +743,10 @@ void handleSoulCollision(int32_t obj1, int32_t obj2){
 
 
 void handleBallModeCollision(objid obj1, objid obj2){
+	if (!hasBallModeOptions()){
+		return;
+	}
+
   handleLevelEndCollision(obj1, obj2);
   handleGravityHoleCollision(obj1, obj2);
   handlePowerupCollision(obj1, obj2);
