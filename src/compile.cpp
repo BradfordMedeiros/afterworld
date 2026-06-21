@@ -333,6 +333,11 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = "true",
       });
 
+      attributes.push_back(GameobjAttributeOpts { 
+        .field = "activate-mask",
+        .attributeValue = static_cast<float>(0b1011),
+      });
+
       attributes.push_back(GameobjAttributeOpts {
         .field = "scale",
         .attributeValue = glm::vec3(3.f, 3.f, 3.f),

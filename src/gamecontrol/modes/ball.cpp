@@ -430,6 +430,9 @@ void ballModeSetPlayMode(objid sceneId){
 
 	setGameObjectEmitterEffectTint(modeOptions.spiritId, glm::vec4(0.f, 1.f, 0.f, 0.f));
 
+ 	setActivatableObject(modeOptions.ballId, 0b11111111);
+
+
 	changeGameType(gametypeSystem, ballMode, "ball", &modeOptions);
 }
 
@@ -1018,11 +1021,7 @@ GameTypeInfo getBallMode(){
 					}
 				  setEntityActivateMask(getEntityForPlayerIndex(0).value(), mask);
 
-				  if (ballMode.spirit == MODE_BLUE){
-				  	setActivatableObject(ballMode.ballId);
-				  }else{
-					  setActivatableObject(std::nullopt);
-				  }
+			  	setActivatableObject(ballMode.ballId, mask);
 
   			  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
 

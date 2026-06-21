@@ -147,7 +147,7 @@ bool setCanActivate(objid id, bool canActivate);
 void activateAllItems();
 void handleActivationCollision(objid obj1, objid obj2);
 
-void setActivatableObject(std::optional<objid> obj);
+void setActivatableObject(std::optional<objid> obj, std::optional<int> mask);
 void maybeResetActivatableObject(objid id);
 
 

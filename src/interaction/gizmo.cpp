@@ -585,9 +585,19 @@ bool isDeactivating(Activatable& activateable){
 bool isActivated(Activatable& activateable){
 	return activateable.activated;	
 }
+
+bool passesMask(Activatable& activateable, std::optional<int> mask){
+	if (mask.has_value()){
+		if (mask.value() & activateable.mask){
+			return false;
+		}
+	}
+	return true;
+}
+
 bool activate(Activatable& activateable, std::optional<int> mask){
 	// mask if it's 0 it activates.
-	if (mask.has_value() && (mask.value() & activateable.mask)){
+	if (!passesMask(activateable, mask)){
 		return false;
 	}
 	if (activateable.activated){
@@ -623,10 +633,15 @@ void toggleActivation(Activatable& item){
 	}
 }
 
-void maybeTriggerActivation(objid id){
+void maybeTriggerActivation(objid id, std::optional<int> mask){
 	std::cout << "touch: maybeTriggerActivation" << std::endl;
 	if (activateables.find(id) != activateables.end()){
 		auto& activateable = activateables.at(id);
+
+		if (!passesMask(activateable, mask)){
+			return;
+		}
+
 		auto touchActivatable = std::get_if<ActivationTouch>(&activateable.type);
 		if (touchActivatable){
 			std::cout << "touch: try activate" << std::endl;
@@ -657,12 +672,23 @@ void maybeTriggerActivation(objid id){
 }
 
 
-std::optional<objid> activateableObject;
-void setActivatableObject(std::optional<objid> obj){
-	activateableObject = obj;
+struct Activater {
+	objid id;
+	std::optional<int> mask;
+};
+std::optional<Activater> activateableObject;
+void setActivatableObject(std::optional<objid> obj, std::optional<int> mask){
+	if (!obj.has_value()){
+		activateableObject = std::nullopt;
+		return;
+	}
+	activateableObject = Activater {
+		.id = obj.value(),
+		.mask = mask,
+	};
 }
 void maybeResetActivatableObject(objid id){
-	if (activateableObject.has_value() && activateableObject.value() == id){
+	if (activateableObject.has_value() && activateableObject.value().id == id){
 		activateableObject = std::nullopt;
 	}
 }
@@ -672,10 +698,10 @@ void handleActivationCollision(objid obj1, objid obj2){
 		return;
 	}
 
-  if (activateableObject.value() == obj2){
-    maybeTriggerActivation(obj1);
-  }else if (activateableObject.value() == obj1){
-   	maybeTriggerActivation(obj2);
+  if (activateableObject.value().id == obj2){
+    maybeTriggerActivation(obj1, activateableObject.value().mask);
+  }else if (activateableObject.value().id == obj1){
+   	maybeTriggerActivation(obj2, activateableObject.value().mask);
   }
 }
 
