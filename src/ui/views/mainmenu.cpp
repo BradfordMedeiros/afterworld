@@ -1,6 +1,6 @@
 #include "./mainmenu.h"
 
-void pushHistory(std::vector<std::string> route, bool replace);
+void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data);
 std::string getArgOption(const char* name);
 bool hasOption(const char* name);
 
@@ -11,13 +11,13 @@ Props createLevelListProps(){
   levels.push_back(ListComponentData {
     .name = "Campaign",
     .onClick = []() -> void {
-      pushHistory({ "levelselect" }, false);
+      pushHistory({ "levelselect" }, false, std::nullopt);
     }
   });
   levels.push_back(ListComponentData {
     .name = "Settings",
     .onClick = []() -> void {
-      pushHistory({ "settings" }, false);
+      pushHistory({ "settings" }, false, std::nullopt);
     }
   });
   levels.push_back(ListComponentData {

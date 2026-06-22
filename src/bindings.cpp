@@ -57,6 +57,7 @@ struct ManagedScene {
   int index;
   std::string path;
   std::optional<std::string> sceneFile;
+  std::optional<std::string> activeLevel;
   GameMode gameMode = GameModeNone{};
 };
 struct SceneManagement {
@@ -149,15 +150,45 @@ UiStateContext uiStateContext {
   .uiState = createUiState(),
 };
 
+struct LevelOptions {
+  std::optional<std::string> hint;
+};
 
-void goToLevel(std::string levelShortName){
-  pushHistory({ "playing", levelShortName }, true);
-  activeLevel = levelShortName;
+std::optional<ActiveLevel> getActiveLevel(){
+  if (!sceneManagement.managedScene.has_value()){
+    return std::nullopt;
+  }
+  if (!sceneManagement.managedScene.value().activeLevel.has_value()){
+    return std::nullopt;
+  }
+  auto& data = getData();
+
+  if (data.has_value()){
+    LevelOptions* value = std::any_cast<LevelOptions>(&data.value());
+    modassert(value != NULL, "getActiveLevel expected LevelOptions type");
+    return ActiveLevel {
+      .name = sceneManagement.managedScene.value().activeLevel.value(),
+      .hint = value -> hint,
+    };
+  }
+
+
+  return ActiveLevel {
+    .name = sceneManagement.managedScene.value().activeLevel.value(),
+  };
+}
+
+
+void goToLevel(std::string levelShortName, std::optional<std::string> hint){
+  LevelOptions options {
+    .hint = hint,
+  };
+  pushHistory({ "playing", levelShortName }, true, options);
 }
 void goToLink(std::string link){
   pushHistory({ "loading" }, true);
   gameapi -> schedule(0, true, 5000, NULL, [link](void*) -> void {
-    goToLevel(link);
+    goToLevel(link, std::nullopt);
   });
 }
 
@@ -331,7 +362,6 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
       }
       sceneManagement.managedScene = std::nullopt;
-      activeLevel = std::nullopt;
       sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     }
   }
@@ -361,9 +391,9 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .index = currentIndex,
       .path = currentPath,
       .sceneFile = sceneToLoad.value().sceneFile,
+      .activeLevel = params.size() > 0 ? params.at(0) : std::optional<std::string>(std::nullopt),
       .gameMode = router.value() -> getGameMode(params),
     };
-    activeLevel = std::nullopt;
     sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     modlog("router scene route load", sceneManagement.managedScene.value().path);
     startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
@@ -791,7 +821,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     updateState();
 
     if (levelShortcutToLoad.has_value()){
-      goToLevel(levelShortcutToLoad.value());
+      goToLevel(levelShortcutToLoad.value(), std::nullopt);
       levelShortcutToLoad = std::nullopt;
     }
 

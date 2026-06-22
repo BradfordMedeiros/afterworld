@@ -95,7 +95,7 @@ void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn){
 }
 
 std::optional<objid> activeSceneForSelected();
-void goToLevel(std::string levelShortName);
+void goToLevel(std::string levelShortName, std::optional<std::string> hint);
 void setNoClipMode();
 void setFreeCam();
 void setNormalMode();
@@ -179,7 +179,7 @@ UiContext getUiContext(){
    .levels = LevelUIInterface {
       .goToLevel = [](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);
-        goToLevel(level.name);
+        goToLevel(level.name, std::nullopt);
       },
       .goToMenu = goToMenu,
     },
@@ -203,7 +203,7 @@ UiContext getUiContext(){
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [](std::string scene) -> void {
       modassert(false, "load scene not yet implemented");
-      goToLevel(scene);
+      goToLevel(scene, std::nullopt);
     },
     .newScene = [](std::string sceneName) -> void {
       const std::string sceneFolder = "./res/scenes/";
@@ -226,7 +226,7 @@ UiContext getUiContext(){
       .setBackground = setMenuBackground,
       .goToLevel = [](std::optional<std::string> level) -> void {
         modlog("gotolevel", std::string("level loading: ") + level.value());
-        goToLevel(level.value());
+        goToLevel(level.value(), std::nullopt);
       },
       .nextLevel = []() -> void {
         modassert(false, "next level does not exist anymore");

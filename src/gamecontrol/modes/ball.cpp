@@ -4,14 +4,14 @@ extern CustomApiBindings* gameapi;
 extern GLFWwindow* window;
 
 extern GameTypes gametypeSystem;
-extern std::optional<std::string> activeLevel;
 extern Vehicles vehicles;
 extern Movement movement;
 extern Weapons weapons;
 extern std::unordered_map<objid, Powerup> powerups;
 extern std::unordered_map<objid, Activatable> activateables;
 
-void goToLevel(std::string levelShortName);
+void goToLevel(std::string levelShortName, std::optional<std::string> hint);
+std::optional<ActiveLevel> getActiveLevel();
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 void inputOverride(bool paused, bool showMouse);
 void inputOverride();
@@ -288,12 +288,13 @@ void ballEndGameplay(EasyCutscene& cutscene){
 	});
 
   run(cutscene, 3, []() -> void {
-  	goToLevel("ballselect");
+  	goToLevel("ballselect", "skip_menu");
   });
 }
 
 void setBallLevelComplete(){
-	std::cout << "set ball level complete: " << activeLevel.value() << std::endl;
+	auto activeLevel = getActiveLevel().value().name;
+	std::cout << "set ball level complete: " << activeLevel << std::endl;
 
 	auto& ballModeOptions = getBallModeOptions();
 	if (ballModeOptions.finalBallTime.has_value()){
@@ -302,7 +303,7 @@ void setBallLevelComplete(){
 	auto timeElapsed = gameapi -> timeSeconds(false) - ballModeOptions.ballStartTime.value();
 	ballModeOptions.finalBallTime = timeElapsed;
 
-	markLevelComplete(activeLevel.value(), timeElapsed);
+	markLevelComplete(activeLevel, timeElapsed);
 	commitCrystals();
 	playCutscene(ballEndGameplay, std::nullopt);	
 }
@@ -411,7 +412,7 @@ void ballModeSetPlayMode(objid sceneId){
   changeUiMode(BallModeUi{});
 
 	setPauseMenuOverride([]() -> void {
-    goToLevel("ballselect");
+    goToLevel("ballselect", std::nullopt);
 	});
   
 
@@ -510,9 +511,9 @@ void ballModeNewGame2(objid sceneId){
 
 
 
-void startBallIntroMode(objid sceneId){	
+void startBallIntroMode(objid sceneId){		
 	setPauseMenuOverride([]() -> void {
-    goToLevel("ballselect");
+    goToLevel("ballselect", std::nullopt);
 	});
 
 	//if (currentCutscene.has_value()){
@@ -548,7 +549,18 @@ void startBallIntroMode(objid sceneId){
 void startBallMode(objid sceneId){
   auto hasLevelSelect = gameapi -> getObjectsByAttr("levelselect", std::nullopt, sceneId).size() > 0;
 
-  if (hasLevelSelect){
+  //std::cout << "active level: " << print(getActiveLevel()) << std::endl;
+	auto activeLevel = getActiveLevel();
+
+	bool skipMenu = false;
+	if (activeLevel.has_value()){
+		auto& hint = activeLevel.value().hint;
+		if (hint.has_value() && hint.value() == "skip_menu"){
+			skipMenu = true;
+		}
+	}
+
+  if (hasLevelSelect && !skipMenu){
   	startBallIntroMode(sceneId);
   }else{
   	ballModeSetPlayMode(sceneId);
@@ -971,7 +983,7 @@ GameTypeInfo getBallMode(){
 	   			setTempCamera(std::nullopt, 0);
 					hideLetterBox();
 					ballMode.worldView = std::nullopt;
-					goToLevel("dev");
+					goToLevel("dev", std::nullopt);
 					return;
 
 	  			auto multiOrbView = multiorbViewByCamera(cameraId);
@@ -979,7 +991,7 @@ GameTypeInfo getBallMode(){
 	  				auto level = getSelectedLevel(*multiOrbView.value());
 	  				if (level.has_value()){
 							std::cout << "worldView set null 2" << std::endl;
-	  					goToLevel(level.value());
+	  					goToLevel(level.value(), std::nullopt);
 	  				}
 	  			}
 	  		}

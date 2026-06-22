@@ -6,11 +6,13 @@
 struct RouterHistory {
   float currentRouteTime;
   std::deque<std::string> history;
+  std::optional<std::any> data;
   std::optional<std::function<void()>> registerOnRouteChangedFn;
 };
 RouterHistory createHistory();
-void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace = false);
+void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt));
 void popHistory(RouterHistory& history);
+std::optional<std::any>& getData(RouterHistory& history);
 
 std::string fullHistoryStr(RouterHistory& history);
 std::string fullDebugStr(RouterHistory& history);

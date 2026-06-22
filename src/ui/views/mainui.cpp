@@ -651,11 +651,15 @@ RouterHistory& getMainRouterHistory(){
   return mainRouterHistory;
 }
 
-void pushHistory(std::vector<std::string> route, bool replace){
-  pushHistory(mainRouterHistory, route, replace);
+void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data){
+  pushHistory(mainRouterHistory, route, replace, data);
 }
 void popHistory(){
   popHistory(mainRouterHistory);
+}
+
+std::optional<std::any>& getData(){
+  return getData(mainRouterHistory);
 }
 
 std::string getCurrentPath(){

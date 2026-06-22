@@ -10,8 +10,9 @@ RouterHistory createHistory(){
 	};
 }
 
-void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace){
+void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace, std::optional<std::any> data){
   history.currentRouteTime = gameapi -> timeSeconds(true);
+  history.data = data;
   if (replace){
     history.history = {};
   }
@@ -32,6 +33,10 @@ void popHistory(RouterHistory& history){
   if (history.registerOnRouteChangedFn.has_value()){
     history.registerOnRouteChangedFn.value()();
   }  
+}
+
+std::optional<std::any>& getData(RouterHistory& history){
+  return history.data;
 }
 
 std::string fullHistoryStr(RouterHistory& history){

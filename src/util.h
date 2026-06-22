@@ -186,4 +186,9 @@ objid createPrefab(glm::vec3 position, std::string&& prefab, objid sceneId);
 objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec3 scale);
 
 
+struct ActiveLevel {
+  std::string name;
+  std::optional<std::string> hint;
+};
+
 #endif
