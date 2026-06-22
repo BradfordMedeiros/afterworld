@@ -156,7 +156,11 @@ void onActivationFrame(){
 
 			std::optional<std::optional<int>> maskToUse;
 			for (auto& player : players){
-				auto activateMask = getActiveControllable(player.viewport).value() -> activateMask;
+				auto activeControllable = getActiveControllable(player.viewport);
+				if (!activeControllable.has_value()){
+					continue;
+				}
+				auto activateMask = activeControllable.value() -> activateMask;
 				if (!maskToUse.has_value()){
 					maskToUse = activateMask;
 				}else {
@@ -205,7 +209,7 @@ void onActivationFrame(){
 				auto shouldReset = !isActivated(activatedItem);
 				if (shouldReset){
 					activateTrigger -> lastActivateId = std::nullopt;
-	    	  		setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+	    	  setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
 				}
 			}
 		}

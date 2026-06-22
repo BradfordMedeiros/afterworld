@@ -274,6 +274,53 @@ void addGem(std::string gem, std::vector<GameobjAttributeOpts>& attributes, std:
 
 }
 
+
+void addWarp(std::vector<GameobjAttributeOpts>& attributes, bool isLevelSelect){
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "layer",
+      .attributeValue = "nolighting",
+    });
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "mesh",
+      .attributeValue = "../gameresources/build/uncategorized/warp.gltf",
+    });
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "physics_shape",
+      .attributeValue = "shape_exact",
+    });
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "physics",
+      .attributeValue = "enabled",
+    });
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "physics_shape",
+      .attributeValue = "shape_exact",
+      .submodel = "target",
+    });
+    attributes.push_back(GameobjAttributeOpts {
+      .field = "physics",
+      .attributeValue = "enabled",
+      .submodel = "target",
+    });
+
+    if (isLevelSelect){
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "selectwarp",
+        .attributeValue = "default",
+        .submodel = "target",
+      });      
+    }else{
+      attributes.push_back(GameobjAttributeOpts {
+        .field = "endwarp",
+        .attributeValue = "default",
+        .submodel = "target",
+      });      
+    }
+
+
+}
+
+     
 std::string getBallGameTemplate(std::string mapFile, std::optional<std::string> templateFile){
   std::string templatePath = "../afterworld/scenes/levels/ball.rawscene";
   if (templateFile.has_value()){
@@ -1181,48 +1228,12 @@ CompileMapFns getCompileMapForBallGame(){
 
           {
             std::vector<GameobjAttributeOpts> newAttributes;
-
-     
-
             newAttributes.push_back(GameobjAttributeOpts {
               .field = "position",
               .attributeValue = position + (rotation * glm::vec3(0.f, -2.f, -5.f)),
             });
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "layer",
-              .attributeValue = "nolighting",
-            });
 
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "mesh",
-              .attributeValue = "../gameresources/build/uncategorized/warp.gltf",
-            });
-
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "physics_shape",
-              .attributeValue = "shape_exact",
-            });
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "physics",
-              .attributeValue = "enabled",
-            });
-
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "physics_shape",
-              .attributeValue = "shape_exact",
-              .submodel = "target",
-            });
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "physics",
-              .attributeValue = "enabled",
-              .submodel = "target",
-            });
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "endwarp",
-              .attributeValue = "default",
-              .submodel = "target",
-            });
-
+            addWarp(newAttributes, false);
 
             additionalEntities.push_back(AdditionalEntity {
               .modelName = originalModelName + "_endwarp",
@@ -1235,6 +1246,9 @@ CompileMapFns getCompileMapForBallGame(){
         }
 
 
+    }else if (*className.value() == "warp"){
+      *shouldWrite = true;
+      addWarp(attributes, true);
     }else if (*className.value() == "gem"){
         *shouldWrite = true;
         auto gemValue = getValue(entity, "gem");

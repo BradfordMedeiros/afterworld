@@ -32,6 +32,8 @@ enum BallModeSpirit {
 	MODE_PURPLE,
 };
 
+struct LevelWarp { };
+
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    objid ballId;
@@ -59,6 +61,8 @@ struct BallModeOptions{
    std::optional<glm::vec3> ballplanePos;
 
    std::optional<objid> endwarp;
+
+   std::unordered_map<objid, LevelWarp> warps; 
 };
 
 bool hasBallModeOptions(){
@@ -448,6 +452,14 @@ void ballModeSetPlayMode(objid sceneId){
 		modeOptions.endwarp = endwarp.at(0);
 	}
 
+	auto warps = gameapi -> getObjectsByAttr("selectwarp", std::nullopt, sceneId);
+	for (auto id : warps){
+		std::cout << "added warp: " << id << std::endl;
+		modeOptions.warps[id] = LevelWarp {
+
+		};
+	}
+
 	if (ballplanes.size() > 0){
 		auto ballplaneId = ballplanes.at(0);
 		auto ballplanePos = gameapi -> getGameObjectPos(ballplaneId, true, "[gamelogic] ballplane pos");
@@ -684,7 +696,7 @@ void handlePowerupCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-void doWorldSelect(objid id, std::string& value){
+void doWorldSelect(std::string& value){
 	std::cout << "worldView doWorldSelect called" << std::endl;
 	auto& ballModeOptions = getBallModeOptions();
 	ballModeOptions.worldView = WorldView {
@@ -709,14 +721,14 @@ void handleMultiselectCollision(int32_t obj1, int32_t obj2){
     auto worldSelect = getStrAttr(objAttr, "worldselect");
     if (worldSelect.has_value()){
 		  std::cout << "onModeCollision: worldselect: " << nameObj2 << ", scene = " << gameapi -> listSceneId(obj2) << ", other: " << nameObj1 << "(" << obj1 <<  ")" << std::endl;
-    	doWorldSelect(obj1, worldSelect.value());
+    	doWorldSelect(worldSelect.value());
     }
   }else if (isControlledVehicle(obj2) && obj2 == activeBall){
     auto objAttr = getAttrHandle(obj1);
     auto worldSelect = getStrAttr(objAttr, "worldselect");
     if (worldSelect.has_value()){
 		  std::cout << "onModeCollision: worldselect: " << nameObj1 << ", scene = " << gameapi -> listSceneId(obj1) <<  ", other: " << nameObj2  << "(" << obj2 << ")" << std::endl;
-    	doWorldSelect(obj2, worldSelect.value());
+    	doWorldSelect(worldSelect.value());
     }
   }
 }
@@ -1014,6 +1026,10 @@ GameTypeInfo getBallMode(){
 	  	}
 	  	if (key == 'N' && action == 1){
 	  		ballMode.shouldReset = true;
+	  	}
+	  	if (key == 'M' && action == 1){
+	  		std::string world("w1");
+	  		doWorldSelect(world);
 	  	}
 	  	if (key == '[' && action == 1){
 	  		commitCrystals();
