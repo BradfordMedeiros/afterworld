@@ -38,6 +38,7 @@ Movement createMovement();
 void addPlayerPortToMovement(Movement& movement, int port);
 void removePlayerPortFromMovement(Movement& movement, int port);
 ControlParams& getControlParamsByPort(Movement& movement, int playerIndex);
+void resetControlParams(Movement& movement, int playerIndex);
 
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action, int playerIndex);
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos, int playerPort);

@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 extern OrbData orbData;
 extern std::unordered_map<objid, MultiOrbView> multiOrbViews;
 
-bool showDebugInfo = true;
+bool showDebugInfo = false;
 
 std::optional<Orb*> getOrb(std::vector<Orb>& orbs, int index){
 	for (auto& orb : orbs){
@@ -156,7 +156,7 @@ void handleOrbViews(OrbData& orbData){
 			gameapi -> drawRect(0.f, 0.f, 0.5f, 0.5f, false, glm::vec4(1.f, 1.f, 1.f, opacity), std::nullopt, true, std::nullopt, targetOrb.value() -> image.value(), std::nullopt);
 		}
 		
-		gameapi -> drawText(targetOrb.value() -> level, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+		//gameapi -> drawText(targetOrb.value() -> level, 0.f, 0.f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 		
 
 		auto orbPosition = getOrbPosition(orbUi, objView.actualIndex);

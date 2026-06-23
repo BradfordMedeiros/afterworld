@@ -10,7 +10,7 @@ RouterHistory createHistory(){
 	};
 }
 
-void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace, std::optional<std::any> data){
+void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool replace, std::optional<std::any> data, bool forceLoad){
   history.currentRouteTime = gameapi -> timeSeconds(true);
   history.data = data;
   if (replace){
@@ -20,7 +20,7 @@ void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool 
     history.history.push_back(path);
   }
   if (history.registerOnRouteChangedFn.has_value()){
-    history.registerOnRouteChangedFn.value()();
+    history.registerOnRouteChangedFn.value()(forceLoad);
   }
 }
 
@@ -31,7 +31,7 @@ void popHistory(RouterHistory& history){
   history.history.pop_back();
   history.currentRouteTime = gameapi -> timeSeconds(true);
   if (history.registerOnRouteChangedFn.has_value()){
-    history.registerOnRouteChangedFn.value()();
+    history.registerOnRouteChangedFn.value()(false);
   }  
 }
 
@@ -169,7 +169,7 @@ Component withAnimator(RouterHistory& history, Component wrappedComponent, float
 }
 
 
-void registerOnRouteChanged(RouterHistory& history, std::function<void()> onRouteChanged){
+void registerOnRouteChanged(RouterHistory& history, std::function<void(bool)> onRouteChanged){
   modassert(!history.registerOnRouteChangedFn.has_value(), "can only register a single route");
   history.registerOnRouteChangedFn = onRouteChanged;
 }

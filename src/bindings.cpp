@@ -179,16 +179,16 @@ std::optional<ActiveLevel> getActiveLevel(){
 }
 
 
-void goToLevel(std::string levelShortName, std::optional<std::string> hint){
+void goToLevel(std::string levelShortName, std::optional<std::string> hint, bool forceReload){
   LevelOptions options {
     .hint = hint,
   };
-  pushHistory({ "playing", levelShortName }, true, options);
+  pushHistory({ "playing", levelShortName }, true, options, forceReload);
 }
 void goToLink(std::string link){
-  pushHistory({ "loading" }, true);
+  pushHistory({ "loading" }, true, std::nullopt, false);
   gameapi -> schedule(0, true, 5000, NULL, [link](void*) -> void {
-    goToLevel(link, std::nullopt);
+    goToLevel(link, std::nullopt, false);
   });
 }
 
@@ -317,7 +317,7 @@ bool disableGameInput(){
 }
 
 
-void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath){
+void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, bool forceLoad){
   modlog("router scene route", std::string("path is: ") + currentPath);
 
   int currentIndex = 0;
@@ -349,7 +349,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   bool currentSceneFileLoaded = sceneToLoad.has_value() && sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().sceneFile.has_value() && sceneManagement.managedScene.value().sceneFile.value() == sceneToLoad.value().sceneFile;
 
   if (sceneManagement.managedScene.has_value()){
-    if (router.has_value() && sceneManagement.managedScene.value().index == currentIndex && currentSceneFileLoaded){
+    if (!forceLoad && (router.has_value() && sceneManagement.managedScene.value().index == currentIndex && currentSceneFileLoaded)){
       modlog("router scene route", "already loaded, returning");
       return;
     }else{
@@ -729,9 +729,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     initSettings();
     registerOnRouteChanged(
       getMainRouterHistory(),
-      []() -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
+      [](bool forceLoad) -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
         auto currentPath = fullHistoryStr();
-        onSceneRouteChange(sceneManagement, currentPath);
+        onSceneRouteChange(sceneManagement, currentPath, forceLoad);
         modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
       }
     );
@@ -821,7 +821,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     updateState();
 
     if (levelShortcutToLoad.has_value()){
-      goToLevel(levelShortcutToLoad.value(), std::nullopt);
+      goToLevel(levelShortcutToLoad.value(), std::nullopt, false);
       levelShortcutToLoad = std::nullopt;
     }
 

@@ -651,8 +651,8 @@ RouterHistory& getMainRouterHistory(){
   return mainRouterHistory;
 }
 
-void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data){
-  pushHistory(mainRouterHistory, route, replace, data);
+void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data, bool forceLoad){
+  pushHistory(mainRouterHistory, route, replace, data, forceLoad);
 }
 void popHistory(){
   popHistory(mainRouterHistory);

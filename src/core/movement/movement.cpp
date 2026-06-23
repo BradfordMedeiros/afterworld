@@ -199,6 +199,11 @@ ControlParams& getControlParamsByPort(Movement& movement, int playerIndex){
   return movement.controlParams.at(0);
 }
 
+void resetControlParams(Movement& movement, int playerIndex){
+  auto& controlParams = getControlParamsByPort(movement, playerIndex);
+  controlParams = createControlParams(playerIndex);
+}
+
 
 void addPlayerPortToMovement(Movement& movement, int port){
   for (auto& controlParams : movement.controlParams){

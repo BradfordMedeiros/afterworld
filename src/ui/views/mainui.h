@@ -74,7 +74,7 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);
 void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, double xPos, double yPos, float xNdc, float yNdc);
 void onMainUiObjectsChanged();
-void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt));
+void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt), bool forceLoad = false);
 std::optional<std::any>& getData();
 
 void popHistory();

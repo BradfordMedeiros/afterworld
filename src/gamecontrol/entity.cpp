@@ -301,6 +301,13 @@ std::optional<objid> getCameraForThirdPerson(int playerIndex){
 ////////////////////// Basic Entity Manipulation //////////////////////
 void setEntityControlDisabled(bool isDisabled, objid id){
 	controllableEntities.at(id).disablePlayerControl = isDisabled;
+
+	if (isDisabled){
+ 		auto viewport = getPlayerIndexForEntity(id);
+ 		if (viewport.has_value()){
+			resetControlParams(movement, viewport.value());
+ 		}		
+	}
 }
 
 bool isEntityControlDisabled(objid id){
