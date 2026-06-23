@@ -207,84 +207,86 @@ std::optional<CurrLevelSelect> currentLevel(){
 }
 
 
-void ballStartGameplay(EasyCutscene& cutscene){
-	struct BallStartData {
-		bool cutsceneFinished = false;
-	};
+struct BallStartData {
+	bool cutsceneFinished = false;
+};
 
-  if (initialize(cutscene)){
-		std::cout << "ball mode: ballStartGameplay initialize" << std::endl;
+std::function<void(EasyCutscene&)> createReveal(std::string letterbox, std::string rail){
+	return [letterbox, rail](EasyCutscene& cutscene) -> void {
+  	if (initialize(cutscene)){
+			std::cout << "ball mode: ballStartGameplay initialize" << std::endl;
+  	  setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
+  	  BallStartData startData {};
+  	  store(cutscene, startData);
+  	}
+  	if (finalize(cutscene)){
+			std::cout << "ball mode: ballStartGameplay finalize" << std::endl;
+  		auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
+  		emitWarp(position);
+  	  setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
+  	}
 
-    setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
-    BallStartData startData {};
-    store(cutscene, startData);
-  }
-  if (finalize(cutscene)){
-		std::cout << "ball mode: ballStartGameplay finalize" << std::endl;
+  	run(cutscene, 2, [&cutscene, letterbox, rail]() -> void {
+  			auto sceneId = gameapi -> listSceneId(getEntityForPlayerIndex(0).value());
+ 			  auto railId = railIdForName(rail, 0);
 
-  }
-
-  run(cutscene, 2, [&cutscene]() -> void {
-  		auto sceneId = gameapi -> listSceneId(getEntityForPlayerIndex(0).value());
- 		  auto railId = railIdForName("levelintro", 0);
-
-  		if (!railId.has_value()){
-		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
-		  	modassert(startData, "ballStartGameplay startData is null");
-		  	startData -> cutsceneFinished = true;
-   			setTempCamera(std::nullopt, 0);
-   			return;
-  		}
-
-  		setTempCamera(ensureTempCamera(sceneId), 0);
-  		
-  		std::vector<SimpleNarration> narrations;
-
-  		
-  		auto& railPoints = *railForId(railId.value()).value();
-  		for (auto& key : railPoints.keys){
-  			narrations.push_back(SimpleNarration {
-  				.text = key.has_value() ? key.value() : "",
-  			});
-  		}
-  		
-
-  		NarratedMovement narratedMovement {
-  			.railId = railId.value(),
-  			.letterbox = "Welcome to The World",
-  			.narrations = narrations,
-  		};
-
-  		bool skipCutscene = false;
-  		if (skipCutscene){
-		  	BallStartData* startData = getStorage<BallStartData>(cutscene);
-		  	modassert(startData, "ballStartGameplay startData is null");
-		  	startData -> cutsceneFinished = true;
-   			setTempCamera(std::nullopt, 0);
-  		}else{
- 				playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), narratedMovement, false, [&cutscene]() -> void { 
+  			if (!railId.has_value()){
 		  		BallStartData* startData = getStorage<BallStartData>(cutscene);
 		  		modassert(startData, "ballStartGameplay startData is null");
 		  		startData -> cutsceneFinished = true;
    				setTempCamera(std::nullopt, 0);
-				}), std::nullopt);
-  		}
-  });
+   				return;
+  			}
+
+  			setTempCamera(ensureTempCamera(sceneId), 0);
+  		
+  			std::vector<SimpleNarration> narrations;
+
+  		
+  			auto& railPoints = *railForId(railId.value()).value();
+  			for (auto& key : railPoints.keys){
+  				narrations.push_back(SimpleNarration {
+  					.text = key.has_value() ? key.value() : "",
+  				});
+  			}
+  		
+
+  			NarratedMovement narratedMovement {
+  				.railId = railId.value(),
+  				.letterbox = letterbox,
+  				.narrations = narrations,
+  			};
+
+  			bool skipCutscene = false;
+  			if (skipCutscene){
+		  		BallStartData* startData = getStorage<BallStartData>(cutscene);
+		  		modassert(startData, "ballStartGameplay startData is null");
+		  		startData -> cutsceneFinished = true;
+   				setTempCamera(std::nullopt, 0);
+  			}else{
+ 					playCutscene(simpleNarratedMovement(ensureTempCamera(sceneId), narratedMovement, false, [&cutscene]() -> void { 
+		  			BallStartData* startData = getStorage<BallStartData>(cutscene);
+		  			modassert(startData, "ballStartGameplay startData is null");
+		  			startData -> cutsceneFinished = true;
+   					setTempCamera(std::nullopt, 0);
+					}), std::nullopt);
+  			}
+  	});
 
 
-	waitFor(cutscene, 3, [&cutscene]() -> bool {
-	  BallStartData* startData = getStorage<BallStartData>(cutscene);
-		modassert(startData, "ballStartGameplay startData is null");
-		return startData -> cutsceneFinished;
-	});
+		waitFor(cutscene, 3, [&cutscene]() -> bool {
+		  BallStartData* startData = getStorage<BallStartData>(cutscene);
+			modassert(startData, "ballStartGameplay startData is null");
+			return startData -> cutsceneFinished;
+		});
 
-
-  run(cutscene, 4, []() -> void {
-  	auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
-  	emitWarp(position);
-    setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
-  });
+	};
 }
+
+void ballStartGameplay(EasyCutscene& cutscene){
+
+}
+
 void ballEndGameplay(EasyCutscene& cutscene){
 	if (initialize(cutscene)){
 	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
@@ -326,6 +328,8 @@ void ballEndGameplay(EasyCutscene& cutscene){
   	goToLevel("ballselect", "skip_menu", false);
   });
 }
+
+
 
 void setBallLevelComplete(){
 	auto activeLevel = getActiveLevel().value().name;
@@ -1004,7 +1008,7 @@ GameTypeInfo getBallMode(){
 				setEntityInVehicle(entityId, modeOptions.ballId);
 				setCanExitVehicle(false);
 
-				playCutscene(ballStartGameplay, std::nullopt);
+				playCutscene(createReveal("Welcome to the world", "levelintro"), std::nullopt);
 			}
 
 	  	auto pos = gameapi -> getGameObjectPos(modeOptions.ballId, true, "[gamelogic] get ball position for start");
@@ -1104,6 +1108,9 @@ GameTypeInfo getBallMode(){
 	  	}
 	  	if (key == '[' && action == 1){
 	  		commitCrystals();
+	  	}
+	  	if (key == 'Y' && action == 1){
+	  		playCutscene(createReveal("this is a cool check", "w1-2-end"), std::nullopt);
 	  	}
 
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
