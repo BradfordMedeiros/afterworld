@@ -10,7 +10,7 @@ extern Weapons weapons;
 extern std::unordered_map<objid, Powerup> powerups;
 extern std::unordered_map<objid, Activatable> activateables;
 
-void goToLevel(std::string levelShortName, std::optional<std::string> hint, bool forceReload);
+void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 std::optional<ActiveLevel> getActiveLevel();
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 void inputOverride(bool paused, bool showMouse);
@@ -33,6 +33,16 @@ enum BallModeSpirit {
 };
 
 struct LevelWarp { };
+
+struct CompletionInfo {
+	bool firstTimeWin = false;
+	std::string levelName;
+};
+
+struct LevelLoadOptions {
+	bool skipMenu = false;
+	std::optional<CompletionInfo> completion;
+};
 
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
@@ -64,6 +74,8 @@ struct BallModeOptions{
 
    std::unordered_map<objid, LevelWarp> warps; 
    objid lastTouchId = 0;
+
+   std::optional<LevelLoadOptions> loadOptions;
 };
 
 bool hasBallModeOptions(){
@@ -287,14 +299,37 @@ void ballStartGameplay(EasyCutscene& cutscene){
 
 }
 
+struct BallEndData {
+	bool firstTimeWin = false;
+};
 void ballEndGameplay(EasyCutscene& cutscene){
 	if (initialize(cutscene)){
+		auto activeLevel = getActiveLevel().value().name;
+		std::cout << "set ball level complete: " << activeLevel << std::endl;
+
+		auto& ballModeOptions = getBallModeOptions();
+		if (ballModeOptions.finalBallTime.has_value()){
+			return;
+		}
+		auto timeElapsed = gameapi -> timeSeconds(false) - ballModeOptions.ballStartTime.value();
+		ballModeOptions.finalBallTime = timeElapsed;
+
+		auto wasLevelComplete = isLevelComplete(activeLevel);
+	
+		markLevelComplete(activeLevel, timeElapsed);
+		commitCrystals();
+
 	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
     setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
 
 
 		auto warpPos = gameapi -> getGameObjectPos(getBallModeOptions().endwarp.value(), true, "[gamelogic] ball - warp");
 		gameapi -> moveCameraTo(getBallModeOptions().ballId, warpPos + glm::vec3(0.f, 1.f, 0.f), 0.1f);
+
+		BallEndData ballEndData{
+			.firstTimeWin = !wasLevelComplete,
+		};
+   	store(cutscene, ballEndData);
 	}
 
 	waitUntil(cutscene, 0, 100);
@@ -307,7 +342,6 @@ void ballEndGameplay(EasyCutscene& cutscene){
 		setGameObjectTint(getBallModeOptions().eyeId, glm::vec4(1.f, 0.f, 0.f, 0.f));	
 		getBallModeOptions().changeSpirit = MODE_NONE;
 	}
-
 
   waitUntil(cutscene, 1, 5000);
 
@@ -324,28 +358,19 @@ void ballEndGameplay(EasyCutscene& cutscene){
 		return getGlobalState().control.leftMouseDown;
 	});
 
-  run(cutscene, 3, []() -> void {
-  	goToLevel("ballselect", "skip_menu", false);
+  run(cutscene, 3, [&cutscene]() -> void {
+	  BallEndData* ballEndData = getStorage<BallEndData>(cutscene);
+	  modassert(ballEndData, "ball end data does not have a value");
+  	goToLevel("ballselect", LevelLoadOptions { 
+  		.skipMenu = true,
+  		.completion = CompletionInfo {
+  			.firstTimeWin = ballEndData -> firstTimeWin,
+  			.levelName = getActiveLevel().value().name,
+  		},
+  	}, false);
   });
 }
 
-
-
-void setBallLevelComplete(){
-	auto activeLevel = getActiveLevel().value().name;
-	std::cout << "set ball level complete: " << activeLevel << std::endl;
-
-	auto& ballModeOptions = getBallModeOptions();
-	if (ballModeOptions.finalBallTime.has_value()){
-		return;
-	}
-	auto timeElapsed = gameapi -> timeSeconds(false) - ballModeOptions.ballStartTime.value();
-	ballModeOptions.finalBallTime = timeElapsed;
-
-	markLevelComplete(activeLevel, timeElapsed);
-	commitCrystals();
-	playCutscene(ballEndGameplay, std::nullopt);	
-}
 
 struct BallObj {
 	objid id;
@@ -441,7 +466,7 @@ std::optional<BallPowerupState> getPowerup(){
 
 GameTypeInfo getBallMode();
 
-void ballModeSetPlayMode(objid sceneId, bool inHub){
+void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptions> loadLevel){
 	setTempCamera(std::nullopt, 0);
 
 	inputOverride();
@@ -450,9 +475,9 @@ void ballModeSetPlayMode(objid sceneId, bool inHub){
 
 	setPauseMenuOverride([sceneId, inHub]() -> void {
 		if (inHub){
-			goToLevel("ballselect", std::nullopt, true);
+			goToLevel("ballselect", LevelLoadOptions{}, true);
 		}else{
-	    goToLevel("ballselect", "skip_menu", false);
+	    goToLevel("ballselect", LevelLoadOptions { .skipMenu = true }, false);
 		}
 	});
   
@@ -513,6 +538,7 @@ void ballModeSetPlayMode(objid sceneId, bool inHub){
 		modeOptions.rebirthSphereInitialPos = rebirthSphereInitialPos;		
 	}
 
+	modeOptions.loadOptions = loadLevel;
 
 	setGameObjectEmitterEffectTint(modeOptions.spiritId, glm::vec4(0.f, 1.f, 0.f, 0.f));
 
@@ -550,17 +576,17 @@ void ballModeNewGame2(objid sceneId, bool inHub){
 
 	bool skipCutscene = false;
 	if (skipCutscene){
-  			ballModeSetPlayMode(sceneId, inHub); 
+  			ballModeSetPlayMode(sceneId, inHub, std::nullopt); 
 	}else{
   	auto currentCutscene = playCutscene(simpleNarratedMovement(cameraId, narratedMovement, false, [sceneId, inHub]() -> void { 
-  			ballModeSetPlayMode(sceneId, inHub); 
+  			ballModeSetPlayMode(sceneId, inHub, std::nullopt); 
   	}), std::nullopt);		
 	}
 }
 
 void startBallIntroMode(objid sceneId, bool inHub){		
 	setPauseMenuOverride([]() -> void {
-    goToLevel("ballselect", std::nullopt, false);
+    goToLevel("ballselect", LevelLoadOptions {}, false);
 	});
 
 	//if (currentCutscene.has_value()){
@@ -577,7 +603,7 @@ void startBallIntroMode(objid sceneId, bool inHub){
   inputOverride(false, true);
   changeUiMode(LiveMenu {
    	.options = MainMenu2Options {
-   		.backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f),
+   		.backgroundColor = glm::vec4(1.f, 1.f, 1.f, 0.4f),
    		.offsetY = 0.f,
 			.onNewGame = [sceneId, inHub]() -> void {
 				hideLetterBox();
@@ -585,7 +611,7 @@ void startBallIntroMode(objid sceneId, bool inHub){
 			},
 			.onContinueGame = [sceneId, inHub]() -> void {
 				hideLetterBox();
-				ballModeSetPlayMode(sceneId, inHub);
+				ballModeSetPlayMode(sceneId, inHub, std::nullopt);
 			},
    	},
   });
@@ -599,17 +625,23 @@ void startBallMode(objid sceneId){
 	auto activeLevel = getActiveLevel();
 
 	bool skipMenu = false;
+
+
+	std::optional<LevelLoadOptions> options;
 	if (activeLevel.has_value()){
 		auto& hint = activeLevel.value().hint;
-		if (hint.has_value() && hint.value() == "skip_menu"){
-			skipMenu = true;
+		if (hint.has_value()){
+	    LevelLoadOptions* value = std::any_cast<LevelLoadOptions>(&hint.value());
+    	modassert(value != NULL, "expected LevelLoadOptions type");
+    	skipMenu = value -> skipMenu;
+    	options = *value;
 		}
 	}
 
   if (inHub && !skipMenu){
   	startBallIntroMode(sceneId, inHub);
   }else{
-  	ballModeSetPlayMode(sceneId, inHub);
+  	ballModeSetPlayMode(sceneId, inHub, options);
   }
 }
 
@@ -686,8 +718,7 @@ void handleLevelEndCollision(int32_t obj1, int32_t obj2){
 
   std::cout << "handleLevelEndCollision: " << gameapi -> getGameObjNameForId(obj1).value() << ", " << gameapi -> getGameObjNameForId(obj2).value() << ", collide = " << didCollideLevelEnd << std::endl;
   if (didCollideLevelEnd){
-    // obviously this is kind of overly coupled to the ball game here. 
-    setBallLevelComplete();
+    playCutscene(ballEndGameplay, std::nullopt);	
   }
 }
 
@@ -769,8 +800,6 @@ void handleWarp(objid id, LevelWarp& warp){
 	std::cout << "touched warp: " << id << std::endl;
 	std::string world("w1");
 	doWorldSelect(world);
-
-
 }
 
 void handleWarpCollision(objid obj1, objid obj2){
@@ -873,8 +902,6 @@ std::vector<Narration> createNarration(std::vector<std::string> texts, int textL
 	}
 	return narrations;
 }
-
-
 
 struct DeathCutsceneData {
 	std::optional<objid> narrationCutscene;
@@ -1008,7 +1035,20 @@ GameTypeInfo getBallMode(){
 				setEntityInVehicle(entityId, modeOptions.ballId);
 				setCanExitVehicle(false);
 
-				playCutscene(createReveal("Welcome to the world", "levelintro"), std::nullopt);
+				//playCutscene(createReveal("Welcome to the world", "levelintro"), std::nullopt);
+
+				if (modeOptions.loadOptions.has_value()){
+					if (modeOptions.loadOptions.value().completion.has_value()){
+						auto& completion = modeOptions.loadOptions.value().completion.value();
+						if (completion.firstTimeWin){
+							std::string railName = completion.levelName + "-complete";
+							std::cout << "try rail: " << railName << std::endl;
+							playCutscene(createReveal("asdf", railName), std::nullopt);
+
+						}
+					}
+				}
+
 			}
 
 	  	auto pos = gameapi -> getGameObjectPos(modeOptions.ballId, true, "[gamelogic] get ball position for start");
@@ -1077,7 +1117,7 @@ GameTypeInfo getBallMode(){
 	  				auto level = getSelectedLevel(*multiOrbView.value());
 	  				if (level.has_value()){
 							std::cout << "worldView set null 2" << std::endl;
-	  					goToLevel(level.value(), std::nullopt, false);
+	  					goToLevel(level.value(), LevelLoadOptions {}, false);
 	  				}
 	  			}
 	  		}
@@ -1110,7 +1150,7 @@ GameTypeInfo getBallMode(){
 	  		commitCrystals();
 	  	}
 	  	if (key == 'Y' && action == 1){
-	  		playCutscene(createReveal("this is a cool check", "w1-2-end"), std::nullopt);
+	  		playCutscene(createReveal("this is a cool check", "w1-1-end"), std::nullopt);
 	  	}
 
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;

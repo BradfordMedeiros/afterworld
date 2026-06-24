@@ -151,7 +151,7 @@ UiStateContext uiStateContext {
 };
 
 struct LevelOptions {
-  std::optional<std::string> hint;
+  std::optional<std::any> hint;
 };
 
 std::optional<ActiveLevel> getActiveLevel(){
@@ -179,7 +179,7 @@ std::optional<ActiveLevel> getActiveLevel(){
 }
 
 
-void goToLevel(std::string levelShortName, std::optional<std::string> hint, bool forceReload){
+void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload){
   LevelOptions options {
     .hint = hint,
   };

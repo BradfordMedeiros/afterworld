@@ -45,7 +45,7 @@ Component mainMenu2 {
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = title },
-        PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.8f) },
+        PropPair { .symbol = colorSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 0.8f) },
         PropPair { .symbol = fontsizeSymbol, .value = 0.1f }
       },
     };
@@ -88,7 +88,7 @@ Component mainMenu2 {
       }
     }
 
-    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, mainMenuOptions -> backgroundColor, true, std::nullopt, "./res/textures/wood.jpg",  ShapeOptions {
+    drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, mainMenuOptions -> backgroundColor, true, std::nullopt, "../gameresources/build/textures/backgrounds/test3.png",  ShapeOptions {
       .shaderId = useCoolShader ? std::optional<unsigned int>(*shaderId) : std::optional<unsigned int>(std::nullopt),
       .zIndex = -1,
     }, std::nullopt);

@@ -95,7 +95,7 @@ void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn){
 }
 
 std::optional<objid> activeSceneForSelected();
-void goToLevel(std::string levelShortName, std::optional<std::string> hint, bool forceReload);
+void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 void setNoClipMode();
 void setFreeCam();
 void setNormalMode();

@@ -188,7 +188,7 @@ objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec
 
 struct ActiveLevel {
   std::string name;
-  std::optional<std::string> hint;
+  std::optional<std::any> hint;
 };
 
 #endif
