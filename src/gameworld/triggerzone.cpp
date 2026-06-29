@@ -80,6 +80,11 @@ void handleOnTriggerEnter(objid obj1, objid obj2){
   }
 }
 
+void handleTriggerValues(std::string triggerZone, std::optional<int> triggerValue){
+  triggerMovement(triggerZone, triggerValue);
+  triggerColor(triggerZone);
+}
+
 void handleTriggerZone(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){
     auto objAttr = getAttrHandle(obj2);
@@ -88,11 +93,9 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
       auto triggerData = getFloatAttr(objAttr, "trigger_data");
       if (triggerData.has_value()){
         auto triggerValue  = static_cast<int>(triggerData.value());
-        triggerMovement(triggerZone.value(), triggerValue);
-        triggerColor(triggerZone.value());
+        handleTriggerValues(triggerZone.value(), triggerValue);
       }else{
-        triggerMovement(triggerZone.value(), std::nullopt);
-        triggerColor(triggerZone.value());
+        handleTriggerValues(triggerZone.value(), std::nullopt);
       }
     }
 
@@ -120,11 +123,9 @@ void handleTriggerZone(int32_t obj1, int32_t obj2){
       auto triggerData = getFloatAttr(objAttr, "trigger_data");
       if (triggerData.has_value()){
         auto triggerValue  = static_cast<int>(triggerData.value());
-        triggerMovement(triggerZone.value(), triggerValue);
-        triggerColor(triggerZone.value());
+        handleTriggerValues(triggerZone.value(), triggerValue);
       }else{
-        triggerMovement(triggerZone.value(), std::nullopt);
-        triggerColor(triggerZone.value());
+        handleTriggerValues(triggerZone.value(), std::nullopt);
       }
     }
     auto triggerEvent = getStrAttr(objAttr, "trigger_event");

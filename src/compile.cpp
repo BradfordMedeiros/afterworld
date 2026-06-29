@@ -855,6 +855,26 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });   
         
+        auto curve = getValue(entity, "curve");
+        if (curve.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "curve",
+            .attributeValue = *curve.value(),
+          });    
+
+          auto triggerTarget = getValue(entity, "trigger-curve");
+          modassert(triggerTarget.has_value(), "must have a trigger-curve if have a curve");
+          if (triggerTarget.has_value()){
+            attributes.push_back(GameobjAttributeOpts {
+              .field = "trigger",
+              .attributeValue = *triggerTarget.value(),
+            });
+          }      
+        }
+
+
+
+
     }else if (*className.value() == "lightzone"){
       //modassert(false, "compile for light zone not yet implemented");
       // do nothing, we just reference this in the brush

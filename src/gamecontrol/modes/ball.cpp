@@ -295,9 +295,7 @@ std::function<void(EasyCutscene&)> createReveal(std::string letterbox, std::stri
 	};
 }
 
-void ballStartGameplay(EasyCutscene& cutscene){
 
-}
 
 struct BallEndData {
 	bool firstTimeWin = false;
@@ -1022,6 +1020,9 @@ void setToLevelEnd(){
  	playCutscene(cutscene, std::nullopt);
 }
 
+void handleTriggerValues(std::string triggerZone, std::optional<int> triggerValue);
+
+
 
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
@@ -1045,10 +1046,15 @@ GameTypeInfo getBallMode(){
 							std::cout << "try rail: " << railName << std::endl;
 							playCutscene(createReveal("asdf", railName), std::nullopt);
 
+
 						}
 					}
 				}
 
+				auto condition = getConditionData();
+				for (auto& trigger : condition.triggers){
+					handleTriggerValues(trigger, std::nullopt);
+				}
 			}
 
 	  	auto pos = gameapi -> getGameObjectPos(modeOptions.ballId, true, "[gamelogic] get ball position for start");

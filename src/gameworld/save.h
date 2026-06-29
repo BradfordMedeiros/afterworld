@@ -10,6 +10,7 @@ void persistSaveMap(std::string scope, std::unordered_map<std::string, JsonType>
 float getSaveFloatValue(std::string scope, std::string key, float defaultValue);
 bool getSaveBoolValue(std::string scope, std::string key, float defaultValue);
 std::string getSaveStringValue(std::string scope, std::string key, std::string defaultValue);
+std::vector<std::string> getSaveVectorValue(std::string scope, std::string key);
 
 struct BoolValueResult {
   std::string field;

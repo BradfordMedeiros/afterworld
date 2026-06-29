@@ -63,6 +63,9 @@ std::string getSaveStringValue(std::string scope, std::string key, std::string d
   return getSaveValue<std::string>(scope, key, defaultValue);
 }
 
+std::vector<std::string> getSaveVectorValue(std::string scope, std::string key){
+  return getSaveValue<std::vector<std::string>>(scope, key, {});
+}
 
 template <typename T>
 void getSaveValue(std::string scope, std::string subfield, std::vector<T>& _values, std::vector<std::string>& _names){

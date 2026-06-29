@@ -1014,12 +1014,12 @@ std::vector<TagUpdater> tagupdates = {
 				setGameObjectTint(id, triggerColors.at(id).unactiveColor.value());
 			}
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    	triggerColors.erase(id);
-  	    },
-  	    .onFrame = []() -> void {
-  	    },
-  	    .onMessage = [](std::string& key, std::any& value) -> void {},
+  	.onRemove = [](int32_t id) -> void {
+  		triggerColors.erase(id);
+  	},
+  	.onFrame = []() -> void {
+  	},
+  	.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "activatable",

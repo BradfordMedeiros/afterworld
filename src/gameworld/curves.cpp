@@ -505,9 +505,8 @@ int timeToTriggerIndex(LinePoints& line, std::optional<int> index){
 	if (!index.has_value()){
 		return line.times.at(line.times.size() - 1);
 	}
-	int totalTime = 0;
 	for (int i = 0; i < line.indexs.size(); i++){
-		if (i == index.value()){ // shouldnt i be comparing to the value here?
+		if (line.indexs.at(i) == index.value()){
 			return line.times.at(i);
 		}
 	}
@@ -610,6 +609,7 @@ RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailM
 }
 
 void triggerMovement(std::string trigger, std::optional<int> railIndex){
+	std::cout << "trigger movement: " << trigger << ", " << print(railIndex) << std::endl;
 	for (auto& [id, managedMovement] : managedRailMovements){
 		if (managedMovement.trigger.has_value()){
 			if (managedMovement.trigger.value() == trigger){

@@ -5,6 +5,29 @@ extern CustomApiBindings* gameapi;
 extern std::vector<LevelProgress> levelProgresses;
 const char* PROGRESS_SAVE_FILE = "../afterworld/data/save/save.json";
 
+LevelConditionData levelConditionData{};
+
+LevelConditionData getConditionData(){
+  auto triggers = getSaveVectorValue("condition", "triggers");
+  levelConditionData.triggers = triggers;
+  return levelConditionData;
+}
+
+
+void saveConditions(LevelConditionData data){
+    levelConditionData = data;
+
+    std::unordered_map<std::string, JsonType> values;
+
+    std::vector<std::string> strValues;
+    for (auto& trigger : data.triggers){
+      strValues.push_back(trigger);
+    }
+
+    values["triggers"] = strValues;
+    persistSaveMap("condition", values);
+}
+
 bool isControlledVehicle(int vehicleId);
 
 
@@ -311,6 +334,9 @@ void resetProgress(){
     levelProgresses.push_back(levelProgress);
   }
 
+  // 
+  levelConditionData = LevelConditionData{};
+  saveConditions(levelConditionData);
 
   saveLevelProgress();
 }
@@ -378,3 +404,4 @@ LevelProgressInfo getLevelProgressInfo(std::string currentWorld, std::string lev
   };
   return levelProgressInfo;
 }
+

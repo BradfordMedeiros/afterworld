@@ -35,7 +35,7 @@ Props createLevelListPropsBall(float offset, std::function<void()> onNewGame, st
 
 Component mainMenu2 {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    static std::string title("Soul Delivery");
+    static std::string title("THE PYRAMID");
 
     auto mainMenuOptions = typeFromProps<MainMenu2Options>(props, valueSymbol);
     modassert(mainMenuOptions, "no main menu2 options");
@@ -45,7 +45,7 @@ Component mainMenu2 {
     Props listItemProps {
       .props = {
         PropPair { .symbol = valueSymbol, .value = title },
-        PropPair { .symbol = colorSymbol, .value = glm::vec4(0.f, 0.f, 1.f, 0.8f) },
+        PropPair { .symbol = colorSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 1.f) },
         PropPair { .symbol = fontsizeSymbol, .value = 0.1f }
       },
     };

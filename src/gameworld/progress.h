@@ -68,5 +68,11 @@ LevelProgressInfo getLevelProgressInfo(std::string currentWorld, std::string lev
 
 
 
+struct LevelConditionData {
+  std::vector<std::string> triggers;
+};
+LevelConditionData getConditionData();
+void saveConditions(LevelConditionData levelConditionData);
+
 
 #endif
