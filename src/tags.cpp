@@ -938,21 +938,26 @@ std::vector<TagUpdater> tagupdates = {
   		.onFrame = []() -> void {
   			auto bufferToAdd = managedRailMovementsBuffer;
   			for (auto id : bufferToAdd){
-  	  			auto attrHandle = getAttrHandle(id);
-				auto curve = getStrAttr(attrHandle, "curve").value();
-				auto trigger = getStrAttr(attrHandle, "trigger");
-				auto railId = railIdForName(curve, gameapi -> listSceneId(id));
-				if (railId.has_value()){
-					managedRailMovementsBuffer.erase(id);
-					managedRailMovements[id] = ManagedRailMovement {
-						.railId = railId.value(),
-						.initialObjectPos = gameapi -> getGameObjectPos(id, true, "[gamelogic] - managed rail movement get init pos"),
-						.initialObjectRot = gameapi -> getGameObjectRotation(id, true, "[gamelogic] - managed rail movement get init rot"),
-						.autostart = false,
-						.initialStartTime = std::nullopt,
-						.trigger = trigger,
-					};
-				}
+  	  		auto attrHandle = getAttrHandle(id);
+					auto curve = getStrAttr(attrHandle, "curve").value();
+					auto trigger = getStrAttr(attrHandle, "trigger");
+					auto railId = railIdForName(curve, gameapi -> listSceneId(id));
+					if (railId.has_value()){
+						auto initPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] - managed rail movement get init pos");
+						auto initRotation =  gameapi -> getGameObjectRotation(id, true, "[gamelogic] - managed rail movement get init rot");
+						managedRailMovementsBuffer.erase(id);
+
+						managedRailMovements[id] = ManagedRailMovement {
+							.railId = railId.value(),
+							.initialObjectPos = initPosition,
+							.initialObjectRot = initRotation,
+							.autostart = false,
+							.reverse = false,
+							.autocleanup = true,
+							.initialStartTime = std::nullopt,
+							.trigger = trigger,
+						};
+					}
   			}
   		},
   		.onMessage = [](std::string& key, std::any& value) -> void {},

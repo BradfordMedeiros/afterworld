@@ -10,6 +10,7 @@ void handleOnTriggerEnter(objid obj1, objid obj2);
 void handleOnTriggerExit(objid obj1, objid obj2);
 void handleOnTriggerRemove(objid triggerZone);
 
-void handleTriggerZone(int32_t obj1, int32_t obj2);
+void handleTriggerValuesEnd(std::string triggerZone);
 
+void handleTriggerZone(int32_t obj1, int32_t obj2);
 #endif

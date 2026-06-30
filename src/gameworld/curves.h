@@ -9,16 +9,19 @@ struct ManagedRailMovement {
   glm::quat initialObjectRot;
 
   bool autostart;
-  bool loop = true;
+  bool loop = false;
 
   bool reverse = false;
+  bool autocleanup = false;
   std::optional<float> initialStartTime;
   std::optional<int> triggerIndex;
+  bool disabled = false;
 
   std::optional<std::string> trigger;
 };
 
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
+void triggerMovementEnd(std::string trigger);
 
 enum LinePointVisualize { VISUALIZE_NONE, VISUALIZE_LINE, VISUALIZE_CONN };
 enum RailInterpolation { INTERP_LINEAR, INTERP_NONE };

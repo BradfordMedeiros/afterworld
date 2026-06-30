@@ -6,6 +6,7 @@
 #include "../../core/vehicles/vehicles.h"
 #include "../../core/scene_core.h"
 #include "../../gameworld/progress.h"
+#include "../../gameworld/triggerzone.h"
 #include "../../interaction/cutscene.h"
 #include "../../interaction/gizmo.h"
 #include "../../collision.h"

@@ -585,12 +585,12 @@ RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailM
 			auto& highRotation = line.rotations.at(i + 1);
  			glm::quat newRotation = glm::slerp(lowRotation, highRotation, glm::clamp(fraction, 0.0f, 1.0f));
 
-
 			return RailSpeed {
 				.targetDistance = targetDistance,
 				.currentTimeFromStart = elapsedTime,
 				.position = position,
 				.rotation = newRotation,
+
 			};
 		}
 		targetDistance += segmentLength;
@@ -599,6 +599,8 @@ RailSpeed calculateRailSpeed(LinePoints& line, ManagedRailMovement& managedRailM
 	float totalRailLength = railLength(line, std::nullopt);
 	glm::vec3 position = managedRailMovement.reverse ? line.points.at(0) : line.points.at(line.points.size() - 1);
 	auto rotation = managedRailMovement.reverse ? line.rotations.at(0) : line.rotations.at(line.rotations.size() - 1);
+
+
 
 	return RailSpeed{
 		.targetDistance = totalRailLength,
@@ -639,10 +641,27 @@ void triggerMovement(std::string trigger, std::optional<int> railIndex){
 	}
 }
 
+void triggerMovementEnd(std::string trigger){
+	for (auto& [id, managedMovement] : managedRailMovements){
+		if (managedMovement.trigger.has_value()){
+			if (managedMovement.trigger.value() == trigger){
+				auto rail = railForId(managedMovement.railId);
+				auto fullRailTime = timeToTriggerIndex(*rail.value(), std::nullopt);
+				managedMovement.initialStartTime = gameapi -> timeSeconds(false) - fullRailTime;
+				managedMovement.reverse = false;
+			}
+		}
+	}
+}
+
+
 void handleEntitiesOnRails(objid ownerId, objid sceneId){
 	for (auto &[id, managedRailMovement] : managedRailMovements){
-		auto rail = railForId(managedRailMovement.railId);
+		if (managedRailMovement.disabled){
+			continue;		
+		}
 
+		auto rail = railForId(managedRailMovement.railId);
 		if (!managedRailMovement.initialStartTime.has_value()){
 			if (!managedRailMovement.autostart){
 				continue;
@@ -652,16 +671,31 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
 
 		auto railSpeed = calculateRailSpeed(*rail.value(), managedRailMovement);
 		auto positionOffset =  railSpeed.position - rail.value() -> points.at(0);
-		
-		auto fullRailTime = timeToTriggerIndex(*rail.value(), std::nullopt);
-  	gameapi -> setGameObjectPosition(id, managedRailMovement.initialObjectPos + positionOffset, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
-  	gameapi -> setGameObjectRot(id, railSpeed.rotation * managedRailMovement.initialObjectRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
-	
-		//std::cout << "rail info: " << railSpeed.endOfRailTime << ", time: " << railSpeed.currentTimeFromStart << std::endl;
-		if (managedRailMovement.loop && railSpeed.currentTimeFromStart >= fullRailTime){
-			managedRailMovement.initialStartTime = gameapi -> timeSeconds(false);
-		}
 
+		auto fullRailTime = timeToTriggerIndex(*rail.value(), std::nullopt);
+
+		//auto targetPos = managedRailMovement.initialObjectPos + positionOffset;
+		//auto targetRot = managedRailMovement.initialObjectRot * railSpeed.rotation ;
+  	//gameapi -> setGameObjectPosition(id, targetPos, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+  	//gameapi -> setGameObjectRot(id, targetRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
+
+
+		auto baseRotation = rail.value() -> rotations.at(0);
+		auto targetPos = managedRailMovement.initialObjectPos + positionOffset;
+//		auto targetRot = managedRailMovement.initialObjectRot * glm::inverse(baseRotation) * railSpeed.rotation ;
+
+		auto targetRot =  (railSpeed.rotation * glm::inverse(baseRotation)) * managedRailMovement.initialObjectRot  ;
+
+  	gameapi -> setGameObjectPosition(id, targetPos, true, Hint { .hint = "[gamelogic] - managedRailMovement" });
+  	gameapi -> setGameObjectRot(id, targetRot, true, Hint { .hint = "[gamelogic] - managedRailMovement rot" });
+	
+		if (railSpeed.currentTimeFromStart >= fullRailTime){
+			if (managedRailMovement.loop){
+				managedRailMovement.initialStartTime = gameapi -> timeSeconds(false);
+			}else if (managedRailMovement.autocleanup){
+				managedRailMovement.disabled = true;
+			}
+		}
 	}
 
  	for (auto &[id, entityOnRail] : entityToRail){
@@ -673,6 +707,7 @@ void handleEntitiesOnRails(objid ownerId, objid sceneId){
   	auto nextPoint = calculateNextPointOnRail(*railForId(entityOnRail.railId).value(), curvePoint, direction * railDistancePerSecond * gameapi -> timeElapsed());
   	gameapi -> setGameObjectPosition(id, nextPoint, true, Hint { .hint = "handleEntitiesOnRails" });
  	}
+
 }
 
 void handleEntitiesRace(){
@@ -690,7 +725,7 @@ void handleEntitiesRace(){
  	}
 }
 
-void addManagedRailMovement(objid idToMove, objid railId, glm::vec3 initialObjectPos, glm::quat initialObjectRot){\
+void addManagedRailMovement(objid idToMove, objid railId, glm::vec3 initialObjectPos, glm::quat initialObjectRot){
 	std::cout << "simpleNarrate addManagedRailMovement: " << railForId(railId).value() -> railName << std::endl;
 	managedRailMovements[idToMove] = ManagedRailMovement {
 		.railId = railId,

@@ -272,7 +272,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, Narrat
  			auto rail = railForId(cutsceneData.railId);
 
   		auto initialPos = initialRailPosition(*rail.value());
-    	auto initialRot = glm::identity<glm::quat>();
+    	auto initialRot = initialRailRotation(*rail.value());
 			auto railTotalTimeMs = timeToTriggerIndex(*rail.value(), std::nullopt) * 1000;
 
   		CutsceneIntroData ballIntroData {

@@ -1020,9 +1020,6 @@ void setToLevelEnd(){
  	playCutscene(cutscene, std::nullopt);
 }
 
-void handleTriggerValues(std::string triggerZone, std::optional<int> triggerValue);
-
-
 
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
@@ -1053,7 +1050,7 @@ GameTypeInfo getBallMode(){
 
 				auto condition = getConditionData();
 				for (auto& trigger : condition.triggers){
-					handleTriggerValues(trigger, std::nullopt);
+					handleTriggerValuesEnd(trigger);
 				}
 			}
 

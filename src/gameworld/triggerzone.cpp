@@ -6,6 +6,7 @@ extern std::unordered_map<objid, std::set<objid>> triggerZoneIdToElements;
 
 bool isControlledVehicle(int vehicleId);
 void triggerMovement(std::string trigger, std::optional<int> railIndex);
+void triggerMovementEnd(std::string trigger);
 void triggerColor(std::string trigger);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 
@@ -81,9 +82,16 @@ void handleOnTriggerEnter(objid obj1, objid obj2){
 }
 
 void handleTriggerValues(std::string triggerZone, std::optional<int> triggerValue){
+  std::cout << "handleEntitiesOnRails handle trigger values: " << triggerZone << ", " << print(triggerValue) << std::endl;
   triggerMovement(triggerZone, triggerValue);
   triggerColor(triggerZone);
 }
+
+void handleTriggerValuesEnd(std::string triggerZone){
+  triggerMovementEnd(triggerZone);
+  triggerColor(triggerZone);
+}
+
 
 void handleTriggerZone(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){
