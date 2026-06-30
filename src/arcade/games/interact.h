@@ -12,4 +12,6 @@ struct DeliverAmmoMessage {
 
 extern ArcadeInterface interactGame;
 
+void setInteractCount(int count);
+
 #endif

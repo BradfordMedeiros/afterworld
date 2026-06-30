@@ -357,6 +357,17 @@ CompileMapFns getCompileMapForBallGame(){
 
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
 
+    }else if (*className.value() == "arcade_zone"){
+      *shouldWrite = true;
+      addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
+      attributes.push_back(GameobjAttributeOpts {  
+        .field = "arcade",
+        .attributeValue = "interact",
+      });
+      attributes.push_back(GameobjAttributeOpts {  
+        .field = "layer",
+        .attributeValue = "nolighting",
+      });
     }else if (*className.value() == "player_start"){
       *shouldWrite = true;
       attributes.push_back(GameobjAttributeOpts {

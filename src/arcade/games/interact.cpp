@@ -3,9 +3,11 @@
 extern CustomApiBindings* gameapi;
 extern ArcadeApi arcadeApi;
 
+int currentValue = 0;  // TODO static 
 
 struct Interact {
 };
+
 
 std::any createInteract(objid id){
 	arcadeApi.ensureTexturesLoaded(id, 
@@ -21,10 +23,9 @@ void rmInteractInstance(std::any& any){
 void updateInteract(std::any& any){
 }
 
-int currentAmmo = 0;
 void drawInteract(std::any& any, std::optional<objid> textureId){
  	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, 1.f), textureId, true, std::nullopt, paths::ARCADE_INTERACT_IMAGE, std::nullopt);
-  drawCenteredText(std::to_string(currentAmmo), 0.f, 0.f, 0.2f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, textureId);
+  drawCenteredText(std::to_string(currentValue), 0.f, 0.f, 0.2f, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, textureId);
 }
 
 void onKeyInteract(std::any& any, int key, int scancode, int action, int mod){
@@ -37,10 +38,11 @@ void onInteractMouseClick(std::any& any, int button, int action, int mods){
 }
 
 void OnInteractMessage(std::any& any){
-  DeliverAmmoMessage* ammoMessage = anycast<DeliverAmmoMessage>(any);
-  if (ammoMessage){
-  	currentAmmo = ammoMessage -> ammo;
-  }
+
+}
+
+void setInteractCount(int count){
+	currentValue = count;
 }
 
 ArcadeInterface interactGame {

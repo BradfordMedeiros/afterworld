@@ -648,21 +648,21 @@ std::vector<TagUpdater> tagupdates = {
 			modlog("arcade", "on add");
 			std::string textureName = std::string("arcade-texture") + std::to_string(id);
 			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
-            gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+      gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
 		 	setGameObjectTexture(id, textureName);
 
-  		    auto arcadeType = getSingleAttr(id, "arcade");
-            addArcadeType(id, arcadeType.value(), arcadeTextureId);
+  		auto arcadeType = getSingleAttr(id, "arcade");
+      addArcadeType(id, arcadeType.value(), arcadeTextureId);
 		},
-  	     .onRemove = [](int32_t id) -> void {
-	     		std::string textureName = std::string("arcade-texture") + std::to_string(id);
- 	      		gameapi -> freeTexture(textureName, id);
-	       		maybeRemoveArcadeType(id);
-	       		unloadManagedSounds(id);
-	       		unloadManagedTexturesLoaded(id);
-  	     },
-  	     .onFrame = std::nullopt,
-  	     .onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+	  		std::string textureName = std::string("arcade-texture") + std::to_string(id);
+ 	   		gameapi -> freeTexture(textureName, id);
+	   		maybeRemoveArcadeType(id);
+	   		unloadManagedSounds(id);
+	   		unloadManagedTexturesLoaded(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "globallight",

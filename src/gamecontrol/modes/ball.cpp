@@ -61,7 +61,7 @@ struct BallModeOptions{
 
    std::optional<WorldView> worldView;
 
-   bool levelSelect = false;
+   bool inHub = false;
 
    std::optional<objid> rebirthSphere;
    std::optional<glm::vec3> rebirthSphereInitialPos;
@@ -506,6 +506,7 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
 	modeOptions.playerSpawnPosition = playerSpawnPosition;
+	modeOptions.inHub = inHub;
 
 	auto endwarp = gameapi -> getObjectsByAttr("endwarp", std::nullopt, sceneId);
 	if (endwarp.size() > 0){
@@ -1033,20 +1034,26 @@ GameTypeInfo getBallMode(){
 				setEntityInVehicle(entityId, modeOptions.ballId);
 				setCanExitVehicle(false);
 
-				//playCutscene(createReveal("Welcome to the world", "levelintro"), std::nullopt);
-
-				if (modeOptions.loadOptions.has_value()){
-					if (modeOptions.loadOptions.value().completion.has_value()){
-						auto& completion = modeOptions.loadOptions.value().completion.value();
-						if (completion.firstTimeWin){
-							std::string railName = completion.levelName + "-complete";
-							std::cout << "try rail: " << railName << std::endl;
-							playCutscene(createReveal("asdf", railName), std::nullopt);
-
-
+				if (modeOptions.inHub){
+					if (modeOptions.loadOptions.has_value()){
+						if (modeOptions.loadOptions.value().completion.has_value()){
+							auto& completion = modeOptions.loadOptions.value().completion.value();
+							if (completion.firstTimeWin){
+								std::string railName = completion.levelName + "-complete";
+								std::cout << "try rail: " << railName << std::endl;
+								playCutscene(createReveal("This is the reveal letterbox", railName), std::nullopt);
+							}
 						}
 					}
+				}else{
+					playCutscene(createReveal("Welcome to the world", "levelintro"), std::nullopt);
 				}
+
+
+
+				auto info = getPlaylistProgressInfo();
+				std::cout << "ball mode: set gem: " << info.gemCount << std::endl;
+				setInteractCount(info.gemCount);
 
 				auto condition = getConditionData();
 				for (auto& trigger : condition.triggers){

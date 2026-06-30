@@ -71,11 +71,13 @@ int numberOfCrystals(std::optional<std::vector<std::string>> levels){
   int count = 0;
   for (auto& levelProgress : levelProgresses){
     if (!levels.has_value()){
+      std::cout << "numberOfCrystals adding for: " << levelProgress.level << ", size = " << levelProgress.crystals.size() << std::endl;
       count += levelProgress.crystals.size();
     }else{
       auto& levelsToCount = levels.value();
       for (auto& level : levelsToCount){
         if (levelProgress.level == level){
+          std::cout << "numberOfCrystals adding for: " << level << ", size = " << levelProgress.crystals.size() << std::endl;
           count += levelProgress.crystals.size();
           break;
         }
