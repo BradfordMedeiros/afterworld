@@ -76,6 +76,8 @@ struct BallModeOptions{
    objid lastTouchId = 0;
 
    std::optional<LevelLoadOptions> loadOptions;
+
+   unsigned int ballShader = 0;
 };
 
 bool hasBallModeOptions(){
@@ -1059,6 +1061,7 @@ GameTypeInfo getBallMode(){
 				for (auto& trigger : condition.triggers){
 					handleTriggerValuesEnd(trigger);
 				}
+
 			}
 
 	  	auto pos = gameapi -> getGameObjectPos(modeOptions.ballId, true, "[gamelogic] get ball position for start");
@@ -1066,6 +1069,30 @@ GameTypeInfo getBallMode(){
 	  	modeOptions.didLose = false;
 	  	modeOptions.shouldReset = false;
 	  	modeOptions.didReset = false;
+
+			auto shaderId = gameapi -> shaderByName("../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl");
+			modassert(shaderId.has_value(), "could not find the ball shader");
+			modeOptions.ballShader = shaderId.value();
+
+			{
+				UniformData uniform {
+	  			.name = "postColor",
+	  			.value = pos,
+	 	 		};
+		  	gameapi -> setShaderUniform(modeOptions.ballShader, uniform);				
+			}
+
+			{
+				UniformData uniform {
+	  			.name = "circleColor",
+	  			.value = glm::vec4(0.f, 0.f, 1.f, 1.f),
+	 	 		};
+		  	gameapi -> setShaderUniform(modeOptions.ballShader, uniform);				
+			}
+
+
+
+
 
 	  	modassert(modeOptions.ballStartTime.has_value(), "no ball start time");
 			getBallModeUI().value() -> ballMode.elapsedTime = []() -> float {
@@ -1170,6 +1197,18 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
 
+
+	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
+
+			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+
+	  	UniformData uniform {
+	  		.name = "postColor",
+	  		.value = position,
+	  	};
+	  	gameapi -> setShaderUniform(ballMode.ballShader, uniform);
+	  	///
+
 	  	if (ballMode.worldView.has_value() && !ballMode.worldView.value().didChangeToOrb && !ballMode.worldView.value().onMultiview){
 	  		auto cameraId = ensureTempCamera(ballMode.sceneId);
 
@@ -1271,7 +1310,6 @@ GameTypeInfo getBallMode(){
 	  			}
 	  		}
 
- 				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 
 
 	  		if (isInKillPlane(ballMode.ballId) && !ballMode.didLose && !ballMode.didReset){ // didReset b/c otherwise at same pos
