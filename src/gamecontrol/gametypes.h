@@ -10,6 +10,7 @@ struct GameTypeInfo {
   std::function<void(std::any&, std::string& event, std::any& value)> onEvent;
   std::function<void(std::any& gametype, int rawKey, int rawScancode, int rawAction, int rawMods)> onKey = [](std::any& gametype, int rawKey, int rawScancode, int rawAction, int rawMods) -> void {};
   std::function<void(std::any& gametype)> onFrame = [](std::any&) -> void {};
+  std::function<void(std::any& gametype)> afterFrame = [](std::any&) -> void {};
 }; 
 
 struct GameTypes  {
@@ -29,6 +30,7 @@ void changeGameType(GameTypes& gametypes, GameTypeInfo& gametype, const char* na
 void changeGameTypeNone(GameTypes& gametypes);
 
 void onGametypesFrame(GameTypes& gametypes);
+void onGametypesAfterFrame(GameTypes& gametypes);
 std::optional<std::any*> getGametypeData(GameTypes& gametypes);
 
 #endif 

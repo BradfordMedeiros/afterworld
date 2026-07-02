@@ -52,6 +52,12 @@ void onGametypesFrame(GameTypes& gametypes){
   }
 }
 
+void onGametypesAfterFrame(GameTypes& gametypes){
+  if (gametypes.meta.has_value()){
+    gametypes.meta.value().afterFrame(gametypes.gametype);
+  }  
+}
+
 std::optional<std::any*> getGametypeData(GameTypes& gametypes){
   if (!gametypes.meta.has_value()){
     return std::nullopt;

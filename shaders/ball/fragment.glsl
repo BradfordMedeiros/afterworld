@@ -26,5 +26,15 @@ void main(){
     }
   }
 
+
+  //if (color.r > 0.5 && color.g < 0.8){
+  //   vec4 newColor = tint * texture(cubemapTexture, normalize(vec3(FragPos.x + cos(time), FragPos.y, -1 * FragPos.z)));
+  //   color.rgb = newColor.rgb;
+  //}
+
+  //if (dot(normalVec, vec3(0, 1, 0)) < 0.2){
+  //  //discard;
+  //}
+
   FragColor = color;
 }

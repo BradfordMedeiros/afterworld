@@ -934,7 +934,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
         onFrameDaynight();
         onGametypesFrame(gametypeSystem);
-  
+
         onTagsFrame();
         handleOrbViews(orbData);
         
@@ -1024,6 +1024,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onFrameAfterUpdate = [](int32_t id, void* data) -> void {
     modlog("onFrameAfterUpdate", "late frame update");
 
+    onGametypesAfterFrame(gametypeSystem);
+
     auto& allPlayers = getPlayers();
     for (auto& player : allPlayers){
       auto activePlayer = player.entityId;
@@ -1092,6 +1094,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
       }
     }
+
   };
 
   binding.onKeyCallback = [](int32_t id, void* data, int rawKey, int rawScancode, int rawAction, int rawMods) -> void {

@@ -58,3 +58,19 @@ void handleSurfaceCollision(int32_t obj1, int32_t obj2){
     addSurfaceModifier(obj1, obj2ModSpeed.value(), obj2);
   }
 }
+
+
+SURFACE_TYPE getSurfaceType(int32_t id){
+  auto objAttr1 = getAttrHandle(id);
+  auto modSpeed = getVec3Attr(objAttr1, "modspeed");
+  if (modSpeed.has_value()){
+    return SURFACE_VELOCITY;
+  }
+
+  auto jumpSurface = getStrAttr(objAttr1, "jumpsurface");
+  if (jumpSurface.has_value()){
+    return SURFACE_JUMP;
+  }
+
+  return SURFACE_NONE;
+}

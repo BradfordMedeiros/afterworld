@@ -7,6 +7,7 @@
 #include "../../core/scene_core.h"
 #include "../../gameworld/progress.h"
 #include "../../gameworld/triggerzone.h"
+#include "../../gameworld/surface.h"
 #include "../../interaction/cutscene.h"
 #include "../../interaction/gizmo.h"
 #include "../../collision.h"

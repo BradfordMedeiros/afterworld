@@ -58,6 +58,7 @@ struct BallModeOptions{
    std::optional<float> finalBallTime;
    BallModeSpirit spirit = MODE_NONE;
    std::optional<BallModeSpirit> changeSpirit;
+   SURFACE_TYPE surfaceType = SURFACE_NONE;
 
    std::optional<WorldView> worldView;
 
@@ -1115,6 +1116,7 @@ GameTypeInfo getBallMode(){
 	  	BallModeOptions& ballMode = *ballModePtr;
  		  auto cameraId = ensureTempCamera(ballMode.sceneId);
 
+
 	  	if (ballMode.worldView.has_value() && ballMode.worldView.value().onMultiview){
 	  		if (key == 32){
 	  			setTempCamera(std::nullopt, 0);
@@ -1122,7 +1124,6 @@ GameTypeInfo getBallMode(){
 	  			removeCameraFromMultiOrbView(cameraId);
 		      setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
   				setGameObjectPhysicsEnable(ballMode.ballId, true);
-  				gameapi -> applyImpulse(ballMode.ballId, glm::vec3(0.f, 10.f, 0.f));
 
 					std::cout << "worldView set null 1" << std::endl;
 	  			ballMode.worldView = std::nullopt;
@@ -1202,11 +1203,10 @@ GameTypeInfo getBallMode(){
 
 			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 
-	  	UniformData uniform {
-	  		.name = "postColor",
-	  		.value = position,
-	  	};
-	  	gameapi -> setShaderUniform(ballMode.ballShader, uniform);
+  		auto& ballVehicle = *getVehicleBall(vehicles, ballMode.ballId).value();
+	  	auto groundedId = getGroundedId(ballVehicle);
+		 	ballMode.surfaceType = !groundedId.has_value() ? SURFACE_NONE : getSurfaceType(groundedId.value());
+
 	  	///
 
 	  	if (ballMode.worldView.has_value() && !ballMode.worldView.value().didChangeToOrb && !ballMode.worldView.value().onMultiview){
@@ -1243,8 +1243,7 @@ GameTypeInfo getBallMode(){
 				//modassert(gravityWellId.has_value(), std::string("no gravity well for name: ") + ballMode.worldView.value().world);
 				doGravityHole(ballMode.ballId, gravityWellId.value());
 
-	  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId).value();
-				setDisableAutolaunch(*ballVehicle, true);
+				setDisableAutolaunch(ballVehicle, true);
 
 				return;
 	  	}
@@ -1408,6 +1407,40 @@ GameTypeInfo getBallMode(){
 	  		//gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
 
+	  },
+	  .afterFrame = [](std::any& gametype) -> void {
+	  	std::cout << "after frame update" << std::endl;
+	  	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(&gametype);
+	  	modassert(ballModePtr, "ballMode options");
+	  	BallModeOptions& ballMode = *ballModePtr;
+
+  		auto& ballVehicle = *getVehicleBall(vehicles, ballMode.ballId).value();
+
+
+	  	{
+				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+	  		UniformData uniform {
+	  			.name = "postColor",
+	  			.value = position,
+	  		};
+	  		gameapi -> setShaderUniform(ballMode.ballShader, uniform);
+	 		}
+
+	 		glm::vec4 circleColor(1.f, 1.f, 1.f, 1.f);
+ 			if (ballMode.surfaceType == SURFACE_NONE){
+	 		}else if (ballMode.surfaceType == SURFACE_VELOCITY){
+	 			circleColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
+	 		}else if (ballMode.surfaceType == SURFACE_JUMP){
+	 			circleColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
+	 		}
+	 		
+			
+			UniformData uniform {
+	  		.name = "circleColor",
+	  		.value = circleColor,
+	 	 	};
+		  gameapi -> setShaderUniform(ballMode.ballShader, uniform);				
+			
 	  },
 	};
 	return ballMode;

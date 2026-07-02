@@ -13,4 +13,7 @@ void handleSurfaceCollision(int32_t obj1, int32_t obj2);
 void removeSurfaceModifier(int32_t obj1, int32_t obj2);
 void removeSurfaceModifier(int32_t id);
 
+enum SURFACE_TYPE { SURFACE_NONE, SURFACE_VELOCITY, SURFACE_JUMP };
+SURFACE_TYPE getSurfaceType(int32_t id);
+
 #endif

@@ -79,6 +79,11 @@ void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes
     .attributeValue = "enabled",
   });
 
+  attributes.push_back(GameobjAttributeOpts {  
+    .field = "shader",
+    .attributeValue = "../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl",
+  });
+
   addTriggerColor(entity, attributes);
 }
 
@@ -356,6 +361,7 @@ CompileMapFns getCompileMapForBallGame(){
       *shouldWrite = true;
 
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
+
 
     }else if (*className.value() == "arcade_zone"){
       *shouldWrite = true;
@@ -724,8 +730,21 @@ CompileMapFns getCompileMapForBallGame(){
       modassert(false, "vert bound plane not supported");
     }else if (*className.value() == "worldspawn"){
       *shouldWrite = true;
-
       addCoreTrench(entity, attributes, brushFileOut);
+    }else if (*className.value() == "surface"){
+      *shouldWrite = true;
+      addCoreTrench(entity, attributes, brushFileOut);   
+      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        .field = "mesh",
+        .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".map",
+      });   
+      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+        .field = "jumpsurface",
+        .attributeValue = "true",
+      });   
+      
+
+
     }else if (*className.value() == "player_end"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this

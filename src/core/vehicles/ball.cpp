@@ -89,6 +89,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   auto groundHit = checkIfGrounded(id);
   bool justGrounded = !vehicleBall.isGrounded && groundHit.has_value();
   vehicleBall.isGrounded = groundHit.has_value();
+  vehicleBall.groundedId = groundHit.has_value() ? groundHit.value().id : std::optional<objid>(std::nullopt);
   if (justGrounded){
     //playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false); 
 
@@ -311,4 +312,12 @@ void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup
 
 void setDisableAutolaunch(VehicleBall& vehicleBall, bool autolaunch){
   vehicleBall.disableAutolaunch = autolaunch;
+}
+
+void setJumpMagMultiplier(VehicleBall& vehicleBall, float scale){
+
+}
+
+std::optional<objid> getGroundedId(VehicleBall& vehicleBall){
+  return vehicleBall.groundedId;
 }

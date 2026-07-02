@@ -20,6 +20,8 @@ struct VehicleBall {
 
   // state
   bool isGrounded;
+  std::optional<objid> groundedId;
+
   bool shouldJump;
   bool shouldUsePowerUp;
 
@@ -48,5 +50,8 @@ void setBallGravityWell(objid id, VehicleBall& vehicleBall, bool enter, objid gr
 std::optional<BallPowerupState> getBallPowerup(VehicleBall& vehicleBall);
 void setPowerupBall(VehicleBall& vehicleBall, std::optional<BallPowerup> powerup);
 void setDisableAutolaunch(VehicleBall& vehicleBall, bool autolaunch);
+void setJumpMagMultiplier(VehicleBall& vehicleBall, float scale);
+
+std::optional<objid> getGroundedId(VehicleBall& vehicleBall);
 
 #endif
