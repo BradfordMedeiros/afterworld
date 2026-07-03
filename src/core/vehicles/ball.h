@@ -21,6 +21,7 @@ struct VehicleBall {
 
   // state
   bool isGrounded;
+  bool justGrounded = false;
   std::optional<objid> groundedId;
 
   bool shouldJump;
@@ -54,5 +55,6 @@ void setDisableAutolaunch(VehicleBall& vehicleBall, bool autolaunch);
 void setJumpMagMultiplier(VehicleBall& vehicleBall, float scale);
 
 std::optional<objid> getGroundedId(VehicleBall& vehicleBall);
+bool justGrounded(VehicleBall& vehicleBall);
 
 #endif

@@ -93,6 +93,7 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   auto velocity = getGameObjectVelocity(id);
   auto groundHit = checkIfGrounded(id);
   bool justGrounded = !vehicleBall.isGrounded && groundHit.has_value();
+  vehicleBall.justGrounded = justGrounded;
   vehicleBall.isGrounded = groundHit.has_value();
   vehicleBall.groundedId = groundHit.has_value() ? groundHit.value().id : std::optional<objid>(std::nullopt);
   if (justGrounded){
@@ -325,4 +326,8 @@ void setJumpMagMultiplier(VehicleBall& vehicleBall, float scale){
 
 std::optional<objid> getGroundedId(VehicleBall& vehicleBall){
   return vehicleBall.groundedId;
+}
+
+bool justGrounded(VehicleBall& vehicleBall){
+  return vehicleBall.justGrounded;
 }

@@ -1251,6 +1251,13 @@ GameTypeInfo getBallMode(){
 		 	}else{
 		 		setJumpMagMultiplier(ballVehicle, 1.f);
 		 	}
+
+		 	auto groundedThisFrame = justGrounded(ballVehicle);
+		 	if (groundedThisFrame){
+		 		applyVisualPulse(position);
+		 	}
+		 	
+
 	  	///
 
 	  	if (ballMode.worldView.has_value() && !ballMode.worldView.value().didChangeToOrb && !ballMode.worldView.value().onMultiview){
