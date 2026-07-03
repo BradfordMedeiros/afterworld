@@ -17,6 +17,7 @@ struct VehicleBall {
   objid id;
   objid innerObj;
   BallConfig ballConfig;
+  float jumpMultiplier = 1.f;
 
   // state
   bool isGrounded;

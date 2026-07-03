@@ -79,6 +79,7 @@ struct BallModeOptions{
    std::optional<LevelLoadOptions> loadOptions;
 
    unsigned int ballShader = 0;
+   int lastImpulseId = 0;
 };
 
 bool hasBallModeOptions(){
@@ -1025,6 +1026,24 @@ void setToLevelEnd(){
 }
 
 
+
+void applyVisualPulse(glm::vec3 location){
+	auto& ballMode  = getBallModeOptions();
+	UniformData uniformPosition {
+			.name = std::string("_pulsePositions[") + std::to_string(ballMode.lastImpulseId) + "]",
+			.value = location,
+	};
+	gameapi -> setShaderUniform(ballMode.ballShader, uniformPosition);				
+	UniformData uniformTime {
+			.name = std::string("_pulseTimes[") + std::to_string(ballMode.lastImpulseId) + "]",
+			.value = static_cast<float>(gameapi -> timeSeconds(false)),
+	};
+	gameapi -> setShaderUniform(ballMode.ballShader, uniformTime);				
+	
+	ballMode.lastImpulseId = (ballMode.lastImpulseId + 1) % 3;
+				
+}
+
 GameTypeInfo getBallMode(){
 	GameTypeInfo ballMode = GameTypeInfo {
 	  .gametypeName = "ball",
@@ -1077,18 +1096,34 @@ GameTypeInfo getBallMode(){
 
 			{
 				UniformData uniform {
-	  			.name = "postColor",
+	  			.name = "_postColor",
 	  			.value = pos,
 	 	 		};
 		  	gameapi -> setShaderUniform(modeOptions.ballShader, uniform);				
 			}
 
+
 			{
 				UniformData uniform {
-	  			.name = "circleColor",
+	  			.name = "_circleColor",
 	  			.value = glm::vec4(0.f, 0.f, 1.f, 1.f),
 	 	 		};
 		  	gameapi -> setShaderUniform(modeOptions.ballShader, uniform);				
+			}
+
+			{
+				UniformData uniformTextureData {
+	 				.name = "_overlayTexture",
+	 				.value = Sampler2D { 
+  					.textureUnitId = 10,
+					},
+				};
+  			gameapi -> setShaderUniform(modeOptions.ballShader, uniformTextureData);
+
+  			std::string texName("./res/textures/hexglow.png");
+  			auto textureSampleId = gameapi -> getTextureSamplerId(texName);
+  			gameapi -> bindTexture(modeOptions.ballShader, 10, textureSampleId.value());
+
 			}
 
 
@@ -1191,6 +1226,11 @@ GameTypeInfo getBallMode(){
 	  		playCutscene(createReveal("this is a cool check", "w1-1-end"), std::nullopt);
 	  	}
 
+	  	if (key == 'I' && action == 1){
+		  	auto ballPos = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] get ball position for start");
+				applyVisualPulse(ballPos);
+	  	}
+
 	  	std::cout << "ball mode: " << key << ", " << action << std::endl;
 	  },
 	  .onFrame = [](std::any& gametype) -> void {
@@ -1206,7 +1246,11 @@ GameTypeInfo getBallMode(){
   		auto& ballVehicle = *getVehicleBall(vehicles, ballMode.ballId).value();
 	  	auto groundedId = getGroundedId(ballVehicle);
 		 	ballMode.surfaceType = !groundedId.has_value() ? SURFACE_NONE : getSurfaceType(groundedId.value());
-
+		 	if (ballMode.surfaceType == SURFACE_JUMP){
+		 		setJumpMagMultiplier(ballVehicle, 5.f);
+		 	}else{
+		 		setJumpMagMultiplier(ballVehicle, 1.f);
+		 	}
 	  	///
 
 	  	if (ballMode.worldView.has_value() && !ballMode.worldView.value().didChangeToOrb && !ballMode.worldView.value().onMultiview){
@@ -1420,7 +1464,7 @@ GameTypeInfo getBallMode(){
 	  	{
 				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 	  		UniformData uniform {
-	  			.name = "postColor",
+	  			.name = "_postColor",
 	  			.value = position,
 	  		};
 	  		gameapi -> setShaderUniform(ballMode.ballShader, uniform);
@@ -1436,7 +1480,7 @@ GameTypeInfo getBallMode(){
 	 		
 			
 			UniformData uniform {
-	  		.name = "circleColor",
+	  		.name = "_circleColor",
 	  		.value = circleColor,
 	 	 	};
 		  gameapi -> setShaderUniform(ballMode.ballShader, uniform);				

@@ -70,6 +70,11 @@ void printBallDebug(VehicleBall& vehicleBall){
 
 }
 
+float getJumpImpulse(VehicleBall& vehicleBall){
+   auto jumpImpulse = vehicleBall.ballConfig.jumpMagnitude * vehicleBall.jumpMultiplier; 
+   return jumpImpulse;
+}
+
 void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams){
   if (!state.occupied.has_value()){
     return;
@@ -157,15 +162,15 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         setBallGravityWell(id, vehicleBall, false, 0);
 
         playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
-        auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
+        auto jumpImpulse = glm::vec3(0.f, getJumpImpulse(vehicleBall), 0.f); 
         gameapi -> applyImpulse(id, jumpImpulse);
       }
       if (vehicleBall.shouldJump && vehicleBall.isGrounded){
         if (RELATIVE_JUMP){
-          auto jumpImpulse = glm::normalize(groundHit.value().normal) * glm::vec3(0.f, 0.f, -1.f * vehicleBall.ballConfig.jumpMagnitude); 
+          auto jumpImpulse = glm::normalize(groundHit.value().normal) * glm::vec3(0.f, 0.f, -1.f * getJumpImpulse(vehicleBall)); 
           gameapi -> applyImpulse(id, jumpImpulse);
         }else{
-          auto jumpImpulse = glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, 0.f); 
+          auto jumpImpulse = glm::vec3(0.f, getJumpImpulse(vehicleBall), 0.f); 
           gameapi -> applyImpulse(id, jumpImpulse);
         }
         applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
@@ -197,10 +202,10 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
       }
       if (vehicleBall.powerup.has_value() && !vehicleBall.powerup.value().useTime.has_value()){
         if (vehicleBall.powerup.value().powerup == BIG_JUMP){
-          gameapi -> applyImpulse(id, glm::vec3(0.f, 2 * vehicleBall.ballConfig.jumpMagnitude, 0.f));
+          gameapi -> applyImpulse(id, glm::vec3(0.f, 2 * getJumpImpulse(vehicleBall), 0.f));
           vehicleBall.powerup = std::nullopt;
         }else if (vehicleBall.powerup.value().powerup == LAUNCH_FORWARD){
-          auto direction = rotation * glm::vec3(0.f, vehicleBall.ballConfig.jumpMagnitude, -1 * vehicleBall.ballConfig.jumpMagnitude);
+          auto direction = rotation * glm::vec3(0.f, getJumpImpulse(vehicleBall), -1 * getJumpImpulse(vehicleBall));
           gameapi -> applyImpulse(id, direction);
           vehicleBall.powerup = std::nullopt;
         }else if (vehicleBall.powerup.value().powerup == LOW_GRAVITY){
@@ -315,7 +320,7 @@ void setDisableAutolaunch(VehicleBall& vehicleBall, bool autolaunch){
 }
 
 void setJumpMagMultiplier(VehicleBall& vehicleBall, float scale){
-
+  vehicleBall.jumpMultiplier = scale;
 }
 
 std::optional<objid> getGroundedId(VehicleBall& vehicleBall){
