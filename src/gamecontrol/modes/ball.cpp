@@ -1247,7 +1247,7 @@ GameTypeInfo getBallMode(){
 	  	auto groundedId = getGroundedId(ballVehicle);
 		 	ballMode.surfaceType = !groundedId.has_value() ? SURFACE_NONE : getSurfaceType(groundedId.value());
 		 	if (ballMode.surfaceType == SURFACE_JUMP){
-		 		setJumpMagMultiplier(ballVehicle, 5.f);
+		 		setJumpMagMultiplier(ballVehicle, 2.f);
 		 	}else{
 		 		setJumpMagMultiplier(ballVehicle, 1.f);
 		 	}

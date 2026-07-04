@@ -27,6 +27,8 @@ void main(){
   vec4 color = vec4(1, 1, 1, 1);
   vec3 normalVec = vec3(0, 0, 0);
 
+  vec2 newUvCoords = vec2(TexCoord.x , TexCoord.y);
+
   mainAlgorithm(color, normalVec);
 
   float direction = dot(normalVec, vec3(0, 1, 0));
@@ -46,27 +48,23 @@ void main(){
   }
 
 
-  //if (color.r > 0.5 && color.g < 0.8){
   float timeOffset = 0.5 * (time);
-  vec4 newColor = texture(_overlayTexture, normalize(vec2(TexCoord.x + timeOffset, TexCoord.y)));
-  //   color.rgb = newColor.rgb;
-  //}
 
-  //if (dot(normalVec, vec3(0, 1, 0)) < 0.2){
-  //  //discard;
-  //}
-
-  
-  vec3 effectColor = textureWithFalloff(_postColor, 1.0, 2);
-
-  if (color.r < 0.3 && color.g < 0.3 && color.b < 0.3){
-    color = color + vec4(effectColor.rgb, 0);
-  }
-
-
+ 
+  bool applyStatic = false;
   vec4 extraColor = vec4(0, 0, 0, 0);
 
-  if (color.r < 0.3 && color.g < 0.3 && color.b < 0.3){
+  if (hasOpacityTexture){
+    vec4 opacityColor = texture(opacityTexture, vec2(TexCoord.x , TexCoord.y));
+    if (opacityColor.r < 0.3){
+      applyStatic = true;
+    }
+  }
+  
+  if (applyStatic){
+    vec3 effectColor = textureWithFalloff(_postColor, 1.0, 4);
+    extraColor = extraColor + vec4(effectColor.rgb, 0);
+
     const float PULSE_DURATION = 0.5;
     const float PULSE_DISTANCE = 2;
 
@@ -83,7 +81,8 @@ void main(){
       }
     }
   }
-  
+    
 
-  FragColor = color + vec4(0.2 * newColor.x, 0.2 * newColor.y, 0.2 * newColor.z, 0) + extraColor;
+  FragColor = color + extraColor;
+
 }
