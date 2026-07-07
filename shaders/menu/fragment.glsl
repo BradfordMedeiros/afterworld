@@ -38,6 +38,8 @@ void main(){
 
   float noiseValue = noise(TexCoord + realtime * 0.00001) * noiseIntensity;
 
+  totalRipple.y += 0.05 * cos(time * 0.1);
+
   mainAlgorithm(color, normalVec, totalRipple + vec2(noiseValue, noiseValue));
 
   vec4 newColor = color;

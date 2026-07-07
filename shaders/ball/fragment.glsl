@@ -29,7 +29,7 @@ void main(){
 
   vec2 newUvCoords = vec2(TexCoord.x , TexCoord.y);
 
-  mainAlgorithm(color, normalVec);
+  mainAlgorithm(color, normalVec, vec2(0, 0));
 
   float direction = dot(normalVec, vec3(0, 1, 0));
   float xzDistance = length(FragPos.xz - _postColor.xz);
