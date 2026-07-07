@@ -14,7 +14,7 @@ vec2 calcRipple(vec2 rippleCoord, float rippleMagnitude){
   return vec2(xWeight, yWeight);
 }
 
-float noiseIntensity = 0.005;
+float noiseIntensity = 0.00;
 float noise(in vec2 st){
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
@@ -42,7 +42,7 @@ void main(){
 
   vec4 newColor = color;
   newColor.a  = 0.7;
-  if (newColor.b < 0.07){
+  if (newColor.b < 0.04){
     // newColor.r = 1;
     //newColor.a = 0.2;
    
