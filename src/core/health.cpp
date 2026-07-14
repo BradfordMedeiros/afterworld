@@ -155,7 +155,7 @@ void doDamageMessageInner(objid id, float damageAmount){
 
   auto healthBehavior = getSingleAttr(targetId, "health-behavior");
   if (valid && enemyDead && healthBehavior.has_value() && healthBehavior.value() == "make-dynamic"){
-  	setGameObjectPhysicsDynamic(targetId);
+  	setGameObjectPhysicsDynamic(targetId, true);
   	return;
   }
   if (valid && enemyDead){

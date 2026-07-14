@@ -5,6 +5,7 @@
 #include "../../ModEngine/src/translations.h"
 #include "../../ModEngine/src/common/symbols.h"
 #include "../../ModEngine/src/main_api.h"
+#include "../../ModEngine/src/object_util.h"
 
 #include <sstream>
 #include <iomanip>
@@ -57,25 +58,6 @@ std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key)
 std::optional<bool> getBoolAttr(ObjectAttrHandle& attrHandle, const char* key);
 std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key);
 bool hasAttribute(objid id, const char* key);
-
-void setGameObjectTexture(objid id, std::string texture);
-void setGameObjectTextureOffset(objid id, glm::vec2 offset);
-void setGameObjectTextureSize(objid id, glm::vec2 offset);
-void setGameObjectFriction(objid id, float friction);
-void setGameObjectGravity(objid id, glm::vec3 gravity);
-glm::vec3 getGameObjectVelocity(objid id);
-void setGameObjectVelocity(objid id, glm::vec3 velocity);
-void setGameObjectTint(objid id, glm::vec4 tint);
-void setGameObjectStateEnabled(objid id, bool enable);
-void setGameObjectMeshEnabled(objid id, bool enable);
-void setGameObjectPhysicsDynamic(objid id);
-void setGameObjectPhysicsEnable(objid id, bool enable);
-void setGameObjectPhysics(objid id, float mass, float restitution, float friction, glm::vec3 gravity);
-void setGameObjectPhysicsMass(objid id, float mass);
-void setGameObjectPhysicsOptions(objid id, glm::vec3 angle, glm::vec3 linear, glm::vec3 gravity);
-void setGameObjectEmission(objid id, std::optional<glm::vec3> emission);
-void setGameObjectEmitterEffectTint(objid id, glm::vec4 tint);
-void setGameObjectLayer(objid id, std::string layer);
 
 void setAmbientLight(glm::vec3 light);
 void setVisualizeVoxelLighting(bool enable);

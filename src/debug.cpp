@@ -413,7 +413,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	saveConditions(LevelConditionData {
   		.triggers = { "one", "two", "three" },
   	});
-  	return;
 
   	//if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
 	  //	//setIsAlive(getActivePlayerId().value(), false);
@@ -440,6 +439,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   		changeWeather(weather, std::nullopt);
   	}
 
+  	return;
 
   	auto fireworkPos = glm::vec3(-100.f + randomNumber(-50.f, 50.f), 50.f + randomNumber(-20.f, 20.f), randomNumber(-20.f, 20.f));
   	emitFirework(fireworkPos);
