@@ -145,47 +145,6 @@ std::vector<NestedListItem> nestedListTest = {
         },
         .items = {},
       },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "create obj",
-          .onClick = std::nullopt,
-          .mappingId = mappingId++,
-        },
-        .items = {
-          NestedListItem {
-            .item = ImListItem {
-              .value = "camera",
-              .onClick = std::nullopt,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "light",
-              .onClick = std::nullopt,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "sound",
-              .onClick = std::nullopt,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "portal",
-              .onClick = std::nullopt,
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
-        },
-      },
     },
   },
   NestedListItem {

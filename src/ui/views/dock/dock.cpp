@@ -535,45 +535,11 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "COLORS",
     .configFields = {
-      DockColorPickerConfig {
-        .label = "primary",
-        .getColor = []() -> glm::vec4 { return styles.primaryColor; },
-        .onColor = [](glm::vec4 color) -> void {
-          setPrimaryColor(color);
-        },
-      },
-      DockColorPickerConfig {
-        .label = "secondary",
-        .getColor = []() -> glm::vec4 { return styles.secondaryColor; },
-        .onColor = [](glm::vec4 color) -> void { 
-          setSecondaryColor(color);
-        },
-      },
-      DockColorPickerConfig {
-        .label = "border",
-        .getColor = []() -> glm::vec4 { return styles.mainBorderColor; },
-        .onColor = [](glm::vec4 color) -> void { 
-          setMainBorderColor(color);
-        },
-      },
-      DockColorPickerConfig {
-        .label = "highlight",
-        .getColor = []() -> glm::vec4 { return styles.highlightColor; },
-        .onColor = [](glm::vec4 color) -> void { 
-          setHighlightColor(color);
-        },
-      },
       DockImageConfig {
         .label =  "[unset]",
         .onImageSelect = [](std::string texture) -> void {
           dockConfigApi.setEditorBackground(texture);
         }
-      },
-      DockButtonConfig {
-        .buttonText = "Reset",
-        .onClick = []() -> void {
-          resetColors();
-        },
       },
     }
   },
@@ -810,21 +776,6 @@ std::vector<DockConfiguration> configurations {
           return false;
         },
       },
-    }
-  },
-  DockConfiguration {
-    .title = "Scene",
-    .configFields = {
-      DockLabelConfig {
-        .label = []() -> std::string {
-           auto id = dockConfigApi.activeScene();
-           if (!id.has_value()){
-            return "no scene";
-           }else{
-            return std::to_string(id.value());
-           }
-        },
-      }, 
     }
   },
   DockConfiguration {

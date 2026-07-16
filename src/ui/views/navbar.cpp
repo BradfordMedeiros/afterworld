@@ -77,10 +77,6 @@ std::vector<NavbarOption> navbarOptionsEditor = {
 		.dock = "Prefabs",
 	},
 	NavbarOption {
-		.name = "Scene",
-		.dock = "Scene",
-	},
-	NavbarOption {
 		.name = "Spawn",
 		.dock = "Spawn",
 	},
