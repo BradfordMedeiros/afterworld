@@ -231,10 +231,6 @@ void setVisualizeVoxelLighting(bool enable){
   });  
 }
 
-std::string uniqueNameSuffix(){
-  return std::to_string(getUniqueObjId());
-}
-
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
   for (auto &worldState : worldStates){

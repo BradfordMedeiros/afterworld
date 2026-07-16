@@ -54,14 +54,6 @@ std::vector<NestedListItem> nestedListTest = {
           },
         },
       },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "quit",
-          .onClick = []() -> void { exit(0); }, // maybe this should send a request to core engine so can shutdown properly }
-          .mappingId = mappingId++,
-        },
-        .items = {},
-      },
     },
   },
   NestedListItem {
@@ -327,26 +319,10 @@ std::vector<NestedListItem> nestedListTest = {
     .items = {
       NestedListItem {
         .item = ImListItem {
-          .value = "show debug",
-          .onClick = getToggleWorldStateBoolStr("editor", "debug"),
-          .mappingId = mappingId++,
-        },
-        .items = {},
-      },
-      NestedListItem {
-        .item = ImListItem {
           .value = "screen grid",
           .onClick = []() -> void { 
             getGlobalState().systemConfig.showScreenspaceGrid = !getGlobalState().systemConfig.showScreenspaceGrid; 
           },
-          .mappingId = mappingId++,
-        },
-        .items = {},
-      },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "mute sound",
-          .onClick = getToggleWorldStateBoolStr("sound", "mute"),
           .mappingId = mappingId++,
         },
         .items = {},
@@ -369,28 +345,6 @@ std::vector<NestedListItem> nestedListTest = {
                 uiManagerContext.uiContext -> newScene(sceneName);
               }
             });
-          },
-          .mappingId = mappingId++,
-        },
-        .items = {},
-      },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "save scene",
-          .onClick = []() -> void {
-            modassert(uiManagerContext.uiContext, "uiContextPtr null");
-            uiManagerContext.uiContext -> worldPlayInterface.saveScene();
-          },
-          .mappingId = mappingId++,
-        },
-        .items = {},
-      },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "reset scene",
-          .onClick = []() -> void {
-            modassert(uiManagerContext.uiContext, "uiContextPtr null");
-            uiManagerContext.uiContext -> resetScene();
           },
           .mappingId = mappingId++,
         },
@@ -453,16 +407,6 @@ std::vector<NestedListItem> nestedListTest = {
             .items = {},
           },
         },
-      },
-      NestedListItem {
-        .item = ImListItem {
-          .value = "discord",
-          .onClick = []() -> void {
-            system("xdg-open https://discord.com/channels/1135105623688757288/");
-          },
-          .mappingId = mappingId++,
-        },
-        .items = {},
       },
     },
   },

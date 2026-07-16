@@ -571,8 +571,6 @@ void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, doubl
   if (uiState.offset < 0){
     uiState.offset = 0;
   }
-  scenegraphScroll(scrollValue);
-
 
   rotateWheel(amount > 0);
 }
@@ -643,7 +641,6 @@ void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, doubl
 }
 
 void onMainUiObjectsChanged(){
-  refreshScenegraph();
 }
 
 auto mainRouterHistory = createHistory();

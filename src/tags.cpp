@@ -537,20 +537,20 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](int32_t id, AttributeValue) -> void {
 	  		setGameObjectTexture(id, queryInitialBackground());
 		},
-  		.onRemove = [](int32_t id) -> void {},
-  		.onFrame = std::nullopt,
-  		.onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "glasstexture",
 		.onAdd = [](int32_t id, AttributeValue) -> void {
 	  		createGlassTexture(id);
 		},
-  		.onRemove = [](int32_t id) -> void {
-  			removeGlassTexture(id);
-  		},
-  		.onFrame = std::nullopt,
-  		.onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+  		removeGlassTexture(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "waypoint",
@@ -561,43 +561,43 @@ std::vector<TagUpdater> tagupdates = {
 	  	    	updateHealth(waypoints, id, hitpoints.value().current / hitpoints.value().total);
 	  	    }
 		},
-  		.onRemove = [](int32_t id) -> void {
-  			removeWaypoint(waypoints, id);
-  		},
-  		.onFrame = std::nullopt,
-  		.onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+  		removeWaypoint(waypoints, id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "autoemission",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			auto period = maybeUnwrapAttrOpt<float>(value).value();
-	  		auto attrHandle = getAttrHandle(id);
+	  	auto attrHandle = getAttrHandle(id);
 			auto emissionLow = getVec3Attr(attrHandle, "autoemission-low");
 			auto emissionHigh = getVec3Attr(attrHandle, "autoemission-high");
 
-            addEmissionObj(
-                id,
-                emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
-                emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
-                period
-            );
+      addEmissionObj(
+        id,
+        emissionLow.has_value() ? emissionLow.value(): glm::vec3(0.f, 0.f, 0.f),
+        emissionHigh.has_value() ? emissionHigh.value() : glm::vec3(1.f, 1.f, 1.f),
+        period
+      );
 		},
-  		.onRemove = [](int32_t id) -> void {
-            removeEmissionObj(id);
-  		},
-  		.onFrame = []() -> void {
-            onEmissionFrame();
-  		},
-  		.onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+           removeEmissionObj(id);
+  	},
+  	.onFrame = []() -> void {
+           onEmissionFrame();
+  	},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "healthcolor",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
 	  		auto attrHandle = getAttrHandle(id);
-			auto colorLow = getVec3Attr(attrHandle, "healthcolor-low");
-			auto colorHigh = getVec3Attr(attrHandle, "healthcolor");
-			auto colorTarget = getStrAttr(attrHandle, "healthcolor-target");
-			auto target = colorTarget.has_value() ? findBodyPart(id, colorTarget.value().c_str()) : std::nullopt;
+				auto colorLow = getVec3Attr(attrHandle, "healthcolor-low");
+				auto colorHigh = getVec3Attr(attrHandle, "healthcolor");
+				auto colorTarget = getStrAttr(attrHandle, "healthcolor-target");
+				auto target = colorTarget.has_value() ? findBodyPart(id, colorTarget.value().c_str()) : std::nullopt;
 
 	  		healthColorObjects[id] = HealthColorObject {
 	  			.lowColor = colorLow.has_value() ? colorLow.value(): glm::vec3(0.f, 0.f, 0.f),
@@ -605,30 +605,30 @@ std::vector<TagUpdater> tagupdates = {
 	  			.target = target,
 	  		};
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    	healthColorObjects.erase(id);
-  	    },
-  	    .onFrame = []() -> void {
-  	    	if (!isInGameMode2()){
-  	    		return;
-  	    	}
-  	    	for (auto &[id, healthColorObject] : healthColorObjects){
-	    			auto health = getHealth(id);
-	    			float percentageHealth = health.value().current / health.value().total;
-	      		glm::vec4 newColor(
-	      			healthColorObject.lowColor.r + ((healthColorObject.highColor.r - healthColorObject.lowColor.r) * percentageHealth), 
-	      			healthColorObject.lowColor.g + ((healthColorObject.highColor.g - healthColorObject.lowColor.g) * percentageHealth), 
-	      			healthColorObject.lowColor.b + ((healthColorObject.highColor.b - healthColorObject.lowColor.b) * percentageHealth),
-	      			1.f
-	      		);
-	      		if (healthColorObject.target.has_value()){
-	    	  		setGameObjectTint(healthColorObject.target.value(), newColor);
-	      		}else{
-	    	  		setGameObjectTint(id, newColor);
-	      		}
-  	    	}
-  	    },
-  	    .onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+  			healthColorObjects.erase(id);
+  	},
+  	.onFrame = []() -> void {
+  			if (!isInGameMode2()){
+  				return;
+  			}
+  	    for (auto &[id, healthColorObject] : healthColorObjects){
+	    		auto health = getHealth(id);
+	    		float percentageHealth = health.value().current / health.value().total;
+	      	glm::vec4 newColor(
+	      		healthColorObject.lowColor.r + ((healthColorObject.highColor.r - healthColorObject.lowColor.r) * percentageHealth), 
+	      		healthColorObject.lowColor.g + ((healthColorObject.highColor.g - healthColorObject.lowColor.g) * percentageHealth), 
+	      		healthColorObject.lowColor.b + ((healthColorObject.highColor.b - healthColorObject.lowColor.b) * percentageHealth),
+	      		1.f
+	      	);
+	      	if (healthColorObject.target.has_value()){
+	    	 		setGameObjectTint(healthColorObject.target.value(), newColor);
+	      	}else{
+	    	 		setGameObjectTint(id, newColor);
+	      	}
+  	    }
+  	},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "cutscene",

@@ -100,36 +100,6 @@ DockTextboxNumeric createSimpleTextboxNumeric(const char* table, const char* lab
   return textbox;
 }
 
-
-int currentDebugMask(){
-  auto value = dockConfigApi.getAttribute("editor", "debugmask");
-  auto debugMaskFloat = std::get_if<float>(&value);
-  modassert(debugMaskFloat, "debug mask is not a float");
-  auto debugValue = static_cast<int>(*debugMaskFloat);
-  return debugValue; 
-}
-std::function<bool()> getIsDebugMaskEnabled(int bitmask){
-  return [bitmask]() -> bool {
-    auto debugValue = currentDebugMask();
-    auto newMask = debugValue & bitmask;
-    //std::cout << "debug value is: " << debugValue << ", check against: " << bitmask << ", new mask: " << newMask << std::endl;
-    return newMask != 0;
-  };
-}
-
-std::function<void(bool)> getOnDebugMaskEnabled(int bitmask){
-  return [bitmask](bool checked) -> void {
-    auto debugMask = currentDebugMask();
-    if (checked){
-      debugMask = debugMask | bitmask; // add the bit to the old mask
-    }else{
-      debugMask = debugMask & ~(bitmask);   // take the bit away from the old mask, by making all 1s except the bit
-    }
-    auto floatMask = static_cast<float>(debugMask);
-    dockConfigApi.setAttribute("editor", "debugmask", floatMask);
-  };
-}
-
 std::unordered_map<std::string, bool> collapseValues;
 std::function<void()> createCollapsableOnClick(const char* value){
   collapseValues[value] = true;
@@ -296,62 +266,6 @@ std::vector<DockConfiguration> configurations {
     },
   },
   DockConfiguration {
-    .title = "Object Details",
-    .configFields = {
-      DockCheckboxConfig {
-        .label = "Enable Physics",
-        .isChecked = getIsCheckedGameobj("physics"),
-        .onChecked = getOnCheckedGameobj("physics"),
-      },
-      DockCheckboxConfig {
-        .label = "Dynamic",
-        .isChecked = getIsCheckedGameobj("physics_type"),
-        .onChecked = getOnCheckedGameobj("physics_type"),
-      },
-      DockCheckboxConfig {
-        .label = "Collide",
-        .isChecked = getIsCheckedGameobj("physics_collision"),
-        .onChecked = getOnCheckedGameobj("physics_collision"),
-      },
-      DockOptionConfig {
-        .options = { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto"  },
-        .onClick = optionsOnClickObj("physics_shape", { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto" }),
-        .getSelectedIndex = optionsSelectedIndexObj("physics_shape", { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto" }),
-      },
-
-      DockTextboxNumeric {
-        .label = "position x",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      DockTextboxNumeric {
-        .label = "position y",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      DockTextboxNumeric {
-        .label = "position z",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      DockTextboxNumeric {
-        .label = "scale x",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      DockTextboxNumeric {
-        .label = "scale y",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      DockTextboxNumeric {
-        .label = "scale z",
-        .value = []() -> std::string{ return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-    },
-  },
-  DockConfiguration {
     .title = "Textures",
     .configFields = {
       DockTextboxConfig {
@@ -421,105 +335,6 @@ std::vector<DockConfiguration> configurations {
         .onClick = optionsOnClick("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
         .getSelectedIndex = optionsSelectedIndex("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
       },
-    },
-  },
-  DockConfiguration {
-    .title = "Cameras",
-    .configFields = {
-      DockButtonConfig {
-        .buttonText = "Create Camera",
-        .onClick = []() -> void { dockConfigApi.createCamera(); },
-      },
-      DockCheckboxConfig {
-        .label = "toggle dof",
-        .isChecked = getIsCheckedGameobj("dof"),
-        .onChecked = getOnCheckedGameobj("dof"),
-      },
-      DockGroup {
-        .groupName = "Depth of Field Blur",
-        .onClick = createCollapsableOnClick("blur"),
-        .collapse = createShouldBeCollapse("blur"),
-        .configFields = {
-          DockGameObjSelector {
-            .label = std::nullopt,
-            .onSelect =  getStrGameObj("target"),
-          },
-          DockSliderConfig {
-            .label = "blur min",
-            .min = 0.f,
-            .max = 1.f,
-            .percentage = getFloatGameobj("minblur"),
-            .onSlide = [](float amount) -> void {
-              auto setMinBlur = getSetFloatGameobj("minblur");
-              setMinBlur(amount);
-            },
-          },
-          DockSliderConfig {
-            .label = "blur max",
-            .min = 0.f,
-            .max = 1.f,
-            .percentage = getFloatGameobj("maxblur"),
-            .onSlide = getSetFloatGameobj("maxblur"),
-          },
-          DockSliderConfig {
-            .label = "blur amount",
-            .min = 0.f,
-            .max = 1.f,
-            .percentage = getFloatGameobj("bluramount"),
-            .onSlide = getSetFloatGameobj("bluramount"),
-          },
-        },
-      },
-    },
-  },
-  DockConfiguration {
-    .title = "Lights",
-    .configFields = {
-      DockButtonConfig {
-        .buttonText = "Create Light",
-        .onClick = []() -> void { dockConfigApi.createLight(); } ,
-      },
-      DockOptionConfig {
-        .options = { "point", "spotlight", "directional" },
-        .onClick = optionsOnClickObj("type", { "point", "spotlight", "directional" }),
-        .getSelectedIndex = optionsSelectedIndexObj("type", { "point", "spotlight", "directional" }),
-      },
-    },
-  },
-  DockConfiguration {
-    .title = "Scenegraph",
-    .configFields = {
-      DockScenegraph {},
-    },
-  },
-  DockConfiguration {
-    .title = "Debug",
-    .configFields = {
-      DockCheckboxConfig {
-        .label = "Show Debug",
-        .isChecked = getIsCheckedWorld("editor", "debug"),
-        .onChecked = getOnCheckedWorld("editor", "debug"),
-      },
-      DockCheckboxConfig {
-        .label = "Show Cameras",
-        .isChecked = getIsDebugMaskEnabled(0b10),
-        .onChecked = getOnDebugMaskEnabled(0b10),
-      },
-      DockCheckboxConfig {
-        .label = "Show Lights",
-        .isChecked = getIsDebugMaskEnabled(0b1000),
-        .onChecked = getOnDebugMaskEnabled(0b1000),
-      },
-      DockCheckboxConfig {
-        .label = "Show Sound",
-        .isChecked = getIsDebugMaskEnabled(0b100),
-        .onChecked = getOnDebugMaskEnabled(0b100),
-      },
-      DockCheckboxConfig {
-        .label = "Show Emitters",
-        .isChecked = getIsDebugMaskEnabled(0b100000),
-        .onChecked = getOnDebugMaskEnabled(0b100000),
-      },   
     },
   },
   DockConfiguration {
@@ -714,34 +529,6 @@ std::vector<DockConfiguration> configurations {
       },
     }
   },
-  DockConfiguration {
-    .title = "WATER",
-    .configFields = {
-      DockButtonConfig {
-        .buttonText = "Create Water",
-        .onClick = []() -> void {},
-      },
-      DockTextboxNumeric {
-        .label = "Density",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-        // gameobj:water-density   // positive number
-      },
-      DockTextboxNumeric {
-        .label = "Viscosity",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-        // gameobj:water-viscosity  // positive number
-      },
-      DockTextboxNumeric {
-        .label = "Gravity",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void {  },
-        // gameobj:water-gravity  // positive number
-      },
-    }
-  },
-
 
   //// Editor Docks ////////////////
   /////////////////////////////////////
@@ -1028,18 +815,6 @@ std::vector<DockConfiguration> configurations {
   DockConfiguration {
     .title = "Scene",
     .configFields = {
-      DockButtonConfig {
-        .buttonText = "Save Scene",
-        .onClick = []() -> void {
-          dockConfigApi.saveScene();
-        },
-      },
-      DockButtonConfig {
-        .buttonText = "Reset Scene",
-        .onClick = []() -> void {
-          dockConfigApi.resetScene();
-        },
-      },
       DockLabelConfig {
         .label = []() -> std::string {
            auto id = dockConfigApi.activeScene();
@@ -1238,11 +1013,6 @@ Component createDockComponent(DockConfig& config){
       componentsForFields(dockGroupOptions -> configFields, elements);
     }
     return simpleVerticalLayout(elements, glm::vec2(0.f, 0.f), defaultAlignment, glm::vec4(0.f, 0.f, 0.f, 1.f), 0.01f);
-  }
-
-  auto dockScenegraphOptions = std::get_if<DockScenegraph>(&config);
-  if (dockScenegraphOptions){
-    return scenegraphContainer;
   }
 
   auto dockTextboxNumeric = std::get_if<DockTextboxNumeric>(&config);

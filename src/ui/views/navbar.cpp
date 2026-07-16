@@ -15,20 +15,8 @@ std::vector<NavbarOption> navbarOptions = {
 		.dock = "Editor",
 	},
 	NavbarOption {
-		.name = "Object Details",
-		.dock = "Object Details",
-	},
-	NavbarOption {
 		.name = "Navmesh",
 		.dock = "Navmesh",
-	},
-	NavbarOption {
-		.name = "Cameras",
-		.dock = "Cameras",
-	},
-	NavbarOption {
-		.name = "Lights",
-		.dock = "Lights",
 	},
 	NavbarOption {
 		.name = "Textures",
@@ -38,44 +26,6 @@ std::vector<NavbarOption> navbarOptions = {
 		.name = "Transform",
 		.dock = "Transform",
 	},
-	NavbarOption {
-		.name = "Scenegraph",
-		.dock = "Scenegraph",
-	},
-	NavbarOption {
-		.name = "Debug",
-		.dock = "Debug",
-	},
-	/*NavbarOption {
-		.name = "Scene Info",
-	},
-	NavbarOption {
-		.name = "Performance",
-	},
-	NavbarOption {
-		.name = "World",
-	},
-	NavbarOption {
-		.name = "Rendering",
-	},
-	NavbarOption {
-		.name = "Models",
-	},
-	NavbarOption {
-		.name = "Textures",
-	},
-	NavbarOption {
-		.name = "Geo",
-	},
-	NavbarOption {
-		.name = "Portal",
-	},
-	NavbarOption {
-		.name = "Voxels",
-	},
-	NavbarOption {
-		.name = "Debug",
-	},*/
 };
 
 std::vector<NavbarOption> navbarOptionsGameplay = {

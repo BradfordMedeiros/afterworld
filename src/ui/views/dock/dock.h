@@ -8,7 +8,6 @@
 #include "../../components/basic/slider.h"
 #include "../../components/basic/checkbox.h"
 #include "../../components/basic/textbox.h"
-#include "../../components/scenegraph.h"
 #include "../../../util.h"
 #include "./dock_util.h"
 #include "./types/dock_label.h"
@@ -29,13 +28,12 @@
 void persistSqlFloat(std::string column, float value);
 
 
-struct DockScenegraph {};
 struct DockGroup;
 
 typedef std::variant<
   DockLabelConfig,   DockButtonConfig, DockOptionConfig, DockSliderConfig,    DockCheckboxConfig, 
   DockTextboxConfig, DockFileConfig,   DockImageConfig,  DockGameObjSelector, DockGroup, 
-  DockScenegraph, DockTextboxNumeric, DockColorPickerConfig, DockSelectConfig
+  DockTextboxNumeric, DockColorPickerConfig, DockSelectConfig
   > DockConfig;
 
 struct DockGroup {

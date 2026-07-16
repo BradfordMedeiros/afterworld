@@ -62,8 +62,6 @@ bool hasAttribute(objid id, const char* key);
 void setAmbientLight(glm::vec3 light);
 void setVisualizeVoxelLighting(bool enable);
 
-std::string uniqueNameSuffix();
-
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);
 std::optional<bool> getBoolWorldState(const char* object, const char* attribute);
 std::optional<AttributeValue> getWorldStateAttr(const char* object, const char* attribute);
