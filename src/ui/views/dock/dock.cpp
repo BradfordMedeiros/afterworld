@@ -301,11 +301,6 @@ std::vector<DockConfiguration> configurations {
         .onChecked = getOnCheckedWorld("editor", "groupselection"),
       },
       DockCheckboxConfig {
-        .label = "Symmetric Translate",
-        .isChecked = getIsCheckedWorld("tools", "position-mirror"),
-        .onChecked = getOnCheckedWorld("tools", "position-mirror"),
-      },
-      DockCheckboxConfig {
         .label = "Absolute Translate",
         .isChecked = getIsCheckedWorld("tools", "snap-position", "absolute", "relative"),
         .onChecked = getOnCheckedWorld("tools", "snap-position", "absolute", "relative"),
@@ -314,11 +309,6 @@ std::vector<DockConfiguration> configurations {
         .options = { "0.01", "0.1", "0.5", "1", "5" },
         .onClick = optionsOnClick("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
         .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-      },
-      DockCheckboxConfig {
-        .label = "Preserve Scale",
-        .isChecked = getIsCheckedWorld("tools", "preserve-scale"),
-        .onChecked = getOnCheckedWorld("tools", "preserve-scale"),
       },
       DockOptionConfig {  // "Snap Scales",
         .options = { "0.01", "0.1", "0.5", "1", "5" },
@@ -337,44 +327,6 @@ std::vector<DockConfiguration> configurations {
       },
     },
   },
-  DockConfiguration {
-    .title = "Transform",
-    .configFields = {
-      DockOptionConfig { // Snap Translates
-        .options = { "translate", "scale", "rotate" },
-        .onClick = optionsOnClick("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
-        .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-mode", { "translate", "scale", "rotate" }),
-      },
-      DockOptionConfig { // Snap Translates
-        .options = { "x", "y", "z" },
-        .onClick = optionsOnClick("tools", "manipulator-axis", { "x", "y", "z" }),
-        .getSelectedIndex = optionsSelectedIndex("tools", "manipulator-axis", { "x", "y", "z" }),
-      },
-      DockOptionConfig { 
-        .options = { "+x", "-x", "+y", "-y", "-z", "+z" },
-        .onClick = [](std::string& choice, int) -> void {
-          // this should use the manipulator api, so it can orient on the axises
-          if (choice == "+x"){
-            sendManipulatorEvent(OBJECT_ORIENT_RIGHT);
-          }else if (choice == "-x"){
-            sendManipulatorEvent(OBJECT_ORIENT_LEFT);
-          }else if (choice == "+y"){
-            sendManipulatorEvent(OBJECT_ORIENT_UP);
-          }else if (choice == "-y"){
-            sendManipulatorEvent(OBJECT_ORIENT_DOWN);
-          }else if (choice == "+z"){
-            sendManipulatorEvent(OBJECT_ORIENT_BACK);
-          }else if (choice == "-z"){
-            sendManipulatorEvent(OBJECT_ORIENT_FORWARD);
-          }
-        },
-        .getSelectedIndex = []() -> int {
-          return -1;
-        },
-      },
-    }
-  },
-
   // Gameplay Docks //////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   DockConfiguration {

@@ -22,10 +22,6 @@ std::vector<NavbarOption> navbarOptions = {
 		.name = "Textures",
 		.dock = "Textures",
 	},
-	NavbarOption {
-		.name = "Transform",
-		.dock = "Transform",
-	},
 };
 
 std::vector<NavbarOption> navbarOptionsGameplay = {

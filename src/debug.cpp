@@ -423,7 +423,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   	//static glm::vec3 position(0.f, 0.f, 0.f);
   	//position.y += 5.f;
 
-  	auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
+  	//auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
 
   	static bool shouldEmitElectric = false;
   	shouldEmitElectric = !shouldEmitElectric;
