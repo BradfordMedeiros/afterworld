@@ -160,16 +160,6 @@ std::vector<NestedListItem> nestedListTest = {
             },
             .items = {},
           },
-          NestedListItem {
-            .item = ImListItem {
-              .value = "arcade",
-              .onClick = []() -> void {
-                setMenuBackground("../gameresources/textures/backgrounds/arcade2.png");
-              },
-              .mappingId = mappingId++,
-            },
-            .items = {},
-          },
         },
       },
     },
