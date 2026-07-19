@@ -292,41 +292,7 @@ std::vector<DockConfiguration> configurations {
       },
     },
   },
-  DockConfiguration {
-    .title = "Editor",
-    .configFields = {
-      DockCheckboxConfig {
-        .label = "Group Selection",
-        .isChecked = getIsCheckedWorld("editor", "groupselection"),
-        .onChecked = getOnCheckedWorld("editor", "groupselection"),
-      },
-      DockCheckboxConfig {
-        .label = "Absolute Translate",
-        .isChecked = getIsCheckedWorld("tools", "snap-position", "absolute", "relative"),
-        .onChecked = getOnCheckedWorld("tools", "snap-position", "absolute", "relative"),
-      },
-      DockOptionConfig { // Snap Translates
-        .options = { "0.01", "0.1", "0.5", "1", "5" },
-        .onClick = optionsOnClick("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-      },
-      DockOptionConfig {  // "Snap Scales",
-        .options = { "0.01", "0.1", "0.5", "1", "5" },
-        .onClick = optionsOnClick("editor", "snapscale", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
-      },
-      DockCheckboxConfig {
-        .label = "Absolute Rotation",
-        .isChecked = getIsCheckedWorld("tools", "snap-rotate", "absolute", "relative"),
-        .onChecked = getOnCheckedWorld("tools", "snap-rotate", "absolute", "relative"),
-      },
-      DockOptionConfig { // Snap Rotation
-        .options = { "1", "5", "15", "30", "45", "90", "180" },
-        .onClick = optionsOnClick("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
-        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
-      },
-    },
-  },
+
   // Gameplay Docks //////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   DockConfiguration {
@@ -484,17 +450,6 @@ std::vector<DockConfiguration> configurations {
 
   //// Editor Docks ////////////////
   /////////////////////////////////////
-  DockConfiguration {
-    .title = "COLORS",
-    .configFields = {
-      DockImageConfig {
-        .label =  "[unset]",
-        .onImageSelect = [](std::string texture) -> void {
-          dockConfigApi.setEditorBackground(texture);
-        }
-      },
-    }
-  },
   DockConfiguration {
     .title = "Particle Viewer",
     .configFields = {

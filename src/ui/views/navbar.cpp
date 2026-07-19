@@ -11,10 +11,6 @@ std::vector<NavbarOption> navbarOptions = {
 		.dock = "",
 	},
 	NavbarOption {
-		.name = "Editor",
-		.dock = "Editor",
-	},
-	NavbarOption {
 		.name = "Navmesh",
 		.dock = "Navmesh",
 	},
@@ -41,24 +37,12 @@ std::vector<NavbarOption> navbarOptionsGameplay = {
 		.name = "TRIGGERS",
 		.dock = "TRIGGERS",
 	},
-	NavbarOption {
-		.name = "HUD",
-		.dock = "HUD",
-	},
-	NavbarOption {
-		.name = "WATER",
-		.dock = "WATER",
-	},
 };
 
 std::vector<NavbarOption> navbarOptionsEditor = {
 	NavbarOption {
 		.name = "Hide",
 		.dock = "",
-	},
-	NavbarOption {
-		.name = "COLORS",
-		.dock = "COLORS",
 	},
 	NavbarOption {
 		.name = "Particle Viewer",
