@@ -265,33 +265,6 @@ std::vector<DockConfiguration> configurations {
       },
     },
   },
-  DockConfiguration {
-    .title = "Textures",
-    .configFields = {
-      DockTextboxConfig {
-        .label = "Tiling",
-        .text = connectGetTextVec2("texturetiling"),
-        .onEdit = connectEditTextVec2("tiling-x", "texturetiling"),
-      },
-      DockTextboxConfig {
-        .label = "Size",
-        .text = connectGetTextVec2("texturesize"),
-        .onEdit = connectEditTextVec2("texturesize", "texturesize"),
-      },
-      DockTextboxConfig {
-        .label = "Offset",
-        .text = connectGetTextVec2("textureoffset"),
-        .onEdit = connectEditTextVec2("textureoffset", "textureoffset"),
-      },
-      DockImageConfig {
-        .label =  "someimage-here",
-        .onImageSelect = [](std::string texture) -> void {
-          modlog("dock set texture", texture);
-          dockConfigApi.setTexture(texture);
-        }
-      },
-    },
-  },
 
   // Gameplay Docks //////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
@@ -620,39 +593,6 @@ std::vector<DockConfiguration> configurations {
           },
         }
       }
-    }
-  },
-  DockConfiguration {
-    .title = "Models",
-    .configFields = {
-      DockFileConfig {
-        .label = "Select Model",
-        .displayLimit = 30,
-        .onFileSelected = [](std::string& file) -> void {
-          // TODO REALFILES
-          std::filesystem::path workingDir = std::filesystem::current_path(); 
-          std::filesystem::path absolutePath = file;
-          std::filesystem::path relativePath = std::filesystem::relative(absolutePath, workingDir);
-          auto pathAsStr = relativePath.string();
-          dockConfigApi.createMesh(pathAsStr);
-        },
-        .filterFilter = [](bool isDirectory, std::string& file) -> bool {
-          if (isDirectory){
-            return true;
-          }
-          auto extension = getExtension(file);
-          if (extension.has_value()){
-            if (extension.value() == "gltf"){
-              return true;
-            }else if (extension.value() == "obj"){
-              return true;
-            }else if (extension.value() == "fbx"){
-              return true;
-            }
-          }
-          return false;
-        },
-      },
     }
   },
   DockConfiguration {
