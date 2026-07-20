@@ -118,7 +118,7 @@ UiContext getUiContext(){
     return getBoolWorldState("editor", "debug").value(); 
    },
    .showEditor = []() -> bool {
-      bool showEditorOverload = true;
+      bool showEditorOverload = false;
       return showEditorOverload && getGlobalState().showEditor;
    },
    .showConsole = showConsole,

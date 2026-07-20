@@ -269,38 +269,6 @@ std::vector<DockConfiguration> configurations {
   // Gameplay Docks //////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   DockConfiguration {
-    .title = "WEAPONS",
-    .configFields = {
-      DockSelectConfig {
-        .selectOptions = SelectOptions {
-          .getOptions = []() -> std::vector<std::string>& {
-            static std::vector<std::string> options = listGuns();
-            return options;
-          },
-          .toggleExpanded = [](bool expanded) -> void {
-            weaponsExpanded = expanded;
-          },
-          .onSelect = [](int index, std::string& gun) -> void {
-            weaponSelectIndex = index;
-            weaponsExpanded = false;
-            selectedGun = gun;
-            modlog("editor gun", std::string("selected gun: ") + gun);
-          },
-          .currentSelection = []() -> int { return weaponSelectIndex; },
-          .isExpanded = []() -> bool { return weaponsExpanded; },
-        }
-      },
-      createSimpleGunCheckbox("Ironsight", "ironsight"),
-      createSimpleGunCheckbox("Raycast", "raycast"),
-      createSimpleGunCheckbox("Hold", "hold"),
-      createSimpleTextboxNumeric("guns","Bloom", "bloom"),
-      createSimpleTextboxNumeric("guns","Min Bloom", "minbloom"),
-      createSimpleTextboxNumeric("guns","Bloom Length", "bloom-length"),
-      createSimpleTextboxNumeric("guns","Horizontal Sway", "bloom-length"),
-      createSimpleTextboxNumeric("guns","Vertical Sway", "bloom-length"),
-    }
-  },
-  DockConfiguration {
     .title = "TRIGGERS",
     .configFields = {
       DockButtonConfig {
