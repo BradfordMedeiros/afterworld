@@ -472,6 +472,9 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
 
+  if (key == 'P' && action == 1){
+  	getGlobalState().systemConfig.showScreenspaceGrid = !getGlobalState().systemConfig.showScreenspaceGrid; 
+  }
 
   if (key == '[' && action == 0){
   	auto activeCamera = gameapi -> getCameraTransform(getDefaultPlayerIndex());

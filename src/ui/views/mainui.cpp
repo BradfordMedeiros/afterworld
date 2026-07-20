@@ -362,12 +362,6 @@ NavbarType queryLoadNavbarType(){
   return strToNavbarType(navbarType);
 }
 
-NavListApi navListApi {
-  .changeLayout = [](std::string layout) -> void {
-    commonState -> navbarType = strToNavbarType(layout);
-    persistSave("settings", "ui-layout", layout);
-  }
-};
 
 ImageList loadImageListTextures(){
   ImageList imageListDatas {

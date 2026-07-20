@@ -167,7 +167,6 @@ Component editorViewComponent {
     /////////////////
 
     auto defaultProps = getDefaultProps();
-    withProps(navList, navListProps).draw(drawTools, defaultProps);
 
     {
       Props navbarProps {

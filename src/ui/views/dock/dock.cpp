@@ -596,36 +596,6 @@ std::vector<DockConfiguration> configurations {
     }
   },
   DockConfiguration {
-    .title = "Prefabs",
-    .configFields = {
-      DockFileConfig {
-        .label = "Select Prefab",
-        .displayLimit = 30,
-        .onFileSelected = [](std::string& file) -> void {
-          // TODO REALFILES
-          std::filesystem::path workingDir = std::filesystem::current_path(); 
-          std::filesystem::path absolutePath = file;
-          std::filesystem::path relativePath = std::filesystem::relative(absolutePath, workingDir);
-          auto pathAsStr = relativePath.string();
-          std::unordered_map<std::string, AttributeValue> attrs;
-          dockConfigApi.createPrefab(pathAsStr, attrs);
-        },
-        .filterFilter = [](bool isDirectory, std::string& file) -> bool {
-          if (isDirectory){
-            return true;
-          }
-          auto extension = getExtension(file);
-          if (extension.has_value()){
-            if (extension.value() == "rawscene"){
-              return true;
-            }
-          }
-          return false;
-        },
-      },
-    }
-  },
-  DockConfiguration {
     .title = "Spawn",
     .configFields = {
       DockButtonConfig {

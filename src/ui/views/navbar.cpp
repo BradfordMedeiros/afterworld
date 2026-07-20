@@ -10,13 +10,6 @@ std::vector<NavbarOption> navbarOptions = {
 		.name = "Hide",
 		.dock = "",
 	},
-};
-
-std::vector<NavbarOption> navbarOptionsGameplay = {
-	NavbarOption {
-		.name = "Hide",
-		.dock = "",
-	},
 	NavbarOption {
 		.name = "MOVEMENT",
 		.dock = "MOVEMENT",
@@ -29,20 +22,9 @@ std::vector<NavbarOption> navbarOptionsGameplay = {
 		.name = "TRIGGERS",
 		.dock = "TRIGGERS",
 	},
-};
-
-std::vector<NavbarOption> navbarOptionsEditor = {
-	NavbarOption {
-		.name = "Hide",
-		.dock = "",
-	},
 	NavbarOption {
 		.name = "Particle Viewer",
 		.dock = "Particle Viewer",
-	},
-	NavbarOption {
-		.name = "Prefabs",
-		.dock = "Prefabs",
 	},
 	NavbarOption {
 		.name = "Spawn",
@@ -51,19 +33,8 @@ std::vector<NavbarOption> navbarOptionsEditor = {
 };
 
 NavbarType strToNavbarType(std::string& layout){
-  if (layout == "main"){
-    return MAIN_EDITOR;
-  }
-  if (layout == "gameplay"){
-    return GAMEPLAY_EDITOR;
-  }
-  if (layout == "editor"){
-    return EDITOR_EDITOR;
-  }
-  modassert(false, std::string("invalid layout: ") + layout);
   return MAIN_EDITOR;
 }
-
 
 const float STYLE_UI_NAVBAR_FONTSIZE = 0.02f;
 const float STYLE_UI_NAVBAR_ITEM_PADDING = 0.02f;
@@ -73,10 +44,6 @@ Props createMenuOptions(NavbarType type, std::function<void(const char*)>& onCli
 	std::vector<NavbarOption>* navbarOptionsPtr = NULL;
 	if (type == MAIN_EDITOR){
 		navbarOptionsPtr = &navbarOptions;
-	}else if (type == GAMEPLAY_EDITOR){
-		navbarOptionsPtr = &navbarOptionsGameplay;
-	}else if (type == EDITOR_EDITOR){
-		navbarOptionsPtr = &navbarOptionsEditor;
 	}
 	modassert(navbarOptionsPtr != NULL, "navbar type null");
   std::vector<ListComponentData> levels;

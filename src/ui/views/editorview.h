@@ -8,7 +8,6 @@
 #include "../components/fileexplorer.h"
 #include "../components/dialog.h"
 #include "../components/scenemanager.h"
-#include "./navlist.h"
 #include "./navbar.h"
 #include "./dock/dock.h"
 
