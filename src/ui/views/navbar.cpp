@@ -11,10 +11,6 @@ std::vector<NavbarOption> navbarOptions = {
 		.dock = "",
 	},
 	NavbarOption {
-		.name = "MOVEMENT",
-		.dock = "MOVEMENT",
-	},
-	NavbarOption {
 		.name = "WEAPONS",
 		.dock = "WEAPONS",
 	},

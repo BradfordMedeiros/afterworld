@@ -118,7 +118,8 @@ UiContext getUiContext(){
     return getBoolWorldState("editor", "debug").value(); 
    },
    .showEditor = []() -> bool {
-      return getGlobalState().showEditor;
+      bool showEditorOverload = true;
+      return showEditorOverload && getGlobalState().showEditor;
    },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
