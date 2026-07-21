@@ -68,7 +68,7 @@ struct UiStateContext {
   RouterHistory* routerHistory;
   UiState uiState;
 };
-HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor);
+HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode);
 void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, double amount);
 void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);

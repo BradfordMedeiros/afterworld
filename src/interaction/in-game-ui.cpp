@@ -65,7 +65,8 @@ void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiC
 			uiContext, 
 			getGlobalState().control.selectedId, 
 			textDisplay.textureId, 
-			drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt)
+			drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt),
+			false
 		);
 
 		auto ndiCoords = uvToNdi(getGlobalState().control.texCoordUvView);

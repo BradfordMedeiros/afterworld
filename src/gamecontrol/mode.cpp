@@ -6,6 +6,8 @@ void inputOverride();
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 
 void startMode(GameMode& gameMode, objid sceneId){
+  std::cout << "mode: start" << std::endl;
+
   auto& allPlayers = getPlayers();
   for (auto& player : allPlayers){
     setTempCamera(std::nullopt, player.viewport);
@@ -34,6 +36,8 @@ void startMode(GameMode& gameMode, objid sceneId){
 }
 
 void stopMode(GameMode& gameMode){
+  std::cout << "mode: stop" << std::endl;
+
   auto gamemodeFps = std::get_if<GameModeFps>(&gameMode);
   if (gamemodeFps){
     stopFpsMode();
@@ -63,6 +67,11 @@ void stopMode(GameMode& gameMode){
   for (auto& player : allPlayers){
     setTempCamera(std::nullopt, player.viewport);
   }
+}
+
+bool isModeNone(GameMode& gameMode){
+  auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
+  return gamemodeNone != NULL;
 }
 
 void onModeCollision(GameMode& gameMode, objid obj1, objid obj2){

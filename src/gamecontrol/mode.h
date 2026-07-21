@@ -17,6 +17,7 @@ typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeVideo> Gam
 
 void startMode(GameMode& gameMode, objid sceneId);
 void stopMode(GameMode& gameMode);
+bool isModeNone(GameMode& gameMode);
 
 void onModeCollision(GameMode& gameMode, objid obj1, objid obj2);
 

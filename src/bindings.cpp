@@ -185,6 +185,10 @@ void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool fo
   };
   pushHistory({ "playing", levelShortName }, true, options, forceReload);
 }
+void goToLevel(std::string levelShortName){
+  goToLevel(levelShortName, std::nullopt, true);
+}
+
 void goToLink(std::string link){
   pushHistory({ "loading" }, true, std::nullopt, false);
   gameapi -> schedule(0, true, 5000, NULL, [link](void*) -> void {
@@ -317,6 +321,26 @@ bool disableGameInput(){
 }
 
 
+bool autostartMode = true;
+void startMode(bool loadedScene){
+  if (autostartMode && loadedScene){
+    startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+  }else{
+    startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+  }
+}
+void stopMode(bool unloadedScene){
+  if (unloadedScene){
+    stopMode(sceneManagement.managedScene.value().gameMode);
+  }else{
+    stopMode(sceneManagement.managedScene.value().gameMode);
+  }
+}
+bool inMode(){
+  return sceneManagement.managedScene.has_value() && !isModeNone(sceneManagement.managedScene.value().gameMode);
+}
+
+
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, bool forceLoad){
   modlog("router scene route", std::string("path is: ") + currentPath);
 
@@ -355,7 +379,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     }else{
       modlog("router scene route unload", sceneManagement.managedScene.value().path);
       if (sceneManagement.managedScene.value().id.has_value()){
-        stopMode(sceneManagement.managedScene.value().gameMode);
+        stopMode(true);
         auto sceneFileName = gameapi -> listSceneFiles(sceneManagement.managedScene.value().id.value()).at(0);
         auto sceneName = gameapi -> sceneNameById(sceneManagement.managedScene.value().id.value());
         modlog("router scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
@@ -396,7 +420,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     };
     sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     modlog("router scene route load", sceneManagement.managedScene.value().path);
-    startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+    startMode(true);
   }
 }
 
@@ -750,10 +774,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       levelShortcutToLoad = getArgOption("level");;
     }else if (args.find("route") == args.end()){
       pushHistory({ "mainmenu" }, true);
-    }else{
-      pushHistory(split(args.at("route"), '/'), true);
     }
-
+    
     loadDialogTree();
 
     soundData = createSoundData(gameapi -> rootSceneId());
@@ -967,7 +989,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     
       //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
       std::optional<glm::vec2> mainUiCursorCoord;
-      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData.uiContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord);
+
+      bool disableUiContent = !inMode();
+      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData.uiContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord, disableUiContent);
+      
 
       onInGameUiFrame(uiStateContext, inGameUi, uiData.uiContext, std::nullopt, ndiCoord);
     
@@ -1125,10 +1150,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       saveGunTransform(getWeaponState(weapons, controlledPlayer.entityId.value()).weaponValues);
     }
 
-    if (key == "reset"){
-      pushHistory({ "mainmenu" }, true);
-      return;
-    }
     if (key == "reload-config:levels"){
       sceneManagement.levels = loadLevels();
       return;

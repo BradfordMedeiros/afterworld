@@ -380,7 +380,7 @@ ImageList loadImageListTextures(){
 
 
 static bool firstTime = true;
-HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor){
+HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode){
   UiState& uiState = uiStateContext.uiState;
   commonState = &uiState;
 
@@ -450,8 +450,11 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
   };
   resetMenuItemMappingId();
 
-  auto routerProps = createRouterProps(*(uiStateContext.routerHistory), uiContext, selectedId);
-  router.draw(drawTools, routerProps);
+  if (!editorMode){
+    auto routerProps = createRouterProps(*(uiStateContext.routerHistory), uiContext, selectedId);
+    router.draw(drawTools, routerProps);    
+  }
+
 
   {
     Props defaultProps {
