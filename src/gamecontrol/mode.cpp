@@ -5,8 +5,30 @@ extern GameTypes gametypeSystem;
 void inputOverride();
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
 
+std::string modeTypeString(GameMode& gameMode){
+  auto gamemodeFps = std::get_if<GameModeFps>(&gameMode);
+  if (gamemodeFps){
+    return "fps";
+  }
+  auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
+  if (gamemodeBall){
+    return "ball";
+  }
+  auto gamemodeVideo = std::get_if<GameModeVideo>(&gameMode);
+  if (gamemodeVideo){
+    return "video";
+  }
+
+  auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
+  if (gamemodeNone){
+    return "none";
+  }
+  return "[unknown]";
+}
+
+
 void startMode(GameMode& gameMode, objid sceneId){
-  std::cout << "mode: start" << std::endl;
+  std::cout << "mode: start: " << modeTypeString(gameMode) << std::endl;
 
   auto& allPlayers = getPlayers();
   for (auto& player : allPlayers){

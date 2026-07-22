@@ -36,6 +36,7 @@ struct ScenarioOptions {
 struct SceneRouterPath {
   std::vector<std::string> paths;
   std::optional<std::function<SceneLoadInfo(std::vector<std::string> params)>> scene;
+  std::optional<std::function<std::optional<SceneLoadInfo>(std::vector<std::string> params)>> additionalScene;
   std::optional<std::function<ScenarioOptions(std::vector<std::string> params)>> scenarioOptions;
   std::function<GameMode(std::vector<std::string> params)> getGameMode = [](std::vector<std::string> params) -> GameMode { return GameModeNone{}; };
 };

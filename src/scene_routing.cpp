@@ -10,6 +10,8 @@ GameMode gamemodeByShortcutName(std::string shortcut);
 struct LevelInfo {
   std::string filepath;
   std::vector<std::vector<std::string>> additionalTokens;
+
+  std::optional<std::string> additionalFilepath;
 };
 std::optional<LevelInfo> levelByShortcutName(std::string shortcut);
 ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut);
@@ -164,6 +166,18 @@ std::vector<SceneRouterPath> routerPaths = {
         .additionalTokens = sceneFile.value().additionalTokens,
       };
     },
+    .additionalScene = [](std::vector<std::string> params) -> std::optional<SceneLoadInfo> {
+      auto sceneFile = levelByShortcutName(params.at(0));
+      modassert(sceneFile.has_value(), std::string("no scene file for: ") + params.at(0));
+
+      std::cout << "file add: " << print(sceneFile.value().additionalFilepath) << std::endl;
+      if (!sceneFile.value().additionalFilepath.has_value()){
+        return std::nullopt;
+      }
+      return SceneLoadInfo {
+        .sceneFile = sceneFile.value().additionalFilepath.value(),
+      };
+    },
     .scenarioOptions = [](std::vector<std::string> params) -> ScenarioOptions {
       return scenarioOptionsByShortcutName(params.at(0));
     },
@@ -223,6 +237,7 @@ std::vector<SceneRouterPath> routerPaths = {
 struct RawLevelData {
   std::string name;
   std::string filepath;
+  std::optional<std::string> additionalFilepath;
   std::string description;
   std::string image;
   std::string shortcut;
@@ -296,6 +311,12 @@ std::vector<RawLevelData> getRawLevelData(){
     bool mapExists = fileExistsFromPackage(mapName);
     std::cout << "dyn map: " << mapName << ", exists = " << mapExists << std::endl;
       
+    std::optional<std::string> additionalSceneFilepath = filePathData.dirPath + "/items.rawscene2";
+    bool additionalSceneExists = fileExistsFromPackage(additionalSceneFilepath.value());
+    if (!additionalSceneExists){
+      additionalSceneFilepath = std::nullopt;
+    }
+
     glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
     glm::vec3 skyboxColor(0.8f, 0.8f, 0.8f);
     std::string skybox("../gameresources/skybox/storm");
@@ -327,6 +348,7 @@ std::vector<RawLevelData> getRawLevelData(){
     levelData.push_back(RawLevelData {
       .name = levelPathData.filename,
       .filepath = rawsceneFile,
+      .additionalFilepath = additionalSceneFilepath,
       .description = description,
       .image = image,
       .shortcut = levelPathData.filename,
@@ -392,6 +414,7 @@ std::optional<LevelInfo> levelByShortcutName(std::string shortcut){
       return LevelInfo {
         .filepath = rawLevel.filepath,
         .additionalTokens = rawLevel.additionalTokens,
+        .additionalFilepath = rawLevel.additionalFilepath,
       };
     }
   }

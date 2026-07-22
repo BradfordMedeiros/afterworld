@@ -54,6 +54,7 @@ std::optional<SceneRouterOptions*> currentRoute;
 
 struct ManagedScene {
   std::optional<objid> id; 
+  std::optional<objid> additionalId;
   int index;
   std::string path;
   std::optional<std::string> sceneFile;
@@ -351,6 +352,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   //modassert(router.has_value(), std::string("no router for path: ") + currentPath);
 
   std::optional<SceneLoadInfo> sceneToLoad;
+  std::optional<SceneLoadInfo> additionalSceneToLoad;
   std::optional<ScenarioOptions> scenarioOptions;
 
   int matchedRouterOption = 0;
@@ -363,6 +365,10 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   if (router.has_value() && router.value() -> scene.has_value()){
     sceneToLoad = router.value() -> scene.value()(params);
     modlog("router scene route load", sceneToLoad.value().sceneFile);
+  }
+  if (router.has_value() && router.value() -> additionalScene.has_value()){
+    additionalSceneToLoad = router.value() -> additionalScene.value()(params);
+    modlog("router scene route load additional", sceneToLoad.value().sceneFile);
   }
   if (router.has_value() && router.value() -> scenarioOptions.has_value()){
     scenarioOptions = router.value() -> scenarioOptions.value()(params);
@@ -385,6 +391,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
         modlog("router scene route unloading", std::to_string(sceneManagement.managedScene.value().id.value()) + std::string(" ") + print(sceneName) + std::string(" ") + sceneFileName);
         gameapi -> unloadScene(sceneManagement.managedScene.value().id.value());
       }
+      if (sceneManagement.managedScene.value().additionalId.has_value()){
+        gameapi -> unloadScene(sceneManagement.managedScene.value().additionalId.value());
+      }
+
+
       sceneManagement.managedScene = std::nullopt;
       sceneManagement.changedLevelFrame = gameapi -> currentFrame();
     }
@@ -399,8 +410,12 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       }else{
         std::cout << "additional tokens: " << "none" << std::endl;
       }
-
       sceneId = gameapi -> loadScene(sceneToLoad.value().sceneFile, sceneToLoad.value().additionalTokens, std::nullopt, {});
+    }
+
+    std::optional<objid> additionalSceneId;
+    if (additionalSceneToLoad.has_value()){
+      additionalSceneId = gameapi -> loadScene(additionalSceneToLoad.value().sceneFile, additionalSceneToLoad.value().additionalTokens, std::nullopt, {});
     }
     
     static ScenarioOptions defaultSettings {
@@ -412,6 +427,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     
     sceneManagement.managedScene = ManagedScene {
       .id = sceneId,
+      .additionalId = additionalSceneId,
       .index = currentIndex,
       .path = currentPath,
       .sceneFile = sceneToLoad.value().sceneFile,
