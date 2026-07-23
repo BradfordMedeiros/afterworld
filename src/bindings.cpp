@@ -113,6 +113,16 @@ void setLifetimeObject(objid id, std::function<void()> fn, std::string hint){
   };
 }
 
+void setSkybox(std::string skybox){
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "skybox",
+      .attribute = "texture",
+      .value = skybox,
+    }
+  });  
+}
+
 void setScenarioOptions(ScenarioOptions& options){
   gameapi -> setWorldState({ 
     ObjectValue {
@@ -124,13 +134,10 @@ void setScenarioOptions(ScenarioOptions& options){
       .object = "skybox",
       .attribute = "color",
       .value = options.skyboxColor,
-    },
-    ObjectValue {
-      .object = "skybox",
-      .attribute = "texture",
-      .value = options.skybox,
-    },
+    }
   });
+  setSkybox(options.skybox);
+
   defaultAudioClipPath = options.audioClipPath;
   modlog("set scenario options: ambient", print(options.ambientLight));
   modlog("set scenario options: skyboxColor", print(options.skyboxColor));
@@ -195,6 +202,52 @@ void goToLink(std::string link){
   gameapi -> schedule(0, true, 5000, NULL, [link](void*) -> void {
     goToLevel(link, std::nullopt, false);
   });
+}
+
+std::vector<std::string> uiListLevels(){
+  static auto levelData = getRawLevelData();
+
+  std::vector<std::string> levelNames;
+  for (auto& level : levelData){
+    levelNames.push_back(level.shortcut);
+  }
+  return levelNames;
+}
+std::vector<UiLevelInfo> uiListLevelInfo(){
+  static auto levelData = getRawLevelData();
+
+  std::vector<UiLevelInfo> levels;
+  for (auto& level : levelData){
+    levels.push_back(UiLevelInfo {
+      .levelName = level.name,
+      .description = level.description,
+    });    
+  }
+  return levels;
+}
+
+void uiSetLevelInfo(UiLevelInfo uiLevelInfo){
+    std::cout << "uiSetLevelInfo: " << uiLevelInfo.levelName << ", description = " << uiLevelInfo.description << std::endl;
+}
+
+std::optional<std::string> uiCurrentLevel(){
+  return std::nullopt;
+}
+
+std::vector<std::string> uiListLevelSkyboxes(){
+  return { 
+    "../gameresources/skybox/space1",
+    "./res/textures/skyboxs/desert/",
+    "../gameresources/skybox/storm",
+  };
+}
+void uiSetLevelSkybox(std::string level, std::string skybox){
+  setSkybox(skybox);
+}
+void uiGoToLevel(std::optional<std::string> level){
+  if (level.has_value()){
+    goToLevel(level.value(), std::nullopt, true);
+  }
 }
 
 std::optional<PauseOverride> pauseOverride;
@@ -322,8 +375,9 @@ bool disableGameInput(){
 }
 
 
-bool autostartMode = true;
+bool autostartMode = false;
 void startMode(bool loadedScene){
+  return;
   if (autostartMode && loadedScene){
     startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
   }else{

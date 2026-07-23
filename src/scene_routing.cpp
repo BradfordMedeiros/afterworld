@@ -234,20 +234,6 @@ std::vector<SceneRouterPath> routerPaths = {
 
 
 //////////////////////////////////// LEVEL QUERY CODE ////////////////////////////////////
-struct RawLevelData {
-  std::string name;
-  std::string filepath;
-  std::optional<std::string> additionalFilepath;
-  std::string description;
-  std::string image;
-  std::string shortcut;
-  glm::vec3 ambientLight;
-  glm::vec3 skyboxColor;
-  std::string skybox;
-  std::string audioClipPath;
-  std::string mode;
-  std::vector<std::vector<std::string>> additionalTokens;
-};
 
 
 // Kind of violating the cscript interface but...idk if i care...it's not really a game logic state thing, just utility
@@ -317,10 +303,30 @@ std::vector<RawLevelData> getRawLevelData(){
       additionalSceneFilepath = std::nullopt;
     }
 
+    std::optional<std::string> configFile = filePathData.dirPath + "/config.json";
+    bool configExists = fileExistsFromPackage(configFile.value());
+    if (!configExists){
+      configFile = std::nullopt;
+    }
+
     glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
     glm::vec3 skyboxColor(0.8f, 0.8f, 0.8f);
     std::string skybox("../gameresources/skybox/storm");
     std::string description("[no description]");
+    if (configFile.has_value()){
+      bool success = true;
+      auto data = gameapi -> loadFromJsonFile2(configFile.value(), &success, false);
+     // typedef std::variant<std::string, std::vector<std::string>, bool, int, float> JsonType;
+      if (data.find("skybox") != data.end()){
+        auto skyboxPtr = std::get_if<std::string>(&data.at("skybox"));
+        skybox = *skyboxPtr; 
+      }
+    }
+
+    //void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
+    //std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> (*loadFromJsonFile)(std::string file, bool* success);
+
+
 
     if (mapExists){
       auto mapData = parseMapData(mapName);
@@ -332,11 +338,6 @@ std::vector<RawLevelData> getRawLevelData(){
       auto skyboxcolor = getVec3Value(entity, "skyboxcolor");
       if (skyboxcolor.has_value()){
         skyboxColor = skyboxcolor.value();
-      }
-
-      auto skyboxAttr = getValue(entity, "skybox");
-      if (skyboxAttr.has_value()){
-        skybox = *skyboxAttr.value();
       }
 
       auto descriptionAttr = getValue(entity, "description");

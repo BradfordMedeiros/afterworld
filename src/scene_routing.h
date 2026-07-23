@@ -47,6 +47,21 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
 // level specific code
 std::vector<Level> loadLevels();
 
+struct RawLevelData {
+  std::string name;
+  std::string filepath;
+  std::optional<std::string> additionalFilepath;
+  std::string description;
+  std::string image;
+  std::string shortcut;
+  glm::vec3 ambientLight;
+  glm::vec3 skyboxColor;
+  std::string skybox;
+  std::string audioClipPath;
+  std::string mode;
+  std::vector<std::vector<std::string>> additionalTokens;
+};
+std::vector<RawLevelData> getRawLevelData();
 
 
 #endif 
