@@ -244,39 +244,7 @@ MapData parseMapData(std::string file);
 std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name);
 
 std::vector<RawLevelData> getRawLevelData(){
-  auto query = gameapi -> compileSqlQuery("select name, filepath, description, image, shortcut, ambient, skyboxcolor, skybox, audio, attr, mode from levels", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-
   std::vector<RawLevelData> levelData;
-  for (auto& row : result){
-    RawLevelData rawLevelData {
-      .name = row.at(0),
-      .filepath = row.at(1),
-      .description = row.at(2),
-      .image = row.at(3),
-      .shortcut = row.at(4),
-      .ambientLight = parseVec3(row.at(5)),
-      .skyboxColor = parseVec3(row.at(6)),
-      .skybox = row.at(7),
-      .audioClipPath = row.at(8),
-      .mode = row.at(10),
-    };
-    {
-      std::string additionalTokensStr = row.at(9);
-      auto rowData = split(additionalTokensStr, ';');
-      std::vector<std::vector<std::string>> additionalTokens;
-      for (auto& tokenStr: rowData){
-        auto values = split(tokenStr, ':');
-        modassert(values.size() == 3, "invalid number of attr in level");
-        additionalTokens.push_back(values);
-      }
-      rawLevelData.additionalTokens = additionalTokens;
-    }
-    levelData.push_back(rawLevelData);
-  }
-
 
   auto extraMaps = listFilesWithExtensionsFromPackage("../afterworld/scenes/levels/worlds/", { "rawscene" });
   for (auto& rawsceneFile : extraMaps){
@@ -286,9 +254,7 @@ std::vector<RawLevelData> getRawLevelData(){
 
     auto levelName = levelPathData.filename;
     auto worldName = worldPathData.filename;
-    if (worldName == "core" || worldName == "debug"){
-      continue;
-    }
+ 
     auto imageName = filePathData.dirPath + "/map.png";
     auto image = fileExistsFromPackage(imageName) ? imageName : "./res/textures/wood.jpg";
     std::cout << "dyn image: " << imageName << ", exists = " << fileExistsFromPackage(imageName) << std::endl;
@@ -310,7 +276,7 @@ std::vector<RawLevelData> getRawLevelData(){
     }
 
     glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
-    glm::vec3 skyboxColor(0.8f, 0.8f, 0.8f);
+    glm::vec3 skyboxColor(1.f, 1.f, 1.f);
     std::string skybox("../gameresources/skybox/storm");
     std::string description("[no description]");
     if (configFile.has_value()){
@@ -323,28 +289,6 @@ std::vector<RawLevelData> getRawLevelData(){
       }
     }
 
-    //void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
-    //std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> (*loadFromJsonFile)(std::string file, bool* success);
-
-
-
-    if (mapExists){
-      auto mapData = parseMapData(mapName);
-      auto& entity = getEntityByName(mapData, "worldspawn");
-      auto ambient = getVec3Value(entity, "ambient");
-      if (ambient.has_value()){
-        ambientLight = ambient.value();
-      }
-      auto skyboxcolor = getVec3Value(entity, "skyboxcolor");
-      if (skyboxcolor.has_value()){
-        skyboxColor = skyboxcolor.value();
-      }
-
-      auto descriptionAttr = getValue(entity, "description");
-      if (descriptionAttr.has_value()){
-        description = *descriptionAttr.value();
-      }
-    }
 
     levelData.push_back(RawLevelData {
       .name = levelPathData.filename,
@@ -358,12 +302,20 @@ std::vector<RawLevelData> getRawLevelData(){
       .skybox = skybox,
       .audioClipPath = "../gameresources/sound/rain.wav",
       .mode = "ball",
-      .additionalTokens = {},      
+      .additionalTokens = {},
+
+      .configFile = configFile,   
     });
   }
 
 
   return levelData;
+}
+
+void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
+  if (updateLevel.description.has_value()){
+
+  }
 }
 
 GameMode gamemodeByShortcutName(std::string shortcut){

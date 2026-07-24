@@ -60,8 +60,15 @@ struct RawLevelData {
   std::string audioClipPath;
   std::string mode;
   std::vector<std::vector<std::string>> additionalTokens;
+
+  std::optional<std::string> configFile;
 };
 std::vector<RawLevelData> getRawLevelData();
 
+struct UpdateLevel {
+  std::optional<std::string> skybox;
+  std::optional<std::string> description;
+};
+void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
 
 #endif 
