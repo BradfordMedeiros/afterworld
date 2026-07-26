@@ -228,8 +228,10 @@ std::vector<UiLevelInfo> uiListLevelInfo(){
 
 void uiSetLevelInfo(UiLevelInfo uiLevelInfo){
   updateRawLevelData(uiLevelInfo.levelName, UpdateLevel {
-    //.skybox = 
+    .skybox = uiLevelInfo.skybox,
     .description = uiLevelInfo.description, 
+    .ambient = uiLevelInfo.ambient,
+    .skyboxColor = uiLevelInfo.skyboxColor,
   });
 }
 
@@ -380,7 +382,7 @@ bool disableGameInput(){
 
 bool autostartMode = true;
 void startMode(bool loadedScene){
-  //return;
+  return;
   if (autostartMode && loadedScene){
     startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
   }else{
@@ -395,6 +397,7 @@ void stopMode(bool unloadedScene){
   }
 }
 bool inMode(){
+  return false;
   return sceneManagement.managedScene.has_value() && !isModeNone(sceneManagement.managedScene.value().gameMode);
 }
 
@@ -1063,7 +1066,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       //std::optional<glm::vec2> mainUiCursorCoord = glm::vec2(getGlobalState().xNdc, getGlobalState().yNdc);
       std::optional<glm::vec2> mainUiCursorCoord;
 
-      bool disableUiContent = false;
+      bool disableUiContent = !inMode();
       uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData.uiContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord, disableUiContent);
       
 

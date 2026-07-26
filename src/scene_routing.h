@@ -61,13 +61,16 @@ struct RawLevelData {
   std::string mode;
   std::vector<std::vector<std::string>> additionalTokens;
 
-  std::optional<std::string> configFile;
+  std::string configFile;
+  bool configFileExists;
 };
 std::vector<RawLevelData> getRawLevelData();
 
 struct UpdateLevel {
   std::optional<std::string> skybox;
   std::optional<std::string> description;
+  std::optional<glm::vec3> ambient;
+  std::optional<glm::vec3> skyboxColor;
 };
 void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
 

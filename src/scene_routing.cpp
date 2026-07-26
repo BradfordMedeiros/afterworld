@@ -269,23 +269,41 @@ std::vector<RawLevelData> getRawLevelData(){
       additionalSceneFilepath = std::nullopt;
     }
 
-    std::optional<std::string> configFile = filePathData.dirPath + "/config.json";
-    bool configExists = fileExistsFromPackage(configFile.value());
-    if (!configExists){
-      configFile = std::nullopt;
-    }
+    std::string configFile = filePathData.dirPath + "/config.json";
+    bool configExists = fileExistsFromPackage(configFile);
+    
 
     glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
     glm::vec3 skyboxColor(1.f, 1.f, 1.f);
     std::string skybox("../gameresources/skybox/storm");
     std::string description("[no description]");
-    if (configFile.has_value()){
+    std::string mode("ball");
+    if (configExists){
       bool success = true;
-      auto data = gameapi -> loadFromJsonFile2(configFile.value(), &success, false);
-     // typedef std::variant<std::string, std::vector<std::string>, bool, int, float> JsonType;
+      auto data = gameapi -> loadFromJsonFile2(configFile, &success, false);
+      modassert(success, "error parsing json");
+
+      if (data.find("ambient") != data.end()){
+        auto ambientPtr = std::get_if<std::vector<float>>(&data.at("ambient"));
+        modassert(ambientPtr -> size() == 3, std::string("unexpected ambientPtr value, got size = ") + std::to_string(ambientPtr -> size()));
+        ambientLight = glm::vec3(ambientPtr -> at(0), ambientPtr -> at(1), ambientPtr -> at(2));
+      }
+      if (data.find("skyboxcolor") != data.end()){
+        auto skyboxColorPtr = std::get_if<std::vector<float>>(&data.at("skyboxcolor"));
+        modassert(skyboxColorPtr -> size() == 3, std::string("unexpected skybox value, got size = ") + std::to_string(skyboxColorPtr -> size()));
+        skyboxColor = glm::vec3(skyboxColorPtr -> at(0), skyboxColorPtr -> at(1), skyboxColorPtr -> at(2));
+      }
       if (data.find("skybox") != data.end()){
         auto skyboxPtr = std::get_if<std::string>(&data.at("skybox"));
         skybox = *skyboxPtr; 
+      }
+      if (data.find("description") != data.end()){
+        auto descriptionPtr = std::get_if<std::string>(&data.at("description"));
+        description = *descriptionPtr;
+      }
+      if (data.find("mode") != data.end()){
+        auto modePtr = std::get_if<std::string>(&data.at("mode"));
+        mode = *modePtr;
       }
     }
 
@@ -301,10 +319,11 @@ std::vector<RawLevelData> getRawLevelData(){
       .skyboxColor = skyboxColor,
       .skybox = skybox,
       .audioClipPath = "../gameresources/sound/rain.wav",
-      .mode = "ball",
+      .mode = mode,
       .additionalTokens = {},
 
       .configFile = configFile,   
+      .configFileExists = configExists,
     });
   }
 
@@ -312,10 +331,48 @@ std::vector<RawLevelData> getRawLevelData(){
   return levelData;
 }
 
+std::optional<RawLevelData> currLevelData(std::string levelName){
+  auto allLevels = getRawLevelData();
+  for (auto& level : allLevels){
+    if (level.name == levelName){
+      return level;
+    }
+  }
+  return std::nullopt;
+}
+
 void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
-  if (updateLevel.description.has_value()){
+  auto oldLevelData = currLevelData(levelName);
+  if (oldLevelData.has_value()){
+
+    auto level = oldLevelData.value();
+
+  
+    std::unordered_map<std::string, JsonType> data;
+    if (level.configFileExists){
+      bool success = true;
+      data = gameapi -> loadFromJsonFile2(level.configFile, &success, false);
+      modassert(success, "error parsing json");
+    }
+
+    if (updateLevel.description.has_value()){
+      data["description"] = updateLevel.description.value();
+    }
+    if (updateLevel.skybox.has_value()){
+      data["skybox"] = updateLevel.skybox.value();
+    }
+
+    if (updateLevel.ambient.has_value()){
+      data["ambient"] = std::vector<float>({ updateLevel.ambient.value().r,  updateLevel.ambient.value().g, updateLevel.ambient.value().b });
+    }
+
+    if (updateLevel.skyboxColor.has_value()){
+      data["skyboxcolor"] = std::vector<float>({ updateLevel.skyboxColor.value().r,  updateLevel.skyboxColor.value().g, updateLevel.skyboxColor.value().b });
+    }
+    gameapi -> saveToJsonFile2(level.configFile, data);
 
   }
+
 }
 
 GameMode gamemodeByShortcutName(std::string shortcut){

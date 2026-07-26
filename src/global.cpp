@@ -17,11 +17,7 @@ void toggleKeyboard(){
 }
 
 bool queryConsoleCanEnable(){
-  auto query = gameapi -> compileSqlQuery("select console from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0) == "true";
+  return true;
 }
 bool showConsole(){
   static bool canEnableConsole = queryConsoleCanEnable();

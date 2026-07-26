@@ -3,14 +3,10 @@
 extern CustomApiBindings* gameapi;
 
 void initStyles(){
-  auto query = gameapi -> compileSqlQuery("select style-primary, style-secondary, style-border, style-highlight from session", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  auto primaryColor = parseVec4(result.at(0).at(0));
-  auto secondaryColor = parseVec4(result.at(0).at(1));
-  auto borderColor = parseVec4(result.at(0).at(2));
-  auto highlightColor = parseVec4(result.at(0).at(3));
+  auto primaryColor = glm::vec4(0.f, 0.f, 0.f, 0.5f);
+  auto secondaryColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);
+  auto borderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+  auto highlightColor = glm::vec4(0.f, 1.f, 0.f, 0.5f);
 
   styles.primaryColor = primaryColor;
   styles.secondaryColor = secondaryColor;

@@ -28,15 +28,6 @@ std::function<void(bool)> persistSql(std::string column, std::string enabled, st
   };
 };
 
-std::string getSqlValue(std::string column){
-  auto query = gameapi -> compileSqlQuery("select ? from settings", { column });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  return result.at(0).at(0).c_str();
-}
-
-
 float getWorldStateFloat(std::string object, std::string attribute){
   auto valueAttr = dockConfigApi.getAttribute(object, attribute);
   float* floatPtr = std::get_if<float>(&valueAttr);
