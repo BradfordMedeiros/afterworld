@@ -1,5 +1,15 @@
 #include "./editorui.h"
 
+void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
+void setSkybox(std::string skybox);
+std::vector<std::string> uiListLevelSkyboxes(){
+  return { 
+    "../gameresources/skybox/space1",
+    "./res/textures/skyboxs/desert/",
+    "../gameresources/skybox/storm",
+  };
+}
+
 void renderBallGameplay(bool includePanel){
   if (includePanel){
     ImGui::Begin("Ball Gameplay");
@@ -20,7 +30,6 @@ void renderBallGameplay(bool includePanel){
     ImGui::End();
   }
 }
-
 
 void renderMovementPanel(bool includePanel){
 
@@ -406,6 +415,7 @@ void renderTriggerPanel(bool includePanel){
   }   
 }
 
+
 void renderLevelPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Levels");
@@ -416,20 +426,20 @@ void renderLevelPanel(bool includePanel){
   {
 
     static int selectedLevel = -1;
-    auto levels = uiListLevelInfo();
+    auto levels = getRawLevelData();
 
     std::string selectedLevelStr = "[no level]";
     if (selectedLevel != -1){
-      selectedLevelStr = levels.at(selectedLevel).levelName;
+      selectedLevelStr = levels.at(selectedLevel).name;
     }
     
-    static std::string description = selectedLevel >= 0 ? levels.at(selectedLevel).description.value() : std::string("No description");
+    static std::string description = selectedLevel >= 0 ? levels.at(selectedLevel).description : std::string("No description");
     ImGui::InputText("Name", &description);
     
     if (ImGui::BeginCombo("Level", selectedLevelStr.c_str())){
           for (int i = 0; i < levels.size(); i++){
               bool selected = (selectedLevel == i);
-              if (ImGui::Selectable(levels.at(i).levelName.c_str(), selected)){
+              if (ImGui::Selectable(levels.at(i).name.c_str(), selected)){
                 selectedLevel = i;
               }
               if (selected){
@@ -439,7 +449,7 @@ void renderLevelPanel(bool includePanel){
           ImGui::EndCombo();
     }
     if(ImGui::Button("Load Level")){
-      uiGoToLevel(selectedLevelStr);
+    	goToLevel(selectedLevelStr, std::nullopt, true);
     }
 
     std::vector<std::string> skyboxs = uiListLevelSkyboxes();
@@ -463,16 +473,16 @@ void renderLevelPanel(bool includePanel){
       }
       if(ImGui::Button("Set skybox")){
         if (selectedSkybox != -1){
-          uiSetLevelSkybox("mylevel", skyboxs.at(selectedSkybox));
+        	setSkybox(skyboxs.at(selectedSkybox));
         }
       }
     }
 
-    auto skybox = skyboxColor();
+    auto skyboxCol = skyboxColor();
     auto ambient = ambientLight();
 
     {
-      float color[3] = {skybox.r, skybox.g, skybox.b};
+      float color[3] = {skyboxCol.r, skyboxCol.g, skyboxCol.b};
       if (ImGui::ColorEdit3("Skybox Color", color)){
         setSkyboxColor(glm::vec3(color[0], color[1], color[2]));
       }
@@ -487,15 +497,16 @@ void renderLevelPanel(bool includePanel){
 
     if(ImGui::Button("Update")){
       /// needs to be moved 
-      std::cout << "uiSetLevelInfo here: " << description << std::endl;
-       UiLevelInfo newLevelInfo {
-          .levelName = selectedLevelStr,
-          .description = description,
-          .skybox = selectedSkyboxStr,
-          .ambient = ambient,
-          .skyboxColor = skybox,
-       };
-       uiSetLevelInfo(newLevelInfo);
+       std::cout << "uiSetLevelInfo here: " << description << std::endl;
+
+
+  	   updateRawLevelData(selectedLevelStr, UpdateLevel {
+  	     .skybox = selectedSkyboxStr,
+  	     .description = description, 
+  	     .ambient = ambient,
+  	     .skyboxColor = skyboxCol,
+  	   });
+
     }
   }
 
@@ -507,7 +518,6 @@ void renderLevelPanel(bool includePanel){
     ImGui::End();
   }     
 }
-
 
 void initImGuiGameUi(){
 	registerWidget("testpanel", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {

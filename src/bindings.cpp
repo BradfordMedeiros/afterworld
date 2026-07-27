@@ -204,56 +204,6 @@ void goToLink(std::string link){
   });
 }
 
-std::vector<std::string> uiListLevels(){
-  static auto levelData = getRawLevelData();
-
-  std::vector<std::string> levelNames;
-  for (auto& level : levelData){
-    levelNames.push_back(level.shortcut);
-  }
-  return levelNames;
-}
-std::vector<UiLevelInfo> uiListLevelInfo(){
-  static auto levelData = getRawLevelData();
-
-  std::vector<UiLevelInfo> levels;
-  for (auto& level : levelData){
-    levels.push_back(UiLevelInfo {
-      .levelName = level.name,
-      .description = level.description,
-    });    
-  }
-  return levels;
-}
-
-void uiSetLevelInfo(UiLevelInfo uiLevelInfo){
-  updateRawLevelData(uiLevelInfo.levelName, UpdateLevel {
-    .skybox = uiLevelInfo.skybox,
-    .description = uiLevelInfo.description, 
-    .ambient = uiLevelInfo.ambient,
-    .skyboxColor = uiLevelInfo.skyboxColor,
-  });
-}
-
-std::optional<std::string> uiCurrentLevel(){
-  return std::nullopt;
-}
-
-std::vector<std::string> uiListLevelSkyboxes(){
-  return { 
-    "../gameresources/skybox/space1",
-    "./res/textures/skyboxs/desert/",
-    "../gameresources/skybox/storm",
-  };
-}
-void uiSetLevelSkybox(std::string level, std::string skybox){
-  setSkybox(skybox);
-}
-void uiGoToLevel(std::optional<std::string> level){
-  if (level.has_value()){
-    goToLevel(level.value(), std::nullopt, true);
-  }
-}
 
 std::optional<PauseOverride> pauseOverride;
 
