@@ -552,6 +552,12 @@ void initImGuiGameUi(){
     registerWidget("level", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderLevelPanel(includePanel);
     });   
+
+    registerAction("Start Ball", "Mode", []() -> void {
+      modassert(false, "start ball mode");
+    });
+    registerAction("Stop", "Mode", []() -> void {});
+
 }
 
 
