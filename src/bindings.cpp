@@ -827,6 +827,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     validateAnimationControllerAnimations = getArgEnabled("validate-animation");
 
     initSettings();
+    initImGuiGameUi();
     registerOnRouteChanged(
       getMainRouterHistory(),
       [](bool forceLoad) -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
