@@ -520,7 +520,7 @@ void renderLevelPanel(bool includePanel){
 }
 
 void initImGuiGameUi(){
-	registerWidget("testpanel", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+	registerWidget("testpanel", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
   		if (includePanel){
   		  ImGui::Begin("testpanel");
   		}
@@ -529,27 +529,27 @@ void initImGuiGameUi(){
   		}   
     });
 
-    registerWidget("Game - Ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Game - Ball", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderBallGameplay(includePanel);
     });     
 
-    registerWidget("FPS - Movement", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("FPS - Movement", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderMovementPanel(includePanel);
     });                 
 
-    registerWidget("FPS - Weapons", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("FPS - Weapons", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderWeaponsPanel(includePanel);
     });       
 
-    registerWidget("FPS - Spawn", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("FPS - Spawn", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderSpawnPanel(includePanel);
     });     
 
-    registerWidget("Trigger", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Trigger", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderTriggerPanel(includePanel);
     });   
         
-    registerWidget("level", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("level", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderLevelPanel(includePanel);
     });   
 }
