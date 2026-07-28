@@ -1,6 +1,7 @@
 #include "./vehicles.h"
 
 extern CustomApiBindings* gameapi;
+extern Vehicles vehicles;
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 
@@ -195,4 +196,21 @@ std::optional<VehicleBall*> getVehicleBall(Vehicles& vehicles, objid vehicleId){
     return vehicleBall;
   }
   return std::nullopt;
+}
+
+
+void reloadVehicleSettings(){
+  for (auto &[id, vehicle] :  vehicles.vehicles){
+    {
+      VehicleShip* vehicleShip = std::get_if<VehicleShip>(&vehicle.vehicle);
+      if (vehicleShip){
+      }
+    }
+    {
+      VehicleBall* vehicleBall = std::get_if<VehicleBall>(&vehicle.vehicle);
+      if (vehicleBall){
+        reloadVehiclePhysics(id, *vehicleBall);
+      }
+    }
+  }
 }

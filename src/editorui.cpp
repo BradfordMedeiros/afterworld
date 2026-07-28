@@ -1,6 +1,12 @@
 #include "./editorui.h"
 
+void startMode(bool loadedScene);
+void stopMode(bool unloadedScene);
+void reloadVehicleSettings();
+
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
+void resetLevel();
+
 void setSkybox(std::string skybox);
 std::vector<std::string> uiListLevelSkyboxes(){
   return { 
@@ -16,15 +22,33 @@ void renderBallGameplay(bool includePanel){
   }
   static bool doThing = false;
 
+  auto ballConfig = getBallConfig();
+
+  //BallConfig getBallConfig();
+  //void setBallConfig(BallConfig ballConfig);
+
+/*
+struct BallConfig {
+  float magnitude;
+  float torque;
+  float jumpMagnitude;
+  float mass;
+  float friction;
+  float restitution;
+  float gravity;
+};*/
+
   static float speed = 0.f;
-  ImGui::DragFloat("jump", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("magnitude", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("torque", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("jump-magnitude", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("mass", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("friction", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("restitution", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("gravity", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("magnitude", &ballConfig.magnitude, 0.0f, 200.0f);
+  ImGui::DragFloat("torque", &ballConfig.torque, 0.0f, 10.0f);
+  ImGui::DragFloat("jump-magnitude", &ballConfig.jumpMagnitude, 0.0f, 10.0f);
+  ImGui::DragFloat("mass", &ballConfig.mass, 0.0f, 10.0f);
+  ImGui::DragFloat("friction", &ballConfig.friction, 0.0f, 10.0f);
+  ImGui::DragFloat("restitution", &ballConfig.restitution, 0.0f, 10.0f);
+  ImGui::DragFloat("gravity", &ballConfig.gravity, 0.0f, 10.0f);
+
+  setBallConfig(ballConfig);
+  reloadVehicleSettings();
 
   if (includePanel){
     ImGui::End();
@@ -553,10 +577,13 @@ void initImGuiGameUi(){
         renderLevelPanel(includePanel);
     });   
 
-    registerAction("Start Ball", "Mode", []() -> void {
-      modassert(false, "start ball mode");
+    registerAction("Start", "Mode", []() -> void {
+      startMode(false);
     });
-    registerAction("Stop", "Mode", []() -> void {});
+    registerAction("Stop", "Mode", []() -> void {
+      stopMode(false);
+      resetLevel();
+    });
 
 }
 

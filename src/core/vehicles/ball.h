@@ -13,10 +13,12 @@ struct BallConfig {
   float gravity;
 };
 
+BallConfig getBallConfig();
+void setBallConfig(BallConfig ballConfig);
+
 struct VehicleBall {
   objid id;
   objid innerObj;
-  BallConfig ballConfig;
   float jumpMultiplier = 1.f;
 
   // state
@@ -56,5 +58,7 @@ void setJumpMagMultiplier(VehicleBall& vehicleBall, float scale);
 
 std::optional<objid> getGroundedId(VehicleBall& vehicleBall);
 bool justGrounded(VehicleBall& vehicleBall);
+
+void reloadVehiclePhysics(objid id, VehicleBall& vehicleBall);
 
 #endif

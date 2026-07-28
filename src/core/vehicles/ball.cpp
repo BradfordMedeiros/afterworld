@@ -20,22 +20,29 @@ bool shouldAutolaunchGravityWell(objid managed);
 
 glm::vec3 getSurfaceVelocityModifiers(objid id);
 
+BallConfig ballConfig {
+  .magnitude = 100.f,
+  .torque = 50.f,
+  .jumpMagnitude = 100.f,
+  .mass = 10.f,
+  .friction = 1.f,
+  .restitution = 0.5f,
+  .gravity = -9.81f,
+};
+
+BallConfig getBallConfig(){
+  return ballConfig;
+}
+void setBallConfig(BallConfig newBallConfig){
+  ballConfig = newBallConfig;
+}
+
 VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state){
-  BallConfig ballConfig {
-    .magnitude = 100.f,
-    .torque = 50.f,
-    .jumpMagnitude = 100.f,
-    .mass = 10.f,
-    .friction = 1.f,
-    .restitution = 0.5f,
-    .gravity = -9.81f,
-  };
   auto innerObj = findChildObjBySuffix(vehicleId, "eye");
   modassert(innerObj.has_value(), "no eye for the vehicle");
   VehicleBall vehicleBall {
     .id = vehicleId,
     .innerObj = innerObj.value(),
-    .ballConfig = ballConfig,
     .isGrounded = false,
     .shouldJump = false,
     .shouldUsePowerUp = false,
@@ -71,7 +78,7 @@ void printBallDebug(VehicleBall& vehicleBall){
 }
 
 float getJumpImpulse(VehicleBall& vehicleBall){
-   auto jumpImpulse = vehicleBall.ballConfig.jumpMagnitude * vehicleBall.jumpMultiplier; 
+   auto jumpImpulse = ballConfig.jumpMagnitude * vehicleBall.jumpMultiplier; 
    return jumpImpulse;
 }
 
@@ -110,8 +117,8 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   //////////// CORE MOVEMENT ////////////
   std::cout << "onVehicleFrameBall onFrame" << std::endl;
   {
-    auto magnitude = vehicleBall.ballConfig.magnitude *    (vehicleBall.isGrounded ? 1.f : AERIAL_MAG_SCALE);
-    auto torqueMagnitude = vehicleBall.ballConfig.torque * (vehicleBall.isGrounded ? 1.f : AERIAL_TORQUE_SCALE);
+    auto magnitude = ballConfig.magnitude *    (vehicleBall.isGrounded ? 1.f : AERIAL_MAG_SCALE);
+    auto torqueMagnitude = ballConfig.torque * (vehicleBall.isGrounded ? 1.f : AERIAL_TORQUE_SCALE);
 
     glm::vec3 direction(0.f, 0.f, 0.f);
     if (controlParams.goForward){
@@ -210,11 +217,11 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
           gameapi -> applyImpulse(id, direction);
           vehicleBall.powerup = std::nullopt;
         }else if (vehicleBall.powerup.value().powerup == LOW_GRAVITY){
-          setGameObjectGravity(id, glm::vec3(0.f, 0.2f * vehicleBall.ballConfig.gravity, 0.f));
+          setGameObjectGravity(id, glm::vec3(0.f, 0.2f * ballConfig.gravity, 0.f));
           vehicleBall.powerup = std::nullopt;
         }else if (vehicleBall.powerup.value().powerup == REVERSE_GRAVITY){
           // This needs changes in the camera to feel correct
-          setGameObjectGravity(id, glm::vec3(0.f, -1.f * vehicleBall.ballConfig.gravity, 0.f));
+          setGameObjectGravity(id, glm::vec3(0.f, -1.f * ballConfig.gravity, 0.f));
           vehicleBall.powerup = std::nullopt;
         }else if (vehicleBall.powerup.value().powerup == TELEPORT){
           vehicleBall.teleportPosition =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get ball position for teleport");
@@ -330,4 +337,8 @@ std::optional<objid> getGroundedId(VehicleBall& vehicleBall){
 
 bool justGrounded(VehicleBall& vehicleBall){
   return vehicleBall.justGrounded;
+}
+
+void reloadVehiclePhysics(objid vehicleId, VehicleBall& vehicleBall){
+  setGameObjectPhysics(vehicleId, ballConfig.mass, ballConfig.restitution, ballConfig.friction, glm::vec3(0.f, ballConfig.gravity, 0.f));
 }

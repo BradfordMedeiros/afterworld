@@ -196,6 +196,18 @@ void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool fo
 void goToLevel(std::string levelShortName){
   goToLevel(levelShortName, std::nullopt, true);
 }
+void resetLevel(){
+  if (sceneManagement.managedScene.has_value()){
+    if (sceneManagement.managedScene.value().id.has_value()){
+      gameapi -> resetScene(sceneManagement.managedScene.value().id.value());
+    }
+    if (sceneManagement.managedScene.value().additionalId.has_value()){
+      gameapi -> resetScene(sceneManagement.managedScene.value().additionalId.value());
+    }
+    
+
+  }
+}
 
 void goToLink(std::string link){
   pushHistory({ "loading" }, true, std::nullopt, false);
@@ -224,13 +236,6 @@ void setEditorMode(){
   setGlobalModeValues(true);
 
   setPlayerFreeCamera(getDefaultPlayerIndex(), true);
-
-  bool liveEdit = false;
-  if (!liveEdit && sceneManagement.managedScene.has_value()){
-    if (sceneManagement.managedScene.value().id.has_value()){
-      gameapi -> resetScene(sceneManagement.managedScene.value().id.value());
-    }
-  }
 }
 
 void setNormalMode(){
@@ -330,13 +335,14 @@ bool disableGameInput(){
 }
 
 
-bool autostartMode = true;
+bool autostartMode = false;
 void startMode(bool loadedScene){
-  return;
-  if (autostartMode && loadedScene){
-    startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+  if (loadedScene){
+    if (autostartMode){
+      startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+    }
   }else{
-    startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+      startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
   }
 }
 void stopMode(bool unloadedScene){

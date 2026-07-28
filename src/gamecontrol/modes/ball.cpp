@@ -1090,7 +1090,7 @@ GameTypeInfo getBallMode(){
 	  	modeOptions.shouldReset = false;
 	  	modeOptions.didReset = false;
 
-			auto shaderId = gameapi -> shaderByName("../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl");
+			auto shaderId = gameapi -> shaderByName("default");
 			modassert(shaderId.has_value(), "could not find the ball shader");
 			modeOptions.ballShader = shaderId.value();
 
@@ -1120,7 +1120,7 @@ GameTypeInfo getBallMode(){
 				};
   			gameapi -> setShaderUniform(modeOptions.ballShader, uniformTextureData);
 
-  			std::string texName("./res/textures/hexglow.png");
+  			std::string texName("./res/textures/wood.jpg");
   			auto textureSampleId = gameapi -> getTextureSamplerId(texName);
   			gameapi -> bindTexture(modeOptions.ballShader, 10, textureSampleId.value());
 

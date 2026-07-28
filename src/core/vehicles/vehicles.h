@@ -40,5 +40,6 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams);
 /// vehicle type specific stuff
 std::optional<VehicleBall*> getVehicleBall(Vehicles& vehicles, objid vehicleId);
 
+void reloadVehicleSettings();
 
 #endif
