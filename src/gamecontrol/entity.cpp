@@ -509,6 +509,11 @@ void entityActionVehicle(objid id){
 	}
 }
 
+bool entityInVehicle(objid id){
+	auto& controllable = controllableEntities.at(id);
+	return controllable.vehicle.has_value();
+}
+
 std::optional<glm::vec3> entityVehiclePosition(objid id){
 	auto& controllable = controllableEntities.at(id);
 	if (!controllable.vehicle.has_value()){

@@ -5,6 +5,7 @@ extern Weapons weapons;
 
 std::optional<objid> getPlayerId(int playerIndex);
 int getDefaultPlayerIndex();
+bool entityInVehicle(objid);
 
 void maybeRemoveControllableEntity(objid idRemoved);
 void createHitbox(objid id);
@@ -149,8 +150,9 @@ struct HotkeyToMessage {
 };
 
 void maybeChangeGunUpdateUi(const char* gun){
-	if (getPlayerId(getDefaultPlayerIndex()).has_value()){
-		maybeChangeGun(getWeaponState(weapons, getPlayerId(getDefaultPlayerIndex()).value()), gun,  getPlayerId(getDefaultPlayerIndex()).value());
+	auto playerId = getPlayerId(getDefaultPlayerIndex());
+	if (playerId.has_value() && !entityInVehicle(playerId.value())){
+		maybeChangeGun(getWeaponState(weapons, playerId.value()), gun,  getPlayerId(getDefaultPlayerIndex()).value());
 	}
 }
 

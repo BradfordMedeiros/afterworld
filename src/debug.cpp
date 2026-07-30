@@ -433,11 +433,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
 	  //	emitWarp(position);
   	//}
 
-  	if (shouldEmitElectric){
-	  	changeWeather(weather, "rain");
-  	}else{
-  		changeWeather(weather, std::nullopt);
-  	}
 
   	return;
 

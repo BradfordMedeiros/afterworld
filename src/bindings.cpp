@@ -123,6 +123,13 @@ void setSkybox(std::string skybox){
   });  
 }
 
+std::optional<std::string> currentWeather(){
+  return weather.weatherName;
+}
+void changeWeather(std::optional<std::string> name){
+  changeWeather(weather, name);
+}
+
 void setScenarioOptions(ScenarioOptions& options){
   gameapi -> setWorldState({ 
     ObjectValue {
@@ -137,6 +144,7 @@ void setScenarioOptions(ScenarioOptions& options){
     }
   });
   setSkybox(options.skybox);
+  changeWeather(weather, (options.weather.has_value()  && options.weather.value() != "default") ? options.weather.value() : std::optional<std::string>(std::nullopt));
 
   defaultAudioClipPath = options.audioClipPath;
   modlog("set scenario options: ambient", print(options.ambientLight));
@@ -438,6 +446,7 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
       .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
       .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
       .skybox = "./res/textures/skyboxs/desert/",
+      .weather = std::nullopt,
     };
     setScenarioOptions(scenarioOptions.has_value() ? scenarioOptions.value() : defaultSettings);
     

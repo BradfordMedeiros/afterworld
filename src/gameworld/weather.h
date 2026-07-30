@@ -7,6 +7,7 @@
 
 struct Weather {
 	std::optional<objid> weatherEmitter;
+	std::optional<std::string> weatherName;
 };
 
 void changeWeather(Weather& weather, std::optional<std::string> name);

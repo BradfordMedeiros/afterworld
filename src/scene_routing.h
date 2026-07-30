@@ -31,6 +31,7 @@ struct ScenarioOptions {
   glm::vec3 ambientLight;
   glm::vec3 skyboxColor;
   std::string skybox;
+  std::optional<std::string> weather;
   std::string audioClipPath;
 };
 struct SceneRouterPath {
@@ -57,6 +58,7 @@ struct RawLevelData {
   glm::vec3 ambientLight;
   glm::vec3 skyboxColor;
   std::string skybox;
+  std::optional<std::string> weather;
   std::string audioClipPath;
   std::string mode;
   std::vector<std::vector<std::string>> additionalTokens;
@@ -71,6 +73,7 @@ struct UpdateLevel {
   std::optional<std::string> description;
   std::optional<glm::vec3> ambient;
   std::optional<glm::vec3> skyboxColor;
+  std::optional<std::string> weather;
 };
 void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
 

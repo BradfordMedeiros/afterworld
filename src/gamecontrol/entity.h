@@ -99,6 +99,7 @@ void setEntityFirstPerson(objid id);
 
 void setEntityInVehicle(objid id, std::optional<objid> vehicleId);
 void entityActionVehicle(objid id);
+bool entityInVehicle(objid id);
 std::optional<glm::vec3> entityVehiclePosition(objid id);
 
 void setEntityFocusArcade(std::optional<objid> arcadeId, objid id);

@@ -16,6 +16,9 @@ std::vector<std::string> uiListLevelSkyboxes(){
   };
 }
 
+std::optional<std::string> currentWeather();
+void changeWeather(std::optional<std::string> name);
+
 void renderBallGameplay(bool includePanel){
   if (includePanel){
     ImGui::Begin("Ball Gameplay");
@@ -519,6 +522,27 @@ void renderLevelPanel(bool includePanel){
       }
     }
 
+    auto weather = currentWeather();
+    {
+      auto weather = currentWeather();
+      ImGui::Text("Weather");
+
+      bool noWeatherEnabled = !weather.has_value() || weather.value() == "default";
+      bool noWeatherWasEnabled = noWeatherEnabled;
+      ImGui::Checkbox("None", &noWeatherEnabled);
+      ImGui::SameLine();
+
+      bool rainEnabled = weather.has_value() && weather.value() == "rain";
+      bool rainWasEnabled = rainEnabled;
+      ImGui::Checkbox("Rain", &rainEnabled);
+
+      if (noWeatherEnabled != noWeatherWasEnabled){
+        changeWeather(std::nullopt);
+      }else if (rainEnabled != rainWasEnabled){
+        changeWeather("rain");
+      }
+    }
+
     if(ImGui::Button("Update")){
       /// needs to be moved 
        std::cout << "uiSetLevelInfo here: " << description << std::endl;
@@ -529,6 +553,7 @@ void renderLevelPanel(bool includePanel){
   	     .description = description, 
   	     .ambient = ambient,
   	     .skyboxColor = skyboxCol,
+         .weather = weather,
   	   });
 
     }

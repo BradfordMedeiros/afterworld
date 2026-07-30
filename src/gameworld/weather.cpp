@@ -45,6 +45,7 @@ void changeWeather(Weather& weather, std::optional<std::string> name){
     gameapi -> removeByGroupId(weather.weatherEmitter.value());
   }
   weather.weatherEmitter = std::nullopt;
+  weather.weatherName = std::nullopt;
 
   if (!name.has_value()){
     std::cout << "weather: change to " << "none" << std::endl;
@@ -53,6 +54,7 @@ void changeWeather(Weather& weather, std::optional<std::string> name){
   
   auto& effect = weatherEffects.at(name.value());
   weather.weatherEmitter = createWeatherEffect(effect.path, std::nullopt, std::nullopt);
+  weather.weatherName = name;
   std::cout << "weather: change to " << name.value() << std::endl;
 }
 

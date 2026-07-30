@@ -278,6 +278,7 @@ std::vector<RawLevelData> getRawLevelData(){
     std::string skybox("../gameresources/skybox/storm");
     std::string description("[no description]");
     std::string mode("ball");
+    std::optional<std::string> weather;
     if (configExists){
       bool success = true;
       auto data = gameapi -> loadFromJsonFile2(configFile, &success, false);
@@ -305,6 +306,10 @@ std::vector<RawLevelData> getRawLevelData(){
         auto modePtr = std::get_if<std::string>(&data.at("mode"));
         mode = *modePtr;
       }
+      if (data.find("weather") != data.end()){
+        auto weatherPtr = std::get_if<std::string>(&data.at("weather"));
+        weather = *weatherPtr;   
+      }
     }
 
 
@@ -318,6 +323,7 @@ std::vector<RawLevelData> getRawLevelData(){
       .ambientLight = ambientLight,
       .skyboxColor = skyboxColor,
       .skybox = skybox,
+      .weather = weather,
       .audioClipPath = "../gameresources/sound/rain.wav",
       .mode = mode,
       .additionalTokens = {},
@@ -369,6 +375,18 @@ void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
     if (updateLevel.skyboxColor.has_value()){
       data["skyboxcolor"] = std::vector<float>({ updateLevel.skyboxColor.value().r,  updateLevel.skyboxColor.value().g, updateLevel.skyboxColor.value().b });
     }
+
+
+    if (updateLevel.skyboxColor.has_value()){
+      data["skyboxcolor"] = std::vector<float>({ updateLevel.skyboxColor.value().r,  updateLevel.skyboxColor.value().g, updateLevel.skyboxColor.value().b });
+    }
+
+    if (updateLevel.weather.has_value()){
+      data["weather"] =  updateLevel.weather.value();
+    }else{
+      data["weather"] = "default";
+    }
+
     gameapi -> saveToJsonFile2(level.configFile, data);
 
   }
@@ -453,6 +471,7 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
         .ambientLight = rawLevel.ambientLight,
         .skyboxColor = rawLevel.skyboxColor,
         .skybox = rawLevel.skybox,
+        .weather = rawLevel.weather,
         .audioClipPath = rawLevel.audioClipPath,
       };    
     }
