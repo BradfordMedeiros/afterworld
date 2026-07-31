@@ -60,7 +60,6 @@ std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* 
 bool hasAttribute(objid id, const char* key);
 
 void setAmbientLight(glm::vec3 light);
-void setVisualizeVoxelLighting(bool enable);
 
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute);
 std::optional<bool> getBoolWorldState(const char* object, const char* attribute);

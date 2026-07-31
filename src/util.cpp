@@ -221,16 +221,6 @@ void setAmbientLight(glm::vec3 light){
   });  
 }
 
-void setVisualizeVoxelLighting(bool enable){
-  gameapi -> setWorldState({ 
-    ObjectValue {
-      .object = "voxellighting",
-      .attribute = "visualize",
-      .value = enable ? "true" : "false",
-    }
-  });  
-}
-
 std::optional<std::string> getStrWorldState(const char* object, const char* attribute){
   auto worldStates = gameapi -> getWorldState();
   for (auto &worldState : worldStates){
