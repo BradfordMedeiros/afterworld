@@ -1,5 +1,7 @@
 #include "./editorui.h"
 
+extern CustomApiBindings* gameapi;
+
 void startMode(bool loadedScene);
 void stopMode(bool unloadedScene);
 void reloadVehicleSettings();
@@ -568,6 +570,54 @@ void renderLevelPanel(bool includePanel){
   }     
 }
 
+void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
+  if (includePanel){
+    ImGui::Begin("Arcade");
+  }
+
+  ImGui::Text("Arcade");
+
+  if (ImGui::Button("Create")){
+
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr { .attr = {
+      { "mesh", "../gameresources/build/uncategorized/arcade.gltf" },
+    }};
+
+    GameobjAttributes screenAttr { .attr = {
+      { "tint", glm::vec4(1.f, 0.f, 0.f, 1.f) },
+      { "texture", "./res/textures/wood.jpg" },
+    }};
+    submodelAttributes["screen"] = screenAttr;
+
+    gameapi -> makeObjectAttr(
+      sceneId.value(), 
+      std::string("arcade-") + uniqueNameSuffix(), 
+      attr, 
+      submodelAttributes
+    );
+
+    /*
+    arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
+    arcade/screen:arcade:invaders
+
+    arcade:activate:arcade
+    arcade:physics:enabled
+
+    arcade:child:>camera
+    >camera:position:0 0 1
+
+    arcade/screen:child:!light
+
+    arcade:health:200000*/
+
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }     
+}
+
 void initImGuiGameUi(){
 	registerWidget("testpanel", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
   		if (includePanel){
@@ -601,6 +651,13 @@ void initImGuiGameUi(){
     registerWidget("level", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderLevelPanel(includePanel);
     });   
+
+
+    registerWidget("arcade", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderArcade(includePanel, objectToDetail, sceneId);
+
+
+    });
 
     registerAction("Start", "Mode", []() -> void {
       startMode(false);
