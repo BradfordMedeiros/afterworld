@@ -41,6 +41,8 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 			.data = interactGame.createInstance(id),
 			.textureId = textureId,
 		};
+	}else if (type == "none"){
+		// empty intentionally
 	}else{
 		modassert(false, "invalid type");
 	}
@@ -53,6 +55,7 @@ void maybeRemoveArcadeType(objid id){
 	}
 	arcadeInstances.erase(id);
 }
+
 
 std::optional<objid> arcadeTextureId(objid id){
 	if (arcadeInstances.find(id) == arcadeInstances.end()){

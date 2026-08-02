@@ -109,7 +109,9 @@ std::any createInvaders(objid id){
 	Invaders invaders = initialInvadersState;
 
 	invaders.id = id;
-	invaders.shaderId = gameapi -> loadShader("arcade", "../afterworld/shaders/arcade");
+
+	// Loads its own shader, should make load shader cache stuf
+	invaders.shaderId = gameapi -> loadShader(std::string("arcade-") + std::to_string(getUniqueObjId()), "../afterworld/shaders/arcade");
   std::cout << "setting resolution color" << std::endl;
 
 	arcadeApi.ensureTexturesLoaded(id, 

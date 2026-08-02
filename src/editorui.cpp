@@ -8,6 +8,10 @@ void reloadVehicleSettings();
 
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 void resetLevel();
+void updateArcadeObj(objid id, std::string newType);
+void rebootMachine(objid id);
+
+std::optional<std::string> FileExplorer(std::string directory);
 
 void setSkybox(std::string skybox);
 std::vector<std::string> uiListLevelSkyboxes(){
@@ -570,6 +574,33 @@ void renderLevelPanel(bool includePanel){
   }     
 }
 
+objid makeArcadeObj(objid sceneId){
+    std::string name = std::string("arcade-") + uniqueNameSuffix();
+
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr { .attr = {
+      { "mesh", "../gameresources/build/uncategorized/arcade.gltf" },
+      { "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
+      { "texture", "../ModEngine/res/textures/hexglow.png" },
+      { "arcade-cabinet", "true" },
+
+    }};
+
+    GameobjAttributes screenAttr { .attr = {
+      { "arcade", "invaders" },
+    }};
+
+    submodelAttributes[name + "/screen"] = screenAttr;
+
+    return gameapi -> makeObjectAttr(
+      sceneId, 
+      name, 
+      attr, 
+      submodelAttributes
+    ).value();
+}
+
+
 void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Arcade");
@@ -579,23 +610,11 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
 
   if (ImGui::Button("Create")){
 
-    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-    GameobjAttributes attr { .attr = {
-      { "mesh", "../gameresources/build/uncategorized/arcade.gltf" },
-    }};
 
-    GameobjAttributes screenAttr { .attr = {
-      { "tint", glm::vec4(1.f, 0.f, 0.f, 1.f) },
-      { "texture", "./res/textures/wood.jpg" },
-    }};
-    submodelAttributes["screen"] = screenAttr;
 
-    gameapi -> makeObjectAttr(
-      sceneId.value(), 
-      std::string("arcade-") + uniqueNameSuffix(), 
-      attr, 
-      submodelAttributes
-    );
+    makeArcadeObj(sceneId.value());
+
+
 
     /*
     arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
@@ -611,6 +630,54 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
 
     arcade:health:200000*/
 
+  }
+
+
+  if (objectToDetail.has_value()){
+    auto arcade = getSingleAttr(objectToDetail.value(), "arcade-cabinet");
+    bool isArcade = arcade.has_value();
+
+    if (isArcade){
+      bool isPlayable = false;
+      ImGui::Checkbox("Playable", &isPlayable);
+
+      std::vector<std::string> games {
+        "none",
+        "tennis",
+        "invaders",
+        "helicopter",
+        "rhythm",
+        "interact",
+      };
+      static int selectedGame = 0;
+      if (ImGui::BeginCombo("Game", games.at(selectedGame).c_str())){
+          for (int i = 0; i < games.size(); i++){
+              bool selected = (selectedGame == i);
+              if (ImGui::Selectable(games.at(i).c_str(), selected)){
+                 selectedGame = i;
+              }
+              if (selected){
+                ImGui::SetItemDefaultFocus();
+              }
+          }
+          ImGui::EndCombo();
+      }    
+
+      if (ImGui::Button("Update Arcade")){
+        auto screenObj = findChildObjBySuffix(objectToDetail.value(), "screen");
+        updateArcadeObj(screenObj.value(), games.at(selectedGame));
+      }
+
+
+    }else{
+      ImGui::Text("Not an arcade obj");
+    }
+  }
+
+  auto selectedFile = FileExplorer("../gameresources/textures/");
+  if (selectedFile.has_value()){
+    std::cout << "selected file: " << selectedFile.value() << std::endl;
+    setGameObjectTexture(objectToDetail.value(), selectedFile.value());
   }
 
   if (includePanel){

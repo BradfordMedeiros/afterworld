@@ -286,6 +286,37 @@ std::vector<std::string> parseDataString(std::string& value){
 }
 
 
+std::unordered_map<objid, std::string> arcadeToTexture;
+void onAddArcadeObj(objid id){
+		modlog("arcade", "on add");
+		std::string textureName = std::string("arcade-texture") + std::to_string(getUniqueObjId());
+		arcadeToTexture[id] = textureName;
+		auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
+    gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+		setGameObjectTexture(id, textureName);
+  	auto arcadeType = getSingleAttr(id, "arcade");
+    addArcadeType(id, arcadeType.value(), arcadeTextureId);
+}
+void onRemoveArcadeObj(objid id){
+	  std::string textureName = arcadeToTexture.at(id);
+ 	  gameapi -> freeTexture(textureName, id);
+	  maybeRemoveArcadeType(id);
+	  unloadManagedSounds(id);
+	  unloadManagedTexturesLoaded(id);
+	  arcadeToTexture.erase(id);
+}
+void updateArcadeObj(objid id, std::string newType){
+	 onRemoveArcadeObj(id);
+	 gameapi -> setSingleGameObjectAttr(id, "arcade", newType);
+	 onAddArcadeObj(id);
+}
+
+void rebootMachine(objid id){
+	onRemoveArcadeObj(id);
+	onAddArcadeObj(id);
+}
+
+
 std::vector<TagUpdater> tagupdates = { 
 	TagUpdater {
 		.attribute = "scrollspeed",
@@ -645,21 +676,10 @@ std::vector<TagUpdater> tagupdates = {
 	TagUpdater {
 		.attribute = "arcade",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
-			modlog("arcade", "on add");
-			std::string textureName = std::string("arcade-texture") + std::to_string(id);
-			auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
-      gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
-		 	setGameObjectTexture(id, textureName);
-
-  		auto arcadeType = getSingleAttr(id, "arcade");
-      addArcadeType(id, arcadeType.value(), arcadeTextureId);
+			onAddArcadeObj(id);
 		},
   	.onRemove = [](int32_t id) -> void {
-	  		std::string textureName = std::string("arcade-texture") + std::to_string(id);
- 	   		gameapi -> freeTexture(textureName, id);
-	   		maybeRemoveArcadeType(id);
-	   		unloadManagedSounds(id);
-	   		unloadManagedTexturesLoaded(id);
+  		onRemoveArcadeObj(id);
   	},
   	.onFrame = std::nullopt,
   	.onMessage = std::nullopt,
