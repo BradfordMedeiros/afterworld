@@ -334,7 +334,7 @@ OneShot playMusicClipById(objid id, std::optional<float> volume){
     volume = 1.f;
   }
   volume = volume.value() * musicVolume;
-  return gameapi -> playOneshot(id, std::nullopt, volume, false, true);
+  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt);
 }
 OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   if (!volume.has_value()){

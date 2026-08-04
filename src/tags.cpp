@@ -543,7 +543,7 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "teleport",
 		.onAdd = [](int32_t id, AttributeValue) -> void {
 	  	    auto attrHandle = getAttrHandle(id);
-			auto teleportExit = getStrAttr(attrHandle, "teleport_exit");
+					auto teleportExit = getStrAttr(attrHandle, "teleport_exit");
   	        teleportObjs[id] = TeleportExit{
   			   .exit = teleportExit,
   		    };
@@ -556,8 +556,13 @@ std::vector<TagUpdater> tagupdates = {
 	},
 	TagUpdater {
 		.attribute = "autoplay",
-		.onAdd = [](int32_t id, AttributeValue) -> void {
-  			playMusicClipById(id, std::nullopt);
+		.onAdd = [](int32_t id, AttributeValue value) -> void {
+   			auto autoplayPtr = std::get_if<std::string>(&value);
+   			if (autoplayPtr && *autoplayPtr == "true"){
+   				playMusicClipById(id, std::nullopt);
+   			}
+
+  			
 		},
   		.onRemove = [](int32_t id) -> void {},
   		.onFrame = std::nullopt,
