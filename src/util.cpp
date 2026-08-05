@@ -334,7 +334,7 @@ OneShot playMusicClipById(objid id, std::optional<float> volume){
     volume = 1.f;
   }
   volume = volume.value() * musicVolume;
-  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt);
+  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt, id);
 }
 OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   if (!volume.has_value()){
@@ -344,16 +344,16 @@ OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<fl
 
   auto clipId = gameapi -> getClipByName(clipName, sceneId);
   modassert(clipId.has_value(), "playGameplayClip clipName does not exist");
-  return gameapi -> playOneshot(clipId.value(), position, volume, false, false);
+  return gameapi -> playOneshot(clipId.value(), position, volume, false, false, clipId.value());
 }
 OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, position, volume, loop, false);
+  return gameapi -> playOneshot(id, position, volume, loop, false, id);
 }
 
 OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, std::nullopt, volume, loop, true);
+  return gameapi -> playOneshot(id, std::nullopt, volume, loop, true, id);
 }
 
 std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId){
