@@ -685,6 +685,279 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
   }     
 }
 
+
+struct SoundBinding {
+  std::string sound;
+  std::vector<std::string> folder;
+};
+
+struct SoundFolderNode
+{
+    std::string name;
+    std::vector<int> sounds;
+    std::vector<SoundFolderNode> children;
+};
+SoundFolderNode BuildSoundTree(std::vector<SoundBinding>& soundBindings){
+    SoundFolderNode root;
+    for (int i = 0; i < soundBindings.size(); i++){
+        auto& binding = soundBindings.at(i);
+        SoundFolderNode* node = &root;
+        for (auto& folder : binding.folder){
+            auto it = std::find_if(
+                node->children.begin(),
+                node->children.end(),
+                [&](const SoundFolderNode& child)
+                {
+                    return child.name == folder;
+                });
+
+            if (it == node->children.end()){
+                node->children.push_back(SoundFolderNode{
+                    .name = folder
+                });
+                node = &node->children.back();
+            }else{
+                node = &*it;
+            }
+        }
+        node->sounds.push_back(i);
+    }
+    return root;
+}
+
+void DrawSoundTree(
+    const SoundFolderNode& node,
+    const std::vector<SoundBinding>& soundBindings,
+    int& selectedSound){
+    for (const auto& child : node.children){
+        if (ImGui::TreeNode(child.name.c_str())){
+            DrawSoundTree(child, soundBindings, selectedSound);
+            ImGui::TreePop();
+        }
+    }
+
+    for (int index : node.sounds){
+        const auto& sound = soundBindings[index];
+        if (ImGui::Selectable(sound.sound.c_str(), selectedSound == index)){
+            selectedSound = index;
+        }
+    }
+}
+
+
+struct SoundInfo {
+  std::vector<SoundBinding> soundBindings;
+};  
+SoundInfo getSoundInfo(){
+  return SoundInfo {
+    .soundBindings = {
+      SoundBinding {
+        .sound = "shoot",
+        .folder = { "fps", "entity" },
+      },
+      SoundBinding {
+        .sound = "jump",
+        .folder = { "fps", "entity" },
+      },
+      SoundBinding {
+        .sound = "jump",
+        .folder = { "ball", "entity" },
+      },
+      SoundBinding {
+        .sound = "roll",
+        .folder = { "ball", "entity" },
+      }
+    },
+  };
+}
+
+struct SoundConfig {
+  std::string name;
+  bool loop = false;
+  bool center = false;
+  float volume = 0.f;
+  std::optional<std::string> clipOne;
+  std::optional<std::string> clipTwo;
+  std::optional<std::string> clipThree;
+  std::optional<std::string> clipFour;
+  std::optional<std::string> clipFive;
+  bool clipOrderSequential = false;
+  std::string bus = "master";
+};
+
+
+SoundConfig soundConfig{ .name = "shoot "};
+SoundConfig getSoundConfig(){
+  return soundConfig;
+}
+void updateSoundConfig(SoundConfig newSoundConfig){
+  soundConfig = newSoundConfig;
+}
+
+void renderMixingPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Mixing");
+  }
+
+  auto soundBindings = getSoundInfo().soundBindings;
+  SoundFolderNode soundTree = BuildSoundTree(soundBindings);
+
+  int selectedSound = -1;
+  DrawSoundTree(soundTree, soundBindings, selectedSound);
+  if (selectedSound != -1){
+    std::cout << "selected sound: " << selectedSound <<  " " << soundBindings.at(selectedSound).sound << std::endl;
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }    
+}
+
+std::vector<std::string> listSoundFiles();
+void renderMixingDetailPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Mixing Detail");
+  }
+
+  auto soundConfig = getSoundConfig();
+
+  ImGui::Text("Sound Name:");
+  ImGui::SameLine();
+  ImGui::Text(soundConfig.name.c_str());
+
+  if (ImGui::Button("Play")){
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Stop")){
+  }
+
+
+  ImGui::Checkbox("Loop", &soundConfig.loop);
+  ImGui::Checkbox("Center", &soundConfig.center);
+  ImGui::SliderFloat("Volume", &soundConfig.volume, 0.f, 1.f);
+
+  std::vector<std::string> clips = listSoundFiles();
+
+  for (int i = 0; i < 5; i++){
+    std::optional<std::string> currClip = soundConfig.clipOne;
+    if (i == 0){
+
+    }else if (i == 1){
+      currClip = soundConfig.clipTwo;
+    }else if (i == 2){
+      currClip = soundConfig.clipThree;
+    }else if (i == 3){
+      currClip = soundConfig.clipFour;
+    }else if (i == 4){
+      currClip = soundConfig.clipFive;
+    }
+    bool enableSound = currClip.has_value();
+    bool wasEnableSound = enableSound;
+
+    std::string value = (std::string("Enable Sound ") + std::to_string(i));
+    ImGui::Checkbox(value.c_str(), &enableSound);
+    if (enableSound && !currClip.has_value()){
+      currClip = clips.at(0);
+      if (i == 0){
+        soundConfig.clipOne = currClip;
+      }else if (i == 1){
+        soundConfig.clipTwo = currClip;
+      }else if (i == 2){
+        soundConfig.clipThree = currClip;
+      }else if (i == 3){
+        soundConfig.clipFour = currClip;
+      }else if (i == 4){
+        soundConfig.clipFive = currClip;
+      }
+      std::cout << "enable curr clip" << std::endl;
+    }
+    if (!enableSound && wasEnableSound){
+      if (i == 0){
+        soundConfig.clipOne = std::nullopt;
+      }else if (i == 1){
+        soundConfig.clipTwo = std::nullopt;
+      }else if (i == 2){
+        soundConfig.clipThree = std::nullopt;
+      }else if (i == 3){
+        soundConfig.clipFour = std::nullopt;
+      }else if (i == 4){
+        soundConfig.clipFive = std::nullopt;
+      }
+      currClip = std::nullopt;
+    }
+
+    std::cout << "enable curr name: " << print(currClip) << std::endl;
+    if (currClip.has_value()){
+      std::cout << "enable curr drawCombo" << std::endl;
+
+      if (ImGui::BeginCombo((std::string("Clip: ") + std::to_string(i)).c_str(), currClip.value().c_str())){
+        for (int j = 0; j < clips.size(); j++){
+          bool selected =  currClip.value() == clips.at(j);
+          if (ImGui::Selectable(clips.at(j).c_str(), selected)){
+            if (i == 0){
+              soundConfig.clipOne = clips.at(j);
+            }else if (i == 1){
+              soundConfig.clipTwo = clips.at(j);
+            }else if (i == 2){
+              soundConfig.clipThree = clips.at(j);
+            }else if (i == 3){
+              soundConfig.clipFour = clips.at(j);
+            }else if (i == 4){
+              soundConfig.clipFive = clips.at(j);
+            }
+          }
+          if (selected){
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+    }    
+  }
+
+
+  bool isSequential = soundConfig.clipOrderSequential;
+  bool wasSequential = isSequential;
+  bool isRandom = !soundConfig.clipOrderSequential;
+  bool wasRandom = isRandom;
+
+  ImGui::Checkbox("Sequential", &isSequential);
+  ImGui::SameLine();
+  ImGui::Checkbox("Random", &isRandom);
+  if (isSequential && !wasSequential){
+    soundConfig.clipOrderSequential = true;
+  }else if (isRandom && !wasRandom){
+    soundConfig.clipOrderSequential = false;
+  }
+
+
+  std::vector<std::string> buses {
+    "master",
+    "sfx",
+    "music", 
+    "voice",
+  };
+
+  if (ImGui::BeginCombo("Bus", soundConfig.bus.c_str())){
+    for (int i = 0; i < buses.size(); i++){
+      bool selected = soundConfig.bus == buses.at(i);
+      if (ImGui::Selectable(buses.at(i).c_str(), selected)){
+        soundConfig.bus = buses.at(i);
+      }
+      if (selected){
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+
+  updateSoundConfig(soundConfig);
+
+  if (includePanel){
+    ImGui::End();
+  }    
+}
+
 void initImGuiGameUi(){
 	registerWidget("testpanel", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
   		if (includePanel){
@@ -722,9 +995,17 @@ void initImGuiGameUi(){
 
     registerWidget("arcade", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderArcade(includePanel, objectToDetail, sceneId);
-
-
     });
+
+    registerWidget("mixing", "sound", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderMixingPanel(includePanel);
+    });
+
+    registerWidget("mixing-detail", "sound", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderMixingDetailPanel(includePanel);
+    });
+
+
 
     registerAction("Start", "Mode", []() -> void {
       startMode(false);
