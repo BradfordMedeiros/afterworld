@@ -19,6 +19,11 @@ std::string modeTypeString(GameMode& gameMode){
     return "video";
   }
 
+  auto gamemodeBoot = std::get_if<GameModeBoot>(&gameMode);
+  if (gamemodeBoot){
+    return "boot";
+  }
+
   auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
   if (gamemodeNone){
     return "none";
@@ -42,6 +47,8 @@ void startMode(GameMode& gameMode, objid sceneId){
   auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
   auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
   auto gamemodeVideo = std::get_if<GameModeVideo>(&gameMode);
+  auto gamemodeBoot = std::get_if<GameModeBoot>(&gameMode);
+
   if (gamemodeFps){
     changeUiMode(FpsModeUi{});
     startFpsMode(sceneId, gamemodeFps -> player, gamemodeFps -> makePlayer);
@@ -52,6 +59,8 @@ void startMode(GameMode& gameMode, objid sceneId){
     changeUiMode(UiModeNone{});
   }else if (gamemodeVideo){
     startVideoMode(sceneId);
+  }else if (gamemodeBoot){
+    startBootMode(sceneId);
   }else {
     modassert(false, "startMode invalid game mode");
   }
@@ -77,6 +86,11 @@ void stopMode(GameMode& gameMode){
   auto gamemodeVideo = std::get_if<GameModeVideo>(&gameMode);
   if (gamemodeVideo){
     // do nothing
+  }
+
+  auto gamemodeBoot = std::get_if<GameModeBoot>(&gameMode);
+  if (gamemodeBoot){
+     stopBootMode();
   }
 
   inputOverride();

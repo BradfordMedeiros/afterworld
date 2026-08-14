@@ -4,6 +4,7 @@
 #include "./modes/ball.h"
 #include "./modes/fps.h"
 #include "./modes/video.h"
+#include "./modes/boot.h"
 
 struct GameModeNone{};
 struct GameModeFps {
@@ -12,8 +13,9 @@ struct GameModeFps {
 };
 struct GameModeBall{};
 struct GameModeVideo{};
+struct GameModeBoot{};
 
-typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeVideo> GameMode;
+typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeVideo, GameModeBoot> GameMode;
 
 void startMode(GameMode& gameMode, objid sceneId);
 void stopMode(GameMode& gameMode);

@@ -361,8 +361,7 @@ void stopMode(bool unloadedScene){
   }
 }
 bool inMode(){
-  return false;
-  return sceneManagement.managedScene.has_value() && !isModeNone(sceneManagement.managedScene.value().gameMode);
+  return sceneManagement.managedScene.has_value();
 }
 
 

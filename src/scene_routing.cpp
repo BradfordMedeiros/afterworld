@@ -310,6 +310,10 @@ std::vector<RawLevelData> getRawLevelData(){
         auto weatherPtr = std::get_if<std::string>(&data.at("weather"));
         weather = *weatherPtr;   
       }
+      if (data.find("mode") != data.end()){
+        auto modePtr = std::get_if<std::string>(&data.at("mode"));
+        mode = *modePtr;
+      }
     }
 
 
@@ -405,6 +409,9 @@ GameMode gamemodeByShortcutName(std::string shortcut){
       }
       if (rawLevel.mode == "video"){
         return GameModeVideo{};
+      }
+      if (rawLevel.mode == "boot"){
+        return GameModeBoot{};
       }
       if (rawLevel.mode == "fps"){
         return GameModeFps {
