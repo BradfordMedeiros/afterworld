@@ -40,7 +40,7 @@ void main(){
 
   totalRipple.y += 0.05 * cos(time * 0.1);
 
-  mainAlgorithm(color, normalVec, totalRipple + vec2(noiseValue, noiseValue));
+  mainAlgorithm(color, normalVec, totalRipple + vec2(noiseValue, noiseValue), TexCoord);
 
   vec4 newColor = color;
   newColor.a  = 0.7;

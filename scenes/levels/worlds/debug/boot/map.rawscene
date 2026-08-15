@@ -3,6 +3,10 @@ menu:mesh:../gameresources/build/primitives/plane_xy_1x1.gltf
 menu:layer:basicui
 menu:position:0 0 -1
 menu:rotation:0 0 1 180
-menu:tint:0.05 0.05 0.05 1
+menu:tint:0.2 0.2 0.2 1
 menu:texture:../gameresources/textures/backgrounds/arcade3.png
+
+tex1:texture:./res/textures/wood.jpg
+tex2:texture:./res/textures/hexglow.png
+
 

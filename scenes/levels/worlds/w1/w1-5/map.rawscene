@@ -1,0 +1,42 @@
+# Generated scene 
+arcade-998906421/screen:rotation:1 0 -5.36442e-07 -0
+arcade-998906421:texture:../gameresources/textures/arcade/trench/city/building_faces/building_20.jpg
+arcade-998906421:tint:1 0.756055 0.0784314 1
+arcade-998906421:mesh:../gameresources/build/uncategorized/arcade.gltf
+arcade-998906421:scale:7.0414 7.0414 7.0414
+arcade-998906421:rotation:-1 0 1.19209e-07 0
+arcade-998906421:position:-30.63 1.71 18.04
+texture3:texture:../gameresources/build/textures/ballgame/bounce.png
+entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-5/map.map
+entity_worldspawn_0:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+entity_worldspawn_0:physics_shape:shape_exact
+entity_worldspawn_0:physics:enabled
+entity_worldspawn_0:position:-203.2 -92 202
+texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+mesh-806755898:mesh:../gameresources/build/primitives/sphere.gltf
+mesh-806755898:scale:5.6188 5.6188 5.6188
+mesh-806755898:position:-29.21 1.15 24.58
+!light:globallight:true
+!light:spin:0.02
+!light:angle:-10
+!light:rotation:nan nan nan nan
+!light:position:0 50 0
+texture5:texture:../gameresources/build/textures/ballgame/none.png
+texture2:texture:../gameresources/build/textures/ballgame/teleport.png
+)text-1943077681:tint:0.433679 0.657575 0.941176 0.858824
+)text-1943077681:value:STATIC MEMORIES
+)text-1943077681:wraptype:char
+)text-1943077681:layer:nolighting
+)text-1943077681:position:-21 -5 -33.87
+texture0:texture:../gameresources/build/textures/ballgame/jump.png
+)text-1943077681-copy-768274:tint:1 0.558824 0 0.858824
+)text-1943077681-copy-768274:value:STATIC MEMORIES
+)text-1943077681-copy-768274:wraptype:char
+)text-1943077681-copy-768274:layer:nolighting
+)text-1943077681-copy-768274:position:-17 0 -34.39
+texture1:texture:../gameresources/build/textures/ballgame/dash.png
+)text-1943077681-copy-1427288164:tint:1 0.196078 0.196078 0.858824
+)text-1943077681-copy-1427288164:value:STATIC MEMORIES
+)text-1943077681-copy-1427288164:wraptype:char
+)text-1943077681-copy-1427288164:layer:nolighting
+)text-1943077681-copy-1427288164:position:-14 2 -33.87

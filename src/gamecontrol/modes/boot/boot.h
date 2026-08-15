@@ -1,8 +1,8 @@
 #ifndef MOD_AFTERWORLD_MODE_BOOT
 #define MOD_AFTERWORLD_MODE_BOOT
 
-#include "../../global.h"
-#include "../gametypes.h"
+#include "../../../global.h"
+#include "../../gametypes.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -13,6 +13,8 @@
 #include <optional>
 #include <string>
 #include <thread>
+
+#include "./platform.h"
 
 void startBootMode(objid sceneId);
 void stopBootMode();

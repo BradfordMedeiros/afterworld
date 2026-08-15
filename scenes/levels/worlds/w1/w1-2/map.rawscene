@@ -1,29 +1,42 @@
-########## Base file content: ../afterworld/scenes/levels/ball.rawscene ##########
-
-!light:spin:true
-!light:globallight:true
-!light:position:0 50 0
-
-playerspawn:playerspawn:true
-playerspawn:mode:ball
-
-texture0:texture:../gameresources/build/textures/ballgame/jump.png
-texture1:texture:../gameresources/build/textures/ballgame/dash.png
-texture2:texture:../gameresources/build/textures/ballgame/teleport.png
-texture3:texture:../gameresources/build/textures/ballgame/bounce.png
-texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
-texture5:texture:../gameresources/build/textures/ballgame/none.png
-
-##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-2/map.map
-
-entity_worldspawn_0:rotation:1 0 -5.96047e-08 0.0395647
+# Generated scene 
+mesh-160845858-copy-1806931537-copy-402658474:mesh:../gameresources/build/uncategorized/treebox.gltf
+mesh-160845858-copy-1806931537-copy-402658474:scale:10.2376 10.2376 10.2376
+mesh-160845858-copy-1806931537-copy-402658474:rotation:8.74228e-08 0 1 0
+mesh-160845858-copy-1806931537-copy-402658474:position:43.3 40.42 3
+mesh-160845858-copy-1806931537-copy-806003949:mesh:../gameresources/build/uncategorized/treebox.gltf
+mesh-160845858-copy-1806931537-copy-806003949:scale:10.2376 10.2376 10.2376
+mesh-160845858-copy-1806931537-copy-806003949:rotation:8.74228e-08 0 1 0
+mesh-160845858-copy-1806931537-copy-806003949:position:43.3 40.42 26
+mesh-160845858-copy-1806931537:mesh:../gameresources/build/uncategorized/treebox.gltf
+mesh-160845858-copy-1806931537:scale:10.2376 10.2376 10.2376
+mesh-160845858-copy-1806931537:rotation:0 0 1 0
+mesh-160845858-copy-1806931537:position:43.3 40.42 -17.5
+mesh-160845858-copy-1256067801:mesh:../gameresources/build/uncategorized/treebox.gltf
+mesh-160845858-copy-1256067801:scale:10.2376 10.2376 10.2376
+mesh-160845858-copy-1256067801:position:-22.7 40.42 0
+entity_worldspawn_0:texture:../gameresources/textures/arcade/trench/city/windows/window_20.opacity.jpg
 entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-2/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
-entity_worldspawn_0:_tb_layer_omit_from_export:1
-entity_worldspawn_0:position:0 0 0
-
-playerspawn:rotation:1 0 -5.96047e-08 0.0395647
+entity_worldspawn_0:position:156 -40.8 -162.4
+texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+playerspawn:mode:ball
+playerspawn:playerspawn:true
+playerspawn:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
 playerspawn:position:-15.2 -20 29.6
-
-
+texture3:texture:../gameresources/build/textures/ballgame/bounce.png
+texture0:texture:../gameresources/build/textures/ballgame/jump.png
+!light:globallight:true
+!light:spin:0.02
+!light:angle:-10
+!light:rotation:nan nan nan nan
+!light:position:0 50 0
+texture1:texture:../gameresources/build/textures/ballgame/dash.png
+texture2:texture:../gameresources/build/textures/ballgame/teleport.png
+texture5:texture:../gameresources/build/textures/ballgame/none.png
+mesh-160845858:mesh:../gameresources/build/uncategorized/treebox.gltf
+mesh-160845858:scale:10.2376 10.2376 10.2376
+mesh-160845858:position:-22.7 40.42 -29.5
+mesh-160845858-copy-1806931537-copy-181032351:mesh:../gameresources/build/uncategorized/treebox.gltf
+mesh-160845858-copy-1806931537-copy-181032351:scale:10.2376 10.2376 10.2376
+mesh-160845858-copy-1806931537-copy-181032351:position:-22.7 40.42 26

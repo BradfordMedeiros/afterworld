@@ -4,7 +4,7 @@
 #include "./modes/ball.h"
 #include "./modes/fps.h"
 #include "./modes/video.h"
-#include "./modes/boot.h"
+#include "./modes/boot/boot.h"
 
 struct GameModeNone{};
 struct GameModeFps {

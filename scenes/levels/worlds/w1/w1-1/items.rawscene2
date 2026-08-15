@@ -1,0 +1,21 @@
+# Generated scene 
+mesh-164248365-copy-845618475:mesh:../gameresources/build/primitives/rail5spoke.gltf
+mesh-164248365-copy-845618475:scale:21.2073 21.2073 21.2073
+mesh-164248365-copy-845618475:rotation:0 0 -1 80
+mesh-164248365-copy-845618475:position:3.5 -25 68.5
+mesh-1859607708:texture:../gameresources/textures/backgrounds/test3.png
+mesh-1859607708:mesh:../gameresources/build/uncategorized/tv.gltf
+mesh-1859607708:scale:15.839 15.839 15.839
+mesh-1859607708:position:-145 -200 0
+mesh-164248365-copy-1905801510:mesh:../gameresources/build/primitives/rail5spoke.gltf
+mesh-164248365-copy-1905801510:scale:21.2073 21.2073 21.2073
+mesh-164248365-copy-1905801510:rotation:0 0 -1 80
+mesh-164248365-copy-1905801510:position:3.5 -25 24.5
+storyboardtexture2:texture:../afterworld/design/storyboard/hell.jpg
++particle-copy-435224120:effekseer:./res/particles/sparks.efkefc
++particle-copy-435224120:state:enabled
++particle-copy-435224120:position:-1.7 -21.3 3.4
+mesh-164248365:mesh:../gameresources/build/primitives/rail5spoke.gltf
+mesh-164248365:scale:21.2073 21.2073 21.2073
+mesh-164248365:rotation:0 0 -1 80
+mesh-164248365:position:3.5 -25 113.5

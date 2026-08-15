@@ -1,0 +1,15 @@
+newmtl amp-texture
+map_Kd ../../../../../../gameresources/textures/amp-texture.png
+
+newmtl arcade/trench/aurora
+map_Kd ../../../../../../gameresources/textures/arcade/trench/aurora.jpg
+
+newmtl arcade/trench/city/metal/metal_16
+map_Kd ../../../../../../gameresources/textures/arcade/trench/city/metal/metal_16.jpg
+
+newmtl backgrounds/test3
+map_Kd ../../../../../../gameresources/textures/backgrounds/test3.png
+
+newmtl clean/chainlink
+map_Kd ../../../../../../gameresources/textures/clean/chainlink.png
+

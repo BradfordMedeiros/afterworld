@@ -1,0 +1,13 @@
+
+]video:position:0 0 -5
+]video:show:enabled
+]video:shader:./res/shaders/video/fragment.glsl,./res/shaders/video/vertex.glsl
+]video:layer:basicui2
+
+]video:texturepath:bigbuck
+]video:skip:true
+
+>testview:position:0 0 40
+>testview:rotation:0 0 -10 0
+
+

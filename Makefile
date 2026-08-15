@@ -15,6 +15,16 @@ validate:
 package: afterworld_release 
 	@(./package.sh)
 
+arcade: 
+	@(mkdir -p ./build/vagrant)
+	@(cp ./arcade/Vagrantfile ./build/vagrant/)
+	@(cd ./build/vagrant && vagrant up)
+
+clean-arcade:
+	@(cd ./build/vagrant && vagrant destroy)
+	@(rm -r ./build/vagrant/)
+
+
 clean:
 	@echo "clean placeholder"
 

@@ -1,32 +1,378 @@
-########## Base file content: ../afterworld/scenes/levels/ball.rawscene ##########
-
-!light:spin:true
-!light:globallight:true
-!light:position:0 50 0
-
-playerspawn:playerspawn:true
-playerspawn:mode:ball
-
-texture0:texture:../gameresources/build/textures/ballgame/jump.png
-texture1:texture:../gameresources/build/textures/ballgame/dash.png
-texture2:texture:../gameresources/build/textures/ballgame/teleport.png
+# Generated scene 
+entity_soul_6_holder:mesh:../gameresources/build/uncategorized/soulspawn.gltf
+entity_soul_6_holder:physics_shape:shape_exact
+entity_soul_6_holder:physics:enabled
+entity_soul_6_holder:position:-18.4 -20.72 24.8
+entity_activateable_19:activate-type:trigger
+entity_activateable_19:activatable:true
+entity_activateable_19:activate-target:crush
+entity_activateable_19:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+entity_activateable_19:physics_shape:shape_exact
+entity_activateable_19:physics:enabled
+entity_activateable_19:activate-mask:11
+entity_activateable_19:scale:24 21 27
+entity_activateable_19:layer:nolighting
+entity_activateable_19:rotation:8.74228e-08 0 1 0
+entity_activateable_19:position:-2.4 -19.9 71.2
 texture3:texture:../gameresources/build/textures/ballgame/bounce.png
-texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
-texture5:texture:../gameresources/build/textures/ballgame/none.png
-
-##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map
-
-entity_worldspawn_0:rotation:1 0 -5.96047e-08 0.0395647
+texture0:texture:../gameresources/build/textures/ballgame/jump.png
+entity_dropper_15:mesh:../gameresources/build/misc/shootingtarget.gltf
+entity_dropper_15:rotation:0 1 -3.57628e-07 -90
+entity_dropper_15:position:-5.6 -16.8 48.8
+entity_simple_activate_36:mesh:../gameresources/build/primitives/medium.gltf
+entity_simple_activate_36:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_simple_activate_36:position:-28 -18.4 114.4
++entity_soul_2:soul:yellow
++entity_soul_2:effekseer:./res/particles/spirit-white.efkefc
++entity_soul_2:effect-tint:1 1 0 1
++entity_soul_2:physics_shape:shape_sphere
++entity_soul_2:physics_collision:nocollide
++entity_soul_2:physics:enabled
++entity_soul_2:state:enabled
++entity_soul_2:scale:0.5 0.5 0.5
++entity_soul_2:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
++entity_soul_2:position:-18.4 -20 32.8
+entity_simple_activate_36/model:activate-delay:1000
+entity_simple_activate_36/model:activate-type:touch
+entity_simple_activate_36/model:activate-autoreset:5000
+entity_simple_activate_36/model:activatable:true
+entity_simple_activate_36/model:physics_shape:shape_exact
+entity_simple_activate_36/model:physics:enabled
+entity_shard_22:breakable:true
+entity_shard_22:scrollspeed:1 1 0
+entity_shard_22:textureoffset:38.2 38.2
+entity_shard_22:tint:0 0 1 0.8
+entity_shard_22:mesh:../gameresources/build/primitives/sphere.gltf
+entity_shard_22:physics_shape:shape_exact
+entity_shard_22:physics_collision:nocollide
+entity_shard_22:physics:enabled
+entity_shard_22:layer:nolighting
+entity_shard_22:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_shard_22:position:-21.6 -20 60
+entity_tube_exit_14/model:physics_shape:shape_exact
+entity_tube_exit_14/model:physics:enabled
+entity_moon_26/portal:radius:5
+entity_moon_26/portal:activate-type:near
+entity_moon_26/portal:activatable:true
+entity_moon_26/portal:rotation:0 0 -1 -180
+entity_spikes_8:radius:7
+entity_spikes_8:activate-type:near
+entity_spikes_8:activatable:true
+entity_spikes_8:mesh:../gameresources/build/misc/spikes_5x5.gltf
+entity_spikes_8:activate-mask:14
+entity_spikes_8:scale:3 3 3
+entity_spikes_8:rotation:0 -1 -3.57628e-07 90
+entity_spikes_8:position:-23.2 -18.4 28
+entity_spinner_9:spin:1
+entity_spinner_9:activate-mask:14
+entity_spinner_9:activatable:true
+entity_spinner_9:mesh:../gameresources/build/misc/spinner.gltf
+entity_spinner_9:position:-8.8 -8.8 52
+entity_spikes_7/model:physics_shape:shape_exact
+entity_spikes_7/model:physics:enabled
+entity_spikes_17/spiketip:killplane:true
+entity_spikes_17/spiketip:physics_shape:shape_exact
+entity_spikes_17/spiketip:physics:enabled
+entity_autodoor_13:activate-type:near
+entity_autodoor_13:activate-mask:14
+entity_autodoor_13:activatable:true
+entity_autodoor_13:mesh:../gameresources/build/building/autodoor.gltf
+entity_autodoor_13:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_autodoor_13:position:-23.2 -18.4 160.8
+entity_water_5:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,5.map
+entity_water_5:physics_shape:shape_box
+entity_water_5:physics:enabled
+entity_water_5:position:39.4651 -4.8 -4.9624
+entity_spikes_7/spiketip:killplane:true
+entity_spikes_7/spiketip:physics_shape:shape_exact
+entity_spikes_7/spiketip:physics:enabled
+entity_tube_exit_14:activate-type:near
+entity_tube_exit_14:activate-mask:11
+entity_tube_exit_14:activatable:true
+entity_tube_exit_14:mesh:../gameresources/build/uncategorized/darkwires_spawn.gltf
+entity_tube_exit_14:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_tube_exit_14:position:-0.8 -21.6 46.8
+entity_gem_33:spin:1
+entity_gem_33:condition:true
+entity_gem_33:gem:mygem
+entity_gem_33:tint:1 1 1 0.2
+entity_gem_33:mesh:../gameresources/build/uncategorized/crystal.gltf
+entity_gem_33:physics_shape:shape_sphere
+entity_gem_33:physics_collision:nocollide
+entity_gem_33:physics:enabled
+entity_gem_33:scale:3 3 3
+entity_gem_33:layer:nolighting
+entity_gem_33:position:-20 -18.4 93.6
++entity_soul_1:soul:blue
++entity_soul_1:effekseer:./res/particles/spirit-white.efkefc
++entity_soul_1:effect-tint:0 0 1 1
++entity_soul_1:physics_shape:shape_sphere
++entity_soul_1:physics_collision:nocollide
++entity_soul_1:physics:enabled
++entity_soul_1:state:enabled
++entity_soul_1:scale:0.5 0.5 0.5
++entity_soul_1:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
++entity_soul_1:position:-24.8 -20 31.2
+entity_moonend_31_endwarp:endwarp:default
+entity_moonend_31_endwarp:mesh:../gameresources/build/uncategorized/warp.gltf
+entity_moonend_31_endwarp:physics_shape:shape_exact
+entity_moonend_31_endwarp:physics:enabled
+entity_moonend_31_endwarp:layer:nolighting
+entity_moonend_31_endwarp:position:-44.2 -20.4 92
+entity_simple_activate_35/model:activate-delay:1000
+entity_simple_activate_35/model:activate-type:touch
+entity_simple_activate_35/model:activate-autoreset:5000
+entity_simple_activate_35/model:activatable:true
+entity_simple_activate_35/model:activate-mask:11
+entity_simple_activate_35/model:physics_shape:shape_exact
+entity_simple_activate_35/model:physics:enabled
+entity_soul_1_holder:mesh:../gameresources/build/uncategorized/soulspawn.gltf
+entity_soul_1_holder:physics_shape:shape_exact
+entity_soul_1_holder:physics:enabled
+entity_soul_1_holder:position:-24.8 -20.72 31.2
+entity_shard_20:breakable:true
+entity_shard_20:scrollspeed:1 1 0
+entity_shard_20:textureoffset:38.2 38.2
+entity_shard_20:tint:0 0 1 0.8
+entity_shard_20:mesh:../gameresources/build/primitives/sphere.gltf
+entity_shard_20:physics_shape:shape_exact
+entity_shard_20:physics_collision:nocollide
+entity_shard_20:physics:enabled
+entity_shard_20:layer:nolighting
+entity_shard_20:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_shard_20:position:-18.4 -20 84
+entity_moon_26/door:scrollspeed:0.02 0.02 0
+entity_moon_26/door:textureoffset:0.763967 0.763967
+entity_moonend_31/portal:radius:5
+entity_moonend_31/portal:activate-type:near
+entity_moonend_31/portal:activatable:true
+entity_moonend_31/portal:rotation:0 0 -1 -180
+entity_water_4:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,4.map
+entity_water_4:physics_shape:shape_box
+entity_water_4:physics:enabled
+entity_water_4:position:34.8377 -4.8 -6.735
+texture1:texture:../gameresources/build/textures/ballgame/dash.png
 entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
-entity_worldspawn_0:_tb_layer_omit_from_export:1
-entity_worldspawn_0:position:0 0 0
-
-playerspawn:rotation:1 0 -5.96047e-08 0.0395647
-playerspawn:position:-15.2 -20 29.6
-
-playerspawn:rotation:1 0 -5.96047e-08 0.0395647
-playerspawn:position:-13.6 -20 114.4
-
-
+entity_worldspawn_0:position:10.4 -92.8 -714.4
+entity_spikes_8/model:physics_shape:shape_exact
+entity_spikes_8/model:physics:enabled
+entity_dropper_12/model:activate-delay:1000
+entity_dropper_12/model:activate-type:touch
+entity_dropper_12/model:activate-autoreset:0
+entity_dropper_12/model:activatable:true
+entity_dropper_12/model:physics_shape:shape_exact
+entity_dropper_12/model:physics:enabled
+texture5:texture:../gameresources/build/textures/ballgame/none.png
+texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+entity_player_end_30:player_end:true
+entity_player_end_30:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,30.map
+entity_player_end_30:physics_shape:shape_exact
+entity_player_end_30:physics_collision:nocollide
+entity_player_end_30:physics:enabled
+entity_player_end_30:position:-31.2 -17.6 71.2
+entity_simple_activate_32/model:activate-delay:1000
+entity_simple_activate_32/model:activate-type:touch
+entity_simple_activate_32/model:activate-autoreset:5000
+entity_simple_activate_32/model:activatable:true
+entity_simple_activate_32/model:activate-mask:14
+entity_simple_activate_32/model:physics_shape:shape_exact
+entity_simple_activate_32/model:physics:enabled
+entity_spikes_17:radius:7
+entity_spikes_17:activate-type:near
+entity_spikes_17:activatable:true
+entity_spikes_17:mesh:../gameresources/build/misc/spikes_5x5.gltf
+entity_spikes_17:activate-mask:14
+entity_spikes_17:scale:3 3 3
+entity_spikes_17:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_spikes_17:position:-10.4 -20.2 40.8
+entity_tube_exit_14/spikes:physics_shape:shape_exact
+entity_tube_exit_14/spikes:physics:enabled
+entity_shard_25:breakable:true
+entity_shard_25:scrollspeed:1 1 0
+entity_shard_25:textureoffset:38.2 38.2
+entity_shard_25:tint:0 0 1 0.8
+entity_shard_25:mesh:../gameresources/build/primitives/sphere.gltf
+entity_shard_25:physics_shape:shape_exact
+entity_shard_25:physics_collision:nocollide
+entity_shard_25:physics:enabled
+entity_shard_25:layer:nolighting
+entity_shard_25:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_shard_25:position:-5.6 -20 68
+combined_entities_rail:data-key:,
+combined_entities_rail:data-time:0,5
+combined_entities_rail:data-interp:,
+combined_entities_rail:data-index:0,1
+combined_entities_rail:data-name:levelintro,levelintro
+combined_entities_rail:data-visual:,
+combined_entities_rail:data-rot:0 0 0,0 0 0
+combined_entities_rail:data-pos:-5.6 -15.2 136.8,-5.6 -8.8 136.8
+combined_entities_rail:rail:true
+entity_moonend_31:texture:./res/textures/cyberguy2.png
+entity_moonend_31:tint:1 1 1 0.6
+entity_moonend_31:mesh:../gameresources/build/objtypes/moon.gltf
+entity_moonend_31:layer:nolighting
+entity_moonend_31:rotation:-1 0 1.19209e-07 0
+entity_moonend_31:position:-39.2 -18.4 92
+entity_water_3:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,3.map
+entity_water_3:physics_shape:shape_box
+entity_water_3:physics:enabled
+entity_water_3:position:29.8002 -4.8 -7.3249
+entity_simple_activate_35:mesh:../gameresources/build/primitives/medium.gltf
+entity_simple_activate_35:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_simple_activate_35:position:-28 -18.4 104.8
+entity_spinner_10:spin:1
+entity_spinner_10:activate-mask:14
+entity_spinner_10:activatable:true
+entity_spinner_10:mesh:../gameresources/build/misc/spinner.gltf
+entity_spinner_10:rotation:1.78814e-07 -1.74846e-07 1 -180
+entity_spinner_10:position:-13.6 -12 47.2
+entity_dropper_12:mesh:../gameresources/build/misc/shootingtarget.gltf
+entity_dropper_12:rotation:0 1 -3.57628e-07 -90
+entity_dropper_12:position:-5.6 -18.4 53.6
+texture2:texture:../gameresources/build/textures/ballgame/teleport.png
+entity_vertical_bound_point_34:ballplane:true
+entity_vertical_bound_point_34:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_vertical_bound_point_34:position:-30.4 -48 -14.4
+entity_shard_24:breakable:true
+entity_shard_24:scrollspeed:1 1 0
+entity_shard_24:textureoffset:38.2 38.2
+entity_shard_24:tint:0 0 1 0.8
+entity_shard_24:mesh:../gameresources/build/primitives/sphere.gltf
+entity_shard_24:physics_shape:shape_exact
+entity_shard_24:physics_collision:nocollide
+entity_shard_24:physics:enabled
+entity_shard_24:layer:nolighting
+entity_shard_24:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_shard_24:position:-5.6 -20 80.8
+entity_shard_21:breakable:true
+entity_shard_21:scrollspeed:1 1 0
+entity_shard_21:textureoffset:38.2 38.2
+entity_shard_21:tint:0 0 1 0.8
+entity_shard_21:mesh:../gameresources/build/primitives/sphere.gltf
+entity_shard_21:physics_shape:shape_exact
+entity_shard_21:physics_collision:nocollide
+entity_shard_21:physics:enabled
+entity_shard_21:layer:nolighting
+entity_shard_21:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_shard_21:position:-18.4 -20 76
+entity_dropper_16:mesh:../gameresources/build/misc/shootingtarget.gltf
+entity_dropper_16:rotation:0 1 -3.57628e-07 -90
+entity_dropper_16:position:-5.6 -13.6 44
+entity_moon_26:playerspawn:true
+entity_moon_26:texture:./res/textures/cyberguy2.png
+entity_moon_26:tint:1 1 1 0.6
+entity_moon_26:rebirth:true
+entity_moon_26:mesh:../gameresources/build/objtypes/moon.gltf
+entity_moon_26:layer:nolighting
+entity_moon_26:rotation:8.74228e-08 1.04083e-17 1 -0.0395647
+entity_moon_26:position:-24 -17.6 136
+entity_moonend_31_gem:spin:1
+entity_moonend_31_gem:condition:true
+entity_moonend_31_gem:gem:default
+entity_moonend_31_gem:tint:1 1 1 0.2
+entity_moonend_31_gem:mesh:../gameresources/build/uncategorized/crystal.gltf
+entity_moonend_31_gem:physics_shape:shape_sphere
+entity_moonend_31_gem:physics_collision:nocollide
+entity_moonend_31_gem:physics:enabled
+entity_moonend_31_gem:scale:3 3 3
+entity_moonend_31_gem:layer:nolighting
+entity_moonend_31_gem:rotation:-1 0 3.57628e-07 nan
+entity_moonend_31_gem:position:-39.2 -16.4 92
+entity_autodoor_11:activate-type:near
+entity_autodoor_11:activate-mask:14
+entity_autodoor_11:activatable:true
+entity_autodoor_11:mesh:../gameresources/build/building/autodoor.gltf
+entity_autodoor_11:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_autodoor_11:position:-12.32 -20 63.2
+entity_crusher_18/model:physics_shape:shape_exact
+entity_crusher_18/model:physics:enabled
+entity_crusher_18/model:rotation:0 4.76837e-07 1 -180
++entity_soul_6:soul:red
++entity_soul_6:effekseer:./res/particles/spirit-white.efkefc
++entity_soul_6:effect-tint:1 0 0 1
++entity_soul_6:physics_shape:shape_sphere
++entity_soul_6:physics_collision:nocollide
++entity_soul_6:physics:enabled
++entity_soul_6:state:enabled
++entity_soul_6:scale:0.5 0.5 0.5
++entity_soul_6:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
++entity_soul_6:position:-18.4 -20 24.8
+entity_crusher_18:activate-autoreset:5000
+entity_crusher_18:activate-name:crush
+entity_crusher_18:activatable:true
+entity_crusher_18:mesh:../gameresources/build/misc/crusher.gltf
+entity_crusher_18:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_crusher_18:position:-2.4 -18.4 63.2
+entity_killplane_27:scrollspeed:0.2 0 0.2
+entity_killplane_27:textureoffset:7.63969 0
+entity_killplane_27:killplane:true
+entity_killplane_27:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,27.map
+entity_killplane_27:physics_shape:shape_exact
+entity_killplane_27:physics:enabled
+entity_killplane_27:position:-20.454 -22.9841 -9.4774
+entity_spikes_7:radius:7
+entity_spikes_7:activate-type:near
+entity_spikes_7:activatable:true
+entity_spikes_7:mesh:../gameresources/build/misc/spikes_5x5.gltf
+entity_spikes_7:activate-mask:14
+entity_spikes_7:scale:3 3 3
+entity_spikes_7:rotation:0 1 -3.57628e-07 -90
+entity_spikes_7:position:-15.2 -18.4 26.4
+entity_shard_23:breakable:true
+entity_shard_23:scrollspeed:1 1 0
+entity_shard_23:textureoffset:38.2 38.2
+entity_shard_23:tint:0 0 1 0.8
+entity_shard_23:mesh:../gameresources/build/primitives/sphere.gltf
+entity_shard_23:physics_shape:shape_exact
+entity_shard_23:physics_collision:nocollide
+entity_shard_23:physics:enabled
+entity_shard_23:layer:nolighting
+entity_shard_23:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_shard_23:position:-5.6 -20 92
+entity_soul_2_holder:mesh:../gameresources/build/uncategorized/soulspawn.gltf
+entity_soul_2_holder:physics_shape:shape_exact
+entity_soul_2_holder:physics:enabled
+entity_soul_2_holder:position:-18.4 -20.72 32.8
+entity_crusher_18/poles:physics_shape:shape_exact
+entity_crusher_18/poles:physics:enabled
+entity_crusher_18/Bone:rotation:0 -4.76837e-07 1 -180
+entity_spikes_17/model:physics_shape:shape_exact
+entity_spikes_17/model:physics:enabled
+!light:globallight:true
+!light:spin:0.02
+!light:angle:-10
+!light:rotation:-1 0 3.57628e-07 nan
+!light:position:0 50 0
+entity_moonend_31/door:scrollspeed:0.02 0.02 0
+entity_moonend_31/door:textureoffset:0.763967 0.763967
+entity_moon_26/model:scrollspeed:0.02 0.02 0
+entity_moon_26/model:textureoffset:0.763967 0.763967
+entity_moon_26/model:physics_shape:shape_exact
+entity_moon_26/model:physics:enabled
+entity_simple_activate_32:mesh:../gameresources/build/primitives/medium.gltf
+entity_simple_activate_32:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_simple_activate_32:position:-28 -18.4 108
+entity_spikes_8/spiketip:killplane:true
+entity_spikes_8/spiketip:physics_shape:shape_exact
+entity_spikes_8/spiketip:physics:enabled
+entity_moonend_31/model:scrollspeed:0.02 0.02 0
+entity_moonend_31/model:textureoffset:0.763967 0.763967
+entity_moonend_31/model:physics_shape:shape_exact
+entity_moonend_31/model:physics:enabled
+entity_dropper_15/model:activate-delay:1000
+entity_dropper_15/model:activate-type:touch
+entity_dropper_15/model:activatable:true
+entity_dropper_15/model:activate-mask:14
+entity_dropper_15/model:physics_shape:shape_exact
+entity_dropper_15/model:physics:enabled
+entity_tube_exit_14/sphere:tint:0 0 1 1
+entity_tube_exit_14/sphere:physics_shape:shape_exact
+entity_tube_exit_14/sphere:physics:enabled
+entity_dropper_16/model:activate-delay:1000
+entity_dropper_16/model:activate-type:touch
+entity_dropper_16/model:activatable:true
+entity_dropper_16/model:activate-mask:14
+entity_dropper_16/model:physics_shape:shape_exact
+entity_dropper_16/model:physics:enabled

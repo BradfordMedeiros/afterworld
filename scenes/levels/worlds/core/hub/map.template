@@ -11,15 +11,15 @@ levelselect:levelselect:true
 
 >menu-view:rotation:0.984808 -1.24095e-08 -0.173648 0
 >menu-view:position:15.1 13.6 51.3
->menu-view:spin:true
+>menu-view:spin:0.02
 
 !light:globallight:true
 !light:position:0 100 0
 !light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
-!light:spin:true
+!light:spin:0.02
 
 #levelselect:orbui:true
-#levelselect:spin:true
+#levelselect:spin:0.02
 #levelselect:texture:./res/textures/skyboxs/sky/bottom.jpg
 #levelselect:mesh:../gameresources/build/primitives/sphere.gltf
 #levelselect:scale:5 5 5
@@ -34,3 +34,5 @@ orb2:texture:../gameresources/build/textures/creepydog.jpg
 
 twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
 
+
+background:texture:../gameresources/build/textures/backgrounds/test3.png

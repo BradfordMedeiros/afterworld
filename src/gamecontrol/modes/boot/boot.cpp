@@ -3,62 +3,17 @@
 extern CustomApiBindings* gameapi;
 extern GameTypes gametypeSystem;
 
-struct ManagedGame {
-	std::string name;
-    pid_t pid;
+union DebugMenuData {
+	bool enabled;
 };
-std::optional<ManagedGame> managedGame;
-
-
 struct DebugMenu {
 	std::string label;
+	std::function<std::string(DebugMenu& self)> displayText;
+	std::optional<std::string> image;
 	std::vector<DebugMenu> submenu;
-	std::function<void()> fn;
+	DebugMenuData data;
+	std::function<void(DebugMenu& self)> fn;
 };
-
-void launchGame(){
-    pid_t pid = fork();
-    if (pid == -1) {
-        std::cerr << "Failed to fork\n";
-        return;
-    }
-    if (pid == 0) {
-        execl("../afterworld/run.sh", "../afterworld/run.sh", (char*)NULL);
-        std::cerr << "Failed to execute game\n";
-        exit(1);
-    }
-
-    managedGame = ManagedGame{
-        .name = "Test Game",
-        .pid = pid,
-    };
-
-    std::thread([pid]() {
-        int status = 0;
-        pid_t result = waitpid(pid, &status, 0);
-        if (result == pid) {
-            if (WIFEXITED(status)) {
-                std::cout << "Game exited with code " << WEXITSTATUS(status) << std::endl;
-            } else if (WIFSIGNALED(status)) {
-                std::cout << "Game killed by signal " << WTERMSIG(status) << std::endl;
-            }
-            if (managedGame && managedGame->pid == pid) {
-                managedGame.reset();
-            }
-        }
-    }).detach();
-}
-
-void killGame(){
-    if (!managedGame) {
-        return;
-    }
-    pid_t pid = managedGame -> pid;
-    if (kill(pid, SIGTERM) == 0) {
-        std::cout << "Sent SIGTERM to game\n";
-    }
-}
-
 
 DebugMenu menu {
 	.label = "Tomorrow's Bad Arcade",
@@ -71,15 +26,16 @@ DebugMenu menu {
 					.submenu = {
 						DebugMenu {
 							.label = "Soul Delivery",
-							.fn = []() -> void {
-								launchGame();
+							.image = "./res/textures/wood.jpg",
+							.fn = [](DebugMenu&) -> void {
+								platform::startGame();
 							},
 						},
 						DebugMenu {
 							.label = "Invaders",
-							.fn = []() -> void {
-								std::cout << "game play version 2"  << std::endl;
-								killGame();
+							.image = "./res/textures/hexglow.png",
+							.fn = [](DebugMenu&) -> void {
+								platform::startGame();
 							},
 						},
 					}
@@ -89,11 +45,59 @@ DebugMenu menu {
 				},
 			},
 		},
-		DebugMenu { .label = "Settings" },
+		DebugMenu { 
+			.label = "Settings",
+			.submenu = {
+				DebugMenu {
+					.label = "Mute",
+					.displayText = [](DebugMenu& self) -> std::string { 
+						return platform::isMuted() ? "[X]" : "[]"; 
+					},
+					.fn = [](DebugMenu& self) -> void {
+						auto isMuted = platform::isMuted();
+						platform::setMuted(!isMuted);
+					},
+				},
+				DebugMenu {
+					.label = "Volume",
+					.displayText = [](DebugMenu& self) -> std::string { 
+						auto volume = platform::getVolume();
+						return std::to_string(volume); 
+					},
+					.fn = [](DebugMenu& self) -> void {
+						auto volume = platform::getVolume();
+						volume += 0.1f;
+						if (volume > 1.05f){
+							volume = 0.f;
+						}
+						platform::setVolume(volume);
+					},
+				},
+			}
+		},
+		DebugMenu { 
+			.label = "Hardware",
+			.submenu = {
+				DebugMenu {
+					.label = "LED Enabled",
+					.data = DebugMenuData{ .enabled = false },
+					.fn = [](DebugMenu& self) -> void {
+						
+					},
+				},
+				DebugMenu {
+					.label = "LED Color",
+					.data = DebugMenuData{ .enabled = false },
+					.fn = [](DebugMenu& self) -> void {
+						
+					},
+				},
+			}
+		},
 		DebugMenu { 
 			.label = "Reboot", 
-			.fn = []() -> void {
-				std::cout << "game play reboot" << std::endl;
+			.fn = [](DebugMenu&) -> void {
+				platform::reboot();
 			},
 		},
 	},
@@ -104,20 +108,20 @@ std::vector<int> menuPath {
 	0
 };
 
-DebugMenu getDebugMenu(){
-	auto currMenu = menu.submenu.at(menuPath.at(0));
+DebugMenu& getDebugMenu(){
+	auto currMenu = &menu.submenu.at(menuPath.at(0));
 	for (int i = 1; i < menuPath.size(); i++){
-		currMenu = currMenu.submenu.at(menuPath.at(i));
+		currMenu = &currMenu -> submenu.at(menuPath.at(i));
 	}
-	return currMenu;
+	return *currMenu;
 }
 
-DebugMenu getDebugMenuParent(){
-	auto currMenu = menu;
+DebugMenu& getDebugMenuParent(){
+	auto currMenu = &menu;
 	for (int i = 0; i < menuPath.size() - 1; i++){
-		currMenu = currMenu.submenu.at(menuPath.at(i));
+		currMenu = &currMenu -> submenu.at(menuPath.at(i));
 	}
-	return currMenu;
+	return *currMenu;
 }
 
 
@@ -136,13 +140,13 @@ GameTypeInfo getBootMode(){
     		}
     	}
     	if (key == 'E' && action == 1){
-    		auto currMenu = getDebugMenu();
+    		auto& currMenu = getDebugMenu();
     		std::cout << "game play  curr menu: " << currMenu.label << std::endl;
     		if (currMenu.submenu.size() > 0){
 	    		menuPath.push_back(0);
     		}else{
     			if (currMenu.fn){
-    				currMenu.fn();
+    				currMenu.fn(currMenu);
     			}else{
 		    		std::cout << "game play  no fn to dispatch: " << currMenu.label << std::endl;
     			}
@@ -167,13 +171,6 @@ GameTypeInfo getBootMode(){
     	}
     },
     .onFrame = [](std::any& gametype) -> void {
-    	if(managedGame.has_value()){
-	  		gameapi -> drawText("Running Game", -0.9f, 0.9f, 12, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	  		gameapi -> drawText(managedGame.value().name, -0.9f, 0.8f, 12, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-
-    		return;
-    	}
-
   		gameapi -> drawText(menu.label, -0.9f, 0.9f, 12, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		
   		auto topMenu = menu.submenu;
@@ -186,6 +183,7 @@ GameTypeInfo getBootMode(){
 
   			auto currMenu = topMenu;
   			auto currDepth = topDepth;
+  			bool isMaxDepth = currDepth == (menuPath.size() - 1);
   			for (int i = 0; i < currMenu.size(); i++){
   				auto item = currMenu.at(i);
   				std::string prefix;
@@ -199,15 +197,47 @@ GameTypeInfo getBootMode(){
   					prefix = "X ";
   				}
 
+  				if (isMaxDepth){
+  					prefix += "| ";
+  				}
+
   				auto tint = isMenu ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f);
-  				gameapi -> drawText(prefix + item.label, -0.9f + 0.2 * currDepth, 0.8f - (i * 0.1f) , 12, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+				std::string fullText = item.label + (item.displayText ? item.displayText(item) : "");
+
+  				gameapi -> drawText(prefix + fullText, -0.9f + 0.2 * currDepth, 0.8f - (i * 0.1f) , 12, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   				bool isMenuOpen = isSelected && menuPath.size() > (currDepth + 1);
   				if (isMenuOpen){
   					std::cout << "menu is open: " << item.label << std::endl;
   					keepRendering = true;
   					topMenu = currMenu.at(i).submenu;
   					topDepth++;
+  				}
 
+				static std::string lastImage;
+
+  				if (isSelected && isMaxDepth){
+  					if (currMenu.at(i).image.has_value()){
+  						ShapeOptions shapeOptions {
+  							.zIndex = -1,
+  						};
+
+  						auto& image = currMenu.at(i).image.value();
+  						static float lastFadeTime = 0.f;
+  						if (lastImage != image){
+  							lastFadeTime = gameapi -> timeSeconds(true);
+  						}
+
+  						auto time = gameapi -> timeSeconds(true) - lastFadeTime;
+  						float percentage = time / 0.2f;
+  						if (percentage > 1.f){
+  							percentage = 1.f;
+  						}
+  		
+  						lastImage = image;
+  						gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.4f, 0.4f, 0.4f, 1.f * percentage), std::nullopt, true, std::nullopt, currMenu.at(i).image.value(), shapeOptions);  						
+  					}else{
+  						lastImage = "";
+  					}
   				}
   			}  			
   		}

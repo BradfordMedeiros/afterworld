@@ -1,0 +1,19 @@
+// Game: Generic
+// Format: Standard
+// entity 0
+{
+"classname" "worldspawn"
+"_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"_tb_layer_locked" "1"
+"_tb_layer_omit_from_export" "1"
+// brush 0
+{
+( -24 24 -4 ) ( -10 8 0 ) ( -24 -24 -4 ) arcade/trench/oldschool/Bricks -4.509247 -6.131572 90 1 -6.24615
+( -10 8 0 ) ( -8 -8 0 ) ( -24 -24 -4 ) arcade/trench/oldschool/Bricks -19.072521 11.472742 97.124756 0.33592826 -7.187254
+( 8 -8 0 ) ( 24 -24 -4 ) ( -24 -24 -4 ) arcade/trench/oldschool/Bricks 23.693024 -3.563414 0 1 5.7313037
+( 24 -24 -4 ) ( 24 24 -4 ) ( -24 24 -4 ) arcade/trench/oldschool/Bricks -8 -1 0 1 1
+( -10 8 0 ) ( 8 8 0 ) ( 8 -8 0 ) arcade/trench/oldschool/Bricks -8 -1 0 1 1
+( -24 24 -4 ) ( 24 24 -4 ) ( 8 8 0 ) arcade/trench/oldschool/Bricks 13.582196 -0.5954392 0 0.4782608 -6.654139
+( 8 8 0 ) ( 24 24 -4 ) ( 24 -24 -4 ) arcade/trench/oldschool/Bricks -0.6562195 7.4430656 90 1 4.993878
+}
+}

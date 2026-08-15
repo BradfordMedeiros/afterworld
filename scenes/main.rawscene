@@ -19,3 +19,5 @@ testobject:physics:disabled
 
 
 
+######### This should be dynamically loaded for level but not...yet i guess
+loadtexture-levels:texture:../afterworld/scenes/levels/worlds/w1/w1-1/map.png

@@ -1,5 +1,7 @@
 ########## Base file content: /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.template ##########
 
+texture:texture:./res/textures/hexglow.png
+
 # Generated scene 
 #floor:texture:../gameresources/build/misc/keyboard.png
 #floor:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
@@ -13,15 +15,15 @@ levelselect:levelselect:true
 
 >menu-view:rotation:0.984808 -1.24095e-08 -0.173648 0
 >menu-view:position:15.1 13.6 51.3
->menu-view:spin:true
+>menu-view:spin:0.02
 
 !light:globallight:true
 !light:position:0 100 0
 !light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
-!light:spin:true
+!light:spin:0.02
 
 #levelselect:orbui:true
-#levelselect:spin:true
+#levelselect:spin:0.02
 #levelselect:texture:./res/textures/skyboxs/sky/bottom.jpg
 #levelselect:mesh:../gameresources/build/primitives/sphere.gltf
 #levelselect:scale:5 5 5
@@ -37,6 +39,7 @@ orb2:texture:../gameresources/build/textures/creepydog.jpg
 twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
 
 
+background:texture:../gameresources/build/textures/backgrounds/test3.png
 
 ##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map
 
@@ -44,64 +47,107 @@ entity_worldspawn_0:rotation:1 0 -5.96047e-08 0.0395647
 entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
-entity_worldspawn_0:_tb_layer_omit_from_export:1
+
 entity_worldspawn_0:position:0 0 0
 
-playerspawn:rotation:1 0 -5.96047e-08 0.0395647
-playerspawn:position:-37.6 0.8 13.6
+entity_trigger_zone_15:rotation:1 0 -5.96047e-08 0.0395647
+entity_trigger_zone_15:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,15.map
+entity_trigger_zone_15:physics_shape:shape_box
+entity_trigger_zone_15:physics:enabled
+entity_trigger_zone_15:physics_collision:nocollide
+entity_trigger_zone_15:worldselect:w1
+entity_trigger_zone_15:trigger_bound:true
+entity_trigger_zone_15:position:0 0 0
 
 entity_trigger_zone_16:rotation:1 0 -5.96047e-08 0.0395647
 entity_trigger_zone_16:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,16.map
 entity_trigger_zone_16:physics_shape:shape_box
 entity_trigger_zone_16:physics:enabled
 entity_trigger_zone_16:physics_collision:nocollide
-entity_trigger_zone_16:worldselect:w1
+entity_trigger_zone_16:trigger_zone:test
 entity_trigger_zone_16:trigger_bound:true
 entity_trigger_zone_16:position:0 0 0
 
-entity_gravityhole_17:rotation:1 0 -5.96047e-08 0.0395647
-entity_gravityhole_17:mesh:../gameresources/build/objtypes/gravityhole.gltf
-entity_gravityhole_17:physics_shape:shape_exact
-entity_gravityhole_17:physics:enabled
-entity_gravityhole_17:gravityhole:true
-entity_gravityhole_17:wellname:w1
-entity_gravityhole_17:targetwell:w1-out
-entity_gravityhole_17:holemode:auto
-entity_gravityhole_17:position:-5.6 5.6 -39.2
+entity_warp_18:rotation:1 0 -5.96047e-08 0.0395647
+entity_warp_18:layer:nolighting
+entity_warp_18:mesh:../gameresources/build/uncategorized/warp.gltf
+entity_warp_18:physics_shape:shape_exact
+entity_warp_18:physics:enabled
+entity_warp_18/target:physics_shape:shape_exact
+entity_warp_18/target:physics:enabled
+entity_warp_18/target:selectwarp:default
+entity_warp_18:position:-39.2 0.8 -0.8
 
-entity_trigger_zone_18:rotation:1 0 -5.96047e-08 0.0395647
-entity_trigger_zone_18:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,18.map
-entity_trigger_zone_18:physics_shape:shape_box
-entity_trigger_zone_18:physics:enabled
-entity_trigger_zone_18:physics_collision:nocollide
-entity_trigger_zone_18:trigger_zone:test
-entity_trigger_zone_18:trigger_bound:true
-entity_trigger_zone_18:position:0 0 0
+entity_player_start_19:rotation:1 0 -5.96047e-08 0.0395647
+entity_player_start_19:playerspawn:true
+entity_player_start_19:position:-44 0.8 -44
 
-entity_gravityhole_19:rotation:1 0 -5.96047e-08 0.0395647
-entity_gravityhole_19:mesh:../gameresources/build/objtypes/gravityhole.gltf
-entity_gravityhole_19:physics_shape:shape_exact
-entity_gravityhole_19:physics:enabled
-entity_gravityhole_19:gravityhole:true
-entity_gravityhole_19:wellname:w1-out
-entity_gravityhole_19:launch:0 100 -100
-entity_gravityhole_19:holemode:auto
-entity_gravityhole_19:position:8.8 5.6 -39.2
+grass:mesh:./res/models/grass.gltf
+grass:scale:1 1 1
+grass:position:-44 -1.5 -44
+grass:shader:../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl
+
+entity_vertical_bound_point_20:rotation:1 0 -5.96047e-08 0.0395647
+entity_vertical_bound_point_20:ballplane:true
+entity_vertical_bound_point_20:position:-0.8 -53.6 0.8
+
+entity_trigger_zone_22:rotation:1 0 -5.96047e-08 0.0395647
+entity_trigger_zone_22:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,22.map
+entity_trigger_zone_22:physics_shape:shape_box
+entity_trigger_zone_22:physics:enabled
+entity_trigger_zone_22:physics_collision:nocollide
+entity_trigger_zone_22:trigger_zone:s
+entity_trigger_zone_22:trigger_bound:true
+entity_trigger_zone_22:position:0 0 0
+
+entity_trigger_zone_23:rotation:1 0 -5.96047e-08 0.0395647
+entity_trigger_zone_23:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,23.map
+entity_trigger_zone_23:physics_shape:shape_box
+entity_trigger_zone_23:physics:enabled
+entity_trigger_zone_23:physics_collision:nocollide
+entity_trigger_zone_23:trigger_zone:testtrigger
+entity_trigger_zone_23:trigger_data:1
+entity_trigger_zone_23:triggercolor:testtrigger
+entity_trigger_zone_23:activecolor:1 0 0 1
+entity_trigger_zone_23:unactivecolor:0 0 1 1
+entity_trigger_zone_23:trigger_bound:true
+entity_trigger_zone_23:curve:move-up
+entity_trigger_zone_23:trigger:testtrigger
+entity_trigger_zone_23:position:0 0 0
+
+entity_arcade_zone_26:rotation:1 0 -5.96047e-08 0.0395647
+entity_arcade_zone_26:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,26.map
+entity_arcade_zone_26:physics_shape:shape_exact
+entity_arcade_zone_26:physics:enabled
+entity_arcade_zone_26:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+entity_arcade_zone_26:arcade:interact
+entity_arcade_zone_26:layer:nolighting
+entity_arcade_zone_26:position:0 0 0
+entity_arcade_zone_26:shader:../afterworld/shaders/trippy/fragment.glsl,../afterworld/shaders/trippy/vertex.glsl
+
+entity_surface_28:rotation:1 0 -5.96047e-08 0.0395647
+entity_surface_28:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map
+entity_surface_28:physics_shape:shape_exact
+entity_surface_28:physics:enabled
+entity_surface_28:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+entity_surface_28:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/hub/map.map,28.map
+entity_surface_28:jumpsurface:true
+entity_surface_28:position:0 0 0
 
 
 combined_entities_rail:rail:true
-combined_entities_rail:data-pos:5.6 0.8 12,5.6 32.8 12,4 37.6 -5.6,4 37.6 -12,-18.4 50.4 -37.6,42.4 63.2 -34.4,45.6 63.2 18.4,4 45.6 -12,45.6 63.2 18.4
-combined_entities_rail:data-rot:0 0 0,0 0 0,0 90 0,0 90 0,0 0 0,0 0 0,0 90 0,0 45 0,0 90 0
-combined_entities_rail:data-name:levelintro,levelintro,levelintro,levelintro,intro,intro,intro,levelintro,intro
-combined_entities_rail:data-index:0,1,2,3,0,1,2,4,3
-combined_entities_rail:data-time:0,10,12,14,0,10,20,16,30
-combined_entities_rail:data-key:this is title one,this is the second key,this is the third one,,I opened my eyes,And saw something wonderful,And saw something wonderful,,And saw something wonderful
-combined_entities_rail:data-visual:,,,,,,,,
-combined_entities_rail:data-interp:,,none,none,,,none,none,none
+combined_entities_rail:data-pos:5.6 0.8 12,5.6 32.8 12,4 37.6 -5.6,4 37.6 -12,-64.8 50.4 -37.6,-34.4 50.4 -37.6,45.6 63.2 18.4,4 45.6 -12,45.6 63.2 18.4,-47.2 0.8 -10.4,-48.8 0.8 7.2,-48.8 0.8 7.2
+combined_entities_rail:data-rot:0 0 0,0 0 0,0 90 0,0 90 0,0 0 0,0 -90 0,0 90 0,0 45 0,0 90 0,0 0 0,0 0 0,0 180 0
+combined_entities_rail:data-name:levelintro,levelintro,levelintro,levelintro,intro,intro,intro,levelintro,intro,w1-1-complete,move-up,move-up
+combined_entities_rail:data-index:0,1,2,3,0,1,2,4,3,0,0,1
+combined_entities_rail:data-time:0,10,12,14,0,5,20,16,30,10,0,2
+combined_entities_rail:data-key:this is title one,this is the second key,this is the third one,,I opened my eyes,And saw something wonderful,And saw something wonderful,,And saw something wonderful,this is some text,this is some text,this is some text
+combined_entities_rail:data-visual:,,,,,,,,,,,
+combined_entities_rail:data-interp:,,none,none,,,none,none,none,,,
 combined_entities_orb:orbui:true
-combined_entities_orb:data-pos:-50.4 0.8 -39.2,-5.6 3.2 -5.6,208.8 2.4 72.8,-53.6 50.4 7.2,252 50.4 133.6
-combined_entities_orb:data-rot:0 0 0,0 90 0,0 0 0,0 45 0,0 90 0
+combined_entities_orb:data-pos:-29.6 0.8 -12,-29.6 1.6 2.4,208.8 2.4 72.8,-53.6 50.4 7.2,252 50.4 133.6
+combined_entities_orb:data-rot:0 -12 -29.6,0 0 0,0 0 0,0 45 0,0 90 0
 combined_entities_orb:data-conn:1,,,4,
 combined_entities_orb:data-name:w1-1,w1-2,one,meta1,meta2
 combined_entities_orb:data-orbui:w1,w1,testorb3,metaworld,metaworld
-combined_entities_orb:data-level:dev,video,one,w1,testorb3
+combined_entities_orb:data-level:w1-1,video,one,w1,testorb3

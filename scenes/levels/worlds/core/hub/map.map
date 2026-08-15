@@ -4,6 +4,7 @@
 {
 "classname" "worldspawn"
 "_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"jumpsurface" "true"
 "_tb_layer_omit_from_export" "1"
 // brush 0
 {
@@ -524,22 +525,68 @@
 ( -1264 1924 16 ) ( -1264 1924 18 ) ( -3104 1924 16 ) arcade/trench/city/windows/window_20 36 -313 0 1 1
 ( -1264 510 16 ) ( -1264 510 18 ) ( -1264 1924 16 ) arcade/trench/city/windows/window_20 194 -313 0 1 1
 }
+// brush 57
+{
+( -256 -16 0 ) ( -256 -15 0 ) ( -256 -16 1 ) arcade/trench/arcade2 80 0 0 1 1
+( -288 64 0 ) ( -288 64 1 ) ( -287 64 0 ) arcade/trench/arcade2 32 0 0 1 1
+( -288 -16 0 ) ( -287 -16 0 ) ( -288 -15 0 ) arcade/trench/arcade2 32 -80 0 1 1
+( -240 144 64 ) ( -240 145 64 ) ( -239 144 64 ) arcade/trench/arcade2 32 -80 0 1 1
+( -240 144 16 ) ( -239 144 16 ) ( -240 144 17 ) arcade/trench/arcade2 32 0 0 1 1
+( -240 144 16 ) ( -240 144 17 ) ( -240 145 16 ) arcade/trench/arcade2 80 0 0 1 1
+}
+// brush 58
+{
+( -240 -144 0 ) ( -240 -143 0 ) ( -240 -144 1 ) arcade/trench/arcade2 208 0 0 1 1
+( -272 -64 0 ) ( -272 -64 1 ) ( -271 -64 0 ) arcade/trench/arcade2 16 0 0 1 1
+( -272 -144 0 ) ( -271 -144 0 ) ( -272 -143 0 ) arcade/trench/arcade2 16 -25 0 1 1
+( -224 16 64 ) ( -224 17 64 ) ( -223 16 64 ) arcade/trench/arcade2 16 -25 0 1 1
+( -224 16 16 ) ( -223 16 16 ) ( -224 16 17 ) arcade/trench/arcade2 16 0 0 1 1
+( -224 16 16 ) ( -224 16 17 ) ( -224 17 16 ) arcade/trench/arcade2 208 0 0 1 1
+}
+// brush 59
+{
+( 112 -144 -96 ) ( 112 -143 -96 ) ( 112 -144 -95 ) arcade/trench/city/building_faces/building_03 -32 -208 0 1 1
+( 240 -144 -96 ) ( 240 -144 -95 ) ( 241 -144 -96 ) arcade/trench/city/building_faces/building_03 32 -208 0 1 1
+( 240 -144 -96 ) ( 241 -144 -96 ) ( 240 -143 -96 ) arcade/trench/city/building_faces/building_03 32 32 0 1 1
+( 256 -80 544 ) ( 256 -79 544 ) ( 257 -80 544 ) arcade/trench/city/building_faces/building_03 32 32 0 1 1
+( 256 1056 -80 ) ( 257 1056 -80 ) ( 256 1056 -79 ) arcade/trench/city/building_faces/building_03 32 -208 0 1 1
+( 256 -80 -80 ) ( 256 -80 -79 ) ( 256 -79 -80 ) arcade/trench/city/building_faces/building_03 -32 -208 0 1 1
+}
+// brush 60
+{
+( -880 32 176 ) ( -880 -176 176 ) ( -880 -176 -32 ) arcade/trench/city/doors/door_03 240 27.076923 0 1 6.5
+( -880 -176 176 ) ( -512 -176 0 ) ( -512 -176 -32 ) arcade/trench/city/doors/door_03 0 0 0 1 1
+( -512 -176 -32 ) ( -512 32 -32 ) ( -880 32 -32 ) arcade/trench/city/doors/door_03 0 -240 0 1 1
+( -512 544 -32 ) ( -512 544 0 ) ( -880 544 176 ) arcade/trench/city/doors/door_03 0 0 0 1 1
+( -880 32 176 ) ( -512 32 0 ) ( -512 -176 0 ) arcade/trench/city/doors/door_03 0 -240 0 1 1
+( -512 -176 0 ) ( -512 32 0 ) ( -512 32 -32 ) arcade/trench/city/doors/door_03 240 0 0 1 1
+}
+// brush 61
+{
+( -384 -120 176 ) ( -384 -160 176 ) ( -384 -160 48 ) arcade/trench/city/doors/door_03 32 48 0 1 1
+( -384 -200 176 ) ( -352 -200 176 ) ( -352 -200 48 ) arcade/trench/city/doors/door_03 64 48 0 1 1
+( -352 -160 48 ) ( -352 -120 48 ) ( -384 -120 48 ) arcade/trench/city/doors/door_03 64 -32 0 1 1
+( -384 -120 96 ) ( -352 -120 96 ) ( -352 -160 96 ) arcade/trench/city/doors/door_03 64 -32 0 1 1
+( -352 -120 48 ) ( -352 -120 176 ) ( -384 -120 176 ) arcade/trench/city/doors/door_03 64 48 0 1 1
+( -336 -160 176 ) ( -336 -120 176 ) ( -336 -120 48 ) arcade/trench/city/doors/door_03 32 48 0 1 1
+}
 }
 // entity 1
 {
 "classname" "orb"
-"origin" "-504 392 8"
+"origin" "-296 120 8"
 "orb" "w1-1"
 "conn" "w1-2"
-"level" "dev"
+"level" "w1-1"
 "orbui" "w1"
+"angles" "a"
 }
 // entity 2
 {
 "classname" "orb"
-"origin" "-56 56 32"
+"origin" "-296 -24 16"
 "orb" "w1-2"
-"angles" "0 90 0"
+"angles" "0 0 0"
 "conn" ""
 "level" "video"
 "orbui" "w1"
@@ -593,12 +640,6 @@
 }
 // entity 8
 {
-"classname" "player_start"
-"origin" "-376 -136 8"
-"angle" "45"
-}
-// entity 9
-{
 "classname" "rail"
 "origin" "40 56 376"
 "rail" "levelintro"
@@ -608,7 +649,7 @@
 "interpolate" "none"
 "rail-key" "this is the third one"
 }
-// entity 10
+// entity 9
 {
 "classname" "rail"
 "origin" "40 120 376"
@@ -618,25 +659,26 @@
 "angles" "0 90 0"
 "interpolate" "none"
 }
-// entity 11
+// entity 10
 {
 "classname" "rail"
-"origin" "-184 376 504"
+"origin" "-648 376 504"
 "rail" "intro"
 "rail-index" "0"
 "time" "0"
 "rail-key" "I opened my eyes"
 }
-// entity 12
+// entity 11
 {
 "classname" "rail"
-"origin" "424 344 632"
+"origin" "-344 376 504"
 "rail" "intro"
 "rail-index" "1"
-"time" "10"
+"time" "5"
 "rail-key" "And saw something wonderful"
+"angles" "0 -90 0"
 }
-// entity 13
+// entity 12
 {
 "classname" "rail"
 "origin" "456 -184 632"
@@ -647,7 +689,7 @@
 "angles" "0 90 0"
 "interpolate" "none"
 }
-// entity 14
+// entity 13
 {
 "classname" "rail"
 "origin" "40 120 456"
@@ -657,7 +699,7 @@
 "angles" "0 45 0"
 "interpolate" "none"
 }
-// entity 15
+// entity 14
 {
 "classname" "rail"
 "origin" "456 -184 632"
@@ -668,29 +710,21 @@
 "angles" "0 90 0"
 "interpolate" "none"
 }
-// entity 16
+// entity 15
 {
 "classname" "trigger_zone"
 "worldselect" "w1"
 // brush 0
 {
-( -128 208 -32 ) ( -128 209 -32 ) ( -128 208 -31 ) clean/chainlink 32 80 0 0.1 0.1
-( -272 288 -32 ) ( -272 288 -31 ) ( -271 288 -32 ) clean/chainlink -224 80 0 0.1 0.1
-( -272 208 -32 ) ( -271 208 -32 ) ( -272 209 -32 ) clean/chainlink -224 -32 0 0.1 0.1
-( -16 464 96 ) ( -16 465 96 ) ( -15 464 96 ) clean/chainlink -224 -32 0 0.1 0.1
-( -16 400 32 ) ( -15 400 32 ) ( -16 400 33 ) clean/chainlink -224 80 0 0.1 0.1
-( -16 464 32 ) ( -16 464 33 ) ( -16 465 32 ) clean/chainlink 32 80 0 0.1 0.1
+( -288 304 -32 ) ( -288 305 -32 ) ( -288 304 -31 ) clean/chainlink -160 80 0 0.1 0.1
+( -432 384 -32 ) ( -432 384 -31 ) ( -431 384 -32 ) clean/chainlink -160 80 0 0.1 0.1
+( -432 304 -32 ) ( -431 304 -32 ) ( -432 305 -32 ) clean/chainlink -160 160 0 0.1 0.1
+( -176 560 96 ) ( -176 561 96 ) ( -175 560 96 ) clean/chainlink -160 160 0 0.1 0.1
+( -176 496 32 ) ( -175 496 32 ) ( -176 496 33 ) clean/chainlink -160 80 0 0.1 0.1
+( -176 560 32 ) ( -176 560 33 ) ( -176 561 32 ) clean/chainlink -160 80 0 0.1 0.1
 }
 }
-// entity 17
-{
-"classname" "gravityhole"
-"origin" "-56 392 56"
-"name" "w1"
-"mode" "auto"
-"target" "w1-out"
-}
-// entity 18
+// entity 16
 {
 "classname" "trigger_zone"
 "trigger" "test"
@@ -704,15 +738,7 @@
 ( -175.06203443626976 -393.4744264940981 -8 ) ( -175.06203443626976 -393.4744264940981 -7 ) ( -175.0620344362697 -392.4744264940978 -8 ) backgrounds/tvs -269.81482 10 0 0.2828427 -0.2
 }
 }
-// entity 19
-{
-"classname" "gravityhole"
-"origin" "88 392 56"
-"name" "w1-out"
-"mode" "auto"
-"launch" "0 100 100"
-}
-// entity 20
+// entity 17
 {
 "classname" "lightzone"
 "color" "0 1 0"
@@ -724,5 +750,129 @@
 ( -7162 5844 784 ) ( -7162 5845 784 ) ( -7161 5844 784 ) const_fence 90 564 0 1 1
 ( -7162 5844 -224 ) ( -7161 5844 -224 ) ( -7162 5844 -223 ) const_fence 90 -304 0 1 1
 ( -6896 5844 -224 ) ( -6896 5844 -223 ) ( -6896 5845 -224 ) const_fence -564 -304 0 1 1
+}
+}
+// entity 18
+{
+"classname" "warp"
+"origin" "-392 8 8"
+}
+// entity 19
+{
+"classname" "player_start"
+"origin" "-440 440 8"
+}
+// entity 20
+{
+"classname" "vertical_bound_point"
+"origin" "-8 -8 -536"
+}
+// entity 21
+{
+"classname" "rail"
+"origin" "-472 104 8"
+"rail" "w1-1-complete"
+"rail-index" "0"
+"time" "10"
+"rail-key" "this is some text"
+}
+// entity 22
+{
+"classname" "trigger_zone"
+"trigger" "s"
+// brush 0
+{
+( -416 112 -48 ) ( -416 113 -48 ) ( -416 112 -47 ) clean/chainlink -32 -80 0 0.1 0.1
+( -560 192 -48 ) ( -560 192 -47 ) ( -559 192 -48 ) clean/chainlink -160 -80 0 0.1 0.1
+( -560 112 -48 ) ( -559 112 -48 ) ( -560 113 -48 ) clean/chainlink -160 32 0 0.1 0.1
+( -304 368 80 ) ( -304 369 80 ) ( -303 368 80 ) clean/chainlink -160 32 0 0.1 0.1
+( -304 304 16 ) ( -303 304 16 ) ( -304 304 17 ) clean/chainlink -160 -80 0 0.1 0.1
+( -304 368 16 ) ( -304 368 17 ) ( -304 369 16 ) clean/chainlink -32 -80 0 0.1 0.1
+}
+}
+// entity 23
+{
+"classname" "trigger_zone"
+"triggercolor" "testtrigger"
+"trigger" "testtrigger"
+"activecolor" "1 0 0 1"
+"unactivecolor" "0 0 1 1"
+"curve" "move-up"
+"trigger_data" "1"
+"trigger-curve" "testtrigger"
+"trigger_is_condition" "true"
+// brush 0
+{
+( -432 -160 0 ) ( -432 -159 0 ) ( -432 -160 1 ) arcade/trench/city/doors/door_19 0 0 0 1 1
+( -464 -160 0 ) ( -464 -160 1 ) ( -463 -160 0 ) arcade/trench/city/doors/door_19 32 0 0 1 1
+( -464 -160 0 ) ( -463 -160 0 ) ( -464 -159 0 ) arcade/trench/city/doors/door_19 32 0 0 1 1
+( -336 -80 96 ) ( -336 -79 96 ) ( -335 -80 96 ) arcade/trench/city/doors/door_19 32 0 0 1 1
+( -336 -80 16 ) ( -335 -80 16 ) ( -336 -80 17 ) arcade/trench/city/doors/door_19 32 0 0 1 1
+( -336 -80 16 ) ( -336 -80 17 ) ( -336 -79 16 ) arcade/trench/city/doors/door_19 0 0 0 1 1
+}
+}
+// entity 24
+{
+"classname" "rail"
+"origin" "-488 -72 8"
+"rail" "move-up"
+"rail-index" "0"
+"time" "0"
+"rail-key" "this is some text"
+}
+// entity 25
+{
+"classname" "rail"
+"origin" "-488 -72 8"
+"rail" "move-up"
+"rail-index" "1"
+"time" "2"
+"rail-key" "this is some text"
+"angles" "0 180 0"
+}
+// entity 26
+{
+"classname" "arcade_zone"
+// brush 0
+{
+( 104 1942.666666666667 41.47200000000191 ) ( 104 1948 41.47200000000191 ) ( 104 1942.666666666667 43.039999999999566 ) arcade/trench/city/doors/door_10 -46.500122 -1.5106201 0 0.5333333 0.1568001
+( 537.9444938456002 300 16.38400000000246 ) ( 536.0495397240161 300 16.38400000000246 ) ( 537.9444938456002 300 17.952000000001533 ) arcade/trench/city/doors/door_10 57.82544 -1.5106201 0 -0.18949553 0.1568001
+( 537.9444938456003 1601.3333333333335 -4 ) ( 537.9444938456003 1606.666666666667 -4 ) ( 536.0495397240163 1601.3333333333335 -4 ) arcade/trench/city/doors/door_10 -46.500122 -1043.8254 90 0.5333333 0.18949553
+( 143.79403655352797 1942.666666666667 192 ) ( 141.89908243193025 1942.666666666667 192 ) ( 143.79403655352797 1948 192 ) arcade/trench/city/doors/door_10 -46.500122 -1043.8254 90 0.5333333 0.18949553
+( 143.79403655352786 556 41.47200000000191 ) ( 143.79403655352786 556 43.039999999999566 ) ( 141.89908243193014 556 41.47200000000191 ) arcade/trench/city/doors/door_10 57.82544 -1.5106201 0 -0.18949553 0.1568001
+( 194.95779783663505 1601.3333333333335 16.38400000000246 ) ( 194.95779783663505 1601.3333333333335 17.952000000001533 ) ( 194.95779783663505 1606.666666666667 16.38400000000246 ) arcade/trench/city/doors/door_10 -46.500122 -1.5106201 0 0.5333333 0.1568001
+}
+}
+// entity 27
+{
+"classname" "func_group"
+"_tb_type" "_tb_layer"
+"_tb_name" "layer2"
+"_tb_id" "1"
+"_tb_layer_sort_index" "0"
+"_tb_layer_omit_from_export" "1"
+}
+// entity 28
+{
+"classname" "surface"
+"_tb_layer" "1"
+// brush 0
+{
+( -1200 400 176 ) ( -1200 -192 176 ) ( -1200 -192 152 ) clean/metalgrid -77.405396 -58.66665 0 1.9473689 1.4999998
+( -1181.7142857142858 -176 176 ) ( -880 -176 176 ) ( -880 -176 152 ) clean/metalgrid 196.00012 -58.66665 0 1.5714283 1.4999998
+( -880 -192 152 ) ( -880 119.57894736842098 152 ) ( -1181.7142857142858 400 152 ) clean/metalgrid 196.00012 77.40541 0 1.5714283 1.9473689
+( -1181.7142857142858 400 176 ) ( -880 119.57894736842098 176 ) ( -880 -192 176 ) clean/metalgrid 196.00012 77.40541 0 1.5714283 1.9473689
+( -827.9289956817972 175.60386321142943 152 ) ( -827.9289956817972 175.60386321142943 176 ) ( -1129.643281396083 456.02491584300844 176 ) clean/metalgrid 162.86401 -58.66665 0 1.5714283 1.4999998
+( -880 -192 176 ) ( -880 119.57894736842098 176 ) ( -880 119.57894736842098 152 ) clean/metalgrid 11.329723 -58.66665 0 1.024931 1.4999998
+}
+// brush 1
+{
+( -1584 400 528 ) ( -1584 -192 528 ) ( -1584 -192 32 ) clean/metalgrid -209.40543 -9.806452 0 1.9473689 5.166666
+( -1197.7142857143017 512 32 ) ( -1197.714285714296 512 176 ) ( -1584 400 528 ) clean/metalgrid 5.751663 5.3333435 0 1.5089283 1.4999998
+( -1584 -192 528 ) ( -1181.7142857142926 -192 176 ) ( -1181.7142857142926 -192 32 ) clean/metalgrid -35.999817 5.3333435 0 1.5714283 1.4999998
+( -1584 -192 32 ) ( -1181.7142857142926 -192 32 ) ( -1197.7142857143017 512 32 ) clean/metalgrid -35.999817 -290.5946 0 1.5714283 1.9473689
+( -1584 400 528 ) ( -1181.7142857142926 -192 176 ) ( -1584 -192 528 ) clean/metalgrid -35.999832 -290.5946 0 1.5714283 1.9473689
+( -1197.714285714296 512 176 ) ( -1181.7142857142926 -192 176 ) ( -1584 400 528 ) clean/metalgrid -35.999847 -290.5946 0 1.5714283 1.9473689
+( -1181.7142857142926 -192 32 ) ( -1181.7142857142926 -192 176 ) ( -1197.714285714296 512 176 ) clean/metalgrid -225.09091 5.3333435 0 2.3157902 1.4999998
 }
 }
