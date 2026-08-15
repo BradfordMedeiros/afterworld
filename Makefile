@@ -15,6 +15,9 @@ validate:
 package: afterworld_release 
 	@(./package.sh)
 
+package-debug: afterworld 
+	@(./package.sh)
+
 arcade: 
 	@(mkdir -p ./build/vagrant)
 	@(cp ./arcade/Vagrantfile ./build/vagrant/)
