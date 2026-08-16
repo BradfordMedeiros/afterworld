@@ -1,0 +1,14 @@
+[Unit]
+Description=Arcade Application
+After=graphical.target
+Wants=graphical.target
+
+[Service]
+User=arcade
+WorkingDirectory=/arcade
+ExecStart=/arcade/run.sh --mount=/game.mod
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target

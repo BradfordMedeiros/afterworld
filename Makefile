@@ -18,14 +18,19 @@ package: afterworld_release
 package-debug: afterworld 
 	@(./package.sh)
 
-arcade: 
+arcade: ./arcade/Vagrantfile 
 	@(mkdir -p ./build/vagrant)
 	@(cp ./arcade/Vagrantfile ./build/vagrant/)
+	@(cp ./arcade/setup.sh ./build/vagrant/)
 	@(cd ./build/vagrant && vagrant up)
 
+upload-arcade:
+	@(cd ./build/vagrant && vagrant ssh -c "sudo rm -rf /arcade/*")
+	@(cd ./build/vagrant && vagrant upload ../../.. /arcade/)
+
 clean-arcade:
-	@(cd ./build/vagrant && vagrant destroy)
-	@(rm -r ./build/vagrant/)
+	@(cd ./build/vagrant && vagrant destroy -f)
+	@(rm -rf ./build/vagrant/)
 
 
 clean:

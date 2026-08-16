@@ -1,8 +1,8 @@
 #ifndef MOD_AFTERWORLD_MODE_BOOT_PLATFORM
 #define MOD_AFTERWORLD_MODE_BOOT_PLATFORM
 
+#include "../../../../arcade/leds/emulator/main.h"
 namespace platform {
-
 	inline void startGame(){
 		system("notify-send 'Tomorrows Bad Arcade' 'Soul Delivery launched'");
 		std::this_thread::sleep_for(std::chrono::seconds(5)); // just to simulate launching
@@ -33,6 +33,15 @@ namespace platform {
 		system("notify-send 'Tomorrows Bad Arcade' 'Mock Reboot'");
 	}
 
+	inline void setLedState(int led, bool on){
+		Command command {};
+		command.type = CommandType::SetLed;
+		command.led = SetLedCommand {
+			.led = led,
+			.on = on,
+		};
+		sendLedCommand(command);
+	}
 
 
 
