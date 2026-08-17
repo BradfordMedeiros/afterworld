@@ -1,0 +1,6 @@
+{
+	"name" : "AfterWorld Display Name",
+    "command": "./build/game",
+    "working_directory": "build"
+}
+

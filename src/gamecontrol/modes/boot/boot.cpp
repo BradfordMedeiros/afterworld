@@ -80,9 +80,13 @@ DebugMenu menu {
 			.submenu = {
 				DebugMenu {
 					.label = "LED Enabled",
+					.displayText = [](DebugMenu& self) -> std::string { 
+							return platform::isLedStateEnabled(0) ? "[X]" : "[ ]";
+					},
 					.data = DebugMenuData{ .enabled = false },
 					.fn = [](DebugMenu& self) -> void {
-						
+							self.data.enabled = !self.data.enabled;
+							platform::setLedState(0, self.data.enabled);
 					},
 				},
 				DebugMenu {
@@ -171,6 +175,12 @@ GameTypeInfo getBootMode(){
     	}
     },
     .onFrame = [](std::any& gametype) -> void {
+    	if (!platform::isConnected()){
+  			gameapi -> drawText("not connected", -0.9f, 0.9f, 12, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    		return;
+    	}
+    	platform::poll();
+    	
   		gameapi -> drawText(menu.label, -0.9f, 0.9f, 12, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		
   		auto topMenu = menu.submenu;
