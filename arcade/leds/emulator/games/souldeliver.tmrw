@@ -1,0 +1,7 @@
+{
+	"name" : "Soul Delivery",
+    "command": "./run.sh",
+    "working_directory": "/home/brad/gamedev/mosttrusted/afterworld",
+    "args": ["-a", "level=boot" ]
+}
+

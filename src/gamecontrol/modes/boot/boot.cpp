@@ -23,7 +23,7 @@ DebugMenu createMenu(){
 		games.push_back(DebugMenu {
 			.label = game.displayName,
 			.image = "./res/textures/wood.jpg",
-			.fn = [](DebugMenu&) -> void {
+			.fn = [game](DebugMenu&) -> void {
 				platform::startGame(game.name);
 			},
 		});

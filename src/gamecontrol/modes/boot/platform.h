@@ -70,16 +70,17 @@ namespace platform {
 		std::string name;
 		std::string displayName;
 	};
-
 	inline std::vector<Game> listGames(){
-		return {
-			Game { .name = "soul_delivery", .displayName = "Soul Delivery" },
-			Game { .name = "afterworld", .displayName = "Afterworld" },
-			Game { .name = "web", .displayName = "web" },
-		};
+		auto allGames = listTmrwGames();
+		std::vector<Game> games;
+		for (auto& game : allGames){
+			games.push_back(Game {
+				.name = game.filepath,
+				.displayName = game.name,
+			});
+		}
+		return games;
 	}
-
-
 }
 
 
