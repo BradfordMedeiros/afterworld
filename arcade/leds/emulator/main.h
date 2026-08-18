@@ -125,8 +125,7 @@ inline HardwareState parseHardwareState(std::string content, bool* success){
     return hardwareState;
 }
 
-inline std::string readFileContent(){
-   std::string filepath = stateFile;
+inline std::string readFileContent(std::string filepath){
    std::ifstream file(filepath.c_str());
    if (!file.good()){
      throw std::runtime_error("file not found" + filepath);
@@ -139,7 +138,7 @@ inline std::string readFileContent(){
 
 inline HardwareState readHardwareState(){
     bool success = false;
-    auto fileContent = readFileContent();
+    auto fileContent = readFileContent(stateFile);
     return parseHardwareState(fileContent, &success);
 }
 

@@ -1,0 +1,6 @@
+{
+	"name" : "website",
+    "command": "./run.sh",
+    "working_directory": "/home/brad/gamedev/mosttrusted/afterworld/arcade/leds/emulator/games/website"
+}
+

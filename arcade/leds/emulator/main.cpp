@@ -16,6 +16,8 @@
 #include <optional>
 #include <signal.h>
 #include <sys/wait.h>
+#include <filesystem>
+
 #include "./main.h"
 
 bool tryReadCommand(int fd, Command& command){
@@ -71,7 +73,6 @@ bool tryReadCommandResponse(int fd, CommandResponse& command){
 }
 
 
-	
 HardwareState hardwareState {
 	.leds = {
 		Led { .num = 0, .on = false },
@@ -114,11 +115,194 @@ void writeHardwareState(){
   file.close();
 }
 
+
+
+std::vector<std::string> listAllFiles(std::filesystem::path path) {
+  std::vector<std::string> files;
+  for(auto &file: std::filesystem::recursive_directory_iterator(path)) {
+    if (!std::filesystem::is_directory(file)) {
+      files.push_back(file.path());
+    }
+  }
+  return files;
+}
+std::vector<std::string> split(std::string strToSplit, char delimeter){
+  std::vector<std::string> splittedStrings;
+  int lowIndex = 0;
+  for (int i = 0; i < strToSplit.size(); i++){
+    if (strToSplit.at(i) == delimeter){
+      auto stringlength = i - lowIndex;
+      auto token = strToSplit.substr(lowIndex, stringlength);
+      lowIndex = i + 1;
+      splittedStrings.push_back(token);
+    }
+  }
+  if (lowIndex != strToSplit.size()){
+    auto token = strToSplit.substr(lowIndex, strToSplit.size() - lowIndex);
+    splittedStrings.push_back(token);
+  }
+  if (strToSplit.size() > 0 && strToSplit.at(strToSplit.size() - 1) == delimeter){
+    splittedStrings.push_back("");
+  }
+  return splittedStrings;
+}
+std::optional<std::string> getExtension(std::string file){
+  auto parts = split(file, '.');
+  if (parts.size() >= 2){
+    return parts.at(parts.size() - 1);  
+  }
+  return std::nullopt;
+}
+bool isExtensionType(std::string& file, std::vector<std::string>& extensions){
+  bool isValidExtension = false;
+  auto extensionData = getExtension(file);
+  if (extensionData.has_value()){
+    auto extension = extensionData.value();
+    for (auto knownExtension : extensions){
+      if (extension == knownExtension){
+        isValidExtension = true;
+        break;
+      }
+    }
+  }
+  return isValidExtension;
+}
+
+std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions){
+  std::vector<std::string> files;
+  for (auto file : listAllFiles(folder)){
+    bool isValidExtension = isExtensionType(file, extensions);
+    if (isValidExtension){
+      files.push_back(file);
+    }
+  }
+  return files;
+}
+
+struct TmrwGame {
+    std::string name;
+    std::string filepath;
+    std::string command;
+    std::string workingDir;
+    std::vector<std::string> args;
+};
+
+std::string print(TmrwGame& game){
+    std::string content;
+    content += "name = " + game.name + ", ";
+    content += "command = " + game.command + ", ";
+    content += "workingDir = " + game.workingDir;
+
+    return content;
+}
+
+std::optional<TmrwGame> parseGameFile(std::string filepath){
+    auto fileContent = readFileContent(filepath);
+
+
+    std::optional<std::string> name;
+    std::optional<std::string> command;
+    std::optional<std::string> workingDir;
+    std::vector<std::string> args;
+
+    {
+      rapidjson::Document doc;
+      rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+      if (doc.HasParseError()){
+        std::cout << "error parsing game file: " << filepath << "  (" << fileContent << ")" << std::endl;
+        exit(1);
+      }
+
+
+      {
+        auto it = doc.FindMember("name");
+        if (it != doc.MemberEnd() && it -> value.IsString()) {
+          name = it -> value.GetString();
+        }        
+      }
+      {
+        auto it = doc.FindMember("command");
+        if (it != doc.MemberEnd() && it -> value.IsString()) {
+          command = it -> value.GetString();
+        }        
+      }
+      {
+        auto it = doc.FindMember("working_directory");
+        if (it != doc.MemberEnd() && it -> value.IsString()) {
+          workingDir = it -> value.GetString();
+        }        
+      }
+      {
+        auto it = doc.FindMember("args");
+        if (it != doc.MemberEnd() && it->value.IsArray()) {
+            for (const auto& arg : it->value.GetArray()) {
+                if (arg.IsString()) {
+                    args.emplace_back(arg.GetString());
+                }
+            }
+        }       
+      }
+    }
+
+    std::cout << fileContent << " ";
+    
+    bool valid = true;
+    if (!name.has_value()){
+        std::cout << filepath << " missing name" << std::endl;
+        valid = false;
+    }
+    if (!command.has_value()){
+        std::cout << filepath << " missing command" << std::endl;
+        valid = false;
+
+    }
+    if (!workingDir.has_value()){
+        std::cout << filepath << " missing working_directory" << std::endl;
+        valid = false;
+    }
+
+    if (!valid){
+        return std::nullopt;
+    }
+
+    return TmrwGame {
+        .name = name.value(),
+        .filepath = filepath,
+        .command = command.value(),
+        .workingDir = workingDir.value(),
+        .args = args,
+    };
+}
+std::vector<TmrwGame> listGames(){
+    std::vector<TmrwGame> games;
+    auto allFiles = listFilesWithExtensions("./games", { "tmrw" });
+    for (auto & file : allFiles){
+        auto game = parseGameFile(file);
+        if (game.has_value()){
+           games.push_back(game.value()); 
+        }
+    }
+    std::cout << "games: [";
+    for (int i = 0; i < games.size(); i++){
+        std::cout <<  print(games.at(i)) << " ";
+    }
+    std::cout << "]" << std::endl;
+    return games;
+}
+
+std::optional<TmrwGame*> getGameByName(std::vector<TmrwGame>& games, std::string name){
+    for (auto& game : games){
+        if (game.name == name){
+            return &game;
+        }
+    }
+    return std::nullopt;
+}
+
 pid_t launchGame(
     const std::string& executable,
     const std::string& workingDirectory,
-    const std::vector<std::string>& args = {}
-) {
+    const std::vector<std::string>& args = {}) {
     pid_t pid = fork();
 
     if (pid == -1)
@@ -144,6 +328,19 @@ pid_t launchGame(
     return pid;
 }
 
+std::optional<pid_t> launchGameByName(std::string name){
+    auto games = listGames();
+    auto tmrwGame = getGameByName(games, name);
+    if (tmrwGame.has_value()){
+        auto& game = *tmrwGame.value();
+        std::cout << "launch game: found: " << name << std::endl;
+        return launchGame(game.command, game.workingDir, game.args);
+    }
+
+    std::cout << "launch game: not found: " << name << std::endl;
+    return std::nullopt;
+}
+
 
 bool hasExited(pid_t pid) {
     int status;
@@ -155,6 +352,7 @@ bool hasExited(pid_t pid) {
 
     return false;
 }
+
 
 
 int main(){
@@ -171,7 +369,6 @@ int main(){
 
 
 	auto now = std::chrono::steady_clock::now();
-
 
 
 	while(true){
@@ -209,7 +406,7 @@ int main(){
                 if (command.type == CommandType::StartGame){
                     kill(command.startGame.pid, SIGTERM);
                     system("notify-send 'Tomorrows Bad Arcade' 'Soul Delivery launched from daemon'");
-                    launchedGame = launchGame("./run.sh", "/home/brad/gamedev/mosttrusted/afterworld", {});
+                    launchedGame = launchGameByName("website").value();
                 }
     			sendCommandResponse(commandResponse);
     		}
@@ -217,7 +414,8 @@ int main(){
         if (launchedGame.has_value()){
             if (hasExited(launchedGame.value())){
                 std::cout << "managed game exited" << std::endl;
-                launchGame("./run.sh", "/home/brad/gamedev/mosttrusted/afterworld", { "-a",  "level=boot"});
+                //launchGame("./run.sh", "/home/brad/gamedev/mosttrusted/afterworld", { "-a",  "level=boot"});
+                launchGameByName("boot").value();
                 launchedGame = std::nullopt;
             }
         }
@@ -231,7 +429,7 @@ int main(){
     			writeHardwareState();
 
 
-				auto hardwareFileStr = readFileContent();
+				auto hardwareFileStr = readFileContent(stateFile);
 				std::cout << "hardwareFileStr: " << hardwareFileStr << std::endl;
 			
 				bool success = false;
@@ -242,10 +440,7 @@ int main(){
 			}
     	}
 	}
-//
-	sleep(5);
-
-
+	
 	unlink(fifo);
 	unlink(fifoResponse);
 	std::remove(stateFile);

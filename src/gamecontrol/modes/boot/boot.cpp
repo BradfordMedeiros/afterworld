@@ -15,97 +15,92 @@ struct DebugMenu {
 	std::function<void(DebugMenu& self)> fn;
 };
 
-DebugMenu menu {
-	.label = "Tomorrow's Bad Arcade",
-	.submenu = {
-		DebugMenu { 
-			.label = "Games",
-			.submenu = {
-				DebugMenu {
-					.label = "ModEngine",
-					.submenu = {
-						DebugMenu {
-							.label = "Soul Delivery",
-							.image = "./res/textures/wood.jpg",
-							.fn = [](DebugMenu&) -> void {
-								platform::startGame();
-							},
-						},
-						DebugMenu {
-							.label = "Invaders",
-							.image = "./res/textures/hexglow.png",
-							.fn = [](DebugMenu&) -> void {
-								platform::startGame();
-							},
-						},
-					}
-				},
-				DebugMenu {
-					.label = "GameTwo",
-				},
-			},
-		},
-		DebugMenu { 
-			.label = "Settings",
-			.submenu = {
-				DebugMenu {
-					.label = "Mute",
-					.displayText = [](DebugMenu& self) -> std::string { 
-						return platform::isMuted() ? "[X]" : "[]"; 
-					},
-					.fn = [](DebugMenu& self) -> void {
-						auto isMuted = platform::isMuted();
-						platform::setMuted(!isMuted);
-					},
-				},
-				DebugMenu {
-					.label = "Volume",
-					.displayText = [](DebugMenu& self) -> std::string { 
-						auto volume = platform::getVolume();
-						return std::to_string(volume); 
-					},
-					.fn = [](DebugMenu& self) -> void {
-						auto volume = platform::getVolume();
-						volume += 0.1f;
-						if (volume > 1.05f){
-							volume = 0.f;
-						}
-						platform::setVolume(volume);
-					},
-				},
-			}
-		},
-		DebugMenu { 
-			.label = "Hardware",
-			.submenu = {
-				DebugMenu {
-					.label = "LED Enabled",
-					.displayText = [](DebugMenu& self) -> std::string { 
-							return platform::isLedStateEnabled(0) ? "[X]" : "[ ]";
-					},
-					.data = DebugMenuData{ .enabled = false },
-					.fn = [](DebugMenu& self) -> void {
-							self.data.enabled = !self.data.enabled;
-							platform::setLedState(0, self.data.enabled);
-					},
-				},
-				DebugMenu {
-					.label = "LED Color",
-					.data = DebugMenuData{ .enabled = false },
-					.fn = [](DebugMenu& self) -> void {
-						
-					},
-				},
-			}
-		},
-		DebugMenu { 
-			.label = "Reboot", 
+DebugMenu createMenu(){
+	auto allGames = platform::listGames();
+
+	std::vector<DebugMenu> games = {};
+	for (auto& game : allGames){
+		games.push_back(DebugMenu {
+			.label = game.displayName,
+			.image = "./res/textures/wood.jpg",
 			.fn = [](DebugMenu&) -> void {
-				platform::reboot();
+				platform::startGame(game.name);
+			},
+		});
+	}
+
+
+	DebugMenu menu {
+		.label = "Tomorrow's Bad Arcade",
+		.submenu = {
+			DebugMenu { 
+				.label = "Games",
+				.submenu = games,
+			},
+			DebugMenu { 
+				.label = "Settings",
+				.submenu = {
+					DebugMenu {
+						.label = "Mute",
+						.displayText = [](DebugMenu& self) -> std::string { 
+							return platform::isMuted() ? "[X]" : "[]"; 
+						},
+						.fn = [](DebugMenu& self) -> void {
+							auto isMuted = platform::isMuted();
+							platform::setMuted(!isMuted);
+						},
+					},
+					DebugMenu {
+						.label = "Volume",
+						.displayText = [](DebugMenu& self) -> std::string { 
+							auto volume = platform::getVolume();
+							return std::to_string(volume); 
+						},
+						.fn = [](DebugMenu& self) -> void {
+							auto volume = platform::getVolume();
+							volume += 0.1f;
+							if (volume > 1.05f){
+								volume = 0.f;
+							}
+							platform::setVolume(volume);
+						},
+					},
+				}
+			},
+			DebugMenu { 
+				.label = "Hardware",
+				.submenu = {
+					DebugMenu {
+						.label = "LED Enabled",
+						.displayText = [](DebugMenu& self) -> std::string { 
+								return platform::isLedStateEnabled(0) ? "[X]" : "[ ]";
+						},
+						.data = DebugMenuData{ .enabled = false },
+						.fn = [](DebugMenu& self) -> void {
+								self.data.enabled = !self.data.enabled;
+								platform::setLedState(0, self.data.enabled);
+						},
+					},
+					DebugMenu {
+						.label = "LED Color",
+						.data = DebugMenuData{ .enabled = false },
+						.fn = [](DebugMenu& self) -> void {
+						},
+					},
+				}
+			},
+			DebugMenu { 
+				.label = "Reboot", 
+				.fn = [](DebugMenu&) -> void {
+					platform::reboot();
+				},
 			},
 		},
-	},
-};
+	};
+	return menu;
+}
+
+DebugMenu menu = createMenu();
 
 
 std::vector<int> menuPath {

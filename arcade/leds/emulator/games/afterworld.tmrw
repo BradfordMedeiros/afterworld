@@ -1,6 +1,6 @@
 {
-	"name" : "AfterWorld Display Name",
-    "command": "./build/game",
-    "working_directory": "build"
+	"name" : "afterworld",
+    "command": "./run.sh",
+    "working_directory": "/home/brad/gamedev/mosttrusted/afterworld"
 }
 

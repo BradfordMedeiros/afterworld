@@ -1,5 +1,7 @@
 {
-    "command": "./build/game",
-    "working_directory": "build"
+	"name" : "boot",
+    "command": "./run.sh",
+    "working_directory": "/home/brad/gamedev/mosttrusted/afterworld",
+    "args": ["-a", "level=boot" ]
 }
 

@@ -3,8 +3,8 @@
 
 #include "../../../../arcade/leds/emulator/main.h"
 namespace platform {
-	inline void startGame(){
 
+	inline void startGame(std::string name){
 		Command command {};
 		command.type = CommandType::StartGame;
 		command.startGame = StartGameCommand { 
@@ -65,6 +65,20 @@ namespace platform {
 	inline bool isConnected(){
 		return isEmulatorConnected();
 	}
+
+	struct Game {
+		std::string name;
+		std::string displayName;
+	};
+
+	inline std::vector<Game> listGames(){
+		return {
+			Game { .name = "soul_delivery", .displayName = "Soul Delivery" },
+			Game { .name = "afterworld", .displayName = "Afterworld" },
+			Game { .name = "web", .displayName = "web" },
+		};
+	}
+
 
 }
 
