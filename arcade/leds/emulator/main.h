@@ -13,7 +13,6 @@ enum class CommandType : uint8_t {
 };
 
 struct StartGameCommand {
-    uint32_t pid;
 };
 struct SetMutedCommand {
     bool mute;

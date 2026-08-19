@@ -16,7 +16,6 @@ namespace platform {
 		Command command {};
 		command.type = CommandType::StartGame;
 		command.startGame = StartGameCommand { 
-			.pid = getpid(),
 		};
 		sendCommand(command);
 

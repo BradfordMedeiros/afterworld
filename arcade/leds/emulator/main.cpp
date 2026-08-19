@@ -81,6 +81,7 @@ pid_t launchGame(
         _exit(127);
     }
 
+    setpgid(pid, pid);  // process group 
     return pid;
 }
 
@@ -124,6 +125,8 @@ ArcadeState* createSharedMemory(){
     return state;
 }
 
+static std::optional<pid_t> launchedGame;
+static std::optional<pid_t> launchedBootGame;
 
 int main(){
     ArcadeState* arcadeState = createSharedMemory();
@@ -132,34 +135,57 @@ int main(){
 	mkfifo(fifo, 0660);
 
 	int readFd = open(fifo, O_RDWR | O_NONBLOCK);
-	std::chrono::seconds(10);
 
+    launchedBootGame = launchGameByName("boot").value();
 
 	while(true){
-        static std::optional<pid_t> launchedGame;
 		{	// read requests
 	 		Command command{};
 			if (tryReadCommand(readFd, command)){
     			std::cout << "request = " << print(command) << std::endl;
     			
                 if (command.type == CommandType::StartGame){
-                    kill(command.startGame.pid, SIGTERM);
+                    if (launchedBootGame.has_value()){
+                        if(kill(-launchedBootGame.value(), SIGKILL)){  // yes negative, kills process group
+                            perror("kill boot");
+                            assert(false);
+                        }
+                        launchedBootGame = std::nullopt;
+                    }
+                    if (launchedGame.has_value()){
+                        kill(-launchedGame.value(), SIGTERM);  // yes negative, kills process group
+                        launchedGame = std::nullopt;
+                    }
+
                     system("notify-send 'Tomorrows Bad Arcade' 'Soul Delivery launched from daemon'");
-                    launchedGame = launchGameByName("website").value();
+                    launchedGame = launchGameByName("afterworld").value();
+                    
                 }
                 if (command.type == CommandType::SetMuted){
                     arcadeState -> isMuted = command.setMuted.mute;
                 }
     		}
     	}
+
         if (launchedGame.has_value()){
             if (hasExited(launchedGame.value())){
-                std::cout << "managed game exited" << std::endl;
+                std::cout << "launchedGame game exited" << std::endl;
                 //launchGame("./run.sh", "/home/brad/gamedev/mosttrusted/afterworld", { "-a",  "level=boot"});
-                launchGameByName("boot").value();
                 launchedGame = std::nullopt;
             }
         }
+        if (launchedBootGame.has_value()){
+            if (hasExited(launchedBootGame.value())){
+                std::cout << "launchedBootGame game exited" << std::endl;
+                //launchGame("./run.sh", "/home/brad/gamedev/mosttrusted/afterworld", { "-a",  "level=boot"});
+                launchedBootGame = std::nullopt;
+            }
+        }
+
+        if (!launchedGame.has_value() && !launchedBootGame.has_value()){
+            launchedBootGame = launchGameByName("boot").value();
+        }                
+
 
 	}
 	
