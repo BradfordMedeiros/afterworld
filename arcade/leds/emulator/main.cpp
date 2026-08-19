@@ -164,6 +164,4 @@ int main(){
 	}
 	
 	unlink(fifo);
-	std::remove(stateFile);
-
 }

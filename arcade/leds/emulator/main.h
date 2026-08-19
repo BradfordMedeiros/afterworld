@@ -5,7 +5,6 @@
 #include <atomic>
 
 inline const char* fifo = "/home/brad/gamedev/mosttrusted/afterworld/arcade/leds/emulator/hw-command-request";
-inline const char* stateFile = "/home/brad/gamedev/mosttrusted/afterworld/arcade/leds/emulator/state.json";
 inline const char* gamesDir = "/home/brad/gamedev/mosttrusted/afterworld/arcade/leds/emulator/games";
 
 enum class CommandType : uint8_t {
