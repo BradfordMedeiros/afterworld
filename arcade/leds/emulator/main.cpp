@@ -46,77 +46,6 @@ bool tryReadCommand(int fd, Command& command){
     return true;
 }
 
-bool tryReadCommandResponse(int fd, CommandResponse& command){
-    static uint8_t buffer[sizeof(CommandResponse)];
-    static size_t received = 0;
-    while (received < sizeof(CommandResponse)){
-        ssize_t n = read(fd, buffer + received, sizeof(CommandResponse) - received);
-
-        if (n > 0){
-            received += n;
-        }else if (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)){
-            // Nothing more available right now.
-            return false;
-        }
-        else if (n == 0){
-            received = 0;
-            return false;
-        }else{
-            perror("read");
-            received = 0;
-            return false;
-        }
-    }
-    std::memcpy(&command, buffer, sizeof(CommandResponse));
-    received = 0;
-    return true;
-}
-
-
-HardwareState hardwareState {
-	.leds = {
-		Led { .num = 0, .on = false },
-		Led { .num = 1, .on = true  },
-	}
-};
-
-std::string hardwareStateToString(HardwareState& hardwareState){
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-
-    rapidjson::Value innerMap(rapidjson::kArrayType);
-    for (auto& led : hardwareState.leds){
-       rapidjson::Value ledType(rapidjson::kObjectType);
-       ledType.AddMember("num", led.num, allocator);
-       ledType.AddMember("on", led.on ? true : false, allocator);
-       innerMap.PushBack(ledType, allocator);
-    }
-  
-    rapidjson::Value outerKey("leds", allocator);
-    doc.AddMember(
-        rapidjson::Value(outerKey, allocator),
-        innerMap,
-        allocator
-    );
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    doc.Accept(writer);
-
-    return buffer.GetString();
-}
-
-void writeHardwareState(){
-  auto content = hardwareStateToString(hardwareState);
-  std::ofstream file;
-  file.open(stateFile);
-  file << content;
-  file.close();
-}
-
-
-
 std::optional<TmrwGame*> getGameByName(std::vector<TmrwGame>& games, std::string name){
     for (auto& game : games){
         if (game.name == name){
@@ -181,61 +110,46 @@ bool hasExited(pid_t pid) {
 }
 
 
+ArcadeState* createSharedMemory(){
+    shm_unlink("/arcade_state");
+
+    int fd = shm_open("/arcade_state", O_CREAT | O_RDWR, 0600);
+    ftruncate(fd, sizeof(ArcadeState));
+    void* memory = mmap(nullptr, sizeof(ArcadeState), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    close(fd);
+
+    ArcadeState* state = static_cast<ArcadeState*>(memory);
+    state -> isMuted = false;
+    state -> daemonPid = getpid();
+    return state;
+}
+
 
 int main(){
+    ArcadeState* arcadeState = createSharedMemory();
+
 	unlink(fifo);
 	mkfifo(fifo, 0660);
 
-	unlink(fifoResponse);
-	mkfifo(fifoResponse, 0660);
-
 	int readFd = open(fifo, O_RDWR | O_NONBLOCK);
-	int responseFd = open(fifoResponse, O_RDWR | O_NONBLOCK);
-
 	std::chrono::seconds(10);
 
 
-	auto now = std::chrono::steady_clock::now();
-
-
 	while(true){
-		auto currTime = std::chrono::steady_clock::now();
-		if (currTime - now > std::chrono::seconds(5)){
-			now = currTime;
-
-			Command command {};
-			command.type = CommandType::SetLed;
-
-			static bool ledOn = false;
-			ledOn = !ledOn;
-			command.led = SetLedCommand {
-				.led = 0,
-				.on = ledOn,
-			};
-			sendCommand(command);
-
-		}
-
         static std::optional<pid_t> launchedGame;
 		{	// read requests
 	 		Command command{};
 			if (tryReadCommand(readFd, command)){
     			std::cout << "request = " << print(command) << std::endl;
-    			CommandResponse commandResponse{};
-    			commandResponse.type = command.type;
-    			if(command.type == CommandType::SetLed){
-    				for (auto& led : hardwareState.leds){
-    					if (led.num == command.led.led){
-    						led.on = command.led.on;
-    					}
-    				}
-    			}
+    			
                 if (command.type == CommandType::StartGame){
                     kill(command.startGame.pid, SIGTERM);
                     system("notify-send 'Tomorrows Bad Arcade' 'Soul Delivery launched from daemon'");
                     launchedGame = launchGameByName("website").value();
                 }
-    			sendCommandResponse(commandResponse);
+                if (command.type == CommandType::SetMuted){
+                    arcadeState -> isMuted = command.setMuted.mute;
+                }
     		}
     	}
         if (launchedGame.has_value()){
@@ -247,29 +161,9 @@ int main(){
             }
         }
 
-    	{
-    		// read responses
-			CommandResponse commandResponse{};
-			if (tryReadCommandResponse(responseFd, commandResponse)){
-    			std::cout << "response = " << print(commandResponse) << std::endl;
-
-    			writeHardwareState();
-
-
-				auto hardwareFileStr = readFileContent(stateFile);
-				std::cout << "hardwareFileStr: " << hardwareFileStr << std::endl;
-			
-				bool success = false;
-				auto hardwareState = parseHardwareState(hardwareFileStr, &success);
-				auto hardwareState2 = hardwareStateToString(hardwareState);
-				std::cout << "hardwareFileStr 2: " << hardwareState2 << std::endl;
-
-			}
-    	}
 	}
 	
 	unlink(fifo);
-	unlink(fifoResponse);
 	std::remove(stateFile);
 
 }

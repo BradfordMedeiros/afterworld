@@ -68,28 +68,6 @@ DebugMenu createMenu(){
 				}
 			},
 			DebugMenu { 
-				.label = "Hardware",
-				.submenu = {
-					DebugMenu {
-						.label = "LED Enabled",
-						.displayText = [](DebugMenu& self) -> std::string { 
-								return platform::isLedStateEnabled(0) ? "[X]" : "[ ]";
-						},
-						.data = DebugMenuData{ .enabled = false },
-						.fn = [](DebugMenu& self) -> void {
-								self.data.enabled = !self.data.enabled;
-								platform::setLedState(0, self.data.enabled);
-						},
-					},
-					DebugMenu {
-						.label = "LED Color",
-						.data = DebugMenuData{ .enabled = false },
-						.fn = [](DebugMenu& self) -> void {
-						},
-					},
-				}
-			},
-			DebugMenu { 
 				.label = "Reboot", 
 				.fn = [](DebugMenu&) -> void {
 					platform::reboot();
@@ -128,6 +106,7 @@ GameTypeInfo getBootMode(){
   GameTypeInfo ballMode = GameTypeInfo {
     .gametypeName = "boot",
     .createGametype = [](void* data) -> std::any {
+    	platform::init();
       return NULL; 
     },
     .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {
@@ -218,7 +197,7 @@ GameTypeInfo getBootMode(){
   					topDepth++;
   				}
 
-				static std::string lastImage;
+					static std::string lastImage;
 
   				if (isSelected && isMaxDepth){
   					if (currMenu.at(i).image.has_value()){

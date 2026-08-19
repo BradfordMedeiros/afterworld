@@ -4,6 +4,14 @@
 #include "../../../../arcade/leds/emulator/main.h"
 namespace platform {
 
+	inline ArcadeState* arcadeState = NULL;
+	inline void init(){
+		arcadeState = openSharedMemory();
+		if (arcadeState == NULL){
+			std::cout << "could not allocate shared memory" << std::endl;
+		}
+	}
+
 	inline void startGame(std::string name){
 		Command command {};
 		command.type = CommandType::StartGame;
@@ -22,48 +30,40 @@ namespace platform {
 		volume = newVolume;
 	}
 
-	inline bool mute = false;
 	inline bool isMuted(){
-		return mute;
+		return arcadeState -> isMuted;
 	}
 	inline void setMuted(bool shouldMute){
-		mute = shouldMute;
-	}
-
-	inline std::string platformInfo(){
-		return "Mock Development";
+		Command command {};
+		command.type = CommandType::SetMuted;
+		command.setMuted = SetMutedCommand { 
+			.mute = shouldMute,
+		};
+		sendCommand(command);	
 	}
 
 	inline void reboot(){
 		system("notify-send 'Tomorrows Bad Arcade' 'Mock Reboot'");
 	}
 
-	inline void setLedState(int led, bool on){
-		Command command {};
-		command.type = CommandType::SetLed;
-		command.led = SetLedCommand {
-			.led = led,
-			.on = on,
-		};
-		sendCommand(command);
-	}
-
-	inline bool isLedStateEnabled(int led){
-		auto hwState = readHardwareState();
-		for (auto& ledVal : hwState.leds){
-			if (ledVal.num == led){
-				return ledVal.on;
-			}
-		}
-		return false;
-	}
 
 	inline void poll(){
-		
+		if (arcadeState == NULL){
+			std::cout << "platform.h -> init not called" << std::endl;
+			assert(false);
+		}
+		std::cout << ": " <<  print(*arcadeState) << std::endl;
+	}
+
+	static inline bool processExists(pid_t pid){
+	    if (kill(pid, 0) == 0){
+	        return true;
+	    }
+	    return errno == EPERM;
 	}
 
 	inline bool isConnected(){
-		return isEmulatorConnected();
+		return arcadeState != NULL && processExists(arcadeState -> daemonPid);	
 	}
 
 	struct Game {
