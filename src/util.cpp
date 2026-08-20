@@ -314,48 +314,6 @@ void notYetImplementedAlert(){
 }
 
 
-float musicVolume = 1.f;
-float gameplayVolume = 1.f;
-void setMusicVolume(float volume){
-  musicVolume = volume;
-}
-void setGameplayVolume(float volume){
-  gameplayVolume = volume;
-}
-float getMusicVolume(){
-  return musicVolume;
-}
-float getGameplayVolume(){
-  return gameplayVolume;
-}
-
-OneShot playMusicClipById(objid id, std::optional<float> volume){
-  if (!volume.has_value()){
-    volume = 1.f;
-  }
-  volume = volume.value() * musicVolume;
-  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt, id);
-}
-OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
-  if (!volume.has_value()){
-    volume = 1.f;
-  }
-  volume = volume.value() * gameplayVolume;
-
-  auto clipId = gameapi -> getClipByName(clipName, sceneId);
-  modassert(clipId.has_value(), "playGameplayClip clipName does not exist");
-  return gameapi -> playOneshot(clipId.value(), position, volume, false, false, clipId.value());
-}
-OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
-  std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, position, volume, loop, false, id);
-}
-
-OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
-  std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, std::nullopt, volume, loop, true, id);
-}
-
 std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId){
   if (sceneId.has_value()){
     auto allChildrenIds = gameapi -> listObjAndDescInScene(sceneId.value());

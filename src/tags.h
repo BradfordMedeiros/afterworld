@@ -19,6 +19,7 @@
 #include "./gamecontrol/entity.h"
 #include "./config.h"
 #include "./gameworld/audio.h"
+#include "./resources/sound.h"
 
 struct HealthColorObject {
 	glm::vec3 lowColor;

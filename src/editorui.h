@@ -3,6 +3,7 @@
 
 #include "../../ModEngine/src/ui/gui.h"
 #include "./scene_routing.h"
+#include "./resources/sound.h"
 
 void initImGuiGameUi();
 

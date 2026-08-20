@@ -819,22 +819,27 @@ void renderMixingDetailPanel(bool includePanel){
     ImGui::Begin("Mixing Detail");
   }
 
+  auto mixedSoundPtr = getMixedSound("pistol");
+  auto& mixedSound = *mixedSoundPtr.value();
+
   auto soundConfig = getSoundConfig();
 
   ImGui::Text("Sound Name:");
   ImGui::SameLine();
-  ImGui::Text(soundConfig.name.c_str());
+  ImGui::Text(mixedSound.name.c_str());
 
   if (ImGui::Button("Play")){
+    playMixedSound(mixedSound.nameSymbol, std::nullopt);
   }
   ImGui::SameLine();
   if (ImGui::Button("Stop")){
+
   }
 
 
-  ImGui::Checkbox("Loop", &soundConfig.loop);
-  ImGui::Checkbox("Center", &soundConfig.center);
-  ImGui::SliderFloat("Volume", &soundConfig.volume, 0.f, 1.f);
+  ImGui::Checkbox("Loop", &mixedSound.loop);
+  ImGui::Checkbox("Center", &mixedSound.center);
+  ImGui::SliderFloat("Volume", &mixedSound.volume, 0.f, 1.f);
 
   std::vector<std::string> clips = listSoundFiles();
 
@@ -916,33 +921,30 @@ void renderMixingDetailPanel(bool includePanel){
   }
 
 
-  bool isSequential = soundConfig.clipOrderSequential;
+  bool isSequential = mixedSound.clipOrderSequential;
   bool wasSequential = isSequential;
-  bool isRandom = !soundConfig.clipOrderSequential;
+  bool isRandom = !mixedSound.clipOrderSequential;
   bool wasRandom = isRandom;
 
   ImGui::Checkbox("Sequential", &isSequential);
   ImGui::SameLine();
   ImGui::Checkbox("Random", &isRandom);
   if (isSequential && !wasSequential){
-    soundConfig.clipOrderSequential = true;
+    mixedSound.clipOrderSequential = true;
   }else if (isRandom && !wasRandom){
-    soundConfig.clipOrderSequential = false;
+    mixedSound.clipOrderSequential = false;
   }
 
 
-  std::vector<std::string> buses {
-    "master",
-    "sfx",
-    "music", 
-    "voice",
-  };
+  std::vector<std::string> buses = busNames();
 
-  if (ImGui::BeginCombo("Bus", soundConfig.bus.c_str())){
+  if (ImGui::BeginCombo("Bus", soundBusToStr(mixedSound.bus).c_str())){
     for (int i = 0; i < buses.size(); i++){
       bool selected = soundConfig.bus == buses.at(i);
       if (ImGui::Selectable(buses.at(i).c_str(), selected)){
-        soundConfig.bus = buses.at(i);
+        auto selectedBusStr = buses.at(i);
+        auto soundBus = stringToSoundBus(selectedBusStr);
+        mixedSound.bus = soundBus;
       }
       if (selected){
         ImGui::SetItemDefaultFocus();

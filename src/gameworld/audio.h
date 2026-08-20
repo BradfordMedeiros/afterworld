@@ -6,6 +6,7 @@
 #include <ctime>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../resources/resources.h"
+#include "../resources/sound.h"
 
 extern std::string defaultAudioClipPath;
 void ensureAmbientSound(glm::vec3 cameraPos, int changedLevelFrame, bool hasManagedScene);

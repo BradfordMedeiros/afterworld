@@ -409,7 +409,6 @@ void debugOnKey(int key, int scancode, int action, int mods){
 
 
   if (key == 'R' && action == 1) {
-
   	saveConditions(LevelConditionData {
   		.triggers = { "one", "two", "three" },
   	});

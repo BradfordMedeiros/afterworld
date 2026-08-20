@@ -72,16 +72,6 @@ std::function<void()> getToggleWorldStateSetFloat(const char* object, const char
 
 void notYetImplementedAlert();
 
-void setMusicVolume(float volume);
-void setGameplayVolume(float volume);
-float getMusicVolume();
-float getGameplayVolume();
-
-OneShot playMusicClipById(objid id, std::optional<float> volume);
-OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
-OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
-OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop);
-
 std::optional<objid> findObjByShortName(std::string name, std::optional<objid> sceneId);
 
 void selectWithBorder(glm::vec2 fromPoint, glm::vec2 toPoint);

@@ -5,6 +5,7 @@
 #include "../../util.h"
 #include "../../resources/resources.h"
 #include "../../gameworld/curves.h"
+#include "../../resources/sound.h"
 
 
 struct MovementParams {

@@ -7,6 +7,7 @@
 #include "../../util.h"
 #include "../../resources/materials.h"
 #include "../../resources/layer.h"
+#include "../../resources/sound.h"
 
 struct WeaponParams {
   // gun intrinsic stuff

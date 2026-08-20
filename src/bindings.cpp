@@ -821,7 +821,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     soundData = createSoundData(gameapi -> rootSceneId());
     ensureDefaultSoundsLoadced(gameapi -> rootSceneId());
-
+    ensureMixedSoundsLoaded(gameapi -> rootSceneId());
+    
     gametypeSystem = createGametypes();
     aiData = createAiData();
     maybeSpawnLightFromArgs();

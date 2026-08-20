@@ -6,6 +6,7 @@
 #include "../components/basic/listitem.h"
 #include "./dock/dock.h"
 #include "../../gameworld/save.h"
+#include "../../resources/sound.h"
 
 extern Component settingsComponent;
 
