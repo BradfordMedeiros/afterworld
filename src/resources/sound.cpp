@@ -153,20 +153,20 @@ MixedSound parsedMixedSound(std::string& filepath){
   }
   {
     auto it = doc.FindMember("center");
-    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
-      center = it -> value.GetFloat();
+    if (it != doc.MemberEnd() && it -> value.IsBool()) {
+      center = it -> value.GetBool();
     }        
   }
   {
     auto it = doc.FindMember("loop");
-    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
-      loop = it -> value.GetFloat();
+    if (it != doc.MemberEnd() && it -> value.IsBool()) {
+      loop = it -> value.GetBool();
     }        
   }
   {
     auto it = doc.FindMember("sequential");
-    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
-      sequential = it -> value.GetFloat();
+    if (it != doc.MemberEnd() && it -> value.IsBool()) {
+      sequential = it -> value.GetBool();
     }        
   }
 
@@ -178,25 +178,28 @@ MixedSound parsedMixedSound(std::string& filepath){
     }
   }
 
+  std::vector<std::string> clips;
   {
     auto it = doc.FindMember("clips");
-    if (it != doc.MemberEnd() && it -> value.IsString()){
-      std::string busStr = it -> value.GetString();
-      bus = stringToSoundBus(busStr);
+    if (it != doc.MemberEnd() && it->value.IsArray()) {
+        for (auto& item : it->value.GetArray()) {
+            if (item.IsString()) {
+                clips.push_back(item.GetString());
+            }
+        }
     }
   }
 
 
   return MixedSound{
-    .clips = {
-      paths::TELEPORT_SOUND,
-    },
+    .clips = clips,
     .volume = volume,
     .center = center,
     .loop = loop,
     .clipOrderSequential = sequential,
     .bus = bus,
     .soundBinding = SoundBinding {
+      .filepath = filepath,
       .sound = fileInfo.filename,
       .folder = relativeDirVec,
     },
@@ -212,40 +215,6 @@ std::vector<MixedSound> createMixedSounds(){
     mixedSounds.push_back(parsedMixedSound(mixedSoundFile));
   }
 
-  /*mixedSounds.push_back(
-    MixedSound {
-      .clips = { 
-        paths::TELEPORT_SOUND,
-      },
-      .soundBinding = SoundBinding {
-        .sound = "shoot",
-        .folder = { "fps", "entity" },
-      },
-  });
-  mixedSounds.push_back(
-    MixedSound {
-      .clips = { 
-        paths::EXPLOSION,
-      },
-      .soundBinding = SoundBinding {
-        .sound = "jump",
-        .folder = { "fps", "entity" },
-      },
-    }
-  );
-  mixedSounds.push_back(
-    MixedSound {
-      .clips = { 
-        paths::EXPLOSION,
-        paths::TELEPORT_SOUND,
-      },
-      .soundBinding = SoundBinding {
-        .sound = "pistol3",
-        .folder = { "core" },
-      },
-    }
-  );*/
- 
   for (auto& mixedSound : mixedSounds){
     auto name = symbolStrForMixedSound(mixedSound);
     int symbol = getSymbol(name);
@@ -256,7 +225,11 @@ std::vector<MixedSound> createMixedSounds(){
 }
 std::vector<MixedSound> mixedSounds = createMixedSounds();
 
-
+int symbolForMixedSound(MixedSound& mixedSound){
+  auto name = symbolStrForMixedSound(mixedSound);
+  int symbol = getSymbol(name);
+  return symbol;
+}
 
 SoundInfo getSoundInfo(){
   SoundInfo soundInfo{};
@@ -365,7 +338,6 @@ std::optional<OneShot> playMixedSound(int symbol, std::optional<glm::vec3> posit
 
   auto clipInstanceId = clipInstanceIdOpt.value();
 
-  std::optional<glm::vec3> effectivePosition = position; // this needs to check if the mixedsound is position or not
   float volume = mixedSound -> volume; // need to get this from mix
   bool loop = mixedSound -> loop; // same
   bool center = mixedSound -> center; // same
@@ -425,3 +397,32 @@ void setActiveMixedSound(SoundBinding& soundBinding){
   activeMixedSoundStr = soundBinding.sound;
 };
 
+void saveMixedSound(MixedSound& mixedSound){
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  doc.AddMember("volume", mixedSound.volume, allocator);
+  doc.AddMember("center", mixedSound.center, allocator);
+  doc.AddMember("loop", mixedSound.loop, allocator);
+  doc.AddMember("sequential", mixedSound.clipOrderSequential, allocator);
+
+  auto bus = soundBusToStr(mixedSound.bus);
+  doc.AddMember("bus", bus, allocator);
+
+  rapidjson::Value jsonArray(rapidjson::kArrayType);
+
+  for (auto& clip : mixedSound.clips){
+    jsonArray.PushBack(rapidjson::Value(clip, allocator), allocator);
+  }
+  doc.AddMember("clips", jsonArray, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  auto strValue = buffer.GetString();
+  std::cout << strValue << std::endl;
+
+  realfiles::saveFile(mixedSound.soundBinding.filepath, strValue);
+}

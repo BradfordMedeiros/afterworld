@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <rapidjson/prettywriter.h>
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "./paths.h"
@@ -36,6 +37,7 @@ OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optiona
 OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop);
 
 struct SoundBinding {
+  std::string filepath;
   std::string sound;
   std::vector<std::string> folder;
 };
@@ -71,5 +73,9 @@ void setMixedSoundClip(MixedSound& mixedSound, std::string clip, int index);
 
 std::optional<std::string> activeMixedSound();
 void setActiveMixedSound(SoundBinding& soundBinding);
+
+void saveMixedSound(MixedSound& mixedSound);
+
+int symbolForMixedSound(MixedSound& mixedSound);
 
 #endif 

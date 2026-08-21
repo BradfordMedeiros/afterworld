@@ -9,6 +9,18 @@ DEFINE_RESOURCE(HITMARKER,  "./res/sounds/sample.wav")
 DEFINE_RESOURCE(TELEPORT_SOUND, "../gameresources/sound/q009/teleport.ogg")
 DEFINE_RESOURCE(ACTIVATE_SOUND, "../gameresources/sound/click.wav")
 
+DEFINE_RESOURCE(BREAKABLE,  "ball/entity/orbpickup" )  // mixed
+
+// Ball Sounds
+DEFINE_RESOURCE(BALL_JUMP, "ball/jump")  // mixed
+DEFINE_RESOURCE(BALL_GRAVITYWELL, "fps/entity/test")  // mixed
+DEFINE_RESOURCE(BALL_ROLLING,  "ball/rolling" )  // mixed
+
+
+// Effects
+DEFINE_RESOURCE(FIREWORK, "effects/firework")  // mixed
+
+
 // Graphical Features
 ////////////////////////////////////////////////////////////////////////////////////
 DEFINE_RESOURCE(WATER_TEXTURE, "./res/heightmaps/dunes_low.jpg")  // "../gameresources/build/textures/lava.png"

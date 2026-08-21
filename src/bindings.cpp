@@ -1231,7 +1231,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     if (key == "terminal" && !isShowingTerminal()){
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
+      playMixedSound(getSymbol("screens/terminal"), std::nullopt);
       showTerminal("test");
     }
 

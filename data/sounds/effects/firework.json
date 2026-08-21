@@ -1,0 +1,10 @@
+{
+    "volume": 1.0,
+    "center": false,
+    "loop": false,
+    "sequential": false,
+    "bus": "master",
+    "clips": [
+        "../gameresources/sound/q009/rlauncher3.ogg"
+    ]
+}

@@ -321,7 +321,8 @@ void ballEndGameplay(EasyCutscene& cutscene){
 		markLevelComplete(activeLevel, timeElapsed);
 		commitCrystals();
 
-	  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+    playMixedSound(getSymbol("ball/events/levelcomplete"), std::nullopt);
+
     setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
 
 
@@ -552,7 +553,8 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 
 void ballModeNewGame2(objid sceneId, bool inHub){
   resetProgress();
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+	playMixedSound(getSymbol("ball/newgame"), std::nullopt);
+
 
   inputOverride(false, false);
 	changeUiMode(UiModeNone{});
@@ -683,7 +685,7 @@ void deliverPowerup(objid vehicle, objid powerupId){
     setPowerupBall(*vehicleBall.value(), std::nullopt);
   }
 
-  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
+	playMixedSound(getSymbol("ball/getpowerup"), std::nullopt);
   
   if(!powerup.respawnRateMs.has_value()){
     gameapi -> removeObjectById(powerupId);
@@ -919,7 +921,7 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 
 	return [endTimeMs, endTime, simpleNarrationCutscene](EasyCutscene& cutscene) -> void {
 		if(initialize(cutscene)){
-		  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
+ 			playMixedSound(getSymbol("ball/events/respawnsphere"), std::nullopt);
 
  			auto& ballMode = getBallModeOptions();
 
@@ -1341,10 +1343,9 @@ GameTypeInfo getBallMode(){
 						mask = 0b1000;
 					}
 				  setEntityActivateMask(getEntityForPlayerIndex(0).value(), mask);
-
 			  	setActivatableObject(ballMode.ballId, mask);
 
-  			  playGameplayClipByIdCenter(getManagedSounds().teleportObjId.value(), std::nullopt, false);
+    			playMixedSound(getSymbol("ball/changespirit"), std::nullopt);
 
   			  
 	  			if (ballMode.spirit == MODE_NONE){

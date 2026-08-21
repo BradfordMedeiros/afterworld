@@ -118,10 +118,10 @@ void maybeBreakObject(objid id){
 
 		breakable.isBroken = true;
 		setGameObjectMeshEnabled(id, false);
-	  	playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
-	
-	  	auto totalBroken = numBroken();
-	  	updateGemCanPickup(totalBroken);
+		playMixedSound(getSymbol(paths::BREAKABLE), std::nullopt);
+
+	  auto totalBroken = numBroken();
+	  updateGemCanPickup(totalBroken);
 	}
 }
 void handleBreakableCollision(objid obj1, objid obj2){

@@ -33,7 +33,6 @@ struct VehicleBall {
 
   std::optional<BallPowerupState> powerup;
 
-  std::optional<objid> soundId;
   std::optional<OneShot> oneshotSoundSource;
 
   float lastGravityTime = 0.f;

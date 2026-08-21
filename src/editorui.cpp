@@ -790,7 +790,10 @@ void renderMixingDetailPanel(bool includePanel){
   if (ImGui::Button("Stop")){
 
   }
-
+  ImGui::SameLine();
+  if (ImGui::Button("Save")){
+    saveMixedSound(mixedSound);
+  }
 
   ImGui::Checkbox("Loop", &mixedSound.loop);
   ImGui::Checkbox("Center", &mixedSound.center);

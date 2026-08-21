@@ -88,14 +88,11 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   }
 
   // INIT /////////////////
-  if (!vehicleBall.soundId.has_value()){
-    auto ballSound = findChildObjBySuffix(id, "ballsoundmove");
-    if (ballSound.has_value()){
-      vehicleBall.soundId = ballSound.value();
-      vehicleBall.oneshotSoundSource = playGameplayClipByIdCenter(vehicleBall.soundId.value(), 5.f, true);
-    }
-  }
  
+  if (!vehicleBall.oneshotSoundSource.has_value()){
+    vehicleBall.oneshotSoundSource = playMixedSound(getSymbol(paths::BALL_ROLLING), std::nullopt).value();
+  }
+    
   // PER FRAME STATE CHECK 
   auto velocity = getGameObjectVelocity(id);
   auto groundHit = checkIfGrounded(id);
@@ -104,8 +101,6 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
   vehicleBall.isGrounded = groundHit.has_value();
   vehicleBall.groundedId = groundHit.has_value() ? groundHit.value().id : std::optional<objid>(std::nullopt);
   if (justGrounded){
-    //playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false); 
-
     float shakeY = velocity.y * 5.f;
     applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(0.f, shakeY, 0.f));
 
@@ -164,12 +159,13 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
         setBallGravityWell(id, vehicleBall, false, 0);
         gameapi -> applyImpulse(id, impulse.value());
       }
-      playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
+      playMixedSound(getSymbol(paths::BALL_GRAVITYWELL), std::nullopt);
     }else{
       if (vehicleBall.shouldJump && vehicleBall.inGravityWell){
         setBallGravityWell(id, vehicleBall, false, 0);
 
-        playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
+        playMixedSound(getSymbol(paths::BALL_GRAVITYWELL), std::nullopt);
+
         auto jumpImpulse = glm::vec3(0.f, getJumpImpulse(vehicleBall), 0.f); 
         gameapi -> applyImpulse(id, jumpImpulse);
       }
@@ -182,7 +178,9 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
           gameapi -> applyImpulse(id, jumpImpulse);
         }
         applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(0.f, -20.f, 0.f));
-        playGameplayClipByIdCenter(getManagedSounds().balljumpObjId.value(), std::nullopt, false);
+
+        playMixedSound(getSymbol(paths::BALL_JUMP), std::nullopt);
+
       }  
     }
 
@@ -234,7 +232,6 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 
         }
 
-        playGameplayClipByIdCenter(getManagedSounds().powerupObjId.value(), std::nullopt, false);
       }
     }
 
