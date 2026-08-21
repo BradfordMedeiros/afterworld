@@ -686,13 +686,7 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
 }
 
 
-struct SoundBinding {
-  std::string sound;
-  std::vector<std::string> folder;
-};
-
-struct SoundFolderNode
-{
+struct SoundFolderNode{
     std::string name;
     std::vector<int> sounds;
     std::vector<SoundFolderNode> children;
@@ -745,54 +739,6 @@ void DrawSoundTree(
 }
 
 
-struct SoundInfo {
-  std::vector<SoundBinding> soundBindings;
-};  
-SoundInfo getSoundInfo(){
-  return SoundInfo {
-    .soundBindings = {
-      SoundBinding {
-        .sound = "shoot",
-        .folder = { "fps", "entity" },
-      },
-      SoundBinding {
-        .sound = "jump",
-        .folder = { "fps", "entity" },
-      },
-      SoundBinding {
-        .sound = "jump",
-        .folder = { "ball", "entity" },
-      },
-      SoundBinding {
-        .sound = "roll",
-        .folder = { "ball", "entity" },
-      }
-    },
-  };
-}
-
-struct SoundConfig {
-  std::string name;
-  bool loop = false;
-  bool center = false;
-  float volume = 0.f;
-  std::optional<std::string> clipOne;
-  std::optional<std::string> clipTwo;
-  std::optional<std::string> clipThree;
-  std::optional<std::string> clipFour;
-  std::optional<std::string> clipFive;
-  bool clipOrderSequential = false;
-  std::string bus = "master";
-};
-
-
-SoundConfig soundConfig{ .name = "shoot "};
-SoundConfig getSoundConfig(){
-  return soundConfig;
-}
-void updateSoundConfig(SoundConfig newSoundConfig){
-  soundConfig = newSoundConfig;
-}
 
 void renderMixingPanel(bool includePanel){
   if (includePanel){
@@ -806,6 +752,7 @@ void renderMixingPanel(bool includePanel){
   DrawSoundTree(soundTree, soundBindings, selectedSound);
   if (selectedSound != -1){
     std::cout << "selected sound: " << selectedSound <<  " " << soundBindings.at(selectedSound).sound << std::endl;
+    setActiveMixedSound(soundBindings.at(selectedSound));
   }
 
   if (includePanel){
@@ -819,14 +766,22 @@ void renderMixingDetailPanel(bool includePanel){
     ImGui::Begin("Mixing Detail");
   }
 
-  auto mixedSoundPtr = getMixedSound("pistol");
+  auto mixedSoundName = activeMixedSound();
+  if (!mixedSoundName.has_value()){
+    if (includePanel){
+      ImGui::End();
+    }
+    return;    
+  }
+
+
+  auto mixedSoundPtr = getMixedSound(mixedSoundName.value());
   auto& mixedSound = *mixedSoundPtr.value();
 
-  auto soundConfig = getSoundConfig();
 
   ImGui::Text("Sound Name:");
   ImGui::SameLine();
-  ImGui::Text(mixedSound.name.c_str());
+  ImGui::Text(mixedSound.soundBinding.sound.c_str());
 
   if (ImGui::Button("Play")){
     playMixedSound(mixedSound.nameSymbol, std::nullopt);
@@ -844,18 +799,8 @@ void renderMixingDetailPanel(bool includePanel){
   std::vector<std::string> clips = listSoundFiles();
 
   for (int i = 0; i < 5; i++){
-    std::optional<std::string> currClip = soundConfig.clipOne;
-    if (i == 0){
-
-    }else if (i == 1){
-      currClip = soundConfig.clipTwo;
-    }else if (i == 2){
-      currClip = soundConfig.clipThree;
-    }else if (i == 3){
-      currClip = soundConfig.clipFour;
-    }else if (i == 4){
-      currClip = soundConfig.clipFive;
-    }
+    std::optional<std::string> currClip = mixedSound.clips.size() > i ? mixedSound.clips.at(i) : std::optional<std::string>(std::nullopt);
+  
     bool enableSound = currClip.has_value();
     bool wasEnableSound = enableSound;
 
@@ -863,31 +808,11 @@ void renderMixingDetailPanel(bool includePanel){
     ImGui::Checkbox(value.c_str(), &enableSound);
     if (enableSound && !currClip.has_value()){
       currClip = clips.at(0);
-      if (i == 0){
-        soundConfig.clipOne = currClip;
-      }else if (i == 1){
-        soundConfig.clipTwo = currClip;
-      }else if (i == 2){
-        soundConfig.clipThree = currClip;
-      }else if (i == 3){
-        soundConfig.clipFour = currClip;
-      }else if (i == 4){
-        soundConfig.clipFive = currClip;
-      }
+      enableMixedSoundClip(mixedSound, i);
       std::cout << "enable curr clip" << std::endl;
     }
     if (!enableSound && wasEnableSound){
-      if (i == 0){
-        soundConfig.clipOne = std::nullopt;
-      }else if (i == 1){
-        soundConfig.clipTwo = std::nullopt;
-      }else if (i == 2){
-        soundConfig.clipThree = std::nullopt;
-      }else if (i == 3){
-        soundConfig.clipFour = std::nullopt;
-      }else if (i == 4){
-        soundConfig.clipFive = std::nullopt;
-      }
+      disableMixedSoundClip(mixedSound, i);
       currClip = std::nullopt;
     }
 
@@ -900,15 +825,15 @@ void renderMixingDetailPanel(bool includePanel){
           bool selected =  currClip.value() == clips.at(j);
           if (ImGui::Selectable(clips.at(j).c_str(), selected)){
             if (i == 0){
-              soundConfig.clipOne = clips.at(j);
+              setMixedSoundClip(mixedSound, clips.at(j), 0);
             }else if (i == 1){
-              soundConfig.clipTwo = clips.at(j);
+              setMixedSoundClip(mixedSound, clips.at(j), 1);
             }else if (i == 2){
-              soundConfig.clipThree = clips.at(j);
+              setMixedSoundClip(mixedSound, clips.at(j), 2);
             }else if (i == 3){
-              soundConfig.clipFour = clips.at(j);
+              setMixedSoundClip(mixedSound, clips.at(j), 3);
             }else if (i == 4){
-              soundConfig.clipFive = clips.at(j);
+              setMixedSoundClip(mixedSound, clips.at(j), 4);
             }
           }
           if (selected){
@@ -940,7 +865,7 @@ void renderMixingDetailPanel(bool includePanel){
 
   if (ImGui::BeginCombo("Bus", soundBusToStr(mixedSound.bus).c_str())){
     for (int i = 0; i < buses.size(); i++){
-      bool selected = soundConfig.bus == buses.at(i);
+      bool selected = soundBusToStr(mixedSound.bus) == buses.at(i);
       if (ImGui::Selectable(buses.at(i).c_str(), selected)){
         auto selectedBusStr = buses.at(i);
         auto soundBus = stringToSoundBus(selectedBusStr);
@@ -952,8 +877,6 @@ void renderMixingDetailPanel(bool includePanel){
     }
     ImGui::EndCombo();
   }
-
-  updateSoundConfig(soundConfig);
 
   if (includePanel){
     ImGui::End();

@@ -2,6 +2,7 @@
 // GAMEPLAY
 ////////////////////////////////////////////////////////////////////////////////////
 
+DEFINE_RESOURCE(DEFAULT_SOUND, "../gameresources/sound/q009/weapswitch.ogg")
 DEFINE_RESOURCE(WEAPON_SWITCH, "../gameresources/sound/q009/weapswitch.ogg")
 DEFINE_RESOURCE(EXPLOSION, "../gameresources/sound/q009/rlauncher3.ogg")
 DEFINE_RESOURCE(HITMARKER,  "./res/sounds/sample.wav")

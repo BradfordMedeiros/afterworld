@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* gameapi;
 
+std::string readFileOrPackage(std::string filepath);
 
 std::string* getClipForMaterial(SoundData& sound, std::string& material){
 	for (auto &sound : sound.sounds){
@@ -117,17 +118,154 @@ OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool l
 /* int getSymbol(std::string name);
 std::string nameForSymbol(int symbol); */
 
+std::string symbolStrForMixedSound(MixedSound& mixedSound){
+  std::string value;
+  for (int i = 0; i < mixedSound.soundBinding.folder.size(); i++){
+    value += mixedSound.soundBinding.folder.at(i) + "/";
+  }
+  value += mixedSound.soundBinding.sound;
+  return value;
+}
 
-std::vector<MixedSound> mixedSounds {
-  MixedSound {
-    .name = "pistol",
-    .nameSymbol = getSymbol("pistol"),
-    .clips = { 
-      paths::EXPLOSION,
+
+MixedSound parsedMixedSound(std::string& filepath){
+  auto fileInfo = decomposePath(filepath);
+  auto relativeDir = relativePath("../afterworld/data/sounds", fileInfo.dirPath, ".");
+  auto relativeDirVec = split(relativeDir, '/');
+
+  float volume = 1.f;
+  bool center = false;
+  bool loop = false;
+  bool sequential = false;
+  SoundBus bus = BUS_MASTER;
+
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    std::cout << "error parsing game file: " << filepath << "  (" << fileContent << ")" << std::endl;
+  }
+  {
+    auto it = doc.FindMember("volume");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      volume = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("center");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      center = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("loop");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      loop = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("sequential");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      sequential = it -> value.GetFloat();
+    }        
+  }
+
+  {
+    auto it = doc.FindMember("bus");
+    if (it != doc.MemberEnd() && it -> value.IsString()){
+      std::string busStr = it -> value.GetString();
+      bus = stringToSoundBus(busStr);
+    }
+  }
+
+  {
+    auto it = doc.FindMember("clips");
+    if (it != doc.MemberEnd() && it -> value.IsString()){
+      std::string busStr = it -> value.GetString();
+      bus = stringToSoundBus(busStr);
+    }
+  }
+
+
+  return MixedSound{
+    .clips = {
       paths::TELEPORT_SOUND,
     },
-  },
-};
+    .volume = volume,
+    .center = center,
+    .loop = loop,
+    .clipOrderSequential = sequential,
+    .bus = bus,
+    .soundBinding = SoundBinding {
+      .sound = fileInfo.filename,
+      .folder = relativeDirVec,
+    },
+  };
+}
+
+std::vector<MixedSound> createMixedSounds(){
+  std::vector<MixedSound> mixedSounds;
+
+  auto mixedSoundFiles = listFilesWithExtensionsFromPackage("../afterworld/data/sounds", { "json" });
+
+  for (auto& mixedSoundFile : mixedSoundFiles){
+    mixedSounds.push_back(parsedMixedSound(mixedSoundFile));
+  }
+
+  /*mixedSounds.push_back(
+    MixedSound {
+      .clips = { 
+        paths::TELEPORT_SOUND,
+      },
+      .soundBinding = SoundBinding {
+        .sound = "shoot",
+        .folder = { "fps", "entity" },
+      },
+  });
+  mixedSounds.push_back(
+    MixedSound {
+      .clips = { 
+        paths::EXPLOSION,
+      },
+      .soundBinding = SoundBinding {
+        .sound = "jump",
+        .folder = { "fps", "entity" },
+      },
+    }
+  );
+  mixedSounds.push_back(
+    MixedSound {
+      .clips = { 
+        paths::EXPLOSION,
+        paths::TELEPORT_SOUND,
+      },
+      .soundBinding = SoundBinding {
+        .sound = "pistol3",
+        .folder = { "core" },
+      },
+    }
+  );*/
+ 
+  for (auto& mixedSound : mixedSounds){
+    auto name = symbolStrForMixedSound(mixedSound);
+    int symbol = getSymbol(name);
+    mixedSound.nameSymbol = symbol;
+
+  }
+  return mixedSounds;
+}
+std::vector<MixedSound> mixedSounds = createMixedSounds();
+
+
+
+SoundInfo getSoundInfo(){
+  SoundInfo soundInfo{};
+  for(auto& mixedSound : mixedSounds){
+    soundInfo.soundBindings.push_back(mixedSound.soundBinding);
+  }
+  return soundInfo;
+}
+
 
 struct ClipInstance {
   std::string clip;
@@ -135,19 +273,6 @@ struct ClipInstance {
 };
 
 std::vector<ClipInstance> clipInstances;
-
-
-/*
-  GameobjAttributes attr {
-    .attr = {},
-  };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-
-  for (auto &sound : sounds){
-    attr.attr["clip"] = sound.clip;
-    auto id = gameapi -> makeObjectAttr(sceneId, std::string("&material-") + sound.material, attr, submodelAttributes);
-    modassert(id.has_value(), "could not make material");
-    */
 
 objid loadMixedSound(std::string clip, objid sceneId){
   std::cout << "load mixed sound: " << clip << std::endl;
@@ -168,8 +293,8 @@ std::optional<objid> getClipInstance(std::string& clip){
   }
   return std::nullopt;
 }
-void ensureMixedSoundsLoaded(objid sceneId){
-  for (auto& mixedSound : mixedSounds){
+
+void ensureMixedSoundLoaded(MixedSound& mixedSound, objid sceneId){
     for (auto& clip : mixedSound.clips){
       auto existingClipInstance = getClipInstance(clip);
       if (!existingClipInstance.has_value()){
@@ -178,11 +303,49 @@ void ensureMixedSoundsLoaded(objid sceneId){
            .clip = clip,
            .id = id,
         });
-         
       }
     }
+}
+void ensureMixedSoundsLoaded(objid sceneId){
+  for (auto& mixedSound : mixedSounds){
+    ensureMixedSoundLoaded(mixedSound, sceneId);
   }
 }
+
+
+void enableMixedSoundClip(MixedSound& mixedSound, int index){
+  auto sceneId = gameapi -> rootSceneId();
+  for (int i = 0; i <= index; i++){
+    if (mixedSound.clips.size() <= i){
+      mixedSound.clips.push_back(paths::DEFAULT_SOUND);
+    }
+  }
+  ensureMixedSoundLoaded(mixedSound, sceneId);
+}
+void disableMixedSoundClip(MixedSound& mixedSound, int index){
+  std::vector<std::string> newClips;
+  for (int i = 0; i < mixedSound.clips.size(); i++){
+    if (i != index){
+      newClips.push_back(mixedSound.clips.at(i));
+    }
+  }
+
+  auto sceneId = gameapi -> rootSceneId();
+  mixedSound.clips = newClips;
+  ensureMixedSoundLoaded(mixedSound, sceneId);
+}
+void setMixedSoundClip(MixedSound& mixedSound, std::string clip, int index){
+  std::vector<std::string> newClips;
+  for (int i = 0; i < mixedSound.clips.size(); i++){
+    newClips.push_back((index == i) ? clip : mixedSound.clips.at(i));
+  }
+
+  auto sceneId = gameapi -> rootSceneId();
+  mixedSound.clips = newClips;
+  ensureMixedSoundLoaded(mixedSound, sceneId); 
+}
+
+
 
 std::optional<OneShot> playMixedSound(int symbol, std::optional<glm::vec3> position){
   MixedSound* mixedSound = NULL;
@@ -212,7 +375,7 @@ std::optional<OneShot> playMixedSound(int symbol, std::optional<glm::vec3> posit
 
 std::optional<MixedSound*> getMixedSound(std::string name){
   for (auto& mixedSound : mixedSounds){
-    if (mixedSound.name == name){
+    if (mixedSound.soundBinding.sound == name){
       return &mixedSound;
     }
   }
@@ -253,3 +416,12 @@ std::string soundBusToStr(SoundBus soundBus){
   }
   return "master";
 }
+
+std::optional<std::string> activeMixedSoundStr;
+std::optional<std::string> activeMixedSound(){
+  return activeMixedSoundStr;
+}
+void setActiveMixedSound(SoundBinding& soundBinding){
+  activeMixedSoundStr = soundBinding.sound;
+};
+
