@@ -20,6 +20,8 @@ bool shouldAutolaunchGravityWell(objid managed);
 
 glm::vec3 getSurfaceVelocityModifiers(objid id);
 
+
+
 BallConfig ballConfig {
   .magnitude = 100.f,
   .torque = 50.f,
@@ -30,11 +32,100 @@ BallConfig ballConfig {
   .gravity = -9.81f,
 };
 
-BallConfig getBallConfig(){
+
+static std::string BALL_CONFIG("../afterworld/data/config/ball/ball.json");
+
+BallConfig readBallConfigFromFile(){
+  BallConfig ballConfig {
+    .magnitude = 100.f,
+    .torque = 50.f,
+    .jumpMagnitude = 100.f,
+    .mass = 10.f,
+    .friction = 1.f,
+    .restitution = 0.5f,
+    .gravity = -9.81f,
+  };
+
+  auto fileContent = readFileOrPackage(BALL_CONFIG);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    std::cout << "error parsing game file: " << BALL_CONFIG << "  (" << fileContent << ")" << std::endl;
+    exit(1);
+  }
+
+  {
+    auto it = doc.FindMember("magnitude");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.magnitude = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("torque");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.torque = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("jumpMagnitude");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.jumpMagnitude = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("mass");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.mass = it -> value.GetFloat();
+    }        
+  }
+  {
+    auto it = doc.FindMember("friction");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.friction = it -> value.GetFloat();
+    }        
+  }   
+  {
+    auto it = doc.FindMember("restitution");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.restitution = it -> value.GetFloat();
+    }        
+  }   
+  {
+    auto it = doc.FindMember("gravity");
+    if (it != doc.MemberEnd() && it -> value.IsFloat()) {
+      ballConfig.gravity = it -> value.GetFloat();
+    }        
+  }    
   return ballConfig;
 }
-void setBallConfig(BallConfig newBallConfig){
-  ballConfig = newBallConfig;
+
+void saveBallConfig(){
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  doc.AddMember("magnitude", ballConfig.magnitude, allocator);
+  doc.AddMember("torque", ballConfig.torque, allocator);
+  doc.AddMember("jumpMagnitude", ballConfig.jumpMagnitude, allocator);
+  doc.AddMember("mass", ballConfig.mass, allocator);
+  doc.AddMember("friction", ballConfig.friction, allocator);
+  doc.AddMember("restitution", ballConfig.restitution, allocator);
+  doc.AddMember("gravity", ballConfig.gravity, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  auto strValue = buffer.GetString();
+  realfiles::saveFile(BALL_CONFIG, strValue);
+}
+
+BallConfig& getBallConfig(){
+  return ballConfig;
+}
+
+void initBallVehicleConfig(){
+  ballConfig = readBallConfigFromFile(); 
 }
 
 VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state){

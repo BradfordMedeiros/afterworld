@@ -29,11 +29,13 @@ void renderBallGameplay(bool includePanel){
   if (includePanel){
     ImGui::Begin("Ball Gameplay");
   }
-  static bool doThing = false;
 
-  auto ballConfig = getBallConfig();
+  if (ImGui::Button("Save")){
+    saveBallConfig();
+  }
 
-  static float speed = 0.f;
+  auto& ballConfig = getBallConfig();
+
   ImGui::DragFloat("magnitude", &ballConfig.magnitude, 0.0f, 200.0f);
   ImGui::DragFloat("torque", &ballConfig.torque, 0.0f, 10.0f);
   ImGui::DragFloat("jump-magnitude", &ballConfig.jumpMagnitude, 0.0f, 10.0f);
@@ -42,7 +44,6 @@ void renderBallGameplay(bool includePanel){
   ImGui::DragFloat("restitution", &ballConfig.restitution, 0.0f, 10.0f);
   ImGui::DragFloat("gravity", &ballConfig.gravity, 0.0f, 10.0f);
 
-  setBallConfig(ballConfig);
   reloadVehicleSettings();
 
   if (includePanel){

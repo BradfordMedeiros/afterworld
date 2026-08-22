@@ -13,8 +13,8 @@ struct BallConfig {
   float gravity;
 };
 
-BallConfig getBallConfig();
-void setBallConfig(BallConfig ballConfig);
+BallConfig& getBallConfig();
+void saveBallConfig();
 
 struct VehicleBall {
   objid id;
@@ -44,6 +44,8 @@ struct VehicleBall {
   float lastPlayTime = 0.f;
 
 };
+
+void initBallVehicleConfig();
 
 VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state);
 void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams);

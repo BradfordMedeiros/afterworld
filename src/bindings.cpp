@@ -2,10 +2,10 @@
 
 CustomApiBindings* gameapi = NULL;
 
-Weapons weapons{};
-Movement movement = createMovement();
-Director director = createDirector();
-Vehicles vehicles = createVehicles();
+Weapons weapons;
+Movement movement;
+Director director;
+Vehicles vehicles;
 std::unordered_map<objid, ArcadeInstance> arcadeInstances; 
 std::unordered_map<objid, HitPoints> hitpoints = {}; 
 std::unordered_map<objid, ControllableEntity> controllableEntities;
@@ -21,7 +21,7 @@ std::unordered_map<objid, TriggerColor> triggerColors;
 std::unordered_map<objid, TeleportExit> teleportObjs;
 std::unordered_map<objid, Powerup> powerups;
 std::unordered_map<objid, LinkGunObj> linkGunObj;
-StateController animationController = createStateController();
+StateController animationController;
 OrbData orbData;
 Water water;
 SoundData soundData;
@@ -37,7 +37,7 @@ std::unordered_map<objid, EmissionObject> emissionObjects;
 std::unordered_map<objid, HealthColorObject> healthColorObjects;
 std::unordered_map<objid, ExplosionObj> explosionObjects;
 std::optional<glm::vec3> oldGravity;  // wtf?
-ArcadeApi arcadeApi = createArcadeApi();
+ArcadeApi arcadeApi;
 std::unordered_map<objid, ExtraSurfaceVelocity> extraVelocity;
 std::unordered_map<objid, Activatable> activateables;
 std::unordered_map<objid, Breakable> breakables;
@@ -716,6 +716,11 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     weapons = createWeapons();
+    movement =  createMovement();
+    director = createDirector();
+    vehicles = createVehicles();
+    animationController  = createStateController();
+    arcadeApi = createArcadeApi();
 
     sceneManagement = createSceneManagement();
     movementEntities = MovementEntityData {};
