@@ -10,12 +10,6 @@ extern Weapons weapons;
 
 ArcadeApi createArcadeApi(){
   ArcadeApi arcadeApi {
-    .ensureSoundsLoaded = [](objid id, std::vector<std::string> sounds) -> std::vector<objid> {
-      return ensureSoundLoadedBySceneId(id, rootSceneId(), sounds);
-    },
-    .releaseSounds = [](objid id) -> void {
-      unloadManagedSounds(id);
-    },
     .ensureTexturesLoaded = [](objid id, std::vector<std::string> textures) -> void {
       ensureManagedTexturesLoaded(id, rootSceneId(), textures);
     },

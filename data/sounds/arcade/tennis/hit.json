@@ -5,6 +5,7 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/glauncher.ogg"
+        "../gameresources/sound/q009/grenade2.ogg",
+        "../gameresources/sound/q009/explosion.ogg"
     ]
 }

@@ -1,10 +1,10 @@
 {
     "volume": 1.0,
-    "center": true,
+    "center": false,
     "loop": false,
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/glauncher.ogg"
+        "../gameresources/sound/q009/teleport.ogg"
     ]
 }

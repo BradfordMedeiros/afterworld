@@ -1,10 +1,10 @@
 {
-    "volume": 1.0,
+    "volume": 0.10300000011920929,
     "center": true,
     "loop": false,
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/glauncher.ogg"
+        "../gameresources/sound/q009/outofammo.ogg"
     ]
 }

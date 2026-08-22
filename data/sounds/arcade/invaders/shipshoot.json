@@ -1,10 +1,10 @@
 {
     "volume": 1.0,
     "center": true,
-    "loop": true,
+    "loop": false,
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/rifle2.ogg"
+        "../gameresources/sound/q009/minigun2.ogg"
     ]
 }

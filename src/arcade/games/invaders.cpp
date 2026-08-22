@@ -45,7 +45,6 @@ struct Invaders {
 	bool moveDown;
 
 	bool shoot;
-	objid shootingSound;
 	unsigned int* shaderId;
 
 	std::unordered_map<objid, InvaderParticle> particles;
@@ -121,11 +120,6 @@ std::any createInvaders(objid id){
 			paths::INVADERS_PETE, 
 	});
 
-	auto soundObjs = arcadeApi.ensureSoundsLoaded(id,
-	{
-	  paths::GUNSHOT,
-	});
-	invaders.shootingSound = soundObjs.at(0);
 	invaders.collisions = create2DCollisions();
 	createInvadersEnemy(invaders, invaders.shipId, glm::vec2(0.f, 0.f), glm::vec4(1.f, 1.f, 1.f, 1.f));
 
@@ -236,7 +230,8 @@ void updateInvaderParticles(Invaders& invaders){
 	}
 	for (auto id : killedEnemies){
 		removeInvadersEnemy(invaders, id);
-		arcadeApi.playSound(invaders.shootingSound);
+		playMixedSound(getSymbol("arcade/invaders/enemykill"), std::nullopt);
+
 		invaders.score = invaders.score + 100;
 	}
 }
@@ -346,7 +341,7 @@ void updateInvaders(std::any& any){
 
 	if (invaders.shoot){
 		invadersShoot(invaders, getShipPosition(invaders), invaders.shipDirection, INVADER_SHOT_MULTI);
-		arcadeApi.playSound(invaders.shootingSound);
+		playMixedSound(getSymbol("arcade/invaders/shipshoot"), std::nullopt);
 	}
 	invaders.shoot = false;
 	updateInvaderParticles(invaders);
@@ -490,7 +485,7 @@ void onInvadersMouseClick(std::any& any, int button, int action, int mods){
   if (invaders.state == TITLE){
   	if (button == 0 && action == 0){
   		invaders.state = PLAYING;
-			arcadeApi.playSound(invaders.shootingSound);
+			playMixedSound(getSymbol("arcade/invaders/startmenu"), std::nullopt);
   	}
   	return;
   }

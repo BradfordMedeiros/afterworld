@@ -20,13 +20,6 @@ void addArcadeType(objid id, std::string type, std::optional<objid> textureId){
 			.data = invadersGame.createInstance(id),
 			.textureId = textureId,
 		};
-	}else if (type == "helicopter"){
-		arcadeInstances[id] = ArcadeInstance {
-			.type = ARCADE_HELICOPTER,
-			.interface = &helicopterGame,
-			.data = helicopterGame.createInstance(id),
-			.textureId = textureId,
-		};
 	}else if (type == "rhythm"){
 		arcadeInstances[id] = ArcadeInstance {
 			.type = ARCADE_RHYTHM,

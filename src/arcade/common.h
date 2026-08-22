@@ -4,6 +4,7 @@
 #include "../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../util.h"
 #include "../resources/paths.h"
+#include "../resources/sound.h"
 
 struct ArcadeInterface {
   std::function<std::any(objid)> createInstance;
@@ -17,9 +18,6 @@ struct ArcadeInterface {
 };
 
 struct ArcadeApi {
-  std::function<std::vector<objid>(objid, std::vector<std::string>)> ensureSoundsLoaded;
-  std::function<void(objid)> releaseSounds;
-
   std::function<void(objid, std::vector<std::string>)> ensureTexturesLoaded;
   std::function<void(objid)> releaseTextures;
 

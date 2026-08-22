@@ -5,6 +5,6 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/glauncher.ogg"
+        "../gameresources/sound/teleport.wav"
     ]
 }

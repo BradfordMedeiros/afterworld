@@ -16,8 +16,6 @@ struct Tennis {
 	bool pressingUp;
 	bool pressingDown;
 	bool controllingRightPaddle;
-
-	std::vector<objid> sounds;
 };
 
 float offsetPaddle = 0.1f;
@@ -29,7 +27,6 @@ float paddleXRight = 1.f - offsetPaddle;
 glm::vec2 initialBallVelocity(0.5f, 0.25f);
 
 std::any createTennis(objid id){
-	auto sounds = arcadeApi.ensureSoundsLoaded(id, { paths::TENNIS_HIT_SOUND });
 	arcadeApi.ensureTexturesLoaded(id, 
 	{ 
 		paths::TENNIS_BALL_IMAGE,
@@ -47,12 +44,10 @@ std::any createTennis(objid id){
 		.pressingUp = false,
 		.pressingDown = false,
 		.controllingRightPaddle = false,
-		.sounds = sounds,
 	};
 }
 
 void rmTennisInstance(std::any& any){
-	arcadeApi.releaseSounds(101);
 }
 
 void resetTennisBall(Tennis& tennis){
@@ -142,26 +137,26 @@ void updateTennis(std::any& any){
 	if (paddleHitRight){
 		if (tennis.ballVelocity.x > 0){
 			tennis.ballVelocity = tennisReflect(tennis.ballVelocity);
-			arcadeApi.playSound(tennis.sounds.at(0));
+			playMixedSound(getSymbol("arcade/tennis/hit"), std::nullopt);
 		}
 	}
 	if (paddleHitLeft){
 		if (tennis.ballVelocity.x < 0){
 			tennis.ballVelocity = tennisReflect(tennis.ballVelocity);
-			arcadeApi.playSound(tennis.sounds.at(0));
+			playMixedSound(getSymbol("arcade/tennis/hit"), std::nullopt);
 		}
 	}
 
 	if ((tennis.ballPosition.y + (0.5f * ballSize)) > 1.f){
 		if (tennis.ballVelocity.y > 0.f){
 			tennis.ballVelocity.y *= -1;
-			arcadeApi.playSound(tennis.sounds.at(0));
+			playMixedSound(getSymbol("arcade/tennis/hit"), std::nullopt);
 		}
 	}
 	if ((tennis.ballPosition.y - (0.5f * ballSize)) < -1.f){
 		if (tennis.ballVelocity.y < 0.f){
 			tennis.ballVelocity.y *= -1;
-			arcadeApi.playSound(tennis.sounds.at(0));
+			playMixedSound(getSymbol("arcade/tennis/hit"), std::nullopt);
 		}
 	}
 

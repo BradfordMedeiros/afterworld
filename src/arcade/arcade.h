@@ -5,7 +5,6 @@
 #include "../util.h"
 #include "./games/tennis.h"
 #include "./games/invaders.h"
-#include "./games/helicopter.h"
 #include "./games/rhythm.h"
 #include "./games/interact.h"
 
