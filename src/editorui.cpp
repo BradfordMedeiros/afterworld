@@ -33,20 +33,6 @@ void renderBallGameplay(bool includePanel){
 
   auto ballConfig = getBallConfig();
 
-  //BallConfig getBallConfig();
-  //void setBallConfig(BallConfig ballConfig);
-
-/*
-struct BallConfig {
-  float magnitude;
-  float torque;
-  float jumpMagnitude;
-  float mass;
-  float friction;
-  float restitution;
-  float gravity;
-};*/
-
   static float speed = 0.f;
   ImGui::DragFloat("magnitude", &ballConfig.magnitude, 0.0f, 200.0f);
   ImGui::DragFloat("torque", &ballConfig.torque, 0.0f, 10.0f);
@@ -933,8 +919,6 @@ void initImGuiGameUi(){
         renderMixingDetailPanel(includePanel);
     });
 
-
-
     registerAction("Start", "Mode", []() -> void {
       startMode(false);
     });
@@ -942,6 +926,10 @@ void initImGuiGameUi(){
       stopMode(false);
       resetLevel();
     });
+
+
+    registerView("Mixing", { "mixing" }, { "mixing-detail" });
+
 
 }
 

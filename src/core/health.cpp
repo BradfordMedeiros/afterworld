@@ -7,7 +7,6 @@ extern bool godMode;
 
 bool enableRagdollKill = true;
 
-OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop);
 void onAiHealthChange(objid targetId, float remainingHealth);
 void setEntityIsAlive(objid id, bool alive);
 void emitGibs(objid sceneId, objid lookAtId, glm::vec3 position);
@@ -53,7 +52,7 @@ bool doDamage(std::unordered_map<objid, HitPoints>& hitpoints, objid id, float a
 		auto playerPosition = getEntityPositionByPlayerIndex(getDefaultPlayerIndex()); // TODO - this shoiuldn't be here, only if it is damaged by the player
 		if(playerPosition.has_value()){
 			//modassert(false, "hitmarker sound try play!");
-			playGameplayClipById(getManagedSounds().hitmarkerSoundObjId.value(), std::nullopt, playerPosition.value(), false); 
+			playMixedSound(getSymbol("fps/playerhurt"), playerPosition.value());
 
 			if (*_enemyDead){
 				float magnitude = 10;
@@ -242,8 +241,9 @@ void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::qu
 
   if (force > 50){
     {
-      float volume = 1.f;  // should adjust based on force, how much? 
-      playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position, false);
+      //float volume = 1.f;  
+      //playGameplayClipById(getManagedSounds().landSoundObjId.value(), volume * force / 10.f, position, false);
+      playMixedSound(getSymbol("interaction/collision"), position);  // should adjust based on force, how much? 
 
       auto attr = getAttrHandle(obj1);
       auto collideDamage = getFloatAttr(attr, "collide_damage"); 

@@ -272,7 +272,8 @@ void createExplosion(glm::vec3 position, float outerRadius, float damage){
 		applyImpulseAffectMovement(hitobject.id, glm::vec3(force * dirVec.x, force * dirVec.y, force * dirVec.z));
 	}
 
-	playGameplayClipById(getManagedSounds().explosionSoundObjId.value(), std::nullopt, position, false);
+	playMixedSound(getSymbol("effects/explosion"), position);
+
 	auto activePlayer = getEntityForPlayerIndex(getDefaultPlayerIndex());
 	if (activePlayer.has_value()){
 		emitExplosion(position);
@@ -333,7 +334,7 @@ void onLinkGunObjFrame(){
 void handleTeleport(objid idToTeleport, objid teleporterId){
   auto teleportPosition = gameapi -> getGameObjectPos(teleporterId, true, "gamelogic get teleport position");
   gameapi -> setGameObjectPosition(idToTeleport, teleportPosition, true, Hint { .hint = "teleport set posn" });
-  playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, std::nullopt, false);
+  playMixedSound(getSymbol("effects/teleport"), teleportPosition);
 }
 
 void doTeleport(int32_t idToTeleport, std::string destination){
@@ -607,7 +608,7 @@ bool activate(Activatable& activateable, std::optional<int> mask){
 	activateable.lastActivateTime = gameapi -> timeSeconds(false);
 	gameapi -> playAnimation(activateable.id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
 	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
-	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
+	playMixedSound(getSymbol("interaction/activate"), position);
 	return true;
 }
 
@@ -619,7 +620,7 @@ void deactivate(Activatable& activateable){
 	activateable.lastActivateTime = gameapi -> timeSeconds(false);
 	gameapi -> playAnimation(activateable.id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
 	auto position = gameapi -> getGameObjectPos(activateable.id, true, "[gamelogic] activate");
-	playGameplayClipById(getManagedSounds().teleportObjId.value(), std::nullopt, position, false);
+	playMixedSound(getSymbol("interaction/deactivate"), position);
 }
 
 void toggleActivation(Activatable& item){

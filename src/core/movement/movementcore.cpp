@@ -88,7 +88,7 @@ bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bo
     movementState.changedYVelocity = true;
 
     if (getManagedSounds().jumpSoundObjId.has_value()){
-      playGameplayClipById(getManagedSounds().jumpSoundObjId.value(), std::nullopt, std::nullopt, false);
+      playMixedSound(getSymbol("fps/jump"), std::nullopt);
     }
     return true;
   }
@@ -100,9 +100,7 @@ bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bo
 }
 
 void land(objid id){
-  if (getManagedSounds().landSoundObjId.has_value()){
-    playGameplayClipById(getManagedSounds().landSoundObjId.value(), std::nullopt, std::nullopt, false);
-  }
+  playMixedSound(getSymbol("fps/land"), std::nullopt);
 }
 
 float ironsightSpeedMultiplier = 0.4f;
@@ -617,7 +615,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
     std::cout << "should play move clip" << std::endl;
-    playGameplayClipById(getManagedSounds().moveSoundObjId.value(), std::nullopt, std::nullopt, false);
+    playMixedSound(getSymbol("fps/walk"), std::nullopt);
     movementState.lastMoveSoundPlayTime = currTime;
     movementState.lastMoveSoundPlayLocation = currPos;
   }

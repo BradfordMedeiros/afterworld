@@ -378,7 +378,12 @@ void setEntityZoom(objid id, float multiplier){
   }
   setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(movementEntities, multiplier, id);
-  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
+
+  if (isZoomedIn){
+	  playMixedSound(getSymbol("fps/zoomin"), std::nullopt);
+  }else{
+	  playMixedSound(getSymbol("fps/zoomout"), std::nullopt);
+  }
 }
 bool isEntityGunZoomed(objid id){
   auto gunZoomed = getWeaponState(weapons, id).isGunZoomed;

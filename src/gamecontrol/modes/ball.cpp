@@ -238,7 +238,10 @@ std::function<void(EasyCutscene&)> createReveal(std::string letterbox, std::stri
   	if (finalize(cutscene)){
 			std::cout << "ball mode: ballStartGameplay finalize" << std::endl;
   		auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
+
   		emitWarp(position);
+	   	playMixedSound(getSymbol("ball/events/warpend"), position);
+
   	  setEntityControlDisabled(false, getEntityForPlayerIndex(0).value());
   	}
 
@@ -342,6 +345,8 @@ void ballEndGameplay(EasyCutscene& cutscene){
 
 
   	emitWarp(warpPos);
+  	playMixedSound(getSymbol("ball/events/warpstart"), warpPos);
+
 		setGameObjectTint(getBallModeOptions().eyeId, glm::vec4(1.f, 0.f, 0.f, 0.f));	
 		getBallModeOptions().changeSpirit = MODE_NONE;
 	}
@@ -553,7 +558,7 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 
 void ballModeNewGame2(objid sceneId, bool inHub){
   resetProgress();
-	playMixedSound(getSymbol("ball/newgame"), std::nullopt);
+	playMixedSound(getSymbol("ball/screens/newgame"), std::nullopt);
 
 
   inputOverride(false, false);
@@ -616,6 +621,7 @@ void startBallIntroMode(objid sceneId, bool inHub){
 			},
 			.onContinueGame = [sceneId, inHub]() -> void {
 				hideLetterBox();
+				playMixedSound(getSymbol("ball/screens/continue"), std::nullopt);
 				ballModeSetPlayMode(sceneId, inHub, std::nullopt);
 			},
    	},
@@ -1346,7 +1352,6 @@ GameTypeInfo getBallMode(){
 			  	setActivatableObject(ballMode.ballId, mask);
 
     			playMixedSound(getSymbol("ball/changespirit"), std::nullopt);
-
   			  
 	  			if (ballMode.spirit == MODE_NONE){
 	  				setGameObjectEmitterEffectTint(ballMode.spiritId, glm::vec4(0.f, 0.f, 0.f, 1.f));

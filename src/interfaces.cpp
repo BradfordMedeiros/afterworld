@@ -217,7 +217,7 @@ UiContext getUiContext(){
     },
     .activeSceneId = activeSceneForSelected,
     .playSound = []() -> void {
-      playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
+      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
     },
     .consoleInterface = ConsoleInterface {
       .setNormalMode = setNormalMode,
