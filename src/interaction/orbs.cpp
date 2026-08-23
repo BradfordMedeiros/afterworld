@@ -249,7 +249,6 @@ void setOrbSelectIndex(OrbView& orbView, int targetIndex){
 	orbView.targetIndex = targetIndex;
 	if (oldIndex != targetIndex){
 		orbView.startTime = gameapi -> timeSeconds(false);
-	  playGameplayClipById(getManagedSounds().activateSoundObjId.value(), std::nullopt, std::nullopt, false);
 	}
 }
 

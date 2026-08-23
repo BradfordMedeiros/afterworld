@@ -6,24 +6,6 @@
 #include "../util.h"
 #include "./paths.h"
 
-struct ManagedSounds {
-  std::optional<objid> activateSoundObjId;
-  std::optional<objid> soundObjId;
-  std::optional<objid> explosionSoundObjId;
-
-  std::unordered_map<objid, std::vector<objid>> sceneIdToSounds;
-  std::unordered_map<objid, std::vector<objid>> sceneIdToTextures;
-};
-
-ManagedSounds& getManagedSounds();
-void ensureDefaultSoundsLoadced(objid sceneId);
-void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip);
-void ensureSoundsUnloaded(objid sceneId);
-
-// these dont actually assume it's a scene id
-std::vector<objid> ensureSoundLoadedBySceneId(objid id, objid sceneId, std::vector<std::string>& soundsToLoad);
-void unloadManagedSounds(objid id);
-
 void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::string> textures);
 void unloadManagedTexturesLoaded(objid id);
 

@@ -2,21 +2,16 @@
 
 extern CustomApiBindings* gameapi;
 
+struct ManagedSounds {
+  std::unordered_map<objid, std::vector<objid>> sceneIdToTextures;
+};
 ManagedSounds sounds {
-  .activateSoundObjId = std::nullopt,
-  .soundObjId = std::nullopt,
-  .explosionSoundObjId = std::nullopt,
-  .sceneIdToSounds = {},
   .sceneIdToTextures = {},
 };
 PrecachedResources precachedResources {
   .models = {},
   .ids = {},
 };
-
-ManagedSounds& getManagedSounds(){
-  return sounds;
-}
 
 objid createSound(objid sceneId, std::string soundObjName, std::string clip, bool loop){
   modassert(soundObjName.at(0) == '&', "sound obj must start with &");
@@ -34,28 +29,6 @@ objid createSound(objid sceneId, std::string soundObjName, std::string clip, boo
   auto soundObjId = gameapi -> makeObjectAttr(sceneId, soundObjName, attr, submodelAttributes);
   modassert(soundObjId.has_value(), "sound already exists in scene: " + std::to_string(sceneId));
   return soundObjId.value();
-}
-
-std::vector<objid> ensureSoundLoadedBySceneId(objid id, objid sceneId, std::vector<std::string>& soundsToLoad){
-  modassert(sounds.sceneIdToSounds.find(id) == sounds.sceneIdToSounds.end(), "ensureSoundLoadedBySceneId scene id already loaded");
-  std::vector<objid> soundIds;
-  for (std::string& sound: soundsToLoad){
-    modlog("ensureSoundLoadedBySceneId loaded: ", sound);
-    auto soundObjName = std::string("&code-sound") + uniqueNameSuffix();
-    auto soundId = createSound(sceneId, soundObjName, sound, false);
-    soundIds.push_back(soundId);
-  }
-  sounds.sceneIdToSounds[id] = soundIds;
-  return soundIds;
-}
-void unloadManagedSounds(objid id){
-  if (sounds.sceneIdToSounds.find(id) != sounds.sceneIdToSounds.end()){
-    auto objIds = sounds.sceneIdToSounds.at(id);
-    for (auto soundId : objIds){
-      gameapi -> removeByGroupId(soundId);
-    }
-    sounds.sceneIdToSounds.erase(id);
-  }
 }
 
 // no reason for this to have to create a gameobj to load a texture
@@ -90,54 +63,6 @@ void unloadManagedTexturesLoaded(objid id){
     }
     sounds.sceneIdToTextures.erase(id);
   }
-}
-
-
-void ensureDefaultSoundsLoadced(objid sceneId){
-  std::string activateClip = paths::ACTIVATE_SOUND;
-  if (activateClip != ""){
-    if (sounds.activateSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.activateSoundObjId.value());
-    }
-    sounds.activateSoundObjId = createSound(sceneId, ("&code-activate") + uniqueNameSuffix(), activateClip, false);
-  }
-
-  std::string soundClip = paths::WEAPON_SWITCH;
-  if (soundClip != ""){
-    if (sounds.soundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.soundObjId.value());
-    }
-    sounds.soundObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), soundClip, false);
-  }
-
-  std::string explosionClip = paths::EXPLOSION;
-  if (explosionClip != ""){
-    if (sounds.explosionSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.explosionSoundObjId.value());
-    }
-    sounds.explosionSoundObjId = createSound(sceneId, ("&code-explosion") + uniqueNameSuffix(), explosionClip, false);
-  }
-
-}
-
-void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
-}
-
-void ensureSoundUnloaded(objid sceneId, std::optional<objid>* sound){  // this should just centrally loading into a scene, and then can detect
-	if (sound -> has_value()){
-		if (gameapi -> gameobjExists(sound -> value())){
-			auto objSceneId = gameapi -> listSceneId(sound -> value());
-			if (objSceneId == sceneId){
-				gameapi -> removeByGroupId(sound -> value());
-			}
-		}
-    *sound = std::nullopt;
-	}
-}
-void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading into a scene, and then can detect
-  ensureSoundUnloaded(sceneId, &sounds.activateSoundObjId);
-  ensureSoundUnloaded(sceneId, &sounds.soundObjId);
-  ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
 }
 
 void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly

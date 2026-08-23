@@ -28,10 +28,6 @@ struct MovementParams {
   float crouchFriction;
   float physicsMass;
   float physicsRestitution;
-
-  std::string jumpSound;
-  std::string landSound;
-  std::string moveSound;
 };
 
 struct MovementState {

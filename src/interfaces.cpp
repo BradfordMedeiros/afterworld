@@ -1,7 +1,5 @@
 #include "./interfaces.h"
 
-std::vector<objid> ensureSoundLoadedBySceneId(objid id, objid sceneId, std::vector<std::string>& soundsToLoad);
-void unloadManagedSounds(objid id);
 void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::string> textures);
 void unloadManagedTexturesLoaded(objid id);
 

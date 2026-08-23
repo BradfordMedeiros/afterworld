@@ -825,7 +825,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadDialogTree();
 
     soundData = createSoundData(gameapi -> rootSceneId());
-    ensureDefaultSoundsLoadced(gameapi -> rootSceneId());
     ensureMixedSoundsLoaded(gameapi -> rootSceneId());
     
     gametypeSystem = createGametypes();

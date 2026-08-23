@@ -52,10 +52,6 @@ MovementParams getMovementParams(std::string name){
   moveParams.physicsMass = floatFromFirstSqlResult(result, 8);
   moveParams.physicsRestitution = floatFromFirstSqlResult(result, 4);
 
-  moveParams.jumpSound = result.at(0).at(9);
-  moveParams.landSound = result.at(0).at(10);
-  moveParams.moveSound = result.at(0).at(13);
-
   modlog("movement - load params - jump height", std::string("profile - ") + name + ", jump height = " + std::to_string(moveParams.jumpHeight));
 
   return moveParams;
@@ -70,13 +66,11 @@ void loadMovementCore(std::string& coreName){
 
   MovementCore movementCore { .name = coreName };
   movementCore.moveParams = getMovementParams(coreName);
-  ensureSoundsLoaded(gameapi -> rootSceneId(), movementCore.moveParams.jumpSound, movementCore.moveParams.landSound, movementCore.moveParams.moveSound);
   movementCores[coreName] = movementCore;
 }
 
 void removeAllMovementCores(){
   movementCores = {};
-  ensureSoundsUnloaded(gameapi -> rootSceneId());
 }
 
 bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bool force = false){

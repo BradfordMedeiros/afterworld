@@ -301,7 +301,6 @@ void onRemoveArcadeObj(objid id){
 	  std::string textureName = arcadeToTexture.at(id);
  	  gameapi -> freeTexture(textureName, id);
 	  maybeRemoveArcadeType(id);
-	  unloadManagedSounds(id);
 	  unloadManagedTexturesLoaded(id);
 	  arcadeToTexture.erase(id);
 }

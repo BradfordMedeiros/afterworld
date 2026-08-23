@@ -658,7 +658,7 @@ void maybeTriggerActivation(objid id, std::optional<int> mask){
 			auto sceneId = gameapi -> listSceneId(id);
 	 		auto activationPosition = gameapi -> getGameObjectPos(id, true, "[gamelogic] maybeTriggerActivation");
 
-		  playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
+		  //playGameplayClipByIdCenter(getManagedSounds().explosionSoundObjId.value(), std::nullopt, false);
 			emitElectric(activationPosition);
   		setGameObjectTint(id, glm::vec4(0.6f, 0.6f, 0.6f, 1.f));
 
