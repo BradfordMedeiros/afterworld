@@ -1,63 +1,16 @@
-#ifndef MOD_AFTERWORLD_WEAPON_CORE
-#define MOD_AFTERWORLD_WEAPON_CORE
+#pragma once 
 
 #include <string>
 #include <vector>
+#include "./weapondata.h"
 #include "../../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../../util.h"
 #include "../../resources/materials.h"
 #include "../../resources/layer.h"
 #include "../../resources/sound.h"
 
-struct WeaponParams {
-  // gun intrinsic stuff
-  std::string name;
-  float firingRate;
-  bool canHold;
-  bool isIronsight;
-  bool isRaycast;
 
-  float minBloom;
-  float totalBloom;
-  float bloomLength;
-
-  int totalAmmo;
-
-  // model specific
-  float recoilLength;
-  float recoilPitchRadians;
-  glm::vec3 recoilTranslate;
-  glm::vec3 recoilZoomTranslate;
-
-  std::optional<std::string> fireAnimation;
-  std::optional<std::string> idleAnimation;
-  glm::vec3 initialGunPos;
-  glm::quat initialGunRot;
-  glm::vec4 initialGunRotVec4;
-  glm::quat ironSightAngle;
-  glm::vec3 ironsightOffset;
-
-  glm::vec3 scale;
-  std::string soundpath;
-  std::string modelpath;
-  std::string script;
-
-  std::string muzzleParticleStr;
-  std::string hitParticleStr;
-  std::string projectileParticleStr;
-
-  float damage;
-};
-
-/*
-gunType := registerGunType(name)
-gunType := getGunType(name)
-fireGun(gunType, glm::vec3(fromPos))
-
-gunInstance = createGunInstance(gunType, parent) // actually created the gun model and stuff
-fireGun(gunInstance)*/
 WeaponParams queryWeaponParams(std::string gunName);
-
 
 enum GunAnimation { GUN_RAISED, GUN_LOWERING };
 struct WeaponState {
@@ -131,5 +84,3 @@ GunFireInfo fireGunAndVisualize(GunCore& gunCore, bool holding, bool fireOnce, s
 
 // Sway gun is completely comestic, no effect on gameplay
 void swayGun(GunInstance& weaponValues, bool isGunZoomed, objid playerId, glm::vec2 lookVelocity, glm::vec3 movementVec);
-
-#endif

@@ -35,7 +35,7 @@ BallConfig ballConfig {
 
 static std::string BALL_CONFIG("../afterworld/data/config/ball/ball.json");
 
-BallConfig readBallConfigFromFile(){
+BallConfig parseBallConfigFromFile(){
   BallConfig ballConfig {
     .magnitude = 100.f,
     .torque = 50.f,
@@ -125,7 +125,7 @@ BallConfig& getBallConfig(){
 }
 
 void initBallVehicleConfig(){
-  ballConfig = readBallConfigFromFile(); 
+  ballConfig = parseBallConfigFromFile(); 
 }
 
 VehicleBall doCreateVehicleBall(objid vehicleId, VehicleState& state){

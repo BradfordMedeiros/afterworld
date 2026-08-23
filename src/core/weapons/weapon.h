@@ -1,5 +1,4 @@
-#ifndef MOD_AFTERWORLD_WEAPON
-#define MOD_AFTERWORLD_WEAPON
+#pragma once 
 
 #include <iostream>
 #include <vector>
@@ -69,4 +68,3 @@ void fireGun(Weapons& weapons, objid playerId);
 
 void setShowWeaponModel(bool showModel);
 
-#endif

@@ -91,6 +91,8 @@ AmmoInfo currentAmmoInfo(WeaponEntityState& weaponState, objid inventory){
 }
 
 Weapons createWeapons(){
+  initWeaponsFromConfig();
+  
   Weapons weapons {
     .idToWeapon = {},
   };

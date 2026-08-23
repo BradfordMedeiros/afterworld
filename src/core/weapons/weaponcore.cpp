@@ -93,6 +93,8 @@ void removeAllWeaponCores(){
 
 
 WeaponParams queryWeaponParams(std::string gunName){
+  return getWeaponParamsByGunName(gunName);
+
   auto gunQuery = gameapi -> compileSqlQuery(
     std::string("select modelpath, fireanimation, fire-sound, xoffset-pos, ") +
     "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
