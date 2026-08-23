@@ -1,0 +1,15 @@
+{
+  "firingRate": 50.0,
+  "recoilLength": 0.2,
+  "recoilPitchRadians": 0.0,
+  "canHold": false,
+  "isIronsight": true,
+  "isRaycast": false,
+  "minBloom": 0.0,
+  "totalBloom": 0.05,
+  "bloomLength": 0.5,
+  "totalAmmo": 20,
+  "damage": 20.0,
+  "modelpath": "../gameresources/build/weapons/fork.gltf",
+  "soundpath": "../gameresources/sound/q009/jumppad.ogg"
+}

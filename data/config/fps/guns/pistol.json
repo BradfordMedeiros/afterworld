@@ -1,0 +1,15 @@
+{
+  "firingRate": 0.0,
+  "recoilLength": 0.1,
+  "recoilPitchRadians": -0.2,
+  "canHold": false,
+  "isIronsight": true,
+  "isRaycast": true,
+  "minBloom": 0.0,
+  "totalBloom": 0.01,
+  "bloomLength": 1.0,
+  "totalAmmo": 100,
+  "damage": 100.0,
+  "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
+  "soundpath": "../gameresources/sound/q009/minigun2.ogg"
+}

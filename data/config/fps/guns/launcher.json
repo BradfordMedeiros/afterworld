@@ -1,0 +1,15 @@
+{
+  "firingRate": 200.0,
+  "recoilLength": 0.1,
+  "recoilPitchRadians": -2.0,
+  "canHold": true,
+  "isIronsight": true,
+  "isRaycast": false,
+  "minBloom": 0.0,
+  "totalBloom": 0.05,
+  "bloomLength": 0.5,
+  "totalAmmo": 20,
+  "damage": 20.0,
+  "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
+  "soundpath": "../gameresources/sound/q009/glauncher.ogg"
+}

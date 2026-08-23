@@ -3,11 +3,10 @@
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 std::string readFileOrPackage(std::string filepath);
 
+std::unordered_map<std::string, WeaponParams> weapons;
 
-std::vector<WeaponParams> weaponData;
 
-
-WeaponParams parseWeaponJson(std::string filePath){
+WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
   auto fileContent = readFileOrPackage(filePath);
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
@@ -17,15 +16,8 @@ WeaponParams parseWeaponJson(std::string filePath){
   }
 
   WeaponParams weaponParams {};
-  {
-    auto it = doc.FindMember("name");
-    if (it != doc.MemberEnd() && it -> value.IsString()) {
-      weaponParams.name = it -> value.GetString();
-    }else{
-    	modassert(false, std::string("weapon config must have a name: ") + filePath);
-    }   
-  }
-
+  weaponParams.name = gunName;
+  
   {
     auto it = doc.FindMember("firingRate");
     if (it != doc.MemberEnd() && it -> value.IsFloat()) {
@@ -136,6 +128,11 @@ WeaponParams parseWeaponJson(std::string filePath){
     }  
   }
 
+
+  {
+    weaponParams.scale = glm::vec3(0.5f, -0.25f, -0.75);
+  }
+
   {
   	weaponParams.initialGunPos = glm::vec3(0.5f, -0.25f, -0.75);
   }
@@ -185,12 +182,13 @@ void initWeaponsFromConfig(){
   }
 
   for (auto& gunFile : gunFiles){
-  	parseWeaponJson(gunFile);
+   	auto fileInfo = decomposePath(gunFile);
+  	auto weapon = parseWeaponJson(gunFile, fileInfo.filename);
+  	weapons[fileInfo.filename] = weapon;
   }
 
-  //exit(1);
 }
 
 WeaponParams getWeaponParamsByGunName(std::string gunName){
-	return parseWeaponJson("../afterworld/data/config/fps/guns/shotgun.json");
+	return weapons.at(gunName);
 }

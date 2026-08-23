@@ -1,0 +1,15 @@
+{
+  "firingRate": 100.0,
+  "recoilLength": 0.1,
+  "recoilPitchRadians": -0.2,
+  "canHold": true,
+  "isIronsight": true,
+  "isRaycast": true,
+  "minBloom": 0.0,
+  "totalBloom": 0.01,
+  "bloomLength": 1.0,
+  "totalAmmo": 5,
+  "damage": 20.0,
+  "modelpath": "../gameresources/build/weapons/ak47.gltf",
+  "soundpath": "../gameresources/sound/q009/minigun2.ogg"
+}

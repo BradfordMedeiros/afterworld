@@ -1,0 +1,15 @@
+{
+  "firingRate": 100.0,
+  "recoilLength": 0.1,
+  "recoilPitchRadians": -0.2,
+  "canHold": true,
+  "isIronsight": false,
+  "isRaycast": false,
+  "minBloom": 0.0,
+  "totalBloom": 1.0,
+  "bloomLength": 1.0,
+  "totalAmmo": -1,
+  "damage": 20.0,
+  "modelpath": "",
+  "soundpath": "./res/sounds/silenced-gunshot.wav"
+}
