@@ -7,18 +7,9 @@
 #include "./paths.h"
 
 struct ManagedSounds {
-  std::optional<objid> jumpSoundObjId;
-  std::optional<objid> landSoundObjId;
-  std::optional<objid> moveSoundObjId;
   std::optional<objid> activateSoundObjId;
   std::optional<objid> soundObjId;
   std::optional<objid> explosionSoundObjId;
-  std::optional<objid> hitmarkerSoundObjId;
-  std::optional<objid> teleportObjId;
-
-  std::optional<objid> balljumpObjId;
-  std::optional<objid> powerupObjId;
-  std::optional<objid> rollObjId;
 
   std::unordered_map<objid, std::vector<objid>> sceneIdToSounds;
   std::unordered_map<objid, std::vector<objid>> sceneIdToTextures;

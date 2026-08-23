@@ -87,9 +87,8 @@ bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bo
     movementState.newVelocity += impulse;
     movementState.changedYVelocity = true;
 
-    if (getManagedSounds().jumpSoundObjId.has_value()){
-      playMixedSound(getSymbol("fps/jump"), std::nullopt);
-    }
+    playMixedSound(getSymbol("fps/jump"), std::nullopt);
+    
     return true;
   }
   if (movementState.inWater){
@@ -612,7 +611,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
 
-  if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && getManagedSounds().moveSoundObjId.has_value() && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
+  if (glm::length(currPos - movementState.lastMoveSoundPlayLocation) > moveParams.moveSoundDistance && isGrounded && ((currTime - movementState.lastMoveSoundPlayTime) > moveParams.moveSoundMintime)){
     // move-sound-distance:STRING move-sound-mintime:STRING
     std::cout << "should play move clip" << std::endl;
     playMixedSound(getSymbol("fps/walk"), std::nullopt);

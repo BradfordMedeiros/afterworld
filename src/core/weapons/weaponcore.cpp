@@ -33,7 +33,7 @@ void loadWeaponCore(std::string& coreName, objid sceneId){
     return;
   }
 
-  auto weaponParams = queryWeaponParams(coreName);
+  auto weaponParams = getWeaponParamsByGunName(coreName);
   WeaponCore weaponCore { };
   weaponCore.weaponParams = weaponParams;
   if (weaponParams.soundpath != ""){
@@ -92,81 +92,6 @@ void removeAllWeaponCores(){
 }
 
 
-WeaponParams queryWeaponParams(std::string gunName){
-  return getWeaponParamsByGunName(gunName);
-
-  auto gunQuery = gameapi -> compileSqlQuery(
-    std::string("select modelpath, fireanimation, fire-sound, xoffset-pos, ") +
-    "yoffset-pos, zoffset-pos, xrot, yrot, zrot, xscale, yscale, zscale, " + 
-    "firing-rate, hold, raycast, ironsight, iron-xoffset-pos, iron-yoffset-pos, " + 
-    "iron-zoffset-pos, particle, hit-particle, recoil-length, recoil-angle, " + 
-    "recoil, recoil-zoom, projectile, bloom, script, fireanimation, idleanimation, bloom-length, minbloom, ironsight-rot, ammo, damage " + 
-    "from guns where name = ?",
-    { gunName }
-  );
-
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(gunQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-
-  modassert(result.size() > 0, "no gun named: " + gunName);
-  modassert(result.size() == 1, "more than one gun named: " + gunName);
-  modlog("weapons", "gun: result: " + print(result.at(0)));
-
-	WeaponParams weaponParams {};
-  weaponParams.name = gunName;
-  weaponParams.firingRate = floatFromFirstSqlResult(result, 12);
-  weaponParams.recoilLength = floatFromFirstSqlResult(result, 21);
-
-  weaponParams.recoilPitchRadians = floatFromFirstSqlResult(result, 22);
-  weaponParams.recoilTranslate = vec3FromFirstSqlResult(result, 23);
-  weaponParams.recoilZoomTranslate = vec3FromFirstSqlResult(result, 24);
-  weaponParams.canHold = boolFromFirstSqlResult(result, 13);
-  weaponParams.isIronsight = boolFromFirstSqlResult(result, 15);
-  weaponParams.isRaycast = boolFromFirstSqlResult(result, 14);
-  weaponParams.ironsightOffset = vec3FromFirstSqlResult(result, 16, 17, 18);
-  weaponParams.minBloom = floatFromFirstSqlResult(result, 31);
-  weaponParams.totalBloom = floatFromFirstSqlResult(result, 26);
-  weaponParams.bloomLength = floatFromFirstSqlResult(result, 30);
-  weaponParams.totalAmmo = intFromFirstSqlResult(result, 33);
-  weaponParams.damage = floatFromFirstSqlResult(result, 34);
-
-  auto fireAnimation = strFromFirstSqlResult(result, 28);
-  weaponParams.fireAnimation = std::nullopt;
-  if(fireAnimation != ""){
-    weaponParams.fireAnimation = fireAnimation;
-  }
-
-  auto idleAnimation = strFromFirstSqlResult(result, 29);
-  weaponParams.idleAnimation = std::nullopt;
-  if (idleAnimation != ""){
-    weaponParams.idleAnimation = idleAnimation;;
-  }
-  
-
-  auto gunpos = vec3FromFirstSqlResult(result, 3, 4, 5);
-  weaponParams.initialGunPos = gunpos;
-
-  auto rot3 = vec3FromFirstSqlResult(result, 6, 7, 8);
-  auto rot4 = glm::vec4(rot3.x, rot3.y, rot3.z, 0.f);
-  weaponParams.initialGunRotVec4 = rot4;
-  weaponParams.initialGunRot = parseQuat(rot4);
-  weaponParams.scale = vec3FromFirstSqlResult(result, 9, 10, 11);
-
-  weaponParams.ironSightAngle = result.at(0).at(32) == "" ? weaponParams.initialGunRot : quatFromFirstSqlResult(result, 32);
-
-  weaponParams.soundpath = strFromFirstSqlResult(result, 2);
-  weaponParams.modelpath = strFromFirstSqlResult(result, 0);
-  weaponParams.script = strFromFirstSqlResult(result, 27);
-
-  weaponParams.muzzleParticleStr = strFromFirstSqlResult(result, 19);
-  weaponParams.hitParticleStr = strFromFirstSqlResult(result, 20);
-  weaponParams.projectileParticleStr = strFromFirstSqlResult(result, 25);
-
-
-  return weaponParams;
-}
-
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
 objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName, std::function<objid(objid)> getWeaponParentId){
   std::unordered_map<std::string, AttributeValue> attrAttributes = { 
@@ -177,9 +102,7 @@ objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid pare
     { "scale", weaponParams.scale },
     //{ "tint", glm::vec4(1.f, 1.f, 1.f, 0.4f) },
   };
-  if (weaponParams.script != ""){
-    attrAttributes["script"] = weaponParams.script;
-  }
+ 
   GameobjAttributes attr {
     .attr = attrAttributes,
   };
@@ -224,37 +147,6 @@ std::optional<objid> createThirdPersonWeaponInstance(WeaponParams& weaponParams,
   gameapi -> makeParent(gunId.value(), entityHandId.value());
   return gunId.value();
 
-}
-
-void saveGunTransform(GunInstance& weaponValues){
-  debugAssertForNow(false, "bad code - cannot get raw position / etc since ironsights mean this needs to subtract by initial offset");
-
-  if (weaponValues.gunId.has_value()){
-    auto gunId = weaponValues.gunId.value();
-    auto gun = weaponValues.gunCore.weaponCore -> weaponParams.name;
-
-    auto attrHandle = getAttrHandle(gunId);
-    auto position = getVec3Attr(attrHandle, "position").value();  
-    auto scale = getVec3Attr(attrHandle, "scale").value();
-    auto rotation = getVec4Attr(attrHandle, "rotation").value();
-
-    modlog("weapons", "save gun, name = " + weaponValues.gunCore.weaponCore -> weaponParams.name + ",  pos = " + print(position) + ", scale = " + print(scale) + ", rotation = " + print(rotation));
-
-    auto updateQuery = gameapi -> compileSqlQuery(
-      std::string("update guns set ") +
-        "xoffset-pos = " + serializeFloat(position.x) + ", " +
-        "yoffset-pos = " + serializeFloat(position.y) + ", " +
-        "zoffset-pos = " + serializeFloat(position.z) + ", " + 
-        "xrot = " + serializeFloat(rotation.x) + ", " +
-        "yrot = " + serializeFloat(rotation.y) + ", " +
-        "zrot = " + serializeFloat(rotation.z) + 
-        " where name = " + gun,
-        {}
-    );
-    bool validSql = false;
-    auto result = gameapi -> executeSqlQuery(updateQuery, &validSql);
-    modassert(validSql, "error executing sql query");
-  }
 }
 
 GunCore createGunCoreInstance(std::string gun, objid sceneId){

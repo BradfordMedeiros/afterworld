@@ -3,14 +3,9 @@
 extern CustomApiBindings* gameapi;
 
 ManagedSounds sounds {
-  .jumpSoundObjId = std::nullopt,
-  .landSoundObjId = std::nullopt,
-  .moveSoundObjId = std::nullopt,
   .activateSoundObjId = std::nullopt,
   .soundObjId = std::nullopt,
   .explosionSoundObjId = std::nullopt,
-  .hitmarkerSoundObjId = std::nullopt,
-  .teleportObjId = std::nullopt,
   .sceneIdToSounds = {},
   .sceneIdToTextures = {},
 };
@@ -123,63 +118,9 @@ void ensureDefaultSoundsLoadced(objid sceneId){
     sounds.explosionSoundObjId = createSound(sceneId, ("&code-explosion") + uniqueNameSuffix(), explosionClip, false);
   }
 
-
-  std::string hitmarkerClip = paths::HITMARKER;
-  if (hitmarkerClip != ""){
-    if (sounds.hitmarkerSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.hitmarkerSoundObjId.value());
-    }
-    sounds.hitmarkerSoundObjId = createSound(sceneId, ("&code-hitmarker") + uniqueNameSuffix(), hitmarkerClip, false);
-  }
-
-  std::string teleportClip = paths::TELEPORT_SOUND;
-  if (teleportClip != ""){
-    if (sounds.teleportObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.teleportObjId.value());
-    }
-    sounds.teleportObjId = createSound(sceneId, ("&code-teleport") + uniqueNameSuffix(), teleportClip, false);
-  }
-
-  //////// Ball Game Sounds, probably should have a way to do this dynamically
-  if (sounds.balljumpObjId.has_value()){
-    gameapi -> removeByGroupId(sounds.balljumpObjId.value());
-  }
-  sounds.balljumpObjId = createSound(sceneId, ("&code-balljump") + uniqueNameSuffix(), teleportClip, false);
-
-  if (sounds.powerupObjId.has_value()){
-    gameapi -> removeByGroupId(sounds.powerupObjId.value());
-  }
-  sounds.powerupObjId = createSound(sceneId, ("&code-powerup") + uniqueNameSuffix(), teleportClip, false);
-
-  if (sounds.rollObjId.has_value()){
-    gameapi -> removeByGroupId(sounds.rollObjId.value());
-  }
-  sounds.rollObjId = createSound(sceneId, ("&code-powerup") + uniqueNameSuffix(), teleportClip, false);
-
-  //////////////////////////////////////////////////////////////////////////////
-
 }
 
 void ensureSoundsLoaded(objid sceneId, std::string jumpClip, std::string landClip, std::string moveClip){
-  if (jumpClip != ""){
-    if (sounds.jumpSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.jumpSoundObjId.value());
-    }
-    sounds.jumpSoundObjId = createSound(sceneId, std::string("&code-movement-jump") + uniqueNameSuffix(), jumpClip, false);    
-  }
-  if (landClip != ""){
-    if (sounds.landSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.landSoundObjId.value());
-    }
-    sounds.landSoundObjId = createSound(sceneId, ("&code-movement-land") + uniqueNameSuffix(), landClip, false);
-  }
-
-  if (moveClip != ""){
-    if (sounds.moveSoundObjId.has_value()){
-      gameapi -> removeByGroupId(sounds.moveSoundObjId.value());
-    }
-    sounds.moveSoundObjId = createSound(sceneId, ("&code-move") + uniqueNameSuffix(), moveClip, false);
-  }
 }
 
 void ensureSoundUnloaded(objid sceneId, std::optional<objid>* sound){  // this should just centrally loading into a scene, and then can detect
@@ -190,18 +131,13 @@ void ensureSoundUnloaded(objid sceneId, std::optional<objid>* sound){  // this s
 				gameapi -> removeByGroupId(sound -> value());
 			}
 		}
-		sounds.jumpSoundObjId = std::nullopt;
+    *sound = std::nullopt;
 	}
 }
 void ensureSoundsUnloaded(objid sceneId){  // this should just centrally loading into a scene, and then can detect
-	ensureSoundUnloaded(sceneId, &sounds.jumpSoundObjId);
-	ensureSoundUnloaded(sceneId, &sounds.landSoundObjId);
-	ensureSoundUnloaded(sceneId, &sounds.moveSoundObjId);
   ensureSoundUnloaded(sceneId, &sounds.activateSoundObjId);
   ensureSoundUnloaded(sceneId, &sounds.soundObjId);
   ensureSoundUnloaded(sceneId, &sounds.explosionSoundObjId);
-  ensureSoundUnloaded(sceneId, &sounds.hitmarkerSoundObjId);
-  ensureSoundUnloaded(sceneId, &sounds.teleportObjId);
 }
 
 void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly

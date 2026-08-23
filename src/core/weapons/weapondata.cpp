@@ -5,6 +5,39 @@ std::string readFileOrPackage(std::string filepath);
 
 std::unordered_map<std::string, WeaponParams> weapons;
 
+std::optional<glm::vec3> parseVec3(rapidjson::Value& object, const char* field){
+  if (!object.IsObject()){
+    return std::nullopt;
+  }
+  if (!object.HasMember(field)){
+    return std::nullopt;
+  }
+  auto& value = object[field];
+  if (!value.IsArray() || value.Size() != 3){
+    return std::nullopt;
+  }
+  if (!value[0].IsNumber() || !value[1].IsNumber() || !value[2].IsNumber()){
+    return std::nullopt;
+  }
+  return glm::vec3(value[0].GetFloat(), value[1].GetFloat(), value[2].GetFloat());
+}
+
+std::optional<glm::vec4> parseVec4(rapidjson::Value& object, const char* field){
+  if (!object.IsObject()){
+    return std::nullopt;
+  }
+  if (!object.HasMember(field)){
+    return std::nullopt;
+  }
+  auto& value = object[field];
+  if (!value.IsArray() || value.Size() != 4){
+    return std::nullopt;
+  }
+  if (!value[0].IsNumber() || !value[1].IsNumber() || !value[2].IsNumber() || !value[3].IsNumber()){
+    return std::nullopt;
+  }
+  return glm::vec4(value[0].GetFloat(), value[1].GetFloat(), value[2].GetFloat(), value[3].GetFloat());
+}
 
 WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
   auto fileContent = readFileOrPackage(filePath);
@@ -41,15 +74,17 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
 
 
   {
-    weaponParams.recoilTranslate = glm::vec3(0.f, 0.f, 0.f);
-    //auto it = doc.FindMember("recoilTranslate");
-    //if (it != doc.MemberEnd() && it -> value.IsFloat()) {
-    //  weaponParams.recoilPitchRadians = it -> value.GetFloat();
-    //} 
+    auto recoilTranslate = parseVec3(doc, "recoilTranslate");
+    if (recoilTranslate.has_value()){
+      weaponParams.recoilTranslate = recoilTranslate.value();
+    }
   }
 
   {
-  	  weaponParams.recoilZoomTranslate = glm::vec3(0.f, 0.f, 1.f);
+    auto recoilZoomTranslate = parseVec3(doc, "recoilZoomTranslate");
+    if (recoilZoomTranslate.has_value()){
+      weaponParams.recoilZoomTranslate = recoilZoomTranslate.value();
+    }
   }
 
   {
@@ -74,10 +109,13 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
   }
 
   {
-	  weaponParams.ironsightOffset = glm::vec3(-2.f, 0.f, 0.f);
-
+    auto ironsightOffset = parseVec3(doc, "ironsightOffset");
+    if (ironsightOffset.has_value()){
+      weaponParams.ironsightOffset = ironsightOffset.value();
+    }
   }
-  //auto fileContent = readFileOrPackage(BALL_CONFIG);
+
+
 
   {
     auto it = doc.FindMember("minBloom");
@@ -130,36 +168,77 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
 
 
   {
-    weaponParams.scale = glm::vec3(0.5f, -0.25f, -0.75);
+    auto scale = parseVec3(doc, "scale");
+    if (scale.has_value()){
+      weaponParams.scale = scale.value();
+    }
   }
 
   {
-  	weaponParams.initialGunPos = glm::vec3(0.5f, -0.25f, -0.75);
+    auto initialGunPos = parseVec3(doc, "initialGunPos");
+    if (initialGunPos.has_value()){
+      weaponParams.initialGunPos = initialGunPos.value();
+    }else {
+      weaponParams.initialGunPos = glm::vec3(0.5f, -0.25f, -0.75f);
+    }
   }
 
   {
-  	auto rot4 = glm::vec4(0.1f, 0.f, -1.f, 0.f);
-  	weaponParams.initialGunRotVec4 = rot4;
-  	weaponParams.initialGunRot = parseQuat(rot4);
+    auto rot = parseVec4(doc, "gunrotation");
+    if (rot.has_value()){
+      weaponParams.initialGunRotVec4 = rot.value();
+      weaponParams.initialGunRot = parseQuat(rot.value());      
+    }else{
+      auto rot4 = glm::vec4(0.1f, 0.f, -1.f, 0.f);
+      weaponParams.initialGunRotVec4 = rot4;
+      weaponParams.initialGunRot = parseQuat(rot4); 
+    }
+
   }
 
   {
- 	 weaponParams.scale = glm::vec3(1.f, 1.f, 1.f);
+    auto rot = parseVec4(doc, "ironSightAngle");
+    if (rot.has_value()){
+      weaponParams.ironSightAngle = parseQuat(rot.value());      
+    }
   }
 
-/*
-  auto fireAnimation = strFromFirstSqlResult(result, 28);
-  weaponParams.fireAnimation = std::nullopt;
-  if(fireAnimation != ""){
-    weaponParams.fireAnimation = fireAnimation;
+  
+
+  {
+    auto it = doc.FindMember("fireAnimation");
+    if (it != doc.MemberEnd() && it -> value.IsString()) {
+      weaponParams.fireAnimation = it -> value.GetString();
+    }    
   }
 
-  auto idleAnimation = strFromFirstSqlResult(result, 29);
-  weaponParams.idleAnimation = std::nullopt;
-  if (idleAnimation != ""){
-    weaponParams.idleAnimation = idleAnimation;;
+  {
+    auto it = doc.FindMember("idleAnimation");
+    if (it != doc.MemberEnd() && it -> value.IsString()) {
+      weaponParams.idleAnimation = it -> value.GetString();
+    }    
   }
-  */
+
+  {
+    auto it = doc.FindMember("muzzleParticle");
+    if (it != doc.MemberEnd() && it->value.IsString()) {
+      weaponParams.muzzleParticleStr = it->value.GetString();
+    }
+  }
+  {
+    auto it = doc.FindMember("hitParticle");
+    if (it != doc.MemberEnd() && it->value.IsString()) {
+      weaponParams.hitParticleStr = it->value.GetString();
+    }
+  }
+  {
+    auto it = doc.FindMember("projectileParticle");
+    if (it != doc.MemberEnd() && it->value.IsString()) {
+      weaponParams.projectileParticleStr = it->value.GetString();
+    }
+  }
+
+  std::cout << "projectile: " << weaponParams.projectileParticleStr << std::endl;
 
   return weaponParams;
 }

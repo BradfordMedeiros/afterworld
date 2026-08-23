@@ -1192,11 +1192,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    if (key == "save-gun"){
-      ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
-      saveGunTransform(getWeaponState(weapons, controlledPlayer.entityId.value()).weaponValues);
-    }
-
     if (key == "reload-config:levels"){
       sceneManagement.levels = loadLevels();
       return;

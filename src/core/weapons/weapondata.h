@@ -32,7 +32,6 @@ struct WeaponParams {
   glm::vec3 scale = glm::vec3(1.f, 1.f, 1.f);
   std::string soundpath;
   std::string modelpath;
-  std::string script;
 
   std::string muzzleParticleStr;
   std::string hitParticleStr;
