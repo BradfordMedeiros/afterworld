@@ -87,44 +87,57 @@ void renderMovementPanel(bool includePanel){
   } 
 }
 
+void renderTraitsPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Traits Gameplay");
+  }
+
+  auto& movementParams = movementParamsByName("default");
+  /*
+  struct MovementParams {
+  float moveSpeed = 10.f;
+  float moveSpeedAir = 10.f;
+  float moveSpeedWater = 10.f;
+  float jumpHeight = 5.f;
+  float maxAngleUp = -1.5f;
+  float maxAngleDown = 1.f;
+  float moveSoundDistance = 0.2f;
+  float moveSoundMintime = 0.2f;
+  float groundAngle = 50.f;
+  glm::vec3 gravity = glm::vec3(0.f, -9.81f, 0.f);
+  bool canCrouch = true;
+  bool moveVertical = false;
+  float crouchSpeed = 30.f;
+  float crouchScale = 0.3f;
+  float crouchDelay = 0.f;
+  float friction = 0.f;
+  float crouchFriction = 0.f;
+  float physicsMass = 5.f;
+  float physicsRestitution = 0.f;
+};
+
+*/
+  ImGui::SliderFloat("Move Speed", &movementParams.moveSpeed, 0.f, 100.f);
+  ImGui::SliderFloat("Move Speed Air", &movementParams.moveSpeedAir, 0.f, 100.f);
+  ImGui::SliderFloat("Move Speed Water", &movementParams.moveSpeedWater, 0.f, 100.f);
+  ImGui::SliderFloat("Jump Height", &movementParams.jumpHeight, 0.f, 100.f);
+
+  ImGui::SliderFloat("friction", &movementParams.friction, 0.f, 0.1f);
+  ImGui::SliderFloat("crouchFriction", &movementParams.crouchFriction, 0.f, 100.f);
+  ImGui::SliderFloat("physicsMass", &movementParams.physicsMass, 1.f, 100.f);
+
+
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}
+
+
 void renderWeaponsPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Weapons Gameplay");
   }
-
-/*
-    .title = "WEAPONS",
-    .configFields = {
-      DockSelectConfig {
-        .selectOptions = SelectOptions {
-          .getOptions = []() -> std::vector<std::string>& {
-            static std::vector<std::string> options = listGuns();
-            return options;
-          },
-          .toggleExpanded = [](bool expanded) -> void {
-            weaponsExpanded = expanded;
-          },
-          .onSelect = [](int index, std::string& gun) -> void {
-            weaponSelectIndex = index;
-            weaponsExpanded = false;
-            selectedGun = gun;
-            modlog("editor gun", std::string("selected gun: ") + gun);
-          },
-          .currentSelection = []() -> int { return weaponSelectIndex; },
-          .isExpanded = []() -> bool { return weaponsExpanded; },
-        }
-      },
-      createSimpleGunCheckbox("Ironsight", "ironsight"),
-      createSimpleGunCheckbox("Raycast", "raycast"),
-      createSimpleGunCheckbox("Hold", "hold"),
-      createSimpleTextboxNumeric("guns","Bloom", "bloom"),
-      createSimpleTextboxNumeric("guns","Min Bloom", "minbloom"),
-      createSimpleTextboxNumeric("guns","Bloom Length", "bloom-length"),
-      createSimpleTextboxNumeric("guns","Horizontal Sway", "bloom-length"),
-      createSimpleTextboxNumeric("guns","Vertical Sway", "bloom-length"),
-    }
-  },
-  */
 
   {
     if (ImGui::Button("Rename")){
@@ -893,6 +906,10 @@ void initImGuiGameUi(){
 
     registerWidget("FPS - Weapons", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderWeaponsPanel(includePanel);
+    });       
+
+    registerWidget("FPS - Traits", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderTraitsPanel(includePanel);
     });       
 
     registerWidget("FPS - Spawn", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {

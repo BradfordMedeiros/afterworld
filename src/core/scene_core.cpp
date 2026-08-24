@@ -13,12 +13,7 @@ std::vector<int> getVehicleIds(){
 }
 
 float querySelectDistance(){
-  auto traitQuery = gameapi -> compileSqlQuery("select select-distance from traits where profile = ?", { "default" });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(traitQuery, &validSql);
-  modassert(validSql, "error executing sql query");
-  float selectDistance = floatFromFirstSqlResult(result, 0);
-  return selectDistance;
+  return 100.f;
 }
 
 bool canExitVehicleValue = true;

@@ -8,7 +8,7 @@ std::optional<glm::vec3> parseVec3(rapidjson::Value& object, const char* field);
 
 struct MovementCore {
   std::string name;
-  MovementParams moveParams;
+  MovementParams* moveParams;
 };
 
 std::unordered_map<std::string, MovementCore> movementCores = {};
@@ -17,7 +17,7 @@ MovementParams* findMovementCore(std::string& name){
   for (auto &[_, movementCore] : movementCores){
     if (movementCore.name == name){
       //modlog("movement, comparing", name + ", to " + movementCore.name);
-      return &movementCore.moveParams;
+      return movementCore.moveParams;
     }
   }
   return NULL;
@@ -196,6 +196,10 @@ void initMovementCoreFromConfig(){
 
 }
 
+MovementParams& movementParamsByName(std::string name){
+  return traits.at(name);
+}
+
 void loadMovementCore(std::string& coreName){
   modlog("movement", std::string("load movement core: ") + coreName);
   if (findMovementCore(coreName)){
@@ -204,7 +208,7 @@ void loadMovementCore(std::string& coreName){
   }
 
   MovementCore movementCore { .name = coreName };
-  movementCore.moveParams = traits.at(coreName);
+  movementCore.moveParams = &traits.at(coreName);
   movementCores[coreName] = movementCore;
 }
 
@@ -718,7 +722,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
   bool enableFriction = true;
-  float groundFriction  = 0.008f;
+  float groundFriction  = moveParams.friction;;
   float airFriction = 0.f;
   if (enableFriction){
     float frictionAmount = isWalking ? 0.0f : groundFriction; //0.01f;
