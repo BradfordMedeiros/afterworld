@@ -183,6 +183,8 @@ ControlParams createControlParams(int playerPort){
   return controlParams;
 }
 Movement createMovement(){
+  initMovementCoreFromConfig();
+  
   Movement movement {};
   movement.disabledMeshes = {};
   movement.controlParams = { createControlParams(0) };

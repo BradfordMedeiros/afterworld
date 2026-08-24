@@ -4,6 +4,7 @@ extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
 std::optional<bool> isEntityInShootingMode(objid id);
 std::optional<glm::vec3> getImpulseThisFrame(objid id);
+std::optional<glm::vec3> parseVec3(rapidjson::Value& object, const char* field);
 
 struct MovementCore {
   std::string name;
@@ -22,39 +23,177 @@ MovementParams* findMovementCore(std::string& name){
   return NULL;
 }
 
-MovementParams getMovementParams(std::string name){
-  auto traitsQuery = gameapi -> compileSqlQuery(
-    "select speed, speed-air, jump-height, gravity, restitution, friction, max-angleup, max-angledown, mass, jump-sound, land-sound, dash, dash-sound, move-sound, move-sound-distance, move-sound-mintime, ground-angle, gravity-water, crouch, crouch-speed, crouch-scale, crouch-delay, crouch-friction, speed-water, move-vertical from traits where profile = " + name,
-    {}
-  );
-  bool validTraitSql = false;
-  auto result = gameapi -> executeSqlQuery(traitsQuery, &validTraitSql);
-  modassert(validTraitSql, "error executing sql query");
+
+std::unordered_map<std::string, MovementParams> traits;
+
+
+
+MovementParams parseTraitJson(std::string& filePath, std::string& name){
+  auto fileContent = readFileOrPackage(filePath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+
+  if (doc.HasParseError()){
+    std::cout << "error parsing trait file: " << filePath
+              << " (" << fileContent << ")" << std::endl;
+    exit(1);
+  }
 
   MovementParams moveParams {};
-  moveParams.moveSpeed = floatFromFirstSqlResult(result, 0);
-  moveParams.moveSpeedAir = floatFromFirstSqlResult(result, 1);
-  moveParams.moveSpeedWater = floatFromFirstSqlResult(result, 23);
-  moveParams.jumpHeight = floatFromFirstSqlResult(result, 2);
-  moveParams.maxAngleUp = floatFromFirstSqlResult(result, 6);
-  moveParams.maxAngleDown = floatFromFirstSqlResult(result, 7);
-  moveParams.moveSoundDistance = floatFromFirstSqlResult(result, 14);
-  moveParams.moveSoundMintime = floatFromFirstSqlResult(result, 15);
-  moveParams.groundAngle = glm::cos(glm::radians(floatFromFirstSqlResult(result, 16)));
-  moveParams.gravity = glm::vec3(0.f, floatFromFirstSqlResult(result, 3), 0.f);
-  moveParams.canCrouch = boolFromFirstSqlResult(result, 18);
-  moveParams.moveVertical = boolFromFirstSqlResult(result, 24);
-  moveParams.crouchSpeed = floatFromFirstSqlResult(result, 19);
-  moveParams.crouchScale = floatFromFirstSqlResult(result, 20);
-  moveParams.crouchDelay = floatFromFirstSqlResult(result, 21);
-  moveParams.friction = floatFromFirstSqlResult(result, 5);
-  moveParams.crouchFriction = floatFromFirstSqlResult(result, 22);
-  moveParams.physicsMass = floatFromFirstSqlResult(result, 8);
-  moveParams.physicsRestitution = floatFromFirstSqlResult(result, 4);
 
-  modlog("movement - load params - jump height", std::string("profile - ") + name + ", jump height = " + std::to_string(moveParams.jumpHeight));
+  {
+    auto it = doc.FindMember("moveSpeed");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.moveSpeed = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("moveSpeedAir");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.moveSpeedAir = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("moveSpeedWater");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.moveSpeedWater = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("jumpHeight");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.jumpHeight = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("maxAngleUp");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.maxAngleUp = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("maxAngleDown");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.maxAngleDown = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("moveSoundDistance");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.moveSoundDistance = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("moveSoundMintime");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.moveSoundMintime = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("groundAngle");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.groundAngle = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto gravity = parseVec3(doc, "gravity");
+    if (gravity.has_value()) {
+      moveParams.gravity = gravity.value();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("canCrouch");
+    if (it != doc.MemberEnd() && it->value.IsBool()) {
+      moveParams.canCrouch = it->value.GetBool();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("moveVertical");
+    if (it != doc.MemberEnd() && it->value.IsBool()) {
+      moveParams.moveVertical = it->value.GetBool();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("crouchSpeed");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.crouchSpeed = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("crouchScale");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.crouchScale = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("crouchDelay");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.crouchDelay = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("friction");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.friction = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("crouchFriction");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.crouchFriction = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("physicsMass");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.physicsMass = it->value.GetFloat();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("physicsRestitution");
+    if (it != doc.MemberEnd() && it->value.IsFloat()) {
+      moveParams.physicsRestitution = it->value.GetFloat();
+    }
+  }
 
   return moveParams;
+}
+
+void initMovementCoreFromConfig(){
+  auto traitFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/fps/traits", { "json" });
+  
+  for (auto& traitFile : traitFiles){
+    auto fileInfo = decomposePath(traitFile);
+    auto relativeDir = relativePath("../afterworld/data/config/fps/traits", fileInfo.dirPath, ".");
+    auto relativeDirVec = split(relativeDir, '/');
+    std::cout << print(fileInfo) << std::endl;
+    std::cout << relativeDir << ", " << print(relativeDirVec) << std::endl;
+  }
+
+  for (auto& traitFile : traitFiles){
+    auto fileInfo = decomposePath(traitFile);
+    auto trait = parseTraitJson(traitFile, fileInfo.filename);
+    traits[fileInfo.filename] = trait;
+  }
+
 }
 
 void loadMovementCore(std::string& coreName){
@@ -65,7 +204,7 @@ void loadMovementCore(std::string& coreName){
   }
 
   MovementCore movementCore { .name = coreName };
-  movementCore.moveParams = getMovementParams(coreName);
+  movementCore.moveParams = traits.at(coreName);
   movementCores[coreName] = movementCore;
 }
 

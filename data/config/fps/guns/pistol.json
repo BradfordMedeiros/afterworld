@@ -1,15 +1,35 @@
 {
-  "firingRate": 0.0,
-  "recoilLength": 0.1,
-  "recoilPitchRadians": -0.2,
-  "canHold": false,
-  "isIronsight": true,
-  "isRaycast": true,
-  "minBloom": 0.0,
-  "totalBloom": 0.01,
-  "bloomLength": 1.0,
-  "totalAmmo": 100,
-  "damage": 100.0,
   "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
-  "soundpath": "../gameresources/sound/q009/minigun2.ogg"
+  "soundpath": "../gameresources/sound/q009/minigun2.ogg",
+
+  "initialGunPos": [0.0, -0.440691, -1.5099],
+  "initialGunRot": [0.0, 0.0, 0.0, 0.0],
+  "scale": [1.0, 1.0, 1.0],
+
+  "firingRate": 200.0,
+  "canHold": true,
+  "isRaycast": false,
+  "isIronsight": true,
+
+  "ironsightOffset": [0.0, -0.1, -1.2],
+  "ironSightAngle": [1.0, 0.0, 0.0, 0.0],
+
+  "muzzleParticle": "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:1 1 0.2 0.3;+layer:transparency;duration:0.05;+scale:0.1 0.1 0.1;+position:0 0 1;+texture:./res/textures/trippyflash.png",
+  "hitParticle": "",
+  "projectileParticle": "?greenorb",
+
+  "recoilLength": 0.1,
+  "recoilPitchRadians": -2.0,
+  "recoilTranslate": [0.0, 0.0, 0.4],
+  "recoilZoomTranslate": [0.0, 0.0, 0.6],
+
+  "minBloom": 0.0,
+  "totalBloom": 0.05,
+  "bloomLength": 0.5,
+
+  "totalAmmo": 20,
+  "damage": 20.0,
+
+  "fireAnimation": null,
+  "idleAnimation": null
 }

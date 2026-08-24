@@ -1,0 +1,29 @@
+{
+  "moveSpeed": 0.0,
+  "moveSpeedAir": 0.0,
+  "moveSpeedWater": 0.0,
+
+  "jumpHeight": 0.0,
+
+  "maxAngleUp": 1.0,
+  "maxAngleDown": 1.0,
+
+  "friction": 0.0,
+  "physicsRestitution": 0.0,
+  "physicsMass": 100.0,
+
+  "gravity": [0.0, -9.81, 0.0],
+
+  "moveSoundDistance": 100.0,
+  "moveSoundMintime": 0.0,
+
+  "groundAngle": 50.0,
+
+  "canCrouch": false,
+  "crouchSpeed": 0.0,
+  "crouchScale": 1.0,
+  "crouchDelay": 0.0,
+  "crouchFriction": 0.0,
+
+  "moveVertical": false
+}

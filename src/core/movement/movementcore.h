@@ -9,25 +9,25 @@
 
 
 struct MovementParams {
-  float moveSpeed;
-  float moveSpeedAir;
-  float moveSpeedWater;
-  float jumpHeight;
-  float maxAngleUp;
-  float maxAngleDown;
-  float moveSoundDistance;
-  float moveSoundMintime;
-  float groundAngle;
-  glm::vec3 gravity;
-  bool canCrouch;
-  bool moveVertical;
-  float crouchSpeed;
-  float crouchScale;
-  float crouchDelay;
-  float friction;
-  float crouchFriction;
-  float physicsMass;
-  float physicsRestitution;
+  float moveSpeed = 10.f;
+  float moveSpeedAir = 10.f;
+  float moveSpeedWater = 10.f;
+  float jumpHeight = 5.f;
+  float maxAngleUp = -1.5f;
+  float maxAngleDown = 1.f;
+  float moveSoundDistance = 0.2f;
+  float moveSoundMintime = 0.2f;
+  float groundAngle = 50.f;
+  glm::vec3 gravity = glm::vec3(0.f, -9.81f, 0.f);
+  bool canCrouch = true;
+  bool moveVertical = false;
+  float crouchSpeed = 30.f;
+  float crouchScale = 0.3f;
+  float crouchDelay = 0.f;
+  float friction = 0.f;
+  float crouchFriction = 0.f;
+  float physicsMass = 5.f;
+  float physicsRestitution = 0.f;
 };
 
 struct MovementState {
@@ -74,6 +74,8 @@ struct MovementState {
   std::optional<float> reloading;
   std::optional<float> reloadingLength;
 };
+
+void initMovementCoreFromConfig();
 
 MovementParams* findMovementCore(std::string& name);
 void loadMovementCore(std::string& coreName);
