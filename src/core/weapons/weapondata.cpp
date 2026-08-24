@@ -187,20 +187,17 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
     auto rot = parseVec4(doc, "gunrotation");
     if (rot.has_value()){
       weaponParams.initialGunRotVec4 = rot.value();
-      weaponParams.initialGunRot = parseQuat(rot.value());      
-    }else{
-      auto rot4 = glm::vec4(0.1f, 0.f, -1.f, 0.f);
-      weaponParams.initialGunRotVec4 = rot4;
-      weaponParams.initialGunRot = parseQuat(rot4); 
     }
+    weaponParams.initialGunRot = parseQuat(weaponParams.initialGunRotVec4); 
 
   }
 
   {
     auto rot = parseVec4(doc, "ironSightAngle");
     if (rot.has_value()){
-      weaponParams.ironSightAngle = parseQuat(rot.value());      
+      weaponParams.initialIronSightAngle = rot.value();
     }
+    weaponParams.ironSightAngle = parseQuat(weaponParams.initialIronSightAngle);      
   }
 
   
@@ -238,9 +235,113 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
     }
   }
 
-  std::cout << "projectile: " << weaponParams.projectileParticleStr << std::endl;
-
   return weaponParams;
+}
+
+void saveWeaponJson(std::string gunName){
+  std::string filePath = "../afterworld/data/config/fps/guns/";
+  filePath += gunName + ".json";
+
+
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  std::cout << "saveWeaponJson: " << filePath << std::endl;
+  WeaponParams weaponParams = getWeaponParamsByGunName(gunName);
+
+  doc.AddMember("firingRate", weaponParams.firingRate, allocator);
+  doc.AddMember("canHold", weaponParams.canHold, allocator);
+  doc.AddMember("isIronsight", weaponParams.isIronsight, allocator);
+  doc.AddMember("isRaycast", weaponParams.isRaycast, allocator);
+  doc.AddMember("minBloom", weaponParams.minBloom, allocator);
+  doc.AddMember("totalBloom", weaponParams.totalBloom, allocator);
+  doc.AddMember("bloomLength", weaponParams.bloomLength, allocator);
+  doc.AddMember("totalAmmo", weaponParams.totalAmmo, allocator);
+  doc.AddMember("recoilLength", weaponParams.recoilLength, allocator);
+  doc.AddMember("recoilPitchRadians", weaponParams.recoilPitchRadians, allocator);
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.recoilTranslate.x, allocator);
+    value.PushBack(weaponParams.recoilTranslate.y, allocator);
+    value.PushBack(weaponParams.recoilTranslate.z, allocator);
+    doc.AddMember("recoilTranslate", value, allocator);
+  }
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.recoilZoomTranslate.x, allocator);
+    value.PushBack(weaponParams.recoilZoomTranslate.y, allocator);
+    value.PushBack(weaponParams.recoilZoomTranslate.z, allocator);
+    doc.AddMember("recoilZoomTranslate", value, allocator);
+  }
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.initialGunPos.x, allocator);
+    value.PushBack(weaponParams.initialGunPos.y, allocator);
+    value.PushBack(weaponParams.initialGunPos.z, allocator);
+    doc.AddMember("initialGunPos", value, allocator);
+  }
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.initialGunRotVec4.x, allocator);
+    value.PushBack(weaponParams.initialGunRotVec4.y, allocator);
+    value.PushBack(weaponParams.initialGunRotVec4.z, allocator);
+    value.PushBack(weaponParams.initialGunRotVec4.w, allocator);
+    doc.AddMember("gunrotation", value, allocator);
+  }
+
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.ironsightOffset.x, allocator);
+    value.PushBack(weaponParams.ironsightOffset.y, allocator);
+    value.PushBack(weaponParams.ironsightOffset.z, allocator);
+    doc.AddMember("ironsightOffset", value, allocator);
+  }
+
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.initialIronSightAngle.x, allocator);
+    value.PushBack(weaponParams.initialIronSightAngle.y, allocator);
+    value.PushBack(weaponParams.initialIronSightAngle.z, allocator);
+    value.PushBack(weaponParams.initialIronSightAngle.w, allocator);
+    doc.AddMember("ironSightAngle", value, allocator);
+  }
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.scale.x, allocator);
+    value.PushBack(weaponParams.scale.y, allocator);
+    value.PushBack(weaponParams.scale.z, allocator);
+    doc.AddMember("scale", value, allocator);
+  }
+
+  doc.AddMember("soundpath", rapidjson::Value(weaponParams.soundpath.c_str(), allocator), allocator);
+  doc.AddMember("modelpath", rapidjson::Value(weaponParams.modelpath.c_str(), allocator), allocator);
+  doc.AddMember("muzzleParticle", rapidjson::Value(weaponParams.muzzleParticleStr.c_str(), allocator), allocator);
+  doc.AddMember("hitParticle", rapidjson::Value(weaponParams.hitParticleStr.c_str(), allocator), allocator);
+  doc.AddMember("projectileParticle", rapidjson::Value(weaponParams.projectileParticleStr.c_str(), allocator), allocator);
+  doc.AddMember("damage", weaponParams.damage, allocator);
+
+  if (weaponParams.fireAnimation.has_value()){
+    doc.AddMember("fireAnimation", rapidjson::Value(weaponParams.fireAnimation->c_str(), allocator), allocator);
+  }
+  if (weaponParams.idleAnimation.has_value()){
+    doc.AddMember("idleAnimation", rapidjson::Value(weaponParams.idleAnimation->c_str(), allocator), allocator);
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  auto strValue = buffer.GetString();
+  std::cout << strValue << std::endl;
+  realfiles::saveFile(filePath, strValue);
 }
 
 void initWeaponsFromConfig(){
@@ -268,6 +369,22 @@ void initWeaponsFromConfig(){
 
 }
 
-WeaponParams getWeaponParamsByGunName(std::string gunName){
+WeaponParams& getWeaponParamsByGunName(std::string gunName){
 	return weapons.at(gunName);
+}
+
+std::vector<std::string> getWeaponNames(){
+  std::vector<std::string> values;
+  for (auto& [name, weapon] : weapons){
+    values.push_back(name);
+  }
+  return values;
+}
+
+std::optional<std::string> selectedWeaponName;
+std::optional<std::string> selectedWeapon(){
+  return selectedWeaponName;
+}
+void setSelectedWeapon(std::string gunName){
+  selectedWeaponName = gunName;
 }

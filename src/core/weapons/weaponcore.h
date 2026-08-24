@@ -21,7 +21,7 @@ struct WeaponState {
 
 struct WeaponCore {
   std::string name;
-  WeaponParams weaponParams;
+  WeaponParams* weaponParams;
   std::optional<objid> muzzleParticle;
   std::optional<objid> hitParticles;
   std::optional<objid> projectileParticles;

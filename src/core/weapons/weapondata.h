@@ -25,8 +25,9 @@ struct WeaponParams {
   std::optional<std::string> idleAnimation;
   glm::vec3 initialGunPos = glm::vec3(0.f, 0.f, 0.f);
   glm::quat initialGunRot = glm::identity<glm::quat>();
-  glm::vec4 initialGunRotVec4 = glm::vec4(0.f, 0.f, 0.f, 0.f);
+  glm::vec4 initialGunRotVec4 = glm::vec4(0.f, 0.f, -1.f, 0.f);
   glm::quat ironSightAngle = glm::identity<glm::quat>();
+  glm::vec4 initialIronSightAngle = glm::vec4(0.f, 0.f, -1.f, 0.f);
   glm::vec3 ironsightOffset = glm::vec3(0.f, 0.f, 0.f);
 
   glm::vec3 scale = glm::vec3(1.f, 1.f, 1.f);
@@ -40,6 +41,10 @@ struct WeaponParams {
   float damage = 0.f;
 };
 
-WeaponParams getWeaponParamsByGunName(std::string gunName);
+WeaponParams& getWeaponParamsByGunName(std::string gunName);
+std::vector<std::string> getWeaponNames();
+std::optional<std::string> selectedWeapon();
+void setSelectedWeapon(std::string gunName);
 
 void initWeaponsFromConfig();
+void saveWeaponJson(std::string gunName);

@@ -52,19 +52,6 @@ void renderBallGameplay(bool includePanel){
 }
 
 void renderMovementPanel(bool includePanel){
-
-  /*
-      createSimpleTextboxNumeric("traits", "Speed", "speed", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleTextboxNumeric("traits", "Speed Air", "speed-air", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleTextboxNumeric("traits", "Jump Height", "jump-height", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleTextboxNumeric("traits", "Gravity", "gravity", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleTextboxNumeric("traits", "Mass", "mass", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleTextboxNumeric("traits", "Friction", "friction", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleTextboxNumeric("traits", "Restitution", "restitution", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleCheckbox("traits", "Crouch", "crouch", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "default" }; }),
-      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "default" }; }),
-  */
-
   if (includePanel){
     ImGui::Begin("Movement Gameplay");
   }
@@ -139,60 +126,15 @@ void renderWeaponsPanel(bool includePanel){
     ImGui::Begin("Weapons Gameplay");
   }
 
-  {
-    if (ImGui::Button("Rename")){
-      ImGui::OpenPopup("Rename");
-    }
-  
-    if (ImGui::BeginPopupModal("Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)){
-        std::string name = "";
-        ImGui::InputText("Name", &name);
-        if (ImGui::Button("OK"))
-        {
-            std::cout << "create weapon: " << name << std::endl;
-    
-            ImGui::CloseCurrentPopup();
-        }
-    
-        ImGui::SameLine();
-    
-        if (ImGui::Button("Cancel"))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-    
-        ImGui::EndPopup();
-    }
-  }
-  {
-    if (ImGui::Button("Delete Weapon")){
-      ImGui::OpenPopup("Confirm Delete Weapon");
-    }
-    if (ImGui::BeginPopupModal("Confirm Delete Weapon", nullptr, ImGuiWindowFlags_AlwaysAutoResize)){
-      ImGui::Text("Are you sure?");
-      if (ImGui::Button("OK")){
-          ImGui::CloseCurrentPopup();
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Cancel")){
-          ImGui::CloseCurrentPopup();
-      }
-      ImGui::EndPopup();
-    }
-  }
 
-  std::vector<std::string> weapons {
-    "weapon_one",
-    "weapon_two",
-  };
+  auto allWeapons = getWeaponNames();
+  std::string selectedWeaponName = selectedWeapon().has_value() ? selectedWeapon().value() : "";
 
-  int selectedWeapon = 0;
-
-  if (ImGui::BeginCombo("Weapon", weapons.at(selectedWeapon).c_str())){
-      for (int i = 0; i < weapons.size(); i++){
-          bool selected = (selectedWeapon == i);
-          if (ImGui::Selectable(weapons.at(i).c_str(), selected)){
-             selectedWeapon = i;
+  if (ImGui::BeginCombo("Weapon", selectedWeaponName.c_str())){
+      for (int i = 0; i < allWeapons.size(); i++){
+          bool selected = false;
+          if (ImGui::Selectable(allWeapons.at(i).c_str(), selected)){
+             setSelectedWeapon(allWeapons.at(i));
           }
           if (selected){
             ImGui::SetItemDefaultFocus();
@@ -201,19 +143,85 @@ void renderWeaponsPanel(bool includePanel){
       ImGui::EndCombo();
   }
 
-  bool enabled = false;
+  if (selectedWeaponName != ""){
+    auto& gun = getWeaponParamsByGunName(selectedWeaponName);
 
-  ImGui::Checkbox("Ironsight", &enabled);
-  ImGui::Checkbox("Raycast", &enabled);
-  ImGui::Checkbox("Hold", &enabled);
+    if(ImGui::Button("Save")){
+        saveWeaponJson(selectedWeaponName);
+    }
 
-  static float speed = 0.f;
-  ImGui::DragFloat("Bloom", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Min Bloom", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Bloom Length", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Horizontal Sway", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Vertical Sway", &speed, 0.0f, 10.0f);
+    ImGui::Checkbox("canHold", &gun.canHold);
+    ImGui::Checkbox("isIronsight", &gun.isIronsight);
+    ImGui::Checkbox("isRaycast", &gun.isRaycast);
+    ImGui::DragFloat("firingRate", &gun.firingRate, 0.01f);
 
+    ImGui::DragFloat("minBloom", &gun.minBloom, 0.01f);
+    ImGui::DragFloat("totalBloom", &gun.totalBloom, 0.01f);
+    ImGui::DragFloat("bloomLength", &gun.bloomLength, 0.01f);
+
+
+    ImGui::DragFloat("pos-x", &gun.initialGunPos.x, 0.1f);
+    ImGui::DragFloat("pos-y", &gun.initialGunPos.y, 0.1f);
+    ImGui::DragFloat("pos-z", &gun.initialGunPos.z, 0.1f);
+
+
+    ImGui::DragFloat("rot-x", &gun.initialGunRotVec4.x, 0.1f);
+    ImGui::DragFloat("rot-y", &gun.initialGunRotVec4.y, 0.1f);
+    ImGui::DragFloat("rot-z", &gun.initialGunRotVec4.z, 0.1f);
+    ImGui::DragFloat("rot-w", &gun.initialGunRotVec4.w, 0.1f);
+    gun.initialGunRot = parseQuat(gun.initialGunRotVec4);    
+
+    ImGui::DragFloat("recoilTranslate-x", &gun.recoilTranslate.x, 0.1f);
+    ImGui::DragFloat("recoilTranslate-y", &gun.recoilTranslate.y, 0.1f);
+    ImGui::DragFloat("recoilTranslate-z", &gun.recoilTranslate.z, 0.1f);
+
+    ImGui::DragFloat("recoilZoomTranslate-x", &gun.recoilZoomTranslate.x, 0.1f);
+    ImGui::DragFloat("recoilZoomTranslate-y", &gun.recoilZoomTranslate.y, 0.1f);
+    ImGui::DragFloat("recoilZoomTranslate-z", &gun.recoilZoomTranslate.z, 0.1f);
+
+  
+    ImGui::DragFloat("ironsight-x", &gun.ironsightOffset.x, 0.1f);
+    ImGui::DragFloat("ironsight-y", &gun.ironsightOffset.y, 0.1f);
+    ImGui::DragFloat("ironsight-z", &gun.ironsightOffset.z, 0.1f);
+
+
+    ImGui::DragFloat("iron-rot-x", &gun.initialIronSightAngle.x, 0.1f);
+    ImGui::DragFloat("iron-rot-y", &gun.initialIronSightAngle.y, 0.1f);
+    ImGui::DragFloat("iron-rot-z", &gun.initialIronSightAngle.z, 0.1f);
+    ImGui::DragFloat("iron-rot-w", &gun.initialIronSightAngle.w, 0.1f);
+    gun.ironSightAngle = parseQuat(gun.initialIronSightAngle);    
+
+
+    ImGui::DragFloat("damage", &gun.damage, 0.1f);
+
+/*
+
+
+  int totalAmmo = 0;
+
+  // model specific
+  float recoilLength = 0.f;
+  float recoilPitchRadians = 0.f;
+  glm::vec3 recoilZoomTranslate = glm::vec3(0.f, 0.f, 0.f);
+
+  std::optional<std::string> fireAnimation;
+  std::optional<std::string> idleAnimation;
+  glm::quat initialGunRot = glm::identity<glm::quat>();
+  glm::vec4 initialGunRotVec4 = glm::vec4(0.f, 0.f, 0.f, 0.f);
+  glm::quat ironSightAngle = glm::identity<glm::quat>();
+
+  glm::vec3 scale = glm::vec3(1.f, 1.f, 1.f);
+  std::string soundpath;
+  std::string modelpath;
+
+  std::string muzzleParticleStr;
+  std::string hitParticleStr;
+  std::string projectileParticleStr;
+
+  float damage = 0.f;
+  */
+
+  }
 
   if (includePanel){
     ImGui::End();

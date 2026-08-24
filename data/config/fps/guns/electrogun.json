@@ -1,15 +1,55 @@
 {
-  "firingRate": 100.0,
-  "recoilLength": 0.1,
-  "recoilPitchRadians": -0.2,
-  "canHold": true,
-  "isIronsight": true,
-  "isRaycast": true,
-  "minBloom": 0.0,
-  "totalBloom": 0.01,
-  "bloomLength": 1.0,
-  "totalAmmo": 5,
-  "damage": 20.0,
-  "modelpath": "../gameresources/build/weapons/ak47.gltf",
-  "soundpath": "fps/guns/electrogun"
+    "firingRate": 100.0,
+    "canHold": true,
+    "isIronsight": true,
+    "isRaycast": true,
+    "minBloom": 0.0,
+    "totalBloom": 0.009999999776482582,
+    "bloomLength": 1.0,
+    "totalAmmo": 5,
+    "recoilLength": 0.10000000149011612,
+    "recoilPitchRadians": -0.20000000298023225,
+    "recoilTranslate": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "recoilZoomTranslate": [
+        0.0,
+        0.0,
+        0.4000000059604645
+    ],
+    "initialGunPos": [
+        0.4000000059604645,
+        -0.25,
+        -0.3499999940395355
+    ],
+    "gunrotation": [
+        0.5,
+        0.0,
+        -1.0,
+        0.0
+    ],
+    "ironsightOffset": [
+        0.0,
+        -0.20000000298023225,
+        -0.10000000149011612
+    ],
+    "ironSightAngle": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "soundpath": "fps/guns/electrogun",
+    "modelpath": "../gameresources/build/weapons/ak47.gltf",
+    "muzzleParticle": "",
+    "hitParticle": "",
+    "projectileParticle": "",
+    "damage": 20.0
 }

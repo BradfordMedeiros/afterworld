@@ -81,9 +81,9 @@ void deliverAmmoToCurrentGun(WeaponEntityState& weaponState, int amount, objid i
   }
 }
 AmmoInfo currentAmmoInfo(WeaponEntityState& weaponState, objid inventory){
-  auto gunName = weaponState.weaponValues.gunCore.weaponCore -> weaponParams.name;
+  auto gunName = weaponState.weaponValues.gunCore.weaponCore -> weaponParams -> name;
   auto currentAmmo = ammoForGun(inventory, gunName);
-  auto totalAmmo = weaponState.weaponValues.gunCore.weaponCore  -> weaponParams.totalAmmo;
+  auto totalAmmo = weaponState.weaponValues.gunCore.weaponCore  -> weaponParams -> totalAmmo;
   return AmmoInfo {
     .currentAmmo = currentAmmo,
     .totalAmmo = totalAmmo,

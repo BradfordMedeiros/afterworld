@@ -1,21 +1,55 @@
 {
-	"firingRate" : 100.0,
-	"recoilLength" : 0.1,
-	"recoilPitchRadians" : -0.2,
-	"canHold" : false,
-	"isIronsight" : true,
-	"isRaycast" : true,
-	"minBloom" : 0.0,
-	"totalBloom" : 0.01,
-	"bloomLength" : 1.0,
-	"totalAmmo" : 100,
-	"damage" : 100.0,
-	"modelpath" : "../gameresources/build/weapons/shotgun.gltf",
-	"soundpath": "fps/guns/shotgun",
-	"recoilTranslate" : [0.0, 0.0, 3.0],
-	"recoilZoomTranslate" : [0.0, 0.0, 1.0],
-	"ironsightOffset" : [-2.0, 0.0, 0.0], 
-	"scale" : [1, 1, 1],
-	"gunrotation" : [0, 0, -1, 0],
-	"initialGunPos": [0.5, -0.25, -0.75]
+    "firingRate": 100.0,
+    "canHold": false,
+    "isIronsight": true,
+    "isRaycast": false,
+    "minBloom": 0.0,
+    "totalBloom": 0.0,
+    "bloomLength": 1.0,
+    "totalAmmo": 100,
+    "recoilLength": 0.10000000149011612,
+    "recoilPitchRadians": -0.20000000298023225,
+    "recoilTranslate": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "recoilZoomTranslate": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "initialGunPos": [
+        0.30000001192092898,
+        -0.15000000596046449,
+        -0.44999998807907107
+    ],
+    "gunrotation": [
+        0.30000001192092898,
+        0.0,
+        -1.0,
+        0.0
+    ],
+    "ironsightOffset": [
+        0.0,
+        -0.20000000298023225,
+        0.0
+    ],
+    "ironSightAngle": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "soundpath": "fps/guns/shotgun",
+    "modelpath": "../gameresources/build/weapons/shotgun.gltf",
+    "muzzleParticle": "",
+    "hitParticle": "",
+    "projectileParticle": "",
+    "damage": 20.0
 }
