@@ -1,6 +1,6 @@
 {
   "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
-  "soundpath": "../gameresources/sound/q009/glauncher.ogg",
+  "soundpath": "fps/guns/launcher",
 
   "initialGunPos": [0.7, -0.440691, -1.5099],
   "initialGunRot": [0.955642, 0.014955, 0.294151, 0.0],

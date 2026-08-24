@@ -36,20 +36,6 @@ void loadWeaponCore(std::string& coreName, objid sceneId){
   auto weaponParams = getWeaponParamsByGunName(coreName);
   WeaponCore weaponCore { };
   weaponCore.weaponParams = weaponParams;
-  if (weaponParams.soundpath != ""){
-    GameobjAttributes soundAttr {
-      .attr = { { "clip", weaponParams.soundpath }, { "physics", "disabled" }},
-    };
-    std::string soundClipObj = std::string("&code-weaponsound-") + uniqueNameSuffix();
-    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-    auto clipObjectId = gameapi -> makeObjectAttr(sceneId, soundClipObj, soundAttr, submodelAttributes);
-    modassert(clipObjectId.has_value(), "load weapon core sound, could not create clip obj");
-    SoundResource soundResource {
-      .clipObjectId = clipObjectId.value(),
-    };
-    weaponCore.soundResource = soundResource;
-  }
-  
   weaponCore.name = coreName;
 
   weaponCore.muzzleParticle = createParticleEmitter(sceneId, weaponParams.muzzleParticleStr, (std::string("+code-muzzleparticle") + uniqueNameSuffix()));
@@ -70,9 +56,6 @@ void loadWeaponCore(std::string& coreName, objid sceneId){
 }
 
 void unloadWeaponCore(WeaponCore& weaponCore){
-  if (weaponCore.soundResource.has_value()){
-    gameapi -> removeByGroupId(weaponCore.soundResource.value().clipObjectId);
-  }
   if (weaponCore.muzzleParticle.has_value()){
     gameapi -> removeByGroupId(weaponCore.muzzleParticle.value());
   }
@@ -399,9 +382,7 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
     deliverAmmo(inventory, gunCore.weaponCore -> weaponParams.name, -1);
   }
 
-  if (gunCore.weaponCore -> soundResource.has_value()){
-    playGameplayClipById(gunCore.weaponCore -> soundResource.value().clipObjectId, std::nullopt, playerPos, false);
-  }
+  playMixedSound(getSymbol(gunCore.weaponCore -> weaponParams.soundpath), playerPos);
 
   if (gunCore.weaponCore -> muzzleParticle.has_value() && gunId.has_value()){
     if (muzzleId.has_value()){

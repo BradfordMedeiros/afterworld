@@ -11,5 +11,5 @@
   "totalAmmo": 5,
   "damage": 20.0,
   "modelpath": "../gameresources/build/weapons/ak47.gltf",
-  "soundpath": "../gameresources/sound/q009/minigun2.ogg"
+  "soundpath": "fps/guns/electrogun"
 }

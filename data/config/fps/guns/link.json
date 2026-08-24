@@ -11,5 +11,5 @@
   "totalAmmo": 20,
   "damage": 20.0,
   "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
-  "soundpath": "../gameresources/sound/q009/glauncher.ogg"
+  "soundpath": "fps/guns/link"
 }

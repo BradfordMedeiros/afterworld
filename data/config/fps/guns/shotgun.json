@@ -11,7 +11,7 @@
 	"totalAmmo" : 100,
 	"damage" : 100.0,
 	"modelpath" : "../gameresources/build/weapons/shotgun.gltf",
-	"soundpath" : "../gameresources/sound/q009/shotgun2.ogg",
+	"soundpath": "fps/guns/shotgun",
 	"recoilTranslate" : [0.0, 0.0, 3.0],
 	"recoilZoomTranslate" : [0.0, 0.0, 1.0],
 	"ironsightOffset" : [-2.0, 0.0, 0.0], 

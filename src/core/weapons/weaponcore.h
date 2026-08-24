@@ -19,14 +19,9 @@ struct WeaponState {
   GunAnimation gunState;
 };
 
-struct SoundResource {
-  objid clipObjectId;
-};
-
 struct WeaponCore {
   std::string name;
   WeaponParams weaponParams;
-  std::optional<SoundResource> soundResource;
   std::optional<objid> muzzleParticle;
   std::optional<objid> hitParticles;
   std::optional<objid> projectileParticles;

@@ -11,5 +11,5 @@
   "totalAmmo": 100,
   "damage": 20.0,
   "modelpath": "../gameresources/build/weapons/scrapgun.gltf",
-  "soundpath": "./res/sounds/muffled-gunshot.wav"
+  "soundpath": "fps/guns/scrapgun"
 }

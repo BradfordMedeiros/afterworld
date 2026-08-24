@@ -1,0 +1,10 @@
+{
+    "volume": 1.0,
+    "center": true,
+    "loop": false,
+    "sequential": false,
+    "bus": "master",
+    "clips": [
+        "../gameresources/sound/q009/glauncher.ogg"
+    ]
+}

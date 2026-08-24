@@ -11,5 +11,5 @@
   "totalAmmo": 20,
   "damage": 20.0,
   "modelpath": "../gameresources/build/weapons/fork.gltf",
-  "soundpath": "../gameresources/sound/q009/jumppad.ogg"
+  "soundpath": "fps/guns/fork"
 }

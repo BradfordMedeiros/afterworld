@@ -11,5 +11,5 @@
   "totalAmmo": -1,
   "damage": 20.0,
   "modelpath": "",
-  "soundpath": "./res/sounds/silenced-gunshot.wav"
+  "soundpath": "fps/guns/none"
 }
