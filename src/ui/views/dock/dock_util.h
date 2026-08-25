@@ -11,7 +11,6 @@ struct DockConfigApi {
   std::function<void()> createCamera;
   std::function<void()> createLight;
   std::function<void()> createNavmesh;
-  std::function<void(std::function<void(bool, std::string)>, std::function<bool(bool, std::string&)>)> openFilePicker;
   std::function<void(std::function<void(bool, std::string)>)> openImagePicker;
   std::function<void(std::function<void(glm::vec4)>, std::string)> openColorPicker;
   std::function<void(std::function<void(objid, std::string)>)> pickGameObj;
@@ -24,7 +23,6 @@ struct DockConfigApi {
   std::function<void(std::string, AttributeValue)> setObjAttr;
   std::function<void(std::string&)> setEditorBackground;
 
-  std::function<void()> emitParticleViewerParticle;
   std::function<void(bool)> setParticlesViewerShouldEmit;
   std::function<bool()> getParticlesViewerShouldEmit;
   std::function<void(std::string, AttributeValue)> setParticleAttribute;
@@ -71,7 +69,6 @@ std::function<void(std::string& choice, int)> optionsOnClickObj(std::string attr
 std::function<int()> optionsSelectedIndexObj(std::string attribute, std::vector<AttributeValue> optionValueMapping);
 
 
-void emitNewParticleViewerParticle();
 void setParticlesViewerShouldEmit(bool shouldEmit);
 bool getParticlesViewerShouldEmit();
 void setParticleAttribute(std::string, AttributeValue);

@@ -18,7 +18,6 @@
 #include "./types/dock_textbox_numeric.h"
 #include "./types/dock_checkbox.h"
 #include "./types/dock_image.h"
-#include "./types/dock_file.h"
 #include "./types/dock_gameobj.h"
 #include "./types/dock_colorpicker.h"
 #include "./types/dock_select.h"
@@ -32,7 +31,7 @@ struct DockGroup;
 
 typedef std::variant<
   DockLabelConfig,   DockButtonConfig, DockOptionConfig, DockSliderConfig,    DockCheckboxConfig, 
-  DockTextboxConfig, DockFileConfig,   DockImageConfig,  DockGameObjSelector, DockGroup, 
+  DockTextboxConfig,  DockImageConfig,  DockGameObjSelector, DockGroup, 
   DockTextboxNumeric, DockColorPickerConfig, DockSelectConfig
   > DockConfig;
 

@@ -169,10 +169,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
 UiState createUiState(){
   UiState uiState {
     .imageListScrollAmount = 0,
-    .fileexplorerScrollAmount = 0,
-    .onFileAddedFn = std::nullopt,
     .onGameObjSelected = std::nullopt,
-    .fileFilter = std::nullopt,
     .onInputBoxFn = std::nullopt,
   
     .colorPickerTitle = "color picker",
@@ -181,11 +178,9 @@ UiState createUiState(){
     .focusedId = std::nullopt,
     .lastAutofocusedKey = "",
   
-    .showScenes = false,
     .offset = 2,
     .currentScene = -1,
   
-    .navbarType = MAIN_EDITOR,
     .dockedDocks = {},
   };
   return uiState;
@@ -262,35 +257,13 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     GameobjAttributes attr { .attr = {} };
     makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
   },
-  .openFilePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded, std::function<bool(bool, std::string&)> fileFilterFn) -> void {
-    windowSetEnabled(windowFileExplorerSymbol, true);
-    commonState -> onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
-      onFileAdded(closedWithoutNewFile, file);
-      commonState -> onFileAddedFn = std::nullopt;
-      commonState -> fileFilter = std::nullopt;
-      windowSetEnabled(windowFileExplorerSymbol, false);
-    };
-    commonState -> fileFilter = fileFilterFn;
-  },
   .openImagePicker = [](std::function<void(bool closedWithoutNewFile, std::string file)> onFileAdded) -> void {
-    windowSetEnabled(windowImageExplorerSymbol, true);
-    commonState -> onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
-      onFileAdded(closedWithoutNewFile, file);
-      commonState -> onFileAddedFn = std::nullopt;
-      windowSetEnabled(windowImageExplorerSymbol, false);
-    };
+ 
   },
   .openColorPicker = [](std::function<void(glm::vec4)> onColor, std::string windowName) -> void {
     windowSetEnabled(windowColorPickerSymbol, true);
     commonState -> onNewColor = onColor;
     commonState -> colorPickerTitle = windowName;
-    //onFileAddedFn = [onFileAdded](bool closedWithoutNewFile, std::string file) -> void {
-    //  onFileAdded(closedWithoutNewFile, file);
-    //  onFileAddedFn = std::nullopt;
-    //  fileFilter = std::nullopt;
-    //  windowSetEnabled(windowFileExplorerSymbol, false);
-    //};
-    //fileFilter = fileFilterFn;
   },
   .pickGameObj = [](std::function<void(objid, std::string)> selectGameObj) -> void {
     std::cout << "dock pick gameobj" << std::endl;
@@ -338,7 +311,6 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     gameapi -> setSingleGameObjectAttr(id, key.c_str(), value);
   },
   .setEditorBackground = setMenuBackground,
-  .emitParticleViewerParticle = emitNewParticleViewerParticle,
   .setParticlesViewerShouldEmit = setParticlesViewerShouldEmit,
   .getParticlesViewerShouldEmit = getParticlesViewerShouldEmit,
   .setParticleAttribute = setParticleAttribute,
@@ -355,12 +327,6 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
     return uiManagerContext.uiContext -> activeSceneId();
   },
 };
-
-
-NavbarType queryLoadNavbarType(){
-  auto navbarType = getSaveStringValue("settings", "ui-layout", "main");
-  return strToNavbarType(navbarType);
-}
 
 
 ImageList loadImageListTextures(){
@@ -386,7 +352,6 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
 
   if (firstTime){
     initStyles();
-    uiState.navbarType = queryLoadNavbarType();
   }
   firstTime = false;
   static ImageList imageListDatas = loadImageListTextures();
@@ -476,53 +441,6 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
     utilViewComponent.draw(drawTools, defaultProps);
   }
 
-  if (uiContext.showEditor()){
-    auto onClickNavbar = [&uiState](const char* value) -> void {
-      uiState.dockedDocks.insert(value);
-      for (auto &dock : uiState.dockedDocks){
-        auto windowDockSymbol = getSymbol(std::string("window-symbol-") + dock);
-        windowSetEnabled(windowDockSymbol, true, glm::vec2(1.f, 0.9f));    
-      }
-    };
-
-    Props editorViewProps {
-      .props = {
-        PropPair {
-          .symbol = valueSymbol, 
-          .value = EditorViewOptions { 
-            .worldPlayInterface = &uiContext.worldPlayInterface,
-            .onNewColor = uiState.onNewColor,
-            .colorPickerTitle = &uiState.colorPickerTitle,
-            .navbarType = uiState.navbarType,
-            .onClickNavbar = onClickNavbar,
-            .onFileAddedFn = uiState.onFileAddedFn,
-            .fileexplorerScrollAmount = uiState.fileexplorerScrollAmount,
-            .fileFilter = uiState.fileFilter,
-            .onInputBoxFn = uiState.onInputBoxFn,
-            .imageListDatas = &imageListDatas,
-            .imageListScrollAmount = uiState.imageListScrollAmount,
-            .dockedDocks = &uiState.dockedDocks,
-            .sceneManagerInterface = SceneManagerInterface {
-              .showScenes = uiState.showScenes,
-              .offset = uiState.offset,
-              .onSelectScene = [&uiState, &uiContext](int index, std::string scene) -> void {
-                uiContext.loadScene(scene);
-                uiState.currentScene = index;
-                uiState.showScenes = false;
-              },
-              .toggleShowScenes = [&uiState]() -> void {
-                uiState.showScenes = !uiState.showScenes;
-              },
-              .scenes = uiContext.listScenes(),
-              .currentScene = uiState.currentScene,
-            },
-          } 
-        },
-      }
-    };
-    editorViewComponent.draw(drawTools, editorViewProps);
-  }
-
   {
     Props props {
       .props = {},
@@ -557,11 +475,6 @@ void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, doubl
   uiState.imageListScrollAmount += (scrollValue * 5);
   if (uiState.imageListScrollAmount < 0){
     uiState.imageListScrollAmount = 0;
-  }
-
-  uiState.fileexplorerScrollAmount += scrollValue;
-  if (uiState.fileexplorerScrollAmount < 0){
-    uiState.fileexplorerScrollAmount = 0;
   }
 
   uiState.offset += scrollValue;

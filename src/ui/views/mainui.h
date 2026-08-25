@@ -8,7 +8,6 @@
 #include "./playing.h"
 #include "./mainmenu.h"
 #include "./settings.h"
-#include "./editorview.h"
 #include "./windowmanager.h"
 #include "./uicontext.h"
 #include "../components/uiwindow.h"
@@ -41,8 +40,6 @@ RouterHistory& getMainRouterHistory();
 
 struct UiState {
   int imageListScrollAmount;
-  int fileexplorerScrollAmount;
-  std::optional<std::function<void(bool closedWithoutNewFile, std::string file)>> onFileAddedFn;
   std::optional<std::function<void(objid, std::string)>> onGameObjSelected;
   std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter;
   std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn;
@@ -53,11 +50,9 @@ struct UiState {
   std::optional<objid> focusedId;
   std::string lastAutofocusedKey;
 
-  bool showScenes;
   int offset;
   int currentScene;
 
-  NavbarType navbarType;
   std::set<std::string> dockedDocks;
 
   

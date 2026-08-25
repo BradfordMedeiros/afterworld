@@ -938,3 +938,116 @@ void initImGuiGameUi(){
 }
 
 
+
+/*
+  DockConfiguration {
+    .title = "Spawn",
+    .configFields = {
+      DockButtonConfig {
+        .buttonText = "Create Spawnpoint",
+        .onClick = []() -> void {
+          std::string spawnpointFile("../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene");
+          std::unordered_map<std::string, AttributeValue> attrs;
+          attrs["+spawnpoint|spawn"] = std::string("|") + enemyTypes.at(0);
+          dockConfigApi.createPrefab(spawnpointFile, attrs);
+        },
+      },
+      DockOptionConfig {
+        .options = enemyTypes,
+        .onClick = [](std::string&, int index) -> void {
+          dockConfigApi.setObjAttr("+spawnpoint|spawn", std::string("|") + enemyTypes.at(index));
+        },
+        .getSelectedIndex = [](void) -> int {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawn");
+          if (!attr.has_value()){
+            return -1;
+          }
+          auto spawnStr = std::get_if<std::string>(&attr.value());
+          modassert(spawnStr, "invalid type for spawnStr");
+
+          for (int i = 0; i < enemyTypes.size(); i++){
+            if (enemyTypes.at(i) == spawnStr -> substr(1, spawnStr -> size())){
+              return i;
+            }
+          }
+          return -1;
+        }
+      },
+      DockCheckboxConfig {
+        .label = "Spawn On Load",
+        .isChecked = []() -> bool {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return false;
+          }
+          auto value = std::get_if<std::string>(&attr.value());
+          if (value == NULL){
+            return false;
+          }
+          return *value == "|onload";
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", "|onload");
+          }else{
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", DeleteAttribute{});
+          }
+        },
+      },
+      DockCheckboxConfig {
+        .label = "Enable Spawn Tag",
+        .isChecked = []() -> bool {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return false;
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "enable spawn tag wrong type");
+          auto values = split(strValue -> substr(1, strValue -> size()), ',');
+          for (auto &value : values){
+            if (value != "onload"){
+              return true;
+            }
+          }
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", "|default");
+          }else{
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", DeleteAttribute{});
+          }
+        },
+      },
+      DockTextboxConfig {
+        .label = "Spawn Tag",
+        .text = []() -> std::string {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return "[disabled]";
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "invalid type for spawn tag");
+          auto body = strValue -> substr(1, strValue -> size());
+          if (body == "onload"){
+            return "[disabled]";
+          }
+          return body; 
+        },
+        .onEdit = [](std::string value) -> void {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return;
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "invalid type for spawn tag");
+          auto body = strValue -> substr(1, strValue -> size());
+          if (body == "onload"){
+            return;
+          }
+          dockConfigApi.setObjAttr("+spawnpoint|spawntags", std::string("|") + value);
+        }
+      },
+    }
+  },
+  */
