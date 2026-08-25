@@ -19,13 +19,8 @@ struct WeaponState {
   GunAnimation gunState;
 };
 
-struct WeaponCore {
-  std::string name;
-  WeaponParams* weaponParams;
-};
-
 struct GunCore {
-  WeaponCore* weaponCore = NULL;
+  WeaponParams* weaponParams = NULL;
   WeaponState weaponState;
 };
 
