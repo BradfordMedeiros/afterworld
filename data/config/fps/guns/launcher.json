@@ -15,7 +15,6 @@
   "ironSightAngle": [1.0, 0.0, 0.0, 0.0],
 
   "muzzleParticle": "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:1 1 0.2 0.3;+layer:transparency;duration:0.05;+scale:0.1 0.1 0.1;+position:0 0 1;+texture:./res/textures/trippyflash.png",
-  "hitParticle": "",
   "projectileParticle": "?grenade",
 
   "recoilLength": 0.1,

@@ -5,8 +5,6 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/shotgun2.ogg",
-        "../gameresources/sound/q009/shotgun.ogg",
-        "../gameresources/sound/q009/rifle.ogg"
+        "../gameresources/sound/q009/pistol.ogg"
     ]
 }

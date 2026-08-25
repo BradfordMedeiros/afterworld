@@ -222,12 +222,7 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
       weaponParams.muzzleParticleStr = it->value.GetString();
     }
   }
-  {
-    auto it = doc.FindMember("hitParticle");
-    if (it != doc.MemberEnd() && it->value.IsString()) {
-      weaponParams.hitParticleStr = it->value.GetString();
-    }
-  }
+
   {
     auto it = doc.FindMember("projectileParticle");
     if (it != doc.MemberEnd() && it->value.IsString()) {
@@ -324,7 +319,6 @@ void saveWeaponJson(std::string gunName){
   doc.AddMember("soundpath", rapidjson::Value(weaponParams.soundpath.c_str(), allocator), allocator);
   doc.AddMember("modelpath", rapidjson::Value(weaponParams.modelpath.c_str(), allocator), allocator);
   doc.AddMember("muzzleParticle", rapidjson::Value(weaponParams.muzzleParticleStr.c_str(), allocator), allocator);
-  doc.AddMember("hitParticle", rapidjson::Value(weaponParams.hitParticleStr.c_str(), allocator), allocator);
   doc.AddMember("projectileParticle", rapidjson::Value(weaponParams.projectileParticleStr.c_str(), allocator), allocator);
   doc.AddMember("damage", weaponParams.damage, allocator);
 

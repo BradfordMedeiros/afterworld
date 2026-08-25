@@ -254,12 +254,27 @@ void emitEffect(std::string effectName, glm::vec3 position){
   gameapi -> emit(effect.id.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
 }
 
-void emitParticle(int symbol, glm::vec3 position, glm::quat rotation){
+void emitParticle(int symbol, glm::vec3 position, glm::quat rotation, glm::vec3 initialVelocity){
   auto name = nameForSymbol(symbol);
-  if (name == "explosion"){
-    emitBlood(gameapi -> rootSceneId(), 0, position);
+  if (name == ""){
+    return;
   }
-  emitEffect(name, position);
+  if (name.size() > 0 &&  name.at(0) == '?'){
+    auto particleName = name.substr(1, name.size());
+    auto particleId = getParticleEmitter(particleName);
+    if (particleId.has_value()){
+      gameapi -> emit(particleId.value(), position, rotation, initialVelocity, std::nullopt, std::nullopt);
+    }else{
+      std::cout << "missing particle for: " << name << std::endl;
+    }
+
+  }else if (name == "explosion"){
+    emitBlood(gameapi -> rootSceneId(), 0, position);
+  }else{
+    if (effects.find(name) != effects.end()){
+      emitEffect(name, position);
+    }
+  }
 }
 
 void emitKillEffect(glm::vec3 position){

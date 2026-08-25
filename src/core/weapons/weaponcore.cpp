@@ -37,30 +37,10 @@ void loadWeaponCore(std::string& coreName, objid sceneId){
   WeaponCore weaponCore { };
   weaponCore.weaponParams = &weaponParams;
   weaponCore.name = coreName;
-
-  weaponCore.hitParticles = createParticleEmitter(sceneId, weaponParams.hitParticleStr, (std::string("+code-hitparticle") + uniqueNameSuffix()));
-
-  if (weaponParams.projectileParticleStr.size() > 0 && weaponParams.projectileParticleStr.at(0) == '?'){
-    auto particle = weaponParams.projectileParticleStr.substr(1, weaponParams.projectileParticleStr.size());
-    auto particleId = getParticleEmitter(particle);
-    modassert(particleId.has_value(), "projectile particle: no particle for: " + particle);
-    weaponCore.projectileParticles = particleId.value();
-    weaponCore.removeProjectileOnExit = false;
-  }else{
-    weaponCore.projectileParticles = createParticleEmitter(sceneId, weaponParams.projectileParticleStr, (std::string("+code-projectileparticle") + uniqueNameSuffix()));
-    weaponCore.removeProjectileOnExit = true;
-  }
-
   weaponCores.push_back(weaponCore);
 }
 
 void unloadWeaponCore(WeaponCore& weaponCore){
-  if (weaponCore.hitParticles.has_value()){
-    gameapi -> removeByGroupId(weaponCore.hitParticles.value());
-  }
-  if (weaponCore.projectileParticles.has_value() && weaponCore.removeProjectileOnExit){
-    gameapi -> removeByGroupId(weaponCore.projectileParticles.value());
-  }
 }
 
 void removeAllWeaponCores(){
@@ -326,20 +306,8 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
         splashEmitterId = material.value() -> splashParticle.value().particleId;
       }
     }
-
-    if (gunCore.weaponCore -> hitParticles.has_value()){
-      emitterId = gunCore.weaponCore -> hitParticles.value();
-    }
-
     auto addedGlassDecal = maybeAddGlassBulletHole(hitpoint.id, playerId);
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
-    if (!addedGlassDecal){
-      if (emitterId.has_value()){
-        std::cout << "hit particle, hitpoint.id = " << hitpoint.id << std::endl;
-        // these are the decals that get added on the wall eg a bullet hole
-        gameapi -> emit(emitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, hitpoint.id);
-      }      
-    }
 
     if (soundEmitterId.has_value()){
       playGameplayClipById(soundEmitterId.value(), std::nullopt, hitpoint.point, false);
@@ -389,8 +357,6 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
       glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
       auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
       emitParticle(getSymbol(gunCore.weaponCore -> weaponParams -> muzzleParticleStr), slightlyInFrontOfGun, playerRotation);
-
-      //gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation /* should this be the gun rotation? */, std::nullopt, std::nullopt, playerId);
     }
   }
   gunCore.weaponState.lastShootingTime = now;
@@ -400,12 +366,12 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
   if (gunCore.weaponCore -> weaponParams -> isRaycast){
     fireRaycast(gunCore, shootingVecAngle, playerId, materials, playerPos, playerRotation);
   }
-  if (gunCore.weaponCore -> projectileParticles.has_value()){
+  if (gunCore.weaponCore -> weaponParams -> projectileParticleStr != ""){
     auto fromPos = gameapi -> moveRelative(playerPos, playerRotation, 3);
     glm::vec3 projectileArc(0.f, 0.f, -1.f);
     auto playerForwardAndUp = playerRotation * gameapi -> orientationFromPos(glm::vec3(0.f, 0.f, 0.f), projectileArc);
     auto initialVelocity = playerForwardAndUp * shootingVecAngle * 10.f;
-    gameapi -> emit(gunCore.weaponCore -> projectileParticles.value(), fromPos, playerRotation, initialVelocity, std::nullopt, std::nullopt);
+    emitParticle(getSymbol(gunCore.weaponCore -> weaponParams -> projectileParticleStr), fromPos, playerRotation, initialVelocity);
   }
 
   if (gunId.has_value() && gunCore.weaponCore -> weaponParams -> fireAnimation.has_value()){

@@ -49,7 +49,6 @@
     "soundpath": "fps/guns/electrogun",
     "modelpath": "../gameresources/build/weapons/ak47.gltf",
     "muzzleParticle": "sparks",
-    "hitParticle": "",
     "projectileParticle": "",
     "damage": 20.0
 }

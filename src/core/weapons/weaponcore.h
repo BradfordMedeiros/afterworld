@@ -22,9 +22,6 @@ struct WeaponState {
 struct WeaponCore {
   std::string name;
   WeaponParams* weaponParams;
-  std::optional<objid> hitParticles;
-  std::optional<objid> projectileParticles;
-  bool removeProjectileOnExit;
 };
 
 struct GunCore {

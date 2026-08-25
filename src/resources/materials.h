@@ -38,7 +38,7 @@ void emitSparks(glm::vec3 position);
 void emitFirework(glm::vec3 position);
 void emitFog(glm::vec3 position);
 
-void emitParticle(int symbol, glm::vec3 position, glm::quat rotation = glm::identity<glm::quat>());
+void emitParticle(int symbol, glm::vec3 position, glm::quat rotation = glm::identity<glm::quat>(), glm::vec3 initialVelocity = glm::vec3(0.f, 0.f, 0.f));
 
 #endif
 

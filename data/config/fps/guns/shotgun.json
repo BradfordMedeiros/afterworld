@@ -49,7 +49,6 @@
     "soundpath": "fps/guns/shotgun",
     "modelpath": "../gameresources/build/weapons/shotgun.gltf",
     "muzzleParticle": "",
-    "hitParticle": "",
     "projectileParticle": "",
     "damage": 20.0
 }

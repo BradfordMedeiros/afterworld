@@ -49,7 +49,6 @@
     "soundpath": "fps/guns/pistol",
     "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
     "muzzleParticle": "sparks",
-    "hitParticle": "",
     "projectileParticle": "?greenorb",
     "damage": 20.0
 }

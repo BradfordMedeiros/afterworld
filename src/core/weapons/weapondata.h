@@ -35,7 +35,6 @@ struct WeaponParams {
   std::string modelpath;
 
   std::string muzzleParticleStr;
-  std::string hitParticleStr;
   std::string projectileParticleStr;
 
   float damage = 0.f;
