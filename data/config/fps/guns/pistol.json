@@ -1,35 +1,55 @@
 {
-  "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
-  "soundpath": "fps/guns/pistol",
-
-  "initialGunPos": [0.0, -0.440691, -1.5099],
-  "initialGunRot": [0.0, 0.0, 0.0, 0.0],
-  "scale": [1.0, 1.0, 1.0],
-
-  "firingRate": 200.0,
-  "canHold": true,
-  "isRaycast": false,
-  "isIronsight": true,
-
-  "ironsightOffset": [0.0, -0.1, -1.2],
-  "ironSightAngle": [1.0, 0.0, 0.0, 0.0],
-
-  "muzzleParticle": "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:1 1 0.2 0.3;+layer:transparency;duration:0.05;+scale:0.1 0.1 0.1;+position:0 0 1;+texture:./res/textures/trippyflash.png",
-  "hitParticle": "",
-  "projectileParticle": "?greenorb",
-
-  "recoilLength": 0.1,
-  "recoilPitchRadians": -2.0,
-  "recoilTranslate": [0.0, 0.0, 0.4],
-  "recoilZoomTranslate": [0.0, 0.0, 0.6],
-
-  "minBloom": 0.0,
-  "totalBloom": 0.05,
-  "bloomLength": 0.5,
-
-  "totalAmmo": 20,
-  "damage": 20.0,
-
-  "fireAnimation": null,
-  "idleAnimation": null
+    "firingRate": 1.0,
+    "canHold": false,
+    "isIronsight": true,
+    "isRaycast": false,
+    "minBloom": 0.0,
+    "totalBloom": 0.05000000074505806,
+    "bloomLength": 0.5,
+    "totalAmmo": 20,
+    "recoilLength": 0.10000000149011612,
+    "recoilPitchRadians": 0.0,
+    "recoilTranslate": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "recoilZoomTranslate": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "initialGunPos": [
+        0.6000000238418579,
+        -0.5410000085830689,
+        -1.1100000143051148
+    ],
+    "gunrotation": [
+        2.9000000953674318,
+        -0.10000000149011612,
+        0.8999999761581421,
+        0.30000001192092898
+    ],
+    "ironsightOffset": [
+        0.0,
+        -0.4000000059604645,
+        -0.699999988079071
+    ],
+    "ironSightAngle": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "soundpath": "fps/guns/pistol",
+    "modelpath": "../gameresources/build/weapons/nailpistol.gltf",
+    "muzzleParticle": "sparks",
+    "hitParticle": "",
+    "projectileParticle": "?greenorb",
+    "damage": 20.0
 }
