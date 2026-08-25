@@ -31,14 +31,14 @@ std::optional<objid> getParticleEmitter(std::string& emitterName);
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);
 
-void emitExplosion(glm::vec3 position);
-void emitElectric(glm::vec3 position);
 void emitKillEffect(glm::vec3 position);
 void emitWarp(glm::vec3 position);
 void emitSplash(glm::vec3 position);
 void emitSparks(glm::vec3 position);
 void emitFirework(glm::vec3 position);
 void emitFog(glm::vec3 position);
+
+void emitParticle(int symbol, glm::vec3 position, glm::quat rotation = glm::identity<glm::quat>());
 
 #endif
 

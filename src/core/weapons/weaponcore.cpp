@@ -38,7 +38,6 @@ void loadWeaponCore(std::string& coreName, objid sceneId){
   weaponCore.weaponParams = &weaponParams;
   weaponCore.name = coreName;
 
-  weaponCore.muzzleParticle = createParticleEmitter(sceneId, weaponParams.muzzleParticleStr, (std::string("+code-muzzleparticle") + uniqueNameSuffix()));
   weaponCore.hitParticles = createParticleEmitter(sceneId, weaponParams.hitParticleStr, (std::string("+code-hitparticle") + uniqueNameSuffix()));
 
   if (weaponParams.projectileParticleStr.size() > 0 && weaponParams.projectileParticleStr.at(0) == '?'){
@@ -56,9 +55,6 @@ void loadWeaponCore(std::string& coreName, objid sceneId){
 }
 
 void unloadWeaponCore(WeaponCore& weaponCore){
-  if (weaponCore.muzzleParticle.has_value()){
-    gameapi -> removeByGroupId(weaponCore.muzzleParticle.value());
-  }
   if (weaponCore.hitParticles.has_value()){
     gameapi -> removeByGroupId(weaponCore.hitParticles.value());
   }
@@ -349,8 +345,6 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       playGameplayClipById(soundEmitterId.value(), std::nullopt, hitpoint.point, false);
     }
 
-
-    emitWaterSplash(rootSceneId(), getEntityForPlayerIndex(getDefaultPlayerIndex()).value(), emitParticlePosition);
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
     }
@@ -384,16 +378,19 @@ bool tryFireGun(objid inventory, std::optional<objid> gunId, std::optional<objid
 
   playMixedSound(getSymbol(gunCore.weaponCore -> weaponParams -> soundpath), playerPos);
 
-  if (gunCore.weaponCore -> muzzleParticle.has_value() && gunId.has_value()){
+  if (gunId.has_value()){
     if (muzzleId.has_value()){
       auto muzzlePosition = gameapi -> getGameObjectPos(muzzleId.value(), true, "[gamelogic] tryFireGun - find muzzle position");
       std::cout << "muzzle emit: " << print(muzzlePosition) << std::endl;
-      gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), muzzlePosition, playerRotation /* should this be the muzzle rotation? */, std::nullopt, std::nullopt, playerId);
+      //gameapi -> emit(gunCore.weaponCore -> weaponParams -> muzzleParticleStr, muzzlePosition, playerRotation /* should this be the muzzle rotation? */, std::nullopt, std::nullopt, playerId);
+      emitParticle(getSymbol(gunCore.weaponCore -> weaponParams -> muzzleParticleStr), muzzlePosition, playerRotation);
     }else{
       auto gunPosition = gameapi -> getGameObjectPos(gunId.value(), true, "[gamelogic] tryFireGun - get gun position");
       glm::vec3 distanceFromGun = glm::vec3(0.f, 0.f, -1.); // should parameterize particleOffset
       auto slightlyInFrontOfGun = gameapi -> moveRelativeVec(gunPosition, playerRotation, distanceFromGun);
-      gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation /* should this be the gun rotation? */, std::nullopt, std::nullopt, playerId);
+      emitParticle(getSymbol(gunCore.weaponCore -> weaponParams -> muzzleParticleStr), slightlyInFrontOfGun, playerRotation);
+
+      //gameapi -> emit(gunCore.weaponCore -> muzzleParticle.value(), slightlyInFrontOfGun, playerRotation /* should this be the gun rotation? */, std::nullopt, std::nullopt, playerId);
     }
   }
   gunCore.weaponState.lastShootingTime = now;

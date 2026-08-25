@@ -254,12 +254,12 @@ void emitEffect(std::string effectName, glm::vec3 position){
   gameapi -> emit(effect.id.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
 }
 
-void emitElectric(glm::vec3 position){
-  emitEffect("electric", position);
-}
-
-void emitExplosion(glm::vec3 position){
-  emitBlood(gameapi -> rootSceneId(), 0, position);
+void emitParticle(int symbol, glm::vec3 position, glm::quat rotation){
+  auto name = nameForSymbol(symbol);
+  if (name == "explosion"){
+    emitBlood(gameapi -> rootSceneId(), 0, position);
+  }
+  emitEffect(name, position);
 }
 
 void emitKillEffect(glm::vec3 position){

@@ -17,8 +17,11 @@ DEFINE_RESOURCE(BALL_GRAVITYWELL, "fps/entity/test")  // mixed
 DEFINE_RESOURCE(BALL_ROLLING,  "ball/rolling" )  // mixed
 
 
-// Effects
+// Sounds
 DEFINE_RESOURCE(FIREWORK, "effects/firework")  // mixed
+
+// Particles
+DEFINE_RESOURCE(PARTICLE_ELECTRIC, "electric")  // mixed
 
 
 // Graphical Features
