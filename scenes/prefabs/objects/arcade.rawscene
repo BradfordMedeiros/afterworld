@@ -5,7 +5,7 @@ arcade:activate:arcade
 arcade:physics:enabled
 
 arcade:child:>camera
->camera:position:0 0.75 0.5
+>camera:position:0 0 1
 
 arcade/screen:child:!light
 

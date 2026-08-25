@@ -51,59 +51,18 @@ void renderBallGameplay(bool includePanel){
   }
 }
 
-void renderMovementPanel(bool includePanel){
-  if (includePanel){
-    ImGui::Begin("Movement Gameplay");
-  }
-
-  static float speed = 0.f;
-  ImGui::DragFloat("Speed", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Speed Air", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Jump Height", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Gravity", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Mass", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Friction", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("Restitution", &speed, 0.0f, 10.0f);
-
-  bool enabled = false;
-  ImGui::Checkbox("Crouch", &enabled);
-  ImGui::Checkbox("Move Vertical", &enabled);
-
-  if (includePanel){
-    ImGui::End();
-  } 
-}
 
 void renderTraitsPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Traits Gameplay");
   }
 
-  auto& movementParams = movementParamsByName("default");
-  /*
-  struct MovementParams {
-  float moveSpeed = 10.f;
-  float moveSpeedAir = 10.f;
-  float moveSpeedWater = 10.f;
-  float jumpHeight = 5.f;
-  float maxAngleUp = -1.5f;
-  float maxAngleDown = 1.f;
-  float moveSoundDistance = 0.2f;
-  float moveSoundMintime = 0.2f;
-  float groundAngle = 50.f;
-  glm::vec3 gravity = glm::vec3(0.f, -9.81f, 0.f);
-  bool canCrouch = true;
-  bool moveVertical = false;
-  float crouchSpeed = 30.f;
-  float crouchScale = 0.3f;
-  float crouchDelay = 0.f;
-  float friction = 0.f;
-  float crouchFriction = 0.f;
-  float physicsMass = 5.f;
-  float physicsRestitution = 0.f;
-};
+  if (ImGui::Button("Save")){
+      saveTrait("default");
+  }
 
-*/
+  auto& movementParams = movementParamsByName("default");
+
   ImGui::SliderFloat("Move Speed", &movementParams.moveSpeed, 0.f, 100.f);
   ImGui::SliderFloat("Move Speed Air", &movementParams.moveSpeedAir, 0.f, 100.f);
   ImGui::SliderFloat("Move Speed Water", &movementParams.moveSpeedWater, 0.f, 100.f);
@@ -894,34 +853,52 @@ void renderMixingDetailPanel(bool includePanel){
   }    
 }
 
+
+void renderPropPanel(bool includePanel, std::optional<objid> sceneId){
+  if (includePanel){
+    ImGui::Begin("Fps Props");
+  }
+
+  if (ImGui::Button("Explosive Barrel")){
+    createPrefab(createLocation(), "../afterworld/scenes/prefabs/objects/explosive.rawscene", sceneId.value());
+  }
+
+
+  if (ImGui::Button("Breakable Crate")){
+    createPrefab(createLocation(), "../afterworld/scenes/prefabs/objects/crate.rawscene", sceneId.value());
+  }
+
+  if (ImGui::Button("Terminal")){
+    createPrefab(createLocation(), "../afterworld/scenes/prefabs/objects/terminal.rawscene", sceneId.value());
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  }    
+}
+
+
 void initImGuiGameUi(){
-	registerWidget("testpanel", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-  		if (includePanel){
-  		  ImGui::Begin("testpanel");
-  		}
-  		if (includePanel){
-  		  ImGui::End();
-  		}   
-    });
 
     registerWidget("Game - Ball", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderBallGameplay(includePanel);
     });     
 
-    registerWidget("FPS - Movement", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderMovementPanel(includePanel);
-    });                 
-
-    registerWidget("FPS - Weapons", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("FPS - Weapons", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderWeaponsPanel(includePanel);
     });       
 
-    registerWidget("FPS - Traits", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("FPS - Traits", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderTraitsPanel(includePanel);
     });       
 
     registerWidget("FPS - Spawn", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderSpawnPanel(includePanel);
+    });     
+
+    registerWidget("FPS - Props", "fps", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderPropPanel(includePanel, sceneId);
     });     
 
     registerWidget("Trigger", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
@@ -937,11 +914,11 @@ void initImGuiGameUi(){
         renderArcade(includePanel, objectToDetail, sceneId);
     });
 
-    registerWidget("mixing", "sound", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("mixing", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderMixingPanel(includePanel);
     });
 
-    registerWidget("mixing-detail", "sound", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("mixing-detail", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderMixingDetailPanel(includePanel);
     });
 
@@ -956,6 +933,7 @@ void initImGuiGameUi(){
 
     registerView("Mixing", { "mixing" }, { "mixing-detail" });
 
+    registerView("FPS", { "FPS - Weapons" }, { "FPS - Traits" });
 
 }
 

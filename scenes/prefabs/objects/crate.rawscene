@@ -1,9 +1,7 @@
 crate:mesh:./res/models/box/crate.gltf
-#crate:physics_type:dynamic
-crate:physics:enabled
-#crate:health:1
-#crate:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
-crate:scale:0.2 0.2 0.2
+
+crate:health:50
+crate:destroy:../afterworld/scenes/prefabs/objects/crate-broken.rawscene
 crate:physics:enabled
 crate:physics_type:dynamic
 

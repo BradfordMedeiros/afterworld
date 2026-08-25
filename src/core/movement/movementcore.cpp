@@ -177,6 +177,59 @@ MovementParams parseTraitJson(std::string& filePath, std::string& name){
   return moveParams;
 }
 
+void saveTrait(std::string traitName){
+  std::string filePath = "../afterworld/data/config/fps/traits/";
+  filePath += traitName + ".json";
+
+
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  std::cout << "saveTrait: " << filePath << std::endl;
+  MovementParams& movementParams = traits.at(traitName);
+
+  doc.AddMember("moveSpeed", movementParams.moveSpeed, allocator);
+  doc.AddMember("moveSpeedAir", movementParams.moveSpeedAir, allocator);
+  doc.AddMember("moveSpeedWater", movementParams.moveSpeedWater, allocator);
+  doc.AddMember("jumpHeight", movementParams.jumpHeight, allocator);
+  doc.AddMember("maxAngleUp", movementParams.maxAngleUp, allocator);
+  doc.AddMember("maxAngleDown", movementParams.maxAngleDown, allocator);
+
+  doc.AddMember("moveSoundDistance", movementParams.moveSoundDistance, allocator);
+  doc.AddMember("moveSoundMintime", movementParams.moveSoundMintime, allocator);
+
+  doc.AddMember("groundAngle", movementParams.groundAngle, allocator);
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(movementParams.gravity.x, allocator);
+    value.PushBack(movementParams.gravity.y, allocator);
+    value.PushBack(movementParams.gravity.z, allocator);
+    doc.AddMember("gravity", value, allocator);
+  }
+
+  doc.AddMember("canCrouch", movementParams.canCrouch, allocator);
+  doc.AddMember("moveVertical", movementParams.moveVertical, allocator);
+
+  doc.AddMember("crouchSpeed", movementParams.crouchSpeed, allocator);
+  doc.AddMember("crouchScale", movementParams.crouchScale, allocator);
+  doc.AddMember("crouchDelay", movementParams.crouchDelay, allocator);
+  doc.AddMember("friction", movementParams.friction, allocator);
+  doc.AddMember("crouchFriction", movementParams.crouchFriction, allocator);
+
+  doc.AddMember("physicsMass", movementParams.physicsMass, allocator);
+  doc.AddMember("physicsRestitution", movementParams.physicsRestitution, allocator);
+  
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  auto strValue = buffer.GetString();
+  std::cout << strValue << std::endl;
+  realfiles::saveFile(filePath, strValue); 
+}
+
 void initMovementCoreFromConfig(){
   auto traitFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/fps/traits", { "json" });
   

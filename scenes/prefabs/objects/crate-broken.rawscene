@@ -9,7 +9,6 @@ crate/Cube.001:physics_mass:10
 crate/Cube.001:position:0 0.5 0
 crate/Cube.001:health:1
 crate/Cube.001:health-remove:self
-crate/Cube.001:health
 
 crate/Cube.002:physics:enabled
 crate/Cube.002:physics_type:dynamic

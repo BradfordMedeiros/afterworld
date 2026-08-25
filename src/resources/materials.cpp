@@ -244,8 +244,6 @@ std::unordered_map<std::string, EffekData> effects {
 
     { "sparks", EffekData { .path  = "./res/particles/sparks.efkefc" , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
     { "firework", EffekData { .path  = "./res/particles/firework.efkefc"  }},
-
-
 };
 
 void emitEffect(std::string effectName, glm::vec3 position){
