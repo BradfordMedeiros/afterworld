@@ -329,22 +329,6 @@ DockConfigApi dockConfigApi { // probably should be done via a prop for better c
 };
 
 
-ImageList loadImageListTextures(){
-  ImageList imageListDatas {
-    .images = {},
-  };
-  auto allTextures = gameapi -> listResources("textures");;
-  imageListDatas.images = {};
-  for (auto &texture : allTextures){
-    imageListDatas.images.push_back(ImageListImage {
-      .image = texture,
-    });
-  }
-  modlog("mainui", "loadImageListTextures");
-  return imageListDatas;
-}
-
-
 static bool firstTime = true;
 HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode){
   UiState& uiState = uiStateContext.uiState;
@@ -354,7 +338,6 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
     initStyles();
   }
   firstTime = false;
-  static ImageList imageListDatas = loadImageListTextures();
 
   //////////////////////////////
   // navlist uses this via extern

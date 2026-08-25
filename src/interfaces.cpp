@@ -180,19 +180,6 @@ UiContext getUiContext(){
       .pause = pauseOnMenu,
       .resume = resumeOnMenu,
     },
-    .worldPlayInterface = WorldPlayInterface {
-      .isGameMode = []() -> bool { return getGlobalState().routeState.inGameMode; },
-      .isPaused = isPaused,
-      .enterGameMode = []() -> void {},
-      .exitGameMode = []() -> void {},
-      .pause = pauseOnMenu,
-      .resume = resumeOnMenu,
-      .saveScene = []() -> void {
-        auto sceneId = activeSceneForSelected();
-        modassert(sceneId.has_value(), "save scene - no active scene");
-        gameapi -> saveScene(false /*include ids */, sceneId.value(), std::nullopt /* filename */);
-      },
-    },
     .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
     .loadScene = [](std::string scene) -> void {
       modassert(false, "load scene not yet implemented");

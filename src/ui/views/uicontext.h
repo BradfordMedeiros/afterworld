@@ -1,7 +1,6 @@
 #ifndef MOD_AFTERWORLD_COMPONENTS_UICONTEXT
 #define MOD_AFTERWORLD_COMPONENTS_UICONTEXT
 
-#include "../components/worldplay.h"
 #include "../components/console.h"
 #include "./ball.h"
 
@@ -47,7 +46,6 @@ struct UiContext {
   // api for the ui
   LevelUIInterface levels;
   PauseInterface pauseInterface;
-  WorldPlayInterface worldPlayInterface;
 
   std::function<std::vector<std::string>()> listScenes;
   std::function<void(std::string)> loadScene;
