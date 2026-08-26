@@ -860,6 +860,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void { 
+
+    drawImGuiText("this is some text");
+    drawImGuiText("this is more text");
+
     // CONTROLS ///////////////////////////
     gameapi -> idAtCoordAsync(getGlobalState().control.xNdc, getGlobalState().control.yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().control.selectedId = selectedId;

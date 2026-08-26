@@ -149,147 +149,6 @@ std::vector<std::pair<std::string, std::vector<SettingConfiguration>>> settingsI
       },
     },
   }},
-  { "Controls", std::vector<SettingConfiguration> {
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Jump",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Up",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Down",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Left",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Right",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Shoot",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Aim",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Crouch",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockTextboxNumeric {
-        .label = "Pickup",
-        .value = []() -> std::string { return "1.0"; },
-        .onEdit = [](float, std::string&) -> void { },
-      },
-      .initSetting = std::nullopt,
-    },
-  }},
-  { "Sound", std::vector<SettingConfiguration> {
-    SettingConfiguration {
-      .config = DockCheckboxConfig {
-        .label = "Sound Enabled",
-        .isChecked = getIsCheckedWorldInvert("sound", "mute"),
-        .onChecked = [](bool isChecked) -> void {
-          bool mute = !isChecked;
-          persistSave("settings", "mute", mute);
-          dockConfigApi.setAttribute("sound", "mute", mute);
-        },
-      },
-      .initSetting = []() -> void {
-        bool mute = getSaveBoolValue("settings", "mute", false);
-        dockConfigApi.setAttribute("sound", "mute", mute);
-      },
-    },
-    SettingConfiguration {
-      .config = DockSliderConfig {
-        .label = "Volume",
-        .min = 0.f,
-        .max = 1.f,
-        .percentage = []() -> float { 
-          auto volume = getWorldStateFloat("sound", "volume");
-          return volume;
-        },
-        .onSlide = [](float amount) -> void {
-          // sound:volume:0.2
-          dockConfigApi.setAttribute("sound", "volume", amount);
-          persistSave("settings", "volume", amount);
-        },
-      },
-      .initSetting = []() -> void {
-        auto volume = getSaveFloatValue("settings", "volume", 1.f);
-        dockConfigApi.setAttribute("sound", "volume", volume);
-      },
-    },
-
-    SettingConfiguration {
-      .config = DockSliderConfig {
-        .label = "Gameplay Volume",
-        .min = 0.f,
-        .max = 1.f,
-        .percentage = []() -> float { 
-          return getGameplayVolume();
-        },
-        .onSlide = [](float amount) -> void {
-          setGameplayVolume(amount);
-        },
-      },
-      .initSetting = std::nullopt,
-    },
-    SettingConfiguration {
-      .config = DockSliderConfig {
-        .label = "Music Volume",
-        .min = 0.f,
-        .max = 1.f,
-        .percentage = []() -> float { 
-          return getMusicVolume();
-        },
-        .onSlide = [](float amount) -> void {
-          setMusicVolume(amount);
-        },
-      },
-      .initSetting = std::nullopt,
-    },
-
-  }},
 };
 
 
@@ -400,8 +259,8 @@ Component menuList {
 Component settingsComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     std::vector<Component> elements;
-    elements.push_back(menuList);
-    elements.push_back(settingsInner);
+    //elements.push_back(menuList);
+    //elements.push_back(settingsInner);
 
     Layout outerLayout {
       .tint = glm::vec4(0.f, 0.f, 0.f, 0.f),//styles.secondaryColor,

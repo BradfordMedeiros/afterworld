@@ -27,6 +27,8 @@ const float margin = letterSizeNdi * 3;
 const float marginLeft = margin;
 const float marginBottom = margin;
 
+void drawImGuiText(std::string);
+
 void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer){
 	for (int i = 0; i < buffer.size(); i++){
 		AlertMessage& message = buffer.at(i);
@@ -38,7 +40,7 @@ void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer
 		}
 
 		auto textToDraw = amountToDraw2(message.message, message.time.value(), 100);
-		gameapi -> drawText(
+		/*gameapi -> drawText(
 			textToDraw, 
 			(-1 + marginLeft),
 			(-1 + (letterSizeNdi * 0.5) + marginBottom), 
@@ -51,7 +53,10 @@ void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer
 			std::nullopt,
 			std::nullopt,
 			std::nullopt
-		);
+		);*/
+
+		drawImGuiText(textToDraw);
+
 		break;
 	}
 }

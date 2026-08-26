@@ -73,4 +73,10 @@ bool rightMouseDown();
 bool middleMouseDown();
 glm::vec2 getMouseVelocity();
 
+struct ControlBinding {
+  std::string text;
+  int* currentKey;
+};
+std::vector<ControlBinding> controlBindings();
+
 #endif

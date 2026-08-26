@@ -727,6 +727,38 @@ void renderMixingPanel(bool includePanel){
   }    
 }
 
+namespace Mod {
+  bool Button(const char* title){
+    if(ImGui::Button(title)){
+      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
+      return true;
+    }
+    return false;
+  }
+
+  bool Button(const char* title, ImVec2 vec){
+    if(ImGui::Button(title, vec)){
+      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
+      return true;
+    }
+    return false;
+  }
+
+  bool Selectable(const char* label, bool selected = false,  ImGuiSelectableFlags flags = 0, const ImVec2& size = ImVec2(0, 0)){
+    if(ImGui::Selectable(label, selected, flags, size)){
+      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
+      return true;
+    }
+    return false;
+  }
+
+
+
+  
+
+}
+
+
 std::vector<std::string> listSoundFiles();
 void renderMixingDetailPanel(bool includePanel){
   if (includePanel){
@@ -878,9 +910,181 @@ void renderPropPanel(bool includePanel, std::optional<objid> sceneId){
   }    
 }
 
+std::string selectedSettingOption = "Graphics";
+
+
+void renderGameSettingsControlPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Fps Props");
+  }
+    float volume = 0.f;
+    bool muteSound = false;
+
+    std::vector<std::string> items {
+        "Graphics",
+        "Controls",
+        "Sound",
+    };
+    for (auto& item : items) {
+    if (Mod::Selectable(item.c_str(), false, 0, ImVec2(300, 40))) {
+      selectedSettingOption = item;
+    }
+  }
+  if (includePanel){
+    ImGui::End();
+  }    
+}
+
+
+void renderGraphicsPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Fps Graphics");
+  }
+
+  float volume = 0.f;
+  bool muteSound = false;
+  if (ImGui::Checkbox("Enable Bloom", &muteSound)){
+
+  }
+
+  std::vector<std::string> resolutions {
+    "1920x1080",
+    "720x1080",
+    "2560x1080",
+  };
+  if (ImGui::BeginCombo("Resolution", resolutions.at(0).c_str())){
+      for (int i = 0; i < resolutions.size(); i++){
+          bool selected = false;
+          if (Mod::Selectable(resolutions.at(i).c_str(), selected)){
+          }
+          if (selected){
+            ImGui::SetItemDefaultFocus();
+          }
+      }
+      ImGui::EndCombo();
+  }
+
+  if(ImGui::SliderFloat("Field of View", &volume, 45.0f, 115.0f)){
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }    
+}
+
+
+int toAscii(ImGuiKey key) {
+    if (key >= ImGuiKey_A && key <= ImGuiKey_Z)
+        return 'A' + (key - ImGuiKey_A);
+
+    if (key >= ImGuiKey_0 && key <= ImGuiKey_9)
+        return '0' + (key - ImGuiKey_0);
+
+    return 0;
+}
+
+
+bool renderKeyBinding(const char* title, int* keyBinding, bool isWaiting){
+  std::string buttonLabel(title);
+  buttonLabel += " - " + std::to_string(*keyBinding);
+
+  if (Mod::Button(buttonLabel.c_str(), ImVec2(120, 0))) {
+    return true;
+  }
+  if (isWaiting){
+    ImGui::SameLine();
+    ImGui::Text("Press a key...");
+  }
+  return false;
+}
+
+void renderControlsPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Fps Controls");
+  }
+
+    float volume = 0.f;
+    bool muteSound = false;
+    if (ImGui::Checkbox("Controls", &muteSound)){
+
+    }
+
+    static std::optional<std::string> currentKey;
+
+    auto controls = controlBindings();
+    for (auto& control : controls){
+      bool isWaiting = currentKey.has_value() && currentKey.value() == control.text;
+      auto clickedBinding = renderKeyBinding(control.text.c_str(), control.currentKey, isWaiting);
+      if (clickedBinding){
+        currentKey = control.text;
+      }
+    }
+
+    if (currentKey.has_value()) {
+      for (int key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key++) {
+          if (ImGui::IsKeyPressed((ImGuiKey)key)) {
+              auto ascii = toAscii((ImGuiKey)key);
+              for (auto& control : controls){
+                if (control.text == currentKey.value()){
+                  *control.currentKey = ascii;
+                  playMixedSound(getSymbol("interaction/activate"), std::nullopt);
+                }
+              }
+              currentKey = std::nullopt;
+              break;
+          }
+      }
+    }
+
+    if(ImGui::SliderFloat("Mouse Sensitivity ", &volume, 0.0f, 10.0f)){
+    }
+
+    if (Mod::Button("Restore Defaults")) {
+        ImGui::OpenPopup("Confirm Restore");
+    }
+    if (ImGui::BeginPopupModal("Confirm Restore", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar)) {
+        ImGui::Text("Are you sure you want to restore all defaults?");
+        if (Mod::Button("Yes")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (Mod::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    if (includePanel){
+      ImGui::End();
+    }    
+}
+void renderGameVolumePanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Fps Volume");
+  }
+
+    float volume = 0.f;
+    bool muteSound = false;
+    if (ImGui::Checkbox("Mute Sound", &muteSound)){
+
+    }
+    if(ImGui::SliderFloat("Master Volume ", &volume, 0.0f, 1.0f)){
+    }
+
+    auto gameplayVolume = getGameplayVolume();
+    if(ImGui::SliderFloat("Gameplay Volume ", gameplayVolume, 0.0f, 1.0f)){
+    }
+
+    auto musicVolume = getMusicVolume();
+    if(ImGui::SliderFloat("Music Volume ", musicVolume, 0.0f, 1.0f)){
+    }
+  if (includePanel){
+    ImGui::End();
+  }    
+}
+
 
 void initImGuiGameUi(){
-
     registerWidget("Game - Ball", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderBallGameplay(includePanel);
     });     
@@ -922,6 +1126,20 @@ void initImGuiGameUi(){
         renderMixingDetailPanel(includePanel);
     });
 
+    registerWidget("game-settings-select", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderGameSettingsControlPanel(includePanel);
+    });
+
+    registerWidget("game-settings-volume", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        if (selectedSettingOption == "Graphics"){
+          renderGraphicsPanel(includePanel);
+        }else if (selectedSettingOption == "Controls"){
+          renderControlsPanel(includePanel);
+        }else if (selectedSettingOption == "Sound"){
+          renderGameVolumePanel(includePanel);
+        }
+    });
+
     registerAction("Start", "Mode", []() -> void {
       startMode(false);
     });
@@ -934,6 +1152,9 @@ void initImGuiGameUi(){
     registerView("Mixing", { "mixing" }, { "mixing-detail" });
 
     registerView("FPS", { "FPS - Weapons" }, { "FPS - Traits" });
+
+
+    registerView("GameSettings", { "game-settings-select" }, { "game-settings-volume" });
 
 }
 

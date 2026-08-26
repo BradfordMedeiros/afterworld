@@ -30,62 +30,6 @@ int exitTerminalButton = 'R';
 int toggleThirdPersonButton = 'O';
 int reloadButton = 'H';
 
-void setControl(int controlSymbol, int key){
-	static int jumpSymbol = getSymbol("control-jump");
-	static int grindSymbol = getSymbol("control-grind");
-	static int reverseGrindSymbol = getSymbol("control-grind-reverse");
-	static int moveForwardSymbol = getSymbol("control-move-forward");
-	static int moveBackwardSymbol = getSymbol("control-move-backward");
-	static int moveLeftSymbol = getSymbol("control-move-left");
-	static int moveRightSymbol = getSymbol("control-move-right");
-	static int crouchSymbol = getSymbol("control-crouch");
-	static int interactSymbol = getSymbol("control-interact");
-
-	static int fireSymbol = getSymbol("control-fire");
-	static int aimSymbol = getSymbol("control-aim");
-	static int modifierSymbol = getSymbol("control-modifier");
-	static int teleportSymbol = getSymbol("control-teleport");
-	static int exitTerminalSymbol = getSymbol("control-exit-terminal");
-	static int toggleThirdPersonSymbol = getSymbol("control-third-person");
-	static int reloadSymbol = getSymbol("control-reload");
-
-	if (controlSymbol == jumpSymbol){
-		jumpKey = key;
-	}else if (controlSymbol == grindSymbol){
-		grindKey = key;
-	}else if (controlSymbol == reverseGrindSymbol){
-		reverseGrindKey = key;
-	}else if (controlSymbol == moveForwardSymbol){
-		moveFowardKey = key;
-	}else if (controlSymbol == moveBackwardSymbol){
-		moveBackwardKey = key;
-	}else if (controlSymbol == moveLeftSymbol){
-		moveLeftKey = key;
-	}else if (controlSymbol == moveRightSymbol){
-		moveRightKey = key;
-	}else if (controlSymbol == crouchSymbol){
-		crouchKey = key;
-	}else if (controlSymbol == interactSymbol){
-		interactKey = key;
-	}else if (controlSymbol == fireSymbol){
-		fireButton = key;
-	}else if (controlSymbol == aimSymbol){
-		aimButton = key;
-	}else if (controlSymbol == modifierSymbol){
-		modifierButton = key;
-	}else if (controlSymbol == teleportSymbol){
-		teleportButton = key;
-	}else if (controlSymbol == exitTerminalSymbol){
-		exitTerminalButton = key;
-	}else if (controlSymbol == toggleThirdPersonSymbol){
-		toggleThirdPersonButton = key;
-	}else if (controlSymbol == reloadSymbol){
-		reloadButton = key;
-	}else {
-		modassert(false, std::string("invalid control symbol: ") + nameForSymbol(controlSymbol));
-	}
-}
-
 bool isJumpKey(int key){
 	return key == jumpKey; // space
 }
@@ -679,4 +623,15 @@ bool middleMouseDown(){
 }
 glm::vec2 getMouseVelocity(){
   return getGlobalState().control.mouseVelocity;
+}
+
+std::vector<ControlBinding> controlBindings(){
+	return {
+		ControlBinding { .text = "Jump", .currentKey = &jumpKey },  
+		ControlBinding { .text = "Forward", .currentKey = &moveFowardKey },  
+		ControlBinding { .text = "Back", .currentKey = &moveBackwardKey },  
+		ControlBinding { .text = "Left", .currentKey = &moveLeftKey },  
+		ControlBinding { .text = "Right", .currentKey = &moveRightKey },  
+
+	};
 }

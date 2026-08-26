@@ -72,17 +72,11 @@ SoundData createSoundData(objid sceneId){
 
 float musicVolume = 1.f;
 float gameplayVolume = 1.f;
-void setMusicVolume(float volume){
-  musicVolume = volume;
+float* getMusicVolume(){
+  return &musicVolume;
 }
-void setGameplayVolume(float volume){
-  gameplayVolume = volume;
-}
-float getMusicVolume(){
-  return musicVolume;
-}
-float getGameplayVolume(){
-  return gameplayVolume;
+float* getGameplayVolume(){
+  return &gameplayVolume;
 }
 
 
