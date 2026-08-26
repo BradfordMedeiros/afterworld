@@ -12,6 +12,8 @@ void updateArcadeObj(objid id, std::string newType);
 void rebootMachine(objid id);
 glm::vec3* getColorGrade();
 float* getSaturation();
+float* getContrast();
+
 
 std::optional<std::string> FileExplorer(std::string directory);
 
@@ -507,9 +509,14 @@ void renderLevelPanel(bool includePanel){
 
     {
       auto saturation = getSaturation();
-      ImGui::SliderFloat("Saturation", saturation, -2.f, 1.f);
-
+      ImGui::SliderFloat("Saturation", saturation, -5.f, 2.f);
     }
+
+    {
+      auto contrast = getContrast();
+      ImGui::SliderFloat("Contrast", contrast, -2.f, 2.f);
+    }
+
 
     auto weather = currentWeather();
     {
@@ -989,14 +996,37 @@ void renderGraphicsPanel(bool includePanel){
 }
 
 
-int toAscii(ImGuiKey key) {
-    if (key >= ImGuiKey_A && key <= ImGuiKey_Z)
-        return 'A' + (key - ImGuiKey_A);
+int toGlfwKey(ImGuiKey key) {
+    if (key >= ImGuiKey_A && key <= ImGuiKey_Z) {
+        return GLFW_KEY_A + (key - ImGuiKey_A);
+    }
 
-    if (key >= ImGuiKey_0 && key <= ImGuiKey_9)
-        return '0' + (key - ImGuiKey_0);
+    if (key >= ImGuiKey_0 && key <= ImGuiKey_9) {
+        return GLFW_KEY_0 + (key - ImGuiKey_0);
+    }
 
-    return 0;
+    switch (key) {
+        case ImGuiKey_Space:        return GLFW_KEY_SPACE;
+
+        case ImGuiKey_LeftShift:    return GLFW_KEY_LEFT_SHIFT;
+        case ImGuiKey_RightShift:   return GLFW_KEY_RIGHT_SHIFT;
+
+        case ImGuiKey_LeftCtrl:     return GLFW_KEY_LEFT_CONTROL;
+        case ImGuiKey_RightCtrl:    return GLFW_KEY_RIGHT_CONTROL;
+
+        case ImGuiKey_LeftAlt:      return GLFW_KEY_LEFT_ALT;
+        case ImGuiKey_RightAlt:     return GLFW_KEY_RIGHT_ALT;
+
+        case ImGuiKey_CapsLock:     return GLFW_KEY_CAPS_LOCK;
+
+        case ImGuiKey_Enter:        return GLFW_KEY_ENTER;
+        case ImGuiKey_Tab:          return GLFW_KEY_TAB;
+        case ImGuiKey_Backspace:    return GLFW_KEY_BACKSPACE;
+        case ImGuiKey_Escape:       return GLFW_KEY_ESCAPE;
+
+        default:
+            return 0;
+    }
 }
 
 
@@ -1039,7 +1069,7 @@ void renderControlsPanel(bool includePanel){
     if (currentKey.has_value()) {
       for (int key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key++) {
           if (ImGui::IsKeyPressed((ImGuiKey)key)) {
-              auto ascii = toAscii((ImGuiKey)key);
+              auto ascii = toGlfwKey((ImGuiKey)key);
               for (auto& control : controls){
                 if (control.text == currentKey.value()){
                   *control.currentKey = ascii;

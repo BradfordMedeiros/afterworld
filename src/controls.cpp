@@ -11,24 +11,28 @@ void maybeRemoveControllableEntity(objid idRemoved);
 void createHitbox(objid id);
 void enterRagdoll(objid id);
 
-int jumpKey = 32;
-int grindKey = 'Q';
-int reverseGrindKey = 'Z';
-int moveFowardKey = 'W';
-int moveBackwardKey = 'S';
-int moveLeftKey = 'A';
-int moveRightKey = 'D';
-int crouchKey = 341;
-int interactKey = 'E';
-int pausekey = 256;   // escape 
+int jumpKey = GLFW_KEY_SPACE;
+int grindKey = GLFW_KEY_Q;
+int reverseGrindKey = GLFW_KEY_Z;
 
-int fireButton = 0;
-int aimButton = 1;
-int modifierButton = 340;  // shift
-int teleportButton = 'T';
-int exitTerminalButton = 'R';
-int toggleThirdPersonButton = 'O';
-int reloadButton = 'H';
+int moveFowardKey = GLFW_KEY_W;
+int moveBackwardKey = GLFW_KEY_S;
+int moveLeftKey = GLFW_KEY_A;
+int moveRightKey = GLFW_KEY_D;
+
+int crouchKey = GLFW_KEY_LEFT_CONTROL;
+int interactKey = GLFW_KEY_E;
+int pausekey = GLFW_KEY_ESCAPE;
+
+int fireButton = GLFW_MOUSE_BUTTON_LEFT;
+int aimButton = GLFW_MOUSE_BUTTON_RIGHT;
+
+int modifierButton = GLFW_KEY_LEFT_SHIFT;
+int teleportButton = GLFW_KEY_T;
+int exitTerminalButton = GLFW_KEY_R;
+int toggleThirdPersonButton = GLFW_KEY_O;
+int reloadButton = GLFW_KEY_H;
+
 
 bool isJumpKey(int key){
 	return key == jumpKey; // space
