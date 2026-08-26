@@ -10,6 +10,8 @@ void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool fo
 void resetLevel();
 void updateArcadeObj(objid id, std::string newType);
 void rebootMachine(objid id);
+glm::vec3* getColorGrade();
+float* getSaturation();
 
 std::optional<std::string> FileExplorer(std::string directory);
 
@@ -493,6 +495,20 @@ void renderLevelPanel(bool includePanel){
       if (ImGui::ColorEdit3("Ambient", color)){
         setAmbientLightColor(glm::vec3(color[0], color[1], color[2]));
       }
+    }
+
+    {
+      auto colorGrade = getColorGrade();
+      float color[3] = {colorGrade -> x, colorGrade -> y, colorGrade -> z};
+      if (ImGui::ColorEdit3("Color Grade", color)){
+        *colorGrade = glm::vec3(color[0], color[1], color[2]);
+      }
+    }
+
+    {
+      auto saturation = getSaturation();
+      ImGui::SliderFloat("Saturation", saturation, -2.f, 1.f);
+
     }
 
     auto weather = currentWeather();
