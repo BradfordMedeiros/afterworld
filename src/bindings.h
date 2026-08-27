@@ -43,7 +43,7 @@
 #include "./arcade/arcade.h"
 #include "./scene_routing.h"
 #include "./interfaces.h"
-#include "./editorui.h"
+#include "./ui/imgui/editorui.h"
 
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
