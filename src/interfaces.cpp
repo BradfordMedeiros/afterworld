@@ -180,21 +180,6 @@ UiContext getUiContext(){
       .pause = pauseOnMenu,
       .resume = resumeOnMenu,
     },
-    .listScenes = []() -> std::vector<std::string> { return gameapi -> listResources("scenefiles"); },
-    .loadScene = [](std::string scene) -> void {
-      modassert(false, "load scene not yet implemented");
-      goToLevel(scene, std::nullopt, false);
-    },
-    .newScene = [](std::string sceneName) -> void {
-      const std::string sceneFolder = "./res/scenes/";
-      gameapi -> createScene(sceneFolder + sceneName + ".rawscene");
-    },
-    .resetScene = []() -> void {
-      auto sceneId = activeSceneForSelected();
-      modassert(sceneId.has_value(), "resetScene  - no active scene");
-      gameapi -> resetScene(sceneId.value());
-    },
-    .activeSceneId = activeSceneForSelected,
     .playSound = []() -> void {
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
     },

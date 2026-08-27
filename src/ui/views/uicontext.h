@@ -47,27 +47,14 @@ struct UiContext {
   LevelUIInterface levels;
   PauseInterface pauseInterface;
 
-  std::function<std::vector<std::string>()> listScenes;
-  std::function<void(std::string)> loadScene;
-  std::function<void()> saveScene;
-  std::function<void(std::string)> newScene;
-  std::function<void()> resetScene;
-  std::function<std::optional<objid>()> activeSceneId;
-
   std::function<void()> playSound;
 
   ConsoleInterface consoleInterface;
 };
 
 
-struct UiMainContext {
-	std::function<void(std::function<void(bool closedWithoutInput, std::string input)>)> openNewSceneMenu;
-};
-
 struct UiManagerContext {
 	UiContext* uiContext;
-	UiMainContext uiMainContext;
-
 };
 
 #endif

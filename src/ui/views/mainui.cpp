@@ -167,21 +167,9 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
 }
 
 UiState createUiState(){
-  UiState uiState {
-    .imageListScrollAmount = 0,
-    .onGameObjSelected = std::nullopt,
-    .onInputBoxFn = std::nullopt,
-  
-    .colorPickerTitle = "color picker",
-    .onNewColor = std::nullopt,
-  
+  UiState uiState {    
     .focusedId = std::nullopt,
     .lastAutofocusedKey = "",
-  
-    .offset = 2,
-    .currentScene = -1,
-  
-    .dockedDocks = {},
   };
   return uiState;
 }
@@ -199,19 +187,6 @@ std::optional<AttributeValue> getWorldState(const char* object, const char* attr
 
 UiManagerContext uiManagerContext {
   .uiContext = NULL,
-  .uiMainContext = UiMainContext {
-    .openNewSceneMenu = [](std::function<void(bool closedWithoutInput, std::string input)> onInputBox) -> void { // replace with onInputBoxFn
-      modassert(commonState, "commonState is NULL");
-      windowSetEnabled(windowDialogSymbol, true);
-      commonState -> onInputBoxFn = [onInputBox](bool closedWithoutNewFile, std::string userInput) -> void {
-        onInputBox(closedWithoutNewFile, userInput);
-        std::cout << "open new scene user input is: " << userInput << std::endl;;
-        commonState -> onInputBoxFn = std::nullopt;
-        windowSetEnabled(windowDialogSymbol, false);
-      };
-      std::cout << "open new scene placeholder" << std::endl;
-    }
-  }
 };
 
 
@@ -341,15 +316,6 @@ void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, doubl
 
   auto scrollValue = static_cast<int>(amount);
   std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
-  uiState.imageListScrollAmount += (scrollValue * 5);
-  if (uiState.imageListScrollAmount < 0){
-    uiState.imageListScrollAmount = 0;
-  }
-
-  uiState.offset += scrollValue;
-  if (uiState.offset < 0){
-    uiState.offset = 0;
-  }
 
   rotateWheel(amount > 0);
 }
@@ -367,12 +333,6 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
     std::cout << uiStoreToStr() << std::endl;
   }
   if (button == 0 && action == 1){
-    if (selectedId.has_value() && uiState.onGameObjSelected.has_value()){
-      auto gameobjName = gameapi -> getGameObjNameForId(selectedId.value()).value();
-      uiState.onGameObjSelected.value()(selectedId.value(), gameobjName);
-      uiState.onGameObjSelected = std::nullopt;
-    }
-
     if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() <= handlerFns.maxManagedId){
       uiState.focusedId = selectedId.value();
     }

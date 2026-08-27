@@ -39,23 +39,8 @@ struct HandlerFns {
 RouterHistory& getMainRouterHistory();
 
 struct UiState {
-  int imageListScrollAmount;
-  std::optional<std::function<void(objid, std::string)>> onGameObjSelected;
-  std::optional<std::function<bool(bool isDirectory, std::string&)>> fileFilter;
-  std::optional<std::function<void(bool closedWithoutInput, std::string input)>> onInputBoxFn;
-
-  std::string colorPickerTitle;
-  std::optional<std::function<void(glm::vec4)>> onNewColor;
-
   std::optional<objid> focusedId;
   std::string lastAutofocusedKey;
-
-  int offset;
-  int currentScene;
-
-  std::set<std::string> dockedDocks;
-
-  
 };
 UiState createUiState();
 
