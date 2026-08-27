@@ -279,6 +279,8 @@ std::vector<RawLevelData> getRawLevelData(){
     std::string description("[no description]");
     std::string mode("ball");
     std::optional<std::string> weather;
+    glm::vec2 chromatic(0.f, 0.f);
+
     if (configExists){
       bool success = true;
       auto data = gameapi -> loadFromJsonFile2(configFile, &success, false);
@@ -314,6 +316,13 @@ std::vector<RawLevelData> getRawLevelData(){
         auto modePtr = std::get_if<std::string>(&data.at("mode"));
         mode = *modePtr;
       }
+
+      if (data.find("chromatic") != data.end()){
+        auto chromaticPtr = std::get_if<std::vector<float>>(&data.at("chromatic"));
+        modassert(chromaticPtr -> size() == 2, std::string("unexpected chromaticPtr value, got size = ") + std::to_string(chromaticPtr -> size()));
+        chromatic = glm::vec2(chromaticPtr -> at(0), chromaticPtr -> at(1));
+      }
+
     }
 
 
@@ -330,6 +339,7 @@ std::vector<RawLevelData> getRawLevelData(){
       .weather = weather,
       .audioClipPath = "../gameresources/sound/rain.wav",
       .mode = mode,
+      .chromatic = chromatic,
       .additionalTokens = {},
 
       .configFile = configFile,   
@@ -376,10 +386,9 @@ void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
       data["ambient"] = std::vector<float>({ updateLevel.ambient.value().r,  updateLevel.ambient.value().g, updateLevel.ambient.value().b });
     }
 
-    if (updateLevel.skyboxColor.has_value()){
-      data["skyboxcolor"] = std::vector<float>({ updateLevel.skyboxColor.value().r,  updateLevel.skyboxColor.value().g, updateLevel.skyboxColor.value().b });
+    if (updateLevel.chromatic.has_value()){
+      data["chromatic"] = std::vector<float>({ updateLevel.chromatic.value().x,  updateLevel.chromatic.value().y });
     }
-
 
     if (updateLevel.skyboxColor.has_value()){
       data["skyboxcolor"] = std::vector<float>({ updateLevel.skyboxColor.value().r,  updateLevel.skyboxColor.value().g, updateLevel.skyboxColor.value().b });
@@ -480,6 +489,8 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
         .skybox = rawLevel.skybox,
         .weather = rawLevel.weather,
         .audioClipPath = rawLevel.audioClipPath,
+        .chromatic = rawLevel.chromatic,
+
       };    
     }
   }
@@ -488,6 +499,7 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
     .skyboxColor = glm::vec3(0.f, 0.f, 1.f),
     .skybox = "./res/textures/skyboxs/desert/",
     .audioClipPath = "",
+    .chromatic = glm::vec2(0.f, 0.f),
   };
   return defaultScenario;
 }

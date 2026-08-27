@@ -147,6 +147,9 @@ void setScenarioOptions(ScenarioOptions& options){
   changeWeather(weather, (options.weather.has_value()  && options.weather.value() != "default") ? options.weather.value() : std::optional<std::string>(std::nullopt));
 
   defaultAudioClipPath = options.audioClipPath;
+
+  *getChromatic() = options.chromatic;
+
   modlog("set scenario options: ambient", print(options.ambientLight));
   modlog("set scenario options: skyboxColor", print(options.skyboxColor));
   modlog("set scenario options: skybox", print(options.skybox));

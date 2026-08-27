@@ -33,6 +33,7 @@ struct ScenarioOptions {
   std::string skybox;
   std::optional<std::string> weather;
   std::string audioClipPath;
+  glm::vec2 chromatic;
 };
 struct SceneRouterPath {
   std::vector<std::string> paths;
@@ -61,6 +62,8 @@ struct RawLevelData {
   std::optional<std::string> weather;
   std::string audioClipPath;
   std::string mode;
+  glm::vec2 chromatic;
+
   std::vector<std::vector<std::string>> additionalTokens;
 
   std::string configFile;
@@ -74,6 +77,7 @@ struct UpdateLevel {
   std::optional<glm::vec3> ambient;
   std::optional<glm::vec3> skyboxColor;
   std::optional<std::string> weather;
+  std::optional<glm::vec2> chromatic;
 };
 void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
 

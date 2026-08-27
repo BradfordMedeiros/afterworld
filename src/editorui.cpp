@@ -13,6 +13,7 @@ void rebootMachine(objid id);
 glm::vec3* getColorGrade();
 float* getSaturation();
 float* getContrast();
+glm::vec2* getChromatic();
 
 
 std::optional<std::string> FileExplorer(std::string directory);
@@ -517,6 +518,13 @@ void renderLevelPanel(bool includePanel){
       ImGui::SliderFloat("Contrast", contrast, -2.f, 2.f);
     }
 
+    auto chromatic = getChromatic();
+    {
+      ImGui::SliderFloat("chromatic.x", &chromatic->x, 0.f, 0.5f);
+      ImGui::SliderFloat("chromatic.y", &chromatic->y, 0.f, 0.5f);
+
+    }
+
 
     auto weather = currentWeather();
     {
@@ -539,7 +547,7 @@ void renderLevelPanel(bool includePanel){
       }
     }
 
-    if(ImGui::Button("Update")){
+    if(ImGui::Button("Save")){
       /// needs to be moved 
        std::cout << "uiSetLevelInfo here: " << description << std::endl;
 
@@ -550,6 +558,7 @@ void renderLevelPanel(bool includePanel){
   	     .ambient = ambient,
   	     .skyboxColor = skyboxCol,
          .weather = weather,
+         .chromatic = *chromatic,
   	   });
 
     }
