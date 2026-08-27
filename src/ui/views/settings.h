@@ -4,9 +4,9 @@
 #include "../components/common.h"
 #include "../components/basic/layout.h"
 #include "../components/basic/listitem.h"
-#include "./dock/dock.h"
 #include "../../gameworld/save.h"
 #include "../../resources/sound.h"
+#include "../../global.h"
 
 extern Component settingsComponent;
 

@@ -32,7 +32,6 @@
 #include "./global.h"
 #include "./ui/components/common.h"
 #include "./ui/components/basic/list.h"
-#include "./ui/components/basic/radiobutton.h"
 #include "./ui/components/basic/slider.h"
 #include "./ui/components/imagelist.h"
 #include "./ui/components/router.h"
