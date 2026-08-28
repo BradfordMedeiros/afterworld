@@ -407,6 +407,16 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
 }
 
 
+void renderMoreUi(){
+  ImGui::Begin("Custom Panel");
+  
+  auto view = viewByName(getSymbol("GameSettings"));
+  renderLayout(*view.value());
+
+  ImGui::End();
+  
+}
+
 void initImGuiGameUi(){
     registerWidget("Game - Ball", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderBallGameplay(includePanel);
@@ -466,13 +476,11 @@ void initImGuiGameUi(){
     });
 
 
-    registerView("Mixing", { "mixing" }, { "mixing-detail" });
+    registerView("Mixing", false,  { "mixing" }, { "mixing-detail" }, DIVIDED_LAYOUT);
+    registerView("FPS", false, { "FPS - Weapons" }, { "FPS - Traits" }, DIVIDED_LAYOUT);
+    registerView("GameSettings", true,{ "game-settings-select" }, { "game-settings-volume" }, SPLIT_LAYOUT);
 
-    registerView("FPS", { "FPS - Weapons" }, { "FPS - Traits" });
-
-
-    registerView("GameSettings", { "game-settings-select" }, { "game-settings-volume" });
-
+    setGuiFn(renderMoreUi);
 }
 
 
