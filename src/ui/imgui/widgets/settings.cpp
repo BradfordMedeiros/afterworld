@@ -269,6 +269,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 }
 
 
+// void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data, bool forceReload);
 
 void renderMainMenu(bool includePanel){
     static std::vector<MenuItem> menuItems {
@@ -276,19 +277,21 @@ void renderMainMenu(bool includePanel){
         .text = "CAMPAIGN",
         .onClick = []() -> void {
           std::cout << "list: CAMPAIGN clicked" << std::endl;
+          pushHistory({ "levelselect" }, false, std::nullopt, false);
         },
       },
       MenuItem { 
         .text = "SETTINGS",
         .onClick = []() -> void {
           std::cout << "list: SETTINGS clicked" << std::endl;
-    
+          pushHistory({ "settings" }, false, std::nullopt, false);
         },
       },
       MenuItem { 
         .text = "EXIT",
         .onClick = []() -> void {
           std::cout << "list: EXIT clicked" << std::endl;
+          exit(0);
         },
       },
     };
@@ -319,3 +322,4 @@ void renderDeadMenu(bool includePanel){
     };
     renderList(includePanel, "Game Over", menuItems);
 }
+

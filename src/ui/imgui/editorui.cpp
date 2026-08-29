@@ -451,6 +451,23 @@ void renderMoreUi(){
     auto view = viewByName(getSymbol("GameSettings"));
     renderLayout(*view.value());    
   }
+  
+  ImGui::Begin("Trigger",  nullptr, ImGuiWindowFlags_NoBackground);
+
+  ImGuiIO& io = ImGui::GetIO();
+  static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/cliche21.ttf", 128.0f);
+ 
+  ImGui::PushFont(bigFont);
+
+  if (uiSettings.showMainMenu){
+    ImGui::Text("AFTERWORLD");
+    auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
+    renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 200.f));
+  }
+  ImGui::PopFont();
+
+  ImGui::End();
+
 
   if (uiSettings.showPauseMenu){
     renderBackground();

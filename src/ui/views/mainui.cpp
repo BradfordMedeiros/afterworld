@@ -146,7 +146,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
 
 
   std::unordered_map<std::string, Component> routeToComponent = {
-    { "mainmenu/",  mainMenu },
+    { "mainmenu/",  emptyComponent },
     { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.125f)) },
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
     { "playing/*/",  playingView },
