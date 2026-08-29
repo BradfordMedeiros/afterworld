@@ -807,8 +807,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         onSceneRouteChange(sceneManagement, currentPath, forceLoad);
         modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
 
-        getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";
-        
+        getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";        
       }
     );
 
@@ -896,6 +895,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         .showMouse = interactState.showMouse || getGlobalState().userRequestedPause,
       };
     }
+
+    getUiSettings() -> showPauseMenu = global.routeState.paused;
+
     updateState();
 
     if (levelShortcutToLoad.has_value()){

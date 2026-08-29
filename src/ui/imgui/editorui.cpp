@@ -413,11 +413,51 @@ UiSettings* getUiSettings(){
   return &uiSettings;
 }
 
+// pos 0.5 is center, 1.f is right, 0.f is left
+// pos 0.5 is center, 1.f is up, 0.f is down
+// alignment -> 0,5 is center, 1.f is right, 0.f is left
+//            ->0.5 is center, 1.f is up, 0.f is down
+
+void renderBackground(){
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0.f, 0.f), screen, IM_COL32(0, 0, 0, 160));
+}
+
+void renderLayoutAlignUpCenterHorz(ImVec2 ndi, ImVec2 alignment, ImVec2 size){
+
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+
+    ImVec2 position(screen.x * ndi.x, screen.y * (1.f - ndi.y));
+
+    position.x -= size.x * (1.f - alignment.x);
+    position.y -= size.y * alignment.y;
+
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 1.f, 0.f, 1.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.2f));
+    
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(size);
+    ImGui::Begin("Layout", nullptr, ImGuiWindowFlags_NoDecoration);
+
+    renderPauseMenu(false);
+
+    ImGui::End();
+
+    ImGui::PopStyleColor(2);
+}
+
 void renderMoreUi(){
+
   if (uiSettings.showGameSettings){
     auto view = viewByName(getSymbol("GameSettings"));
     renderLayout(*view.value());    
   }
+
+  if (uiSettings.showPauseMenu){
+    renderBackground();
+    renderLayoutAlignUpCenterHorz(ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+  }
+
 }
 
 void initImGuiGameUi(){

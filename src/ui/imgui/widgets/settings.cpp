@@ -1,5 +1,8 @@
 #include "./settings.h"
 
+void resumeOnMenu();
+void goToMenu();
+
 void renderGraphicsPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Fps Graphics");
@@ -208,22 +211,17 @@ void renderGameSettingsView(bool includePanel){
 
 struct MenuItem {
   std::string text;
-};
-std::vector<MenuItem> menuItems {
-  MenuItem { .text = "CAMPAIGN" },
-  MenuItem { .text = "SETTINGS" },
-  MenuItem { .text = "EXIT" },
-
+  std::function<void()> onClick;
 };
 
-void renderMainMenu(bool includePanel)
-{
+
+void renderList(bool includePanel, const char* title, std::vector<MenuItem>& menuItems){
     if (includePanel){
-      ImGui::Begin("Main Panel", nullptr, ImGuiWindowFlags_NoBackground);
+      ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoBackground);
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.0f);
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/Walby-Regular.ttf", 32.0f);
 
     static int selected = 0;
 
@@ -253,6 +251,7 @@ void renderMainMenu(bool includePanel)
 
         if (ImGui::Selectable(menuItems.at(i).text.c_str(), selected == i, 0, ImVec2(itemWidth, 0))){
           selected = i;
+          menuItems.at(i).onClick();
         }
         if (ImGui::IsItemHovered()){
           selected = i;
@@ -269,59 +268,43 @@ void renderMainMenu(bool includePanel)
     }
 }
 
-void renderPauseMenu(bool includePanel)
-{
-    if (includePanel){
-      ImGui::Begin("Main Panel", nullptr, ImGuiWindowFlags_NoBackground);
-    }
 
-    ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.0f);
 
-    static int selected = 0;
-
-    const char* items[] = {
-        "Play",
-        "Pause",
+void renderMainMenu(bool includePanel){
+    static std::vector<MenuItem> menuItems {
+      MenuItem { 
+        .text = "CAMPAIGN",
+        .onClick = []() -> void {
+          std::cout << "list: CAMPAIGN clicked" << std::endl;
+        },
+      },
+      MenuItem { 
+        .text = "SETTINGS",
+        .onClick = []() -> void {
+          std::cout << "list: SETTINGS clicked" << std::endl;
+    
+        },
+      },
+      MenuItem { 
+        .text = "EXIT",
+        .onClick = []() -> void {
+          std::cout << "list: EXIT clicked" << std::endl;
+        },
+      },
     };
+    renderList(includePanel, "Main Panel", menuItems);
+}
 
-    ImGui::PushFont(bigFont);
-    ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-
-    float menuWidth = 0.0f;
-    for (int i = 0; i < 2; ++i){
-      menuWidth = std::max(menuWidth, ImGui::CalcTextSize(items[i]).x);
-    }
-        
-
-    float padding = 30.0f;
-    float itemWidth = menuWidth + padding * 2.0f;
-    float panelWidth = ImGui::GetContentRegionAvail().x;
-
-    // This centers the actual text
-    ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
-
-    for (int i = 0; i < 2; ++i){
-        // This centers the panael
-        ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
-        //ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
-
-        if (ImGui::Selectable(items[i], selected == i, 0, ImVec2(itemWidth, 0))){
-          selected = i;
-        }
-        if (ImGui::IsItemHovered()){
-          selected = i;
-        }
-            
-    }
-
-    ImGui::PopStyleVar();
-    ImGui::PopFont();
-    ImGui::PopStyleColor(3);
-
-    if (includePanel){
-        ImGui::End();
-    }
+void renderPauseMenu(bool includePanel){
+    static std::vector<MenuItem> menuItems {
+      MenuItem { 
+        .text = "Resume",
+        .onClick = resumeOnMenu,
+      },
+      MenuItem { 
+        .text = "Go to Menu",
+        .onClick = goToMenu,
+      },
+    };
+    renderList(includePanel, "Pause Panel", menuItems);
 }

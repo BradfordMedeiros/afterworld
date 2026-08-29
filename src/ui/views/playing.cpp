@@ -56,12 +56,6 @@ Component playingComponent {
       drawCenteredText(drawTools, "gameover", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
     }*/
 
-    if (playingOptions -> pauseOptions.has_value()){
-      auto pauseProps = pauseMenuProps(std::nullopt, playingOptions -> pauseOptions.value().resume, playingOptions -> pauseOptions.value().mainMenu);
-      auto pauseComponent = withPropsCopy(pauseMenuComponent, props);
-      pauseProps.props.push_back(PropPair { .symbol = interfaceSymbol, .value = playingOptions -> pauseOptions.value() });
-      return pauseComponent.draw(drawTools, pauseProps);     
-    }
 
     if (terminal.has_value()){
       Props terminalProps { 

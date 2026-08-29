@@ -12,6 +12,7 @@
 
 struct UiSettings {
   bool showGameSettings = false;
+  bool showPauseMenu = false;
 };
 UiSettings* getUiSettings();
 
