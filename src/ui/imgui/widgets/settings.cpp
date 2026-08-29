@@ -221,7 +221,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/Walby-Regular.ttf", 32.0f);
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/cliche21.ttf", 32.0f);
 
     static int selected = 0;
 
@@ -307,4 +307,15 @@ void renderPauseMenu(bool includePanel){
       },
     };
     renderList(includePanel, "Pause Panel", menuItems);
+}
+
+
+void renderDeadMenu(bool includePanel){
+    static std::vector<MenuItem> menuItems {
+      MenuItem { 
+        .text = "Go to Menu",
+        .onClick = goToMenu,
+      },
+    };
+    renderList(includePanel, "Game Over", menuItems);
 }

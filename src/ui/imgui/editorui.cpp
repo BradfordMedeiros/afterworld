@@ -423,8 +423,7 @@ void renderBackground(){
     ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0.f, 0.f), screen, IM_COL32(0, 0, 0, 160));
 }
 
-void renderLayoutAlignUpCenterHorz(ImVec2 ndi, ImVec2 alignment, ImVec2 size){
-
+void renderLayoutAlignUpCenterHorz(WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size){
     ImVec2 screen = ImGui::GetIO().DisplaySize;
 
     ImVec2 position(screen.x * ndi.x, screen.y * (1.f - ndi.y));
@@ -432,14 +431,14 @@ void renderLayoutAlignUpCenterHorz(ImVec2 ndi, ImVec2 alignment, ImVec2 size){
     position.x -= size.x * (1.f - alignment.x);
     position.y -= size.y * alignment.y;
 
-    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 1.f, 0.f, 1.f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.2f));
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 1.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.1f));
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
     ImGui::Begin("Layout", nullptr, ImGuiWindowFlags_NoDecoration);
 
-    renderPauseMenu(false);
+    renderWidget2(widget, false);
 
     ImGui::End();
 
@@ -455,7 +454,14 @@ void renderMoreUi(){
 
   if (uiSettings.showPauseMenu){
     renderBackground();
-    renderLayoutAlignUpCenterHorz(ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+    auto& widget = *widgetByNameSymbol(getSymbol("pause-menu")).value();
+    renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+  }
+
+  if (uiSettings.showDeadMenu){
+    renderBackground();
+    auto& widget = *widgetByNameSymbol(getSymbol("dead-menu")).value();
+    renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
   }
 
 }
@@ -515,6 +521,9 @@ void initImGuiGameUi(){
     });
     registerWidget("pause-menu", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderPauseMenu(includePanel);
+    });  
+    registerWidget("dead-menu", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderDeadMenu(includePanel);
     });  
 
 

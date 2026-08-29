@@ -1,11 +1,8 @@
 #include "./playing.h"
 
-UiMode uiMode = UiModeNone{};
-std::optional<TerminalConfig> terminal;
+extern UiMode uiMode;
 
-void changeUiMode(UiMode newUiMode){
-  uiMode = newUiMode;
-}
+std::optional<TerminalConfig> terminal;
 
 std::optional<BallModeUi*> getBallModeUI(){
   auto uiModeBall = std::get_if<BallModeUi>(&uiMode);

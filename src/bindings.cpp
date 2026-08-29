@@ -710,6 +710,27 @@ void onTranslateController(objid id, void* data){
   }
 }
 
+
+UiMode uiMode = UiModeNone{};
+void changeUiMode(UiMode newUiMode){
+  uiMode = newUiMode;
+
+  auto uiModeNone = std::get_if<UiModeNone>(&uiMode);
+  auto uiModeFps = std::get_if<FpsModeUi>(& uiMode);
+  auto uiModeBall = std::get_if<BallModeUi>(&uiMode);
+  auto uiModeLiveMenu = std::get_if<LiveMenu>(&uiMode);
+  auto uiModeGameOver = std::get_if<GameOverUi>(&uiMode);
+
+  if (uiModeGameOver){
+    getUiSettings() -> showDeadMenu = true;
+  }else {
+    getUiSettings() -> showDeadMenu = false;
+  }
+
+}
+
+
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   if (getArgEnabled("help")){
@@ -897,6 +918,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     getUiSettings() -> showPauseMenu = global.routeState.paused;
+    
 
     updateState();
 
