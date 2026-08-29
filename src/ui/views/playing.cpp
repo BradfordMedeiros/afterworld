@@ -82,12 +82,7 @@ Component playingComponent {
       auto hudProps = getDefaultProps();
       hudComponent.draw(drawTools, hudProps);   
     }else if (uiModeGameOver){
-      std::function<void()> goToMenu = []() -> void {
-        modassert(false, "goToMenu on dead menu not implemented");
-      };
-      auto deadComponent = withPropsCopy(pauseMenuComponent, deadMenuProps(std::nullopt, goToMenu));
-      auto defaultProps = getDefaultProps();
-      return deadComponent.draw(drawTools, defaultProps);    
+
     }
 
   	if (playingOptions -> showZoomOverlay.has_value()){

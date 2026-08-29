@@ -6,7 +6,7 @@
 #include "../components/game/zoom.h"
 #include "../components/game/score.h"
 #include "../components/game/terminal.h"
-#include "./pausemenu.h"
+#include "./uicontext.h"
 #include "./ball.h"
 #include "./mainmenu2.h"
 
@@ -34,7 +34,6 @@ std::optional<TerminalConfig*> getTerminalConfig();
 struct PlayingOptions {
 	std::optional<ZoomOptions> showZoomOverlay;
 	std::optional<ScoreOptions> scoreOptions;
-	std::optional<PauseOptions> pauseOptions;
 };
 
 

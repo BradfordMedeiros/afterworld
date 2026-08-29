@@ -34,7 +34,6 @@
 #include "./ui/components/basic/list.h"
 #include "./ui/components/router.h"
 #include "./ui/views/mainui.h"
-#include "./ui/views/pausemenu.h"
 #include "./collision.h"
 #include "./vector_gfx.h"
 #include "./gameworld/progress.h"

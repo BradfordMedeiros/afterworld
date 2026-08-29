@@ -102,7 +102,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
           .value = PlayingOptions { 
             .showZoomOverlay = uiContext.showZoomOverlay(),
             .scoreOptions = uiContext.getScoreConfig(),
-            .pauseOptions = uiContext.pauseOptions(),
           } 
         },
       },
