@@ -431,12 +431,13 @@ void renderLayoutAlignUpCenterHorz(WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 a
     position.x -= size.x * (1.f - alignment.x);
     position.y -= size.y * alignment.y;
 
-    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 1.f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.1f));
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
     ImGui::Begin("Layout", nullptr, ImGuiWindowFlags_NoDecoration);
+
 
     renderWidget2(widget, false);
 
@@ -452,21 +453,12 @@ void renderMoreUi(){
     renderLayout(*view.value());    
   }
   
-  ImGui::Begin("Trigger",  nullptr, ImGuiWindowFlags_NoBackground);
-
-  ImGuiIO& io = ImGui::GetIO();
-  static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/cliche21.ttf", 128.0f);
- 
-  ImGui::PushFont(bigFont);
 
   if (uiSettings.showMainMenu){
-    ImGui::Text("AFTERWORLD");
-    auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
-    renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 200.f));
+      auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
+      renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
   }
-  ImGui::PopFont();
 
-  ImGui::End();
 
 
   if (uiSettings.showPauseMenu){

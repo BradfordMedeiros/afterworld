@@ -156,10 +156,13 @@ void renderGameVolumePanel(bool includePanel){
   }
 
     float volume = 0.f;
-    bool muteSound = false;
-    if (ImGui::Checkbox("Mute Sound", &muteSound)){
+    bool muteSound = isMuted();
 
+
+    if (ImGui::Checkbox("Mute Sound", &muteSound)){
+      setIsMuted(muteSound);
     }
+
     if(ImGui::SliderFloat("Master Volume ", &volume, 0.0f, 1.0f)){
     }
 
@@ -221,15 +224,16 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/cliche21.ttf", 32.0f);
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.0f);
 
     static int selected = 0;
 
  
     ImGui::PushFont(bigFont);
-    ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, 0.6));
+    ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.f, 1.0f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(1.f, 0.f, 0.f, 1.0f));
 
     float menuWidth = 0.0f;
     for (int i = 0; i < menuItems.size(); ++i){
@@ -261,7 +265,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 
     ImGui::PopStyleVar();
     ImGui::PopFont();
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor(4);
 
     if (includePanel){
         ImGui::End();
@@ -272,23 +276,39 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 // void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data, bool forceReload);
 
 void renderMainMenu(bool includePanel){
+    ImGuiIO& io = ImGui::GetIO();
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 100.0f);
+
+    ImGui::PushFont(bigFont);
+
+    ImVec2 textSize = ImGui::CalcTextSize("Afterworld");
+    float width = ImGui::GetContentRegionAvail().x;
+    ImGui::SetCursorPosX(
+        ImGui::GetStyle().WindowPadding.x +
+        (width - textSize.x) * 0.5f
+    );
+
+    ImGui::Text("Afterworld");
+    ImGui::PopFont();
+    ImGui::Dummy(ImVec2(0, 20));
+
     static std::vector<MenuItem> menuItems {
       MenuItem { 
-        .text = "CAMPAIGN",
+        .text = "Campaign",
         .onClick = []() -> void {
           std::cout << "list: CAMPAIGN clicked" << std::endl;
           pushHistory({ "levelselect" }, false, std::nullopt, false);
         },
       },
       MenuItem { 
-        .text = "SETTINGS",
+        .text = "Settings",
         .onClick = []() -> void {
           std::cout << "list: SETTINGS clicked" << std::endl;
           pushHistory({ "settings" }, false, std::nullopt, false);
         },
       },
       MenuItem { 
-        .text = "EXIT",
+        .text = "Exit",
         .onClick = []() -> void {
           std::cout << "list: EXIT clicked" << std::endl;
           exit(0);
