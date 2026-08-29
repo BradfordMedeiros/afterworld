@@ -407,14 +407,17 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
 }
 
 
-void renderMoreUi(){
-  ImGui::Begin("Custom Panel");
-  
-  auto view = viewByName(getSymbol("GameSettings"));
-  renderLayout(*view.value());
 
-  ImGui::End();
-  
+UiSettings uiSettings{};
+UiSettings* getUiSettings(){
+  return &uiSettings;
+}
+
+void renderMoreUi(){
+  if (uiSettings.showGameSettings){
+    auto view = viewByName(getSymbol("GameSettings"));
+    renderLayout(*view.value());    
+  }
 }
 
 void initImGuiGameUi(){
@@ -463,9 +466,18 @@ void initImGuiGameUi(){
         renderGameSettingsControlPanel(includePanel);
     });
 
-    registerWidget("game-settings-volume", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("game-settings", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderGameSettingsView(includePanel);
     });
+
+    registerWidget("main-menu", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderMainMenu(includePanel);
+    });
+    registerWidget("pause-menu", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderPauseMenu(includePanel);
+    });  
+
+
 
     registerAction("Start", "Mode", []() -> void {
       startMode(false);
@@ -478,7 +490,7 @@ void initImGuiGameUi(){
 
     registerView("Mixing", false,  { "mixing" }, { "mixing-detail" }, DIVIDED_LAYOUT);
     registerView("FPS", false, { "FPS - Weapons" }, { "FPS - Traits" }, DIVIDED_LAYOUT);
-    registerView("GameSettings", true,{ "game-settings-select" }, { "game-settings-volume" }, SPLIT_LAYOUT);
+    registerView("GameSettings", true,{ "game-settings-select" }, { "game-settings" }, SPLIT_LAYOUT);
 
     setGuiFn(renderMoreUi);
 }

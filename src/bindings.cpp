@@ -806,6 +806,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         auto currentPath = fullHistoryStr();
         onSceneRouteChange(sceneManagement, currentPath, forceLoad);
         modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
+
+        getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";
+        
       }
     );
 

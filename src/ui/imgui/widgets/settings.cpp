@@ -205,3 +205,123 @@ void renderGameSettingsView(bool includePanel){
     renderGameVolumePanel(includePanel);
   }
 }
+
+struct MenuItem {
+  std::string text;
+};
+std::vector<MenuItem> menuItems {
+  MenuItem { .text = "CAMPAIGN" },
+  MenuItem { .text = "SETTINGS" },
+  MenuItem { .text = "EXIT" },
+
+};
+
+void renderMainMenu(bool includePanel)
+{
+    if (includePanel){
+      ImGui::Begin("Main Panel", nullptr, ImGuiWindowFlags_NoBackground);
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.0f);
+
+    static int selected = 0;
+
+ 
+    ImGui::PushFont(bigFont);
+    ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+
+    float menuWidth = 0.0f;
+    for (int i = 0; i < menuItems.size(); ++i){
+      menuWidth = std::max(menuWidth, ImGui::CalcTextSize(menuItems.at(i).text.c_str()).x);
+    }
+        
+
+    float padding = 30.0f;
+    float itemWidth = menuWidth + padding * 2.0f;
+    float panelWidth = ImGui::GetContentRegionAvail().x;
+
+    // This centers the actual text
+    ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+
+    for (int i = 0; i < menuItems.size(); ++i){
+        // This centers the panael
+        ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
+        //ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
+
+        if (ImGui::Selectable(menuItems.at(i).text.c_str(), selected == i, 0, ImVec2(itemWidth, 0))){
+          selected = i;
+        }
+        if (ImGui::IsItemHovered()){
+          selected = i;
+        }
+            
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::PopFont();
+    ImGui::PopStyleColor(3);
+
+    if (includePanel){
+        ImGui::End();
+    }
+}
+
+void renderPauseMenu(bool includePanel)
+{
+    if (includePanel){
+      ImGui::Begin("Main Panel", nullptr, ImGuiWindowFlags_NoBackground);
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.0f);
+
+    static int selected = 0;
+
+    const char* items[] = {
+        "Play",
+        "Pause",
+    };
+
+    ImGui::PushFont(bigFont);
+    ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+
+    float menuWidth = 0.0f;
+    for (int i = 0; i < 2; ++i){
+      menuWidth = std::max(menuWidth, ImGui::CalcTextSize(items[i]).x);
+    }
+        
+
+    float padding = 30.0f;
+    float itemWidth = menuWidth + padding * 2.0f;
+    float panelWidth = ImGui::GetContentRegionAvail().x;
+
+    // This centers the actual text
+    ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+
+    for (int i = 0; i < 2; ++i){
+        // This centers the panael
+        ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
+        //ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
+
+        if (ImGui::Selectable(items[i], selected == i, 0, ImVec2(itemWidth, 0))){
+          selected = i;
+        }
+        if (ImGui::IsItemHovered()){
+          selected = i;
+        }
+            
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::PopFont();
+    ImGui::PopStyleColor(3);
+
+    if (includePanel){
+        ImGui::End();
+    }
+}

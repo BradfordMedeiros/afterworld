@@ -6,3 +6,6 @@
 
 void renderGameSettingsControlPanel(bool includePanel);
 void renderGameSettingsView(bool includePanel);
+
+void renderMainMenu(bool includePanel);
+void renderPauseMenu(bool includePanel);

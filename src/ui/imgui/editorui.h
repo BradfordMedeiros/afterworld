@@ -10,6 +10,11 @@
 #include "./widgets/settings.h"
 #include "./common.h"
 
+struct UiSettings {
+  bool showGameSettings = false;
+};
+UiSettings* getUiSettings();
+
 void initImGuiGameUi();
 
 

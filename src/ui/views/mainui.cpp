@@ -262,6 +262,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
   if (!editorMode){
     auto routerProps = createRouterProps(*(uiStateContext.routerHistory), uiContext, selectedId);
     router.draw(drawTools, routerProps);    
+
   }
 
 
