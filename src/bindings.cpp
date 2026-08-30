@@ -830,6 +830,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
         getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";   
         getUiSettings() -> showMainMenu = currentPath == "mainmenu/";     
+        getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";     
+
       }
     );
 

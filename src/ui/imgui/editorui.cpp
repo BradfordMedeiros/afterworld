@@ -423,7 +423,7 @@ void renderBackground(){
     ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0.f, 0.f), screen, IM_COL32(0, 0, 0, 160));
 }
 
-void renderLayoutAlignUpCenterHorz(WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size){
+void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size){
     ImVec2 screen = ImGui::GetIO().DisplaySize;
 
     ImVec2 position(screen.x * ndi.x, screen.y * (1.f - ndi.y));
@@ -436,7 +436,7 @@ void renderLayoutAlignUpCenterHorz(WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 a
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
-    ImGui::Begin("Layout", nullptr, ImGuiWindowFlags_NoDecoration);
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration);
 
 
     renderWidget2(widget, false);
@@ -444,6 +444,28 @@ void renderLayoutAlignUpCenterHorz(WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 a
     ImGui::End();
 
     ImGui::PopStyleColor(2);
+}
+
+void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
+  ImVec2 available = ImGui::GetContentRegionAvail();
+
+  float leftWidth = available.x * 0.325f;
+  float rightWidth = available.x * 0.675f;
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 1.0f, 0.2f));
+  ImGui::BeginChild("Left", ImVec2(leftWidth, available.y));
+    renderWidget2(widgetOne, false);
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+
+  ImGui::SameLine();
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.f, 0.0f, 0.0f, 0.5f));
+  ImGui::BeginChild("Right", ImVec2(rightWidth, available.y));
+   // renderWidget2(widgetTwo, false);
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+
 }
 
 void renderMoreUi(){
@@ -456,21 +478,39 @@ void renderMoreUi(){
 
   if (uiSettings.showMainMenu){
       auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
-      renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+      renderLayoutAlignUpCenterHorz("main-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
   }
-
-
 
   if (uiSettings.showPauseMenu){
     renderBackground();
     auto& widget = *widgetByNameSymbol(getSymbol("pause-menu")).value();
-    renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+    renderLayoutAlignUpCenterHorz("pause-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
   }
 
   if (uiSettings.showDeadMenu){
     renderBackground();
     auto& widget = *widgetByNameSymbol(getSymbol("dead-menu")).value();
-    renderLayoutAlignUpCenterHorz(widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+    renderLayoutAlignUpCenterHorz("dead-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+  }
+
+  if (uiSettings.showLevelSelect){
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(screen);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+    ImGui::Begin("level-select-layout", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove  | ImGuiWindowFlags_NoBackground);
+
+    auto& widgetList = *widgetByNameSymbol(getSymbol("level-list")).value();
+    auto& widgetDetail = *widgetByNameSymbol(getSymbol("level-detail")).value();
+
+    renderLayoutHalf(widgetList, widgetDetail);
+
+    ImGui::End();
+
+    ImGui::PopStyleVar(2);
   }
 
 }
@@ -534,6 +574,17 @@ void initImGuiGameUi(){
     registerWidget("dead-menu", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderDeadMenu(includePanel);
     });  
+
+
+    registerWidget("level-list", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderLevelList(includePanel);
+    });  
+
+    registerWidget("level-detail", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderLevelDetail(includePanel);
+    });  
+
+
 
 
 

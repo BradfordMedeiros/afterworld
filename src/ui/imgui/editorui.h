@@ -15,6 +15,7 @@ struct UiSettings {
   bool showGameSettings = false;
   bool showPauseMenu = false;
   bool showDeadMenu = false;
+  bool showLevelSelect = false;
 };
 UiSettings* getUiSettings();
 

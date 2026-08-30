@@ -218,16 +218,16 @@ struct MenuItem {
 };
 
 
-void renderList(bool includePanel, const char* title, std::vector<MenuItem>& menuItems){
+void renderList(bool includePanel, const char* title, std::vector<MenuItem>& menuItems, bool centerText, ImFont* font = NULL){
     if (includePanel){
       ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoBackground);
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.0f);
-
+    static ImFont* defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.f);
     static int selected = 0;
 
+    ImFont* bigFont = font ? font : defaultFont;
  
     ImGui::PushFont(bigFont);
     ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, 0.6));
@@ -235,13 +235,13 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.f, 1.0f, 0.8f));
     ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(1.f, 0.f, 0.f, 1.0f));
 
-    float menuWidth = 0.0f;
+    bool fullWidth = true;
+    float menuWidth =  fullWidth ? ImGui::GetContentRegionAvail().x : 0.f;
     for (int i = 0; i < menuItems.size(); ++i){
       menuWidth = std::max(menuWidth, ImGui::CalcTextSize(menuItems.at(i).text.c_str()).x);
     }
         
-
-    float padding = 30.0f;
+    float padding = 0.0f;
     float itemWidth = menuWidth + padding * 2.0f;
     float panelWidth = ImGui::GetContentRegionAvail().x;
 
@@ -249,11 +249,10 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 
     for (int i = 0; i < menuItems.size(); ++i){
-        // This centers the panael
-        ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
-        //ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
-
-        if (ImGui::Selectable(menuItems.at(i).text.c_str(), selected == i, 0, ImVec2(itemWidth, 0))){
+        if (centerText){
+          ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
+        }
+        if (ImGui::Selectable(menuItems.at(i).text.c_str(), selected == i, 0, ImVec2(itemWidth, 0.f))){
           selected = i;
           menuItems.at(i).onClick();
         }
@@ -315,7 +314,7 @@ void renderMainMenu(bool includePanel){
         },
       },
     };
-    renderList(includePanel, "Main Panel", menuItems);
+    renderList(includePanel, "Main Panel", menuItems, true);
 }
 
 void renderPauseMenu(bool includePanel){
@@ -329,7 +328,7 @@ void renderPauseMenu(bool includePanel){
         .onClick = goToMenu,
       },
     };
-    renderList(includePanel, "Pause Panel", menuItems);
+    renderList(includePanel, "Pause Panel", menuItems, true);
 }
 
 
@@ -340,6 +339,167 @@ void renderDeadMenu(bool includePanel){
         .onClick = goToMenu,
       },
     };
-    renderList(includePanel, "Game Over", menuItems);
+    renderList(includePanel, "Game Over", menuItems, true);
+}
+
+
+
+void renderLevelList(bool includePanel){
+    if (includePanel){
+      ImGui::Begin("Level List", nullptr, ImGuiWindowFlags_NoBackground);
+    }
+
+    ImVec2 available = ImGui::GetContentRegionAvail();
+    ImVec2 cursor = ImGui::GetCursorPos();
+    ImVec2 childSize(available.x * 0.75f,  available.y * 0.75f);
+
+    ImGui::SetCursorPos(ImVec2(cursor.x + (available.x - childSize.x) * 0.5f, cursor.y + (available.y - childSize.y) * 0.5f));
+
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.0f, 0.0f, 0.5f));
+
+    ImGui::BeginChild("level-list-child", childSize);
+
+ //   ImVec2 cursor = ImGui::GetCursorPos();
+ //   ImGui::SetCursorPos(ImVec2(cursor.x + (ImGui::GetContentRegionAvail().x - panelWidth * 0.5f), cursor.y));
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImFontConfig config;
+    config.SizePixels = 12.0f;
+    static ImFont* smallFont = io.Fonts->AddFontDefault(&config);
+
+    ImGui::PushFont(smallFont);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 1.f, 1.f));
+    ImGui::Text("Levels");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    ImGui::Dummy(ImVec2(0, 20));
+
+    static std::vector<MenuItem> menuItems {
+      MenuItem { 
+        .text = "Level1",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level2",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level3",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level4",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level5",
+        .onClick = goToMenu,
+      },
+    };
+
+
+    renderList(false, "Level List", menuItems, true, smallFont);
+
+
+    ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, 50);
+    float availableWidth = ImGui::GetContentRegionAvail().x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (availableWidth - size.x) * 0.5f);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+
+    if (Mod::Button("Start", size)) {
+    }
+
+    ImGui::PopStyleVar();
+
+    ImGui::EndChild();
+
+    ImGui::PopStyleColor();
+
+    if (includePanel){
+        ImGui::End();
+    }
+
+}
+
+
+void renderLevelDetail(bool includePanel){
+    if (includePanel){
+      ImGui::Begin("Level Detail", nullptr, ImGuiWindowFlags_NoBackground);
+    }
+
+    ImVec2 available = ImGui::GetContentRegionAvail();
+    ImVec2 cursor = ImGui::GetCursorPos();
+    ImVec2 childSize(available.x * 0.75f,  available.y * 0.75f);
+
+    ImGui::SetCursorPos(ImVec2(cursor.x + (available.x - childSize.x) * 0.5f, cursor.y + (available.y - childSize.y) * 0.5f));
+
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.0f, 0.0f, 0.5f));
+
+    ImGui::BeginChild("level-list-child", childSize);
+
+ //   ImVec2 cursor = ImGui::GetCursorPos();
+ //   ImGui::SetCursorPos(ImVec2(cursor.x + (ImGui::GetContentRegionAvail().x - panelWidth * 0.5f), cursor.y));
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImFontConfig config;
+    config.SizePixels = 48.0f;
+    static ImFont* smallFont = io.Fonts->AddFontDefault(&config);
+
+    ImGui::PushFont(smallFont);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 1.f, 1.f));
+    ImGui::Text("Levels");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    ImGui::Dummy(ImVec2(0, 20));
+
+    static std::vector<MenuItem> menuItems {
+      MenuItem { 
+        .text = "Level1",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level2",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level3",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level4",
+        .onClick = goToMenu,
+      },
+      MenuItem { 
+        .text = "Level5",
+        .onClick = goToMenu,
+      },
+    };
+
+
+    renderList(false, "Level List", menuItems, true, smallFont);
+
+
+    ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, 50);
+    float availableWidth = ImGui::GetContentRegionAvail().x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (availableWidth - size.x) * 0.5f);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+
+    if (Mod::Button("Start", size)) {
+    }
+
+    ImGui::PopStyleVar();
+
+    ImGui::EndChild();
+
+    ImGui::PopStyleColor();
+
+    if (includePanel){
+        ImGui::End();
+    }
+
 }
 

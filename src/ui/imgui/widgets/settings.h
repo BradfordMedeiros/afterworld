@@ -10,3 +10,6 @@ void renderGameSettingsView(bool includePanel);
 void renderMainMenu(bool includePanel);
 void renderPauseMenu(bool includePanel);
 void renderDeadMenu(bool includePanel);
+
+void renderLevelList(bool includePanel);
+void renderLevelDetail(bool includePanel);
