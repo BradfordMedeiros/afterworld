@@ -320,10 +320,6 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
   commonState = &uiState;
 
   std::cout << "button: " << button << ", action: " << action << std::endl;
-  if (button == 0 && action == 0){
-    windowOnRelease();
-    std::cout << uiStoreToStr() << std::endl;
-  }
   if (button == 0 && action == 1){
     if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() <= handlerFns.maxManagedId){
       uiState.focusedId = selectedId.value();
