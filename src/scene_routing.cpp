@@ -142,7 +142,6 @@ std::vector<SceneRouterOptions> routerPathOptions = {
     },
     defaultRouterOptions("debug/"),
     defaultRouterOptions("debug/wheel/"),
-    defaultRouterOptions("gamemenu/elevatorcontrol/"),
 };
 
 std::vector<SceneRouterPath> routerPaths = {

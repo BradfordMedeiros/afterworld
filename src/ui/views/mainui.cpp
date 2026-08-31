@@ -100,29 +100,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     }
   );
 
-  auto elevatorView = withPropsCopy(
-    elevatorComponent,
-    Props {
-      .props = {
-        PropPair {
-          .symbol = valueSymbol, 
-          .value = ElevatorUiOptions {
-            .onClickUp = []() -> void {
-              modlog("main ui game", "elevator up");
-              modassert(false, "elavator up not implemented");
-            },
-            .onClickDown = []() -> void {
-              modlog("main ui game", "elevator down");
-              modassert(false, "elavator down not implemented");
-            },
-            .canClickUp = []() -> bool { return false; },
-            .canClickDown =  []() -> bool { return false; },
-          },
-        },
-      },
-    }   
-  );
-
   auto wheelView = withPropsCopy(
     wheelComponent,
     Props {
@@ -142,7 +119,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.125f)) },
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
     { "playing/*/",  playingView },
-    { "gamemenu/elevatorcontrol/", elevatorView },
     { "debug/wheel/",  simpleLayout(wheelView, glm::vec2(1.5f, 1.5f), defaultAlignment, glm::vec4(1.f, 0.f, 0.f, 1.f)) },
     { "loading/",  loadingComponent },
     { "",  emptyComponent  },

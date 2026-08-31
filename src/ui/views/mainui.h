@@ -8,7 +8,6 @@
 #include "./mainmenu.h"
 #include "./settings.h"
 #include "./uicontext.h"
-#include "../components/game/elevator.h"
 #include "../components/game/wheel.h"
 #include "../components/game/fade.h"
 #include "./navigation.h"
