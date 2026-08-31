@@ -5,7 +5,6 @@
 #include "../components/common.h"
 #include "../components/basic/list.h"
 #include "../components/router.h"
-#include "./mainmenu2.h"
 #include "./style.h"
 
 

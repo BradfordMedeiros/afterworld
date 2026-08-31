@@ -7,7 +7,6 @@
 #include "../components/game/terminal.h"
 #include "./uicontext.h"
 #include "./ball.h"
-#include "./mainmenu2.h"
 
 struct UiModeNone{};
 struct FpsModeUi {
@@ -15,6 +14,14 @@ struct FpsModeUi {
 };
 struct BallModeUi {
 	BallComponentOptions ballMode;
+};
+
+struct MainMenu2Options {
+	glm::vec4 backgroundColor;
+	float offsetY;
+
+	std::function<void()> onNewGame = []() -> void {};
+	std::function<void()> onContinueGame = []() -> void {};
 };
 struct LiveMenu {
 	MainMenu2Options options;

@@ -320,6 +320,35 @@ void renderMainMenu(bool includePanel){
 }
 
 void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
+
+    {
+      bool useCoolShader = true;
+
+      static bool didLoadShader = false;
+      static unsigned int* shaderId = nullptr;
+
+      if (useCoolShader) {
+          if (!didLoadShader) {
+              shaderId = gameapi->loadShader(
+                  "storyboard",
+                  "../afterworld/shaders/storyboard"
+              );
+      
+              didLoadShader = true;
+          }
+      }
+      ShapeOptions shapeOptions {
+        .shaderId = useCoolShader ? std::optional<unsigned int>(*shaderId) : std::nullopt,
+        .zIndex = -1,
+      };
+
+      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.5f), std::nullopt /*textureId*/, true, std::nullopt, "../gameresources/build/textures/backgrounds/test3.png", shapeOptions);
+
+
+
+    }
+
+
     ImGuiIO& io = ImGui::GetIO();
     static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/panoptic.otf", 30.0f);
 

@@ -70,14 +70,6 @@ Component playingComponent {
       };
       ballComponent.draw(drawTools, ballProps);    
       return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
-    }else if (uiModeLiveMenu){
-      Props defaultProps { 
-        .props = {
-          PropPair { .symbol = valueSymbol, .value = uiModeLiveMenu -> options }
-        }
-      };
-      mainMenu2.draw(drawTools, defaultProps);      
-      return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
     }else if (uiModeFps){
       auto hudProps = getDefaultProps();
       hudComponent.draw(drawTools, hudProps);   
