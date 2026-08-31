@@ -452,7 +452,7 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
   float leftWidth = available.x * 0.325f;
   float rightWidth = available.x * 0.675f;
 
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 1.0f, 0.2f));
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 1.0f, 0.f));
   ImGui::BeginChild("Left", ImVec2(leftWidth, available.y));
     renderWidget2(widgetOne, false);
   ImGui::EndChild();
@@ -460,9 +460,9 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
 
   ImGui::SameLine();
 
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.f, 0.0f, 0.0f, 0.5f));
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.f, 0.0f, 0.0f, 0.f));
   ImGui::BeginChild("Right", ImVec2(rightWidth, available.y));
-   // renderWidget2(widgetTwo, false);
+    renderWidget2(widgetTwo, false);
   ImGui::EndChild();
   ImGui::PopStyleColor();
 

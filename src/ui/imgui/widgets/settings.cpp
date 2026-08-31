@@ -1,7 +1,12 @@
 #include "./settings.h"
 
+extern CustomApiBindings* gameapi;
+
+
 void resumeOnMenu();
 void goToMenu();
+std::vector<UILevel> queryLevels();
+void goToLevel(std::string levelShortName);
 
 void renderGraphicsPanel(bool includePanel){
   if (includePanel){
@@ -276,7 +281,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 
 void renderMainMenu(bool includePanel){
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 100.0f);
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/panoptic.otf", 30.0f);
 
     ImGui::PushFont(bigFont);
 
@@ -343,6 +348,7 @@ void renderDeadMenu(bool includePanel){
 }
 
 
+static std::optional<UILevel> selectedLevel;
 
 void renderLevelList(bool includePanel){
     if (includePanel){
@@ -375,29 +381,17 @@ void renderLevelList(bool includePanel){
 
     ImGui::Dummy(ImVec2(0, 20));
 
-    static std::vector<MenuItem> menuItems {
-      MenuItem { 
-        .text = "Level1",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level2",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level3",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level4",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level5",
-        .onClick = goToMenu,
-      },
-    };
 
+    auto levels = queryLevels();
+    std::vector<MenuItem> menuItems;
+    for (auto& level : levels){
+      menuItems.push_back(MenuItem {
+        .text = level.name,
+        .onClick = [level]() -> void {
+          selectedLevel = level;
+        },
+      });
+    }
 
     renderList(false, "Level List", menuItems, true, smallFont);
 
@@ -408,9 +402,14 @@ void renderLevelList(bool includePanel){
 
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
 
+    ImGui::BeginDisabled(!selectedLevel.has_value());
     if (Mod::Button("Start", size)) {
+      if (selectedLevel.has_value()){
+        goToLevel(selectedLevel.value().shortcut);
+      }
     }
-
+    ImGui::EndDisabled();
+  
     ImGui::PopStyleVar();
 
     ImGui::EndChild();
@@ -426,80 +425,76 @@ void renderLevelList(bool includePanel){
 
 void renderLevelDetail(bool includePanel){
     if (includePanel){
-      ImGui::Begin("Level Detail", nullptr, ImGuiWindowFlags_NoBackground);
+        ImGui::Begin("Level Detail", nullptr, ImGuiWindowFlags_NoBackground);
     }
 
     ImVec2 available = ImGui::GetContentRegionAvail();
     ImVec2 cursor = ImGui::GetCursorPos();
-    ImVec2 childSize(available.x * 0.75f,  available.y * 0.75f);
 
-    ImGui::SetCursorPos(ImVec2(cursor.x + (available.x - childSize.x) * 0.5f, cursor.y + (available.y - childSize.y) * 0.5f));
+    float imageWidth = available.x * 0.75f;
+    float imageHeight = imageWidth * 9.0f / 16.0f;
+    ImVec2 imageSize(imageWidth, imageHeight);
 
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.2f, 0.0f, 0.0f, 0.5f));
+    std::string defaultTextureName = "./res/textures/wood.jpg";
 
-    ImGui::BeginChild("level-list-child", childSize);
+    auto textureId = gameapi->getTextureSamplerId(
+        selectedLevel.has_value()
+            ? selectedLevel.value().image
+            : defaultTextureName
+    ).value();
 
- //   ImVec2 cursor = ImGui::GetCursorPos();
- //   ImGui::SetCursorPos(ImVec2(cursor.x + (ImGui::GetContentRegionAvail().x - panelWidth * 0.5f), cursor.y));
+    // Center image horizontally and vertically
+    ImGui::SetCursorPos(ImVec2(
+        cursor.x,
+        cursor.y + (available.y - imageHeight) * 0.333f
+    ));
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImFontConfig config;
-    config.SizePixels = 48.0f;
-    static ImFont* smallFont = io.Fonts->AddFontDefault(&config);
+    ImGui::Image(
+        (ImTextureID)(intptr_t)textureId,
+        imageSize,
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+    );
 
-    ImGui::PushFont(smallFont);
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 1.f, 1.f));
-    ImGui::Text("Levels");
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+    //
+    // DETAILS
+    //
 
-    ImGui::Dummy(ImVec2(0, 20));
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
 
-    static std::vector<MenuItem> menuItems {
-      MenuItem { 
-        .text = "Level1",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level2",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level3",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level4",
-        .onClick = goToMenu,
-      },
-      MenuItem { 
-        .text = "Level5",
-        .onClick = goToMenu,
-      },
-    };
+    if (selectedLevel.has_value()) {
+        auto& level = selectedLevel.value();
 
+        ImGui::Text("%s", level.name.c_str());
 
-    renderList(false, "Level List", menuItems, true, smallFont);
+        ImGui::Spacing();
 
+        ImGui::TextWrapped(
+            "%s",
+            level.description.c_str()
+        );
 
-    ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, 50);
-    float availableWidth = ImGui::GetContentRegionAvail().x;
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (availableWidth - size.x) * 0.5f);
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
 
-    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+        ImGui::Text("Highest Score: %d", 1000);
 
-    if (Mod::Button("Start", size)) {
+        ImGui::Text("Difficulty: %s", "Hard");
+
+        ImGui::Text(
+            "Image: %s",
+            selectedLevel.value().image.c_str()
+        );
+
+    } else {
+        ImGui::TextDisabled("Select a level");
     }
 
-    ImGui::PopStyleVar();
-
-    ImGui::EndChild();
-
-    ImGui::PopStyleColor();
 
     if (includePanel){
         ImGui::End();
     }
-
 }
-

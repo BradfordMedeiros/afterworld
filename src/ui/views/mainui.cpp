@@ -85,14 +85,6 @@ Component withSimpleAnimatedLayout(Component& component){
 }
 
 Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
-  auto levelSelect = withPropsCopy(
-    levelSelectComponent, 
-    Props { .props = {
-        { .symbol = playLevelSymbol, .value = uiContext.consoleInterface.goToLevel } 
-      }
-    }
-  );
-
   auto playingView = withPropsCopy(
     playingComponent,
     Props {
@@ -147,7 +139,7 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
 
   std::unordered_map<std::string, Component> routeToComponent = {
     { "mainmenu/",  emptyComponent },
-    { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(levelSelect), 0.125f)) },
+    { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.125f)) },
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(settingsComponent), 0.25f)) },
     { "playing/*/",  playingView },
     { "gamemenu/elevatorcontrol/", elevatorView },
