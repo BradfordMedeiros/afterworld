@@ -26,7 +26,6 @@ struct PauseOptions {
 
 struct TerminalConfig;
 struct ZoomOptions;
-struct ScoreOptions;
 struct DebugConfig;
 struct RouterHistory;
 
@@ -40,8 +39,6 @@ struct UiContext {
   std::function<std::optional<ZoomOptions>()> showZoomOverlay;
   std::function<bool()> showKeyboard;
   std::function<std::optional<DebugConfig>()> debugConfig;
-
-  std::function<std::optional<ScoreOptions>()> getScoreConfig;
 
   // api for the ui
   LevelUIInterface levels;

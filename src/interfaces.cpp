@@ -166,9 +166,6 @@ UiContext getUiContext(){
       }
       return std::nullopt;
    },
-   .getScoreConfig = []() -> std::optional<ScoreOptions> {
-      return std::nullopt;
-   },
    .levels = LevelUIInterface {
       .goToLevel = [](Level& level) -> void {
         modassert(false, std::string("level ui goToLevel: ") + level.name);

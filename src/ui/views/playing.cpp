@@ -95,18 +95,6 @@ Component playingComponent {
   	}
 
 
-	  if (playingOptions -> scoreOptions.has_value()){
-	    float scorePadding = 0.02f;
-    	Props scoreProps {
-    	  .props = {
-    	    PropPair { .symbol = valueSymbol, .value = playingOptions -> scoreOptions.value() },
-    	    PropPair { .symbol = xoffsetSymbol, .value = 1.f - scorePadding },
-    	    PropPair { .symbol = yoffsetSymbol, .value = -1.f + scorePadding },
-    	  },
-    	};
- 	    scoreComponent.draw(drawTools, scoreProps);
-	  }
-
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },
 };
