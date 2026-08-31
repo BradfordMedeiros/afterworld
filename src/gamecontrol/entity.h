@@ -10,7 +10,6 @@
 #include "../ai/ai.h"
 #include "../gameworld/curves.h"
 #include "../options.h"
-#include "../ui/views/settings.h"
 #include "../animation/state-controller.h"
 
 struct ControlledPlayer {

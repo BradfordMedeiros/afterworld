@@ -15,6 +15,8 @@ extern int mainPlayerControl;
 extern std::vector<ControlledPlayer> players;
 
 
+void setZoom(float percentage, bool hideGun);
+
 ////////////////////// Core Add / Rm  //////////////////////
 void onAddEntity(objid idAdded){
 	modlog("controllable entity added id:", std::to_string(idAdded));

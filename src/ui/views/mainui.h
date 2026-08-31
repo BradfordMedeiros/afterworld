@@ -5,7 +5,6 @@
 #include "./utilview.h"
 #include "./uicontext.h"
 #include "./playing.h"
-#include "./settings.h"
 #include "./uicontext.h"
 #include "../components/game/wheel.h"
 #include "../components/game/fade.h"

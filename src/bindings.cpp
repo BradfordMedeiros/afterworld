@@ -123,6 +123,33 @@ void setSkybox(std::string skybox){
   });  
 }
 
+float originalFov = 90.f;
+void setZoom(float percentage, bool hideGun){
+  gameapi -> setLayerState({
+      StrValues {
+        .target = "",
+        .attribute = "fov",
+        .payload = std::to_string(originalFov * percentage),
+      },
+  });    
+  gameapi -> setLayerState({
+      StrValues {
+        .target = "transparency",
+        .attribute = "fov",
+        .payload = std::to_string(originalFov * percentage),
+      },
+  });    
+
+  gameapi -> setLayerState({
+      StrValues {
+        .target = "no_depth",
+        .attribute = "visible",
+        .payload = hideGun ? "false" : "true",
+      },
+  });  
+}
+
+
 std::optional<std::string> currentWeather(){
   return weather.weatherName;
 }
@@ -828,7 +855,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     disableTpsMesh = getArgEnabled("no-mesh-tp");
     validateAnimationControllerAnimations = getArgEnabled("validate-animation");
 
-    initSettings();
+    getGlobalState().control.invertY = getSaveBoolValue("settings", "invertY", false);
+    getGlobalState().control.xsensitivity = getSaveFloatValue("settings", "xsensitivity", 1.f);
+    getGlobalState().control.ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
+
     initImGuiGameUi();
     registerOnRouteChanged(
       getMainRouterHistory(),
