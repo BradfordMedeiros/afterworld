@@ -300,27 +300,61 @@ void renderMainMenu(bool includePanel){
       MenuItem { 
         .text = "Campaign",
         .onClick = []() -> void {
-          std::cout << "list: CAMPAIGN clicked" << std::endl;
           pushHistory({ "levelselect" }, false, std::nullopt, false);
         },
       },
       MenuItem { 
         .text = "Settings",
         .onClick = []() -> void {
-          std::cout << "list: SETTINGS clicked" << std::endl;
           pushHistory({ "settings" }, false, std::nullopt, false);
         },
       },
       MenuItem { 
         .text = "Exit",
         .onClick = []() -> void {
-          std::cout << "list: EXIT clicked" << std::endl;
           exit(0);
         },
       },
     };
     renderList(includePanel, "Main Panel", menuItems, true);
 }
+
+void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
+    ImGuiIO& io = ImGui::GetIO();
+    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/panoptic.otf", 30.0f);
+
+    ImGui::PushFont(bigFont);
+
+    ImVec2 textSize = ImGui::CalcTextSize("The Pyramid");
+    float width = ImGui::GetContentRegionAvail().x;
+    ImGui::SetCursorPosX(
+        ImGui::GetStyle().WindowPadding.x +
+        (width - textSize.x) * 0.5f
+    );
+
+    ImGui::Text("The Pyramid");
+    ImGui::PopFont();
+    ImGui::Dummy(ImVec2(0, 20));
+
+    static std::vector<MenuItem> menuItems {
+      MenuItem { 
+        .text = "New Game",
+        .onClick = liveMenu.newGame,
+      },
+      MenuItem { 
+        .text = "Continue",
+        .onClick = liveMenu.continueGame,
+      },
+      MenuItem { 
+        .text = "Quit",
+        .onClick = []() -> void {
+          exit(0);
+        },
+      },
+    };
+    renderList(includePanel, "Main Panel", menuItems, true);
+}
+
 
 void renderPauseMenu(bool includePanel){
     static std::vector<MenuItem> menuItems {

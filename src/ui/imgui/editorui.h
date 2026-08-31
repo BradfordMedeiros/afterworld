@@ -10,12 +10,18 @@
 #include "./widgets/settings.h"
 #include "./common.h"
 
+
+
+
 struct UiSettings {
   bool showMainMenu = false;
   bool showGameSettings = false;
   bool showPauseMenu = false;
   bool showDeadMenu = false;
   bool showLevelSelect = false;
+
+
+  std::optional<LiveMenuFn> liveMenu;
 };
 UiSettings* getUiSettings();
 

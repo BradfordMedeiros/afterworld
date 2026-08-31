@@ -727,6 +727,15 @@ void changeUiMode(UiMode newUiMode){
     getUiSettings() -> showDeadMenu = false;
   }
 
+  if (uiModeLiveMenu){
+    getUiSettings() -> liveMenu = LiveMenuFn {
+      .newGame = uiModeLiveMenu -> options.onNewGame,
+      .continueGame = uiModeLiveMenu -> options.onContinueGame,
+    };
+  }else{
+    getUiSettings() -> liveMenu = std::nullopt;
+  }
+
 }
 
 

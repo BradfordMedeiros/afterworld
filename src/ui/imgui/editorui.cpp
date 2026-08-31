@@ -513,6 +513,13 @@ void renderMoreUi(){
     ImGui::PopStyleVar(2);
   }
 
+  if (uiSettings.liveMenu.has_value()){
+      auto& widget = *widgetByNameSymbol(getSymbol("main-menu2")).value();
+      renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+
+  
+  }
+
 }
 
 void initImGuiGameUi(){
@@ -575,6 +582,12 @@ void initImGuiGameUi(){
         renderDeadMenu(includePanel);
     });  
 
+    registerWidget("main-menu2", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        if (getUiSettings() -> liveMenu.has_value()){
+          renderMainMenu2(includePanel, getUiSettings() -> liveMenu.value());
+        }
+    });
+    
 
     registerWidget("level-list", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderLevelList(includePanel);
