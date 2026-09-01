@@ -10,8 +10,7 @@ void renderGameSettingsView(bool includePanel);
 void renderMainMenu(bool includePanel);
 
 struct LiveMenuFn {
-  std::function<void()> newGame;
-  std::function<void()> continueGame;
+  LiveMenu* liveMenu = NULL;
 };
 void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu);
 

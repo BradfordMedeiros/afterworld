@@ -6,14 +6,36 @@
 #include "../components/game/zoom.h"
 #include "../components/game/terminal.h"
 #include "./uicontext.h"
-#include "./ball.h"
 
 struct UiModeNone{};
 struct FpsModeUi {
 	
 };
+
+struct BallLevelComplete {};
+struct BallComponentOptions {
+	std::optional<std::function<float()>> elapsedTime;
+	bool showElapsedTime = false;
+
+	std::optional<BallLevelComplete> levelComplete;
+
+	bool showPowerup = false;
+	std::optional<std::string> powerupTexture;
+	std::optional<float> powerupStartTime;
+	std::optional<float> powerupDuration;
+};
+
+struct BallLevelSelectInfo {
+	std::string world;
+	std::string level;
+	std::string parTime;
+	std::string bestTime;
+	int gems = 0;
+	int totalGems = 0;
+};
 struct BallModeUi {
 	BallComponentOptions ballMode;
+	std::optional<BallLevelSelectInfo> levelSelect;
 };
 
 struct MainMenu2Options {
@@ -23,8 +45,15 @@ struct MainMenu2Options {
 	std::function<void()> onNewGame = []() -> void {};
 	std::function<void()> onContinueGame = []() -> void {};
 };
+
+struct BallInfo {
+
+};
 struct LiveMenu {
 	MainMenu2Options options;
+	std::optional<BallInfo> ballInfo;
+
+	std::string text;
 };
 struct GameOverUi {};
 

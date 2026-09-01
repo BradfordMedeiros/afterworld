@@ -62,19 +62,9 @@ Component playingComponent {
     }
 
 
-    if (uiModeBall){
-      Props ballProps { 
-        .props = {
-          PropPair { .symbol = valueSymbol, .value = uiModeBall -> ballMode },
-        },
-      };
-      ballComponent.draw(drawTools, ballProps);    
-      return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
-    }else if (uiModeFps){
+    if (uiModeFps){
       auto hudProps = getDefaultProps();
       hudComponent.draw(drawTools, hudProps);   
-    }else if (uiModeGameOver){
-
     }
 
   	if (playingOptions -> showZoomOverlay.has_value()){

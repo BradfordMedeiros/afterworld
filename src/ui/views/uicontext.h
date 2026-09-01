@@ -2,7 +2,6 @@
 #define MOD_AFTERWORLD_COMPONENTS_UICONTEXT
 
 #include "../components/console.h"
-#include "./ball.h"
 
 struct Level {
   std::string scene;

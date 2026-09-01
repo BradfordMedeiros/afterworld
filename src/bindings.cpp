@@ -739,6 +739,7 @@ void onTranslateController(objid id, void* data){
 
 
 UiMode uiMode = UiModeNone{};
+
 void changeUiMode(UiMode newUiMode){
   uiMode = newUiMode;
 
@@ -756,15 +757,19 @@ void changeUiMode(UiMode newUiMode){
 
   if (uiModeLiveMenu){
     getUiSettings() -> liveMenu = LiveMenuFn {
-      .newGame = uiModeLiveMenu -> options.onNewGame,
-      .continueGame = uiModeLiveMenu -> options.onContinueGame,
+      .liveMenu = uiModeLiveMenu,
     };
   }else{
     getUiSettings() -> liveMenu = std::nullopt;
   }
 
-}
+  if (uiModeBall){
+    getUiSettings() -> ballModeUi = uiModeBall;
+  }else{
+    getUiSettings() -> ballModeUi = NULL;
+  }
 
+}
 
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -870,7 +875,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";   
         getUiSettings() -> showMainMenu = currentPath == "mainmenu/";     
         getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";     
-
       }
     );
 

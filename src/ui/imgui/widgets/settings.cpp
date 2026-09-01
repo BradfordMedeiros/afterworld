@@ -368,11 +368,11 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
     static std::vector<MenuItem> menuItems {
       MenuItem { 
         .text = "New Game",
-        .onClick = liveMenu.newGame,
+        .onClick = liveMenu.liveMenu -> options.onNewGame,
       },
       MenuItem { 
         .text = "Continue",
-        .onClick = liveMenu.continueGame,
+        .onClick =  liveMenu.liveMenu -> options.onContinueGame,
       },
       MenuItem { 
         .text = "Quit",

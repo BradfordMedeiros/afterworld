@@ -19,9 +19,8 @@ struct UiSettings {
   bool showPauseMenu = false;
   bool showDeadMenu = false;
   bool showLevelSelect = false;
-
-
   std::optional<LiveMenuFn> liveMenu;
+  BallModeUi* ballModeUi = NULL;
 };
 UiSettings* getUiSettings();
 

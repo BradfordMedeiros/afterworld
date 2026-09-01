@@ -108,77 +108,6 @@ struct DescInfo2 {
 	bool onOverworld;
 };
 
-DescInfo2 getDescriptionInfo2(MultiOrbView& multiOrbView){
-	bool onOverworld = isOverworld(multiOrbView);
-
-	std::string worldName = "test";  // multiOrbView.activeWorldName
-	std::optional<std::string> levelName = getSelectedLevel(multiOrbView);
-
-
-	auto progressInfo = getPlaylistProgressInfo();
-	auto worldProgressInfo = getWorldProgressInfo(worldName);
-	DescInfo2 descInfo {
-		.mainInfos = {
-			std::string("overworld: ") + (onOverworld ? "true" : "false"),
-			std::string("total gems: ") + std::to_string(progressInfo.gemCount) + " / " + std::to_string(progressInfo.totalGemCount),
-		},
-		.hubInfos = {
-			std::string("world: ") + worldProgressInfo.currentWorld,
-			std::string("completed: ") + std::to_string(progressInfo.completedLevels) + " / " + std::to_string(progressInfo.totalLevels),
-			std::string("total gems: ") + std::to_string(worldProgressInfo.gemCount) + " / " + std::to_string(worldProgressInfo.totalGemCount),
-		},
-		.levelInfos = {},
-		.onOverworld = onOverworld,
-	};
-
-	if (levelName.has_value()){
-		auto levelProgressInfo = getLevelProgressInfo(worldName, levelName.value());
- 		std::string parTime = print(levelProgressInfo.parTime, 2);
- 		std::string bestTime = "n/a";
- 		if(levelProgressInfo.bestTime.has_value()){
- 			bestTime = print(levelProgressInfo.bestTime.value(), 2);
- 		}
-		descInfo.levelInfos = {
-			std::string("current level: ") + levelName.value(),
-			std::string("par time: ") + parTime + "s",
-			std::string("best time: ") + bestTime + "s",
-			std::string("total gems: ") + std::to_string(levelProgressInfo.gemCount) + " / " + std::to_string(levelProgressInfo.totalGemCount),
-		};
-	}
-
-	descInfo.worldOrbInfos = getOrbUiData(multiOrbView);
-
-	return descInfo;
-}
-
-
-void drawLevelInfos(std::vector<std::string>& levelInfos){
-	for (int i = 0; i < levelInfos.size(); i++){
-	 	gameapi -> drawText(levelInfos.at(i), 0.6f, 0.7f - (i * 0.1f), 8, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	}
-}
-void drawDescInfo2(DescInfo2& descInfo){
-	for (int i = 0; i < descInfo.worldOrbInfos.size(); i++){
-		 auto& info = descInfo.worldOrbInfos.at(i);
-     gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.05f, 0.05f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-     if (info.isComplete){
-	 	   gameapi -> drawRect(0.95f, 0.75 + (-0.1 * i), 0.01f, 0.01f, false, glm::vec4(1.0f, 0.9216f, 0.2314f, 0.4f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-     }
-     if (info.selected){
-     	gameapi -> drawRect(0.95f + (0.05f * 0.5f), 0.75 + (-0.1 * i), 0.005f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.9f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);	  		
-     }
-	}
-
- 	for (int i = 0; i < descInfo.hubInfos.size(); i++){
-		gameapi -> drawText(descInfo.hubInfos.at(i), -0.9f, 0.7f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	}
-	for (int i = 0; i < descInfo.mainInfos.size(); i++){
-	 	gameapi -> drawText(descInfo.mainInfos.at(i), -0.9f, -0.6f - (i * 0.1f), 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	}
-	if (!descInfo.onOverworld){
-	 	drawLevelInfos(descInfo.levelInfos);	
-	}
-}
 
 objid ensureTempCamera(objid sceneId){
 	std::string cameraName = ">tempcamera-ball";
@@ -626,6 +555,8 @@ void startBallIntroMode(objid sceneId, bool inHub){
 			},
    	},
   });
+
+  
   showLetterBoxHold("This is the intro mode", 0.f);
 }
 
@@ -1147,7 +1078,7 @@ GameTypeInfo getBallMode(){
 				return gameapi -> timeSeconds(false) - ballModeOptions.ballStartTime.value();
 			};
 
-			getBallModeUI().value() -> ballMode.showElapsedTime = false;
+			getBallModeUI().value() -> ballMode.showElapsedTime = true;
 			getBallModeUI().value() -> ballMode.showPowerup = false;
 
 	    return *modeOptionsPtr; 
@@ -1308,13 +1239,8 @@ GameTypeInfo getBallMode(){
 	  	}
 	  	if (ballMode.worldView.has_value() &&  ballMode.worldView.value().onMultiview) {
 	  		auto currLevel = currentLevel();
-	  		std::cout << "on multiviewon multiview" << std::endl;
-
 	  		auto worldName = currLevel.value().world;
 	  		auto levelName = currLevel.value().level;
-
-	  		gameapi -> drawText(worldName, 0.f, 0.2f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	  		gameapi -> drawText(levelName, 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 
 				auto levelProgressInfo = getLevelProgressInfo(worldName, levelName);
  				std::string parTime = print(levelProgressInfo.parTime, 2);
@@ -1322,13 +1248,17 @@ GameTypeInfo getBallMode(){
  				if(levelProgressInfo.bestTime.has_value()){
  					bestTime = print(levelProgressInfo.bestTime.value(), 2);
  				}
-				std::vector<std::string> levelInfos {
-					std::string("current level: ") + levelName,
-					std::string("par time: ") + parTime + "s",
-					std::string("best time: ") + bestTime + "s",
-					std::string("total gems: ") + std::to_string(levelProgressInfo.gemCount) + " / " + std::to_string(levelProgressInfo.totalGemCount),
+				getBallModeUI().value() -> levelSelect = BallLevelSelectInfo{
+					.world = worldName,
+					.level = levelName,
+					.parTime = parTime,
+					.bestTime = bestTime,
+					.gems = levelProgressInfo.gemCount,
+					.totalGems = levelProgressInfo.totalGemCount,
 				};
-				drawLevelInfos(levelInfos);
+
+	  	}else{
+	  		getBallModeUI().value() -> levelSelect = std::nullopt;
 	  	}
 
 	  	// below is the ball game logic itself

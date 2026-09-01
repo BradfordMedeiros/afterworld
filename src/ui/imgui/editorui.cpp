@@ -514,18 +514,35 @@ void renderMoreUi(){
   }
 
   if (uiSettings.liveMenu.has_value()){
-      auto& widget = *widgetByNameSymbol(getSymbol("main-menu2")).value();
-      renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
-
-  
+      {
+        auto& widget = *widgetByNameSymbol(getSymbol("main-menu2")).value();
+        renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+      }
   }
 
+  if (uiSettings.ballModeUi){
+      {
+        if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value()){
+          renderBackground();
+        }
+        auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
+        renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
+      }
+  }
+  
 }
+
 
 void initImGuiGameUi(){
     registerWidget("Game - Ball", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderBallGameplay(includePanel);
     });     
+    registerWidget("game-ball-progress", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        if (getUiSettings() -> ballModeUi){
+          renderBallProgressInfo(includePanel, *getUiSettings() -> ballModeUi);
+        }
+    });     
+
 
     registerWidget("FPS - Weapons", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderWeaponsPanel(includePanel);
