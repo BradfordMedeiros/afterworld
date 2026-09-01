@@ -418,10 +418,42 @@ UiSettings* getUiSettings(){
 // alignment -> 0,5 is center, 1.f is right, 0.f is left
 //            ->0.5 is center, 1.f is up, 0.f is down
 
-void renderBackground(){
-    ImVec2 screen = ImGui::GetIO().DisplaySize;
-    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0.f, 0.f), screen, IM_COL32(0, 0, 0, 160));
+void renderBackground(const char* name, float opacity = 1.f, float widthPercent = 1.f, float heightPercent = 1.f){
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(ImVec2(viewport->Size.x * widthPercent, viewport->Size.y * heightPercent));
+
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove ;
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.f));
+
+    ImGui::Begin(name, nullptr, flags);
+
+    {
+      std::string defaultTextureName = "./res/textures/testgradient.png";
+      auto textureId = gameapi->getTextureSamplerId(defaultTextureName).value();
+
+      // Center image horizontally and vertically
+      //ImGui::SetCursorPos(ImVec2(cursor.x, cursor.y + (available.y - imageHeight) * 0.333));
+
+      ImGui::GetWindowDrawList()->AddImage(
+          (ImTextureID)(intptr_t)textureId,
+          viewport->Pos,
+          ImVec2(
+              viewport->Pos.x + viewport->Size.x,
+              viewport->Pos.y + viewport->Size.y
+          ),
+          ImVec2(0, 1),
+          ImVec2(1, 0),
+          IM_COL32(128  * opacity, 128 * opacity, 128 * opacity, 255)
+      );
+    }
+
+    ImGui::End();
+
+    ImGui::PopStyleColor();
 }
+
 
 void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size){
     ImVec2 screen = ImGui::GetIO().DisplaySize;
@@ -432,12 +464,11 @@ void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, Im
     position.y -= size.y * alignment.y;
 
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 0.f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.f));
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
     ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration);
-
 
     renderWidget2(widget, false);
 
@@ -445,6 +476,24 @@ void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, Im
 
     ImGui::PopStyleColor(2);
 }
+
+void renderLayoutCenter(const char* name, WidgetMenuItem2& widget){
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+    ImVec2 position(0.f, 0.f);
+
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
+    
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(ImVec2(screen.x, screen.y * 0.5));
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration);
+
+    renderWidget2(widget, false);
+
+    ImGui::End();
+    ImGui::PopStyleColor(2);
+}
+
 
 void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
   ImVec2 available = ImGui::GetContentRegionAvail();
@@ -482,13 +531,13 @@ void renderMoreUi(){
   }
 
   if (uiSettings.showPauseMenu){
-    renderBackground();
+    renderBackground("##pausemenu-background");
     auto& widget = *widgetByNameSymbol(getSymbol("pause-menu")).value();
     renderLayoutAlignUpCenterHorz("pause-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
   }
 
   if (uiSettings.showDeadMenu){
-    renderBackground();
+    renderBackground("##deadmenu-background");
     auto& widget = *widgetByNameSymbol(getSymbol("dead-menu")).value();
     renderLayoutAlignUpCenterHorz("dead-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
   }
@@ -523,11 +572,33 @@ void renderMoreUi(){
   if (uiSettings.ballModeUi){
       {
         if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value()){
-          renderBackground();
+          renderBackground("##levelcomplete-background");
         }
         auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
         renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
       }
+  }
+
+  static std::optional<float> showConsoleTime;
+  if (uiSettings.showConsole){
+    if (!showConsoleTime.has_value()){
+      showConsoleTime = gameapi -> timeSeconds(true);
+    }
+    float elapsedTime = gameapi -> timeSeconds(true) - showConsoleTime.value();
+
+    auto& widget = *widgetByNameSymbol(getSymbol("console")).value();
+
+    float sizeRatio = 0.75f;
+    float percentage = glm::min(1.f, elapsedTime / 0.25f);
+    //renderBackground("##console-background", percentage, 1.f, sizeRatio);
+    {
+      //renderLayoutCenter("console-layout", widget);
+      auto size = ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y * sizeRatio);
+      renderLayoutAlignUpCenterHorz("console-layout", widget, ImVec2(1.f, 1.f), ImVec2(0.f, 1.f - percentage), size);
+    }
+      
+  }else{
+    showConsoleTime = std::nullopt;
   }
   
 }
@@ -614,9 +685,9 @@ void initImGuiGameUi(){
         renderLevelDetail(includePanel);
     });  
 
-
-
-
+    registerWidget("console", "debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderConsole(includePanel);
+    });  
 
     registerAction("Start", "Mode", []() -> void {
       startMode(false);

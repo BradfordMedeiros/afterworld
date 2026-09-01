@@ -963,8 +963,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       };
     }
 
-    getUiSettings() -> showPauseMenu = global.routeState.paused;
-    
+    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole;
+    getUiSettings() -> showConsole = global.systemConfig.showConsole;
 
     updateState();
 

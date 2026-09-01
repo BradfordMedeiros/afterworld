@@ -581,7 +581,7 @@ Component consoleComponent {
     elements.push_back(textboxWithProps);
 
   	Layout layout {
-  	  .tint = glm::vec4(0.f, 0.f, 0.f, 0.9f),
+  	  .tint = glm::vec4(0.f, 0.f, 0.f, 0.f),
   	  .showBackpanel = true,
   	  .borderColor = glm::vec4(1.f, 1.f, 1.f, 1.f),
   	  .minwidth = CONSOLE_WIDTH,

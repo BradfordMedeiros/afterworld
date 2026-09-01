@@ -8,6 +8,7 @@
 #include "./widgets/sound.h"
 #include "./widgets/ball.h"
 #include "./widgets/settings.h"
+#include "./widgets/util.h"
 #include "./common.h"
 
 
@@ -21,6 +22,7 @@ struct UiSettings {
   bool showLevelSelect = false;
   std::optional<LiveMenuFn> liveMenu;
   BallModeUi* ballModeUi = NULL;
+  bool showConsole = false;
 };
 UiSettings* getUiSettings();
 
