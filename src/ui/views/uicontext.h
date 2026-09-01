@@ -12,16 +12,7 @@ struct LevelUIInterface {
   std::function<void(Level&)> goToLevel;
   std::function<void()> goToMenu;
 };
-struct PauseInterface {
-  std::function<void()> pause;
-  std::function<void()> resume;
-};
 
-
-struct PauseOptions {
-   std::function<void()> resume;
-   std::function<void()> mainMenu;
-};
 
 struct TerminalConfig;
 struct ZoomOptions;
@@ -31,17 +22,14 @@ struct RouterHistory;
 struct UiContext {
   // UI Options
   std::function<bool()> isDebugMode;
-  std::function<bool()> showEditor;
   std::function<bool()> showConsole;
   std::function<bool()> showScreenspaceGrid;
-  std::function<std::optional<PauseOptions>()> pauseOptions;
   std::function<std::optional<ZoomOptions>()> showZoomOverlay;
   std::function<bool()> showKeyboard;
   std::function<std::optional<DebugConfig>()> debugConfig;
 
   // api for the ui
   LevelUIInterface levels;
-  PauseInterface pauseInterface;
 
   std::function<void()> playSound;
 

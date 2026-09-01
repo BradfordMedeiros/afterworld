@@ -109,22 +109,8 @@ UiContext getUiContext(){
     }
     return getBoolWorldState("editor", "debug").value(); 
    },
-   .showEditor = []() -> bool {
-      bool showEditorOverload = false;
-      return showEditorOverload && getGlobalState().showEditor;
-   },
    .showConsole = showConsole,
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
-   .pauseOptions = []() -> std::optional<PauseOptions> { 
-        bool showPause = getGlobalState().routeState.paused && !getGlobalState().systemConfig.showConsole;
-        if (!showPause){
-          return std::nullopt;
-        }
-        return PauseOptions {
-          .resume = resumeOnMenu,
-          .mainMenu = goToMenu,
-        };
-    },
    .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
       auto entityId = getEntityForPlayerIndex(0);
       if (!entityId.has_value()){
@@ -172,10 +158,6 @@ UiContext getUiContext(){
         goToLevel(level.name, std::nullopt, false);
       },
       .goToMenu = goToMenu,
-    },
-    .pauseInterface = PauseInterface {
-      .pause = pauseOnMenu,
-      .resume = resumeOnMenu,
     },
     .playSound = []() -> void {
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
