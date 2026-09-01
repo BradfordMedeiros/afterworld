@@ -152,13 +152,6 @@ UiContext getUiContext(){
       }
       return std::nullopt;
    },
-   .levels = LevelUIInterface {
-      .goToLevel = [](Level& level) -> void {
-        modassert(false, std::string("level ui goToLevel: ") + level.name);
-        goToLevel(level.name, std::nullopt, false);
-      },
-      .goToMenu = goToMenu,
-    },
     .playSound = []() -> void {
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
     },

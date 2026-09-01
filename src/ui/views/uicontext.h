@@ -8,11 +8,6 @@ struct Level {
   std::string name;
 };
 
-struct LevelUIInterface {
-  std::function<void(Level&)> goToLevel;
-  std::function<void()> goToMenu;
-};
-
 
 struct TerminalConfig;
 struct ZoomOptions;
@@ -28,8 +23,6 @@ struct UiContext {
   std::function<bool()> showKeyboard;
   std::function<std::optional<DebugConfig>()> debugConfig;
 
-  // api for the ui
-  LevelUIInterface levels;
 
   std::function<void()> playSound;
 
