@@ -17,10 +17,6 @@ enum DebugPrintType {
   DEBUG_ANIMATION,
 };
 
-extern const int CONSOLE_LOG_LIMIT;
-extern const int CONSOLE_DISPLAY_LIMIT;
-extern bool showLog;
-
 struct ConsoleInterface {
   std::function<void()> setNormalMode;
   std::function<void()> setShowEditor;

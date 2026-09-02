@@ -3,7 +3,6 @@
 extern CustomApiBindings* gameapi;
 
 const int CONSOLE_LOG_LIMIT = 25;
-const int CONSOLE_DISPLAY_LIMIT = 10;
 bool showLog = false;
 
 std::deque<HistoryInstance> loadCommandHistory(){
