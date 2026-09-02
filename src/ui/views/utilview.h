@@ -4,15 +4,12 @@
 #include "../components/common.h"
 #include "./alert.h"
 #include "../components/game/keyboard.h"
-#include "../components/console.h"
 #include "./debug.h"
 
 struct UtilViewOptions {
 	bool showKeyboard;
-	bool showConsole;
 	bool showScreenspaceGrid;
 	std::string consoleKeyName;
-	ConsoleInterface* consoleInterface;
 	std::optional<glm::vec2> ndiCursor;
 	std::optional<DebugConfig> debugConfig;
 };

@@ -1,12 +1,10 @@
-#ifndef MOD_AFTERWORLD_COMPONENTS_CONSOLE
-#define MOD_AFTERWORLD_COMPONENTS_CONSOLE
+#pragma once 
 
 #include <deque>
-
-#include "./common.h"
-#include "./basic/layout.h"
-#include "./basic/listitem.h"
-#include "./basic/textbox.h"
+#include <functional>
+#include <iostream>
+#include <optional>
+#include "../../util.h"
 
 enum DebugPrintType {
   DEBUG_NONE,
@@ -18,6 +16,10 @@ enum DebugPrintType {
   DEBUG_ACTIVEPLAYER,
   DEBUG_ANIMATION,
 };
+
+extern const int CONSOLE_LOG_LIMIT;
+extern const int CONSOLE_DISPLAY_LIMIT;
+extern bool showLog;
 
 struct ConsoleInterface {
   std::function<void()> setNormalMode;
@@ -42,7 +44,23 @@ struct ConsoleInterface {
   std::function<void(std::string, float)> markLevelComplete;
 };
 
-extern Component consoleComponent;
+struct HistoryInstance {
+  std::string command;
+  bool valid;
+};
 
-#endif
+std::deque<HistoryInstance> loadCommandHistory();
 
+struct CommandDispatch {
+  std::string command;
+  std::function<std::optional<std::string>(ConsoleInterface&, std::string&, bool*)> fn;
+};
+
+extern std::vector<CommandDispatch> commands;
+extern std::deque<HistoryInstance> commandHistory;
+extern std::deque<HistoryInstance> logHistory;
+
+
+void initializeConsole();
+
+void executeCommand(ConsoleInterface& consoleInterface, std::string command);

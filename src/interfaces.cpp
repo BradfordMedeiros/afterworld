@@ -99,63 +99,8 @@ void pauseOnMenu(){
 void resumeOnMenu(){
   getGlobalState().userRequestedPause = false;
 }
-UiContext getUiContext(){
-  UiContext uiContext {
-   .isDebugMode = []() -> bool { 
-    auto args = gameapi -> getArgs();
-    bool debugUi = getArgEnabled("debug-ui");
-    if (debugUi){
-      return true;
-    }
-    return getBoolWorldState("editor", "debug").value(); 
-   },
-   .showConsole = showConsole,
-   .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
-   .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
-      auto entityId = getEntityForPlayerIndex(0);
-      if (!entityId.has_value()){
-        return std::nullopt;
-      }
-      auto zoomAmount = getEntityZoomAmount(entityId.value());
-      if (!zoomAmount.has_value()){
-        return std::nullopt;
-      }
-      return ZoomOptions {
-        .zoomAmount = zoomAmount.value(),
-      };
-   },
-   .showKeyboard = []() -> bool { 
-      return getGlobalState().systemConfig.showKeyboard;
-   },
-   .debugConfig = []() -> std::optional<DebugConfig> {
-      if (printType == DEBUG_GLOBAL){
-        return debugPrintGlobal();
-      }
-      if (printType == DEBUG_INVENTORY){
-        debugPrintInventory(scopenameToInventory);
-        return std::nullopt;
-      }
-      if (printType == DEBUG_GAMETYPE){
-        return debugPrintGametypes(gametypeSystem);
-      }
-      if (printType == DEBUG_AI){
-        return debugPrintAi(aiData);
-      }
-      if (printType == DEBUG_HEALTH){
-        return debugPrintHealth();
-      }
-      if (printType == DEBUG_ACTIVEPLAYER){
-        return debugPrintActivePlayer(getDefaultPlayerIndex());
-      }
-      if (printType == DEBUG_ANIMATION){
-        return debugPrintAnimations(getDefaultPlayerIndex());
-      }
-      return std::nullopt;
-   },
-    .playSound = []() -> void {
-      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
-    },
-    .consoleInterface = ConsoleInterface {
+
+ConsoleInterface consoleInterface  {
       .setNormalMode = setNormalMode,
       .setShowEditor = setEditorMode,
       .setFreeCam = setFreeCam,
@@ -205,6 +150,63 @@ UiContext getUiContext(){
         spawnFromAllSpawnpoints(director.managedSpawnpoints, tag.c_str());       
       },
       .markLevelComplete = markLevelComplete,
+};
+
+
+UiContext getUiContext(){
+  UiContext uiContext {
+   .isDebugMode = []() -> bool { 
+    auto args = gameapi -> getArgs();
+    bool debugUi = getArgEnabled("debug-ui");
+    if (debugUi){
+      return true;
+    }
+    return getBoolWorldState("editor", "debug").value(); 
+   },
+   .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
+   .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
+      auto entityId = getEntityForPlayerIndex(0);
+      if (!entityId.has_value()){
+        return std::nullopt;
+      }
+      auto zoomAmount = getEntityZoomAmount(entityId.value());
+      if (!zoomAmount.has_value()){
+        return std::nullopt;
+      }
+      return ZoomOptions {
+        .zoomAmount = zoomAmount.value(),
+      };
+   },
+   .showKeyboard = []() -> bool { 
+      return getGlobalState().systemConfig.showKeyboard;
+   },
+   .debugConfig = []() -> std::optional<DebugConfig> {
+      if (printType == DEBUG_GLOBAL){
+        return debugPrintGlobal();
+      }
+      if (printType == DEBUG_INVENTORY){
+        debugPrintInventory(scopenameToInventory);
+        return std::nullopt;
+      }
+      if (printType == DEBUG_GAMETYPE){
+        return debugPrintGametypes(gametypeSystem);
+      }
+      if (printType == DEBUG_AI){
+        return debugPrintAi(aiData);
+      }
+      if (printType == DEBUG_HEALTH){
+        return debugPrintHealth();
+      }
+      if (printType == DEBUG_ACTIVEPLAYER){
+        return debugPrintActivePlayer(getDefaultPlayerIndex());
+      }
+      if (printType == DEBUG_ANIMATION){
+        return debugPrintAnimations(getDefaultPlayerIndex());
+      }
+      return std::nullopt;
+   },
+    .playSound = []() -> void {
+      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
     },
   };
   return uiContext;

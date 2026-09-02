@@ -9,16 +9,6 @@ Component utilViewComponent {
       drawScreenspaceGrid(ImGrid{ .numCells = 10 });
     }
 
-    if (utilViewOptions -> showConsole){
-      Props props {
-        .props = {
-          { .symbol = consoleInterfaceSymbol, .value = utilViewOptions -> consoleInterface },
-          { .symbol = autofocusSymbol, .value = utilViewOptions -> consoleKeyName  },
-        },
-      };
-      consoleComponent.draw(drawTools, props);
-    }
-
     if (utilViewOptions -> showKeyboard){
       Props keyboardProps { 
         .props = {

@@ -2,6 +2,7 @@
 #include "./util.h"
 #include "./arcade/arcade.h"
 #include "./ui/views/uicontext.h"
+#include "./ui/components/console_core.h"
 #include "./ai/ai.h"
 #include "./core/movement/movement.h"
 #include "./core/health.h"

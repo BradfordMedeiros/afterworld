@@ -239,10 +239,8 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
           .symbol = valueSymbol, 
           .value = UtilViewOptions {
             .showKeyboard = uiContext.showKeyboard(),
-            .showConsole = uiContext.showConsole(),
             .showScreenspaceGrid = uiContext.showScreenspaceGrid(),
             .consoleKeyName = (std::string("console-") + uniqueNameSuffix()),
-            .consoleInterface = &uiContext.consoleInterface,
             .ndiCursor = ndiCursor,
             .debugConfig = uiContext.debugConfig(),
           } 
