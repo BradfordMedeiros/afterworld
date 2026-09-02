@@ -350,17 +350,22 @@ std::deque<HistoryInstance> logHistory = {};
 
 
 void initializeConsole(){
-  commandHistory = loadCommandHistory();
-  gameapi -> setLogEndpoint([](std::string& message) -> void {
-    std::cout << message << std::endl;
-    if (logHistory.size() >= CONSOLE_LOG_LIMIT){
-      logHistory.pop_front();
-    }
-    logHistory.push_back(HistoryInstance {
-      .command = message,
-      .valid = true,
+  static bool doOnce = true;
+  if (doOnce){
+    doOnce = false;
+    commandHistory = loadCommandHistory();
+    gameapi -> setLogEndpoint([](std::string& message) -> void {
+      std::cout << message << std::endl;
+      if (logHistory.size() >= CONSOLE_LOG_LIMIT){
+        logHistory.pop_front();
+      }
+      logHistory.push_back(HistoryInstance {
+        .command = message,
+        .valid = true,
+      });
     });
-  });
+  }
+
 }
 
 std::optional<CommandDispatch*> findCommand(std::string commandStr){

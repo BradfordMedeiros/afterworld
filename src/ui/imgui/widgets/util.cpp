@@ -5,6 +5,7 @@ extern ConsoleInterface consoleInterface;
 
 static bool showConsoleLog = false;
 
+
 void renderConsole(bool includePanel){
   if (includePanel){
     ImGui::Begin("Console");
@@ -12,86 +13,84 @@ void renderConsole(bool includePanel){
 
   initializeConsole();
 
-  float opacity = 0.5f;
-  {
-    std::string textureName = "./res/textures/testgradient.png";
-    auto textureId = gameapi->getTextureSamplerId(textureName).value();
+  static std::string textureName = "./res/textures/testgradient.png";
+  static std::optional<GLuint> textureId;
 
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    ImVec2 windowSize = ImGui::GetWindowSize();
-
-    ImGui::GetWindowDrawList()->AddImage(
-      (ImTextureID)(intptr_t)textureId,
-      windowPos,
-      ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
-      ImVec2(0, 1),
-      ImVec2(1, 0),
-      IM_COL32(128 * opacity, 128 * opacity, 128 * opacity, 255 * 0.9f)
-    );
+  if (!textureId.has_value()){
+    textureId = gameapi->getTextureSamplerId(textureName).value();
   }
 
-  auto& source = showConsoleLog ? logHistory : commandHistory; 
+  float opacity = 0.5f;
+
+  ImVec2 windowPos = ImGui::GetWindowPos();
+  ImVec2 windowSize = ImGui::GetWindowSize();
+
+  ImGui::GetWindowDrawList()->AddImage(
+    (ImTextureID)(intptr_t)textureId.value(),
+    windowPos,
+    ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
+    ImVec2(0, 1),
+    ImVec2(1, 0),
+    IM_COL32(128 * opacity, 128 * opacity, 128 * opacity, 255 * 0.9f)
+  );
+
+  auto& source = showConsoleLog ? logHistory : commandHistory;
+
   if (ImGui::Button("Clear")){
-      source.clear();
+    source.clear();
   }
 
   ImGui::Separator();
 
-  // Scrollable output area
   ImGui::BeginChild("ConsoleOutput", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true);
 
-  static std::string consoleText;
-  static std::vector<char> consoleBuffer;
+  static int selectedCommand = -1;
 
-  consoleText.clear();
+  for (int i = 0; i < source.size(); ++i){
+    const auto& command = source.at(i);
 
-  for (const auto& command : source){
-      consoleText += command.command;
-      consoleText += '\n';
+    if (!command.valid){
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
+    }
+
+    std::string label = command.command + "##" + std::to_string(i);
+
+    if (ImGui::Selectable(label.c_str(), selectedCommand == i)){
+      selectedCommand = i;
+    }
+
+    if (!command.valid){
+      ImGui::PopStyleColor();
+    }
   }
 
-  consoleBuffer.assign(consoleText.begin(), consoleText.end());
-  consoleBuffer.push_back('\0');
-
-  ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-
-  ImGui::InputTextMultiline(
-    "##ConsoleOutputText",
-    consoleBuffer.data(),
-    consoleBuffer.size(),
-    ImVec2(-FLT_MIN, -FLT_MIN),
-    ImGuiInputTextFlags_ReadOnly
-  );
-
-  ImGui::PopStyleColor();
+  if (selectedCommand >= 0 && selectedCommand < source.size() && ImGui::IsKeyPressed(ImGuiKey_C) && ImGui::GetIO().KeyCtrl){
+    ImGui::SetClipboardText(source.at(selectedCommand).command.c_str());
+  }
 
   ImGui::EndChild();
+
   ImGui::Separator();
 
   static char inputBuffer[256] = "";
 
   ImGui::SetNextItemWidth(-FLT_MIN);
 
-  if (ImGui::InputText(
-        "##ConsoleInput",
-        inputBuffer,
-        sizeof(inputBuffer),
-        ImGuiInputTextFlags_EnterReturnsTrue))
-  {
-      std::cout << "value is: " << inputBuffer << std::endl;
+  if (ImGui::InputText("##ConsoleInput", inputBuffer, sizeof(inputBuffer), ImGuiInputTextFlags_EnterReturnsTrue)){
+    std::cout << "value is: " << inputBuffer << '\n';
 
-      if (std::string(inputBuffer) == "log"){
-        showConsoleLog = true;
-      }else if (std::string(inputBuffer) == "console"){
-        showConsoleLog = false;
-      }
+    if (strcmp(inputBuffer, "log") == 0){
+      showConsoleLog = true;
+    }
+    else if (strcmp(inputBuffer, "console") == 0){
+      showConsoleLog = false;
+    }
 
-      executeCommand(consoleInterface, inputBuffer);
+    executeCommand(consoleInterface, inputBuffer);
 
-      inputBuffer[0] = '\0';
+    inputBuffer[0] = '\0';
   }
 
-  std::cout << "commandsize = " << commandHistory.size() << std::endl;
   if (includePanel){
     ImGui::End();
   }

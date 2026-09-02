@@ -468,7 +468,7 @@ void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, Im
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
-    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration);
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
     renderWidget2(widget, false);
 
