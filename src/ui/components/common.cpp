@@ -363,14 +363,6 @@ void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float n
   drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY - (height * 0.5f), fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
 
-void drawWindowX(DrawingTools& drawTools, BoundingBox2D& boundingBox, std::function<void()>& onClickX){
-  auto sides = calculateSides(boundingBox);
-  auto xMappingId = uniqueMenuItemMappingId();
-  bool xHovered =  drawTools.selectedId.has_value() && drawTools.selectedId.value() == xMappingId;
-  drawTextLeftHorzDownVert(drawTools, "x", sides.right, sides.top, 0.04f, xHovered ? glm::vec4(1.f, 1.f, 1.f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 0.4f), xMappingId);
-  drawTools.registerCallbackFns(xMappingId, onClickX);
-}
-
 void drawCircle(DrawingTools& drawTools, glm::vec2 center, float radius){
   int resolution = 12;
   auto radiansPerIncrement = (2 * M_PI) / resolution;
@@ -391,21 +383,7 @@ struct UiDataStore {
 };
 
 UiDataStore dataStore { .data = { }, .typeHints = {} };
-void registerUiSource(int symbol, void* data, DataStoreHint typeHint){
-  modassert(dataStore.data.find(symbol) == dataStore.data.end(), std::string("element already exists in data store: ") + std::to_string(symbol));
-  dataStore.data[symbol] = data;
-  dataStore.typeHints[symbol] = typeHint;
-  modlog("uistore", std::string("registered data: ") + std::to_string(symbol));
-}
-void unregisterUiSource(int symbol){
-  modlog("uistore", std::string("unregistered data: ") + std::to_string(symbol));
-  dataStore.data.erase(symbol);
-  dataStore.typeHints.erase(symbol);
-}
-void* uiConnect(int symbol){
-  modlog("uistore", std::string("connected to: " ) + std::to_string(symbol));
-  return dataStore.data.at(symbol);
-}
+
 struct UiStoreKeyValue {
   std::string key;
   std::string value;
