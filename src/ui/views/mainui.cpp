@@ -113,7 +113,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.25f)) },
     { "playing/*/",  playingView },
     { "debug/wheel/",  simpleLayout(wheelView, glm::vec2(1.5f, 1.5f), defaultAlignment, glm::vec4(1.f, 0.f, 0.f, 1.f)) },
-    { "loading/",  loadingComponent },
     { "",  emptyComponent  },
   };
 
