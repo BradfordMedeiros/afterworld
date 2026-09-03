@@ -2,7 +2,6 @@
 #define MOD_AFTERWORLD_COMPONENTS_UTILVIEW
 
 #include "../components/common.h"
-#include "./alert.h"
 #include "../components/game/keyboard.h"
 #include "./debug.h"
 

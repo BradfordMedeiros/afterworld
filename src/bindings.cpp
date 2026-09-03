@@ -933,9 +933,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
   binding.onFrame = [](int32_t id, void* data) -> void { 
 
-    drawImGuiText("this is some text");
-    drawImGuiText("this is more text");
-
     // CONTROLS ///////////////////////////
     gameapi -> idAtCoordAsync(getGlobalState().control.xNdc, getGlobalState().control.yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().control.selectedId = selectedId;
@@ -1122,6 +1119,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       onInGameUiFrame(uiStateContext, inGameUi, uiData.uiContext, std::nullopt, ndiCoord);
     
+      onAlertFrame();
+
+
       if (isInGameMode2()){
         std::optional<UiHealth> uiHealth;
         {
@@ -1289,13 +1289,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (key == "alert"){
       auto strValue = anycast<std::string>(value); 
       if (strValue != NULL){
-        sendUiAlert(*strValue);
+        pushAlertMessage(*strValue);
         return;
       }
 
       auto charStrValue = anycast<const char*>(value);
       if (charStrValue != NULL){
-        sendUiAlert(*charStrValue);
+        pushAlertMessage(*charStrValue);
         return;
       }
       modassert(false, "send alert invalid value");

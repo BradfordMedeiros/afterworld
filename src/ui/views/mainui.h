@@ -54,8 +54,6 @@ void popHistory();
 std::string getCurrentPath();
 std::string fullHistoryStr();
 std::optional<std::string> getPathParts(int index);
-void sendUiAlert(std::string message);
-
 
 #endif
 

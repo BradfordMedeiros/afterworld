@@ -19,14 +19,6 @@ Component utilViewComponent {
       keyboardComponent.draw(drawTools, keyboardProps);     
     }
     
-    {
-      Props defaultProps {
-        .props = {},
-      };
-      alertComponent.draw(drawTools, defaultProps);
-    }
-
-
     if (utilViewOptions -> ndiCursor.has_value()){
       const glm::vec2 cursorSizeNdi(0.02f, 0.02f);
       drawTools.drawRect(utilViewOptions -> ndiCursor.value().x, utilViewOptions -> ndiCursor.value().y, cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, "./res/textures/crosshairs/crosshair029.png", ShapeOptions { .zIndex = 6 }, std::nullopt);
