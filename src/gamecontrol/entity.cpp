@@ -16,6 +16,7 @@ extern std::vector<ControlledPlayer> players;
 
 
 void setZoom(float percentage, bool hideGun);
+void setZoomAmount(std::optional<float>);
 
 ////////////////////// Core Add / Rm  //////////////////////
 void onAddEntity(objid idAdded){
@@ -380,6 +381,7 @@ void setEntityZoom(objid id, float multiplier){
   }
   setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(movementEntities, multiplier, id);
+  setZoomAmount(isZoomedIn ? multiplier : std::optional<float>(std::nullopt));
 
   if (isZoomedIn){
 	  playMixedSound(getSymbol("fps/zoomin"), std::nullopt);

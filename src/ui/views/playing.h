@@ -3,7 +3,6 @@
 
 #include "../components/common.h"
 #include "../components/game/hud.h"
-#include "../components/game/zoom.h"
 #include "../components/game/terminal.h"
 #include "./uicontext.h"
 
@@ -65,10 +64,6 @@ std::optional<LiveMenu*> getLiveMenuUi();
 
 void setTerminalConfig(std::optional<TerminalConfig> terminalConfig);
 std::optional<TerminalConfig*> getTerminalConfig();
-
-struct PlayingOptions {
-	std::optional<ZoomOptions> showZoomOverlay;
-};
 
 
 extern Component playingComponent;

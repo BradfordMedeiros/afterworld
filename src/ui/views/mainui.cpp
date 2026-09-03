@@ -89,12 +89,6 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     playingComponent,
     Props {
       .props = {
-        PropPair {
-          .symbol = valueSymbol, 
-          .value = PlayingOptions { 
-            .showZoomOverlay = uiContext.showZoomOverlay(),
-          } 
-        },
       },
     }
   );

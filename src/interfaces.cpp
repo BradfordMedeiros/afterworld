@@ -59,7 +59,6 @@ AIInterface aiInterface {
 
 
 extern DebugPrintType printType;
-extern std::optional<ZoomOptions> zoomOptions;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;
 extern GameTypes gametypeSystem;
 extern Director director;
@@ -164,19 +163,6 @@ UiContext getUiContext(){
     return getBoolWorldState("editor", "debug").value(); 
    },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
-   .showZoomOverlay = []() -> std::optional<ZoomOptions> { 
-      auto entityId = getEntityForPlayerIndex(0);
-      if (!entityId.has_value()){
-        return std::nullopt;
-      }
-      auto zoomAmount = getEntityZoomAmount(entityId.value());
-      if (!zoomAmount.has_value()){
-        return std::nullopt;
-      }
-      return ZoomOptions {
-        .zoomAmount = zoomAmount.value(),
-      };
-   },
    .showKeyboard = []() -> bool { 
       return getGlobalState().systemConfig.showKeyboard;
    },

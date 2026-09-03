@@ -673,7 +673,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
     if (!isPaused() && !disableGameInput() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.entityId.value()), button, action, controlledPlayer.entityId.value(), selectDistance);
       if (uiUpdate.zoomAmount.has_value()){
-        //setEntityZoom(controlledPlayer.entityId.value(), uiUpdate.zoomAmount.value());
+        setEntityZoom(controlledPlayer.entityId.value(), uiUpdate.zoomAmount.value());
       }
     }
   }

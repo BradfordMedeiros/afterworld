@@ -46,6 +46,11 @@ void setUiGemCount(std::optional<GemCount> count){
   uiGemCount = count;
 }
 
+std::optional<float> zoomAmount;
+void setZoomAmount(std::optional<float> amount){
+  zoomAmount = amount;
+}
+
 enum DrawBarAlign { DRAWBAR_ALIGN_NONE, DRAWBAR_ALIGN_POSITIVE, DRAWBAR_ALIGN_NEGATIVE };
 void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::vec2 offset, DrawBarAlign align, glm::vec4 tint){
   float width = sizeNdi.x;
@@ -67,6 +72,8 @@ void drawbar(DrawingTools& drawTools, float percentage, glm::vec2 sizeNdi, glm::
 
 //std::optional<std::string> imageForHud = "./res/textures/badhud.png";
 std::optional<std::string> imageForHud = std::nullopt;
+
+
 
 Component hudComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -101,6 +108,17 @@ Component hudComponent {
 
     if (showActivate){
       drawTools.drawText("press e to activate", 0.75f, 0.7f, 8, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    }
+
+    const glm::vec4 backgroundColor(0.f, 0.f, 0.f, 0.6f);
+    //drawTools.drawRect(0.75f, 0.f, 0.5f, 2.f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    //drawTools.drawRect(-0.75f, 0.f, 0.5f, 2.f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    //drawTools.drawRect(0, 0.75f, 1.f, 0.5f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    //drawTools.drawRect(0, -0.75f, 1.f, 0.5f, false, backgroundColor, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+
+    if (zoomAmount.has_value()){
+      drawTools.drawRect(0, 0, 1.f, 1.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), true, std::nullopt, paths::UI_ZOOM_IMAGE, std::nullopt, std::nullopt);
+      drawTools.drawText(std::to_string(zoomAmount.value()) + "x " + std::string("zoom"), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
 
   	return BoundingBox2D {

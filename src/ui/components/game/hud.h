@@ -3,6 +3,7 @@
 
 #include "../common.h"
 #include "../../../global.h"
+#include "../../../resources/paths.h"
 
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
 
@@ -21,6 +22,7 @@ struct GemCount {
   int totalCount;
 };
 void setUiGemCount(std::optional<GemCount> count);
+void setZoomAmount(std::optional<float> amount);
 
 extern Component hudComponent;
 

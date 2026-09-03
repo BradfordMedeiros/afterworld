@@ -16,7 +16,6 @@ struct UiContext {
   // UI Options
   std::function<bool()> isDebugMode;
   std::function<bool()> showScreenspaceGrid;
-  std::function<std::optional<ZoomOptions>()> showZoomOverlay;
   std::function<bool()> showKeyboard;
   std::function<std::optional<DebugConfig>()> debugConfig;
   std::function<void()> playSound;
