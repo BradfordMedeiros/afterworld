@@ -106,6 +106,16 @@ ControlledPlayer& getControlledPlayer(int playerIndex){
 	return players.at(0);
 }
 
+bool hasControlledPlayer(int playerIndex){
+	for (auto& player : players){
+		if (player.viewport == playerIndex){
+			return true;
+		}
+	}
+	return false;
+}
+
+
 ControlledPlayer& getMainControlledPlayer(){
 	return players.at(getDefaultPlayerIndex());
 }
@@ -701,38 +711,3 @@ std::optional<bool> entityInThirdPersonByPlayerIndex(int playerIndex){
 	return thirdPerson;
 }
 
-DebugConfig debugPrintActivePlayer(int playerIndex){
-	ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
-
-  DebugConfig debugConfig { .data = {} };
-
-  {
-  	std::string activeCameraName = "";
-  	auto activeCameraId = gameapi -> getActiveCamera(std::nullopt);
-  	if (activeCameraId.has_value()){
-  		activeCameraName = gameapi -> getGameObjNameForId(activeCameraId.value()).value();
-  	}
-	  debugConfig.data.push_back({"activeCameraName", print(activeCameraId) + " [" + activeCameraName + "]" });
-	}
-
-	{
-	  std::string playerName = "";
-	  if (controlledPlayer.entityId.has_value()){
-	  	playerName = gameapi -> getGameObjNameForId(controlledPlayer.entityId.value()).value();
-	  }
-	  debugConfig.data.push_back({"activeplayer id", print(controlledPlayer.entityId) + + " [" + playerName + "]" });
-	}
-
-	{
-  	std::string cameraName = "";
-  	if (controlledPlayer.activePlayerManagedCameraId.has_value()){
-  		cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
-  	}
-  	debugConfig.data.push_back({"activePlayerManagedCameraId id", print(controlledPlayer.activePlayerManagedCameraId) + + " [" +  cameraName + "]" });
-	}
-
-	auto inThirdPerson = entityInThirdPersonByPlayerIndex(playerIndex);
-	debugConfig.data.push_back({ "mode", (inThirdPerson.has_value() && inThirdPerson.value()) ? "third person" : "first person" });			
-
-  return debugConfig;
-}

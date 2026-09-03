@@ -760,20 +760,3 @@ DebugConfig debugPrintAnimations(int playerIndex){
   }
   return debugConfig;
 }
-
-DebugConfig debugPrintGlobal(){
-	auto global = getGlobalState();
-  DebugConfig debugConfig { .data = {} };
-  debugConfig.data.push_back({ "showEditor", print(global.showEditor) });
-  debugConfig.data.push_back({ "showConsole", print(global.systemConfig.showConsole) });
-  debugConfig.data.push_back({ "showKeyboard" , print(global.systemConfig.showKeyboard), DebugItem {
-    .text = "TOGGLE",
-    .onClick = []() -> void {
-      toggleKeyboard();
-    },
-  }});
-  debugConfig.data.push_back({ "routeState.paused", print(global.routeState.paused) });
-  debugConfig.data.push_back({ "routeState.inGameMode", print(global.routeState.inGameMode) });
-  debugConfig.data.push_back({ "routeState.showMouse", print(global.routeState.showMouse) });
-  return debugConfig;
-}

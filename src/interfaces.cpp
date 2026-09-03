@@ -152,6 +152,20 @@ ConsoleInterface consoleInterface  {
 };
 
 
+std::optional<DebugConfig> debugConfig(){
+  if (printType == DEBUG_INVENTORY){
+    debugPrintInventory(scopenameToInventory);
+    return std::nullopt;
+  }
+  if (printType == DEBUG_HEALTH){
+    return debugPrintHealth();
+  }
+  if (printType == DEBUG_ANIMATION){
+    return debugPrintAnimations(getDefaultPlayerIndex());
+  }
+  return std::nullopt;
+}
+
 UiContext getUiContext(){
   UiContext uiContext {
    .isDebugMode = []() -> bool { 
@@ -166,32 +180,8 @@ UiContext getUiContext(){
    .showKeyboard = []() -> bool { 
       return getGlobalState().systemConfig.showKeyboard;
    },
-   .debugConfig = []() -> std::optional<DebugConfig> {
-      if (printType == DEBUG_GLOBAL){
-        return debugPrintGlobal();
-      }
-      if (printType == DEBUG_INVENTORY){
-        debugPrintInventory(scopenameToInventory);
-        return std::nullopt;
-      }
-      if (printType == DEBUG_GAMETYPE){
-        return debugPrintGametypes(gametypeSystem);
-      }
-      if (printType == DEBUG_AI){
-        return debugPrintAi(aiData);
-      }
-      if (printType == DEBUG_HEALTH){
-        return debugPrintHealth();
-      }
-      if (printType == DEBUG_ACTIVEPLAYER){
-        return debugPrintActivePlayer(getDefaultPlayerIndex());
-      }
-      if (printType == DEBUG_ANIMATION){
-        return debugPrintAnimations(getDefaultPlayerIndex());
-      }
-      return std::nullopt;
-   },
-    .playSound = []() -> void {
+   .debugConfig = debugConfig,
+   .playSound = []() -> void {
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
     },
   };

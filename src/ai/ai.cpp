@@ -317,11 +317,6 @@ void onAiOnMessage(AiData& aiData, std::string& key, std::any& value){
   }
 }
 
-DebugConfig debugPrintAi(AiData& aiData){
-  DebugConfig debugConfig { .data = {} };
-  debugConfig.data.push_back({{ "agents", std::to_string(aiData.agents.size()) }});
-  return debugConfig;
-}
 
 Agent nullAgent{};
 Agent& getAgent(AiData& aiData, objid id){

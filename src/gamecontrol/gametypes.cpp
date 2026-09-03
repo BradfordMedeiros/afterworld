@@ -36,16 +36,6 @@ void gametypesOnMessage(GameTypes& gametypes, std::string& key, std::any& value)
   }
 }
 
-DebugConfig debugPrintGametypes(GameTypes& gametype){
-  DebugConfig debugConfig { .data = {} };
-  if (!gametype.meta){
-    debugConfig.data.push_back({ "gametype", "no gametype" });
-  }else{
-    debugConfig.data.push_back({ "gametype", gametype.name });
-  }
-  return debugConfig;
-}
-
 void onGametypesFrame(GameTypes& gametypes){
   if (gametypes.meta.has_value()){
     gametypes.meta.value().onFrame(gametypes.gametype);

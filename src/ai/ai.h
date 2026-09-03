@@ -24,7 +24,6 @@ void onObjAdded(AiData& aiData, objid id);
 void onObjRemoved(AiData& aiData, objid id);
 
 void onAiOnMessage(AiData& aiData, std::string& key, std::any& value);
-DebugConfig debugPrintAi(AiData& aiData);
 
 void maybeReEnableAi(AiData& aiData, objid id);
 void maybeDisableAi(AiData& aiData, objid id);

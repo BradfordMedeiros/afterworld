@@ -8,7 +8,6 @@ struct Level {
 
 
 struct TerminalConfig;
-struct ZoomOptions;
 struct DebugConfig;
 struct RouterHistory;
 

@@ -4,7 +4,9 @@ extern CustomApiBindings* gameapi;
 extern ConsoleInterface consoleInterface;
 
 static bool showConsoleLog = false;
-
+extern AiData aiData;
+extern GameTypes gametypeSystem;
+extern GlobalState global;
 
 void renderConsole(bool includePanel){
   if (includePanel){
@@ -199,3 +201,110 @@ void onAlertFrame(){
   filterExpiredMessages2(alerts); // probably shouldn't be done every frame
 }
 
+void renderAi(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Debug Ai");
+  }
+
+  ImGui::Text("num agents: ");
+  ImGui::SameLine();
+  ImGui::Text(std::to_string(aiData.agents.size()).c_str());
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+
+void renderGameType(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Debug GameType");
+  }
+
+  if (!gametypeSystem.meta){
+    ImGui::Text("no gametype");
+  }else{
+    ImGui::Text(gametypeSystem.name.c_str());
+  }
+
+  ImGui::Text("Show Editor: ");
+  ImGui::SameLine();
+  ImGui::Text(global.showEditor ? "true" : "false");
+
+  ImGui::Text("Show Console: ");
+  ImGui::SameLine();
+  ImGui::Text(global.systemConfig.showConsole ? "true" : "false");
+
+  ImGui::Text("Show Keyboard: ");
+  ImGui::SameLine();
+  ImGui::Text(global.systemConfig.showKeyboard ? "true" : "false");
+  ImGui::SameLine();
+  if (ImGui::Button("Toggle Keyboard")){
+    global.systemConfig.showKeyboard = !global.systemConfig.showKeyboard;
+  }
+
+
+  ImGui::Text("routeState.paused: ");
+  ImGui::SameLine();
+  ImGui::Text(global.routeState.paused ? "true" : "false");
+
+  ImGui::Text("routeState.inGameMode: ");
+  ImGui::SameLine();
+  ImGui::Text(global.routeState.inGameMode ? "true" : "false");
+
+  ImGui::Text("routeState.showMouse: ");
+  ImGui::SameLine();
+  ImGui::Text(global.routeState.showMouse ? "true" : "false");
+
+
+  auto playerIndex = getDefaultPlayerIndex();
+
+
+  {
+    std::string activeCameraName = "";
+    auto activeCameraId = gameapi -> getActiveCamera(std::nullopt);
+    if (activeCameraId.has_value()){
+      activeCameraName = gameapi -> getGameObjNameForId(activeCameraId.value()).value();
+    }
+    ImGui::Text("Active Name: ");
+    ImGui::SameLine();
+    ImGui::Text(activeCameraName.c_str());
+  }
+
+  {
+    std::string playerName = "";
+    std::string cameraName = "";
+    bool isControlledPlayer = hasControlledPlayer(playerIndex);
+    if (isControlledPlayer){
+      ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+      if (controlledPlayer.entityId.has_value()){
+        playerName = gameapi -> getGameObjNameForId(controlledPlayer.entityId.value()).value();
+      }      
+      if (controlledPlayer.activePlayerManagedCameraId.has_value()){
+        cameraName = gameapi -> getGameObjNameForId(controlledPlayer.activePlayerManagedCameraId.value()).value();
+      }
+    }
+
+    ImGui::Text("Player Obj Name");
+    ImGui::SameLine();
+    ImGui::Text(playerName == "" ? "[no player name]" : playerName.c_str());
+
+    ImGui::Text("activePlayerManagedCameraId Name");
+    ImGui::SameLine();
+    ImGui::Text(cameraName == "" ? "[no active camera name]" : cameraName.c_str());
+  }
+
+  {
+    auto inThirdPerson = entityInThirdPersonByPlayerIndex(playerIndex);
+    ImGui::Text("Mode: ");
+    ImGui::SameLine();
+    if (inThirdPerson.has_value()){
+      ImGui::Text(inThirdPerson.value() ? "Third" : "First");
+    }else{
+      ImGui::Text("Not entity");
+    }
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }  
+}

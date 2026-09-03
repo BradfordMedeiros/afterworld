@@ -44,6 +44,7 @@ bool updateEntityLookAt(objid id, std::optional<objid> lookAt);
 
 ////////////////////// Player port / viewport functions 
 ControlledPlayer& getControlledPlayer(int playerIndex);
+bool hasControlledPlayer(int playerIndex);
 ControlledPlayer& getMainControlledPlayer();
 int getNumberOfPlayers();
 void setMainPlayerControl(int playerIndex);
@@ -95,6 +96,7 @@ void killEntity(objid id);
 
 void setEntityThirdPerson(objid id);
 void setEntityFirstPerson(objid id);
+std::optional<bool> entityInThirdPersonByPlayerIndex(int playerIndex);
 
 void setEntityInVehicle(objid id, std::optional<objid> vehicleId);
 void entityActionVehicle(objid id);
@@ -118,12 +120,8 @@ void setTempCamera(std::optional<objid> camera, int playerIndex);
 void setPlayerFreeCamera(int playerIndex, bool editorMode);
 void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 
+
 ////////////////////// Glue //////////////////////
 WeaponEntityData getWeaponEntityData(objid id);
-
-
-////////////////////// Misc //////////////////////
-DebugConfig debugPrintActivePlayer(int playerIndex);
-
 
 #endif 
