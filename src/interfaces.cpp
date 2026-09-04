@@ -58,7 +58,6 @@ AIInterface aiInterface {
 };
 
 
-extern DebugPrintType printType;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;
 extern GameTypes gametypeSystem;
 extern Director director;
@@ -127,9 +126,6 @@ ConsoleInterface consoleInterface  {
       },
       .toggleKeyboard = []() -> void {
         toggleKeyboard();
-      },
-      .setShowDebugUi = [](DebugPrintType newPrintType) -> void {
-        printType = newPrintType;
       },
       .showWeapon = [](bool showWeapon) -> void {
         modlog("console weapons", std::string("show weapon: ") + print(showWeapon));

@@ -6,17 +6,6 @@
 #include <optional>
 #include "../../util.h"
 
-enum DebugPrintType {
-  DEBUG_NONE,
-  DEBUG_GLOBAL,
-  DEBUG_INVENTORY,
-  DEBUG_GAMETYPE,
-  DEBUG_AI,
-  DEBUG_HEALTH,
-  DEBUG_ACTIVEPLAYER,
-  DEBUG_ANIMATION,
-};
-
 struct ConsoleInterface {
   std::function<void()> setNormalMode;
   std::function<void()> setShowEditor;
@@ -32,7 +21,6 @@ struct ConsoleInterface {
 
   std::function<void()> die;
   std::function<void()> toggleKeyboard;
-  std::function<void(DebugPrintType printType)> setShowDebugUi;
   std::function<void(bool)> showWeapon;
   std::function<void(int)> deliverAmmo;
   std::function<void(bool)> disableActiveEntity;

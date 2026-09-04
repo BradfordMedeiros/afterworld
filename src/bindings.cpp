@@ -77,7 +77,6 @@ MovementEntityData movementEntities;
 std::optional<std::string> dragSelect;
 std::optional<glm::vec2> selecting;
 UiData uiData;
-DebugPrintType printType;
 
 std::optional<std::string> activeLevel;
 int mainPlayerControl = 0;
@@ -832,24 +831,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       setDrawDebugVector(true);
     }
 
-    printType = DEBUG_NONE;
-
-    if (getArgChoice("print-type", "inventory")){
-      printType = DEBUG_INVENTORY;
-    }else if (getArgChoice("print-type", "global")){
-      printType = DEBUG_GLOBAL;
-    }else if (getArgChoice("print-type", "gametype")){
-      printType = DEBUG_GAMETYPE;
-    }else if (getArgChoice("print-type", "ai")){
-      printType = DEBUG_AI;
-    }else if (getArgChoice("print-type", "health")){
-      printType = DEBUG_HEALTH;
-    }else if (getArgChoice("print-type", "active")){
-      printType = DEBUG_ACTIVEPLAYER;
-    }else if (getArgChoice("print-type", "animation")){
-      printType = DEBUG_ANIMATION;
-    }
-    
     if (args.find("uiselection-texture") != args.end()){
       setShowSelectionTexture(true);
     }
