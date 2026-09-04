@@ -195,17 +195,6 @@ std::optional<HitPoints> getHealth(objid id){
 	return hitpoints.at(id);
 }
 
-DebugConfig debugPrintHealth(){
-  DebugConfig debugConfig { .data = {} };
-	for (auto &[id, hitpoint] : hitpoints){
-		debugConfig.data.push_back({ 
-			gameapi -> getGameObjNameForId(id).value(), 
-			std::to_string(hitpoint.current) + "    " + std::to_string(id)
-		});
-	}
-	return debugConfig;	
-}
-
 void handleCollisionDamage(objid obj1, objid obj2){
   {
     auto objAttr1 = getAttrHandle(obj1);

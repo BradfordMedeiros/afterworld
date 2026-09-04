@@ -235,7 +235,6 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
             .showScreenspaceGrid = uiContext.showScreenspaceGrid(),
             .consoleKeyName = (std::string("console-") + uniqueNameSuffix()),
             .ndiCursor = ndiCursor,
-            .debugConfig = uiContext.debugConfig(),
           } 
         },
       },
@@ -259,7 +258,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
     }
   }
 
-  if (uiContext.isDebugMode()){
+  if (editorMode){
     drawTools.drawText(std::string("route: ") + fullDebugStr(*(uiStateContext.routerHistory)), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);

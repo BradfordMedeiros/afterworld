@@ -18,7 +18,6 @@ void addEntityIdHitpoints(objid id);
 void removeEntityIdHitpoints(objid id);
 void doDamageMessage(objid targetId, float damageAmount);
 std::optional<HitPoints> getHealth(objid id);
-DebugConfig debugPrintHealth();
 
 void handleCollisionDamage(objid obj1, objid obj2);
 void handleMomentumCollision(objid obj1, objid obj2, glm::vec3 position, glm::quat direction, float force);

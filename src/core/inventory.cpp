@@ -82,29 +82,6 @@ void setGunAmmo(objid inventory, std::string gun, int currentAmmo){
   updateItemCount(scopenameToInventory, inventory, ammoNameForGun(gun), currentAmmo);
 }
 
-void debugPrintInventory(std::unordered_map<objid, Inventory>& scopenameToInventory){
-    const float fontSize = 0.02f;
-    drawRightText("inventory\n---------------", -0.9, 0.9f - fontSize, fontSize, std::nullopt, std::nullopt, std::nullopt);
-
-    std::vector<objid> inventoryNames;
-    for (auto &[name, inventory] : scopenameToInventory){
-      inventoryNames.push_back(name);
-    }
-    int offset = 0;
-    for (int i = 0; i < inventoryNames.size(); i++){
-
-      drawRightText(std::to_string(inventoryNames.at(i)), -0.9, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), std::nullopt, std::nullopt);
-      offset++;
-
-      for (auto &[name, amount] : scopenameToInventory.at(inventoryNames.at(i)).items){
-        drawRightText(name, -0.8, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
-        drawRightText(std::to_string(amount), -0.5, 0.9f - ((offset + 3) * fontSize), fontSize, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
-        offset++;       
-      }
-    }
-}
-
-
 
 bool isPlayer(objid id){
   auto playerAttr = getSingleAttr(id, "player");

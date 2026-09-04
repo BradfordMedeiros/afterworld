@@ -8,15 +8,12 @@ struct Level {
 
 
 struct TerminalConfig;
-struct DebugConfig;
 struct RouterHistory;
 
 struct UiContext {
   // UI Options
-  std::function<bool()> isDebugMode;
   std::function<bool()> showScreenspaceGrid;
   std::function<bool()> showKeyboard;
-  std::function<std::optional<DebugConfig>()> debugConfig;
   std::function<void()> playSound;
 };
 

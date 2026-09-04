@@ -13,5 +13,7 @@ void onAlertFrame();
 void pushAlertMessage(std::string message);
 
 
-void renderAi(bool includePanel);
+void renderAnimations(bool includePanel);
 void renderGameType(bool includePanel);
+void renderHitpoints(bool includePanel);
+void renderInventory(bool includePanel);

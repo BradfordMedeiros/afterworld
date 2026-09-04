@@ -628,15 +628,20 @@ void initImGuiGameUi(){
         renderConsole(includePanel);
     });  
 
-    registerWidget("debug-ai", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderAi(includePanel);
+    registerWidget("animations", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderAnimations(includePanel);
     });  
     registerWidget("debug-gametype", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderGameType(includePanel);
     });  
 
+    registerWidget("debug-hitpoints", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderHitpoints(includePanel);
+    });  
 
-
+    registerWidget("debug-inventory", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderInventory(includePanel);
+    });  
 
 
     registerAction("Start", "Mode", []() -> void {

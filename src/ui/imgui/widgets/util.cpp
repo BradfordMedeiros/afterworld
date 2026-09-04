@@ -7,6 +7,8 @@ static bool showConsoleLog = false;
 extern AiData aiData;
 extern GameTypes gametypeSystem;
 extern GlobalState global;
+extern std::unordered_map<objid, HitPoints> hitpoints;
+extern std::unordered_map<objid, Inventory> scopenameToInventory;
 
 void renderConsole(bool includePanel){
   if (includePanel){
@@ -201,14 +203,59 @@ void onAlertFrame(){
   filterExpiredMessages2(alerts); // probably shouldn't be done every frame
 }
 
-void renderAi(bool includePanel){
+void renderAnimations(bool includePanel){
   if (includePanel){
-    ImGui::Begin("Debug Ai");
+    ImGui::Begin("Debug Animations");
   }
 
-  ImGui::Text("num agents: ");
-  ImGui::SameLine();
-  ImGui::Text(std::to_string(aiData.agents.size()).c_str());
+  auto playerIndex = getDefaultPlayerIndex();
+  bool isControlledPlayer = hasControlledPlayer(playerIndex);
+  if (!isControlledPlayer){
+      ImGui::Text("No Controlled Player");
+  }else{
+      ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
+      ImGui::Text("Controlled Player");
+
+      std::vector<objid> ids;
+      if (controlledPlayer.entityId.has_value()){
+        ids.push_back(controlledPlayer.entityId.value());
+      }
+      if (ids.size() == 0){
+        ImGui::Text("No Entity");
+      }else{
+        ImGui::Text("Entity Id: ");
+        ImGui::SameLine();
+        ImGui::Text(std::to_string(controlledPlayer.entityId.value()).c_str());
+      }
+      if (ids.size() > 0){
+        auto id = ids.at(0);
+        auto name = gameapi -> getGameObjNameForId(id).value();
+        auto animationNames = gameapi -> listAnimations(id);
+        ImGui::Text("Num Animations");
+        ImGui::SameLine();
+        ImGui::Text(std::to_string(animationNames.size()).c_str());
+      
+        int index = 0;
+        for (auto& animation : animationNames){
+          bool isNamePose = animation.find("pose-") == 0;
+          ImGui::Text("Animation: ");
+          ImGui::SameLine();
+          ImGui::Text(animation.c_str());
+          ImGui::SameLine();
+
+          ImGui::PushID(index);
+          index++;
+          if (ImGui::Button("Play")){
+            if (isNamePose){
+              gameapi -> setAnimationPose(id, animation, 0.f);
+            }else{
+              gameapi -> playAnimation(id, animation, ONESHOT, std::nullopt, 0, false, std::nullopt);
+            }
+          }
+          ImGui::PopID();
+        }
+      }
+  }
 
   if (includePanel){
     ImGui::End();
@@ -219,6 +266,10 @@ void renderGameType(bool includePanel){
   if (includePanel){
     ImGui::Begin("Debug GameType");
   }
+
+  ImGui::Text("num agents: ");
+  ImGui::SameLine();
+  ImGui::Text(std::to_string(aiData.agents.size()).c_str());
 
   if (!gametypeSystem.meta){
     ImGui::Text("no gametype");
@@ -308,3 +359,55 @@ void renderGameType(bool includePanel){
     ImGui::End();
   }  
 }
+
+void renderHitpoints(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Debug Hitpoints");
+  }
+
+  ImGui::Text("Num Managed: ");
+  ImGui::SameLine();
+  ImGui::Text(std::to_string(hitpoints.size()).c_str());
+
+  ImGui::Separator();
+
+  for (auto &[id, hitpoint] : hitpoints){
+    ImGui::Text(std::to_string(id).c_str());
+    ImGui::SameLine();
+    auto name = gameapi -> getGameObjNameForId(id).value();
+    ImGui::Text(name.c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(hitpoint.current).c_str());
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+
+void renderInventory(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Debug Inventory");
+  }
+
+  ImGui::Text("Num Inventories: ");
+  ImGui::SameLine();
+  ImGui::Text(std::to_string(scopenameToInventory.size()).c_str());
+
+  for (auto& [id, inventory] : scopenameToInventory){
+    ImGui::Text(std::to_string(id).c_str());
+    ImGui::SameLine();
+    ImGui::Text(inventory.infinite ? "infinite" : "");
+    ImGui::Indent();
+    for (auto& [item, _] : inventory.items){
+      ImGui::Text(item.c_str());
+    }
+    ImGui::Unindent();
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+

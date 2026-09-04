@@ -152,35 +152,13 @@ ConsoleInterface consoleInterface  {
 };
 
 
-std::optional<DebugConfig> debugConfig(){
-  if (printType == DEBUG_INVENTORY){
-    debugPrintInventory(scopenameToInventory);
-    return std::nullopt;
-  }
-  if (printType == DEBUG_HEALTH){
-    return debugPrintHealth();
-  }
-  if (printType == DEBUG_ANIMATION){
-    return debugPrintAnimations(getDefaultPlayerIndex());
-  }
-  return std::nullopt;
-}
 
 UiContext getUiContext(){
   UiContext uiContext {
-   .isDebugMode = []() -> bool { 
-    auto args = gameapi -> getArgs();
-    bool debugUi = getArgEnabled("debug-ui");
-    if (debugUi){
-      return true;
-    }
-    return getBoolWorldState("editor", "debug").value(); 
-   },
    .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
    .showKeyboard = []() -> bool { 
       return getGlobalState().systemConfig.showKeyboard;
    },
-   .debugConfig = debugConfig,
    .playSound = []() -> void {
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
     },
