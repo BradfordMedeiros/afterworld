@@ -943,6 +943,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole;
     getUiSettings() -> showConsole = global.systemConfig.showConsole;
+    getUiSettings() -> showFpsHud = true;
 
     updateState();
 
@@ -1035,7 +1036,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           float magnitude = static_cast<int>(std::rand()) % 5;
           applyScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec3(magnitude * glm::cos(std::rand()), magnitude * glm::cos(std::rand()), 0.f));
         }else{
-          setShowActivate(false);
           setUIAmmoCount(0, 0);
           setUiWeapon(std::nullopt);
         }
@@ -1101,6 +1101,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       onInGameUiFrame(uiStateContext, inGameUi, uiData.uiContext, std::nullopt, ndiCoord);
     
       onAlertFrame();
+      if (getGlobalState().systemConfig.showScreenspaceGrid){
+         drawScreenspaceGrid(ImGrid{ .numCells = 10 });
+      }
 
 
       if (isInGameMode2()){

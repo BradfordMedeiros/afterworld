@@ -23,6 +23,7 @@ struct UiSettings {
   std::optional<LiveMenuFn> liveMenu;
   BallModeUi* ballModeUi = NULL;
   bool showConsole = false;
+  bool showFpsHud = false;
 };
 UiSettings* getUiSettings();
 

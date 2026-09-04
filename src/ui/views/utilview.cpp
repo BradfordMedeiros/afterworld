@@ -5,10 +5,6 @@ Component utilViewComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
     UtilViewOptions* utilViewOptions = typeFromProps<UtilViewOptions>(props, valueSymbol);
 
-    if (utilViewOptions -> showScreenspaceGrid){
-      drawScreenspaceGrid(ImGrid{ .numCells = 10 });
-    }
-
     if (utilViewOptions -> showKeyboard){
       Props keyboardProps { 
         .props = {

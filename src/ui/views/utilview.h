@@ -6,7 +6,6 @@
 
 struct UtilViewOptions {
 	bool showKeyboard;
-	bool showScreenspaceGrid;
 	std::string consoleKeyName;
 	std::optional<glm::vec2> ndiCursor;
 };

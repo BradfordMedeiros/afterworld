@@ -151,7 +151,6 @@ ConsoleInterface consoleInterface  {
 
 UiContext getUiContext(){
   UiContext uiContext {
-   .showScreenspaceGrid = []() -> bool { return getGlobalState().systemConfig.showScreenspaceGrid; },
    .showKeyboard = []() -> bool { 
       return getGlobalState().systemConfig.showKeyboard;
    },

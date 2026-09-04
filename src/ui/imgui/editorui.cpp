@@ -517,6 +517,11 @@ void renderMoreUi(){
       }
   }
 
+  if (uiSettings.showFpsHud){
+    auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
+    renderLayoutCenter("fps-hud-layout", widget, false);
+  }
+
   static std::optional<float> showConsoleTime;
   if (uiSettings.showConsole){
     if (!showConsoleTime.has_value()){
@@ -568,7 +573,13 @@ void initImGuiGameUi(){
 
     registerWidget("FPS - Props", "fps", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderPropPanel(includePanel, sceneId);
-    });     
+    }); 
+
+    registerWidget("FPS - Hud", "fps", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderFpsHud(includePanel);
+    });       
+    
+
 
     registerWidget("Trigger", "game", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderTriggerPanel(includePanel);
@@ -642,6 +653,9 @@ void initImGuiGameUi(){
     registerWidget("debug-inventory", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderInventory(includePanel);
     });  
+
+
+
 
 
     registerAction("Start", "Mode", []() -> void {

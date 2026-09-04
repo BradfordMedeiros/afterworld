@@ -58,12 +58,6 @@ Component playingComponent {
       terminalComponent.draw(drawTools, terminalProps);    
     }
 
-
-    if (uiModeFps){
-      auto hudProps = getDefaultProps();
-      hudComponent.draw(drawTools, hudProps);   
-    }
-
     return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
   },
 };

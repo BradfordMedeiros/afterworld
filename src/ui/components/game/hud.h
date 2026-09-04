@@ -5,6 +5,10 @@
 #include "../../../global.h"
 #include "../../../resources/paths.h"
 
+struct AmmoHudInfo {
+  int currentAmmo;
+  int totalAmmo;
+};
 void setUIAmmoCount(int currentAmmo, int totalAmmo);
 
 struct UiHealth {
@@ -24,7 +28,6 @@ struct GemCount {
 void setUiGemCount(std::optional<GemCount> count);
 void setZoomAmount(std::optional<float> amount);
 
-extern Component hudComponent;
 
 
 #endif

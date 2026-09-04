@@ -395,12 +395,7 @@ std::vector<KeyLocation> keys {
     .topLeft = glm::vec2(0.784566, 0.696809),
     .bottomRight = glm::vec2(0.963558, 0.420213),
   },
-
-
 };
-
- 
-
 
 void drawKeyHighlighted(DrawingTools& drawTools, KeyLocation& key, glm::vec2 size){
   glm::vec2 topLeft = key.topLeft;

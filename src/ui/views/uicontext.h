@@ -12,7 +12,6 @@ struct RouterHistory;
 
 struct UiContext {
   // UI Options
-  std::function<bool()> showScreenspaceGrid;
   std::function<bool()> showKeyboard;
   std::function<void()> playSound;
 };
