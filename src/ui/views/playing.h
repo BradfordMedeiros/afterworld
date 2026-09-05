@@ -2,7 +2,6 @@
 #define MOD_AFTERWORLD_COMPONENTS_PLAYING
 
 #include "../components/common.h"
-#include "../components/game/hud.h"
 #include "../components/game/terminal.h"
 
 struct TerminalConfig;
