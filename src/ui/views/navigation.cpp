@@ -12,7 +12,7 @@ Component navigationComponent {
         PropPair { .symbol = valueSymbol, .value = std::string("BACK") },
         PropPair { .symbol = tintSymbol, .value = glm::vec4(0.f, 0.f, 0.f, 0.2f) },
         PropPair { .symbol = colorSymbol, .value = glm::vec4(1.f, 1.f, 0.f, 0.8f) },
-        PropPair { .symbol = paddingSymbol, .value = styles.dockElementPadding },
+        PropPair { .symbol = paddingSymbol, .value = 0.2f },
         PropPair { .symbol = onclickSymbol, .value =  fn },
         PropPair { .symbol = minwidthSymbol, .value = 0.5f },
         PropPair { .symbol = borderColorSymbol, .value = glm::vec4(1.f, 1.f, 1.f, 0.1f) },
@@ -25,9 +25,9 @@ Component navigationComponent {
 };
 
 
-Component withNavigation(UiContext& uiContext, Component wrappedComponent){
+Component withNavigation(Component wrappedComponent){
   Component component {
-    .draw = [&uiContext, wrappedComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
+    .draw = [wrappedComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
       Props emptyProps {
         .props = {
           PropPair { .symbol = xoffsetSymbol, .value = -0.95f },

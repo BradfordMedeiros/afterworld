@@ -31,7 +31,6 @@
 #include "./director/director.h"
 #include "./global.h"
 #include "./ui/components/common.h"
-#include "./ui/components/basic/list.h"
 #include "./ui/components/router.h"
 #include "./ui/views/mainui.h"
 #include "./collision.h"

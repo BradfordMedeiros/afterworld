@@ -68,7 +68,6 @@ struct SceneManagement {
 };
 
 struct UiData {
-  UiContext uiContext;
   HandlerFns uiCallbacks;
 };
 
@@ -207,7 +206,6 @@ std::optional<ActiveLevel> getActiveLevel(){
     return std::nullopt;
   }
   auto& data = getData();
-
   if (data.has_value()){
     LevelOptions* value = std::any_cast<LevelOptions>(&data.value());
     modassert(value != NULL, "getActiveLevel expected LevelOptions type");
@@ -523,8 +521,6 @@ void objectRemoved(objid idRemoved){
 
   onRemoveEntity(idRemoved);
 
-  onMainUiObjectsChanged();
-
   onObjectRemovedWater(water, idRemoved);
   
   handleTagsOnObjectRemoved(idRemoved);
@@ -631,8 +627,8 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 }
 
 void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
-  onMainUiMousePress(uiStateContext, uiData.uiContext, uiData.uiCallbacks, button, action, getGlobalState().control.selectedId);
-  onInGameUiMouseCallback(uiStateContext, uiData.uiContext, inGameUi, button, action, getGlobalState().control.lookAtId /* this needs to come from the texture */);
+  onMainUiMousePress(uiStateContext, uiData.uiCallbacks, button, action, getGlobalState().control.selectedId);
+  onInGameUiMouseCallback(uiStateContext, inGameUi, button, action, getGlobalState().control.lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
   onVehicleMouseClick(vehicles, button, action, mods);
 
@@ -679,7 +675,6 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
 }
 
 void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float xNdc, float yNdc, int playerPort){ 
-  onMainUiMouseMove(uiStateContext,  uiData.uiContext, xPos, yPos, xNdc, yNdc);
   onInGameUiMouseMoveCallback(inGameUi, xPos, yPos, xNdc, yNdc);
   onMouseMoveArcade(xPos, yPos, xNdc, yNdc);
 
@@ -790,7 +785,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     movementEntities = MovementEntityData {};
     selecting = std::nullopt;
     uiData = {
-      .uiContext = {},
       .uiCallbacks = HandlerFns {
         .handlerFns = {},
         .handlerFns2 = {},
@@ -813,7 +807,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     dragSelect = std::nullopt;
-    uiData.uiContext = getUiContext();
 
     levelProgresses = loadLevelProgress();
 
@@ -1095,15 +1088,27 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       std::optional<glm::vec2> mainUiCursorCoord;
 
       bool disableUiContent = !inMode();
-      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, uiData.uiContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord, disableUiContent);
+      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord, disableUiContent);
       
 
-      onInGameUiFrame(uiStateContext, inGameUi, uiData.uiContext, std::nullopt, ndiCoord);
+      onInGameUiFrame(uiStateContext, inGameUi, std::nullopt, ndiCoord);
     
       onAlertFrame();
       if (getGlobalState().systemConfig.showScreenspaceGrid){
          drawScreenspaceGrid(ImGrid{ .numCells = 10 });
       }
+      drawFade();
+
+      if (getGlobalState().systemConfig.showKeyboard){
+        drawInputVisualization();
+      }
+
+      if (true){
+        const glm::vec2 cursorSizeNdi(0.1f, 0.1f);
+        gameapi->drawRect(getGlobalState().control.xNdc, getGlobalState().control.yNdc , cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/crosshairs/crosshair029.png", ShapeOptions { .zIndex = 6 });
+      }
+
+      
 
 
       if (isInGameMode2()){
@@ -1393,7 +1398,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   binding.onScrollCallback = [](objid id, void* data, double rawAmount) -> void {
     auto scrollCallback = remapScrollCallback(rawAmount);
 
-    onMainUiScroll(uiStateContext, uiData.uiContext, scrollCallback.amount);
     onInGameUiScrollCallback(inGameUi, scrollCallback.amount);
     onMovementScrollCallback(movement, scrollCallback.amount, scrollCallback.playerPort);
   };
@@ -1404,7 +1408,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     onAddEntity(idAdded);
     handleOnAddedTags(idAdded);
 
-    onMainUiObjectsChanged();
     onObjAdded(aiData, idAdded);
   };
 

@@ -1,5 +1,7 @@
 #include "./interfaces.h"
 
+extern CustomApiBindings* gameapi;
+
 void ensureManagedTexturesLoaded(objid id, objid sceneId, std::vector<std::string> textures);
 void unloadManagedTexturesLoaded(objid id);
 
@@ -148,15 +150,3 @@ ConsoleInterface consoleInterface  {
 };
 
 
-
-UiContext getUiContext(){
-  UiContext uiContext {
-   .showKeyboard = []() -> bool { 
-      return getGlobalState().systemConfig.showKeyboard;
-   },
-   .playSound = []() -> void {
-      playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
-    },
-  };
-  return uiContext;
-}

@@ -2,43 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-void setMenuBackground(std::string background);
-objid createPrefab(objid sceneId, const char* prefab, glm::vec3 pos, std::unordered_map<std::string, AttributeValue> additionalFields);
-
-float wheelRotationOffset = 0.f;
-float actualWheelRotationOffset = wheelRotationOffset;
-int wheelRotate = 0;
-void rotateWheel(bool up);
-WheelConfig wheelConfig {
-  .numElementsInWheel = 10,
-  .wheelRadius = 0.5f,
-  .selectedIndex = 0,
-  .getWheelContent = [](int index) -> std::optional<std::string> {
-    if ((index - wheelRotate) == 0){
-      return std::nullopt;
-    }
-    return std::string("placeholder content: " + std::to_string(index));
-  },
-  .getRotationOffset = []() -> float {
-    actualWheelRotationOffset = glm::lerp(actualWheelRotationOffset, wheelRotationOffset, static_cast<float>(gameapi -> timeElapsed()));
-    return actualWheelRotationOffset;
-  },
-  .onClick = [](int index) -> void {
-    wheelRotate = index - 1;
-    rotateWheel(true);
-  },
-};
-
-void rotateWheel(bool up){
-  wheelRotate += (up ? 1 : -1);
-  if (wheelRotate < 0){
-    wheelRotate = 0;
-  }
-  auto wheelDegreesPerRotate = (2 * M_PI) / wheelConfig.numElementsInWheel;
-  wheelRotationOffset = -1 * wheelRotate * wheelDegreesPerRotate;
-  wheelConfig.selectedIndex = wheelRotate;
-}
-
 Component withSimpleAnimatedLayout(Component& component){
   Component simpleAnimatedLayout {
     .draw = [component](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
@@ -84,7 +47,7 @@ Component withSimpleAnimatedLayout(Component& component){
   return simpleAnimatedLayout;
 }
 
-Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std::optional<objid> selectedId){
+Props createRouterProps(RouterHistory& routerHistory, std::optional<objid> selectedId){
   auto playingView = withPropsCopy(
     playingComponent,
     Props {
@@ -93,26 +56,10 @@ Props createRouterProps(RouterHistory& routerHistory, UiContext& uiContext, std:
     }
   );
 
-  auto wheelView = withPropsCopy(
-    wheelComponent,
-    Props {
-      .props = {
-        PropPair {
-          .symbol = valueSymbol, 
-          .value = wheelConfig,
-        },
-      },
-    }
-  );
-
-
-
   std::unordered_map<std::string, Component> routeToComponent = {
-    { "mainmenu/",  emptyComponent },
-    { "mainmenu/levelselect/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.125f)) },
-    { "mainmenu/settings/", withNavigation(uiContext, withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.25f)) },
+    { "mainmenu/levelselect/", withNavigation(withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.125f)) },
+    { "mainmenu/settings/", withNavigation(withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.25f)) },
     { "playing/*/",  playingView },
-    { "debug/wheel/",  simpleLayout(wheelView, glm::vec2(1.5f, 1.5f), defaultAlignment, glm::vec4(1.f, 0.f, 0.f, 1.f)) },
     { "",  emptyComponent  },
   };
 
@@ -132,37 +79,12 @@ UiState createUiState(){
   };
   return uiState;
 }
-UiState* commonState = NULL;
 
-std::optional<AttributeValue> getWorldState(const char* object, const char* attribute){
-  auto worldStates = gameapi -> getWorldState();
-  for (auto &worldState : worldStates){
-    if (worldState.object == object && worldState.attribute == attribute){
-      return worldState.value;
-    }
-  }
-  return std::nullopt;
-}
-
-UiManagerContext uiManagerContext {
-  .uiContext = NULL,
-};
-
-
-static bool firstTime = true;
-HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode){
+HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode){
   UiState& uiState = uiStateContext.uiState;
-  commonState = &uiState;
-
-  if (firstTime){
-    initStyles();
-  }
-  firstTime = false;
 
   //////////////////////////////
   // navlist uses this via extern
-
-  uiManagerContext.uiContext = &uiContext;
 
   HandlerFns handlerFuncs {
     .minManagedId = -1,
@@ -219,33 +141,9 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
   resetMenuItemMappingId();
 
   if (!editorMode){
-    auto routerProps = createRouterProps(*(uiStateContext.routerHistory), uiContext, selectedId);
+    auto routerProps = createRouterProps(*(uiStateContext.routerHistory), selectedId);
     router.draw(drawTools, routerProps);    
 
-  }
-
-
-  {
-    Props defaultProps {
-      .props = {
-        PropPair {
-          .symbol = valueSymbol, 
-          .value = UtilViewOptions {
-            .showKeyboard = uiContext.showKeyboard(),
-            .consoleKeyName = (std::string("console-") + uniqueNameSuffix()),
-            .ndiCursor = ndiCursor,
-          } 
-        },
-      },
-    };
-    utilViewComponent.draw(drawTools, defaultProps);
-  }
-
-  {
-    Props props {
-      .props = {},
-    };
-    fadeComponent.draw(drawTools, props);
   }
 
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
@@ -266,22 +164,11 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& uiContext
   return handlerFuncs;
 }
 
-void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, double amount){
-  UiState& uiState = uiStateContext.uiState;
-  commonState = &uiState;
-
-  auto scrollValue = static_cast<int>(amount);
-  std::cout << "dock: on main ui scroll: " << scrollValue << std::endl;
-
-  rotateWheel(amount > 0);
-}
-
-void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
+void onMainUiMousePress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
   //modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
   //modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
 
   UiState& uiState = uiStateContext.uiState;
-  commonState = &uiState;
 
   std::cout << "button: " << button << ", action: " << action << std::endl;
   if (button == 0 && action == 1){
@@ -292,7 +179,6 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
     if (selectedId.has_value()){
       if (handlerFns.handlerFns.find(selectedId.value()) != handlerFns.handlerFns.end()){
         handlerFns.handlerFns.at(selectedId.value())();
-        uiContext.playSound();
       }
       if (handlerFns.handlerCallbackFns.find(selectedId.value()) != handlerFns.handlerCallbackFns.end()){\
         HandlerCallbackFn data{
@@ -315,7 +201,6 @@ void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, Ha
 
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods){
   UiState& uiState = uiStateContext.uiState;
-  commonState = &uiState;
 
   modlog("mainui key press", std::to_string(key));
   modlog("mainui key press focused", print(uiState.focusedId));
@@ -327,12 +212,6 @@ void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, in
   }
 }
 
-void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, double xPos, double yPos, float xNdc, float yNdc){
-  
-}
-
-void onMainUiObjectsChanged(){
-}
 
 auto mainRouterHistory = createHistory();
 RouterHistory& getMainRouterHistory(){

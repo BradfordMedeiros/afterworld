@@ -17,6 +17,9 @@ void inputOverride(bool paused, bool showMouse);
 void inputOverride();
 bool isReloadKey(int button);
 void handleRemoveKillplaneCollision(objid);
+void hideLetterBox();
+void showLetterBox(std::string title, float duration);
+void showLetterBoxHold(std::string title, float fadeInTime);
 
 struct WorldView {
 	bool didChangeToOrb = false;

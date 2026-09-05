@@ -32,25 +32,6 @@ std::optional<TerminalConfig*> getTerminalConfig(){
 
 Component playingComponent {
   .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    auto uiModeNone = std::get_if<UiModeNone>(&uiMode);
-    auto uiModeFps = std::get_if<FpsModeUi>(& uiMode);
-    auto uiModeBall = std::get_if<BallModeUi>(&uiMode);
-    auto uiModeLiveMenu = std::get_if<LiveMenu>(&uiMode);
-    auto uiModeGameOver = std::get_if<GameOverUi>(&uiMode);
-
-    /*if (uiModeNone){
-      drawCenteredText(drawTools, "none", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
-    }else if (uiModeFps){
-      drawCenteredText(drawTools, "fps", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
-    }else if (uiModeBall){
-      drawCenteredText(drawTools, "ball", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
-    }else if (uiModeLiveMenu){
-      drawCenteredText(drawTools, "livemenu", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
-    }else if (uiModeGameOver){
-      drawCenteredText(drawTools, "gameover", 0.f, 0.f, 0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt);
-    }*/
-
-
     if (terminal.has_value()){
       Props terminalProps { 
         .props = { PropPair { .symbol = valueSymbol, .value = terminal.value() }},

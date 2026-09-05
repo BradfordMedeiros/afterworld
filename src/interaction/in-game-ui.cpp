@@ -52,7 +52,7 @@ std::optional<objid> getAnyUiInstance(InGameUi& inGameUi){
 }
 
 
-void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiContext, std::optional<objid> textureId, glm::vec2 ndiCoord){
+void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, std::optional<objid> textureId, glm::vec2 ndiCoord){
 	// should make sure the texture id is the same
 	bool drawCursor = true;
 	for (auto &[id, textDisplay] : inGameUi.textDisplays){
@@ -62,7 +62,6 @@ void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiC
     UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
 		textDisplay.handlerFns = handleDrawMainUi(
 			actualUiState, 
-			uiContext, 
 			getGlobalState().control.selectedId, 
 			textDisplay.textureId, 
 			drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt),
@@ -80,8 +79,8 @@ void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, UiContext& uiC
 	}
 }
 
-void onInGameUiMouseClick(UiStateContext& uiState, UiContext& uiContext, InGameUi& inGameUi, objid id, int button, int action, glm::vec2 ndiCoords){
-  gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, inGameUi.textDisplays.at(id).textureId, [&uiState, id, ndiCoords, &inGameUi, &uiContext, button, action](std::optional<objid> uiId, glm::vec2 texCoordUv) -> void {
+void onInGameUiMouseClick(UiStateContext& uiState, InGameUi& inGameUi, objid id, int button, int action, glm::vec2 ndiCoords){
+  gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, inGameUi.textDisplays.at(id).textureId, [&uiState, id, ndiCoords, &inGameUi, button, action](std::optional<objid> uiId, glm::vec2 texCoordUv) -> void {
 		if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
 			return;
 		}
@@ -90,12 +89,12 @@ void onInGameUiMouseClick(UiStateContext& uiState, UiContext& uiContext, InGameU
 			TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
 	  	UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
 			modlog("ui pick color on game ui id", std::to_string(uiId.value()));
-			onMainUiMousePress(actualUiState, uiContext, handlerFns, button, action, uiId.value());
+			onMainUiMousePress(actualUiState, handlerFns, button, action, uiId.value());
 		}
   });
 }
 
-void onInGameUiMouseCallback(UiStateContext& uiState, UiContext& uiContext, InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
+void onInGameUiMouseCallback(UiStateContext& uiState, InGameUi& inGameUi, int button, int action, std::optional<objid> selectedId){
 	if (!selectedId.has_value()){
 		return;
 	}
@@ -107,7 +106,7 @@ void onInGameUiMouseCallback(UiStateContext& uiState, UiContext& uiContext, InGa
 
 	TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
   UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
-	onInGameUiMouseClick(actualUiState, uiContext, inGameUi, id, button, action, ndiCoords);
+	onInGameUiMouseClick(actualUiState, inGameUi, id, button, action, ndiCoords);
 }
 
 void onInGameUiMouseMoveCallback(InGameUi& inGameUi, double xPos, double yPos, float xNdc, float yNdc){

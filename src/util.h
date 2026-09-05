@@ -151,4 +151,10 @@ struct ActiveLevel {
   std::optional<std::any> hint;
 };
 
+struct Level {
+  std::string scene;
+  std::string name;
+};
+
+
 #endif

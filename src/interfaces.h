@@ -1,7 +1,6 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./arcade/arcade.h"
-#include "./ui/views/uicontext.h"
 #include "./ui/components/console_core.h"
 #include "./ai/ai.h"
 #include "./core/movement/movement.h"
@@ -18,4 +17,3 @@ ArcadeApi createArcadeApi();
 extern AIInterface aiInterface;
 
 
-UiContext getUiContext();

@@ -3,10 +3,8 @@
 
 #include "../components/common.h"
 #include "../components/basic/listitem.h"
-#include "./style.h"
-#include "./uicontext.h"
 
-Component withNavigation(UiContext& uiContext, Component wrappedComponent);
+Component withNavigation(Component wrappedComponent);
 
 #endif
 

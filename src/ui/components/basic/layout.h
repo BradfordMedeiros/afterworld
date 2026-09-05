@@ -2,7 +2,6 @@
 #define MOD_AFTERWORLD_COMPONENTS_LAYOUT
 
 #include "../common.h"
-#include "../../views/style.h"
 
 extern CustomApiBindings* gameapi;
 

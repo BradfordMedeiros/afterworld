@@ -2,12 +2,8 @@
 #define MOD_AFTERWORLD_COMPONENTS_INDEX
 
 #include "../components/router.h"
-#include "./utilview.h"
-#include "./uicontext.h"
+#include "../components/basic/layout.h"
 #include "./playing.h"
-#include "./uicontext.h"
-#include "../components/game/wheel.h"
-#include "../components/game/fade.h"
 #include "./navigation.h"
 
 extern Component mainUI;
@@ -40,12 +36,9 @@ struct UiStateContext {
   RouterHistory* routerHistory;
   UiState uiState;
 };
-HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, UiContext& context, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode);
-void onMainUiScroll(UiStateContext& uiStateContext,  UiContext& uiContext, double amount);
-void onMainUiMousePress(UiStateContext& uiStateContext, UiContext& uiContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
+HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode);
+void onMainUiMousePress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
 void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);
-void onMainUiMouseMove(UiStateContext& uiStateContext, UiContext& context, double xPos, double yPos, float xNdc, float yNdc);
-void onMainUiObjectsChanged();
 void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt), bool forceLoad = false);
 std::optional<std::any>& getData();
 

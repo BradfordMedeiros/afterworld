@@ -17,3 +17,22 @@ void renderAnimations(bool includePanel);
 void renderGameType(bool includePanel);
 void renderHitpoints(bool includePanel);
 void renderInventory(bool includePanel);
+
+void drawInputVisualization();
+
+
+///
+struct LetterboxFade {
+  std::string title;
+  std::optional<float> animationDuration;
+  std::optional<float> animationHold;
+  std::optional<float> fadeOutDuration;
+  glm::vec4 boxColor;
+  std::optional<glm::vec4> fadeColor;
+  float fontSize;
+};
+void showLetterBox(std::string title, float duration);
+void showLetterBoxHold(std::string title, float fadeInTime);
+void hideLetterBox();
+
+void drawFade();

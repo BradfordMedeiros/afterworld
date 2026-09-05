@@ -4,7 +4,8 @@
 #include "../components/common.h"
 #include "../components/game/hud.h"
 #include "../components/game/terminal.h"
-#include "./uicontext.h"
+
+struct TerminalConfig;
 
 struct UiModeNone{};
 struct FpsModeUi {
