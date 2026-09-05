@@ -53,7 +53,6 @@ std::optional<std::function<void()>>* optFnFromProp(Props& props, int symbol);
 std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol);
 std::string strFromProp(Props& props, int symbol, const char* defaultValue);
 objid objidFromProp(Props& props, int symbol);
-bool boolFromProp(Props& prop, int symbol, bool defaultValue);
 
 template <typename T>
 T* typeFromProps(Props& props, int symbol){
@@ -82,7 +81,6 @@ struct Component {
 };
 
 void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt, std::optional<ShapeOptions> shapeOptions = std::nullopt);
-void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = glm::vec4(0.f, 0.f, 0.f, 0.2f));
 std::string print(BoundingBox2D& box);
 
 struct ImGrid {
@@ -100,7 +98,6 @@ struct BoundingBoxMeasurer {
 BoundingBoxMeasurer createMeasurer();
 void setX(BoundingBoxMeasurer& box, float value);
 void setY(BoundingBoxMeasurer& box, float value);
-void setBox(BoundingBoxMeasurer& box, float x, float y, float width, float height);
 void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox);
 BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
 
@@ -123,17 +120,7 @@ void resetMenuItemMappingId();
 void getMenuMappingData(int* _minId, int* _currentId);
 
 void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
-
-void drawCenteredTextReal(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
-void drawLeftText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
 void drawRightText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<float> maxWidth);
-
-void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
-
-void drawCircle(DrawingTools& drawTools, glm::vec2 center, float radius);
-
-enum DataStoreHint { NOHINT, VEC4, STRING };
-std::string uiStoreToStr();
 
 struct UILevel {
   std::string name;
@@ -142,8 +129,6 @@ struct UILevel {
   std::string shortcut;
 };
 
-
-extern std::optional<std::function<void()>> nullClick;
 
 extern const int horizontalSymbol;
 extern const int listItemsSymbol;

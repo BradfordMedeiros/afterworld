@@ -27,10 +27,6 @@ void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optio
   drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
 }
 
-void drawFillDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint){
-  gameapi -> drawRect(box.x, box.y, box.width, box.height, false, tint, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
-}
-
 std::string print(BoundingBox2D& box){
   return std::string("x = " + std::to_string(box.x) + ", y = " + std::to_string(box.y) + ", width = " + std::to_string(box.width) + ", height = " + std::to_string(box.height));
 }
@@ -88,17 +84,6 @@ void setY(BoundingBoxMeasurer& box, float value){
   if (value > box.maxY.value()){
     box.maxY = value;
   }
-}
-
-void setBox(BoundingBoxMeasurer& box, float x, float y, float width, float height){
-  float left = x - (width * 0.5f);
-  float right = x + (width * 0.5f);
-  float top = y + (height * 0.5f);
-  float bottom = y - (height * 0.5f);
-  setX(box, left);
-  setX(box, right);
-  setY(box, top);
-  setY(box, bottom);
 }
 
 void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox){
@@ -256,14 +241,6 @@ objid objidFromProp(Props& props, int symbol){
   return *objIdValue; 
 }
 
-bool boolFromProp(Props& props, int symbol, bool defaultValue){
-  auto boolValue = typeFromProps<bool>(props, symbol);
-  if (!boolValue){
-    return defaultValue;
-  }
-  return *boolValue; 
-}
-
 void updatePropValue(Props& props, int symbol, std::any value){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
@@ -337,95 +314,17 @@ void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffset
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
 }
-void drawCenteredTextReal(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
-  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  float width = 0.f;
-  float height = 0.f;
-  gameapi -> getTextDimensionsNdi(text, ndiSize, true, std::nullopt, &width, &height);
-  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
-}
-void drawLeftText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
-  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  float width = 0.f;
-  float height = 0.f;
-  gameapi -> getTextDimensionsNdi(text, ndiSize, true, std::nullopt, &width, &height);
-  drawTools.drawText(text, ndiOffsetX - width, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
-}
+
 void drawRightText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<float> maxWidth){
   float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
   drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, maxWidth, std::nullopt);
 }
 
-void drawTextLeftHorzDownVert(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
-  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  float width = text.size() * ndiSize;
-  float height = text.size() * ndiSize;
-  drawTools.drawText(text, ndiOffsetX - (width * 0.5f), ndiOffsetY - (height * 0.5f), fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
-}
-
-void drawCircle(DrawingTools& drawTools, glm::vec2 center, float radius){
-  int resolution = 12;
-  auto radiansPerIncrement = (2 * M_PI) / resolution;
-  for (int i = 0; i < resolution; i++){
-    float radiansFrom = radiansPerIncrement * i;
-    float radiansTo = radiansPerIncrement * (i + 1);
-    float xFrom = (radius * glm::cos(radiansFrom)) + center.x;
-    float yFrom = (radius * glm::sin(radiansFrom)) + center.y;
-    float xTo = (radius* glm::cos(radiansTo)) + center.x;
-    float yTo = (radius* glm::sin(radiansTo)) + center.y;
-    drawTools.drawLine2D(glm::vec3(xFrom, yFrom, 0.f), glm::vec3(xTo, yTo, 0.f), false, glm::vec4(1.f, 0.f, 0.f, 1.f), true, std::nullopt, std::nullopt, std::nullopt);
-  }
-}
-
-struct UiDataStore {
-  std::unordered_map<int, void*> data;
-  std::unordered_map<int, DataStoreHint> typeHints;
-};
-
-UiDataStore dataStore { .data = { }, .typeHints = {} };
 
 struct UiStoreKeyValue {
   std::string key;
   std::string value;
 };
-std::vector<UiStoreKeyValue> printUiStoreDebug(){
-  std::vector<UiStoreKeyValue> debugData;
-  for (auto &[symbol, data] : dataStore.data){
-    auto type = dataStore.typeHints.at(symbol);
-    if (type == NOHINT){
-      debugData.push_back(UiStoreKeyValue {
-        .key = nameForSymbol(symbol),
-        .value = "cannot serialize data",
-      });
-    }else if (type == VEC4){
-      glm::vec4* value = static_cast<glm::vec4*>(data);
-      debugData.push_back(UiStoreKeyValue {
-        .key = nameForSymbol(symbol),
-        .value = print(*value),
-      });
-    }else if (type == STRING){
-      std::string* value = static_cast<std::string*>(data);
-      debugData.push_back(UiStoreKeyValue {
-        .key = nameForSymbol(symbol),
-        .value = *value,
-      });
-    }else{
-      modassert(false, "printUiStoreDebug invalid type hint");
-    }
-  }
-
-  return debugData;
-}
-
-std::string uiStoreToStr(){
-  std::string data = "";
-  for (auto &dataValue : printUiStoreDebug()){
-    data += dataValue.key + std::string("=") + dataValue.value + std::string("\n");
-  }
-  return data;
-}
-
-std::optional<std::function<void()>> nullClick = []() -> void {};
 
 
 const int horizontalSymbol = getSymbol("horizontal");
