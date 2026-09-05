@@ -1,13 +1,13 @@
 #include "../../ModEngine/src/cscript/cscript_binding.h"
 #include "./util.h"
 #include "./arcade/arcade.h"
-#include "./ui/components/console_core.h"
 #include "./ai/ai.h"
 #include "./core/movement/movement.h"
 #include "./core/health.h"
 #include "./interaction/terminal.h"
 #include "./debug.h"
 #include "./gamecontrol/gametypes.h"
+#include "./ui/imgui/widgets/console_core.h"
 
 struct PauseOverride {
   std::function<void()> menu;
