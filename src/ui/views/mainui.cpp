@@ -49,8 +49,8 @@ Component withSimpleAnimatedLayout(Component& component){
 
 Props createRouterProps(RouterHistory& routerHistory, std::optional<objid> selectedId){
   std::unordered_map<std::string, Component> routeToComponent = {
-    { "mainmenu/levelselect/", withNavigation(withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.125f)) },
-    { "mainmenu/settings/", withNavigation(withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.25f)) },
+    { "mainmenu/levelselect/", withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.125f) },
+    { "mainmenu/settings/", withAnimator(routerHistory, withSimpleAnimatedLayout(emptyComponent), 0.25f) },
     { "",  emptyComponent  },
   };
 

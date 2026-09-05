@@ -39,3 +39,5 @@ void hideLetterBox();
 void drawFade();
 
 void renderTerminal(bool includePanel);
+
+void renderNavigation(bool includePanel);

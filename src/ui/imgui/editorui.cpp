@@ -526,7 +526,17 @@ void renderMoreUi(){
     renderLayoutCenter("terminal-layout", widget);
   }
 
+  if (true){
+    auto& widget = *widgetByNameSymbol(getSymbol("navigation")).value();
 
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs;
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
+    ImGui::Begin("navigation-layoutwindow", nullptr, flags);
+      renderLayoutAlignUpCenterHorz("nav-layout", widget, ImVec2(0.f, 0.f), ImVec2(1.f, 0.5f), ImVec2(100.f, 200.f));
+    ImGui::End();
+
+    ImGui::PopStyleColor();
+  }
 
   static std::optional<float> showConsoleTime;
   if (uiSettings.showConsole){
@@ -665,7 +675,9 @@ void initImGuiGameUi(){
         renderTerminal(includePanel);
     });  
 
-
+    registerWidget("navigation", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderNavigation(includePanel);
+    });  
 
 
 
