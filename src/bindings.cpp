@@ -937,6 +937,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole;
     getUiSettings() -> showConsole = global.systemConfig.showConsole;
     getUiSettings() -> showFpsHud = true;
+    getUiSettings() -> showTerminal = getTerminalConfig().has_value();
 
     updateState();
 

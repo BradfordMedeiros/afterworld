@@ -24,6 +24,7 @@ struct UiSettings {
   BallModeUi* ballModeUi = NULL;
   bool showConsole = false;
   bool showFpsHud = false;
+  bool showTerminal = false;
 };
 UiSettings* getUiSettings();
 

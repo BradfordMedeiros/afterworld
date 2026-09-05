@@ -4,7 +4,7 @@
 #include "../../../../src/ai/ai.h"
 #include "../../../../src/gamecontrol/gametypes.h"
 #include "../../../../src/gamecontrol/entity.h"
-#include "../../../../src/ui/components/game/terminal.h"
+#include "../../../../src/ui/views/playing.h"
 #include "./console_core.h"
 
 void renderConsole(bool includePanel);
@@ -37,3 +37,5 @@ void showLetterBoxHold(std::string title, float fadeInTime);
 void hideLetterBox();
 
 void drawFade();
+
+void renderTerminal(bool includePanel);

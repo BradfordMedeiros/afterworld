@@ -30,15 +30,3 @@ std::optional<TerminalConfig*> getTerminalConfig(){
   return &terminal.value();
 }
 
-Component playingComponent {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    if (terminal.has_value()){
-      Props terminalProps { 
-        .props = { PropPair { .symbol = valueSymbol, .value = terminal.value() }},
-      };
-      terminalComponent.draw(drawTools, terminalProps);    
-    }
-
-    return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
-  },
-};

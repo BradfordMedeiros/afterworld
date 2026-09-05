@@ -6,6 +6,7 @@
 #include "../util.h"
 #include "../ui/views/mainui.h"
 #include "../vector_gfx.h"
+#include "../global.h"
 
 struct TextDisplay {
 	objid textureId;

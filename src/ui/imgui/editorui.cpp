@@ -456,7 +456,7 @@ void renderBackground(const char* name, float opacity = 1.f, float widthPercent 
 
 
 void renderMoreUi(){
-  if (uiSettings.showFpsHud){
+  if (false && uiSettings.showFpsHud){
     auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
     renderLayoutCenter("fps-hud-layout", widget);
   }
@@ -519,6 +519,11 @@ void renderMoreUi(){
         auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
         renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
       }
+  }
+
+  if (uiSettings.showTerminal){
+    auto& widget = *widgetByNameSymbol(getSymbol("terminal")).value();
+    renderLayoutCenter("terminal-layout", widget);
   }
 
 
@@ -653,6 +658,11 @@ void initImGuiGameUi(){
 
     registerWidget("debug-inventory", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderInventory(includePanel);
+    });  
+
+
+    registerWidget("terminal", "old-debug", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderTerminal(includePanel);
     });  
 
 

@@ -2,7 +2,6 @@
 #define MOD_AFTERWORLD_COMPONENTS_PLAYING
 
 #include "../components/common.h"
-#include "../components/game/terminal.h"
 
 struct TerminalConfig;
 
@@ -62,11 +61,27 @@ void changeUiMode(UiMode);
 std::optional<BallModeUi*> getBallModeUI();
 std::optional<LiveMenu*> getLiveMenuUi();
 
+
+struct TerminalImage {
+  std::string image;
+};
+struct TerminalImageLeftTextRight {
+  std::string image;
+  std::string text;
+};
+struct TerminalText {
+  std::string text;
+};
+typedef std::variant<TerminalImage, TerminalImageLeftTextRight, TerminalText> TerminalDisplayType;
+struct TerminalConfig {
+  float time;
+	TerminalDisplayType terminalDisplay;
+};
+
+
 void setTerminalConfig(std::optional<TerminalConfig> terminalConfig);
 std::optional<TerminalConfig*> getTerminalConfig();
 
-
-extern Component playingComponent;
 
 #endif
 
