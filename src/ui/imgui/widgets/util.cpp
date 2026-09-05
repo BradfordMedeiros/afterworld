@@ -9,6 +9,7 @@ extern GameTypes gametypeSystem;
 extern GlobalState global;
 extern std::unordered_map<objid, HitPoints> hitpoints;
 extern std::unordered_map<objid, Inventory> scopenameToInventory;
+void popHistory();
 
 void renderConsole(bool includePanel){
   if (includePanel){
@@ -986,4 +987,89 @@ void drawFade(){
   }else {
     letterBoxStartTime = std::nullopt;
   }
+}
+
+
+void renderTerminal(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Terminal");
+  }
+
+  auto terminalConfig = getTerminalConfig();
+  if (!terminalConfig.has_value()){
+    ImGui::Text("No Terminal");
+  }else{
+    auto terminalImagePtr = std::get_if<TerminalImage>(&terminalConfig.value() -> terminalDisplay);
+    auto terminalImageLeftTextRightPtr = std::get_if<TerminalImageLeftTextRight>(&terminalConfig.value() -> terminalDisplay);
+    auto terminalTextPtr = std::get_if<TerminalText>(&terminalConfig.value() -> terminalDisplay);   
+
+    ImVec2 size = ImGui::GetContentRegionAvail();
+
+    if (terminalImagePtr){
+      ImGui::Image(
+        (ImTextureID)(intptr_t)gameapi->getTextureSamplerId(terminalImagePtr -> image).value(),
+        size,
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+      );      
+    }else if (terminalImageLeftTextRightPtr){
+      auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - terminalConfig.value() -> time) * 100.f);
+      auto textSubtr = terminalImageLeftTextRightPtr -> text.substr(0, currIndex);
+      ImGui::TextWrapped(textSubtr.c_str());
+      ImGui::Image(
+        (ImTextureID)(intptr_t)gameapi->getTextureSamplerId(terminalImageLeftTextRightPtr -> image).value(),
+        size,
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+      );     
+      
+    }else if (terminalTextPtr){
+      ImGui::Text("terminalTextPtr");
+      std::string texture = "./res/textures/wood.jpg";
+      ImGui::Image(
+        (ImTextureID)(intptr_t)gameapi->getTextureSamplerId(texture).value(),
+        ImVec2(size.x * 0.5f, size.y),
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+      );      
+    }
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+
+void renderNavigation(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Navigation");
+  }
+
+  ImGuiIO& io = ImGui::GetIO();
+  static ImFont* defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.f);
+
+ 
+  ImGui::PushFont(defaultFont);
+  ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, 0.6));
+  ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 0.8f));
+  ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.f, 1.0f, 0.8f));
+  ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(1.f, 0.f, 0.f, 1.0f));
+
+
+    // This centers the actual text
+  ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+
+  if (ImGui::Selectable("BACK", false, 0, ImVec2(100.f, 100.f))){
+    popHistory();
+  }
+    
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
+  ImGui::PopStyleColor(4);
+
+
+  if (includePanel){
+    ImGui::End();
+  }  
 }

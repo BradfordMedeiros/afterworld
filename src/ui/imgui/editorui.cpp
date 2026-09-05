@@ -456,13 +456,17 @@ void renderBackground(const char* name, float opacity = 1.f, float widthPercent 
 
 
 void renderMoreUi(){
+  if (uiSettings.showFpsHud){
+    auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
+    renderLayoutCenter("fps-hud-layout", widget);
+  }
 
   if (uiSettings.showGameSettings){
     auto view = viewByName(getSymbol("GameSettings"));
     renderLayout(*view.value());    
   }
   
-
+  
   if (uiSettings.showMainMenu){
       auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
       renderLayoutAlignUpCenterHorz("main-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
@@ -503,7 +507,7 @@ void renderMoreUi(){
   if (uiSettings.liveMenu.has_value()){
       {
         auto& widget = *widgetByNameSymbol(getSymbol("main-menu2")).value();
-        renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+        renderLayoutAlignUpCenterHorz("main-menu2-livemenu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
       }
   }
 
@@ -513,14 +517,11 @@ void renderMoreUi(){
           renderBackground("##levelcomplete-background");
         }
         auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
-        renderLayoutAlignUpCenterHorz("main-menu2-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
+        renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
       }
   }
 
-  if (uiSettings.showFpsHud){
-    auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
-    renderLayoutCenter("fps-hud-layout", widget, false);
-  }
+
 
   static std::optional<float> showConsoleTime;
   if (uiSettings.showConsole){

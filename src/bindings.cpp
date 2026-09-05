@@ -1107,7 +1107,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         const glm::vec2 cursorSizeNdi(0.1f, 0.1f);
         gameapi->drawRect(getGlobalState().control.xNdc, getGlobalState().control.yNdc , cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/crosshairs/crosshair029.png", ShapeOptions { .zIndex = 6 });
       }
-
       
 
 
