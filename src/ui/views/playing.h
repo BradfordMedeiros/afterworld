@@ -1,7 +1,9 @@
 #ifndef MOD_AFTERWORLD_COMPONENTS_PLAYING
 #define MOD_AFTERWORLD_COMPONENTS_PLAYING
 
-#include "../components/common.h"
+#include <string>
+#include <optional>
+#include "../../util.h"
 
 struct TerminalConfig;
 

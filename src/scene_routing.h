@@ -4,8 +4,15 @@
 #include <string>
 #include <vector>
 #include <optional>
-#include "./ui/components/router.h"
+#include "./ui/views/mainui.h"
 #include "./gamecontrol/mode.h"
+
+struct UILevel {
+  std::string name;
+  std::string description;
+  std::string image;
+  std::string shortcut;
+};
 
 struct PathAndParams {
   std::string path;

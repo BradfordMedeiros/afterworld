@@ -30,8 +30,6 @@
 #include "./director/spawn.h"
 #include "./director/director.h"
 #include "./global.h"
-#include "./ui/components/common.h"
-#include "./ui/components/router.h"
 #include "./ui/views/mainui.h"
 #include "./collision.h"
 #include "./vector_gfx.h"
