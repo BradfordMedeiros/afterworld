@@ -5,15 +5,6 @@
 #include <optional>
 #include "../../util.h"
 
-struct BoundingBox2D {
-  float x;
-  float y;
-  float width;
-  float height;
-};
-
-std::string print(BoundingBox2D& box);
-
 struct ImGrid {
   int numCells;
 };
@@ -26,58 +17,5 @@ struct UILevel {
   std::string image;
   std::string shortcut;
 };
-
-
-extern const int horizontalSymbol;
-extern const int listItemsSymbol;
-extern const int valueSymbol;
-extern const int interfaceSymbol;
-extern const int onclickSymbol;
-extern const int onclickRightSymbol;
-extern const int onInputSymbol;
-extern const int layoutSymbol;
-extern const int routerSymbol;
-extern const int tintSymbol;
-extern const int minwidthSymbol;
-extern const int minheightSymbol;
-extern const int xoffsetSymbol;
-extern const int yoffsetSymbol;
-extern const int offsetSymbol;
-extern const int elapsedTimeSymbol;
-extern const int resumeSymbol;
-extern const int goToMainMenuSymbol;
-extern const int layoutSymbol;
-extern const int sliderSymbol;
-extern const int radioSymbol;
-extern const int colorSymbol;
-extern const int routerMappingSymbol;
-extern const int paddingSymbol;
-extern const int itemPaddingSymbol;
-extern const int alignVertical;
-extern const int flowHorizontal;
-extern const int flowVertical;
-extern const int titleSymbol;
-extern const int detailSymbol;
-extern const int xoffsetFromSymbol;
-extern const int interpolationSymbol;
-extern const int checkedSymbol;
-extern const int editableSymbol;
-extern const int onWindowDragSymbol;
-extern const int onSlideSymbol;
-extern const int enableSymbol;
-extern const int dockTypeSymbol;
-extern const int selectedSymbol;
-extern const int fontsizeSymbol;
-extern const int fixedSizeSymbol;
-extern const int sizeSymbol;
-extern const int limitSymbol;
-extern const int focusTintSymbol;
-extern const int borderColorSymbol;
-extern const int barColorSymbol;
-extern const int consoleInterfaceSymbol;
-extern const int playLevelSymbol;
-extern const int widthSymbol;
-extern const int heightSymbol;
-extern const int autofocusSymbol;
 
 #endif
