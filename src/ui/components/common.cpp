@@ -2,30 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-std::string print(TrackedLocationData& data){
-  return print(data.position) + ", "  + print(data.size);
-}
-
-std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocationIds){
-  std::string value = "[";
-  for (auto &[id, data] : trackedLocationIds){
-    value += "(" + print(data.position) + ", " + print(data.size) + ") ";
-  }
-  return value + "]";
-}
-
-void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint, std::optional<ShapeOptions> shapeOptions){
-  //gameapi -> drawRect(box.x, box.y, box.width, box.height, false, glm::vec4(1.f, 0.f, 1.f, 0.2f), std::nullopt, true, std::nullopt, std::nullopt);
-  //gameapi -> drawRect(-0.915000, -0.795, 0.17f, 0.15f, false, glm::vec4(1.f, 0.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);
-  float left = box.x - (box.width * 0.5f);
-  float right = box.x + (box.width * 0.5f);
-  float up = box.y + (box.height * 0.5f);
-  float down = box.y - (box.height * 0.5f);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(right, up, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
-  drawTools.drawLine2D(glm::vec3(left, down, 0.f), glm::vec3(right, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
-  drawTools.drawLine2D(glm::vec3(left, up, 0.f), glm::vec3(left, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
-  drawTools.drawLine2D(glm::vec3(right, up, 0.f), glm::vec3(right, down, 0.f), false, tint, true, std::nullopt, std::nullopt, shapeOptions);
-}
 
 std::string print(BoundingBox2D& box){
   return std::string("x = " + std::to_string(box.x) + ", y = " + std::to_string(box.y) + ", width = " + std::to_string(box.width) + ", height = " + std::to_string(box.height));
@@ -143,16 +119,7 @@ float floatFromProp(PropPair& propPair){
   modassert(floatValue, "invalid prop");
   return *floatValue;
 }
-glm::vec3 vec3FromProp(PropPair& propPair){
-  glm::vec3* vec3Value = anycast<glm::vec3>(propPair.value);
-  modassert(vec3Value, "invalid prop");
-  return *vec3Value;
-}
-glm::vec4 vec4FromProp(PropPair& propPair){
-  glm::vec4* vec4Value = anycast<glm::vec4>(propPair.value);
-  modassert(vec4Value, "invalid prop");
-  return *vec4Value;
-}
+
 
 int intFromProp(Props& props, int symbol, int defaultValue){
   auto propPair = propPairAtIndex(props.props, symbol);
@@ -176,71 +143,6 @@ std::optional<float> floatFromProp(Props& props, int symbol){
   return std::nullopt;
 }
 
-glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue){
-  auto propPair = propPairAtIndex(props.props, symbol);
-  if (propPair){
-    return vec3FromProp(*propPair);
-  }
-  return defaultValue;
-}
-glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue){
-  auto propPair = propPairAtIndex(props.props, symbol);
-  if (propPair){
-    return vec4FromProp(*propPair);
-  }
-  return defaultValue;
-}
-
-std::optional<std::function<void()>> fnFromProp(Props& props, int symbol){
-  auto propPair = propPairAtIndex(props.props, symbol);
-  if (propPair){
-    const std::type_info& typeInfo = propPair -> value.type();
-    //std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
-    std::function<void()>* fnValue = anycast<std::function<void()>>(propPair -> value);
-    modassert(fnValue, "fnFromProp invalid type");
-    return *fnValue;
-
-  }
-  return std::nullopt;
-}
-
-std::optional<std::function<void()>>* optFnFromProp(Props& props, int symbol){
-  auto propPair = propPairAtIndex(props.props, symbol);
-  if (propPair){
-    //const std::type_info& typeInfo = propPair -> value.type();
-    //std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
-    std::optional<std::function<void()>>* fnValue = anycast<std::optional<std::function<void()>>>(propPair -> value);
-    return fnValue;
-  }
-  return NULL;
-}
-
-std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol){
-  auto propPair = propPairAtIndex(props.props, symbol);
-  if (propPair){
-    const std::type_info& typeInfo = propPair -> value.type();
-    //std::cout << "Type of std::any value: " << typeInfo.name() << std::endl;
-    std::function<void(const char*)>* fnValue = anycast<std::function<void(const char*)>>(propPair -> value);
-    modassert(fnValue, "fnFromProp invalid type");
-    return *fnValue;
-  }
-  return std::nullopt;
-}
-
-std::string strFromProp(Props& props, int symbol, const char* defaultValue){
-  auto strValue = typeFromProps<std::string>(props, symbol);
-  if (!strValue){
-    return defaultValue;
-  }
-  return *strValue;
-}
-
-objid objidFromProp(Props& props, int symbol){
-  auto objIdValue = typeFromProps<objid>(props, symbol);
-  modassert(objIdValue, "objid is null");
-  return *objIdValue; 
-}
-
 void updatePropValue(Props& props, int symbol, std::any value){
   auto propPair = propPairAtIndex(props.props, symbol);
   if (propPair){
@@ -254,77 +156,6 @@ void updatePropValue(Props& props, int symbol, std::any value){
   });
 }
 
-
-Component withProps(Component& wrappedComponent, Props& outerProps){
-  auto component = Component {
-    .draw = [&wrappedComponent, &outerProps](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      for (auto &prop : outerProps.props){
-        updatePropValue(props, prop.symbol, prop.value);
-      }
-      return wrappedComponent.draw(drawTools, props);
-    },
-  };
-  return component;
-}
-
-Component withPropsCopy(Component& wrappedComponent, Props outerProps){
-  auto component = Component {
-    .draw = [&wrappedComponent, outerProps](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      Props outerPropsCopy = outerProps;
-      for (auto &prop : props.props){
-        updatePropValue(outerPropsCopy, prop.symbol, prop.value);
-      }
-      return wrappedComponent.draw(drawTools, outerPropsCopy);
-    },
-  };
-  return component;
-}
-
-Props getDefaultProps(){
-  return Props { 
-    .props = {}
-  };
-}
- 
-
-Component emptyComponent {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-    return { .x = 0, .y = 0, .width = 0.f, .height = 0.f };
-  },
-};
-
-int minManangedId = 990000;
-objid uniqueMappingId  = minManangedId;
-objid uniqueMenuItemMappingId(){
-  uniqueMappingId++;
-  return uniqueMappingId;
-}
-void resetMenuItemMappingId(){
-  uniqueMappingId = minManangedId;
-}
-
-void getMenuMappingData(int* _minId, int* _currentId){
-  *_minId = minManangedId;
-  *_currentId = uniqueMappingId;
-}
-
-
-// this is actually down right aligned, but vert centered
-void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId){
-  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, std::nullopt, std::nullopt);
-}
-
-void drawRightText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<float> maxWidth){
-  float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-  drawTools.drawText(text, ndiOffsetX, ndiOffsetY, fontSizeNdiEquivalent, false, tint, std::nullopt, true, std::nullopt, selectionId, maxWidth, std::nullopt);
-}
-
-
-struct UiStoreKeyValue {
-  std::string key;
-  std::string value;
-};
 
 
 const int horizontalSymbol = getSymbol("horizontal");

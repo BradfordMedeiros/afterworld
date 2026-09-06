@@ -19,7 +19,6 @@ std::string fullDebugStr(RouterHistory& history);
 std::string getCurrentPath(RouterHistory& history);
 
 std::optional<std::string> getPathParts(RouterHistory& history, int index);
-Component withAnimator(RouterHistory& history, Component component, float duration);
 void registerOnRouteChanged(RouterHistory& history, std::function<void(bool forceLoad)> onRouteChanged);
 
 
@@ -32,6 +31,5 @@ struct PathMatch {
 PathMatch matchPath(std::string path, std::string expression);
 
 
-extern Component router;
 
 #endif

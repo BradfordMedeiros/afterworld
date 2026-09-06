@@ -25,7 +25,6 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
 
  	inGameUi.textDisplays[id] = TextDisplay{
  		.textureId = uiTexture,
- 		.handlerFns = {},
  		.mouseCoordNdc = glm::vec2(0.f, 0.f),
  		.routerHistory = createHistory(),
  		.uiStateContext = UiStateContext {
@@ -59,13 +58,6 @@ void onInGameUiFrame(UiStateContext& uiState, InGameUi& inGameUi, std::optional<
 
 		gameapi -> clearTexture(textDisplay.textureId, std::nullopt, std::nullopt, std::nullopt);
     UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
-		textDisplay.handlerFns = handleDrawMainUi(
-			actualUiState, 
-			getGlobalState().control.selectedId, 
-			textDisplay.textureId, 
-			drawCursor ? textDisplay.mouseCoordNdc : std::optional<glm::vec2>(std::nullopt),
-			false
-		);
 
 		auto ndiCoords = uvToNdi(getGlobalState().control.texCoordUvView);
     gameapi -> idAtCoordAsync(ndiCoords.x, ndiCoords.y, false, textDisplay.textureId, [ndiCoords](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
@@ -83,7 +75,6 @@ void onInGameUiMouseClick(UiStateContext& uiState, InGameUi& inGameUi, objid id,
 		if (inGameUi.textDisplays.find(id) == inGameUi.textDisplays.end()){
 			return;
 		}
-		auto& handlerFns = inGameUi.textDisplays.at(id).handlerFns; // should probably check this still exists
 		if (uiId.has_value()){
 			TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
 	  	UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;

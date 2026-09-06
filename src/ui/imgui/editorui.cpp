@@ -418,7 +418,7 @@ UiSettings* getUiSettings(){
 // alignment -> 0,5 is center, 1.f is right, 0.f is left
 //            ->0.5 is center, 1.f is up, 0.f is down
 
-void renderBackground(const char* name, float opacity = 1.f, float widthPercent = 1.f, float heightPercent = 1.f){
+void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f), float widthPercent = 1.f, float heightPercent = 1.f, std::optional<std::string> texture = std::optional<std::string>(std::nullopt)){
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -430,7 +430,7 @@ void renderBackground(const char* name, float opacity = 1.f, float widthPercent 
     ImGui::Begin(name, nullptr, flags);
 
     {
-      std::string defaultTextureName = "./res/textures/testgradient.png";
+      std::string defaultTextureName = texture.has_value() ? texture.value() : "./res/textures/testgradient.png";
       auto textureId = gameapi->getTextureSamplerId(defaultTextureName).value();
 
       // Center image horizontally and vertically
@@ -445,7 +445,7 @@ void renderBackground(const char* name, float opacity = 1.f, float widthPercent 
           ),
           ImVec2(0, 1),
           ImVec2(1, 0),
-          IM_COL32(128  * opacity, 128 * opacity, 128 * opacity, 255)
+          IM_COL32(255 * tint.x, 255 * tint.y, 255 * tint.z, 255 * tint.w)
       );
     }
 
@@ -463,6 +463,11 @@ void renderMoreUi(){
 
   if (uiSettings.showGameSettings){
     auto view = viewByName(getSymbol("GameSettings"));
+
+
+    //      drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
+    renderBackground("game-settings-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
+
     renderLayout(*view.value());    
   }
   
@@ -485,6 +490,8 @@ void renderMoreUi(){
   }
 
   if (uiSettings.showLevelSelect){
+    renderBackground("level-select-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
+
     ImVec2 screen = ImGui::GetIO().DisplaySize;
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(screen);

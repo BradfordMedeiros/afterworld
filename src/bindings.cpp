@@ -67,15 +67,11 @@ struct SceneManagement {
   int changedLevelFrame;
 };
 
-struct UiData {
-  HandlerFns uiCallbacks;
-};
 
 SceneManagement sceneManagement;
 MovementEntityData movementEntities;
 std::optional<std::string> dragSelect;
 std::optional<glm::vec2> selecting;
-UiData uiData;
 
 std::optional<std::string> activeLevel;
 int mainPlayerControl = 0;
@@ -781,13 +777,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     sceneManagement = createSceneManagement();
     movementEntities = MovementEntityData {};
     selecting = std::nullopt;
-    uiData = {
-      .uiCallbacks = HandlerFns {
-        .handlerFns = {},
-        .handlerFns2 = {},
-        .inputFns = {},
-      }
-    };
 
     addPlayerPort(0);
 
@@ -1086,8 +1075,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       std::optional<glm::vec2> mainUiCursorCoord;
 
       bool disableUiContent = !inMode();
-      uiData.uiCallbacks = handleDrawMainUi(uiStateContext, getGlobalState().control.selectedId, std::nullopt, mainUiCursorCoord, disableUiContent);
-      
 
       onInGameUiFrame(uiStateContext, inGameUi, std::nullopt, ndiCoord);
     

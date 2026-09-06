@@ -5,28 +5,6 @@
 #include <optional>
 #include "../../util.h"
 
-struct TrackedLocationData {
-  glm::vec2 position;
-  glm::vec2 size;
-};
-struct HandlerCallbackFn {
-  TrackedLocationData trackedLocationData;
-};
-std::string print(TrackedLocationData& data);
-std::string print(std::unordered_map<objid, TrackedLocationData>& trackedLocationIds);
-
-struct DrawingTools {
-  std::function<void(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidth, std::optional<ShapeOptions> shaderId)> drawText;
-  std::function<void(std::string word, float fontSizeNdi, bool ndi, std::optional<std::string> fontFamily, float* _width, float* _height)> getTextDimensionsNdi;
-  std::function<void(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId, std::optional<objid> trackingId)> drawRect;
-  std::function<void(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId)> drawLine2D;
-  std::function<void(objid, std::function<void()>)> registerCallbackFns;
-  std::function<void(objid, std::function<void(HandlerCallbackFn&)>)> registerCallbackFnsHandler;
-  std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
-  std::function<void(objid, std::function<void(int key, int mods)>)> registerInputFns;
-  std::function<void(objid, std::string& uniqueKey)> registerAutoFocus;
-};
-
 struct PropPair {
   int symbol;
   std::any value;
@@ -36,19 +14,10 @@ struct Props {
   std::vector<PropPair> props;
 };
 
-Props getDefaultProps();
 
 PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol);
-int intFromProp(Props& props, int symbol, int defaultValue);
 float floatFromProp(Props& props, int symbol, float defaultValue);
 std::optional<float> floatFromProp(Props& props, int symbol);
-glm::vec3 vec3FromProp(Props& props, int symbol, glm::vec3 defaultValue);
-glm::vec4 vec4FromProp(Props& props, int symbol, glm::vec4 defaultValue);
-std::optional<std::function<void()>> fnFromProp(Props& props, int symbol);
-std::optional<std::function<void()>>* optFnFromProp(Props& props, int symbol);
-std::optional<std::function<void(const char*)>> fnStrFromProp(Props& props, int symbol);
-std::string strFromProp(Props& props, int symbol, const char* defaultValue);
-objid objidFromProp(Props& props, int symbol);
 
 template <typename T>
 T* typeFromProps(Props& props, int symbol){
@@ -72,11 +41,6 @@ struct BoundingBox2D {
   float height;
 };
 
-struct Component {
-  std::function<BoundingBox2D(DrawingTools&, Props&)> draw;
-};
-
-void drawDebugBoundingBox(DrawingTools& drawTools, BoundingBox2D box, std::optional<glm::vec4> tint = std::nullopt, std::optional<ShapeOptions> shapeOptions = std::nullopt);
 std::string print(BoundingBox2D& box);
 
 struct ImGrid {
@@ -106,17 +70,6 @@ struct SideMeasurements {
 SideMeasurements calculateSides(BoundingBox2D& elementsBox);
 std::string print(SideMeasurements& sides);
 
-Component withProps(Component& wrappedComponent, Props& props);
-Component withPropsCopy(Component& wrappedComponent, Props props);
-
-extern Component emptyComponent;
-
-objid uniqueMenuItemMappingId();
-void resetMenuItemMappingId();
-void getMenuMappingData(int* _minId, int* _currentId);
-
-void drawCenteredText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId);
-void drawRightText(DrawingTools& drawTools, std::string text, float ndiOffsetX, float ndiOffsetY, float ndiSize, std::optional<glm::vec4> tint, std::optional<objid> selectionId, std::optional<float> maxWidth);
 
 struct UILevel {
   std::string name;

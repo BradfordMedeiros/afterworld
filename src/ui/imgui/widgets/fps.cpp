@@ -1,5 +1,7 @@
 #include "./fps.h"
 
+extern CustomApiBindings* gameapi;
+
 void renderTraitsPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Traits Gameplay");

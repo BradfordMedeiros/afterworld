@@ -76,17 +76,6 @@ RouterHistory* routerHistory(Props& props){
  	return router;
 }
 
-std::unordered_map<std::string, Component>* routerMapping(Props& props){
-  auto propPair = propPairAtIndex(props.props, routerMappingSymbol);
-  if (!propPair){
-    return NULL;
-  }
-  std::unordered_map<std::string, Component>* routerMapping = anycast<std::unordered_map<std::string, Component>>(propPair -> value);
-  modassert(routerMapping, "invalid router mapping");
-  return routerMapping;
-}
-
-
 // can insert * instead of the subpath and that will match anything
 PathMatch matchPath(std::string path, std::string expression){
   auto pathSplit = split(path, '/');
@@ -117,57 +106,6 @@ PathMatch matchPath(std::string path, std::string expression){
     .params = params,
   };
 }
-
-const Component* componentAtRoute(const std::unordered_map<std::string, Component>& routeToComponent, std::string& path){
-  for (auto &[routePath, component] : routeToComponent){
-    if (matchPath(path, routePath).matches){
-      return &component;
-    }
-  }
-  return NULL;
-}
-
-Component router {
-  .draw = [](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-  	auto history = routerHistory(props);
-  	if (!history){
-  		modlog("router", "no history");
-	     return BoundingBox2D { .x = 0.f, .y = 0.f, .width = 0.f, .height = 0.f };    		
-  	}
-    auto routeToComponent = routerMapping(props);
-    modassert(routeToComponent, "router - no router mapping");
-
-    auto fullPath = fullHistoryStr(*history);
-    auto component = componentAtRoute(*routeToComponent, fullPath);
-  	if (!component){
-  		modlog("router", std::string("no path for: ") + fullPath);
-  		return BoundingBox2D { .x = 0.f, .y = 0.f, .width = 0.f, .height = 0.f };
-  	}
-    return component -> draw(drawTools, props);
-  },
-};
-
-
-Component withAnimator(RouterHistory& history, Component wrappedComponent, float duration){
-  float elapsedTime = gameapi -> timeSeconds(true) - history.currentRouteTime;
-  float interpAmount = glm::min(1.f, elapsedTime / duration);
-
-  Component component {
-    .draw = [interpAmount, wrappedComponent](DrawingTools& drawTools, Props& props) -> BoundingBox2D {
-      Props interpProps {
-        .props = {
-          PropPair  { .symbol = interpolationSymbol, .value = interpAmount },
-        },
-      };
-
-      props.props.push_back(PropPair  { .symbol = interpolationSymbol, .value = interpAmount });
-      auto boundingBox = wrappedComponent.draw(drawTools, props);
-      return boundingBox;
-    }
-  };
-  return component;
-}
-
 
 void registerOnRouteChanged(RouterHistory& history, std::function<void(bool)> onRouteChanged){
   modassert(!history.registerOnRouteChangedFn.has_value(), "can only register a single route");
