@@ -4,7 +4,6 @@
 #include "../components/router.h"
 #include "../components/basic/layout.h"
 #include "./playing.h"
-#include "./navigation.h"
 
 extern Component mainUI;
 
