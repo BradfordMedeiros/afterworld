@@ -66,16 +66,6 @@ std::optional<std::string> getPathParts(RouterHistory& history, int index){
   return history.history.at(index);
 }
 
-RouterHistory* routerHistory(Props& props){
- 	auto propPair = propPairAtIndex(props.props, routerSymbol);
- 	if (!propPair){
- 		return NULL;
- 	}
- 	RouterHistory* router = anycast<RouterHistory>(propPair -> value);
- 	modassert(router, "invalid router propr");
- 	return router;
-}
-
 // can insert * instead of the subpath and that will match anything
 PathMatch matchPath(std::string path, std::string expression){
   auto pathSplit = split(path, '/');

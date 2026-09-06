@@ -5,35 +5,6 @@
 #include <optional>
 #include "../../util.h"
 
-struct PropPair {
-  int symbol;
-  std::any value;
-};
-
-struct Props {
-  std::vector<PropPair> props;
-};
-
-
-PropPair* propPairAtIndex(std::vector<PropPair>& props, int symbol);
-float floatFromProp(Props& props, int symbol, float defaultValue);
-std::optional<float> floatFromProp(Props& props, int symbol);
-
-template <typename T>
-T* typeFromProps(Props& props, int symbol){
-  auto propPair = propPairAtIndex(props.props, symbol);
-  if (!propPair){
-    return NULL;
-  }
-  T* propValue = anycast<T>(propPair -> value);
-  modassert(propValue, "invalid cast in typeFromProps");
-  return propValue;
-}
-
-
-void updatePropValue(Props& props, int symbol, std::any value);
-
-
 struct BoundingBox2D {
   float x;
   float y;
@@ -47,28 +18,6 @@ struct ImGrid {
   int numCells;
 };
 void drawScreenspaceGrid(ImGrid grid);
-
-
-struct BoundingBoxMeasurer {
-  std::optional<float> minX;
-  std::optional<float> maxX;
-  std::optional<float> minY;
-  std::optional<float> maxY;
-};
-BoundingBoxMeasurer createMeasurer();
-void setX(BoundingBoxMeasurer& box, float value);
-void setY(BoundingBoxMeasurer& box, float value);
-void measureBoundingBox(BoundingBoxMeasurer& boundingBoxMeasurer, BoundingBox2D& boundingBox);
-BoundingBox2D measurerToBox(BoundingBoxMeasurer& box);
-
-struct SideMeasurements {
-  float left;
-  float right;
-  float top;
-  float bottom;
-};
-SideMeasurements calculateSides(BoundingBox2D& elementsBox);
-std::string print(SideMeasurements& sides);
 
 
 struct UILevel {
