@@ -105,11 +105,6 @@ void createBufferedDrawingTools(BufferedDrawingTools& bufferedDrawingTools, Draw
   drawTools.registerCallbackFnsHandler = realTools.registerCallbackFnsHandler;
   drawTools.registerCallbackRightFns = realTools.registerCallbackRightFns;
   drawTools.registerInputFns = realTools.registerInputFns;
-  drawTools.registerAutoFocus = realTools.registerAutoFocus;
-  drawTools.selectedId = realTools.selectedId;
-  drawTools.focusedId = realTools.focusedId;
-  drawTools.getClipboardString = realTools.getClipboardString;
-  drawTools.setClipboardString = realTools.setClipboardString;
 
 	bufferedDrawingTools.drawTools = drawTools,
 	bufferedDrawingTools.realTools = &realTools,

@@ -25,10 +25,6 @@ struct DrawingTools {
   std::function<void(objid, std::function<void(int)>)> registerCallbackRightFns;
   std::function<void(objid, std::function<void(int key, int mods)>)> registerInputFns;
   std::function<void(objid, std::string& uniqueKey)> registerAutoFocus;
-  std::optional<objid> selectedId;
-  std::optional<objid> focusedId;
-  const char*(*getClipboardString)();
-  void (*setClipboardString)(const char*);
 };
 
 struct PropPair {

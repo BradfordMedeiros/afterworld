@@ -7,11 +7,6 @@
 
 extern Component mainUI;
 
-struct AutoFocusObj {
-  objid id;
-  std::string key;
-};
-
 struct HandlerFns {
   int minManagedId;
   int maxManagedId;
@@ -20,24 +15,14 @@ struct HandlerFns {
   std::unordered_map<objid, std::function<void(int)>> handlerFns2;
   std::unordered_map<objid, std::function<void(int, int)>> inputFns;
   std::unordered_map<objid, TrackedLocationData> trackedLocationIds;
-  std::optional<AutoFocusObj> autofocus;
 };
 
 RouterHistory& getMainRouterHistory();
 
-struct UiState {
-  std::optional<objid> focusedId;
-  std::string lastAutofocusedKey;
-};
-UiState createUiState();
-
 struct UiStateContext {
   RouterHistory* routerHistory;
-  UiState uiState;
 };
 HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode);
-void onMainUiMousePress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId);
-void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods);
 void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt), bool forceLoad = false);
 std::optional<std::any>& getData();
 

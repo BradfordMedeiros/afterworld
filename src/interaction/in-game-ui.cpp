@@ -29,7 +29,6 @@ void createInGamesUiInstance(InGameUi& inGameUi, objid id){
  		.mouseCoordNdc = glm::vec2(0.f, 0.f),
  		.routerHistory = createHistory(),
  		.uiStateContext = UiStateContext {
- 			.uiState = createUiState(),
  		},
  	};
  	inGameUi.textDisplays.at(id).uiStateContext.value().routerHistory = &inGameUi.textDisplays.at(id).routerHistory.value();
@@ -89,7 +88,6 @@ void onInGameUiMouseClick(UiStateContext& uiState, InGameUi& inGameUi, objid id,
 			TextDisplay& textDisplay = inGameUi.textDisplays.at(id);
 	  	UiStateContext& actualUiState = textDisplay.uiStateContext.has_value() ? textDisplay.uiStateContext.value() : uiState;
 			modlog("ui pick color on game ui id", std::to_string(uiId.value()));
-			onMainUiMousePress(actualUiState, handlerFns, button, action, uiId.value());
 		}
   });
 }

@@ -63,17 +63,7 @@ Props createRouterProps(RouterHistory& routerHistory, std::optional<objid> selec
   return routerProps;
 }
 
-UiState createUiState(){
-  UiState uiState {    
-    .focusedId = std::nullopt,
-    .lastAutofocusedKey = "",
-  };
-  return uiState;
-}
-
 HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid> selectedId, std::optional<unsigned int> textureId, std::optional<glm::vec2> ndiCursor, bool editorMode){
-  UiState& uiState = uiStateContext.uiState;
-
   //////////////////////////////
   // navlist uses this via extern
 
@@ -85,7 +75,6 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid>
     .handlerFns2 = {},
     .inputFns = {},
     .trackedLocationIds = {},
-    .autofocus = std::nullopt,
   };
   //std::cout << "focusedId: " << (focusedId.has_value() ? std::to_string(focusedId.value()) : "no value") << std::endl;
 
@@ -118,16 +107,6 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid>
      .registerInputFns = [&handlerFuncs](objid id, std::function<void(int, int)> fn) -> void {
         handlerFuncs.inputFns[id] = fn;
      },
-     .registerAutoFocus = [&handlerFuncs](objid id, std::string& key) -> void {
-        handlerFuncs.autofocus = AutoFocusObj {
-          .id = id,
-          .key = key,
-        };
-     },
-     .selectedId = selectedId,
-     .focusedId = uiState.focusedId,
-     .getClipboardString = gameapi -> getClipboardString,
-     .setClipboardString = gameapi -> setClipboardString,
   };
   resetMenuItemMappingId();
 
@@ -139,68 +118,7 @@ HandlerFns handleDrawMainUi(UiStateContext& uiStateContext, std::optional<objid>
 
   getMenuMappingData(&handlerFuncs.minManagedId, &handlerFuncs.maxManagedId);
 
-  if (handlerFuncs.autofocus.has_value()){
-    if (uiState.lastAutofocusedKey != handlerFuncs.autofocus.value().key){
-      uiState.focusedId = handlerFuncs.autofocus.value().id;
-      uiState.lastAutofocusedKey = handlerFuncs.autofocus.value().key;
-    }
-  }
-
-  if (editorMode){
-    drawTools.drawText(std::string("route: ") + fullDebugStr(*(uiStateContext.routerHistory)), -0.8f, -0.95f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("handlers: ") + std::to_string(handlerFuncs.handlerFns.size()), -0.8f, -0.90f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-    drawTools.drawText(std::string("inputfns: ") + std::to_string(handlerFuncs.inputFns.size()), -0.8f, -0.85f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  }
-
   return handlerFuncs;
-}
-
-void onMainUiMousePress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int button, int action, std::optional<objid> selectedId){
-  //modassert(handlerFns.minManagedId, "handlerfns minManagedId invalid data");
-  //modassert(handlerFns.maxManagedId, "handlerfns maxManagedId invalid data");
-
-  UiState& uiState = uiStateContext.uiState;
-
-  std::cout << "button: " << button << ", action: " << action << std::endl;
-  if (button == 0 && action == 1){
-    if (selectedId.has_value() &&  selectedId.value() >= handlerFns.minManagedId &&  selectedId.value() <= handlerFns.maxManagedId){
-      uiState.focusedId = selectedId.value();
-    }
-
-    if (selectedId.has_value()){
-      if (handlerFns.handlerFns.find(selectedId.value()) != handlerFns.handlerFns.end()){
-        handlerFns.handlerFns.at(selectedId.value())();
-      }
-      if (handlerFns.handlerCallbackFns.find(selectedId.value()) != handlerFns.handlerCallbackFns.end()){\
-        HandlerCallbackFn data{
-          .trackedLocationData = handlerFns.trackedLocationIds.at(selectedId.value()),
-        };
-        handlerFns.handlerCallbackFns.at(selectedId.value())(data);
-      }
-    }
-  }
-
-  if (action == 1){
-    if (selectedId.has_value()){
-      if (handlerFns.handlerFns2.find(selectedId.value()) != handlerFns.handlerFns2.end()){
-        handlerFns.handlerFns2.at(selectedId.value())(button);
-      }
-    }  
-  }
-
-}
-
-void onMainUiKeyPress(UiStateContext& uiStateContext, HandlerFns& handlerFns, int key, int scancode, int action, int mods){
-  UiState& uiState = uiStateContext.uiState;
-
-  modlog("mainui key press", std::to_string(key));
-  modlog("mainui key press focused", print(uiState.focusedId));
-  if (!uiState.focusedId.has_value()){
-    return;
-  }
-  if (handlerFns.inputFns.find(uiState.focusedId.value()) != handlerFns.inputFns.end()){
-    handlerFns.inputFns.at(uiState.focusedId.value())(key, mods);
-  }
 }
 
 

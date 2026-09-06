@@ -191,7 +191,6 @@ SceneManagement createSceneManagement(){
 
 UiStateContext uiStateContext {
   .routerHistory = &getMainRouterHistory(),
-  .uiState = createUiState(),
 };
 
 struct LevelOptions {
@@ -561,7 +560,6 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
       showTerminal(std::nullopt);
     }
 
-    onMainUiKeyPress(uiStateContext, uiData.uiCallbacks, key, scancode, action, mods);
     onInGameUiKeyCallback(key, scancode, action, mods);
   }
   handleHotkey(key, action);
@@ -627,7 +625,6 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
 }
 
 void onMouseCallback(objid id, void* data, int button, int action, int mods, int playerIndex){
-  onMainUiMousePress(uiStateContext, uiData.uiCallbacks, button, action, getGlobalState().control.selectedId);
   onInGameUiMouseCallback(uiStateContext, inGameUi, button, action, getGlobalState().control.lookAtId /* this needs to come from the texture */);
   onMouseClickArcade(button, action, mods);
   onVehicleMouseClick(vehicles, button, action, mods);
