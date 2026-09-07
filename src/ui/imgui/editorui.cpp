@@ -30,8 +30,6 @@ std::optional<std::string> currentWeather();
 void changeWeather(std::optional<std::string> name);
 
 
-
-
 void renderTriggerPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Trigger");
@@ -330,27 +328,7 @@ void renderArcade(bool includePanel, std::optional<objid> objectToDetail, std::o
   ImGui::Text("Arcade");
 
   if (ImGui::Button("Create")){
-
-
-
     makeArcadeObj(sceneId.value());
-
-
-
-    /*
-    arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
-    arcade/screen:arcade:invaders
-
-    arcade:activate:arcade
-    arcade:physics:enabled
-
-    arcade:child:>camera
-    >camera:position:0 0 1
-
-    arcade/screen:child:!light
-
-    arcade:health:200000*/
-
   }
 
 

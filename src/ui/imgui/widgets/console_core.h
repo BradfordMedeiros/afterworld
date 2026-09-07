@@ -44,7 +44,5 @@ extern std::vector<CommandDispatch> commands;
 extern std::deque<HistoryInstance> commandHistory;
 extern std::deque<HistoryInstance> logHistory;
 
-
 void initializeConsole();
-
 void executeCommand(ConsoleInterface& consoleInterface, std::string command);

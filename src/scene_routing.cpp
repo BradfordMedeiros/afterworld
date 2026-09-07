@@ -141,7 +141,6 @@ std::vector<SceneRouterOptions> routerPathOptions = {
       .getInteract = withDefaults(basicInteract(true, false, true)),
     },
     defaultRouterOptions("debug/"),
-    defaultRouterOptions("debug/wheel/"),
 };
 
 std::vector<SceneRouterPath> routerPaths = {

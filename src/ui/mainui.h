@@ -9,19 +9,13 @@ struct RouterHistory {
   float currentRouteTime;
   std::deque<std::string> history;
   std::optional<std::any> data;
-  std::optional<std::function<void(bool)>> registerOnRouteChangedFn;
+  std::optional<bool> routeChangedForceReload;
 };
 RouterHistory createHistory();
 void pushHistory(RouterHistory& history, std::vector<std::string> path, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt), bool forceLoad = false);
 void popHistory(RouterHistory& history);
-std::optional<std::any>& getData(RouterHistory& history);
 
 std::string fullHistoryStr(RouterHistory& history);
-std::string getCurrentPath(RouterHistory& history);
-
-std::optional<std::string> getPathParts(RouterHistory& history, int index);
-void registerOnRouteChanged(RouterHistory& history, std::function<void(bool forceLoad)> onRouteChanged);
-
 
 struct PathMatch {
   bool matches;
@@ -32,27 +26,14 @@ struct PathMatch {
 PathMatch matchPath(std::string path, std::string expression);
 
 
-RouterHistory& getMainRouterHistory();
-
 struct UiStateContext {
   RouterHistory* routerHistory;
 };
 void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data = std::optional<std::any>(std::nullopt), bool forceLoad = false);
-std::optional<std::any>& getData();
-
 void popHistory();
-std::string getCurrentPath();
-std::string fullHistoryStr();
-std::optional<std::string> getPathParts(int index);
-
-
-
-struct TerminalConfig;
 
 struct UiModeNone{};
-struct FpsModeUi {
-  
-};
+struct FpsModeUi {};
 
 struct BallLevelComplete {};
 struct BallComponentOptions {
@@ -88,9 +69,7 @@ struct MainMenu2Options {
   std::function<void()> onContinueGame = []() -> void {};
 };
 
-struct BallInfo {
-
-};
+struct BallInfo {};
 struct LiveMenu {
   MainMenu2Options options;
   std::optional<BallInfo> ballInfo;

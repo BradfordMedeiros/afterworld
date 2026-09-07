@@ -11,9 +11,6 @@
 #include "./widgets/util.h"
 #include "./common.h"
 
-
-
-
 struct UiSettings {
   bool showMainMenu = false;
   bool showGameSettings = false;

@@ -2,12 +2,15 @@
 
 extern CustomApiBindings* gameapi;
 extern UiMode uiMode;
+extern RouterHistory mainRouterHistory;
+
+std::optional<TerminalConfig> terminal;
+
 
 RouterHistory createHistory(){
   return RouterHistory {
     .currentRouteTime = 0.f,
     .history = {},
-    .registerOnRouteChangedFn = std::nullopt,
   };
 }
 
@@ -20,9 +23,7 @@ void pushHistory(RouterHistory& history, std::vector<std::string> newPath, bool 
   for (auto &path : newPath){
     history.history.push_back(path);
   }
-  if (history.registerOnRouteChangedFn.has_value()){
-    history.registerOnRouteChangedFn.value()(forceLoad);
-  }
+  history.routeChangedForceReload = forceLoad;
 }
 
 void popHistory(RouterHistory& history){
@@ -31,13 +32,7 @@ void popHistory(RouterHistory& history){
   }
   history.history.pop_back();
   history.currentRouteTime = gameapi -> timeSeconds(true);
-  if (history.registerOnRouteChangedFn.has_value()){
-    history.registerOnRouteChangedFn.value()(false);
-  }  
-}
-
-std::optional<std::any>& getData(RouterHistory& history){
-  return history.data;
+  history.routeChangedForceReload = false;
 }
 
 std::string fullHistoryStr(RouterHistory& history){
@@ -46,18 +41,6 @@ std::string fullHistoryStr(RouterHistory& history){
     str += path + "/";
   }
   return str;
-}
-
-
-std::string getCurrentPath(RouterHistory& history){
-  return history.history.at(history.history.size() - 1);
-}
-
-std::optional<std::string> getPathParts(RouterHistory& history, int index){
-  if (history.history.size() <= index){
-    return std::nullopt;
-  }
-  return history.history.at(index);
 }
 
 // can insert * instead of the subpath and that will match anything
@@ -91,42 +74,12 @@ PathMatch matchPath(std::string path, std::string expression){
   };
 }
 
-void registerOnRouteChanged(RouterHistory& history, std::function<void(bool)> onRouteChanged){
-  modassert(!history.registerOnRouteChangedFn.has_value(), "can only register a single route");
-  history.registerOnRouteChangedFn = onRouteChanged;
-}
-
-
-auto mainRouterHistory = createHistory();
-RouterHistory& getMainRouterHistory(){
-  return mainRouterHistory;
-}
-
 void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data, bool forceLoad){
   pushHistory(mainRouterHistory, route, replace, data, forceLoad);
 }
 void popHistory(){
   popHistory(mainRouterHistory);
 }
-
-std::optional<std::any>& getData(){
-  return getData(mainRouterHistory);
-}
-
-std::string getCurrentPath(){
-  return getCurrentPath(mainRouterHistory);
-}
-
-std::string fullHistoryStr(){
-  return fullHistoryStr(mainRouterHistory);
-}
-
-std::optional<std::string> getPathParts(int index){
-  return getPathParts(mainRouterHistory, index);
-}
-
-
-std::optional<TerminalConfig> terminal;
 
 std::optional<BallModeUi*> getBallModeUI(){
   auto uiModeBall = std::get_if<BallModeUi>(&uiMode);

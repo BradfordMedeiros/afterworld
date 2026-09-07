@@ -41,6 +41,8 @@ ArcadeApi arcadeApi;
 std::unordered_map<objid, ExtraSurfaceVelocity> extraVelocity;
 std::unordered_map<objid, Activatable> activateables;
 std::unordered_map<objid, Breakable> breakables;
+RouterHistory mainRouterHistory = createHistory();
+UiMode uiMode = UiModeNone{};
 
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;
@@ -186,7 +188,7 @@ SceneManagement createSceneManagement(){
 }
 
 UiStateContext uiStateContext {
-  .routerHistory = &getMainRouterHistory(),
+  .routerHistory = &mainRouterHistory,
 };
 
 struct LevelOptions {
@@ -200,7 +202,7 @@ std::optional<ActiveLevel> getActiveLevel(){
   if (!sceneManagement.managedScene.value().activeLevel.has_value()){
     return std::nullopt;
   }
-  auto& data = getData();
+  auto& data = mainRouterHistory.data;
   if (data.has_value()){
     LevelOptions* value = std::any_cast<LevelOptions>(&data.value());
     modassert(value != NULL, "getActiveLevel expected LevelOptions type");
@@ -744,7 +746,6 @@ void drawScreenspaceGrid(int numCells){
 
 
 
-UiMode uiMode = UiModeNone{};
 void changeUiMode(UiMode newUiMode){
   uiMode = newUiMode;
 
@@ -778,6 +779,16 @@ void changeUiMode(UiMode newUiMode){
 
 
 
+void handleRouteChanged(bool forceLoad){
+  auto currentPath = fullHistoryStr(mainRouterHistory);
+  modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
+
+  getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";   
+  getUiSettings() -> showMainMenu = currentPath == "mainmenu/";     
+  getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";     
+
+  onSceneRouteChange(sceneManagement, currentPath, forceLoad);
+}
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
@@ -845,20 +856,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getGlobalState().control.ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
 
     initImGuiGameUi();
-    registerOnRouteChanged(
-      getMainRouterHistory(),
-      [](bool forceLoad) -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
-        auto currentPath = fullHistoryStr();
-        modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
-
-        getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";   
-        getUiSettings() -> showMainMenu = currentPath == "mainmenu/";     
-        getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";     
-
-        onSceneRouteChange(sceneManagement, currentPath, forceLoad);
-
-      }
-    );
 
     if (hasOption("config-server") && hasOption("config-connected") && hasOption("remote-mod")){
       auto configUrl = getArgOption("config-server");
@@ -914,7 +911,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onFrame = [](int32_t id, void* data) -> void { 
-
+    auto& routeHistory = mainRouterHistory;
+    if (routeHistory.routeChangedForceReload.has_value()){
+      auto forceReload = routeHistory.routeChangedForceReload.value();
+      routeHistory.routeChangedForceReload = std::nullopt;
+      handleRouteChanged(forceReload);
+    }
     // CONTROLS ///////////////////////////
     gameapi -> idAtCoordAsync(getGlobalState().control.xNdc, getGlobalState().control.yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
       getGlobalState().control.selectedId = selectedId;
