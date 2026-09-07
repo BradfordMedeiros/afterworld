@@ -849,12 +849,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       getMainRouterHistory(),
       [](bool forceLoad) -> void {  // I hate this callback.  I should just query a flag in the main loop and do it intentionally
         auto currentPath = fullHistoryStr();
-        onSceneRouteChange(sceneManagement, currentPath, forceLoad);
         modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
 
         getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";   
         getUiSettings() -> showMainMenu = currentPath == "mainmenu/";     
         getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";     
+
+        onSceneRouteChange(sceneManagement, currentPath, forceLoad);
+
       }
     );
 
@@ -940,7 +942,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       };
     }
 
-    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole;
+    bool onMainMenu = getUiSettings() -> showLevelSelect || getUiSettings() -> showGameSettings || getUiSettings() -> showMainMenu;
+    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole && !onMainMenu;
     getUiSettings() -> showConsole = global.systemConfig.showConsole;
     getUiSettings() -> showFpsHud = true;
     getUiSettings() -> showTerminal = getTerminalConfig().has_value();
