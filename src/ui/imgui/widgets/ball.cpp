@@ -28,7 +28,6 @@ void renderBallGameplay(bool includePanel){
   }
 }
 
-
 void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   if (includePanel){
     ImGui::Begin("renderBallProgressInfo");
@@ -68,11 +67,9 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
       }
     }
 
-*/
+  */
 
-    //  if (ballOptions -> showElapsedTime && ballOptions -> elapsedTime.has_value()){
-
-
+  //  if (ballOptions -> showElapsedTime && ballOptions -> elapsedTime.has_value()){
 
   if (includePanel){
     ImGui::End();

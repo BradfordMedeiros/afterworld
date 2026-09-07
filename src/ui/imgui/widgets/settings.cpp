@@ -2,7 +2,6 @@
 
 extern CustomApiBindings* gameapi;
 
-
 void resumeOnMenu();
 void goToMenu();
 std::vector<UILevel> queryLevels();
@@ -43,7 +42,6 @@ void renderGraphicsPanel(bool includePanel){
     ImGui::End();
   }    
 }
-
 
 int toGlfwKey(ImGuiKey key) {
     if (key >= ImGuiKey_A && key <= ImGuiKey_Z) {
@@ -92,7 +90,6 @@ bool renderKeyBinding(const char* title, int* keyBinding, bool isWaiting){
   }
   return false;
 }
-
 
 void renderControlsPanel(bool includePanel){
   if (includePanel){
@@ -184,7 +181,6 @@ void renderGameVolumePanel(bool includePanel){
 }
 
 std::string selectedSettingOption = "Graphics";
-
 void renderGameSettingsControlPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Settings");
@@ -275,9 +271,6 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
         ImGui::End();
     }
 }
-
-
-// void pushHistory(std::vector<std::string> route, bool replace, std::optional<std::any> data, bool forceReload);
 
 void renderMainMenu(bool includePanel){
     ImGuiIO& io = ImGui::GetIO();
@@ -384,7 +377,6 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
     renderList(includePanel, "Main Panel", menuItems, true);
 }
 
-
 void renderPauseMenu(bool includePanel){
     static std::vector<MenuItem> menuItems {
       MenuItem { 
@@ -398,7 +390,6 @@ void renderPauseMenu(bool includePanel){
     };
     renderList(includePanel, "Pause Panel", menuItems, true);
 }
-
 
 void renderDeadMenu(bool includePanel){
     static std::vector<MenuItem> menuItems {
@@ -482,7 +473,6 @@ void renderLevelList(bool includePanel){
     if (includePanel){
         ImGui::End();
     }
-
 }
 
 
@@ -499,29 +489,11 @@ void renderLevelDetail(bool includePanel){
     ImVec2 imageSize(imageWidth, imageHeight);
 
     std::string defaultTextureName = "./res/textures/wood.jpg";
-
-    auto textureId = gameapi->getTextureSamplerId(
-        selectedLevel.has_value()
-            ? selectedLevel.value().image
-            : defaultTextureName
-    ).value();
+    auto textureId = gameapi->getTextureSamplerId(selectedLevel.has_value() ? selectedLevel.value().image : defaultTextureName).value();
 
     // Center image horizontally and vertically
-    ImGui::SetCursorPos(ImVec2(
-        cursor.x,
-        cursor.y + (available.y - imageHeight) * 0.333f
-    ));
-
-    ImGui::Image(
-        (ImTextureID)(intptr_t)textureId,
-        imageSize,
-        ImVec2(0, 1),
-        ImVec2(1, 0)
-    );
-
-    //
-    // DETAILS
-    //
+    ImGui::SetCursorPos(ImVec2(cursor.x, cursor.y + (available.y - imageHeight) * 0.333f));
+    ImGui::Image((ImTextureID)(intptr_t)textureId, imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -531,31 +503,19 @@ void renderLevelDetail(bool includePanel){
         auto& level = selectedLevel.value();
 
         ImGui::Text("%s", level.name.c_str());
-
         ImGui::Spacing();
-
-        ImGui::TextWrapped(
-            "%s",
-            level.description.c_str()
-        );
+        ImGui::TextWrapped("%s", level.description.c_str());
 
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
 
         ImGui::Text("Highest Score: %d", 1000);
-
         ImGui::Text("Difficulty: %s", "Hard");
-
-        ImGui::Text(
-            "Image: %s",
-            selectedLevel.value().image.c_str()
-        );
-
-    } else {
+        ImGui::Text("Image: %s", selectedLevel.value().image.c_str());
+    }else{
         ImGui::TextDisabled("Select a level");
     }
-
 
     if (includePanel){
         ImGui::End();

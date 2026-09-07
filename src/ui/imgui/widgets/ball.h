@@ -4,6 +4,4 @@
 #include "../../../scene_routing.h"
 
 void renderBallGameplay(bool includePanel);
-
-
 void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi);
