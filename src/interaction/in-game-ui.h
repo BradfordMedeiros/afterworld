@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "../util.h"
-#include "../ui/views/mainui.h"
+#include "../ui/mainui.h"
 #include "../vector_gfx.h"
 #include "../global.h"
 

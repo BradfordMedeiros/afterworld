@@ -4,7 +4,7 @@
 #include "../../../../src/ai/ai.h"
 #include "../../../../src/gamecontrol/gametypes.h"
 #include "../../../../src/gamecontrol/entity.h"
-#include "../../../../src/ui/views/playing.h"
+#include "../../../../src/ui/mainui.h"
 #include "./console_core.h"
 
 void renderConsole(bool includePanel);

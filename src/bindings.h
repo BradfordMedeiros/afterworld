@@ -30,7 +30,7 @@
 #include "./director/spawn.h"
 #include "./director/director.h"
 #include "./global.h"
-#include "./ui/views/mainui.h"
+#include "./ui/mainui.h"
 #include "./collision.h"
 #include "./vector_gfx.h"
 #include "./gameworld/progress.h"
