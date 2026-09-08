@@ -5,6 +5,7 @@
 #include "../../../../src/gamecontrol/gametypes.h"
 #include "../../../../src/gamecontrol/entity.h"
 #include "../../../../src/ui/mainui.h"
+#include "../../../scene_routing.h"
 #include "./console_core.h"
 
 void renderConsole(bool includePanel);
@@ -39,5 +40,6 @@ void hideLetterBox();
 void drawFade();
 
 void renderTerminal(bool includePanel);
-
 void renderNavigation(bool includePanel);
+void renderLevelPanel(bool includePanel);
+void renderTriggerPanel(bool includePanel);

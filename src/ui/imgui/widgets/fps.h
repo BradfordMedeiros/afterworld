@@ -2,6 +2,9 @@
 
 #include "../../../../../ModEngine/src/ui/gui.h"
 #include "../../../scene_routing.h"
+#include "../common.h"
+#include "../../../global.h"
+#include "../../../resources/paths.h"
 
 void renderTraitsPanel(bool includePanel);
 void renderWeaponsPanel(bool includePanel);
@@ -9,9 +12,6 @@ void renderSpawnPanel(bool includePanel);
 void renderPropPanel(bool includePanel, std::optional<objid> sceneId);
 void renderFpsHud(bool includePanel);
 
-#include "../common.h"
-#include "../../../global.h"
-#include "../../../resources/paths.h"
 
 struct AmmoHudInfo {
   int currentAmmo;
