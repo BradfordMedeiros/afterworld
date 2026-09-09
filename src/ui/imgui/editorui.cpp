@@ -368,18 +368,13 @@ void initImGuiGameUi(){
       registerWidget("console", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderConsole(includePanel);
       });  
+      registerWidget("game-settings-select", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+          renderGameSettingsControlPanel(includePanel);
+      });
+      registerWidget("game-settings", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+          renderGameSettingsView(includePanel);
+      });
     }
-
-    registerWidget("game-settings-select", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderGameSettingsControlPanel(includePanel);
-    });
-
-    registerWidget("game-settings", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderGameSettingsView(includePanel);
-    });
-
-
-
 
 
     registerAction("Start", "Mode", []() -> void {
