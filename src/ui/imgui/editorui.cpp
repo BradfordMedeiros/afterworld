@@ -115,6 +115,7 @@ UiSettings* getUiSettings(){
 //            ->0.5 is center, 1.f is up, 0.f is down
 
 void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f), float widthPercent = 1.f, float heightPercent = 1.f, std::optional<std::string> texture = std::optional<std::string>(std::nullopt)){
+    return;
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -159,9 +160,7 @@ void renderMoreUi(){
 
   if (uiSettings.showGameSettings){
     auto view = viewByName(getSymbol("GameSettings"));
-
-
-    //      drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
+    // drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
     renderBackground("game-settings-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
 
     renderLayout(*view.value());    
@@ -195,7 +194,7 @@ void renderMoreUi(){
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-    ImGui::Begin("level-select-layout", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove  | ImGuiWindowFlags_NoBackground);
+    ImGui::Begin("level-select-layout", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove  | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
     auto& widgetList = *widgetByNameSymbol(getSymbol("level-list")).value();
     auto& widgetDetail = *widgetByNameSymbol(getSymbol("level-detail")).value();
@@ -232,7 +231,7 @@ void renderMoreUi(){
   if (true){
     auto& widget = *widgetByNameSymbol(getSymbol("navigation")).value();
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove;
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
     ImGui::Begin("navigation-layoutwindow", nullptr, flags);
       renderLayoutAlignUpCenterHorz("nav-layout", widget, ImVec2(0.f, 0.f), ImVec2(1.f, 0.5f), ImVec2(100.f, 200.f));
