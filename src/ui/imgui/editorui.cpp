@@ -115,13 +115,12 @@ UiSettings* getUiSettings(){
 //            ->0.5 is center, 1.f is up, 0.f is down
 
 void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f), float widthPercent = 1.f, float heightPercent = 1.f, std::optional<std::string> texture = std::optional<std::string>(std::nullopt)){
-    return;
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     ImGui::SetNextWindowPos(viewport->Pos);
     ImGui::SetNextWindowSize(ImVec2(viewport->Size.x * widthPercent, viewport->Size.y * heightPercent));
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove ;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus;
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.f));
 
     ImGui::Begin(name, nullptr, flags);
@@ -153,6 +152,8 @@ void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f
 
 
 void renderMoreUi(){
+  std::vector<std::string> windowOrdering {};
+
   if (false && uiSettings.showFpsHud){
     auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
     renderLayoutCenter("fps-hud-layout", widget);
@@ -162,26 +163,31 @@ void renderMoreUi(){
     auto view = viewByName(getSymbol("GameSettings"));
     // drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
     renderBackground("game-settings-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
-
+    windowOrdering.push_back("game-settings-background");
+    windowOrdering.push_back("game-settings");
+    windowOrdering.push_back("game-settings-select" );
     renderLayout(*view.value());    
   }
   
   
   if (uiSettings.showMainMenu){
-      auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
-      renderLayoutAlignUpCenterHorz("main-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+    auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
+    renderLayoutAlignUpCenterHorz("main-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+    windowOrdering.push_back("main-menu-layout");
   }
 
   if (uiSettings.showPauseMenu){
     renderBackground("##pausemenu-background");
     auto& widget = *widgetByNameSymbol(getSymbol("pause-menu")).value();
     renderLayoutAlignUpCenterHorz("pause-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+    windowOrdering.push_back("pause-menu-layout");
   }
 
   if (uiSettings.showDeadMenu){
     renderBackground("##deadmenu-background");
     auto& widget = *widgetByNameSymbol(getSymbol("dead-menu")).value();
     renderLayoutAlignUpCenterHorz("dead-menu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(300.f, 100.f));
+    windowOrdering.push_back("dead-menu-layout");
   }
 
   if (uiSettings.showLevelSelect){
@@ -202,6 +208,7 @@ void renderMoreUi(){
     renderLayoutHalf(widgetList, widgetDetail);
 
     ImGui::End();
+    windowOrdering.push_back("level-select-layout");
 
     ImGui::PopStyleVar(2);
   }
@@ -220,22 +227,24 @@ void renderMoreUi(){
         }
         auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
         renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
+        windowOrdering.push_back("main-menu2-ball-progress-layout");
       }
   }
 
   if (uiSettings.showTerminal){
     auto& widget = *widgetByNameSymbol(getSymbol("terminal")).value();
     renderLayoutCenter("terminal-layout", widget);
+    windowOrdering.push_back("terminal-layout");
   }
 
-  if (true){
+  if (uiSettings.showLevelSelect || uiSettings.showGameSettings){
     auto& widget = *widgetByNameSymbol(getSymbol("navigation")).value();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove;
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
-    ImGui::Begin("navigation-layoutwindow", nullptr, flags);
-      renderLayoutAlignUpCenterHorz("nav-layout", widget, ImVec2(0.f, 0.f), ImVec2(1.f, 0.5f), ImVec2(100.f, 200.f));
-    ImGui::End();
+
+    renderLayoutAlignUpCenterHorz("nav-layout", widget, ImVec2(0.f, 0.f), ImVec2(1.f, 0.5f), ImVec2(100.f, 200.f));
+    windowOrdering.push_back("nav-layout");
 
     ImGui::PopStyleColor();
   }
@@ -256,13 +265,18 @@ void renderMoreUi(){
       //renderLayoutCenter("console-layout", widget);
       auto size = ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y * sizeRatio);
       renderLayoutAlignUpCenterHorz("console-layout", widget, ImVec2(1.f, 1.f), ImVec2(0.f, 1.f - percentage), size);
+      windowOrdering.push_back("console-layout");
     }
       
   }else{
     showConsoleTime = std::nullopt;
   }
 
-  
+  for (auto& window : windowOrdering){
+    ImGuiWindow* navWindow = ImGui::FindWindowByName(window.c_str());
+    ImGui::BringWindowToDisplayFront(navWindow);
+  }
+
 }
 
 
