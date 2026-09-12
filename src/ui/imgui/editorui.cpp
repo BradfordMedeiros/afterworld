@@ -154,6 +154,8 @@ void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f
 void renderMoreUi(){
   std::vector<std::string> windowOrdering {};
 
+  drawFade();
+
   if (false && uiSettings.showFpsHud){
     auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
     renderLayoutCenter("fps-hud-layout", widget);
@@ -169,6 +171,22 @@ void renderMoreUi(){
     renderLayout(*view.value());    
   }
   
+  if (uiSettings.ballModeUi){
+      {
+        if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value()){
+          renderBackground("##levelcomplete-background");
+        }
+        auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
+        renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
+        windowOrdering.push_back("main-menu2-ball-progress-layout");
+      }
+  }
+
+  if (uiSettings.showTerminal){
+    auto& widget = *widgetByNameSymbol(getSymbol("terminal")).value();
+    renderLayoutCenter("terminal-layout", widget);
+    windowOrdering.push_back("terminal-layout");
+  }
   
   if (uiSettings.showMainMenu){
     auto& widget = *widgetByNameSymbol(getSymbol("main-menu")).value();
@@ -220,22 +238,7 @@ void renderMoreUi(){
       }
   }
 
-  if (uiSettings.ballModeUi){
-      {
-        if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value()){
-          renderBackground("##levelcomplete-background");
-        }
-        auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
-        renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
-        windowOrdering.push_back("main-menu2-ball-progress-layout");
-      }
-  }
 
-  if (uiSettings.showTerminal){
-    auto& widget = *widgetByNameSymbol(getSymbol("terminal")).value();
-    renderLayoutCenter("terminal-layout", widget);
-    windowOrdering.push_back("terminal-layout");
-  }
 
   if (uiSettings.showLevelSelect || uiSettings.showGameSettings){
     auto& widget = *widgetByNameSymbol(getSymbol("navigation")).value();
@@ -272,6 +275,7 @@ void renderMoreUi(){
     showConsoleTime = std::nullopt;
   }
 
+
   for (auto& window : windowOrdering){
     ImGuiWindow* navWindow = ImGui::FindWindowByName(window.c_str());
     ImGui::BringWindowToDisplayFront(navWindow);
@@ -281,6 +285,10 @@ void renderMoreUi(){
 
 
 void initImGuiGameUi(){
+    loadImGuiFont(getSymbol("default-medium"), "./res/fonts/vcr.ttf", 16.f);
+    loadImGuiFont(getSymbol("default-header"), "./res/fonts/vcr.ttf", 32.f);
+    loadImGuiFont(getSymbol("default-title"), "./res/fonts/panoptic.otf", 32.f);
+
     // Systems
     { 
       registerWidget("level", "system", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
@@ -357,7 +365,7 @@ void initImGuiGameUi(){
       });
       registerWidget("main-menu2", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
           if (getUiSettings() -> liveMenu.has_value()){
-            renderMainMenu2(includePanel, getUiSettings() -> liveMenu.value());
+            renderMainMenu2(includePanel,  getUiSettings() -> liveMenu.value());
           }
       });
       registerWidget("pause-menu", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {

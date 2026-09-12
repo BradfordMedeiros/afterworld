@@ -65,6 +65,8 @@ struct MainMenu2Options {
   glm::vec4 backgroundColor;
   float offsetY;
 
+  bool showSettings = false;
+  bool canContinue = false;
   std::function<void()> onNewGame = []() -> void {};
   std::function<void()> onContinueGame = []() -> void {};
 };
@@ -73,7 +75,6 @@ struct BallInfo {};
 struct LiveMenu {
   MainMenu2Options options;
   std::optional<BallInfo> ballInfo;
-
   std::string text;
 };
 struct GameOverUi {};

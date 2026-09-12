@@ -225,7 +225,8 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.f);
+    ImFont* defaultFont =  getImGuiFont(getSymbol("default-medium")).value();
+
     static int selected = 0;
 
     ImFont* bigFont = font ? font : defaultFont;
@@ -274,7 +275,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 
 void renderMainMenu(bool includePanel){
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/panoptic.otf", 30.0f);
+    ImFont* bigFont =  getImGuiFont(getSymbol("default-title")).value();
 
     ImGui::PushFont(bigFont);
 
@@ -309,7 +310,7 @@ void renderMainMenu(bool includePanel){
         },
       },
     };
-    renderList(includePanel, "Main Panel", menuItems, true);
+    renderList(includePanel, "Main Panel", menuItems, true, bigFont);
 }
 
 void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
@@ -343,37 +344,51 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
 
 
     ImGuiIO& io = ImGui::GetIO();
-    static ImFont* bigFont = io.Fonts->AddFontFromFileTTF("./res/fonts/panoptic.otf", 30.0f);
+    ImFont* bigFont =  getImGuiFont(getSymbol("default-title")).value();
+
 
     ImGui::PushFont(bigFont);
 
     ImVec2 textSize = ImGui::CalcTextSize("The Pyramid");
     float width = ImGui::GetContentRegionAvail().x;
-    ImGui::SetCursorPosX(
-        ImGui::GetStyle().WindowPadding.x +
-        (width - textSize.x) * 0.5f
-    );
+    ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (width - textSize.x) * 0.5f);
 
     ImGui::Text("The Pyramid");
     ImGui::PopFont();
     ImGui::Dummy(ImVec2(0, 20));
 
-    static std::vector<MenuItem> menuItems {
+    std::vector<MenuItem> menuItems{};
+    menuItems.push_back(
       MenuItem { 
-        .text = "New Game",
-        .onClick = liveMenu.liveMenu -> options.onNewGame,
-      },
+      .text = "New Game",
+      .onClick = liveMenu.liveMenu -> options.onNewGame,
+      }
+    );
+    if (liveMenu.liveMenu -> options.canContinue){
+      menuItems.push_back(
+        MenuItem { 
+          .text = "Continue",
+          .onClick =  liveMenu.liveMenu -> options.onContinueGame,
+        }
+      );
+    }
+    menuItems.push_back(
       MenuItem { 
-        .text = "Continue",
-        .onClick =  liveMenu.liveMenu -> options.onContinueGame,
-      },
+        .text = "Settings",
+        .onClick = [&liveMenu]() -> void {
+          liveMenu.liveMenu -> options.showSettings = true;
+        },
+      }
+    );
+    menuItems.push_back(
       MenuItem { 
         .text = "Quit",
         .onClick = []() -> void {
           exit(0);
         },
-      },
-    };
+      }
+    );
+
     renderList(includePanel, "Main Panel", menuItems, true);
 }
 
@@ -422,16 +437,11 @@ void renderLevelList(bool includePanel){
  //   ImVec2 cursor = ImGui::GetCursorPos();
  //   ImGui::SetCursorPos(ImVec2(cursor.x + (ImGui::GetContentRegionAvail().x - panelWidth * 0.5f), cursor.y));
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImFontConfig config;
-    config.SizePixels = 12.0f;
-    static ImFont* smallFont = io.Fonts->AddFontDefault(&config);
+    ImFont* smallFont = getImGuiFont(getSymbol("default-medium")).value();
 
-    ImGui::PushFont(smallFont);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 1.f, 1.f));
     ImGui::Text("Levels");
     ImGui::PopStyleColor();
-    ImGui::PopFont();
 
     ImGui::Dummy(ImVec2(0, 20));
 

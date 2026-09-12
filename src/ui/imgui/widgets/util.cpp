@@ -973,29 +973,49 @@ void hideLetterBox(){
 
 void drawFade(){
   auto fade = calculateFade(letterbox, letterBoxStartTime);
+
   if (fade.has_value()){
-    float percentage = fade.value();
-    {
-      // background
-      if (letterbox.fadeColor.has_value()){
-        gameapi->drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(letterbox.fadeColor.value().x, letterbox.fadeColor.value().y, letterbox.fadeColor.value().z, letterbox.fadeColor.value().w * percentage), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+    float percentage = glm::clamp(fade.value(), 0.f, 1.f);
+
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImDrawList* drawList = ImGui::GetForegroundDrawList(viewport);
+    ImVec2 screenMin = viewport -> Pos;
+    ImVec2 screenMax = ImVec2(viewport -> Pos.x + viewport -> Size.x, viewport -> Pos.y + viewport -> Size.y);
+
+    if (letterbox.fadeColor.has_value()){
+      glm::vec4 color = letterbox.fadeColor.value();
+      drawList -> AddRectFilled(screenMin, screenMax, IM_COL32((int)(color.r * 255.f), (int)(color.g * 255.f), (int)(color.b * 255.f), (int)(color.a * percentage * 255.f)));
+    }
+
+    // Borders
+    { 
+      float barHeight = viewport -> Size.y * 0.1f * percentage;
+      glm::vec4 color = letterbox.boxColor;
+      ImU32 boxColor = IM_COL32((int)(color.r * 255.f), (int)(color.g * 255.f), (int)(color.b * 255.f), (int)(color.a * 255.f));
+
+      static std::string texture = "../gameresources/textures/backgrounds/test3.png";
+      auto textureId = gameapi -> getTextureSamplerId(texture);
+
+      ImVec2 uvStart(0.f, 0.f);
+      ImVec2 uvEnd(0.2f, 1.f);
+
+      if (textureId.has_value()){
+        ImTextureID texture = (ImTextureID)(intptr_t)textureId.value();
+        drawList -> AddImage(texture, ImVec2(screenMin.x, screenMin.y), ImVec2(screenMax.x, screenMin.y + barHeight), uvStart, uvEnd, boxColor);
+        drawList -> AddImage(texture, ImVec2(screenMin.x, screenMax.y - barHeight), ImVec2(screenMax.x, screenMax.y), uvStart, uvEnd, boxColor);
+      }else{
+        drawList -> AddRectFilled(ImVec2(screenMin.x, screenMin.y), ImVec2(screenMax.x, screenMin.y + barHeight), boxColor);
+        drawList -> AddRectFilled(ImVec2(screenMin.x, screenMax.y - barHeight), ImVec2(screenMax.x, screenMax.y), boxColor);
+      }
+
+      if (!letterbox.title.empty()){
+        const float textPaddingRight = 40.f;
+        ImVec2 textSize = ImGui::CalcTextSize(letterbox.title.c_str());
+        ImVec2 textPosition(screenMax.x - textSize.x - textPaddingRight, screenMax.y - barHeight + (barHeight - textSize.y) * 0.5f);
+        drawList -> AddText(textPosition, IM_COL32(255, 255, 255, 255), letterbox.title.c_str());
       }
     }
-    { // title borders
-      modlog("ui border", std::string("percentage is: ") + std::to_string(percentage));
-      float barHeight = 0.2f * percentage;
-      gameapi->drawRect(0.f, 1.f - (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, "./res/textures/wood.jpg", std::nullopt);
-      gameapi->drawRect(0.f, -1.f + (barHeight * 0.5f), 2.f, barHeight, false, letterbox.boxColor, std::nullopt, true, std::nullopt, "./res/textures/wood.jpg", std::nullopt);
-      const float textPaddingRight = 0.04f;
-      float textWidth;
-      float textHeight;
 
-      float ndiSize = 0.1f;
-      float fontSizeNdiEquivalent = ndiSize * 1000.f / 2.f;   // 1000 = 1 ndi
-
-      gameapi -> getTextDimensionsNdi(letterbox.title, fontSizeNdiEquivalent, true, std::nullopt, &textWidth, &textHeight);
-      gameapi -> drawText(letterbox.title, 0.f, 0.f, fontSizeNdiEquivalent, false, std::nullopt, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-    }
   }else {
     letterBoxStartTime = std::nullopt;
   }
@@ -1053,13 +1073,15 @@ void renderTerminal(bool includePanel){
   }
 }
 
+
+
 void renderNavigation(bool includePanel){
   if (includePanel){
     ImGui::Begin("Navigation");
   }
 
   ImGuiIO& io = ImGui::GetIO();
-  static ImFont* defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/vcr.ttf", 32.f);
+  ImFont* defaultFont =  getImGuiFont(getSymbol("default-medium")).value();
 
  
   ImGui::PushFont(defaultFont);

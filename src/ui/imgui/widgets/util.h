@@ -7,6 +7,7 @@
 #include "../../../../src/ui/mainui.h"
 #include "../../../scene_routing.h"
 #include "./console_core.h"
+#include "../common.h"
 
 void renderConsole(bool includePanel);
 

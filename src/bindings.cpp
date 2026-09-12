@@ -950,6 +950,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getUiSettings() -> showFpsHud = true;
     getUiSettings() -> showTerminal = getTerminalConfig().has_value();
 
+    if (getUiSettings() -> liveMenu.has_value()){
+
+      getUiSettings() -> showGameSettings = getUiSettings() -> liveMenu.value().liveMenu -> options.showSettings;
+
+    }
+
+
     updateState();
 
     if (levelShortcutToLoad.has_value()){
@@ -1107,7 +1114,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       if (getGlobalState().systemConfig.showScreenspaceGrid){
          drawScreenspaceGrid(10);
       }
-      drawFade();
 
       if (getGlobalState().systemConfig.showKeyboard){
         drawInputVisualization();
