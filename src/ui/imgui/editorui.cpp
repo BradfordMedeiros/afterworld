@@ -289,6 +289,10 @@ void initImGuiGameUi(){
     loadImGuiFont(getSymbol("default-header"), "./res/fonts/vcr.ttf", 32.f);
     loadImGuiFont(getSymbol("default-title"), "./res/fonts/panoptic.otf", 32.f);
 
+    getImGuiColor(getSymbol("main-color"), glm::vec4(0.f, 1.f, 0.f, 1.f));
+    getImGuiColor(getSymbol("secondary-color"), glm::vec4(1.f, 0.f, 0.f, 1.f));
+
+
     // Systems
     { 
       registerWidget("level", "system", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
