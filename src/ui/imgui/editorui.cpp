@@ -267,7 +267,8 @@ void renderMoreUi(){
     {
       //renderLayoutCenter("console-layout", widget);
       auto size = ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y * sizeRatio);
-      renderLayoutAlignUpCenterHorz("console-layout", widget, ImVec2(1.f, 1.f), ImVec2(0.f, 1.f - percentage), size);
+      auto color = getImGuiColor(getSymbol("console-color"), glm::vec4(0.f, 0.f, 0.f, 0.f));
+      renderLayoutAlignUpCenterHorz("console-layout", widget, ImVec2(1.f, 1.f), ImVec2(0.f, 1.f - percentage), size, color);
       windowOrdering.push_back("console-layout");
     }
       

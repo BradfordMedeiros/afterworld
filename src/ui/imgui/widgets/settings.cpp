@@ -219,7 +219,7 @@ struct MenuItem {
 };
 
 
-void renderList(bool includePanel, const char* title, std::vector<MenuItem>& menuItems, bool centerText, ImFont* font = NULL){
+void renderList(bool includePanel, const char* title, std::vector<MenuItem>& menuItems, bool centerText, ImFont* font = NULL, ImVec4 color = ImVec4(1.f, 1.f, 1.f, 0.6f), ImVec4 colorHeader = ImVec4(0.15f, 0.15f, 0.15f, 0.8f)){
     if (includePanel){
       ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoBackground);
     }
@@ -232,8 +232,8 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     ImFont* bigFont = font ? font : defaultFont;
  
     ImGui::PushFont(bigFont);
-    ImGui::PushStyleColor(ImGuiCol_Text,          ImVec4(1, 1, 1, 0.6));
-    ImGui::PushStyleColor(ImGuiCol_Header,        ImVec4(0.15f, 0.15f, 0.15f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_Text,          color);
+    ImGui::PushStyleColor(ImGuiCol_Header,        colorHeader);
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.0f, 0.f, 1.0f, 0.8f));
     ImGui::PushStyleColor(ImGuiCol_HeaderActive,  ImVec4(1.f, 0.f, 0.f, 1.0f));
 
@@ -286,9 +286,12 @@ void renderMainMenu(bool includePanel){
         (width - textSize.x) * 0.5f
     );
 
+    auto color = getImGuiColor(getSymbol("main-menu-title-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
+    ImGui::PushStyleColor(ImGuiCol_Text, color);
     ImGui::Text("Afterworld");
+    ImGui::PopStyleColor();
     ImGui::PopFont();
-    ImGui::Dummy(ImVec2(0, 20));
+    ImGui::Dummy(ImVec2(0, 40));
 
     static std::vector<MenuItem> menuItems {
       MenuItem { 
@@ -314,7 +317,6 @@ void renderMainMenu(bool includePanel){
 }
 
 void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
-
     {
       bool useCoolShader = true;
 
@@ -353,7 +355,11 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
     float width = ImGui::GetContentRegionAvail().x;
     ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (width - textSize.x) * 0.5f);
 
+    auto textColor = getImGuiColor(getSymbol("ball-menu-title-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor);
     ImGui::Text("The Pyramid");
+    ImGui::PopStyleColor();
+
     ImGui::PopFont();
     ImGui::Dummy(ImVec2(0, 20));
 
@@ -389,7 +395,10 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
       }
     );
 
-    renderList(includePanel, "Main Panel", menuItems, true);
+    auto color = getImGuiColor(getSymbol("ball-menu-font-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
+    auto colorHeader = getImGuiColor(getSymbol("ball-menu-font-header-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
+
+    renderList(includePanel, "Main Panel", menuItems, true, NULL, color, colorHeader);
 }
 
 void renderPauseMenu(bool includePanel){

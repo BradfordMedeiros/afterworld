@@ -47,13 +47,15 @@ void renderConsole(bool includePanel){
   ImVec2 windowPos = ImGui::GetWindowPos();
   ImVec2 windowSize = ImGui::GetWindowSize();
 
+  auto color = getImGuiColor(getSymbol("console-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
+
   ImGui::GetWindowDrawList()->AddImage(
     (ImTextureID)(intptr_t)textureId.value(),
     windowPos,
     ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
     ImVec2(0, 1),
     ImVec2(1, 0),
-    IM_COL32(128 * opacity, 128 * opacity, 128 * opacity, 255 * 0.9f)
+    IM_COL32(255 * color.x, 255 * color.y, 255 * color.z, 255 * color.w)
   );
 
   auto& source = showConsoleLog ? logHistory : commandHistory;
