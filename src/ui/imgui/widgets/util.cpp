@@ -1083,7 +1083,7 @@ void renderNavigation(bool includePanel){
   }
 
   ImGuiIO& io = ImGui::GetIO();
-  ImFont* defaultFont =  getImGuiFont(getSymbol("default-medium")).value();
+  ImFont* defaultFont =  getImGuiFont(getSymbol("default-medium"));
 
  
   ImGui::PushFont(defaultFont);

@@ -225,7 +225,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    ImFont* defaultFont =  getImGuiFont(getSymbol("default-medium")).value();
+    ImFont* defaultFont =  getImGuiFont(getSymbol("default-medium"));
 
     static int selected = 0;
 
@@ -275,7 +275,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 
 void renderMainMenu(bool includePanel){
     ImGuiIO& io = ImGui::GetIO();
-    ImFont* bigFont =  getImGuiFont(getSymbol("default-title")).value();
+    ImFont* bigFont =  getImGuiFont(getSymbol("default-title"));
 
     ImGui::PushFont(bigFont);
 
@@ -346,7 +346,7 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
 
 
     ImGuiIO& io = ImGui::GetIO();
-    ImFont* bigFont =  getImGuiFont(getSymbol("default-title")).value();
+    ImFont* bigFont =  getImGuiFont(getSymbol("default-title"));
 
 
     ImGui::PushFont(bigFont);
@@ -446,7 +446,7 @@ void renderLevelList(bool includePanel){
  //   ImVec2 cursor = ImGui::GetCursorPos();
  //   ImGui::SetCursorPos(ImVec2(cursor.x + (ImGui::GetContentRegionAvail().x - panelWidth * 0.5f), cursor.y));
 
-    ImFont* smallFont = getImGuiFont(getSymbol("default-medium")).value();
+    ImFont* smallFont = getImGuiFont(getSymbol("default-medium"));
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 1.f, 1.f));
     ImGui::Text("Levels");
