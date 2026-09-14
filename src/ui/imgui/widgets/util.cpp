@@ -26,7 +26,6 @@ glm::vec3* getColorGrade();
 float* getSaturation();
 float* getContrast();
 glm::vec2* getChromatic();
-void popHistory();
 
 void renderConsole(bool includePanel){
   if (includePanel){
@@ -216,8 +215,10 @@ void pushAlertMessage(std::string message){
    }
 }
 
-void onAlertFrame(){
-  renderAlerts2(alerts, 400, alerts.messageBuffer);
+void onAlertFrame(bool showAlerts){
+  if (showAlerts){
+    renderAlerts2(alerts, 400, alerts.messageBuffer);
+  }
   filterExpiredMessages2(alerts); // probably shouldn't be done every frame
 }
 
@@ -1077,7 +1078,7 @@ void renderTerminal(bool includePanel){
 
 
 
-void renderNavigation(bool includePanel){
+void renderNavigation(bool includePanel, std::function<void()> backFn){
   if (includePanel){
     ImGui::Begin("Navigation");
   }
@@ -1097,7 +1098,7 @@ void renderNavigation(bool includePanel){
   ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 
   if (ImGui::Selectable("BACK", false, 0, ImVec2(100.f, 100.f))){
-    popHistory();
+    backFn();
   }
     
   ImGui::PopStyleVar();

@@ -8,6 +8,7 @@ void stopMode(bool unloadedScene);
 void resetLevel();
 void updateArcadeObj(objid id, std::string newType);
 void rebootMachine(objid id);
+void popHistory();
 
 std::optional<std::string> ScenegraphView(std::string directory, FILE_EXTENSION_TYPE type);
 
@@ -389,7 +390,13 @@ void initImGuiGameUi(){
           renderTerminal(includePanel);
       });
       registerWidget("navigation", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-          renderNavigation(includePanel);
+          renderNavigation(includePanel, []() -> void {
+            if (uiSettings.liveMenu.has_value()){
+              uiSettings.liveMenu.value().liveMenu -> options.showSettings = false;
+            }else{
+              popHistory();
+            } 
+          });
       });  
       registerWidget("level-list", menu, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
           renderLevelList(includePanel);

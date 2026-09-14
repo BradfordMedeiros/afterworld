@@ -12,7 +12,7 @@
 void renderConsole(bool includePanel);
 
 // This is a bit different not a widget, but this just sponors the drawing of the text
-void onAlertFrame();
+void onAlertFrame(bool showAlerts);
 void pushAlertMessage(std::string message);
 
 
@@ -41,6 +41,6 @@ void hideLetterBox();
 void drawFade();
 
 void renderTerminal(bool includePanel);
-void renderNavigation(bool includePanel);
+void renderNavigation(bool includePanel, std::function<void()> fn);
 void renderLevelPanel(bool includePanel);
 void renderTriggerPanel(bool includePanel);

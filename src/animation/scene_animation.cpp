@@ -47,7 +47,6 @@ void doStateControllerAnimations(bool validateAnimationControllerAnimations, boo
         }
         modlog("statecontroller animation controller play animation no matching animation for state", nameForSymbol(stateAnimation -> state) + ", for animation: " + stateAnimation -> animation.value() + ", " + std::to_string(entityId));
         pushAlertMessage(nameForSymbol(stateAnimation -> state) + " " + stateAnimation -> animation.value() + " -- missing animation");
-
       }
       modlog("statecontroller stop animation", std::to_string(entityId));
       gameapi -> stopAnimation(entityId);

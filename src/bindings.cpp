@@ -43,6 +43,7 @@ std::unordered_map<objid, Activatable> activateables;
 std::unordered_map<objid, Breakable> breakables;
 RouterHistory mainRouterHistory = createHistory();
 UiMode uiMode = UiModeNone{};
+extern bool showNavbar;
 
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;
@@ -262,6 +263,7 @@ void setGlobalModeValues(bool isEditorMode){
 
 void setEditorMode(){
   // this should be for all players (at least for now i guess)
+  showNavbar = true;
   global.isFreeCam = false;
   global.showEditor = true;
   persistSave("settings", "show-editor", true);
@@ -271,6 +273,8 @@ void setEditorMode(){
 }
 
 void setNormalMode(){
+  showNavbar = false;
+
   global.isFreeCam = false;
   global.showEditor = false;
   persistSave("settings", "show-editor", false);
@@ -280,6 +284,7 @@ void setNormalMode(){
 }
 
 void setFreeCam(){
+  showNavbar = false;
   global.isFreeCam = true;
   global.showEditor = false;
   persistSave("settings", "show-editor", false);
@@ -1106,7 +1111,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       onInGameUiFrame(uiStateContext, inGameUi, std::nullopt, ndiCoord);
     
-      onAlertFrame();
+      onAlertFrame(getGlobalState().showEditor);
       if (getGlobalState().systemConfig.showScreenspaceGrid){
          drawScreenspaceGrid(10);
       }
