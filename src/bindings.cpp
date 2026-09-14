@@ -950,11 +950,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     getUiSettings() -> showFpsHud = true;
     getUiSettings() -> showTerminal = getTerminalConfig().has_value();
 
-    if (getUiSettings() -> liveMenu.has_value()){
 
-      getUiSettings() -> showGameSettings = getUiSettings() -> liveMenu.value().liveMenu -> options.showSettings;
-
-    }
 
 
     updateState();

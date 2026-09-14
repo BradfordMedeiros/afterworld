@@ -231,16 +231,26 @@ void renderMoreUi(){
     ImGui::PopStyleVar(2);
   }
 
+  bool showNavigation = uiSettings.showLevelSelect || uiSettings.showGameSettings;
   if (uiSettings.liveMenu.has_value()){
-      {
+      if(uiSettings.liveMenu.value().liveMenu -> options.showSettings){
+        auto view = viewByName(getSymbol("GameSettings"));
+        // drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
+        //renderBackground("game-settings-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
+        windowOrdering.push_back("game-settings-background");
+        windowOrdering.push_back("game-settings");
+        windowOrdering.push_back("game-settings-select" );
+        renderSplitLayout(*view.value(), glm::vec2(0.f, 100.f));     
+        showNavigation = true;     
+      }else{
         auto& widget = *widgetByNameSymbol(getSymbol("main-menu2")).value();
-        renderLayoutAlignUpCenterHorz("main-menu2-livemenu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+        renderLayoutAlignUpCenterHorz("main-menu2-livemenu-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));    
       }
   }
 
 
 
-  if (uiSettings.showLevelSelect || uiSettings.showGameSettings){
+  if (showNavigation){
     auto& widget = *widgetByNameSymbol(getSymbol("navigation")).value();
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove;

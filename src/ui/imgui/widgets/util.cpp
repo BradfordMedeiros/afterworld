@@ -980,7 +980,7 @@ void drawFade(){
     float percentage = glm::clamp(fade.value(), 0.f, 1.f);
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImDrawList* drawList = ImGui::GetForegroundDrawList(viewport);
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList(viewport);
     ImVec2 screenMin = viewport -> Pos;
     ImVec2 screenMax = ImVec2(viewport -> Pos.x + viewport -> Size.x, viewport -> Pos.y + viewport -> Size.y);
 
