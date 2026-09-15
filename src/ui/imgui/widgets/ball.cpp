@@ -34,11 +34,33 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   }
 
   if (ballModeUi.levelSelect.has_value()){
+    ImFont* font = getFontByBinding(getSymbol("ball-level-info"));
+    ImGui::PushFont(font);
 
-    ImGui::Text("Level: %s", ballModeUi.levelSelect.value().level.c_str());
-    ImGui::Text("par time: %s", ballModeUi.levelSelect.value().parTime.c_str());
-    ImGui::Text("best time: %s", ballModeUi.levelSelect.value().bestTime.c_str());
-    ImGui::Text("total gems %d / %d", ballModeUi.levelSelect.value().gems, ballModeUi.levelSelect.value().totalGems);
+    std::string level = std::string("Level: ") + ballModeUi.levelSelect.value().level;
+
+    float panelWidth = ImGui::GetContentRegionAvail().x;
+    float width = ImGui::CalcTextSize(level.c_str()).x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (panelWidth - width) * 0.5f);
+    ImGui::TextUnformatted(level.c_str());
+
+    const char* text = "par time: ";
+    std::string parTime = std::string(text) + ballModeUi.levelSelect.value().parTime;
+    width = ImGui::CalcTextSize(parTime.c_str()).x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (panelWidth - width) * 0.5f);
+    ImGui::TextUnformatted(parTime.c_str());
+
+    std::string bestTime = std::string("best time: ") + ballModeUi.levelSelect.value().bestTime;
+    width = ImGui::CalcTextSize(bestTime.c_str()).x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (panelWidth - width) * 0.5f);
+    ImGui::TextUnformatted(bestTime.c_str());
+
+    std::string gems = "total gems " + std::to_string(ballModeUi.levelSelect.value().gems) + " / " + std::to_string(ballModeUi.levelSelect.value().totalGems);
+    width = ImGui::CalcTextSize(gems.c_str()).x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (panelWidth - width) * 0.5f);
+    ImGui::TextUnformatted(gems.c_str());
+
+    ImGui::PopFont();
   }
 
   ImFont* font = getFontByBinding(getSymbol("ball-level-complete"));
