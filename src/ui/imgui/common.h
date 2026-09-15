@@ -13,7 +13,8 @@ namespace Mod {
   }
 
   inline bool Button(const char* title, ImVec2 vec){
-    if(ImGui::Button(title, vec)){
+    ImGui::Button(title, vec);
+    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
       return true;
     }
@@ -21,11 +22,13 @@ namespace Mod {
   }
 
   inline bool Selectable(const char* label, bool selected = false,  ImGuiSelectableFlags flags = 0, const ImVec2& size = ImVec2(0, 0)){
-    if(ImGui::Selectable(label, selected, flags, size)){
+    ImGui::Selectable(label, selected, flags, size);
+    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)){
       playMixedSound(getSymbol("screens/menuclick"), std::nullopt);
       return true;
     }
     return false;
+
   }
 }
 

@@ -122,7 +122,7 @@ void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f
     ImGui::SetNextWindowSize(ImVec2(viewport->Size.x * widthPercent, viewport->Size.y * heightPercent));
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus;
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0., 0.f, 0.f, 0.f));
 
     ImGui::Begin(name, nullptr, flags);
 
@@ -146,9 +146,10 @@ void renderBackground(const char* name, glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f
       );
     }
 
+    ImGui::PopStyleColor();
+    
     ImGui::End();
 
-    ImGui::PopStyleColor();
 }
 
 
@@ -174,11 +175,11 @@ void renderMoreUi(){
   
   if (uiSettings.ballModeUi){
       {
-        if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value()){
-          renderBackground("##levelcomplete-background");
+        if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value() || uiSettings.ballModeUi -> ballMode.showComplete){
+          renderBackground("##levelcomplete-background", glm::vec4(1.f, 1.f, 1.f, 0.6f));
         }
         auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
-        renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.f, 0.5f), ImVec2(1.f, 0.5f), ImVec2(700.f, 500.f));
+        renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
         windowOrdering.push_back("main-menu2-ball-progress-layout");
       }
   }

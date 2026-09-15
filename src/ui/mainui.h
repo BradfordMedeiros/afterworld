@@ -41,6 +41,7 @@ struct BallComponentOptions {
   bool showElapsedTime = false;
 
   std::optional<BallLevelComplete> levelComplete;
+  bool showComplete = false;
 
   bool showPowerup = false;
   std::optional<std::string> powerupTexture;

@@ -254,7 +254,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
         if (centerText){
           ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (panelWidth - itemWidth) * 0.5f);
         }
-        if (ImGui::Selectable(menuItems.at(i).text.c_str(), selected == i, 0, ImVec2(itemWidth, 0.f))){
+        if (Mod::Selectable(menuItems.at(i).text.c_str(), selected == i, 0, ImVec2(itemWidth, 0.f))){
           selected = i;
           menuItems.at(i).onClick();
         }
@@ -274,8 +274,7 @@ void renderList(bool includePanel, const char* title, std::vector<MenuItem>& men
 }
 
 void renderMainMenu(bool includePanel){
-    ImGuiIO& io = ImGui::GetIO();
-    ImFont* bigFont =  getImGuiFont(getSymbol("default-title"));
+    ImFont* bigFont = getFontByBinding(getSymbol("main-menu"));
 
     ImGui::PushFont(bigFont);
 
@@ -346,8 +345,7 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
 
 
     ImGuiIO& io = ImGui::GetIO();
-    ImFont* bigFont =  getImGuiFont(getSymbol("default-title"));
-
+    ImFont* bigFont = getFontByBinding(getSymbol("main-menu2-title"));
 
     ImGui::PushFont(bigFont);
 
@@ -446,7 +444,7 @@ void renderLevelList(bool includePanel){
  //   ImVec2 cursor = ImGui::GetCursorPos();
  //   ImGui::SetCursorPos(ImVec2(cursor.x + (ImGui::GetContentRegionAvail().x - panelWidth * 0.5f), cursor.y));
 
-    ImFont* smallFont = getImGuiFont(getSymbol("default-medium"));
+    ImFont* smallFont = getFontByBinding(getSymbol("level-list"));
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 1.f, 1.f));
     ImGui::Text("Levels");

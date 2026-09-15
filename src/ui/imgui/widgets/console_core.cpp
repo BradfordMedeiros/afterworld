@@ -4,6 +4,9 @@ extern CustomApiBindings* gameapi;
 
 const int CONSOLE_LOG_LIMIT = 25;
 bool showLog = false;
+void startMode(bool loadedScene);
+void stopMode(bool unloadedScene);
+void resetLevel();
 
 std::deque<HistoryInstance> loadCommandHistory(){
   std::cout << "load command history" << std::endl;
@@ -305,6 +308,23 @@ std::vector<CommandDispatch> commands {
           },
         });  
       }
+      return std::nullopt;
+    },
+  },
+
+
+  CommandDispatch {
+    .command = "start",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      startMode(false);
+      return std::nullopt;
+    },
+  },
+  CommandDispatch {
+    .command = "stop",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      stopMode(false);
+      resetLevel();
       return std::nullopt;
     },
   },

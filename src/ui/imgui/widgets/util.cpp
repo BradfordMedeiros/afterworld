@@ -173,7 +173,7 @@ void renderAlerts2(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer
       std::nullopt
     );*/
 
-    drawImGuiText(textToDraw);
+    drawImGuiText(textToDraw, std::nullopt);
 
     break;
   }

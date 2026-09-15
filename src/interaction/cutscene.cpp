@@ -3,6 +3,8 @@
 extern CustomApiBindings* gameapi;
 extern GLFWwindow* window;
 
+void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi);
+
 struct CutsceneInstance2 {
 	EasyCutscene easyCutscene;
 	std::function<void(EasyCutscene&)> cutsceneFn;
@@ -316,7 +318,7 @@ std::function<void(EasyCutscene&)> simpleNarratedMovement(objid cameraId, Narrat
   		if (finished(cutscene, index) && !finished(cutscene, index + 1)){
   			if (i < cutsceneData.narrations.size()){
 	  			auto text = cutsceneData.narrations.at(i).text;
-		  		gameapi -> drawText(text, 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  			drawImGuiText(text, glm::vec2(0.5f, 0.5f));
   			}
   		}
   		index++;
@@ -354,7 +356,7 @@ std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::v
   		if ((elapsedTime * 1000) > narration.at(i).startTimeMs){
     		if (!finished(cutscene, index)){
 	  			auto& text = narration.at(i).text;
-		 			gameapi -> drawText(text, 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  			drawImGuiText(text, glm::vec2(0.5f, 0.5f));
 		 		}			
   		}
   		waitUntil(cutscene, index, narration.at(i).endTimeMs);

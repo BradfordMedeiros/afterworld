@@ -408,59 +408,59 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
 
-  if (key == 'R' && action == 1) {
-  	saveConditions(LevelConditionData {
-  		.triggers = { "one", "two", "three" },
-  	});
-
-  	//if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
-	  //	//setIsAlive(getActivePlayerId().value(), false);
-  	//}
-
-  	//activateAllItems();
-
-  	//static glm::vec3 position(0.f, 0.f, 0.f);
-  	//position.y += 5.f;
-
-  	//auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
-
-  	static bool shouldEmitElectric = false;
-  	shouldEmitElectric = !shouldEmitElectric;
-  	//if (shouldEmitElectric){
-	  //	emitWarp(position);
-  	//}else{
-	  //	emitWarp(position);
-  	//}
-
-
-
-  	auto fireworkPos = glm::vec3(-100.f + randomNumber(-50.f, 50.f), 50.f + randomNumber(-20.f, 20.f), randomNumber(-20.f, 20.f));
-  	//emitFirework(fireworkPos);
-		//playMixedSound(getSymbol(paths::FIREWORK), fireworkPos);
-
-
-  	createExplosion(glm::vec3(0.F, 0.F, 0.F), 20.F, 5.F);
-
-
-		static bool activate = false;
-		activate = !activate;
-
-		//auto id = findObjByShortName("entity_moon_27", std::nullopt).value();
-		//auto doorId = findObjByShortName("entity_moon_27/portal", std::nullopt).value();
-		//auto doorPosition = gameapi -> getGameObjectPos(doorId, true, "[gamelogic] - get door pos");
-		//auto floorId = findObjByShortName("entity_moon_27/floor", std::nullopt).value();
-		//auto floorPosition = gameapi -> getGameObjectPos(floorId, true, "[gamelogic] - get floorId pos");
-		//if (activate){
-		//	emitFog(doorPosition);
-	  //  gameapi -> playAnimation(id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
-		//}else{
-	  //  gameapi -> playAnimation(id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
-		//}
-
-		//emitWarp(floorPosition + glm::vec3(3.f, 1.f, 0.f));
-
-
-  }
+  //if (key == 'R' && action == 1) {
+  //	saveConditions(LevelConditionData {
+  //		.triggers = { "one", "two", "three" },
+  //	});
+//
+  //	//if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
+	//  //	//setIsAlive(getActivePlayerId().value(), false);
+  //	//}
+//
+  //	//activateAllItems();
+//
+  //	//static glm::vec3 position(0.f, 0.f, 0.f);
+  //	//position.y += 5.f;
+//
+  //	//auto position = getPositionMaybeInVehicleByPlayerIndex(0).value();
+//
+  //	static bool shouldEmitElectric = false;
+  //	shouldEmitElectric = !shouldEmitElectric;
+  //	//if (shouldEmitElectric){
+	//  //	emitWarp(position);
+  //	//}else{
+	//  //	emitWarp(position);
+  //	//}
+//
+//
+//
+  //	auto fireworkPos = glm::vec3(-100.f + randomNumber(-50.f, 50.f), 50.f + randomNumber(-20.f, 20.f), randomNumber(-20.f, 20.f));
+  //	//emitFirework(fireworkPos);
+	//	//playMixedSound(getSymbol(paths::FIREWORK), fireworkPos);
+//
+//
+  //	createExplosion(glm::vec3(0.F, 0.F, 0.F), 20.F, 5.F);
+//
+//
+	//	static bool activate = false;
+	//	activate = !activate;
+//
+	//	//auto id = findObjByShortName("entity_moon_27", std::nullopt).value();
+	//	//auto doorId = findObjByShortName("entity_moon_27/portal", std::nullopt).value();
+	//	//auto doorPosition = gameapi -> getGameObjectPos(doorId, true, "[gamelogic] - get door pos");
+	//	//auto floorId = findObjByShortName("entity_moon_27/floor", std::nullopt).value();
+	//	//auto floorPosition = gameapi -> getGameObjectPos(floorId, true, "[gamelogic] - get floorId pos");
+	//	//if (activate){
+	//	//	emitFog(doorPosition);
+	//  //  gameapi -> playAnimation(id, "activate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+	//	//}else{
+	//  //  gameapi -> playAnimation(id, "deactivate", ONESHOT, std::nullopt, 0, false, std::nullopt);
+	//	//}
+//
+	//	//emitWarp(floorPosition + glm::vec3(3.f, 1.f, 0.f));
+//
+//
+  //}
 
   if (!getArgEnabled("dev")){
   	return;

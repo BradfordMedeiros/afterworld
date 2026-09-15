@@ -286,12 +286,13 @@ void ballEndGameplay(EasyCutscene& cutscene){
   waitUntil(cutscene, 1, 5000);
 
   if (finishedThisFrame(cutscene, 1)){
+  	getBallModeUI().value() -> ballMode.showComplete = false;
   	getBallModeUI().value() -> ballMode.levelComplete = BallLevelComplete{};
   	inputOverride(false, true);
   }
 
   if (!finished(cutscene, 1)){
- 		gameapi -> drawText("Level Complete, Moving", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  	getBallModeUI().value() -> ballMode.showComplete = true;
   }
 
 	waitFor(cutscene, 2, []() -> bool {
@@ -502,7 +503,7 @@ void ballModeNewGame2(objid sceneId, bool inHub){
   	.letterbox = "Welcome to The World",
   	.narrations = {
   		SimpleNarration {
-  			.text = "this is the first part",
+  			.text = "You started here in the world.\nWowToThat.\nIwas not sure exactly what was going on.",
   		},
   		SimpleNarration {
   			.text = "",

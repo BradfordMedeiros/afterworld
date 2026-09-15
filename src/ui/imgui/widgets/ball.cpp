@@ -41,14 +41,33 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
     ImGui::Text("total gems %d / %d", ballModeUi.levelSelect.value().gems, ballModeUi.levelSelect.value().totalGems);
   }
 
+  ImFont* font = getFontByBinding(getSymbol("ball-level-complete"));
+  ImGui::PushFont(font);
+  
   if (ballModeUi.ballMode.levelComplete.has_value()){
-      ImGui::Text("Level Complete");
-      ImGui::Text("Click to Continue");
+      const char* text = "Level Complete";
+      float width = ImGui::CalcTextSize(text).x;
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - width) * 0.5f);
+      ImGui::TextUnformatted(text);
+  
+      text = "Click to Continue";
+      width = ImGui::CalcTextSize(text).x;
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - width) * 0.5f);
+      ImGui::TextUnformatted(text);
+  }else if (ballModeUi.ballMode.showComplete){
+      const char* text = "Level Complete, Moving";
+      float width = ImGui::CalcTextSize(text).x;
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - width) * 0.5f);
+      ImGui::TextUnformatted(text);
   }
-
+  
+  ImGui::PopFont();
 
   if (ballModeUi.ballMode.showElapsedTime && ballModeUi.ballMode.elapsedTime.has_value()){
-      ImGui::Text(std::to_string(ballModeUi.ballMode.elapsedTime.value()()).c_str());
+    std::string text = std::to_string(ballModeUi.ballMode.elapsedTime.value()());
+    float width = ImGui::CalcTextSize(text.c_str()).x;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - width) * 0.5f);
+    ImGui::Text(text.c_str());
   }
 
   /*
