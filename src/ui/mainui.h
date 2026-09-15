@@ -67,6 +67,7 @@ struct MainMenu2Options {
   float offsetY;
 
   bool showSettings = false;
+  bool showStageSelect = false;
   bool canContinue = false;
   std::function<void()> onNewGame = []() -> void {};
   std::function<void()> onContinueGame = []() -> void {};

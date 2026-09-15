@@ -116,3 +116,35 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
     ImGui::End();
   }
 }
+
+
+void renderStageSelectPanel(bool includePanel){
+    if (includePanel){
+        ImGui::Begin("renderStageSelectPanel");
+    }
+
+    ImGui::Text("Stage Select");
+
+    const int columns = 4;
+    const float size = 80.0f;
+    const float spacing = 10.0f;
+
+    for (int i = 0; i < 12; i++){
+        int row = i / columns;
+        int column = i % columns;
+
+        ImGui::SetCursorPos(ImVec2(
+            column * (size + spacing),
+            40.0f + row * (size + spacing)
+        ));
+
+        ImGui::Button(
+            std::to_string(i + 1).c_str(),
+            ImVec2(size, size)
+        );
+    }
+
+    if (includePanel){
+        ImGui::End();
+    }
+}

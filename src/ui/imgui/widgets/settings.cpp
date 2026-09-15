@@ -378,6 +378,14 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
     }
     menuItems.push_back(
       MenuItem { 
+        .text = "Stage Select",
+        .onClick = [&liveMenu]() -> void {
+          liveMenu.liveMenu -> options.showStageSelect = true;
+        },
+      }
+    );
+    menuItems.push_back(
+      MenuItem { 
         .text = "Settings",
         .onClick = [&liveMenu]() -> void {
           liveMenu.liveMenu -> options.showSettings = true;

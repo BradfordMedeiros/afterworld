@@ -5,3 +5,5 @@
 
 void renderBallGameplay(bool includePanel);
 void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi);
+
+void renderStageSelectPanel(bool includePanel);
