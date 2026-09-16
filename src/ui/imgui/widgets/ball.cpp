@@ -1,5 +1,7 @@
 #include "./ball.h"
 
+extern CustomApiBindings* gameapi;
+
 void reloadVehicleSettings();
 
 void renderBallGameplay(bool includePanel){
@@ -116,33 +118,405 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
     ImGui::End();
   }
 }
-
-
 void renderStageSelectPanel(bool includePanel){
     if (includePanel){
         ImGui::Begin("renderStageSelectPanel");
     }
 
-    ImGui::Text("Stage Select");
+    static int selectedWorld = 0;
+    static int selectedLevel = 0;
 
-    const int columns = 4;
-    const float size = 80.0f;
-    const float spacing = 10.0f;
+    const int worldCount = 4;
+    const int levelsPerWorld = 8;
 
-    for (int i = 0; i < 12; i++){
-        int row = i / columns;
-        int column = i % columns;
+    const float worldWidth = 300.0f;
+    const float worldHeight = 70.0f;
 
-        ImGui::SetCursorPos(ImVec2(
-            column * (size + spacing),
-            40.0f + row * (size + spacing)
-        ));
+    const float spacing = 12.0f;
 
-        ImGui::Button(
-            std::to_string(i + 1).c_str(),
-            ImVec2(size, size)
-        );
+    // --------------------------------------------------
+    // Background image
+    // --------------------------------------------------
+
+    std::string backgroundTexture =
+        "../afterworld/scenes/levels/worlds/w1/w1-2/map.png";
+
+    auto textureId =
+        gameapi->getTextureSamplerId(backgroundTexture).value();
+
+    ImVec2 panelMin = ImGui::GetWindowPos();
+    ImVec2 panelMax = ImVec2(
+        panelMin.x + ImGui::GetWindowWidth(),
+        panelMin.y + ImGui::GetWindowHeight()
+    );
+
+    ImGui::GetWindowDrawList()->AddImage(
+        (ImTextureID)(intptr_t)textureId,
+        panelMin,
+        panelMax,
+        ImVec2(0, 1),
+        ImVec2(1, 0),
+        IM_COL32(255, 255, 255, 180)
+    );
+
+    // --------------------------------------------------
+    // General layout
+    // --------------------------------------------------
+
+    float availableWidth = ImGui::GetContentRegionAvail().x;
+    float cursorX = ImGui::GetCursorPosX();
+
+    // --------------------------------------------------
+    // World selector
+    // --------------------------------------------------
+
+    float selectorWidth =
+        40.0f +
+        spacing +
+        worldWidth +
+        spacing +
+        40.0f;
+
+    ImGui::SetCursorPosX(
+        cursorX +
+        (availableWidth - selectorWidth) * 0.5f
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_Button,
+        ImVec4(0, 0, 0, 0)
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonHovered,
+        ImVec4(1, 1, 1, 0.12f)
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonActive,
+        ImVec4(1, 1, 1, 0.20f)
+    );
+
+    ImGui::PushStyleVar(
+        ImGuiStyleVar_FrameRounding,
+        4.0f
+    );
+
+    if (ImGui::Button("<", ImVec2(40, 40))){
+        selectedWorld--;
+
+        if (selectedWorld < 0){
+            selectedWorld = worldCount - 1;
+        }
+
+        selectedLevel = 0;
     }
+
+    ImGui::SameLine(0.0f, spacing);
+
+    std::string worldText =
+        "WORLD " + std::to_string(selectedWorld + 1);
+
+    ImGui::Button(
+        worldText.c_str(),
+        ImVec2(worldWidth, worldHeight)
+    );
+
+    ImGui::SameLine(0.0f, spacing);
+
+    if (ImGui::Button(">", ImVec2(40, 40))){
+        selectedWorld++;
+
+        if (selectedWorld >= worldCount){
+            selectedWorld = 0;
+        }
+
+        selectedLevel = 0;
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(3);
+
+    // --------------------------------------------------
+    // World subtitle
+    // --------------------------------------------------
+
+    ImGui::Spacing();
+
+    std::string worldDescription =
+        "THE FORGOTTEN DEPTHS";
+
+    float worldDescriptionWidth =
+        ImGui::CalcTextSize(worldDescription.c_str()).x;
+
+    ImGui::SetCursorPosX(
+        cursorX +
+        (availableWidth - worldDescriptionWidth) * 0.5f
+    );
+
+    ImGui::TextUnformatted(worldDescription.c_str());
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    // --------------------------------------------------
+    // Level navigation
+    // --------------------------------------------------
+
+    float levelNavigationWidth =
+        40.0f +
+        spacing +
+        180.0f +
+        spacing +
+        40.0f;
+
+    ImGui::SetCursorPosX(
+        cursorX +
+        (availableWidth - levelNavigationWidth) * 0.5f
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_Button,
+        ImVec4(0, 0, 0, 0)
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonHovered,
+        ImVec4(1, 1, 1, 0.12f)
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonActive,
+        ImVec4(1, 1, 1, 0.20f)
+    );
+
+    if (ImGui::Button("<", ImVec2(40, 40))){
+        selectedLevel--;
+
+        if (selectedLevel < 0){
+            selectedLevel = levelsPerWorld - 1;
+        }
+    }
+
+    ImGui::SameLine(0.0f, spacing);
+
+    std::string levelNumber =
+        "LEVEL " + std::to_string(selectedLevel + 1);
+
+    ImGui::Button(
+        levelNumber.c_str(),
+        ImVec2(180, 40)
+    );
+
+    ImGui::SameLine(0.0f, spacing);
+
+    if (ImGui::Button(">", ImVec2(40, 40))){
+        selectedLevel++;
+
+        if (selectedLevel >= levelsPerWorld){
+            selectedLevel = 0;
+        }
+    }
+
+    ImGui::PopStyleColor(3);
+
+    // --------------------------------------------------
+    // Level progression
+    // --------------------------------------------------
+
+    ImGui::Spacing();
+
+    const float progressionWidth = 240.0f;
+
+    float progressionX =
+        cursorX +
+        (availableWidth - progressionWidth) * 0.5f;
+
+    ImGui::SetCursorPosX(progressionX);
+
+    ImVec2 progressionStart =
+        ImGui::GetCursorScreenPos();
+
+    ImDrawList* drawList =
+        ImGui::GetWindowDrawList();
+
+    float dotSpacing =
+        progressionWidth /
+        (levelsPerWorld - 1);
+
+    for (int i = 0; i < levelsPerWorld; i++){
+        float x =
+            progressionStart.x +
+            dotSpacing * i;
+
+        float y =
+            progressionStart.y + 5.0f;
+
+        bool completed = i < 2;
+        bool selected = i == selectedLevel;
+        bool locked = i > 2;
+
+        float radius =
+            selected ? 5.0f : 3.0f;
+
+        ImU32 color;
+
+        if (selected){
+            color = IM_COL32(
+                255, 255, 255, 255
+            );
+        }
+        else if (completed){
+            color = IM_COL32(
+                255, 255, 255, 180
+            );
+        }
+        else if (locked){
+            color = IM_COL32(
+                255, 255, 255, 60
+            );
+        }
+        else{
+            color = IM_COL32(
+                255, 255, 255, 120
+            );
+        }
+
+        if (locked){
+            drawList->AddCircle(
+                ImVec2(x, y),
+                radius,
+                color,
+                16,
+                1.5f
+            );
+        }
+        else{
+            drawList->AddCircleFilled(
+                ImVec2(x, y),
+                radius,
+                color
+            );
+        }
+    }
+
+    ImGui::Dummy(
+        ImVec2(progressionWidth, 15.0f)
+    );
+
+    // --------------------------------------------------
+    // Level information
+    // --------------------------------------------------
+
+    ImGui::Spacing();
+
+    std::string levelName =
+        "THE DEEP DESCENT";
+
+    float levelNameWidth =
+        ImGui::CalcTextSize(levelName.c_str()).x;
+
+    ImGui::SetCursorPosX(
+        cursorX +
+        (availableWidth - levelNameWidth) * 0.5f
+    );
+
+    ImGui::TextUnformatted(
+        levelName.c_str()
+    );
+
+    ImGui::Spacing();
+
+    std::string description =
+        "Descend into the abandoned complex.";
+
+    float descriptionWidth =
+        ImGui::CalcTextSize(description.c_str()).x;
+
+    ImGui::SetCursorPosX(
+        cursorX +
+        (availableWidth - descriptionWidth) * 0.5f
+    );
+
+    ImGui::TextUnformatted(
+        description.c_str()
+    );
+
+    // --------------------------------------------------
+    // Stats
+    // --------------------------------------------------
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    float statsWidth = 300.0f;
+
+    float statsX =
+        cursorX +
+        (availableWidth - statsWidth) * 0.5f;
+
+    ImGui::SetCursorPosX(statsX);
+
+    ImGui::Text("BEST TIME");
+    ImGui::SameLine(statsX + 190.0f);
+    ImGui::Text("02:14.38");
+
+    ImGui::SetCursorPosX(statsX);
+
+    ImGui::Text("HIGH SCORE");
+    ImGui::SameLine(statsX + 190.0f);
+    ImGui::Text("18,420");
+
+    ImGui::SetCursorPosX(statsX);
+
+    ImGui::Text("SOULS");
+    ImGui::SameLine(statsX + 190.0f);
+    ImGui::Text("100%%");
+
+    // --------------------------------------------------
+    // Play button
+    // --------------------------------------------------
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    const float playWidth = 220.0f;
+    const float playHeight = 55.0f;
+
+    ImGui::SetCursorPosX(
+        cursorX +
+        (availableWidth - playWidth) * 0.5f
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_Button,
+        ImVec4(0.15f, 0.15f, 0.15f, 0.90f)
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonHovered,
+        ImVec4(0.30f, 0.30f, 0.30f, 0.95f)
+    );
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonActive,
+        ImVec4(0.40f, 0.40f, 0.40f, 1.0f)
+    );
+
+    ImGui::PushStyleVar(
+        ImGuiStyleVar_FrameRounding,
+        6.0f
+    );
+
+    if (ImGui::Button(
+            "PLAY",
+            ImVec2(playWidth, playHeight)
+    )){
+        // Start selected level here
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(3);
 
     if (includePanel){
         ImGui::End();

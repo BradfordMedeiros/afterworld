@@ -5,6 +5,7 @@
 #include "../common.h"
 
 void renderGameSettingsControlPanel(bool includePanel);
+void renderCheatsPanel(bool includePanel);
 void renderGameSettingsView(bool includePanel);
 
 void renderMainMenu(bool includePanel);

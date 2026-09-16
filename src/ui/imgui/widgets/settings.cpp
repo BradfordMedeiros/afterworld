@@ -180,6 +180,24 @@ void renderGameVolumePanel(bool includePanel){
   }    
 }
 
+void renderCheatsPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Cheats");
+  }
+
+  bool enable = false;
+  ImGui::Text("Cheats");
+  if (ImGui::Checkbox("Unlock All Stage Select Levels", &enable)){
+  }
+  if (ImGui::Checkbox("Disable All Timers", &enable)){
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  }   
+}
+
 std::string selectedSettingOption = "Graphics";
 void renderGameSettingsControlPanel(bool includePanel){
   if (includePanel){
@@ -192,6 +210,7 @@ void renderGameSettingsControlPanel(bool includePanel){
         "Graphics",
         "Controls",
         "Sound",
+        "Cheats",
     };
     for (auto& item : items) {
     if (Mod::Selectable(item.c_str(), false, 0, ImVec2(300, 40))) {
@@ -210,6 +229,8 @@ void renderGameSettingsView(bool includePanel){
     renderControlsPanel(includePanel);
   }else if (selectedSettingOption == "Sound"){
     renderGameVolumePanel(includePanel);
+  }else if (selectedSettingOption == "Cheats"){
+    renderCheatsPanel(includePanel);
   }
 }
 

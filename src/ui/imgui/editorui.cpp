@@ -254,7 +254,7 @@ void renderMoreUi(){
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-        auto size = ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+        auto size = ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y * 0.8f);
         auto& widget = *widgetByNameSymbol(getSymbol("stage-select")).value();
         renderLayoutAlignUpCenterHorz("stage-select-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), size);
 
