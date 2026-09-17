@@ -3,6 +3,7 @@
 extern CustomApiBindings* gameapi;
 
 void reloadVehicleSettings();
+void goToLevel(std::string);
 
 void renderBallGameplay(bool includePanel){
   if (includePanel){
@@ -178,12 +179,22 @@ void renderStageSelectPanel(bool includePanel){
 
     static int selectedWorld = 0;
     static int selectedLevel = 0;
-    const int worldCount = 4;
-    const int levelsPerWorld = 8;
+
+    auto worlds = worldsForPlaylist("levelselect");
+    auto& playlist = *playlistByName("levelselect").value();
+
+    auto activeWorld = worlds.at(selectedWorld);
+    auto worldLevels = levelsForWorld(playlist, activeWorld);
+
+    std::cout << "worlds: " << print(worlds) << ", name = " << activeWorld << std::endl;
+
+
+    int levelsPerWorld = worldLevels.size();
+
+    std::string selectedLevelName = worldLevels.at(selectedLevel) -> level;
 
     std::string backgroundTexture = "../afterworld/scenes/levels/worlds/w1/w1-2/map.png";
 
-    static auto levels = getRawLevelData();
 
     const float worldWidth = 300.0f;
     const float worldHeight = 70.0f;
@@ -213,20 +224,20 @@ void renderStageSelectPanel(bool includePanel){
       if (ImGui::Button("<", ImVec2(40, 40))){
           selectedWorld--;
           if (selectedWorld < 0){
-              selectedWorld = worldCount - 1;
+              selectedWorld = 0;
           }
           selectedLevel = 0;
       }
 
       ImGui::SameLine(0.0f, spacing);
-      std::string worldText = "THE FORGOTTEN DEPTHS " + std::to_string(selectedWorld + 1);
+      std::string worldText = activeWorld;
       ImGui::Button(worldText.c_str(), ImVec2(worldWidth, worldHeight));
       ImGui::SameLine(0.0f, spacing);
 
       if (ImGui::Button(">", ImVec2(40, 40))){
           selectedWorld++;
-          if (selectedWorld >= worldCount){
-              selectedWorld = 0;
+          if (selectedWorld >= worlds.size()){
+              selectedWorld = worlds.size() - 1;
           }
           selectedLevel = 0;
       }
@@ -242,7 +253,7 @@ void renderStageSelectPanel(bool includePanel){
       ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.12f));
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
 
-      if (ImGui::Button("<", ImVec2(40, 40))){
+      if (ImGui::Button("-<", ImVec2(40, 40))){
           selectedLevel--;
           if (selectedLevel < 0){
               selectedLevel = levelsPerWorld - 1;
@@ -250,11 +261,11 @@ void renderStageSelectPanel(bool includePanel){
       }
 
       ImGui::SameLine(0.0f, spacing);
-      std::string levelNumber = "LEVEL " + std::to_string(selectedLevel + 1);
+      std::string levelNumber = selectedLevelName;
       ImGui::Button(levelNumber.c_str(), ImVec2(180, 40));
       ImGui::SameLine(0.0f, spacing);
 
-      if (ImGui::Button(">", ImVec2(40, 40))){
+      if (ImGui::Button(">-", ImVec2(40, 40))){
           selectedLevel++;
           if (selectedLevel >= levelsPerWorld){
               selectedLevel = 0;
@@ -320,6 +331,8 @@ void renderStageSelectPanel(bool includePanel){
 
       if (ImGui::Button("PLAY", ImVec2(playWidth, playHeight))){
           // Start selected level here
+         goToLevel(selectedLevelName);
+
       }
 
       ImGui::PopStyleVar();

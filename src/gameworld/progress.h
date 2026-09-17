@@ -25,7 +25,6 @@ struct LevelProgress {
 std::vector<LevelProgress> loadLevelProgress();
 void saveLevelProgress();
 int completedLevels();
-int totalLevels();
 void markLevelComplete(std::string name, float time);
 bool isLevelComplete(std::string name);
 
@@ -38,6 +37,21 @@ void saveData();
 ////////////////////
 // ball mode
 
+
+struct PlaylistLevel {
+  std::string level;
+  std::string world;
+  std::optional<float> parTime;
+  std::set<std::string> crystals;
+};
+struct Playlist {
+  std::string name;
+  std::vector<PlaylistLevel> levels;
+};
+
+std::vector<std::string> worldsForPlaylist(std::string playlistName);
+std::optional<Playlist*> playlistByName(std::string playlistName);
+std::vector<PlaylistLevel*> levelsForWorld(Playlist& playlist, std::string world);
 
 struct PlaylistProgressInfo {
   std::string currentWorld;

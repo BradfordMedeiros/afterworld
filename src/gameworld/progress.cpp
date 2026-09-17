@@ -5,6 +5,11 @@ extern CustomApiBindings* gameapi;
 extern std::vector<LevelProgress> levelProgresses;
 const char* PROGRESS_SAVE_FILE = "../afterworld/data/save/save.json";
 
+
+std::vector<Playlist> playlists;   // TODO STATIC
+std::set<std::string> stagedCrystals; // TODO STATIC
+
+
 LevelConditionData levelConditionData{};
 
 LevelConditionData getConditionData(){
@@ -12,7 +17,6 @@ LevelConditionData getConditionData(){
   levelConditionData.triggers = triggers;
   return levelConditionData;
 }
-
 
 void saveConditions(LevelConditionData data){
     levelConditionData = data;
@@ -28,143 +32,15 @@ void saveConditions(LevelConditionData data){
     persistSaveMap("condition", values);
 }
 
-bool isControlledVehicle(int vehicleId);
 
-
-struct PlaylistType {
-  std::string playlist;
-  std::string levelShortname;
-  std::set<std::string> crystals;
-  std::optional<float> parTime;
-  std::optional<std::string> world;
-};
-
-std::vector<PlaylistType> playlist;   // TODO STATIC
-std::set<std::string> stagedCrystals; // TODO STATIC
-
-std::optional<LevelProgress*> getLevelProgress(std::string level){
-  for (auto& levelProgress : levelProgresses){
-    if (levelProgress.level == level){
-      return &levelProgress;
-    }
-  }
-  return std::nullopt;
-}
-
-
-bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
-  if (values.find("crystals") == values.end()){
-    return false;
-  }
-  for (auto &[savedKey, savedValueObj] : values.at("crystals")){
-    auto boolValue = std::get_if<bool>(&savedValueObj);
-    if (boolValue){
-      if (savedKey == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
-        return *boolValue;
-      }      
-    }
-  }
-  return false;
-}
-
-int numberOfCrystals(std::optional<std::vector<std::string>> levels){
-  int count = 0;
-  for (auto& levelProgress : levelProgresses){
-    if (!levels.has_value()){
-      std::cout << "numberOfCrystals adding for: " << levelProgress.level << ", size = " << levelProgress.crystals.size() << std::endl;
-      count += levelProgress.crystals.size();
-    }else{
-      auto& levelsToCount = levels.value();
-      for (auto& level : levelsToCount){
-        if (levelProgress.level == level){
-          std::cout << "numberOfCrystals adding for: " << level << ", size = " << levelProgress.crystals.size() << std::endl;
-          count += levelProgress.crystals.size();
-          break;
-        }
-      }
-    }
-  }
-  return count;
-}
-int totalCrystals(std::optional<std::vector<std::string>> levels){
-  int count = 0;
-  for (auto& levelProgress : playlist){
-    if (!levels.has_value()){
-      count += levelProgress.crystals.size();
-    }else{
-      auto& levelsToCount = levels.value();
-      for (auto& level : levelsToCount){
-        if (levelProgress.levelShortname == level){
-          count += levelProgress.crystals.size();
-          break;
-        }
-      }
-    }
-  }
-  return count;
-}
-
-bool hasCrystal(std::string& name){
-  for (auto& levelProgress : levelProgresses){
-    if (levelProgress.crystals.count(name) > 0){
-      return true;
-    }
-  }
-  return false;
-}
-
-void pickupCrystal(std::string name){
-  std::cout << "pickup crystal: " << name << std::endl;
-
-  bool foundLevelForCrystal = false;
-  for (auto& level : playlist){
-    auto levelProgress = getLevelProgress(level.levelShortname);
-    modassert(levelProgress.has_value(), std::string("level progress no value: ") + level.levelShortname);
-    if (level.crystals.count(name) > 0){
-      std::cout << "progress pickup added to " << level.levelShortname << std::endl;
-      levelProgress.value() -> crystals.insert(name);
-      foundLevelForCrystal = true;
-    }
-  }
-
-
-  if (!foundLevelForCrystal){
-    std::cout << "progress pickup - missing level for crystal: " << name << std::endl;
-  }
-
-  saveLevelProgress();
-}
-
-void stageCrystal(std::string name){
-  std::cout << "progress stageCrystal: " << name << std::endl;
-  stagedCrystals.insert(name);
-}
-void commitCrystals(){
-  for (auto crystal : stagedCrystals){
-    pickupCrystal(crystal);
-  }
-  std::cout << "progress commitCrystals" << std::endl;
-  stagedCrystals = {};
-}
-
-
-struct PlaylistLevel {
-  std::string level;
-  std::string world;
-  std::optional<float> parTime;
-};
-struct Playlist {
-  std::string name;
-  std::vector<PlaylistLevel> levels;
-};
 Playlist parsePlaylist(std::string filepath){
   Playlist playlist{};
-
-  std::string name = "playlistname";
 
   auto fileInfo = decomposePath(filepath);
   auto relativeDir = relativePath("../afterworld/data/config/playlists/ ", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
+
+  std::string name = fileInfo.filename;
 
   auto fileContent = readFileOrPackage(filepath);
   rapidjson::Document doc;
@@ -225,6 +101,49 @@ std::vector<Playlist>  loadPlaylists(){
   return playlists;
 }
 
+std::vector<std::string> worldsForPlaylist(std::string playlistName){
+  std::vector<std::string> worlds;
+  for (auto& playlist : playlists){
+    if (playlist.name == playlistName){
+      for (auto& level : playlist.levels){
+        bool foundAlready = false;
+        for (auto& world : worlds){
+          if (level.world == world){
+            foundAlready = true;
+            break;
+          }
+        }
+        if (!foundAlready){
+          worlds.push_back(level.world);
+        }
+      }
+      return worlds;
+    }
+  }
+  modassert(false, "worldsForPlaylist no specified playlist exists");
+  return {};
+}
+
+std::optional<Playlist*> playlistByName(std::string playlistName){
+  for (auto& playlist : playlists){
+    if (playlist.name == playlistName){
+      return &playlist;
+    }
+  }
+  return std::nullopt;
+}
+
+std::vector<PlaylistLevel*> levelsForWorld(Playlist& playlist, std::string world){
+  std::vector<PlaylistLevel*> levels;
+  for (auto& playlistLevel : playlist.levels){
+    if (playlistLevel.world == world){
+      levels.push_back(&playlistLevel);
+    }
+  }
+  return levels;
+}
+
+
 std::string print(PlaylistLevel& playlistLevel){
   std::string value;
   value += "[level = ";
@@ -251,37 +170,129 @@ std::string print(Playlist& playlist){
 }
 
 
+std::optional<LevelProgress*> getLevelProgress(std::string level){
+  for (auto& levelProgress : levelProgresses){
+    if (levelProgress.level == level){
+      return &levelProgress;
+    }
+  }
+  return std::nullopt;
+}
 
-std::vector<LevelProgress> loadLevelProgress(){
-  std::vector<PlaylistType> levels;
-  {
-    auto loadedPlaylists = loadPlaylists();
-    for (auto& loadedPlaylist : loadedPlaylists){
-      for (auto& level : loadedPlaylist.levels){
-        levels.push_back(PlaylistType {
-          .playlist = loadedPlaylist.name,
-          .levelShortname = level.level,
-          .crystals = {},
-          .parTime = level.parTime,
-          .world = level.world,
-        });      
+
+bool hasCrystal(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& values, std::string key){
+  if (values.find("crystals") == values.end()){
+    return false;
+  }
+  for (auto &[savedKey, savedValueObj] : values.at("crystals")){
+    auto boolValue = std::get_if<bool>(&savedValueObj);
+    if (boolValue){
+      if (savedKey == (std::string(key) + std::string("|") + std::string("has_crystal"))) {
+        return *boolValue;
+      }      
+    }
+  }
+  return false;
+}
+
+int numberOfCrystals(std::optional<std::vector<std::string>> levels){
+  int count = 0;
+  for (auto& levelProgress : levelProgresses){
+    if (!levels.has_value()){
+      std::cout << "numberOfCrystals adding for: " << levelProgress.level << ", size = " << levelProgress.crystals.size() << std::endl;
+      count += levelProgress.crystals.size();
+    }else{
+      auto& levelsToCount = levels.value();
+      for (auto& level : levelsToCount){
+        if (levelProgress.level == level){
+          std::cout << "numberOfCrystals adding for: " << level << ", size = " << levelProgress.crystals.size() << std::endl;
+          count += levelProgress.crystals.size();
+          break;
+        }
       }
     }
   }
-  playlist = levels;
+  return count;
+}
+int totalCrystals(std::optional<std::vector<std::string>> levels){
+  /*int count = 0;
+  for (auto& levelProgress : playlist){
+    if (!levels.has_value()){
+      count += levelProgress.crystals.size();
+    }else{
+      auto& levelsToCount = levels.value();
+      for (auto& level : levelsToCount){
+        if (levelProgress.levelShortname == level){
+          count += levelProgress.crystals.size();
+          break;
+        }
+      }
+    }
+  }
+  return count;*/
+  return 0;
+}
 
-  std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
-  for (auto& playlistLevel : playlist){
-    if (levelToLevelProgress.find(playlistLevel.levelShortname) == levelToLevelProgress.end()){
-      levelToLevelProgress[playlistLevel.levelShortname] = LevelProgress {
-        .level = playlistLevel.levelShortname,
-        .complete = false,
-        .bestTime = std::nullopt,
-        .crystals = {},
-      };
+bool hasCrystal(std::string& name){
+  for (auto& levelProgress : levelProgresses){
+    if (levelProgress.crystals.count(name) > 0){
+      return true;
+    }
+  }
+  return false;
+}
+
+void pickupCrystal(std::string name){
+  std::cout << "pickup crystal: " << name << std::endl;
+
+  bool foundLevelForCrystal = false;
+  for (auto& playlist : playlists){
+    for (auto& level : playlist.levels){
+      auto levelProgress = getLevelProgress(level.level);
+      modassert(levelProgress.has_value(), std::string("level progress no value: ") + level.level);
+      if (level.crystals.count(name) > 0){
+        std::cout << "progress pickup added to " << level.level << std::endl;
+        levelProgress.value() -> crystals.insert(name);
+        foundLevelForCrystal = true;
+      }
     }
   }
 
+  if (!foundLevelForCrystal){
+    std::cout << "progress pickup - missing level for crystal: " << name << std::endl;
+  }
+
+  saveLevelProgress();
+}
+
+void stageCrystal(std::string name){
+  std::cout << "progress stageCrystal: " << name << std::endl;
+  stagedCrystals.insert(name);
+}
+void commitCrystals(){
+  for (auto crystal : stagedCrystals){
+    pickupCrystal(crystal);
+  }
+  std::cout << "progress commitCrystals" << std::endl;
+  stagedCrystals = {};
+}
+
+std::vector<LevelProgress> loadLevelProgress(){
+  playlists = loadPlaylists();;
+
+  std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
+  for (auto& playlist : playlists){
+    for (auto& playlistLevel : playlist.levels){
+      if (levelToLevelProgress.find(playlistLevel.level) == levelToLevelProgress.end()){
+        levelToLevelProgress[playlistLevel.level] = LevelProgress {
+          .level = playlistLevel.level,
+          .complete = false,
+          .bestTime = std::nullopt,
+          .crystals = {},
+        };
+      }
+    }
+  }
 
   auto boolValues = getSaveBoolValues("levelprogress", "complete");
   auto floatValues = getSaveFloatValues("levelprogress", "bestTime");
@@ -370,7 +381,11 @@ int completedLevels(){
   return count;
 }
 int totalLevels(){
-  return playlist.size();
+  int count = 0;
+  for (auto& playlist : playlists){
+    count += playlist.levels.size();
+  }
+  return count;
 }
 
 void markLevelComplete(std::string name, float time){
@@ -395,7 +410,6 @@ void markLevelComplete(std::string name, float time){
   saveLevelProgress();
 }
 
-
 bool isLevelComplete(std::string name){
   for (auto& levelProgress : levelProgresses){
     if (levelProgress.level == name && levelProgress.complete){
@@ -408,14 +422,16 @@ bool isLevelComplete(std::string name){
 void resetProgress(){
   levelProgresses = {};
   std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
-  for (auto& playlistLevel : playlist){
-    if (levelToLevelProgress.find(playlistLevel.levelShortname) == levelToLevelProgress.end()){
-      levelToLevelProgress[playlistLevel.levelShortname] = LevelProgress {
-        .level = playlistLevel.levelShortname,
-        .complete = false,
-        .bestTime = std::nullopt,
-        .crystals = {},
-      };
+  for (auto& playlist : playlists){
+    for (auto& playlistLevel : playlist.levels){
+      if (levelToLevelProgress.find(playlistLevel.level) == levelToLevelProgress.end()){
+        levelToLevelProgress[playlistLevel.level] = LevelProgress {
+          .level = playlistLevel.level,
+          .complete = false,
+          .bestTime = std::nullopt,
+          .crystals = {},
+        };
+      }
     }
   }
   for (auto& [_, levelProgress] : levelToLevelProgress){
@@ -444,10 +460,12 @@ std::optional<float> bestTime(std::string& level){
 }
 
 float parTime(std::string& level){
-  for (auto& playlistLevel : playlist){
-    if (playlistLevel.levelShortname == level){
-      return playlistLevel.parTime.has_value() ? playlistLevel.parTime.value() : 0.f;
-    }
+  for (auto& playlist : playlists){
+    for (auto& playlistLevel : playlist.levels){
+      if (playlistLevel.level == level){
+        return playlistLevel.parTime.has_value() ? playlistLevel.parTime.value() : 0.f;
+      }
+    }    
   }
   return 0.f;
 }
@@ -455,9 +473,11 @@ float parTime(std::string& level){
 //////////////// ball mode ////////////////////
 std::vector<std::string> playlistLevelsInWorld(std::string world){
   std::vector<std::string> levels;
-  for (auto& playlistType : playlist){
-    if (playlistType.world == world){
-      levels.push_back(playlistType.levelShortname);
+  for (auto& playlist : playlists){
+    for (auto& playlistType : playlist.levels){
+      if (playlistType.world == world){
+        levels.push_back(playlistType.level);
+      }
     }
   }
   return levels;
@@ -492,7 +512,6 @@ LevelProgressInfo getLevelProgressInfo(std::string currentWorld, std::string lev
   };
   return levelProgressInfo;
 }
-
 
 
 std::vector<RawLevelData> getRawLevelData(){
