@@ -624,7 +624,7 @@ std::vector<RawLevelData> getRawLevelData(){
 }
 
 std::optional<RawLevelData> levelByShortcutName(std::string shortcut){
-  auto rawLevels = getRawLevelData();
+  static auto rawLevels = getRawLevelData();
   for (auto& rawLevel : rawLevels){
     if (rawLevel.shortcut == shortcut){
       return rawLevel;
@@ -634,7 +634,7 @@ std::optional<RawLevelData> levelByShortcutName(std::string shortcut){
 }
 
 std::optional<RawLevelData> levelByName(std::string levelName){
-  auto allLevels = getRawLevelData();
+  static auto allLevels = getRawLevelData();
   for (auto& level : allLevels){
     if (level.name == levelName){
       return level;
@@ -682,4 +682,18 @@ void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
 
     gameapi -> saveToJsonFile2(level.configFile, data);
   }
+}
+
+std::string print(RawLevelData& level){
+  std::string value;
+  value += "[ name = " + level.name + " ]";
+  return value;
+}
+
+std::string print(std::vector<RawLevelData>& levels){
+  std::string value;
+  for (auto& level : levels){
+    value += print(level) + " ";
+  }
+  return value;
 }

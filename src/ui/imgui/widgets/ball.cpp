@@ -192,9 +192,7 @@ void renderStageSelectPanel(bool includePanel){
     int levelsPerWorld = worldLevels.size();
 
     std::string selectedLevelName = worldLevels.at(selectedLevel) -> level;
-
-    std::string backgroundTexture = "../afterworld/scenes/levels/worlds/w1/w1-2/map.png";
-
+    auto levelData = levelByShortcutName(selectedLevelName);
 
     const float worldWidth = 300.0f;
     const float worldHeight = 70.0f;
@@ -203,7 +201,9 @@ void renderStageSelectPanel(bool includePanel){
     float cursorX = ImGui::GetCursorPosX();
 
     // Background image
-    {
+    if(levelData.has_value()){
+      std::string backgroundTexture = levelData.value().image;
+
       auto textureId = gameapi -> getTextureSamplerId(backgroundTexture).value();
       ImVec2 panelMin = ImGui::GetWindowPos();
       ImVec2 panelMax = ImVec2(panelMin.x + ImGui::GetWindowWidth(), panelMin.y + ImGui::GetWindowHeight());
@@ -283,10 +283,10 @@ void renderStageSelectPanel(bool includePanel){
 
 
     // Level information
-    {
+    if(levelData.has_value()){
       ImGui::Spacing();
 
-      std::string description = "Descend into the abandoned complex.";
+      std::string description = levelData.value().description;
       float descriptionWidth = ImGui::CalcTextSize(description.c_str()).x;
       ImGui::SetCursorPosX(cursorX + (availableWidth - descriptionWidth) * 0.5f);
       ImGui::TextUnformatted(description.c_str());
@@ -312,10 +312,12 @@ void renderStageSelectPanel(bool includePanel){
       ImGui::Text("SOULS");
       ImGui::SameLine(statsX + 190.0f);
       ImGui::Text("100%%");
+    }else{
+      ImGui::Text("Missing Level");
     }
 
     // Play Button
-    {
+    if(levelData.has_value()){
       ImGui::Spacing();
       ImGui::Spacing();
 

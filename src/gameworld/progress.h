@@ -123,6 +123,7 @@ struct UpdateLevel {
   std::optional<glm::vec2> chromatic;
 };
 void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
+std::string print(std::vector<RawLevelData>& levels);
 
 
 #endif
