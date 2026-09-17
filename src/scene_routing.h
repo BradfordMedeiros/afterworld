@@ -7,13 +7,6 @@
 #include "./ui/mainui.h"
 #include "./gamecontrol/mode.h"
 
-struct UILevel {
-  std::string name;
-  std::string description;
-  std::string image;
-  std::string shortcut;
-};
-
 struct PathAndParams {
   std::string path;
 };
@@ -52,40 +45,5 @@ struct SceneRouterPath {
 
 
 std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, std::vector<std::string>* _params);
-
-// level specific code
-std::vector<Level> loadLevels();
-
-struct RawLevelData {
-  std::string name;
-  std::string filepath;
-  std::optional<std::string> additionalFilepath;
-  std::string description;
-  std::string image;
-  std::string shortcut;
-  glm::vec3 ambientLight;
-  glm::vec3 skyboxColor;
-  std::string skybox;
-  std::optional<std::string> weather;
-  std::string audioClipPath;
-  std::string mode;
-  glm::vec2 chromatic;
-
-  std::vector<std::vector<std::string>> additionalTokens;
-
-  std::string configFile;
-  bool configFileExists;
-};
-std::vector<RawLevelData> getRawLevelData();
-
-struct UpdateLevel {
-  std::optional<std::string> skybox;
-  std::optional<std::string> description;
-  std::optional<glm::vec3> ambient;
-  std::optional<glm::vec3> skyboxColor;
-  std::optional<std::string> weather;
-  std::optional<glm::vec2> chromatic;
-};
-void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
 
 #endif 

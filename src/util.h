@@ -152,7 +152,7 @@ struct ActiveLevel {
 };
 
 struct Level {
-  std::string scene;
+  std::string filepath;
   std::string name;
 };
 

@@ -75,4 +75,40 @@ LevelConditionData getConditionData();
 void saveConditions(LevelConditionData levelConditionData);
 
 
+struct RawLevelData {
+  std::string name;
+  std::string world;
+  std::string filepath;
+  std::optional<std::string> additionalFilepath;
+  std::string description;
+  std::string image;
+  std::string shortcut;
+  glm::vec3 ambientLight;
+  glm::vec3 skyboxColor;
+  std::string skybox;
+  std::optional<std::string> weather;
+  std::string audioClipPath;
+  std::string mode;
+  glm::vec2 chromatic;
+
+  std::vector<std::vector<std::string>> additionalTokens;
+
+  std::string configFile;
+  bool configFileExists;
+};
+std::vector<RawLevelData> getRawLevelData();
+std::optional<RawLevelData> levelByShortcutName(std::string shortcut);
+
+
+struct UpdateLevel {
+  std::optional<std::string> skybox;
+  std::optional<std::string> description;
+  std::optional<glm::vec3> ambient;
+  std::optional<glm::vec3> skyboxColor;
+  std::optional<std::string> weather;
+  std::optional<glm::vec2> chromatic;
+};
+void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
+
+
 #endif

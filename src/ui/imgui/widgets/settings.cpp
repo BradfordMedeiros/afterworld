@@ -4,7 +4,6 @@ extern CustomApiBindings* gameapi;
 
 void resumeOnMenu();
 void goToMenu();
-std::vector<UILevel> queryLevels();
 void goToLevel(std::string levelShortName);
 
 void renderGraphicsPanel(bool includePanel){
@@ -453,7 +452,7 @@ void renderDeadMenu(bool includePanel){
 }
 
 
-static std::optional<UILevel> selectedLevel;
+static std::optional<RawLevelData> selectedLevel;
 
 void renderLevelList(bool includePanel){
     if (includePanel){
@@ -482,7 +481,7 @@ void renderLevelList(bool includePanel){
     ImGui::Dummy(ImVec2(0, 20));
 
 
-    auto levels = queryLevels();
+    auto levels = getRawLevelData();
     std::vector<MenuItem> menuItems;
     for (auto& level : levels){
       menuItems.push_back(MenuItem {

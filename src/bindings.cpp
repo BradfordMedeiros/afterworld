@@ -65,7 +65,6 @@ struct ManagedScene {
   GameMode gameMode = GameModeNone{};
 };
 struct SceneManagement {
-  std::vector<Level> levels;
   std::optional<ManagedScene> managedScene;
   int changedLevelFrame;
 };
@@ -182,7 +181,6 @@ void setScenarioOptions(ScenarioOptions& options){
 
 SceneManagement createSceneManagement(){
   return SceneManagement {
-    .levels = loadLevels(),
     .managedScene = std::nullopt,
     .changedLevelFrame = 0,
   };
@@ -1276,11 +1274,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   };
 
   binding.onMessage = [](int32_t id, void* data, std::string& key, std::any& value){
-    if (key == "reload-config:levels"){
-      sceneManagement.levels = loadLevels();
-      return;
-    }
-
     if (key == "selected"){
       auto gameObjId = anycast<objid>(value); 
       modassert(gameObjId, "selected value invalid");

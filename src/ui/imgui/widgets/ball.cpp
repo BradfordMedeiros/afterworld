@@ -180,12 +180,16 @@ void renderStageSelectPanel(bool includePanel){
     static int selectedLevel = 0;
     const int worldCount = 4;
     const int levelsPerWorld = 8;
+
+    std::string backgroundTexture = "../afterworld/scenes/levels/worlds/w1/w1-2/map.png";
+
+    static auto levels = getRawLevelData();
+
     const float worldWidth = 300.0f;
     const float worldHeight = 70.0f;
     const float spacing = 12.0f;
     float availableWidth = ImGui::GetContentRegionAvail().x;
     float cursorX = ImGui::GetCursorPosX();
-    std::string backgroundTexture = "../afterworld/scenes/levels/worlds/w1/w1-2/map.png";
 
     // Background image
     {

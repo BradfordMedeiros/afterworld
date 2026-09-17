@@ -148,41 +148,127 @@ void commitCrystals(){
 }
 
 
+struct PlaylistLevel {
+  std::string level;
+  std::string world;
+  std::optional<float> parTime;
+};
+struct Playlist {
+  std::string name;
+  std::vector<PlaylistLevel> levels;
+};
+Playlist parsePlaylist(std::string filepath){
+  Playlist playlist{};
 
+  std::string name = "playlistname";
 
-std::vector<PlaylistType> loadPlaylist(){
-  auto query = gameapi -> compileSqlQuery("select name, level, crystals, par, world from playlist", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-  std::vector<PlaylistType> levels = {};
-  for (auto &row : result){
-    auto playlistName = row.at(0);
-    auto levelShortname = row.at(1);
+  auto fileInfo = decomposePath(filepath);
+  auto relativeDir = relativePath("../afterworld/data/config/playlists/ ", fileInfo.dirPath, ".");
+  auto relativeDirVec = split(relativeDir, '/');
 
-    auto crystalsStr = row.at(2);
-    auto crystalsVec = split(crystalsStr, ';');
-    std::set<std::string> crystals;
-    for (auto& crystal : crystalsVec){
-      crystals.insert(crystal);
-    }
-
-    auto parTimeStr = row.at(3);
-    auto parTime = parTimeStr == "" ? std::optional<float>(std::nullopt) : std::atof(parTimeStr.c_str());
-    levels.push_back(PlaylistType {
-      .playlist = playlistName,
-      .levelShortname = levelShortname,
-      .crystals = crystals,
-      .parTime = parTime,
-      .world = (row.at(4) == "" ? std::optional<std::string>(std::nullopt) : row.at(4)),
-    });
-    std::cout << "playlist: adding: " << levelShortname << ", crystals: " << print(crystals) << std::endl;
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    std::cout << "error parsing game file: " << filepath << "  (" << fileContent << ")" << std::endl;
   }
-  return levels;
+ 
+
+  std::vector<PlaylistLevel> playlistLevels;
+  {
+    auto it = doc.FindMember("levels");
+    if (it != doc.MemberEnd() && it -> value.IsArray()) {
+        for (auto& item : it -> value.GetArray()) {
+            if (!item.IsObject()) {
+              continue;
+            }
+
+            PlaylistLevel playlistLevel{};
+            {
+              auto levelIt = item.FindMember("level");
+              if (levelIt != item.MemberEnd() && levelIt -> value.IsString()) {
+                  playlistLevel.level = levelIt -> value.GetString();
+              }
+            }
+            {
+              auto worldIt = item.FindMember("world");
+              if (worldIt != item.MemberEnd() && worldIt -> value.IsString()) {
+                  playlistLevel.world = worldIt -> value.GetString();
+              }
+            }
+            {
+              auto parTimeIt = item.FindMember("par");
+              if (parTimeIt != item.MemberEnd() && parTimeIt -> value.IsNumber()) {
+                  playlistLevel.parTime = parTimeIt -> value.GetDouble();
+              }
+            }
+            playlistLevels.push_back(playlistLevel);
+        }
+    }
+  }
+
+
+  return Playlist{ 
+    .name = name,
+    .levels = playlistLevels,
+  };
 }
 
+std::vector<Playlist>  loadPlaylists(){
+  std::vector<Playlist> playlists;
+  auto playlistFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/playlists", { "json" });
+  for (auto& playlistFile : playlistFiles){
+    auto playlist = parsePlaylist(playlistFile);
+    playlists.push_back(playlist);
+  }
+
+  return playlists;
+}
+
+std::string print(PlaylistLevel& playlistLevel){
+  std::string value;
+  value += "[level = ";
+  value += playlistLevel.level;
+  value += ", world = ";
+  value += playlistLevel.world; 
+  value += ", parTime = ";
+  value += playlistLevel.parTime.has_value() ? std::to_string(playlistLevel.parTime.value()) : "n/a"; 
+  value += " ]";
+
+  return value;
+}
+
+std::string print(Playlist& playlist){
+  std::string value;
+  value += "playlist = ";
+  value += playlist.name;
+  value += " ( ";
+  for (auto& playlistLevel : playlist.levels){
+    value += print(playlistLevel) + "  ";
+  }
+  value += ")";
+  return value;
+}
+
+
+
 std::vector<LevelProgress> loadLevelProgress(){
-  playlist = loadPlaylist(); // maybe this should be separate
+  std::vector<PlaylistType> levels;
+  {
+    auto loadedPlaylists = loadPlaylists();
+    for (auto& loadedPlaylist : loadedPlaylists){
+      for (auto& level : loadedPlaylist.levels){
+        levels.push_back(PlaylistType {
+          .playlist = loadedPlaylist.name,
+          .levelShortname = level.level,
+          .crystals = {},
+          .parTime = level.parTime,
+          .world = level.world,
+        });      
+      }
+    }
+  }
+  playlist = levels;
 
   std::unordered_map<std::string, LevelProgress> levelToLevelProgress;
   for (auto& playlistLevel : playlist){
@@ -407,3 +493,174 @@ LevelProgressInfo getLevelProgressInfo(std::string currentWorld, std::string lev
   return levelProgressInfo;
 }
 
+
+
+std::vector<RawLevelData> getRawLevelData(){
+  std::vector<RawLevelData> levelData;
+
+  auto extraMaps = listFilesWithExtensionsFromPackage("../afterworld/scenes/levels/worlds/", { "rawscene" });
+  for (auto& rawsceneFile : extraMaps){
+    auto filePathData = decomposePath(rawsceneFile);
+    auto levelPathData = decomposePath(filePathData.dirPath);
+    auto worldPathData = decomposePath(levelPathData.dirPath);
+
+    auto levelName = levelPathData.filename;
+    auto worldName = worldPathData.filename;
+ 
+    auto imageName = filePathData.dirPath + "/map.png";
+    auto image = fileExistsFromPackage(imageName) ? imageName : "./res/textures/wood.jpg";
+    std::cout << "dyn image: " << imageName << ", exists = " << fileExistsFromPackage(imageName) << std::endl;
+
+    auto mapName = filePathData.dirPath + "/map.map";
+    bool mapExists = fileExistsFromPackage(mapName);
+    std::cout << "dyn map: " << mapName << ", exists = " << mapExists << std::endl;
+      
+    std::optional<std::string> additionalSceneFilepath = filePathData.dirPath + "/items.rawscene2";
+    bool additionalSceneExists = fileExistsFromPackage(additionalSceneFilepath.value());
+    if (!additionalSceneExists){
+      additionalSceneFilepath = std::nullopt;
+    }
+
+    std::string configFile = filePathData.dirPath + "/config.json";
+    bool configExists = fileExistsFromPackage(configFile);
+    
+
+    glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
+    glm::vec3 skyboxColor(1.f, 1.f, 1.f);
+    std::string skybox("../gameresources/skybox/storm");
+    std::string description("[no description]");
+    std::string mode("ball");
+    std::optional<std::string> weather;
+    glm::vec2 chromatic(0.f, 0.f);
+
+    if (configExists){
+      bool success = true;
+      auto data = gameapi -> loadFromJsonFile2(configFile, &success, false);
+      modassert(success, "error parsing json");
+
+      if (data.find("ambient") != data.end()){
+        auto ambientPtr = std::get_if<std::vector<float>>(&data.at("ambient"));
+        modassert(ambientPtr -> size() == 3, std::string("unexpected ambientPtr value, got size = ") + std::to_string(ambientPtr -> size()));
+        ambientLight = glm::vec3(ambientPtr -> at(0), ambientPtr -> at(1), ambientPtr -> at(2));
+      }
+      if (data.find("skyboxcolor") != data.end()){
+        auto skyboxColorPtr = std::get_if<std::vector<float>>(&data.at("skyboxcolor"));
+        modassert(skyboxColorPtr -> size() == 3, std::string("unexpected skybox value, got size = ") + std::to_string(skyboxColorPtr -> size()));
+        skyboxColor = glm::vec3(skyboxColorPtr -> at(0), skyboxColorPtr -> at(1), skyboxColorPtr -> at(2));
+      }
+      if (data.find("skybox") != data.end()){
+        auto skyboxPtr = std::get_if<std::string>(&data.at("skybox"));
+        skybox = *skyboxPtr; 
+      }
+      if (data.find("description") != data.end()){
+        auto descriptionPtr = std::get_if<std::string>(&data.at("description"));
+        description = *descriptionPtr;
+      }
+      if (data.find("mode") != data.end()){
+        auto modePtr = std::get_if<std::string>(&data.at("mode"));
+        mode = *modePtr;
+      }
+      if (data.find("weather") != data.end()){
+        auto weatherPtr = std::get_if<std::string>(&data.at("weather"));
+        weather = *weatherPtr;   
+      }
+      if (data.find("mode") != data.end()){
+        auto modePtr = std::get_if<std::string>(&data.at("mode"));
+        mode = *modePtr;
+      }
+
+      if (data.find("chromatic") != data.end()){
+        auto chromaticPtr = std::get_if<std::vector<float>>(&data.at("chromatic"));
+        modassert(chromaticPtr -> size() == 2, std::string("unexpected chromaticPtr value, got size = ") + std::to_string(chromaticPtr -> size()));
+        chromatic = glm::vec2(chromaticPtr -> at(0), chromaticPtr -> at(1));
+      }
+
+    }
+
+
+    levelData.push_back(RawLevelData {
+      .name = levelPathData.filename,
+      .world = worldName,
+      .filepath = rawsceneFile,
+      .additionalFilepath = additionalSceneFilepath,
+      .description = description,
+      .image = image,
+      .shortcut = levelPathData.filename,
+      .ambientLight = ambientLight,
+      .skyboxColor = skyboxColor,
+      .skybox = skybox,
+      .weather = weather,
+      .audioClipPath = "../gameresources/sound/rain.wav",
+      .mode = mode,
+      .chromatic = chromatic,
+      .additionalTokens = {},
+
+      .configFile = configFile,   
+      .configFileExists = configExists,
+    });
+  }
+
+
+  return levelData;
+}
+
+std::optional<RawLevelData> levelByShortcutName(std::string shortcut){
+  auto rawLevels = getRawLevelData();
+  for (auto& rawLevel : rawLevels){
+    if (rawLevel.shortcut == shortcut){
+      return rawLevel;
+    }
+  }
+  return std::nullopt;
+}
+
+std::optional<RawLevelData> levelByName(std::string levelName){
+  auto allLevels = getRawLevelData();
+  for (auto& level : allLevels){
+    if (level.name == levelName){
+      return level;
+    }
+  }
+  return std::nullopt;
+}
+
+void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
+  auto oldLevelData = levelByName(levelName);
+  if (oldLevelData.has_value()){
+    auto level = oldLevelData.value();
+  
+    std::unordered_map<std::string, JsonType> data;
+    if (level.configFileExists){
+      bool success = true;
+      data = gameapi -> loadFromJsonFile2(level.configFile, &success, false);
+      modassert(success, "error parsing json");
+    }
+
+    if (updateLevel.description.has_value()){
+      data["description"] = updateLevel.description.value();
+    }
+    if (updateLevel.skybox.has_value()){
+      data["skybox"] = updateLevel.skybox.value();
+    }
+
+    if (updateLevel.ambient.has_value()){
+      data["ambient"] = std::vector<float>({ updateLevel.ambient.value().r,  updateLevel.ambient.value().g, updateLevel.ambient.value().b });
+    }
+
+    if (updateLevel.chromatic.has_value()){
+      data["chromatic"] = std::vector<float>({ updateLevel.chromatic.value().x,  updateLevel.chromatic.value().y });
+    }
+
+    if (updateLevel.skyboxColor.has_value()){
+      data["skyboxcolor"] = std::vector<float>({ updateLevel.skyboxColor.value().r,  updateLevel.skyboxColor.value().g, updateLevel.skyboxColor.value().b });
+    }
+
+    if (updateLevel.weather.has_value()){
+      data["weather"] =  updateLevel.weather.value();
+    }else{
+      data["weather"] = "default";
+    }
+
+    gameapi -> saveToJsonFile2(level.configFile, data);
+  }
+}
