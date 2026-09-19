@@ -1033,7 +1033,7 @@ GameTypeInfo getBallMode(){
 	  	modeOptions.shouldReset = false;
 	  	modeOptions.didReset = false;
 
-			auto shaderId = gameapi -> shaderByName("default");
+			auto shaderId = gameapi -> shaderByName("../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl");
 			modassert(shaderId.has_value(), "could not find the ball shader");
 			modeOptions.ballShader = shaderId.value();
 
@@ -1396,6 +1396,7 @@ GameTypeInfo getBallMode(){
 	  			.value = position,
 	  		};
 	  		gameapi -> setShaderUniform(ballMode.ballShader, uniform);
+	  		std::cout << "postColor: " << print(position) << std::endl;
 	 		}
 
 	 		glm::vec4 circleColor(1.f, 1.f, 1.f, 1.f);

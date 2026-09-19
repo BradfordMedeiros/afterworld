@@ -56,7 +56,7 @@ void main(){
   float timeOffset = 0.5 * (time);
 
  
-  bool applyStatic = true;
+  bool applyStatic = false;
   vec4 extraColor = vec4(0, 0, 0, 0);
 
   if (hasOpacityTexture){
