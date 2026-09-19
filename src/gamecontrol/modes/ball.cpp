@@ -1054,25 +1054,6 @@ GameTypeInfo getBallMode(){
 		  	gameapi -> setShaderUniform(modeOptions.ballShader, uniform);				
 			}
 
-			{
-				UniformData uniformTextureData {
-	 				.name = "_overlayTexture",
-	 				.value = Sampler2D { 
-  					.textureUnitId = 10,
-					},
-				};
-  			gameapi -> setShaderUniform(modeOptions.ballShader, uniformTextureData);
-
-  			std::string texName("./res/textures/wood.jpg");
-  			auto textureSampleId = gameapi -> getTextureSamplerId(texName);
-  			gameapi -> bindTexture(modeOptions.ballShader, 10, textureSampleId.value());
-
-			}
-
-
-
-
-
 	  	modassert(modeOptions.ballStartTime.has_value(), "no ball start time");
 			getBallModeUI().value() -> ballMode.elapsedTime = []() -> float {
 				auto& ballModeOptions  = getBallModeOptions();
@@ -1439,4 +1420,3 @@ GameTypeInfo getBallMode(){
 
 
 /////////////////////////////////////////////////////////
-

@@ -2,12 +2,17 @@
 
 uniform vec3 _postColor;
 uniform vec4 _circleColor;
-uniform sampler2D _overlayTexture;
+uniform sampler2D customTexture;
+uniform bool hasCustomTexture;
 
 uniform vec3  _pulsePositions[3];
 uniform float _pulseTimes[3];
 
 vec3 textureWithFalloff(vec3 impulsePos, float scale, float falloffDistance){
+  if (!hasCustomTexture){
+    return vec3(0, 0, 0);
+  }
+
   float dist = length(impulsePos - FragPos);
   float value = length(dist + time) * 10;
   int valueInt = int(value);
@@ -19,7 +24,7 @@ vec3 textureWithFalloff(vec3 impulsePos, float scale, float falloffDistance){
   if (percentage < 0){
     return vec3(0, 0, 0);
   }
-  return 0.4 * texture(_overlayTexture, vec2(TexCoord.x * 10 * scale , TexCoord.y * 10  * scale)).rgb * percentage * 2;
+  return 0.4 * texture(customTexture, vec2(TexCoord.x * 10 * scale , TexCoord.y * 10  * scale)).rgb * percentage * 2;
 
 }
 void main(){
@@ -51,7 +56,7 @@ void main(){
   float timeOffset = 0.5 * (time);
 
  
-  bool applyStatic = false;
+  bool applyStatic = true;
   vec4 extraColor = vec4(0, 0, 0, 0);
 
   if (hasOpacityTexture){
