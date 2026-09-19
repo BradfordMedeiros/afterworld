@@ -7,6 +7,7 @@
 "_tb_mod" "characters"
 "property 2" ""
 "_tb_def" "external:../../../../home/brad/gamedev/mosttrusted/gameresources/trenchbroom/models.fgd"
+"_tb_layer_locked" "1"
 // brush 0
 {
 ( -176 1232 192 ) ( -176 992 192 ) ( -176 992 176 ) clean/metalgrid 0 0 0 1 1
@@ -18,12 +19,12 @@
 }
 // brush 1
 {
-( 1120 768 48 ) ( 1120 769 48 ) ( 1120 768 49 ) clean/metalgrid 0 0 0 1 1
-( 1120 768 48 ) ( 1120 768 49 ) ( 1121 768 48 ) clean/metalgrid 0 0 0 1 1
-( 1120 768 48 ) ( 1121 768 48 ) ( 1120 769 48 ) clean/metalgrid 0 0 0 1 1
-( 1232 784 64 ) ( 1232 785 64 ) ( 1233 784 64 ) clean/metalgrid 0 0 0 1 1
-( 1232 880 64 ) ( 1233 880 64 ) ( 1232 880 65 ) clean/metalgrid 0 0 0 1 1
-( 1232 784 64 ) ( 1232 784 65 ) ( 1232 785 64 ) clean/metalgrid 0 0 0 1 1
+( 1120 768 48 ) ( 1120 769 48 ) ( 1120 768 49 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 768 48 ) ( 1120 768 49 ) ( 1121 768 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 768 48 ) ( 1121 768 48 ) ( 1120 769 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 784 64 ) ( 1232 785 64 ) ( 1233 784 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 880 64 ) ( 1233 880 64 ) ( 1232 880 65 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 784 64 ) ( 1232 784 65 ) ( 1232 785 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
 }
 // brush 2
 {
@@ -117,12 +118,12 @@
 }
 // brush 12
 {
-( 1120 544 48 ) ( 1120 545 48 ) ( 1120 544 49 ) clean/metalgrid 0 0 0 1 1
-( 1120 544 48 ) ( 1120 544 49 ) ( 1121 544 48 ) clean/metalgrid 0 0 0 1 1
-( 1120 544 48 ) ( 1121 544 48 ) ( 1120 545 48 ) clean/metalgrid 0 0 0 1 1
-( 1232 560 64 ) ( 1232 561 64 ) ( 1233 560 64 ) clean/metalgrid 0 0 0 1 1
-( 1232 656 64 ) ( 1233 656 64 ) ( 1232 656 65 ) clean/metalgrid 0 0 0 1 1
-( 1232 560 64 ) ( 1232 560 65 ) ( 1232 561 64 ) clean/metalgrid 0 0 0 1 1
+( 1120 544 48 ) ( 1120 545 48 ) ( 1120 544 49 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 544 48 ) ( 1120 544 49 ) ( 1121 544 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 544 48 ) ( 1121 544 48 ) ( 1120 545 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 560 64 ) ( 1232 561 64 ) ( 1233 560 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 656 64 ) ( 1233 656 64 ) ( 1232 656 65 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 560 64 ) ( 1232 560 65 ) ( 1232 561 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
 }
 // brush 13
 {
@@ -171,29 +172,29 @@
 }
 // brush 18
 {
-( 672 736 -3088 ) ( 672 736 64 ) ( 672 288 -3088 ) clean/metalgrid 0 0 0 1 1
-( 672 288 -3088 ) ( 672 288 64 ) ( 864 288 -3088 ) clean/metalgrid 0 0 0 1 1
+( 672 736 -3088 ) ( 672 736 64 ) ( 672 288 -3088 ) worntv 0 0 0 1 1
+( 672 288 -3088 ) ( 672 288 64 ) ( 864 288 -3088 ) worntv 0 0 0 1 1
 ( 672 736 -3088 ) ( 672 288 -3088 ) ( 864 736 -3088 ) clean/metalgrid 0 0 0 1 1
-( 864 288 64 ) ( 672 288 64 ) ( 864 736 64 ) clean/metalgrid 0 0 0 1 1
-( 864 736 -3088 ) ( 864 736 64 ) ( 672 736 -3088 ) clean/metalgrid 0 0 0 1 1
+( 864 288 64 ) ( 672 288 64 ) ( 864 736 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 864 736 -3088 ) ( 864 736 64 ) ( 672 736 -3088 ) worntv 0 0 0 1 1
 ( 864 288 -3088 ) ( 864 288 64 ) ( 864 736 -3088 ) clean/metalgrid 0 0 0 1 1
 }
 // brush 19
 {
-( 864 736 64 ) ( 864 288 64 ) ( 864 288 32 ) clean/metalgrid 0 0 0 1 1
-( 864 288 64 ) ( 896 288 48 ) ( 896 288 32 ) clean/metalgrid 0 0 0 1 1
-( 896 288 32 ) ( 896 736 32 ) ( 864 736 32 ) clean/metalgrid 0 0 0 1 1
-( 896 736 32 ) ( 896 736 48 ) ( 864 736 64 ) clean/metalgrid 0 0 0 1 1
-( 864 736 64 ) ( 896 736 48 ) ( 896 288 48 ) clean/metalgrid 0 0 0 1 1
-( 896 288 48 ) ( 896 736 48 ) ( 896 736 32 ) clean/metalgrid 0 32 0 1 0.5
+( 864 736 64 ) ( 864 288 64 ) ( 864 288 32 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 864 288 64 ) ( 896 288 48 ) ( 896 288 32 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 896 288 32 ) ( 896 736 32 ) ( 864 736 32 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 896 736 32 ) ( 896 736 48 ) ( 864 736 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 864 736 64 ) ( 896 736 48 ) ( 896 288 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 896 288 48 ) ( 896 736 48 ) ( 896 736 32 ) clean/metalbridgetoprailbig 0 32 0 1 0.5
 }
 // brush 20
 {
-( 672 288 1344 ) ( 672 288 256 ) ( 672 736 1344 ) clean/metalgrid 0 0 0 1 1
-( 864 288 1344 ) ( 864 288 256 ) ( 672 288 1344 ) clean/metalgrid 0 0 0 1 1
-( 672 736 256 ) ( 672 288 256 ) ( 864 736 256 ) clean/metalgrid 0 0 0 1 1
+( 672 288 1344 ) ( 672 288 256 ) ( 672 736 1344 ) worntv 0 0 0 1 1
+( 864 288 1344 ) ( 864 288 256 ) ( 672 288 1344 ) worntv 0 0 0 1 1
+( 672 736 256 ) ( 672 288 256 ) ( 864 736 256 ) worntv 0 0 0 1 1
 ( 864 736 1344 ) ( 864 288 1344 ) ( 672 736 1344 ) clean/metalgrid 0 0 0 1 1
-( 672 736 1344 ) ( 672 736 256 ) ( 864 736 1344 ) clean/metalgrid 0 0 0 1 1
+( 672 736 1344 ) ( 672 736 256 ) ( 864 736 1344 ) worntv 0 0 0 1 1
 ( 864 736 1344 ) ( 864 736 256 ) ( 864 288 1344 ) clean/metalgrid 0 0 0 1 1
 }
 // brush 21
@@ -405,21 +406,21 @@
 }
 // brush 44
 {
-( 1120 64 48 ) ( 1120 65 48 ) ( 1120 64 49 ) clean/metalgrid 0 0 0 1 1
-( 1120 64 48 ) ( 1120 64 49 ) ( 1121 64 48 ) clean/metalgrid 0 0 0 1 1
-( 1120 64 48 ) ( 1121 64 48 ) ( 1120 65 48 ) clean/metalgrid 0 0 0 1 1
-( 1232 80 64 ) ( 1232 81 64 ) ( 1233 80 64 ) clean/metalgrid 0 0 0 1 1
-( 1232 176 64 ) ( 1233 176 64 ) ( 1232 176 65 ) clean/metalgrid 0 0 0 1 1
-( 1232 80 64 ) ( 1232 80 65 ) ( 1232 81 64 ) clean/metalgrid 0 0 0 1 1
+( 1120 64 48 ) ( 1120 65 48 ) ( 1120 64 49 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 64 48 ) ( 1120 64 49 ) ( 1121 64 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 64 48 ) ( 1121 64 48 ) ( 1120 65 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 80 64 ) ( 1232 81 64 ) ( 1233 80 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 176 64 ) ( 1233 176 64 ) ( 1232 176 65 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 80 64 ) ( 1232 80 65 ) ( 1232 81 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
 }
 // brush 45
 {
-( 1120 304 48 ) ( 1120 305 48 ) ( 1120 304 49 ) clean/metalgrid 0 0 0 1 1
-( 1120 304 48 ) ( 1120 304 49 ) ( 1121 304 48 ) clean/metalgrid 0 0 0 1 1
-( 1120 304 48 ) ( 1121 304 48 ) ( 1120 305 48 ) clean/metalgrid 0 0 0 1 1
-( 1232 320 64 ) ( 1232 321 64 ) ( 1233 320 64 ) clean/metalgrid 0 0 0 1 1
-( 1232 416 64 ) ( 1233 416 64 ) ( 1232 416 65 ) clean/metalgrid 0 0 0 1 1
-( 1232 320 64 ) ( 1232 320 65 ) ( 1232 321 64 ) clean/metalgrid 0 0 0 1 1
+( 1120 304 48 ) ( 1120 305 48 ) ( 1120 304 49 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 304 48 ) ( 1120 304 49 ) ( 1121 304 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1120 304 48 ) ( 1121 304 48 ) ( 1120 305 48 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 320 64 ) ( 1232 321 64 ) ( 1233 320 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 416 64 ) ( 1233 416 64 ) ( 1232 416 65 ) clean/metalbridgetoprailbig 0 0 0 1 1
+( 1232 320 64 ) ( 1232 320 65 ) ( 1232 321 64 ) clean/metalbridgetoprailbig 0 0 0 1 1
 }
 }
 // entity 1
@@ -429,33 +430,72 @@
 "_tb_name" "metadata"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
+"_tb_layer_locked" "1"
 }
 // entity 2
-{
-"classname" "player_start"
-"origin" "-376 1080 40"
-"_tb_layer" "1"
-}
-// entity 3
 {
 "classname" "player_end"
 "_tb_layer" "1"
 // brush 0
 {
-( -128 1024 0 ) ( -128 1025 0 ) ( -128 1024 1 ) clean/metalgrid 0 0 0 1 1
-( -128 1024 0 ) ( -128 1024 1 ) ( -127 1024 0 ) clean/metalgrid 0 0 0 1 1
-( -128 1024 0 ) ( -127 1024 0 ) ( -128 1025 0 ) clean/metalgrid 0 0 0 1 1
-( 128 1216 176 ) ( 128 1217 176 ) ( 129 1216 176 ) clean/metalgrid 0 0 0 1 1
-( 128 1216 64 ) ( 129 1216 64 ) ( 128 1216 65 ) clean/metalgrid 0 0 0 1 1
-( 112 1216 64 ) ( 112 1216 65 ) ( 112 1217 64 ) clean/metalgrid 0 0 0 1 1
+( -128 1024 0 ) ( -128 1025 0 ) ( -128 1024 1 ) __TB_empty 0 0 0 1 1
+( -128 1024 0 ) ( -128 1024 1 ) ( -127 1024 0 ) __TB_empty 0 0 0 1 1
+( -128 1024 0 ) ( -127 1024 0 ) ( -128 1025 0 ) __TB_empty 0 0 0 1 1
+( 128 1216 176 ) ( 128 1217 176 ) ( 129 1216 176 ) __TB_empty 0 0 0 1 1
+( 128 1216 64 ) ( 129 1216 64 ) ( 128 1216 65 ) __TB_empty 0 0 0 1 1
+( 112 1216 64 ) ( 112 1216 65 ) ( 112 1217 64 ) __TB_empty 0 0 0 1 1
+}
+}
+// entity 3
+{
+"classname" "vertical_bound_plane"
+"_tb_layer" "1"
+// brush 0
+{
+( 160 1632 -1104 ) ( 160 1633 -1104 ) ( 160 1632 -1103 ) __TB_empty 0 16 0 1 1
+( 160 880 -1104 ) ( 160 880 -1103 ) ( 161 880 -1104 ) __TB_empty 0 16 0 1 1
+( 160 1632 -1104 ) ( 161 1632 -1104 ) ( 160 1633 -1104 ) __TB_empty 0 0 0 1 1
+( 240 1760 -1056 ) ( 240 1761 -1056 ) ( 241 1760 -1056 ) __TB_empty 0 0 0 1 1
+( 240 1296 -1088 ) ( 241 1296 -1088 ) ( 240 1296 -1087 ) __TB_empty 0 16 0 1 1
+( 496 1760 -1088 ) ( 496 1760 -1087 ) ( 496 1761 -1088 ) __TB_empty 0 16 0 1 1
 }
 }
 // entity 4
+{
+"classname" "player_start"
+"origin" "-472 1080 40"
+"angle" "270"
+"_tb_layer" "1"
+}
+// entity 5
+{
+"classname" "player_start"
+"origin" "-376 1080 40"
+"_tb_layer" "1"
+}
+// entity 6
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"
 "_tb_name" "decor"
 "_tb_id" "2"
 "_tb_layer_sort_index" "1"
-"_tb_layer_hidden" "1"
+// brush 0
+{
+( 144 -416 -368 ) ( 144 -415 -368 ) ( 144 -416 -367 ) arcade/rhythm/arrow-left 32 -48 0 1 1
+( 208 -512 -368 ) ( 208 -512 -367 ) ( 209 -512 -368 ) arcade/rhythm/arrow-left -4 -48 0 1 1
+( 208 -416 -368 ) ( 209 -416 -368 ) ( 208 -415 -368 ) arcade/rhythm/arrow-left -4 -32 0 1 1
+( 336 -288 416 ) ( 336 -287 416 ) ( 337 -288 416 ) arcade/rhythm/arrow-left -4 -32 0 1 1
+( 336 -288 -352 ) ( 337 -288 -352 ) ( 336 -288 -351 ) arcade/rhythm/arrow-left -4 -48 0 1 1
+( 336 -288 -352 ) ( 336 -288 -351 ) ( 336 -287 -352 ) arcade/rhythm/arrow-left 32 -48 0 1 1
+}
+// brush 1
+{
+( 144 -784 -368 ) ( 144 -783 -368 ) ( 144 -784 -367 ) arcade/rhythm/arrow-left 0 -48 0 1 1
+( 208 -880 -368 ) ( 208 -880 -367 ) ( 209 -880 -368 ) arcade/rhythm/arrow-left -4 -48 0 1 1
+( 208 -784 -368 ) ( 209 -784 -368 ) ( 208 -783 -368 ) arcade/rhythm/arrow-left -4 0 0 1 1
+( 336 -656 416 ) ( 336 -655 416 ) ( 337 -656 416 ) arcade/rhythm/arrow-left -4 0 0 1 1
+( 336 -656 -352 ) ( 337 -656 -352 ) ( 336 -656 -351 ) arcade/rhythm/arrow-left -4 -48 0 1 1
+( 336 -656 -352 ) ( 336 -656 -351 ) ( 336 -655 -352 ) arcade/rhythm/arrow-left 0 -48 0 1 1
+}
 }

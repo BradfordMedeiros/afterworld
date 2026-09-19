@@ -424,22 +424,12 @@
 }
 // entity 1
 {
-"classname" "func_group"
-"_tb_type" "_tb_layer"
-"_tb_name" "metadata"
-"_tb_id" "1"
-"_tb_layer_sort_index" "0"
+"classname" "player_start"
+"origin" "-376 1080 40"
 }
 // entity 2
 {
-"classname" "player_start"
-"origin" "-376 1080 40"
-"_tb_layer" "1"
-}
-// entity 3
-{
 "classname" "player_end"
-"_tb_layer" "1"
 // brush 0
 {
 ( -128 1024 0 ) ( -128 1025 0 ) ( -128 1024 1 ) clean/metalgrid 0 0 0 1 1
@@ -450,7 +440,7 @@
 ( 112 1216 64 ) ( 112 1216 65 ) ( 112 1217 64 ) clean/metalgrid 0 0 0 1 1
 }
 }
-// entity 4
+// entity 3
 {
 "classname" "func_group"
 "_tb_type" "_tb_layer"

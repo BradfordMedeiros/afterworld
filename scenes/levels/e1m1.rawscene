@@ -1,69 +1,155 @@
-!light:globallight:true
+# Generated scene 
+gameobj-1958221535-copy-1753857996:texture:./res/textures/wood.normal.jpg
+gameobj-1958221535-copy-1753857996:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-1958221535-copy-1753857996:scale:23.3031 30 23.3031
+gameobj-1958221535-copy-1753857996:rotation:-0.104528 3.26517e-10 -0.994522 0.0395647
+gameobj-1958221535-copy-1753857996:position:-150 1 75
+gameobj-906314857-copy-183816166-copy-698833150:mesh:../gameresources/build/uncategorized/atmmachine.gltf
+gameobj-906314857-copy-183816166-copy-698833150:scale:5.0415 7 7
+gameobj-906314857-copy-183816166-copy-698833150:rotation:0 0 1 0
+gameobj-906314857-copy-183816166-copy-698833150:position:-44 30 -113
+gameobj-906314857-copy-183816166-copy-800729292:mesh:../gameresources/build/uncategorized/atmmachine.gltf
+gameobj-906314857-copy-183816166-copy-800729292:scale:5.0415 7 7
+gameobj-906314857-copy-183816166-copy-800729292:position:-173 30 30
+gameobj-906314857:mesh:../gameresources/build/uncategorized/atmmachine.gltf
+gameobj-906314857:scale:5.0415 7 7
+gameobj-906314857:position:-169 30 55
+obj/entity0_brush0:texture:./res/textures/wood.jpg
+obj/entity0_brush0:physics_shape:shape_exact
+obj/entity0_brush0:physics:enabled
+gameobj-906314857-copy-183816166:mesh:../gameresources/build/uncategorized/atmmachine.gltf
+gameobj-906314857-copy-183816166:scale:5.0415 7 7
+gameobj-906314857-copy-183816166:rotation:-0.0522642 -0.00273914 0.99863 357.004
+gameobj-906314857-copy-183816166:position:-44 30 -40
+gameobj-906314857-copy-183816166-copy-997814453:mesh:../gameresources/build/uncategorized/atmmachine.gltf
+gameobj-906314857-copy-183816166-copy-997814453:scale:5.0415 7 7
+gameobj-906314857-copy-183816166-copy-997814453:rotation:-0.0174524 -8.5897e-08 0.999848 359.96
+gameobj-906314857-copy-183816166-copy-997814453:position:-44 30 -80
+spawnpoint-63147309:mesh:../gameresources/build/objtypes/spawnpoint.gltf
+spawnpoint-63147309:spawntags:collider
+spawnpoint-63147309:spawn:enemy
+spawnpoint-63147309:position:113.313 -6.2 11.3059
+>fixedcamera:position:48 -5.5 15
+[prefab-instance-190593360:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-190593360:position:48 -3 -9
+gameobj-200406735-copy-1553888618-copy-1124647424:mesh:../gameresources/build/opengameart/skull.gltf
+gameobj-200406735-copy-1553888618-copy-1124647424:scale:66.397 66.397 66.397
+gameobj-200406735-copy-1553888618-copy-1124647424:position:-244.77 70 -207.992
+[gem:+gem|gem-label:|e1m1
+[gem:scene:../afterworld/scenes/prefabs/objects/gem.rawscene
+[gem:position:48 -5 -12
+[prefab-instance-1269390657:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-1269390657:position:48 -3 -9
+gameobj-1038298054:texture:light-atlas
+gameobj-1038298054:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-1038298054:scale:5.0415 5.0415 5.0415
+gameobj-1038298054:position:39.1802 -5.9226 -13.2093
+gameobj-1771555739-copy-1022105861:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1022105861:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1022105861:rotation:-0.0523041 0.0348995 -0.998021 0.0884693
+gameobj-1771555739-copy-1022105861:position:-300 -10 -250
+
+obj:mesh:../afterworld/scenes/levels/trench/testmap.obj
+obj:scale:0.2 0.2 0.2
+
+[prefab-instance-2101333690-copy-510543552:+spawnpoint|spawn:|turret
+[prefab-instance-2101333690-copy-510543552:scene:../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene
+[prefab-instance-2101333690-copy-510543552:rotation:0.866025 -7.37782e-08 -0.5 0.0559529
+[prefab-instance-2101333690-copy-510543552:position:40.9813 -5.9455 27.9221
+gameobj-1771555739-copy-1209006060-copy-303605107:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1209006060-copy-303605107:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1209006060-copy-303605107:rotation:-0.34202 2.99004e-08 -0.939693 180
+gameobj-1771555739-copy-1209006060-copy-303605107:position:-340 170 -15
+[arcade:scene:../afterworld/scenes/prefabs/objects/arcade.rawscene
+[arcade:position:48 -5.5 -9
+&music:volume:5
+&music:autoplay:true
+&music:clip:../gameresources/sound/rain.wav
+gameobj-200406735:mesh:../gameresources/build/opengameart/skull.gltf
+gameobj-200406735:scale:66.397 66.397 66.397
+gameobj-200406735:position:-244.77 28.0318 -207.992
+gameobj-1771555739-copy-1209006060-copy-1683674639:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1209006060-copy-1683674639:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1209006060-copy-1683674639:position:-210 -10 -200
+gameobj-1771555739-copy-1166870389-copy-1966255158:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1166870389-copy-1966255158:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1166870389-copy-1966255158:rotation:-0.052336 0 -0.99863 0
+gameobj-1771555739-copy-1166870389-copy-1966255158:position:-40 55 -177.757
+[ammo:scene:../afterworld/scenes/prefabs/ammo.rawscene
+[ammo:position:49 -5 -12
+gameobj-1771555739-copy-1720044593:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1720044593:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1720044593:position:-190 50 -260
+[prefab-instance-2101333690:scene:../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene
+[prefab-instance-2101333690:+spawnpoint|spawn:|turret
+[prefab-instance-2101333690:rotation:0.866025 -7.37782e-08 -0.5 0.0559529
+[prefab-instance-2101333690:position:42.8813 -5.9455 27.9221
 !light:spin:true
-!light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
+!light:globallight:true
+#!light:texture:../gameresources/textures/backgrounds/test3.png
 !light:angle:-10
 !light:rotation:1 0 1.19209e-07 0
 !light:position:-12.93 -58.31 11.98
-
-
-
-obj:mesh:../gameresources/build/nocheck/e1m1.gltf
-obj:physics:enabled
-obj:physics_shape:shape_exact
-obj:texture:./res/textures/wood.jpg
-
-
+playerspawn:teleport:true
 playerspawn:playerspawn:true
 playerspawn:position:48 -3 -9
-playerspawn:teleport:true
 
-[gem:scene:../afterworld/scenes/prefabs/objects/gem.rawscene
-[gem:position:48 -5 -12
-[gem:+gem|gem-label:|e1m1
-
-
-#[enemy:scene:../afterworld/scenes/prefabs/enemy/enemy.rawscene
-#[enemy:position:-22 10 0
-
-
-#[link:scene:../afterworld/scenes/prefabs/objects/link.rawscene
-#[link:position:-147 -5 -132
-#[link:+link:link:next
-
-
-&music:clip:../gameresources/sound/rain.wav
-&music:autoplay:true
-&music:volume:5
-
-
-######## spawning
-
-spawnpoint-63147309:position:113.313 -6.2 11.3059 #spawn debug
-spawnpoint-63147309:spawn:enemy #spawn debug
-spawnpoint-63147309:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-spawnpoint-63147309:spawntags:collider
-
-
-#spawnpoint-602475919:position:116.097 -6.2 30.0432 #spawn debug
-#spawnpoint-602475919:spawn:enemy #spawn debug
-#spawnpoint-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-#spawnpoint-602475919:spawntags:onload
-
-#spawntrigger-602475919:position:116.097 -6.2 30.0432 #spawn debug
-#spawntrigger-602475919:spawn:enemy #spawn debug
-#spawntrigger-602475919:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-#spawntrigger-602475919:spawn-trigger:collider
-#spawntrigger-602475919:physics:enabled
-#spawntrigger-602475919:scale:5 5 5
-#
-#
-#spawnpoint-355426010:position:154.033 5 23.5665 #spawn debug
-#spawnpoint-355426010:spawn:enemy #spawn debug
-#spawnpoint-355426010:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-#spawnpoint-355426010:spawntags:collider
-#
-#spawnpoint-1748154242:position:19.0161 -5.39999 84.2045 #spawn debug
-#spawnpoint-1748154242:spawn:enemy #spawn debug
-#spawnpoint-1748154242:mesh:../gameresources/build/objtypes/spawnpoint.gltf #spawn debug
-#spawnpoint-1748154242:spawntags:collider
-
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-2032834761:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-2032834761:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-2032834761:rotation:0 0 -1 180
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-2032834761:position:-300 170 -15
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-1869630893:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-1869630893:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-1869630893:rotation:0 0 -1 180
+gameobj-1771555739-copy-1209006060-copy-303605107-copy-1869630893:position:-300 170 -200
+gameobj-1771555739-copy-1209006060-copy-1405228941:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1209006060-copy-1405228941:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1209006060-copy-1405228941:rotation:0 0 -1 180
+gameobj-1771555739-copy-1209006060-copy-1405228941:position:-240 170 -200
+gameobj-1771555739-copy-1209006060:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1209006060:scale:14.2791 14.2791 14.2791
+gameobj-1771555739-copy-1209006060:rotation:0 0 -1 180
+gameobj-1771555739-copy-1209006060:position:-320 170 -270
+gameobj-200406735-copy-1553888618:mesh:../gameresources/build/opengameart/skull.gltf
+gameobj-200406735-copy-1553888618:scale:66.397 66.397 66.397
+gameobj-200406735-copy-1553888618:rotation:-6.10202e-09 1.74739e-07 -1 1.9999
+gameobj-200406735-copy-1553888618:position:-244.77 110 -207.992
+[prefab-instance-2101333690-copy-1965673226:+spawnpoint|spawn:|turret
+[prefab-instance-2101333690-copy-1965673226:scene:../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene
+[prefab-instance-2101333690-copy-1965673226:rotation:0.866025 -7.37782e-08 -0.5 0.0559529
+[prefab-instance-2101333690-copy-1965673226:position:39.2813 -5.9455 27.9221
+gameobj-1771555739-copy-1166870389:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739-copy-1166870389:scale:20 22 14.2791
+gameobj-1771555739-copy-1166870389:rotation:-0.325568 2.52476e-09 -0.945519 0.0395647
+gameobj-1771555739-copy-1166870389:position:-55 90 -230
+gameobj-1771555739:mesh:../gameresources/build/uncategorized/treebox.gltf
+gameobj-1771555739:scale:14.2791 14.2791 14.2791
+gameobj-1771555739:rotation:-0.0523041 0.0348995 -0.998021 0.068528
+gameobj-1771555739:position:-330 50 -310
+gameobj-1175455879:texture:./res/textures/fonts/gamefont/image.png
+gameobj-1175455879:mesh:../gameresources/build/uncategorized/accent.gltf
+gameobj-1175455879:scale:6 1 1
+gameobj-1175455879:position:24.929 -6.6205 37.2572
+gameobj-1038298054-copy-269194469:texture:../gameresources/build/uncategorized/metalbridgebeam1.jpg
+gameobj-1038298054-copy-269194469:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-1038298054-copy-269194469:scale:5.0415 5.0415 5.0415
+gameobj-1038298054-copy-269194469:position:41.0102 -5.9226 -16.4993
+gameobj-2100176917:texture:./res/models/box/bluetransparent.png
+gameobj-2100176917:mesh:../gameresources/build/opengameart/skull.gltf
+gameobj-2100176917:scale:17.0829 17.0829 17.0829
+gameobj-2100176917:position:45.7468 -1.903 -17.3133
+gameobj-1038298054-copy-63938771:texture:../gameresources/build/uncategorized/metalbridgebeam1.jpg
+gameobj-1038298054-copy-63938771:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-1038298054-copy-63938771:scale:5.0415 5.0415 5.0415
+gameobj-1038298054-copy-63938771:position:37.4102 -5.9226 -16.4993
+[prefab-instance-1254324307:scene:../afterworld/scenes/prefabs/toys/target.rawscene
+[prefab-instance-1254324307:scale:1.4365 1.4365 1.4365
+[prefab-instance-1254324307:rotation:0 0 -1 180
+[prefab-instance-1254324307:position:23.0094 -7.3307 38.0065
+[prefab-instance-929776790:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-929776790:position:48 -3 -9
+gameobj-1958221535:texture:./res/textures/wood.normal.jpg
+gameobj-1958221535:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+gameobj-1958221535:scale:23.3031 30 23.3031
+gameobj-1958221535:rotation:-0.104528 3.26517e-10 -0.994522 0
+gameobj-1958221535:position:-150 0 90

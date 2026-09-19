@@ -1,10 +1,10 @@
 # Generated scene 
-#ship:mesh:../gameresources/build/vehicles/spaceship.gltf
-#ship:position:78.7 -62 0
-#ship:vehicle:ship
-#ship:physics:enabled
-#ship:physics_type:dynamic
-#ship:physics_mass:1000
+ship:mesh:../gameresources/build/vehicles/spaceship.gltf
+ship:position:78.7 -62 0
+ship:vehicle:ship
+ship:physics:enabled
+ship:physics_type:dynamic
+ship:physics_mass:1000
 
 #&ship-sound:clip:../gameresources/sound/engine.ogg
 #ship:child:&ship-sound

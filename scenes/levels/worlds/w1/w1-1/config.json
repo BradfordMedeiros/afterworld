@@ -1,1 +1,16 @@
-{"mode":"ball","skyboxcolor":[1.0,1.0,1.0],"ambient":[1.0,1.0,1.0],"description":"No description","skybox":"../gameresources/skybox/storm","weather":"rain"}
+{
+    "mode": "ball",
+    "skyboxcolor": [
+        0.27941179275512698,
+        0.2643454670906067,
+        0.2643454670906067
+    ],
+    "ambient": [
+        0.39215683937072756,
+        0.386389821767807,
+        0.386389821767807
+    ],
+    "description": "Long straight stretch",
+    "skybox": "../gameresources/skybox/storm",
+    "weather": "rain"
+}

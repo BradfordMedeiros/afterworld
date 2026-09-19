@@ -1,0 +1,15 @@
+{
+    "mode": "fps",
+    "weather": "default",
+    "skyboxcolor": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "ambient": [
+        0.4000000059604645,
+        0.4000000059604645,
+        0.4000000059604645
+    ],
+    "description": "No description"
+}

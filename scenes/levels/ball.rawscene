@@ -1,9 +1,6 @@
-!light:spin:true
+!light:spin:0.02
 !light:globallight:true
 !light:position:0 50 0
-
-playerspawn:playerspawn:true
-playerspawn:mode:ball
 
 texture0:texture:../gameresources/build/textures/ballgame/jump.png
 texture1:texture:../gameresources/build/textures/ballgame/dash.png

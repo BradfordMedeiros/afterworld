@@ -1,1 +1,1 @@
-{"weather":"rain","skyboxcolor":[0.4117646813392639,0.4117646813392639,0.4117646813392639],"ambient":[0.12254899740219116,0.12254899740219116,0.12254899740219116],"description":"No description","skybox":"../gameresources/skybox/space1"}
+{"skybox":"../gameresources/skybox/space1","description":"No description","ambient":[0.4000000059604645,0.4000000059604645,0.4000000059604645],"skyboxcolor":[1.0,1.0,1.0],"weather":"default"}

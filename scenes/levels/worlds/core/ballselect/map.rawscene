@@ -1,0 +1,114 @@
+# Generated scene 
+twisty/screen.001:rotation:0.964547 0 -0.26391 -0
+twisty/screen.002:rotation:0.978944 0 -0.204131 -0
+entity_warp_18/target:selectwarp:default
+entity_warp_18/target:physics_shape:shape_exact
+entity_warp_18/target:physics:enabled
+twisty/screen:rotation:0.999503 0 -0.0315384 -0
+!light:spin:0.02
+!light:globallight:true
+!light:texture:../gameresources/textures/backgrounds/stainedglass.jpg
+!light:angle:-10
+!light:rotation:1 0 1.19209e-07 0
+!light:position:0 100 0
+orb2:texture:../gameresources/build/textures/creepydog.jpg
+texture:texture:./res/textures/hexglow.png
+entity_player_start_19:playerspawn:true
+entity_player_start_19:rotation:1 0 -2.38419e-07 0.0559529
+entity_player_start_19:position:-44 0.8 -44
+entity_surface_28:jumpsurface:true
+entity_surface_28:texture:../gameresources/textures/clean/metalgrid.jpg
+entity_surface_28:opacity-texture:../gameresources/textures/clean/metalgrid.jpg
+entity_surface_28:custom-texture:../gameresources/build/textures/backgrounds/test3.png
+entity_surface_28:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,28.map
+entity_surface_28:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+entity_surface_28:physics_shape:shape_exact
+entity_surface_28:physics:enabled
+entity_surface_28:position:-123.2 28 -16.4708
+grass:mesh:./res/models/grass.gltf
+grass:shader:../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl
+grass:position:-44 -1.5 -44
+entity_arcade_zone_26:arcade:interact
+entity_arcade_zone_26:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,26.map
+entity_arcade_zone_26:shader:../afterworld/shaders/trippy/fragment.glsl,../afterworld/shaders/trippy/vertex.glsl
+entity_arcade_zone_26:physics_shape:shape_exact
+entity_arcade_zone_26:physics:enabled
+entity_arcade_zone_26:layer:nolighting
+entity_arcade_zone_26:position:14.9479 9.4 -42.8
+combined_entities_orb:data-level:w1-1,video,one,w1,testorb3
+combined_entities_orb:data-orbui:w1,w1,testorb3,metaworld,metaworld
+combined_entities_orb:data-conn:1,,,4,
+combined_entities_orb:data-rot:0 -12 -29.6,0 0 0,0 0 0,0 45 0,0 90 0
+combined_entities_orb:data-pos:-29.6 0.8 -12,-29.6 1.6 2.4,208.8 2.4 72.8,-53.6 50.4 7.2,252 50.4 133.6
+combined_entities_orb:data-name:w1-1,w1-2,one,meta1,meta2
+combined_entities_orb:orbui:true
+loadtexture-levels1:texture:../afterworld/scenes/levels/worlds/w1/w1-1/map.png
+loadtexture-levels2:texture:../afterworld/scenes/levels/worlds/w1/w1-2/map.png
+levelselect:levelselect:true
+>menu-view:spin:0.02
+>menu-view:rotation:0.173648 1.04128e-08 0.984808 0
+>menu-view:position:15.1 13.6 51.3
+>camera-view:position:10 5.1 2
+twisty:mesh:../gameresources/build/uncategorized/twisty.gltf
+entity_vertical_bound_point_20:ballplane:true
+entity_vertical_bound_point_20:rotation:1 0 -2.38419e-07 0.0559529
+entity_vertical_bound_point_20:position:-0.8 -53.6 0.8
+combined_entities_rail:data-key:this is title one,this is the second key,this is the third one,,I opened my eyes,And saw something wonderful,And saw something wonderful,,And saw something wonderful,this is some text,this is some text,this is some text
+combined_entities_rail:data-time:0,10,12,14,0,5,20,16,30,10,0,2
+combined_entities_rail:data-interp:,,none,none,,,none,none,none,,,
+combined_entities_rail:data-index:0,1,2,3,0,1,2,4,3,0,0,1
+combined_entities_rail:data-name:levelintro,levelintro,levelintro,levelintro,intro,intro,intro,levelintro,intro,w1-1-complete,move-up,move-up
+combined_entities_rail:data-visual:,,,,,,,,,,,
+combined_entities_rail:data-rot:0 0 0,0 0 0,0 90 0,0 90 0,0 0 0,0 -90 0,0 90 0,0 45 0,0 90 0,0 0 0,0 0 0,0 180 0
+combined_entities_rail:data-pos:5.6 0.8 12,5.6 32.8 12,4 37.6 -5.6,4 37.6 -12,-64.8 50.4 -37.6,-34.4 50.4 -37.6,45.6 63.2 18.4,4 45.6 -12,45.6 63.2 18.4,-47.2 0.8 -10.4,-48.8 0.8 7.2,-48.8 0.8 7.2
+combined_entities_rail:rail:true
+orb1:texture:../gameresources/build/textures/creepguy.png
+entity_trigger_zone_22:trigger_bound:true
+entity_trigger_zone_22:trigger_zone:s
+entity_trigger_zone_22:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,22.map
+entity_trigger_zone_22:physics_shape:shape_box
+entity_trigger_zone_22:physics_collision:nocollide
+entity_trigger_zone_22:physics:enabled
+entity_trigger_zone_22:position:-36 1.6 -24.8
+entity_trigger_zone_15:trigger_bound:true
+entity_trigger_zone_15:worldselect:w1
+entity_trigger_zone_15:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,15.map
+entity_trigger_zone_15:physics_shape:shape_box
+entity_trigger_zone_15:physics_collision:nocollide
+entity_trigger_zone_15:physics:enabled
+entity_trigger_zone_15:position:-23.2 3.2 -44
+arcade/screen:rotation:1 0 -5.36442e-07 -0
+twisty/Plane.003:rotation:0.310574 -0.950129 -0.028278 68.9001
+entity_trigger_zone_16:trigger_bound:true
+entity_trigger_zone_16:trigger_zone:test
+entity_trigger_zone_16:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,16.map
+entity_trigger_zone_16:physics_shape:shape_box
+entity_trigger_zone_16:physics_collision:nocollide
+entity_trigger_zone_16:physics:enabled
+entity_trigger_zone_16:position:-34.8303 21.05 34.5474
+entity_trigger_zone_23:trigger_zone:testtrigger
+entity_trigger_zone_23:position:-38.4 4.8 12
+entity_trigger_zone_23:physics_collision:nocollide
+entity_trigger_zone_23:physics:enabled
+entity_trigger_zone_23:physics_shape:shape_box
+entity_trigger_zone_23:tint:0 0 1 1
+entity_trigger_zone_23:curve:move-up
+entity_trigger_zone_23:trigger_bound:true
+entity_trigger_zone_23:activecolor:1 0 0 1
+entity_trigger_zone_23:unactivecolor:0 0 1 1
+entity_trigger_zone_23:triggercolor:testtrigger
+entity_trigger_zone_23:trigger:testtrigger
+entity_trigger_zone_23:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,23.map
+entity_trigger_zone_23:trigger_data:1
+entity_warp_18:mesh:../gameresources/build/uncategorized/warp.gltf
+entity_warp_18:physics_shape:shape_exact
+entity_warp_18:physics:enabled
+entity_warp_18:layer:nolighting
+entity_warp_18:rotation:1 0 -2.38419e-07 0.0559529
+entity_warp_18:position:-39.2 0.8 -0.8
+arcade:mesh:../gameresources/build/uncategorized/arcade.gltf
+entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map
+entity_worldspawn_0:physics_shape:shape_exact
+entity_worldspawn_0:physics:enabled
+entity_worldspawn_0:position:130.5 -13.6 -67.2808
+background:texture:../gameresources/build/textures/backgrounds/test3.png

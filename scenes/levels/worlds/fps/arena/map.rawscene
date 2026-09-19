@@ -1,0 +1,61 @@
+# Generated scene 
+platform_lowert:material:metal
+platform_lowert:texture:./res/textures/fonts/gamefont/image.png
+platform_lowert:texturesize:40 40
+platform_lowert:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert:physics_restitution:0.2
+platform_lowert:physics:enabled
+platform_lowert:scale:100 90 10
+platform_lowert:position:-20 -5 60
+[prefab-instance-954472513:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-954472513:position:-20 0 0
+playerspawn:playerspawn:true
+playerspawn:teleport:true
+playerspawn:position:-20 0 0
+[instance-616469738:scene:../afterworld/scenes/prefabs/objects/terminal.rawscene
+[instance-616469738:position:3.50377 -61.554 -39.7126
+platform_lowert-copy-2004538622-copy-1980783383:texturesize:40 40
+platform_lowert-copy-2004538622-copy-1980783383:material:metal
+platform_lowert-copy-2004538622-copy-1980783383:texture:../gameresources/build/textures/evilpattern.png
+platform_lowert-copy-2004538622-copy-1980783383:cubemap-strength:0.722
+platform_lowert-copy-2004538622-copy-1980783383:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-2004538622-copy-1980783383:physics_restitution:0.2
+platform_lowert-copy-2004538622-copy-1980783383:physics:enabled
+platform_lowert-copy-2004538622-copy-1980783383:cubemap:../gameresources/skybox/techno
+platform_lowert-copy-2004538622-copy-1980783383:scale:100 100 10
+platform_lowert-copy-2004538622-copy-1980783383:rotation:0 1 -5.96047e-08 0.0395647
+platform_lowert-copy-2004538622-copy-1980783383:position:-18 -65 -23
+boxtest1:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+boxtest1:physics_type:dynamic
+boxtest1:physics:enabled
+boxtest1:physics_gravity:0 1 0
+boxtest1:scale:1 19 1
+boxtest1:rotation:2.83122e-07 -1 -1.78814e-07 -7.10991
+boxtest1:position:1.8974 57.8 19.1495
+[prefab-instance-410048896:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[prefab-instance-410048896:position:-20 0 0
+spawnpoint-2:mesh:../gameresources/build/objtypes/spawnpoint.gltf
+spawnpoint-2:spawn:enemy
+spawnpoint-2:position:-20 -62 0
+platform_lowert-copy-608709856:material:metal
+platform_lowert-copy-608709856:texture:./res/textures/hexglow.png
+platform_lowert-copy-608709856:texturesize:40 40
+platform_lowert-copy-608709856:textureoffset:0 3.8956
+platform_lowert-copy-608709856:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-608709856:physics_restitution:0.2
+platform_lowert-copy-608709856:physics:enabled
+platform_lowert-copy-608709856:scale:97 100 90
+platform_lowert-copy-608709856:rotation:-1 0 1.19209e-07 0
+platform_lowert-copy-608709856:position:80 100.5 -20
+boxtest2:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+boxtest2:scale:10 10 10
+boxtest2:position:25 -50 0
+platform_lowert-copy-2004538622:material:metal
+platform_lowert-copy-2004538622:texture:./res/textures/hexglow.png
+platform_lowert-copy-2004538622:texturesize:40 40
+platform_lowert-copy-2004538622:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform_lowert-copy-2004538622:physics_restitution:0.2
+platform_lowert-copy-2004538622:physics:enabled
+platform_lowert-copy-2004538622:scale:100 100 10
+platform_lowert-copy-2004538622:rotation:1.16415e-10 1 -6.55651e-07 -0.118694
+platform_lowert-copy-2004538622:position:-20 60 -23

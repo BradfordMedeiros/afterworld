@@ -1,0 +1,42 @@
+########## Base file content: ../afterworld/scenes/levels/ball.rawscene ##########
+
+!light:spin:true
+!light:globallight:true
+!light:position:0 50 0
+
+playerspawn:playerspawn:true
+playerspawn:mode:ball
+
+texture0:texture:../gameresources/build/textures/ballgame/jump.png
+texture1:texture:../gameresources/build/textures/ballgame/dash.png
+texture2:texture:../gameresources/build/textures/ballgame/teleport.png
+texture3:texture:../gameresources/build/textures/ballgame/bounce.png
+texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+texture5:texture:../gameresources/build/textures/ballgame/none.png
+
+##########  Generated content: + /home/brad/gamedev/mosttrusted/afterworld/scenes/levels/trench/balls/easy_drops.map
+
+entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/trench/balls/easy_drops.brush
+entity_worldspawn_0:physics_shape:shape_exact
+entity_worldspawn_0:physics:enabled
+entity_worldspawn_0:property 1:
+entity_worldspawn_0:_tb_mod:characters
+entity_worldspawn_0:property 2:
+entity_worldspawn_0:_tb_layer_locked:1
+entity_worldspawn_0:position:0 0 0
+
+entity_player_end_2:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/trench/balls/easy_drops.brush,2.brush
+entity_player_end_2:physics_shape:shape_exact
+entity_player_end_2:physics:enabled
+entity_player_end_2:physics_collision:nocollide
+entity_player_end_2:player_end:true
+entity_player_end_2:position:0 0 0
+
+entity_vertical_bound_plane_3:ballplane:true
+entity_vertical_bound_plane_3:position:0 149.356 0
+
+playerspawn:position:-47.2 4 -108
+
+playerspawn:position:-37.6 4 -108
+
+

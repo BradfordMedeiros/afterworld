@@ -6,7 +6,8 @@
 "property 1" ""
 "_tb_mod" "characters"
 "property 2" ""
-"_tb_def" "external:../../../../home/brad/gamedev/mosttrusted/gameresources/trenchbroom/models.fgd"
+"_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"_tb_layer_locked" "1"
 // brush 0
 {
 ( -176 1232 192 ) ( -176 992 192 ) ( -176 992 176 ) clean/metalgrid 0 0 0 1 1
@@ -432,12 +433,6 @@
 }
 // entity 2
 {
-"classname" "player_start"
-"origin" "-376 1080 40"
-"_tb_layer" "1"
-}
-// entity 3
-{
 "classname" "player_end"
 "_tb_layer" "1"
 // brush 0
@@ -450,12 +445,9 @@
 ( 112 1216 64 ) ( 112 1216 65 ) ( 112 1217 64 ) clean/metalgrid 0 0 0 1 1
 }
 }
-// entity 4
+// entity 3
 {
-"classname" "func_group"
-"_tb_type" "_tb_layer"
-"_tb_name" "decor"
-"_tb_id" "2"
-"_tb_layer_sort_index" "1"
-"_tb_layer_hidden" "1"
+"classname" "player_start"
+"origin" "-376 1080 40"
+"_tb_layer" "1"
 }

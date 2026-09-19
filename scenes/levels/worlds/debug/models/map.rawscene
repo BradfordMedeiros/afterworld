@@ -1,0 +1,10 @@
+model:mesh:/home/brad/Downloads/rock.gltf
+model2:mesh:/home/brad/Downloads/tree/tree.gltf
+
+barrel1:mesh:/home/brad/Downloads/barrel.gltf
+barrel2:mesh:/home/brad/Downloads/barrel.gltf
+barrel3:mesh:/home/brad/Downloads/barrel.gltf
+barrel4:mesh:/home/brad/Downloads/barrel.gltf
+
+sonic:mesh:/home/brad/Downloads/sonic/scene.gltf
+sonic:scale:20 20 20

@@ -6,7 +6,8 @@
 "property 1" ""
 "_tb_mod" "characters"
 "property 2" ""
-"_tb_def" "external:../../../../home/brad/gamedev/mosttrusted/gameresources/trenchbroom/models.fgd"
+"_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"_tb_layer_locked" "1"
 // brush 0
 {
 ( -176 1232 192 ) ( -176 992 192 ) ( -176 992 176 ) clean/metalgrid 0 0 0 1 1
@@ -429,14 +430,26 @@
 "_tb_name" "metadata"
 "_tb_id" "1"
 "_tb_layer_sort_index" "0"
+// brush 0
+{
+( -496 736 32 ) ( -496 737 32 ) ( -496 736 33 ) clean/metalgrid 64 0 0 1 1
+( -496 736 32 ) ( -496 736 33 ) ( -495 736 32 ) clean/metalgrid 144 0 0 1 1
+( -496 736 32 ) ( -495 736 32 ) ( -496 737 32 ) clean/metalgrid 144 -64 0 1 1
+( -336 880 96 ) ( -336 881 96 ) ( -335 880 96 ) clean/metalgrid 144 -64 0 1 1
+( -336 880 48 ) ( -335 880 48 ) ( -336 880 49 ) clean/metalgrid 144 0 0 1 1
+( -336 880 48 ) ( -336 880 49 ) ( -336 881 48 ) clean/metalgrid 64 0 0 1 1
+}
+// brush 1
+{
+( -544 544 32 ) ( -544 545 32 ) ( -544 544 33 ) clean/metalgrid 256 0 0 1 1
+( -544 544 32 ) ( -544 544 33 ) ( -543 544 32 ) clean/metalgrid 192 0 0 1 1
+( -544 544 32 ) ( -543 544 32 ) ( -544 545 32 ) clean/metalgrid 192 -256 0 1 1
+( -384 688 96 ) ( -384 689 96 ) ( -383 688 96 ) clean/metalgrid 192 -256 0 1 1
+( -384 688 48 ) ( -383 688 48 ) ( -384 688 49 ) clean/metalgrid 192 0 0 1 1
+( -384 688 48 ) ( -384 688 49 ) ( -384 689 48 ) clean/metalgrid 256 0 0 1 1
+}
 }
 // entity 2
-{
-"classname" "player_start"
-"origin" "-376 1080 40"
-"_tb_layer" "1"
-}
-// entity 3
 {
 "classname" "player_end"
 "_tb_layer" "1"
@@ -450,12 +463,9 @@
 ( 112 1216 64 ) ( 112 1216 65 ) ( 112 1217 64 ) clean/metalgrid 0 0 0 1 1
 }
 }
-// entity 4
+// entity 3
 {
-"classname" "func_group"
-"_tb_type" "_tb_layer"
-"_tb_name" "decor"
-"_tb_id" "2"
-"_tb_layer_sort_index" "1"
-"_tb_layer_hidden" "1"
+"classname" "player_start"
+"origin" "-376 1080 40"
+"_tb_layer" "1"
 }
