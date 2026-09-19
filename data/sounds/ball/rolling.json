@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/engine.ogg"
+        {
+            "clip": "../gameresources/sound/engine.ogg",
+            "pitch": 1.0
+        }
     ]
 }

@@ -5,7 +5,13 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/grenade2.ogg",
-        "../gameresources/sound/q009/explosion.ogg"
+        {
+            "clip": "../gameresources/sound/q009/grenade2.ogg",
+            "pitch": 1.0
+        },
+        {
+            "clip": "../gameresources/sound/q009/explosion.ogg",
+            "pitch": 1.0
+        }
     ]
 }

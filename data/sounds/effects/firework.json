@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/rlauncher3.ogg"
+        {
+            "clip": "../gameresources/sound/q009/rlauncher3.ogg",
+            "pitch": 1.0
+        }
     ]
 }

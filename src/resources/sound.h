@@ -49,6 +49,7 @@ struct MixedSound {
   int nameSymbol;
 
   std::vector<std::string> clips;
+  std::vector<float> clipPitches;
 
   float volume = 1.f;
   bool center = false;

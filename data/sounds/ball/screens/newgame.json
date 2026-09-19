@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/ren.ogg"
+        {
+            "clip": "../gameresources/sound/q009/ren.ogg",
+            "pitch": 1.0
+        }
     ]
 }

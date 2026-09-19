@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/quaddamage_shoot.ogg"
+        {
+            "clip": "../gameresources/sound/q009/quaddamage_shoot.ogg",
+            "pitch": 1.0
+        }
     ]
 }

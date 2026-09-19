@@ -5,8 +5,17 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/minigun.ogg",
-        "../gameresources/sound/q009/rifle2.ogg",
-        "../gameresources/sound/q009/pistol2.ogg"
+        {
+            "clip": "../gameresources/sound/q009/minigun.ogg",
+            "pitch": 1.0
+        },
+        {
+            "clip": "../gameresources/sound/q009/rifle2.ogg",
+            "pitch": 1.0
+        },
+        {
+            "clip": "../gameresources/sound/q009/pistol2.ogg",
+            "pitch": 1.0
+        }
     ]
 }

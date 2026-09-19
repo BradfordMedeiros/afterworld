@@ -85,7 +85,7 @@ OneShot playMusicClipById(objid id, std::optional<float> volume){
     volume = 1.f;
   }
   volume = volume.value() * musicVolume;
-  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt, id);
+  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt, std::nullopt, id);
 }
 
 OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
@@ -96,17 +96,17 @@ OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<fl
 
   auto clipId = gameapi -> getClipByName(clipName, sceneId);
   modassert(clipId.has_value(), "playGameplayClip clipName does not exist");
-  return gameapi -> playOneshot(clipId.value(), position, volume, false, false, clipId.value());
+  return gameapi -> playOneshot(clipId.value(), position, volume, std::nullopt, false, false, clipId.value());
 }
 
 OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, position, volume, loop, false, id);
+  return gameapi -> playOneshot(id, position, volume, std::nullopt, loop, false, id);
 }
 
 OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
   std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, std::nullopt, volume, loop, true, id);
+  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, loop, true, id);
 }
 
 /* int getSymbol(std::string name);
@@ -173,12 +173,19 @@ MixedSound parsedMixedSound(std::string& filepath){
   }
 
   std::vector<std::string> clips;
+  std::vector<float> clipPitches;
   {
     auto it = doc.FindMember("clips");
     if (it != doc.MemberEnd() && it->value.IsArray()) {
         for (auto& item : it->value.GetArray()) {
-            if (item.IsString()) {
-                clips.push_back(item.GetString());
+            if (item.IsObject()) {
+                auto clipIt = item.FindMember("clip");
+                auto pitchIt = item.FindMember("pitch");
+                if (clipIt != item.MemberEnd() && clipIt->value.IsString()
+                    && pitchIt != item.MemberEnd() && pitchIt->value.IsNumber()) {
+                    clips.push_back(clipIt->value.GetString());
+                    clipPitches.push_back(pitchIt->value.GetFloat());
+                }
             }
         }
     }
@@ -187,6 +194,7 @@ MixedSound parsedMixedSound(std::string& filepath){
 
   return MixedSound{
     .clips = clips,
+    .clipPitches = clipPitches,
     .volume = volume,
     .center = center,
     .loop = loop,
@@ -285,20 +293,24 @@ void enableMixedSoundClip(MixedSound& mixedSound, int index){
   for (int i = 0; i <= index; i++){
     if (mixedSound.clips.size() <= i){
       mixedSound.clips.push_back(paths::DEFAULT_SOUND);
+      mixedSound.clipPitches.push_back(1.f);
     }
   }
   ensureMixedSoundLoaded(mixedSound, sceneId);
 }
 void disableMixedSoundClip(MixedSound& mixedSound, int index){
   std::vector<std::string> newClips;
+  std::vector<float> newClipPitches;
   for (int i = 0; i < mixedSound.clips.size(); i++){
     if (i != index){
       newClips.push_back(mixedSound.clips.at(i));
+      newClipPitches.push_back(mixedSound.clipPitches.at(i));
     }
   }
 
   auto sceneId = gameapi -> rootSceneId();
   mixedSound.clips = newClips;
+  mixedSound.clipPitches = newClipPitches;
   ensureMixedSoundLoaded(mixedSound, sceneId);
 }
 void setMixedSoundClip(MixedSound& mixedSound, std::string clip, int index){
@@ -333,10 +345,11 @@ std::optional<OneShot> playMixedSound(int symbol, std::optional<glm::vec3> posit
   auto clipInstanceId = clipInstanceIdOpt.value();
 
   float volume = mixedSound -> volume; // need to get this from mix
+  float pitch = mixedSound -> clipPitches.at(clipToPlay);
   bool loop = mixedSound -> loop; // same
   bool center = mixedSound -> center; // same
 
-  return gameapi -> playOneshot(clipInstanceId, position, volume, loop, center, clipInstanceId);
+  return gameapi -> playOneshot(clipInstanceId, position, volume, pitch, loop, center, clipInstanceId);
 }
 
 std::optional<MixedSound*> getMixedSound(std::string name){
@@ -406,8 +419,15 @@ void saveMixedSound(MixedSound& mixedSound){
 
   rapidjson::Value jsonArray(rapidjson::kArrayType);
 
-  for (auto& clip : mixedSound.clips){
-    jsonArray.PushBack(rapidjson::Value(clip, allocator), allocator);
+  for (int i = 0; i < mixedSound.clips.size(); i++){
+    rapidjson::Value clipValue(rapidjson::kObjectType);
+    clipValue.AddMember(
+      "clip",
+      rapidjson::Value(mixedSound.clips.at(i), allocator),
+      allocator
+    );
+    clipValue.AddMember("pitch", mixedSound.clipPitches.at(i), allocator);
+    jsonArray.PushBack(clipValue, allocator);
   }
   doc.AddMember("clips", jsonArray, allocator);
 

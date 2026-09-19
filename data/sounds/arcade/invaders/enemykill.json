@@ -5,7 +5,13 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/ren3.ogg",
-        "../gameresources/sound/q009/glauncher3.ogg"
+        {
+            "clip": "../gameresources/sound/q009/ren3.ogg",
+            "pitch": 1.0
+        },
+        {
+            "clip": "../gameresources/sound/q009/glauncher3.ogg",
+            "pitch": 1.0
+        }
     ]
 }

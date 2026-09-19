@@ -4,32 +4,37 @@
       "level": "w1-1",
       "world": "w1",
       "par": 90,
-      "crystals": []
+      "crystals": [],
+      "unlock" : true
     },
     {
       "level": "w1-2",
       "world": "w1",
       "par": 180.5,
-      "crystals": []
+      "crystals": [],
+      "unlock" : true
     },
     {
       "level": "w1-3",
       "world": "w1",
       "par": 90,
-      "crystals": []
+      "crystals": [],
+      "unlock" : true
     },
     {
       "level": "w1-4",
       "world": "w1",
       "par": 90,
-      "crystals": ["one", "two"]
+      "crystals": ["one", "two"],
+      "unlock" : true
     },
 
     {
       "level": "w2-1",
       "world": "w2",
       "par": 90,
-      "crystals": []
+      "crystals": [],
+      "unlock" : true
     },
 
 
@@ -38,19 +43,22 @@
       "level": "boot",
       "world": "debug",
       "par": 90,
-      "crystals": []
+      "crystals": [],
+      "unlock" : false
     },
     {
       "level": "models",
       "world": "debug",
       "par": 90,
-      "crystals": []
+      "crystals": [],
+      "unlock" : false
     },
     {
       "level": "testvideo",
       "world": "debug",
       "par": 90,
-      "crystals": []
+      "crystals": [],
+      "unlock" : false
     }
     
 

@@ -1,5 +1,7 @@
 #include "./sound.h"
 
+#include <cmath>
+
 std::vector<std::string> listSoundFiles();
 
 
@@ -159,6 +161,17 @@ void renderMixingDetailPanel(bool includePanel){
           }
         }
         ImGui::EndCombo();
+      }
+
+      float pitchOctaves = std::log2(mixedSound.clipPitches.at(i));
+      if (ImGui::SliderFloat(
+        (std::string("Pitch (octaves)##") + std::to_string(i)).c_str(),
+        &pitchOctaves,
+        -5.f,
+        5.f,
+        "%.1f"
+      )){
+        mixedSound.clipPitches.at(i) = std::exp2(pitchOctaves);
       }
     }    
   }

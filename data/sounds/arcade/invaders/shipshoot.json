@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/q009/minigun2.ogg"
+        {
+            "clip": "../gameresources/sound/q009/minigun2.ogg",
+            "pitch": 1.0
+        }
     ]
 }

@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/beep.ogg"
+        {
+            "clip": "../gameresources/sound/beep.ogg",
+            "pitch": 1.0
+        }
     ]
 }

@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "./res/sounds/hitmarker.wav"
+        {
+            "clip": "./res/sounds/hitmarker.wav",
+            "pitch": 1.0
+        }
     ]
 }

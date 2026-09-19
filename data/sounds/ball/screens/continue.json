@@ -5,6 +5,9 @@
     "sequential": false,
     "bus": "master",
     "clips": [
-        "../gameresources/sound/teleport.wav"
+        {
+            "clip": "../gameresources/sound/teleport.wav",
+            "pitch": 1.0
+        }
     ]
 }
