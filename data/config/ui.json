@@ -1,0 +1,96 @@
+{
+    "colors": {
+        "main-color": [
+            0.9282700419425964,
+            0.06266801804304123,
+            0.06266801804304123,
+            1.0
+        ],
+        "secondary-color": [
+            0.6075949668884277,
+            0.0666559711098671,
+            0.0666559711098671,
+            1.0
+        ],
+        "main-menu-title-color": [
+            0.37254902720451357,
+            0.5843137502670288,
+            0.8352941274642944,
+            1.0
+        ],
+        "widget-color": [
+            0.125490203499794,
+            0.125490203499794,
+            0.125490203499794,
+            0.5372549295425415
+        ],
+        "editor-color": [
+            0.03921568766236305,
+            0.03921568766236305,
+            0.03921568766236305,
+            1.0
+        ],
+        "console-color": [
+            0.16078431904315949,
+            0.16078431904315949,
+            0.16078431904315949,
+            0.5254902243614197
+        ],
+        "ball-menu-title-color": [
+            0.7890295386314392,
+            0.869144856929779,
+            1.0,
+            1.0
+        ],
+        "ball-menu-font-color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "ball-menu-font-header-color": [
+            0.501960813999176,
+            0.501960813999176,
+            0.501960813999176,
+            0.18039216101169587
+        ]
+    },
+    "fonts": {
+        "default-medium": {
+            "file": "./res/fonts/ocr.ttf",
+            "size": 32.0
+        },
+        "default-header": {
+            "file": "./res/fonts/vcr.ttf",
+            "size": 33.0
+        },
+        "default-title": {
+            "file": "./res/fonts/Chronic-Normal.otf",
+            "size": 54.0
+        },
+        "default-font": {
+            "file": "./res/fonts/vcr.ttf",
+            "size": 24.0
+        }
+    },
+    "font-bindings": {
+        "title-screen": {
+            "font": "default-title"
+        },
+        "menu-styles": {
+            "font": "default-medium"
+        },
+        "main-menu": {
+            "font": "default-title"
+        },
+        "main-menu2-title": {
+            "font": "default-title"
+        },
+        "level-list": {
+            "font": "default-font"
+        },
+        "ball-level-complete": {
+            "font": "default-title"
+        }
+    }
+}

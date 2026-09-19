@@ -78,6 +78,12 @@ Playlist parsePlaylist(std::string filepath){
                   playlistLevel.parTime = parTimeIt -> value.GetDouble();
               }
             }
+            {
+              auto unlockIt = item.FindMember("unlock");
+              if (unlockIt != item.MemberEnd() && unlockIt -> value.IsBool()){
+                playlistLevel.mustUnlock = unlockIt -> value.GetBool();
+              }
+            }
             playlistLevels.push_back(playlistLevel);
         }
     }
@@ -141,6 +147,15 @@ std::vector<PlaylistLevel*> levelsForWorld(Playlist& playlist, std::string world
     }
   }
   return levels;
+}
+
+std::optional<PlaylistLevel*> levelInPlaylist(Playlist& playlist, std::string levelName){
+  for (auto& playlistLevel : playlist.levels){
+    if (playlistLevel.level == levelName){
+      return &playlistLevel;
+    }
+  }
+  return std::nullopt;
 }
 
 

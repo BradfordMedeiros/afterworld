@@ -1,2 +1,9 @@
 {
+    "magnitude": 100.0,
+    "torque": 50.0,
+    "jumpMagnitude": 100.0,
+    "mass": 10.0,
+    "friction": 1.0,
+    "restitution": 0.5,
+    "gravity": -9.8100004196167
 }

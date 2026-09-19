@@ -1,0 +1,10 @@
+{
+  "levels": [
+    {
+      "level": "dev",
+      "world": "test",
+      "par": 90,
+      "crystals": ["one", "two", "mygem"]
+    }
+  ]
+}

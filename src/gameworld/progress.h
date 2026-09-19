@@ -43,6 +43,7 @@ struct PlaylistLevel {
   std::string world;
   std::optional<float> parTime;
   std::set<std::string> crystals;
+  bool mustUnlock = true;
 };
 struct Playlist {
   std::string name;
@@ -52,6 +53,7 @@ struct Playlist {
 std::vector<std::string> worldsForPlaylist(std::string playlistName);
 std::optional<Playlist*> playlistByName(std::string playlistName);
 std::vector<PlaylistLevel*> levelsForWorld(Playlist& playlist, std::string world);
+std::optional<PlaylistLevel*> levelInPlaylist(Playlist& playlist, std::string levelName);
 
 struct PlaylistProgressInfo {
   std::string currentWorld;

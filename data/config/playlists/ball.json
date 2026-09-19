@@ -1,0 +1,28 @@
+{
+  "levels": [
+    {
+      "level": "w1",
+      "world": "test",
+      "par": 90,
+      "crystals": ["one", "two", "mygem"]
+    },
+    {
+      "level": "video",
+      "world": "test",
+      "par": 24.5,
+      "crystals": []
+    },
+    {
+      "level": "video",
+      "world": "test",
+      "par": 24.5,
+      "crystals": []
+    },
+    {
+      "level": "test1",
+      "world": "test",
+      "par": 24.5,
+      "crystals": ["one", "two"]
+    }
+  ]
+}

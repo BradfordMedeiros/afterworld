@@ -185,14 +185,31 @@ void renderStageSelectPanel(bool includePanel){
 
     auto activeWorld = worlds.at(selectedWorld);
     auto worldLevels = levelsForWorld(playlist, activeWorld);
-
     std::cout << "worlds: " << print(worlds) << ", name = " << activeWorld << std::endl;
-
 
     int levelsPerWorld = worldLevels.size();
 
     std::string selectedLevelName = worldLevels.at(selectedLevel) -> level;
     auto levelData = levelByShortcutName(selectedLevelName);
+    auto playlistLevel = levelInPlaylist(playlist, selectedLevelName);
+
+
+    bool isLevelLocked = false;
+    if (playlistLevel.value() -> mustUnlock){
+      isLevelLocked = true;
+      if (selectedLevel == 0){
+        isLevelLocked = false;
+      }else{
+        auto previousLevel = worldLevels.at(selectedLevel - 1);
+        isLevelLocked = !isLevelComplete(previousLevel -> level);
+      }
+    }
+
+
+    if (!levelData.has_value() || !playlistLevel.has_value()){
+      levelData = std::nullopt;
+      playlistLevel = std::nullopt;
+    }
 
     const float worldWidth = 300.0f;
     const float worldHeight = 70.0f;
@@ -202,12 +219,16 @@ void renderStageSelectPanel(bool includePanel){
 
     // Background image
     if(levelData.has_value()){
-      std::string backgroundTexture = levelData.value().image;
+      if (isLevelLocked){
+        ImGui::Text("Level Locked");
+      }else{
+        std::string backgroundTexture = levelData.value().image;
+        auto textureId = gameapi -> getTextureSamplerId(backgroundTexture).value();
+        ImVec2 panelMin = ImGui::GetWindowPos();
+        ImVec2 panelMax = ImVec2(panelMin.x + ImGui::GetWindowWidth(), panelMin.y + ImGui::GetWindowHeight());
+        ImGui::GetWindowDrawList() -> AddImage((ImTextureID)(intptr_t)textureId, panelMin, panelMax, ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, 255));        
+      }
 
-      auto textureId = gameapi -> getTextureSamplerId(backgroundTexture).value();
-      ImVec2 panelMin = ImGui::GetWindowPos();
-      ImVec2 panelMax = ImVec2(panelMin.x + ImGui::GetWindowWidth(), panelMin.y + ImGui::GetWindowHeight());
-      ImGui::GetWindowDrawList() -> AddImage((ImTextureID)(intptr_t)textureId, panelMin, panelMax, ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, 255));
     }
 
 
@@ -221,12 +242,15 @@ void renderStageSelectPanel(bool includePanel){
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
       ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 
+      auto oldWorld = selectedWorld;
       if (ImGui::Button("<", ImVec2(40, 40))){
           selectedWorld--;
           if (selectedWorld < 0){
               selectedWorld = 0;
           }
-          selectedLevel = 0;
+          if (selectedWorld != oldWorld){
+            selectedLevel = 0;
+          }
       }
 
       ImGui::SameLine(0.0f, spacing);
@@ -239,7 +263,9 @@ void renderStageSelectPanel(bool includePanel){
           if (selectedWorld >= worlds.size()){
               selectedWorld = worlds.size() - 1;
           }
-          selectedLevel = 0;
+          if (selectedWorld != oldWorld){
+            selectedLevel = 0;
+          }
       }
       ImGui::PopStyleVar();
       ImGui::PopStyleColor(3);
@@ -256,7 +282,7 @@ void renderStageSelectPanel(bool includePanel){
       if (ImGui::Button("-<", ImVec2(40, 40))){
           selectedLevel--;
           if (selectedLevel < 0){
-              selectedLevel = levelsPerWorld - 1;
+              selectedLevel = 0;
           }
       }
 
@@ -268,7 +294,7 @@ void renderStageSelectPanel(bool includePanel){
       if (ImGui::Button(">-", ImVec2(40, 40))){
           selectedLevel++;
           if (selectedLevel >= levelsPerWorld){
-              selectedLevel = 0;
+              selectedLevel = (levelsPerWorld - 1);
           }
       }
 
@@ -283,7 +309,9 @@ void renderStageSelectPanel(bool includePanel){
 
 
     // Level information
-    if(levelData.has_value()){
+    if(!levelData.has_value()){
+      ImGui::Text("Missing Level");
+    }else {
       ImGui::Spacing();
 
       std::string description = levelData.value().description;
@@ -299,9 +327,9 @@ void renderStageSelectPanel(bool includePanel){
       float statsX = cursorX + (availableWidth - statsWidth) * 0.5f;
 
       ImGui::SetCursorPosX(statsX);
-      ImGui::Text("BEST TIME");
+      ImGui::Text("PAR TIME");
       ImGui::SameLine(statsX + 190.0f);
-      ImGui::Text("02:14.38");
+      ImGui::Text(printFloat(playlistLevel.value() -> parTime).c_str());
 
       ImGui::SetCursorPosX(statsX);
       ImGui::Text("HIGH SCORE");
@@ -312,12 +340,10 @@ void renderStageSelectPanel(bool includePanel){
       ImGui::Text("SOULS");
       ImGui::SameLine(statsX + 190.0f);
       ImGui::Text("100%%");
-    }else{
-      ImGui::Text("Missing Level");
     }
 
     // Play Button
-    if(levelData.has_value()){
+    if(!isLevelLocked && levelData.has_value()){
       ImGui::Spacing();
       ImGui::Spacing();
 
