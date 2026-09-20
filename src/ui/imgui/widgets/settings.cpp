@@ -95,11 +95,6 @@ void renderControlsPanel(bool includePanel){
     ImGui::Begin("Fps Controls");
   }
 
-    float volume = 0.f;
-    bool muteSound = false;
-    if (ImGui::Checkbox("Controls", &muteSound)){
-
-    }
 
     static std::optional<std::string> currentKey;
 
@@ -131,6 +126,7 @@ void renderControlsPanel(bool includePanel){
       }
     }
 
+    float volume = 0.f;
     if(ImGui::SliderFloat("Mouse Sensitivity ", &volume, 0.0f, 10.0f)){
     }
 
