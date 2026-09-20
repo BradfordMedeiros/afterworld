@@ -116,6 +116,9 @@ void renderControlsPanel(bool includePanel){
       for (int key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key++) {
           if (ImGui::IsKeyPressed((ImGuiKey)key)) {
               auto ascii = toGlfwKey((ImGuiKey)key);
+              if (ascii == 0) {
+                  continue;
+              }
               for (auto& control : controls){
                 if (control.text == currentKey.value()){
                   *control.currentKey = ascii;
