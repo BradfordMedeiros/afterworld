@@ -10,6 +10,8 @@ extern Weapons weapons;
 extern std::unordered_map<objid, Powerup> powerups;
 extern std::unordered_map<objid, Activatable> activateables;
 
+const std::string BALL_SHADER_NAME = "../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl";
+
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 std::optional<ActiveLevel> getActiveLevel();
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
@@ -565,6 +567,12 @@ void startBallIntroMode(objid sceneId, bool inHub){
 }
 
 void startBallMode(objid sceneId){
+	auto ballShader = gameapi -> shaderByName(BALL_SHADER_NAME);
+	if (!ballShader.has_value()){
+		auto loadedShader = gameapi -> loadShader(BALL_SHADER_NAME, "../afterworld/shaders/ball");
+		modassert(loadedShader != nullptr, "could not load the ball shader");
+	}
+
   auto inHub = gameapi -> getObjectsByAttr("levelselect", std::nullopt, sceneId).size() > 0;
 
   //std::cout << "active level: " << print(getActiveLevel()) << std::endl;
@@ -1033,7 +1041,7 @@ GameTypeInfo getBallMode(){
 	  	modeOptions.shouldReset = false;
 	  	modeOptions.didReset = false;
 
-			auto shaderId = gameapi -> shaderByName("../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl");
+			auto shaderId = gameapi -> shaderByName(BALL_SHADER_NAME);
 			modassert(shaderId.has_value(), "could not find the ball shader");
 			modeOptions.ballShader = shaderId.value();
 
