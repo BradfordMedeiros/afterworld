@@ -159,7 +159,7 @@ void renderGameVolumePanel(bool includePanel){
     bool muteSound = isMuted();
 
     if (ImGui::Checkbox("Mute Sound", &muteSound)){
-      setIsMuted(muteSound);
+      setMutedSound(muteSound);
     }
 
     float volume = getMasterVolume();
@@ -169,10 +169,12 @@ void renderGameVolumePanel(bool includePanel){
 
     auto gameplayVolume = getGameplayVolume();
     if(ImGui::SliderFloat("Gameplay Volume ", gameplayVolume, 0.0f, 1.0f)){
+      setGameplayVolume(*gameplayVolume);
     }
 
     auto musicVolume = getMusicVolume();
     if(ImGui::SliderFloat("Music Volume ", musicVolume, 0.0f, 1.0f)){
+      setMusicVolume(*musicVolume);
     }
   if (includePanel){
     ImGui::End();

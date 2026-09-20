@@ -1,4 +1,5 @@
 #include "./sound.h"
+#include "../gameworld/save.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -79,6 +80,10 @@ float* getGameplayVolume(){
   return &gameplayVolume;
 }
 
+void validateVolume(float volume, const char* name){
+  modassert(volume >= 0.f && volume <= 1.f, std::string(name) + " is outside the valid range");
+}
+
 float getMasterVolume(){
   auto value = getWorldStateAttr("sound", "volume");
   modassert(value.has_value(), "master volume state is unavailable");
@@ -89,7 +94,7 @@ float getMasterVolume(){
 }
 
 void setMasterVolume(float volume){
-  modassert(volume >= 0.f && volume <= 1.f, "master volume is outside the valid range");
+  validateVolume(volume, "master volume");
   gameapi -> setWorldState({
     ObjectValue {
       .object = "sound",
@@ -97,6 +102,46 @@ void setMasterVolume(float volume){
       .value = volume,
     },
   });
+  persistSave("settings", "master-volume", volume);
+}
+
+void setMusicVolume(float volume){
+  validateVolume(volume, "music volume");
+  musicVolume = volume;
+  persistSave("settings", "music-volume", volume);
+}
+
+void setGameplayVolume(float volume){
+  validateVolume(volume, "gameplay volume");
+  gameplayVolume = volume;
+  persistSave("settings", "gameplay-volume", volume);
+}
+
+void setMutedSound(bool muted){
+  setIsMuted(muted);
+  persistSave("settings", "mute", muted);
+}
+
+void loadSoundSettings(){
+  auto masterVolume = getSaveFloatValue("settings", "master-volume", 1.f);
+  auto savedMusicVolume = getSaveFloatValue("settings", "music-volume", 1.f);
+  auto savedGameplayVolume = getSaveFloatValue("settings", "gameplay-volume", 1.f);
+  auto savedMute = getSaveBoolValue("settings", "mute", false);
+
+  validateVolume(masterVolume, "master volume");
+  validateVolume(savedMusicVolume, "music volume");
+  validateVolume(savedGameplayVolume, "gameplay volume");
+
+  gameapi -> setWorldState({
+    ObjectValue {
+      .object = "sound",
+      .attribute = "volume",
+      .value = masterVolume,
+    },
+  });
+  musicVolume = savedMusicVolume;
+  gameplayVolume = savedGameplayVolume;
+  setIsMuted(savedMute);
 }
 
 
