@@ -362,6 +362,7 @@ void updateState(){
      .value = (global.routeState.paused || global.showEditor) ? "true" : "false",
    }
   });
+  gameapi -> setUpdateDynamicBodiesPositionsBasedOnParent(global.showEditor || !global.routeState.inGameMode);
 }
 
 bool disableGameInput(){
