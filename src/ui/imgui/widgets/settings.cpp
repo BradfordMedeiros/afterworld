@@ -156,15 +156,15 @@ void renderGameVolumePanel(bool includePanel){
     ImGui::Begin("Fps Volume");
   }
 
-    float volume = 0.f;
     bool muteSound = isMuted();
-
 
     if (ImGui::Checkbox("Mute Sound", &muteSound)){
       setIsMuted(muteSound);
     }
 
+    float volume = getMasterVolume();
     if(ImGui::SliderFloat("Master Volume ", &volume, 0.0f, 1.0f)){
+      setMasterVolume(volume);
     }
 
     auto gameplayVolume = getGameplayVolume();

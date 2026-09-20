@@ -28,6 +28,8 @@ void onCollisionEnterSound(SoundData& sound, int32_t sceneId, int32_t obj1, int3
 
 float* getMusicVolume();
 float* getGameplayVolume();
+float getMasterVolume();
+void setMasterVolume(float volume);
 
 OneShot playMusicClipById(objid id, std::optional<float> volume);
 OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);

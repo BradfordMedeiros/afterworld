@@ -79,13 +79,53 @@ float* getGameplayVolume(){
   return &gameplayVolume;
 }
 
+float getMasterVolume(){
+  auto value = getWorldStateAttr("sound", "volume");
+  modassert(value.has_value(), "master volume state is unavailable");
+
+  auto volume = std::get_if<float>(&value.value());
+  modassert(volume != NULL, "master volume state has an invalid type");
+  return *volume;
+}
+
+void setMasterVolume(float volume){
+  modassert(volume >= 0.f && volume <= 1.f, "master volume is outside the valid range");
+  gameapi -> setWorldState({
+    ObjectValue {
+      .object = "sound",
+      .attribute = "volume",
+      .value = volume,
+    },
+  });
+}
+
+
+OneShot playMusicClipByIdWithOptions(
+  objid id,
+  std::optional<float> volume,
+  std::optional<glm::vec3> position,
+  std::optional<float> pitch,
+  std::optional<bool> loop,
+  std::optional<bool> center
+){
+  volume = volume.value_or(1.f) * musicVolume;
+  return gameapi -> playOneshot(id, position, volume, pitch, loop, center, id);
+}
 
 OneShot playMusicClipById(objid id, std::optional<float> volume){
-  if (!volume.has_value()){
-    volume = 1.f;
-  }
-  volume = volume.value() * musicVolume;
-  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, std::nullopt, std::nullopt, id);
+  return playMusicClipByIdWithOptions(id, volume, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+}
+
+OneShot playGameplayClipByIdWithOptions(
+  objid id,
+  std::optional<float> volume,
+  std::optional<glm::vec3> position,
+  std::optional<float> pitch,
+  std::optional<bool> loop,
+  std::optional<bool> center
+){
+  volume = volume.value_or(1.f) * gameplayVolume;
+  return gameapi -> playOneshot(id, position, volume, pitch, loop, center, id);
 }
 
 OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
@@ -100,13 +140,11 @@ OneShot playGameplayClip(std::string&& clipName, objid sceneId, std::optional<fl
 }
 
 OneShot playGameplayClipById(objid id, std::optional<float> volume, std::optional<glm::vec3> position, bool loop){
-  std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, position, volume, std::nullopt, loop, false, id);
+  return playGameplayClipByIdWithOptions(id, volume, position, std::nullopt, loop, false);
 }
 
 OneShot playGameplayClipByIdCenter(objid id, std::optional<float> volume, bool loop){
-  std::cout << "playGameplayClipById: " << loop << std::endl;
-  return gameapi -> playOneshot(id, std::nullopt, volume, std::nullopt, loop, true, id);
+  return playGameplayClipByIdWithOptions(id, volume, std::nullopt, std::nullopt, loop, true);
 }
 
 /* int getSymbol(std::string name);
@@ -349,6 +387,17 @@ std::optional<OneShot> playMixedSound(int symbol, std::optional<glm::vec3> posit
   bool loop = mixedSound -> loop; // same
   bool center = mixedSound -> center; // same
 
+  switch (mixedSound -> bus){
+    case BUS_MUSIC:
+      return playMusicClipByIdWithOptions(clipInstanceId, volume, position, pitch, loop, center);
+    case BUS_SFX:
+    case BUS_VOICE:
+      return playGameplayClipByIdWithOptions(clipInstanceId, volume, position, pitch, loop, center);
+    case BUS_MASTER:
+      return gameapi -> playOneshot(clipInstanceId, position, volume, pitch, loop, center, clipInstanceId);
+  }
+
+  modassert(false, "mixed sound has an invalid bus");
   return gameapi -> playOneshot(clipInstanceId, position, volume, pitch, loop, center, clipInstanceId);
 }
 
