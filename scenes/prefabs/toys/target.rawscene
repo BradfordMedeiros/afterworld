@@ -1,4 +1,10 @@
+# Generated scene 
+# @editor expose target:health type=float label=Health min=1 max=500
+# @editor expose target/model:tint type=vec4 label=Tint min=0 max=1
+
+target:tint:0.641 0.294 0.192 0.532
+target:health:225.751
 target:mesh:../gameresources/build/misc/shootingtarget.gltf
-target:physics:enabled
 target:physics_shape:shape_exact
-target:health:10
+target:physics:enabled
+target/model:tint:0 0 1 1
