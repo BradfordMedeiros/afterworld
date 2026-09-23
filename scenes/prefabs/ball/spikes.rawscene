@@ -1,0 +1,19 @@
+# @editor expose spikes:activate-mask type=int label="Activate_Mask" min=0 max=15
+# @editor expose spikes:activate-autoreset type=float label="AutoReset" min=0 max=1000
+# @editor expose spikes:activate-type type=string label="Activation_Type"
+# @editor expose spikes:radius type=float label="Radius" min=0
+# @editor expose spikes:activate-delay type=float label="Activation_Delay" min=0
+# @editor expose spikes:activate-name type=string label="Activation_Name"
+
+spikes:mesh:../gameresources/build/misc/spikes_5x5.gltf
+spikes:activatable:true
+spikes:activate-mask:14
+#spikes:activate-autoreset:1000
+spikes:activate-type:near
+spikes:radius:5
+spikes:activate-delay:0
+#spikes:activate-name:
+spikes:scale:3 3 3
+spikes/spiketip:killplane:true
+spikes/spiketip:physics_shape:shape_exact
+spikes/spiketip:physics:enabled

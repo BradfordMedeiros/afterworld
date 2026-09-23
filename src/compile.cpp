@@ -618,16 +618,7 @@ CompileMapFns getCompileMapForBallGame(){
         });
 
     }else if (*className.value() == "spikes"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spikes_5x5.gltf", std::nullopt, { "model", "spiketip" });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "killplane",
-        .attributeValue = "true",
-        .submodel = "spiketip",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "scale",
-        .attributeValue = glm::vec3(3.f, 3.f, 3.f),
-      });
+      modassert(false, "spikes moved to editor");      
     }else if (*className.value() == "crusher"){
       addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/crusher.gltf", std::nullopt,  { "model", "poles" });
       //attributes.push_back(GameobjAttributeOpts {
