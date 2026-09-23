@@ -1,4 +1,3 @@
-# @editor name "Jump Powerup"
 # @editor expose powerup:powerup-rate type=float label="Powerup Rate" min=0 max=1000
 
 powerup:physics_shape:shape_sphere

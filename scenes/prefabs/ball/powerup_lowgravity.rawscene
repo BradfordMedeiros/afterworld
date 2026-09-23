@@ -1,0 +1,12 @@
+# @editor expose powerup:powerup-rate type=float label="Powerup Rate" min=0 max=1000
+
+powerup:physics_shape:shape_sphere
+powerup:physics:enabled
+powerup:physics_collision:nocollide
+powerup:layer:transparency
+powerup:spin:0.1
+powerup:powerup-rate:1000
+powerup:powerup:low_gravity
+powerup:tint:1 0 1 1
+powerup:mesh:../gameresources/build/objtypes/powerup.gltf
+powerup:texture:../gameresources/textures/arcade/invaders/ship.png

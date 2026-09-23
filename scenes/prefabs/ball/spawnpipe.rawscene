@@ -1,0 +1,4 @@
+spawn_pipe:mesh:../gameresources/build/uncategorized/darkwires4.gltf
+spawn_pipe:physics_shape:shape_exact
+spawn_pipe:physics:enabled
+spawn_pipe:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl

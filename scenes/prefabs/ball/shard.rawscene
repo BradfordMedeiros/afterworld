@@ -1,0 +1,9 @@
+shard:mesh:../gameresources/build/primitives/sphere.gltf
+shard:physics_shape:shape_exact
+shard:physics:enabled
+shard:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+shard:scrollspeed:1 1 0
+shard:breakable:true
+shard:physics_collision:nocollide
+shard:tint:0 0 1 0.8
+shard:layer:nolighting

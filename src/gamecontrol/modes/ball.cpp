@@ -425,10 +425,10 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 	});
   
 
-	auto playerSpawnId = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, sceneId).at(0);
+	auto playerSpawnId = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
 	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId, true, "[gamelogic] ball - get playerspawn position");
 
-	auto ballplanes = gameapi -> getObjectsByAttr("ballplane", std::nullopt, sceneId);
+	auto ballplanes = gameapi -> getObjectsByAttr("ballplane", std::nullopt, std::nullopt);
 
 
   // TODO - no reason to actually create the prefab here

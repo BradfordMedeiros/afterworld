@@ -1,0 +1,9 @@
+# @editor expose laser:laserlength type=float label="Laser Length" min=0 max=100
+
+laser:mesh:../gameresources/build/objtypes/laser.gltf
+laser:physics_shape:shape_exact
+laser:physics:enabled
+laser:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+laser:tint:0 1 0 1
+laser:laser:true
+laser:laserlength:100

@@ -563,170 +563,10 @@ CompileMapFns getCompileMapForBallGame(){
       });
 
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
-      *shouldWrite = true;
-
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "physics_shape",
-        .attributeValue = "shape_sphere",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "physics",
-        .attributeValue = "enabled",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "physics_collision",
-        .attributeValue = "nocollide",
-      });
-
-      // When it becomes deactivated (respawnable but used) make it transparent
-      // So hence this layer
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "layer",
-        .attributeValue = "transparency",
-      });
-
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "spin",
-        .attributeValue = "true",
-      });
-
-      auto rate = getIntValue(entity, "rate");
-      if (rate.has_value()){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "powerup-rate",
-          .attributeValue = static_cast<float>(rate.value()),
-        });
-      }
-
-      if (*className.value() == "powerup_jump"){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "powerup",
-          .attributeValue = "jump",
-        });
-        attributes.push_back(GameobjAttributeOpts {  
-          .field = "tint",
-          .attributeValue = glm::vec4(1.f, 0.f, 0.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::POWERUP_MODEL_JUMP,
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::POWERUP_MODEL_JUMP,
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "texture",
-          .attributeValue = paths::INVADERS_SHIP,
-        });
-      }else if (*className.value() == "powerup_dash"){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "powerup",
-          .attributeValue = "dash",
-        });
-        attributes.push_back(GameobjAttributeOpts {  
-          .field = "tint",
-          .attributeValue = glm::vec4(0.f, 0.f, 1.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::POWERUP_MODEL_DASH,
-        });
-      }else if (*className.value() == "powerup_teleport"){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "powerup",
-          .attributeValue = "low_gravity",
-        });
-        attributes.push_back(GameobjAttributeOpts {  
-          .field = "tint",
-          .attributeValue = glm::vec4(0.f, 1.f, 1.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::POWERUP_MODEL_TELEPORT,
-        });
-      }else if (*className.value() == "powerup_lowgravity"){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "powerup",
-          .attributeValue = "teleport",
-        });
-        attributes.push_back(GameobjAttributeOpts {  
-          .field = "tint",
-          .attributeValue = glm::vec4(1.f, 0.f, 1.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::POWERUP_MODEL_TELEPORT,
-        });
-      }else if (*className.value() == "powerup_invincibility"){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "powerup",
-          .attributeValue = "invincibility",
-        });
-        attributes.push_back(GameobjAttributeOpts {  
-          .field = "tint",
-          .attributeValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = paths::POWERUP_MODEL_INVINCIBILITY,
-        });
-      }else{
-        modassert(false, "invalid powerup type");
-      }
-
+      modassert(false, "powerup moved to editor");
     }else if (*className.value() == "vertical_bound_point"){
-      *shouldWrite = true;
-
-      auto position = getEntityPosition(mapData, entity);
-
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "ballplane",
-        .attributeValue = "true",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "position", 
-        .attributeValue = position,
-      });
-
+      modassert(false, "vertical_bound_point moved to editor");
     }else if (*className.value() == "vertical_bound_plane"){
-      /*shouldWrite = true;
-
-      double yValueSum = 0;
-      int totalPoints = 0;
-
-      auto position = getEntityPosition(mapData, entity);
-
-      for (auto& brush : entity.brushes){
-        for (auto &brushFace : brush.brushFaces){
-
-          auto value = parseVecTrenchbroom(brushFace.point1, mapData.scale);
-
-          std::cout << "vert: " << print(position) << std::endl;
-          std::cout << "point1: " << print(brushFace.point1) << std::endl;
-          std::cout << "point2: " << print(brushFace.point2) << std::endl;
-          std::cout << "point3: " << print(brushFace.point3) << std::endl;
-
-          yValueSum += parseVecTrenchbroom(brushFace.point1, 1.f).y;
-          yValueSum += parseVecTrenchbroom(brushFace.point2, 1.f).y;
-          yValueSum += parseVecTrenchbroom(brushFace.point3, 1.f).y;
-          totalPoints += 3;
-        }
-      }
-        
-      modassert(totalPoints > 0, "invalid ballplane no faces");
-      auto average = yValueSum / totalPoints;
-      modassert(average > -10000 && average < 10000, "invalid ballplane"); // arbitrary numbers to guard against weird
-
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "ballplane",
-        .attributeValue = "true",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "position", 
-        .attributeValue = glm::vec3(0.f, average, 0.f),
-      });*/
-
       modassert(false, "vert bound plane not supported");
     }else if (*className.value() == "worldspawn"){
       *shouldWrite = true;
@@ -902,9 +742,6 @@ CompileMapFns getCompileMapForBallGame(){
           }      
         }
 
-
-
-
     }else if (*className.value() == "lightzone"){
       //modassert(false, "compile for light zone not yet implemented");
       // do nothing, we just reference this in the brush
@@ -916,24 +753,7 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = "true",
       });
     }else if (*className.value() == "laser"){
-        *shouldWrite = true;
-        addCoreTrench(entity, attributes, paths::LASER_MODEL);
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "tint",
-          .attributeValue = glm::vec4(0.f, 1.f, 0.f, 1.f),
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "laser",
-          .attributeValue = "true",
-        });   
-
-
-        auto laserLength = getScaledFloatValue(mapData, entity, "length");
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "laserlength",
-          .attributeValue = laserLength.value(),
-        });       
+      modassert(false, "laser moved to editor");      
     }else if (*className.value() == "gravityhole"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, paths::GRAVITYHOLE_MODEL);
@@ -1037,19 +857,7 @@ CompileMapFns getCompileMapForBallGame(){
           });
         }
     }else if (*className.value() == "teleport_exit"){
-        std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
-        *shouldWrite = true;
-        auto teleportTarget = getValue(entity, "exit");
-        if (teleportTarget.has_value()){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "teleport",
-            .attributeValue = "true",
-          });
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "teleport_exit",
-            .attributeValue = *teleportTarget.value(),
-          });             
-        }
+      modassert(false, "teleport_exit moved to editor");      
     }else if (*className.value() == "dynamic"){
         std::cout << "got dynamic" << std::endl;
         *shouldWrite = true;

@@ -1,0 +1,4 @@
+# @editor expose teleport:teleport_exit type=string label="Teleport Exit"
+
+teleport:teleport:true
+teleport:teleport_exit:default
