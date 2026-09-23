@@ -1,0 +1,14 @@
+# @editor expose autodoor:activate-mask type=int label="Activate-Mask" min=0 max=15
+# @editor expose autodoor:activate-autoreset type=float label="Auto-Reset" min=0
+# @editor expose autodoor:activate-type type=string label="Activation Type"
+# @editor expose autodoor:radius type=float label="Radius" min=0
+# @editor expose autodoor:activate-delay type=float label="Activation-Delay" min=0
+# @editor expose autodoor:activate-name type=string label="Activation-Name"
+
+autodoor:mesh:../gameresources/build/building/autodoor.gltf
+autodoor:activatable:true
+autodoor:activate-type:near
+autodoor:radius:5
+
+autodoor/leftside:physics:enabled
+autodoor/model:physics:enabled

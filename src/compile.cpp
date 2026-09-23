@@ -631,14 +631,9 @@ CompileMapFns getCompileMapForBallGame(){
       //  .attributeValue = glm::vec3(3.f, 3.f, 3.f),
       //});
     }else if (*className.value() == "spinner"){
-      auto spin = getFloatValue(entity, "speed");
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/spinner.gltf", std::nullopt, {});
-      attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-        .field =  "spin",
-        .attributeValue = spin.has_value() ? spin.value() : 1.f,
-      });
+      modassert(false, "spinner moved to editor");      
     }else if (*className.value() == "autodoor"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/building/autodoor.gltf", std::nullopt, {});
+      modassert(false, "autodoor moved to editor");      
     }else if (*className.value() == "dropper"){
       addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", "model", { "model" });
     }else if (*className.value() == "trigger_zone"){

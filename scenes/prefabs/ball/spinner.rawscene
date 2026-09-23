@@ -1,0 +1,5 @@
+# @editor expose spinner:spin type=float label="Spin_Speed" min=0 max=10
+
+spinner:mesh:../gameresources/build/misc/spinner.gltf
+spinner:activatable:true
+spinner:spin:1
