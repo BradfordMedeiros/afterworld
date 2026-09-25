@@ -1,0 +1,8 @@
+
+[prefab-instance-moon:scene:../afterworld/scenes/prefabs/ball/moon.rawscene
+
+[prefab-instance-gem:scene:../afterworld/scenes/prefabs/ball/gem.rawscene
+[prefab-instance-gem:position:0 0 0
+
+[prefab-instance-endwarp:scene:../afterworld/scenes/prefabs/ball/warp_end.rawscene
+[prefab-instance-endwarp:position:0 -3 0

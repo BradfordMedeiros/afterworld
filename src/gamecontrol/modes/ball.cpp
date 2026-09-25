@@ -453,12 +453,12 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 	modeOptions.playerSpawnPosition = playerSpawnPosition;
 	modeOptions.inHub = inHub;
 
-	auto endwarp = gameapi -> getObjectsByAttr("endwarp", std::nullopt, sceneId);
+	auto endwarp = gameapi -> getObjectsByAttr("endwarp", std::nullopt, std::nullopt);
 	if (endwarp.size() > 0){
 		modeOptions.endwarp = endwarp.at(0);
 	}
 
-	auto warps = gameapi -> getObjectsByAttr("selectwarp", std::nullopt, sceneId);
+	auto warps = gameapi -> getObjectsByAttr("selectwarp", std::nullopt, std::nullopt);
 	for (auto id : warps){
 		std::cout << "added warp: " << id << std::endl;
 		modeOptions.warps[id] = LevelWarp {

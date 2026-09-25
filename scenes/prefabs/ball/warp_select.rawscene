@@ -1,0 +1,7 @@
+warp:layer:nolighting
+warp:mesh:../gameresources/build/uncategorized/warp.gltf
+warp:physics_shape:shape_exact
+warp:physics:enabled
+warp/target:physics_shape:shape_exact
+warp/target:physics:enabled
+warp/target:selectwarp:default

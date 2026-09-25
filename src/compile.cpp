@@ -953,151 +953,15 @@ CompileMapFns getCompileMapForBallGame(){
         addRotation(entity, attributes);
         
     }else if (*className.value() == "light"){
-      *shouldWrite = true;
-      *modelName = std::string("!") + *modelName;
-      auto color = getVec3Value(entity, "color");
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "color",
-        .attributeValue = color.has_value() ? color.value() : glm::vec3(1.f, 1.f, 1.f),
-      });
-
-      auto type = getValue(entity, "type");
-      if (type.has_value()){
-        if (*type.value() == "spotlight"){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "type",
-            .attributeValue = "spotlight",
-          });
-        }else if (*type.value() == "directional"){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "type",
-            .attributeValue = "directional",
-          });
-        }else if (*type.value() == "point"){
-          // this is the default do nothing
-        }else{
-          modassert(false, "invalid light type");
-        }
-      }
-
-    }else if (*className.value() == "moon" || *className.value() == "moonend"){
-        *shouldWrite = true;
-
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "activatable",
-          .attributeValue = "true",
-          .submodel = "portal",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "activate-type",
-          .attributeValue = "near",
-          .submodel = "portal",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "radius",
-          .attributeValue = 5.f,
-          .submodel = "portal",
-        });        
-  
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics",
-          .attributeValue = "enabled",
-          .submodel = "model",
-        });       
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_shape",
-          .attributeValue = "shape_exact",
-          .submodel = "model",
-        });     
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "mesh",
-          .attributeValue = "../gameresources/build/objtypes/moon.gltf",
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "scrollspeed",
-          .attributeValue = glm::vec3(0.02f, 0.02f, 0.f),
-          .submodel = "model",
-        });
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "scrollspeed",
-          .attributeValue = glm::vec3(0.02f, 0.02f, 0.f),
-          .submodel = "door",
-        });
-        
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "texture",
-          .attributeValue = "./res/textures/cyberguy2.png",
-        });        
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "tint",
-          .attributeValue = glm::vec4(1.f, 1.f, 1.f, 0.6f),
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "layer",
-          .attributeValue = "nolighting",   // nolighting
-        });       
-    
-        if (*className.value() == "moon"){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "playerspawn",
-            .attributeValue = "true",
-          });
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "rebirth",
-            .attributeValue = "true",
-          });   
-        }else if (*className.value() == "moonend"){
-          auto originalModelName = *modelName;
-          auto position = getEntityPosition(mapData, entity);
-
-          auto rotationAngles = getVec3Value(entity, "angles").value();
-          auto rotation = quatFromTrenchBroomAngles(
-            rotationAngles.x,
-            rotationAngles.y,
-            rotationAngles.z
-          );
-
-          {
-            std::vector<GameobjAttributeOpts> newAttributes;
-            addGem("default", newAttributes, position + (rotation * glm::vec3(0.f, 2.f, 0.f)));
-            additionalEntities.push_back(AdditionalEntity {
-              .modelName = originalModelName + "_gem",
-              .attributes = newAttributes,
-            });
-          }
-
-          {
-            std::vector<GameobjAttributeOpts> newAttributes;
-            newAttributes.push_back(GameobjAttributeOpts {
-              .field = "position",
-              .attributeValue = position + (rotation * glm::vec3(0.f, -2.f, -5.f)),
-            });
-
-            addWarp(newAttributes, false);
-
-            additionalEntities.push_back(AdditionalEntity {
-              .modelName = originalModelName + "_endwarp",
-              .attributes = newAttributes,
-            });
-          }
-
-
-
-        }
-
-
+      modassert(false, "light moved to editor");
+    }else if (*className.value() == "moon"){
+      modassert(false, "moon moved to editor");
+    }else if (*className.value() == "moonend"){
+      modassert(false, "moonend moved to editor"); // warp_select
     }else if (*className.value() == "warp"){
-      *shouldWrite = true;
-      addWarp(attributes, true);
+      modassert(false, "warp moved to editor"); // warp_select
     }else if (*className.value() == "gem"){
-        *shouldWrite = true;
-        auto gemValue = getValue(entity, "gem");
-        modassert(gemValue.has_value(), "gem does not have a value");
-        addGem(*gemValue.value(), attributes, std::nullopt);
+      modassert(false, "gem moved to editor"); // warp_select
     }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;

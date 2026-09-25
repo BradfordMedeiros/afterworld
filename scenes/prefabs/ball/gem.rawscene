@@ -1,0 +1,11 @@
+# @editor expose gem:gem type=string label=Gem
+
+gem:gem:emerald
+gem:scale:3 3 3
+gem:physics_shape:shape_sphere
+gem:physics:enabled
+gem:physics_collision:nocollide
+gem:mesh:../gameresources/build/uncategorized/crystal.gltf
+gem:condition:true
+gem:layer:nolighting
+gem:spin:1

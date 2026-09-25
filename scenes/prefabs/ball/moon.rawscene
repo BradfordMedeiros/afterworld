@@ -1,0 +1,17 @@
+moon/portal:activatable:true
+moon/portal:activate-type:near
+moon/portal:radius:5
+
+moon/model:physics:enabled
+moon/model:physics_shape:shape_exact
+
+moon:mesh:../gameresources/build/objtypes/moon.gltf
+moon/model:scrollspeed:0.02 0.02 0
+moon/door:scrollspeed:0.02 0.02 0
+
+moon:texture:./res/textures/cyberguy2.png
+moon:tint:1 1 1 0.6
+moon:layer:nolighting
+
+moon:playerspawn:true
+moon:rebirth:true
