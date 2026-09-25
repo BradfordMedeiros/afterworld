@@ -939,19 +939,7 @@ CompileMapFns getCompileMapForBallGame(){
         orbEntity.conn = connections;
         ballGameCompile.orbs.push_back(orbEntity);
     }else if (*className.value() == "camera"){
-        *shouldWrite = true;
-        *modelName = std::string(">") + *modelName;
-
-        auto tag = getValue(entity, "tag");
-        if (tag.has_value()){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "cameratag",
-            .attributeValue = *tag.value(),
-          });
-        }
-
-        addRotation(entity, attributes);
-        
+      modassert(false, "camera moved to editor");
     }else if (*className.value() == "light"){
       modassert(false, "light moved to editor");
     }else if (*className.value() == "moon"){
