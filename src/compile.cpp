@@ -341,6 +341,38 @@ struct BallGameCompile {
   std::vector<OrbEntity> orbs;
 };
 
+struct PrefabEntity {
+  std::string name;
+  std::string prefabFilename;
+};
+
+const std::vector<PrefabEntity> prefabEntities {
+  PrefabEntity { .name = "_player_start", .prefabFilename = "../afterworld/scenes/prefabs/ball/playerspawn.rawscene" },
+  PrefabEntity { .name = "_spawn_pipe", .prefabFilename = "../afterworld/scenes/prefabs/ball/spawnpipe.rawscene" },
+  PrefabEntity { .name = "_activateable", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/activator.rawscene" },
+  PrefabEntity { .name = "_simple_activate", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/platform.rawscene" },
+  PrefabEntity { .name = "_shard", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/shard.rawscene" },
+  PrefabEntity { .name = "_powerup_jump", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/powerup_jump.rawscene" },
+  PrefabEntity { .name = "_powerup_dash", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/powerup_dash.rawscene" },
+  PrefabEntity { .name = "_powerup_teleport", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/powerup_teleport.rawscene" },
+  PrefabEntity { .name = "_powerup_lowgravity", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/powerup_lowgravity.rawscene" },
+  PrefabEntity { .name = "_powerup_invincibility", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/powerup_invincibility.rawscene" },
+  PrefabEntity { .name = "_vertical_bound_point", .prefabFilename = "../afterworld/scenes/prefabs/ball/vertical_bound_point.rawscene" },
+  PrefabEntity { .name = "_tube_exit", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/tube_exit.rawscene" },
+  PrefabEntity { .name = "_spikes", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/spikes.rawscene" },
+  PrefabEntity { .name = "_crusher", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/crusher.rawscene" },
+  PrefabEntity { .name = "_spinner", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/spinner.rawscene" },
+  PrefabEntity { .name = "_autodoor", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/autodoor.rawscene" },
+  PrefabEntity { .name = "_dropper", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/dropper.rawscene" },
+  PrefabEntity { .name = "_laser", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/laser.rawscene" },
+  PrefabEntity { .name = "_gravityhole", .prefabFilename = "../afterworld/scenes/prefabs/ball/toy/gravityhole.rawscene" },
+  PrefabEntity { .name = "_teleport_exit", .prefabFilename = "../afterworld/scenes/prefabs/ball/teleport_exit.rawscene" },
+  PrefabEntity { .name = "_moon", .prefabFilename = "../afterworld/scenes/prefabs/ball/moon.rawscene" },
+  PrefabEntity { .name = "_moonend", .prefabFilename = "../afterworld/scenes/prefabs/ball/moon_end.rawscene" },
+  PrefabEntity { .name = "_warp", .prefabFilename = "../afterworld/scenes/prefabs/ball/warp_select.rawscene" },
+  PrefabEntity { .name = "_gem", .prefabFilename = "../afterworld/scenes/prefabs/ball/pickup/gem.rawscene" },
+};
+
 CompileMapFns getCompileMapForBallGame(){
   auto ballGameCompileSharedPtr = std::make_shared<BallGameCompile>();
   auto compileFn = [ballGameCompileSharedPtr](std::string& brushFileOut, MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName, std::vector<AdditionalEntity>& additionalEntities) -> void {
@@ -356,6 +388,16 @@ CompileMapFns getCompileMapForBallGame(){
     addRotation(entity, attributes);
   
     int layerIndex = -1;
+
+
+    bool isPrefabEntity = false;
+    for (const auto& prefabEntity : prefabEntities){
+      if (*className.value() == prefabEntity.name){
+        isPrefabEntity = true;
+        std::cout << prefabEntity.name << " moved to prefab: " << prefabEntity.prefabFilename << std::endl;
+      }
+    }
+
     if (isLayerEntity(entity, &layerIndex) && entity.brushes.size() > 0){
       // same as world spawn, but without added keys
       *shouldWrite = true;
@@ -372,14 +414,6 @@ CompileMapFns getCompileMapForBallGame(){
         .field = "layer",
         .attributeValue = "nolighting",
       });
-    }else if (*className.value() == "player_start"){
-      modassert(false, "player_start moved to editor");
-    }else if (*className.value() == "spawn_pipe"){
-      modassert(false, "spawn_pipe moved to editor");
-    }else if (*className.value() == "activateable"){
-      modassert(false, "activateable moved to editor as activator");
-    }else if (*className.value() == "simple_activate"){
-      modassert(false, "simple_activate moved to editor as platform");
     }else if (*className.value() == "soul"){
       *shouldWrite = true;
 
@@ -480,12 +514,6 @@ CompileMapFns getCompileMapForBallGame(){
         });
       }
 
-    }else if (*className.value() == "shard"){
-      modassert(false, "shard moved to editor");
-    }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
-      modassert(false, "powerup moved to editor");
-    }else if (*className.value() == "vertical_bound_point"){
-      modassert(false, "vertical_bound_point moved to editor");
     }else if (*className.value() == "vertical_bound_plane"){
       modassert(false, "vert bound plane not supported");
     }else if (*className.value() == "worldspawn"){
@@ -527,18 +555,6 @@ CompileMapFns getCompileMapForBallGame(){
           .field = "player_end",
           .attributeValue = "true",
         });
-    }else if (*className.value() == "tube_exit"){
-        modassert(false, "tube_exit moved to editor");      
-    }else if (*className.value() == "spikes"){
-      modassert(false, "spikes moved to editor");      
-    }else if (*className.value() == "crusher"){
-      modassert(false, "crusher moved to editor");      
-    }else if (*className.value() == "spinner"){
-      modassert(false, "spinner moved to editor");      
-    }else if (*className.value() == "autodoor"){
-      modassert(false, "autodoor moved to editor");      
-    }else if (*className.value() == "dropper"){
-      modassert(false, "dropper moved to editor");      
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -641,10 +657,6 @@ CompileMapFns getCompileMapForBallGame(){
         .field = "killplane",
         .attributeValue = "true",
       });
-    }else if (*className.value() == "laser"){
-      modassert(false, "laser moved to editor");      
-    }else if (*className.value() == "gravityhole"){
-      modassert(false, "gravityhole moved to editor");      
     }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
@@ -702,8 +714,6 @@ CompileMapFns getCompileMapForBallGame(){
             .attributeValue = *teleportTarget.value(),
           });
         }
-    }else if (*className.value() == "teleport_exit"){
-      modassert(false, "teleport_exit moved to editor");      
     }else if (*className.value() == "dynamic"){
         std::cout << "got dynamic" << std::endl;
         *shouldWrite = true;
@@ -799,20 +809,14 @@ CompileMapFns getCompileMapForBallGame(){
         orbEntity.conn = connections;
         ballGameCompile.orbs.push_back(orbEntity);
     }else if (*className.value() == "camera"){
-      modassert(false, "camera moved to editor");
+      modassert(false, "camera moved to core editor");
     }else if (*className.value() == "light"){
-      modassert(false, "light moved to editor");
-    }else if (*className.value() == "moon"){
-      modassert(false, "moon moved to editor");
-    }else if (*className.value() == "moonend"){
-      modassert(false, "moonend moved to editor"); // warp_select
-    }else if (*className.value() == "warp"){
-      modassert(false, "warp moved to editor"); // warp_select
-    }else if (*className.value() == "gem"){
-      modassert(false, "gem moved to editor"); // warp_select
+      modassert(false, "light moved to core editor");
     }else{
+      if (!isPrefabEntity){
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
+      }
     }
 
     auto layer = getValue(entity, "layer");
