@@ -1,0 +1,12 @@
+# @editor expose gravityhole:wellname type=string label="Well Name"
+# @editor expose gravityhole:targetwell type=string label="Target Well"
+# @editor expose gravityhole:launch type=vec3 label="Launch" min=0 max=1000
+
+gravityhole:mesh:../gameresources/build/objtypes/gravityhole.gltf
+gravityhole:physics_shape:shape_exact
+gravityhole:physics:enabled
+gravityhole:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+gravityhole:gravityhole:true
+gravityhole:holemode:auto
+
+gravityhole:launch:0 500 0

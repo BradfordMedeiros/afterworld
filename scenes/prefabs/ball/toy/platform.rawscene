@@ -1,0 +1,7 @@
+# Generated scene 
+medium:mesh:../gameresources/build/primitives/medium.gltf
+medium/model:activate-autoreset:1000
+medium/model:activate-type:touch
+medium/model:activatable:true
+medium/model:physics_shape:shape_exact
+medium/model:physics:enabled

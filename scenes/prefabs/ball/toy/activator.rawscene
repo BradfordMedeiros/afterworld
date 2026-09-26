@@ -1,0 +1,11 @@
+# @editor expose mushroom:target type=string label=Target
+
+mushroom:mesh:../gameresources/build/uncategorized/metalmushroom.gltf
+mushroom:activatable:true
+mushroom:activate-mask:11
+mushroom:scale:3 3 3
+mushroom:physics_shape:shape_exact
+mushroom:physics:enabled
+mushroom:activate-type:trigger
+mushroom:layer:nolighting
+mushroom:activate-target:test

@@ -1,0 +1,10 @@
+crusher:mesh:../gameresources/build/misc/crusher.gltf
+crusher:activatable:true
+crusher:activate-type:near
+crusher:radius:5
+
+crusher/model:physics_shape:shape_exact
+crusher/model:physics:enabled
+
+crusher/poles:physics_shape:shape_exact
+crusher/poles:physics:enabled

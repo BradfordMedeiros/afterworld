@@ -361,8 +361,6 @@ CompileMapFns getCompileMapForBallGame(){
       *shouldWrite = true;
 
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
-
-
     }else if (*className.value() == "arcade_zone"){
       *shouldWrite = true;
       addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");
@@ -375,65 +373,13 @@ CompileMapFns getCompileMapForBallGame(){
         .attributeValue = "nolighting",
       });
     }else if (*className.value() == "player_start"){
-      *shouldWrite = true;
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "playerspawn",
-        .attributeValue = "true",
-      });
+      modassert(false, "player_start moved to editor");
     }else if (*className.value() == "spawn_pipe"){
-      *shouldWrite = true;
-  
-      addCoreTrench(entity, attributes, "../gameresources/build/uncategorized/darkwires4.gltf");
-
+      modassert(false, "spawn_pipe moved to editor");
     }else if (*className.value() == "activateable"){
-      *shouldWrite = true;
-      attributes.push_back(GameobjAttributeOpts {  
-        .field = "mesh",
-        .attributeValue = paths::MUSHROOM,
-      });
-
-      attributes.push_back(GameobjAttributeOpts { 
-        .field = "activatable",
-        .attributeValue = "true",
-      });
-
-      attributes.push_back(GameobjAttributeOpts { 
-        .field = "activate-mask",
-        .attributeValue = static_cast<float>(0b1011),
-      });
-
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "scale",
-        .attributeValue = glm::vec3(3.f, 3.f, 3.f),
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "physics_shape",
-        .attributeValue = "shape_exact",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "physics",
-        .attributeValue = "enabled",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "activate-type",
-        .attributeValue = "trigger",
-      });
-
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "layer",
-        .attributeValue = "nolighting",
-      });
-
-      auto targetName = getValue(entity, "target");
-      modassert(targetName.has_value(), "activatable but does not have a target to activate");
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "activate-target",
-        .attributeValue = *targetName.value(),
-      });
-
+      modassert(false, "activateable moved to editor as activator");
     }else if (*className.value() == "simple_activate"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/primitives/medium.gltf", "model", { "model" });
- 
+      modassert(false, "simple_activate moved to editor as platform");
     }else if (*className.value() == "soul"){
       *shouldWrite = true;
 
@@ -535,33 +481,7 @@ CompileMapFns getCompileMapForBallGame(){
       }
 
     }else if (*className.value() == "shard"){
-      *shouldWrite = true;
-      addCoreTrench(entity, attributes, paths::SHARD);
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "scrollspeed",
-        .attributeValue = glm::vec3(1.f, 1.f, 0.f),
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "scrollspeed",
-        .attributeValue = glm::vec3(1.f, 1.f, 0.f),
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "breakable",
-        .attributeValue = "true",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "physics_collision",
-        .attributeValue = "nocollide",
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "tint",
-        .attributeValue = glm::vec4(0.f, 0.f, 1.f, 0.8f),
-      });
-      attributes.push_back(GameobjAttributeOpts {
-        .field = "layer",
-        .attributeValue = "nolighting",
-      });
-
+      modassert(false, "shard moved to editor");
     }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity" || *className.value() == "powerup_invincibility"){
       modassert(false, "powerup moved to editor");
     }else if (*className.value() == "vertical_bound_point"){
@@ -582,8 +502,6 @@ CompileMapFns getCompileMapForBallGame(){
         .field = "jumpsurface",
         .attributeValue = "true",
       });   
-      
-
 
     }else if (*className.value() == "player_end"){
         *shouldWrite = true;
@@ -610,32 +528,17 @@ CompileMapFns getCompileMapForBallGame(){
           .attributeValue = "true",
         });
     }else if (*className.value() == "tube_exit"){
-        auto tint = addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/uncategorized/darkwires_spawn.gltf", std::nullopt, { "sphere", "model", "spikes", });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field =  "tint",
-          .attributeValue = tint,
-          .submodel = "sphere",
-        });
-
+        modassert(false, "tube_exit moved to editor");      
     }else if (*className.value() == "spikes"){
       modassert(false, "spikes moved to editor");      
     }else if (*className.value() == "crusher"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/crusher.gltf", std::nullopt,  { "model", "poles" });
-      //attributes.push_back(GameobjAttributeOpts {
-      //  .field = "killplane",
-      //  .attributeValue = "true",
-      //  .submodel = "spiketip",
-      //});
-      //attributes.push_back(GameobjAttributeOpts {
-      //  .field = "scale",
-      //  .attributeValue = glm::vec3(3.f, 3.f, 3.f),
-      //});
+      modassert(false, "crusher moved to editor");      
     }else if (*className.value() == "spinner"){
       modassert(false, "spinner moved to editor");      
     }else if (*className.value() == "autodoor"){
       modassert(false, "autodoor moved to editor");      
     }else if (*className.value() == "dropper"){
-      addSimpleActivatable(shouldWrite, entity, attributes, "../gameresources/build/misc/shootingtarget.gltf", "model", { "model" });
+      modassert(false, "dropper moved to editor");      
     }else if (*className.value() == "trigger_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -741,50 +644,7 @@ CompileMapFns getCompileMapForBallGame(){
     }else if (*className.value() == "laser"){
       modassert(false, "laser moved to editor");      
     }else if (*className.value() == "gravityhole"){
-        *shouldWrite = true;
-        addCoreTrench(entity, attributes, paths::GRAVITYHOLE_MODEL);
-
-
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "gravityhole",
-          .attributeValue = "true",
-        });     
-
-        auto wellname = getValue(entity, "name");
-        if (wellname.has_value()){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "wellname",
-            .attributeValue = *wellname.value(),
-          });        
-        }
-
-        auto targetwell = getValue(entity, "target");
-        if (targetwell.has_value()){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "targetwell",
-            .attributeValue = *targetwell.value(),
-          });        
-        }
-
-
-
-
-        auto launch = getVec3Value(entity, "launch");
-        if (launch.has_value()){
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "launch",
-            .attributeValue = changeCoord(launch.value()),
-          });     
-        }
-
-        auto holemode = getValue(entity, "mode");
-        if (holemode.has_value()){
-          modassert(*holemode.value() == "auto", "unsupported mode for gravityhole");
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "holemode",
-            .attributeValue = *holemode.value(),
-          }); 
-        }
+      modassert(false, "gravityhole moved to editor");      
     }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".map");

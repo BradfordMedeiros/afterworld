@@ -142,22 +142,16 @@ void onFrameGravityWells(){
 			auto position = gameapi -> getGameObjectPos(gravityWell.managedItem.value(), true, "[gamelogic] gravityhole");
 			auto targetWellPosition = getTargetWellPosition(gravityWell);
 			auto distance = targetWellPosition - position;
-  		auto direction = glm::normalize(distance);
-  		float speed = gameapi -> timeElapsed() * 10.f;
-  		auto offset = glm::vec3(direction.x * speed, direction.y * speed, direction.z * speed);
+			auto remainingDistance = glm::length(distance);
+			float maxStep = gameapi -> timeElapsed() * 10.f;
+			constexpr float ARRIVAL_EPSILON = 0.001f;
 
-  		// without this is will osscilate 
-  		if ((offset.x > 0 && distance.x < offset.x) || (offset.x < 0 && distance.x > offset.x)){
-  			offset.x = distance.x;
-  		}
-  		if ((offset.y > 0 &&  distance.y < offset.y) || (offset.y < 0 && distance.y > offset.y)){
-  			offset.y = distance.y;
-  		}
-  		if ((offset.z > 0 && distance.z < offset.z) || (offset.z < 0 && distance.z > offset.z)){
-  			offset.z = distance.z;
-  		}
-  		auto newPosition = position + offset;
-		gameapi -> setGameObjectPosition(gravityWell.managedItem.value(), newPosition, false, Hint { .hint = "[gamelogic] - set well item posn" });
+			auto newPosition = (remainingDistance <= maxStep || remainingDistance <= ARRIVAL_EPSILON)
+				? targetWellPosition
+				: position + (distance / remainingDistance) * maxStep;
+
+			std::cout << "gravity set position: " << print(newPosition) << std::endl;
+			gameapi -> setGameObjectPosition(gravityWell.managedItem.value(), newPosition, false, Hint { .hint = "[gamelogic] - set well item posn" });
   	}
 }
 

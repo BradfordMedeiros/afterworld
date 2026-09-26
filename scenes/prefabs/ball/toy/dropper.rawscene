@@ -1,0 +1,8 @@
+# Generated scene 
+shootingtarget:radius:5
+shootingtarget:activate-type:touch
+shootingtarget:activatable:true
+shootingtarget:mesh:../gameresources/build/misc/shootingtarget.gltf
+shootingtarget/model:activatable:true
+shootingtarget/model:physics_shape:shape_exact
+shootingtarget/model:physics:enabled

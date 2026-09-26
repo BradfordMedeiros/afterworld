@@ -13,7 +13,7 @@ DEFINE_RESOURCE(BREAKABLE,  "ball/entity/orbpickup" )  // mixed
 
 // Ball Sounds
 DEFINE_RESOURCE(BALL_JUMP, "ball/jump")  // mixed
-DEFINE_RESOURCE(BALL_GRAVITYWELL, "fps/entity/test")  // mixed
+DEFINE_RESOURCE(BALL_GRAVITYWELL, "effects/gravitywell")  // mixed
 DEFINE_RESOURCE(BALL_ROLLING,  "ball/rolling" )  // mixed
 
 
