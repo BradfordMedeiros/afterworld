@@ -233,7 +233,7 @@ objid addWaterObj(objid sceneId){
 }
 
 
-void drawWaterOverlay(bool inGameMode, bool isFreeCam, glm::vec3 cameraPos){
+void drawWaterOverlay(bool inGameMode, glm::vec3 cameraPos){
   static std::optional<OctreeMaterial> material;
   static std::optional<OctreeMaterial> lastMaterial;
   static float changeTime = 0.f;
@@ -256,12 +256,12 @@ void drawWaterOverlay(bool inGameMode, bool isFreeCam, glm::vec3 cameraPos){
     alpha = 1;
   }
 
-  if (inGameMode || isFreeCam){
+  if (inGameMode){
     if (isWater){
       gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, alpha * 0.3), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
     }else{
       // this is wrong since starts from 0.3
-      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, 0.3 - (alpha * 0.3)), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+      //gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(tintColor.x, tintColor.y, tintColor.z, 0.3 - (alpha * 0.3)), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
     }
   }
   lastMaterial = material;

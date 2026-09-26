@@ -18,7 +18,7 @@ void generateWaterMesh();
 objid addWaterObj(objid sceneId);
 
 ////
-void drawWaterOverlay(bool inGameMode, bool isFreeCam, glm::vec3 position);
+void drawWaterOverlay(bool inGameMode, glm::vec3 position);
 
 
 #endif
