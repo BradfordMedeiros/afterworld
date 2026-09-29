@@ -729,14 +729,13 @@ std::vector<TagUpdater> tagupdates = {
 
 	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
 	  	modassert(railDataRot.has_value(), "no data for rail-rot");
-	  	auto dataRotations = parseDataVec3(railDataRot.value());
+      auto dataRotations = split(railDataRot.value(), ',');
 
 			std::vector<OrbDataConfig> orbDatas;
 			for (int i = 0; i < orbPositions.size(); i++){
-				auto rotVec = dataRotations.at(i);
 				orbDatas.push_back(OrbDataConfig {
 					.pos = orbPositions.at(i),
-					.rotation = quatFromTrenchBroomAngles(rotVec.x, rotVec.y, rotVec.z),
+					.rotation = parseQuat(parseVec4(dataRotations.at(i))),
 					.level = orbLevels.at(i),
 					.orbUi = orbUisData.at(i),
 				});

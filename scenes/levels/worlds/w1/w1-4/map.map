@@ -11,12 +11,12 @@
 "_tb_layer_omit_from_export" "1"
 // brush 0
 {
-( -48 -64 -16 ) ( -48 -63 -16 ) ( -48 -64 -15 ) arcade/trench/aurora -48 -32 0 1 1
-( -48 -64 -16 ) ( -48 -64 -15 ) ( -47 -64 -16 ) arcade/trench/aurora -16 -32 0 1 1
-( -48 -64 -16 ) ( -47 -64 -16 ) ( -48 -63 -16 ) arcade/trench/aurora -16 48 0 1 1
-( 160 48 0 ) ( 160 49 0 ) ( 161 48 0 ) arcade/trench/aurora -16 48 0 1 1
-( 160 48 0 ) ( 161 48 0 ) ( 160 48 1 ) arcade/trench/aurora -16 -32 0 1 1
-( 112 48 0 ) ( 112 48 1 ) ( 112 49 0 ) arcade/trench/aurora -48 -32 0 1 1
+( -272 -64 -16 ) ( -272 -63 -16 ) ( -272 -64 -15 ) arcade/trench/aurora -48 -32 0 1 1
+( -16 -496 -16 ) ( -16 -496 -15 ) ( -15 -496 -16 ) arcade/trench/aurora -48 -32 0 1 1
+( -16 -64 -16 ) ( -15 -64 -16 ) ( -16 -63 -16 ) arcade/trench/aurora -48 48 0 1 1
+( 192 48 0 ) ( 192 49 0 ) ( 193 48 0 ) arcade/trench/aurora -48 48 0 1 1
+( 192 48 0 ) ( 193 48 0 ) ( 192 48 1 ) arcade/trench/aurora -48 -32 0 1 1
+( 144 48 0 ) ( 144 48 1 ) ( 144 49 0 ) arcade/trench/aurora -48 -32 0 1 1
 }
 // brush 1
 {

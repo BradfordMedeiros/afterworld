@@ -1098,14 +1098,14 @@ GameTypeInfo getBallMode(){
 		  		auto ballVehicle = getVehicleBall(vehicles, ballMode.ballId).value();
 	  			setDisableAutolaunch(*ballVehicle, false);
 	  		}
-	  		if (key == 'A'){
+      if (key == 'A' && action == 1){
 	  			auto multiOrbView = multiorbViewByCamera(cameraId);
 
 	  			if (multiOrbView.has_value()){
 		  			prevOrb(*multiOrbView.value());
 	  			}
 	  		}
-	  		if (key == 'D'){
+      if (key == 'D' && action == 1){
 	  			auto multiOrbView = multiorbViewByCamera(cameraId);
 	  			if (multiOrbView.has_value()){
 		  			nextOrb(*multiOrbView.value());  			

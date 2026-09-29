@@ -38,7 +38,7 @@ entity_arcade_zone_26:position:14.9479 9.4 -42.8
 combined_entities_orb:data-level:w1-1,video,one,w1,testorb3
 combined_entities_orb:data-orbui:w1,w1,testorb3,metaworld,metaworld
 combined_entities_orb:data-conn:1,,,4,
-combined_entities_orb:data-rot:0 -12 -29.6,0 0 0,0 0 0,0 45 0,0 90 0
+combined_entities_orb:data-rot:0.9781476 0 0.2079117 -29.6,1 0 0 0,1 0 0 0,0.7071068 0 -0.7071068 0,0 0 -1 0
 combined_entities_orb:data-pos:-29.6 0.8 -12,-29.6 1.6 2.4,208.8 2.4 72.8,-53.6 50.4 7.2,252 50.4 133.6
 combined_entities_orb:data-name:w1-1,w1-2,one,meta1,meta2
 combined_entities_orb:orbui:true
@@ -111,4 +111,3 @@ entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
 entity_worldspawn_0:position:130.5 -13.6 -67.2808
-background:texture:../gameresources/build/textures/backgrounds/test3.png
