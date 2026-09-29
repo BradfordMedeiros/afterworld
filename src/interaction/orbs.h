@@ -102,4 +102,9 @@ struct WorldOrbInfos {
 std::vector<WorldOrbInfos> getOrbUiData(MultiOrbView& multiOrbView);
 
 
+struct OrbUiContainer {
+
+};
+
+
 #endif 

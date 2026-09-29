@@ -205,7 +205,7 @@ std::string symbolStrForMixedSound(MixedSound& mixedSound){
 }
 
 
-MixedSound parsedMixedSound(std::string& filepath){
+MixedSound parseMixedSound(std::string& filepath){
   auto fileInfo = decomposePath(filepath);
   auto relativeDir = relativePath("../afterworld/data/sounds", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
@@ -297,7 +297,7 @@ std::vector<MixedSound> createMixedSounds(){
   auto mixedSoundFiles = listFilesWithExtensionsFromPackage("../afterworld/data/sounds", { "json" });
 
   for (auto& mixedSoundFile : mixedSoundFiles){
-    mixedSounds.push_back(parsedMixedSound(mixedSoundFile));
+    mixedSounds.push_back(parseMixedSound(mixedSoundFile));
   }
 
   for (auto& mixedSound : mixedSounds){

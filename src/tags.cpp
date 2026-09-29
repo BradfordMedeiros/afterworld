@@ -765,32 +765,31 @@ std::vector<TagUpdater> tagupdates = {
 				orbData.orbUis[getUniqueObjId()] = orbUi;			
 			}
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    	
-  	    },
-  	    .onFrame = []() -> void {
- 	    		std::set<objid> cachesToRemove;
-	    		for (auto& [orbUiId, indexToMesh] : orbData.orbIdToIndexToMeshId){
-	    			if (indexToMesh.size() == 0 || orbData.orbUis.find(orbUiId) == orbData.orbUis.end()){
-	    				cachesToRemove.insert(orbUiId);
-	    			}
-	    		}
-	    		for (auto cacheToRemove : cachesToRemove){
-	    			for (auto&[index, meshObjId] :  orbData.orbIdToIndexToMeshId.at(cacheToRemove)){
-	    				gameapi -> removeObjectById(meshObjId);
-	    			}
-	    			orbData.orbIdToIndexToMeshId.erase(cacheToRemove);
-	    		}
+  	.onRemove = [](int32_t id) -> void {
+  	},
+  	.onFrame = []() -> void {
+ 	   	std::set<objid> cachesToRemove;
+	   	for (auto& [orbUiId, indexToMesh] : orbData.orbIdToIndexToMeshId){
+	   		if (indexToMesh.size() == 0 || orbData.orbUis.find(orbUiId) == orbData.orbUis.end()){
+	   			cachesToRemove.insert(orbUiId);
+	   		}
+	   	}
+	   	for (auto cacheToRemove : cachesToRemove){
+	   		for (auto&[index, meshObjId] :  orbData.orbIdToIndexToMeshId.at(cacheToRemove)){
+	   			gameapi -> removeObjectById(meshObjId);
+	   		}
+	   		orbData.orbIdToIndexToMeshId.erase(cacheToRemove);
+	   	}
     
-	    		for (auto& [id, orbUi] : orbData.orbUis){
-	    			auto objExists = gameapi -> gameobjExists(id);
-	    			if (!objExists){
-	    				continue;
-	    			}
-	      		drawOrbs(orbData, orbUi, id);  			
-	    		}
-  	    },
-  	    .onMessage = [](std::string& key, std::any& value) -> void {},
+	    for (auto& [id, orbUi] : orbData.orbUis){
+	    	auto objExists = gameapi -> gameobjExists(id);
+	    	if (!objExists){
+	    		continue;
+	    	}
+	     	drawOrbs(orbData, orbUi, id);  			
+	    }
+  	},
+  	.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "vehicle",
