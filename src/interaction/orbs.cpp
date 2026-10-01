@@ -42,7 +42,7 @@ glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
 	auto orbFrom = getOrb(orbUi.orbs, index);
 	modassert(orbFrom.has_value(), std::string("orbFrom does not exist: ") + std::to_string(index));
 	auto position = orbFrom.value() -> position;
-	return offset +  (rotation * (scale * position));
+	return  position;
 }
 
 glm::quat getOrbRotation(OrbUi& orbUi, int index){
@@ -185,7 +185,7 @@ void handleOrbViews(OrbData& orbData){
 
 		gameapi -> setGameObjectRot(cameraId, orbRotation, true, Hint { .hint = "handleOrbViews set orb camera rotn" });
 
-		glm::vec3 cameraOffset = orbRotation * glm::vec3(0.f, 0.f, 2.f);
+		glm::vec3 cameraOffset = orbRotation * glm::vec3(0.f, 0.f, 0.f);
 		gameapi -> setGameObjectPosition(cameraId, orbPosition + cameraOffset, true, Hint { .hint = "handleOrbViews set orb camera" });
 
 		if (showDebugInfo){

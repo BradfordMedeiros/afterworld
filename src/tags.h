@@ -20,6 +20,7 @@
 #include "./config.h"
 #include "./gameworld/audio.h"
 #include "./resources/sound.h"
+#include "../../ModEngine/src/ui/widgets/widgets.h"
 
 struct HealthColorObject {
 	glm::vec3 lowColor;

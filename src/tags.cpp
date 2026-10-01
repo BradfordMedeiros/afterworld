@@ -704,66 +704,43 @@ std::vector<TagUpdater> tagupdates = {
 		.attribute = "orbui",
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
 	  	auto attrHandle = getAttrHandle(id);
-	  	auto orbPositionStrs = getStrAttr(attrHandle, "data-pos");
-	  	modassert(orbPositionStrs.has_value(), "no data for orbs");
-			auto orbPositions = parseDataVec3(orbPositionStrs.value());
-			std::cout << "orbui: ";
-			for (auto pos : orbPositions){
-				std::cout << print(pos) << " ";
-			}
-			std::cout << std::endl;
+	  	auto configFile = getStrAttr(attrHandle, "config");
+	  	if (configFile.has_value()){
+	  		auto pointConfig = loadPointConfig(configFile.value());
 
-			auto orbLevelsStr = getStrAttr(attrHandle, "data-level");
-			modassert(orbLevelsStr.has_value(), "no data for orb levels");
-			auto orbLevels = split(orbLevelsStr.value(), ',');
+	  		std::cout << print(pointConfig) << std::endl;
+				std::vector<OrbDataConfig> orbDatas;
+				std::vector<OrbDataConection> orbConns;
 
-			auto orbNamesStr = getStrAttr(attrHandle, "data-name");
-	  	modassert(orbNamesStr.has_value(), "no data-name for orbs");
-	  	std::set<std::string> names;
+				for (int i = 0; i < pointConfig.position.size(); i++){
+					auto position = pointConfig.position.at(i);
+					auto rotation = pointConfig.rotations.at(i);
+					auto level = pointConfig.levels.at(i);
+					auto orbUi = pointConfig.orbUis.at(i);
+					auto connection = pointConfig.connections.at(i); // single connection only right now should support multi
+					orbDatas.push_back(OrbDataConfig {
+						.pos = position,
+						.rotation = rotation,
+						.level = level.has_value() ? level.value() : "",
+						.orbUi = orbUi.has_value() ? orbUi.value() : "",
+					});
 
-	  	auto orbNames = parseDataString(orbNamesStr.value());
-
-			auto orbUisStr = getStrAttr(attrHandle, "data-orbui");
-	  	modassert(orbUisStr.has_value(), "no data-orbui for orbs");
-	  	auto orbUisData = parseDataString(orbUisStr.value());
-
-	  	auto railDataRot = getStrAttr(attrHandle, "data-rot");
-	  	modassert(railDataRot.has_value(), "no data for rail-rot");
-      auto dataRotations = split(railDataRot.value(), ',');
-
-			std::vector<OrbDataConfig> orbDatas;
-			for (int i = 0; i < orbPositions.size(); i++){
-				orbDatas.push_back(OrbDataConfig {
-					.pos = orbPositions.at(i),
-					.rotation = parseQuat(parseVec4(dataRotations.at(i))),
-					.level = orbLevels.at(i),
-					.orbUi = orbUisData.at(i),
-				});
-			}
-
-			auto orbConnStr = getStrAttr(attrHandle, "data-conn");
-			modassert(orbConnStr.has_value(), "no data-conn for orbs");
-			auto orbConnStrs = split(orbConnStr.value(), ',');
-
-			std::vector<OrbDataConection> orbConns;
-			for (int i = 0; i < orbConnStrs.size(); i++){
-				auto toConns = split(orbConnStrs.at(i), '-');
-				for (auto& conn : toConns){
-					auto toIndex = std::atoi(conn.c_str());
 					orbConns.push_back(OrbDataConection {
 							.connection = OrbConnection {
 								.indexFrom = i,
-								.indexTo = toIndex,
+								.indexTo = connection,
 							},
-							.orbUi = orbUisData.at(i),
+							.orbUi = orbUi.has_value() ? orbUi.value() : "",
 					});
-				}
-			}
 
-			auto orbUis = createOrbUi2(id, orbDatas, orbConns);
-			for (auto& orbUi : orbUis){
-				orbData.orbUis[getUniqueObjId()] = orbUi;			
-			}
+				}
+
+				auto orbUis = createOrbUi2(id, orbDatas, orbConns);
+				for (auto& orbUi : orbUis){
+					orbData.orbUis[getUniqueObjId()] = orbUi;			
+				}
+				return;
+	  	}
 		},
   	.onRemove = [](int32_t id) -> void {
   	},
