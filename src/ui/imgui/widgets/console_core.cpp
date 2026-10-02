@@ -328,6 +328,16 @@ std::vector<CommandDispatch> commands {
       return std::nullopt;
     },
   },
+
+  CommandDispatch {
+    .command = "go",
+    .fn = [](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      startMode(false);
+      consoleInterface.setNormalMode();
+      return std::nullopt;
+    },
+  },
+
 };
 
 
