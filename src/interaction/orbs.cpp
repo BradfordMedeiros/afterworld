@@ -35,10 +35,6 @@ std::vector<int> getAllConnections(OrbUi& orbUi, int index){
 
 glm::vec3 getOrbPosition(OrbUi& orbUi, int index){
 	modassert(gameapi -> gameobjExists(orbUi.ownerId), "orb does not exist for this orb view");
-	
-	glm::vec3 offset = gameapi -> getGameObjectPos(orbUi.ownerId, true, "getOrbPosition pos");
-	auto scale = gameapi -> getGameObjectScale(orbUi.ownerId, "getOrbPosition scale");
-	auto rotation = gameapi -> getGameObjectRotation(orbUi.ownerId, true, "getOrbPosition rotn");
 	auto orbFrom = getOrb(orbUi.orbs, index);
 	modassert(orbFrom.has_value(), std::string("orbFrom does not exist: ") + std::to_string(index));
 	auto position = orbFrom.value() -> position;
