@@ -11,6 +11,7 @@ extern std::unordered_map<objid, Powerup> powerups;
 extern std::unordered_map<objid, Activatable> activateables;
 
 const std::string BALL_SHADER_NAME = "../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl";
+const std::string GRASS_SHADER_NAME = "../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl";
 
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 std::optional<ActiveLevel> getActiveLevel();
@@ -84,6 +85,7 @@ struct BallModeOptions{
    std::optional<LevelLoadOptions> loadOptions;
 
    unsigned int ballShader = 0;
+   unsigned int grassShader = 0;
    int lastImpulseId = 0;
 };
 
@@ -572,6 +574,11 @@ void startBallMode(objid sceneId){
 		auto loadedShader = gameapi -> loadShader(BALL_SHADER_NAME, "../afterworld/shaders/ball");
 		modassert(loadedShader != nullptr, "could not load the ball shader");
 	}
+	auto grassShader = gameapi -> shaderByName(GRASS_SHADER_NAME);
+	if (!grassShader.has_value()){
+		auto loadedShader = gameapi -> loadShader(GRASS_SHADER_NAME, "../afterworld/shaders/grass");
+		modassert(loadedShader != nullptr, "could not load the grass shader");
+	}
 
   auto inHub = gameapi -> getObjectsByAttr("levelselect", std::nullopt, sceneId).size() > 0;
 
@@ -1045,6 +1052,10 @@ GameTypeInfo getBallMode(){
 			modassert(shaderId.has_value(), "could not find the ball shader");
 			modeOptions.ballShader = shaderId.value();
 
+			auto grassShaderId = gameapi -> shaderByName(GRASS_SHADER_NAME);
+			modassert(grassShaderId.has_value(), "could not find the grass shader");
+			modeOptions.grassShader = grassShaderId.value();
+
 			{
 				UniformData uniform {
 	  			.name = "_postColor",
@@ -1174,6 +1185,11 @@ GameTypeInfo getBallMode(){
 	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
 
 			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
+			UniformData grassBallPosition {
+				.name = "_postColor",
+				.value = position,
+			};
+			gameapi -> setShaderUniform(ballMode.grassShader, grassBallPosition);
 
   		auto& ballVehicle = *getVehicleBall(vehicles, ballMode.ballId).value();
 	  	auto groundedId = getGroundedId(ballVehicle);
