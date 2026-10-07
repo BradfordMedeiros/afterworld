@@ -7,17 +7,23 @@ extern CustomApiBindings* gameapi;
 int getNumberOfPlayers();
 
 const std::string GRASS_SHADER_NAME = "../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl";
+const std::string FUR_SHELL_SHADER_NAME = "../afterworld/shaders/fur_shell/fragment.glsl,../afterworld/shaders/fur_shell/vertex.glsl,../afterworld/shaders/fur_shell/geometry.glsl";
 
-void updateGrassWind(const Weather& weather){
-  auto shaderId = gameapi -> shaderByName(GRASS_SHADER_NAME);
+void updateShaderWind(const std::string& shaderName, float windStrength) {
+  auto shaderId = gameapi -> shaderByName(shaderName);
   if (!shaderId.has_value()){
     return;
   }
   UniformData wind {
     .name = "_windStrength",
-    .value = weather.windStrength,
+    .value = windStrength,
   };
   gameapi -> setShaderUniform(shaderId.value(), wind);
+}
+
+void updateWeatherShaderWind(const Weather& weather) {
+  updateShaderWind(GRASS_SHADER_NAME, weather.windStrength);
+  updateShaderWind(FUR_SHELL_SHADER_NAME, weather.windStrength);
 }
 
 objid createWeatherEffect(std::string path, std::optional<glm::vec3> scale, std::optional<glm::vec4> tint){
@@ -64,7 +70,7 @@ void changeWeather(Weather& weather, std::optional<std::string> name){
   weather.weatherEmitter = std::nullopt;
   weather.weatherName = std::nullopt;
   weather.windStrength = 0.25f;
-  updateGrassWind(weather);
+  updateWeatherShaderWind(weather);
 
   if (!name.has_value()){
     std::cout << "weather: change to " << "none" << std::endl;
@@ -75,7 +81,7 @@ void changeWeather(Weather& weather, std::optional<std::string> name){
   weather.weatherEmitter = createWeatherEffect(effect.path, std::nullopt, std::nullopt);
   weather.weatherName = name;
   weather.windStrength = effect.windStrength;
-  updateGrassWind(weather);
+  updateWeatherShaderWind(weather);
   std::cout << "weather: change to " << name.value() << std::endl;
 }
 
@@ -111,7 +117,7 @@ void handleSplash(glm::vec3 cameraPos){
 }
 
 void onWeatherFrame(Weather& weather){
-  updateGrassWind(weather);
+  updateWeatherShaderWind(weather);
 
   auto numPlayers = getNumberOfPlayers();
   modassert(numPlayers == 1, "weather system does not support more than 1 player");
