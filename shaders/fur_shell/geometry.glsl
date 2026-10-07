@@ -1,7 +1,7 @@
 #version 430 core
 
 layout (triangles) in;
-layout (triangle_strip, max_vertices = 18) out;
+layout (triangle_strip, max_vertices = 33) out;
 
 in vec2 TexCoord[];
 in vec3 Normal[];
@@ -25,14 +25,17 @@ uniform mat4 lightsprojview;
 uniform mat4 model;
 uniform float time;
 uniform float _windStrength;
+uniform float _furLength;
+uniform float _furWindMultiplier;
+uniform int _furLayers;
 
 void emitShellVertex(int vertexIndex, float height) {
   vec3 normal = normalize(Normal[vertexIndex]);
   float modelScale = (length(model[0].xyz) + length(model[1].xyz) + length(model[2].xyz)) / 3.0;
   float gust = cos(time * 0.8 + FragPos[vertexIndex].x * 0.35 + FragPos[vertexIndex].z * 0.2);
-  float sway = 0.3 * _windStrength * height * gust;
+  float sway = 0.3 * _windStrength * _furWindMultiplier * height * gust;
   vec3 windOffset = vec3(sway, 0.0, sway);
-  vec3 position = FragPos[vertexIndex] + normal * (height * 0.08 * modelScale) + windOffset;
+  vec3 position = FragPos[vertexIndex] + normal * (height * _furLength * modelScale) + windOffset;
 
   ShellTexCoord = TexCoord[vertexIndex];
   ShellNormal = normal;
@@ -47,8 +50,9 @@ void emitShellVertex(int vertexIndex, float height) {
 }
 
 void main() {
-  for (int shell = 0; shell <= 5; shell++) {
-    float height = float(shell) / 5.0;
+  int layerCount = clamp(_furLayers, 2, 11);
+  for (int shell = 0; shell < layerCount; shell++) {
+    float height = float(shell) / float(max(layerCount - 1, 1));
     for (int vertex = 0; vertex < 3; vertex++) {
       emitShellVertex(vertex, height);
     }

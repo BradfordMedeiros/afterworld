@@ -8,6 +8,8 @@
 #include "./res/shaders/default/default_lighting.glsl"
 
 in float shellHeight;
+uniform float _furDensity;
+uniform float _furStrandWidth;
 
 float strandHash(vec2 cell) {
   return fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
@@ -19,12 +21,12 @@ void main() {
   mainAlgorithm(baseColor, normalVec, vec2(0.0), ShellTexCoord);
 
   if (shellHeight > 0.0) {
-    vec2 strandGrid = ShellTexCoord * vec2(220.0, 90.0);
+    vec2 strandGrid = ShellTexCoord * vec2(_furDensity * 2.4444, _furDensity);
     vec2 strandCell = floor(strandGrid);
     vec2 localUv = fract(strandGrid);
     float seed = strandHash(strandCell);
     float strandCenter = 0.5 + (strandHash(strandCell + 13.7) - 0.5) * 0.55;
-    float strandWidth = mix(0.12, 0.34, strandHash(strandCell + 27.1));
+    float strandWidth = mix(_furStrandWidth * 0.5, _furStrandWidth * 1.5, strandHash(strandCell + 27.1));
     float strandLength = mix(0.22, 1.0, strandHash(strandCell + 41.3));
     strandCenter += 0.08 * sin(localUv.y * 3.14 + seed * 6.28);
 

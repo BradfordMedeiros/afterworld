@@ -342,6 +342,9 @@ void initImGuiGameUi(){
       registerWidget("debug-inventory", "system", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
           renderInventory(includePanel);
       });  
+      registerWidget("Fur Shell", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+          renderFurShellPanel(includePanel);
+      });
     }
 
     // Fps

@@ -7,6 +7,7 @@
 #include "./widgets/fps.h"
 #include "./widgets/sound.h"
 #include "./widgets/ball.h"
+#include "./widgets/fur.h"
 #include "./widgets/settings.h"
 #include "./widgets/util.h"
 #include "./common.h"
