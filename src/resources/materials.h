@@ -29,7 +29,6 @@ std::vector<MaterialToParticle>& getMaterials();
 void onCollisionEnterSound(int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos);
 
 void loadParticleEmitters(objid rootSceneId);
-std::optional<objid> getParticleEmitter(std::string& emitterName);
 
 void emitBlood(objid sceneId, objid lookAtId, glm::vec3 position);
 void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position);

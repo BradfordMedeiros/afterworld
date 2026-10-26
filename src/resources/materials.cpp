@@ -163,11 +163,61 @@ void onCollisionEnterSound(int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec
   }
 }
 
+objid createEffect(std::string path, std::optional<glm::vec3> scale, std::optional<glm::vec4> tint){
+    auto sceneId = gameapi -> rootSceneId();
+    GameobjAttributes emitterAttr { 
+      .attr = {
+        { "effekseer", path },
+        //{ "state", "enabled" },
+      } 
+    };
+    if (scale.has_value()){
+      emitterAttr.attr["scale"] = scale.value();
+    }
+    if (tint.has_value()){
+      emitterAttr.attr["effect-tint"] = tint.value();
+    }
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    std::string emitterName = std::string("+emitter-") + std::to_string(getUniqueObjId());
+    auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
+    return emitter.value();
+}
 
-std::vector<ParticleAndEmitter> particleEmitters;
+
+struct EffekData {
+  std::string name;
+  std::string path;
+  std::optional<objid> id;
+  std::optional<glm::vec3> scale;
+  std::optional<glm::vec4> tint;
+};
+std::unordered_map<std::string, EffekData> effects {
+    { "electric", EffekData { .name = "electric", .path  = "./res/particles/electric.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
+    { "killeffect", EffekData { .name = "killeffect", .path  = "./res/particles/backgrounds.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
+    { "warp", EffekData { .name = "warp",  .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f)  }},
+   
+    { "rain", EffekData { .name = "rain", .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "splash", EffekData { .name = "splash", .path  = "./res/particles/splash.efkefc" }},
 
 
-ParticleAndEmitter parseParticleEmitter(objid rootSceneId, std::string filepath){
+    { "fire", EffekData { .name = "fire", .path  = "./res/particles/fire.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "fog", EffekData { .name = "fog",  .path  = "./res/particles/fog.efkefc", .scale = glm::vec3(6.f, 6.f, 6.f) }},
+
+    { "sparks", EffekData { .name = "sparks", .path  = "./res/particles/sparks.efkefc" , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
+    { "firework", EffekData { .name = "firework", .path  = "./res/particles/firework.efkefc"  }},
+};
+
+
+struct ParticleEmitters {
+  std::vector<ParticleAndEmitter> coreEmitters;
+  std::vector<EffekData> effekseerEmitters;
+};
+
+ParticleEmitters particleEmitters;
+
+typedef std::variant<ParticleAndEmitter, EffekData> ParsedEmitterData;
+
+ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath){
   auto fileContent = readFileOrPackage(filepath);
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
@@ -187,46 +237,87 @@ ParticleAndEmitter parseParticleEmitter(objid rootSceneId, std::string filepath)
     .particle = name,
   };
 
-  bool hasParticleStr = false;
+
+
   {
-    auto particleStr = doc.FindMember("particle");
-    if (particleStr != doc.MemberEnd() && particleStr -> value.IsString()) {
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-      std::string particleStrValue = particleStr -> value.GetString();
-      auto particleAttr = particleAttributes(particleStrValue);
-      auto particleEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
-      particle.particleId = particleEmitterId.value();
-      hasParticleStr = true;
-    }       
+    auto typeStr = doc.FindMember("type");
+    if (typeStr != doc.MemberEnd() && typeStr -> value.IsString()){
+      std::string type = typeStr -> value.GetString();
+      if (type == "default"){
+        // do nothing
+      }else if (type == "effekseer"){
+        auto effekseerFilePath = doc.FindMember("particle");
+        modassert(effekseerFilePath -> value.IsString(), "particle field must be defined for partseParticleEmitter");
+        std::string filePath = effekseerFilePath -> value.GetString();
+        EffekData effekData { .name = name,  .path  = filePath  };
+        return effekData;
+      }else{
+        modassert(false, std::string("parseParticleEmitter invalid type: ") + typeStr -> value.GetString());
+      }
+    }
+
   }
-  modassert(hasParticleStr, std::string("particle does not have a particlestr defined in config: ") + particle.particle);
+  
+  {
+    bool hasParticleStr = false;
+    {
+      auto particleStr = doc.FindMember("particle");
+      if (particleStr != doc.MemberEnd() && particleStr -> value.IsString()) {
+        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+        std::string particleStrValue = particleStr -> value.GetString();
+        auto particleAttr = particleAttributes(particleStrValue);
+        auto particleEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
+        particle.particleId = particleEmitterId.value();
+        hasParticleStr = true;
+      }       
+    }
+    modassert(hasParticleStr, std::string("particle does not have a particlestr defined in config: ") + particle.particle);    
+  }
+
   return particle;
 }
-std::vector<ParticleAndEmitter> loadParticleEmittersFromConfig(objid sceneId){
-  std::vector<ParticleAndEmitter> particleEmitters;
+ParticleEmitters loadParticleEmittersFromConfig(objid sceneId){
+  ParticleEmitters particleEmitters;
 
   auto particleEmitterFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/particles/", { "json" });
   for (auto &particleEmitterFile : particleEmitterFiles){
-    auto particleEmitter = parseParticleEmitter(sceneId, particleEmitterFile);
-    particleEmitters.push_back(particleEmitter);
-  }
+    auto particleEmitterVariant = parseParticleEmitter(sceneId, particleEmitterFile);
+    auto particleEmitterPtr = std::get_if<ParticleAndEmitter>(&particleEmitterVariant);
+    auto effekDataPtr = std::get_if<EffekData>(&particleEmitterVariant);
+
+    if (particleEmitterPtr){
+      particleEmitters.coreEmitters.push_back(*particleEmitterPtr);
+    }else if (effekDataPtr){
+      particleEmitters.effekseerEmitters.push_back(*effekDataPtr);
+    }else{
+      modassert(false, "load particle emitter invalid type");
+    }
+  } 
+
   return particleEmitters;
 }
 
 void loadParticleEmitters(objid rootSceneId){
   auto particles = loadParticleEmittersFromConfig(rootSceneId);
-  for (auto& particle : particles){
-    particleEmitters.push_back(particle);
-  }
+  particleEmitters = particles;
 }
 
 
 
 
-std::optional<objid> getParticleEmitter(std::string& emitterName){
-  for (auto &emitter : particleEmitters){
+std::optional<objid> getParticleEmitterCore(std::string& emitterName){
+  for (auto &emitter : particleEmitters.coreEmitters){
     if (emitter.particle == emitterName){
       return emitter.particleId;
+    }
+  }
+  return std::nullopt;
+}
+
+std::optional<EffekData*> getParticleEmitterEffek(std::string& emitterName){
+  for (auto &emitter : particleEmitters.effekseerEmitters){
+    if (emitter.name == emitterName){
+      return &emitter;
     }
   }
   return std::nullopt;
@@ -303,57 +394,16 @@ void emitWaterSplash(objid sceneId, objid lookAtId, glm::vec3 position){
   gameapi -> emit(waterEmitter.value(), position3, std::nullopt, glm::vec3(0.f, 2.f, 0.f), std::nullopt, std::nullopt); 
 }
 
-
-
-objid createEffect(std::string path, std::optional<glm::vec3> scale, std::optional<glm::vec4> tint){
-    auto sceneId = gameapi -> rootSceneId();
-    GameobjAttributes emitterAttr { 
-      .attr = {
-        { "effekseer", path },
-        //{ "state", "enabled" },
-      } 
-    };
-    if (scale.has_value()){
-      emitterAttr.attr["scale"] = scale.value();
-    }
-    if (tint.has_value()){
-      emitterAttr.attr["effect-tint"] = tint.value();
-    }
-    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-    std::string emitterName = std::string("+emitter-") + std::to_string(getUniqueObjId());
-    auto emitter = gameapi -> makeObjectAttr(sceneId, emitterName, emitterAttr, submodelAttributes);
-    return emitter.value();
-}
-
-
-struct EffekData {
-  std::string path;
-  std::optional<objid> id;
-  std::optional<glm::vec3> scale;
-  std::optional<glm::vec4> tint;
-};
-std::unordered_map<std::string, EffekData> effects {
-    { "electric", EffekData { .path  = "./res/particles/electric.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
-    { "killeffect", EffekData { .path  = "./res/particles/backgrounds.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
-    { "warp", EffekData { .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f)  }},
-   
-    { "rain", EffekData { .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
-    { "splash", EffekData { .path  = "./res/particles/splash.efkefc" }},
-
-
-    { "fire", EffekData { .path  = "./res/particles/fire.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
-    { "fog", EffekData { .path  = "./res/particles/fog.efkefc", .scale = glm::vec3(6.f, 6.f, 6.f) }},
-
-    { "sparks", EffekData { .path  = "./res/particles/sparks.efkefc" , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
-    { "firework", EffekData { .path  = "./res/particles/firework.efkefc"  }},
-};
-
-void emitEffect(std::string effectName, glm::vec3 position){
-  auto& effect = effects.at(effectName);
+void emitEffectRaw(EffekData& effect, glm::vec3 position){
   if (!effect.id.has_value()){
     effect.id = createEffect(effect.path, effect.scale, effect.tint);
   }
   gameapi -> emit(effect.id.value(), position, std::nullopt, std::nullopt, std::nullopt, std::nullopt); 
+}
+
+void emitEffect(std::string effectName, glm::vec3 position){
+  auto& effect = effects.at(effectName);
+  emitEffectRaw(effect, position);
 }
 
 void emitParticle(int symbol, glm::vec3 position, glm::quat rotation, glm::vec3 initialVelocity){
@@ -363,11 +413,18 @@ void emitParticle(int symbol, glm::vec3 position, glm::quat rotation, glm::vec3 
   }
   if (name.size() > 0 &&  name.at(0) == '?'){
     auto particleName = name.substr(1, name.size());
-    auto particleId = getParticleEmitter(particleName);
+    auto particleId = getParticleEmitterCore(particleName);
     if (particleId.has_value()){
       gameapi -> emit(particleId.value(), position, rotation, initialVelocity, std::nullopt, std::nullopt);
     }else{
-      std::cout << "missing particle for: " << name << std::endl;
+
+      auto emitterEffect = getParticleEmitterEffek(particleName);
+      if (emitterEffect.has_value()){
+         emitEffectRaw(*emitterEffect.value(), position);
+      }else{
+        std::cout << "missing particle for: " << name << std::endl;
+      }
+     
     }
 
   }else if (name == "explosion"){
