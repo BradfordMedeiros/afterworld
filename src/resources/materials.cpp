@@ -165,26 +165,64 @@ void onCollisionEnterSound(int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec
 
 
 std::vector<ParticleAndEmitter> particleEmitters;
-void loadParticleEmitters(objid rootSceneId){
-  auto query = gameapi -> compileSqlQuery("select name, projectile from particles", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
 
-  modlog("load particle emitters", "start");
 
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-  for (auto &row : result){
-    auto particleAttr = particleAttributes(row.at(1));
-    auto materialEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + row.at(0), particleAttr, submodelAttributes);
-    particleEmitters.push_back(ParticleAndEmitter {
-      .particle = row.at(0),
-      .particleId = materialEmitterId.value(),
-    });
-    modlog("load particle emitters - loading", row.at(0));
+ParticleAndEmitter parseParticleEmitter(objid rootSceneId, std::string filepath){
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    std::cout << "error parsing game file: " << filepath << "  (" << fileContent << ")" << std::endl;
+    modassert(false, "parseParticleEmitter failed");
   }
-  modlog("load particle emitters", "finish");
+
+  auto fileInfo = decomposePath(filepath);
+  auto relativeDir = relativePath("../afterworld/data/config/particles/ ", fileInfo.dirPath, ".");
+  auto relativeDirVec = split(relativeDir, '/');
+  std::string name = fileInfo.filename;
+
+  std::cout << "particle: parseParticleEmitter: " << filepath << ", name = " << name << std::endl;
+
+  ParticleAndEmitter particle {
+    .particle = name,
+  };
+
+  bool hasParticleStr = false;
+  {
+    auto particleStr = doc.FindMember("particle");
+    if (particleStr != doc.MemberEnd() && particleStr -> value.IsString()) {
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      std::string particleStrValue = particleStr -> value.GetString();
+      auto particleAttr = particleAttributes(particleStrValue);
+      auto particleEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
+      particle.particleId = particleEmitterId.value();
+      hasParticleStr = true;
+    }       
+  }
+  modassert(hasParticleStr, std::string("particle does not have a particlestr defined in config: ") + particle.particle);
+  return particle;
 }
+std::vector<ParticleAndEmitter> loadParticleEmittersFromConfig(objid sceneId){
+  std::vector<ParticleAndEmitter> particleEmitters;
+
+  auto particleEmitterFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/particles/", { "json" });
+  for (auto &particleEmitterFile : particleEmitterFiles){
+    auto particleEmitter = parseParticleEmitter(sceneId, particleEmitterFile);
+    particleEmitters.push_back(particleEmitter);
+  }
+  return particleEmitters;
+}
+
+void loadParticleEmitters(objid rootSceneId){
+  auto particles = loadParticleEmittersFromConfig(rootSceneId);
+  for (auto& particle : particles){
+    particleEmitters.push_back(particle);
+  }
+}
+
+
+
+
 std::optional<objid> getParticleEmitter(std::string& emitterName){
   for (auto &emitter : particleEmitters){
     if (emitter.particle == emitterName){
