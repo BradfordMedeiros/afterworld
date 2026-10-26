@@ -62,6 +62,13 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
     modassert(false, "parseMaterial failed");
   }
 
+  {
+    auto collisionParticleClip = doc.FindMember("collision-clip");
+    if (collisionParticleClip != doc.MemberEnd() && collisionParticleClip -> value.IsString()) {
+      materialToParticle.collisionSound = collisionParticleClip -> value.GetString();
+      std::cout << "material: parseMaterial: particle material set hit-clip = " << print(materialToParticle.collisionSound) << std::endl;
+    }       
+  }
 
   {
     auto hitParticle = doc.FindMember("hit-particle");
@@ -133,6 +140,29 @@ void loadAllMaterials(objid rootSceneId){
 std::vector<MaterialToParticle>& getMaterials(){
   return materials;
 }
+
+
+void onCollisionEnterSound(int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos){
+  for (auto& material : materials){
+    auto materialForObj1 = materialTypeForObj(obj1);
+    auto materialForObj2 = materialTypeForObj(obj2);
+
+    std::string materialName = "default";
+    if (materialForObj1.has_value()){
+      materialName = materialForObj1.value();
+    }else if (materialForObj2.has_value()){
+      materialName = materialForObj2.value();
+    }
+
+    if (material.material == materialName){ // obvously this shouldnt be hardcoded to this
+      if (material.collisionSound.has_value()){
+        playMixedSound(getSymbol(material.collisionSound.value()), pos);
+      }
+      return;
+    }
+  }
+}
+
 
 std::vector<ParticleAndEmitter> particleEmitters;
 void loadParticleEmitters(objid rootSceneId){

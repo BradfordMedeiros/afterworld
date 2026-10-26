@@ -24,7 +24,6 @@ std::unordered_map<objid, LinkGunObj> linkGunObj;
 StateController animationController;
 OrbData orbData;
 Water water;
-SoundData soundData;
 GameTypes gametypeSystem;
 AiData aiData;
 Weather weather;
@@ -782,7 +781,6 @@ void changeUiMode(UiMode newUiMode){
 }
 
 
-
 void handleRouteChanged(bool forceLoad){
   auto currentPath = fullHistoryStr(mainRouterHistory);
   modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
@@ -880,7 +878,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     loadDialogTree();
 
     loadSoundSettings();
-    soundData = createSoundData(gameapi -> rootSceneId());
     ensureMixedSoundsLoaded(gameapi -> rootSceneId());
     
     gametypeSystem = createGametypes();
@@ -1329,12 +1326,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       deliverEntityAmmo(itemAcquiredMessage -> targetId, itemAcquiredMessage -> amount);
     }
 
-    if (key == "play-material-sound"){
-      auto soundPosition = anycast<MessagePlaySound>(value);
-      modassert(soundPosition != NULL, "sound position not given");
-      playMaterialSound(soundData, gameapi -> rootSceneId(), soundPosition -> position, soundPosition -> material);
-    }
-
     if (key == "arcade"){
       auto attrValue = anycast<MessageWithId>(value); 
       modassert(attrValue, "message invalid arcade");
@@ -1379,7 +1370,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     handleBreakableCollision(obj1, obj2);
 
     onCollisionEnterWater(water, obj1, obj2);
-    onCollisionEnterSound(soundData, gameapi -> rootSceneId(), obj1, obj2, pos);
+    onCollisionEnterSound(gameapi -> rootSceneId(), obj1, obj2, pos);
   };
 
   binding.onCollisionExit = [](objid id, void* data, int32_t obj1, int32_t obj2) -> void {

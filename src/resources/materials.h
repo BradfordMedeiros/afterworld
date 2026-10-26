@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "../util.h"
+#include "./sound.h"
 #include "../../../ModEngine/src/scene/serialization.h"
 
 struct ParticleAndEmitter {
@@ -13,6 +14,7 @@ struct ParticleAndEmitter {
 
 struct MaterialToParticle {
   std::string material;
+  std::optional<std::string> collisionSound;
   std::optional<std::string> hitParticleClip;
   std::optional<ParticleAndEmitter> hitParticle;  // wherever gun hits, gets parented to the surface
   std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented.
@@ -24,6 +26,7 @@ std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleS
 
 void loadAllMaterials(objid rootSceneId);
 std::vector<MaterialToParticle>& getMaterials();
+void onCollisionEnterSound(int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos);
 
 void loadParticleEmitters(objid rootSceneId);
 std::optional<objid> getParticleEmitter(std::string& emitterName);
