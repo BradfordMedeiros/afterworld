@@ -37,14 +37,13 @@ GameobjAttributes particleAttributes(std::string& particle){
 }
 
 
-MaterialToParticle parseMaterial(std::string filepath){
+MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
   auto fileInfo = decomposePath(filepath);
   auto relativeDir = relativePath("../afterworld/data/config/materials/ ", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
   std::string name = fileInfo.filename;
 
   std::cout << "material: parseMaterial: " << filepath << ", name = " << name << std::endl;
-
 
 
   MaterialToParticle materialToParticle {
@@ -54,59 +53,61 @@ MaterialToParticle parseMaterial(std::string filepath){
     // .hitParticle;  // wherever gun hits, gets parented to the surface
     // .splashParticle;  // same as hit particle, but does not get parented.
   };
+
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    std::cout << "error parsing game file: " << filepath << "  (" << fileContent << ")" << std::endl;
+    modassert(false, "parseMaterial failed");
+  }
+
+
+  {
+    auto hitParticle = doc.FindMember("hit-particle");
+    if (hitParticle != doc.MemberEnd() && hitParticle -> value.IsString()) {
+      ParticleAndEmitter particleAndEmitter { .particle = "", .particleId = 0 };
+      particleAndEmitter.particle = hitParticle -> value.GetString();
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      auto particleAttr = particleAttributes(particleAndEmitter.particle);
+      auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
+      particleAndEmitter.particleId = materialEmitterId.value();
+      std::cout << "material: parseMaterial: particle material set materialToParticle.hitParticle.particle = " << particleAndEmitter.particle << std::endl;
+      materialToParticle.hitParticle = particleAndEmitter;
+    }    
+  }
+  {
+    auto hitParticleClip = doc.FindMember("hit-clip");
+    if (hitParticleClip != doc.MemberEnd() && hitParticleClip -> value.IsString()) {
+      materialToParticle.hitParticleClip = hitParticleClip -> value.GetString();
+      std::cout << "material: parseMaterial: particle material set hit-clip = " << print(materialToParticle.hitParticleClip) << std::endl;
+    }    
+  }
+
+
+  {
+    auto splashParticle = doc.FindMember("splash-particle");
+    if (splashParticle != doc.MemberEnd() && splashParticle -> value.IsString()) {
+      ParticleAndEmitter particleAndEmitter { .particle = "", .particleId = 0 };
+      particleAndEmitter.particle = splashParticle -> value.GetString();
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      auto particleAttr = particleAttributes(particleAndEmitter.particle);
+      auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-splashparticle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
+      particleAndEmitter.particleId = materialEmitterId.value();
+      std::cout << "material: parseMaterial: particle material set materialToParticle.splashParticle.particle = " << particleAndEmitter.particle << std::endl;
+      materialToParticle.splashParticle = particleAndEmitter;
+    }    
+  }
+
   return materialToParticle;
 }
 
-std::vector<MaterialToParticle> loadMaterials2(objid sceneId){
+std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   std::vector<MaterialToParticle> materialToParticles;
   auto materialFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/materials", { "json" });
   for (auto &materialFile : materialFiles){
-    auto material = parseMaterial(materialFile);
+    auto material = parseMaterial(sceneId, materialFile);
     materialToParticles.push_back(material);
-  }
-  return materialToParticles;
-}
-
-std::vector<MaterialToParticle> loadMaterials(objid sceneId){
-  loadMaterials2(sceneId);
-
-  std::vector<MaterialToParticle> materialToParticles;
-  auto query = gameapi -> compileSqlQuery("select material, hit-particle, particle, hit-sound from materials", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
-
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-  for (auto &row : result){
-    auto particleAttr = particleAttributes(row.at(1));
-    auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + row.at(0), particleAttr, submodelAttributes);
-
-    auto splashParticleAttr = particleAttributes(row.at(2));
-    auto splashEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-splashparticle-" + row.at(0), splashParticleAttr, submodelAttributes);
-
-    GameobjAttributes attr {
-      .attr = {},
-    };
-
-    auto materialHitSound = row.at(3);
-    std::optional<std::string> hitParticleClip;
-    if (materialHitSound != ""){
-      attr.attr["clip"] = row.at(3);
-      hitParticleClip = row.at(3);
-    }
-
-    materialToParticles.push_back(MaterialToParticle {
-      .material = row.at(0),
-      .hitParticleClip = hitParticleClip,
-      .hitParticle = ParticleAndEmitter {
-        .particle = row.at(1),
-        .particleId = materialEmitterId.value(),
-      },
-      .splashParticle = ParticleAndEmitter {
-        .particle = row.at(2),
-        .particleId = splashEmitterId.value(),
-      },
-    });
   }
   return materialToParticles;
 }

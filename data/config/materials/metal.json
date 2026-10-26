@@ -1,0 +1,3 @@
+{
+	"hit-particle": "+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:0 1 0 1;+scale:0.1 0.1 0.1"
+}

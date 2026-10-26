@@ -265,7 +265,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       }
 
       if (material.has_value() && material.value() -> hitParticleClip.has_value()){
-        playMixedSound(getSymbol(material.value() -> hitParticleClip.value()), std::nullopt);
+        playMixedSound(getSymbol(material.value() -> hitParticleClip.value()), hitpoint.point);
       }
     }
     auto addedGlassDecal = maybeAddGlassBulletHole(hitpoint.id, playerId);
