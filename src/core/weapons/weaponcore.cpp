@@ -251,7 +251,6 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       objMaterial = "default";
     }
 
-    std::optional<objid> soundEmitterId = std::nullopt;
     std::optional<objid> emitterId = std::nullopt;
     std::optional<objid> splashEmitterId = std::nullopt;
 
@@ -261,19 +260,18 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       if (material.has_value() && material.value() -> hitParticle.has_value()){
         emitterId = material.value() -> hitParticle.value().particleId;
       }
-      if (material.has_value()){
-        soundEmitterId = material.value() -> hitParticleClipId;
-      }
       if (material.has_value() && material.value() -> splashParticle.has_value()){
         splashEmitterId = material.value() -> splashParticle.value().particleId;
+      }
+
+      if (material.has_value() && material.value() -> hitParticleClip.has_value()){
+        playMixedSound(getSymbol(material.value() -> hitParticleClip.value()), std::nullopt);
       }
     }
     auto addedGlassDecal = maybeAddGlassBulletHole(hitpoint.id, playerId);
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
 
-    if (soundEmitterId.has_value()){
-      playGameplayClipById(soundEmitterId.value(), std::nullopt, hitpoint.point, false);
-    }
+
 
     if (splashEmitterId.has_value()){
       gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);

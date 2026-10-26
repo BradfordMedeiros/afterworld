@@ -13,7 +13,7 @@ struct ParticleAndEmitter {
 
 struct MaterialToParticle {
   std::string material;
-  std::optional<objid> hitParticleClipId;
+  std::optional<std::string> hitParticleClip;
   std::optional<ParticleAndEmitter> hitParticle;  // wherever gun hits, gets parented to the surface
   std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented.
 };

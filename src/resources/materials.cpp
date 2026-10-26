@@ -36,7 +36,40 @@ GameobjAttributes particleAttributes(std::string& particle){
   return particleAttr;
 }
 
+
+MaterialToParticle parseMaterial(std::string filepath){
+  auto fileInfo = decomposePath(filepath);
+  auto relativeDir = relativePath("../afterworld/data/config/materials/ ", fileInfo.dirPath, ".");
+  auto relativeDirVec = split(relativeDir, '/');
+  std::string name = fileInfo.filename;
+
+  std::cout << "material: parseMaterial: " << filepath << ", name = " << name << std::endl;
+
+
+
+  MaterialToParticle materialToParticle {
+    .material = name,
+
+    // .hitParticleClipId;
+    // .hitParticle;  // wherever gun hits, gets parented to the surface
+    // .splashParticle;  // same as hit particle, but does not get parented.
+  };
+  return materialToParticle;
+}
+
+std::vector<MaterialToParticle> loadMaterials2(objid sceneId){
+  std::vector<MaterialToParticle> materialToParticles;
+  auto materialFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/materials", { "json" });
+  for (auto &materialFile : materialFiles){
+    auto material = parseMaterial(materialFile);
+    materialToParticles.push_back(material);
+  }
+  return materialToParticles;
+}
+
 std::vector<MaterialToParticle> loadMaterials(objid sceneId){
+  loadMaterials2(sceneId);
+
   std::vector<MaterialToParticle> materialToParticles;
   auto query = gameapi -> compileSqlQuery("select material, hit-particle, particle, hit-sound from materials", {});
   bool validSql = false;
@@ -56,15 +89,15 @@ std::vector<MaterialToParticle> loadMaterials(objid sceneId){
     };
 
     auto materialHitSound = row.at(3);
-    std::optional<objid> hitParticleClipId;
+    std::optional<std::string> hitParticleClip;
     if (materialHitSound != ""){
       attr.attr["clip"] = row.at(3);
-      hitParticleClipId = gameapi -> makeObjectAttr(sceneId, std::string("&material-hitsound") + row.at(0), attr, submodelAttributes);
+      hitParticleClip = row.at(3);
     }
 
     materialToParticles.push_back(MaterialToParticle {
       .material = row.at(0),
-      .hitParticleClipId = hitParticleClipId,
+      .hitParticleClip = hitParticleClip,
       .hitParticle = ParticleAndEmitter {
         .particle = row.at(1),
         .particleId = materialEmitterId.value(),
