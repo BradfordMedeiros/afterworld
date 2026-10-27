@@ -15,6 +15,7 @@ struct ParticleAndEmitter {
 struct HitDecal {
   std::string texture;
   glm::vec2 size;
+  glm::vec4 tint;
 };
 
 struct MaterialToParticle {
@@ -46,7 +47,7 @@ void emitFirework(glm::vec3 position);
 void emitFog(glm::vec3 position);
 
 void emitParticle(int symbol, glm::vec3 position, glm::quat rotation = glm::identity<glm::quat>(), glm::vec3 initialVelocity = glm::vec3(0.f, 0.f, 0.f));
-void makeDecal(glm::vec3 position, glm::quat rotation, objid parent);
+void makeDecal(MaterialToParticle& material, glm::vec3 position, glm::quat rotation, objid parent);
 
 #endif
 

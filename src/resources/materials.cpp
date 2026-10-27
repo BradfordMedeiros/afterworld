@@ -2,6 +2,9 @@
 
 extern CustomApiBindings* gameapi;
 
+std::optional<glm::vec2> parseVec2(rapidjson::Value& object, const char* field);
+std::optional<glm::vec4> parseVec4(rapidjson::Value& object, const char* field);
+
 std::optional<std::string> materialTypeForObj(objid id){
   auto attr = getAttrHandle(id);
   return getStrAttr(attr, "material");
@@ -72,11 +75,16 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
 
   {
     // hitDecal
-    auto hitDecal= doc.FindMember("hit-decal");
+    auto hitDecal = doc.FindMember("hit-decal");
     if (hitDecal != doc.MemberEnd() && hitDecal -> value.IsObject()) {
+      auto textureValue = hitDecal -> value.FindMember("texture");
+      auto size = parseVec2(hitDecal -> value, "size");
+      auto tint = parseVec4(hitDecal -> value, "tint");
+      std::cout << "hit decal size: " << print(size) << std::endl;
       materialToParticle.hitDecal = HitDecal {
-        .texture = "./res/textures/wood.jpg",
-        .size = glm::vec2(1.f, 1.f),
+        .texture = textureValue -> value.IsString() ? textureValue -> value.GetString() : "./res/textures/wood.jpg",
+        .size = size.has_value() ? size.value() : glm::vec2(1.f, 1.f),
+        .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
       };
     }    
   }
@@ -451,12 +459,12 @@ void emitFog(glm::vec3 position){
   emitEffect("fog", position);
 }
 
-void makeDecal(glm::vec3 position, glm::quat rotation, objid parent){
-
+void makeDecal(MaterialToParticle& material, glm::vec3 position, glm::quat rotation, objid parent){
   std::unordered_map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" }, 
-    { "texture", "./res/textures/wood.jpg" },
-    { "scale", glm::vec3(0.01f, 0.01f, 0.01f) },
+    { "texture", material.hitDecal.value().texture },
+    { "scale", glm::vec3(0.01f * material.hitDecal.value().size.x, 0.01f * material.hitDecal.value().size.y, 0.01f) },
+    { "tint", material.hitDecal.value().tint },
   };
   GameobjAttributes attr { .attr = attrAttributes };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;

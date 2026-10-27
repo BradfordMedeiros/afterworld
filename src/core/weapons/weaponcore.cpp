@@ -264,7 +264,7 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       }
 
       if (material.has_value() && material.value() -> hitDecal.has_value()){
-        makeDecal(hitpoint.point,  hitpoint.normal, hitpoint.id);
+        makeDecal(*material.value(), hitpoint.point,  hitpoint.normal, hitpoint.id);
       }
       if (material.has_value() && material.value() -> hitParticleClip.has_value()){
         playMixedSound(getSymbol(material.value() -> hitParticleClip.value()), hitpoint.point);

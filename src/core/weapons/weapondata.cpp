@@ -5,6 +5,22 @@ std::string readFileOrPackage(std::string filepath);
 
 std::unordered_map<std::string, WeaponParams> weapons;
 
+std::optional<glm::vec2> parseVec2(rapidjson::Value& object, const char* field){
+  if (!object.IsObject()){
+    return std::nullopt;
+  }
+  if (!object.HasMember(field)){
+    return std::nullopt;
+  }
+  auto& value = object[field];
+  if (!value.IsArray() || value.Size() != 2){
+    return std::nullopt;
+  }
+  if (!value[0].IsNumber() || !value[1].IsNumber()){
+    return std::nullopt;
+  }
+  return glm::vec2(value[0].GetFloat(), value[1].GetFloat());  
+}
 std::optional<glm::vec3> parseVec3(rapidjson::Value& object, const char* field){
   if (!object.IsObject()){
     return std::nullopt;
@@ -21,6 +37,7 @@ std::optional<glm::vec3> parseVec3(rapidjson::Value& object, const char* field){
   }
   return glm::vec3(value[0].GetFloat(), value[1].GetFloat(), value[2].GetFloat());
 }
+
 
 std::optional<glm::vec4> parseVec4(rapidjson::Value& object, const char* field){
   if (!object.IsObject()){
