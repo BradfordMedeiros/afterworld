@@ -126,6 +126,8 @@ struct ThirdPersonCameraUpdate {
   glm::quat rotation;
   glm::quat yAxisRotation;
 };
+
+float limitAngleY(float value);
 ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id, bool useTargetAngle);
 enum BallPowerup { BIG_JUMP, LAUNCH_FORWARD, LOW_GRAVITY, REVERSE_GRAVITY, TELEPORT, INVINCIBILITY };
 struct BallPowerupState {

@@ -12,12 +12,17 @@ struct ParticleAndEmitter {
   objid particleId;
 };
 
+struct HitDecal {
+  std::string texture;
+  glm::vec2 size;
+};
+
 struct MaterialToParticle {
   std::string material;
   std::optional<std::string> collisionSound;
   std::optional<std::string> hitParticleClip;
-  std::optional<ParticleAndEmitter> hitParticle;  // wherever gun hits, gets parented to the surface
-  std::optional<ParticleAndEmitter> splashParticle;  // same as hit particle, but does not get parented.
+  std::optional<std::string> splashParticle;
+  std::optional<HitDecal> hitDecal;
 };
 
 std::optional<std::string> materialTypeForObj(objid id);
@@ -41,6 +46,7 @@ void emitFirework(glm::vec3 position);
 void emitFog(glm::vec3 position);
 
 void emitParticle(int symbol, glm::vec3 position, glm::quat rotation = glm::identity<glm::quat>(), glm::vec3 initialVelocity = glm::vec3(0.f, 0.f, 0.f));
+void makeDecal(glm::vec3 position, glm::quat rotation, objid parent);
 
 #endif
 

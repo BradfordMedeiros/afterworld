@@ -144,7 +144,8 @@ void onVehicleFrame(Vehicles& vehicles, ControlParams& controlParams){
     if (vehicle.state.occupied.has_value()){
       vehicle.state.managedCamera.distanceFromTarget += gameapi -> timeElapsed() * controlParams.zoom_delta * 20.f /*arbitary multiplier */;
       vehicle.state.managedCamera.targetAngleX += gameapi -> timeElapsed() * controlParams.lookVelocity.x;
-      vehicle.state.managedCamera.targetAngleY += gameapi -> timeElapsed() * controlParams.lookVelocity.y;
+      vehicle.state.managedCamera.targetAngleY -= gameapi -> timeElapsed() * controlParams.lookVelocity.y;
+      vehicle.state.managedCamera.targetAngleY = limitAngleY(vehicle.state.managedCamera.targetAngleY);
 
       auto position  =  gameapi -> getGameObjectPos(id, true, "[gamelogic] get vehicle position for camera");
       auto camera = lookThirdPersonCalc(vehicle.state.managedCamera, id, false);

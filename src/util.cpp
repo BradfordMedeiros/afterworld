@@ -398,30 +398,40 @@ void drawRightText(std::string text, float ndiOffsetX, float ndiOffsetY, float n
 }
 
 
+float limitAngleY(float value){
+  float angle = glm::clamp(value, -glm::half_pi<float>() + 0.01f, glm::half_pi<float>() - 0.01f);
+  return angle;
+}
 ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonInfo, objid id, bool useTargetAngle){
   float reverseMultiplier = thirdPersonInfo.reverseCamera ? -1.f : 1.f;
 
   float x,y,z;
   if (useTargetAngle){
+    float angleY = limitAngleY(thirdPersonInfo.targetAngleY);
+
     x = glm::sin(thirdPersonInfo.targetAngleX) * thirdPersonInfo.distanceFromTarget;
     z = -glm::cos(thirdPersonInfo.targetAngleX) * thirdPersonInfo.distanceFromTarget;
-    y = glm::sin(thirdPersonInfo.targetAngleY) * thirdPersonInfo.distanceFromTarget;
+    y = glm::sin(angleY) * thirdPersonInfo.distanceFromTarget;
   }else{
+    float angleY = glm::clamp(thirdPersonInfo.angleY, -glm::half_pi<float>() + 0.01f, glm::half_pi<float>() - 0.01f);
+
     x = glm::sin(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
     z = -glm::cos(thirdPersonInfo.angleX) * thirdPersonInfo.actualDistanceFromTarget;
-    y = glm::sin(thirdPersonInfo.angleY) * thirdPersonInfo.actualDistanceFromTarget;
+    y = glm::sin(angleY) * thirdPersonInfo.actualDistanceFromTarget;
+
+    std::cout << "effective angle: " << thirdPersonInfo.angleX << ", " << angleY << std::endl;
   }
+
 
   auto targetLocation = gameapi -> getGameObjectPos(id, true, "[gamelogic] lookThirdPersonCalc");
   auto fromLocation = targetLocation + glm::vec3(x, -y, z);
   auto newOrientation = orientationFromPos(fromLocation, targetLocation);
 
   auto fromLocationYOnly = targetLocation + glm::vec3(x, 0.f, z);
-  auto newOrientationNoX = orientationFromPos(fromLocationYOnly, targetLocation);  // maybe should clear the y
+  auto newOrientationNoX = orientationFromPos(fromLocationYOnly, targetLocation);
 
   auto finalCameraLocation = fromLocation + (newOrientation * glm::vec3(reverseMultiplier * thirdPersonInfo.additionalCameraOffset.x, thirdPersonInfo.additionalCameraOffset.y, thirdPersonInfo.additionalCameraOffset.z)) + (newOrientation * glm::vec3(thirdPersonInfo.actualZoomOffset.x, thirdPersonInfo.actualZoomOffset.y, 0.f));
-  // should encode the same logic as look probably, and this also shouldn't be exactly the same as the camera.  Don't set upward rotation
-    
+
   ThirdPersonCameraUpdate cameraUpdate {
     .position = finalCameraLocation,
     .rotation = newOrientation,
@@ -429,7 +439,6 @@ ThirdPersonCameraUpdate lookThirdPersonCalc(ThirdPersonCameraInfo& thirdPersonIn
   };
   return cameraUpdate;
 }
-
 
 std::string print(BallPowerup powerup){
   if (powerup == BIG_JUMP){

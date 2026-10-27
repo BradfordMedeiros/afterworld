@@ -8,42 +8,65 @@ void startMode(bool loadedScene);
 void stopMode(bool unloadedScene);
 void resetLevel();
 
+std::deque<HistoryInstance> commandHistory =  {};
+std::deque<HistoryInstance> logHistory = {};
+
+
 std::deque<HistoryInstance> loadCommandHistory(){
   std::cout << "load command history" << std::endl;
-  auto query = gameapi -> compileSqlQuery("select text, valid from history", {});
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
+
+  std::string filepath = "../afterworld/data/history.json";
+
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+
+  if (doc.HasParseError()){
+    std::cout << "error parsing loadCommandHistory: " << filepath << " (" << fileContent << ")" << std::endl;
+    modassert(false, "parseCommandHistory failed");
+  }
 
   std::deque<HistoryInstance> history;
 
-  int fromIndex = result.size() - CONSOLE_LOG_LIMIT;
-  if (fromIndex < 0){
-    fromIndex = 0;
-  }
+  for (auto& row : doc.GetArray()){
+    if (!row.IsArray() || row.Size() < 2 || !row[0].IsString() || !row[1].IsBool()){
+      modassert(false, "loadCommandHistory invalid type in history");
+    }
 
-  for (auto &row : result){
-    std::cout << "pushing back value: " << row.at(0) << std::endl << std::endl;
-  }
-
-  for (int i = fromIndex; i < result.size(); i++){
-    auto row = result.at(i);
-    std::cout << "pushing back: " << i <<  ", " << row.at(0) << std::endl;
     history.push_back(
       HistoryInstance {
-        .command = row.at(0),      
-        .valid = row.at(1) == "true",
+        .command = row[0].GetString(),
+        .valid = row[1].GetBool(),
       }
     );
   }
+
   return history;
 }
 
-void insertCommandHistory(std::string& command, bool valid){
-  auto query = gameapi -> compileSqlQuery("insert into history (text, valid) values ( ?, ?)", { command, valid ? "true" : "false" });
-  bool validSql = false;
-  auto result = gameapi -> executeSqlQuery(query, &validSql);
-  modassert(validSql, "error executing sql query");
+void saveCommandHistory(){
+  rapidjson::Document doc;
+  doc.SetArray();
+
+  auto& allocator = doc.GetAllocator();
+
+  for (auto& instance : commandHistory){
+    rapidjson::Value row(rapidjson::kArrayType);
+    row.PushBack(rapidjson::Value(instance.command.c_str(), allocator), allocator);
+    row.PushBack(instance.valid, allocator);
+
+    doc.PushBack(row, allocator);
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  std::string filepath = "../afterworld/data/history.json";
+  std::ofstream file(filepath);
+  modassert(file.is_open(), "failed to open command history file");
+
+  file << buffer.GetString();
 }
 
 std::vector<CommandDispatch> commands {
@@ -341,9 +364,6 @@ std::vector<CommandDispatch> commands {
 };
 
 
-std::deque<HistoryInstance> commandHistory =  {};
-std::deque<HistoryInstance> logHistory = {};
-
 
 void initializeConsole(){
   static bool doOnce = true;
@@ -392,7 +412,7 @@ void executeCommand(ConsoleInterface& consoleInterface, std::string command){
       .command = command,
       .valid = valid,
     });
-    insertCommandHistory(command, valid);
+    saveCommandHistory();
 
     if (result.has_value()){
       commandHistory.push_back(HistoryInstance {
@@ -406,6 +426,6 @@ void executeCommand(ConsoleInterface& consoleInterface, std::string command){
       .command = command,
       .valid = false,
     });
-    insertCommandHistory(command, false);
+    saveCommandHistory();
   }
 }

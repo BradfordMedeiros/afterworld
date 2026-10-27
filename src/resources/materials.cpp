@@ -71,16 +71,13 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
   }
 
   {
-    auto hitParticle = doc.FindMember("hit-particle");
-    if (hitParticle != doc.MemberEnd() && hitParticle -> value.IsString()) {
-      ParticleAndEmitter particleAndEmitter { .particle = "", .particleId = 0 };
-      particleAndEmitter.particle = hitParticle -> value.GetString();
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-      auto particleAttr = particleAttributes(particleAndEmitter.particle);
-      auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-hitparticle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
-      particleAndEmitter.particleId = materialEmitterId.value();
-      std::cout << "material: parseMaterial: particle material set materialToParticle.hitParticle.particle = " << particleAndEmitter.particle << std::endl;
-      materialToParticle.hitParticle = particleAndEmitter;
+    // hitDecal
+    auto hitDecal= doc.FindMember("hit-decal");
+    if (hitDecal != doc.MemberEnd() && hitDecal -> value.IsObject()) {
+      materialToParticle.hitDecal = HitDecal {
+        .texture = "./res/textures/wood.jpg",
+        .size = glm::vec2(1.f, 1.f),
+      };
     }    
   }
   {
@@ -95,14 +92,8 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
   {
     auto splashParticle = doc.FindMember("splash-particle");
     if (splashParticle != doc.MemberEnd() && splashParticle -> value.IsString()) {
-      ParticleAndEmitter particleAndEmitter { .particle = "", .particleId = 0 };
-      particleAndEmitter.particle = splashParticle -> value.GetString();
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-      auto particleAttr = particleAttributes(particleAndEmitter.particle);
-      auto materialEmitterId = gameapi -> makeObjectAttr(sceneId, "+code-splashparticle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
-      particleAndEmitter.particleId = materialEmitterId.value();
-      std::cout << "material: parseMaterial: particle material set materialToParticle.splashParticle.particle = " << particleAndEmitter.particle << std::endl;
-      materialToParticle.splashParticle = particleAndEmitter;
+      materialToParticle.splashParticle = splashParticle -> value.GetString();
+      std::cout << "material: parseMaterial: particle material set materialToParticle.materialToParticle.splashParticle = " << print(materialToParticle.splashParticle) << std::endl;
     }    
   }
 
@@ -458,4 +449,24 @@ void emitFirework(glm::vec3 position){
 
 void emitFog(glm::vec3 position){
   emitEffect("fog", position);
+}
+
+void makeDecal(glm::vec3 position, glm::quat rotation, objid parent){
+
+  std::unordered_map<std::string, AttributeValue> attrAttributes = { 
+    { "mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" }, 
+    { "texture", "./res/textures/wood.jpg" },
+    { "scale", glm::vec3(0.01f, 0.01f, 0.01f) },
+  };
+  GameobjAttributes attr { .attr = attrAttributes };
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  auto decal = gameapi -> makeObjectAttr(gameapi -> listSceneId(parent), std::to_string(getUniqueObjId()), attr, submodelAttributes);
+  modassert(decal.has_value(), "could not create decal");
+  gameapi -> makeParent(decal.value(), parent);
+
+  auto zFightingAdjustment = rotation * glm::vec3(0.f, 0.f, -0.001f);
+
+  gameapi -> setGameObjectPosition(decal.value(), position + zFightingAdjustment, true, Hint { .hint = "make decal pos" }); 
+  gameapi -> setGameObjectRot(decal.value(), rotation, true, Hint { .hint = "make decal rot" }); 
+
 }

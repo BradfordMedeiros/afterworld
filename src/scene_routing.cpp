@@ -129,7 +129,6 @@ std::vector<SceneRouterOptions> routerPathOptions = {
     SceneRouterOptions {
       .paths = { 
         PathAndParams { .path = "mainmenu/modelviewer/" },  
-        PathAndParams { .path = "mainmenu/particleviewer/" },
       },
       .getInteract = withDefaults(basicInteract(false, false, true)),
     },
@@ -210,23 +209,7 @@ std::vector<SceneRouterPath> routerPaths = {
         .player = "maincamera",
       };
     }
-  },
-  SceneRouterPath {
-    .paths = { "mainmenu/particleviewer/" },
-    .scene = [](std::vector<std::string> params) -> SceneLoadInfo { 
-      return SceneLoadInfo {
-        .sceneFile = "../afterworld/scenes/dev/particles.rawscene",
-        .additionalTokens = {},
-      };
-    },
-    .scenarioOptions = std::nullopt,
-    .getGameMode = [](std::vector<std::string> params) -> GameMode {
-      return GameModeFps {
-        .makePlayer = false,
-        .player = "maincamera",
-      };
-    }
-  },
+  }
 };
 
 

@@ -251,31 +251,26 @@ void fireRaycast(GunCore& gunCore, glm::vec3 orientationOffset, objid playerId, 
       objMaterial = "default";
     }
 
-    std::optional<objid> emitterId = std::nullopt;
-    std::optional<objid> splashEmitterId = std::nullopt;
-
-    if (objMaterial.has_value()){
-      auto material = getHitMaterial(materials, objMaterial.value());
-      std::cout << "hit particle material: (" << (material.has_value() && material.value() -> hitParticle.has_value() ? "has hit particle" : "no hit particle" ) << ") " << std::endl;
-      if (material.has_value() && material.value() -> hitParticle.has_value()){
-        emitterId = material.value() -> hitParticle.value().particleId;
-      }
-      if (material.has_value() && material.value() -> splashParticle.has_value()){
-        splashEmitterId = material.value() -> splashParticle.value().particleId;
-      }
-
-      if (material.has_value() && material.value() -> hitParticleClip.has_value()){
-        playMixedSound(getSymbol(material.value() -> hitParticleClip.value()), hitpoint.point);
-      }
-    }
     auto addedGlassDecal = maybeAddGlassBulletHole(hitpoint.id, playerId);
     auto emitParticlePosition = zFightingForParticle(hitpoint.point, hitpoint.normal);
 
 
+    if (objMaterial.has_value()){
+      auto material = getHitMaterial(materials, objMaterial.value());
 
-    if (splashEmitterId.has_value()){
-      gameapi -> emit(splashEmitterId.value(), emitParticlePosition, hitpoint.normal, std::nullopt, std::nullopt, std::nullopt);
+      if (material.has_value() && material.value() -> splashParticle.has_value()){
+        std::cout << "emitting splash: " << material.value() -> splashParticle.value() << std::endl;
+        emitParticle(getSymbol(material.value() -> splashParticle.value()), emitParticlePosition, hitpoint.normal, glm::vec3(0.f, 0.f, 0.f));
+      }
+
+      if (material.has_value() && material.value() -> hitDecal.has_value()){
+        makeDecal(hitpoint.point,  hitpoint.normal, hitpoint.id);
+      }
+      if (material.has_value() && material.value() -> hitParticleClip.has_value()){
+        playMixedSound(getSymbol(material.value() -> hitParticleClip.value()), hitpoint.point);
+      }
     }
+
 
     auto activePlayerId = getEntityForPlayerIndex(getDefaultPlayerIndex());
     auto inFront = hitpoint.point + (hitpoint.normal * glm::vec3(0.f, 0.f, -0.1f));
