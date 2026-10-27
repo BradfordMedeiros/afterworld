@@ -79,4 +79,8 @@ struct ControlBinding {
 };
 std::vector<ControlBinding> controlBindings();
 
+void initControls();
+glm::vec2 getMouseSensitivty();
+void updateMouseSensitivity(float x, float y);
+
 #endif

@@ -853,10 +853,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     disableTpsMesh = getArgEnabled("no-mesh-tp");
     validateAnimationControllerAnimations = getArgEnabled("validate-animation");
 
-    getGlobalState().control.invertY = getSaveBoolValue("settings", "invertY", false);
-    getGlobalState().control.xsensitivity = getSaveFloatValue("settings", "xsensitivity", 1.f);
-    getGlobalState().control.ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
 
+    initControls();
     initImGuiGameUi();
 
     if (hasOption("config-server") && hasOption("config-connected") && hasOption("remote-mod")){

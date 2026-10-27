@@ -6,6 +6,9 @@ void resumeOnMenu();
 void goToMenu();
 void goToLevel(std::string levelShortName);
 
+glm::vec2 getMouseSensitivty();
+void updateMouseSensitivity(float x, float y);
+
 void renderGraphicsPanel(bool includePanel){
   if (includePanel){
     ImGui::Begin("Fps Graphics");
@@ -126,8 +129,9 @@ void renderControlsPanel(bool includePanel){
       }
     }
 
-    float volume = 0.f;
-    if(ImGui::SliderFloat("Mouse Sensitivity ", &volume, 0.0f, 10.0f)){
+    float sensitivity = getMouseSensitivty().x;
+    if(ImGui::SliderFloat("Mouse Sensitivity ", &sensitivity, 0.0f, 2.0f)){
+      updateMouseSensitivity(sensitivity, sensitivity);
     }
 
     if (Mod::Button("Restore Defaults")) {

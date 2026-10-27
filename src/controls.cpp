@@ -639,3 +639,19 @@ std::vector<ControlBinding> controlBindings(){
 
 	};
 }
+
+void initControls(){
+  getGlobalState().control.invertY = getSaveBoolValue("settings", "invertY", false);
+  getGlobalState().control.xsensitivity = getSaveFloatValue("settings", "xsensitivity", 1.f);
+  getGlobalState().control.ysensitivity = getSaveFloatValue("settings", "ysensitivity", 1.f);
+}
+
+glm::vec2 getMouseSensitivty(){
+	return glm::vec2(getGlobalState().control.xsensitivity, getGlobalState().control.ysensitivity);
+}
+void updateMouseSensitivity(float x, float y){
+	getGlobalState().control.xsensitivity = x;
+	getGlobalState().control.ysensitivity = y;
+	persistSave("settings", "xsensitivity", x);
+	persistSave("settings", "ysensitivity", y);
+}
