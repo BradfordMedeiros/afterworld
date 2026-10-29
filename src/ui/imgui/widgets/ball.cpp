@@ -371,3 +371,328 @@ void renderStageSelectPanel(bool includePanel){
         ImGui::End();
     }
 }
+
+
+const float RHYTHM_GRACE = 0.1f;
+struct RhythmSong {
+  float startTime;
+  float lastLane0Press = 0.f;
+  float lastLane1Press = 0.f;
+  float lastLane2Press = 0.f;
+};
+std::optional<RhythmSong> rhythmSong;
+void startRhythm(){
+  rhythmSong = RhythmSong {
+    .startTime = gameapi -> timeSeconds(false),
+  };
+}
+void rhythmPressNoteLane0(){
+  if (!rhythmSong.has_value()){
+    return;
+  }
+  rhythmSong.value().lastLane0Press = gameapi -> timeSeconds(false);
+}
+void rhythmPressNoteLane1(){
+  if (!rhythmSong.has_value()){
+    return;
+  }
+  rhythmSong.value().lastLane1Press = gameapi -> timeSeconds(false);
+}
+void rhythmPressNoteLane2(){
+  if (!rhythmSong.has_value()){
+    return;
+  }
+  rhythmSong.value().lastLane2Press = gameapi -> timeSeconds(false);
+}
+
+void registerPressNote(int lane){
+  if (lane == 0){
+    rhythmPressNoteLane0();
+  }
+  if (lane == 1){
+    rhythmPressNoteLane1();
+  }
+  if (lane == 2){
+    rhythmPressNoteLane2();
+  }
+}
+
+struct NoteToRender {
+  int lane;
+  glm::vec4 color;
+  float time;
+};
+struct RhythmRendering {
+  float currentPlaybackTime;
+  std::vector<NoteToRender> notes;
+  bool lane0Pressed;
+  bool lane1Pressed;
+  bool lane2Pressed;
+};
+
+
+
+RhythmRendering getRendering(float length){
+  if (!rhythmSong.has_value()){
+    return RhythmRendering {
+      .currentPlaybackTime = 0,
+      .notes = {},
+    };
+  }
+  auto currentTime = gameapi -> timeSeconds(false);
+  return RhythmRendering {
+    .currentPlaybackTime = currentTime - rhythmSong.value().startTime,
+    .notes = { 
+      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 0.f },
+      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 2.f },
+      NoteToRender { .lane = 1, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 2.f },
+      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 4.f },
+      NoteToRender { .lane = 1, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 4.f },
+      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 6.f },
+      NoteToRender { .lane = 1, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 6.f },
+    },
+    .lane0Pressed = (currentTime - rhythmSong.value().lastLane0Press) <= RHYTHM_GRACE,
+    .lane1Pressed = (currentTime - rhythmSong.value().lastLane1Press) <= RHYTHM_GRACE,
+    .lane2Pressed = (currentTime - rhythmSong.value().lastLane2Press) <= RHYTHM_GRACE,
+  };
+}
+
+
+struct RhythmNote {
+  int lane;
+  float y;
+  ImU32 color;
+};
+
+
+void renderRhythmPanel(bool includePanel){
+    if (includePanel){
+        ImGui::Begin("renderRhythmPanel");
+    }
+    if (ImGui::Button("Play Song")){
+      startRhythm();
+    }
+
+    auto drawList = ImGui::GetWindowDrawList();
+
+    ImVec2 panelMin = ImGui::GetWindowPos();
+    ImVec2 panelMax = ImVec2(
+        panelMin.x + ImGui::GetWindowWidth(),
+        panelMin.y + ImGui::GetWindowHeight()
+    );
+
+    // Rhythm chart area
+    float chartWidth = 300.0f;
+    float chartHeight = 500.0f;
+
+    ImVec2 chartMin = ImVec2(
+        panelMin.x + (ImGui::GetWindowWidth() - chartWidth) * 0.5f,
+        panelMin.y + 80.0f
+    );
+
+    ImVec2 chartMax = ImVec2(
+        chartMin.x + chartWidth,
+        chartMin.y + chartHeight
+    );
+
+    // Background image
+
+    std::string backgroundTexture = "./res/textures/wood.jpg";
+    auto textureId = gameapi -> getTextureSamplerId(backgroundTexture).value();
+
+    float imageTransparency = 0.2f;
+
+    // Top
+    ImGui::PushClipRect(
+        panelMin,
+        ImVec2(panelMax.x, chartMin.y),
+        true
+    );
+
+    drawList -> AddImage(
+        (ImTextureID)(intptr_t)textureId,
+        panelMin,
+        panelMax,
+        ImVec2(0, 1),
+        ImVec2(1, 0),
+        IM_COL32(255, 255, 255, (int)(255 * imageTransparency))
+    );
+
+    ImGui::PopClipRect();
+
+
+    // Bottom
+    ImGui::PushClipRect(
+        ImVec2(panelMin.x, chartMax.y),
+        panelMax,
+        true
+    );
+
+    drawList -> AddImage(
+        (ImTextureID)(intptr_t)textureId,
+        panelMin,
+        panelMax,
+        ImVec2(0, 1),
+        ImVec2(1, 0),
+        IM_COL32(255, 255, 255, (int)(255 * imageTransparency))
+    );
+
+    ImGui::PopClipRect();
+
+
+    // Left
+    ImGui::PushClipRect(
+        ImVec2(panelMin.x, chartMin.y),
+        ImVec2(chartMin.x, chartMax.y),
+        true
+    );
+
+    drawList -> AddImage(
+        (ImTextureID)(intptr_t)textureId,
+        panelMin,
+        panelMax,
+        ImVec2(0, 1),
+        ImVec2(1, 0),
+        IM_COL32(255, 255, 255, (int)(255 * imageTransparency))
+    );
+
+    ImGui::PopClipRect();
+
+
+    // Right
+    ImGui::PushClipRect(
+        ImVec2(chartMax.x, chartMin.y),
+        ImVec2(panelMax.x, chartMax.y),
+        true
+    );
+
+    drawList -> AddImage(
+        (ImTextureID)(intptr_t)textureId,
+        panelMin,
+        panelMax,
+        ImVec2(0, 1),
+        ImVec2(1, 0),
+        IM_COL32(255, 255, 255, (int)(255 * imageTransparency))
+    );
+
+    ImGui::PopClipRect();
+
+
+    // Semi-transparent black rhythm chart
+    drawList -> AddRectFilled(
+        chartMin,
+        chartMax,
+        IM_COL32(0, 0, 0, (int)(255 * 0.4f))
+    );
+
+
+    // Chart border
+    drawList -> AddRect(
+        chartMin,
+        chartMax,
+        IM_COL32(255, 255, 255, 100),
+        0.0f,
+        0,
+        2.0f
+    );
+
+
+    // Three rhythm lanes
+    float laneWidth = chartWidth / 3.0f;
+
+    for (int i = 1; i < 3; i++){
+        float x = chartMin.x + laneWidth * i;
+
+        drawList -> AddLine(
+            ImVec2(x, chartMin.y),
+            ImVec2(x, chartMax.y),
+            IM_COL32(255, 255, 255, 40),
+            1.0f
+        );
+    }
+
+
+    // Hit line
+    float hitY = chartMax.y - 70.0f;
+
+    drawList -> AddLine(
+        ImVec2(chartMin.x, hitY),
+        ImVec2(chartMax.x, hitY),
+        IM_COL32(255, 255, 255, 180),
+        2.0f
+    );
+
+    {
+      // Notes
+      float noteWidth = laneWidth * 0.55f;
+      float noteHeight = 24.0f;
+
+
+      auto notesToRender = getRendering(10);
+            /*
+      struct NoteToRender {
+        int lane;
+        glm::vec4 color;
+        float time;
+      };
+      struct RhythmRendering {
+        float currentPlaybackTime;
+        std::vector<NoteToRender> notes;
+      };*/
+
+      float noteTransparency = 0.5f;
+
+      std::vector<RhythmNote> notes {}; 
+
+
+      int pixelsPerSecond = 100;
+      auto timeOffset = notesToRender.currentPlaybackTime * pixelsPerSecond;
+
+      //notes = {
+      //    {0, chartMin.y + timeOffset + 80.0f,  IM_COL32(255, 80, 80, 255 * noteTransparency)},
+      //    {1, chartMin.y + timeOffset + 160.0f, IM_COL32(80, 180, 255, 255 * noteTransparency)},
+      //    {2, chartMin.y + timeOffset + 240.0f, IM_COL32(255, 220, 70, 255 * noteTransparency)},
+      //    {1, chartMin.y + timeOffset + 320.0f, IM_COL32(80, 180, 255, 255 * noteTransparency)},
+      //    {0, chartMin.y + timeOffset + 400.0f, IM_COL32(255, 80, 80, 255 * noteTransparency)},
+      //    {2, chartMin.y + timeOffset + 450.0f, IM_COL32(255, 220, 70, 255 * noteTransparency)}
+      //};
+      for (auto& note : notesToRender.notes){
+        notes.push_back(RhythmNote {
+          .lane = note.lane,
+          .y = chartMax.y - note.time * pixelsPerSecond + timeOffset,
+          .color = IM_COL32(255, 80, 80, 255 * noteTransparency),
+        });
+      }     
+
+      notes.push_back(RhythmNote {
+        .lane = 0,
+        .y = chartMax.y,
+        .color = IM_COL32(notesToRender.lane0Pressed ? 255 : 0, 0, 0, 255),
+      });
+      notes.push_back(RhythmNote {
+        .lane = 1,
+        .y = chartMax.y,
+        .color = IM_COL32(notesToRender.lane1Pressed ? 255 : 0, 0, 0, 255),
+      });
+      notes.push_back(RhythmNote {
+        .lane = 2,
+        .y = chartMax.y,
+        .color = IM_COL32(notesToRender.lane2Pressed ? 255 : 0, 0, 0, 255),
+      });
+   
+      
+
+      for (auto& note : notes){
+          float centerX = chartMin.x + laneWidth * note.lane  + laneWidth * 0.5f;
+          ImVec2 noteMin = ImVec2(centerX - noteWidth * 0.5f, note.y - noteHeight * 0.5f);
+          ImVec2 noteMax = ImVec2(centerX + noteWidth * 0.5f, note.y + noteHeight * 0.5f);
+          drawList -> AddRectFilled(noteMin, noteMax, note.color, 5.0f);
+          drawList -> AddRect(noteMin, noteMax, IM_COL32(255, 255, 255, 255), 5.0f, 0, 1.0f);
+      }
+    }
+
+
+    if (includePanel){
+        ImGui::End();
+    }
+}

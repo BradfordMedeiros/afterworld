@@ -41,6 +41,8 @@ struct VehicleBall {
   bool disableAutolaunch = false;
   std::optional<float> lastAutoTime;
 
+  bool applyMoveTowardView = false;
+
   float lastPlayTime = 0.f;
 
 };

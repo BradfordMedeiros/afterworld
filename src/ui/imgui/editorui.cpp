@@ -384,6 +384,11 @@ void initImGuiGameUi(){
       registerWidget("stage-select", "ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
          renderStageSelectPanel(includePanel);
       });   
+
+      registerWidget("game-ball-rhythm", "ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderRhythmPanel(includePanel);
+      });
+      
       
 
     }

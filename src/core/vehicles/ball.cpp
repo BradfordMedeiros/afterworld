@@ -173,6 +173,7 @@ float getJumpImpulse(VehicleBall& vehicleBall){
    return jumpImpulse;
 }
 
+bool useWASDControl = false;
 void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall, ControlParams& controlParams){
   if (!state.occupied.has_value()){
     return;
@@ -207,21 +208,29 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
     auto torqueMagnitude = ballConfig.torque * (vehicleBall.isGrounded ? 1.f : AERIAL_TORQUE_SCALE);
 
     glm::vec3 direction(0.f, 0.f, 0.f);
-    if (controlParams.goForward){
-      direction.z = -1.f;
+
+    if (useWASDControl){
+      if (controlParams.goForward){
+        direction.z = -1.f;
+      }
+      if (controlParams.goBackward){
+        direction.z = 1.f;
+      }
+      if (controlParams.goLeft){
+        direction.x = -1.f;
+      }
+      if (controlParams.goRight){
+        direction.x = 1.f;
+      }      
+    }else{
+      if (vehicleBall.applyMoveTowardView){
+        direction = glm::vec3(0.f, 0.f, -1.f);
+      }
     }
-    if (controlParams.goBackward){
-      direction.z = 1.f;
-    }
-    if (controlParams.goLeft){
-      direction.x = -1.f;
-    }
-    if (controlParams.goRight){
-      direction.x = 1.f;
-    }
-    if (glm::length(direction) > 0.001f){
-      direction = glm::normalize(direction);
-    }
+
+    //if (glm::length(direction) > 0.001f){
+    //  direction = glm::normalize(direction);
+    //}
 
     auto extraVelocityForce = getSurfaceVelocityModifiers(id);
     std::cout << "extra vel: " << print(extraVelocityForce) << std::endl;
@@ -363,10 +372,26 @@ void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mo
     vehicleBall.shouldUsePowerUp = true;
   }
 
+  if (!useWASDControl){
+    if (button == 0 && action == 1){
+      vehicleBall.shouldJump = true;
+    }
+  }
+  if (button == 1){ 
+    if (action == 0){ // release
+      vehicleBall.applyMoveTowardView = false;
+    }
+    if (action == 1){ // press
+      vehicleBall.applyMoveTowardView = true;
+    }
+  }
+
 }
 void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action){
-  if(isJumpKey(key) /* space */ && action == 1){
-    vehicleBall.shouldJump = true;
+  if (useWASDControl){
+    if(isJumpKey(key) /* space */ && action == 1){
+      vehicleBall.shouldJump = true;
+    }
   }
   if (isInteractKey(key) && action == 1){
     vehicleBall.shouldUsePowerUp = true;

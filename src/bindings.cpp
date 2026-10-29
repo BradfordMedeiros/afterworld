@@ -44,6 +44,9 @@ RouterHistory mainRouterHistory = createHistory();
 UiMode uiMode = UiModeNone{};
 extern bool showNavbar;
 
+void registerPressNote(int lane);
+
+
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;
 
@@ -544,6 +547,18 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
   if (action == 1){
+  
+    if (key == 'A'){
+      registerPressNote(0);
+    }
+    if (key == 'S'){
+      registerPressNote(1);
+    }
+    if (key == 'D'){
+      registerPressNote(2);
+    }
+
+
     auto playerId = controlledPlayer.entityId;
     if (isPauseKey(key)){
       getGlobalState().userRequestedPause = !getGlobalState().userRequestedPause;
@@ -666,7 +681,7 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
     if (!isPaused() && !disableGameInput() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.entityId.value()), button, action, controlledPlayer.entityId.value(), selectDistance);
       if (uiUpdate.zoomAmount.has_value()){
-        setEntityZoom(controlledPlayer.entityId.value(), uiUpdate.zoomAmount.value());
+        //setEntityZoom(controlledPlayer.entityId.value(), uiUpdate.zoomAmount.value());  // TODO - this is because vehicle should not zoom
       }
     }
   }
