@@ -17,6 +17,9 @@ void startBallMode(objid sceneId);
 void endBallMode();
 
 void handleBallModeCollision(objid obj1, objid obj2);
+void ballModeForceAcquireSoul();
 
+void startSoulRun();
+void stopSoulRun();
 
 #endif 

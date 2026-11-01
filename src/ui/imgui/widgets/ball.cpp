@@ -373,92 +373,8 @@ void renderStageSelectPanel(bool includePanel){
 }
 
 
-const float RHYTHM_GRACE = 0.1f;
-struct RhythmSong {
-  float startTime;
-  float lastLane0Press = 0.f;
-  float lastLane1Press = 0.f;
-  float lastLane2Press = 0.f;
-};
-std::optional<RhythmSong> rhythmSong;
-void startRhythm(){
-  rhythmSong = RhythmSong {
-    .startTime = gameapi -> timeSeconds(false),
-  };
-}
-void rhythmPressNoteLane0(){
-  if (!rhythmSong.has_value()){
-    return;
-  }
-  rhythmSong.value().lastLane0Press = gameapi -> timeSeconds(false);
-}
-void rhythmPressNoteLane1(){
-  if (!rhythmSong.has_value()){
-    return;
-  }
-  rhythmSong.value().lastLane1Press = gameapi -> timeSeconds(false);
-}
-void rhythmPressNoteLane2(){
-  if (!rhythmSong.has_value()){
-    return;
-  }
-  rhythmSong.value().lastLane2Press = gameapi -> timeSeconds(false);
-}
 
-void registerPressNote(int lane){
-  if (lane == 0){
-    rhythmPressNoteLane0();
-  }
-  if (lane == 1){
-    rhythmPressNoteLane1();
-  }
-  if (lane == 2){
-    rhythmPressNoteLane2();
-  }
-}
-
-struct NoteToRender {
-  int lane;
-  glm::vec4 color;
-  float time;
-};
-struct RhythmRendering {
-  float currentPlaybackTime;
-  std::vector<NoteToRender> notes;
-  bool lane0Pressed;
-  bool lane1Pressed;
-  bool lane2Pressed;
-};
-
-
-
-RhythmRendering getRendering(float length){
-  if (!rhythmSong.has_value()){
-    return RhythmRendering {
-      .currentPlaybackTime = 0,
-      .notes = {},
-    };
-  }
-  auto currentTime = gameapi -> timeSeconds(false);
-  return RhythmRendering {
-    .currentPlaybackTime = currentTime - rhythmSong.value().startTime,
-    .notes = { 
-      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 0.f },
-      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 2.f },
-      NoteToRender { .lane = 1, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 2.f },
-      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 4.f },
-      NoteToRender { .lane = 1, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 4.f },
-      NoteToRender { .lane = 0, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 6.f },
-      NoteToRender { .lane = 1, .color = glm::vec4(1.f, 0.f, 0.f, 1.f), .time = 6.f },
-    },
-    .lane0Pressed = (currentTime - rhythmSong.value().lastLane0Press) <= RHYTHM_GRACE,
-    .lane1Pressed = (currentTime - rhythmSong.value().lastLane1Press) <= RHYTHM_GRACE,
-    .lane2Pressed = (currentTime - rhythmSong.value().lastLane2Press) <= RHYTHM_GRACE,
-  };
-}
-
-
-struct RhythmNote {
+struct RhythmNoteUi {
   int lane;
   float y;
   ImU32 color;
@@ -472,6 +388,15 @@ void renderRhythmPanel(bool includePanel){
     if (ImGui::Button("Play Song")){
       startRhythm();
     }
+
+    if (ImGui::Button("Load Song")){
+      loadSong();
+    }
+
+    auto notesToRender = getRhythmRendering(10);
+    ImGui::Text("Num Notes: %d", notesToRender.stats.numNotesTotal);
+    ImGui::Text("Num Success: %d", notesToRender.stats.numSuccess);
+    ImGui::Text("Num Failure: %d", notesToRender.stats.numFailure);
 
     auto drawList = ImGui::GetWindowDrawList();
 
@@ -628,7 +553,6 @@ void renderRhythmPanel(bool includePanel){
       float noteHeight = 24.0f;
 
 
-      auto notesToRender = getRendering(10);
             /*
       struct NoteToRender {
         int lane;
@@ -642,7 +566,7 @@ void renderRhythmPanel(bool includePanel){
 
       float noteTransparency = 0.5f;
 
-      std::vector<RhythmNote> notes {}; 
+      std::vector<RhythmNoteUi> notes {}; 
 
 
       int pixelsPerSecond = 100;
@@ -657,24 +581,24 @@ void renderRhythmPanel(bool includePanel){
       //    {2, chartMin.y + timeOffset + 450.0f, IM_COL32(255, 220, 70, 255 * noteTransparency)}
       //};
       for (auto& note : notesToRender.notes){
-        notes.push_back(RhythmNote {
+        notes.push_back(RhythmNoteUi {
           .lane = note.lane,
           .y = chartMax.y - note.time * pixelsPerSecond + timeOffset,
-          .color = IM_COL32(255, 80, 80, 255 * noteTransparency),
+          .color = IM_COL32(note.color.r * 255, note.color.g * 255, note.color.b * 255, 255 * note.color.a),
         });
       }     
 
-      notes.push_back(RhythmNote {
+      notes.push_back(RhythmNoteUi {
         .lane = 0,
         .y = chartMax.y,
         .color = IM_COL32(notesToRender.lane0Pressed ? 255 : 0, 0, 0, 255),
       });
-      notes.push_back(RhythmNote {
+      notes.push_back(RhythmNoteUi {
         .lane = 1,
         .y = chartMax.y,
         .color = IM_COL32(notesToRender.lane1Pressed ? 255 : 0, 0, 0, 255),
       });
-      notes.push_back(RhythmNote {
+      notes.push_back(RhythmNoteUi {
         .lane = 2,
         .y = chartMax.y,
         .color = IM_COL32(notesToRender.lane2Pressed ? 255 : 0, 0, 0, 255),

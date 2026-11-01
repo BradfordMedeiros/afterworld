@@ -44,9 +44,6 @@ RouterHistory mainRouterHistory = createHistory();
 UiMode uiMode = UiModeNone{};
 extern bool showNavbar;
 
-void registerPressNote(int lane);
-
-
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;
 
@@ -546,18 +543,8 @@ void objectRemoved(objid idRemoved){
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
 
+  onPressKeyRhythm(key, action);
   if (action == 1){
-  
-    if (key == 'A'){
-      registerPressNote(0);
-    }
-    if (key == 'S'){
-      registerPressNote(1);
-    }
-    if (key == 'D'){
-      registerPressNote(2);
-    }
-
 
     auto playerId = controlledPlayer.entityId;
     if (isPauseKey(key)){
@@ -960,7 +947,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     }
 
     bool onMainMenu = getUiSettings() -> showLevelSelect || getUiSettings() -> showGameSettings || getUiSettings() -> showMainMenu;
-    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole && !onMainMenu;
+    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole && !onMainMenu && false;
     getUiSettings() -> showConsole = global.systemConfig.showConsole;
     getUiSettings() -> showFpsHud = true;
     getUiSettings() -> showTerminal = getTerminalConfig().has_value();
@@ -1092,6 +1079,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         /// temp code 
         // TODO multiviewport sound
         ensureAmbientSound(cameraPos.position, sceneManagement.changedLevelFrame, sceneManagement.managedScene.has_value());
+        onRhythmFrame();
       }
       debugOnFrame();
     }

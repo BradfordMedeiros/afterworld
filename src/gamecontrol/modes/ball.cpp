@@ -23,6 +23,8 @@ void handleRemoveKillplaneCollision(objid);
 void hideLetterBox();
 void showLetterBox(std::string title, float duration);
 void showLetterBoxHold(std::string title, float fadeInTime);
+float* getDigitalAmount();
+void registerCommand(std::string name, std::function<std::optional<std::string>(std::string& command, bool* valid)> registerFn);
 
 struct WorldView {
 	bool didChangeToOrb = false;
@@ -64,6 +66,7 @@ struct BallModeOptions{
    std::optional<float> finalBallTime;
    BallModeSpirit spirit = MODE_NONE;
    std::optional<BallModeSpirit> changeSpirit;
+   bool inSoulMode = false;
    SURFACE_TYPE surfaceType = SURFACE_NONE;
 
    std::optional<WorldView> worldView;
@@ -87,6 +90,8 @@ struct BallModeOptions{
    unsigned int ballShader = 0;
    unsigned int grassShader = 0;
    int lastImpulseId = 0;
+
+   std::optional<OneShot> songOneShot;
 };
 
 bool hasBallModeOptions(){
@@ -425,7 +430,7 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 	    goToLevel("ballselect", LevelLoadOptions { .skipMenu = true }, false);
 		}
 	});
-  
+
 
 	auto playerSpawnId = gameapi -> getObjectsByAttr("playerspawn", std::nullopt, std::nullopt).at(0);
 	auto playerSpawnPosition = gameapi -> getGameObjectPos(playerSpawnId, true, "[gamelogic] ball - get playerspawn position");
@@ -569,6 +574,19 @@ void startBallIntroMode(objid sceneId, bool inHub){
 }
 
 void startBallMode(objid sceneId){
+	static bool doOnce = true;
+	if (doOnce){
+    registerCommand("startsoul", [](std::string& command, bool* valid) -> std::optional<std::string> {
+      startSoulRun();
+      return std::nullopt;
+    });
+    registerCommand("stopsoul", [](std::string& command, bool* valid) -> std::optional<std::string> {
+      stopSoulRun();
+      return std::nullopt;
+    });
+    doOnce = false;
+	}
+
 	auto ballShader = gameapi -> shaderByName(BALL_SHADER_NAME);
 	if (!ballShader.has_value()){
 		auto loadedShader = gameapi -> loadShader(BALL_SHADER_NAME, "../afterworld/shaders/ball");
@@ -607,6 +625,7 @@ void startBallMode(objid sceneId){
 }
 
 void endBallMode(){
+	stopSoulRun();
 }
 
 void doGravityHole(objid id, objid gravityHole){
@@ -793,6 +812,95 @@ void handleWarpCollision(objid obj1, objid obj2){
 
 }
 
+
+std::function<void(EasyCutscene&)> startSoulModeCutscene(){
+ 	int endTimeMs = 0;
+ 	float endTime = endTimeMs / 1000.f;
+
+	return [endTimeMs, endTime](EasyCutscene& cutscene) -> void {
+		if(initialize(cutscene)){
+ 			playMixedSound(getSymbol("ball/rhythm/start_soul"), std::nullopt);
+
+			auto digitalAmount =	getDigitalAmount();
+			*digitalAmount = 1.0f;
+
+			getBallModeUI().value() -> ballMode.showRhythmUi = true;
+
+			inputOverride(true, false);
+			
+		 	getBallModeOptions().songOneShot = playMixedSound(getSymbol("ball/song"), std::nullopt);
+
+ 			/*auto& ballMode = getBallModeOptions();
+
+		 	auto narrationCutscene = playCutscene(simpleNarrationCutscene, std::nullopt);
+			std::cout << "death cutscene: initialize: t = " << gameapi -> timeSeconds(false) << std::endl;
+			std::cout << "death cutscene: initialize: endTime = " << endTime << ", ms = " << endTimeMs << std::endl;
+
+			DeathCutsceneData cutsceneData{};
+			cutsceneData.narrationCutscene = narrationCutscene;
+    	store(cutscene, cutsceneData);*/
+
+		}
+		if (finalize(cutscene)){
+			//std::cout << "death cutscene: finalize: t = " << gameapi -> timeSeconds(false) << std::endl;
+//
+			//auto& ballOptions = getBallModeOptions();
+			//ballOptions.shouldReset = true;
+//
+ 			//auto sphereObj = ballOptions.rebirthSphere.value();
+ 			//gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
+//
+ 			//setGameObjectLayer(ballOptions.eyeId, "");
+ 			//setGameObjectLayer(ballOptions.rebirthSphere.value(), "");
+		}
+
+		waitUntil(cutscene, 1, 5000);
+		run(cutscene, 2, []() -> void {
+			inputOverride(false, false);
+		});
+
+	};
+}
+
+void startSoulRun(){
+	if(!hasBallModeOptions()){
+		std::cout << "soul run: start: not in ball mode" << std::endl;
+		return;
+	}
+	std::cout << "soul run: start" << std::endl;
+	auto& ballModeOptions  = getBallModeOptions();
+	if (ballModeOptions.inSoulMode){
+		return;
+	}
+
+	ballModeOptions.inSoulMode = true;
+
+
+	playCutscene(startSoulModeCutscene(), std::nullopt, true);
+
+}
+void stopSoulRun(){
+	if (!hasBallModeOptions()){
+		std::cout << "soul run: stop: not in ball mode" << std::endl;
+		return;
+	}
+	auto& ballModeOptions  = getBallModeOptions();
+	if (!ballModeOptions.inSoulMode){
+		return;
+	}
+
+	ballModeOptions.inSoulMode = false;
+	auto digitalAmount =	getDigitalAmount();
+	*digitalAmount = 0.f;
+
+	getBallModeUI().value() -> ballMode.showRhythmUi = false;
+
+	if (getBallModeOptions().songOneShot.has_value()){
+		gameapi -> stopOneshot(getBallModeOptions().songOneShot.value());
+	}
+
+}
+
 void deliverSoul(std::string& soul, objid soulId){
 	auto& ballMode = getBallModeOptions();
 
@@ -804,6 +912,7 @@ void deliverSoul(std::string& soul, objid soulId){
 		ballMode.changeSpirit = MODE_YELLOW;
 	}else if (soul == "purple"){
 		ballMode.changeSpirit = MODE_PURPLE;
+		startSoulRun();
 	}
   gameapi -> removeObjectById(soulId);
 
@@ -877,7 +986,6 @@ std::function<void(EasyCutscene&)> deathCutscene(){
 
 	return [endTimeMs, endTime, simpleNarrationCutscene](EasyCutscene& cutscene) -> void {
 		if(initialize(cutscene)){
- 			playMixedSound(getSymbol("ball/events/respawnsphere"), std::nullopt);
 
  			auto& ballMode = getBallModeOptions();
 

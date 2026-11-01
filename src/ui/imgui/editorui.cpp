@@ -178,9 +178,19 @@ void renderMoreUi(){
         if (uiSettings.ballModeUi -> ballMode.levelComplete.has_value() || uiSettings.ballModeUi -> ballMode.showComplete){
           renderBackground("##levelcomplete-background", glm::vec4(1.f, 1.f, 1.f, 0.6f));
         }
-        auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
-        renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
-        windowOrdering.push_back("main-menu2-ball-progress-layout");
+
+        {
+          auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
+          renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+          windowOrdering.push_back("main-menu2-ball-progress-layout");
+        }
+
+        if (uiSettings.ballModeUi -> ballMode.showRhythmUi){
+          auto& widget = *widgetByNameSymbol(getSymbol("game-ball-rhythm")).value();
+          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f, 500.f));
+          windowOrdering.push_back("rhythm-ui-layout");
+        }
+
       }
   }
 
@@ -459,6 +469,15 @@ void initImGuiGameUi(){
       stopMode(false);
       resetLevel();
     });
+
+    registerAction("Soul Run Start", "Ball-Debug", []() -> void {
+      startSoulRun();
+    });
+    registerAction("Soul Run Stop", "Ball-Debug", []() -> void {
+      stopSoulRun();
+    });
+
+
 
 
     registerView("Mixing", false,  { "mixing" }, { "mixing-detail" }, DIVIDED_LAYOUT);

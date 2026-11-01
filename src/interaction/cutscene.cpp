@@ -14,10 +14,11 @@ struct CutsceneInstance2 {
 std::unordered_map<objid, CutsceneInstance2> playingCutscenes2 {};
 std::vector<objid> cutscenesToRemove;
 
-objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId){
+objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId, bool realTime){
 	auto cutsceneId = ownerId.has_value() ? ownerId.value() : getUniqueObjId();
 	CutsceneInstance2 cutsceneInstance {
 		.easyCutscene = EasyCutscene{
+			.realTime = realTime,
 			.cutsceneId = cutsceneId,
 		},
 		.cutsceneFn = cutsceneFn,
@@ -102,9 +103,9 @@ void waitUntil(EasyCutscene& easyCutscene, int index, int milliseconds){
   }
 
   if (easyCutscene.startTime.find(index) == easyCutscene.startTime.end()){
-	  easyCutscene.startTime[index] = gameapi -> timeSeconds(false);
+	  easyCutscene.startTime[index] = gameapi -> timeSeconds(easyCutscene.realTime);
   }
-  auto timeElapsed = gameapi -> timeSeconds(false) - easyCutscene.startTime.at(index);
+  auto timeElapsed = gameapi -> timeSeconds(easyCutscene.realTime) - easyCutscene.startTime.at(index);
   if (timeElapsed > (milliseconds / 1000.f)){
   	easyCutscene.playedEvents.insert(index);
   	easyCutscene.playedEventsThisFrame.insert(index);
@@ -199,7 +200,7 @@ void playOpening(EasyCutscene& cutscene){
 		setEntityControlDisabled(true, getEntityForPlayerIndex(0).value());
 		store(cutscene, OpeningData{
 			.text = "You Have Fallen Asleep.",
-			.time = gameapi -> timeSeconds(false),
+			.time = gameapi -> timeSeconds(cutscene.realTime),
 		});
 	}
 	if (finalize(cutscene)){
@@ -210,14 +211,14 @@ void playOpening(EasyCutscene& cutscene){
   modassert(value, "openingData is null");
 
 	waitUntil(cutscene, 0, 10000);
-	run(cutscene, 1, [value]() -> void {
-		value -> time = gameapi -> timeSeconds(false);
+	run(cutscene, 1, [value, &cutscene]() -> void {
+		value -> time = gameapi -> timeSeconds(cutscene.realTime);
 		value -> text = "It is Not Yet Time To Wake Up";
 	});
 
 	waitUntil(cutscene, 2, 15000);
-	run(cutscene, 3, [value]() -> void {
-		value -> time = gameapi -> timeSeconds(false);
+	run(cutscene, 3, [value, &cutscene]() -> void {
+		value -> time = gameapi -> timeSeconds(cutscene.realTime);
 		value -> text = "It is Time to [?????]";
 	});
 
@@ -229,7 +230,7 @@ void playOpening(EasyCutscene& cutscene){
 		 	//.zIndex = zIndex,
 		});
 
-		auto currIndex = static_cast<int>((gameapi -> timeSeconds(false) - value -> time) * 10.f);
+		auto currIndex = static_cast<int>((gameapi -> timeSeconds(cutscene.realTime) - value -> time) * 10.f);
 		auto textSubtr = value -> text.substr(0, currIndex);
 		drawRightText(textSubtr, -0.4f, 0.f, 0.04f, std::nullopt /* tint */, std::nullopt, std::nullopt);
 	}else{
@@ -349,7 +350,7 @@ std::function<void(EasyCutscene&)> simpleNarration(std::string letterbox, std::v
   	  return;
   	}
 
-  	auto elapsedTime = gameapi -> timeSeconds(false) - startTime;
+  	auto elapsedTime = gameapi -> timeSeconds(cutscene.realTime) - startTime;
 
   	int index = 0;
   	for (int i = 0; i < narration.size(); i++){

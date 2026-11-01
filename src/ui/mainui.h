@@ -47,6 +47,8 @@ struct BallComponentOptions {
   std::optional<std::string> powerupTexture;
   std::optional<float> powerupStartTime;
   std::optional<float> powerupDuration;
+
+  bool showRhythmUi = false;
 };
 
 struct BallLevelSelectInfo {

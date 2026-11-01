@@ -26,6 +26,8 @@ glm::vec3* getColorGrade();
 float* getSaturation();
 float* getContrast();
 glm::vec2* getChromatic();
+float* getDigitalAmount();
+
 
 void renderConsole(bool includePanel){
   if (includePanel){
@@ -1213,9 +1215,7 @@ void renderLevelPanel(bool includePanel){
     {
       ImGui::SliderFloat("chromatic.x", &chromatic->x, 0.f, 0.5f);
       ImGui::SliderFloat("chromatic.y", &chromatic->y, 0.f, 0.5f);
-
     }
-
 
     auto weather = currentWeather();
     {
@@ -1255,6 +1255,11 @@ void renderLevelPanel(bool includePanel){
     }
   }
 
+  ImGui::Separator();
+  auto digitalAmount = getDigitalAmount();
+  {
+    ImGui::SliderFloat("Digital Amount", digitalAmount, 0.f, 1.f);
+  }
 
   ImGui::Dummy(ImVec2(0, 10));
   

@@ -15,10 +15,12 @@ struct EasyCutscene {
   bool firstRun = true;
   bool finished = false;
   bool requestRemoval = false;
+
+  bool realTime = false;
   objid cutsceneId;
 };
 
-objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId);
+objid playCutscene(std::function<void(EasyCutscene&)> cutsceneFn, std::optional<objid> ownerId, bool realTime = false);
 void removeCutscene(objid id, bool forceTick = false);
 
 void tickCutscenes2();

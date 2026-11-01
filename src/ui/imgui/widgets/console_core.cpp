@@ -364,6 +364,15 @@ std::vector<CommandDispatch> commands {
 };
 
 
+void registerCommand(std::string name, std::function<std::optional<std::string>(std::string& command, bool* valid)> registerFn){
+  commands.push_back(CommandDispatch {
+    .command = name,
+    .fn = [registerFn](ConsoleInterface& consoleInterface, std::string& command, bool* valid) -> std::optional<std::string> {
+      return registerFn(command, valid);
+    },
+  });
+}
+
 
 void initializeConsole(){
   static bool doOnce = true;

@@ -46,3 +46,4 @@ extern std::deque<HistoryInstance> logHistory;
 
 void initializeConsole();
 void executeCommand(ConsoleInterface& consoleInterface, std::string command);
+void registerCommand(std::string name, std::function<std::optional<std::string>(std::string& command, bool* valid)> registerFn);
