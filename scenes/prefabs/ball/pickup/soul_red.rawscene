@@ -1,0 +1,13 @@
++soul:scale:0.5 0.5 0.5
++soul:state:enabled
++soul:effekseer:./res/particles/spirit-white.efkefc
++soul:physics_shape:shape_sphere
++soul:physics:enabled
++soul:physics_collision:nocollide
++soul:soul:red
++soul:effect-tint:1 0 0 1
+
++soul/holder:mesh:../gameresources/build/objtypes/soul-holder.gltf
++soul/holder:position:0 -0.72 0
++soul/holder:physics_shape:shape_exact
++soul/holder:physics:enabled

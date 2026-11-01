@@ -934,6 +934,28 @@ void handleSoulCollision(int32_t obj1, int32_t obj2){
   }
 }
 
+void deliverSoulMusic(std::string& soulMusic, objid id){
+	//   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/pickup/soul_run.rawscene",  playerSpawnPosition, {});    
+
+  gameapi -> removeObjectById(id);
+	startSoulRun();
+}
+void handleMusicSoulCollision(int32_t obj1, int32_t obj2){
+  if (isControlledVehicle(obj1)){
+    auto objAttr = getAttrHandle(obj2);
+    auto soul = getStrAttr(objAttr, "soulrun");
+    if (soul.has_value()){
+      deliverSoulMusic(soul.value(), obj2);
+    }
+  }else if (isControlledVehicle(obj2)){
+    auto objAttr = getAttrHandle(obj1);
+    auto soul = getStrAttr(objAttr, "soulrun");
+    if (soul.has_value()){
+      deliverSoulMusic(soul.value(), obj1);
+    }
+  }	
+}
+
 
 void handleBallModeCollision(objid obj1, objid obj2){
 	if (!hasBallModeOptions()){
@@ -948,6 +970,8 @@ void handleBallModeCollision(objid obj1, objid obj2){
   handleWarpCollision(obj1, obj2);
 
   handleSoulCollision(obj1, obj2);
+
+  handleMusicSoulCollision(obj1, obj2);
 
   // just check if it this the multiview here
 }
