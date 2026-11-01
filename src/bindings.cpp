@@ -91,6 +91,7 @@ GlobalState global {
     .paused = true,
     .inGameMode = false,
     .showMouse = true,
+    .forceHidePauseMenu = false,
   },
   .userRequestedPause = false,
 };
@@ -943,11 +944,12 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         .paused = interactState.paused || getGlobalState().userRequestedPause,
         .inGameMode = interactState.inGameMode,
         .showMouse = interactState.showMouse || getGlobalState().userRequestedPause,
+        .forceHidePauseMenu = interactState.forceHidePauseMenu,
       };
     }
 
     bool onMainMenu = getUiSettings() -> showLevelSelect || getUiSettings() -> showGameSettings || getUiSettings() -> showMainMenu;
-    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole && !onMainMenu && false;
+    getUiSettings() -> showPauseMenu = global.routeState.paused && !global.systemConfig.showConsole && !onMainMenu && !global.routeState.forceHidePauseMenu;
     getUiSettings() -> showConsole = global.systemConfig.showConsole;
     getUiSettings() -> showFpsHud = true;
     getUiSettings() -> showTerminal = getTerminalConfig().has_value();

@@ -16,7 +16,7 @@ const std::string GRASS_SHADER_NAME = "../afterworld/shaders/grass/fragment.glsl
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 std::optional<ActiveLevel> getActiveLevel();
 void setPauseMenuOverride(std::optional<std::function<void()>> goToMenuFn);
-void inputOverride(bool paused, bool showMouse);
+void inputOverride(bool paused, bool showMouse, bool hidePauseMenu);
 void inputOverride();
 bool isReloadKey(int button);
 void handleRemoveKillplaneCollision(objid);
@@ -297,7 +297,7 @@ void ballEndGameplay(EasyCutscene& cutscene){
   if (finishedThisFrame(cutscene, 1)){
   	getBallModeUI().value() -> ballMode.showComplete = false;
   	getBallModeUI().value() -> ballMode.levelComplete = BallLevelComplete{};
-  	inputOverride(false, true);
+  	inputOverride(false, true, false);
   }
 
   if (!finished(cutscene, 1)){
@@ -503,7 +503,7 @@ void ballModeNewGame2(objid sceneId, bool inHub){
 	playMixedSound(getSymbol("ball/screens/newgame"), std::nullopt);
 
 
-  inputOverride(false, false);
+  inputOverride(false, false, false);
 	changeUiMode(UiModeNone{});
 
   auto railId = railIdForName("intro", 0);
@@ -552,7 +552,7 @@ void startBallIntroMode(objid sceneId, bool inHub){
   }
 
 
-  inputOverride(false, true);
+  inputOverride(false, true, false);
   changeUiMode(LiveMenu {
    	.options = MainMenu2Options {
    		.backgroundColor = glm::vec4(1.f, 1.f, 1.f, 0.4f),
@@ -826,7 +826,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(){
 
 			getBallModeUI().value() -> ballMode.showRhythmUi = true;
 
-			inputOverride(true, false);
+			inputOverride(true, false, true);
 			
 		 	getBallModeOptions().songOneShot = playMixedSound(getSymbol("ball/song"), std::nullopt);
 
@@ -856,7 +856,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(){
 
 		waitUntil(cutscene, 1, 5000);
 		run(cutscene, 2, []() -> void {
-			inputOverride(false, false);
+			inputOverride(false, false, false);
 		});
 
 	};

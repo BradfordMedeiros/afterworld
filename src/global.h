@@ -9,6 +9,8 @@ struct RouteState {
   bool paused;
   bool inGameMode;
   bool showMouse;
+  bool forceHidePauseMenu;
+
 };
 
 struct SystemConfig {

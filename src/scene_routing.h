@@ -15,6 +15,7 @@ struct InteractState {
   bool paused;
   bool inGameMode;
   bool showMouse;
+  bool forceHidePauseMenu;
 };
 struct SceneRouterOptions {
   std::vector<PathAndParams> paths;

@@ -6,7 +6,7 @@ extern Director director;
 extern GameTypes gametypeSystem;
 
 //    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
-void inputOverride(bool paused, bool showMouse);
+void inputOverride(bool paused, bool showMouse, bool forceHidePauseMenu);
 
 GameTypeInfo getFpsMode(){
   GameTypeInfo ballMode = GameTypeInfo {
@@ -19,7 +19,7 @@ GameTypeInfo getFpsMode(){
     .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {},
     .onFrame = [](std::any& gametype) -> void {
       if (allPlayersDead()){
-          inputOverride(false, true);
+          inputOverride(false, true, false);
           changeUiMode(GameOverUi{});
       }
     },

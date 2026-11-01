@@ -23,6 +23,7 @@ std::function<InteractState()> basicInteract(bool paused, bool inGameMode, bool 
       .paused = paused,
       .inGameMode = inGameMode,
       .showMouse = showMouse,
+      .forceHidePauseMenu = false,
     };
   };
 }
@@ -34,6 +35,7 @@ std::function<InteractState()> withDefaults(std::function<InteractState()> inter
         .paused = true,
         .inGameMode = false,
         .showMouse = true,
+        .forceHidePauseMenu = false,
       };
     }
     if (getGlobalState().showEditor){
@@ -41,6 +43,7 @@ std::function<InteractState()> withDefaults(std::function<InteractState()> inter
         .paused = false,
         .inGameMode = true,
         .showMouse = true,
+        .forceHidePauseMenu = false,
       };     
     }
     return interact();
@@ -91,11 +94,12 @@ std::optional<SceneRouterPath*> getSceneRouter(std::string& path, int* _index, s
   return std::nullopt;
 }
 
-void inputOverride(bool paused, bool showMouse){
+void inputOverride(bool paused, bool showMouse, bool hidePauseMenu){
   modeInputOverride = InteractState {
     .paused = paused,
     .inGameMode = true,
     .showMouse = showMouse,
+    .forceHidePauseMenu = hidePauseMenu,
   };
 }
 void inputOverride(){
@@ -123,6 +127,7 @@ std::vector<SceneRouterOptions> routerPathOptions = {
             .paused = getGlobalState().userRequestedPause,
             .inGameMode = true,
             .showMouse = false,
+            .forceHidePauseMenu = false,
         };
       }),
     },
