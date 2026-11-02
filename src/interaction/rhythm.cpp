@@ -5,11 +5,7 @@ extern CustomApiBindings* gameapi;
 const float RHYTHM_GRACE = 0.4f;
 
 std::optional<RhythmSong> rhythmSong;
-void startRhythm(){
-  rhythmSong = RhythmSong {
-    .startTime = gameapi -> timeSeconds(false),
-  };
-}
+
 void rhythmPressNoteLane0(){
   if (!rhythmSong.has_value()){
     return;
@@ -42,10 +38,12 @@ void registerPressNote(int lane){
 }
 
 struct RawSongData {
+	std::string name;
   std::vector<RhythmNote> notes;
 };
 std::unordered_map<std::string, RawSongData> songToData {
 	{"song1", RawSongData {
+		.name = "song1",
 		.notes = {
 			RhythmNote { 
 				.time = 0.f, 
@@ -59,9 +57,22 @@ std::unordered_map<std::string, RawSongData> songToData {
 				.time = 5.f, 
 				.lane = 2,
 			},
+			RhythmNote { 
+				.time = 10.f, 
+				.lane = 0,
+			},
+			RhythmNote { 
+				.time = 15.f, 
+				.lane = 0,
+			},
+			RhythmNote { 
+				.time = 15.f, 
+				.lane = 1,
+			},
 		},
 	}},
 	{"song2", RawSongData {
+		.name = "song2",
 		.notes = {
 			RhythmNote { },
 		},
@@ -69,7 +80,7 @@ std::unordered_map<std::string, RawSongData> songToData {
 };
 
 int initSong1(){
-	auto& notes = songToData.at("song1").notes;
+	auto& notes = songToData.at("song2").notes;
 	for (int i = 0 ; i < 100; i++){
 		notes.push_back(RhythmNote {
 			.time = i * 0.2f,
@@ -80,7 +91,11 @@ int initSong1(){
 }
 auto _ = initSong1();
 
-void loadSong(){
+void loadSong(std::string song){
+	if (songToData.find(song) == songToData.end()){
+		modassert(false, std::string("could not find song: ") + song);
+	}
+
 	if (rhythmSong.has_value()){
 		rhythmSong = std::nullopt;
 	}
@@ -90,7 +105,7 @@ void loadSong(){
 		.lastLane0Press = 0.f,
 		.lastLane1Press = 0.f,
 		.lastLane2Press = 0.f,
-		.notes = songToData.at("song1").notes,
+		.notes = songToData.at(song).notes,
 		.stats = {},
 		//struct RhythmSong {
 		//  float startTime;
@@ -110,7 +125,20 @@ void loadSong(){
 		});
 	}
 	rhythmSong.value().stats = stats;
+
+ 	rhythmSong.value().playingSong = playMixedSound(getSymbol("ball/song"), std::nullopt);
 }
+
+void unloadSong(){
+	if (rhythmSong.has_value() && rhythmSong.value().playingSong.has_value()){
+		gameapi -> stopOneshot(rhythmSong.value().playingSong.value());
+	}
+}
+
+
+// list songs
+// RawSongData parseSongData(filepath)
+// std::unordered_map<std::string, RawSongData> loadAllSongs;
 
 
 bool isLane0PressedWithGrace(float currentTime){
@@ -204,3 +232,5 @@ void onPressKeyRhythm(int key, int action){
     	}
 	}
 }
+
+void loa

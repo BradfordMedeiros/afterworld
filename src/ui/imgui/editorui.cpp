@@ -21,7 +21,6 @@ objid makeArcadeObj(objid sceneId){
       { "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
       { "texture", "../ModEngine/res/textures/hexglow.png" },
       { "arcade-cabinet", "true" },
-
     }};
 
     GameobjAttributes screenAttr { .attr = {
@@ -187,7 +186,7 @@ void renderMoreUi(){
 
         if (uiSettings.ballModeUi -> ballMode.showRhythmUi){
           auto& widget = *widgetByNameSymbol(getSymbol("game-ball-rhythm")).value();
-          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f, 500.f));
+          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f, 1000.f));
           windowOrdering.push_back("rhythm-ui-layout");
         }
 
@@ -469,16 +468,6 @@ void initImGuiGameUi(){
       stopMode(false);
       resetLevel();
     });
-
-    registerAction("Soul Run Start", "Ball-Debug", []() -> void {
-      startSoulRun();
-    });
-    registerAction("Soul Run Stop", "Ball-Debug", []() -> void {
-      stopSoulRun();
-    });
-
-
-
 
     registerView("Mixing", false,  { "mixing" }, { "mixing-detail" }, DIVIDED_LAYOUT);
     registerView("FPS", false, { "FPS - Weapons" }, { "FPS - Traits" }, DIVIDED_LAYOUT);

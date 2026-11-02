@@ -91,7 +91,6 @@ struct BallModeOptions{
    unsigned int grassShader = 0;
    int lastImpulseId = 0;
 
-   std::optional<OneShot> songOneShot;
 };
 
 bool hasBallModeOptions(){
@@ -577,7 +576,7 @@ void startBallMode(objid sceneId){
 	static bool doOnce = true;
 	if (doOnce){
     registerCommand("startsoul", [](std::string& command, bool* valid) -> std::optional<std::string> {
-      startSoulRun();
+      startSoulRun("test");
       return std::nullopt;
     });
     registerCommand("stopsoul", [](std::string& command, bool* valid) -> std::optional<std::string> {
@@ -828,18 +827,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(){
 
 			inputOverride(true, false, true);
 			
-		 	getBallModeOptions().songOneShot = playMixedSound(getSymbol("ball/song"), std::nullopt);
-
- 			/*auto& ballMode = getBallModeOptions();
-
-		 	auto narrationCutscene = playCutscene(simpleNarrationCutscene, std::nullopt);
-			std::cout << "death cutscene: initialize: t = " << gameapi -> timeSeconds(false) << std::endl;
-			std::cout << "death cutscene: initialize: endTime = " << endTime << ", ms = " << endTimeMs << std::endl;
-
-			DeathCutsceneData cutsceneData{};
-			cutsceneData.narrationCutscene = narrationCutscene;
-    	store(cutscene, cutsceneData);*/
-
+		 	loadSong("song1");
 		}
 		if (finalize(cutscene)){
 			//std::cout << "death cutscene: finalize: t = " << gameapi -> timeSeconds(false) << std::endl;
@@ -862,7 +850,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(){
 	};
 }
 
-void startSoulRun(){
+void startSoulRun(std::string song){
 	if(!hasBallModeOptions()){
 		std::cout << "soul run: start: not in ball mode" << std::endl;
 		return;
@@ -895,10 +883,7 @@ void stopSoulRun(){
 
 	getBallModeUI().value() -> ballMode.showRhythmUi = false;
 
-	if (getBallModeOptions().songOneShot.has_value()){
-		gameapi -> stopOneshot(getBallModeOptions().songOneShot.value());
-	}
-
+	unloadSong();
 }
 
 void deliverSoul(std::string& soul, objid soulId){
@@ -912,7 +897,6 @@ void deliverSoul(std::string& soul, objid soulId){
 		ballMode.changeSpirit = MODE_YELLOW;
 	}else if (soul == "purple"){
 		ballMode.changeSpirit = MODE_PURPLE;
-		startSoulRun();
 	}
   gameapi -> removeObjectById(soulId);
 
@@ -938,7 +922,7 @@ void deliverSoulMusic(std::string& soulMusic, objid id){
 	//   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/pickup/soul_run.rawscene",  playerSpawnPosition, {});    
 
   gameapi -> removeObjectById(id);
-	startSoulRun();
+	startSoulRun("test");
 }
 void handleMusicSoulCollision(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){

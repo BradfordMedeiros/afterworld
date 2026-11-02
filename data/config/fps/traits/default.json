@@ -4,7 +4,7 @@
     "moveSpeedWater": 50.0,
     "jumpHeight": 11.456000328063965,
     "maxAngleUp": -1.5,
-    "maxAngleDown": 1.0,
+    "maxAngleDown": 1.5,
     "moveSoundDistance": 0.20000000298023225,
     "moveSoundMintime": 0.20000000298023225,
     "groundAngle": 50.0,

@@ -1,0 +1,5 @@
+mesh-1900711920:texture:../gameresources/build/textures/backgrounds/test3.png
+mesh-1900711920:tint:0 0.513317 1 1
+mesh-1900711920:mesh:../gameresources/build/misc/pyramid.gltf
+mesh-1900711920:shader:../afterworld/shaders/menu/fragment.glsl
+mesh-1900711920:scale:190 480 240

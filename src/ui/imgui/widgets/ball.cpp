@@ -385,13 +385,6 @@ void renderRhythmPanel(bool includePanel){
     if (includePanel){
         ImGui::Begin("renderRhythmPanel");
     }
-    if (ImGui::Button("Play Song")){
-      startRhythm();
-    }
-
-    if (ImGui::Button("Load Song")){
-      loadSong();
-    }
 
     auto notesToRender = getRhythmRendering(10);
     ImGui::Text("Num Notes: %d", notesToRender.stats.numNotesTotal);

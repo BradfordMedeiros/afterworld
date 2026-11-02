@@ -10,6 +10,7 @@
 #include "../../gameworld/surface.h"
 #include "../../interaction/cutscene.h"
 #include "../../interaction/gizmo.h"
+#include "../../interaction/rhythm.h"
 #include "../../collision.h"
 #include "../entity.h"
 
@@ -19,7 +20,7 @@ void endBallMode();
 void handleBallModeCollision(objid obj1, objid obj2);
 void ballModeForceAcquireSoul();
 
-void startSoulRun();
+void startSoulRun(std::string song);
 void stopSoulRun();
 
 #endif 

@@ -1,9 +1,12 @@
 
 
 maincamera:mesh:../gameresources/build/characters/plaguerobot.gltf
+
+#maincamera:mesh:./build/build.modelb
+
+
 #enemy/model:texture:/home/brad/Desktop/art/deadinternet.png
 
-maincamera/model:tint:0 0 1 1
 
 maincamera:physics_angle:0 0 0
 maincamera:physics:enabled

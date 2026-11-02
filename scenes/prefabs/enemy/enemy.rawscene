@@ -1,4 +1,7 @@
 enemy:mesh:../gameresources/build/characters/plaguerobot.gltf
+
+#enemy:mesh:./build/build.modelb
+
 #enemy/model:texture:/home/brad/Desktop/art/deadinternet.png
 
 enemy:physics_angle:0 0 0

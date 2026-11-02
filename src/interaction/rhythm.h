@@ -21,6 +21,8 @@ struct RhythmSong {
 
   std::vector<RhythmNote> notes;
   std::vector<RhythmNoteStat> stats;
+
+  std::optional<OneShot> playingSong;
 };
 
 void startRhythm();
@@ -50,7 +52,9 @@ struct RhythmRendering {
   RhythmStats stats;
 };
 
-void loadSong();
+void loadSong(std::string song);
+void unloadSong();
+
 RhythmRendering getRhythmRendering(float length);
 void onRhythmFrame();
 
