@@ -1,8 +1,8 @@
 {
-	"name" : "Display name for test song",
+	"name" : "song2",
 	"notes" : [
 		[0, { "lane" : 0 }],
 		[5000, { "lane" : 0 }],
-		[5000, { "lane" : 1 }],
+		[5000, { "lane" : 1 }]
 	]
 }

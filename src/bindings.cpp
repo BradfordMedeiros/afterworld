@@ -904,8 +904,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (hasOption("arcade")){
       addArcadeType(-1, getArgOption("arcade"), std::nullopt);
     }
-
-
+    
     return NULL;
   };
 

@@ -1,0 +1,19 @@
+{
+    "weather": "rain",
+    "skyboxcolor": [
+        0.1307505965232849,
+        0.1307505965232849,
+        0.1307505965232849
+    ],
+    "chromatic": [
+        0.0,
+        0.0
+    ],
+    "ambient": [
+        0.10895884037017822,
+        0.10895884037017822,
+        0.10895884037017822
+    ],
+    "skybox": "../gameresources/skybox/space1",
+    "description": "No description"
+}

@@ -37,59 +37,8 @@ void registerPressNote(int lane){
   }
 }
 
-struct RawSongData {
-	std::string name;
-  std::vector<RhythmNote> notes;
-};
-std::unordered_map<std::string, RawSongData> songToData {
-	{"song1", RawSongData {
-		.name = "song1",
-		.notes = {
-			RhythmNote { 
-				.time = 0.f, 
-				.lane = 0,
-			},
-			RhythmNote { 
-				.time = 5.f, 
-				.lane = 0,
-			},
-			RhythmNote { 
-				.time = 5.f, 
-				.lane = 2,
-			},
-			RhythmNote { 
-				.time = 10.f, 
-				.lane = 0,
-			},
-			RhythmNote { 
-				.time = 15.f, 
-				.lane = 0,
-			},
-			RhythmNote { 
-				.time = 15.f, 
-				.lane = 1,
-			},
-		},
-	}},
-	{"song2", RawSongData {
-		.name = "song2",
-		.notes = {
-			RhythmNote { },
-		},
-	}},
-};
 
-int initSong1(){
-	auto& notes = songToData.at("song2").notes;
-	for (int i = 0 ; i < 100; i++){
-		notes.push_back(RhythmNote {
-			.time = i * 0.2f,
-			.lane = i % 3,
-		});
-	}
-	return 0;
-}
-auto _ = initSong1();
+std::unordered_map<std::string, RawSongData> songToData {};
 
 void loadSong(std::string song){
 	if (songToData.find(song) == songToData.end()){
@@ -135,10 +84,71 @@ void unloadSong(){
 	}
 }
 
-
 // list songs
-// RawSongData parseSongData(filepath)
-// std::unordered_map<std::string, RawSongData> loadAllSongs;
+RawSongData parseSongData(std::string filepath){
+  auto fileInfo = decomposePath(filepath);
+  auto fileContent = readFileOrPackage(filepath);
+
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+
+  modassert(!doc.HasParseError(), "error parsing song file");
+  modassert(doc.IsObject(), "song data must be an object");
+
+  modassert(doc.HasMember("name"), "song data missing name");
+  modassert(doc["name"].IsString(), "song name must be a string");
+
+  modassert(doc.HasMember("notes"), "song data missing notes");
+  modassert(doc["notes"].IsArray(), "song notes must be an array");
+
+  RawSongData result{
+    .name = doc["name"].GetString(),
+  };
+
+  for (auto& note : doc["notes"].GetArray()){
+    modassert(note.IsArray(), "song note must be an array");
+    modassert(note.Size() == 2, "song note must contain time and data");
+
+    modassert(note[0].IsNumber(), "song note time must be a number");
+
+    auto& data = note[1];
+    modassert(data.IsObject(), "song note data must be an object");
+
+    modassert(data.HasMember("lane"), "song note missing lane");
+    modassert(data["lane"].IsInt(), "song note lane must be an integer");
+
+    auto time = note[0].GetFloat();
+    auto lane = data["lane"].GetInt();
+
+    modassert(time >= 0.f, "song note time cannot be negative");
+    modassert(lane >= 0 && lane <= 2, "song note lane out of range");
+
+    result.notes.push_back(RhythmNote{
+      .time = time / 1000.f,
+      .lane = lane,
+    });
+  }
+
+  return result;
+}
+
+
+std::unordered_map<std::string, RawSongData> loadAllSongs(){
+  auto songFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/ball/songs/", { "json" });
+
+  std::unordered_map<std::string, RawSongData> songs;
+  for (auto& songFile : songFiles){
+  	auto songData = parseSongData(songFile);
+  	std::cout << "song file: " << songData.name << std::endl;
+  	songs[songData.name] = songData;
+  }
+
+	return songs;
+}
+
+void doLoadAllSongs(){
+		songToData = loadAllSongs();
+}
 
 
 bool isLane0PressedWithGrace(float currentTime){
@@ -228,9 +238,8 @@ void onPressKeyRhythm(int key, int action){
     	}
     	if (key == 'D'){
     	  registerPressNote(2);
-          playMixedSound(getSymbol("ball/rhythm/press_note"), std::nullopt);
+        playMixedSound(getSymbol("ball/rhythm/press_note"), std::nullopt);
     	}
 	}
 }
 
-void loa

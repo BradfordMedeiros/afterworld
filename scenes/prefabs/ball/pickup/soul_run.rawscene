@@ -4,7 +4,7 @@
 +soul:physics_shape:shape_sphere
 +soul:physics:enabled
 +soul:physics_collision:nocollide
-+soul:soulrun:test
++soul:soulrun:song2
 +soul:effect-tint:1 0 1 1
 
 +soul/holder:mesh:../gameresources/build/objtypes/soul-holder.gltf

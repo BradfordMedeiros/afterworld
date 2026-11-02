@@ -575,6 +575,8 @@ void startBallIntroMode(objid sceneId, bool inHub){
 void startBallMode(objid sceneId){
 	static bool doOnce = true;
 	if (doOnce){
+		doLoadAllSongs();
+
     registerCommand("startsoul", [](std::string& command, bool* valid) -> std::optional<std::string> {
       startSoulRun("test");
       return std::nullopt;
@@ -812,11 +814,8 @@ void handleWarpCollision(objid obj1, objid obj2){
 }
 
 
-std::function<void(EasyCutscene&)> startSoulModeCutscene(){
- 	int endTimeMs = 0;
- 	float endTime = endTimeMs / 1000.f;
-
-	return [endTimeMs, endTime](EasyCutscene& cutscene) -> void {
+std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
+	return [song](EasyCutscene& cutscene) -> void {
 		if(initialize(cutscene)){
  			playMixedSound(getSymbol("ball/rhythm/start_soul"), std::nullopt);
 
@@ -827,7 +826,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(){
 
 			inputOverride(true, false, true);
 			
-		 	loadSong("song1");
+		 	loadSong(song);
 		}
 		if (finalize(cutscene)){
 			//std::cout << "death cutscene: finalize: t = " << gameapi -> timeSeconds(false) << std::endl;
@@ -863,8 +862,7 @@ void startSoulRun(std::string song){
 
 	ballModeOptions.inSoulMode = true;
 
-
-	playCutscene(startSoulModeCutscene(), std::nullopt, true);
+	playCutscene(startSoulModeCutscene(song), std::nullopt, true);
 
 }
 void stopSoulRun(){
@@ -918,24 +916,24 @@ void handleSoulCollision(int32_t obj1, int32_t obj2){
   }
 }
 
-void deliverSoulMusic(std::string& soulMusic, objid id){
+void deliverSoulMusic(std::string& soulMusic, objid id, std::string song){
 	//   auto prefabId = createPrefab(sceneId, "../afterworld/scenes/prefabs/pickup/soul_run.rawscene",  playerSpawnPosition, {});    
 
   gameapi -> removeObjectById(id);
-	startSoulRun("test");
+	startSoulRun(song);
 }
 void handleMusicSoulCollision(int32_t obj1, int32_t obj2){
   if (isControlledVehicle(obj1)){
     auto objAttr = getAttrHandle(obj2);
     auto soul = getStrAttr(objAttr, "soulrun");
     if (soul.has_value()){
-      deliverSoulMusic(soul.value(), obj2);
+      deliverSoulMusic(soul.value(), obj2, soul.value());
     }
   }else if (isControlledVehicle(obj2)){
     auto objAttr = getAttrHandle(obj1);
     auto soul = getStrAttr(objAttr, "soulrun");
     if (soul.has_value()){
-      deliverSoulMusic(soul.value(), obj1);
+      deliverSoulMusic(soul.value(), obj1, soul.value());
     }
   }	
 }

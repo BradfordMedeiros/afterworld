@@ -59,3 +59,11 @@ RhythmRendering getRhythmRendering(float length);
 void onRhythmFrame();
 
 void onPressKeyRhythm(int key, int action);
+
+struct RawSongData {
+  std::string name;
+  std::vector<RhythmNote> notes;
+};
+std::unordered_map<std::string, RawSongData> loadAllSongs();
+
+void doLoadAllSongs();
