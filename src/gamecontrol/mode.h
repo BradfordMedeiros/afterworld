@@ -23,5 +23,6 @@ bool isModeNone(GameMode& gameMode);
 
 void onModeCollision(GameMode& gameMode, objid obj1, objid obj2);
 
+void onModePauseToggle(GameMode& gameMode, bool isPaused);
 
 #endif 

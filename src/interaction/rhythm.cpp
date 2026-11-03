@@ -54,6 +54,7 @@ void loadSong(std::string song){
 		.lastLane0Press = 0.f,
 		.lastLane1Press = 0.f,
 		.lastLane2Press = 0.f,
+		.rawSongData = &songToData.at(song),
 		.notes = songToData.at(song).notes,
 		.stats = {},
 		//struct RhythmSong {
@@ -76,12 +77,16 @@ void loadSong(std::string song){
 	rhythmSong.value().stats = stats;
 
  	rhythmSong.value().playingSong = playMixedSound(getSymbol("ball/song"), std::nullopt);
+
+ 	std::cout << "song length is: " << getSoundLengthOneshot(rhythmSong.value().playingSong.value()) << std::endl;
+
 }
 
 void unloadSong(){
 	if (rhythmSong.has_value() && rhythmSong.value().playingSong.has_value()){
 		gameapi -> stopOneshot(rhythmSong.value().playingSong.value());
 	}
+	rhythmSong = std::nullopt;
 }
 
 // list songs
@@ -102,7 +107,8 @@ RawSongData parseSongData(std::string filepath){
   modassert(doc["notes"].IsArray(), "song notes must be an array");
 
   RawSongData result{
-    .name = doc["name"].GetString(),
+    .name = fileInfo.filename,
+    .displayName = doc["name"].GetString(),
   };
 
   for (auto& note : doc["notes"].GetArray()){
@@ -161,12 +167,32 @@ bool isLane2PressedWithGrace(float currentTime){
 	return glm::abs(currentTime - rhythmSong.value().lastLane2Press) <= RHYTHM_GRACE;
 }
 
-RhythmRendering getRhythmRendering(float length){
+int numNotesTotal(RhythmSong& song){
+	return song.notes.size();
+}
+int numNotesSuccess(RhythmSong& song, float currentTime){
+	int success = 0;
+	for (int i = 0; i < song.notes.size(); i++){
+		if (song.stats.at(i).success){
+			success++;
+		}
+	}
+	return success;
+}
+int numNotesFailure(RhythmSong& song, float currentTime){
+	int failure = 0;
+	for (int i = 0; i < song.notes.size(); i++){
+		// Probably should allow a buffer here (technically can input after this)
+		if (currentTime > song.notes.at(i).time && !song.stats.at(i).success){
+			failure++;
+		}
+	}
+	return failure;
+}
+
+std::optional<RhythmRendering> getRhythmRendering(float length){
   if (!rhythmSong.has_value()){
-    return RhythmRendering {
-      .currentPlaybackTime = 0,
-      .notes = {},
-    };
+    return std::nullopt;
   }
   auto currentTime = gameapi -> timeSeconds(false);
 
@@ -180,16 +206,24 @@ RhythmRendering getRhythmRendering(float length){
   		.time = note.time,
   	});
   }
+
+  float currentPlaybackTime = currentTime - rhythmSong.value().startTime;
+  auto totalCount = numNotesTotal(rhythmSong.value());
+  int successCount = numNotesSuccess(rhythmSong.value(), currentPlaybackTime);
+  int failureCount = numNotesFailure(rhythmSong.value(), currentPlaybackTime);
+  bool songComplete = (successCount + failureCount) == totalCount;
   return RhythmRendering {
-    .currentPlaybackTime = currentTime - rhythmSong.value().startTime,
+    .currentPlaybackTime = currentPlaybackTime,
     .notes = notesToRender,
     .lane0Pressed = isLane0PressedWithGrace(currentTime),
     .lane1Pressed = isLane1PressedWithGrace(currentTime),
     .lane2Pressed = isLane2PressedWithGrace(currentTime),
+    .rawSongData = rhythmSong.value().rawSongData,
     .stats = RhythmStats {
-  		.numNotesTotal = 100,
-  		.numSuccess = 34,
-  		.numFailure = 5,
+    	.songComplete = songComplete,
+  		.numNotesTotal = totalCount,
+  		.numSuccess = successCount,
+  		.numFailure = failureCount,
     },
   };
 }
@@ -243,3 +277,15 @@ void onPressKeyRhythm(int key, int action){
 	}
 }
 
+
+void onSongPauseToggle(bool paused){
+	if (rhythmSong.has_value() && rhythmSong.value().playingSong.has_value()){
+		if (paused){
+			std::cout << "rhythm pause: pause oneshot" << std::endl;
+			gameapi -> pauseOneshot(rhythmSong.value().playingSong.value());
+		}else{
+			std::cout << "rhythm pause: resume oneshot" << std::endl;
+			gameapi -> resumeOneshot(rhythmSong.value().playingSong.value());
+		}
+	}
+}

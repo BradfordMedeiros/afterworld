@@ -1,5 +1,5 @@
 {
-	"name" : "song2",
+	"name" : "This is The Name Of Song 2",
 	"notes" : [
 		[0, { "lane" : 0 }],
 		[5000, { "lane" : 0 }],

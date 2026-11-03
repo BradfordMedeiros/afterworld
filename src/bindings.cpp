@@ -363,6 +363,8 @@ void updateState(){
    }
   });
   gameapi -> setUpdateDynamicBodiesPositionsBasedOnParent(global.showEditor || !global.routeState.inGameMode);
+
+  onModePauseToggle(sceneManagement.managedScene.value().gameMode, global.routeState.paused);
 }
 
 bool disableGameInput(){

@@ -12,6 +12,11 @@ struct RhythmNote {
   float time = 0.f;
   int lane = 0;
 };
+struct RawSongData {
+  std::string name;
+  std::string displayName;
+  std::vector<RhythmNote> notes;
+};
 
 struct RhythmSong {
   float startTime;
@@ -19,6 +24,7 @@ struct RhythmSong {
   float lastLane1Press = 0.f;
   float lastLane2Press = 0.f;
 
+  RawSongData* rawSongData = NULL;
   std::vector<RhythmNote> notes;
   std::vector<RhythmNoteStat> stats;
 
@@ -38,6 +44,7 @@ struct NoteToRender {
 };
 
 struct RhythmStats {
+  bool songComplete;
   int numNotesTotal;
   int numSuccess;
   int numFailure;
@@ -49,21 +56,21 @@ struct RhythmRendering {
   bool lane1Pressed;
   bool lane2Pressed;
 
+  RawSongData* rawSongData = NULL;
   RhythmStats stats;
 };
 
 void loadSong(std::string song);
 void unloadSong();
 
-RhythmRendering getRhythmRendering(float length);
+std::optional<RhythmRendering> getRhythmRendering(float length);
 void onRhythmFrame();
 
 void onPressKeyRhythm(int key, int action);
 
-struct RawSongData {
-  std::string name;
-  std::vector<RhythmNote> notes;
-};
+
 std::unordered_map<std::string, RawSongData> loadAllSongs();
 
 void doLoadAllSongs();
+
+void onSongPauseToggle(bool paused);

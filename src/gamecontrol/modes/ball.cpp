@@ -61,6 +61,7 @@ struct BallModeOptions{
    bool didLose = false;
    bool shouldReset = false;
    bool didReset = false;
+   bool canShowRhythmUi = false;
    std::optional<float> ballFallingTime;
    std::optional<float> ballStartTime;
    std::optional<float> finalBallTime;
@@ -822,7 +823,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 			auto digitalAmount =	getDigitalAmount();
 			*digitalAmount = 1.0f;
 
-			getBallModeUI().value() -> ballMode.showRhythmUi = true;
+			getBallModeOptions().canShowRhythmUi = true;
 
 			inputOverride(true, false, true);
 			
@@ -879,7 +880,7 @@ void stopSoulRun(){
 	auto digitalAmount =	getDigitalAmount();
 	*digitalAmount = 0.f;
 
-	getBallModeUI().value() -> ballMode.showRhythmUi = false;
+	getBallModeOptions().canShowRhythmUi = false;
 
 	unloadSong();
 }
@@ -1513,6 +1514,8 @@ GameTypeInfo getBallMode(){
 
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
+			getBallModeUI().value() -> ballMode.showRhythmUi = getBallModeOptions().canShowRhythmUi && !isPaused();
+
   		if (ballMode.didLose){
 	  		//gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
@@ -1557,5 +1560,10 @@ GameTypeInfo getBallMode(){
 	return ballMode;
 }
 
+
+void handleBallModePauseToggle(bool paused){
+	std::cout << "ball mode pause toggle: " << paused << std::endl;
+	onSongPauseToggle(paused);
+}
 
 /////////////////////////////////////////////////////////

@@ -116,3 +116,16 @@ void onModeCollision(GameMode& gameMode, objid obj1, objid obj2){
     handleBallModeCollision(obj1, obj2);
   }
 }
+
+void onModePauseToggle(GameMode& gameMode, bool isPaused){
+  static std::optional<bool> pauseState;
+  if (pauseState.has_value() && pauseState.value() == isPaused){
+    return;
+  }
+  pauseState = isPaused;
+
+  auto gamemodeBall = std::get_if<GameModeBall>(&gameMode);
+  if (gamemodeBall){
+    handleBallModePauseToggle(isPaused);
+  } 
+}

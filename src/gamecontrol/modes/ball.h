@@ -23,4 +23,6 @@ void ballModeForceAcquireSoul();
 void startSoulRun(std::string song);
 void stopSoulRun();
 
+void handleBallModePauseToggle(bool paused);
+
 #endif 

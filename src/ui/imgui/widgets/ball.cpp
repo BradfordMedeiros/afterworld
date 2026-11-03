@@ -386,10 +386,23 @@ void renderRhythmPanel(bool includePanel){
         ImGui::Begin("renderRhythmPanel");
     }
 
-    auto notesToRender = getRhythmRendering(10);
+    auto notesToRenderOpt = getRhythmRendering(10);
+    if (!notesToRenderOpt.has_value()){
+      if (includePanel){
+        ImGui::End();
+      }
+      return;
+    }
+
+    auto& notesToRender = notesToRenderOpt.value();
+
+    modassert(notesToRender.rawSongData != NULL, "notes to render is null");
+
+    ImGui::Text("Display Name: %s", notesToRender.rawSongData -> displayName.c_str());
     ImGui::Text("Num Notes: %d", notesToRender.stats.numNotesTotal);
     ImGui::Text("Num Success: %d", notesToRender.stats.numSuccess);
     ImGui::Text("Num Failure: %d", notesToRender.stats.numFailure);
+    ImGui::Text("Complete: %s", notesToRender.stats.songComplete ? "true" : "false");
 
     auto drawList = ImGui::GetWindowDrawList();
 
