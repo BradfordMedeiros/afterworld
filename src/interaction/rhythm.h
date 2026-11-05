@@ -47,6 +47,7 @@ struct NoteToRender {
 
 struct RhythmStats {
   bool songComplete;
+  bool songPlaybackComplete;
   int numNotesTotal;
   int numSuccess;
   int numFailure;

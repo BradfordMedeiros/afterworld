@@ -408,6 +408,8 @@ void renderRhythmPanel(bool includePanel){
     ImGui::Text("Num Success: %d", notesToRender.stats.numSuccess);
     ImGui::Text("Num Failure: %d", notesToRender.stats.numFailure);
     ImGui::Text("Complete: %s", notesToRender.stats.songComplete ? "true" : "false");
+    ImGui::Text("Playback Complete: %s", notesToRender.stats.songPlaybackComplete ? "true" : "false");
+
 
     auto drawList = ImGui::GetWindowDrawList();
 

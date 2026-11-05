@@ -99,8 +99,6 @@ void loadSong(std::string song){
 		clipGameObject.value()
 	);
 
- 	std::cout << "song length is: " << getSoundLengthOneshot(rhythmSong.value().playingSong.value()) << std::endl;
-
 }
 
 void unloadSong(){
@@ -220,6 +218,34 @@ int numNotesFailure(RhythmSong& song, float currentTime){
 	return failure;
 }
 
+RhythmStats calcRhythmStats(RhythmSong& rhythmSong, float currentPlaybackTime){
+	bool songPlaybackComplete = true;
+	if (rhythmSong.playingSong.has_value()){
+		auto songLength = getSoundLengthOneshot(rhythmSong.playingSong.value());
+		if (songLength.has_value()){
+	  	std::cout << "song length: " << currentPlaybackTime << " / " << songLength.value() << std::endl;
+			songPlaybackComplete =  currentPlaybackTime > songLength.value();
+		}else{
+			std::cout << "song length: n/a" << std::endl;
+		}
+	}else{
+		std::cout << "song length: no playing song" << std::endl;
+	}
+
+  auto totalCount = numNotesTotal(rhythmSong);
+  int successCount = numNotesSuccess(rhythmSong, currentPlaybackTime);
+  int failureCount = numNotesFailure(rhythmSong, currentPlaybackTime);
+  bool songComplete = (successCount + failureCount) == totalCount;
+	RhythmStats rhythmStats {
+   	.songComplete = songComplete,
+   	.songPlaybackComplete = songPlaybackComplete,
+  	.numNotesTotal = totalCount,
+  	.numSuccess = successCount,
+  	.numFailure = failureCount,
+  };
+  return rhythmStats;
+}
+
 std::optional<RhythmRendering> getRhythmRendering(float length){
   if (!rhythmSong.has_value()){
     return std::nullopt;
@@ -238,10 +264,8 @@ std::optional<RhythmRendering> getRhythmRendering(float length){
   }
 
   float currentPlaybackTime = currentTime - rhythmSong.value().startTime;
-  auto totalCount = numNotesTotal(rhythmSong.value());
-  int successCount = numNotesSuccess(rhythmSong.value(), currentPlaybackTime);
-  int failureCount = numNotesFailure(rhythmSong.value(), currentPlaybackTime);
-  bool songComplete = (successCount + failureCount) == totalCount;
+  auto rhythmStats = calcRhythmStats(rhythmSong.value(), currentPlaybackTime);
+
   return RhythmRendering {
     .currentPlaybackTime = currentPlaybackTime,
     .notes = notesToRender,
@@ -249,12 +273,7 @@ std::optional<RhythmRendering> getRhythmRendering(float length){
     .lane1Pressed = isLane1PressedWithGrace(currentTime),
     .lane2Pressed = isLane2PressedWithGrace(currentTime),
     .rawSongData = rhythmSong.value().rawSongData,
-    .stats = RhythmStats {
-    	.songComplete = songComplete,
-  		.numNotesTotal = totalCount,
-  		.numSuccess = successCount,
-  		.numFailure = failureCount,
-    },
+    .stats = rhythmStats,
   };
 }
 
