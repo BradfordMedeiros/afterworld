@@ -62,6 +62,9 @@ bool getSaveBoolValue(std::string scope, std::string key, float defaultValue){
 std::string getSaveStringValue(std::string scope, std::string key, std::string defaultValue){
   return getSaveValue<std::string>(scope, key, defaultValue);
 }
+int getSaveIntValue(std::string scope, std::string key, int defaultValue){
+  return getSaveValue<int>(scope, key, defaultValue);
+}
 
 std::vector<std::string> getSaveVectorValue(std::string scope, std::string key){
   return getSaveValue<std::vector<std::string>>(scope, key, {});

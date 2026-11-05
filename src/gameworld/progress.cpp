@@ -712,3 +712,33 @@ std::string print(std::vector<RawLevelData>& levels){
   }
   return value;
 }
+
+bool loadedPersistedSouls = false;
+PersistedSouls persistedSouls {
+  .delivered  = 0,
+  .lost = 0,
+};
+PersistedSouls& getPersistedSouls(){
+  if (!loadedPersistedSouls){
+    persistedSouls.delivered = getSaveIntValue("souls", "delivered", 0);;
+    persistedSouls.lost = getSaveIntValue("souls", "lost", 0);;
+    loadedPersistedSouls = true;
+  }
+  return persistedSouls;
+}
+
+void saveSouls(){
+  std::unordered_map<std::string, JsonType> values;
+  values["delivered"] = getPersistedSouls().delivered;
+  values["lost"] = getPersistedSouls().lost;
+  persistSaveMap("souls", values);
+}
+void deliverSoul(){
+  getPersistedSouls().delivered++;
+  saveSouls();
+}
+void loseSoul(){
+  getPersistedSouls().lost++;
+  saveSouls();
+}
+

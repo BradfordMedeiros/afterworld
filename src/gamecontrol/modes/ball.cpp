@@ -25,6 +25,7 @@ void showLetterBox(std::string title, float duration);
 void showLetterBoxHold(std::string title, float fadeInTime);
 float* getDigitalAmount();
 void registerCommand(std::string name, std::function<std::optional<std::string>(std::string& command, bool* valid)> registerFn);
+void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi);
 
 struct WorldView {
 	bool didChangeToOrb = false;
@@ -91,7 +92,6 @@ struct BallModeOptions{
    unsigned int ballShader = 0;
    unsigned int grassShader = 0;
    int lastImpulseId = 0;
-
 };
 
 bool hasBallModeOptions(){
@@ -380,20 +380,6 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
   }
 
 
-  {
-  	GameobjAttributes emitterAttr { 
-  		.attr = {
-  			{ "clip", "../gameresources/sound/rolling.ogg" },
- 				{ "loop", "true" },
-  		} 
-  	};
-  	std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
-  	auto ballSound = gameapi -> makeObjectAttr(sceneId, std::string("&ballsoundmove"), emitterAttr, submodelAttributesEmitter);
-  	modassert(ballSound.has_value(), "ballSound was not created");
-
-  	gameapi -> makeParent(ballSound.value(), ball.value());
-	}
-
 	return BallObj {
 		.id = ball.value(),
 		.eyeId = eyeId.value(),
@@ -586,6 +572,16 @@ void startBallMode(objid sceneId){
       stopSoulRun();
       return std::nullopt;
     });
+
+    registerCommand("deliver", [](std::string& command, bool* valid) -> std::optional<std::string> {
+      deliverSoul();
+      return std::nullopt;
+    });
+    registerCommand("lose", [](std::string& command, bool* valid) -> std::optional<std::string> {
+      loseSoul();
+      return std::nullopt;
+    });
+
     doOnce = false;
 	}
 
@@ -847,6 +843,10 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 			inputOverride(false, false, false);
 		});
 
+		if (!finished(cutscene, 1)){
+			drawImGuiText("SOUL RUN", glm::vec2(0.5f, 0.5f));
+		}
+
 	};
 }
 
@@ -875,6 +875,8 @@ void stopSoulRun(){
 	if (!ballModeOptions.inSoulMode){
 		return;
 	}
+
+	loseSoul();
 
 	ballModeOptions.inSoulMode = false;
 	auto digitalAmount =	getDigitalAmount();
@@ -1459,7 +1461,14 @@ GameTypeInfo getBallMode(){
 	  		}
 
 	  		if (ballMode.ballFallingTime.has_value()){
-		  		gameapi -> drawText("Falling", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+	  			gameapi->drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.f, 0.f, 0.f, 0.8f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);
+
+					if (ballMode.inSoulMode){
+						drawImGuiText("SOUL LOST", glm::vec2(0.5f, 0.5f));
+					}else{
+						drawImGuiText("FELL", glm::vec2(0.5f, 0.5f));
+					}				
+
 	  			auto timeElapsed = gameapi -> timeSeconds(false) - ballMode.ballFallingTime.value();
 	  			if (timeElapsed > 1.5f){
 	  				ballMode.shouldReset = true;
@@ -1476,6 +1485,8 @@ GameTypeInfo getBallMode(){
 	  			setGameObjectTint(ballMode.eyeId, glm::vec4(1.f, 1.f, 1.f, 1.f));
 	  		}
 	  		if (ballMode.shouldReset){
+		      stopSoulRun();
+
 		  		gameapi -> setGameObjectPosition(ballMode.ballId, ballMode.initialBallPos.value(), true, Hint { .hint = "[gamelogic] - ball set pos" });
 		  		setGameObjectVelocity(ballMode.ballId, glm::vec3(0.f, 0.f, 0.f));
 		  		
@@ -1515,6 +1526,8 @@ GameTypeInfo getBallMode(){
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
 			getBallModeUI().value() -> ballMode.showRhythmUi = getBallModeOptions().canShowRhythmUi && !isPaused();
+			getBallModeUI().value() -> ballMode.lostSouls = getPersistedSouls().lost;
+			getBallModeUI().value() -> ballMode.deliveredSouls = getPersistedSouls().delivered;
 
   		if (ballMode.didLose){
 	  		//gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);

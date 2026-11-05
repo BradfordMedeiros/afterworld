@@ -128,4 +128,12 @@ void updateRawLevelData(std::string levelName, UpdateLevel updateLevel);
 std::string print(std::vector<RawLevelData>& levels);
 
 
+struct PersistedSouls {
+  int delivered;
+  int lost;
+};
+void deliverSoul();
+void loseSoul();
+PersistedSouls& getPersistedSouls();
+
 #endif

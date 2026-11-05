@@ -69,6 +69,11 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   ImFont* font = getFontByBinding(getSymbol("ball-level-complete"));
   ImGui::PushFont(font);
   
+  ImGui::SetCursorPosX(0);
+  ImGui::SetCursorPosY(0);
+  ImGui::Text("Delivered Souls: %d", ballModeUi.ballMode.deliveredSouls);
+  ImGui::Text("Lost Souls: %d", ballModeUi.ballMode.lostSouls);
+
   if (ballModeUi.ballMode.levelComplete.has_value()){
       const char* text = "Level Complete";
       float width = ImGui::CalcTextSize(text).x;

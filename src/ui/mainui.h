@@ -49,6 +49,9 @@ struct BallComponentOptions {
   std::optional<float> powerupDuration;
 
   bool showRhythmUi = false;
+
+  int lostSouls = 0;
+  int deliveredSouls = 0;
 };
 
 struct BallLevelSelectInfo {

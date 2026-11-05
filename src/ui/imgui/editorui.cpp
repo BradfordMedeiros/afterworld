@@ -180,7 +180,7 @@ void renderMoreUi(){
 
         {
           auto& widget = *widgetByNameSymbol(getSymbol("game-ball-progress")).value();
-          renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImVec2(700.f, 500.f));
+          renderLayoutAlignUpCenterHorz("main-menu2-ball-progress-layout", widget, ImVec2(1.f, 0.5f), ImVec2(0.f, 1.f), ImVec2(700.f, 500.f));
           windowOrdering.push_back("main-menu2-ball-progress-layout");
         }
 
