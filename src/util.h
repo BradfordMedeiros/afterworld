@@ -159,4 +159,6 @@ struct Level {
 };
 
 
+void setPlaybackSpeed(std::optional<float> speed);
+
 #endif

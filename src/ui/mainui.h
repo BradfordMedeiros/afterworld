@@ -50,6 +50,7 @@ struct BallComponentOptions {
 
   bool showRhythmUi = false;
 
+  bool showSoulCount = false;
   int lostSouls = 0;
   int deliveredSouls = 0;
 };

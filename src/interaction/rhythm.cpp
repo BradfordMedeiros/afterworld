@@ -55,6 +55,8 @@ void loadSong(std::string song){
 		.rawSongData = &songToData.at(song),
 		.notes = songToData.at(song).notes,
 		.stats = {},
+  	.songCurrentHealth = 3,
+  	.songTotalHealth = 5,
 		//struct RhythmSong {
 		//  float startTime;
 		//  float lastLane0Press = 0.f;
@@ -242,6 +244,8 @@ RhythmStats calcRhythmStats(RhythmSong& rhythmSong, float currentPlaybackTime){
   	.numNotesTotal = totalCount,
   	.numSuccess = successCount,
   	.numFailure = failureCount,
+  	.songCurrentHealth = rhythmSong.songCurrentHealth,
+  	.songTotalHealth = rhythmSong.songTotalHealth,
   };
   return rhythmStats;
 }

@@ -536,3 +536,13 @@ objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec
   return emitter.value();
 }
 
+void setPlaybackSpeed(std::optional<float> speed){
+  gameapi -> setWorldState({ 
+    ObjectValue {
+      .object = "game",
+      .attribute = "speed",
+      .value = speed.has_value() ? speed.value() : 1.f,
+    }
+  });  
+  
+}

@@ -810,7 +810,7 @@ void handleWarpCollision(objid obj1, objid obj2){
 
 }
 
-
+bool soulModePauses = false;
 std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 	return [song](EasyCutscene& cutscene) -> void {
 		if(initialize(cutscene)){
@@ -821,7 +821,11 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 
 			getBallModeOptions().canShowRhythmUi = true;
 
-			inputOverride(true, false, true);
+			if (soulModePauses){
+				inputOverride(true, false, true);
+			}else{
+				setPlaybackSpeed(0.5f);
+			}
 			
 		 	loadSong(song);
 		}
@@ -840,7 +844,11 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 
 		waitUntil(cutscene, 1, 5000);
 		run(cutscene, 2, []() -> void {
-			inputOverride(false, false, false);
+			if (soulModePauses){
+				inputOverride(false, false, false);
+			}else{
+				setPlaybackSpeed(std::nullopt);
+			}
 		});
 
 		if (!finished(cutscene, 1)){
@@ -1447,6 +1455,7 @@ GameTypeInfo getBallMode(){
 						//ballMode.shouldReset = true;
 
 	  				ballMode.ballFallingTime = gameapi -> timeSeconds(false);
+	  				ballMode.canShowRhythmUi = false;
 
 	  				auto viewTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
 						auto viewPosition = viewTransform.position;
@@ -1470,7 +1479,7 @@ GameTypeInfo getBallMode(){
 					}				
 
 	  			auto timeElapsed = gameapi -> timeSeconds(false) - ballMode.ballFallingTime.value();
-	  			if (timeElapsed > 1.5f){
+	  			if (timeElapsed > 3.f){
 	  				ballMode.shouldReset = true;
 	  			}
 	  		}
@@ -1526,6 +1535,9 @@ GameTypeInfo getBallMode(){
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
 			getBallModeUI().value() -> ballMode.showRhythmUi = getBallModeOptions().canShowRhythmUi && !isPaused();
+
+
+			getBallModeUI().value() -> ballMode.showSoulCount = !getBallModeOptions().ballFallingTime.has_value();
 			getBallModeUI().value() -> ballMode.lostSouls = getPersistedSouls().lost;
 			getBallModeUI().value() -> ballMode.deliveredSouls = getPersistedSouls().delivered;
 

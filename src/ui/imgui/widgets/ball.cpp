@@ -71,8 +71,23 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   
   ImGui::SetCursorPosX(0);
   ImGui::SetCursorPosY(0);
-  ImGui::Text("Delivered Souls: %d", ballModeUi.ballMode.deliveredSouls);
-  ImGui::Text("Lost Souls: %d", ballModeUi.ballMode.lostSouls);
+
+  if (ballModeUi.ballMode.showSoulCount){
+    ImGui::Text("Delivered Souls: %d", ballModeUi.ballMode.deliveredSouls);
+    ImGui::Text("Lost Souls: %d", ballModeUi.ballMode.lostSouls);
+
+    if (ballModeUi.ballMode.showElapsedTime && ballModeUi.ballMode.elapsedTime.has_value()){
+      ImGui::PopFont();
+
+      std::string text = std::to_string(ballModeUi.ballMode.elapsedTime.value()());
+      float width = ImGui::CalcTextSize(text.c_str()).x;
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - width) * 0.5f);
+      ImGui::Text(text.c_str());
+
+      ImGui::PushFont(font);
+
+    }
+  }
 
   if (ballModeUi.ballMode.levelComplete.has_value()){
       const char* text = "Level Complete";
@@ -93,12 +108,7 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   
   ImGui::PopFont();
 
-  if (ballModeUi.ballMode.showElapsedTime && ballModeUi.ballMode.elapsedTime.has_value()){
-    std::string text = std::to_string(ballModeUi.ballMode.elapsedTime.value()());
-    float width = ImGui::CalcTextSize(text.c_str()).x;
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - width) * 0.5f);
-    ImGui::Text(text.c_str());
-  }
+
 
   /*
       if (ballOptions -> showPowerup){
@@ -409,6 +419,7 @@ void renderRhythmPanel(bool includePanel){
     ImGui::Text("Num Failure: %d", notesToRender.stats.numFailure);
     ImGui::Text("Complete: %s", notesToRender.stats.songComplete ? "true" : "false");
     ImGui::Text("Playback Complete: %s", notesToRender.stats.songPlaybackComplete ? "true" : "false");
+    ImGui::Text("Health: %i / %i", notesToRender.stats.songCurrentHealth, notesToRender.stats.songTotalHealth);
 
 
     auto drawList = ImGui::GetWindowDrawList();

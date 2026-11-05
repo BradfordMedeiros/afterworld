@@ -28,6 +28,8 @@ struct RhythmSong {
   RawSongData* rawSongData = NULL;
   std::vector<RhythmNote> notes;
   std::vector<RhythmNoteStat> stats;
+  int songCurrentHealth;
+  int songTotalHealth;
 
   std::optional<objid> clipGameObject;
   std::optional<OneShot> playingSong;
@@ -51,6 +53,8 @@ struct RhythmStats {
   int numNotesTotal;
   int numSuccess;
   int numFailure;
+  int songCurrentHealth;
+  int songTotalHealth;
 };
 struct RhythmRendering {
   float currentPlaybackTime;
