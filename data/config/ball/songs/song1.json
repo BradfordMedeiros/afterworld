@@ -1,5 +1,6 @@
 {
-	"name" : "song1",
+	"name" : "MGMT - Of Moons, Birds & Monsters",
+	"file": "../gameresources/sound/songs/moon.ogg",
 	"notes" : [
 		[0, { "lane" : 0 }],
 		

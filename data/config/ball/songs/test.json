@@ -1,5 +1,6 @@
 {
 	"name" : "test",
+	"file": "../gameresources/sound/songs/moon.ogg",
 	"notes" : [
 		[0, { "lane" : 0 }],
 		

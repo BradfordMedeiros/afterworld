@@ -45,9 +45,7 @@ void loadSong(std::string song){
 		modassert(false, std::string("could not find song: ") + song);
 	}
 
-	if (rhythmSong.has_value()){
-		rhythmSong = std::nullopt;
-	}
+	unloadSong();
 
 	rhythmSong = RhythmSong {
 		.startTime = gameapi -> timeSeconds(false),
@@ -76,15 +74,43 @@ void loadSong(std::string song){
 	}
 	rhythmSong.value().stats = stats;
 
- 	rhythmSong.value().playingSong = playMixedSound(getSymbol("ball/song"), std::nullopt);
+	GameobjAttributes clipAttr {
+		.attr = {
+			{ "clip", rhythmSong.value().rawSongData->file },
+			{ "center", "true" },
+		},
+	};
+	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+	auto clipGameObject = gameapi->makeObjectAttr(
+		gameapi->rootSceneId(),
+		std::string("&rhythm-song-") + uniqueNameSuffix(),
+		clipAttr,
+		submodelAttributes
+	);
+	modassert(clipGameObject.has_value(), "could not create rhythm song clip gameobject");
+	rhythmSong.value().clipGameObject = clipGameObject.value();
+	rhythmSong.value().playingSong = gameapi->playOneshot(
+		clipGameObject.value(),
+		std::nullopt,
+		std::nullopt,
+		std::nullopt,
+		false,
+		true,
+		clipGameObject.value()
+	);
 
  	std::cout << "song length is: " << getSoundLengthOneshot(rhythmSong.value().playingSong.value()) << std::endl;
 
 }
 
 void unloadSong(){
-	if (rhythmSong.has_value() && rhythmSong.value().playingSong.has_value()){
-		gameapi -> stopOneshot(rhythmSong.value().playingSong.value());
+	if (rhythmSong.has_value()){
+		if (rhythmSong.value().playingSong.has_value()){
+			gameapi -> stopOneshot(rhythmSong.value().playingSong.value());
+		}
+		if (rhythmSong.value().clipGameObject.has_value()){
+			gameapi -> removeObjectById(rhythmSong.value().clipGameObject.value());
+		}
 	}
 	rhythmSong = std::nullopt;
 }
@@ -110,6 +136,10 @@ RawSongData parseSongData(std::string filepath){
     .name = fileInfo.filename,
     .displayName = doc["name"].GetString(),
   };
+
+  modassert(doc.HasMember("file"), "song data missing file");
+  modassert(doc["file"].IsString(), "song file must be a string");
+  result.file = doc["file"].GetString();
 
   for (auto& note : doc["notes"].GetArray()){
     modassert(note.IsArray(), "song note must be an array");

@@ -15,6 +15,7 @@ struct RhythmNote {
 struct RawSongData {
   std::string name;
   std::string displayName;
+  std::string file;
   std::vector<RhythmNote> notes;
 };
 
@@ -28,6 +29,7 @@ struct RhythmSong {
   std::vector<RhythmNote> notes;
   std::vector<RhythmNoteStat> stats;
 
+  std::optional<objid> clipGameObject;
   std::optional<OneShot> playingSong;
 };
 

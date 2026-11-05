@@ -1,5 +1,6 @@
 {
-	"name" : "This is The Name Of Song 2",
+	"name" : "Brad for Your Brain - Transmission Error",
+	"file": "../gameresources/sound/songs/nineinch.wav",
 	"notes" : [
 		[0, { "lane" : 0 }],
 		[5000, { "lane" : 0 }],
