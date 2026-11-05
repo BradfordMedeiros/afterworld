@@ -830,16 +830,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 		 	loadSong(song);
 		}
 		if (finalize(cutscene)){
-			//std::cout << "death cutscene: finalize: t = " << gameapi -> timeSeconds(false) << std::endl;
-//
-			//auto& ballOptions = getBallModeOptions();
-			//ballOptions.shouldReset = true;
-//
- 			//auto sphereObj = ballOptions.rebirthSphere.value();
- 			//gameapi -> moveCameraTo(sphereObj, ballOptions.rebirthSphereInitialPos.value(), endTime);
-//
- 			//setGameObjectLayer(ballOptions.eyeId, "");
- 			//setGameObjectLayer(ballOptions.rebirthSphere.value(), "");
+
 		}
 
 		waitUntil(cutscene, 1, 5000);
@@ -847,7 +838,7 @@ std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 			if (soulModePauses){
 				inputOverride(false, false, false);
 			}else{
-				setPlaybackSpeed(std::nullopt);
+				setPlaybackSpeed(0.5f);
 			}
 		});
 
