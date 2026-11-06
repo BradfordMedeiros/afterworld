@@ -71,7 +71,7 @@ void loadSong(std::string song){
 	std::vector<RhythmNoteStat> stats;
 	for (auto& note : rhythmSong.value().notes){
 		stats.push_back(RhythmNoteStat {
-			.success = false,
+			.noteState = NOTE_DEFAULT,
 		});
 	}
 	rhythmSong.value().stats = stats;
@@ -203,7 +203,7 @@ int numNotesTotal(RhythmSong& song){
 int numNotesSuccess(RhythmSong& song, float currentTime){
 	int success = 0;
 	for (int i = 0; i < song.notes.size(); i++){
-		if (song.stats.at(i).success){
+		if (song.stats.at(i).noteState == NOTE_SUCCESS){
 			success++;
 		}
 	}
@@ -213,7 +213,7 @@ int numNotesFailure(RhythmSong& song, float currentTime){
 	int failure = 0;
 	for (int i = 0; i < song.notes.size(); i++){
 		// Probably should allow a buffer here (technically can input after this)
-		if (currentTime > song.notes.at(i).time && !song.stats.at(i).success){
+		if (song.stats.at(i).noteState == NOTE_FAILURE){
 			failure++;
 		}
 	}
@@ -262,7 +262,7 @@ std::optional<RhythmRendering> getRhythmRendering(float length){
 		auto& stat = rhythmSong.value().stats.at(i);
   	notesToRender.push_back(NoteToRender {
   		.lane = note.lane,
-  		.color = stat.success ? glm::vec4(0.f, 1.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f),
+  		.color = stat.noteState == NOTE_SUCCESS ? glm::vec4(0.f, 1.f, 0.f, 1.f) : glm::vec4(0.f, 0.f, 1.f, 1.f),
   		.time = note.time,
   	});
   }
@@ -299,15 +299,31 @@ void onRhythmFrame(){
 		auto isLane2Pressed = isLane2PressedWithGrace(adjustedTime);
 
 		if (note.lane == 0 && isLane0Pressed){
-			stat.success = true;
+			stat.noteState = NOTE_SUCCESS;
 		}
 		if (note.lane == 1 && isLane1Pressed){
-			stat.success = true;
+			stat.noteState = NOTE_SUCCESS;
 		}
 		if (note.lane == 2 && isLane2Pressed){
-			stat.success = true;
+			stat.noteState = NOTE_SUCCESS;
+		}
+
+		if (elapsedTime > (note.time + RHYTHM_GRACE) && stat.noteState == NOTE_DEFAULT){
+			std::cout << "set note to failure: " << i << std::endl;
+			stat.noteState = NOTE_FAILURE;
+			rhythmSong.value().songCurrentHealth--;
+			if (rhythmSong.value().songCurrentHealth < 0){
+				rhythmSong.value().songCurrentHealth = 0;
+			}
 		}
 	}
+}
+
+bool isRhythmEnd(){
+	if (!rhythmSong.has_value()){
+		return false;
+	}
+	return rhythmSong.value().songCurrentHealth <= 0;
 }
 
 void onPressKeyRhythm(int key, int action){

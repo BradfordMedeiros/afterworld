@@ -5,8 +5,9 @@
 #include "../../../../ModEngine/src/cscript/cscript_binding.h"
 #include "../resources/sound.h"
 
+enum NoteState { NOTE_SUCCESS, NOTE_FAILURE, NOTE_DEFAULT };
 struct RhythmNoteStat {
-  bool success;
+  NoteState noteState = NOTE_DEFAULT;
 };
 struct RhythmNote {
   float time = 0.f;
@@ -72,6 +73,7 @@ void unloadSong();
 
 std::optional<RhythmRendering> getRhythmRendering(float length);
 void onRhythmFrame();
+bool isRhythmEnd();
 
 void onPressKeyRhythm(int key, int action);
 

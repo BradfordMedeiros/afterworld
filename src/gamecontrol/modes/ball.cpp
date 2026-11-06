@@ -810,7 +810,7 @@ void handleWarpCollision(objid obj1, objid obj2){
 
 }
 
-bool soulModePauses = false;
+bool soulModePauses = true;
 std::function<void(EasyCutscene&)> startSoulModeCutscene(std::string song){
 	return [song](EasyCutscene& cutscene) -> void {
 		if(initialize(cutscene)){
@@ -1532,6 +1532,10 @@ GameTypeInfo getBallMode(){
 			getBallModeUI().value() -> ballMode.lostSouls = getPersistedSouls().lost;
 			getBallModeUI().value() -> ballMode.deliveredSouls = getPersistedSouls().delivered;
 
+			if (isRhythmEnd()){
+				stopSoulRun();
+			}
+			
   		if (ballMode.didLose){
 	  		//gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
