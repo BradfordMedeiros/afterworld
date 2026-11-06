@@ -118,8 +118,9 @@ std::optional<glm::vec3> getPositionMaybeInVehicleByPlayerIndex(int playerIndex)
 void setManagedCameraId(std::optional<objid> camera, int playerIndex);
 void setTempCamera(std::optional<objid> camera, int playerIndex);
 void setPlayerFreeCamera(int playerIndex, bool editorMode);
-void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 
+void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
+void updateScreenshake(ControlledPlayer& player);
 
 ////////////////////// Glue //////////////////////
 WeaponEntityData getWeaponEntityData(objid id);

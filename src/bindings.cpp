@@ -797,6 +797,7 @@ void handleRouteChanged(bool forceLoad){
   onSceneRouteChange(sceneManagement, currentPath, forceLoad);
 }
 
+
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
   auto binding = createCScriptBinding(name, api);
   if (getArgEnabled("help")){
@@ -1194,26 +1195,10 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         if (movementEntities.movementEntities.find(id) == movementEntities.movementEntities.end()){
           continue;
         }
+
+        updateScreenshake(player);
+
         MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
-
-        const float shakeStiffness = 100.f;
-        const float shakeDamping = 20.f;
-
-        if (player.shakeImpulse.has_value()){
-          player.shakeVelocity += player.shakeImpulse.value();
-          player.shakeImpulse = std::nullopt;
-        }
-        glm::vec3 springForce(-1 * player.shakeOffset.x * shakeStiffness, -1 * player.shakeOffset.y * shakeStiffness, -1 * player.shakeOffset.z * shakeStiffness);
-        glm::vec3 dampingForce(-1 * player.shakeVelocity.x * shakeDamping, -1 * player.shakeVelocity.y * shakeDamping, -1 * player.shakeVelocity.z * shakeDamping);
-        glm::vec3 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y, springForce.z + dampingForce.z);
-
-        player.shakeVelocity.x += acceleration.x * gameapi -> timeElapsed();
-        player.shakeVelocity.y += acceleration.y * gameapi -> timeElapsed();
-        player.shakeVelocity.z += acceleration.z * gameapi -> timeElapsed();
-
-        player.shakeOffset.x  += player.shakeVelocity.x * gameapi -> timeElapsed();
-        player.shakeOffset.y  += player.shakeVelocity.y * gameapi -> timeElapsed();
-        player.shakeOffset.z  += player.shakeVelocity.z * gameapi -> timeElapsed();
 
         if (thirdPersonCamera.has_value()){
           auto controllable = getActiveControllable(player.viewport);
