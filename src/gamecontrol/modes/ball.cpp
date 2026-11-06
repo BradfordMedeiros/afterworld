@@ -1211,7 +1211,7 @@ GameTypeInfo getBallMode(){
  		  auto cameraId = ensureTempCamera(ballMode.sceneId);
 
  		  if (key == 'K' && action == 1){
- 		  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 10.f));
+ 		  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 50.f));
 
  		  }
 
@@ -1301,14 +1301,7 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
 
- 		  	gameapi -> drawText(
- 		  		"test text", 
- 		  		getActiveControllable(getDefaultPlayerIndex()).value() -> uiShakeOffset.x, 
- 		  		getActiveControllable(getDefaultPlayerIndex()).value() -> uiShakeOffset.y, 
- 		  		12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt
- 		  	);
-
-
+ 		
 	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
 
 			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
@@ -1330,8 +1323,6 @@ GameTypeInfo getBallMode(){
 		 	auto groundedThisFrame = justGrounded(ballVehicle);
 		 	if (groundedThisFrame){
 		 		applyVisualPulse(position);
- 		  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 10.f));
-
 		 	}
 		 	
 

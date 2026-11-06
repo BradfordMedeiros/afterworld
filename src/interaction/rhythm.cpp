@@ -2,7 +2,11 @@
 
 extern CustomApiBindings* gameapi;
 
-const float RHYTHM_GRACE = 0.4f;
+const float RHYTHM_GRACE = 0.1f;
+
+
+int getDefaultPlayerIndex();
+void applyUiScreenshakeByPlayerIndex(int playerIndex, glm::vec2 impulse);
 
 std::optional<RhythmSong> rhythmSong;
 
@@ -11,19 +15,23 @@ void rhythmPressNoteLane0(){
     return;
   }
   rhythmSong.value().lastLane0Press = gameapi -> timeSeconds(false);
+	rhythmSong.value().lane0PressLastFrame = true;
 }
 void rhythmPressNoteLane1(){
   if (!rhythmSong.has_value()){
     return;
   }
   rhythmSong.value().lastLane1Press = gameapi -> timeSeconds(false);
+	rhythmSong.value().lane1PressLastFrame = true;
 }
 void rhythmPressNoteLane2(){
   if (!rhythmSong.has_value()){
     return;
   }
   rhythmSong.value().lastLane2Press = gameapi -> timeSeconds(false);
+	rhythmSong.value().lane2PressLastFrame = true;
 }
+
 
 void registerPressNote(int lane){
   if (lane == 0){
@@ -298,14 +306,20 @@ void onRhythmFrame(){
 		auto isLane1Pressed = isLane1PressedWithGrace(adjustedTime);
 		auto isLane2Pressed = isLane2PressedWithGrace(adjustedTime);
 
-		if (note.lane == 0 && isLane0Pressed){
+		bool successNote = false;
+		if (note.lane == 0 && isLane0Pressed && stat.noteState == NOTE_DEFAULT){
 			stat.noteState = NOTE_SUCCESS;
 		}
-		if (note.lane == 1 && isLane1Pressed){
+		if (note.lane == 1 && isLane1Pressed && stat.noteState == NOTE_DEFAULT){
 			stat.noteState = NOTE_SUCCESS;
+			successNote = true;
 		}
-		if (note.lane == 2 && isLane2Pressed){
+		if (note.lane == 2 && isLane2Pressed && stat.noteState == NOTE_DEFAULT){
 			stat.noteState = NOTE_SUCCESS;
+			successNote = true;
+		}
+		if (successNote){
+			rhythmSong.value().songCurrentHealth++;
 		}
 
 		if (elapsedTime > (note.time + RHYTHM_GRACE) && stat.noteState == NOTE_DEFAULT){
@@ -317,6 +331,14 @@ void onRhythmFrame(){
 			}
 		}
 	}
+
+	if (rhythmSong.value().lane0PressLastFrame || rhythmSong.value().lane1PressLastFrame || rhythmSong.value().lane2PressLastFrame){
+	  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 1.f)); // kind of weird to put in here
+	}
+
+	rhythmSong.value().lane0PressLastFrame = false;
+	rhythmSong.value().lane1PressLastFrame = false;
+	rhythmSong.value().lane2PressLastFrame = false;
 }
 
 bool isRhythmEnd(){

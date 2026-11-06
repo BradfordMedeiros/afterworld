@@ -25,6 +25,9 @@ struct RhythmSong {
   float lastLane0Press = 0.f;
   float lastLane1Press = 0.f;
   float lastLane2Press = 0.f;
+  bool lane0PressLastFrame = false;
+  bool lane1PressLastFrame = false;
+  bool lane2PressLastFrame = false;
 
   RawSongData* rawSongData = NULL;
   std::vector<RhythmNote> notes;

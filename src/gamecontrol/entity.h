@@ -55,6 +55,7 @@ void addPlayerPort(int playerIndex);
 void removePlayerPort(int playerIndex);
 bool isControlledPlayer(int playerId);
 int getDefaultPlayerIndex();
+void applyUiScreenshakeByPlayerIndex(int playerIndex, glm::vec2 impulse);
 
 ////////////////////// Lookup Utilities //////////////////////
 std::optional<int> getPlayerIndexForEntity(objid id);

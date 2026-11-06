@@ -69,9 +69,6 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   ImFont* font = getFontByBinding(getSymbol("ball-level-complete"));
   ImGui::PushFont(font);
   
-  ImGui::SetCursorPosX(0);
-  ImGui::SetCursorPosY(0);
-
   if (ballModeUi.ballMode.showSoulCount){
     ImGui::Text("Delivered Souls: %d", ballModeUi.ballMode.deliveredSouls);
     ImGui::Text("Lost Souls: %d", ballModeUi.ballMode.lostSouls);
@@ -425,10 +422,7 @@ void renderRhythmPanel(bool includePanel){
     auto drawList = ImGui::GetWindowDrawList();
 
     ImVec2 panelMin = ImGui::GetWindowPos();
-    ImVec2 panelMax = ImVec2(
-        panelMin.x + ImGui::GetWindowWidth(),
-        panelMin.y + ImGui::GetWindowHeight()
-    );
+    ImVec2 panelMax = ImVec2(panelMin.x + ImGui::GetWindowWidth(), panelMin.y + ImGui::GetWindowHeight());
 
     // Rhythm chart area
     float chartWidth = 300.0f;
@@ -452,11 +446,7 @@ void renderRhythmPanel(bool includePanel){
     float imageTransparency = 0.2f;
 
     // Top
-    ImGui::PushClipRect(
-        panelMin,
-        ImVec2(panelMax.x, chartMin.y),
-        true
-    );
+    ImGui::PushClipRect(panelMin, ImVec2(panelMax.x, chartMin.y), true);
 
     drawList -> AddImage(
         (ImTextureID)(intptr_t)textureId,
@@ -469,13 +459,7 @@ void renderRhythmPanel(bool includePanel){
 
     ImGui::PopClipRect();
 
-
-    // Bottom
-    ImGui::PushClipRect(
-        ImVec2(panelMin.x, chartMax.y),
-        panelMax,
-        true
-    );
+    ImGui::PushClipRect(ImVec2(panelMin.x, chartMax.y), panelMax, true);
 
     drawList -> AddImage(
         (ImTextureID)(intptr_t)textureId,
@@ -487,14 +471,7 @@ void renderRhythmPanel(bool includePanel){
     );
 
     ImGui::PopClipRect();
-
-
-    // Left
-    ImGui::PushClipRect(
-        ImVec2(panelMin.x, chartMin.y),
-        ImVec2(chartMin.x, chartMax.y),
-        true
-    );
+    ImGui::PushClipRect(ImVec2(panelMin.x, chartMin.y), ImVec2(chartMin.x, chartMax.y), true);
 
     drawList -> AddImage(
         (ImTextureID)(intptr_t)textureId,
@@ -506,14 +483,9 @@ void renderRhythmPanel(bool includePanel){
     );
 
     ImGui::PopClipRect();
-
 
     // Right
-    ImGui::PushClipRect(
-        ImVec2(chartMax.x, chartMin.y),
-        ImVec2(panelMax.x, chartMax.y),
-        true
-    );
+    ImGui::PushClipRect(ImVec2(chartMax.x, chartMin.y), ImVec2(panelMax.x, chartMax.y), true);
 
     drawList -> AddImage(
         (ImTextureID)(intptr_t)textureId,
@@ -528,11 +500,7 @@ void renderRhythmPanel(bool includePanel){
 
 
     // Semi-transparent black rhythm chart
-    drawList -> AddRectFilled(
-        chartMin,
-        chartMax,
-        IM_COL32(0, 0, 0, (int)(255 * 0.4f))
-    );
+    drawList -> AddRectFilled(chartMin, chartMax, IM_COL32(0, 0, 0, (int)(255 * 0.4f)));
 
 
     // Chart border
@@ -551,42 +519,19 @@ void renderRhythmPanel(bool includePanel){
 
     for (int i = 1; i < 3; i++){
         float x = chartMin.x + laneWidth * i;
-
-        drawList -> AddLine(
-            ImVec2(x, chartMin.y),
-            ImVec2(x, chartMax.y),
-            IM_COL32(255, 255, 255, 40),
-            1.0f
-        );
+        drawList -> AddLine(ImVec2(x, chartMin.y), ImVec2(x, chartMax.y), IM_COL32(255, 255, 255, 40), 1.0f);
     }
 
 
     // Hit line
     float hitY = chartMax.y - 70.0f;
 
-    drawList -> AddLine(
-        ImVec2(chartMin.x, hitY),
-        ImVec2(chartMax.x, hitY),
-        IM_COL32(255, 255, 255, 180),
-        2.0f
-    );
+    drawList -> AddLine(ImVec2(chartMin.x, hitY), ImVec2(chartMax.x, hitY), IM_COL32(255, 255, 255, 180), 2.0f);
 
     {
       // Notes
       float noteWidth = laneWidth * 0.55f;
       float noteHeight = 24.0f;
-
-
-            /*
-      struct NoteToRender {
-        int lane;
-        glm::vec4 color;
-        float time;
-      };
-      struct RhythmRendering {
-        float currentPlaybackTime;
-        std::vector<NoteToRender> notes;
-      };*/
 
       float noteTransparency = 0.5f;
 
@@ -596,14 +541,6 @@ void renderRhythmPanel(bool includePanel){
       int pixelsPerSecond = 100;
       auto timeOffset = notesToRender.currentPlaybackTime * pixelsPerSecond;
 
-      //notes = {
-      //    {0, chartMin.y + timeOffset + 80.0f,  IM_COL32(255, 80, 80, 255 * noteTransparency)},
-      //    {1, chartMin.y + timeOffset + 160.0f, IM_COL32(80, 180, 255, 255 * noteTransparency)},
-      //    {2, chartMin.y + timeOffset + 240.0f, IM_COL32(255, 220, 70, 255 * noteTransparency)},
-      //    {1, chartMin.y + timeOffset + 320.0f, IM_COL32(80, 180, 255, 255 * noteTransparency)},
-      //    {0, chartMin.y + timeOffset + 400.0f, IM_COL32(255, 80, 80, 255 * noteTransparency)},
-      //    {2, chartMin.y + timeOffset + 450.0f, IM_COL32(255, 220, 70, 255 * noteTransparency)}
-      //};
       for (auto& note : notesToRender.notes){
         notes.push_back(RhythmNoteUi {
           .lane = note.lane,
@@ -614,12 +551,12 @@ void renderRhythmPanel(bool includePanel){
 
       notes.push_back(RhythmNoteUi {
         .lane = 0,
-        .y = chartMax.y,
+        .y = chartMax.y ,
         .color = IM_COL32(notesToRender.lane0Pressed ? 255 : 0, 0, 0, 255),
       });
       notes.push_back(RhythmNoteUi {
         .lane = 1,
-        .y = chartMax.y,
+        .y = chartMax.y ,
         .color = IM_COL32(notesToRender.lane1Pressed ? 255 : 0, 0, 0, 255),
       });
       notes.push_back(RhythmNoteUi {
@@ -627,8 +564,8 @@ void renderRhythmPanel(bool includePanel){
         .y = chartMax.y,
         .color = IM_COL32(notesToRender.lane2Pressed ? 255 : 0, 0, 0, 255),
       });
-   
-      
+
+
 
       for (auto& note : notes){
           float centerX = chartMin.x + laneWidth * note.lane  + laneWidth * 0.5f;
