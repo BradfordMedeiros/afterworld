@@ -647,27 +647,74 @@ void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse){
   if (hasOption("no-shake")){
     return;
   }
-  getControlledPlayer(playerIndex).shakeImpulse = impulse;
+  auto controllable = getActiveControllable(playerIndex);
+  if (controllable.has_value()){
+    controllable.value()->shakeImpulse = impulse;
+  }
 }
-void updateScreenshake(ControlledPlayer& player){
+
+void applyUiScreenshakeByPlayerIndex(int playerIndex, glm::vec2 impulse){
+  if (hasOption("no-shake")){
+    return;
+  }
+  auto controllable = getActiveControllable(playerIndex);
+  if (controllable.has_value()){
+    controllable.value()->uiShakeImpulse = impulse;
+  }
+}
+
+void updateScreenshakeByPlayerIndex(int playerIndex){
+  auto controllable = getActiveControllable(playerIndex);
+  if (!controllable.has_value()){
+    return;
+  }
+  ControllableEntity& entity = *controllable.value();
+
   const float shakeStiffness = 100.f;
   const float shakeDamping = 20.f;
 
-  if (player.shakeImpulse.has_value()){
-    player.shakeVelocity += player.shakeImpulse.value();
-    player.shakeImpulse = std::nullopt;
+  if (entity.shakeImpulse.has_value()){
+    entity.shakeVelocity += entity.shakeImpulse.value();
+    entity.shakeImpulse = std::nullopt;
   }
-  glm::vec3 springForce(-1 * player.shakeOffset.x * shakeStiffness, -1 * player.shakeOffset.y * shakeStiffness, -1 * player.shakeOffset.z * shakeStiffness);
-  glm::vec3 dampingForce(-1 * player.shakeVelocity.x * shakeDamping, -1 * player.shakeVelocity.y * shakeDamping, -1 * player.shakeVelocity.z * shakeDamping);
+  glm::vec3 springForce(-1 * entity.shakeOffset.x * shakeStiffness, -1 * entity.shakeOffset.y * shakeStiffness, -1 * entity.shakeOffset.z * shakeStiffness);
+  glm::vec3 dampingForce(-1 * entity.shakeVelocity.x * shakeDamping, -1 * entity.shakeVelocity.y * shakeDamping, -1 * entity.shakeVelocity.z * shakeDamping);
   glm::vec3 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y, springForce.z + dampingForce.z);
+  float deltaTime = gameapi -> timeElapsed();
 
-  player.shakeVelocity.x += acceleration.x * gameapi -> timeElapsed();
-  player.shakeVelocity.y += acceleration.y * gameapi -> timeElapsed();
-  player.shakeVelocity.z += acceleration.z * gameapi -> timeElapsed();
+  entity.shakeVelocity.x += acceleration.x * deltaTime;
+  entity.shakeVelocity.y += acceleration.y * deltaTime;
+  entity.shakeVelocity.z += acceleration.z * deltaTime;
 
-  player.shakeOffset.x  += player.shakeVelocity.x * gameapi -> timeElapsed();
-  player.shakeOffset.y  += player.shakeVelocity.y * gameapi -> timeElapsed();
-  player.shakeOffset.z  += player.shakeVelocity.z * gameapi -> timeElapsed();
+  entity.shakeOffset.x  += entity.shakeVelocity.x * deltaTime;
+  entity.shakeOffset.y  += entity.shakeVelocity.y * deltaTime;
+  entity.shakeOffset.z  += entity.shakeVelocity.z * deltaTime;
+}
+
+void updateUiScreenshakeByPlayerIndex(int playerIndex){
+  auto controllable = getActiveControllable(playerIndex);
+  if (!controllable.has_value()){
+    return;
+  }
+  ControllableEntity& entity = *controllable.value();
+
+  const float shakeStiffness = 100.f;
+  const float shakeDamping = 20.f;
+
+  if (entity.uiShakeImpulse.has_value()){
+    entity.uiShakeVelocity += entity.uiShakeImpulse.value();
+    entity.uiShakeImpulse = std::nullopt;
+  }
+  glm::vec2 springForce(-1 * entity.uiShakeOffset.x * shakeStiffness, -1 * entity.uiShakeOffset.y * shakeStiffness);
+  glm::vec2 dampingForce(-1 * entity.uiShakeVelocity.x * shakeDamping, -1 * entity.uiShakeVelocity.y * shakeDamping);
+  glm::vec2 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y);
+  float deltaTime = gameapi -> timeElapsed();
+
+  entity.uiShakeVelocity.x += acceleration.x * deltaTime;
+  entity.uiShakeVelocity.y += acceleration.y * deltaTime;
+
+  entity.uiShakeOffset.x += entity.uiShakeVelocity.x * deltaTime;
+  entity.uiShakeOffset.y += entity.uiShakeVelocity.y * deltaTime;
 }
 
 

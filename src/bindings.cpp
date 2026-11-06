@@ -1192,12 +1192,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
       if (activePlayer.has_value()){
         auto id = activePlayer.value();
+        updateScreenshakeByPlayerIndex(player.viewport);
+        updateUiScreenshakeByPlayerIndex(player.viewport);
+
         if (movementEntities.movementEntities.find(id) == movementEntities.movementEntities.end()){
           continue;
         }
 
-        updateScreenshake(player);
-
+        ControllableEntity& controllableEntity = controllableEntities.at(id);
         MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
 
         if (thirdPersonCamera.has_value()){
@@ -1212,7 +1214,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
             auto cameraOffset = finalRot * glm::vec3(0.f, 0.f, 10.f);
 
             auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).state.managedCamera, controllable.value() -> vehicle.value(), false);
-            glm::vec3 screenShake = thirdPerson.rotation * player.shakeOffset;
+            glm::vec3 screenShake = thirdPerson.rotation * controllableEntity.shakeOffset;
 
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
             gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
@@ -1222,13 +1224,13 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
           if (movementEntity.managedCamera.thirdPersonMode){
             auto thirdPersonInfo = lookThirdPersonCalc(movementEntity.managedCamera, id, false);
-            glm::vec3 screenShake = thirdPersonInfo.rotation * player.shakeOffset;
+            glm::vec3 screenShake = thirdPersonInfo.rotation * controllableEntity.shakeOffset;
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPersonInfo.position + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
             gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPersonInfo.rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });        
           }else{
             auto rotation = weaponLookDirection(movementEntity.movementState);
             auto playerPos = gameapi -> getGameObjectPos(movementEntity.playerId, true, "[gamelogic] onMovementFrame - entity pos for set first person camera");
-            glm::vec3 screenShake = rotation * player.shakeOffset;
+            glm::vec3 screenShake = rotation * controllableEntity.shakeOffset;
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), playerPos + screenShake, true, Hint { .hint = "[gamelogic] onMovementFrame1" });
             gameapi -> setGameObjectRot(thirdPersonCamera.value(), rotation, true, Hint { .hint = "[gamelogic] onMovementFrame2 rot" });     
           } 

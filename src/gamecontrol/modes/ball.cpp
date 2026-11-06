@@ -1210,6 +1210,10 @@ GameTypeInfo getBallMode(){
 	  	BallModeOptions& ballMode = *ballModePtr;
  		  auto cameraId = ensureTempCamera(ballMode.sceneId);
 
+ 		  if (key == 'K' && action == 1){
+ 		  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 10.f));
+
+ 		  }
 
 	  	if (ballMode.worldView.has_value() && ballMode.worldView.value().onMultiview){
 	  		if (key == 32){
@@ -1297,6 +1301,13 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
 
+ 		  	gameapi -> drawText(
+ 		  		"test text", 
+ 		  		getActiveControllable(getDefaultPlayerIndex()).value() -> uiShakeOffset.x, 
+ 		  		getActiveControllable(getDefaultPlayerIndex()).value() -> uiShakeOffset.y, 
+ 		  		12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt
+ 		  	);
+
 
 	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
 
@@ -1319,6 +1330,8 @@ GameTypeInfo getBallMode(){
 		 	auto groundedThisFrame = justGrounded(ballVehicle);
 		 	if (groundedThisFrame){
 		 		applyVisualPulse(position);
+ 		  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 10.f));
+
 		 	}
 		 	
 
@@ -1535,7 +1548,7 @@ GameTypeInfo getBallMode(){
 			if (isRhythmEnd()){
 				stopSoulRun();
 			}
-			
+
   		if (ballMode.didLose){
 	  		//gameapi -> drawText("you lose", 0.f, 0.f, 12, false, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   		}
