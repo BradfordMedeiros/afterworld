@@ -1323,6 +1323,7 @@ GameTypeInfo getBallMode(){
 		 	auto groundedThisFrame = justGrounded(ballVehicle);
 		 	if (groundedThisFrame){
 		 		applyVisualPulse(position);
+		 		applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 20.f));
 		 	}
 		 	
 

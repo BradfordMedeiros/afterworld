@@ -70,7 +70,14 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   ImGui::PushFont(font);
   
   if (ballModeUi.ballMode.showSoulCount){
+
+    auto uiOffset = getActiveControllable(getDefaultPlayerIndex()).value() -> uiShakeOffset;
+    ImGui::SetCursorPosX(uiOffset.x * -100);
+    ImGui::SetCursorPosY(uiOffset.y * -50 + 100);
+
     ImGui::Text("Delivered Souls: %d", ballModeUi.ballMode.deliveredSouls);
+
+    ImGui::SetCursorPosX(uiOffset.x * -100);
     ImGui::Text("Lost Souls: %d", ballModeUi.ballMode.lostSouls);
 
     if (ballModeUi.ballMode.showElapsedTime && ballModeUi.ballMode.elapsedTime.has_value()){
