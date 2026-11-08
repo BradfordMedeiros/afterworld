@@ -31,12 +31,18 @@ struct ControllableEntity {
 	std::set<objid> disableAnimationIds;
 	std::optional<int> zoomAmount;
 	std::optional<int> activateMask;
+	
 	glm::vec3 shakeOffset = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 shakeVelocity = glm::vec3(0.f, 0.f, 0.f);
 	std::optional<glm::vec3> shakeImpulse;
+	
 	glm::vec2 uiShakeOffset = glm::vec2(0.f, 0.f);
 	glm::vec2 uiShakeVelocity = glm::vec2(0.f, 0.f);
 	std::optional<glm::vec2> uiShakeImpulse;
+
+	glm::vec2 uiMoveOffset = glm::vec2(0.f, 0.f);
+	glm::vec2 uiMoveImpulse = glm::vec2(0.f, 0.f);
+
 };
 
 
@@ -125,8 +131,11 @@ void setPlayerFreeCamera(int playerIndex, bool editorMode);
 
 void applyScreenshakeByPlayerIndex(int playerIndex, glm::vec3 impulse);
 void applyUiScreenshakeByPlayerIndex(int playerIndex, glm::vec2 impulse);
+void applyUiMovementByPlayerIndex(int playerIndex, glm::vec2 impulse);
+
 void updateScreenshakeByPlayerIndex(int playerIndex);
 void updateUiScreenshakeByPlayerIndex(int playerIndex);
+void updateUiMovementByPlayerIndex(int playerIndex);
 
 ////////////////////// Glue //////////////////////
 WeaponEntityData getWeaponEntityData(objid id);

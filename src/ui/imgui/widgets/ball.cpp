@@ -72,6 +72,9 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi){
   if (ballModeUi.ballMode.showSoulCount){
 
     auto uiOffset = getActiveControllable(getDefaultPlayerIndex()).value() -> uiShakeOffset;
+    auto uiMoveOffset = getActiveControllable(getDefaultPlayerIndex()).value() -> uiMoveOffset;
+    uiOffset = uiOffset + glm::vec2(uiMoveOffset.x,  -uiMoveOffset.y);
+
     ImGui::SetCursorPosX(uiOffset.x * -100);
     ImGui::SetCursorPosY(uiOffset.y * -50 + 100);
 

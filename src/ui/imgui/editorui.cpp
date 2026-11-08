@@ -185,8 +185,12 @@ void renderMoreUi(){
         }
 
         if (uiSettings.ballModeUi -> ballMode.showRhythmUi){
+
+          auto uiMoveOffset = getActiveControllable(getDefaultPlayerIndex()).value() -> uiMoveOffset;
+          auto uiOffset = glm::vec2(uiMoveOffset.x,  -uiMoveOffset.y);
+
           auto& widget = *widgetByNameSymbol(getSymbol("game-ball-rhythm")).value();
-          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f, 1000.f));
+          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f + 50 * uiOffset, 1000.f + 50 * uiOffset));
           windowOrdering.push_back("rhythm-ui-layout");
         }
 

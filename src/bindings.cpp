@@ -702,6 +702,8 @@ void onMouseMoveCallback(objid id, void* data, double xPos, double yPos, float x
       }
 
     }
+
+    applyUiMovementByPlayerIndex(playerIndex, glm::vec2(movementX, movementY));
   }
 }
 
@@ -1194,6 +1196,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         auto id = activePlayer.value();
         updateScreenshakeByPlayerIndex(player.viewport);
         updateUiScreenshakeByPlayerIndex(player.viewport);
+        updateUiMovementByPlayerIndex(player.viewport);
 
         if (movementEntities.movementEntities.find(id) == movementEntities.movementEntities.end()){
           continue;

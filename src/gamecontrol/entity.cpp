@@ -663,6 +663,16 @@ void applyUiScreenshakeByPlayerIndex(int playerIndex, glm::vec2 impulse){
   }
 }
 
+void applyUiMovementByPlayerIndex(int playerIndex, glm::vec2 impulse){
+  if (hasOption("no-shake")){
+    return;
+  }
+  auto controllable = getActiveControllable(playerIndex);
+  if (controllable.has_value()){
+    controllable.value() -> uiMoveImpulse += impulse;
+  }
+}
+
 void updateScreenshakeByPlayerIndex(int playerIndex){
   auto controllable = getActiveControllable(playerIndex);
   if (!controllable.has_value()){
@@ -717,6 +727,19 @@ void updateUiScreenshakeByPlayerIndex(int playerIndex){
   entity.uiShakeOffset.y += entity.uiShakeVelocity.y * deltaTime;
 }
 
+void updateUiMovementByPlayerIndex(int playerIndex){
+  auto controllable = getActiveControllable(playerIndex);
+  if (!controllable.has_value()){
+    return;
+  }
+  ControllableEntity& entity = *controllable.value();
+
+  float deltaTime = gameapi -> timeElapsed();
+  float returnSpeed = 5.f;
+
+  entity.uiMoveOffset = entity.uiMoveOffset * (1.f - returnSpeed * deltaTime)  + entity.uiMoveImpulse;
+  entity.uiMoveImpulse = glm::vec2(0.f);
+}
 
 ////////////////////// Glue //////////////////////
 FiringTransform getFireTransform(objid id,  objid entityId){
