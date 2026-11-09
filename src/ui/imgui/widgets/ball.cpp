@@ -1,4 +1,5 @@
 #include "./ball.h"
+#include <algorithm>
 
 extern CustomApiBindings* gameapi;
 
@@ -201,193 +202,194 @@ void renderStageSelectPanel(bool includePanel){
 
     static int selectedWorld = 0;
     static int selectedLevel = 0;
+    static float wheelPosition = 0.0f;
 
     auto worlds = worldsForPlaylist("levelselect");
-    auto& playlist = *playlistByName("levelselect").value();
+    auto playlistOpt = playlistByName("levelselect");
+    if (worlds.empty() || !playlistOpt.has_value()){
+      ImGui::TextUnformatted("No stages available");
+      if (includePanel){
+        ImGui::End();
+      }
+      return;
+    }
 
-    auto activeWorld = worlds.at(selectedWorld);
-    auto worldLevels = levelsForWorld(playlist, activeWorld);
-    std::cout << "worlds: " << print(worlds) << ", name = " << activeWorld << std::endl;
+    selectedWorld = std::clamp(selectedWorld, 0, (int)worlds.size() - 1);
 
-    int levelsPerWorld = worldLevels.size();
+    ImVec2 origin = ImGui::GetCursorScreenPos();
+    ImVec2 available = ImGui::GetContentRegionAvail();
+    const float margin = 20.0f;
+    const float gap = 20.0f;
+    const float contentWidth = available.x - margin * 2.0f;
+    const float bodyHeight = available.y - 62.0f;
+    const float leftWidth = (contentWidth - gap) * 0.62f;
+    const float rightWidth = contentWidth - gap - leftWidth;
+    const float leftX = origin.x + margin;
+    const float rightX = leftX + leftWidth + gap;
+    const float bodyY = origin.y + 58.0f;
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-    std::string selectedLevelName = worldLevels.at(selectedLevel) -> level;
+    auto oldWorld = selectedWorld;
+    ImGui::SetCursorScreenPos(ImVec2(leftX, origin.y));
+    if (ImGui::Button("<", ImVec2(42.0f, 42.0f))){
+      selectedWorld = std::max(0, selectedWorld - 1);
+    }
+    ImGui::SetCursorScreenPos(ImVec2(leftX + 54.0f, origin.y));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.08f, 0.10f, 0.15f, 0.85f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.14f, 0.20f, 0.29f, 0.95f));
+    ImGui::Button(worlds.at(selectedWorld).c_str(), ImVec2(leftWidth - 108.0f, 42.0f));
+    ImGui::PopStyleColor(2);
+    ImGui::SetCursorScreenPos(ImVec2(leftX + leftWidth - 42.0f, origin.y));
+    if (ImGui::Button(">", ImVec2(42.0f, 42.0f))){
+      selectedWorld = std::min((int)worlds.size() - 1, selectedWorld + 1);
+    }
+    if (selectedWorld != oldWorld){
+      selectedLevel = 0;
+      wheelPosition = 0.0f;
+    }
+
+    auto& playlist = *playlistOpt.value();
+    auto worldLevels = levelsForWorld(playlist, worlds.at(selectedWorld));
+    if (worldLevels.empty()){
+      ImGui::SetCursorScreenPos(ImVec2(leftX, bodyY));
+      ImGui::TextUnformatted("No stages in this world");
+      if (includePanel){
+        ImGui::End();
+      }
+      return;
+    }
+
+    selectedLevel = std::clamp(selectedLevel, 0, (int)worldLevels.size() - 1);
+    if (wheelPosition > (float)worldLevels.size() - 1.0f){
+      wheelPosition = (float)worldLevels.size() - 1.0f;
+    }
+
+    if (ImGui::IsMouseHoveringRect(ImVec2(rightX, bodyY), ImVec2(rightX + rightWidth, bodyY + bodyHeight))){
+      float wheel = ImGui::GetIO().MouseWheel;
+      if (wheel != 0.0f){
+        selectedLevel = std::clamp(selectedLevel - (int)wheel, 0, (int)worldLevels.size() - 1);
+      }
+    }
+    if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)){
+      selectedLevel = std::max(0, selectedLevel - 1);
+    }
+    if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)){
+      selectedLevel = std::min((int)worldLevels.size() - 1, selectedLevel + 1);
+    }
+
+    wheelPosition += (selectedLevel - wheelPosition) * std::min(1.0f, ImGui::GetIO().DeltaTime * 12.0f);
+
+    std::string selectedLevelName = worldLevels.at(selectedLevel)->level;
     auto levelData = levelByShortcutName(selectedLevelName);
-    auto playlistLevel = levelInPlaylist(playlist, selectedLevelName);
+    auto isLocked = [&worldLevels](int index) {
+      if (!worldLevels.at(index)->mustUnlock || index == 0){
+        return false;
+      }
+      return !isLevelComplete(worldLevels.at(index - 1)->level);
+    };
+    bool isLevelLocked = isLocked(selectedLevel);
+    float imageHeight = bodyHeight * 0.48f;
 
-
-    bool isLevelLocked = false;
-    if (playlistLevel.value() -> mustUnlock){
-      isLevelLocked = true;
-      if (selectedLevel == 0){
-        isLevelLocked = false;
-      }else{
-        auto previousLevel = worldLevels.at(selectedLevel - 1);
-        isLevelLocked = !isLevelComplete(previousLevel -> level);
+    drawList->AddRectFilled(ImVec2(leftX, bodyY), ImVec2(leftX + leftWidth, bodyY + bodyHeight), IM_COL32(9, 14, 23, 235), 8.0f);
+    drawList->AddRect(ImVec2(leftX, bodyY), ImVec2(leftX + leftWidth, bodyY + bodyHeight), IM_COL32(95, 131, 171, 170), 8.0f, 0, 1.5f);
+    ImVec2 imageMin(leftX + 1.0f, bodyY + 1.0f);
+    ImVec2 imageMax(leftX + leftWidth - 1.0f, bodyY + imageHeight);
+    drawList->AddRectFilled(imageMin, imageMax, IM_COL32(20, 29, 42, 255), 7.0f);
+    if (levelData.has_value() && !levelData->image.empty()){
+      auto textureId = gameapi->getTextureSamplerId(levelData->image);
+      if (textureId.has_value()){
+        drawList->AddImage((ImTextureID)(intptr_t)textureId.value(), imageMin, imageMax, ImVec2(0, 1), ImVec2(1, 0));
       }
     }
+    drawList->AddRectFilled(imageMin, ImVec2(imageMax.x, imageMax.y), IM_COL32(0, 0, 0, 35), 7.0f);
 
+    std::string stageTitle = levelData.has_value() ? levelData->name : selectedLevelName;
+    drawList->AddText(ImVec2(leftX + 18.0f, bodyY + imageHeight + 14.0f), IM_COL32(245, 249, 255, 255), stageTitle.c_str());
+    if (!levelData.has_value()){
+      drawList->AddText(ImVec2(leftX + 18.0f, bodyY + imageHeight + 42.0f), IM_COL32(220, 225, 235, 220), "Missing stage data");
+    }else{
+      ImVec2 descriptionMin(leftX + 18.0f, bodyY + imageHeight + 44.0f);
+      ImVec2 descriptionMax(leftX + leftWidth - 18.0f, bodyY + bodyHeight - 106.0f);
+      drawList->PushClipRect(descriptionMin, descriptionMax, true);
+      drawList->AddText(ImGui::GetFont(), ImGui::GetFontSize(), descriptionMin, IM_COL32(205, 215, 228, 230), levelData->description.c_str(), nullptr, leftWidth - 36.0f);
+      drawList->PopClipRect();
 
-    if (!levelData.has_value() || !playlistLevel.has_value()){
-      levelData = std::nullopt;
-      playlistLevel = std::nullopt;
+      auto progress = getLevelProgressInfo(worlds.at(selectedWorld), selectedLevelName);
+      float statsY = bodyY + bodyHeight - 91.0f;
+      drawList->AddText(ImVec2(leftX + 18.0f, statsY), IM_COL32(120, 157, 202, 255), "PAR");
+      std::string parTime = printFloat(progress.parTime);
+      drawList->AddText(ImVec2(leftX + 18.0f, statsY + 20.0f), IM_COL32(240, 244, 250, 255), parTime.c_str());
+      drawList->AddText(ImVec2(leftX + leftWidth * 0.34f, statsY), IM_COL32(120, 157, 202, 255), "BEST");
+      std::string bestTime = progress.bestTime.has_value() ? printFloat(progress.bestTime.value()) : "--";
+      drawList->AddText(ImVec2(leftX + leftWidth * 0.34f, statsY + 20.0f), IM_COL32(240, 244, 250, 255), bestTime.c_str());
+      drawList->AddText(ImVec2(leftX + leftWidth * 0.62f, statsY), IM_COL32(120, 157, 202, 255), "CRYSTALS");
+      std::string crystals = std::to_string(progress.gemCount) + " / " + std::to_string(progress.totalGemCount);
+      drawList->AddText(ImVec2(leftX + leftWidth * 0.62f, statsY + 20.0f), IM_COL32(240, 244, 250, 255), crystals.c_str());
     }
 
-    const float worldWidth = 300.0f;
-    const float worldHeight = 70.0f;
-    const float spacing = 12.0f;
-    float availableWidth = ImGui::GetContentRegionAvail().x;
-    float cursorX = ImGui::GetCursorPosX();
-
-    // Background image
-    if(levelData.has_value()){
-      if (isLevelLocked){
-        ImGui::Text("Level Locked");
-      }else{
-        std::string backgroundTexture = levelData.value().image;
-        auto textureId = gameapi -> getTextureSamplerId(backgroundTexture).value();
-        ImVec2 panelMin = ImGui::GetWindowPos();
-        ImVec2 panelMax = ImVec2(panelMin.x + ImGui::GetWindowWidth(), panelMin.y + ImGui::GetWindowHeight());
-        ImGui::GetWindowDrawList() -> AddImage((ImTextureID)(intptr_t)textureId, panelMin, panelMax, ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 255, 255));        
-      }
-
+    if (isLevelLocked){
+      drawList->AddRectFilled(imageMin, imageMax, IM_COL32(0, 0, 0, 145), 7.0f);
+      drawList->AddText(ImVec2(leftX + 18.0f, bodyY + imageHeight - 38.0f), IM_COL32(255, 211, 105, 255), "LOCKED");
     }
 
-
-    // World select
-    {
-      float selectorWidth = 40.0f + spacing + worldWidth + spacing + 40.0f;
-
-      ImGui::SetCursorPosX(cursorX + (availableWidth - selectorWidth) * 0.5f);
-      ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.12f));
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
-      ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-
-      auto oldWorld = selectedWorld;
-      if (ImGui::Button("<", ImVec2(40, 40))){
-          selectedWorld--;
-          if (selectedWorld < 0){
-              selectedWorld = 0;
-          }
-          if (selectedWorld != oldWorld){
-            selectedLevel = 0;
-          }
-      }
-
-      ImGui::SameLine(0.0f, spacing);
-      std::string worldText = activeWorld;
-      ImGui::Button(worldText.c_str(), ImVec2(worldWidth, worldHeight));
-      ImGui::SameLine(0.0f, spacing);
-
-      if (ImGui::Button(">", ImVec2(40, 40))){
-          selectedWorld++;
-          if (selectedWorld >= worlds.size()){
-              selectedWorld = worlds.size() - 1;
-          }
-          if (selectedWorld != oldWorld){
-            selectedLevel = 0;
-          }
-      }
-      ImGui::PopStyleVar();
-      ImGui::PopStyleColor(3);
+    ImGui::SetCursorScreenPos(ImVec2(leftX + leftWidth - 190.0f, bodyY + bodyHeight - 58.0f));
+    ImGui::BeginDisabled(isLevelLocked || !levelData.has_value());
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.46f, 0.82f, 0.95f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.16f, 0.58f, 0.98f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.07f, 0.36f, 0.68f, 1.0f));
+    if (ImGui::Button("PLAY STAGE", ImVec2(172.0f, 44.0f))){
+      goToLevel(selectedLevelName);
     }
+    ImGui::PopStyleColor(3);
+    ImGui::EndDisabled();
 
-    // Level Select
-    {
-      float levelNavigationWidth = 40.0f + spacing + 180.0f + spacing + 40.0f;
-      ImGui::SetCursorPosX(cursorX + (availableWidth - levelNavigationWidth) * 0.5f);
-      ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.12f));
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
+    ImVec2 wheelMin(rightX, bodyY);
+    ImVec2 wheelMax(rightX + rightWidth, bodyY + bodyHeight);
+    drawList->AddRectFilled(wheelMin, wheelMax, IM_COL32(7, 11, 18, 230), 8.0f);
+    drawList->AddRect(wheelMin, wheelMax, IM_COL32(95, 131, 171, 170), 8.0f, 0, 1.5f);
+    drawList->AddText(ImVec2(rightX + 18.0f, bodyY + 15.0f), IM_COL32(120, 157, 202, 255), "STAGE SELECT");
+    drawList->AddText(ImVec2(rightX + rightWidth - 82.0f, bodyY + 15.0f), IM_COL32(120, 157, 202, 190), "UP / DOWN");
 
-      if (ImGui::Button("-<", ImVec2(40, 40))){
-          selectedLevel--;
-          if (selectedLevel < 0){
-              selectedLevel = 0;
-          }
+    const float rowHeight = std::min(68.0f, (bodyHeight - 56.0f) / 5.0f);
+    const float wheelCenterY = bodyY + 48.0f + (bodyHeight - 48.0f) * 0.5f;
+    drawList->PushClipRect(ImVec2(rightX + 2.0f, bodyY + 42.0f), ImVec2(rightX + rightWidth - 2.0f, bodyY + bodyHeight - 5.0f), true);
+    int firstLevel = std::max(0, (int)wheelPosition - 3);
+    int lastLevel = std::min((int)worldLevels.size() - 1, (int)wheelPosition + 3);
+    for (int index = firstLevel; index <= lastLevel; index++){
+      float offset = index - wheelPosition;
+      float rowY = wheelCenterY + offset * rowHeight - rowHeight * 0.5f;
+      ImVec2 rowMin(rightX + 12.0f, rowY);
+      ImVec2 rowSize(rightWidth - 24.0f, rowHeight - 7.0f);
+      ImGui::SetCursorScreenPos(rowMin);
+      ImGui::PushID(index);
+      bool clicked = ImGui::InvisibleButton("stage-wheel-row", rowSize);
+      bool hovered = ImGui::IsItemHovered();
+      if (clicked){
+        selectedLevel = index;
       }
 
-      ImGui::SameLine(0.0f, spacing);
-      std::string levelNumber = selectedLevelName;
-      ImGui::Button(levelNumber.c_str(), ImVec2(180, 40));
-      ImGui::SameLine(0.0f, spacing);
+      bool selected = index == selectedLevel;
+      ImU32 rowColor = selected ? IM_COL32(28, 79, 125, 245) : hovered ? IM_COL32(30, 43, 61, 220) : IM_COL32(17, 25, 37, 190);
+      ImU32 borderColor = selected ? IM_COL32(91, 187, 255, 255) : IM_COL32(67, 87, 111, 130);
+      drawList->AddRectFilled(rowMin, ImVec2(rowMin.x + rowSize.x, rowMin.y + rowSize.y), rowColor, 5.0f);
+      drawList->AddRect(rowMin, ImVec2(rowMin.x + rowSize.x, rowMin.y + rowSize.y), borderColor, 5.0f, 0, selected ? 2.0f : 1.0f);
 
-      if (ImGui::Button(">-", ImVec2(40, 40))){
-          selectedLevel++;
-          if (selectedLevel >= levelsPerWorld){
-              selectedLevel = (levelsPerWorld - 1);
-          }
+      std::string rowTitle = worldLevels.at(index)->level;
+      auto rowLevelData = levelByShortcutName(rowTitle);
+      if (rowLevelData.has_value()){
+        rowTitle = rowLevelData->name;
       }
-
-      ImGui::PopStyleColor(3);
-    }
-
-    // --------------------------------------------------
-    // Level progression
-    // --------------------------------------------------
-
-    //addLevelDots(cursorX, availableWidth, levelsPerWorld, selectedLevel);
-
-
-    // Level information
-    if(!levelData.has_value()){
-      ImGui::Text("Missing Level");
-    }else {
-      ImGui::Spacing();
-
-      std::string description = levelData.value().description;
-      float descriptionWidth = ImGui::CalcTextSize(description.c_str()).x;
-      ImGui::SetCursorPosX(cursorX + (availableWidth - descriptionWidth) * 0.5f);
-      ImGui::TextUnformatted(description.c_str());
-
-
-      ImGui::Spacing();
-      ImGui::Spacing();
-
-      float statsWidth = 300.0f;
-      float statsX = cursorX + (availableWidth - statsWidth) * 0.5f;
-
-      ImGui::SetCursorPosX(statsX);
-      ImGui::Text("PAR TIME");
-      ImGui::SameLine(statsX + 190.0f);
-      ImGui::Text(printFloat(playlistLevel.value() -> parTime).c_str());
-
-      ImGui::SetCursorPosX(statsX);
-      ImGui::Text("HIGH SCORE");
-      ImGui::SameLine(statsX + 190.0f);
-      ImGui::Text("18,420");
-
-      ImGui::SetCursorPosX(statsX);
-      ImGui::Text("SOULS");
-      ImGui::SameLine(statsX + 190.0f);
-      ImGui::Text("100%%");
-    }
-
-    // Play Button
-    if(!isLevelLocked && levelData.has_value()){
-      ImGui::Spacing();
-      ImGui::Spacing();
-
-      const float playWidth = 220.0f;
-      const float playHeight = 55.0f;
-
-      ImGui::SetCursorPosX(cursorX + (availableWidth - playWidth) * 0.5f);
-
-      ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.15f, 0.90f));
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.30f, 0.30f, 0.30f, 0.95f));
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.40f, 0.40f, 1.0f));
-      ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
-
-      if (ImGui::Button("PLAY", ImVec2(playWidth, playHeight))){
-          // Start selected level here
-         goToLevel(selectedLevelName);
-
+      ImU32 textColor = isLocked(index) ? IM_COL32(145, 153, 165, 190) : IM_COL32(231, 238, 247, selected ? 255 : 205);
+      drawList->AddText(ImVec2(rowMin.x + 14.0f, rowMin.y + (rowSize.y - ImGui::GetFontSize()) * 0.5f), textColor, rowTitle.c_str());
+      if (isLocked(index)){
+        drawList->AddText(ImVec2(rowMin.x + rowSize.x - 60.0f, rowMin.y + (rowSize.y - ImGui::GetFontSize()) * 0.5f), IM_COL32(230, 184, 96, 220), "LOCKED");
       }
-
-      ImGui::PopStyleVar();
-      ImGui::PopStyleColor(3);
+      ImGui::PopID();
     }
+    drawList->PopClipRect();
+
+    ImGui::SetCursorScreenPos(ImVec2(origin.x, origin.y + available.y));
+    ImGui::Dummy(ImVec2(available.x, 1.0f));
 
     if (includePanel){
         ImGui::End();
