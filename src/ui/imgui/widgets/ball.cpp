@@ -1,5 +1,6 @@
 #include "./ball.h"
 #include <algorithm>
+#include <cmath>
 
 extern CustomApiBindings* gameapi;
 
@@ -259,22 +260,20 @@ void renderStageSelectPanel(bool includePanel){
       return;
     }
 
-    selectedLevel = std::clamp(selectedLevel, 0, (int)worldLevels.size() - 1);
-    if (wheelPosition > (float)worldLevels.size() - 1.0f){
-      wheelPosition = (float)worldLevels.size() - 1.0f;
-    }
+    const int levelCount = (int)worldLevels.size();
+    selectedLevel = std::clamp(selectedLevel, 0, levelCount - 1);
 
     if (ImGui::IsMouseHoveringRect(ImVec2(rightX, bodyY), ImVec2(rightX + rightWidth, bodyY + bodyHeight))){
       float wheel = ImGui::GetIO().MouseWheel;
       if (wheel != 0.0f){
-        selectedLevel = std::clamp(selectedLevel - (int)wheel, 0, (int)worldLevels.size() - 1);
+        selectedLevel = std::clamp(selectedLevel - (int)wheel, 0, levelCount - 1);
       }
     }
     if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)){
       selectedLevel = std::max(0, selectedLevel - 1);
     }
     if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)){
-      selectedLevel = std::min((int)worldLevels.size() - 1, selectedLevel + 1);
+      selectedLevel = std::min(levelCount - 1, selectedLevel + 1);
     }
 
     wheelPosition += (selectedLevel - wheelPosition) * std::min(1.0f, ImGui::GetIO().DeltaTime * 12.0f);
@@ -353,13 +352,17 @@ void renderStageSelectPanel(bool includePanel){
     const float rowHeight = std::min(68.0f, (bodyHeight - 56.0f) / 5.0f);
     const float wheelCenterY = bodyY + 48.0f + (bodyHeight - 48.0f) * 0.5f;
     drawList->PushClipRect(ImVec2(rightX + 2.0f, bodyY + 42.0f), ImVec2(rightX + rightWidth - 2.0f, bodyY + bodyHeight - 5.0f), true);
-    int firstLevel = std::max(0, (int)wheelPosition - 3);
-    int lastLevel = std::min((int)worldLevels.size() - 1, (int)wheelPosition + 3);
+    int firstLevel = std::max(0, (int)std::floor(wheelPosition) - 3);
+    int lastLevel = std::min(levelCount - 1, (int)std::floor(wheelPosition) + 3);
     for (int index = firstLevel; index <= lastLevel; index++){
       float offset = index - wheelPosition;
+      float curve = std::min(std::abs(offset) / 3.0f, 1.0f);
+      float curveAmount = curve * curve;
+      float horizontalInset = curveAmount * 48.0f;
       float rowY = wheelCenterY + offset * rowHeight - rowHeight * 0.5f;
-      ImVec2 rowMin(rightX + 12.0f, rowY);
-      ImVec2 rowSize(rightWidth - 24.0f, rowHeight - 7.0f);
+      float cardHeight = (rowHeight - 7.0f) * (1.0f - curve * 0.12f);
+      ImVec2 rowMin(rightX + 12.0f + horizontalInset * 0.5f, rowY + (rowHeight - 7.0f - cardHeight) * 0.5f);
+      ImVec2 rowSize(rightWidth - 24.0f - horizontalInset, cardHeight);
       ImGui::SetCursorScreenPos(rowMin);
       ImGui::PushID(index);
       bool clicked = ImGui::InvisibleButton("stage-wheel-row", rowSize);

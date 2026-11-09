@@ -403,7 +403,7 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
     }
     menuItems.push_back(
       MenuItem { 
-        .text = "Stage Select",
+        .text = "Arcade Mode",
         .onClick = [&liveMenu]() -> void {
           liveMenu.liveMenu -> options.showStageSelect = true;
         },
