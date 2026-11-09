@@ -309,6 +309,7 @@ void onRhythmFrame(){
 		bool successNote = false;
 		if (note.lane == 0 && isLane0Pressed && stat.noteState == NOTE_DEFAULT){
 			stat.noteState = NOTE_SUCCESS;
+			successNote = true;
 		}
 		if (note.lane == 1 && isLane1Pressed && stat.noteState == NOTE_DEFAULT){
 			stat.noteState = NOTE_SUCCESS;
