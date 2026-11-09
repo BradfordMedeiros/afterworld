@@ -68,8 +68,18 @@ struct SceneManagement {
   int changedLevelFrame;
 };
 
+struct SceneRouteLoadState {
+  std::string path;
+  int index;
+  std::vector<std::string> params;
+  std::optional<SceneLoadInfo> sceneToLoad;
+  std::optional<SceneLoadInfo> additionalSceneToLoad;
+  std::optional<ScenarioOptions> scenarioOptions;
+  std::optional<GameMode> gameMode;
+};
 
 SceneManagement sceneManagement;
+std::optional<SceneRouteLoadState> pendingSceneRouteLoad;
 MovementEntityData movementEntities;
 std::optional<std::string> dragSelect;
 std::optional<glm::vec2> selecting;
@@ -371,7 +381,7 @@ bool disableGameInput(){
 }
 
 
-bool autostartMode = false;
+bool autostartMode = true;
 void startMode(bool loadedScene){
   if (loadedScene){
     if (autostartMode){
@@ -392,6 +402,46 @@ bool inMode(){
   return sceneManagement.managedScene.has_value();
 }
 
+void loadSceneRoute(SceneManagement& sceneManagement, SceneRouteLoadState& route){
+  if (!route.gameMode.has_value()){
+    return;
+  }
+  std::optional<objid> sceneId;
+  if (route.sceneToLoad.has_value()){
+    if (route.sceneToLoad.value().additionalTokens.size() > 0){
+      std::cout << "additional tokens: " << print(route.sceneToLoad.value().additionalTokens.at(0)) << std::endl;
+    }else{
+      std::cout << "additional tokens: " << "none" << std::endl;
+    }
+    sceneId = gameapi -> loadScene(route.sceneToLoad.value().sceneFile, route.sceneToLoad.value().additionalTokens, std::nullopt, {});
+  }
+
+  std::optional<objid> additionalSceneId;
+  if (route.additionalSceneToLoad.has_value()){
+    additionalSceneId = gameapi -> loadScene(route.additionalSceneToLoad.value().sceneFile, route.additionalSceneToLoad.value().additionalTokens, std::nullopt, {});
+  }
+
+  static ScenarioOptions defaultSettings {
+    .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
+    .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
+    .skybox = "./res/textures/skyboxs/desert/",
+    .weather = std::nullopt,
+  };
+  setScenarioOptions(route.scenarioOptions.has_value() ? route.scenarioOptions.value() : defaultSettings);
+
+  sceneManagement.managedScene = ManagedScene {
+    .id = sceneId,
+    .additionalId = additionalSceneId,
+    .index = route.index,
+    .path = route.path,
+    .sceneFile = route.sceneToLoad.value().sceneFile,
+    .activeLevel = route.params.size() > 0 ? route.params.at(0) : std::optional<std::string>(std::nullopt),
+    .gameMode = route.gameMode.value(),
+  };
+  sceneManagement.changedLevelFrame = gameapi -> currentFrame();
+  modlog("router scene route load", sceneManagement.managedScene.value().path);
+  startMode(true);
+}
 
 void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPath, bool forceLoad){
   modlog("router scene route", std::string("path is: ") + currentPath);
@@ -400,11 +450,11 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   std::vector<std::string> params;
   auto router = getSceneRouter(currentPath, &currentIndex, &params);
   modlog("router scene route, router, has router = ", print(router.has_value()));
-  //modassert(router.has_value(), std::string("no router for path: ") + currentPath);
-
-  std::optional<SceneLoadInfo> sceneToLoad;
-  std::optional<SceneLoadInfo> additionalSceneToLoad;
-  std::optional<ScenarioOptions> scenarioOptions;
+  SceneRouteLoadState route {
+    .path = currentPath,
+    .index = currentIndex,
+    .params = params,
+  };
 
   int matchedRouterOption = 0;
   auto routerOptions = getRouterOptions(currentPath, &matchedRouterOption);
@@ -414,20 +464,20 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
   modlog("router", std::string("matched router option: ") + std::to_string(matchedRouterOption));
 
   if (router.has_value() && router.value() -> scene.has_value()){
-    sceneToLoad = router.value() -> scene.value()(params);
-    modlog("router scene route load", sceneToLoad.value().sceneFile);
+    route.sceneToLoad = router.value() -> scene.value()(params);
+    modlog("router scene route load", route.sceneToLoad.value().sceneFile);
+    route.gameMode = router.value() -> getGameMode(params);
   }
   if (router.has_value() && router.value() -> additionalScene.has_value()){
-    additionalSceneToLoad = router.value() -> additionalScene.value()(params);
-    modlog("router scene route load additional", sceneToLoad.value().sceneFile);
+    route.additionalSceneToLoad = router.value() -> additionalScene.value()(params);
+    modlog("router scene route load additional", route.sceneToLoad.value().sceneFile);
   }
   if (router.has_value() && router.value() -> scenarioOptions.has_value()){
-    scenarioOptions = router.value() -> scenarioOptions.value()(params);
+    route.scenarioOptions = router.value() -> scenarioOptions.value()(params);
   }
-  
 
   // This is kind of weird now since can load things with additional tokens.  Maybe should be aware of the level name or something? 
-  bool currentSceneFileLoaded = sceneToLoad.has_value() && sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().sceneFile.has_value() && sceneManagement.managedScene.value().sceneFile.value() == sceneToLoad.value().sceneFile;
+  bool currentSceneFileLoaded = route.sceneToLoad.has_value() && sceneManagement.managedScene.has_value() && sceneManagement.managedScene.value().sceneFile.has_value() && sceneManagement.managedScene.value().sceneFile.value() == route.sceneToLoad.value().sceneFile;
 
   if (sceneManagement.managedScene.has_value()){
     if (!forceLoad && (router.has_value() && sceneManagement.managedScene.value().index == currentIndex && currentSceneFileLoaded)){
@@ -449,47 +499,24 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
 
       sceneManagement.managedScene = std::nullopt;
       sceneManagement.changedLevelFrame = gameapi -> currentFrame();
+      pendingSceneRouteLoad = std::move(route);
+      return;
     }
   }
 
+  pendingSceneRouteLoad = std::move(route);
+  return;
+}
 
-  if (router.has_value()){
-    std::optional<objid> sceneId;
-    if (sceneToLoad.has_value()){
-      if (sceneToLoad.value().additionalTokens.size() > 0){
-        std::cout << "additional tokens: " << print(sceneToLoad.value().additionalTokens.at(0)) << std::endl;
-      }else{
-        std::cout << "additional tokens: " << "none" << std::endl;
-      }
-      sceneId = gameapi -> loadScene(sceneToLoad.value().sceneFile, sceneToLoad.value().additionalTokens, std::nullopt, {});
-    }
+void handleRouteChanged(bool forceLoad){
+  auto currentPath = fullHistoryStr(mainRouterHistory);
+  modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
 
-    std::optional<objid> additionalSceneId;
-    if (additionalSceneToLoad.has_value()){
-      additionalSceneId = gameapi -> loadScene(additionalSceneToLoad.value().sceneFile, additionalSceneToLoad.value().additionalTokens, std::nullopt, {});
-    }
-    
-    static ScenarioOptions defaultSettings {
-      .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
-      .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
-      .skybox = "./res/textures/skyboxs/desert/",
-      .weather = std::nullopt,
-    };
-    setScenarioOptions(scenarioOptions.has_value() ? scenarioOptions.value() : defaultSettings);
-    
-    sceneManagement.managedScene = ManagedScene {
-      .id = sceneId,
-      .additionalId = additionalSceneId,
-      .index = currentIndex,
-      .path = currentPath,
-      .sceneFile = sceneToLoad.value().sceneFile,
-      .activeLevel = params.size() > 0 ? params.at(0) : std::optional<std::string>(std::nullopt),
-      .gameMode = router.value() -> getGameMode(params),
-    };
-    sceneManagement.changedLevelFrame = gameapi -> currentFrame();
-    modlog("router scene route load", sceneManagement.managedScene.value().path);
-    startMode(true);
-  }
+  getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";
+  getUiSettings() -> showMainMenu = currentPath == "mainmenu/";
+  getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";
+
+  onSceneRouteChange(sceneManagement, currentPath, forceLoad);
 }
 
 std::optional<objid> activeSceneForSelected(){
@@ -786,16 +813,6 @@ void changeUiMode(UiMode newUiMode){
 }
 
 
-void handleRouteChanged(bool forceLoad){
-  auto currentPath = fullHistoryStr(mainRouterHistory);
-  modlog("routing", std::string("scene route registerOnRouteChanged: , new route: ") + currentPath);
-
-  getUiSettings() -> showGameSettings = currentPath == "mainmenu/settings/";   
-  getUiSettings() -> showMainMenu = currentPath == "mainmenu/";     
-  getUiSettings() -> showLevelSelect = currentPath == "mainmenu/levelselect/";     
-
-  onSceneRouteChange(sceneManagement, currentPath, forceLoad);
-}
 
 
 CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
@@ -920,7 +937,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     if (routeHistory.routeChangedForceReload.has_value()){
       auto forceReload = routeHistory.routeChangedForceReload.value();
       routeHistory.routeChangedForceReload = std::nullopt;
+      pendingSceneRouteLoad = std::nullopt;
       handleRouteChanged(forceReload);
+      std::cout << "route change: skipped frame" << std::endl;
+      return;
+    }else if (pendingSceneRouteLoad.has_value()){
+      auto route = std::move(pendingSceneRouteLoad.value());
+      pendingSceneRouteLoad = std::nullopt;
+      loadSceneRoute(sceneManagement, route);
     }
     // CONTROLS ///////////////////////////
     gameapi -> idAtCoordAsync(getGlobalState().control.xNdc, getGlobalState().control.yNdc, false, std::nullopt, [](std::optional<objid> selectedId, glm::vec2 texCoordUv) -> void {
