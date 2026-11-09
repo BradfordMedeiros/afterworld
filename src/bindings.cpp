@@ -224,9 +224,7 @@ void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool fo
   };
   pushHistory({ "playing", levelShortName }, true, options, forceReload);
 }
-void goToLevel(std::string levelShortName){
-  goToLevel(levelShortName, std::nullopt, true);
-}
+
 void resetLevel(){
   if (sceneManagement.managedScene.has_value()){
     if (sceneManagement.managedScene.value().id.has_value()){

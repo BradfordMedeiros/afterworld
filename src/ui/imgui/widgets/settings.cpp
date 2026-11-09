@@ -4,7 +4,7 @@ extern CustomApiBindings* gameapi;
 
 void resumeOnMenu();
 void goToMenu();
-void goToLevel(std::string levelShortName);
+void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 
 glm::vec2 getMouseSensitivty();
 void updateMouseSensitivity(float x, float y);
@@ -509,7 +509,7 @@ void renderLevelList(bool includePanel){
     ImGui::BeginDisabled(!selectedLevel.has_value());
     if (Mod::Button("Start", size)) {
       if (selectedLevel.has_value()){
-        goToLevel(selectedLevel.value().shortcut);
+        goToLevel(selectedLevel.value().shortcut, std::nullopt, false);
       }
     }
     ImGui::EndDisabled();

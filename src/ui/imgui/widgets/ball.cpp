@@ -6,7 +6,7 @@
 extern CustomApiBindings* gameapi;
 
 void reloadVehicleSettings();
-void goToLevel(std::string);
+void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 
 void renderBallGameplay(bool includePanel){
   if (includePanel){
@@ -295,6 +295,9 @@ void renderStageSelectPanel(bool includePanel){
       imageAspect = aspect->second;
     }
     auto isLocked = [&worldLevels](int index) {
+      if (getArgEnabled("unlock")){
+        return false;
+      }
       if (!worldLevels.at(index)->mustUnlock || index == 0){
         return false;
       }
@@ -366,7 +369,13 @@ void renderStageSelectPanel(bool includePanel){
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.07f, 0.36f, 0.68f, 1.0f));
     bool playClicked = ImGui::Button("PLAY STAGE", ImVec2(172.0f, 44.0f));
     if (!isLevelLocked && levelData.has_value() && (playClicked || ImGui::IsKeyPressed(ImGuiKey_Enter))){
-      goToLevel(selectedLevelName);
+      goToLevel(
+        selectedLevelName, 
+        LevelLoadOptions {
+          .arcadeMode = true,
+        }, 
+        false
+      );
     }
     ImGui::PopStyleColor(3);
     ImGui::EndDisabled();

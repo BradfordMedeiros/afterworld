@@ -43,16 +43,6 @@ enum BallModeSpirit {
 
 struct LevelWarp { };
 
-struct CompletionInfo {
-	bool firstTimeWin = false;
-	std::string levelName;
-};
-
-struct LevelLoadOptions {
-	bool skipMenu = false;
-	std::optional<CompletionInfo> completion;
-};
-
 struct BallModeOptions{
    std::optional<glm::vec3> initialBallPos;
    objid ballId;
@@ -243,7 +233,15 @@ std::function<void(EasyCutscene&)> createReveal(std::string letterbox, std::stri
 	};
 }
 
-
+std::optional<LevelLoadOptions> getLoadLevelOptions(){
+	auto activeLevel = getActiveLevel();
+	auto& hint = activeLevel.value().hint;
+	if (hint.has_value()){
+	  LevelLoadOptions* value = std::any_cast<LevelLoadOptions>(&hint.value());
+	  return *value;
+	}
+	return std::nullopt;
+}
 
 struct BallEndData {
 	bool firstTimeWin = false;
@@ -311,12 +309,18 @@ void ballEndGameplay(EasyCutscene& cutscene){
   run(cutscene, 3, [&cutscene]() -> void {
 	  BallEndData* ballEndData = getStorage<BallEndData>(cutscene);
 	  modassert(ballEndData, "ball end data does not have a value");
+
+	  auto loadLevelOptions = getLoadLevelOptions();
+	  if (loadLevelOptions.has_value() && loadLevelOptions.value().arcadeMode){
+  		goToLevel("ballselect", LevelLoadOptions { 
+  			.skipMenu = false,
+	  		.completion = CompletionInfo { .firstTimeWin = ballEndData -> firstTimeWin, .levelName = getActiveLevel().value().name },
+  		}, false);
+	  }
+
   	goToLevel("ballselect", LevelLoadOptions { 
   		.skipMenu = true,
-  		.completion = CompletionInfo {
-  			.firstTimeWin = ballEndData -> firstTimeWin,
-  			.levelName = getActiveLevel().value().name,
-  		},
+  		.completion = CompletionInfo { .firstTimeWin = ballEndData -> firstTimeWin, .levelName = getActiveLevel().value().name },
   	}, false);
   });
 }
@@ -559,6 +563,7 @@ void startBallIntroMode(objid sceneId, bool inHub){
   showLetterBoxHold("This is the intro mode", 0.f);
 }
 
+
 void startBallMode(objid sceneId){
 	static bool doOnce = true;
 	if (doOnce){
@@ -604,16 +609,7 @@ void startBallMode(objid sceneId){
 	bool skipMenu = false;
 
 
-	std::optional<LevelLoadOptions> options;
-	if (activeLevel.has_value()){
-		auto& hint = activeLevel.value().hint;
-		if (hint.has_value()){
-	    LevelLoadOptions* value = std::any_cast<LevelLoadOptions>(&hint.value());
-    	modassert(value != NULL, "expected LevelLoadOptions type");
-    	skipMenu = value -> skipMenu;
-    	options = *value;
-		}
-	}
+	auto options = getLoadLevelOptions();
 
   if (inHub && !skipMenu){
   	startBallIntroMode(sceneId, inHub);
@@ -1301,7 +1297,19 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
 
- 		
+ 			if (ballMode.loadOptions.has_value()){
+ 				if (ballMode.loadOptions.value().arcadeMode){
+						drawImGuiText("Arcade Mode", glm::vec2(0.5f, 0.5f));
+						std::cout << "ball mode style: arcade" << std::endl;
+ 				}else{
+						drawImGuiText("Story Mode", glm::vec2(0.5f, 0.5f));
+						std::cout << "ball mode style: story - mode" << std::endl;
+ 				}
+ 			}else{
+						drawImGuiText("Default Mode", glm::vec2(0.5f, 0.5f));
+						std::cout << "ball mode style: story - default" << std::endl;
+ 			}
+
 	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
 
 			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");

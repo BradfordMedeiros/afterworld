@@ -14,6 +14,17 @@
 #include "../../collision.h"
 #include "../entity.h"
 
+struct CompletionInfo {
+	bool firstTimeWin = false;
+	std::string levelName;
+};
+
+struct LevelLoadOptions {
+	bool skipMenu = false;
+	std::optional<CompletionInfo> completion;
+	bool arcadeMode = false;
+};
+
 void startBallMode(objid sceneId);
 void endBallMode();
 
