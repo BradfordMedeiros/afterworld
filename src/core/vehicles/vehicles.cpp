@@ -9,6 +9,7 @@ const bool SHOULD_SMOOTH_ANGLES = false;
 const bool SHOULD_SMOOTH_ZOOM = true;
 const bool SHOULD_LIMIT_CAMERA = true;
 
+
 Vehicles createVehicles(){
   initBallVehicleConfig();
   return Vehicles{};

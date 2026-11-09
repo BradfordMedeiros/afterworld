@@ -9,6 +9,7 @@ bool addToGravityWell(objid gravityWellId, objid managed);
 void removeFromGravityWell(objid managed);
 std::optional<glm::vec3> goToNextGravityWell(objid managed, glm::vec3 dir);
 bool shouldAutolaunchGravityWell(objid managed);
+bool isPaused();
 
 /*
   TODO 
@@ -367,6 +368,10 @@ void onVehicleFrameBall(objid id, VehicleState& state, VehicleBall& vehicleBall,
 }
 
 void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mods){
+  if (isPaused()){
+    return;
+  }
+
   if (button == 0 && action == 1){
     vehicleBall.shouldExitGravityWell = true;
     vehicleBall.shouldUsePowerUp = true;
@@ -388,6 +393,9 @@ void onVehicleBallMouse(VehicleBall& vehicleBall, int button, int action, int mo
 
 }
 void onVehicleBallKey(VehicleBall& vehicleBall, int key, int action){
+  if (isPaused()){
+    return;
+  }
   if (useWASDControl){
     if(isJumpKey(key) /* space */ && action == 1){
       vehicleBall.shouldJump = true;

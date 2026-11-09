@@ -603,7 +603,9 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
     observeEntityNext(0);
   }
 
-  onVehicleKey(vehicles, key, action);
+  if (!isPaused()){
+    onVehicleKey(vehicles, key, action);
+  }
 
   if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
     if (!(isPaused() || disableGameInput())){
@@ -996,7 +998,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     //////// needs multiviewport work ///////////////////////////////
 
     if (isInGameMode2()){
-      onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
+      if (!isPaused()){
+        onVehicleFrame(vehicles, getControlParamsByPort(movement, 0));
+      }
 
       ControlledPlayer& controlledPlayer = getControlledPlayer(getDefaultPlayerIndex());
       if (controlledPlayer.entityId.has_value() && !isEntityControlDisabled(getEntityForPlayerIndex(getDefaultPlayerIndex()).value())){

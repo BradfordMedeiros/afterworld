@@ -1201,6 +1201,10 @@ GameTypeInfo getBallMode(){
 	  },
 	  .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {},
 	  .onKey = [](std::any& gametype, int key, int scancode, int action, int mods) -> void {
+ 		  if (isPaused()){
+ 		  	return;
+ 		  }
+ 		  
 	  	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
@@ -1310,6 +1314,10 @@ GameTypeInfo getBallMode(){
 						std::cout << "ball mode style: story - default" << std::endl;
  			}
 
+ 			if (isPaused()){
+ 				return;
+ 			}
+ 			
 	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
 
 			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
@@ -1561,7 +1569,6 @@ GameTypeInfo getBallMode(){
 	  	BallModeOptions& ballMode = *ballModePtr;
 
   		auto& ballVehicle = *getVehicleBall(vehicles, ballMode.ballId).value();
-
 
 	  	{
 				auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
