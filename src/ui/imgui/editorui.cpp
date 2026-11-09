@@ -190,7 +190,7 @@ void renderMoreUi(){
           auto uiOffset = glm::vec2(uiMoveOffset.x,  -uiMoveOffset.y);
 
           auto& widget = *widgetByNameSymbol(getSymbol("game-ball-rhythm")).value();
-          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f + 50 * uiOffset, 1000.f + 50 * uiOffset));
+          renderLayoutAlignUpCenterHorz("rhythm-ui-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.f, 0.5f), ImVec2(1000.f + 50 * uiOffset.x, 1000.f + 50 * uiOffset.y));
           windowOrdering.push_back("rhythm-ui-layout");
         }
 
