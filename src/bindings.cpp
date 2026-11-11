@@ -372,7 +372,9 @@ void updateState(){
   });
   gameapi -> setUpdateDynamicBodiesPositionsBasedOnParent(global.showEditor || !global.routeState.inGameMode);
 
-  onModePauseToggle(sceneManagement.managedScene.value().gameMode, global.routeState.paused);
+  if (sceneManagement.managedScene.has_value()){
+    onModePauseToggle(sceneManagement.managedScene.value().gameMode, global.routeState.paused);
+  }
 }
 
 bool disableGameInput(){
@@ -567,6 +569,10 @@ void objectRemoved(objid idRemoved){
   maybeResetActivatableObject(idRemoved);
 }
 
+bool userCanTogglePause = true;
+void setCanTogglePause(bool canPause){
+  userCanTogglePause = canPause;
+}
 
 void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, int mods, int playerIndex){
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
@@ -575,7 +581,7 @@ void onKeyCallback(int32_t id, void* data, int key, int scancode, int action, in
   if (action == 1){
 
     auto playerId = controlledPlayer.entityId;
-    if (isPauseKey(key)){
+    if (isPauseKey(key) && userCanTogglePause){
       getGlobalState().userRequestedPause = !getGlobalState().userRequestedPause;
     } 
     if (isTeleportButton(key) && !isPaused()){

@@ -26,6 +26,7 @@ void showLetterBoxHold(std::string title, float fadeInTime);
 float* getDigitalAmount();
 void registerCommand(std::string name, std::function<std::optional<std::string>(std::string& command, bool* valid)> registerFn);
 void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi);
+void setCanTogglePause(bool canPause);
 
 struct WorldView {
 	bool didChangeToOrb = false;
@@ -415,6 +416,7 @@ std::optional<BallPowerupState> getPowerup(){
 GameTypeInfo getBallMode();
 
 void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptions> loadLevel){
+	setCanTogglePause(true);
 	setTempCamera(std::nullopt, 0);
 
 	inputOverride();
@@ -548,8 +550,9 @@ void startBallIntroMode(objid sceneId, bool inHub){
 		removeCameraFromMultiOrbView(cameraId.value());
 	  setTempCamera(cameraId.value(), 0);  	
   }
+ 
 
-  inputOverride(false, true, false);
+  inputOverride(false, true, true);
 
   auto showArcadeMenu = false;
   if (getLoadLevelOptions().has_value()){
@@ -628,6 +631,7 @@ void startBallMode(objid sceneId){
 	auto options = getLoadLevelOptions();
 
   if (inHub && !skipMenu){
+  	setCanTogglePause(false);
   	startBallIntroMode(sceneId, inHub);
   }else{
   	ballModeSetPlayMode(sceneId, inHub, options);
@@ -636,6 +640,7 @@ void startBallMode(objid sceneId){
 
 void endBallMode(){
 	stopSoulRun();
+	hideLetterBox();
 }
 
 void doGravityHole(objid id, objid gravityHole){
