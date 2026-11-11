@@ -230,21 +230,40 @@ void renderStageSelectPanel(bool includePanel){
     const float rightX = leftX + leftWidth + gap;
     const float bodyY = origin.y + 58.0f;
     ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImDrawListSplitter drawListSplitter;
+    drawListSplitter.Split(drawList, 2);
+    drawListSplitter.SetCurrentChannel(drawList, 1);
 
     auto oldWorld = selectedWorld;
+    drawList->AddRectFilled(
+      ImVec2(leftX, origin.y),
+      ImVec2(leftX + leftWidth, origin.y + 42.0f),
+      IM_COL32(10, 17, 28, 225),
+      7.0f
+    );
+    drawList->AddRect(
+      ImVec2(leftX, origin.y),
+      ImVec2(leftX + leftWidth, origin.y + 42.0f),
+      IM_COL32(55, 86, 112, 150),
+      7.0f
+    );
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 6.0f));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.055f, 0.095f, 0.15f, 0.96f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.08f, 0.24f, 0.31f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.34f, 0.4f, 1.0f));
     ImGui::SetCursorScreenPos(ImVec2(leftX, origin.y));
     if (ImGui::Button("<", ImVec2(42.0f, 42.0f))){
       selectedWorld = std::max(0, selectedWorld - 1);
     }
     ImGui::SetCursorScreenPos(ImVec2(leftX + 54.0f, origin.y));
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.08f, 0.10f, 0.15f, 0.85f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.14f, 0.20f, 0.29f, 0.95f));
     ImGui::Button(worlds.at(selectedWorld).c_str(), ImVec2(leftWidth - 108.0f, 42.0f));
-    ImGui::PopStyleColor(2);
     ImGui::SetCursorScreenPos(ImVec2(leftX + leftWidth - 42.0f, origin.y));
     if (ImGui::Button(">", ImVec2(42.0f, 42.0f))){
       selectedWorld = std::min((int)worlds.size() - 1, selectedWorld + 1);
     }
+    ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar(2);
     if (selectedWorld != oldWorld){
       selectedLevel = 0;
       wheelPosition = 0.0f;
@@ -255,6 +274,7 @@ void renderStageSelectPanel(bool includePanel){
     if (worldLevels.empty()){
       ImGui::SetCursorScreenPos(ImVec2(leftX, bodyY));
       ImGui::TextUnformatted("No stages in this world");
+      drawListSplitter.Merge(drawList);
       if (includePanel){
         ImGui::End();
       }
@@ -282,18 +302,6 @@ void renderStageSelectPanel(bool includePanel){
     std::string selectedLevelName = worldLevels.at(selectedLevel)->level;
     auto levelData = levelByShortcutName(selectedLevelName);
     static std::unordered_map<std::string, float> imageAspectCache;
-    float imageAspect = 1.0f;
-    if (levelData.has_value() && !levelData->image.empty()){
-      auto aspect = imageAspectCache.find(levelData->image);
-      if (aspect == imageAspectCache.end()){
-        auto dimensions = gameapi->getTextureSize(levelData->image);
-        aspect = imageAspectCache.emplace(
-          levelData->image,
-          dimensions.x / dimensions.y
-        ).first;
-      }
-      imageAspect = aspect->second;
-    }
     auto isLocked = [&worldLevels](int index) {
       if (getArgEnabled("unlock")){
         return false;
@@ -305,33 +313,73 @@ void renderStageSelectPanel(bool includePanel){
     };
     bool isLevelLocked = isLocked(selectedLevel);
     float imageHeight = bodyHeight * 0.48f;
-
-    drawList->AddRectFilled(ImVec2(leftX, bodyY), ImVec2(leftX + leftWidth, bodyY + bodyHeight), IM_COL32(9, 14, 23, 235), 8.0f);
-    drawList->AddRect(ImVec2(leftX, bodyY), ImVec2(leftX + leftWidth, bodyY + bodyHeight), IM_COL32(95, 131, 171, 170), 8.0f, 0, 1.5f);
     ImVec2 imageMin(leftX + 1.0f, bodyY + 1.0f);
     ImVec2 imageMax(leftX + leftWidth - 1.0f, bodyY + imageHeight);
-    drawList->AddRectFilled(imageMin, imageMax, IM_COL32(20, 29, 42, 255), 7.0f);
-    if (levelData.has_value() && !levelData->image.empty()){
-      auto textureId = gameapi->getTextureSamplerId(levelData->image);
-      if (textureId.has_value()){
-        float frameWidth = imageMax.x - imageMin.x;
-        float frameHeight = imageMax.y - imageMin.y;
-        float frameAspect = frameWidth / frameHeight;
-        ImVec2 uvMin(0.0f, 1.0f);
-        ImVec2 uvMax(1.0f, 0.0f);
-        if (imageAspect > frameAspect){
-          float visibleWidth = frameAspect / imageAspect;
-          uvMin.x = (1.0f - visibleWidth) * 0.5f;
-          uvMax.x = 1.0f - uvMin.x;
-        }else{
-          float visibleHeight = imageAspect / frameAspect;
-          uvMin.y = 0.5f + visibleHeight * 0.5f;
-          uvMax.y = 0.5f - visibleHeight * 0.5f;
-        }
-        drawList->AddImage((ImTextureID)(intptr_t)textureId.value(), imageMin, imageMax, uvMin, uvMax);
+    auto drawCoverTexture = [&](std::string texturePath, ImVec2 targetMin, ImVec2 targetMax, ImU32 tint, ImDrawList* targetDrawList){
+      auto textureId = gameapi->getTextureSamplerId(texturePath);
+      if (!textureId.has_value()){
+        return;
       }
+
+      auto aspect = imageAspectCache.find(texturePath);
+      if (aspect == imageAspectCache.end()){
+        auto dimensions = gameapi->getTextureSize(texturePath);
+        if (dimensions.x <= 0.0f || dimensions.y <= 0.0f){
+          return;
+        }
+        aspect = imageAspectCache.emplace(texturePath, dimensions.x / dimensions.y).first;
+      }
+
+      float textureAspect = aspect->second;
+      float frameWidth = targetMax.x - targetMin.x;
+      float frameHeight = targetMax.y - targetMin.y;
+      if (frameWidth <= 0.0f || frameHeight <= 0.0f){
+        return;
+      }
+      float frameAspect = frameWidth / frameHeight;
+      ImVec2 uvMin(0.0f, 1.0f);
+      ImVec2 uvMax(1.0f, 0.0f);
+      if (textureAspect > frameAspect){
+        float visibleWidth = frameAspect / textureAspect;
+        uvMin.x = (1.0f - visibleWidth) * 0.5f;
+        uvMax.x = 1.0f - uvMin.x;
+      }else{
+        float visibleHeight = textureAspect / frameAspect;
+        uvMin.y = 0.5f + visibleHeight * 0.5f;
+        uvMax.y = 0.5f - visibleHeight * 0.5f;
+      }
+      targetDrawList->AddImage((ImTextureID)(intptr_t)textureId.value(), targetMin, targetMax, uvMin, uvMax, tint);
+    };
+
+    bool hasBackgroundTexture = levelData.has_value() && levelData->backgroundTexture.has_value();
+    drawList->AddRectFilledMultiColor(
+      ImVec2(leftX, bodyY),
+      ImVec2(leftX + leftWidth, bodyY + bodyHeight),
+      IM_COL32(13, 23, 36, 225),
+      IM_COL32(8, 14, 24, 225),
+      IM_COL32(6, 11, 19, 225),
+      IM_COL32(10, 18, 30, 225)
+    );
+    drawList->AddRect(ImVec2(leftX, bodyY), ImVec2(leftX + leftWidth, bodyY + bodyHeight), IM_COL32(65, 103, 133, 190), 8.0f, 0, 1.5f);
+    drawList->AddRectFilled(ImVec2(leftX + 18.0f, bodyY + 9.0f), ImVec2(leftX + 70.0f, bodyY + 12.0f), IM_COL32(57, 224, 222, 220), 2.0f);
+    drawList->AddRectFilled(imageMin, imageMax, IM_COL32(16, 29, 43, 255), 7.0f);
+    if (levelData.has_value() && !levelData->image.empty()){
+      drawCoverTexture(levelData->image, imageMin, imageMax, IM_COL32(255, 255, 255, 255), drawList);
     }
     drawList->AddRectFilled(imageMin, ImVec2(imageMax.x, imageMax.y), IM_COL32(0, 0, 0, 35), 7.0f);
+    drawList->AddRectFilledMultiColor(
+      ImVec2(imageMin.x, imageMax.y - 54.0f),
+      imageMax,
+      IM_COL32(5, 11, 19, 0),
+      IM_COL32(5, 11, 19, 0),
+      IM_COL32(5, 11, 19, 150),
+      IM_COL32(5, 11, 19, 150)
+    );
+    if (levelData.has_value() && levelData->secondaryBackgroundTexture.has_value()){
+      ImVec2 detailsMin(leftX + 2.0f, imageMax.y + 2.0f);
+      ImVec2 detailsMax(leftX + leftWidth - 2.0f, bodyY + bodyHeight - 2.0f);
+      drawCoverTexture(levelData->secondaryBackgroundTexture.value(), detailsMin, detailsMax, IM_COL32(255, 255, 255, 255), drawList);
+    }
 
     std::string stageTitle = levelData.has_value() ? levelData->name : selectedLevelName;
     drawList->AddText(ImVec2(leftX + 18.0f, bodyY + imageHeight + 14.0f), IM_COL32(245, 249, 255, 255), stageTitle.c_str());
@@ -346,27 +394,29 @@ void renderStageSelectPanel(bool includePanel){
 
       auto progress = getLevelProgressInfo(worlds.at(selectedWorld), selectedLevelName);
       float statsY = bodyY + bodyHeight - 91.0f;
-      drawList->AddText(ImVec2(leftX + 18.0f, statsY), IM_COL32(120, 157, 202, 255), "PAR");
+      drawList->AddLine(ImVec2(leftX + 18.0f, statsY - 9.0f), ImVec2(leftX + leftWidth - 18.0f, statsY - 9.0f), IM_COL32(74, 108, 132, 120));
+      drawList->AddText(ImVec2(leftX + 18.0f, statsY), IM_COL32(91, 190, 199, 255), "PAR");
       std::string parTime = printFloat(progress.parTime);
       drawList->AddText(ImVec2(leftX + 18.0f, statsY + 20.0f), IM_COL32(240, 244, 250, 255), parTime.c_str());
-      drawList->AddText(ImVec2(leftX + leftWidth * 0.34f, statsY), IM_COL32(120, 157, 202, 255), "BEST");
+      drawList->AddText(ImVec2(leftX + leftWidth * 0.34f, statsY), IM_COL32(91, 190, 199, 255), "BEST");
       std::string bestTime = progress.bestTime.has_value() ? printFloat(progress.bestTime.value()) : "--";
       drawList->AddText(ImVec2(leftX + leftWidth * 0.34f, statsY + 20.0f), IM_COL32(240, 244, 250, 255), bestTime.c_str());
-      drawList->AddText(ImVec2(leftX + leftWidth * 0.62f, statsY), IM_COL32(120, 157, 202, 255), "CRYSTALS");
+      drawList->AddText(ImVec2(leftX + leftWidth * 0.62f, statsY), IM_COL32(91, 190, 199, 255), "CRYSTALS");
       std::string crystals = std::to_string(progress.gemCount) + " / " + std::to_string(progress.totalGemCount);
       drawList->AddText(ImVec2(leftX + leftWidth * 0.62f, statsY + 20.0f), IM_COL32(240, 244, 250, 255), crystals.c_str());
     }
 
     if (isLevelLocked){
       drawList->AddRectFilled(imageMin, imageMax, IM_COL32(0, 0, 0, 145), 7.0f);
-      drawList->AddText(ImVec2(leftX + 18.0f, bodyY + imageHeight - 38.0f), IM_COL32(255, 211, 105, 255), "LOCKED");
+      drawList->AddText(ImVec2(leftX + 18.0f, bodyY + imageHeight - 38.0f), IM_COL32(255, 198, 104, 255), "LOCKED");
     }
 
     ImGui::SetCursorScreenPos(ImVec2(leftX + leftWidth - 190.0f, bodyY + bodyHeight - 58.0f));
     ImGui::BeginDisabled(isLevelLocked || !levelData.has_value());
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.46f, 0.82f, 0.95f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.16f, 0.58f, 0.98f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.07f, 0.36f, 0.68f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.04f, 0.48f, 0.51f, 0.98f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.06f, 0.67f, 0.67f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.03f, 0.37f, 0.42f, 1.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7.0f);
     bool playClicked = ImGui::Button("PLAY STAGE", ImVec2(172.0f, 44.0f));
     if (!isLevelLocked && levelData.has_value() && (playClicked || ImGui::IsKeyPressed(ImGuiKey_Enter))){
       goToLevel(
@@ -377,15 +427,37 @@ void renderStageSelectPanel(bool includePanel){
         false
       );
     }
+    ImGui::PopStyleVar();
     ImGui::PopStyleColor(3);
     ImGui::EndDisabled();
 
     ImVec2 wheelMin(rightX, bodyY);
     ImVec2 wheelMax(rightX + rightWidth, bodyY + bodyHeight);
-    drawList->AddRectFilled(wheelMin, wheelMax, IM_COL32(7, 11, 18, 230), 8.0f);
-    drawList->AddRect(wheelMin, wheelMax, IM_COL32(95, 131, 171, 170), 8.0f, 0, 1.5f);
-    drawList->AddText(ImVec2(rightX + 18.0f, bodyY + 15.0f), IM_COL32(120, 157, 202, 255), "STAGE SELECT");
-    drawList->AddText(ImVec2(rightX + rightWidth - 82.0f, bodyY + 15.0f), IM_COL32(120, 157, 202, 190), "UP / DOWN");
+    if (hasBackgroundTexture){
+      drawListSplitter.SetCurrentChannel(drawList, 0);
+      drawList->PushClipRect(wheelMin, wheelMax, false);
+      drawCoverTexture(levelData->backgroundTexture.value(), wheelMin, wheelMax, IM_COL32(255, 255, 255, 255), drawList);
+      drawList->PopClipRect();
+      drawListSplitter.SetCurrentChannel(drawList, 1);
+    }
+    int wheelPanelAlpha = hasBackgroundTexture ? 0 : 225;
+    drawList->AddRectFilledMultiColor(
+      wheelMin,
+      wheelMax,
+      IM_COL32(11, 20, 32, wheelPanelAlpha),
+      IM_COL32(7, 13, 22, wheelPanelAlpha),
+      IM_COL32(6, 11, 19, wheelPanelAlpha),
+      IM_COL32(9, 17, 28, wheelPanelAlpha)
+    );
+    drawList->PushClipRect(wheelMin, wheelMax, true);
+    for (float x = rightX + 16.0f; x < rightX + rightWidth; x += 32.0f){
+      drawList->AddLine(ImVec2(x, bodyY + 43.0f), ImVec2(x, bodyY + bodyHeight), IM_COL32(88, 142, 165, 12));
+    }
+    drawList->PopClipRect();
+    drawList->AddRect(wheelMin, wheelMax, IM_COL32(65, 103, 133, 190), 8.0f, 0, 1.5f);
+    drawList->AddRectFilled(ImVec2(rightX + 18.0f, bodyY + 28.0f), ImVec2(rightX + 58.0f, bodyY + 30.0f), IM_COL32(57, 224, 222, 190), 1.0f);
+    drawList->AddText(ImVec2(rightX + 18.0f, bodyY + 9.0f), IM_COL32(132, 205, 211, 255), "STAGE SELECT");
+    drawList->AddText(ImVec2(rightX + rightWidth - 82.0f, bodyY + 11.0f), IM_COL32(116, 144, 163, 210), "UP / DOWN");
 
     const float rowHeight = std::min(68.0f, (bodyHeight - 56.0f) / 5.0f);
     const float wheelCenterY = bodyY + 48.0f + (bodyHeight - 48.0f) * 0.5f;
@@ -414,11 +486,11 @@ void renderStageSelectPanel(bool includePanel){
       bool selected = index == selectedLevel;
       int rowAlpha = (int)((selected ? 245 : hovered ? 220 : 190) * fade);
       int borderAlpha = selected ? 255 : (int)(130 * fade);
-      ImU32 rowColor = selected ? IM_COL32(12, 72, 105, rowAlpha) : hovered ? IM_COL32(30, 43, 61, rowAlpha) : IM_COL32(17, 25, 37, rowAlpha);
-      ImU32 borderColor = selected ? IM_COL32(54, 232, 255, borderAlpha) : IM_COL32(67, 87, 111, borderAlpha);
+      ImU32 rowColor = selected ? IM_COL32(12, 69, 76, rowAlpha) : hovered ? IM_COL32(25, 45, 55, rowAlpha) : IM_COL32(13, 23, 34, rowAlpha);
+      ImU32 borderColor = selected ? IM_COL32(68, 225, 213, borderAlpha) : IM_COL32(55, 81, 101, borderAlpha);
       drawList->AddRectFilled(rowMin, ImVec2(rowMin.x + rowSize.x, rowMin.y + rowSize.y), rowColor, 5.0f);
       if (selected){
-        drawList->AddRect(ImVec2(rowMin.x - 3.0f, rowMin.y - 3.0f), ImVec2(rowMin.x + rowSize.x + 3.0f, rowMin.y + rowSize.y + 3.0f), IM_COL32(255, 69, 202, 125), 7.0f, 0, 1.5f);
+        drawList->AddRect(ImVec2(rowMin.x - 2.0f, rowMin.y - 2.0f), ImVec2(rowMin.x + rowSize.x + 2.0f, rowMin.y + rowSize.y + 2.0f), IM_COL32(79, 231, 220, 95), 7.0f, 0, 1.5f);
       }
       drawList->AddRect(rowMin, ImVec2(rowMin.x + rowSize.x, rowMin.y + rowSize.y), borderColor, 5.0f, 0, selected ? 2.0f : 1.0f);
 
@@ -453,7 +525,7 @@ void renderStageSelectPanel(bool includePanel){
 
       float numberX = thumbnailMax.x + 9.0f;
       float textY = rowMin.y + (rowSize.y - ImGui::GetFontSize()) * 0.5f;
-      drawList->AddText(ImVec2(numberX, textY), IM_COL32(255, 95, 205, textAlpha), stageNumber.c_str());
+      drawList->AddText(ImVec2(numberX, textY), IM_COL32(91, 204, 207, textAlpha), stageNumber.c_str());
       float titleX = numberX + 30.0f;
       float titleMaxX = isLocked(index) ? rowMin.x + rowSize.x - 68.0f : rowMin.x + rowSize.x - 10.0f;
       if (titleMaxX > titleX){
@@ -487,6 +559,7 @@ void renderStageSelectPanel(bool includePanel){
     ImGui::SetCursorScreenPos(ImVec2(origin.x, origin.y + available.y));
     ImGui::Dummy(ImVec2(available.x, 1.0f));
 
+    drawListSplitter.Merge(drawList);
     if (includePanel){
         ImGui::End();
     }

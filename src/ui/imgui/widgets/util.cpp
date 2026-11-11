@@ -1124,6 +1124,9 @@ void renderLevelPanel(bool includePanel){
   {
 
     static int selectedLevel = -1;
+    static int backgroundTextureLevel = -2;
+    static std::string backgroundTexture;
+    static std::string secondaryBackgroundTexture;
     auto levels = getRawLevelData();
 
     std::string selectedLevelStr = "[no level]";
@@ -1146,6 +1149,13 @@ void renderLevelPanel(bool includePanel){
           }
           ImGui::EndCombo();
     }
+    if (backgroundTextureLevel != selectedLevel){
+      backgroundTexture = selectedLevel >= 0 ? levels.at(selectedLevel).backgroundTexture.value_or("") : "";
+      secondaryBackgroundTexture = selectedLevel >= 0 ? levels.at(selectedLevel).secondaryBackgroundTexture.value_or("") : "";
+      backgroundTextureLevel = selectedLevel;
+    }
+    ImGui::InputText("Background Texture", &backgroundTexture);
+    ImGui::InputText("Secondary Background Texture", &secondaryBackgroundTexture);
     if(ImGui::Button("Load Level")){
       goToLevel(selectedLevelStr, std::nullopt, true);
     }
@@ -1246,6 +1256,8 @@ void renderLevelPanel(bool includePanel){
        updateRawLevelData(selectedLevelStr, UpdateLevel {
          .skybox = selectedSkyboxStr,
          .description = description, 
+         .backgroundTexture = backgroundTexture,
+         .secondaryBackgroundTexture = secondaryBackgroundTexture,
          .ambient = ambient,
          .skyboxColor = skyboxCol,
          .weather = weather,

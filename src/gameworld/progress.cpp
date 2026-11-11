@@ -563,6 +563,8 @@ std::vector<RawLevelData> getRawLevelData(){
     glm::vec3 skyboxColor(1.f, 1.f, 1.f);
     std::string skybox("../gameresources/skybox/storm");
     std::string description("[no description]");
+    std::optional<std::string> backgroundTexture;
+    std::optional<std::string> secondaryBackgroundTexture;
     std::string mode("ball");
     std::optional<std::string> weather;
     glm::vec2 chromatic(0.f, 0.f);
@@ -589,6 +591,20 @@ std::vector<RawLevelData> getRawLevelData(){
       if (data.find("description") != data.end()){
         auto descriptionPtr = std::get_if<std::string>(&data.at("description"));
         description = *descriptionPtr;
+      }
+      if (data.find("backgroundtexture") != data.end()){
+        auto backgroundTexturePtr = std::get_if<std::string>(&data.at("backgroundtexture"));
+        modassert(backgroundTexturePtr != nullptr, "unexpected backgroundtexture value");
+        if (!backgroundTexturePtr->empty()){
+          backgroundTexture = *backgroundTexturePtr;
+        }
+      }
+      if (data.find("secondarybackgroundtexture") != data.end()){
+        auto secondaryBackgroundTexturePtr = std::get_if<std::string>(&data.at("secondarybackgroundtexture"));
+        modassert(secondaryBackgroundTexturePtr != nullptr, "unexpected secondarybackgroundtexture value");
+        if (!secondaryBackgroundTexturePtr->empty()){
+          secondaryBackgroundTexture = *secondaryBackgroundTexturePtr;
+        }
       }
       if (data.find("mode") != data.end()){
         auto modePtr = std::get_if<std::string>(&data.at("mode"));
@@ -619,6 +635,8 @@ std::vector<RawLevelData> getRawLevelData(){
       .additionalFilepath = additionalSceneFilepath,
       .description = description,
       .image = image,
+      .backgroundTexture = backgroundTexture,
+      .secondaryBackgroundTexture = secondaryBackgroundTexture,
       .shortcut = levelPathData.filename,
       .ambientLight = ambientLight,
       .skyboxColor = skyboxColor,
@@ -672,6 +690,12 @@ void updateRawLevelData(std::string levelName, UpdateLevel updateLevel){
 
     if (updateLevel.description.has_value()){
       data["description"] = updateLevel.description.value();
+    }
+    if (updateLevel.backgroundTexture.has_value()){
+      data["backgroundtexture"] = updateLevel.backgroundTexture.value();
+    }
+    if (updateLevel.secondaryBackgroundTexture.has_value()){
+      data["secondarybackgroundtexture"] = updateLevel.secondaryBackgroundTexture.value();
     }
     if (updateLevel.skybox.has_value()){
       data["skybox"] = updateLevel.skybox.value();

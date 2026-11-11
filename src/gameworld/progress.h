@@ -98,6 +98,8 @@ struct RawLevelData {
   std::optional<std::string> additionalFilepath;
   std::string description;
   std::string image;
+  std::optional<std::string> backgroundTexture;
+  std::optional<std::string> secondaryBackgroundTexture;
   std::string shortcut;
   glm::vec3 ambientLight;
   glm::vec3 skyboxColor;
@@ -119,6 +121,8 @@ std::optional<RawLevelData> levelByShortcutName(std::string shortcut);
 struct UpdateLevel {
   std::optional<std::string> skybox;
   std::optional<std::string> description;
+  std::optional<std::string> backgroundTexture;
+  std::optional<std::string> secondaryBackgroundTexture;
   std::optional<glm::vec3> ambient;
   std::optional<glm::vec3> skyboxColor;
   std::optional<std::string> weather;
