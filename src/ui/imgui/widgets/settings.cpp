@@ -380,27 +380,38 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
 
     auto textColor = getImGuiColor(getSymbol("ball-menu-title-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
     ImGui::PushStyleColor(ImGuiCol_Text, textColor);
-    ImGui::Text("The Pyramid");
+
+    auto isArcadeModeGame = getArgEnabled("ballarcade");
+    if (isArcadeModeGame){
+      ImGui::Text("Soul Delivery Arcade");
+    }else{
+      ImGui::Text("Soul Delivery");
+    }
     ImGui::PopStyleColor();
 
     ImGui::PopFont();
     ImGui::Dummy(ImVec2(0, 20));
 
     std::vector<MenuItem> menuItems{};
-    menuItems.push_back(
-      MenuItem { 
-      .text = "New Game",
-      .onClick = liveMenu.liveMenu -> options.onNewGame,
-      }
-    );
-    if (liveMenu.liveMenu -> options.canContinue){
+
+
+    if (!isArcadeModeGame){
       menuItems.push_back(
         MenuItem { 
-          .text = "Continue",
-          .onClick =  liveMenu.liveMenu -> options.onContinueGame,
+        .text = "New Game",
+        .onClick = liveMenu.liveMenu -> options.onNewGame,
         }
       );
+      if (liveMenu.liveMenu -> options.canContinue){
+        menuItems.push_back(
+          MenuItem { 
+            .text = "Continue",
+            .onClick =  liveMenu.liveMenu -> options.onContinueGame,
+          }
+        );
+      }      
     }
+
     menuItems.push_back(
       MenuItem { 
         .text = "Arcade Mode",

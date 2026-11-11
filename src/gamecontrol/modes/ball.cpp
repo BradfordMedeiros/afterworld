@@ -1334,6 +1334,11 @@ GameTypeInfo getBallMode(){
  				}	  		
 	  	}
 
+			getBallModeUI().value() -> ballMode.showRhythmUi = getBallModeOptions().canShowRhythmUi && !isPaused();
+			getBallModeUI().value() -> ballMode.showSoulCount = !getBallModeOptions().ballFallingTime.has_value();
+			getBallModeUI().value() -> ballMode.lostSouls = getPersistedSouls().lost;
+			getBallModeUI().value() -> ballMode.deliveredSouls = getPersistedSouls().delivered;
+
  			if (isPaused()){
  				return;
  			}
@@ -1566,12 +1571,6 @@ GameTypeInfo getBallMode(){
 
   		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
 
-			getBallModeUI().value() -> ballMode.showRhythmUi = getBallModeOptions().canShowRhythmUi && !isPaused();
-
-
-			getBallModeUI().value() -> ballMode.showSoulCount = !getBallModeOptions().ballFallingTime.has_value();
-			getBallModeUI().value() -> ballMode.lostSouls = getPersistedSouls().lost;
-			getBallModeUI().value() -> ballMode.deliveredSouls = getPersistedSouls().delivered;
 
 			if (isRhythmEnd()){
 				stopSoulRun();

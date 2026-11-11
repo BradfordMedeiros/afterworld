@@ -133,7 +133,11 @@ std::vector<GameOption> gameOptions {
     .description = "Show the Mode for ballmode",
     .option = BoolOption{},
   },
-
+  GameOption {
+    .arg = "ballarcade",
+    .description = "Arcade Mode for Ball Game",
+    .option = BoolOption{},
+  },
 
 };
 
