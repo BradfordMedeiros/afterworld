@@ -21,6 +21,7 @@ struct CompletionInfo {
 
 struct LevelLoadOptions {
 	bool skipMenu = false;
+	bool showArcadeMenuOnLoad = false;
 	std::optional<CompletionInfo> completion;
 	bool arcadeMode = false;
 };

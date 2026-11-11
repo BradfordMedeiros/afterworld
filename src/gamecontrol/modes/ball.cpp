@@ -311,17 +311,25 @@ void ballEndGameplay(EasyCutscene& cutscene){
 	  modassert(ballEndData, "ball end data does not have a value");
 
 	  auto loadLevelOptions = getLoadLevelOptions();
-	  if (loadLevelOptions.has_value() && loadLevelOptions.value().arcadeMode){
+	  modassert(loadLevelOptions.has_value(), "no load level options value");
+
+	  if (loadLevelOptions.value().arcadeMode){
+		  std::cout << "ball complete: arcade" << std::endl;
   		goToLevel("ballselect", LevelLoadOptions { 
   			.skipMenu = false,
+  			.showArcadeMenuOnLoad = true,
 	  		.completion = CompletionInfo { .firstTimeWin = ballEndData -> firstTimeWin, .levelName = getActiveLevel().value().name },
   		}, false);
+	  }else{
+		  std::cout << "ball complete: default" << std::endl;
+  		goToLevel("ballselect", LevelLoadOptions { 
+  			.skipMenu = true,
+  			.showArcadeMenuOnLoad = false,
+  			.completion = CompletionInfo { .firstTimeWin = ballEndData -> firstTimeWin, .levelName = getActiveLevel().value().name },
+  		}, false);	  	
 	  }
 
-  	goToLevel("ballselect", LevelLoadOptions { 
-  		.skipMenu = true,
-  		.completion = CompletionInfo { .firstTimeWin = ballEndData -> firstTimeWin, .levelName = getActiveLevel().value().name },
-  	}, false);
+
   });
 }
 
@@ -541,12 +549,20 @@ void startBallIntroMode(objid sceneId, bool inHub){
 	  setTempCamera(cameraId.value(), 0);  	
   }
 
-
   inputOverride(false, true, false);
+
+  auto showArcadeMenu = false;
+  if (getLoadLevelOptions().has_value()){
+  	showArcadeMenu = getLoadLevelOptions().value().showArcadeMenuOnLoad;
+  	std::cout << "load level options: true, show arcade: " <<  showArcadeMenu  << std::endl;
+  }else{
+  	std::cout << "load level options: false" << std::endl;
+  }
   changeUiMode(LiveMenu {
    	.options = MainMenu2Options {
    		.backgroundColor = glm::vec4(1.f, 1.f, 1.f, 0.4f),
    		.offsetY = 0.f,
+   		.showStageSelect = showArcadeMenu,
 			.onNewGame = [sceneId, inHub]() -> void {
 				hideLetterBox();
 				ballModeNewGame2(sceneId, inHub);
@@ -1205,15 +1221,11 @@ GameTypeInfo getBallMode(){
  		  	return;
  		  }
  		  
+
 	  	BallModeOptions* ballModePtr = std::any_cast<BallModeOptions>(&gametype);
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
  		  auto cameraId = ensureTempCamera(ballMode.sceneId);
-
- 		  if (key == 'K' && action == 1){
- 		  	applyUiScreenshakeByPlayerIndex(getDefaultPlayerIndex(), glm::vec2(0.f, 50.f));
-
- 		  }
 
 	  	if (ballMode.worldView.has_value() && ballMode.worldView.value().onMultiview){
 	  		if (key == 32){
@@ -1301,18 +1313,21 @@ GameTypeInfo getBallMode(){
 	  	modassert(ballModePtr, "ballMode options");
 	  	BallModeOptions& ballMode = *ballModePtr;
 
- 			if (ballMode.loadOptions.has_value()){
- 				if (ballMode.loadOptions.value().arcadeMode){
-						drawImGuiText("Arcade Mode", glm::vec2(0.5f, 0.5f));
-						std::cout << "ball mode style: arcade" << std::endl;
+	  	static bool showMode = getArgEnabled("showmode");
+	  	if (showMode){
+ 				if (ballMode.loadOptions.has_value()){
+ 					if (ballMode.loadOptions.value().arcadeMode){
+							drawImGuiText("Arcade Mode", glm::vec2(0.5f, 0.5f));
+							std::cout << "ball mode style: arcade" << std::endl;
+ 					}else{
+							drawImGuiText("Story Mode", glm::vec2(0.5f, 0.5f));
+							std::cout << "ball mode style: story - mode" << std::endl;
+ 					}
  				}else{
-						drawImGuiText("Story Mode", glm::vec2(0.5f, 0.5f));
-						std::cout << "ball mode style: story - mode" << std::endl;
- 				}
- 			}else{
-						drawImGuiText("Default Mode", glm::vec2(0.5f, 0.5f));
-						std::cout << "ball mode style: story - default" << std::endl;
- 			}
+							drawImGuiText("Default Mode", glm::vec2(0.5f, 0.5f));
+							std::cout << "ball mode style: story - default" << std::endl;
+ 				}	  		
+	  	}
 
  			if (isPaused()){
  				return;

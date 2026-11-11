@@ -123,12 +123,17 @@ std::vector<GameOption> gameOptions {
     .description = "path of a remote mod package to install. This gets appended to the server url",
     .option = StrOption{},
   },
-
   GameOption {
     .arg = "unlock",
     .description = "unlock all levels",
     .option = BoolOption{},
   },
+  GameOption {
+    .arg = "showmode",
+    .description = "Show the Mode for ballmode",
+    .option = BoolOption{},
+  },
+
 
 };
 
