@@ -11,6 +11,7 @@
 #include "./interaction/in-game-ui.h"
 #include "./interaction/gizmo.h"
 #include "./interaction/orbs.h"
+#include "./interaction/pickups.h"
 #include "./core/health.h"
 #include "./core/vehicles/vehicles.h"
 #include "./debug.h"
@@ -54,15 +55,6 @@ void setMenuBackground(std::string background);
 void handleOrbControls(int key, int action);
 
 
-
-struct Breakable {
-	bool isBroken = false;
-};
-struct Gem {
-	std::string name;
-	bool alreadyPickedUp = false;
-	bool canPickup = false;
-};
 
 
 #endif 

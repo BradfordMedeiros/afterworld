@@ -43,6 +43,7 @@ std::unordered_map<objid, Breakable> breakables;
 RouterHistory mainRouterHistory = createHistory();
 UiMode uiMode = UiModeNone{};
 extern bool showNavbar;
+std::unordered_map<objid, Gem> gems;
 
 std::optional<std::string> levelShortcutToLoad;
 bool godMode = false;
@@ -106,7 +107,6 @@ GlobalState global {
   .userRequestedPause = false,
 };
 
-void handleGemCollision(int32_t obj1, int32_t obj2);
 void handleBreakableCollision(objid obj1, objid obj2);
 
 
