@@ -258,7 +258,7 @@ void renderMoreUi(){
         renderSplitLayout(*view.value(), glm::vec2(0.f, 100.f));     
         showNavigation = true;     
       }else if (uiSettings.liveMenu.value().liveMenu -> options.showStageSelect){
-        renderBackground("stage-select-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
+        //renderBackground("stage-select-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
 
         ImVec2 screen = ImGui::GetIO().DisplaySize;
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -271,7 +271,7 @@ void renderMoreUi(){
         auto& widget = *widgetByNameSymbol(getSymbol("stage-select")).value();
         renderLayoutAlignUpCenterHorz("stage-select-layout", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), size);
 
-        windowOrdering.push_back("stage-select-layout");
+        //windowOrdering.push_back("stage-select-layout");
 
         ImGui::PopStyleVar(2);
 

@@ -970,7 +970,7 @@ void showLetterBox(std::string title, float duration){
   showLetterBoxDetail(title, duration * 0.25f, glm::vec4(0.f, 0.f, 0.f, 0.2f), glm::vec4(0.f, 0.f, 0.f, 0.8f), duration * 0.5f, duration * 0.25f);
 }
 void showLetterBoxHold(std::string title, float fadeInTime){
-  showLetterBoxDetail(title, 0.f, std::nullopt, glm::vec4(1.f, 1.f, 1.f, 0.8f), 10000000.f, fadeInTime);
+  showLetterBoxDetail(title, 0.f, std::nullopt, glm::vec4(0.26f, 0.62f, 0.7f, 0.82f), 10000000.f, fadeInTime);
 }
 void hideLetterBox(){
   letterBoxStartTime = std::nullopt;
@@ -994,21 +994,28 @@ void drawFade(){
 
     // Borders
     { 
-      float barHeight = viewport -> Size.y * 0.1f * percentage;
+      float barHeight = viewport -> Size.y * 0.075f * percentage;
       glm::vec4 color = letterbox.boxColor;
-      ImU32 boxColor = IM_COL32((int)(color.r * 255.f), (int)(color.g * 255.f), (int)(color.b * 255.f), (int)(color.a * 255.f));
+      glm::vec4 barTint(color.r, color.g, color.b, color.a * percentage);
 
       static std::string texture = "../gameresources/textures/backgrounds/test3.png";
       auto textureId = gameapi -> getTextureSamplerId(texture);
 
-      ImVec2 uvStart(0.f, 0.f);
-      ImVec2 uvEnd(0.2f, 1.f);
-
       if (textureId.has_value()){
-        ImTextureID texture = (ImTextureID)(intptr_t)textureId.value();
-        drawList -> AddImage(texture, ImVec2(screenMin.x, screenMin.y), ImVec2(screenMax.x, screenMin.y + barHeight), uvStart, uvEnd, boxColor);
-        drawList -> AddImage(texture, ImVec2(screenMin.x, screenMax.y - barHeight), ImVec2(screenMax.x, screenMax.y), uvStart, uvEnd, boxColor);
+        static unsigned int* letterboxShader = nullptr;
+        if (letterboxShader == nullptr){
+          letterboxShader = gameapi -> loadShader("storyboard-letterbox", "../afterworld/shaders/letterbox");
+        }
+
+        float barHeightNdi = barHeight * 2.f / viewport -> Size.y;
+        ShapeOptions shaderOptions {
+          .shaderId = *letterboxShader,
+          .zIndex = 100,
+        };
+        gameapi -> drawRect(0.f, 1.f - barHeightNdi * 0.5f, 2.f, barHeightNdi, false, barTint, std::nullopt, true, std::nullopt, texture, shaderOptions);
+        gameapi -> drawRect(0.f, -1.f + barHeightNdi * 0.5f, 2.f, barHeightNdi, false, barTint, std::nullopt, true, std::nullopt, texture, shaderOptions);
       }else{
+        ImU32 boxColor = IM_COL32((int)(color.r * 255.f), (int)(color.g * 255.f), (int)(color.b * 255.f), (int)(color.a * percentage * 255.f));
         drawList -> AddRectFilled(ImVec2(screenMin.x, screenMin.y), ImVec2(screenMax.x, screenMin.y + barHeight), boxColor);
         drawList -> AddRectFilled(ImVec2(screenMin.x, screenMax.y - barHeight), ImVec2(screenMax.x, screenMax.y), boxColor);
       }
