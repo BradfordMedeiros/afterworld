@@ -84,7 +84,7 @@ int numBroken(){
 void maybeBreakObject(objid id){
 	if (breakables.find(id) != breakables.end()){
 		auto& breakable = breakables.at(id);
-		if (breakable.isBroken){
+		if (breakable.isBroken || !breakable.isEnabled){
 			return;
 		}
 
@@ -102,4 +102,21 @@ void handleBreakableCollision(objid obj1, objid obj2){
   }else if (isControlledPlayer(obj1) || isControlledVehicle(obj1)){
    	maybeBreakObject(obj2);
   }
+}
+
+void disableAllBreakables(){
+	for (auto& [id, breakable] : breakables){
+		breakable.isEnabled = false;
+		breakable.isBroken = false;
+		setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 0.2f));
+		setGameObjectMeshEnabled(id, true);
+	}
+	updateGemCanPickup(numBroken());
+}
+void enableAllBreakables(){
+	for (auto& [id, breakable] : breakables){
+		breakable.isEnabled = true;
+		setGameObjectTint(id, glm::vec4(1.f, 1.f, 1.f, 1.f));
+	}
+	updateGemCanPickup(numBroken());
 }

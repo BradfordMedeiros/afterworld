@@ -630,12 +630,16 @@ void startBallMode(objid sceneId){
 
 	auto options = getLoadLevelOptions();
 
+ 	disableAllBreakables();
+
   if (inHub && !skipMenu){
   	setCanTogglePause(false);
   	startBallIntroMode(sceneId, inHub);
   }else{
   	ballModeSetPlayMode(sceneId, inHub, options);
   }
+
+
 }
 
 void endBallMode(){
@@ -879,6 +883,7 @@ void startSoulRun(std::string song){
 
 	ballModeOptions.inSoulMode = true;
 
+	enableAllBreakables();
 	playCutscene(startSoulModeCutscene(song), std::nullopt, true);
 
 }
@@ -892,6 +897,7 @@ void stopSoulRun(){
 		return;
 	}
 
+	disableAllBreakables();
 	loseSoul();
 
 	ballModeOptions.inSoulMode = false;

@@ -231,7 +231,6 @@ std::vector<TagUpdater> tagupdates = {
   	    },
   	    .onMessage = std::nullopt,
 	},
-
 	TagUpdater {
 		.attribute = "flipbook",
 		.onAdd = [](int32_t id, AttributeValue attrValue) -> void {
@@ -262,35 +261,31 @@ std::vector<TagUpdater> tagupdates = {
   	    },
   	    .onMessage = std::nullopt,
 	},
-
-	
-
-
 	TagUpdater {
 		.attribute = "health",
 		.onAdd = [](int32_t id, AttributeValue) -> void {
  			modlog("health", "entity added: " + std::to_string(id));
  			addEntityIdHitpoints(id);
-  	     },
-  	     .onRemove = [](int32_t id) -> void {
-	        modlog("health", "entity removed: " + std::to_string(id));
-	        removeEntityIdHitpoints(id);
-  	     },
-  	     .onFrame = std::nullopt,
-  	     .onMessage = std::nullopt,
+  	},
+  	.onRemove = [](int32_t id) -> void {
+	   modlog("health", "entity removed: " + std::to_string(id));
+	   removeEntityIdHitpoints(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "ambient",
 		.onAdd = [](int32_t id, AttributeValue) -> void {
             addAudioZone(id);
-  	    },
-  	    .onRemove = [](int32_t id) -> void {
-            removeAudioZone(id);
-  	    },
-  	    .onFrame = []() -> void {
-            onAudioZoneFrame();
-  	    },
-  	    .onMessage = std::nullopt,
+  	},
+  	.onRemove = [](int32_t id) -> void {
+        removeAudioZone(id);
+  	},
+  	.onFrame = []() -> void {
+        onAudioZoneFrame();
+  	},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "spawn",
@@ -313,11 +308,11 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](int32_t id, AttributeValue) -> void {
 			modlog("spawn-manage added: ", gameapi -> getGameObjNameForId(id).value());
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    	spawnRemoveId(director.managedSpawnpoints, id);
-  	    },
-  	    .onFrame = []() -> void {},
-  	    .onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+  		spawnRemoveId(director.managedSpawnpoints, id);
+  	},
+  	.onFrame = []() -> void {},
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "destroy",
@@ -565,11 +560,11 @@ std::vector<TagUpdater> tagupdates = {
 			auto cutscene = getSingleAttr(id, "cutscene");
 			playCutsceneScript(id, cutscene.value());
 		},
-  	    .onRemove = [](int32_t id) -> void {
-	        removeCutscene(id);
-  	    },
-  	    .onFrame = std::nullopt,
-  	    .onMessage = std::nullopt,
+  	.onRemove = [](int32_t id) -> void {
+	    removeCutscene(id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = std::nullopt,
 	},
 	TagUpdater {
 		.attribute = "arcade",
@@ -588,11 +583,9 @@ std::vector<TagUpdater> tagupdates = {
 			gameapi -> setGlobalLight(id);
 			gameapi -> applyVertexLighting();
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    },
-  	    .onFrame = std::nullopt,
-  	    .onMessage = [](std::string& key, std::any& value) -> void {
-  	    },
+  	.onRemove = [](int32_t id) -> void {},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "orbui",
@@ -675,11 +668,11 @@ std::vector<TagUpdater> tagupdates = {
 				modassert(false, std::string("vehicle type not supported: ") + *vehicleType);
 			}
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    	removeVehicle(vehicles, id);
-  	    },
-  	    .onFrame = std::nullopt,
-  	    .onMessage = [](std::string& key, std::any& value) -> void {},
+  	.onRemove = [](int32_t id) -> void {
+  		removeVehicle(vehicles, id);
+  	},
+  	.onFrame = std::nullopt,
+  	.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 	TagUpdater {
 		.attribute = "powerup",
@@ -982,12 +975,11 @@ std::vector<TagUpdater> tagupdates = {
 		.onAdd = [](int32_t id, AttributeValue value) -> void {
 			breakables[id] = Breakable{};
 		},
-  	    .onRemove = [](int32_t id) -> void {
-  	    	breakables.erase(id);
-  	    },
-  	    .onFrame = []() -> void {
-  	    },
-  	    .onMessage = [](std::string& key, std::any& value) -> void {},
+  	.onRemove = [](int32_t id) -> void {
+  	 	breakables.erase(id);
+  	},
+  	.onFrame = []() -> void {},
+  	.onMessage = [](std::string& key, std::any& value) -> void {},
 	},
 
 

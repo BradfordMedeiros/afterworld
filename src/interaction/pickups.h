@@ -12,6 +12,7 @@ struct Gem {
 };
 struct Breakable {
 	bool isBroken = false;
+	bool isEnabled = false;
 };
 
 void updateGemStyle(objid id);
@@ -20,3 +21,6 @@ void doPickupGem(objid id);
 bool isGem(objid id);
 void handleGemCollision(int32_t obj1, int32_t obj2);
 void updateGemCanPickup(int numBroken);
+
+void disableAllBreakables();
+void enableAllBreakables();
