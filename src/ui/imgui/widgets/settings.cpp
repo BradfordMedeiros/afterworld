@@ -371,22 +371,19 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
 
     ImGuiIO& io = ImGui::GetIO();
     ImFont* bigFont = getFontByBinding(getSymbol("main-menu2-title"));
+    auto isArcadeModeGame = getArgEnabled("ballarcade");
+    const char* title = isArcadeModeGame ? "Soul Delivery Arcade" : "Soul Delivery";
 
     ImGui::PushFont(bigFont);
 
-    ImVec2 textSize = ImGui::CalcTextSize("The Pyramid");
+    ImVec2 textSize = ImGui::CalcTextSize(title);
     float width = ImGui::GetContentRegionAvail().x;
     ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + (width - textSize.x) * 0.5f);
 
     auto textColor = getImGuiColor(getSymbol("ball-menu-title-color"), glm::vec4(0.5f, 0.5f, 0.5f, 0.9f));
     ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 
-    auto isArcadeModeGame = getArgEnabled("ballarcade");
-    if (isArcadeModeGame){
-      ImGui::Text("Soul Delivery Arcade");
-    }else{
-      ImGui::Text("Soul Delivery");
-    }
+    ImGui::Text("%s", title);
     ImGui::PopStyleColor();
 
     ImGui::PopFont();

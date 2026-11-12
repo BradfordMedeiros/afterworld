@@ -253,25 +253,39 @@ void renderStageSelectPanel(bool includePanel){
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.08f, 0.24f, 0.31f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.34f, 0.4f, 1.0f));
     ImGui::SetCursorScreenPos(ImVec2(leftX, origin.y));
-    if (ImGui::Button("<", ImVec2(42.0f, 42.0f))){
+    if (ImGui::Button("<", ImVec2(42.0f, 42.0f)) || ImGui::IsKeyPressed(ImGuiKey_LeftArrow)){
       selectedWorld = std::max(0, selectedWorld - 1);
     }
-    ImGui::SetCursorScreenPos(ImVec2(leftX + 54.0f, origin.y));
-    ImGui::Button(worlds.at(selectedWorld).c_str(), ImVec2(leftWidth - 108.0f, 42.0f));
     ImGui::SetCursorScreenPos(ImVec2(leftX + leftWidth - 42.0f, origin.y));
-    if (ImGui::Button(">", ImVec2(42.0f, 42.0f))){
+    if (ImGui::Button(">", ImVec2(42.0f, 42.0f)) || ImGui::IsKeyPressed(ImGuiKey_RightArrow)){
       selectedWorld = std::min((int)worlds.size() - 1, selectedWorld + 1);
     }
     ImGui::PopStyleColor(3);
     ImGui::PopStyleVar(2);
-    if (selectedWorld != oldWorld){
+    bool worldChanged = selectedWorld != oldWorld;
+    if (worldChanged){
       selectedLevel = 0;
       wheelPosition = 0.0f;
     }
 
+    const std::string& worldName = worlds.at(selectedWorld);
+    ImVec2 worldLabelMin(leftX + 54.0f, origin.y);
+    ImVec2 worldLabelMax(leftX + leftWidth - 54.0f, origin.y + 42.0f);
+    drawList->AddRectFilled(worldLabelMin, worldLabelMax, IM_COL32(14, 24, 38, 245), 6.0f);
+    ImVec2 worldLabelSize = ImGui::CalcTextSize(worldName.c_str());
+    drawList->AddText(
+      ImVec2(worldLabelMin.x + (worldLabelMax.x - worldLabelMin.x - worldLabelSize.x) * 0.5f,
+             worldLabelMin.y + (worldLabelMax.y - worldLabelMin.y - worldLabelSize.y) * 0.5f),
+      IM_COL32(255, 255, 255, 255),
+      worldName.c_str()
+    );
+
     auto& playlist = *playlistOpt.value();
     auto worldLevels = levelsForWorld(playlist, worlds.at(selectedWorld));
     if (worldLevels.empty()){
+      if (worldChanged){
+        playMixedSound(getSymbol("ball/screens/worldpress"), std::nullopt);
+      }
       ImGui::SetCursorScreenPos(ImVec2(leftX, bodyY));
       ImGui::TextUnformatted("No stages in this world");
       drawListSplitter.Merge(drawList);
@@ -283,10 +297,13 @@ void renderStageSelectPanel(bool includePanel){
 
     const int levelCount = (int)worldLevels.size();
     selectedLevel = std::clamp(selectedLevel, 0, levelCount - 1);
+    int previousSelectedLevel = selectedLevel;
+    bool levelSelectionInput = false;
 
     if (ImGui::IsMouseHoveringRect(ImVec2(rightX, bodyY), ImVec2(rightX + rightWidth, bodyY + bodyHeight))){
       float wheel = ImGui::GetIO().MouseWheel;
       if (wheel != 0.0f){
+        levelSelectionInput = true;
         selectedLevel = std::clamp(selectedLevel - (int)wheel, 0, levelCount - 1);
       }
     }
@@ -480,6 +497,7 @@ void renderStageSelectPanel(bool includePanel){
       bool clicked = ImGui::InvisibleButton("stage-wheel-row", rowSize);
       bool hovered = ImGui::IsItemHovered();
       if (clicked){
+        levelSelectionInput = true;
         selectedLevel = index;
       }
 
@@ -537,6 +555,11 @@ void renderStageSelectPanel(bool includePanel){
         drawList->AddText(ImVec2(rowMin.x + rowSize.x - 60.0f, rowMin.y + (rowSize.y - ImGui::GetFontSize()) * 0.5f), IM_COL32(230, 184, 96, (int)(220 * fade)), "LOCKED");
       }
       ImGui::PopID();
+    }
+    if (worldChanged){
+      playMixedSound(getSymbol("ball/screens/worldpress"), std::nullopt);
+    }else if (levelSelectionInput || selectedLevel != previousSelectedLevel){
+      playMixedSound(getSymbol("ball/screens/levelselect"), std::nullopt);
     }
     drawList->AddRectFilledMultiColor(
       ImVec2(rightX + 2.0f, bodyY + 42.0f),
