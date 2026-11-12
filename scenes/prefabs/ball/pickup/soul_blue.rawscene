@@ -1,6 +1,7 @@
 +soul:scale:0.5 0.5 0.5
 +soul:state:enabled
 +soul:effekseer:./res/particles/spirit-white.efkefc
++soul:layer:fx
 +soul:physics_shape:shape_sphere
 +soul:physics:enabled
 +soul:physics_collision:nocollide

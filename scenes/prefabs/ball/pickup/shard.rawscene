@@ -7,3 +7,4 @@ shard:breakable:true
 shard:physics_collision:nocollide
 shard:tint:0 0 1 0.8
 shard:layer:nolighting
+shard:material:pickup

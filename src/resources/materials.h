@@ -24,10 +24,13 @@ struct MaterialToParticle {
   std::optional<std::string> hitParticleClip;
   std::optional<std::string> splashParticle;
   std::optional<HitDecal> hitDecal;
+  bool affectsCamera = true;
 };
 
 std::optional<std::string> materialTypeForObj(objid id);
 std::optional<MaterialToParticle*> getHitMaterial(std::vector<MaterialToParticle>& materials, std::string& materialName);
+std::optional<MaterialToParticle*> getHitMaterial(objid id);
+
 std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleStr, std::string emitterName);
 
 void loadAllMaterials(objid rootSceneId);

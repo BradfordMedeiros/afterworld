@@ -61,12 +61,12 @@
             "size": 32.0
         },
         "default-header": {
-            "file": "./res/fonts/vcr.ttf",
+            "file": "./res/fonts/cliche21.ttf",
             "size": 33.0
         },
         "default-title": {
-            "file": "./res/fonts/Chronic-Normal.otf",
-            "size": 54.0
+            "file": "./res/fonts/vcr.ttf",
+            "size": 52.0
         },
         "default-font": {
             "file": "./res/fonts/vcr.ttf",
@@ -91,6 +91,9 @@
         },
         "ball-level-complete": {
             "font": "default-title"
+        },
+        "ball-level-info": {
+            "font": "default-font"
         }
     }
 }

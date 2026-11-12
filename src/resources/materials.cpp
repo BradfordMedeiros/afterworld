@@ -5,6 +5,8 @@ extern CustomApiBindings* gameapi;
 std::optional<glm::vec2> parseVec2(rapidjson::Value& object, const char* field);
 std::optional<glm::vec4> parseVec4(rapidjson::Value& object, const char* field);
 
+std::vector<MaterialToParticle> materials;
+
 std::optional<std::string> materialTypeForObj(objid id){
   auto attr = getAttrHandle(id);
   return getStrAttr(attr, "material");
@@ -17,6 +19,14 @@ std::optional<MaterialToParticle*> getHitMaterial(std::vector<MaterialToParticle
     }
   }
   return std::nullopt;
+}
+
+std::optional<MaterialToParticle*> getHitMaterial(objid id){
+  auto materialStr = materialTypeForObj(id);
+  if (!materialStr.has_value()){
+    return std::nullopt;
+  }
+  return getHitMaterial(materials, materialStr.value());
 }
 
 GameobjAttributes particleAttributes(std::string& particle){
@@ -63,6 +73,13 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
   if (doc.HasParseError()){
     std::cout << "error parsing game file: " << filepath << "  (" << fileContent << ")" << std::endl;
     modassert(false, "parseMaterial failed");
+  }
+
+  {
+    auto affectsCamera = doc.FindMember("affectsCamera");
+    if (affectsCamera != doc.MemberEnd() && affectsCamera->value.IsBool()) {
+      materialToParticle.affectsCamera = affectsCamera->value.GetBool();
+    }
   }
 
   {
@@ -131,7 +148,6 @@ std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleS
   return particleId;
 }
 
-std::vector<MaterialToParticle> materials;
 void loadAllMaterials(objid rootSceneId){
   materials = loadMaterials(rootSceneId);
 }
