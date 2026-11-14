@@ -15,6 +15,7 @@
 #include "./gameworld/weather.h"
 #include "./ai/scene_ai.h"
 #include "./resources/sound.h"
+#include "../../ModEngine/src/scene/objtypes/sound/midi.h"
 
 void debugOnFrame();
 void debugOnKey(int key, int scancode, int action, int mods);

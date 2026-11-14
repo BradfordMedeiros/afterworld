@@ -384,6 +384,10 @@ void setupViewports(){
 
 void activateAllItems();
 
+void noteOn(uint8_t note, uint8_t velocity);
+void noteOff(uint8_t note);
+
+
 void debugOnKey(int key, int scancode, int action, int mods){
   if (key == 96 /* ~ */  && action == 1){
   	setShowConsole(!showConsole());
@@ -391,6 +395,8 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'K' && action == 1){
+  	loadMidi("../gameresources/sound/midi/nevergiveyouup.mid");
+
   	std::cout << "send notify message" << std::endl;
   	gameapi -> sendNotifyMessage("ball-game", std::string("complete"));
   	if (getEntityForPlayerIndex(getDefaultPlayerIndex()).has_value()){
