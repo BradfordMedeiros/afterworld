@@ -1,26 +1,58 @@
 # Generated scene 
-orbs-point-editor-generated:data-level:w11,w12,w13
-orbs-point-editor-generated:data-orbui:w1,w1,w1
-orbs-point-editor-generated:data-conn:1,2,
-orbs-point-editor-generated:data-rot:0 0 -1 -0,0 0 -1 -0,1 0 0 -0
-orbs-point-editor-generated:data-pos:16.5126 -7.2979 60.2463,8.7305 -6.1026 -1.3451,7.0303 28.6865 -40.7679
-orbs-point-editor-generated:data-name:point-orb-0,point-orb-1,point-orb-2
-orbs-point-editor-generated:orbui:true
-texture0:texture:../gameresources/build/textures/ballgame/jump.png
-texture1:texture:../gameresources/build/textures/ballgame/dash.png
-texture5:texture:../gameresources/build/textures/ballgame/none.png
+[shard_1-copy-127334522-copy-546253297-copy-1201703190:scene:../afterworld/scenes/prefabs/ball/pickup/shard.rawscene
+[shard_1-copy-127334522-copy-546253297-copy-1201703190:position:15.4975 -20.2865 -46.7849
+[shard_1-copy-127334522:scene:../afterworld/scenes/prefabs/ball/pickup/shard.rawscene
+[shard_1-copy-127334522:position:13.7975 -20.2865 -34.0849
+
+[prefab-instance-1903360788:scene:../afterworld/scenes/prefabs/enemy/player-cheap.rawscene
+[prefab-instance-1903360788:position:24.3718 -10.6012 12.956
+[shard_1-copy-102540618:scene:../afterworld/scenes/prefabs/ball/pickup/shard.rawscene
+[shard_1-copy-102540618:position:13.7975 -20.2865 -30.0849
+[shard_1:scene:../afterworld/scenes/prefabs/ball/pickup/shard.rawscene
+[shard_1:position:13.7975 -20.2865 -24.6849
+[shard_0:scene:../afterworld/scenes/prefabs/ball/pickup/shard.rawscene
+[shard_0:position:13.5707 -20.1973 -13.7755
 texture2:texture:../gameresources/build/textures/ballgame/teleport.png
-texture3:texture:../gameresources/build/textures/ballgame/bounce.png
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-2/map.map
-entity_worldspawn_0:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
-entity_worldspawn_0:physics_shape:shape_exact
-entity_worldspawn_0:physics:enabled
-entity_worldspawn_0:position:156 -40.8 -162.4
+[soul_run_1:scene:../afterworld/scenes/prefabs/ball/pickup/soul_run.rawscene
+[soul_run_1:position:3.06208 -19.6464 -18.5014
+texture0:texture:../gameresources/build/textures/ballgame/jump.png
+[pyramid_0:scene:../afterworld/scenes/prefabs/gameplay/pyramid.rawscene
+[pyramid_0:position:-0.8206 5.6081 8.839
+[shard_1-copy-127334522-copy-546253297:scene:../afterworld/scenes/prefabs/ball/pickup/shard.rawscene
+[shard_1-copy-127334522-copy-546253297:position:13.7975 -20.2865 -38.0849
+[warp_end_0:scene:../afterworld/scenes/prefabs/ball/warp_end.rawscene
+[warp_end_0:position:15.3319 -20.7378 -0.5038
+
+entity_vertical_bound_point_20:ballplane:true
+entity_vertical_bound_point_20:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
+entity_vertical_bound_point_20:position:-0.8 -185 0.8
+
+[playerspawn_0:scene:../afterworld/scenes/prefabs/ball/playerspawn.rawscene
+[playerspawn_0:position:24.3718 -10.6012 12.956
 !light:globallight:true
 !light:spin:0.02
 !light:angle:-10
-!light:rotation:-0.97881 0.00607358 -0.204679 0.311533
+!light:rotation:0.992574 -0.00671588 -0.121455 0.426828
 !light:position:0 50 0
-[playerspawn_0:scene:../afterworld/scenes/prefabs/ball/playerspawn.rawscene
-[playerspawn_0:position:24.3718 -10.6012 12.956
+texture1:texture:../gameresources/build/textures/ballgame/dash.png
+[prefab-instance-1676405286:scene:../afterworld/scenes/prefabs/enemy/player-cheap.rawscene
+[prefab-instance-1676405286:position:24.3718 -10.6012 12.956
+
+[orb_0:scene:../afterworld/scenes/prefabs/gameplay/orb.rawscene
+[orb_0:position:6.1686 -12.881 -15.7564
+texture3:texture:../gameresources/build/textures/ballgame/bounce.png
+[soul_run_0:scene:../afterworld/scenes/prefabs/ball/pickup/soul_run.rawscene
+[soul_run_0:position:-1.06208 -19.6464 -18.5014
+texture5:texture:../gameresources/build/textures/ballgame/none.png
 texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
+entity_worldspawn_0:texture:../gameresources/build/misc/vehl1tanktop1.jpg
+entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-2/map.map
+entity_worldspawn_0:cubemap:./res/textures/skyboxs/desert
+entity_worldspawn_0:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
+entity_worldspawn_0:cubemap-reflection:0.306 10 0.171
+entity_worldspawn_0:physics_shape:shape_exact
+entity_worldspawn_0:physics:enabled
+entity_worldspawn_0:position:156 -40.8 -162.4
+
+>tempcamera-ball:rotation:0.215838 0.0570101 -0.974764 -0.3576
+>tempcamera-ball:position:15.8862 -52.9559 97.7185

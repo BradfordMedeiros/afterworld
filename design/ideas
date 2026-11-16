@@ -1,3 +1,7 @@
+https://osci-render.com/
+
+
+
 - health uses the time system thing, that drains, enemies give back
 - recurring level that forces you to replay, change permutations when going back 
 - stack based level design (go into another level from one, do stuff, pop back out)
@@ -11,3 +15,41 @@
 
 
 - overhead cloud castle worlds that you have a window of opportunity to go to-+
+
+
+
+std::unordered_map<std::string, CutsceneOption> cutsceneDatas {
+	{ "testorb", CutsceneOption {
+			.text = { "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else." },
+			.rail = "cutscene1-rail",
+			.letterbox = "Nothing to Be Afraid Of",
+	}},
+	{ "testorb2", CutsceneOption {
+			.text = { "I remember a nightmare I had as a child.\n\n"
+"A large pyramid\n"
+"moving slowly\n"
+"on a tilted plane.\n\n"
+"There was nothing.\n"
+"And yet,\n"
+"it terrified me more than anything else.", "More Text", "This is Even More Text So\nHello0", "Wow", "Go", "cool" },
+			.rail = "cutscene1-rail",
+			.letterbox = "Nothing to Be Afraid Of",
+	}},
+
+	{ "testorb3", CutsceneOption {
+			.text = { "This is the first page of text", "This is second page of text", "This is third page of text" },
+			.rail = "cutscene1-rail",
+			.letterbox = "Abstract Geometry",
+	}},
+};
+
+
+
+tv can pick up and deliver shit 
+improve physics based item pickup behavior – interpolate, set physics on pickup, apply momentum when release

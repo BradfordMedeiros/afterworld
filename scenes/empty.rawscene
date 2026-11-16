@@ -3,3 +3,11 @@
 playerspawn:playerspawn:true
 playerspawn:position:-20 0 0
 playerspawn:teleport:true
+
+platform:position:0.000000 -5.000000 0.000000
+platform:scale:100.000000 1.000000 100.000000
+platform:rotation:0 0 1 0
+platform/Cube:physics_shape:shape_box
+platform/Cube:physics:enabled
+platform:mesh:./res/models/box/box.obj
+platform/Cube:texture:./res/textures/wood.jpg

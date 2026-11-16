@@ -1,0 +1,13 @@
+{
+	"position" : [
+		[0, 0, 0],
+		[0, 10, 0]
+	],
+	"rotations" : [
+		[0, 0, -1, 0],
+		[0, 1, 0, 0]	
+	],
+	"connections" : [-1, -1],
+	"names" : [null, "this is the name"],
+	"orbui" : [null, "this is an orbui"]
+}

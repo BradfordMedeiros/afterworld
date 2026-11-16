@@ -24,6 +24,7 @@ entity_simple_activate_36:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
 entity_simple_activate_36:position:-28 -18.4 114.4
 +entity_soul_2:soul:yellow
 +entity_soul_2:effekseer:./res/particles/spirit-white.efkefc
++entity_soul_2:layer:fx
 +entity_soul_2:effect-tint:1 1 0 1
 +entity_soul_2:physics_shape:shape_sphere
 +entity_soul_2:physics_collision:nocollide
@@ -105,6 +106,7 @@ entity_gem_33:layer:nolighting
 entity_gem_33:position:-20 -18.4 93.6
 +entity_soul_1:soul:blue
 +entity_soul_1:effekseer:./res/particles/spirit-white.efkefc
++entity_soul_1:layer:fx
 +entity_soul_1:effect-tint:0 0 1 1
 +entity_soul_1:physics_shape:shape_sphere
 +entity_soul_1:physics_collision:nocollide
@@ -213,7 +215,6 @@ entity_moonend_31:texture:./res/textures/cyberguy2.png
 entity_moonend_31:tint:1 1 1 0.6
 entity_moonend_31:mesh:../gameresources/build/objtypes/moon.gltf
 entity_moonend_31:layer:nolighting
-entity_moonend_31:rotation:-1 0 1.19209e-07 0
 entity_moonend_31:position:-39.2 -18.4 92
 entity_water_3:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,3.map
 entity_water_3:physics_shape:shape_box
@@ -278,7 +279,6 @@ entity_moonend_31_gem:physics_collision:nocollide
 entity_moonend_31_gem:physics:enabled
 entity_moonend_31_gem:scale:3 3 3
 entity_moonend_31_gem:layer:nolighting
-entity_moonend_31_gem:rotation:-1 0 3.57628e-07 nan
 entity_moonend_31_gem:position:-39.2 -16.4 92
 entity_autodoor_11:activate-type:near
 entity_autodoor_11:activate-mask:14
@@ -291,6 +291,7 @@ entity_crusher_18/model:physics:enabled
 entity_crusher_18/model:rotation:0 4.76837e-07 1 -180
 +entity_soul_6:soul:red
 +entity_soul_6:effekseer:./res/particles/spirit-white.efkefc
++entity_soul_6:layer:fx
 +entity_soul_6:effect-tint:1 0 0 1
 +entity_soul_6:physics_shape:shape_sphere
 +entity_soul_6:physics_collision:nocollide

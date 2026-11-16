@@ -20,4 +20,10 @@ testobject:physics:disabled
 
 
 ######### This should be dynamically loaded for level but not...yet i guess
-loadtexture-levels:texture:../afterworld/scenes/levels/worlds/w1/w1-1/map.png
+loadtexture-levels1:texture:../afterworld/scenes/levels/worlds/w1/w1-1/map.png
+loadtexture-levels2:texture:../afterworld/scenes/levels/worlds/w1/w1-2/map.png
+
+consoletexture:texture:./res/textures/testgradient.png
+
+fade:texture:../gameresources/textures/backgrounds/test3.png
+
