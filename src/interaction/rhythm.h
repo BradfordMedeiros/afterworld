@@ -86,3 +86,5 @@ std::unordered_map<std::string, RawSongData> loadAllSongs();
 void doLoadAllSongs();
 
 void onSongPauseToggle(bool paused);
+
+void writeBallConfig(std::string midiFile);

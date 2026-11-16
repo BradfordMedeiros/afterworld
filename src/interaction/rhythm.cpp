@@ -177,6 +177,90 @@ RawSongData parseSongData(std::string filepath){
 }
 
 
+void loadMidiNotes(std::string midiFile){
+ 	auto midi = gameapi -> loadMidi(midiFile).value();
+ 	gameapi -> playMidiFile(midi);
+
+
+ 	for (int i = 0; i < midi.tracks.size(); i++){
+ 		auto& track = midi.tracks.at(i);
+ 		for (int j = 0; j < track.events.size(); j++){
+ 			auto& midiEvent = track.events.at(j);
+			//struct MidiEvent {
+			//	int midiEventId = 0; // Just for internal uniqueness
+			//	uint32_t offset = 0;  // Delta time in MIDI ticks from the previous event
+			//	uint64_t absoluteOffset = 0;  // Cumulative MIDI ticks from the start of this track
+			//	uint8_t channel = -1;
+			//	MidiEventCategory category;
+			//	MidiEventType event;
+			//};
+ 			MidiNoteOn* midiNoteOn = std::get_if<MidiNoteOn>(&midiEvent.event);
+      auto eventTime = convertEventToTimeSeconds(midi, midiEvent);
+      if (midiNoteOn){
+      	std::cout << "midi note on time: " << eventTime << ", " << noteNameFromInt(midiNoteOn -> note).value() << std::endl;
+      }
+
+ 		}
+ 	}
+}
+
+void writeBallConfig(std::string midiFile){
+  auto midi = gameapi->loadMidi(midiFile).value();
+
+  // MIDI pitches C4, D4, and E4 map to the three rhythm lanes.
+  const std::unordered_map<int, int> noteToLane {
+    { 60, 0 },
+    { 62, 1 },
+    { 64, 2 },
+  };
+
+  std::vector<std::pair<float, int>> notes;
+  for (auto& track : midi.tracks){
+    for (auto& midiEvent : track.events){
+      auto* noteOn = std::get_if<MidiNoteOn>(&midiEvent.event);
+      if (!noteOn){
+        continue;
+      }
+
+      auto lane = noteToLane.find(noteOn->note);
+      if (lane == noteToLane.end()){
+        continue;
+      }
+
+      auto eventTime = convertEventToTimeSeconds(midi, midiEvent);
+      notes.emplace_back(eventTime * 1000.f, lane->second);
+    }
+  }
+  std::stable_sort(notes.begin(), notes.end(), [](const auto& a, const auto& b){
+    return a.first < b.first;
+  });
+
+  rapidjson::Document doc;
+  doc.SetObject();
+  auto& allocator = doc.GetAllocator();
+  auto fileInfo = decomposePath(midiFile);
+  doc.AddMember("name", rapidjson::Value(fileInfo.filename.c_str(), allocator), allocator);
+  doc.AddMember("file", rapidjson::Value(midiFile.c_str(), allocator), allocator);
+
+  rapidjson::Value noteArray(rapidjson::kArrayType);
+  for (auto& [time, lane] : notes){
+    rapidjson::Value note(rapidjson::kArrayType);
+    note.PushBack(time, allocator);
+    rapidjson::Value data(rapidjson::kObjectType);
+    data.AddMember("lane", lane, allocator);
+    note.PushBack(data, allocator);
+    noteArray.PushBack(note, allocator);
+  }
+  doc.AddMember("notes", noteArray, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  std::string json = buffer.GetString();
+  std::cout << json << std::endl;
+}
+
 std::unordered_map<std::string, RawSongData> loadAllSongs(){
   auto songFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/ball/songs/", { "json" });
 
