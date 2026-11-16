@@ -11,6 +11,7 @@ extern std::unordered_map<objid, Powerup> powerups;
 extern std::unordered_map<objid, Activatable> activateables;
 
 const std::string BALL_SHADER_NAME = "../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl";
+const std::string BALL_EYE_SHADER_NAME = "../afterworld/shaders/ball-eye/fragment.glsl,../afterworld/shaders/ball-eye/vertex.glsl";
 const std::string GRASS_SHADER_NAME = "../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl";
 
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
@@ -81,7 +82,9 @@ struct BallModeOptions{
    std::optional<LevelLoadOptions> loadOptions;
 
    unsigned int ballShader = 0;
+   unsigned int eyeShader = 0;
    unsigned int grassShader = 0;
+   glm::vec2 pupilLook = glm::vec2(0.f);
    int lastImpulseId = 0;
 };
 
@@ -361,8 +364,9 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
 	std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   submodelAttributes["ball1/eye"] = GameobjAttributes {
   	.attr = {
-  		//{ "flipbook", glm::vec3(4.f, 4.f, 4.f) },
-  		// { "tint", glm::vec4(0.f, 0.f, 5.f, 1.f) },
+			{ "shader", BALL_EYE_SHADER_NAME },
+			{ "texture", "../afterworld/data/textures/ball/eye_base.png" },
+			{ "custom-texture", "../afterworld/data/textures/ball/eye_pupil.png" },
   	}
   };
  	auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);  
@@ -448,12 +452,15 @@ void ballModeSetPlayMode(objid sceneId, bool inHub, std::optional<LevelLoadOptio
 
   auto ballData = createBallObj(sceneId, playerSpawnPosition);
 	auto ballId = ballData.id;
+	auto ballEyeShaderId = gameapi -> shaderByName(BALL_EYE_SHADER_NAME);
+	modassert(ballEyeShaderId.has_value(), "could not find the ball eye shader");
 
 
 	GameTypeInfo ballMode = getBallMode();
 	BallModeOptions modeOptions {};
 	modeOptions.ballId = ballId;
 	modeOptions.eyeId =  ballData.eyeId;
+	modeOptions.eyeShader = ballEyeShaderId.value();
 	modeOptions.spiritId = ballData.spiritId.value();
 	modeOptions.ballStartTime = gameapi -> timeSeconds(false);
 	modeOptions.sceneId = sceneId;
@@ -613,6 +620,11 @@ void startBallMode(objid sceneId){
 	if (!ballShader.has_value()){
 		auto loadedShader = gameapi -> loadShader(BALL_SHADER_NAME, "../afterworld/shaders/ball");
 		modassert(loadedShader != nullptr, "could not load the ball shader");
+	}
+	auto ballEyeShader = gameapi -> shaderByName(BALL_EYE_SHADER_NAME);
+	if (!ballEyeShader.has_value()){
+		auto loadedShader = gameapi -> loadShader(BALL_EYE_SHADER_NAME, "../afterworld/shaders/ball-eye");
+		modassert(loadedShader != nullptr, "could not load the ball eye shader");
 	}
 	auto grassShader = gameapi -> shaderByName(GRASS_SHADER_NAME);
 	if (!grassShader.has_value()){
@@ -1348,8 +1360,27 @@ GameTypeInfo getBallMode(){
  			if (isPaused()){
  				return;
  			}
+
+			auto cameraView = gameapi -> getView();
+			auto eyePosition = gameapi -> getGameObjectPos(ballMode.eyeId, true, "[gamelogic] eye pupil gaze position");
+			auto eyeRotation = gameapi -> getGameObjectRotation(ballMode.eyeId, true, "[gamelogic] eye pupil gaze rotation");
+			auto cameraDirection = cameraView.position - eyePosition;
+			if (glm::length(cameraDirection) < 0.001f){
+				cameraDirection = -(cameraView.rotation * glm::vec3(0.f, 0.f, -1.f));
+			}
+			auto localCameraDirection = glm::inverse(eyeRotation) * glm::normalize(cameraDirection);
+			glm::vec2 pupilLookTarget(localCameraDirection.x, localCameraDirection.y);
+			auto pupilLookLength = glm::length(pupilLookTarget);
+			if (pupilLookLength > 0.8f){
+				pupilLookTarget *= 0.8f / pupilLookLength;
+			}
+			ballMode.pupilLook = glm::mix(ballMode.pupilLook, pupilLookTarget, 0.12f);
+			UniformData pupilLookUniform {
+				.name = "_pupilLook",
+				.value = ballMode.pupilLook,
+			};
+			gameapi -> setShaderUniform(ballMode.eyeShader, pupilLookUniform);
  			
-	  	auto time = static_cast<int>(gameapi -> timeSeconds(false)) % 10;
 
 			auto position = gameapi -> getGameObjectPos(ballMode.ballId, true, "[gamelogic] - ballIntroOpening pos");
 			UniformData grassBallPosition {
