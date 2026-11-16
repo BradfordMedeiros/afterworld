@@ -37,16 +37,16 @@
             0.5254902243614197
         ],
         "ball-menu-title-color": [
-            0.7890295386314392,
-            0.869144856929779,
+            0.07450980693101883,
+            0.49803921580314639,
             1.0,
-            1.0
+            0.5686274766921997
         ],
         "ball-menu-font-color": [
             1.0,
             1.0,
             1.0,
-            1.0
+            0.5490196347236633
         ],
         "ball-menu-font-header-color": [
             0.501960813999176,
@@ -57,16 +57,16 @@
     },
     "fonts": {
         "default-medium": {
-            "file": "./res/fonts/ocr.ttf",
+            "file": "./res/fonts/bloodcrow.ttf",
             "size": 32.0
         },
         "default-header": {
-            "file": "./res/fonts/cliche21.ttf",
+            "file": "./res/fonts/dpquake.ttf",
             "size": 33.0
         },
         "default-title": {
-            "file": "./res/fonts/vcr.ttf",
-            "size": 52.0
+            "file": "./res/fonts/Chronic-Normal.otf",
+            "size": 76.0
         },
         "default-font": {
             "file": "./res/fonts/vcr.ttf",
