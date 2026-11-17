@@ -1,4 +1,5 @@
 #include "./entity.h"
+#include <cmath>
 
 extern CustomApiBindings* gameapi;
 extern Weapons weapons;
@@ -680,25 +681,16 @@ void updateScreenshakeByPlayerIndex(int playerIndex){
   }
   ControllableEntity& entity = *controllable.value();
 
-  const float shakeStiffness = 100.f;
-  const float shakeDamping = 20.f;
-
   if (entity.shakeImpulse.has_value()){
     entity.shakeVelocity += entity.shakeImpulse.value();
     entity.shakeImpulse = std::nullopt;
   }
-  glm::vec3 springForce(-1 * entity.shakeOffset.x * shakeStiffness, -1 * entity.shakeOffset.y * shakeStiffness, -1 * entity.shakeOffset.z * shakeStiffness);
-  glm::vec3 dampingForce(-1 * entity.shakeVelocity.x * shakeDamping, -1 * entity.shakeVelocity.y * shakeDamping, -1 * entity.shakeVelocity.z * shakeDamping);
-  glm::vec3 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y, springForce.z + dampingForce.z);
   float deltaTime = gameapi -> timeElapsed();
-
-  entity.shakeVelocity.x += acceleration.x * deltaTime;
-  entity.shakeVelocity.y += acceleration.y * deltaTime;
-  entity.shakeVelocity.z += acceleration.z * deltaTime;
-
-  entity.shakeOffset.x  += entity.shakeVelocity.x * deltaTime;
-  entity.shakeOffset.y  += entity.shakeVelocity.y * deltaTime;
-  entity.shakeOffset.z  += entity.shakeVelocity.z * deltaTime;
+  float omega = 10.f;
+  glm::vec3 coefficient = entity.shakeVelocity + entity.shakeOffset * omega;
+  float decay = std::exp(-omega * deltaTime);
+  entity.shakeOffset = (entity.shakeOffset + coefficient * deltaTime) * decay;
+  entity.shakeVelocity = (entity.shakeVelocity - coefficient * (omega * deltaTime)) * decay;
 }
 
 void updateUiScreenshakeByPlayerIndex(int playerIndex){
@@ -708,23 +700,16 @@ void updateUiScreenshakeByPlayerIndex(int playerIndex){
   }
   ControllableEntity& entity = *controllable.value();
 
-  const float shakeStiffness = 100.f;
-  const float shakeDamping = 20.f;
-
   if (entity.uiShakeImpulse.has_value()){
     entity.uiShakeVelocity += entity.uiShakeImpulse.value();
     entity.uiShakeImpulse = std::nullopt;
   }
-  glm::vec2 springForce(-1 * entity.uiShakeOffset.x * shakeStiffness, -1 * entity.uiShakeOffset.y * shakeStiffness);
-  glm::vec2 dampingForce(-1 * entity.uiShakeVelocity.x * shakeDamping, -1 * entity.uiShakeVelocity.y * shakeDamping);
-  glm::vec2 acceleration(springForce.x + dampingForce.x, springForce.y + dampingForce.y);
   float deltaTime = gameapi -> timeElapsed();
-
-  entity.uiShakeVelocity.x += acceleration.x * deltaTime;
-  entity.uiShakeVelocity.y += acceleration.y * deltaTime;
-
-  entity.uiShakeOffset.x += entity.uiShakeVelocity.x * deltaTime;
-  entity.uiShakeOffset.y += entity.uiShakeVelocity.y * deltaTime;
+  float omega = 10.f;
+  glm::vec2 coefficient = entity.uiShakeVelocity + entity.uiShakeOffset * omega;
+  float decay = std::exp(-omega * deltaTime);
+  entity.uiShakeOffset = (entity.uiShakeOffset + coefficient * deltaTime) * decay;
+  entity.uiShakeVelocity = (entity.uiShakeVelocity - coefficient * (omega * deltaTime)) * decay;
 }
 
 void updateUiMovementByPlayerIndex(int playerIndex){
