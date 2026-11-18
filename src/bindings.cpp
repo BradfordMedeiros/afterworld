@@ -63,6 +63,7 @@ struct ManagedScene {
   std::optional<std::string> sceneFile;
   std::optional<std::string> activeLevel;
   GameMode gameMode = GameModeNone{};
+  std::optional<std::string> modeOption;
 };
 struct SceneManagement {
   std::optional<ManagedScene> managedScene;
@@ -77,6 +78,7 @@ struct SceneRouteLoadState {
   std::optional<SceneLoadInfo> additionalSceneToLoad;
   std::optional<ScenarioOptions> scenarioOptions;
   std::optional<GameMode> gameMode;
+  std::optional<std::string> modeOption;
 };
 
 SceneManagement sceneManagement;
@@ -387,10 +389,10 @@ bool autostartMode = true;
 void startMode(bool loadedScene){
   if (loadedScene){
     if (autostartMode){
-      startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+      startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value(), sceneManagement.managedScene.value().modeOption);
     }
   }else{
-      startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value());
+      startMode(sceneManagement.managedScene.value().gameMode, sceneManagement.managedScene.value().id.value(), sceneManagement.managedScene.value().modeOption);
   }
 }
 void stopMode(bool unloadedScene){
@@ -439,6 +441,7 @@ void loadSceneRoute(SceneManagement& sceneManagement, SceneRouteLoadState& route
     .sceneFile = route.sceneToLoad.value().sceneFile,
     .activeLevel = route.params.size() > 0 ? route.params.at(0) : std::optional<std::string>(std::nullopt),
     .gameMode = route.gameMode.value(),
+    .modeOption = route.modeOption,
   };
   sceneManagement.changedLevelFrame = gameapi -> currentFrame();
   modlog("router scene route load", sceneManagement.managedScene.value().path);
@@ -469,6 +472,12 @@ void onSceneRouteChange(SceneManagement& sceneManagement, std::string& currentPa
     route.sceneToLoad = router.value() -> scene.value()(params);
     modlog("router scene route load", route.sceneToLoad.value().sceneFile);
     route.gameMode = router.value() -> getGameMode(params);
+    if (params.size() > 0){
+      auto level = levelByShortcutName(params.at(0));
+      if (level.has_value()){
+        route.modeOption = level.value().modeOption;
+      }
+    }
   }
   if (router.has_value() && router.value() -> additionalScene.has_value()){
     route.additionalSceneToLoad = router.value() -> additionalScene.value()(params);
@@ -1250,6 +1259,8 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
             auto thirdPerson = lookThirdPersonCalc(vehicles.vehicles.at(controllable.value() -> vehicle.value()).state.managedCamera, controllable.value() -> vehicle.value(), false);
             glm::vec3 screenShake = thirdPerson.rotation * controllableEntity.shakeOffset;
+
+            std::cout << "screen shake: " << print(controllableEntity.shakeOffset) << std::endl;
 
             gameapi -> setGameObjectPosition(thirdPersonCamera.value(), thirdPerson.position + screenShake, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });
             gameapi -> setGameObjectRot(thirdPersonCamera.value(), thirdPerson.rotation, true, Hint { .hint = "[gamelogic] lateUpdate - set vehicle camera" });

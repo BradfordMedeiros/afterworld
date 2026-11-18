@@ -107,6 +107,7 @@ struct RawLevelData {
   std::optional<std::string> weather;
   std::string audioClipPath;
   std::string mode;
+  std::optional<std::string> modeOption;
   glm::vec2 chromatic;
 
   std::vector<std::vector<std::string>> additionalTokens;

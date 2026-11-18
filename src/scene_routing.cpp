@@ -242,6 +242,9 @@ GameMode gamemodeByShortcutName(std::string shortcut){
           .player = "maincamera",
         };
       }
+      if (rawLevel.mode == "simpleui"){
+        return SimpleUiMode{};
+      }
       break;
     }
   }

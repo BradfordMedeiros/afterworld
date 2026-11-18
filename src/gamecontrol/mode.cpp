@@ -32,7 +32,7 @@ std::string modeTypeString(GameMode& gameMode){
 }
 
 
-void startMode(GameMode& gameMode, objid sceneId){
+void startMode(GameMode& gameMode, objid sceneId, std::optional<std::string> modeOption){
   std::cout << "mode: start: " << modeTypeString(gameMode) << std::endl;
 
   auto& allPlayers = getPlayers();
@@ -48,6 +48,7 @@ void startMode(GameMode& gameMode, objid sceneId){
   auto gamemodeNone = std::get_if<GameModeNone>(&gameMode);
   auto gamemodeVideo = std::get_if<GameModeVideo>(&gameMode);
   auto gamemodeBoot = std::get_if<GameModeBoot>(&gameMode);
+  auto simpleUiMode = std::get_if<SimpleUiMode>(&gameMode);
 
   if (gamemodeFps){
     changeUiMode(FpsModeUi{});
@@ -61,6 +62,8 @@ void startMode(GameMode& gameMode, objid sceneId){
     startVideoMode(sceneId);
   }else if (gamemodeBoot){
     startBootMode(sceneId);
+  }else if (simpleUiMode){
+    startSimpleUiMode(sceneId);
   }else {
     modassert(false, "startMode invalid game mode");
   }

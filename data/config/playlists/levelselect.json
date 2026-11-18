@@ -59,6 +59,27 @@
       "par": 90,
       "crystals": [],
       "unlock" : false
+    },
+    {
+      "level": "swinfo",
+      "world": "debug",
+      "par": 90,
+      "crystals": [],
+      "unlock" : false
+    },
+    {
+      "level": "stats",
+      "world": "debug",
+      "par": 90,
+      "crystals": [],
+      "unlock" : false
+    },
+    {
+      "level": "credits",
+      "world": "debug",
+      "par": 90,
+      "crystals": [],
+      "unlock" : false
     }
     
 

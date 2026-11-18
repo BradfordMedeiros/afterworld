@@ -1,6 +1,6 @@
 {
 	"name" : "Brad for Your Brain - Transmission Error",
-	"file": "../gameresources/sound/songs/nineinch.wav",
+	"file": "../gameresources/sound/songs/moon.ogg",
 	"notes" : [
 		[0, { "lane" : 0 }],
 		[5000, { "lane" : 0 }],

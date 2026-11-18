@@ -5,6 +5,7 @@
 #include "./modes/fps.h"
 #include "./modes/video.h"
 #include "./modes/boot/boot.h"
+#include "./modes/swinfo.h"
 
 struct GameModeNone{};
 struct GameModeFps {
@@ -14,10 +15,11 @@ struct GameModeFps {
 struct GameModeBall{};
 struct GameModeVideo{};
 struct GameModeBoot{};
+struct SimpleUiMode{};
 
-typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeVideo, GameModeBoot> GameMode;
+typedef std::variant<GameModeNone, GameModeFps, GameModeBall, GameModeVideo, GameModeBoot, SimpleUiMode> GameMode;
 
-void startMode(GameMode& gameMode, objid sceneId);
+void startMode(GameMode& gameMode, objid sceneId, std::optional<std::string> modeOption);
 void stopMode(GameMode& gameMode);
 bool isModeNone(GameMode& gameMode);
 

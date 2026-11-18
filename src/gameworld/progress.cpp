@@ -566,6 +566,7 @@ std::vector<RawLevelData> getRawLevelData(){
     std::optional<std::string> backgroundTexture;
     std::optional<std::string> secondaryBackgroundTexture;
     std::string mode("ball");
+    std::optional<std::string> modeOption;
     std::optional<std::string> weather;
     glm::vec2 chromatic(0.f, 0.f);
 
@@ -610,6 +611,12 @@ std::vector<RawLevelData> getRawLevelData(){
         auto modePtr = std::get_if<std::string>(&data.at("mode"));
         mode = *modePtr;
       }
+      if (data.find("modeoption") != data.end()){
+        auto modeOptionPtr = std::get_if<std::string>(&data.at("modeoption"));
+        if (modeOptionPtr != nullptr){
+          modeOption = *modeOptionPtr;
+        }
+      }
       if (data.find("weather") != data.end()){
         auto weatherPtr = std::get_if<std::string>(&data.at("weather"));
         weather = *weatherPtr;   
@@ -644,6 +651,7 @@ std::vector<RawLevelData> getRawLevelData(){
       .weather = weather,
       .audioClipPath = "../gameresources/sound/rain.wav",
       .mode = mode,
+      .modeOption = modeOption,
       .chromatic = chromatic,
       .additionalTokens = {},
 
