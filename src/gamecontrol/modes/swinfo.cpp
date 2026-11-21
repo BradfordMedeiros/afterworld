@@ -14,6 +14,8 @@ void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool fo
 struct SWInfoModeOptions {
   std::string option;
 };
+SimpleTextDisplayUi swInfoDisplay;
+bool swInfoDisplayHiddenForPause = false;
 
 GameTypeInfo simpleUi {
   .gametypeName = "simpleui",
@@ -35,7 +37,17 @@ GameTypeInfo simpleUi {
   	return NULL;
   },
   .onEvent = [](std::any& gametype, std::string& event, std::any& value) -> void {},
-  .onFrame = [](std::any& gametype) -> void {},
+  .onFrame = [](std::any& gametype) -> void {
+    if (isPaused()){
+      if (!swInfoDisplayHiddenForPause){
+        changeUiMode(UiModeNone{});
+        swInfoDisplayHiddenForPause = true;
+      }
+    }else if (swInfoDisplayHiddenForPause){
+      changeUiMode(swInfoDisplay);
+      swInfoDisplayHiddenForPause = false;
+    }
+  },
 };
 
 SWInfoModeOptions sWInfoModeOptions{};
@@ -103,6 +115,9 @@ void startSimpleUiMode(objid sceneId, std::optional<std::string> modeOption){
     textDisplay.rows.push_back(SimpleTextDisplayTextRow{ .text = modeOption.value() });
   }
 
-  changeUiMode(textDisplay);
+  swInfoDisplay = textDisplay;
+  swInfoDisplayHiddenForPause = false;
+  changeUiMode(swInfoDisplay);
+
 	changeGameType(gametypeSystem, simpleUi, "simpleui", &sWInfoModeOptions);
 }
