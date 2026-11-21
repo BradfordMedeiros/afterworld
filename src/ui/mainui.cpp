@@ -97,6 +97,14 @@ std::optional<LiveMenu*> getLiveMenuUi(){
   return liveMenu;
 }
 
+std::optional<SimpleTextDisplayUi*> getSimpleTextDisplayUi(){
+  auto simpleTextDisplay = std::get_if<SimpleTextDisplayUi>(&uiMode);
+  if (simpleTextDisplay == NULL){
+    return std::nullopt;
+  }
+  return simpleTextDisplay;
+}
+
 void setTerminalConfig(std::optional<TerminalConfig> terminalConfig){
   terminal = terminalConfig;
 }

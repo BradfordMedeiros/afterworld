@@ -787,10 +787,133 @@ void renderRhythmPanel(bool includePanel){
 }
 
 
-void renderSimpleTextDump(bool includePanel){
+void renderSimpleTextDump(bool includePanel, const SimpleTextDisplayUi& display){
   if (includePanel){
+    ImGui::SetNextWindowSize(ImVec2(900.0f, 600.0f), ImGuiCond_FirstUseEver);
     ImGui::Begin("Text Dump Display");
   }
+
+  ImVec2 available = ImGui::GetContentRegionAvail();
+  const float cardWidth = std::max(0.0f, std::min(920.0f, available.x - 48.0f));
+  const float horizontalPadding = 44.0f;
+  const float textWidth = std::max(1.0f, cardWidth - horizontalPadding * 2.0f);
+  const float columnGap = ImGui::GetStyle().ItemSpacing.x;
+  const float columnWidth = std::max(1.0f, (textWidth - columnGap) * 0.5f);
+  ImFont* titleFont = getFontByBinding(getSymbol("main-menu2-title"));
+  ImFont* bodyFont = getFontByBinding(getSymbol("ball-level-info"));
+
+  auto measureText = [](const std::string& text, ImFont* font, float wrapWidth) {
+    if (font){
+      ImGui::PushFont(font);
+    }
+    ImVec2 size = ImGui::CalcTextSize(text.c_str(), nullptr, false, wrapWidth);
+    if (font){
+      ImGui::PopFont();
+    }
+    return size;
+  };
+
+  float contentHeight = 0.0f;
+  if (display.header.has_value() && !display.header->empty()){
+    contentHeight += measureText(display.header.value(), titleFont, textWidth).y + 18.0f;
+  }
+  for (const auto& row : display.rows){
+    if (const auto* textRow = std::get_if<SimpleTextDisplayTextRow>(&row)){
+      contentHeight += measureText(textRow->text, bodyFont, textWidth).y + 12.0f;
+    }else{
+      const auto& columnRow = std::get<SimpleTextDisplayColumnRow>(row);
+      contentHeight += std::max(
+        measureText(columnRow.left, bodyFont, columnWidth).y,
+        measureText(columnRow.right, bodyFont, columnWidth).y
+      ) + 12.0f;
+    }
+  }
+
+  const float verticalPadding = 38.0f;
+  const float desiredHeight = std::max(176.0f, contentHeight + verticalPadding * 2.0f);
+  const float cardHeight = std::min(desiredHeight, std::max(0.0f, available.y - 48.0f));
+  ImGui::SetCursorPos(ImVec2(
+    ImGui::GetCursorPosX() + (available.x - cardWidth) * 0.5f,
+    ImGui::GetCursorPosY() + (available.y - cardHeight) * 0.5f
+  ));
+
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(horizontalPadding, verticalPadding));
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.035f, 0.055f, 0.075f, 0.92f));
+  ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.18f, 0.32f, 0.39f, 0.9f));
+  ImGui::BeginChild(
+    "simple-text-dump-card",
+    ImVec2(cardWidth, cardHeight),
+    true
+  );
+
+  ImVec2 cardPosition = ImGui::GetWindowPos();
+  ImGui::GetWindowDrawList()->AddRectFilled(
+    ImVec2(cardPosition.x + horizontalPadding, cardPosition.y + 13.0f),
+    ImVec2(cardPosition.x + horizontalPadding + 72.0f, cardPosition.y + 17.0f),
+    IM_COL32(57, 224, 222, 230),
+    2.0f
+  );
+
+  const float innerWidth = ImGui::GetContentRegionAvail().x;
+  if (display.header.has_value() && !display.header->empty()){
+    if (titleFont){
+      ImGui::PushFont(titleFont);
+    }
+    ImVec2 size = ImGui::CalcTextSize(display.header->c_str(), nullptr, false, innerWidth);
+    ImGui::SetCursorPosX(ImGui::GetStyle().WindowPadding.x + std::max(0.0f, (innerWidth - size.x) * 0.5f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.96f, 0.98f, 1.0f, 1.0f));
+    ImGui::TextWrapped("%s", display.header->c_str());
+    ImGui::PopStyleColor();
+    if (titleFont){
+      ImGui::PopFont();
+    }
+    ImGui::Spacing();
+  }
+
+  for (size_t i = 0; i < display.rows.size(); ++i){
+    const auto& row = display.rows.at(i);
+    if (const auto* textRow = std::get_if<SimpleTextDisplayTextRow>(&row)){
+      ImVec2 size = measureText(textRow->text, bodyFont, innerWidth);
+      float x = ImGui::GetStyle().WindowPadding.x;
+      if (textRow->alignment == SimpleTextDisplayAlignment::Center){
+        x += std::max(0.0f, (innerWidth - size.x) * 0.5f);
+      }
+      ImGui::SetCursorPosX(x);
+      if (bodyFont){
+        ImGui::PushFont(bodyFont);
+      }
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.91f, 0.94f, 0.97f, 1.0f));
+      ImGui::TextWrapped("%s", textRow->text.c_str());
+      ImGui::PopStyleColor();
+      if (bodyFont){
+        ImGui::PopFont();
+      }
+    }else{
+      const auto& columnRow = std::get<SimpleTextDisplayColumnRow>(row);
+      ImGui::PushID(static_cast<int>(i));
+      ImGui::Columns(2, "simple-text-dump-columns", false);
+      ImGui::SetColumnWidth(0, innerWidth * 0.5f);
+      if (bodyFont){
+        ImGui::PushFont(bodyFont);
+      }
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.91f, 0.94f, 0.97f, 1.0f));
+      ImGui::TextWrapped("%s", columnRow.left.c_str());
+      ImGui::NextColumn();
+      ImGui::TextWrapped("%s", columnRow.right.c_str());
+      ImGui::PopStyleColor();
+      if (bodyFont){
+        ImGui::PopFont();
+      }
+      ImGui::Columns(1);
+      ImGui::PopID();
+    }
+    ImGui::Spacing();
+  }
+
+  ImGui::EndChild();
+  ImGui::PopStyleColor(2);
+  ImGui::PopStyleVar(2);
 
   if (includePanel){
     ImGui::End();

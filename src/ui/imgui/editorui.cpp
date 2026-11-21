@@ -298,10 +298,13 @@ void renderMoreUi(){
   }
 
   {
+    auto textDisplayUi = getSimpleTextDisplayUi();
+    if (textDisplayUi.has_value()){
+      auto& widget = *widgetByNameSymbol(getSymbol("ball-text-display")).value();
+      renderLayoutAlignUpCenterHorz("ball-text-display-view", widget, ImVec2(0.5f, 0.5f), ImVec2(0.5f, 0.5f), ImGui::GetIO().DisplaySize);
+      //windowOrdering.push_back("ball-text-display-view");      
+    }
 
-    auto& widget = *widgetByNameSymbol(getSymbol("ball-text-display")).value();
-    renderLayoutAlignUpCenterHorz("ball-text-display-view", widget, ImVec2(0.f, 0.f), ImVec2(1.f, 0.5f), ImVec2(100.f, 200.f));
-    windowOrdering.push_back("ball-text-display-view");
   }
 
   static std::optional<float> showConsoleTime;
@@ -410,7 +413,12 @@ void initImGuiGameUi(){
       });
 
       registerWidget("ball-text-display", "ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderSimpleTextDump(includePanel);
+        auto textDisplayUi = getSimpleTextDisplayUi();
+        if (textDisplayUi.has_value()){
+          renderSimpleTextDump(includePanel, *textDisplayUi.value());
+        }else{
+          renderSimpleTextDump(includePanel, SimpleTextDisplayUi{});
+        }
       });
 
     }

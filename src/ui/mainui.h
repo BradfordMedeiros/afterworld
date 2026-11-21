@@ -3,6 +3,8 @@
 
 #include <string>
 #include <optional>
+#include <vector>
+#include <variant>
 #include "../util.h"
 
 struct RouterHistory {
@@ -34,6 +36,23 @@ void popHistory();
 
 struct UiModeNone{};
 struct FpsModeUi {};
+enum class SimpleTextDisplayAlignment {
+  Left,
+  Center,
+};
+struct SimpleTextDisplayTextRow {
+  std::string text;
+  SimpleTextDisplayAlignment alignment = SimpleTextDisplayAlignment::Center;
+};
+struct SimpleTextDisplayColumnRow {
+  std::string left;
+  std::string right;
+};
+using SimpleTextDisplayRow = std::variant<SimpleTextDisplayTextRow, SimpleTextDisplayColumnRow>;
+struct SimpleTextDisplayUi {
+  std::optional<std::string> header;
+  std::vector<SimpleTextDisplayRow> rows;
+};
 
 struct BallLevelComplete {};
 struct BallComponentOptions {
@@ -87,11 +106,12 @@ struct LiveMenu {
 };
 struct GameOverUi {};
 
-typedef std::variant<UiModeNone, FpsModeUi, BallModeUi, LiveMenu, GameOverUi> UiMode;
+typedef std::variant<UiModeNone, FpsModeUi, BallModeUi, LiveMenu, GameOverUi, SimpleTextDisplayUi> UiMode;
 void changeUiMode(UiMode);
 
 std::optional<BallModeUi*> getBallModeUI();
 std::optional<LiveMenu*> getLiveMenuUi();
+std::optional<SimpleTextDisplayUi*> getSimpleTextDisplayUi();
 
 
 struct TerminalImage {
