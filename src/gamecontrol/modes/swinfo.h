@@ -3,4 +3,4 @@
 #include "../../global.h"
 #include "../gametypes.h"
 
-void startSimpleUiMode(objid sceneId);
+void startSimpleUiMode(objid sceneId, std::optional<std::string> modeOption);

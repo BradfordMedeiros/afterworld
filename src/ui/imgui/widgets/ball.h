@@ -9,3 +9,5 @@ void renderBallProgressInfo(bool includePanel, BallModeUi& ballModeUi);
 
 void renderStageSelectPanel(bool includePanel);
 void renderRhythmPanel(bool includePanel);
+
+void renderSimpleTextDump(bool includePanel);

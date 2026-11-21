@@ -785,3 +785,14 @@ void renderRhythmPanel(bool includePanel){
         ImGui::End();
     }
 }
+
+
+void renderSimpleTextDump(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Text Dump Display");
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }
+}

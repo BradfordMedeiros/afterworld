@@ -297,6 +297,13 @@ void renderMoreUi(){
     ImGui::PopStyleColor();
   }
 
+  {
+
+    auto& widget = *widgetByNameSymbol(getSymbol("ball-text-display")).value();
+    renderLayoutAlignUpCenterHorz("ball-text-display-view", widget, ImVec2(0.f, 0.f), ImVec2(1.f, 0.5f), ImVec2(100.f, 200.f));
+    windowOrdering.push_back("ball-text-display-view");
+  }
+
   static std::optional<float> showConsoleTime;
   if (uiSettings.showConsole){
     if (!showConsoleTime.has_value()){
@@ -401,8 +408,10 @@ void initImGuiGameUi(){
       registerWidget("game-ball-rhythm", "ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderRhythmPanel(includePanel);
       });
-      
-      
+
+      registerWidget("ball-text-display", "ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderSimpleTextDump(includePanel);
+      });
 
     }
 

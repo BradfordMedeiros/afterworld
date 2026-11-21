@@ -63,7 +63,7 @@ void startMode(GameMode& gameMode, objid sceneId, std::optional<std::string> mod
   }else if (gamemodeBoot){
     startBootMode(sceneId);
   }else if (simpleUiMode){
-    startSimpleUiMode(sceneId);
+    startSimpleUiMode(sceneId, modeOption);
   }else {
     modassert(false, "startMode invalid game mode");
   }
