@@ -9,6 +9,9 @@ afterworld:
 afterworld_release: 
 	@(cd ../ModEngine && make modengine_release additional_src=../../afterworld/src)
 
+update_release_binary: afterworld_release
+	@(cp ../ModEngine/build/modengine ./build/ModEngine/build/modengine)
+
 validate: 
 	@(cd ../ModEngine && ./build/modengine --validate ../afterworld/scenes --validate ../ModEngine/res/)
 
