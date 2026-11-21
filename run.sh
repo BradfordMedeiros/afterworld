@@ -12,7 +12,7 @@ COMMAND_ARGS="\
   -a sqldir=../afterworld/data/sql/ \
   --data ../afterworld/data/temp/ \
   -r ../afterworld/scenes/main.rawscene \
-  --font ../ModEngine/res/fonts/ocr.ttf \
+  --font ./res/fonts/ocr.ttf \
   $@"
 
 #   --font ./res/fonts/ocr.ttf \
