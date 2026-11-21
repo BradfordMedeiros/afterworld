@@ -80,8 +80,14 @@
       "par": 90,
       "crystals": [],
       "unlock" : false
+    },
+    {
+      "level": "ghost",
+      "world": "debug",
+      "par": 90,
+      "crystals": [],
+      "unlock" : false
     }
-    
 
   ]
 }

@@ -1,4 +1,23 @@
 {
-    "mode": "ball",
-    "description": "Credit sequence"
+    "weather": "rain",
+    "ambient": [
+        0.4000000059604645,
+        0.4000000059604645,
+        0.4000000059604645
+    ],
+    "skybox": "../gameresources/skybox/space1",
+    "secondarybackgroundtexture": "",
+    "skyboxcolor": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "backgroundtexture": "",
+    "description": "No description",
+    "chromatic": [
+        0.0,
+        0.0
+    ],
+    "mode": "simpleui",
+    "modeoption" : "credits"
 }
