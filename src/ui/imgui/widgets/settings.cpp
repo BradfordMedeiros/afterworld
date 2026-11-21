@@ -494,7 +494,7 @@ void renderLevelList(bool includePanel){
     ImGui::Dummy(ImVec2(0, 20));
 
 
-    auto levels = getRawLevelData();
+    static auto levels = getRawLevelData();
     std::vector<MenuItem> menuItems;
     for (auto& level : levels){
       menuItems.push_back(MenuItem {
