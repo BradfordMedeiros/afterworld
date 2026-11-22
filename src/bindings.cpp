@@ -1468,7 +1468,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
 
 AdditionalResourceValidation getAdditionalPathsToValidate(){
   return AdditionalResourceValidation {
-    .additionalPaths = paths::allResources,
+    .additionalPaths = paths::allFileResources,
     .additionalAttributes = { "destroy", "config" },
   };
 }
