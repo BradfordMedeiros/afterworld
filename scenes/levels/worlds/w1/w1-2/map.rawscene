@@ -46,7 +46,7 @@ texture3:texture:../gameresources/build/textures/ballgame/bounce.png
 texture5:texture:../gameresources/build/textures/ballgame/none.png
 texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
 entity_worldspawn_0:texture:../gameresources/build/misc/vehl1tanktop1.jpg
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-2/map.map
+entity_worldspawn_0:mesh:../afterworld/scenes/levels/worlds/w1/w1-2/map.map
 entity_worldspawn_0:cubemap:./res/textures/skyboxs/desert
 entity_worldspawn_0:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
 entity_worldspawn_0:cubemap-reflection:0.306 10 0.171

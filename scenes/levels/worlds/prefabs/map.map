@@ -3,7 +3,7 @@
 // entity 0
 {
 "classname" "worldspawn"
-"_tb_def" "external:/home/brad/gamedev/mosttrusted/gameresources/trenchbroom/ballgame.fgd"
+"_tb_def" "external:../gameresources/trenchbroom/ballgame.fgd"
 "_tb_layer_locked" "1"
 "_tb_layer_omit_from_export" "1"
 // brush 0

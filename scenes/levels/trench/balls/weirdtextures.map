@@ -6,7 +6,7 @@
 "property 1" ""
 "_tb_mod" "characters"
 "property 2" ""
-"_tb_def" "external:../../../../home/brad/gamedev/mosttrusted/gameresources/trenchbroom/models.fgd"
+"_tb_def" "external:../gameresources/trenchbroom/models.fgd"
 // brush 0
 {
 ( -176 1232 192 ) ( -176 992 192 ) ( -176 992 176 ) arcade/trench/graffiti 0 0 0 1 1

@@ -80,7 +80,7 @@ entity_autodoor_13:activatable:true
 entity_autodoor_13:mesh:../gameresources/build/building/autodoor.gltf
 entity_autodoor_13:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
 entity_autodoor_13:position:-23.2 -18.4 160.8
-entity_water_5:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,5.map
+entity_water_5:mesh:../afterworld/scenes/levels/worlds/w1/w1-1/map.map,5.map
 entity_water_5:physics_shape:shape_box
 entity_water_5:physics:enabled
 entity_water_5:position:39.4651 -4.8 -4.9624
@@ -149,12 +149,12 @@ entity_moonend_31/portal:radius:5
 entity_moonend_31/portal:activate-type:near
 entity_moonend_31/portal:activatable:true
 entity_moonend_31/portal:rotation:0 0 -1 -180
-entity_water_4:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,4.map
+entity_water_4:mesh:../afterworld/scenes/levels/worlds/w1/w1-1/map.map,4.map
 entity_water_4:physics_shape:shape_box
 entity_water_4:physics:enabled
 entity_water_4:position:34.8377 -4.8 -6.735
 texture1:texture:../gameresources/build/textures/ballgame/dash.png
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map
+entity_worldspawn_0:mesh:../afterworld/scenes/levels/worlds/w1/w1-1/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
 entity_worldspawn_0:position:10.4 -92.8 -714.4
@@ -169,7 +169,7 @@ entity_dropper_12/model:physics:enabled
 texture5:texture:../gameresources/build/textures/ballgame/none.png
 texture4:texture:../gameresources/build/textures/ballgame/bounce.normal.png
 entity_player_end_30:player_end:true
-entity_player_end_30:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,30.map
+entity_player_end_30:mesh:../afterworld/scenes/levels/worlds/w1/w1-1/map.map,30.map
 entity_player_end_30:physics_shape:shape_exact
 entity_player_end_30:physics_collision:nocollide
 entity_player_end_30:physics:enabled
@@ -216,7 +216,7 @@ entity_moonend_31:tint:1 1 1 0.6
 entity_moonend_31:mesh:../gameresources/build/objtypes/moon.gltf
 entity_moonend_31:layer:nolighting
 entity_moonend_31:position:-39.2 -18.4 92
-entity_water_3:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,3.map
+entity_water_3:mesh:../afterworld/scenes/levels/worlds/w1/w1-1/map.map,3.map
 entity_water_3:physics_shape:shape_box
 entity_water_3:physics:enabled
 entity_water_3:position:29.8002 -4.8 -7.3249
@@ -309,7 +309,7 @@ entity_crusher_18:position:-2.4 -18.4 63.2
 entity_killplane_27:scrollspeed:0.2 0 0.2
 entity_killplane_27:textureoffset:7.63969 0
 entity_killplane_27:killplane:true
-entity_killplane_27:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/w1/w1-1/map.map,27.map
+entity_killplane_27:mesh:../afterworld/scenes/levels/worlds/w1/w1-1/map.map,27.map
 entity_killplane_27:physics_shape:shape_exact
 entity_killplane_27:physics:enabled
 entity_killplane_27:position:-20.454 -22.9841 -9.4774

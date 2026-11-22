@@ -20,7 +20,7 @@ entity_player_start_19:playerspawn:true
 entity_player_start_19:rotation:1 8.73115e-11 -2.98023e-07 0.0559529
 entity_player_start_19:position:-44 0.8 -44
 levelselect:levelselect:true
-entity_worldspawn_0:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map
+entity_worldspawn_0:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map
 entity_worldspawn_0:physics_shape:shape_exact
 entity_worldspawn_0:physics:enabled
 entity_worldspawn_0:position:130.5 -13.6 -67.2808
@@ -34,7 +34,7 @@ entity_surface_28:jumpsurface:true
 entity_surface_28:texture:../gameresources/textures/clean/metalgrid.jpg
 entity_surface_28:opacity-texture:../gameresources/textures/clean/metalgrid.jpg
 entity_surface_28:custom-texture:../gameresources/build/textures/backgrounds/test3.png
-entity_surface_28:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,28.map
+entity_surface_28:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map,28.map
 entity_surface_28:shader:../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl
 entity_surface_28:physics_shape:shape_exact
 entity_surface_28:physics:enabled
@@ -55,14 +55,14 @@ combined_entities_rail:rail:true
 loadtexture-levels2:texture:../afterworld/scenes/levels/worlds/w1/w1-2/map.png
 entity_trigger_zone_16:trigger_bound:true
 entity_trigger_zone_16:trigger_zone:test
-entity_trigger_zone_16:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,16.map
+entity_trigger_zone_16:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map,16.map
 entity_trigger_zone_16:physics_shape:shape_box
 entity_trigger_zone_16:physics_collision:nocollide
 entity_trigger_zone_16:physics:enabled
 entity_trigger_zone_16:position:-34.8303 21.05 34.5474
 loadtexture-levels1:texture:../afterworld/scenes/levels/worlds/w1/w1-1/map.png
 entity_arcade_zone_26:arcade:interact
-entity_arcade_zone_26:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,26.map
+entity_arcade_zone_26:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map,26.map
 entity_arcade_zone_26:shader:../afterworld/shaders/trippy/fragment.glsl,../afterworld/shaders/trippy/vertex.glsl
 entity_arcade_zone_26:physics_shape:shape_exact
 entity_arcade_zone_26:physics:enabled
@@ -92,7 +92,7 @@ entity_trigger_zone_23:physics_shape:shape_box
 entity_trigger_zone_23:tint:0 0 1 1
 entity_trigger_zone_23:curve:move-up
 entity_trigger_zone_23:trigger:testtrigger
-entity_trigger_zone_23:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,23.map
+entity_trigger_zone_23:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map,23.map
 entity_trigger_zone_23:trigger_data:1
 entity_trigger_zone_23:trigger_zone:testtrigger
 entity_trigger_zone_23:activecolor:1 0 0 1
@@ -100,14 +100,14 @@ entity_trigger_zone_23:unactivecolor:0 0 1 1
 entity_trigger_zone_23:triggercolor:testtrigger
 entity_trigger_zone_15:trigger_bound:true
 entity_trigger_zone_15:worldselect:w1
-entity_trigger_zone_15:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,15.map
+entity_trigger_zone_15:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map,15.map
 entity_trigger_zone_15:physics_shape:shape_box
 entity_trigger_zone_15:physics_collision:nocollide
 entity_trigger_zone_15:physics:enabled
 entity_trigger_zone_15:position:-23.2 3.2 -44
 entity_trigger_zone_22:trigger_bound:true
 entity_trigger_zone_22:trigger_zone:s
-entity_trigger_zone_22:mesh:/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/worlds/core/ballselect/map.map,22.map
+entity_trigger_zone_22:mesh:../afterworld/scenes/levels/worlds/core/ballselect/map.map,22.map
 entity_trigger_zone_22:physics_shape:shape_box
 entity_trigger_zone_22:physics_collision:nocollide
 entity_trigger_zone_22:physics:enabled
