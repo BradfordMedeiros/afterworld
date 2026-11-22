@@ -17,7 +17,11 @@ COMMAND_ARGS="\
 
 #   --font ./res/fonts/ocr.ttf \
 
-if [ "$1" == "gdb" ]; then
+if [ "$1" == "validate" ]; then
+  (
+    cd ../ModEngine && "$BINARY" --validate ../afterworld/scenes
+  )
+elif [ "$1" == "gdb" ]; then
   (
     cd ../ModEngine && gdb "$BINARY" -ex "run  $COMMAND_ARGS"
   )
