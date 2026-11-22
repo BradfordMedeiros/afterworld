@@ -998,7 +998,7 @@ void drawFade(){
       glm::vec4 color = letterbox.boxColor;
       glm::vec4 barTint(color.r, color.g, color.b, color.a * percentage);
 
-      static std::string texture = "../gameresources/textures/backgrounds/test3.png";
+      static std::string texture = paths::TEXTURE_BACKGROUND;
       auto textureId = gameapi -> getTextureSamplerId(texture);
 
       if (textureId.has_value()){
@@ -1069,7 +1069,7 @@ void renderTerminal(bool includePanel){
       
     }else if (terminalTextPtr){
       ImGui::Text("terminalTextPtr");
-      std::string texture = "./res/textures/wood.jpg";
+      std::string texture = paths::TEXTURE_WOOD;
       ImGui::Image(
         (ImTextureID)(intptr_t)gameapi->getTextureSamplerId(texture).value(),
         ImVec2(size.x * 0.5f, size.y),

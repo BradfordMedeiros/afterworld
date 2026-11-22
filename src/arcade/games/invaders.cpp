@@ -423,7 +423,7 @@ void drawInvaders(std::any& any, std::optional<objid> textureId){
 	};
   gameapi -> setShaderUniform(*invaders.shaderId, uniformTextureData);
 
-  std::string texName("./res/textures/wood.jpg");
+  std::string texName(paths::TEXTURE_WOOD);
   auto textureSampleId = gameapi -> getTextureSamplerId(texName);
   gameapi -> bindTexture(*invaders.shaderId, 7, textureSampleId.value());
 

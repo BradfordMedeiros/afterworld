@@ -10,9 +10,9 @@ extern Weapons weapons;
 extern std::unordered_map<objid, Powerup> powerups;
 extern std::unordered_map<objid, Activatable> activateables;
 
-const std::string BALL_SHADER_NAME = "../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl";
-const std::string BALL_EYE_SHADER_NAME = "../afterworld/shaders/ball-eye/fragment.glsl,../afterworld/shaders/ball-eye/vertex.glsl";
-const std::string GRASS_SHADER_NAME = "../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl";
+const std::string BALL_SHADER_NAME = std::string(paths::SHADER_BALL_FRAGMENT) + "," + paths::SHADER_BALL_VERTEX;
+const std::string BALL_EYE_SHADER_NAME = std::string(paths::SHADER_BALL_EYE_FRAGMENT) + "," + paths::SHADER_BALL_EYE_VERTEX;
+const std::string GRASS_SHADER_NAME = std::string(paths::SHADER_GRASS_FRAGMENT) + "," + paths::SHADER_GRASS_VERTEX;
 
 void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool forceReload);
 std::optional<ActiveLevel> getActiveLevel();
@@ -347,10 +347,10 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
   GameobjAttributes attr { 
   	.attr = {
   		{ "vehicle", "ball" },
-			{ "texture", "./res/textures/wood.jpg" },
+			{ "texture", paths::TEXTURE_WOOD },
 			{ "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
 			{ "physics_restitution", 0.5f },
-			{ "mesh", "../gameresources/build/characters/ball.gltf" },
+			{ "mesh", paths::MODEL_BALL },
 			{ "physics_mass" , 10.f },
 			{ "physics_type", "dynamic" },
 			{ "physics_shape", "shape_sphere" },
@@ -365,8 +365,8 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
   submodelAttributes["ball1/eye"] = GameobjAttributes {
   	.attr = {
 			{ "shader", BALL_EYE_SHADER_NAME },
-			{ "texture", "../afterworld/data/textures/ball/eye_base.png" },
-			{ "custom-texture", "../afterworld/data/textures/ball/eye_pupil.png" },
+			{ "texture", paths::TEXTURE_BALL_EYE_BASE },
+			{ "custom-texture", paths::TEXTURE_BALL_EYE_PUPIL },
   	}
   };
  	auto ball = gameapi -> makeObjectAttr(sceneId, std::string("ball1"), attr, submodelAttributes);  
@@ -384,7 +384,7 @@ BallObj createBallObj(objid sceneId, glm::vec3 position){
   		modassert(ball.has_value(), "ball was not created");
   		GameobjAttributes emitterAttr { 
   			.attr = {
- 					{ "effekseer", "./res/particles/spirit-white.efkefc" },
+        { "effekseer", paths::PARTICLE_SPIRIT_WHITE },
  					{ "state", "enabled" },
   			} 
   		};
@@ -1583,22 +1583,22 @@ GameTypeInfo getBallMode(){
 	  		if (powerup.has_value()){
 		  		std::cout << "powerup: " << print(powerup.value().powerup) << std::endl;
 	  			if (powerup.value().powerup == BIG_JUMP){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/jump.png", std::nullopt, std::nullopt);
+          setPowerupTexture(paths::TEXTURE_POWERUP_JUMP, std::nullopt, std::nullopt);
 	 		  		return;
 	  			}else if (powerup.value().powerup == LAUNCH_FORWARD){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/dash.png", std::nullopt, std::nullopt);
+          setPowerupTexture(paths::TEXTURE_POWERUP_DASH, std::nullopt, std::nullopt);
 	 		  		return;
 	  			}else if (powerup.value().powerup == LOW_GRAVITY){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/bounce.png", std::nullopt, std::nullopt);
+          setPowerupTexture(paths::TEXTURE_POWERUP_BOUNCE, std::nullopt, std::nullopt);
 	 		  		return;
 	  			}else if (powerup.value().powerup == REVERSE_GRAVITY){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/bounce.normal.png", std::nullopt, std::nullopt);
+          setPowerupTexture(paths::TEXTURE_POWERUP_BOUNCE_NORMAL, std::nullopt, std::nullopt);
 	 		  		return;
 	  			}else if (powerup.value().powerup == TELEPORT){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.png", std::nullopt, std::nullopt);
+          setPowerupTexture(paths::TEXTURE_POWERUP_TELEPORT, std::nullopt, std::nullopt);
 	 		  		return;
 	  			}else if (powerup.value().powerup == INVINCIBILITY){
-	 		  		setPowerupTexture("../gameresources/build/textures/ballgame/teleport.normal.png", powerup.value().useTime, powerup.value().duration);
+          setPowerupTexture(paths::TEXTURE_POWERUP_TELEPORT_NORMAL, powerup.value().useTime, powerup.value().duration);
 	 		  		return;
 	  			}else{
 	  				modassert(false, "invalid powerup size ball.cpp");
@@ -1606,7 +1606,7 @@ GameTypeInfo getBallMode(){
 	  		}
 	  	
 
-  		setPowerupTexture("../gameresources/build/textures/ballgame/none.png", std::nullopt, std::nullopt);
+        setPowerupTexture(paths::TEXTURE_POWERUP_NONE, std::nullopt, std::nullopt);
 
 
 			if (isRhythmEnd()){

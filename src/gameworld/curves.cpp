@@ -1,4 +1,5 @@
 #include "./curves.h"
+#include "../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -458,7 +459,7 @@ void generateMeshForRail(objid sceneId, LinePoints& linePoints){
     .attr = {
 			{ "mesh", meshName },
 			{ "position", glm::vec3(0.f, -0.2f, 0.f) },
-			{ "texture", "./res/textures/wood.jpg" },
+			{ "texture", paths::TEXTURE_WOOD },
 		}
   };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;

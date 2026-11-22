@@ -22,7 +22,7 @@ void createGlassTexture(objid id){
 		.id = glassTextureId,
 		.name = textureName,
 	};
-    gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.75f), glassTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+    gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.75f), glassTextureId, true, std::nullopt, paths::TEXTURE_WATER, std::nullopt);
     setGameObjectTexture(id, objIdToGlassTexture.at(id).name);
 }
 
@@ -45,7 +45,7 @@ bool maybeAddGlassBulletHole(objid id, objid playerId){
   	auto ndiCoord = uvToNdi(getGlobalState().control.texCoordUvView);
 	float bulletHoleSize = randomNumber(0.f, 0.1f) + 0.1;
 
-	 gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTexture.id, true, std::nullopt, "./res/textures/glassbroken.png", std::nullopt);
+	 gameapi -> drawRect(ndiCoord.x /*centerX*/, ndiCoord.y /*centerY*/, bulletHoleSize, bulletHoleSize, false, glm::vec4(1.f, 1.f, 1.f, 0.8f), glassTexture.id, true, std::nullopt, paths::TEXTURE_GLASSBROKEN, std::nullopt);
 	return true;
 }
 
@@ -62,7 +62,7 @@ void addLaser(objid id, float length){
 
 		GameobjAttributes emitterAttr { 
   		.attr = {
- 				{ "effekseer", "./res/particles/Laser02.efkefc" },
+        { "effekseer", paths::PARTICLE_LASER },
  				{ "state", "enabled" },
  				{ "killplane", "true" },
   		} 

@@ -99,7 +99,7 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
       auto tint = parseVec4(hitDecal -> value, "tint");
       std::cout << "hit decal size: " << print(size) << std::endl;
       materialToParticle.hitDecal = HitDecal {
-        .texture = textureValue -> value.IsString() ? textureValue -> value.GetString() : "./res/textures/wood.jpg",
+        .texture = textureValue -> value.IsString() ? textureValue -> value.GetString() : paths::TEXTURE_WOOD,
         .size = size.has_value() ? size.value() : glm::vec2(1.f, 1.f),
         .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
       };
@@ -207,19 +207,19 @@ struct EffekData {
   std::optional<glm::vec4> tint;
 };
 std::unordered_map<std::string, EffekData> effects {
-    { "electric", EffekData { .name = "electric", .path  = "./res/particles/electric.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
-    { "killeffect", EffekData { .name = "killeffect", .path  = "./res/particles/backgrounds.efkefc", .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
-    { "warp", EffekData { .name = "warp",  .path  = "./res/particles/warp.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f)  }},
+    { "electric", EffekData { .name = "electric", .path  = paths::PARTICLE_ELECTRIC_FILE, .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
+    { "killeffect", EffekData { .name = "killeffect", .path  = paths::PARTICLE_BACKGROUNDS, .scale = glm::vec3(0.2f, 0.2f, 0.2f)  }},
+    { "warp", EffekData { .name = "warp",  .path  = paths::PARTICLE_WARP, .scale = glm::vec3(0.4f, 0.4f, 0.4f)  }},
    
-    { "rain", EffekData { .name = "rain", .path  = "./res/particles/rain2.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
-    { "splash", EffekData { .name = "splash", .path  = "./res/particles/splash.efkefc" }},
+    { "rain", EffekData { .name = "rain", .path  = paths::PARTICLE_RAIN, .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "splash", EffekData { .name = "splash", .path  = paths::PARTICLE_SPLASH }},
 
 
-    { "fire", EffekData { .name = "fire", .path  = "./res/particles/fire.efkefc", .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
-    { "fog", EffekData { .name = "fog",  .path  = "./res/particles/fog.efkefc", .scale = glm::vec3(6.f, 6.f, 6.f) }},
+    { "fire", EffekData { .name = "fire", .path  = paths::PARTICLE_FIRE, .scale = glm::vec3(0.4f, 0.4f, 0.4f) }},
+    { "fog", EffekData { .name = "fog",  .path  = paths::PARTICLE_FOG, .scale = glm::vec3(6.f, 6.f, 6.f) }},
 
-    { "sparks", EffekData { .name = "sparks", .path  = "./res/particles/sparks.efkefc" , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
-    { "firework", EffekData { .name = "firework", .path  = "./res/particles/firework.efkefc"  }},
+    { "sparks", EffekData { .name = "sparks", .path  = paths::PARTICLE_SPARKS , .scale = glm::vec3(0.1f, 0.1f, 0.1f) }},
+    { "firework", EffekData { .name = "firework", .path  = paths::PARTICLE_FIREWORK  }},
 };
 
 
@@ -477,7 +477,7 @@ void emitFog(glm::vec3 position){
 
 void makeDecal(MaterialToParticle& material, glm::vec3 position, glm::quat rotation, objid parent){
   std::unordered_map<std::string, AttributeValue> attrAttributes = { 
-    { "mesh", "../gameresources/build/primitives/plane_xy_1x1.gltf" }, 
+    { "mesh", paths::MODEL_PLANE },
     { "texture", material.hitDecal.value().texture },
     { "scale", glm::vec3(0.01f * material.hitDecal.value().size.x, 0.01f * material.hitDecal.value().size.y, 0.01f) },
     { "tint", material.hitDecal.value().tint },

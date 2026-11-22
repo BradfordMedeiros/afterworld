@@ -1,4 +1,5 @@
 #include "./boot.h"
+#include "../../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 extern GameTypes gametypeSystem;
@@ -22,7 +23,7 @@ DebugMenu createMenu(){
 	for (auto& game : allGames){
 		games.push_back(DebugMenu {
 			.label = game.displayName,
-			.image = "./res/textures/wood.jpg",
+			.image = paths::TEXTURE_WOOD,
 			.fn = [game](DebugMenu&) -> void {
 				platform::startGame(game.name);
 			},

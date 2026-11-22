@@ -207,7 +207,7 @@ void drawTennis(std::any& any, std::optional<objid> textureId){
   Tennis* tennisPtr = anycast<Tennis>(any);
   Tennis& tennis = *tennisPtr;
 
-	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(.1f, .1f, .1f, 1.f), textureId, true, std::nullopt, "./res/textures/hexglow.png", std::nullopt);
+	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(.1f, .1f, .1f, 1.f), textureId, true, std::nullopt, paths::UI_HEXGLOW, std::nullopt);
 
   drawRightText(std::to_string(tennis.scorePlayerOne) + " - " + std::to_string(tennis.scorePlayerTwo), 0.f, 0.8f, 0.04f, glm::vec4(1.f, 1.f, 1.f, 0.6f), std::nullopt, std::nullopt);
 

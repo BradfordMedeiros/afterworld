@@ -1,8 +1,9 @@
 #include "./fur.h"
+#include "../../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
-const std::string FUR_SHELL_SHADER_NAME = "../afterworld/shaders/fur_shell/fragment.glsl,../afterworld/shaders/fur_shell/vertex.glsl,../afterworld/shaders/fur_shell/geometry.glsl";
+const std::string FUR_SHELL_SHADER_NAME = std::string(paths::SHADER_FUR_FRAGMENT) + "," + paths::SHADER_FUR_VERTEX + "," + paths::SHADER_FUR_GEOMETRY;
 
 void renderFurShellPanel(bool includePanel) {
   static float furLength = 0.08f;

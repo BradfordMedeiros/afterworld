@@ -6,8 +6,8 @@ extern CustomApiBindings* gameapi;
 
 int getNumberOfPlayers();
 
-const std::string GRASS_SHADER_NAME = "../afterworld/shaders/grass/fragment.glsl,../afterworld/shaders/grass/vertex.glsl";
-const std::string FUR_SHELL_SHADER_NAME = "../afterworld/shaders/fur_shell/fragment.glsl,../afterworld/shaders/fur_shell/vertex.glsl,../afterworld/shaders/fur_shell/geometry.glsl";
+const std::string GRASS_SHADER_NAME = std::string(paths::SHADER_GRASS_FRAGMENT) + "," + paths::SHADER_GRASS_VERTEX;
+const std::string FUR_SHELL_SHADER_NAME = std::string(paths::SHADER_FUR_FRAGMENT) + "," + paths::SHADER_FUR_VERTEX + "," + paths::SHADER_FUR_GEOMETRY;
 
 void updateShaderWind(const std::string& shaderName, float windStrength) {
   auto shaderId = gameapi -> shaderByName(shaderName);
@@ -51,12 +51,12 @@ struct WeatherEffect {
 
 std::unordered_map<std::string, WeatherEffect> weatherEffects {
   { "rain", WeatherEffect { 
-      .path =  "./res/particles/rain2.efkefc",
+      .path =  paths::PARTICLE_RAIN,
       .windStrength = 0.7f,
   }},
   { 
     "storm", WeatherEffect {
-      .path =  "./res/particles/rain2.efkefc",
+      .path =  paths::PARTICLE_RAIN,
       .flash = true,
       .windStrength = 1.5f,
   }},

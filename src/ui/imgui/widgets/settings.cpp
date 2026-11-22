@@ -362,7 +362,7 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
         .zIndex = -1,
       };
 
-      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.5f), std::nullopt /*textureId*/, true, std::nullopt, "../gameresources/build/textures/backgrounds/test3.png", shapeOptions);
+      gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 1.f, 1.f, 0.5f), std::nullopt /*textureId*/, true, std::nullopt, paths::TEXTURE_BACKGROUND, shapeOptions);
 
 
 
@@ -546,7 +546,7 @@ void renderLevelDetail(bool includePanel){
     float imageHeight = imageWidth * 9.0f / 16.0f;
     ImVec2 imageSize(imageWidth, imageHeight);
 
-    std::string defaultTextureName = "./res/textures/wood.jpg";
+    std::string defaultTextureName = paths::TEXTURE_WOOD;
     auto textureId = gameapi->getTextureSamplerId(selectedLevel.has_value() ? selectedLevel.value().image : defaultTextureName).value();
 
     // Center image horizontally and vertically

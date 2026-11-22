@@ -81,7 +81,7 @@ void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes
 
   attributes.push_back(GameobjAttributeOpts {  
     .field = "shader",
-    .attributeValue = "../afterworld/shaders/ball/fragment.glsl,../afterworld/shaders/ball/vertex.glsl",
+    .attributeValue = std::string(paths::SHADER_BALL_FRAGMENT) + "," + paths::SHADER_BALL_VERTEX,
   });
 
   addTriggerColor(entity, attributes);
@@ -287,7 +287,7 @@ void addWarp(std::vector<GameobjAttributeOpts>& attributes, bool isLevelSelect){
     });
     attributes.push_back(GameobjAttributeOpts {
       .field = "mesh",
-      .attributeValue = "../gameresources/build/uncategorized/warp.gltf",
+      .attributeValue = paths::MODEL_WARP,
     });
     attributes.push_back(GameobjAttributeOpts {
       .field = "physics_shape",
@@ -430,7 +430,7 @@ CompileMapFns getCompileMapForBallGame(){
       });
       attributes.push_back(GameobjAttributeOpts {
         .field = "effekseer",
-        .attributeValue = "./res/particles/spirit-white.efkefc",
+        .attributeValue = paths::PARTICLE_SPIRIT_WHITE,
       });
 
 

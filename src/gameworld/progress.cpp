@@ -1,4 +1,5 @@
 #include "./progress.h"
+#include "../resources/paths.h"
 
 
 extern CustomApiBindings* gameapi;
@@ -542,7 +543,7 @@ std::vector<RawLevelData> getRawLevelData(){
     auto worldName = worldPathData.filename;
  
     auto imageName = filePathData.dirPath + "/map.png";
-    auto image = fileExistsFromPackage(imageName) ? imageName : "./res/textures/wood.jpg";
+    auto image = fileExistsFromPackage(imageName) ? imageName : paths::TEXTURE_WOOD;
     std::cout << "dyn image: " << imageName << ", exists = " << fileExistsFromPackage(imageName) << std::endl;
 
     auto mapName = filePathData.dirPath + "/map.map";

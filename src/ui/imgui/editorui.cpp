@@ -17,7 +17,7 @@ objid makeArcadeObj(objid sceneId){
 
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {
-      { "mesh", "../gameresources/build/uncategorized/arcade.gltf" },
+      { "mesh", paths::MODEL_ARCADE },
       { "tint", glm::vec4(1.f, 1.f, 1.f, 1.f) },
       { "texture", "../ModEngine/res/textures/hexglow.png" },
       { "arcade-cabinet", "true" },

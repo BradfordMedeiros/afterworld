@@ -105,7 +105,7 @@ std::vector<ArrowRender> getArrowRendering(float time, float columnWidth){
 
 
 void drawRhythm(std::any& any, std::optional<objid> textureId){
-	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(.1f, .1f, .1f, 1.f), textureId, true, std::nullopt, "./res/textures/hexglow.png", std::nullopt);
+	gameapi -> drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(.1f, .1f, .1f, 1.f), textureId, true, std::nullopt, paths::UI_HEXGLOW, std::nullopt);
 	gameapi -> drawRect(0.f, 0.8f, 2.f, 0.05f, false, glm::vec4(0.f, 0.f, 1.f, 0.2f), textureId, true, std::nullopt, std::nullopt, std::nullopt);
 
 	float columnWidth = 2.f / 4.f;

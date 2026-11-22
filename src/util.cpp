@@ -1,4 +1,5 @@
 #include "./util.h"
+#include "./resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -520,7 +521,7 @@ objid createObject(objid sceneId, std::string mesh, glm::vec3 position, glm::vec
       { "position", position },
       { "scale", scale },
       { "scrollspeed", glm::vec3(0.2f, 0.2f, 0.f) },
-      { "texture", "./res/textures/cyberguy2.png" },
+      { "texture", paths::TEXTURE_CYBERGUY },
 
 
       { "tint", glm::vec4(1.f, 1.f, 1.f, 0.6f) },

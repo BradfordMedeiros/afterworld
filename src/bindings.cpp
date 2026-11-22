@@ -928,9 +928,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     ensurePrecachedModels(
       gameapi -> rootSceneId(),
       { 
-        "../gameresources/build/weapons/scrapgun.gltf",
-        "../gameresources/build/weapons/electrogun.gltf",
-        "../gameresources/build/weapons/fork.gltf",
+        paths::MODEL_SCRAPGUN,
+        paths::MODEL_ELECTROGUN,
+        paths::MODEL_FORK,
       });
   
     addAnimationController(animationController);
@@ -1168,7 +1168,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
       // this draws a cursor at the pointer
       if (false){
         const glm::vec2 cursorSizeNdi(0.1f, 0.1f);
-        gameapi->drawRect(getGlobalState().control.xNdc, getGlobalState().control.yNdc , cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, "./res/textures/crosshairs/crosshair029.png", ShapeOptions { .zIndex = 6 });
+        gameapi->drawRect(getGlobalState().control.xNdc, getGlobalState().control.yNdc , cursorSizeNdi.x, cursorSizeNdi.y, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, paths::UI_CROSSHAIR, ShapeOptions { .zIndex = 6 });
       }
       
 

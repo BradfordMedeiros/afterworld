@@ -161,7 +161,7 @@ std::string queryInitialBackground(){
 	if (hasOption("background")){
 		return getArgOption("background");
 	}
-	return getSaveStringValue("settings", "background", "../gameresources/textures/backgrounds/test3.png");
+	return getSaveStringValue("settings", "background", paths::TEXTURE_BACKGROUND);
 }
 
 
@@ -186,7 +186,7 @@ void onAddArcadeObj(objid id){
 		std::string textureName = std::string("arcade-texture") + std::to_string(getUniqueObjId());
 		arcadeToTexture[id] = textureName;
 		auto arcadeTextureId = gameapi -> createTexture(textureName, 1000, 1000, id);
-    gameapi -> drawRect(0.f /*centerX*/, 0.f /*centerY*/, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, "./res/textures/water.jpg", std::nullopt);
+    gameapi -> drawRect(0.f /*centerX*/, 0.f, 2.f, 2.f, false, glm::vec4(1.f, 0.f, 1.f, 0.75f), arcadeTextureId, true, std::nullopt, paths::TEXTURE_WATER, std::nullopt);
 		setGameObjectTexture(id, textureName);
   	auto arcadeType = getSingleAttr(id, "arcade");
     addArcadeType(id, arcadeType.value(), arcadeTextureId);

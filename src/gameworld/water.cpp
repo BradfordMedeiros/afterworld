@@ -224,7 +224,7 @@ objid addWaterObj(objid sceneId){
 			{ "scale", glm::vec3(10.f, 10.f, 10.f) },
 			{ "texture",  paths::WATER_TEXTURE },
 			{ "tint", glm::vec4(0.4f, 0.4f, 1.f, 1.f) },
-			{ "shader", "../afterworld/shaders/water/fragment.glsl,../afterworld/shaders/water/vertex.glsl" },
+			{ "shader", std::string(paths::SHADER_WATER_FRAGMENT) + "," + paths::SHADER_WATER_VERTEX },
 		}
   };
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;

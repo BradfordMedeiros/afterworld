@@ -392,7 +392,7 @@ void debugOnKey(int key, int scancode, int action, int mods){
   }
 
   if (key == 'K' && action == 1){
-  	auto midi = loadMidi("../gameresources/sound/midi/nevergiveyouup.mid");
+  auto midi = loadMidi(paths::MIDI_NEVERGIVEYOUP);
   	gameapi -> playMidiFile(midi.value());
 
   	std::cout << "send notify message" << std::endl;

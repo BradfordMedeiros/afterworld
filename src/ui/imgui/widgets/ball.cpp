@@ -644,7 +644,7 @@ void renderRhythmPanel(bool includePanel){
 
     // Background image
 
-    std::string backgroundTexture = "./res/textures/wood.jpg";
+    std::string backgroundTexture = paths::TEXTURE_WOOD;
     auto textureId = gameapi -> getTextureSamplerId(backgroundTexture).value();
 
     float imageTransparency = 0.2f;
