@@ -1466,8 +1466,11 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   return bindings;
 } 
 
-std::vector<const char*> getAdditionalPathsToValidate(){
-  return paths::allResources;
+AdditionalResourceValidation getAdditionalPathsToValidate(){
+  return AdditionalResourceValidation {
+    .additionalPaths = paths::allResources,
+    .additionalAttributes = { "destroy", "config" },
+  };
 }
 
 void setupGameCompileFn(std::unordered_map<std::string, std::string>& args){

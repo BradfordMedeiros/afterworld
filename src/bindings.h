@@ -2,7 +2,9 @@
 #define MOD_AFTERWORLD_BINDING
 
 #include <iostream>
+#include <string>
 #include <vector>
+#include "../../ModEngine/src/resource_validation.h"
 #include <stack>
 #include "./ai/scene_ai.h"
 #include "./animation/scene_animation.h"
@@ -43,7 +45,7 @@
 
 
 std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api);
-std::vector<const char*> getAdditionalPathsToValidate();
+AdditionalResourceValidation getAdditionalPathsToValidate();
 void setupGameCompileFn(std::unordered_map<std::string, std::string>& args);
 
 #endif
