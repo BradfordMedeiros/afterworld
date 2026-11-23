@@ -1,4 +1,5 @@
 #include "./movementcore.h"
+#include "../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 void doAnimationTrigger(objid id, const char* transition);
@@ -178,7 +179,7 @@ MovementParams parseTraitJson(std::string& filePath, std::string& name){
 }
 
 void saveTrait(std::string traitName){
-  std::string filePath = "../afterworld/data/config/fps/traits/";
+  std::string filePath = std::string(paths::TRAIT_CONFIG_DIRECTORY) + "/";
   filePath += traitName + ".json";
 
 
@@ -231,11 +232,11 @@ void saveTrait(std::string traitName){
 }
 
 void initMovementCoreFromConfig(){
-  auto traitFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/fps/traits", { "json" });
+  auto traitFiles = listFilesWithExtensionsFromPackage(paths::TRAIT_CONFIG_DIRECTORY, { "json" });
   
   for (auto& traitFile : traitFiles){
     auto fileInfo = decomposePath(traitFile);
-    auto relativeDir = relativePath("../afterworld/data/config/fps/traits", fileInfo.dirPath, ".");
+    auto relativeDir = relativePath(paths::TRAIT_CONFIG_DIRECTORY, fileInfo.dirPath, ".");
     auto relativeDirVec = split(relativeDir, '/');
     std::cout << print(fileInfo) << std::endl;
     std::cout << relativeDir << ", " << print(relativeDirVec) << std::endl;

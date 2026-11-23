@@ -1,4 +1,5 @@
 #include "./scene_routing.h"
+#include "./resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -273,7 +274,7 @@ ScenarioOptions scenarioOptionsByShortcutName(std::string shortcut){
   ScenarioOptions defaultScenario {
     .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
     .skyboxColor = glm::vec3(0.f, 0.f, 1.f),
-    .skybox = "./res/textures/skyboxs/desert/",
+    .skybox = paths::SKYBOX_DESERT_DIRECTORY,
     .audioClipPath = "",
     .chromatic = glm::vec2(0.f, 0.f),
   };

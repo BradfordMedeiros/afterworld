@@ -38,7 +38,7 @@ Playlist parsePlaylist(std::string filepath){
   Playlist playlist{};
 
   auto fileInfo = decomposePath(filepath);
-  auto relativeDir = relativePath("../afterworld/data/config/playlists/ ", fileInfo.dirPath, ".");
+  auto relativeDir = relativePath(std::string(paths::PLAYLIST_DIRECTORY) + "/ ", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
 
   std::string name = fileInfo.filename;
@@ -99,7 +99,7 @@ Playlist parsePlaylist(std::string filepath){
 
 std::vector<Playlist>  loadPlaylists(){
   std::vector<Playlist> playlists;
-  auto playlistFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/playlists", { "json" });
+  auto playlistFiles = listFilesWithExtensionsFromPackage(paths::PLAYLIST_DIRECTORY, { "json" });
   for (auto& playlistFile : playlistFiles){
     auto playlist = parsePlaylist(playlistFile);
     playlists.push_back(playlist);
@@ -562,7 +562,7 @@ std::vector<RawLevelData> getRawLevelData(){
 
     glm::vec3 ambientLight(0.4f, 0.4f, 0.4f); 
     glm::vec3 skyboxColor(1.f, 1.f, 1.f);
-    std::string skybox("../gameresources/skybox/storm");
+    std::string skybox(paths::SKYBOX_STORM_DIRECTORY);
     std::string description("[no description]");
     std::optional<std::string> backgroundTexture;
     std::optional<std::string> secondaryBackgroundTexture;

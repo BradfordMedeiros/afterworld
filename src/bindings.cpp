@@ -1,4 +1,5 @@
 #include "./bindings.h"
+#include "./resources/paths.h"
 
 CustomApiBindings* gameapi = NULL;
 
@@ -428,7 +429,7 @@ void loadSceneRoute(SceneManagement& sceneManagement, SceneRouteLoadState& route
   static ScenarioOptions defaultSettings {
     .ambientLight = glm::vec3(0.4f, 0.4f, 0.4f),
     .skyboxColor = glm::vec3(1.f, 1.f, 1.f),
-    .skybox = "./res/textures/skyboxs/desert/",
+    .skybox = paths::SKYBOX_DESERT_DIRECTORY,
     .weather = std::nullopt,
   };
   setScenarioOptions(route.scenarioOptions.has_value() ? route.scenarioOptions.value() : defaultSettings);
@@ -1469,6 +1470,7 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
 AdditionalResourceValidation getAdditionalPathsToValidate(){
   return AdditionalResourceValidation {
     .additionalPaths = paths::allFileResources,
+    .additionalDirectories = paths::allDirectoryResources,
     .additionalAttributes = { "destroy", "config" },
   };
 }

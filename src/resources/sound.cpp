@@ -1,4 +1,5 @@
 #include "./sound.h"
+#include "./paths.h"
 #include "../gameworld/save.h"
 
 extern CustomApiBindings* gameapi;
@@ -141,7 +142,7 @@ std::string symbolStrForMixedSound(MixedSound& mixedSound){
 
 MixedSound parseMixedSound(std::string& filepath){
   auto fileInfo = decomposePath(filepath);
-  auto relativeDir = relativePath("../afterworld/data/sounds", fileInfo.dirPath, ".");
+  auto relativeDir = relativePath(paths::SOUND_CONFIG_DIRECTORY, fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
 
   float volume = 1.f;
@@ -228,7 +229,7 @@ MixedSound parseMixedSound(std::string& filepath){
 std::vector<MixedSound> createMixedSounds(){
   std::vector<MixedSound> mixedSounds;
 
-  auto mixedSoundFiles = listFilesWithExtensionsFromPackage("../afterworld/data/sounds", { "json" });
+  auto mixedSoundFiles = listFilesWithExtensionsFromPackage(paths::SOUND_CONFIG_DIRECTORY, { "json" });
 
   for (auto& mixedSoundFile : mixedSoundFiles){
     mixedSounds.push_back(parseMixedSound(mixedSoundFile));

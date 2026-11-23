@@ -12,11 +12,14 @@
 namespace paths {
   #define DEFINE_RESOURCE(name, value) extern const char* name;
   #define DEFINE_FILE_RESOURCE(name, value) extern const char* name;
+  #define DEFINE_DIRECTORY_RESOURCE(name, value) extern const char* name;
     #include "./path_defs.h"
   #undef DEFINE_RESOURCE
   #undef DEFINE_FILE_RESOURCE
+  #undef DEFINE_DIRECTORY_RESOURCE
   
   extern std::vector<const char*> allFileResources;
+  extern std::vector<const char*> allDirectoryResources;
 
 }
 

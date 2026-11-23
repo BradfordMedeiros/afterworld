@@ -1,4 +1,5 @@
 #include "./materials.h"
+#include "./paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -52,7 +53,7 @@ GameobjAttributes particleAttributes(std::string& particle){
 
 MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
   auto fileInfo = decomposePath(filepath);
-  auto relativeDir = relativePath("../afterworld/data/config/materials/ ", fileInfo.dirPath, ".");
+  auto relativeDir = relativePath(std::string(paths::MATERIAL_CONFIG_DIRECTORY) + "/ ", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
   std::string name = fileInfo.filename;
 
@@ -127,7 +128,7 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
 
 std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   std::vector<MaterialToParticle> materialToParticles;
-  auto materialFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/materials", { "json" });
+  auto materialFiles = listFilesWithExtensionsFromPackage(paths::MATERIAL_CONFIG_DIRECTORY, { "json" });
   for (auto &materialFile : materialFiles){
     auto material = parseMaterial(sceneId, materialFile);
     materialToParticles.push_back(material);
@@ -242,7 +243,7 @@ ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath){
   }
 
   auto fileInfo = decomposePath(filepath);
-  auto relativeDir = relativePath("../afterworld/data/config/particles/ ", fileInfo.dirPath, ".");
+  auto relativeDir = relativePath(std::string(paths::PARTICLE_CONFIG_DIRECTORY) + "/ ", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
   std::string name = fileInfo.filename;
 
@@ -294,7 +295,7 @@ ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath){
 ParticleEmitters loadParticleEmittersFromConfig(objid sceneId){
   ParticleEmitters particleEmitters;
 
-  auto particleEmitterFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/particles/", { "json" });
+  auto particleEmitterFiles = listFilesWithExtensionsFromPackage(paths::PARTICLE_CONFIG_DIRECTORY, { "json" });
   for (auto &particleEmitterFile : particleEmitterFiles){
     auto particleEmitterVariant = parseParticleEmitter(sceneId, particleEmitterFile);
     auto particleEmitterPtr = std::get_if<ParticleAndEmitter>(&particleEmitterVariant);

@@ -1,4 +1,5 @@
 #include "./rhythm.h"
+#include "../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -262,7 +263,7 @@ void writeBallConfig(std::string midiFile){
 }
 
 std::unordered_map<std::string, RawSongData> loadAllSongs(){
-  auto songFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/ball/songs/", { "json" });
+  auto songFiles = listFilesWithExtensionsFromPackage(paths::SONG_DIRECTORY, { "json" });
 
   std::unordered_map<std::string, RawSongData> songs;
   for (auto& songFile : songFiles){

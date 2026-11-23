@@ -1,4 +1,5 @@
 #include "./ball.h"
+#include "../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 extern GLFWwindow* window;
@@ -618,17 +619,17 @@ void startBallMode(objid sceneId){
 
 	auto ballShader = gameapi -> shaderByName(BALL_SHADER_NAME);
 	if (!ballShader.has_value()){
-		auto loadedShader = gameapi -> loadShader(BALL_SHADER_NAME, "../afterworld/shaders/ball");
+		auto loadedShader = gameapi -> loadShader(BALL_SHADER_NAME, paths::SHADER_BALL_DIRECTORY);
 		modassert(loadedShader != nullptr, "could not load the ball shader");
 	}
 	auto ballEyeShader = gameapi -> shaderByName(BALL_EYE_SHADER_NAME);
 	if (!ballEyeShader.has_value()){
-		auto loadedShader = gameapi -> loadShader(BALL_EYE_SHADER_NAME, "../afterworld/shaders/ball-eye");
+		auto loadedShader = gameapi -> loadShader(BALL_EYE_SHADER_NAME, paths::SHADER_BALL_EYE_DIRECTORY);
 		modassert(loadedShader != nullptr, "could not load the ball eye shader");
 	}
 	auto grassShader = gameapi -> shaderByName(GRASS_SHADER_NAME);
 	if (!grassShader.has_value()){
-		auto loadedShader = gameapi -> loadShader(GRASS_SHADER_NAME, "../afterworld/shaders/grass");
+		auto loadedShader = gameapi -> loadShader(GRASS_SHADER_NAME, paths::SHADER_GRASS_DIRECTORY);
 		modassert(loadedShader != nullptr, "could not load the grass shader");
 	}
 

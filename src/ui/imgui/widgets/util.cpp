@@ -1,4 +1,5 @@
 #include "./util.h"
+#include "../../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 extern ConsoleInterface consoleInterface;
@@ -15,9 +16,9 @@ void goToLevel(std::string levelShortName, std::optional<std::any> hint, bool fo
 void setSkybox(std::string skybox);
 std::vector<std::string> uiListLevelSkyboxes(){
   return { 
-    "../gameresources/skybox/space1",
-    "./res/textures/skyboxs/desert/",
-    "../gameresources/skybox/storm",
+    paths::SKYBOX_SPACE_DIRECTORY,
+    paths::SKYBOX_DESERT_DIRECTORY,
+    paths::SKYBOX_STORM_DIRECTORY,
   };
 }
 std::optional<std::string> currentWeather();
@@ -1004,7 +1005,7 @@ void drawFade(){
       if (textureId.has_value()){
         static unsigned int* letterboxShader = nullptr;
         if (letterboxShader == nullptr){
-          letterboxShader = gameapi -> loadShader("storyboard-letterbox", "../afterworld/shaders/letterbox");
+          letterboxShader = gameapi -> loadShader("storyboard-letterbox", paths::SHADER_LETTERBOX_DIRECTORY);
         }
 
         float barHeightNdi = barHeight * 2.f / viewport -> Size.y;

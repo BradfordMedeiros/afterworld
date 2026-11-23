@@ -1,4 +1,5 @@
 #include "./invaders.h"
+#include "../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 extern ArcadeApi arcadeApi;
@@ -110,7 +111,7 @@ std::any createInvaders(objid id){
 	invaders.id = id;
 
 	// Loads its own shader, should make load shader cache stuf
-	invaders.shaderId = gameapi -> loadShader(std::string("arcade-") + std::to_string(getUniqueObjId()), "../afterworld/shaders/arcade");
+	invaders.shaderId = gameapi -> loadShader(std::string("arcade-") + std::to_string(getUniqueObjId()), paths::SHADER_ARCADE_DIRECTORY);
   std::cout << "setting resolution color" << std::endl;
 
 	arcadeApi.ensureTexturesLoaded(id, 

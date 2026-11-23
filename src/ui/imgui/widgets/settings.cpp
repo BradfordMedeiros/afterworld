@@ -1,4 +1,5 @@
 #include "./settings.h"
+#include "../../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -351,7 +352,7 @@ void renderMainMenu2(bool includePanel, LiveMenuFn& liveMenu){
           if (!didLoadShader) {
               shaderId = gameapi->loadShader(
                   "storyboard",
-                  "../afterworld/shaders/storyboard"
+                  paths::SHADER_STORYBOARD
               );
       
               didLoadShader = true;

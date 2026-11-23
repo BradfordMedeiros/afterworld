@@ -1,4 +1,5 @@
 #include "./weapondata.h"
+#include "../../resources/paths.h"
 
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 std::string readFileOrPackage(std::string filepath);
@@ -251,7 +252,7 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
 }
 
 void saveWeaponJson(std::string gunName){
-  std::string filePath = "../afterworld/data/config/fps/guns/";
+  std::string filePath = std::string(paths::GUN_CONFIG_DIRECTORY) + "/";
   filePath += gunName + ".json";
 
 
@@ -356,7 +357,7 @@ void saveWeaponJson(std::string gunName){
 }
 
 void initWeaponsFromConfig(){
-  auto gunFiles = listFilesWithExtensionsFromPackage("../afterworld/data/config/fps/guns", { "json" });
+  auto gunFiles = listFilesWithExtensionsFromPackage(paths::GUN_CONFIG_DIRECTORY, { "json" });
   std::cout << "guns: ";
   for (auto& gunFile : gunFiles){
     std::cout << gunFile << " ";
@@ -366,7 +367,7 @@ void initWeaponsFromConfig(){
 
   for (auto& gunFile : gunFiles){
   	auto fileInfo = decomposePath(gunFile);
-  	auto relativeDir = relativePath("../afterworld/data/config/fps/guns", fileInfo.dirPath, ".");
+  auto relativeDir = relativePath(paths::GUN_CONFIG_DIRECTORY, fileInfo.dirPath, ".");
   	auto relativeDirVec = split(relativeDir, '/');
   	std::cout << print(fileInfo) << std::endl;
   	std::cout << relativeDir << ", " << print(relativeDirVec) << std::endl;

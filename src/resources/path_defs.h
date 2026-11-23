@@ -34,7 +34,13 @@ DEFINE_FILE_RESOURCE(AI_TV_HAPPY_FACE, "../gameresources/textures/enemies/happy.
 
 // CUTSCENES
 ////////////////////////////////////////////////////////////////////////////////////
-DEFINE_FILE_RESOURCE(SHADER_STORYBOARD, "../afterworld/shaders/storyboard")
+DEFINE_DIRECTORY_RESOURCE(SHADER_STORYBOARD, "../afterworld/shaders/storyboard")
+DEFINE_DIRECTORY_RESOURCE(SHADER_BALL_DIRECTORY, "../afterworld/shaders/ball")
+DEFINE_DIRECTORY_RESOURCE(SHADER_BALL_EYE_DIRECTORY, "../afterworld/shaders/ball-eye")
+DEFINE_DIRECTORY_RESOURCE(SHADER_GRASS_DIRECTORY, "../afterworld/shaders/grass")
+DEFINE_DIRECTORY_RESOURCE(SHADER_ARCADE_DIRECTORY, "../afterworld/shaders/arcade")
+DEFINE_DIRECTORY_RESOURCE(SHADER_LETTERBOX_DIRECTORY, "../afterworld/shaders/letterbox")
+DEFINE_DIRECTORY_RESOURCE(SHADER_WATER_DIRECTORY, "../afterworld/shaders/water")
 DEFINE_FILE_RESOURCE(IMAGE_CUTSCENE_HELL, "../afterworld/design/storyboard/hell.jpg")
 DEFINE_FILE_RESOURCE(SHADER_BALL_FRAGMENT, "../afterworld/shaders/ball/fragment.glsl")
 DEFINE_FILE_RESOURCE(SHADER_BALL_VERTEX, "../afterworld/shaders/ball/vertex.glsl")
@@ -145,3 +151,16 @@ DEFINE_FILE_RESOURCE(ARCADE_INTERACT_IMAGE, "../gameresources/textures/arcade/in
 
 // Example missing resource
 DEFINE_FILE_RESOURCE(FAKE_RESOURCE, "../gameresources/textures/arcade/fake-resource.txt")
+
+// Directly used directories
+DEFINE_DIRECTORY_RESOURCE(SKYBOX_DESERT_DIRECTORY, "./res/textures/skyboxs/desert")
+DEFINE_DIRECTORY_RESOURCE(SKYBOX_STORM_DIRECTORY, "../gameresources/skybox/storm")
+DEFINE_DIRECTORY_RESOURCE(SKYBOX_SPACE_DIRECTORY, "../gameresources/skybox/space1")
+DEFINE_DIRECTORY_RESOURCE(SQL_DIRECTORY, "../afterworld/data/sql")
+DEFINE_DIRECTORY_RESOURCE(PLAYLIST_DIRECTORY, "../afterworld/data/config/playlists")
+DEFINE_DIRECTORY_RESOURCE(SONG_DIRECTORY, "../afterworld/data/config/ball/songs")
+DEFINE_DIRECTORY_RESOURCE(GUN_CONFIG_DIRECTORY, "../afterworld/data/config/fps/guns")
+DEFINE_DIRECTORY_RESOURCE(TRAIT_CONFIG_DIRECTORY, "../afterworld/data/config/fps/traits")
+DEFINE_DIRECTORY_RESOURCE(MATERIAL_CONFIG_DIRECTORY, "../afterworld/data/config/materials")
+DEFINE_DIRECTORY_RESOURCE(PARTICLE_CONFIG_DIRECTORY, "../afterworld/data/config/particles")
+DEFINE_DIRECTORY_RESOURCE(SOUND_CONFIG_DIRECTORY, "../afterworld/data/sounds")
