@@ -9,6 +9,7 @@
 
 struct ParticleAndEmitter {
   std::string particle;
+  std::string particleStr;
   objid particleId;
 };
 
@@ -36,6 +37,7 @@ std::optional<objid> createParticleEmitter(objid sceneId, std::string& particleS
 void loadAllMaterials(objid rootSceneId);
 std::vector<MaterialToParticle>& getMaterials();
 bool validateMaterials(std::string resourcePath, bool isDirectory);
+bool validateParticles(std::string resourcePath, bool isDirectory);
 void onCollisionEnterSound(int32_t sceneId, int32_t obj1, int32_t obj2, glm::vec3 pos);
 
 void loadParticleEmitters(objid rootSceneId);

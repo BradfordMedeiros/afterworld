@@ -15,6 +15,10 @@
 #define WEAPON_TYPE "weaponType"
 #endif
 
+#ifndef PARTICLE_TYPE
+#define PARTICLE_TYPE "particleType"
+#endif
+
 // GAMEPLAY
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -209,5 +213,5 @@ DEFINE_DIRECTORY_RESOURCE(SONG_DIRECTORY, "../afterworld/data/config/ball/songs"
 DEFINE_DIRECTORY_RESOURCE(GUN_CONFIG_DIRECTORY, "../afterworld/data/config/fps/guns", WEAPON_TYPE)
 DEFINE_DIRECTORY_RESOURCE(TRAIT_CONFIG_DIRECTORY, "../afterworld/data/config/fps/traits")
 DEFINE_DIRECTORY_RESOURCE(MATERIAL_CONFIG_DIRECTORY, "../afterworld/data/config/materials", MATERIAL_TYPE)
-DEFINE_DIRECTORY_RESOURCE(PARTICLE_CONFIG_DIRECTORY, "../afterworld/data/config/particles")
+DEFINE_DIRECTORY_RESOURCE(PARTICLE_CONFIG_DIRECTORY, "../afterworld/data/config/particles", PARTICLE_TYPE)
 DEFINE_DIRECTORY_RESOURCE(SOUND_CONFIG_DIRECTORY, "../afterworld/data/sounds")

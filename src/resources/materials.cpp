@@ -252,7 +252,7 @@ ParticleEmitters particleEmitters;
 
 typedef std::variant<ParticleAndEmitter, EffekData> ParsedEmitterData;
 
-ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath){
+ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath, bool createObjects){
   auto fileContent = readFileOrPackage(filepath);
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
@@ -270,6 +270,8 @@ ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath){
 
   ParticleAndEmitter particle {
     .particle = name,
+    .particleStr = "",
+    .particleId = 0,
   };
 
 
@@ -300,9 +302,12 @@ ParsedEmitterData parseParticleEmitter(objid rootSceneId, std::string filepath){
       if (particleStr != doc.MemberEnd() && particleStr -> value.IsString()) {
         std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
         std::string particleStrValue = particleStr -> value.GetString();
+        particle.particleStr = particleStrValue;
         auto particleAttr = particleAttributes(particleStrValue);
-        auto particleEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
-        particle.particleId = particleEmitterId.value();
+        if (createObjects){
+          auto particleEmitterId = gameapi -> makeObjectAttr(rootSceneId, "+code-particle-" + std::to_string(getUniqueObjId()), particleAttr, submodelAttributes);
+          particle.particleId = particleEmitterId.value();
+        }
         hasParticleStr = true;
       }       
     }
@@ -316,7 +321,7 @@ ParticleEmitters loadParticleEmittersFromConfig(objid sceneId){
 
   auto particleEmitterFiles = listFilesWithExtensionsFromPackage(paths::PARTICLE_CONFIG_DIRECTORY, { "json" });
   for (auto &particleEmitterFile : particleEmitterFiles){
-    auto particleEmitterVariant = parseParticleEmitter(sceneId, particleEmitterFile);
+    auto particleEmitterVariant = parseParticleEmitter(sceneId, particleEmitterFile, true);
     auto particleEmitterPtr = std::get_if<ParticleAndEmitter>(&particleEmitterVariant);
     auto effekDataPtr = std::get_if<EffekData>(&particleEmitterVariant);
 
@@ -330,6 +335,47 @@ ParticleEmitters loadParticleEmittersFromConfig(objid sceneId){
   } 
 
   return particleEmitters;
+}
+
+bool validateParticles(std::string resourcePath, bool isDirectory){
+  if (!isDirectory){
+    std::cout << "\033[31mError: particle resource must be a directory - file = " << resourcePath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  bool missingFiles = false;
+  auto particleFiles = listFilesWithExtensionsFromPackage(resourcePath, { "json" });
+  for (auto& particleFile : particleFiles){
+    auto parsedParticle = parseParticleEmitter(0, particleFile, false);
+    if (auto effekData = std::get_if<EffekData>(&parsedParticle)){
+      auto particleFilepath = effekData->path;
+      if (!fileExistsFromPackage(particleFilepath)){
+        missingFiles = true;
+        std::cout << "\033[31mError: particle file missing - file = " << particleFilepath << "\033[0m" << std::endl;
+      }
+      continue;
+    }
+
+    auto particleEmitter = std::get_if<ParticleAndEmitter>(&parsedParticle);
+    if (particleEmitter == nullptr){
+      continue;
+    }
+
+    auto particleAttributes = split(particleEmitter->particleStr, ';');
+    for (auto& attribute : particleAttributes){
+      auto keyValue = split(attribute, ':');
+      if (keyValue.size() != 2 || (keyValue.at(0) != "+mesh" && keyValue.at(0) != "+texture" && keyValue.at(0) != "+normal-texture")){
+        continue;
+      }
+
+      if (!fileExistsFromPackage(keyValue.at(1))){
+        missingFiles = true;
+        std::cout << "\033[31mError: particle asset missing - file = " << keyValue.at(1) << "\033[0m" << std::endl;
+      }
+    }
+  }
+
+  return missingFiles;
 }
 
 void loadParticleEmitters(objid rootSceneId){
