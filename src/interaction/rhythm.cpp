@@ -268,8 +268,7 @@ std::string songFilenameFromResourcePath(const std::string& resourcePath){
 
 bool validateSong(std::string resourcePath, bool isDirectory){
   if (!isDirectory){
-    std::cout << "\033[31mError: song resource must be a directory - file = "
-              << resourcePath << "\033[0m" << std::endl;
+    std::cout << "\033[31mError: song resource must be a directory - file = " << resourcePath << "\033[0m" << std::endl;
     return true;
   }
 
@@ -281,14 +280,12 @@ bool validateSong(std::string resourcePath, bool isDirectory){
     auto expectedSongName = songFilenameFromResourcePath(songFile);
     if (songData.name != expectedSongName){
       missingFiles = true;
-      std::cout << "\033[31mError: song resource has an unexpected filename - file = "
-                << songFile << "\033[0m" << std::endl;
+      std::cout << "\033[31mError: song resource has an unexpected filename - file = " << songFile << "\033[0m" << std::endl;
     }
 
     if (!fileExistsFromPackage(songData.file)){
       missingFiles = true;
-      std::cout << "\033[31mError: song file missing - file = "
-                << songData.file << "\033[0m" << std::endl;
+      std::cout << "\033[31mError: song file missing - file = " << songData.file << "\033[0m" << std::endl;
     }
   }
 

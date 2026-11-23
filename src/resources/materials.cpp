@@ -51,7 +51,7 @@ GameobjAttributes particleAttributes(std::string& particle){
 }
 
 
-MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
+MaterialToParticle parseMaterial(std::string filepath){
   auto fileInfo = decomposePath(filepath);
   auto relativeDir = relativePath(std::string(paths::MATERIAL_CONFIG_DIRECTORY) + "/ ", fileInfo.dirPath, ".");
   auto relativeDirVec = split(relativeDir, '/');
@@ -126,11 +126,30 @@ MaterialToParticle parseMaterial(objid sceneId, std::string filepath){
   return materialToParticle;
 }
 
+bool validateMaterials(std::string resourcePath, bool isDirectory){
+  if (!isDirectory){
+    std::cout << "\033[31mError: material resource must be a directory - file = " << resourcePath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  bool missingFiles = false;
+  auto materialFiles = listFilesWithExtensionsFromPackage(resourcePath, { "json" });
+  for (auto& materialFile : materialFiles){
+    auto material = parseMaterial(materialFile);
+    if (material.hitDecal.has_value() && !fileExistsFromPackage(material.hitDecal->texture)){
+      missingFiles = true;
+      std::cout << "\033[31mError: material decal texture missing - file = " << material.hitDecal->texture << "\033[0m" << std::endl;
+    }
+  }
+
+  return missingFiles;
+}
+
 std::vector<MaterialToParticle> loadMaterials(objid sceneId){
   std::vector<MaterialToParticle> materialToParticles;
   auto materialFiles = listFilesWithExtensionsFromPackage(paths::MATERIAL_CONFIG_DIRECTORY, { "json" });
   for (auto &materialFile : materialFiles){
-    auto material = parseMaterial(sceneId, materialFile);
+    auto material = parseMaterial(materialFile);
     materialToParticles.push_back(material);
   }
   return materialToParticles;

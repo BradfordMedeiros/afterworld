@@ -1478,6 +1478,9 @@ bool validateAdditionalResource(ResourceDefinition resource){
   if (validationType == "songType"){
     return validateSong(resourcePath, resource.isDirectory);
   }
+  if (validationType == "materialType"){
+    return validateMaterials(resourcePath, resource.isDirectory);
+  }
 
   return false;
 }
