@@ -1,4 +1,5 @@
 #include "./editorui.h"
+#include "../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -165,7 +166,7 @@ void renderMoreUi(){
   if (uiSettings.showGameSettings){
     auto view = viewByName(getSymbol("GameSettings"));
     // drawTools.drawRect(0.f, 0.f, 2.f, 2.f, false, glm::vec4(0.2f, 0.2f, 0.2f, opacity), true, std::nullopt, "../gameresources/build/textures/evilpattern.png", std::nullopt, std::nullopt);
-    renderBackground("game-settings-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
+    renderBackground("game-settings-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  paths::TEXTURE_EVILPATTERN);
     windowOrdering.push_back("game-settings-background");
     windowOrdering.push_back("game-settings");
     windowOrdering.push_back("game-settings-select" );
@@ -224,7 +225,7 @@ void renderMoreUi(){
   }
 
   if (uiSettings.showLevelSelect){
-    renderBackground("level-select-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  "../gameresources/build/textures/evilpattern.png");
+    renderBackground("level-select-background", glm::vec4(0.3f, 0.3f, 0.3f, 0.6f), 1.f, 1.f,  paths::TEXTURE_EVILPATTERN);
 
     ImVec2 screen = ImGui::GetIO().DisplaySize;
     ImGui::SetNextWindowPos(ImVec2(0, 0));

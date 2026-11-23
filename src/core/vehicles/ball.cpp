@@ -1,4 +1,5 @@
 #include "./ball.h"
+#include "../../resources/paths.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -34,7 +35,7 @@ BallConfig ballConfig {
 };
 
 
-static std::string BALL_CONFIG("../afterworld/data/config/ball/ball.json");
+static std::string BALL_CONFIG(paths::BALL_CONFIG);
 
 BallConfig parseBallConfigFromFile(){
   BallConfig ballConfig {

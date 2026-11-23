@@ -75,6 +75,8 @@ DEFINE_FILE_RESOURCE(TERMINAL_BACKGROUND, "../gameresources/build/textures/termi
 DEFINE_FILE_RESOURCE(UI_CROSSHAIR, "./res/textures/crosshairs/crosshair029.png")
 DEFINE_FILE_RESOURCE(UI_TEST_GRADIENT, "./res/textures/testgradient.png")
 DEFINE_FILE_RESOURCE(UI_HEXGLOW, "./res/textures/hexglow.png")
+DEFINE_FILE_RESOURCE(TEXTURE_EVILPATTERN, "../gameresources/build/textures/evilpattern.png")
+DEFINE_FILE_RESOURCE(FONT_OCR, "./res/fonts/ocr.ttf")
 
 // Directly loaded resources
 DEFINE_FILE_RESOURCE(MIDI_NEVERGIVEYOUP, "../gameresources/sound/midi/nevergiveyouup.mid")
@@ -93,6 +95,7 @@ DEFINE_FILE_RESOURCE(TEXTURE_GLASSBROKEN, "./res/textures/glassbroken.png")
 DEFINE_FILE_RESOURCE(TEXTURE_WOOD, "./res/textures/wood.jpg")
 DEFINE_FILE_RESOURCE(TEXTURE_BALL_EYE_BASE, "../afterworld/data/textures/ball/eye_base.png")
 DEFINE_FILE_RESOURCE(TEXTURE_BALL_EYE_PUPIL, "../afterworld/data/textures/ball/eye_pupil.png")
+DEFINE_FILE_RESOURCE(BALL_CONFIG, "../afterworld/data/config/ball/ball.json")
 DEFINE_FILE_RESOURCE(TEXTURE_POWERUP_JUMP, "../gameresources/build/textures/ballgame/jump.png")
 DEFINE_FILE_RESOURCE(TEXTURE_POWERUP_DASH, "../gameresources/build/textures/ballgame/dash.png")
 DEFINE_FILE_RESOURCE(TEXTURE_POWERUP_BOUNCE, "../gameresources/build/textures/ballgame/bounce.png")
