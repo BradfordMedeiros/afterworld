@@ -66,4 +66,6 @@ void saveMixedSound(MixedSound& mixedSound);
 
 int symbolForMixedSound(MixedSound& mixedSound);
 
+bool validateMixedSound(std::string resourcePath);
+
 #endif 

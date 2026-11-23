@@ -1472,9 +1472,8 @@ bool validateAdditionalResource(ResourceDefinition resource){
   std::string validationType = resource.validationType;
 
   std::cout << "custom validator: " << resourcePath << ", type = " << validationType << std::endl;
-  (void)resourcePath;
   if (validationType == "mixedSoundType"){
-    return false;
+    return validateMixedSound(resourcePath);
   }
 
   return false;

@@ -469,3 +469,28 @@ void saveMixedSound(MixedSound& mixedSound){
 
   realfiles::saveFile(mixedSound.soundBinding.filepath, strValue);
 }
+
+bool validateMixedSound(std::string resourcePath){
+  auto resourceFilepath = std::string(paths::SOUND_CONFIG_DIRECTORY) + "/" + resourcePath + ".json";
+  if (!fileExistsFromPackage(resourceFilepath)){
+    std::cout << "\033[31mError: mixed sound resource missing - file = " << resourceFilepath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  auto mixedSound = parseMixedSound(resourceFilepath);
+  auto expectedSoundName = decomposePath(resourcePath).filename;
+  if (mixedSound.soundBinding.sound != expectedSoundName){
+    std::cout << "\033[31mError: mixed sound resource has an unexpected filename - file = "  << resourceFilepath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  bool missingFiles = false;
+  for (auto& clip : mixedSound.clips){
+    if (!fileExistsFromPackage(clip)){
+      missingFiles = true;
+      std::cout << "\033[31mError: mixed sound clip missing - file = " << clip << "\033[0m" << std::endl;
+    }
+  }
+
+  return missingFiles;
+}
