@@ -1475,6 +1475,9 @@ bool validateAdditionalResource(ResourceDefinition resource){
   if (validationType == "mixedSoundType"){
     return validateMixedSound(resourcePath);
   }
+  if (validationType == "songType"){
+    return validateSong(resourcePath, resource.isDirectory);
+  }
 
   return false;
 }

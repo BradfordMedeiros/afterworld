@@ -262,6 +262,39 @@ void writeBallConfig(std::string midiFile){
   std::cout << json << std::endl;
 }
 
+std::string songFilenameFromResourcePath(const std::string& resourcePath){
+  return decomposePath(resourcePath).filename;
+}
+
+bool validateSong(std::string resourcePath, bool isDirectory){
+  if (!isDirectory){
+    std::cout << "\033[31mError: song resource must be a directory - file = "
+              << resourcePath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  bool missingFiles = false;
+  auto songFiles = listFilesWithExtensionsFromPackage(resourcePath, { "json" });
+
+  for (auto& songFile : songFiles){
+    auto songData = parseSongData(songFile);
+    auto expectedSongName = songFilenameFromResourcePath(songFile);
+    if (songData.name != expectedSongName){
+      missingFiles = true;
+      std::cout << "\033[31mError: song resource has an unexpected filename - file = "
+                << songFile << "\033[0m" << std::endl;
+    }
+
+    if (!fileExistsFromPackage(songData.file)){
+      missingFiles = true;
+      std::cout << "\033[31mError: song file missing - file = "
+                << songData.file << "\033[0m" << std::endl;
+    }
+  }
+
+  return missingFiles;
+}
+
 std::unordered_map<std::string, RawSongData> loadAllSongs(){
   auto songFiles = listFilesWithExtensionsFromPackage(paths::SONG_DIRECTORY, { "json" });
 

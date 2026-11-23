@@ -34,9 +34,9 @@ std::vector<ResourceDefinition> allResourceDefinitions = {
 	#define RESOURCE_VALIDATION_TYPE_SELECT(_, validationType, ...) validationType
 	#define RESOURCE_VALIDATION_TYPE(...) \
 		RESOURCE_VALIDATION_TYPE_SELECT(, ##__VA_ARGS__, "")
-	#define DEFINE_RESOURCE(name, value, ...) { name, RESOURCE_VALIDATION_TYPE(__VA_ARGS__) },
-	#define DEFINE_FILE_RESOURCE(name, value, ...) { name, RESOURCE_VALIDATION_TYPE(__VA_ARGS__) },
-	#define DEFINE_DIRECTORY_RESOURCE(name, value, ...) { name, RESOURCE_VALIDATION_TYPE(__VA_ARGS__) },
+	#define DEFINE_RESOURCE(name, value, ...) { name, RESOURCE_VALIDATION_TYPE(__VA_ARGS__), false },
+	#define DEFINE_FILE_RESOURCE(name, value, ...) { name, RESOURCE_VALIDATION_TYPE(__VA_ARGS__), false },
+	#define DEFINE_DIRECTORY_RESOURCE(name, value, ...) { name, RESOURCE_VALIDATION_TYPE(__VA_ARGS__), true },
 		#include "./path_defs.h"
 	#undef DEFINE_RESOURCE
 	#undef DEFINE_FILE_RESOURCE

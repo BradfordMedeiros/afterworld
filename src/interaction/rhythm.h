@@ -82,6 +82,7 @@ void onPressKeyRhythm(int key, int action);
 
 
 std::unordered_map<std::string, RawSongData> loadAllSongs();
+bool validateSong(std::string resourcePath, bool isDirectory);
 
 void doLoadAllSongs();
 
