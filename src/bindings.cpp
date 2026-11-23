@@ -1467,11 +1467,26 @@ std::vector<CScriptBinding> getUserBindings(CustomApiBindings& api){
   return bindings;
 } 
 
+bool validateAdditionalResource(ResourceDefinition resource){
+  std::string resourcePath = resource.path;
+  std::string validationType = resource.validationType;
+
+  std::cout << "custom validator: " << resourcePath << ", type = " << validationType << std::endl;
+  (void)resourcePath;
+  if (validationType == "mixedSoundType"){
+    return false;
+  }
+
+  return false;
+}
+
 AdditionalResourceValidation getAdditionalPathsToValidate(){
   return AdditionalResourceValidation {
     .additionalPaths = paths::allFileResources,
     .additionalDirectories = paths::allDirectoryResources,
     .additionalAttributes = { "destroy", "config" },
+    .additionalResources = paths::allResourceDefinitions,
+    .additionalResourceValidator = validateAdditionalResource,
   };
 }
 
