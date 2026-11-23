@@ -23,6 +23,7 @@ struct LevelProgress {
   std::set<std::string> crystals;
 };
 std::vector<LevelProgress> loadLevelProgress();
+bool validatePlaylists(std::string resourcePath, bool isDirectory);
 void saveLevelProgress();
 int completedLevels();
 void markLevelComplete(std::string name, float time);

@@ -19,6 +19,10 @@
 #define PARTICLE_TYPE "particleType"
 #endif
 
+#ifndef PLAYLIST_TYPE
+#define PLAYLIST_TYPE "playlistType"
+#endif
+
 // GAMEPLAY
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -208,7 +212,7 @@ DEFINE_DIRECTORY_RESOURCE(SKYBOX_DESERT_DIRECTORY, "./res/textures/skyboxs/deser
 DEFINE_DIRECTORY_RESOURCE(SKYBOX_STORM_DIRECTORY, "../gameresources/skybox/storm")
 DEFINE_DIRECTORY_RESOURCE(SKYBOX_SPACE_DIRECTORY, "../gameresources/skybox/space1")
 DEFINE_DIRECTORY_RESOURCE(SQL_DIRECTORY, "../afterworld/data/sql")
-DEFINE_DIRECTORY_RESOURCE(PLAYLIST_DIRECTORY, "../afterworld/data/config/playlists")
+DEFINE_DIRECTORY_RESOURCE(PLAYLIST_DIRECTORY, "../afterworld/data/config/playlists", PLAYLIST_TYPE)
 DEFINE_DIRECTORY_RESOURCE(SONG_DIRECTORY, "../afterworld/data/config/ball/songs", SONG_TYPE)
 DEFINE_DIRECTORY_RESOURCE(GUN_CONFIG_DIRECTORY, "../afterworld/data/config/fps/guns", WEAPON_TYPE)
 DEFINE_DIRECTORY_RESOURCE(TRAIT_CONFIG_DIRECTORY, "../afterworld/data/config/fps/traits")

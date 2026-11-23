@@ -97,6 +97,35 @@ Playlist parsePlaylist(std::string filepath){
   };
 }
 
+bool validatePlaylists(std::string resourcePath, bool isDirectory){
+  if (!isDirectory){
+    std::cout << "\033[31mError: playlist resource must be a directory - file = " << resourcePath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  bool missingFiles = false;
+  auto playlistFiles = listFilesWithExtensionsFromPackage(resourcePath, { "json" });
+  for (auto& playlistFile : playlistFiles){
+    auto playlist = parsePlaylist(playlistFile);
+    std::set<std::string> levelKeys;
+    for (auto& playlistLevel : playlist.levels){
+      auto levelKey = playlistLevel.world + "/" + playlistLevel.level;
+      if (!levelKeys.insert(levelKey).second){
+        missingFiles = true;
+        std::cout << "\033[31mError: duplicate playlist level - file = " << playlistFile << ", level = " << levelKey << "\033[0m" << std::endl;
+      }
+
+      auto levelFile = std::string("../afterworld/scenes/levels/worlds/") + levelKey + "/map.rawscene";
+      if (!fileExistsFromPackage(levelFile)){
+        missingFiles = true;
+        std::cout << "\033[31mError: playlist level missing - file = " << levelFile << "\033[0m" << std::endl;
+      }
+    }
+  }
+
+  return missingFiles;
+}
+
 std::vector<Playlist>  loadPlaylists(){
   std::vector<Playlist> playlists;
   auto playlistFiles = listFilesWithExtensionsFromPackage(paths::PLAYLIST_DIRECTORY, { "json" });

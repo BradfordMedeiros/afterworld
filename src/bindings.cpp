@@ -1487,6 +1487,9 @@ bool validateAdditionalResource(ResourceDefinition resource){
   if (validationType == "particleType"){
     return validateParticles(resourcePath, resource.isDirectory);
   }
+  if (validationType == "playlistType"){
+    return validatePlaylists(resourcePath, resource.isDirectory);
+  }
 
   return false;
 }
