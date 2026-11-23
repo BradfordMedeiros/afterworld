@@ -3,6 +3,7 @@
 
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 std::string readFileOrPackage(std::string filepath);
+bool fileExistsFromPackage(std::string filepath);
 
 std::unordered_map<std::string, WeaponParams> weapons;
 
@@ -354,6 +355,34 @@ void saveWeaponJson(std::string gunName){
   auto strValue = buffer.GetString();
   std::cout << strValue << std::endl;
   realfiles::saveFile(filePath, strValue);
+}
+
+bool validateWeapons(std::string resourcePath, bool isDirectory){
+  if (!isDirectory){
+    std::cout << "\033[31mError: weapon resource must be a directory - file = " << resourcePath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  bool missingFiles = false;
+  auto weaponFiles = listFilesWithExtensionsFromPackage(resourcePath, { "json" });
+  for (auto& weaponFile : weaponFiles){
+    auto fileInfo = decomposePath(weaponFile);
+    auto weapon = parseWeaponJson(weaponFile, fileInfo.filename);
+    if (!weapon.modelpath.empty() && !fileExistsFromPackage(weapon.modelpath)){
+      missingFiles = true;
+      std::cout << "\033[31mError: weapon model missing - file = " << weapon.modelpath << "\033[0m" << std::endl;
+    }
+
+    if (!weapon.soundpath.empty()){
+      auto soundFile = std::string(paths::SOUND_CONFIG_DIRECTORY) + "/" + weapon.soundpath + ".json";
+      if (!fileExistsFromPackage(soundFile)){
+        missingFiles = true;
+        std::cout << "\033[31mError: weapon sound missing - file = " << soundFile << "\033[0m" << std::endl;
+      }
+    }
+  }
+
+  return missingFiles;
 }
 
 void initWeaponsFromConfig(){

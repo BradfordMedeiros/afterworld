@@ -1481,6 +1481,9 @@ bool validateAdditionalResource(ResourceDefinition resource){
   if (validationType == "materialType"){
     return validateMaterials(resourcePath, resource.isDirectory);
   }
+  if (validationType == "weaponType"){
+    return validateWeapons(resourcePath, resource.isDirectory);
+  }
 
   return false;
 }

@@ -46,4 +46,5 @@ std::optional<std::string> selectedWeapon();
 void setSelectedWeapon(std::string gunName);
 
 void initWeaponsFromConfig();
+bool validateWeapons(std::string resourcePath, bool isDirectory);
 void saveWeaponJson(std::string gunName);

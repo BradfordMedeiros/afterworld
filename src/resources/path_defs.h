@@ -11,6 +11,10 @@
 #define MATERIAL_TYPE "materialType"
 #endif
 
+#ifndef WEAPON_TYPE
+#define WEAPON_TYPE "weaponType"
+#endif
+
 // GAMEPLAY
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -202,7 +206,7 @@ DEFINE_DIRECTORY_RESOURCE(SKYBOX_SPACE_DIRECTORY, "../gameresources/skybox/space
 DEFINE_DIRECTORY_RESOURCE(SQL_DIRECTORY, "../afterworld/data/sql")
 DEFINE_DIRECTORY_RESOURCE(PLAYLIST_DIRECTORY, "../afterworld/data/config/playlists")
 DEFINE_DIRECTORY_RESOURCE(SONG_DIRECTORY, "../afterworld/data/config/ball/songs", SONG_TYPE)
-DEFINE_DIRECTORY_RESOURCE(GUN_CONFIG_DIRECTORY, "../afterworld/data/config/fps/guns")
+DEFINE_DIRECTORY_RESOURCE(GUN_CONFIG_DIRECTORY, "../afterworld/data/config/fps/guns", WEAPON_TYPE)
 DEFINE_DIRECTORY_RESOURCE(TRAIT_CONFIG_DIRECTORY, "../afterworld/data/config/fps/traits")
 DEFINE_DIRECTORY_RESOURCE(MATERIAL_CONFIG_DIRECTORY, "../afterworld/data/config/materials", MATERIAL_TYPE)
 DEFINE_DIRECTORY_RESOURCE(PARTICLE_CONFIG_DIRECTORY, "../afterworld/data/config/particles")
