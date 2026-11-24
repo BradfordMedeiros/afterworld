@@ -47,7 +47,7 @@
         1.0
     ],
     "soundpath": "fps/guns/railgun",
-    "modelpath": "../afterworld/data/models/railgun.obj",
+    "modelpath": "../gameresources/build/weapons/railgun.obj",
     "muzzleParticle": "sparks",
     "projectileParticle": "",
     "damage": 100.0
