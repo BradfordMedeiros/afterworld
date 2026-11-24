@@ -19,6 +19,8 @@ void addInventory(std::unordered_map<objid, Inventory>& scopenameToInventory, ob
         { "fork-ammo", 50 },
         { "electrogun",  100 },
         { "electrogun-ammo", 10000 },
+        { "railgun",  1 },
+        { "railgun-ammo", 10 },
       }
     }
   };

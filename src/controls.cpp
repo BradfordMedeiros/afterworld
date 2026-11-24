@@ -247,7 +247,6 @@ std::vector<HotkeyToMessage> hotkeys = {
 			maybeChangeGunUpdateUi("shotgun");
 		},
 	},
-
 	HotkeyToMessage {
 		.key = '8',  
 		.action = 0,
@@ -279,6 +278,13 @@ std::vector<HotkeyToMessage> hotkeys = {
 			}else{
 				gameapi -> clearAnimationPose(getPlayerId().value());
 			}*/
+		},
+	},
+	HotkeyToMessage {
+		.key = '9',
+		.action = 0,
+		.fn = []() -> void {
+			maybeChangeGunUpdateUi("railgun");
 		},
 	},
 	// HotkeyToMessage {
