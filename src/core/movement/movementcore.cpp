@@ -29,15 +29,15 @@ std::unordered_map<std::string, MovementParams> traits;
 
 
 
-MovementParams parseTraitJson(std::string& filePath, std::string& name){
+std::optional<MovementParams> parseTraitJson(std::string& filePath, std::string& name){
   auto fileContent = readFileOrPackage(filePath);
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
 
-  if (doc.HasParseError()){
+  if (!ok || !doc.IsObject()){
     std::cout << "error parsing trait file: " << filePath
               << " (" << fileContent << ")" << std::endl;
-    exit(1);
+    return std::nullopt;
   }
 
   MovementParams moveParams {};
@@ -178,6 +178,25 @@ MovementParams parseTraitJson(std::string& filePath, std::string& name){
   return moveParams;
 }
 
+bool validateTraits(std::string resourcePath, bool isDirectory){
+  if (!isDirectory){
+    std::cout << "\033[31mError: trait resource must be a directory - file = " << resourcePath << "\033[0m" << std::endl;
+    return true;
+  }
+
+  auto traitFiles = listFilesWithExtensionsFromPackage(resourcePath, { "json" });
+  bool hasErrors = false;
+  for (auto& traitFile : traitFiles){
+    auto fileInfo = decomposePath(traitFile);
+    auto trait = parseTraitJson(traitFile, fileInfo.filename);
+    if (!trait.has_value()){
+      hasErrors = true;
+    }
+  }
+
+  return hasErrors;
+}
+
 void saveTrait(std::string traitName){
   std::string filePath = std::string(paths::TRAIT_CONFIG_DIRECTORY) + "/";
   filePath += traitName + ".json";
@@ -245,7 +264,7 @@ void initMovementCoreFromConfig(){
   for (auto& traitFile : traitFiles){
     auto fileInfo = decomposePath(traitFile);
     auto trait = parseTraitJson(traitFile, fileInfo.filename);
-    traits[fileInfo.filename] = trait;
+    traits[fileInfo.filename] = trait.value();
   }
 
 }

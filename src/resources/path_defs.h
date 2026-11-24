@@ -23,6 +23,10 @@
 #define PLAYLIST_TYPE "playlistType"
 #endif
 
+#ifndef TRAIT_TYPE
+#define TRAIT_TYPE "traitType"
+#endif
+
 // GAMEPLAY
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -215,7 +219,7 @@ DEFINE_DIRECTORY_RESOURCE(SQL_DIRECTORY, "../afterworld/data/sql")
 DEFINE_DIRECTORY_RESOURCE(PLAYLIST_DIRECTORY, "../afterworld/data/config/playlists", PLAYLIST_TYPE)
 DEFINE_DIRECTORY_RESOURCE(SONG_DIRECTORY, "../afterworld/data/config/ball/songs", SONG_TYPE)
 DEFINE_DIRECTORY_RESOURCE(GUN_CONFIG_DIRECTORY, "../afterworld/data/config/fps/guns", WEAPON_TYPE)
-DEFINE_DIRECTORY_RESOURCE(TRAIT_CONFIG_DIRECTORY, "../afterworld/data/config/fps/traits")
+DEFINE_DIRECTORY_RESOURCE(TRAIT_CONFIG_DIRECTORY, "../afterworld/data/config/fps/traits", TRAIT_TYPE)
 DEFINE_DIRECTORY_RESOURCE(MATERIAL_CONFIG_DIRECTORY, "../afterworld/data/config/materials", MATERIAL_TYPE)
 DEFINE_DIRECTORY_RESOURCE(PARTICLE_CONFIG_DIRECTORY, "../afterworld/data/config/particles", PARTICLE_TYPE)
 DEFINE_DIRECTORY_RESOURCE(SOUND_CONFIG_DIRECTORY, "../afterworld/data/sounds")

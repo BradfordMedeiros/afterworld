@@ -78,6 +78,7 @@ struct MovementState {
 void initMovementCoreFromConfig();
 MovementParams& movementParamsByName(std::string name);
 void saveTrait(std::string traitName);
+bool validateTraits(std::string resourcePath, bool isDirectory);
 
 MovementParams* findMovementCore(std::string& name);
 void loadMovementCore(std::string& coreName);

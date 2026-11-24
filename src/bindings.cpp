@@ -1490,6 +1490,9 @@ bool validateAdditionalResource(ResourceDefinition resource){
   if (validationType == "playlistType"){
     return validatePlaylists(resourcePath, resource.isDirectory);
   }
+  if (validationType == "traitType"){
+    return validateTraits(resourcePath, resource.isDirectory);
+  }
 
   return false;
 }
