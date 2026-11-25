@@ -313,7 +313,7 @@ void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movemen
   MovementEntity& movementEntity = movementEntityData.movementEntities.at(activeId);
 
   ControlParams& controlParams = getControlParamsByPort(movement, playerPort);
-  controlParams.lookVelocity = glm::vec2(movementEntity.zoomSensitivity * xsensitivity * xPos, movementEntity.zoomSensitivity * ysensitivity * yPos);
+  controlParams.lookVelocity += glm::vec2(movementEntity.zoomSensitivity * xsensitivity * xPos, movementEntity.zoomSensitivity * ysensitivity * yPos);
 }
 
 void onMovementScrollCallback(Movement& movement, double amount, int playerPort){
@@ -326,7 +326,7 @@ glm::quat getLookDirection(MovementEntity& movementEntity){
 }
 
 glm::vec3 getMovementControlData(ControlParams& controlParams, MovementParams& moveParams){
-  static float horzRelVelocity = 0.8f;
+  static float horzRelVelocity = 1.f;
 
   glm::vec3 moveVec(0.f, 0.f, 0.f);
   if (controlParams.goForward){

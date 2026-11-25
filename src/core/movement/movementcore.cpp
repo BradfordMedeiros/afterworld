@@ -323,13 +323,48 @@ float getMoveSpeed(MovementParams& moveParams, MovementState& movementState, boo
   return speed;
 }
 
+void applyMovementFriction(glm::vec3& velocity, float friction, float elapsedTime){
+  glm::vec3 horizontalVelocity(velocity.x, 0.f, velocity.z);
+  float speed = glm::length(horizontalVelocity);
+  if (speed < 0.0001f){
+    velocity.x = 0.f;
+    velocity.z = 0.f;
+    return;
+  }
+
+  float control = glm::max(speed, 1.f);
+  float drop = control * friction * elapsedTime;
+  float newSpeed = glm::max(speed - drop, 0.f);
+  float scale = newSpeed / speed;
+  velocity.x *= scale;
+  velocity.z *= scale;
+}
+
+void accelerateMovement(glm::vec3& velocity, glm::vec3 wishDirection, float wishSpeed, float acceleration, float elapsedTime){
+  wishDirection.y = 0.f;
+  float wishDirectionLength = glm::length(wishDirection);
+  if (wishDirectionLength < 0.0001f || wishSpeed <= 0.f){
+    return;
+  }
+  wishDirection /= wishDirectionLength;
+
+  float currentSpeed = glm::dot(glm::vec3(velocity.x, 0.f, velocity.z), wishDirection);
+  float addSpeed = wishSpeed - currentSpeed;
+  if (addSpeed <= 0.f){
+    return;
+  }
+
+  float accelerationSpeed = acceleration * wishSpeed * elapsedTime;
+  accelerationSpeed = glm::min(accelerationSpeed, addSpeed);
+  velocity += wishDirection * accelerationSpeed;
+}
+
 void updateVelocity(MovementState& movementState, objid id, float elapsedTime, glm::vec3 currPos, bool* _movingDown){ // returns if moveing down
   glm::vec3 displacement = (currPos - movementState.lastPosition) / elapsedTime;
   //auto speed = glm::length(displacement);
   movementState.lastPosition = currPos;
   //std::cout << "velocity = " << print(displacement) << ", speed = " << speed << std::endl;
   movementState.velocity = displacement;
-  modlog("update velocity", print(movementState.velocity));
 
   *_movingDown = displacement.y < 0.f;
 }
@@ -379,8 +414,8 @@ glm::quat weaponLookDirection(MovementState& movementState){
 }
 FirstPersonCameraUpdate look(MovementParams& moveParams, MovementState& movementState, LookParams& lookParams, std::optional<glm::vec2> newRot){
   if (!newRot.has_value()){
-    float raw_deltax = lookParams.turnX * lookParams.elapsedTime;
-    float raw_deltay = lookParams.turnY * lookParams.elapsedTime; 
+    float raw_deltax = lookParams.turnX;
+    float raw_deltay = lookParams.turnY;
 
     float deltax = lookParams.ironsight ? (raw_deltax * lookParams.ironsightTurn) : raw_deltax;
     float deltay = lookParams.ironsight ? (raw_deltay * lookParams.ironsightTurn) : raw_deltay;
@@ -721,14 +756,16 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   }
 
 
-  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
-  //modlog("editor: move speed: ", std::to_string(moveSpeed) + ", is grounded = " + print(isGrounded));
   auto limitedMoveVec = limitMoveDirectionFromCollisions(glm::vec3(movementState.moveVec.x, movementState.moveVec.y, movementState.moveVec.z), hitDirections, rotationWithoutY);
-  //auto limitedMoveVec = moveVec;
   if (!moveParams.moveVertical){
     limitedMoveVec.y = 0.f;
   }
-  auto direction = glm::normalize(glm::vec3(limitedMoveVec.x, limitedMoveVec.y, limitedMoveVec.z));
+  auto direction = limitedMoveVec;
+  if (glm::length(direction) > 0.0001f){
+    direction = glm::normalize(direction);
+  }else{
+    direction = glm::vec3(0.f, 0.f, 0.f);
+  }
   auto isWalking = calcIfWalking(movementState);
   auto isHoldingGun = isEntityInShootingMode(playerId).value();
   animationConfig.isWalking = isWalking;
@@ -738,10 +775,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
 
   auto oldVelocity = getGameObjectVelocity(playerId);
   movementState.newVelocity = oldVelocity;
-
-  auto oppositeVelocity = -1.f * oldVelocity;
-
-  float time = gameapi -> timeElapsed() * 1000;
 
   if (movementState.facingLadder || movementState.attachedToLadder  /* climbing ladder */ ){
     if (movementState.moveVec.x > 0.1f){
@@ -753,71 +786,21 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     }
 
   }else if (isWalking){
-    std::cout << "movement, direction = : " << print(direction) << std::endl;
-
-    // I want counter acceleration here to be a separate variable 
-    // you should be able to slow down faster than 
-    // getting up to speed 
-    {
-      // move absolute
-      auto directionVec = rotationWithoutY * (moveSpeed * direction);
-      if (aboutEqual(glm::length(directionVec), 0.f)){
-        //modassert(false, "magnitude was about zero");
-        modlog("movement", "warning magnitude was about zero");
-      }else{
-        auto towardDirection = directionVec - oldVelocity;
-        auto diffMag = glm::length(towardDirection);
-        
-        // actual magnitude 6
-        // limit  magnitude 2
-        // so limit / actual = divisor
-        // toward * divisor
-        // if limit > actual, divisor = 1
-        float speedLimit = 0.06f;
-        auto ratio = speedLimit / diffMag;
-        if (ratio > 1){
-          ratio = 1.f;
-        }else{
-          std::cout << "Movement ratio limiting: " << diffMag << std::endl;
-        }
-
-        auto finalDir = (time * ratio * towardDirection);
-        finalDir.y = 0.f; // the y is not time adjusted since basically an impulse
-        movementState.newVelocity += finalDir;
-      }
-    }
-
     bool isSideStepping = glm::abs(movementState.moveVec.x) > glm::abs(movementState.moveVec.z);
     animationConfig.isSideStepping = isSideStepping;
     bool isMovingRight = movementState.moveVec.x >= 0.f;
     animationConfig.isMovingRight = isMovingRight;
-
   }
 
-  bool enableFriction = true;
-  float groundFriction  = moveParams.friction;;
-  float airFriction = 0.f;
-  if (enableFriction){
-    float frictionAmount = isWalking ? 0.0f : groundFriction; //0.01f;
-    if (!movementState.isGrounded){
-      frictionAmount = airFriction;
-    }
+  if (movementState.isGrounded && !movementState.inWater){
+    applyMovementFriction(movementState.newVelocity, 6.f, elapsedTime);
+  }
 
-    if (movementState.newVelocity.x > 0.f && (movementState.newVelocity.x + (time * frictionAmount * oppositeVelocity.x)) < 0.f){
-      movementState.newVelocity.x = 0.f;
-    }else if (movementState.newVelocity.x < 0.f && (movementState.newVelocity.x + (time * frictionAmount * oppositeVelocity.x)) > 0.f){
-      movementState.newVelocity.x = 0.f;
-    }else{
-      movementState.newVelocity.x += (time * frictionAmount * oppositeVelocity.x);
-    }
-  
-    if (movementState.newVelocity.z > 0.f && (movementState.newVelocity.z + (time * frictionAmount * oppositeVelocity.z)) < 0.f){
-      movementState.newVelocity.z = 0.f;
-    }else if (movementState.newVelocity.z < 0.f && (movementState.newVelocity.z + (time * frictionAmount * oppositeVelocity.z)) > 0.f){
-      movementState.newVelocity.z = 0.f;
-    }else{
-      movementState.newVelocity.z += (time * frictionAmount * oppositeVelocity.z);
-    }
+  float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
+  if (isWalking && !movementState.facingLadder && !movementState.attachedToLadder){
+    glm::vec3 wishDirection = rotationWithoutY * direction;
+    float acceleration = movementState.isGrounded ? 10.f : 1.f;
+    accelerateMovement(movementState.newVelocity, wishDirection, moveSpeed, acceleration, elapsedTime);
   }
 
 
@@ -851,8 +834,6 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     managedCamera.angleY = movementState.yRot;  
   }
 
-  modlog("movement view first person", print(glm::vec2(movementState.xRot, movementState.yRot)));
-  modlog("movement view third person", print(glm::vec2(managedCamera.angleX, managedCamera.angleY)));
 
   bool movingDown = false;
   updateVelocity(movementState, playerId, elapsedTime, currPos, &movingDown);

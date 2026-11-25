@@ -70,7 +70,6 @@ struct MovementState {
   bool alive;
   bool falling;
 
-
   std::optional<float> reloading;
   std::optional<float> reloadingLength;
 };
