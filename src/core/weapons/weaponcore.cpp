@@ -1,4 +1,5 @@
 #include "./weaponcore.h"
+#include <cmath>
 
 extern CustomApiBindings* gameapi;
 extern bool disableAnimation;
@@ -374,23 +375,12 @@ glm::vec3 calcLocationWithRecoil(GunInstance& weaponValues, glm::vec3 pos, bool 
 }
 
 glm::vec3 smoothVelocity(glm::vec3 lookVelocity){
-  return lookVelocity;
   static glm::vec3 smoothedVel2(0.0f);
-  float velSmoothFactor = 100.0f; // higher = follows player movement faster
+  float velSmoothFactor = 20.0f;
   float dt = gameapi -> timeElapsed();
-  smoothedVel2 += (lookVelocity - smoothedVel2) * (dt * velSmoothFactor);
-
-  auto smoothedVel = smoothedVel2;
-  //if (smoothedVel.x < 0.1 && smoothedVel.x > -0.1){
-  //  smoothedVel.x = 0;
-  //}
-  //if (smoothedVel.y < 0.1 && smoothedVel.y > -0.1){
-  //  smoothedVel.y = 0;
-  //}
-  //if (smoothedVel.z < 0.1 && smoothedVel.z > -0.1){
-  //  smoothedVel.z = 0;
-  //}
-  return smoothedVel;
+  float blend = 1.f - std::exp(-velSmoothFactor * dt);
+  smoothedVel2 += (lookVelocity - smoothedVel2) * glm::clamp(blend, 0.f, 1.f);
+  return smoothedVel2;
 }
 
 glm::vec2 smoothVelocity(glm::vec2 lookVelocity){
@@ -422,8 +412,8 @@ glm::vec3 createNoise(){
   return noiseOffset;
 }
 
-glm::vec3 maxMagSway(0.1f, 0.1f, 0.05f);
-glm::vec3 maxMagSwayRot(0.2f, 0.2f, 0.2f);
+glm::vec3 maxMagSway(0.06f, 0.06f, 0.03f);
+glm::vec3 maxMagSwayRot(0.08f, 0.08f, 0.05f);
 
 float zoomSpeedMultiplier = 5.f;
 float swayVelocity = 1.;
@@ -432,21 +422,9 @@ bool swayTranslation = true;
 bool swayRotation = true;
 
 glm::vec3 springModel(glm::vec3 basePos, glm::vec3 targetPos, bool isGunZoomed, glm::vec3 currentPos){
-  static glm::vec3 velocity(0.0f); // static velocity...okay...maybe should reset this on a gun id or something
-
-  float time = gameapi -> timeElapsed();
-
-  float stiffness = isGunZoomed ? 1400.0f : 1000.0f; // return-to-target speed
-  float damping   = isGunZoomed ? 105.0f : 56.0f;  // how much "friction" slows velocity
-
-  // Spring-damper formula
-  glm::vec3 displacement = targetPos - currentPos;
-  glm::vec3 accel = displacement * stiffness - velocity * damping; // dividing this is effectly mass
-
-  velocity += accel * time;
-  glm::vec3 newPos = currentPos + (velocity * time);
-
-  return newPos;
+  float returnSpeed = isGunZoomed ? 18.f : 14.f;
+  float blend = 1.f - std::exp(-returnSpeed * gameapi -> timeElapsed());
+  return glm::mix(currentPos, targetPos, glm::clamp(blend, 0.f, 1.f));
 }
 
 glm::vec3 lerpModel(glm::vec3 targetPosWithRecoil, glm::vec3 oldGunPos, bool isGunZoomed){
@@ -467,7 +445,6 @@ glm::vec3 swayGunTranslation(GunInstance& weaponValues, bool isGunZoomed, objid 
     normalizedMovement = glm::normalize(movementVec);
   }
   auto smoothedVelocity = smoothVelocity(glm::vec3(maxMagSway.x * normalizedMovement.x, maxMagSway.y *  normalizedMovement.y, maxMagSway.z *  normalizedMovement.z));
-  modlog("sway gun smooth", print(smoothedVelocity));
   auto oldGunPos = gameapi -> getGameObjectPos(gunId, false, "[gamelogic] swayGunTranslation - find gun position");
   
   glm::vec3 maxSway = maxMagSway * (isGunZoomed ? 0.3f : 1.0f);
@@ -482,7 +459,8 @@ glm::vec3 swayGunTranslation(GunInstance& weaponValues, bool isGunZoomed, objid 
 }
 
 glm::quat lerpModel(glm::quat& oldRotation, glm::quat& targetRotation){
-  auto newRotation = glm::slerp(oldRotation, targetRotation, 0.1f);
+  float blend = 1.f - std::exp(-18.f * gameapi -> timeElapsed());
+  auto newRotation = glm::slerp(oldRotation, targetRotation, glm::clamp(blend, 0.f, 1.f));
   return newRotation;
 }
 
@@ -510,7 +488,7 @@ glm::quat swayGunRotation(GunInstance& weaponValues, bool isGunZoomed, glm::vec2
     calcRecoilSlerpAmount(weaponValues.gunCore, weaponValues.gunCore.weaponParams -> recoilLength, true)
   ).y;
 
-  float totalSwayY = limitedSwayY + recoilAmount * 5.f;
+  float totalSwayY = limitedSwayY + recoilAmount;
 
   auto rotation = gameapi -> setFrontDelta(parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), limitedSwayX, totalSwayY, 0.f, 0.1f);
   auto targetRotation = rotation * (isGunZoomed ? weaponValues.gunCore.weaponParams -> ironSightAngle : weaponValues.gunCore.weaponParams -> initialGunRot);
