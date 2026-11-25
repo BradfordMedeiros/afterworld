@@ -297,6 +297,7 @@ void setFreeCam(){
   global.isFreeCam = true;
   global.showEditor = false;
   persistSave("settings", "show-editor", false);
+  setGlobalModeValues(false);
 
   setPlayerFreeCamera(getDefaultPlayerIndex(), true);
 }
