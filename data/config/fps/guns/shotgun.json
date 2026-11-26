@@ -1,7 +1,9 @@
 {
     "firingRate": 100.0,
     "canHold": false,
-    "isIronsight": true,
+    "isIronsight": false,
+    "isZoom": false,
+    "zoomAmount": 4.0,
     "isRaycast": false,
     "minBloom": 0.0,
     "totalBloom": 0.0,

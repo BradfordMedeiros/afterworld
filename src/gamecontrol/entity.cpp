@@ -390,6 +390,7 @@ void setEntityZoom(objid id, float multiplier){
   }else{
     player.zoomAmount = std::nullopt;
   }
+  setZoom(multiplier, isZoomedIn);
   setZoomSensitivity(movementEntities, multiplier, id);
   setZoomAmount(isZoomedIn ? multiplier : std::optional<float>(std::nullopt));
 

@@ -10,6 +10,7 @@
   "canHold": true,
   "isRaycast": false,
   "isIronsight": true,
+  "isZoom": false,
 
   "ironsightOffset": [0.0, -0.3, -1.2],
   "ironSightAngle": [1.0, 0.0, 0.0, 0.0],

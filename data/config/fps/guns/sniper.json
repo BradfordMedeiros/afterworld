@@ -1,0 +1,12 @@
+{
+  "firingRate": 1000.0,
+  "canHold": false,
+  "isIronsight": false,
+  "isZoom": true,
+  "zoomAmount": 10.0,
+  "isRaycast": true,
+  "totalAmmo": 10,
+  "damage": 100.0,
+  "soundpath": "fps/guns/railgun",
+  "modelpath": "../gameresources/weapons/railgun.obj"
+}

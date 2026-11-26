@@ -4,6 +4,7 @@
   "recoilPitchRadians": -0.2,
   "canHold": true,
   "isIronsight": false,
+  "isZoom": false,
   "isRaycast": false,
   "minBloom": 0.0,
   "totalBloom": 1.0,
