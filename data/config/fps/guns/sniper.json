@@ -7,6 +7,6 @@
   "isRaycast": true,
   "totalAmmo": 10,
   "damage": 100.0,
-  "soundpath": "fps/guns/railgun",
+  "soundpath": "fps/guns/sniper",
   "modelpath": "../gameresources/weapons/railgun.obj"
 }
