@@ -7,6 +7,8 @@ struct WeaponParams {
   float firingRate = 1.f;
   bool canHold = false;
   bool isIronsight = false;
+  bool isZoom = false;
+  float zoomAmount = 4.f;
   bool isRaycast = true;
 
   float minBloom = 0.f;

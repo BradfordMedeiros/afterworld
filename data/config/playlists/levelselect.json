@@ -5,89 +5,94 @@
       "world": "w1",
       "par": 90,
       "crystals": [],
-      "unlock" : true
+      "unlock": true
     },
     {
       "level": "w1-2",
       "world": "w1",
       "par": 180.5,
       "crystals": [],
-      "unlock" : true
+      "unlock": true
     },
     {
       "level": "w1-3",
       "world": "w1",
       "par": 90,
       "crystals": [],
-      "unlock" : true
+      "unlock": true
     },
     {
       "level": "w1-4",
       "world": "w1",
       "par": 90,
-      "crystals": ["one", "two"],
-      "unlock" : true
+      "crystals": [
+        "one",
+        "two"
+      ],
+      "unlock": true
     },
-
     {
       "level": "w2-1",
       "world": "w2",
       "par": 90,
       "crystals": [],
-      "unlock" : true
+      "unlock": true
     },
-
-
-
     {
       "level": "boot",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
     },
     {
       "level": "models",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
     },
     {
       "level": "testvideo",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
     },
     {
       "level": "swinfo",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
     },
     {
       "level": "stats",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
     },
     {
       "level": "credits",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
     },
     {
       "level": "ghost",
       "world": "debug",
       "par": 90,
       "crystals": [],
-      "unlock" : false
+      "unlock": false
+    },
+    {
+      "level": "city_rain_rooftop",
+      "world": "fps",
+      "par": 60,
+      "crystals": [],
+      "unlock": false
     }
-
   ]
 }

@@ -248,10 +248,10 @@ std::vector<WeaponsUiUpdate> onWeaponsFrame(Weapons& weapons, objid playerId, gl
   return { weaponsUiUpdate };
 }
 
-const float zoomAmount = 4.f;
 WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int button, int action, objid playerId, float selectDistance){
   std::optional<float> zoomUpdateAmount;
   std::optional<bool> zoomUpdate;
+  auto* weaponParams = weaponsState.weaponValues.gunCore.weaponParams;
   if (isFireButton(button)){
     if (action == 0){
       weaponsState.isHoldingFire = false;
@@ -262,13 +262,17 @@ WeaponsMouseUpdate onWeaponsMouseCallback(WeaponEntityState& weaponsState, int b
   }else if (isAimButton(button)){
     if (action == 0){
       weaponsState.isGunZoomed = false;
-      zoomUpdate = false;
-      zoomUpdateAmount = 1.f;
+      if (weaponParams != NULL && weaponParams -> isZoom){
+        zoomUpdate = false;
+        zoomUpdateAmount = 1.f;
+      }
     }else if (action == 1){
       // select item
       weaponsState.isGunZoomed = true;
-      zoomUpdate = true;
-      zoomUpdateAmount = 1.f / zoomAmount;
+      if (weaponParams != NULL && weaponParams -> isZoom && weaponParams -> zoomAmount > 0.f){
+        zoomUpdate = true;
+        zoomUpdateAmount = 1.f / weaponParams -> zoomAmount;
+      }
     }
   }
   return WeaponsMouseUpdate {

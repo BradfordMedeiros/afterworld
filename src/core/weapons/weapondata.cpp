@@ -121,6 +121,20 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
   }
 
   {
+    auto it = doc.FindMember("isZoom");
+    if (it != doc.MemberEnd() && it -> value.IsBool()) {
+      weaponParams.isZoom = it -> value.GetBool();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("zoomAmount");
+    if (it != doc.MemberEnd() && it -> value.IsFloat() && it -> value.GetFloat() > 0.f) {
+      weaponParams.zoomAmount = it -> value.GetFloat();
+    }
+  }
+
+  {
     auto it = doc.FindMember("isRaycast");
     if (it != doc.MemberEnd() && it -> value.IsBool()) {
       weaponParams.isRaycast = it -> value.GetBool();
@@ -267,6 +281,8 @@ void saveWeaponJson(std::string gunName){
   doc.AddMember("firingRate", weaponParams.firingRate, allocator);
   doc.AddMember("canHold", weaponParams.canHold, allocator);
   doc.AddMember("isIronsight", weaponParams.isIronsight, allocator);
+  doc.AddMember("isZoom", weaponParams.isZoom, allocator);
+  doc.AddMember("zoomAmount", weaponParams.zoomAmount, allocator);
   doc.AddMember("isRaycast", weaponParams.isRaycast, allocator);
   doc.AddMember("minBloom", weaponParams.minBloom, allocator);
   doc.AddMember("totalBloom", weaponParams.totalBloom, allocator);

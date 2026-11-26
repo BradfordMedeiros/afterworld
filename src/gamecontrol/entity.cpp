@@ -404,6 +404,12 @@ bool isEntityGunZoomed(objid id){
   return gunZoomed;
 }
 
+bool isEntityGunIronsight(objid id){
+  auto& weaponState = getWeaponState(weapons, id);
+  auto* weaponParams = weaponState.weaponValues.gunCore.weaponParams;
+  return weaponState.isGunZoomed && weaponParams != NULL && weaponParams -> isIronsight;
+}
+
 std::optional<int> getEntityZoomAmount(objid id){
 	if (!isEntityGunZoomed(id)){
 		return std::nullopt;

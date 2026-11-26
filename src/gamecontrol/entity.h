@@ -96,6 +96,7 @@ std::optional<bool> isEntityReloading(objid id);
 
 void setEntityZoom(objid id, float multiplier);  // TODO restructure to entity id
 bool isEntityGunZoomed(objid id);
+bool isEntityGunIronsight(objid id);
 std::optional<int> getEntityZoomAmount(objid id);
 
 void deliverEntityAmmo(objid id, int ammoAmount);

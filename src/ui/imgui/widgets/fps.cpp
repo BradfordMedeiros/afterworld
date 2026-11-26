@@ -60,6 +60,8 @@ void renderWeaponsPanel(bool includePanel){
 
     ImGui::Checkbox("canHold", &gun.canHold);
     ImGui::Checkbox("isIronsight", &gun.isIronsight);
+    ImGui::Checkbox("isZoom", &gun.isZoom);
+    ImGui::DragFloat("zoomAmount", &gun.zoomAmount, 0.1f, 0.01f);
     ImGui::Checkbox("isRaycast", &gun.isRaycast);
     ImGui::DragFloat("firingRate", &gun.firingRate, 0.01f);
 

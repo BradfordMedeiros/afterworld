@@ -1035,7 +1035,7 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
           });
         }
 
-        auto uiUpdate = onMovementFrame(movementEntities, movement, isEntityGunZoomed, disableTpsMesh, entityUpdates, activePlayers);
+        auto uiUpdate = onMovementFrame(movementEntities, movement, isEntityGunIronsight, disableTpsMesh, entityUpdates, activePlayers);
         setUiSpeed(uiUpdate.velocity, false ? uiUpdate.lookVelocity : std::nullopt);
       }
 
