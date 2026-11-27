@@ -1,12 +1,36 @@
 #include "./fps.h"
+#include "../../core/weapons/weapondata.h"
+#include "../../resources/resources.h"
 
 extern CustomApiBindings* gameapi;
 
 extern Director director;
 extern GameTypes gametypeSystem;
+std::optional<objid> fpsWeaponModelsHandle;
 
 //    .showGameHud = []() -> bool { return getGlobalState().showGameHud && !isPlayerControlDisabled(getDefaultPlayerIndex()); },
 void inputOverride(bool paused, bool showMouse, bool forceHidePauseMenu);
+
+objid precacheFpsWeaponModels(objid sceneId){
+  std::vector<std::string> weaponModels;
+  for (auto& weaponName : getWeaponNames()){
+    auto& weaponParams = getWeaponParamsByGunName(weaponName);
+    if (weaponParams.modelpath.empty()){
+      continue;
+    }
+    bool modelAlreadyPrecached = false;
+    for (auto& precachedModel : weaponModels){
+      if (precachedModel == weaponParams.modelpath){
+        modelAlreadyPrecached = true;
+        break;
+      }
+    }
+    if (!modelAlreadyPrecached){
+      weaponModels.push_back(weaponParams.modelpath);
+    }
+  }
+  return ensurePrecachedModels(sceneId, weaponModels);
+}
 
 GameTypeInfo getFpsMode(){
   GameTypeInfo ballMode = GameTypeInfo {
@@ -30,6 +54,11 @@ GameTypeInfo getFpsMode(){
 
 
 void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePlayer){
+  if (fpsWeaponModelsHandle.has_value()){
+    releasePrecachedModels(fpsWeaponModelsHandle.value());
+    fpsWeaponModelsHandle = std::nullopt;
+  }
+  fpsWeaponModelsHandle = precacheFpsWeaponModels(sceneId);
   GameTypeInfo fpsMode = getFpsMode();
   changeGameType(gametypeSystem, fpsMode, "fps", NULL);
 
@@ -68,5 +97,8 @@ void startFpsMode(objid sceneId, std::optional<std::string> player, bool makePla
 }
 
 void stopFpsMode(){
-
+  if (fpsWeaponModelsHandle.has_value()){
+    releasePrecachedModels(fpsWeaponModelsHandle.value());
+    fpsWeaponModelsHandle = std::nullopt;
+  }
 }

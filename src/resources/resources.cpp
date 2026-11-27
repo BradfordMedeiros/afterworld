@@ -11,6 +11,7 @@ ManagedSounds sounds {
 PrecachedResources precachedResources {
   .models = {},
   .ids = {},
+  .handleIds = {},
 };
 
 objid createSound(objid sceneId, std::string soundObjName, std::string clip, bool loop){
@@ -65,11 +66,8 @@ void unloadManagedTexturesLoaded(objid id){
   }
 }
 
-void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly
-  auto oldIds = precachedResources.ids;
-  precachedResources.models = models;
-
-  std::vector<objid> newIds;
+objid ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // obviously inefficient since could just populate the cache directly
+  auto handleId = getUniqueObjId();
   for (auto &model : models){
     GameobjAttributes attr {
       .attr = {
@@ -80,14 +78,27 @@ void ensurePrecachedModels(objid sceneId, std::vector<std::string> models){  // 
     };
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     auto id = gameapi -> makeObjectAttr(sceneId, std::string("cached-model") + uniqueNameSuffix(), attr, submodelAttributes);
-    newIds.push_back(id.value());
+    precachedResources.models.push_back(model);
+    precachedResources.ids.push_back(id.value());
+    precachedResources.handleIds.push_back(handleId);
 
     gameapi -> setSingleGameObjectAttr(id.value(), "disabled", "true");  // this doesn't work right now?  just putting position at big
   }
-  for (auto id : oldIds){
-    gameapi -> removeObjectById(id);
+  return handleId;
+}
+
+void releasePrecachedModels(objid handleId){
+  PrecachedResources remainingResources;
+  for (size_t i = 0; i < precachedResources.handleIds.size(); i++){
+    if (precachedResources.handleIds.at(i) == handleId){
+      gameapi -> removeObjectById(precachedResources.ids.at(i));
+    }else{
+      remainingResources.models.push_back(precachedResources.models.at(i));
+      remainingResources.ids.push_back(precachedResources.ids.at(i));
+      remainingResources.handleIds.push_back(precachedResources.handleIds.at(i));
+    }
   }
-  precachedResources.ids = newIds;
+  precachedResources = remainingResources;
 }
 
 

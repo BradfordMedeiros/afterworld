@@ -944,14 +944,6 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
     loadAllMaterials(gameapi -> rootSceneId());
     loadParticleEmitters(gameapi -> rootSceneId());
-
-    ensurePrecachedModels(
-      gameapi -> rootSceneId(),
-      { 
-        paths::MODEL_SCRAPGUN,
-        paths::MODEL_ELECTROGUN,
-        paths::MODEL_FORK,
-      });
   
     addAnimationController(animationController);
 

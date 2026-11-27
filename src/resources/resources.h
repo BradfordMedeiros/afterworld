@@ -12,8 +12,10 @@ void unloadManagedTexturesLoaded(objid id);
 struct PrecachedResources {
   std::vector<std::string> models;
   std::vector<objid> ids;
+  std::vector<objid> handleIds;
 };
-void ensurePrecachedModels(objid sceneId, std::vector<std::string> models);
+objid ensurePrecachedModels(objid sceneId, std::vector<std::string> models);
+void releasePrecachedModels(objid handleId);
 
 objid createSound(objid sceneId, std::string soundObjName, std::string clip, bool loop);
 
