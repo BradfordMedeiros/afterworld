@@ -133,6 +133,7 @@ void setSkybox(std::string skybox){
 }
 
 float originalFov = 90.f;
+constexpr float weaponLayerNearPlane = 0.0001f;
 void setZoom(float percentage, bool hideGun){
   gameapi -> setLayerState({
       StrValues {
@@ -149,6 +150,13 @@ void setZoom(float percentage, bool hideGun){
       },
   });    
 
+  gameapi -> setLayerState({
+      StrValues {
+        .target = "no_depth",
+        .attribute = "near",
+        .payload = std::to_string(weaponLayerNearPlane),
+      },
+  });
   gameapi -> setLayerState({
       StrValues {
         .target = "no_depth",
@@ -854,6 +862,14 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
     sceneManagement = createSceneManagement();
     movementEntities = MovementEntityData {};
     selecting = std::nullopt;
+
+    gameapi -> setLayerState({
+      StrValues {
+        .target = "no_depth",
+        .attribute = "near",
+        .payload = std::to_string(weaponLayerNearPlane),
+      },
+    });
 
     addPlayerPort(0);
 
