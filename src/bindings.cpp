@@ -133,7 +133,7 @@ void setSkybox(std::string skybox){
 }
 
 float originalFov = 90.f;
-constexpr float weaponLayerNearPlane = 0.0001f;
+constexpr float weaponLayerNearPlane = 0.01f;
 void setZoom(float percentage, bool hideGun){
   gameapi -> setLayerState({
       StrValues {
