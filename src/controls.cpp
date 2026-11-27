@@ -193,56 +193,56 @@ void testPhysicsObjects(){
 std::vector<HotkeyToMessage> hotkeys = {
 	HotkeyToMessage {
 		.key = 48,  // 0
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("sniper");
 		},
 	},
 	HotkeyToMessage {
 		.key = '1',  // 1
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("pistol");
 		},
 	},
 	HotkeyToMessage {
 		.key = '2',  // 2 
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("electrogun");
 		},
 	},
 	HotkeyToMessage {
 		.key = '3',  // 3
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("scrapgun");
 		},
 	},
 	HotkeyToMessage {
 		.key = '4',  
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("fork");
 		},
 	},
 	HotkeyToMessage {
 		.key = '5',  
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("launcher");
 		},
 	},
 	HotkeyToMessage {
 		.key = '6',  
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("link");
 		},
 	},
 	HotkeyToMessage {
 		.key = '7',  
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("shotgun");
 		},
@@ -282,7 +282,7 @@ std::vector<HotkeyToMessage> hotkeys = {
 	},
 	HotkeyToMessage {
 		.key = '9',
-		.action = 0,
+		.action = 1,
 		.fn = []() -> void {
 			maybeChangeGunUpdateUi("railgun");
 		},
