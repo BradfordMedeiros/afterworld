@@ -33,6 +33,7 @@ struct GunInstance {
   std::optional<objid> muzzleId;
 
   std::optional<objid> thirdPersonGunId;
+  bool thirdPersonGunOnBack = false;
 };
 
 GunCore createGunCoreInstance(std::string gun, objid sceneId);
@@ -44,6 +45,7 @@ struct ThirdPersonWeapon {
 void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGunModel, bool showThirdPersonGun, std::function<objid(objid)> getWeaponParentId, ThirdPersonWeapon thirdPersonWeapon);
 void changeGunAnimate(GunInstance& _weaponValues, std::string gun);
 void removeGun(GunInstance& weaponValues);
+void updateThirdPersonGunBackMount(GunInstance& weaponValues, objid playerId);
 
 void deliverAmmo(objid inventory, std::string gunName, int ammo);
 

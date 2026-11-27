@@ -11,6 +11,17 @@
   "bloomLength": 1.0,
   "totalAmmo": 100,
   "damage": 20.0,
+  "backOffset": [
+    0.0,
+    0.0,
+    -0.15
+  ],
+  "backRotation": [
+    0.6,
+    -19.6,
+    -5.5,
+    338.6
+  ],
   "modelpath": "../gameresources/build/weapons/scrapgun.gltf",
   "soundpath": "fps/guns/scrapgun"
 }

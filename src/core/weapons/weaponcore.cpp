@@ -19,6 +19,62 @@ std::set<objid> entityIdsToEnableForShooting(objid entityId);
 
 
 std::optional<objid> findChildObjBySuffix(objid id, const char* objName);
+std::optional<objid> findBodyPart(objid entityId, const char* part);
+std::optional<bool> isEntityInShootingMode(objid id);
+
+void updateThirdPersonGunBackMount(GunInstance& weaponValues, objid playerId){
+  if (!weaponValues.thirdPersonGunId.has_value()){
+    return;
+  }
+
+  auto shootingMode = isEntityInShootingMode(playerId);
+  if (!shootingMode.has_value()){
+    return;
+  }
+
+  auto gunId = weaponValues.thirdPersonGunId.value();
+  auto& weaponParams = *weaponValues.gunCore.weaponParams;
+  if (shootingMode.value()){
+    auto rightHand = findBodyPart(playerId, "RightHand");
+    if (!rightHand.has_value()){
+      return;
+    }
+
+    auto currentParent = gameapi -> getParent(gunId);
+    if (!currentParent.has_value() || currentParent.value() != rightHand.value()){
+      gameapi -> makeParent(gunId, rightHand.value());
+    }
+    if (weaponValues.thirdPersonGunOnBack || !currentParent.has_value() || currentParent.value() != rightHand.value()){
+      gameapi -> setGameObjectPosition(gunId, glm::vec3(0.f, 0.f, -0.5f), false, Hint { .hint = "updateThirdPersonGunBackMount hand position" });
+      gameapi -> setGameObjectRot(gunId, glm::identity<glm::quat>(), false, Hint { .hint = "updateThirdPersonGunBackMount hand rotation" });
+    }
+    weaponValues.thirdPersonGunOnBack = false;
+    return;
+  }
+
+  auto back = findBodyPart(playerId, "Spine");
+  if (!back.has_value()){
+    back = findBodyPart(playerId, "Chest");
+  }
+  if (!back.has_value()){
+    back = findBodyPart(playerId, "UpperChest");
+  }
+  if (!back.has_value()){
+    return;
+  }
+
+  auto currentParent = gameapi -> getParent(gunId);
+  if (!currentParent.has_value() || currentParent.value() != back.value()){
+    gameapi -> makeParent(gunId, back.value());
+  }
+  weaponValues.thirdPersonGunOnBack = true;
+
+  auto backPosition = gameapi -> getGameObjectPos(back.value(), true, "updateThirdPersonGunBackMount back position");
+  auto backRotation = gameapi -> getGameObjectRotation(back.value(), true, "updateThirdPersonGunBackMount back rotation");
+  gameapi -> setGameObjectPosition(gunId, backPosition + backRotation * weaponParams.backOffset, true, Hint { .hint = "updateThirdPersonGunBackMount back position" });
+  gameapi -> setGameObjectRot(gunId, backRotation * weaponParams.backRotation, true, Hint { .hint = "updateThirdPersonGunBackMount back rotation" });
+}
+
 objid createWeaponInstance(WeaponParams& weaponParams, objid sceneId, objid parentId, std::string& weaponName, std::function<objid(objid)> getWeaponParentId){
   std::unordered_map<std::string, AttributeValue> attrAttributes = { 
     { "mesh", weaponParams.modelpath }, 
@@ -149,6 +205,7 @@ void ensureGunInstance(GunInstance& _gunInstance, objid parentId, bool createGun
     modlog("weapons ensureGunInstance third person", "create weapon instance");
     auto weaponName = std::string("code-weapon-third-") + uniqueNameSuffix();
     _gunInstance.thirdPersonGunId = createThirdPersonWeaponInstance(*gunCore.weaponParams, sceneId, parentId, thirdPersonWeapon, weaponName);
+    _gunInstance.thirdPersonGunOnBack = false;
   }
 
   if (!sameGun){
@@ -181,6 +238,8 @@ void removeGun(GunInstance& weaponValues){
 
   if (weaponValues.thirdPersonGunId.has_value()){
     gameapi -> removeByGroupId(weaponValues.thirdPersonGunId.value());
+    weaponValues.thirdPersonGunId = std::nullopt;
+    weaponValues.thirdPersonGunOnBack = false;
   }
 }
 

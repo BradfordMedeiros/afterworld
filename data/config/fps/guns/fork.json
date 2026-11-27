@@ -11,6 +11,17 @@
   "bloomLength": 0.5,
   "totalAmmo": 20,
   "damage": 20.0,
+  "backOffset": [
+    0.0,
+    0.0,
+    0.25
+  ],
+  "backRotation": [
+    0.0,
+    1.0,
+    0.0,
+    180.0
+  ],
   "modelpath": "../gameresources/build/weapons/fork.gltf",
   "soundpath": "fps/guns/fork"
 }

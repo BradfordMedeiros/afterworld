@@ -233,6 +233,21 @@ WeaponParams parseWeaponJson(std::string filePath, std::string gunName){
     weaponParams.ironSightAngle = parseQuat(weaponParams.initialIronSightAngle);      
   }
 
+  {
+    auto backOffset = parseVec3(doc, "backOffset");
+    if (backOffset.has_value()){
+      weaponParams.backOffset = backOffset.value();
+    }
+  }
+
+  {
+    auto backRotation = parseVec4(doc, "backRotation");
+    if (backRotation.has_value()){
+      weaponParams.backRotationVec4 = backRotation.value();
+    }
+    weaponParams.backRotation = parseQuat(weaponParams.backRotationVec4);
+  }
+
   
 
   {
@@ -331,6 +346,23 @@ void saveWeaponJson(std::string gunName){
     value.PushBack(weaponParams.ironsightOffset.y, allocator);
     value.PushBack(weaponParams.ironsightOffset.z, allocator);
     doc.AddMember("ironsightOffset", value, allocator);
+  }
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.backOffset.x, allocator);
+    value.PushBack(weaponParams.backOffset.y, allocator);
+    value.PushBack(weaponParams.backOffset.z, allocator);
+    doc.AddMember("backOffset", value, allocator);
+  }
+
+  {
+    rapidjson::Value value(rapidjson::kArrayType);
+    value.PushBack(weaponParams.backRotationVec4.x, allocator);
+    value.PushBack(weaponParams.backRotationVec4.y, allocator);
+    value.PushBack(weaponParams.backRotationVec4.z, allocator);
+    value.PushBack(weaponParams.backRotationVec4.w, allocator);
+    doc.AddMember("backRotation", value, allocator);
   }
 
 

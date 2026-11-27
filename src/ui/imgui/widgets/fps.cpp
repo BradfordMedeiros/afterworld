@@ -101,6 +101,13 @@ void renderWeaponsPanel(bool includePanel){
     ImGui::DragFloat("iron-rot-w", &gun.initialIronSightAngle.w, 0.1f);
     gun.ironSightAngle = parseQuat(gun.initialIronSightAngle);    
 
+    ImGui::DragFloat3("back-offset", &gun.backOffset.x, 0.1f);
+    ImGui::DragFloat("back-rot-x", &gun.backRotationVec4.x, 0.1f);
+    ImGui::DragFloat("back-rot-y", &gun.backRotationVec4.y, 0.1f);
+    ImGui::DragFloat("back-rot-z", &gun.backRotationVec4.z, 0.1f);
+    ImGui::DragFloat("back-rot-w", &gun.backRotationVec4.w, 0.1f);
+    gun.backRotation = parseQuat(gun.backRotationVec4);
+
 
     ImGui::DragFloat("damage", &gun.damage, 0.1f);
   }

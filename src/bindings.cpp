@@ -1257,6 +1257,9 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
 
         ControllableEntity& controllableEntity = controllableEntities.at(id);
         MovementEntity& movementEntity = movementEntities.movementEntities.at(id);
+        if (weapons.idToWeapon.find(id) != weapons.idToWeapon.end()){
+          updateThirdPersonGunBackMount(getWeaponState(weapons, id).weaponValues, id);
+        }
 
         if (thirdPersonCamera.has_value()){
           auto controllable = getActiveControllable(player.viewport);

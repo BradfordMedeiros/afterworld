@@ -31,6 +31,9 @@ struct WeaponParams {
   glm::quat ironSightAngle = glm::identity<glm::quat>();
   glm::vec4 initialIronSightAngle = glm::vec4(0.f, 0.f, -1.f, 0.f);
   glm::vec3 ironsightOffset = glm::vec3(0.f, 0.f, 0.f);
+  glm::vec3 backOffset = glm::vec3(0.f, 0.f, 0.25f);
+  glm::vec4 backRotationVec4 = glm::vec4(0.f, 1.f, 0.f, 180.f);
+  glm::quat backRotation = glm::identity<glm::quat>();
 
   glm::vec3 scale = glm::vec3(1.f, 1.f, 1.f);
   std::string soundpath;
