@@ -277,7 +277,6 @@ void setGlobalModeValues(bool isEditorMode){
   showSpawnpoints(director.managedSpawnpoints, isEditorMode);
 }
 
-
 void setEditorMode(){
   // this should be for all players (at least for now i guess)
   showNavbar = true;
@@ -286,7 +285,10 @@ void setEditorMode(){
   persistSave("settings", "show-editor", true);
   setGlobalModeValues(true);
 
+  auto cameraTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
   setPlayerFreeCamera(getDefaultPlayerIndex(), true);
+  gameapi -> moveDefaultCameraAbs(cameraTransform.position);
+  gameapi -> setDefaultCameraRotation(cameraTransform.rotation);
 }
 
 void setNormalMode(){
@@ -307,7 +309,10 @@ void setFreeCam(){
   persistSave("settings", "show-editor", false);
   setGlobalModeValues(false);
 
+  auto cameraTransform = gameapi -> getCameraTransform(getDefaultPlayerIndex());
   setPlayerFreeCamera(getDefaultPlayerIndex(), true);
+  gameapi -> moveDefaultCameraAbs(cameraTransform.position);
+  gameapi -> setDefaultCameraRotation(cameraTransform.rotation);
 }
 
 void setNoClipMode(){
@@ -393,7 +398,6 @@ bool disableGameInput(){
   auto shouldDisable = global.systemConfig.showConsole || !global.routeState.inGameMode || global.showEditor || global.routeState.paused || global.isFreeCam;
   return shouldDisable;
 }
-
 
 bool autostartMode = true;
 void startMode(bool loadedScene){
