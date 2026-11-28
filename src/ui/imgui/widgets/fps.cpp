@@ -284,6 +284,9 @@ void renderFpsHud(bool includePanel){
 
   ImVec2 available = ImGui::GetContentRegionAvail();
   ImVec2 cursor = ImGui::GetCursorPos();
+  if (!includePanel){
+    ImGui::SetCursorPosY(cursor.y + 40.f);
+  }
 
   ImGui::Dummy(ImVec2(0, 30));
 
@@ -323,7 +326,8 @@ void renderFpsHud(bool includePanel){
     ImGui::SameLine();
     ImGui::Text("%s", print(velocity).c_str());
     ImGui::Text("Speed: %.1f  Max: %.1f", uiSpeed, uiMaxSpeedReached);
-    ImGui::ProgressBar(glm::clamp(uiSpeed / 80.f, 0.f, 1.f), ImVec2(-1.f, 8.f));
+    auto speedTextWidth = ImGui::CalcTextSize("Speed: 000.0  Max: 000.0").x;
+    ImGui::ProgressBar(glm::clamp(uiSpeed / 80.f, 0.f, 1.f), ImVec2(speedTextWidth, 8.f));
     ImGui::Text(
       "Can Jump: %s  Can Air Dash: %s  Sliding: %s",
       uiCanJump ? "READY" : "WAIT",
