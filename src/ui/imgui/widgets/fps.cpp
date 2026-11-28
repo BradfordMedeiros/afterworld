@@ -1,4 +1,5 @@
 #include "./fps.h"
+#include "../../../core/movement/movement.h"
 
 extern CustomApiBindings* gameapi;
 
@@ -21,6 +22,10 @@ void renderTraitsPanel(bool includePanel){
   ImGui::SliderFloat("friction", &movementParams.friction, 0.f, 0.1f);
   ImGui::SliderFloat("crouchFriction", &movementParams.crouchFriction, 0.f, 100.f);
   ImGui::Checkbox("Enable Air Dash", &movementParams.enableAirDash);
+  bool grapplingHookEnabled = isGrapplingHookEnabled();
+  if (ImGui::Checkbox("Enable Grappling Hook", &grapplingHookEnabled)){
+    setGrapplingHookEnabled(grapplingHookEnabled);
+  }
   ImGui::Checkbox("Enable Ground Slide", &movementParams.enableGroundSlide);
   ImGui::Checkbox("Enable Surface-Normal Jump", &movementParams.enableSurfaceNormalJump);
   ImGui::SliderFloat("physicsMass", &movementParams.physicsMass, 1.f, 100.f);

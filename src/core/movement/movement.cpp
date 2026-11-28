@@ -1,4 +1,5 @@
 #include "./movement.h"
+#include <limits>
 
 extern CustomApiBindings* gameapi;
 
@@ -6,6 +7,117 @@ std::optional<bool> isEntityInShootingMode(objid id);
 std::optional<objid> findBodyPart(objid entityId, const char* part);
 void setEntityThirdPerson(objid id);
 void setEntityFirstPerson(objid id);
+
+namespace {
+constexpr float grapplingRange = 100.f;
+constexpr float grapplingRopeCorrectionSpeed = 60.f;
+constexpr float grapplingDebugMarkerSize = 0.25f;
+
+bool grapplingHookEnabled = true;
+
+bool isValidGrappleHit(HitObject& hitpoint, objid activeId, objid activeGroup){
+  return hitpoint.id != activeId && gameapi -> groupId(hitpoint.id) != activeGroup;
+}
+
+std::optional<HitObject> closestGrappleHit(std::vector<HitObject>& hitpoints, glm::vec3 origin, objid activeId){
+  objid activeGroup = gameapi -> groupId(activeId);
+  std::optional<HitObject> closestHit;
+  float closestDistanceSquared = std::numeric_limits<float>::max();
+  for (auto& hitpoint : hitpoints){
+    if (!isValidGrappleHit(hitpoint, activeId, activeGroup)){
+      continue;
+    }
+    auto distanceSquared = glm::dot(hitpoint.point - origin, hitpoint.point - origin);
+    if (distanceSquared < closestDistanceSquared){
+      closestDistanceSquared = distanceSquared;
+      closestHit = hitpoint;
+    }
+  }
+  return closestHit;
+}
+
+void drawGrappleMarker(glm::vec3 position, glm::vec4 color, objid ownerId){
+  gameapi -> drawLine(
+    position - glm::vec3(grapplingDebugMarkerSize, 0.f, 0.f),
+    position + glm::vec3(grapplingDebugMarkerSize, 0.f, 0.f),
+    false, ownerId, color, std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    position - glm::vec3(0.f, grapplingDebugMarkerSize, 0.f),
+    position + glm::vec3(0.f, grapplingDebugMarkerSize, 0.f),
+    false, ownerId, color, std::nullopt, std::nullopt
+  );
+  gameapi -> drawLine(
+    position - glm::vec3(0.f, 0.f, grapplingDebugMarkerSize),
+    position + glm::vec3(0.f, 0.f, grapplingDebugMarkerSize),
+    false, ownerId, color, std::nullopt, std::nullopt
+  );
+}
+
+void drawGrappleDebug(MovementEntity& entity, int playerIndex){
+  if (!grapplingHookEnabled){
+    return;
+  }
+  auto cameraTransform = gameapi -> getCameraTransform(playerIndex);
+  auto hitpoints = gameapi -> raycast(
+    cameraTransform.position,
+    cameraTransform.rotation,
+    grapplingRange,
+    std::nullopt
+  );
+  auto closestHit = closestGrappleHit(hitpoints, cameraTransform.position, entity.playerId);
+  std::optional<glm::vec3> candidate;
+  if (closestHit.has_value()){
+    candidate = closestHit.value().point;
+  }
+
+  if (entity.grapplingHeld && entity.grapplingAnchor.has_value()){
+    auto playerPosition = gameapi -> getGameObjectPos(
+      entity.playerId,
+      true,
+      "[gamelogic] grappling hook debug player position"
+    );
+    auto anchor = entity.grapplingAnchor.value();
+    gameapi -> drawLine(
+      playerPosition,
+      anchor,
+      false,
+      entity.playerId,
+      glm::vec4(1.f, 1.f, 0.f, 1.f),
+      std::nullopt,
+      std::nullopt
+    );
+    drawGrappleMarker(anchor, glm::vec4(1.f, 1.f, 0.f, 1.f), entity.playerId);
+    return;
+  }
+
+  auto forward = cameraTransform.rotation * glm::vec3(0.f, 0.f, -1.f);
+  auto target = candidate.value_or(cameraTransform.position + forward * grapplingRange);
+  auto color = candidate.has_value()
+    ? glm::vec4(0.f, 1.f, 0.f, 1.f)
+    : glm::vec4(1.f, 0.f, 0.f, 1.f);
+  gameapi -> drawLine(
+    cameraTransform.position,
+    target,
+    false,
+    entity.playerId,
+    color,
+    std::nullopt,
+    std::nullopt
+  );
+  if (candidate.has_value()){
+    drawGrappleMarker(candidate.value(), color, entity.playerId);
+  }
+}
+}
+
+bool isGrapplingHookEnabled(){
+  return grapplingHookEnabled;
+}
+
+void setGrapplingHookEnabled(bool enabled){
+  grapplingHookEnabled = enabled;
+}
 
 struct AnimGunPosUpdate {
   objid id;
@@ -295,11 +407,48 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
   if (key == 340 /* shift */){
     if (action == 0){
       controlParams.shiftModifier = false;
+      auto entity = movementEntityData.movementEntities.find(activeId);
+      if (entity != movementEntityData.movementEntities.end()){
+        entity->second.grapplingHeld = false;
+        entity->second.grapplingAnchor = std::nullopt;
+        entity->second.grapplingRopeLength = std::nullopt;
+      }
     }else if (action == 1){
       controlParams.shiftModifier = true;
       MovementEntity& entity = movementEntityData.movementEntities.at(activeId);
       if (entity.managedCamera.thirdPersonMode){
         entity.managedCamera.reverseCamera = !entity.managedCamera.reverseCamera;
+      }
+
+      if (grapplingHookEnabled){
+        entity.grapplingHeld = true;
+        entity.grapplingAnchor = std::nullopt;
+        entity.grapplingRopeLength = std::nullopt;
+        auto cameraTransform = gameapi -> getCameraTransform(playerIndex);
+        auto hitpoints = gameapi -> raycast(
+          cameraTransform.position,
+          cameraTransform.rotation,
+          grapplingRange,
+          std::nullopt
+        );
+        auto closestHit = closestGrappleHit(hitpoints, cameraTransform.position, activeId);
+        if (closestHit.has_value()){
+          entity.grapplingAnchor = closestHit.value().point;
+          auto playerPosition = gameapi -> getGameObjectPos(
+            entity.playerId,
+            true,
+            "[gamelogic] grappling hook initial player position"
+          );
+          entity.grapplingRopeLength = glm::length(closestHit.value().point - playerPosition);
+        }
+        if (!entity.grapplingAnchor.has_value()){
+          entity.grapplingHeld = false;
+        }
+      }else{
+        entity.grapplingHeld = false;
+        entity.grapplingAnchor = std::nullopt;
+        entity.grapplingRopeLength = std::nullopt;
+        entity.grapplingRopeLength = std::nullopt;
       }
     }
   }
@@ -410,6 +559,11 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
       ControlParams& controlParams = getControlParamsByPort(movement, player.playerPort);
       if (!controlParams.observeMode){
         MovementEntity& entity = movementEntityData.movementEntities.at(player.activeId);
+        if (!grapplingHookEnabled){
+          entity.grapplingHeld = false;
+          entity.grapplingAnchor = std::nullopt;
+          entity.grapplingRopeLength = std::nullopt;
+        }
         entity.movementState.moveVec = getMovementControlData(controlParams, *entity.moveParams);;
         entity.movementState.speed = 1.f;
         entity.movementState.zoom_delta = controlParams.zoom_delta;
@@ -468,6 +622,44 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
             .rotHint = "[gamelogic] onMovementFrame rotatePlayerModelOnYAxis - rot",
           });
         }
+
+        if (entity.grapplingHeld && entity.grapplingAnchor.has_value()){
+          auto playerPosition = gameapi -> getGameObjectPos(
+            entity.playerId,
+            true,
+            "[gamelogic] grappling hook player position"
+          );
+          glm::vec3 toAnchor = entity.grapplingAnchor.value() - playerPosition;
+          float distance = glm::length(toAnchor);
+          if (!entity.movementState.alive || distance <= 0.001f){
+            entity.grapplingHeld = false;
+            entity.grapplingAnchor = std::nullopt;
+            entity.grapplingRopeLength = std::nullopt;
+          }else{
+            auto ropeDirection = toAnchor / distance;
+            auto velocity = getGameObjectVelocity(entity.playerId);
+            auto radialVelocity = glm::dot(velocity, ropeDirection);
+
+            // A taut rope can pull inward, but it cannot push the player away
+            // from the anchor. Tangential velocity is preserved for swinging.
+            if (radialVelocity < 0.f){
+              velocity -= ropeDirection * radialVelocity;
+            }
+
+            auto ropeLength = entity.grapplingRopeLength.value_or(distance);
+            if (distance > ropeLength){
+              auto correction = glm::min(
+                (distance - ropeLength) * grapplingRopeCorrectionSpeed,
+                grapplingRopeCorrectionSpeed
+              );
+              velocity += ropeDirection * correction;
+            }
+
+            entity.movementState.velocity = velocity;
+            setGameObjectVelocity(entity.playerId, velocity);
+          }
+        }
+        drawGrappleDebug(entity, player.playerPort);
       }
     }
   }

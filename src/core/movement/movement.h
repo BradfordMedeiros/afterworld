@@ -22,6 +22,10 @@ struct MovementEntity {
   MovementState movementState;
   ThirdPersonCameraInfo managedCamera;
 
+  std::optional<glm::vec3> grapplingAnchor;
+  std::optional<float> grapplingRopeLength;
+  bool grapplingHeld = false;
+
   // when set the entity navigates to this location
   std::optional<MovementRequest> targetLocation;
   std::optional<glm::quat> targetRotation;
@@ -69,6 +73,10 @@ struct MovementActivePlayer {
   objid activeId;
   int playerPort;
 };
+
+bool isGrapplingHookEnabled();
+void setGrapplingHookEnabled(bool enabled);
+
 UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movement& movement, std::function<bool(objid)> isGunZoomed, bool disableThirdPersonMesh, std::vector<EntityUpdate>& _entityUpdates, std::vector<MovementActivePlayer>& player);
 
 void setActiveMovementEntity(Movement& movement, bool observeMode, int playerPort);
