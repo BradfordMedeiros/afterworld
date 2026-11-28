@@ -1,0 +1,22 @@
+{
+    "mode": "fps",
+    "chromatic": [
+        0.0,
+        0.0
+    ],
+    "weather": "rain",
+    "skybox": "../gameresources/skybox/storm",
+    "skyboxcolor": [
+        0.07748186588287354,
+        0.07660060375928879,
+        0.004690185654908419
+    ],
+    "backgroundtexture": "",
+    "ambient": [
+        0.4334140419960022,
+        0.4334140419960022,
+        0.4334140419960022
+    ],
+    "description": "No description",
+    "secondarybackgroundtexture": ""
+}

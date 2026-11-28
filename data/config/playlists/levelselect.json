@@ -93,6 +93,20 @@
       "par": 60,
       "crystals": [],
       "unlock": false
+    },
+    {
+      "level": "circuit",
+      "world": "fps",
+      "par": 60,
+      "crystals": [],
+      "unlock": false
+    },
+    {
+      "level": "spacehub",
+      "world": "fps",
+      "par": 60,
+      "crystals": [],
+      "unlock": false
     }
   ]
 }

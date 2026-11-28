@@ -1,0 +1,14 @@
+# Generated scene
+
+entity_worldspawn_0:mesh:../afterworld/scenes/levels/worlds/fps/circuit/map.map
+entity_worldspawn_0:physics_shape:shape_exact
+entity_worldspawn_0:physics:enabled
+entity_worldspawn_0:position:0 0 0
+
+[player:scene:../afterworld/scenes/prefabs/enemy/player.rawscene
+[player:position:0 0 1136
+playerspawn:playerspawn:true
+playerspawn:position:0 100 0
+
+!light:globallight:true
+!light:position:0 0 1600
