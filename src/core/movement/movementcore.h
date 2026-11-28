@@ -26,6 +26,8 @@ struct MovementParams {
   float crouchDelay = 0.f;
   float friction = 0.f;
   float crouchFriction = 0.f;
+  bool enableAirDash = true;
+  bool enableGroundSlide = true;
   float physicsMass = 5.f;
   float physicsRestitution = 0.f;
 };

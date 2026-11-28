@@ -24,6 +24,8 @@
   "crouchScale": 1.0,
   "crouchDelay": 0.0,
   "crouchFriction": 0.0,
+  "enableAirDash": true,
+  "enableGroundSlide": true,
 
   "moveVertical": true
 }

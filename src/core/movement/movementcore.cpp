@@ -162,6 +162,20 @@ std::optional<MovementParams> parseTraitJson(std::string& filePath, std::string&
   }
 
   {
+    auto it = doc.FindMember("enableAirDash");
+    if (it != doc.MemberEnd() && it->value.IsBool()) {
+      moveParams.enableAirDash = it->value.GetBool();
+    }
+  }
+
+  {
+    auto it = doc.FindMember("enableGroundSlide");
+    if (it != doc.MemberEnd() && it->value.IsBool()) {
+      moveParams.enableGroundSlide = it->value.GetBool();
+    }
+  }
+
+  {
     auto it = doc.FindMember("physicsMass");
     if (it != doc.MemberEnd() && it->value.IsFloat()) {
       moveParams.physicsMass = it->value.GetFloat();
@@ -237,6 +251,8 @@ void saveTrait(std::string traitName){
   doc.AddMember("crouchDelay", movementParams.crouchDelay, allocator);
   doc.AddMember("friction", movementParams.friction, allocator);
   doc.AddMember("crouchFriction", movementParams.crouchFriction, allocator);
+  doc.AddMember("enableAirDash", movementParams.enableAirDash, allocator);
+  doc.AddMember("enableGroundSlide", movementParams.enableGroundSlide, allocator);
 
   doc.AddMember("physicsMass", movementParams.physicsMass, allocator);
   doc.AddMember("physicsRestitution", movementParams.physicsRestitution, allocator);
@@ -821,11 +837,11 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     animationConfig.isMovingRight = isMovingRight;
   }
 
-  bool groundSlide = movementState.rightMouseHeld && movementState.isGrounded && !movementState.inWater;
+  bool groundSlide = moveParams.enableGroundSlide && movementState.rightMouseHeld && movementState.isGrounded && !movementState.inWater;
   if (movementState.isGrounded && !movementState.inWater && !movementState.doJump){
     constexpr float normalGroundFriction = 6.f;
     constexpr float heldGroundFriction = 0.75f;
-    auto groundFriction = movementState.rightMouseHeld ? heldGroundFriction : normalGroundFriction;
+    auto groundFriction = groundSlide ? heldGroundFriction : normalGroundFriction;
     applyMovementFriction(movementState.newVelocity, groundFriction, elapsedTime);
   }
 
@@ -836,7 +852,7 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     accelerateMovement(movementState.newVelocity, wishDirection, moveSpeed, acceleration, elapsedTime);
   }
 
-  if (movementState.doAirDash && !movementState.isGrounded){
+  if (moveParams.enableAirDash && movementState.doAirDash && !movementState.isGrounded){
     applyAirDash(moveParams, movementState);
   }
 

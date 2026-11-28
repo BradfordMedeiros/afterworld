@@ -20,6 +20,8 @@
     "crouchDelay": 0.0,
     "friction": 0.0430000014603138,
     "crouchFriction": 45.12200164794922,
+    "enableAirDash": true,
+    "enableGroundSlide": true,
     "physicsMass": 5.0,
     "physicsRestitution": 0.0
 }
