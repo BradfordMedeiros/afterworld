@@ -269,6 +269,11 @@ extern std::optional<std::string> uiWeapon;
 extern std::optional<GemCount> uiGemCount;
 extern std::optional<glm::vec3> uiVelocity;
 extern std::optional<glm::vec2> uiLookVelocity;
+extern float uiSpeed;
+extern float uiMaxSpeedReached;
+extern bool uiCanJump;
+extern bool uiCanAirDash;
+extern bool uiGroundSliding;
 extern bool showActivate;
 extern std::optional<float> zoomAmount;
 
@@ -285,49 +290,53 @@ void renderFpsHud(bool includePanel){
   {
     ImGui::Text("Health: ");
     ImGui::SameLine();
-    ImGui::Text(std::to_string(uiHealth.has_value() ? uiHealth.value().health : 0).c_str());
+    ImGui::Text("%s", std::to_string(uiHealth.has_value() ? uiHealth.value().health : 0).c_str());
     ImGui::SameLine();
-    ImGui::Text(std::to_string(uiHealth.has_value() ? uiHealth.value().totalHealth : 0).c_str());
+    ImGui::Text("%s", std::to_string(uiHealth.has_value() ? uiHealth.value().totalHealth : 0).c_str());
   }
 
   {
     ImGui::Text("Ammo: ");
     ImGui::SameLine();
-    ImGui::Text(std::to_string(ammoInfo.currentAmmo).c_str());
+    ImGui::Text("%s", std::to_string(ammoInfo.currentAmmo).c_str());
     ImGui::SameLine();
-    ImGui::Text(std::to_string(ammoInfo.totalAmmo).c_str());    
+    ImGui::Text("%s", std::to_string(ammoInfo.totalAmmo).c_str());
   }
 
   {
     ImGui::Text("Weapon: ");
     ImGui::SameLine();
-    ImGui::Text((uiWeapon.has_value() ? uiWeapon.value() : std::string("unequipped")).c_str());
+    ImGui::Text("%s", (uiWeapon.has_value() ? uiWeapon.value() : std::string("unequipped")).c_str());
   }
 
   {
     ImGui::Text("Gem Count: ");
     ImGui::SameLine();
-    ImGui::Text((uiGemCount.has_value() ? (std::to_string(uiGemCount.value().currentCount)) : std::to_string(0)).c_str());
+    ImGui::Text("%s", (uiGemCount.has_value() ? (std::to_string(uiGemCount.value().currentCount)) : std::to_string(0)).c_str());
     ImGui::SameLine();
-    ImGui::Text((uiGemCount.has_value() ? (std::to_string(uiGemCount.value().totalCount)) : std::to_string(0)).c_str());
+    ImGui::Text("%s", (uiGemCount.has_value() ? (std::to_string(uiGemCount.value().totalCount)) : std::to_string(0)).c_str());
   }
 
   {
     auto velocity = uiVelocity.has_value()? uiVelocity.value() : glm::vec3(0.f, 0.f, 0.f);
-    glm::ivec3 speedRounded(velocity.x, velocity.y, velocity.z);
-    auto speed = glm::length(velocity);
-    ImGui::Text("Speed: ");
+    ImGui::Text("Velocity: ");
     ImGui::SameLine();
-    ImGui::Text(print(velocity).c_str());
-    ImGui::SameLine();
-    ImGui::Text(std::to_string(speed).c_str());
+    ImGui::Text("%s", print(velocity).c_str());
+    ImGui::Text("Speed: %.1f  Max: %.1f", uiSpeed, uiMaxSpeedReached);
+    ImGui::ProgressBar(glm::clamp(uiSpeed / 80.f, 0.f, 1.f), ImVec2(-1.f, 8.f));
+    ImGui::Text(
+      "Can Jump: %s  Can Air Dash: %s  Sliding: %s",
+      uiCanJump ? "READY" : "WAIT",
+      uiCanAirDash ? "READY" : "USED",
+      uiGroundSliding ? "ON" : "OFF"
+    );
   }
 
   {
     auto lookVelocity = uiLookVelocity.has_value()? uiLookVelocity.value() : glm::vec2(0.f, 0.f);
     ImGui::Text("Look: ");
     ImGui::SameLine();
-    ImGui::Text(print(lookVelocity).c_str());
+    ImGui::Text("%s", print(lookVelocity).c_str());
   }
 
   ImGui::Text(showActivate ? "press e to activate" : "no activate");
@@ -336,7 +345,7 @@ void renderFpsHud(bool includePanel){
     auto zoom = zoomAmount.has_value() ? zoomAmount.value() : 0.f;
     ImGui::Text("Zoom: ");
     ImGui::SameLine();
-    ImGui::Text(std::to_string(zoom).c_str());
+    ImGui::Text("%s", std::to_string(zoom).c_str());
 
     if (zoomAmount.has_value()){
       std::string defaultTextureName = paths::UI_ZOOM_IMAGE;
@@ -382,9 +391,27 @@ void setUiHealth(int player, std::optional<UiHealth> health){
 
 std::optional<glm::vec3> uiVelocity;
 std::optional<glm::vec2> uiLookVelocity;
-void setUiSpeed(std::optional<glm::vec3> velocity, std::optional<glm::vec2> lookVelocity){
+float uiSpeed = 0.f;
+float uiMaxSpeedReached = 0.f;
+bool uiCanJump = false;
+bool uiCanAirDash = false;
+bool uiGroundSliding = false;
+void setUiSpeed(
+  std::optional<glm::vec3> velocity,
+  std::optional<glm::vec2> lookVelocity,
+  float speed,
+  float maxSpeedReached,
+  bool canJump,
+  bool canAirDash,
+  bool groundSliding
+){
   uiVelocity = velocity;
   uiLookVelocity = lookVelocity;
+  uiSpeed = speed;
+  uiMaxSpeedReached = maxSpeedReached;
+  uiCanJump = canJump;
+  uiCanAirDash = canAirDash;
+  uiGroundSliding = groundSliding;
 }
 
 bool showActivate = false;

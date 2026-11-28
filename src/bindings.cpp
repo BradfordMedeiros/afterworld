@@ -1051,7 +1051,15 @@ CScriptBinding afterworldMainBinding(CustomApiBindings& api, const char* name){
         }
 
         auto uiUpdate = onMovementFrame(movementEntities, movement, isEntityGunIronsight, disableTpsMesh, entityUpdates, activePlayers);
-        setUiSpeed(uiUpdate.velocity, false ? uiUpdate.lookVelocity : std::nullopt);
+        setUiSpeed(
+          uiUpdate.velocity,
+          false ? uiUpdate.lookVelocity : std::nullopt,
+          uiUpdate.speed,
+          uiUpdate.maxSpeedReached,
+          uiUpdate.canJump,
+          uiUpdate.canAirDash,
+          uiUpdate.groundSliding
+        );
       }
 
       impulses = {};

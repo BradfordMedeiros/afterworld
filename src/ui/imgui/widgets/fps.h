@@ -25,7 +25,15 @@ struct UiHealth {
 };
 
 void setUiHealth(int player, std::optional<UiHealth> health);
-void setUiSpeed(std::optional<glm::vec3> velocity, std::optional<glm::vec2> lookVelocity);
+void setUiSpeed(
+  std::optional<glm::vec3> velocity,
+  std::optional<glm::vec2> lookVelocity,
+  float speed,
+  float maxSpeedReached,
+  bool canJump,
+  bool canAirDash,
+  bool groundSliding
+);
 void setShowActivate(bool showActivate);
 void setUiWeapon(std::optional<std::string> weapon);
 

@@ -1,7 +1,9 @@
 #include "./editorui.h"
 #include "../../resources/paths.h"
+#include "../../gamecontrol/gametypes.h"
 
 extern CustomApiBindings* gameapi;
+extern GameTypes gametypeSystem;
 
 void startMode(bool loadedScene);
 void stopMode(bool unloadedScene);
@@ -158,9 +160,11 @@ void renderMoreUi(){
 
   drawFade();
 
-  if (false && uiSettings.showFpsHud){
-    auto& widget = *widgetByNameSymbol(getSymbol("FPS - Hud")).value();
-    renderLayoutCenter("fps-hud-layout", widget);
+  if (uiSettings.showFpsHud && gametypeSystem.name == "fps"){
+    auto widget = widgetByNameSymbol(getSymbol("Hud"));
+    if (widget.has_value()){
+      renderLayoutCenter("fps-hud-layout", *widget.value());
+    }
   }
 
   if (uiSettings.showGameSettings){

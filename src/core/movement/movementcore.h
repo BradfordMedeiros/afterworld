@@ -75,6 +75,7 @@ struct MovementState {
 
   bool alive;
   bool falling;
+  float maxSpeedReached;
 
   std::optional<float> reloading;
   std::optional<float> reloadingLength;

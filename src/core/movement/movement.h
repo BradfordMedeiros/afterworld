@@ -50,6 +50,11 @@ glm::quat getLookDirection(MovementEntity& movementEntity);
 struct UiMovementUpdate {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec2> lookVelocity;
+  float speed;
+  float maxSpeedReached;
+  bool canJump;
+  bool canAirDash;
+  bool groundSliding;
 };
 
 struct EntityUpdate {

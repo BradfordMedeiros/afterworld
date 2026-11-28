@@ -395,6 +395,11 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
   UiMovementUpdate uiUpdate {
     .velocity = std::nullopt,
     .lookVelocity = std::nullopt,
+    .speed = 0.f,
+    .maxSpeedReached = 0.f,
+    .canJump = false,
+    .canAirDash = false,
+    .groundSliding = false,
   };
   if (isPaused()){
     return uiUpdate;
@@ -426,6 +431,18 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         auto cameraUpdate = onMovementFrameCore(*entity.moveParams, entity.movementState, entity.playerId, entity.managedCamera, isGunZoomed(player.activeId),  isControlledPlayer(players, entity.playerId));
         uiUpdate.velocity = entity.movementState.velocity;
         uiUpdate.lookVelocity = controlParams.lookVelocity;
+        uiUpdate.speed = glm::length(glm::vec2(entity.movementState.velocity.x, entity.movementState.velocity.z));
+        uiUpdate.maxSpeedReached = entity.movementState.maxSpeedReached;
+        uiUpdate.canJump = entity.movementState.isGrounded || entity.movementState.inWater;
+        uiUpdate.canAirDash =
+          entity.moveParams->enableAirDash &&
+          entity.movementState.airDashAvailable &&
+          !entity.movementState.isGrounded;
+        uiUpdate.groundSliding =
+          entity.moveParams->enableGroundSlide &&
+          entity.movementState.rightMouseHeld &&
+          entity.movementState.isGrounded &&
+          !entity.movementState.inWater;
 
         if (cameraUpdate.thirdPerson.has_value()){
           if (entity.movementState.alive){
