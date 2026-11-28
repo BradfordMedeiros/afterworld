@@ -84,6 +84,8 @@ void setActiveMovementEntity(Movement& movement, bool observeMode, int playerPor
   controlParams.doReleaseFromLadder = false;
   controlParams.doGrind = false;
   controlParams.doReverseGrind = false;
+  controlParams.doAirDash = false;
+  controlParams.rightMouseHeld = false;
   controlParams.doReload = false;
   controlParams.crouchType = CROUCH_NONE;
   controlParams.observeMode = observeMode;
@@ -177,6 +179,8 @@ ControlParams createControlParams(int playerPort){
   controlParams.doReleaseFromLadder = false;
   controlParams.doGrind = false;
   controlParams.doReverseGrind = false;
+  controlParams.doAirDash = false;
+  controlParams.rightMouseHeld = false;
   controlParams.doReload = false;
   controlParams.crouchType = CROUCH_NONE;
   controlParams.observeMode = false;
@@ -306,6 +310,18 @@ void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& mov
   }
 }
 
+void onMovementMouseButtonCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int button, int action, int playerIndex){
+  if (button == GLFW_MOUSE_BUTTON_RIGHT){
+    auto& controlParams = getControlParamsByPort(movement, playerIndex);
+    if (action == GLFW_PRESS){
+      controlParams.doAirDash = true;
+      controlParams.rightMouseHeld = true;
+    }else if (action == GLFW_RELEASE){
+      controlParams.rightMouseHeld = false;
+    }
+  }
+}
+
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos, int playerPort){
   float xsensitivity = getGlobalState().control.xsensitivity;
   float ysensitivity = getGlobalState().control.ysensitivity * (getGlobalState().control.invertY ? -1.f : 1.f);
@@ -397,6 +413,8 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
         entity.movementState.doReleaseFromLadder = controlParams.doReleaseFromLadder;
         entity.movementState.doGrind = controlParams.doGrind;
         entity.movementState.doReverseGrind = controlParams.doReverseGrind;
+        entity.movementState.doAirDash = controlParams.doAirDash;
+        entity.movementState.rightMouseHeld = controlParams.rightMouseHeld;
         if (controlParams.doReload && !entity.movementState.reloading.has_value()){
           entity.movementState.reloading = gameapi -> timeSeconds(false);
         }
@@ -498,6 +516,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     movementEntity.movementState.doReleaseFromLadder = false;
     movementEntity.movementState.doGrind = false;
     movementEntity.movementState.doReverseGrind = false;
+    movementEntity.movementState.doAirDash = false;
     movementEntity.movementState.raw_deltax = 0.f;
     movementEntity.movementState.raw_deltay = 0.f;
     movementEntity.movementState.crouchType = CROUCH_NONE;
@@ -528,6 +547,7 @@ UiMovementUpdate onMovementFrame(MovementEntityData& movementEntityData, Movemen
     controlParams.doReleaseFromLadder = false;
     controlParams.doGrind = false;
     controlParams.doReverseGrind = false;
+    controlParams.doAirDash = false;
     controlParams.doReload = false;
     controlParams.crouchType = CROUCH_NONE;    
   }

@@ -723,6 +723,9 @@ void onMouseCallback(objid id, void* data, int button, int action, int mods, int
 
   ControlledPlayer& controlledPlayer = getControlledPlayer(playerIndex);
   if (controlledPlayer.entityId.has_value()){
+    if (!isPaused() && !disableGameInput() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
+      onMovementMouseButtonCallback(movementEntities, movement, controlledPlayer.entityId.value(), button, action, playerIndex);
+    }
     static float selectDistance = querySelectDistance();
     if (!isPaused() && !disableGameInput() && !isEntityControlDisabled(getEntityForPlayerIndex(playerIndex).value())){
       auto uiUpdate = onWeaponsMouseCallback(getWeaponState(weapons, controlledPlayer.entityId.value()), button, action, controlledPlayer.entityId.value(), selectDistance);

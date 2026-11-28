@@ -41,6 +41,7 @@ ControlParams& getControlParamsByPort(Movement& movement, int playerIndex);
 void resetControlParams(Movement& movement, int playerIndex);
 
 void onMovementKeyCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int key, int action, int playerIndex);
+void onMovementMouseButtonCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeEntity, int button, int action, int playerIndex);
 void onMovementMouseMoveCallback(MovementEntityData& movementEntityData, Movement& movement, objid activeId, double xPos, double yPos, int playerPort);
 void onMovementScrollCallback(Movement& movement, double amount, int playerPort);
 

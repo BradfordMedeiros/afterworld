@@ -25,7 +25,7 @@ int interactKey = GLFW_KEY_E;
 int pausekey = GLFW_KEY_ESCAPE;
 
 int fireButton = GLFW_MOUSE_BUTTON_LEFT;
-int aimButton = GLFW_MOUSE_BUTTON_RIGHT;
+int aimButton = GLFW_MOUSE_BUTTON_MIDDLE;
 
 int modifierButton = GLFW_KEY_LEFT_SHIFT;
 int teleportButton = GLFW_KEY_T;

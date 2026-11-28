@@ -101,6 +101,8 @@ struct ControlParams {
   bool doReleaseFromLadder;
   bool doGrind;
   bool doReverseGrind;
+  bool doAirDash;
+  bool rightMouseHeld;
   bool doReload;
   CrouchType crouchType;
   bool observeMode;

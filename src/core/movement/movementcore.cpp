@@ -640,6 +640,32 @@ glm::vec3 limitMoveDirectionFromCollisions(glm::vec3 moveVec, std::vector<glm::q
   return relativeToPlayer;
 }
 
+float applyDirectionalDash(float velocity, float direction, float dashSpeed){
+  constexpr float dashVelocityDeadzone = 0.05f;
+  if (glm::abs(velocity) > dashVelocityDeadzone && velocity * direction < 0.f){
+    return 0.f;
+  }
+  return velocity + (direction * dashSpeed * 0.8f);
+}
+
+void applyAirDash(MovementParams& moveParams, MovementState& movementState){
+  auto dashDirection = weaponLookDirection(movementState) * glm::vec3(0.f, 0.f, -1.f);
+  if (glm::length(dashDirection) < 0.0001f){
+    dashDirection = glm::vec3(0.f, 0.f, -1.f);
+  }else{
+    dashDirection = glm::normalize(dashDirection);
+  }
+  float dashSpeed = glm::max(6.f, moveParams.moveSpeedAir * 0.75f);
+  if (!movementState.airDashAvailable){
+    return;
+  }
+
+  movementState.newVelocity.x = applyDirectionalDash(movementState.newVelocity.x, dashDirection.x, dashSpeed);
+  movementState.newVelocity.y = applyDirectionalDash(movementState.newVelocity.y, dashDirection.y, dashSpeed);
+  movementState.newVelocity.z = applyDirectionalDash(movementState.newVelocity.z, dashDirection.z, dashSpeed);
+  movementState.airDashAvailable = false;
+}
+
 void maybeToggleCrouch(MovementParams& moveParams, MovementState& movementState, bool crouchDown){
   auto timeSinceLastCrouch = (gameapi -> timeSeconds(false) - movementState.lastCrouchTime) * 1000;
   if (crouchDown && moveParams.canCrouch && (timeSinceLastCrouch > moveParams.crouchDelay)){
@@ -731,6 +757,9 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   std::vector<glm::quat> hitDirections;
   auto collisions = checkMovementCollisions(playerId, hitDirections, rotationWithoutY);
   bool isGrounded = collisions.movementCollisions.at(COLLISION_SPACE_DOWN).has_value();
+  if (isGrounded && !movementState.lastFrameIsGrounded){
+    movementState.airDashAvailable = true;
+  }
    
   movementState.inWater = false;
   for (auto id : collisions.allCollisions){
@@ -792,15 +821,23 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
     animationConfig.isMovingRight = isMovingRight;
   }
 
-  if (movementState.isGrounded && !movementState.inWater){
-    applyMovementFriction(movementState.newVelocity, 6.f, elapsedTime);
+  bool groundSlide = movementState.rightMouseHeld && movementState.isGrounded && !movementState.inWater;
+  if (movementState.isGrounded && !movementState.inWater && !movementState.doJump){
+    constexpr float normalGroundFriction = 6.f;
+    constexpr float heldGroundFriction = 0.75f;
+    auto groundFriction = movementState.rightMouseHeld ? heldGroundFriction : normalGroundFriction;
+    applyMovementFriction(movementState.newVelocity, groundFriction, elapsedTime);
   }
 
   float moveSpeed = getMoveSpeed(moveParams, movementState, false, isGrounded) * movementState.speed;
-  if (isWalking && !movementState.facingLadder && !movementState.attachedToLadder){
+  if (isWalking && !groundSlide && !movementState.facingLadder && !movementState.attachedToLadder){
     glm::vec3 wishDirection = rotationWithoutY * direction;
     float acceleration = movementState.isGrounded ? 10.f : 1.f;
     accelerateMovement(movementState.newVelocity, wishDirection, moveSpeed, acceleration, elapsedTime);
+  }
+
+  if (movementState.doAirDash && !movementState.isGrounded){
+    applyAirDash(moveParams, movementState);
   }
 
 
@@ -1010,6 +1047,7 @@ MovementState getInitialMovementState(objid playerId){
 
   movementState.isGrounded = false;
   movementState.lastFrameIsGrounded = false;
+  movementState.airDashAvailable = true;
   movementState.facingWall = false;
   movementState.facingLadder = false;
   movementState.attachedToLadder = false;

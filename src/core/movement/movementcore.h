@@ -40,6 +40,8 @@ struct MovementState {
   bool doReleaseFromLadder;
   bool doGrind;
   bool doReverseGrind;
+  bool doAirDash;
+  bool rightMouseHeld;
   float raw_deltax;
   float raw_deltay;
   CrouchType crouchType;
@@ -56,6 +58,7 @@ struct MovementState {
   bool inWater;  
   bool isGrounded;              
   bool lastFrameIsGrounded;
+  bool airDashAvailable;
   bool isCrouching;
   bool shouldBeCrouching;
   glm::vec3 lastPosition;
