@@ -176,6 +176,13 @@ std::optional<MovementParams> parseTraitJson(std::string& filePath, std::string&
   }
 
   {
+    auto it = doc.FindMember("enableSurfaceNormalJump");
+    if (it != doc.MemberEnd() && it->value.IsBool()) {
+      moveParams.enableSurfaceNormalJump = it->value.GetBool();
+    }
+  }
+
+  {
     auto it = doc.FindMember("physicsMass");
     if (it != doc.MemberEnd() && it->value.IsFloat()) {
       moveParams.physicsMass = it->value.GetFloat();
@@ -253,6 +260,7 @@ void saveTrait(std::string traitName){
   doc.AddMember("crouchFriction", movementParams.crouchFriction, allocator);
   doc.AddMember("enableAirDash", movementParams.enableAirDash, allocator);
   doc.AddMember("enableGroundSlide", movementParams.enableGroundSlide, allocator);
+  doc.AddMember("enableSurfaceNormalJump", movementParams.enableSurfaceNormalJump, allocator);
 
   doc.AddMember("physicsMass", movementParams.physicsMass, allocator);
   doc.AddMember("physicsRestitution", movementParams.physicsRestitution, allocator);
@@ -305,8 +313,12 @@ void removeAllMovementCores(){
   movementCores = {};
 }
 
-bool jump(MovementParams& moveParams, MovementState& movementState, objid id, bool force = false){
-  glm::vec3 impulse(0, moveParams.jumpHeight, 0);
+bool jump(MovementParams& moveParams, MovementState& movementState, objid id, std::optional<glm::vec3> groundNormal = std::nullopt, bool force = false){
+  auto impulseDirection = glm::vec3(0.f, 1.f, 0.f);
+  if (movementState.isGrounded && groundNormal.has_value() && glm::length(groundNormal.value()) > 0.0001f){
+    impulseDirection = glm::normalize(groundNormal.value());
+  }
+  glm::vec3 impulse = impulseDirection * moveParams.jumpHeight;
   if (movementState.isGrounded || force){
     modlog("movement - jump - height: ", std::to_string(moveParams.jumpHeight));
 
@@ -895,6 +907,15 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
   restrictLadderMovement(movementState, playerId, movingDown);
   updateCrouch(moveParams, movementState, playerId);
 
+  std::optional<glm::vec3> groundNormal;
+  auto groundCollision = collisions.movementCollisions.at(COLLISION_SPACE_DOWN);
+  if (moveParams.enableSurfaceNormalJump && movementState.isGrounded && groundCollision.has_value()){
+    auto normal = groundCollision.value().normal * glm::vec3(0.f, 0.f, -1.f);
+    if (glm::length(normal) > 0.0001f){
+      groundNormal = glm::normalize(normal);
+    }
+  }
+
   auto shouldStep = shouldStepUp(playerId) && (direction.z < 0 /* going forward */ );
   //std::cout << "should step up: " << shouldStep << std::endl;
   if (false && shouldStep){
@@ -907,10 +928,10 @@ CameraUpdate onMovementFrameCore(MovementParams& moveParams, MovementState& move
       unattachToCurve(playerId);
       setGameObjectPhysicsEnable(playerId, true);
       setGameObjectVelocity(playerId, glm::vec3(0.f, 0.f, 0.f));
-      bool didJump = jump(moveParams, movementState, playerId, true);
+      bool didJump = jump(moveParams, movementState, playerId, groundNormal, true);
       animationConfig.didJump = didJump;
     }else{
-      bool didJump = jump(moveParams, movementState, playerId);
+      bool didJump = jump(moveParams, movementState, playerId, groundNormal);
       animationConfig.didJump = didJump;
     }
   }

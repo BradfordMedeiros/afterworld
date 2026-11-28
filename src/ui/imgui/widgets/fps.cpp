@@ -22,6 +22,7 @@ void renderTraitsPanel(bool includePanel){
   ImGui::SliderFloat("crouchFriction", &movementParams.crouchFriction, 0.f, 100.f);
   ImGui::Checkbox("Enable Air Dash", &movementParams.enableAirDash);
   ImGui::Checkbox("Enable Ground Slide", &movementParams.enableGroundSlide);
+  ImGui::Checkbox("Enable Surface-Normal Jump", &movementParams.enableSurfaceNormalJump);
   ImGui::SliderFloat("physicsMass", &movementParams.physicsMass, 1.f, 100.f);
 
 

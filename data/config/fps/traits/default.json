@@ -22,6 +22,7 @@
     "crouchFriction": 45.12200164794922,
     "enableAirDash": true,
     "enableGroundSlide": true,
+    "enableSurfaceNormalJump": true,
     "physicsMass": 5.0,
     "physicsRestitution": 0.0
 }

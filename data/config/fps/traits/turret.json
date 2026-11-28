@@ -26,6 +26,7 @@
   "crouchFriction": 0.0,
   "enableAirDash": true,
   "enableGroundSlide": true,
+  "enableSurfaceNormalJump": true,
 
   "moveVertical": false
 }
